@@ -13,10 +13,27 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\demos">
+      <UniqueIdentifier>{c0fd99ba-9324-4aa8-92b0-e2bca2383840}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{f31dd75d-9d03-4ffd-84b9-4096a07a8ccf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\utils">
+      <UniqueIdentifier>{43fc4a49-999e-4a3b-9bf0-4270ee127bc6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician-demo.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\examples\demos\barelymusician_demo.cpp">
+      <Filter>Source Files\demos</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\examples\utils\pa_wrapper.cpp">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\examples\utils\pa_wrapper.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\instrument">
+      <UniqueIdentifier>{a0eca6ba-82ba-4ffd-9e08-3d4d7a295ad0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\instrument">
+      <UniqueIdentifier>{6fae7c5f-b0c9-4044-85ee-42fb0d80aa0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\base">
+      <UniqueIdentifier>{603293e4-2ae4-4ce2-b74b-6365fcae2def}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\barelymusician\instrument\oscillator.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\unit_generator.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\constants.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\barelymusician\instrument\oscillator.cpp">
+      <Filter>Source Files\instrument</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

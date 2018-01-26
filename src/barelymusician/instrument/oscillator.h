@@ -5,7 +5,7 @@
 
 namespace barelyapi {
 
-// Simple oscillator that generates output samples of basic types.
+// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator : public UnitGenerator {
  public:
   // Oscillator type.
@@ -19,11 +19,7 @@ class Oscillator : public UnitGenerator {
   // Constructs new |Oscillator|.
   //
   // @param sample_interval Sampling interval in seconds.
-  Oscillator(float sample_interval);
-  
-  // Implements |UnitGenerator|.
-  float Next() override;
-  void Reset() override;
+  explicit Oscillator(float sample_interval);
 
   // Sets the frequency of the oscillator.
   //
@@ -35,14 +31,18 @@ class Oscillator : public UnitGenerator {
   // @param type Oscillator type.
   void SetType(Type type);
 
+  // Implements |UnitGenerator|.
+  float Next() override;
+  void Reset() override;
+
  private:
-  // Inverse sampling rate (seconds).
+  // Inverse sampling rate in seconds.
   const float sample_interval_;
 
   // Oscillator type.
   Type type_;
 
-  // Frequency (Hz).
+  // Frequency in Hz.
   float frequency_;
 
   // Internal clock.

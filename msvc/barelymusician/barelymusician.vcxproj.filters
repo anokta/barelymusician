@@ -33,9 +33,15 @@
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\envelope.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\instrument\oscillator.cpp">
+      <Filter>Source Files\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\instrument\envelope.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>

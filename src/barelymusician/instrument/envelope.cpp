@@ -1,6 +1,7 @@
 #include "barelymusician/instrument/envelope.h"
 
 #include <algorithm>
+#include <limits>
 
 namespace barelyapi {
 
@@ -56,37 +57,31 @@ void Envelope::SetRelease(float release) {
 }
 
 float Envelope::Next() {
+  if (state_ == State::kAttack && attack_increment_ <= 0.0f) {
+    phase_ = 0.0f;
+    state_ = State::kDecay;
+  }
+  if (state_ == State::kDecay && decay_increment_ <= 0.0f) {
+    phase_ = 0.0f;
+    state_ = State::kSustain;
+  }
+  if (state_ == State::kRelease && release_increment_ <= 0.0f) {
+    phase_ = 0.0f;
+    state_ = State::kIdle;
+  }
   switch (state_) {
     case State::kAttack:
-      if (attack_increment_ > 0.0f) {
-        output_ = phase_;
-        phase_ += attack_increment_;
-        if (phase_ >= 1.0f) {
-          phase_ = 0.0f;
-          state_ = State::kDecay;
-        }
-      } else {
-        if (decay_increment_ > 0.0f) {
-          output_ = 1.0f;
-          phase_ = decay_increment_;
-          state_ = State::kDecay;
-        } else {
-          output_ = sustain_;
-          phase_ = 0.0f;
-          state_ = State::kSustain;
-        }
+      output_ = phase_;
+      phase_ += attack_increment_;
+      if (phase_ >= 1.0f) {
+        phase_ = 0.0f;
+        state_ = State::kDecay;
       }
       break;
     case State::kDecay:
-      if (decay_increment_ > 0.0f) {
-        output_ = 1.0f - phase_ * (1.0f - sustain_);
-        phase_ += decay_increment_;
-        if (phase_ >= 1.0f) {
-          phase_ = 0.0f;
-          state_ = State::kSustain;
-        }
-      } else {
-        output_ = sustain_;
+      output_ = 1.0f - phase_ * (1.0f - sustain_);
+      phase_ += decay_increment_;
+      if (phase_ >= 1.0f) {
         phase_ = 0.0f;
         state_ = State::kSustain;
       }
@@ -95,15 +90,9 @@ float Envelope::Next() {
       output_ = sustain_;
       break;
     case State::kRelease:
-      if (release_increment_ > 0.0f) {
-        output_ = (1.0f - phase_) * release_output_;
-        phase_ += release_increment_;
-        if (phase_ >= 1.0) {
-          phase_ = 0.0f;
-          state_ = State::kIdle;
-        }
-      } else {
-        output_ = 0.0f;
+      output_ = (1.0f - phase_) * release_output_;
+      phase_ += release_increment_;
+      if (phase_ >= 1.0) {
         phase_ = 0.0f;
         state_ = State::kIdle;
       }

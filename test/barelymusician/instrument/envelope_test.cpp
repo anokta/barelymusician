@@ -10,7 +10,7 @@ const int kSampleRate = 1000;
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Envelope ADSR.
-const float kAttack = 0.2f;
+const float kAttack = 0.02f;
 const float kDecay = 1.0f;
 const float kSustain = 0.5f;
 const float kRelease = 0.8f;

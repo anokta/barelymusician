@@ -22,6 +22,9 @@
     <Filter Include="Header Files\base">
       <UniqueIdentifier>{603293e4-2ae4-4ce2-b74b-6365fcae2def}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\base">
+      <UniqueIdentifier>{94231377-0431-4cd7-b1e8-2d4aefd7370b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\instrument\oscillator.h">
@@ -36,6 +39,9 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\envelope.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\logging.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\instrument\oscillator.cpp">
@@ -43,6 +49,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\instrument\envelope.cpp">
       <Filter>Source Files\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
+      <Filter>Source Files\base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\envelope.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\oscillator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
+    <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\unit_generator.h" />

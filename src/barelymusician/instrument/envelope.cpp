@@ -32,10 +32,16 @@ void Envelope::Stop() {
 
 void Envelope::SetAttack(float attack) {
   attack_increment_ = (attack > 0.0f) ? sample_interval_ / attack : 0.0f;
+  if (attack_increment_ > 1.0f) {
+    attack_increment_ = 0.0f;
+  }
 }
 
 void Envelope::SetDecay(float decay) {
   decay_increment_ = (decay > 0.0f) ? sample_interval_ / decay : 0.0f;
+  if (decay_increment_ > 1.0f) {
+    decay_increment_ = 0.0f;
+  }
 }
 
 void Envelope::SetSustain(float sustain) {
@@ -44,6 +50,9 @@ void Envelope::SetSustain(float sustain) {
 
 void Envelope::SetRelease(float release) {
   release_increment_ = (release > 0.0f) ? sample_interval_ / release : 0.0f;
+  if (release_increment_ > 1.0f) {
+    release_increment_ = 0.0f;
+  }
 }
 
 float Envelope::Next() {
@@ -86,9 +95,15 @@ float Envelope::Next() {
       output_ = sustain_;
       break;
     case State::kRelease:
-      output_ = (1.0f - phase_) * release_output_;
-      phase_ += release_increment_;
-      if (phase_ >= 1.0) {
+      if (release_increment_ > 0.0f) {
+        output_ = (1.0f - phase_) * release_output_;
+        phase_ += release_increment_;
+        if (phase_ >= 1.0) {
+          phase_ = 0.0f;
+          state_ = State::kIdle;
+        }
+      } else {
+        output_ = 0.0f;
         phase_ = 0.0f;
         state_ = State::kIdle;
       }

@@ -57,51 +57,56 @@ void Envelope::SetRelease(float release) {
 }
 
 float Envelope::Next() {
-  if (state_ == State::kAttack && attack_increment_ <= 0.0f) {
-    phase_ = 0.0f;
-    state_ = State::kDecay;
+  if (state_ == State::kIdle) {
+    return 0.0f;
   }
-  if (state_ == State::kDecay && decay_increment_ <= 0.0f) {
-    phase_ = 0.0f;
-    state_ = State::kSustain;
-  }
-  if (state_ == State::kRelease && release_increment_ <= 0.0f) {
-    phase_ = 0.0f;
-    state_ = State::kIdle;
-  }
-  switch (state_) {
-    case State::kAttack:
+  if (state_ == State::kAttack) {
+    if (attack_increment_ > 0.0f) {
       output_ = phase_;
       phase_ += attack_increment_;
       if (phase_ >= 1.0f) {
         phase_ = 0.0f;
         state_ = State::kDecay;
       }
-      break;
-    case State::kDecay:
+      return output_;
+    } else {
+      phase_ = 0.0f;
+      state_ = State::kDecay;
+    }
+  }
+  if (state_ == State::kDecay) {
+    if (decay_increment_ > 0.0f) {
       output_ = 1.0f - phase_ * (1.0f - sustain_);
       phase_ += decay_increment_;
       if (phase_ >= 1.0f) {
         phase_ = 0.0f;
         state_ = State::kSustain;
       }
-      break;
-    case State::kSustain:
-      output_ = sustain_;
-      break;
-    case State::kRelease:
+      return output_;
+    } else {
+      phase_ = 0.0f;
+      state_ = State::kSustain;
+    }
+  }
+  if (state_ == State::kSustain) {
+    output_ = sustain_;
+    return output_;
+  }
+  if (state_ == State::kRelease) {
+    if (release_increment_ > 0.0f) {
       output_ = (1.0f - phase_) * release_output_;
       phase_ += release_increment_;
       if (phase_ >= 1.0) {
         phase_ = 0.0f;
         state_ = State::kIdle;
       }
-      break;
-    case State::kIdle:
-    default:
-      return 0.0f;
+      return output_;
+    } else {
+      phase_ = 0.0f;
+      state_ = State::kIdle;
+    }
   }
-  return output_;
+  return 0.0f;
 }
 
 void Envelope::Reset() { state_ = State::kIdle; }

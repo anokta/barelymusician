@@ -16,7 +16,7 @@
 #endif  // !defined(LOG_OUTPUT)
 
 // Log output stream.
-#define LOG BARELYAPI_LOG
+#define DLOG BARELYAPI_LOG
 
 namespace barelyapi {
 

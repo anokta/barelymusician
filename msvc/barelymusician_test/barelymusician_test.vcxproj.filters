@@ -4,10 +4,19 @@
     <Filter Include="instrument">
       <UniqueIdentifier>{30751e41-b7ac-43fc-be3b-57c36fd93905}</UniqueIdentifier>
     </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{314dc98b-1e28-4422-b5d6-48fa2bb85ea4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\test\barelymusician\instrument\envelope_test.cpp">
       <Filter>instrument</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\barelymusician\base\sequencer_test.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

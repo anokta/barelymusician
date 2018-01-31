@@ -33,7 +33,7 @@ TEST(EnvelopeTest, ProcessDefault) {
 
 // Tests that the envelope generates the expected output samples consistently
 // over multiple samples.
-TEST(EnvelopeTest, ProcessAttackDecay) {
+TEST(EnvelopeTest, ProcessMultiSamples) {
   const int kNumAttackSamples = static_cast<int>(kSampleRate * kAttack);
   const int kNumDecaySamples = static_cast<int>(kSampleRate * kDecay);
   const int kNumSamplesForSustain = kNumAttackSamples + kNumDecaySamples;

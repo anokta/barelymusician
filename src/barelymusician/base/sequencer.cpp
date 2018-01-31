@@ -28,13 +28,13 @@ void Sequencer::Update(int num_samples) {
   if (num_beats_per_bar_ == 0) {
     return;
   }
-  current_bar_ = current_beat_ / num_beats_per_bar_;
+  current_bar_ += current_beat_ / num_beats_per_bar_;
   current_beat_ %= num_beats_per_bar_;
   // Update section count.
   if (num_bars_per_section_ == 0) {
     return;
   }
-  current_section_ = current_bar_ / num_bars_per_section_;
+  current_section_ += current_bar_ / num_bars_per_section_;
   current_bar_ %= num_bars_per_section_;
 }
 

@@ -36,14 +36,28 @@ TEST(SequencerTest, ProcessDefault) {
 TEST(SequencerTest, Process) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetBpm(kBpm);
-  sequencer.SetNumBeatsPerBar(1);
-  sequencer.SetNumBarsPerSection(1);
   sequencer.SetBeatLength(Sequencer::NoteValue::kWholeNote);
-
+  // Test beat count.
+  sequencer.Update(kSampleRate);
+  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.GetCurrentBeat());
+  EXPECT_EQ(0, sequencer.GetCurrentBar());
+  EXPECT_EQ(0, sequencer.GetCurrentSection());
+  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  // Test bar count.
+  sequencer.Reset();
+  sequencer.SetNumBeatsPerBar(1);
+  sequencer.Update(kSampleRate);
+  EXPECT_EQ(0, sequencer.GetCurrentBeat());
+  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.GetCurrentBar());
+  EXPECT_EQ(0, sequencer.GetCurrentSection());
+  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  // Test section count.
+  sequencer.Reset();
+  sequencer.SetNumBarsPerSection(1);
   sequencer.Update(kSampleRate);
   EXPECT_EQ(0, sequencer.GetCurrentBeat());
   EXPECT_EQ(0, sequencer.GetCurrentBar());
-  EXPECT_EQ(kBeatsPerSecond, sequencer.GetCurrentSection());
+  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.GetCurrentSection());
   EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
 }
 

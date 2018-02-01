@@ -36,7 +36,7 @@ TEST(SequencerTest, ProcessDefault) {
 TEST(SequencerTest, Process) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetBpm(kBpm);
-  sequencer.SetBeatLength(Sequencer::NoteValue::kWholeNote);
+  sequencer.SetBeatLength(kBeatLength);
   // Test beat count.
   sequencer.Update(kSampleRate);
   EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.GetCurrentBeat());

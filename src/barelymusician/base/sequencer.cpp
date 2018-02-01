@@ -3,13 +3,14 @@
 #include <algorithm>
 
 #include "barelymusician/base/constants.h"
+#include "barelymusician/base/logging.h"
 
 namespace barelyapi {
 
 Sequencer::Sequencer(int sample_rate)
     : sample_rate_float_(static_cast<float>(sample_rate)),
       bpm_(0.0f),
-      beat_length_(NoteValue::kQuarterNote),
+      beat_length_(0.0f),
       num_samples_per_beat_(0),
       num_beats_per_bar_(0),
       num_bars_per_section_(0) {
@@ -51,10 +52,15 @@ int Sequencer::GetCurrentBar() const { return current_bar_; }
 
 int Sequencer::GetCurrentSection() const { return current_section_; }
 
+// TODO(anokta): Sample offset does not return what it implies, the calculation
+// should be the other way around (how many samples to wait rather than how many
+// samples exceeded).
 int Sequencer::GetCurrentSampleOffset() const { return sample_offset_; }
 
 void Sequencer::SetBeatLength(NoteValue beat_length) {
-  beat_length_ = beat_length;
+  // Traditionally, unit beat length is a quarter note in musical notations.
+  beat_length_ = static_cast<float>(beat_length) /
+                 static_cast<float>(NoteValue::kQuarterNote);
   CalculateNumSamplesPerBeat();
 }
 
@@ -72,10 +78,9 @@ void Sequencer::SetNumBarsPerSection(int num_bars_per_section) {
 }
 
 void Sequencer::CalculateNumSamplesPerBeat() {
+  const float bpm_length = bpm_ * beat_length_;
   const float beat_length_seconds =
-      (bpm_ > 0.0f)
-          ? kSecondsFromMinutes / (bpm_ * static_cast<float>(beat_length_))
-          : 0.0f;
+      (bpm_length > 0.0f) ? kSecondsFromMinutes / bpm_length : 0.0f;
   num_samples_per_beat_ =
       static_cast<int>(beat_length_seconds * sample_rate_float_);
 }

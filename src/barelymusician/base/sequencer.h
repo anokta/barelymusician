@@ -78,8 +78,8 @@ class Sequencer {
   // Number of beats per minute (tempo).
   float bpm_;
 
-  // Beat unit length.
-  NoteValue beat_length_;
+  // Beat length relative to quarter note.
+  float beat_length_;
 
   // Beats per bar.
   int num_beats_per_bar_;

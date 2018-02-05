@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:barelymusician/barelymusician.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:barelymusician_demo/barelymusician_demo.xcodeproj">
+   </FileRef>
+</Workspace>

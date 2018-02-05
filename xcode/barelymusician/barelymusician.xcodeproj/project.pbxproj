@@ -1,0 +1,329 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		42DF079520281D8500229D61 /* logging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42DF079020281D8500229D61 /* logging.cpp */; };
+		42DF079620281D8500229D61 /* constants.h in Headers */ = {isa = PBXBuildFile; fileRef = 42DF079120281D8500229D61 /* constants.h */; };
+		42DF079720281D8500229D61 /* logging.h in Headers */ = {isa = PBXBuildFile; fileRef = 42DF079220281D8500229D61 /* logging.h */; };
+		42DF079820281D8500229D61 /* sequencer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42DF079320281D8500229D61 /* sequencer.cpp */; };
+		42DF079920281D8500229D61 /* sequencer.h in Headers */ = {isa = PBXBuildFile; fileRef = 42DF079420281D8500229D61 /* sequencer.h */; };
+		42DF07A120281DD200229D61 /* envelope.h in Headers */ = {isa = PBXBuildFile; fileRef = 42DF079C20281DD200229D61 /* envelope.h */; };
+		42DF07A220281DD200229D61 /* envelope.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42DF079D20281DD200229D61 /* envelope.cpp */; };
+		42DF07A320281DD200229D61 /* oscillator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 42DF079E20281DD200229D61 /* oscillator.cpp */; };
+		42DF07A420281DD200229D61 /* oscillator.h in Headers */ = {isa = PBXBuildFile; fileRef = 42DF079F20281DD200229D61 /* oscillator.h */; };
+		42DF07A520281DD200229D61 /* unit_generator.h in Headers */ = {isa = PBXBuildFile; fileRef = 42DF07A020281DD200229D61 /* unit_generator.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		423B1C0920281B3C002F9E8B /* libbarelymusician.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libbarelymusician.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		42DF079020281D8500229D61 /* logging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = logging.cpp; path = ../../src/barelymusician/base/logging.cpp; sourceTree = "<group>"; };
+		42DF079120281D8500229D61 /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = constants.h; path = ../../src/barelymusician/base/constants.h; sourceTree = "<group>"; };
+		42DF079220281D8500229D61 /* logging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = logging.h; path = ../../src/barelymusician/base/logging.h; sourceTree = "<group>"; };
+		42DF079320281D8500229D61 /* sequencer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sequencer.cpp; path = ../../src/barelymusician/base/sequencer.cpp; sourceTree = "<group>"; };
+		42DF079420281D8500229D61 /* sequencer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sequencer.h; path = ../../src/barelymusician/base/sequencer.h; sourceTree = "<group>"; };
+		42DF079C20281DD200229D61 /* envelope.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = envelope.h; path = ../../src/barelymusician/instrument/envelope.h; sourceTree = "<group>"; };
+		42DF079D20281DD200229D61 /* envelope.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = envelope.cpp; path = ../../src/barelymusician/instrument/envelope.cpp; sourceTree = "<group>"; };
+		42DF079E20281DD200229D61 /* oscillator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = oscillator.cpp; path = ../../src/barelymusician/instrument/oscillator.cpp; sourceTree = "<group>"; };
+		42DF079F20281DD200229D61 /* oscillator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = oscillator.h; path = ../../src/barelymusician/instrument/oscillator.h; sourceTree = "<group>"; };
+		42DF07A020281DD200229D61 /* unit_generator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unit_generator.h; path = ../../src/barelymusician/instrument/unit_generator.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		423B1C0620281B3C002F9E8B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		423B1BFE20281B28002F9E8B = {
+			isa = PBXGroup;
+			children = (
+				42DF079B20281DB400229D61 /* barelymusician */,
+				423B1C0A20281B3C002F9E8B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		423B1C0A20281B3C002F9E8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				423B1C0920281B3C002F9E8B /* libbarelymusician.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		42DF078F20281D7400229D61 /* base */ = {
+			isa = PBXGroup;
+			children = (
+				42DF079120281D8500229D61 /* constants.h */,
+				42DF079020281D8500229D61 /* logging.cpp */,
+				42DF079220281D8500229D61 /* logging.h */,
+				42DF079320281D8500229D61 /* sequencer.cpp */,
+				42DF079420281D8500229D61 /* sequencer.h */,
+			);
+			name = base;
+			sourceTree = "<group>";
+		};
+		42DF079A20281D9B00229D61 /* instrument */ = {
+			isa = PBXGroup;
+			children = (
+				42DF079D20281DD200229D61 /* envelope.cpp */,
+				42DF079C20281DD200229D61 /* envelope.h */,
+				42DF079E20281DD200229D61 /* oscillator.cpp */,
+				42DF079F20281DD200229D61 /* oscillator.h */,
+				42DF07A020281DD200229D61 /* unit_generator.h */,
+			);
+			name = instrument;
+			sourceTree = "<group>";
+		};
+		42DF079B20281DB400229D61 /* barelymusician */ = {
+			isa = PBXGroup;
+			children = (
+				42DF078F20281D7400229D61 /* base */,
+				42DF079A20281D9B00229D61 /* instrument */,
+			);
+			name = barelymusician;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		423B1C0720281B3C002F9E8B /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				42DF07A420281DD200229D61 /* oscillator.h in Headers */,
+				42DF079720281D8500229D61 /* logging.h in Headers */,
+				42DF07A520281DD200229D61 /* unit_generator.h in Headers */,
+				42DF079920281D8500229D61 /* sequencer.h in Headers */,
+				42DF07A120281DD200229D61 /* envelope.h in Headers */,
+				42DF079620281D8500229D61 /* constants.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		423B1C0820281B3C002F9E8B /* barelymusician */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 423B1C1220281B3C002F9E8B /* Build configuration list for PBXNativeTarget "barelymusician" */;
+			buildPhases = (
+				423B1C0520281B3C002F9E8B /* Sources */,
+				423B1C0620281B3C002F9E8B /* Frameworks */,
+				423B1C0720281B3C002F9E8B /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = barelymusician;
+			productName = barelymusician;
+			productReference = 423B1C0920281B3C002F9E8B /* libbarelymusician.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		423B1BFF20281B28002F9E8B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0920;
+				TargetAttributes = {
+					423B1C0820281B3C002F9E8B = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 423B1C0220281B28002F9E8B /* Build configuration list for PBXProject "barelymusician" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 423B1BFE20281B28002F9E8B;
+			productRefGroup = 423B1C0A20281B3C002F9E8B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				423B1C0820281B3C002F9E8B /* barelymusician */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		423B1C0520281B3C002F9E8B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				42DF07A220281DD200229D61 /* envelope.cpp in Sources */,
+				42DF079520281D8500229D61 /* logging.cpp in Sources */,
+				42DF079820281D8500229D61 /* sequencer.cpp in Sources */,
+				42DF07A320281DD200229D61 /* oscillator.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		423B1C0320281B28002F9E8B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		423B1C0420281B28002F9E8B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		423B1C1320281B3C002F9E8B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../../src";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		423B1C1420281B3C002F9E8B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/../../src";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		423B1C0220281B28002F9E8B /* Build configuration list for PBXProject "barelymusician" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				423B1C0320281B28002F9E8B /* Debug */,
+				423B1C0420281B28002F9E8B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		423B1C1220281B3C002F9E8B /* Build configuration list for PBXNativeTarget "barelymusician" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				423B1C1320281B3C002F9E8B /* Debug */,
+				423B1C1420281B3C002F9E8B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 423B1BFF20281B28002F9E8B /* Project object */;
+}

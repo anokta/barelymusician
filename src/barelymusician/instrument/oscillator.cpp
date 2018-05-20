@@ -29,7 +29,7 @@ float Oscillator::Next() {
       break;
     case Type::kNoise:
     default:
-      // TODO(anokta): Consider switching to STL random number generators.
+      // TODO(#3): Consider switching to STL random number generators.
       output = 2.0f * (static_cast<float>(std::rand()) / RAND_MAX) - 1.0f;
       break;
   }

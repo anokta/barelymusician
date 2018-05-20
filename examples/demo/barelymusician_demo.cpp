@@ -5,13 +5,14 @@
 #include <thread>
 
 #include "barelymusician/base/sequencer.h"
-#include "barelymusician/instrument/envelope.h"
 #include "barelymusician/instrument/oscillator.h"
+#include "barelymusician/instrument/voice.h"
 #include "utils/pa_wrapper.h"
 
 using barelyapi::Envelope;
 using barelyapi::Oscillator;
 using barelyapi::Sequencer;
+using barelyapi::Voice;
 
 namespace {
 
@@ -31,7 +32,7 @@ constexpr Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
 constexpr float kBarFrequency = 440.0f;
 constexpr float kBeatFrequency = 220.0f;
 constexpr Oscillator::Type kOscillatorType = Oscillator::Type::kSquare;
-constexpr float kRelease = 0.05f;
+constexpr float kRelease = 0.025f;
 
 }  // namespace
 
@@ -40,17 +41,16 @@ int main(int argc, char* argv[]) {
   PaWrapper audio_io;
 
   Sequencer sequencer(kSampleRate);
-  Oscillator oscillator(kSampleInterval);
-  Envelope envelope(kSampleInterval);
+  Voice voice(kSampleInterval);
 
   sequencer.SetBpm(kBpm);
   sequencer.SetTimeSignature(kBeatsPerBar, kBeatLength);
 
-  envelope.SetRelease(kRelease);
-  oscillator.SetType(kOscillatorType);
-  oscillator.SetFrequency(kBarFrequency);
+  voice.envelope().SetRelease(kRelease);
+  voice.oscillator().SetType(kOscillatorType);
+  voice.oscillator().SetFrequency(kBarFrequency);
 
-  const auto process = [&sequencer, &oscillator, &envelope](float* output) {
+  const auto process = [&sequencer, &voice](float* output) {
     const int current_bar = sequencer.current_bar();
     const int current_beat = sequencer.current_beat();
     int impulse_sample = -1;
@@ -61,19 +61,19 @@ int main(int argc, char* argv[]) {
     }
     sequencer.Update(kFramesPerBuffer);
     if (current_bar != sequencer.current_bar()) {
-      oscillator.SetFrequency(kBarFrequency);
+      voice.oscillator().SetFrequency(kBarFrequency);
       impulse_sample = sequencer.sample_offset();
     } else if (current_beat != sequencer.current_beat()) {
-      oscillator.SetFrequency(kBeatFrequency);
+      voice.oscillator().SetFrequency(kBeatFrequency);
       impulse_sample = sequencer.sample_offset();
     }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {
-        envelope.Start();
+        voice.Start();
       }
-      const float sample = envelope.Next() * oscillator.Next();
+      const float sample = voice.Next();
       if (frame == impulse_sample) {
-        envelope.Stop();
+        voice.Stop();
       }
       for (int channel = 0; channel < kNumChannels; ++channel) {
         output[kNumChannels * frame + channel] = sample;
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
   // Initialize the audio routine.
   audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
 
-  // TODO(anokta): This is obviously hacky, may consider add a proper I/O lib.
+  // TODO(#2): This is obviously hacky, may consider add a proper I/O lib.
   int input;
   while (true) {
     input = _getch();

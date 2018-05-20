@@ -21,7 +21,7 @@
 namespace barelyapi {
 
 // Logging class that wraps output log stream for debugging.
-// TODO(anokta): Refactor this implementation to include asserts etc.
+// TODO(#4): Refactor this implementation to include asserts etc.
 class Logger {
  public:
   // Constructs new |Logger| for the given output.

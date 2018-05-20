@@ -7,7 +7,7 @@
 
 // Simple portaudio wrapper to be used in the demo projects.
 // @note Only a single instance allowed per application.
-// TODO(anokta): Revisit the single instance limitation (avoid static function).
+// TODO(#5): Revisit the single instance limitation (avoid static function).
 class PaWrapper {
  public:
   // Alias for the audio process callback function.

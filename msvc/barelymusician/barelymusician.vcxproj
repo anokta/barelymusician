@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\envelope.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\oscillator.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\instrument\voice.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\unit_generator.h" />
+    <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -20,65 +20,64 @@ const float kBeatsPerSecond = kBpm / kSecondsFromMinutes;
 // initialized with the default constructor.
 TEST(SequencerTest, ProcessDefault) {
   Sequencer sequencer(kSampleRate);
-  EXPECT_EQ(0, sequencer.GetCurrentBeat());
-  EXPECT_EQ(0, sequencer.GetCurrentBar());
-  EXPECT_EQ(0, sequencer.GetCurrentSection());
-  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  EXPECT_EQ(0, sequencer.current_beat());
+  EXPECT_EQ(0, sequencer.current_bar());
+  EXPECT_EQ(0, sequencer.current_section());
+  EXPECT_EQ(0, sequencer.sample_offset());
 
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(0, sequencer.GetCurrentBeat());
-  EXPECT_EQ(0, sequencer.GetCurrentBar());
-  EXPECT_EQ(0, sequencer.GetCurrentSection());
-  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  EXPECT_EQ(0, sequencer.current_beat());
+  EXPECT_EQ(0, sequencer.current_bar());
+  EXPECT_EQ(0, sequencer.current_section());
+  EXPECT_EQ(0, sequencer.sample_offset());
 }
 
 // Tests that the sequencer updates its current state as expected.
 TEST(SequencerTest, Process) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetBpm(kBpm);
-  sequencer.SetBeatLength(kBeatLength);
+  sequencer.SetTimeSignature(0, kBeatLength);
   // Test beat count.
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.GetCurrentBeat());
-  EXPECT_EQ(0, sequencer.GetCurrentBar());
-  EXPECT_EQ(0, sequencer.GetCurrentSection());
-  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.current_beat());
+  EXPECT_EQ(0, sequencer.current_bar());
+  EXPECT_EQ(0, sequencer.current_section());
+  EXPECT_EQ(0, sequencer.sample_offset());
   // Test bar count.
   sequencer.Reset();
-  sequencer.SetNumBeatsPerBar(1);
+  sequencer.SetTimeSignature(1, kBeatLength);
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(0, sequencer.GetCurrentBeat());
-  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.GetCurrentBar());
-  EXPECT_EQ(0, sequencer.GetCurrentSection());
-  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  EXPECT_EQ(0, sequencer.current_beat());
+  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.current_bar());
+  EXPECT_EQ(0, sequencer.current_section());
+  EXPECT_EQ(0, sequencer.sample_offset());
   // Test section count.
   sequencer.Reset();
   sequencer.SetNumBarsPerSection(1);
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(0, sequencer.GetCurrentBeat());
-  EXPECT_EQ(0, sequencer.GetCurrentBar());
-  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.GetCurrentSection());
-  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  EXPECT_EQ(0, sequencer.current_beat());
+  EXPECT_EQ(0, sequencer.current_bar());
+  EXPECT_EQ(static_cast<int>(kBeatsPerSecond), sequencer.current_section());
+  EXPECT_EQ(0, sequencer.sample_offset());
 }
 
 // Tests that the sequencer successfully resets its current state.
 TEST(SequencerTest, Reset) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetBpm(kBpm);
-  sequencer.SetNumBeatsPerBar(kNumBeatsPerBar);
-  sequencer.SetBeatLength(kBeatLength);
+  sequencer.SetTimeSignature(kNumBeatsPerBar, kBeatLength);
 
   sequencer.Update(kSampleRate);
-  EXPECT_GE(sequencer.GetCurrentBeat(), 0);
-  EXPECT_GE(sequencer.GetCurrentBar(), 0);
-  EXPECT_GE(sequencer.GetCurrentSection(), 0);
-  EXPECT_GE(sequencer.GetCurrentSampleOffset(), 0);
+  EXPECT_GE(sequencer.current_beat(), 0);
+  EXPECT_GE(sequencer.current_bar(), 0);
+  EXPECT_GE(sequencer.current_section(), 0);
+  EXPECT_GE(sequencer.sample_offset(), 0);
 
   sequencer.Reset();
-  EXPECT_EQ(0, sequencer.GetCurrentBeat());
-  EXPECT_EQ(0, sequencer.GetCurrentBar());
-  EXPECT_EQ(0, sequencer.GetCurrentSection());
-  EXPECT_EQ(0, sequencer.GetCurrentSampleOffset());
+  EXPECT_EQ(0, sequencer.current_beat());
+  EXPECT_EQ(0, sequencer.current_bar());
+  EXPECT_EQ(0, sequencer.current_section());
+  EXPECT_EQ(0, sequencer.sample_offset());
 }
 
 }  // namespace

@@ -21,6 +21,10 @@ class Oscillator : public UnitGenerator {
   // @param sample_interval Sampling interval in seconds.
   explicit Oscillator(float sample_interval);
 
+  // Implements |UnitGenerator|.
+  float Next() override;
+  void Reset() override;
+
   // Sets the frequency of the oscillator.
   //
   // @param frequency Oscillator frequency in Hz.
@@ -30,10 +34,6 @@ class Oscillator : public UnitGenerator {
   //
   // @param type Oscillator type.
   void SetType(Type type);
-
-  // Implements |UnitGenerator|.
-  float Next() override;
-  void Reset() override;
 
  private:
   // Inverse sampling rate in seconds.

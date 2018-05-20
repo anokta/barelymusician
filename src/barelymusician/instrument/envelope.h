@@ -14,11 +14,9 @@ class Envelope : UnitGenerator {
   // @param sample_interval Sampling interval in seconds.
   explicit Envelope(float sample_interval);
 
-  // Starts the envelope.
-  void Start();
-
-  // Stops the envelope.
-  void Stop();
+  // Implements |UnitGenerator|.
+  float Next() override;
+  void Reset() override;
 
   // Sets the attack of the envelope in seconds.
   //
@@ -30,19 +28,21 @@ class Envelope : UnitGenerator {
   // decay Attack in seconds.
   void SetDecay(float decay);
 
-  // Sets the sustain of the envelope in amplitude.
-  //
-  // sustain Sustain in amplitude range [0, 1].
-  void SetSustain(float sustain);
-
   // Sets the release of the envelope in seconds.
   //
   // release Release in seconds.
   void SetRelease(float release);
 
-  // Implements |UnitGenerator|.
-  float Next() override;
-  void Reset() override;
+  // Sets the sustain of the envelope in amplitude.
+  //
+  // sustain Sustain in amplitude range [0, 1].
+  void SetSustain(float sustain);
+
+  // Starts the envelope.
+  void Start();
+
+  // Stops the envelope.
+  void Stop();
 
  private:
   // Envelope state.

@@ -20,53 +20,49 @@ class Sequencer {
   // @param sample_rate Sampling rate per second.
   explicit Sequencer(int sample_rate);
 
-  // Updates the sequencer.
-  //
-  // @num_samples Number of samples to iterate.
-  void Update(int num_samples);
-
   // Resets the sequencer.
   void Reset();
-
-  // Returns the current beat.
-  //
-  // @return Current beat.
-  int GetCurrentBeat() const;
-
-  // Returns the current bar.
-  //
-  // @return Current bar.
-  int GetCurrentBar() const;
-
-  // Returns the current section.
-  //
-  // @return Current section.
-  int GetCurrentSection() const;
-
-  // Returns the sample offset from the current beat.
-  //
-  // @return Current sample offset.
-  int GetCurrentSampleOffset() const;
 
   // Sets the tempo of the sequencer.
   //
   // @param bpm Number of beats per minute.
   void SetBpm(float bpm);
 
-  // Sets the beat length (denominator of the time signature).
-  //
-  // @ beat_length Beat length.
-  void SetBeatLength(NoteValue beat_length);
-
-  // Set number of beats per bar (nominator of the time signature).
-  //
-  // @param num_beats Number of beats per bar.
-  void SetNumBeatsPerBar(int num_beats_per_bar);
-
-  // Set number of bars per section.
+  // Sets the number of bars per each section of the sequencer.
   //
   // @param num_bars Number of bars per section.
   void SetNumBarsPerSection(int num_bars_per_section);
+
+  // Set the time signature of the sequencer.
+  //
+  // @param num_beats Number of beats per bar (i.e., nominator).
+  // @ beat_length Beat length (i.e., denominator).
+  void SetTimeSignature(int num_beats_per_bar, NoteValue beat_length);
+
+  // Updates the sequencer.
+  //
+  // @num_samples Number of samples to iterate.
+  void Update(int num_samples);
+
+  // Returns the current bar.
+  //
+  // @return Current bar.
+  int current_bar() const { return current_bar_; }
+
+  // Returns the current beat.
+  //
+  // @return Current beat.
+  int current_beat() const { return current_beat_; }
+
+  // Returns the current section.
+  //
+  // @return Current section.
+  int current_section() const { return current_section_; }
+
+  // Returns the sample offset from the current beat.
+  //
+  // @return Current sample offset.
+  int sample_offset() const { return sample_offset_; }
 
  private:
   // Calculates number of samples per beat with the current settings.

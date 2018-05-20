@@ -1,3 +1,4 @@
+#include <conio.h>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -8,64 +9,63 @@
 #include "barelymusician/instrument/oscillator.h"
 #include "utils/pa_wrapper.h"
 
-namespace {
-
 using barelyapi::Envelope;
 using barelyapi::Oscillator;
 using barelyapi::Sequencer;
 
-// System audio settings.
-const int kSampleRate = 48000;
-const int kNumChannels = 2;
-const int kFramesPerBuffer = 512;
+namespace {
 
-const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+// System audio settings.
+constexpr int kSampleRate = 48000;
+constexpr int kNumChannels = 2;
+constexpr int kFramesPerBuffer = 512;
+
+constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-const float kBpm = 120.0f;
-const int kBeatsPerBar = 4;
-const Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
+constexpr float kBpm = 120.0f;
+constexpr int kBeatsPerBar = 4;
+constexpr Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
 
 // Synth settings.
-const float kBarFrequency = 440.0f;
-const float kBeatFrequency = 220.0f;
-const Oscillator::Type kOscillatorType = Oscillator::Type::kSquare;
-const float kRelease = 0.05f;
+constexpr float kBarFrequency = 440.0f;
+constexpr float kBeatFrequency = 220.0f;
+constexpr Oscillator::Type kOscillatorType = Oscillator::Type::kSquare;
+constexpr float kRelease = 0.05f;
 
 }  // namespace
 
-int main() {
+int main(int argc, char* argv[]) {
+  // Set the audio process callback.
   PaWrapper audio_io;
 
-  // Set the audio process callback.
   Sequencer sequencer(kSampleRate);
   Oscillator oscillator(kSampleInterval);
   Envelope envelope(kSampleInterval);
 
   sequencer.SetBpm(kBpm);
-  sequencer.SetNumBeatsPerBar(kBeatsPerBar);
-  sequencer.SetBeatLength(kBeatLength);
+  sequencer.SetTimeSignature(kBeatsPerBar, kBeatLength);
 
   envelope.SetRelease(kRelease);
   oscillator.SetType(kOscillatorType);
   oscillator.SetFrequency(kBarFrequency);
 
   const auto process = [&sequencer, &oscillator, &envelope](float* output) {
-    const int current_bar = sequencer.GetCurrentBar();
-    const int current_beat = sequencer.GetCurrentBeat();
+    const int current_bar = sequencer.current_bar();
+    const int current_beat = sequencer.current_beat();
     int impulse_sample = -1;
     if (current_bar == 0 && current_beat == 0 &&
-        sequencer.GetCurrentSampleOffset() == 0) {
+        sequencer.sample_offset() == 0) {
       // First tick.
       impulse_sample = 0;
     }
     sequencer.Update(kFramesPerBuffer);
-    if (current_bar != sequencer.GetCurrentBar()) {
+    if (current_bar != sequencer.current_bar()) {
       oscillator.SetFrequency(kBarFrequency);
-      impulse_sample = sequencer.GetCurrentSampleOffset();
-    } else if (current_beat != sequencer.GetCurrentBeat()) {
+      impulse_sample = sequencer.sample_offset();
+    } else if (current_beat != sequencer.current_beat()) {
       oscillator.SetFrequency(kBeatFrequency);
-      impulse_sample = sequencer.GetCurrentSampleOffset();
+      impulse_sample = sequencer.sample_offset();
     }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {
@@ -82,11 +82,30 @@ int main() {
   };
   audio_io.SetAudioProcessCallback(process);
 
-  // Execute the audio routine.
+  // Initialize the audio routine.
   audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
-  while (getchar() == 0) {
+
+  // TODO(anokta): This is obviously hacky, may consider add a proper I/O lib.
+  int input;
+  while (true) {
+    input = _getch();
+    if (input == 27) {
+      // ESC pressed, quit the app.
+      break;
+    }
+    // Test things.
+    switch (static_cast<char>(input)) {
+      case 't':
+        sequencer.SetBpm(2.0f * kBpm);
+        break;
+      case 'r':
+        sequencer.SetBpm(kBpm);
+        break;
+    }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
+
+  // Shutdown the audio routine.
   audio_io.Shutdown();
 
   return 0;

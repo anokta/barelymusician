@@ -14,12 +14,6 @@ Oscillator::Oscillator(float sample_interval)
       phase_(0.0f),
       frequency_(0.0f) {}
 
-void Oscillator::SetFrequency(float frequency) {
-  frequency_ = std::max(frequency, 0.0f);
-}
-
-void Oscillator::SetType(Type type) { type_ = type; }
-
 float Oscillator::Next() {
   float output = 0.0f;
   // Generate the next sample.
@@ -48,5 +42,11 @@ float Oscillator::Next() {
 }
 
 void Oscillator::Reset() { phase_ = 0.0f; }
+
+void Oscillator::SetFrequency(float frequency) {
+  frequency_ = std::max(frequency, 0.0f);
+}
+
+void Oscillator::SetType(Type type) { type_ = type; }
 
 }  // namespace barelyapi

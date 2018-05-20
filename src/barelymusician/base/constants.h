@@ -4,13 +4,13 @@
 namespace barelyapi {
 
 // PI (radians).
-const double kPi = 3.14159265358979323846;
+constexpr float kPi = 3.14159265358979323846f;
 
 // Two PI (radians).
-const float kTwoPi = static_cast<float>(2.0 * kPi);
+constexpr float kTwoPi = 2.0f * kPi;
 
 // Converts minutes to seconds.
-const float kSecondsFromMinutes = 60.0f;
+constexpr float kSecondsFromMinutes = 60.0f;
 
 }  // namespace barelyapi
 

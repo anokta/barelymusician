@@ -1,6 +1,7 @@
 #include "barelymusician/instrument/oscillator.h"
 
 #include "barelymusician/base/constants.h"
+#include "barelymusician/base/logging.h"
 
 #include <algorithm>
 #include <cmath>
@@ -12,7 +13,9 @@ Oscillator::Oscillator(float sample_interval)
     : sample_interval_(sample_interval),
       type_(Type::kNoise),
       phase_(0.0f),
-      frequency_(0.0f) {}
+      frequency_(0.0f) {
+  DCHECK_GE(sample_interval_, 0.0f);
+}
 
 float Oscillator::Next() {
   float output = 0.0f;

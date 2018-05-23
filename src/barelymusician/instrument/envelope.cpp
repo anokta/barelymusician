@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <limits>
 
+#include "barelymusician/base/logging.h"
+
 namespace barelyapi {
 
 Envelope::Envelope(float sample_interval)
@@ -14,7 +16,9 @@ Envelope::Envelope(float sample_interval)
       state_(State::kIdle),
       output_(0.0f),
       release_output_(0.0f),
-      phase_(0.0f) {}
+      phase_(0.0f) {
+  DCHECK_GE(sample_interval_, 0.0f);
+}
 
 float Envelope::Next() {
   if (state_ == State::kIdle) {

@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "barelymusician/base/constants.h"
+#include "barelymusician/base/logging.h"
 
 namespace barelyapi {
 
@@ -13,6 +14,7 @@ Sequencer::Sequencer(int sample_rate)
       num_samples_per_beat_(0),
       num_beats_per_bar_(0),
       num_bars_per_section_(0) {
+  DCHECK_GE(sample_rate_float_, 0.0f);
   Reset();
 }
 

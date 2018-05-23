@@ -15,7 +15,7 @@ SamplePlayer::SamplePlayer(float sample_interval, int frequency,
       loop_(false),
       speed_(1.0f),
       cursor_(0.0f) {
-  DCHECK_GE(sample_ratio_, 0);
+  DCHECK_GE(sample_ratio_, 0.0f);
   DCHECK(data_);
   DCHECK_GT(length_, 0.0f);
 }

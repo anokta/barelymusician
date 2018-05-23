@@ -15,6 +15,9 @@
     <ClCompile Include="..\..\test\barelymusician\base\sequencer_test.cpp">
       <Filter>base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\barelymusician\instrument\sample_player_test.cpp">
+      <Filter>instrument</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

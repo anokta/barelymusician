@@ -48,6 +48,9 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\sample_player.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\instrument\oscillator.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\instrument\voice.cpp">
+      <Filter>Source Files\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\instrument\sample_player.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>

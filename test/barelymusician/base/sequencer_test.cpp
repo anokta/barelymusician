@@ -7,14 +7,14 @@ namespace barelyapi {
 namespace {
 
 // Sampling rate.
-const int kSampleRate = 48000;
+constexpr int kSampleRate = 48000;
 
 // Tempo and time signature.
-const float kBpm = 120.0f;
-const int kNumBeatsPerBar = 4;
-const Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
+constexpr float kBpm = 120.0f;
+constexpr int kNumBeatsPerBar = 4;
+constexpr Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
 
-const float kBeatsPerSecond = kBpm / kSecondsFromMinutes;
+constexpr float kBeatsPerSecond = kBpm / kSecondsFromMinutes;
 
 // Tests that the sequencer updates its current state as expected when
 // initialized with the default constructor.

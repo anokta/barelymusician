@@ -1,53 +1,29 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_VOICE_H_
 #define BARELYMUSICIAN_INSTRUMENT_VOICE_H_
 
-#include "barelymusician/instrument/envelope.h"
-#include "barelymusician/instrument/oscillator.h"
 #include "barelymusician/instrument/unit_generator.h"
 
 namespace barelyapi {
 
-// Voice for a virtual instrument that wraps a unit generator with an envelope
-// and a corresponding gain to generate output samples.
+// Voice interface for a virtual instrument that generates output samples with
+// respect to the note input.
 class Voice : public UnitGenerator {
  public:
-  // Constructs new |Voice|.
+  // Returns whether the voice is currently active (i.e., playing).
   //
-  // @param sample_interval Sampling interval in seconds.
-  explicit Voice(float sample_interval);
+  // @return True if active.
+  virtual bool IsActive() const = 0;
 
-  // Implements |UnitGenerator|.
-  float Next() override;
-  void Reset() override;
-
-  // Sets the gain of the voice.
+  // Stops the voice for the given note input.
   //
-  // @param gain Gain in amplitude.
-  void SetGain(float gain);
+  // @param index Note index to be stopped.
+  virtual void NoteOff(float index) = 0;
 
-  // Starts the voice.
-  void Start();
-
-  // Stops the voice.
-  void Stop();
-
-  Envelope& envelope() { return envelope_; }
-  const Envelope& envelope() const { return envelope_; }
-
-  Oscillator& oscillator() { return oscillator_; }
-  const Oscillator& oscillator() const { return oscillator_; }
-
- private:
-  // Envelope.
-  Envelope envelope_;
-
-  // Unit generator.
-  // TODO(#1): This should probably be generalized to |UnitGenerator*| at some
-  // point (e.g., to support sample players).
-  Oscillator oscillator_;
-
-  // Gain in amplitude.
-  float gain_;
+  // Starts the voice for the given note input.
+  //
+  // @param index Note index to be played.
+  // @param gain Note gain in amplitude.
+  virtual void NoteOn(float index, float gain) = 0;
 };
 
 }  // namespace barelyapi

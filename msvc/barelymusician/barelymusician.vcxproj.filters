@@ -65,9 +65,6 @@
     <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\voice.cpp">
-      <Filter>Source Files\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\instrument\sample_player.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>

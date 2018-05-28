@@ -5,14 +5,13 @@
 #include <thread>
 
 #include "barelymusician/base/sequencer.h"
+#include "barelymusician/instrument/envelope.h"
 #include "barelymusician/instrument/oscillator.h"
-#include "barelymusician/instrument/voice.h"
 #include "utils/pa_wrapper.h"
 
 using barelyapi::Envelope;
 using barelyapi::Oscillator;
 using barelyapi::Sequencer;
-using barelyapi::Voice;
 
 namespace {
 
@@ -41,16 +40,18 @@ int main(int argc, char* argv[]) {
   PaWrapper audio_io;
 
   Sequencer sequencer(kSampleRate);
-  Voice voice(kSampleInterval);
 
   sequencer.SetBpm(kBpm);
   sequencer.SetTimeSignature(kBeatsPerBar, kBeatLength);
 
-  voice.envelope().SetRelease(kRelease);
-  voice.oscillator().SetType(kOscillatorType);
-  voice.oscillator().SetFrequency(kBarFrequency);
+  Oscillator oscillator(kSampleInterval);
+  Envelope envelope(kSampleInterval);
 
-  const auto process = [&sequencer, &voice](float* output) {
+  oscillator.SetType(kOscillatorType);
+  oscillator.SetFrequency(kBarFrequency);
+  envelope.SetRelease(kRelease);
+
+  const auto process = [&sequencer, &oscillator, &envelope](float* output) {
     const int current_bar = sequencer.current_bar();
     const int current_beat = sequencer.current_beat();
     int impulse_sample = -1;
@@ -61,19 +62,20 @@ int main(int argc, char* argv[]) {
     }
     sequencer.Update(kFramesPerBuffer);
     if (current_bar != sequencer.current_bar()) {
-      voice.oscillator().SetFrequency(kBarFrequency);
+      oscillator.SetFrequency(kBarFrequency);
       impulse_sample = sequencer.sample_offset();
     } else if (current_beat != sequencer.current_beat()) {
-      voice.oscillator().SetFrequency(kBeatFrequency);
+      oscillator.SetFrequency(kBeatFrequency);
       impulse_sample = sequencer.sample_offset();
     }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {
-        voice.Start();
+        oscillator.Reset();
+        envelope.Start();
       }
-      const float sample = voice.Next();
+      const float sample = envelope.Next() * oscillator.Next();
       if (frame == impulse_sample) {
-        voice.Stop();
+        envelope.Stop();
       }
       for (int channel = 0; channel < kNumChannels; ++channel) {
         output[kNumChannels * frame + channel] = sample;

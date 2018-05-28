@@ -1,7 +1,7 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_ENVELOPE_H_
-#define BARELYMUSICIAN_INSTRUMENT_ENVELOPE_H_
+#ifndef BARELYMUSICIAN_DSP_ENVELOPE_H_
+#define BARELYMUSICIAN_DSP_ENVELOPE_H_
 
-#include "barelymusician/instrument/unit_generator.h"
+#include "barelymusician/base/unit_generator.h"
 
 namespace barelyapi {
 
@@ -72,4 +72,4 @@ class Envelope : UnitGenerator {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_ENVELOPE_H_
+#endif  // BARELYMUSICIAN_DSP_ENVELOPE_H_

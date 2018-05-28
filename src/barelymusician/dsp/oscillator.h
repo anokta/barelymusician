@@ -1,21 +1,21 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_OSCILLATOR_H_
-#define BARELYMUSICIAN_INSTRUMENT_OSCILLATOR_H_
+#ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
+#define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
-#include "barelymusician/instrument/unit_generator.h"
+#include "barelymusician/base/unit_generator.h"
 
 namespace barelyapi {
+
+// Oscillator type.
+enum class OscillatorType {
+  kSine = 0,    // Sine wave.
+  kSaw = 1,     // Sawtooth wave.
+  kSquare = 2,  // Square wave.
+  kNoise = 3,   // White noise.
+};
 
 // Simple oscillator that generates output samples of basic waveforms.
 class Oscillator : public UnitGenerator {
  public:
-  // Oscillator type.
-  enum class Type {
-    kSine = 0,    // Sine wave.
-    kSaw = 1,     // Sawtooth wave.
-    kSquare = 2,  // Square wave.
-    kNoise = 3,   // White noise.
-  };
-
   // Constructs new |Oscillator|.
   //
   // @param sample_interval Sampling interval in seconds.
@@ -33,14 +33,14 @@ class Oscillator : public UnitGenerator {
   // Sets the type of the oscillator.
   //
   // @param type Oscillator type.
-  void SetType(Type type);
+  void SetType(OscillatorType type);
 
  private:
   // Inverse sampling rate in seconds.
   const float sample_interval_;
 
   // Oscillator type.
-  Type type_;
+  OscillatorType type_;
 
   // Internal clock.
   float phase_;
@@ -51,4 +51,4 @@ class Oscillator : public UnitGenerator {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_OSCILLATOR_H_
+#endif  // BARELYMUSICIAN_DSP_OSCILLATOR_H_

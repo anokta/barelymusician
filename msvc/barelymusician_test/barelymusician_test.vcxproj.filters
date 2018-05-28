@@ -1,28 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="instrument">
-      <UniqueIdentifier>{30751e41-b7ac-43fc-be3b-57c36fd93905}</UniqueIdentifier>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{b7bcdf57-5ccb-4800-b4bf-fc96c2699177}</UniqueIdentifier>
     </Filter>
-    <Filter Include="base">
+    <Filter Include="Source Files\base">
       <UniqueIdentifier>{314dc98b-1e28-4422-b5d6-48fa2bb85ea4}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\test\barelymusician\instrument\envelope_test.cpp">
-      <Filter>instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\barelymusician\base\sequencer_test.cpp">
-      <Filter>base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\barelymusician\instrument\sample_player_test.cpp">
-      <Filter>instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\test\barelymusician\instrument\one_pole_filter_test.cpp">
-      <Filter>instrument</Filter>
-    </ClCompile>
+    <Filter Include="Source Files\dsp">
+      <UniqueIdentifier>{e033ea07-8a55-4037-9658-38539357d2e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_SAMPLE_PLAYER_H_
-#define BARELYMUSICIAN_INSTRUMENT_SAMPLE_PLAYER_H_
+#ifndef BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
+#define BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 
-#include "barelymusician/instrument/unit_generator.h"
+#include "barelymusician/base/unit_generator.h"
 
 namespace barelyapi {
 
@@ -68,4 +68,4 @@ class SamplePlayer : public UnitGenerator {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_SAMPLE_PLAYER_H_
+#endif  // BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_

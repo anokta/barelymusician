@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_VOICE_H_
 #define BARELYMUSICIAN_INSTRUMENT_VOICE_H_
 
-#include "barelymusician/instrument/unit_generator.h"
+#include "barelymusician/base/unit_generator.h"
 
 namespace barelyapi {
 

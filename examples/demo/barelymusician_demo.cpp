@@ -5,12 +5,13 @@
 #include <thread>
 
 #include "barelymusician/base/sequencer.h"
-#include "barelymusician/instrument/envelope.h"
-#include "barelymusician/instrument/oscillator.h"
+#include "barelymusician/dsp/envelope.h"
+#include "barelymusician/dsp/oscillator.h"
 #include "utils/pa_wrapper.h"
 
 using barelyapi::Envelope;
 using barelyapi::Oscillator;
+using barelyapi::OscillatorType;
 using barelyapi::Sequencer;
 
 namespace {
@@ -30,7 +31,7 @@ constexpr Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
 // Synth settings.
 constexpr float kBarFrequency = 440.0f;
 constexpr float kBeatFrequency = 220.0f;
-constexpr Oscillator::Type kOscillatorType = Oscillator::Type::kSquare;
+constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kRelease = 0.025f;
 
 }  // namespace

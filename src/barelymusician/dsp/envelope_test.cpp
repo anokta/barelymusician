@@ -1,4 +1,4 @@
-#include "barelymusician/instrument/envelope.h"
+#include "barelymusician/dsp/envelope.h"
 
 #include "gtest/gtest.h"
 

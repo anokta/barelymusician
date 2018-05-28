@@ -1,4 +1,4 @@
-#include "barelymusician/instrument/one_pole_filter.h"
+#include "barelymusician/dsp/one_pole_filter.h"
 
 #include <cmath>
 
@@ -21,7 +21,7 @@ constexpr float kEpsilon = 1e-6f;
 // coefficient is set.
 TEST(OnePoleFilterTest, LowPass) {
   OnePoleFilter low_pass_filter;
-  low_pass_filter.SetType(OnePoleFilter::Type::kLowPass);
+  low_pass_filter.SetType(FilterType::kLowPass);
   low_pass_filter.SetCoefficient(kCoefficient);
 
   for (int i = 0; i < kInputLength; ++i) {
@@ -35,7 +35,7 @@ TEST(OnePoleFilterTest, LowPass) {
 // set to all-pass.
 TEST(OnePoleFilterTest, LowPassAllPass) {
   OnePoleFilter low_pass_filter;
-  low_pass_filter.SetType(OnePoleFilter::Type::kLowPass);
+  low_pass_filter.SetType(FilterType::kLowPass);
   low_pass_filter.SetCoefficient(0.0f);
 
   for (int i = 0; i < kInputLength; ++i) {
@@ -47,7 +47,7 @@ TEST(OnePoleFilterTest, LowPassAllPass) {
 // coefficient is set.
 TEST(OnePoleFilterTest, HighPass) {
   OnePoleFilter high_pass_filter;
-  high_pass_filter.SetType(OnePoleFilter::Type::kHighPass);
+  high_pass_filter.SetType(FilterType::kHighPass);
   high_pass_filter.SetCoefficient(kCoefficient);
 
   for (int i = 0; i < kInputLength; ++i) {
@@ -62,7 +62,7 @@ TEST(OnePoleFilterTest, HighPass) {
 // is set to all-pass.
 TEST(OnePoleFilterTest, HighPassAllPass) {
   OnePoleFilter high_pass_filter;
-  high_pass_filter.SetType(OnePoleFilter::Type::kHighPass);
+  high_pass_filter.SetType(FilterType::kHighPass);
   high_pass_filter.SetCoefficient(1.0f);
 
   for (int i = 0; i < kInputLength; ++i) {

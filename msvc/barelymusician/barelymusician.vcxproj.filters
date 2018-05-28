@@ -16,28 +16,22 @@
     <Filter Include="Header Files\instrument">
       <UniqueIdentifier>{a0eca6ba-82ba-4ffd-9e08-3d4d7a295ad0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\instrument">
-      <UniqueIdentifier>{6fae7c5f-b0c9-4044-85ee-42fb0d80aa0b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\base">
       <UniqueIdentifier>{603293e4-2ae4-4ce2-b74b-6365fcae2def}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\base">
       <UniqueIdentifier>{94231377-0431-4cd7-b1e8-2d4aefd7370b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\dsp">
+      <UniqueIdentifier>{5e3743c7-cad0-43dc-8212-bd313cfd6dab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\dsp">
+      <UniqueIdentifier>{eb36f113-4397-47d5-9057-b6624dbd0f42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\barelymusician\instrument\oscillator.h">
-      <Filter>Header Files\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\unit_generator.h">
-      <Filter>Header Files\instrument</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
       <Filter>Header Files\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\envelope.h">
-      <Filter>Header Files\instrument</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\logging.h">
       <Filter>Header Files\base</Filter>
@@ -48,31 +42,37 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\sample_player.h">
-      <Filter>Header Files\instrument</Filter>
+    <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h">
+      <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\one_pole_filter.h">
-      <Filter>Header Files\instrument</Filter>
+    <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h">
+      <Filter>Header Files\dsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician\instrument\oscillator.cpp">
-      <Filter>Source Files\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\envelope.cpp">
-      <Filter>Source Files\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\sample_player.cpp">
-      <Filter>Source Files\instrument</Filter>
+    <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp">
+      <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\one_pole_filter.cpp">
-      <Filter>Source Files\instrument</Filter>
+    <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp">
+      <Filter>Source Files\dsp</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

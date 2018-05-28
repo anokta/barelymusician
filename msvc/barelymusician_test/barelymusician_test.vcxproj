@@ -41,10 +41,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\test\barelymusician\base\sequencer_test.cpp" />
-    <ClCompile Include="..\..\test\barelymusician\instrument\envelope_test.cpp" />
-    <ClCompile Include="..\..\test\barelymusician\instrument\one_pole_filter_test.cpp" />
-    <ClCompile Include="..\..\test\barelymusician\instrument\sample_player_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

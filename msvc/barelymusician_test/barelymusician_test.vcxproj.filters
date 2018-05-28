@@ -18,6 +18,9 @@
     <ClCompile Include="..\..\test\barelymusician\instrument\sample_player_test.cpp">
       <Filter>instrument</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\test\barelymusician\instrument\one_pole_filter_test.cpp">
+      <Filter>instrument</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

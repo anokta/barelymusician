@@ -13,7 +13,7 @@ Oscillator::Oscillator(float sample_interval)
     : sample_interval_(sample_interval),
       type_(Type::kNoise),
       phase_(0.0f),
-      frequency_(0.0f) {
+      increment_(0.0f) {
   DCHECK_GE(sample_interval_, 0.0f);
 }
 
@@ -37,7 +37,7 @@ float Oscillator::Next() {
       break;
   }
   // Update the phasor.
-  phase_ += frequency_ * sample_interval_;
+  phase_ += increment_;
   if (phase_ >= 1.0f) {
     phase_ -= 1.0f;
   }
@@ -47,7 +47,7 @@ float Oscillator::Next() {
 void Oscillator::Reset() { phase_ = 0.0f; }
 
 void Oscillator::SetFrequency(float frequency) {
-  frequency_ = std::max(frequency, 0.0f);
+  increment_ = std::max(frequency, 0.0f) * sample_interval_;
 }
 
 void Oscillator::SetType(Type type) { type_ = type; }

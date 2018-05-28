@@ -42,11 +42,11 @@ class Oscillator : public UnitGenerator {
   // Oscillator type.
   Type type_;
 
-  // Frequency in Hz.
-  float frequency_;
-
   // Internal clock.
   float phase_;
+
+  // Increment per sample.
+  float increment_;
 };
 
 }  // namespace barelyapi

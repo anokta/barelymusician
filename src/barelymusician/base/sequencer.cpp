@@ -42,19 +42,6 @@ void Sequencer::SetTimeSignature(int num_beats_per_bar, NoteValue beat_length) {
   CalculateNumSamplesPerBeat();
 }
 
-void Sequencer::CalculateNumSamplesPerBeat() {
-  const float bpm_length = bpm_ * beat_length_;
-  const float beat_length_seconds =
-      (bpm_length > 0.0f) ? kSecondsFromMinutes / bpm_length : 0.0f;
-  num_samples_per_beat_ =
-      static_cast<int>(beat_length_seconds * sample_rate_float_);
-  if (num_samples_per_beat_ > 0) {
-    // Make sure the next beat occurs after the updated |num_samples_per_beat_|
-    // from the last processed beat.
-    sample_offset_ %= num_samples_per_beat_;
-  }
-}
-
 void Sequencer::Update(int num_samples) {
   // Update beat count.
   if (num_samples_per_beat_ == 0) {
@@ -75,6 +62,19 @@ void Sequencer::Update(int num_samples) {
   }
   current_section_ += current_bar_ / num_bars_per_section_;
   current_bar_ %= num_bars_per_section_;
+}
+
+void Sequencer::CalculateNumSamplesPerBeat() {
+  const float bpm_length = bpm_ * beat_length_;
+  const float beat_length_seconds =
+      (bpm_length > 0.0f) ? kSecondsFromMinutes / bpm_length : 0.0f;
+  num_samples_per_beat_ =
+      static_cast<int>(beat_length_seconds * sample_rate_float_);
+  if (num_samples_per_beat_ > 0) {
+    // Make sure the next beat occurs after the updated |num_samples_per_beat_|
+    // from the last processed beat.
+    sample_offset_ %= num_samples_per_beat_;
+  }
 }
 
 }  // namespace barelyapi

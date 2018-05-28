@@ -14,12 +14,18 @@ class SamplePlayer : public UnitGenerator {
   // @param frequency Original sampling frequency in Hz.
   // @param data Sample data.
   // @param length Sample data length.
-  SamplePlayer(float sample_interval, int frequency, const float* data,
-               int length);
+  SamplePlayer(float sample_interval);
 
   // Implements |UnitGenerator|.
   float Next() override;
   void Reset() override;
+
+  // Sets the sample data.
+  //
+  // @param data Sample data.
+  // @param frequency Data sampling frequency in Hz.
+  // @param length Data length in samples.
+  void SetData(const float* data, int frequency, int length);
 
   // Sets whether the playback should be looping.
   //
@@ -32,14 +38,20 @@ class SamplePlayer : public UnitGenerator {
   void SetSpeed(float speed);
 
  private:
-  // Sampling ratio for the playback.
-  const float sample_ratio_;
+  // Calculates per sample increment amount with the current properties.
+  void CalculateIncrementPerSample();
+
+  // Inverse sampling rate in seconds.
+  const float sample_interval_;
 
   // Sample data.
   const float* data_;
 
-  // Sample data length.
-  const float length_;
+  // Sample data sampling rate in Hz.
+  float frequency_;
+
+  // Sample data length in samples.
+  float length_;
 
   // Denotes whether the playback is looping.
   bool loop_;
@@ -49,6 +61,9 @@ class SamplePlayer : public UnitGenerator {
 
   // Playback cursor.
   float cursor_;
+
+  // Increment per sample.
+  float increment_;
 };
 
 }  // namespace barelyapi

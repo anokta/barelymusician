@@ -17,7 +17,8 @@ constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
 // Tests that the sample data is played back as expected.
 TEST(SamplePlayerTest, SimplePlayback) {
-  SamplePlayer sample_player(kSampleInterval, kSampleRate, kData, kDataLength);
+  SamplePlayer sample_player(kSampleInterval);
+  sample_player.SetData(kData, kSampleRate, kDataLength);
 
   for (int i = 0; i < kDataLength; ++i) {
     EXPECT_EQ(kData[i], sample_player.Next()) << "at index " << i;
@@ -27,7 +28,8 @@ TEST(SamplePlayerTest, SimplePlayback) {
 
 // Tests that the sample data is played back as expected, when set to loop.
 TEST(SamplePlayerTest, SimplePlaybackLoop) {
-  SamplePlayer sample_player(kSampleInterval, kSampleRate, kData, kDataLength);
+  SamplePlayer sample_player(kSampleInterval);
+  sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
   const int kNumLoops = 10;
@@ -38,7 +40,8 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
 // Tests that the sample data is played back as expected at different speeds.
 TEST(SamplePlayerTest, SetSpeed) {
-  SamplePlayer sample_player(kSampleInterval, kSampleRate, kData, kDataLength);
+  SamplePlayer sample_player(kSampleInterval);
+  sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
   const std::vector<float> kSpeeds = {0.0f, 0.4f, 1.0f, 1.25f, 2.0f, 3.0f};
@@ -59,9 +62,11 @@ TEST(SamplePlayerTest, SetSpeed) {
 // frequencies.
 TEST(SamplePlayerTest, DifferentSampleFrequency) {
   const std::vector<int> kFrequencies = {0, kSampleRate / 3, kSampleRate,
-                                         2 * kSampleRate, 5 * kSampleRate};
+                                         2 * kSampleRate, 5 * kSampleRate};  
+  SamplePlayer sample_player(kSampleInterval);
   for (const int frequency : kFrequencies) {
-    SamplePlayer sample_player(kSampleInterval, frequency, kData, kDataLength);
+    sample_player.Reset();
+    sample_player.SetData(kData, frequency, kDataLength);
     sample_player.SetLoop(true);
 
     for (int i = 0; i < kDataLength; ++i) {
@@ -75,7 +80,8 @@ TEST(SamplePlayerTest, DifferentSampleFrequency) {
 
 // Tests that the sample player resets its state correctly.
 TEST(SamplePlayerTest, Reset) {
-  SamplePlayer sample_player(kSampleInterval, kSampleRate, kData, kDataLength);
+  SamplePlayer sample_player(kSampleInterval);
+  sample_player.SetData(kData, kSampleRate, kDataLength);
 
   const float first_sample = sample_player.Next();
   EXPECT_NE(first_sample, sample_player.Next());

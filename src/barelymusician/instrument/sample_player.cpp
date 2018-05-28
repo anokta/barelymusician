@@ -7,28 +7,27 @@
 
 namespace barelyapi {
 
-SamplePlayer::SamplePlayer(float sample_interval, int frequency,
-                           const float* data, int length)
-    : sample_ratio_(static_cast<float>(frequency) * sample_interval),
-      data_(data),
-      length_(static_cast<float>(length)),
+SamplePlayer::SamplePlayer(float sample_interval)
+    : sample_interval_(sample_interval),
+      data_(nullptr),
+      frequency_(0.0f),
+      length_(0.0f),
       loop_(false),
       speed_(1.0f),
-      cursor_(0.0f) {
-  DCHECK_GE(sample_ratio_, 0.0f);
-  DCHECK(data_);
-  DCHECK_GT(length_, 0.0f);
+      cursor_(0.0f),
+      increment_(0.0f) {
+  DCHECK_GE(sample_interval_, 0.0f);
 }
 
 float SamplePlayer::Next() {
-  if (cursor_ >= length_) {
-    // Playback is finished, skip processing.
+  if (data_ == nullptr || cursor_ >= length_) {
+    // Nothing to play, skip processing.
     return 0.0f;
   }
-  DCHECK(data_);
+  // TODO(#7): Add a better interpolation method here?
   const float output = data_[static_cast<int>(cursor_)];
   // Update the playback cursor.
-  cursor_ += speed_ * sample_ratio_;
+  cursor_ += increment_;
   if (cursor_ >= length_ && loop_) {
     // Loop the playback.
     cursor_ = std::fmod(cursor_, length_);
@@ -38,8 +37,22 @@ float SamplePlayer::Next() {
 
 void SamplePlayer::Reset() { cursor_ = 0.0f; }
 
-void SamplePlayer::SetSpeed(float speed) { speed_ = std::max(speed, 0.0f); }
+void SamplePlayer::SetData(const float* data, int frequency, int length) {
+  data_ = data;
+  frequency_ = std::max(static_cast<float>(frequency), 0.0f);
+  length_ = std::max(static_cast<float>(length), 0.0f);
+  CalculateIncrementPerSample();
+}
 
 void SamplePlayer::SetLoop(bool loop) { loop_ = loop; }
+
+void SamplePlayer::SetSpeed(float speed) {
+  speed_ = std::max(speed, 0.0f);
+  CalculateIncrementPerSample();
+}
+
+void SamplePlayer::CalculateIncrementPerSample() {
+  increment_ = speed_ * frequency_ * sample_interval_;
+}
 
 }  // namespace barelyapi

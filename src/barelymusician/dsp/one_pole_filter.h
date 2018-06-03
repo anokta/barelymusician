@@ -19,7 +19,7 @@ class OnePoleFilter {
   //
   // @param input Input sample.
   // @return Processed output sample.
-  float ProcessNext(float input);
+  float Next(float input);
 
   // Sets the coefficent of the filter.
   //

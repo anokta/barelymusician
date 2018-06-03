@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
@@ -30,6 +31,7 @@
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\base\sequencer.h" />
+    <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />

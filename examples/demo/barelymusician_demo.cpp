@@ -4,15 +4,22 @@
 #include <memory>
 #include <thread>
 
+#include "barelymusician/base/logging.h"
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "utils/pa_wrapper.h"
 
+//#include "barelymusician/dsp/dsp_utils.h"
+//#include "barelymusician/dsp/one_pole_filter.h"
+
 using barelyapi::Envelope;
 using barelyapi::Oscillator;
 using barelyapi::OscillatorType;
 using barelyapi::Sequencer;
+
+//using barelyapi::FilterType;
+//using barelyapi::OnePoleFilter;
 
 namespace {
 
@@ -34,6 +41,9 @@ constexpr float kBeatFrequency = 220.0f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kRelease = 0.025f;
 
+//constexpr FilterType kFilterType = FilterType::kLowPass;
+//constexpr float kFilterCutoff = 500.0f;
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -51,6 +61,11 @@ int main(int argc, char* argv[]) {
   oscillator.SetType(kOscillatorType);
   oscillator.SetFrequency(kBarFrequency);
   envelope.SetRelease(kRelease);
+
+  // OnePoleFilter filter;
+  // filter.SetType(kFilterType);
+  // filter.SetCoefficient(
+  //    barelyapi::GetFilterCoefficient(kSampleRate, kFilterCutoff));
 
   const auto process = [&sequencer, &oscillator, &envelope](float* output) {
     const int current_bar = sequencer.current_bar();

@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp" />

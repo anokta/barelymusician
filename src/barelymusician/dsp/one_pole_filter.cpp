@@ -7,7 +7,7 @@ namespace barelyapi {
 OnePoleFilter::OnePoleFilter()
     : coefficient_(1.0f), type_(FilterType::kLowPass), output_(0.0f) {}
 
-float OnePoleFilter::ProcessNext(float input) {
+float OnePoleFilter::Next(float input) {
   output_ = coefficient_ * (output_ - input) + input;
   if (type_ == FilterType::kHighPass) {
     return input - output_;

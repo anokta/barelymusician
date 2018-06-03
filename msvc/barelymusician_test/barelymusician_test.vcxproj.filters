@@ -27,5 +27,8 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp">
+      <Filter>Source Files\dsp</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

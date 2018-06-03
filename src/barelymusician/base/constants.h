@@ -12,6 +12,9 @@ constexpr float kTwoPi = 2.0f * kPi;
 // Converts minutes to seconds.
 constexpr float kSecondsFromMinutes = 60.0f;
 
+// Minimum dB threshold. 
+constexpr float kMinDecibels = -80.0f;
+
 }  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_BASE_CONSTANTS_H

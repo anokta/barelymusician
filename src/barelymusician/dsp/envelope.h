@@ -18,6 +18,11 @@ class Envelope : UnitGenerator {
   float Next() override;
   void Reset() override;
 
+  // Returns whether the envelope is currently active (i.e., not idle).
+  //
+  // @return True if active.
+  bool IsActive() const;
+
   // Sets the attack of the envelope in seconds.
   //
   // attack Attack in milliseconds.

@@ -26,16 +26,20 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\base\sequencer.h" />
+    <ClInclude Include="..\..\src\barelymusician\base\unit_generator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
+    <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
+    <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

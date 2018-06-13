@@ -10,6 +10,9 @@
     <Filter Include="Source Files\dsp">
       <UniqueIdentifier>{e033ea07-8a55-4037-9658-38539357d2e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\instrument">
+      <UniqueIdentifier>{12d76503-b79f-487a-b5a5-4baef5ef25ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -29,6 +32,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp">
       <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils_test.cpp">
+      <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

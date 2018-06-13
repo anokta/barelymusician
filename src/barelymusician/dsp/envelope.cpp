@@ -75,6 +75,8 @@ float Envelope::Next() {
 
 void Envelope::Reset() { state_ = State::kIdle; }
 
+bool Envelope::IsActive() const { return state_ != State::kIdle; }
+
 void Envelope::SetAttack(float attack) {
   attack_increment_ = (attack > 0.0f) ? sample_interval_ / attack : 0.0f;
   if (attack_increment_ > 1.0f) {

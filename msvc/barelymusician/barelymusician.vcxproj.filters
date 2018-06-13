@@ -28,6 +28,9 @@
     <Filter Include="Source Files\dsp">
       <UniqueIdentifier>{eb36f113-4397-47d5-9057-b6624dbd0f42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\instrument">
+      <UniqueIdentifier>{801ae952-f451-4f37-b63f-dbcc0fac513e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -57,6 +60,15 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\unit_generator.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -79,6 +91,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp">
       <Filter>Source Files\dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp">
+      <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

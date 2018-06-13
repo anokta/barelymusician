@@ -14,16 +14,14 @@ class Voice : public UnitGenerator {
   // @return True if active.
   virtual bool IsActive() const = 0;
 
-  // Stops the voice for the given note input.
-  //
-  // @param index Note index to be stopped.
-  virtual void NoteOff(float index) = 0;
-
   // Starts the voice for the given note input.
   //
   // @param index Note index to be played.
-  // @param gain Note gain in amplitude.
-  virtual void NoteOn(float index, float gain) = 0;
+  // @param intensity Note intensity, e.g., gain in amplitude.
+  virtual void Start(float index, float intensity) = 0;
+
+  // Stops the voice.
+  virtual void Stop() = 0;
 };
 
 }  // namespace barelyapi

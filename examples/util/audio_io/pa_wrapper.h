@@ -1,5 +1,5 @@
-#ifndef UTILS_PA_WRAPPER_H_
-#define UTILS_PA_WRAPPER_H_
+#ifndef EXAMPLES_UTIL_AUDIO_IO_PA_WRAPPER_H_
+#define EXAMPLES_UTIL_AUDIO_IO_PA_WRAPPER_H_
 
 #include <functional>
 
@@ -45,4 +45,4 @@ class PaWrapper {
   PaStream* stream_;
 };
 
-#endif  // UTILS_PA_WRAPPER_H_
+#endif  // EXAMPLES_UTIL_AUDIO_IO_PA_WRAPPER_H_

@@ -8,7 +8,7 @@
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "utils/pa_wrapper.h"
+#include "util/audio_io/pa_wrapper.h"
 
 //#include "barelymusician/dsp/dsp_utils.h"
 //#include "barelymusician/dsp/one_pole_filter.h"
@@ -18,8 +18,8 @@ using barelyapi::Oscillator;
 using barelyapi::OscillatorType;
 using barelyapi::Sequencer;
 
-//using barelyapi::FilterType;
-//using barelyapi::OnePoleFilter;
+// using barelyapi::FilterType;
+// using barelyapi::OnePoleFilter;
 
 namespace {
 
@@ -41,8 +41,8 @@ constexpr float kBeatFrequency = 220.0f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kRelease = 0.025f;
 
-//constexpr FilterType kFilterType = FilterType::kLowPass;
-//constexpr float kFilterCutoff = 500.0f;
+// constexpr FilterType kFilterType = FilterType::kLowPass;
+// constexpr float kFilterCutoff = 500.0f;
 
 }  // namespace
 

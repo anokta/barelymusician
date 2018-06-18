@@ -13,27 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\utils">
-      <UniqueIdentifier>{f31dd75d-9d03-4ffd-84b9-4096a07a8ccf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\utils">
-      <UniqueIdentifier>{43fc4a49-999e-4a3b-9bf0-4270ee127bc6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\demo">
       <UniqueIdentifier>{c0fd99ba-9324-4aa8-92b0-e2bca2383840}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{5a5dbfe6-52ed-43d1-98f7-9102ea7076b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{e6638220-8752-4b0c-afbd-ea0643c6371a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util\audio_io">
+      <UniqueIdentifier>{bb1b6ba4-633f-4f37-ac21-9bb45c712692}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util\audio_io">
+      <UniqueIdentifier>{62334f18-769f-477a-b5dc-3e943ff65362}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\examples\utils\pa_wrapper.cpp">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\examples\demo\barelymusician_demo.cpp">
       <Filter>Source Files\demo</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\examples\util\audio_io\pa_wrapper.cpp">
+      <Filter>Source Files\util\audio_io</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\examples\utils\pa_wrapper.h">
-      <Filter>Header Files\utils</Filter>
+    <ClInclude Include="..\..\examples\util\audio_io\pa_wrapper.h">
+      <Filter>Header Files\util\audio_io</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

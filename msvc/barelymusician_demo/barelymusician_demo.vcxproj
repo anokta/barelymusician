@@ -138,15 +138,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\barelymusician_demo.cpp" />
-    <ClCompile Include="..\..\examples\utils\pa_wrapper.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\examples\utils\pa_wrapper.h" />
+    <ClCompile Include="..\..\examples\util\audio_io\pa_wrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\barelymusician\barelymusician.vcxproj">
       <Project>{c58bd654-3773-4b8c-94b3-cbb8a6109e1d}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\examples\util\audio_io\pa_wrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

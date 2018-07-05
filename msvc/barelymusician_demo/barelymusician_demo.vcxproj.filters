@@ -28,6 +28,12 @@
     <Filter Include="Source Files\util\audio_io">
       <UniqueIdentifier>{62334f18-769f-477a-b5dc-3e943ff65362}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\util\input_manager">
+      <UniqueIdentifier>{c9d45ec4-a192-4b2d-94c6-bc9e7f913c5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util\input_manager">
+      <UniqueIdentifier>{fa80bb49-8112-44c1-86af-1d8a0f59bd14}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\barelymusician_demo.cpp">
@@ -36,10 +42,16 @@
     <ClCompile Include="..\..\examples\util\audio_io\pa_wrapper.cpp">
       <Filter>Source Files\util\audio_io</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\examples\util\input_manager\win_console_input.cpp">
+      <Filter>Source Files\util\input_manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\examples\util\audio_io\pa_wrapper.h">
       <Filter>Header Files\util\audio_io</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\examples\util\input_manager\win_console_input.h">
+      <Filter>Header Files\util\input_manager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

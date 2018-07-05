@@ -1,6 +1,6 @@
 #include "util/audio_io/pa_wrapper.h"
 
-PaWrapper::AudioProcessCallback PaWrapper::callback_ =
+PaWrapper::AudioProcessCallback PaWrapper::audio_process_ =
     PaWrapper::AudioProcessCallback();
 
 PaWrapper::PaWrapper() : stream_(nullptr) { Pa_Initialize(); }
@@ -33,14 +33,14 @@ void PaWrapper::Shutdown() {
   stream_ = nullptr;
 }
 
-void PaWrapper::SetAudioProcessCallback(AudioProcessCallback&& callback) {
-  callback_ = std::move(callback);
+void PaWrapper::SetAudioProcessCallback(AudioProcessCallback&& audio_process) {
+  audio_process_ = std::move(audio_process);
 }
 
 int PaWrapper::AudioProcess(const void* input, void* output,
                             unsigned long frames_per_buffer,
                             const PaStreamCallbackTimeInfo* time_info,
                             PaStreamCallbackFlags status, void* user_data) {
-  callback_(reinterpret_cast<float*>(output));
+  audio_process_(reinterpret_cast<float*>(output));
   return static_cast<int>(paContinue);
 }

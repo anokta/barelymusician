@@ -1,4 +1,5 @@
 #include <conio.h>
+#include <cctype>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -9,6 +10,7 @@
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "util/audio_io/pa_wrapper.h"
+#include "util/input_manager/win_console_input.h"
 
 //#include "barelymusician/dsp/dsp_utils.h"
 //#include "barelymusician/dsp/one_pole_filter.h"
@@ -47,7 +49,7 @@ constexpr float kRelease = 0.025f;
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  // Set the audio process callback.
+  WinConsoleInput input_manager;
   PaWrapper audio_io;
 
   Sequencer sequencer(kSampleRate);
@@ -100,31 +102,43 @@ int main(int argc, char* argv[]) {
   };
   audio_io.SetAudioProcessCallback(process);
 
-  // Initialize the audio routine.
-  audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
-
-  // TODO(#2): This is obviously hacky, may consider add a proper I/O lib.
-  int input;
-  while (true) {
-    input = _getch();
-    if (input == 27) {
+  bool quit = false;
+  const auto on_key_down = [&quit,
+                            &sequencer](const WinConsoleInput::Key& key) {
+    if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
-      break;
+      quit = true;
+      return;
     }
-    // Test things.
-    switch (static_cast<char>(input)) {
-      case 't':
+
+    LOG(INFO) << key << " pressed.";
+    switch (std::toupper(key)) {
+      case 'T':
         sequencer.SetBpm(2.0f * kBpm);
         break;
-      case 'r':
+      case 'R':
         sequencer.SetBpm(kBpm);
         break;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  };
+  input_manager.SetOnKeyDownCallback(on_key_down);
+
+  const auto on_key_up = [](const WinConsoleInput::Key& key) {
+    LOG(INFO) << key << " released.";
+  };
+  input_manager.SetOnKeyUpCallback(on_key_up);
+
+  // Start the demo.
+  input_manager.Initialize();
+  audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
+
+  while (!quit) {
+    input_manager.Update();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
-  // Shutdown the audio routine.
   audio_io.Shutdown();
+  input_manager.Shutdown();
 
   return 0;
 }

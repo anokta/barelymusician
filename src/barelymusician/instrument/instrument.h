@@ -5,18 +5,20 @@
 
 namespace barelyapi {
 
+// Generic instrument interface.
+// TODO(#9): Should instruments process multiple frames in one go?
 class Instrument : public UnitGenerator {
  public:
-  // Stops note with the given index.
-  //
-  // @param index Note index.
-  virtual void NoteOff(float index) = 0;
-
   // Plays note with the given index and intensity.
   //
   // @param index Note index.
   // @param intensity Note intensity.
   virtual void NoteOn(float index, float intensity) = 0;
+
+  // Stops note with the given index.
+  //
+  // @param index Note index.
+  virtual void NoteOff(float index) = 0;
 
   // Gets the value of a parameter with the given ID.
   //

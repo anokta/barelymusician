@@ -7,7 +7,7 @@ namespace barelyapi {
 
 // Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output
 // samples according to its current state.
-class Envelope : UnitGenerator {
+class Envelope : public UnitGenerator {
  public:
   // Constructs new |Envelope|.
   //

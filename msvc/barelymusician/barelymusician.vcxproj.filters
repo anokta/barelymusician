@@ -69,6 +69,9 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_instrument.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -93,6 +96,9 @@
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp">
+      <Filter>Source Files\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_instrument.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>

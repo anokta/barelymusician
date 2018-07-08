@@ -27,7 +27,6 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_instrument.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />

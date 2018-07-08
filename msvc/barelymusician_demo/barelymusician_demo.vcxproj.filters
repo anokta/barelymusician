@@ -34,6 +34,12 @@
     <Filter Include="Source Files\util\input_manager">
       <UniqueIdentifier>{fa80bb49-8112-44c1-86af-1d8a0f59bd14}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\instruments">
+      <UniqueIdentifier>{942065a2-5d86-4cea-9914-7057436070aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\instruments">
+      <UniqueIdentifier>{5bdf1083-fd7d-4096-8930-d8525d8fbd4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\barelymusician_demo.cpp">
@@ -45,6 +51,12 @@
     <ClCompile Include="..\..\examples\util\input_manager\win_console_input.cpp">
       <Filter>Source Files\util\input_manager</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\examples\instruments\basic_synth_voice.cpp">
+      <Filter>Source Files\instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\examples\instruments\basic_synth_instrument.cpp">
+      <Filter>Source Files\instruments</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\examples\util\audio_io\pa_wrapper.h">
@@ -52,6 +64,12 @@
     </ClInclude>
     <ClInclude Include="..\..\examples\util\input_manager\win_console_input.h">
       <Filter>Header Files\util\input_manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\examples\instruments\basic_synth_voice.h">
+      <Filter>Header Files\instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\examples\instruments\basic_synth_instrument.h">
+      <Filter>Header Files\instruments</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

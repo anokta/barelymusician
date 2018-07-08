@@ -12,6 +12,8 @@
 #include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
 
+#include "instruments/basic_synth_instrument.h"
+
 //#include "barelymusician/dsp/dsp_utils.h"
 //#include "barelymusician/dsp/one_pole_filter.h"
 
@@ -22,6 +24,8 @@ using barelyapi::Sequencer;
 
 // using barelyapi::FilterType;
 // using barelyapi::OnePoleFilter;
+
+using barelyapi::examples::BasicSynthInstrument;
 
 namespace {
 
@@ -37,14 +41,17 @@ constexpr float kBpm = 120.0f;
 constexpr int kBeatsPerBar = 4;
 constexpr Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
 
-// Synth settings.
+// Metronome settings.
 constexpr float kBarFrequency = 440.0f;
 constexpr float kBeatFrequency = 220.0f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kRelease = 0.025f;
+constexpr float kMetronomeGain = 0.125f;
 
 // constexpr FilterType kFilterType = FilterType::kLowPass;
 // constexpr float kFilterCutoff = 500.0f;
+
+constexpr int kNumVoices = 8;
 
 }  // namespace
 
@@ -69,7 +76,14 @@ int main(int argc, char* argv[]) {
   // filter.SetCoefficient(
   //    barelyapi::GetFilterCoefficient(kSampleRate, kFilterCutoff));
 
-  const auto process = [&sequencer, &oscillator, &envelope](float* output) {
+  BasicSynthInstrument basic_synth_instrument(kSampleInterval, kNumVoices);
+
+  basic_synth_instrument.SetFloatParam(
+      static_cast<int>(BasicSynthInstrument::InstrumentFloatParam::kGain),
+      1.0f / static_cast<float>(kNumVoices));
+
+  const auto process = [&sequencer, &oscillator, &envelope,
+                        &basic_synth_instrument](float* output) {
     const int current_bar = sequencer.current_bar();
     const int current_beat = sequencer.current_beat();
     int impulse_sample = -1;
@@ -91,20 +105,25 @@ int main(int argc, char* argv[]) {
         oscillator.Reset();
         envelope.Start();
       }
-      const float sample = envelope.Next() * oscillator.Next();
+
+      const float sample = kMetronomeGain * envelope.Next() * oscillator.Next();
       if (frame == impulse_sample) {
         envelope.Stop();
       }
+
+      const auto instrument_output = basic_synth_instrument.Next();
       for (int channel = 0; channel < kNumChannels; ++channel) {
         output[kNumChannels * frame + channel] = sample;
+        // Add |basic_synth_instrument| output.
+        output[kNumChannels * frame + channel] += instrument_output;
       }
     }
   };
   audio_io.SetAudioProcessCallback(process);
 
   bool quit = false;
-  const auto on_key_down = [&quit,
-                            &sequencer](const WinConsoleInput::Key& key) {
+  const auto on_key_down = [&quit, &sequencer, &basic_synth_instrument](
+                               const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
@@ -113,6 +132,20 @@ int main(int argc, char* argv[]) {
 
     LOG(INFO) << key << " pressed.";
     switch (std::toupper(key)) {
+        // Instrument tests.
+      case 'A':
+        basic_synth_instrument.NoteOn(69.0f, 1.0f);
+        break;
+      case 'S':
+        basic_synth_instrument.NoteOn(73.0f, 1.0f);
+        break;
+      case 'D':
+        basic_synth_instrument.NoteOn(76.0f, 1.0f);
+        break;
+      case 'F':
+        basic_synth_instrument.NoteOn(81.0f, 1.0f);
+        break;
+      // Sequencer tests.
       case 'T':
         sequencer.SetBpm(2.0f * kBpm);
         break;
@@ -123,9 +156,25 @@ int main(int argc, char* argv[]) {
   };
   input_manager.SetOnKeyDownCallback(on_key_down);
 
-  const auto on_key_up = [](const WinConsoleInput::Key& key) {
-    LOG(INFO) << key << " released.";
-  };
+  const auto on_key_up =
+      [&basic_synth_instrument](const WinConsoleInput::Key& key) {
+        LOG(INFO) << key << " released.";
+        switch (std::toupper(key)) {
+            // Instrument tests.
+          case 'A':
+            basic_synth_instrument.NoteOff(69.0f);
+            break;
+          case 'S':
+            basic_synth_instrument.NoteOff(73.0f);
+            break;
+          case 'D':
+            basic_synth_instrument.NoteOff(76.0f);
+            break;
+          case 'F':
+            basic_synth_instrument.NoteOff(81.0f);
+            break;
+        }
+      };
   input_manager.SetOnKeyUpCallback(on_key_up);
 
   // Start the demo.

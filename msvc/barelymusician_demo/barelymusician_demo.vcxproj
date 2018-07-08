@@ -138,6 +138,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\barelymusician_demo.cpp" />
+    <ClCompile Include="..\..\examples\instruments\basic_synth_instrument.cpp" />
+    <ClCompile Include="..\..\examples\instruments\basic_synth_voice.cpp" />
     <ClCompile Include="..\..\examples\util\audio_io\pa_wrapper.cpp" />
     <ClCompile Include="..\..\examples\util\input_manager\win_console_input.cpp" />
   </ItemGroup>
@@ -147,6 +149,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\examples\instruments\basic_synth_instrument.h" />
+    <ClInclude Include="..\..\examples\instruments\basic_synth_voice.h" />
     <ClInclude Include="..\..\examples\util\audio_io\pa_wrapper.h" />
     <ClInclude Include="..\..\examples\util\input_manager\win_console_input.h" />
   </ItemGroup>

@@ -39,7 +39,7 @@ class FakeVoice : public Voice {
 };
 
 // Fake polyphonic instrument for testing.
-class FakePolyphonicInstrument : public PolyphonicInstrument {
+class FakePolyphonicInstrument : public PolyphonicInstrument<FakeVoice> {
  public:
   FakePolyphonicInstrument(int num_voices) {
     voices_.reserve(num_voices);
@@ -50,11 +50,11 @@ class FakePolyphonicInstrument : public PolyphonicInstrument {
   }
 
   // Implements |Instrument|.
-  const void* GetParam(int id) const override {
+  float GetFloatParam(int id) const override {
     UNUSED_PARAM(id);
-    return nullptr;
+    return 0.0f;
   }
-  void SetParam(int id, void* value) override {
+  void SetFloatParam(int id, float value) override {
     UNUSED_PARAM(id);
     UNUSED_PARAM(value);
   }

@@ -20,17 +20,19 @@ class Instrument : public UnitGenerator {
   // @param index Note index.
   virtual void NoteOff(float index) = 0;
 
-  // Gets the value of a parameter with the given ID.
+  // TODO(#13): Should return failure, i.e., return bool and pass param ref.
+  // Gets the value of a float parameter with the given ID.
   //
   // @param id Parameter ID.
-  // @return Parameter value.
-  virtual const void* GetParam(int id) const = 0;
+  // @return Float parameter value.
+  virtual float GetFloatParam(int id) const = 0;
 
-  // Sets the value of a parameter with the given ID.
+  // TODO(#13): Should return failure, i.e., return bool if id not found.
+  // Sets the value of a float parameter with the given ID.
   //
   // @param id Parameter ID.
-  // @param value Parameter value.
-  virtual void SetParam(int id, void* value) = 0;
+  // @param value Float parameter value.
+  virtual void SetFloatParam(int id, float value) = 0;
 };
 
 }  // namespace barelyapi

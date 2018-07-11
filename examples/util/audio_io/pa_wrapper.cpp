@@ -44,7 +44,9 @@ int PaWrapper::AudioProcess(const void* input, void* output,
                             unsigned long frames_per_buffer,
                             const PaStreamCallbackTimeInfo* time_info,
                             PaStreamCallbackFlags status, void* user_data) {
-  audio_process_(reinterpret_cast<float*>(output));
+  if (audio_process_ != nullptr) {
+    audio_process_(reinterpret_cast<float*>(output));
+  }
   return static_cast<int>(paContinue);
 }
 

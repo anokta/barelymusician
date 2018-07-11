@@ -37,11 +37,15 @@ void WinConsoleInput::Update() {
           key_states_[key] = false;
         }
         if (key_event.bKeyDown && !key_states_[key]) {
-          on_key_down_(key);
+          if (on_key_down_ != nullptr) {
+            on_key_down_(key);
+          }
           key_states_[key] = true;
         } else if (!key_event.bKeyDown && key_states_[key]) {
           key_states_[key] = false;
-          on_key_up_(key);
+          if (on_key_up_ != nullptr) {
+            on_key_up_(key);
+          }
         }
       } break;
       default:

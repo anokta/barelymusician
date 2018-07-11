@@ -46,7 +46,7 @@ void BasicSynthInstrument::InitializeModulationMatrix() {
   modulation_matrix_[InstrumentFloatParam::kGain] = 1.0f;
   modulation_matrix_[InstrumentFloatParam::kEnvelopeAttack] = 0.05f;
   modulation_matrix_[InstrumentFloatParam::kEnvelopeSustain] = 1.0f;
-  modulation_matrix_[InstrumentFloatParam::kEnvelopeRelease] = 1.25f;
+  modulation_matrix_[InstrumentFloatParam::kEnvelopeRelease] = 0.25f;
   modulation_matrix_[InstrumentFloatParam::kOscillatorType] =
       static_cast<float>(OscillatorType::kSine);
   for (auto& param_it : modulation_matrix_) {

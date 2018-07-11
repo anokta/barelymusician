@@ -6,9 +6,9 @@
 namespace barelyapi {
 namespace {
 
-#ifndef UNUSED_PARAM(param)
-#define UNUSED_PARAM(param) param
-#endif  // UNUSED_PARAM(param)
+#ifndef UNUSED
+#define UNUSED(param) param
+#endif  // UNUSED
 
 // Number of voices for the polyphonic instrument.
 constexpr int kNumVoices = 4;
@@ -28,7 +28,7 @@ class FakeVoice : public Voice {
   // Implements |Voice|.
   bool IsActive() const override { return intensity_ > 0.0f; }
   void Start(float index, float intensity) override {
-    UNUSED_PARAM(index);
+    UNUSED(index);
     intensity_ = intensity;
   }
   void Stop() override { intensity_ = 0.0f; }
@@ -51,12 +51,12 @@ class FakePolyphonicInstrument : public PolyphonicInstrument<FakeVoice> {
 
   // Implements |Instrument|.
   float GetFloatParam(int id) const override {
-    UNUSED_PARAM(id);
+    UNUSED(id);
     return 0.0f;
   }
   void SetFloatParam(int id, float value) override {
-    UNUSED_PARAM(id);
-    UNUSED_PARAM(value);
+    UNUSED(id);
+    UNUSED(value);
   }
 };
 

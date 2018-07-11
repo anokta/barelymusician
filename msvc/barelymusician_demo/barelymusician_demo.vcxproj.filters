@@ -5,71 +5,10 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Source Files\demo">
-      <UniqueIdentifier>{c0fd99ba-9324-4aa8-92b0-e2bca2383840}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\util">
-      <UniqueIdentifier>{5a5dbfe6-52ed-43d1-98f7-9102ea7076b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\util">
-      <UniqueIdentifier>{e6638220-8752-4b0c-afbd-ea0643c6371a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\util\audio_io">
-      <UniqueIdentifier>{bb1b6ba4-633f-4f37-ac21-9bb45c712692}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\util\audio_io">
-      <UniqueIdentifier>{62334f18-769f-477a-b5dc-3e943ff65362}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\util\input_manager">
-      <UniqueIdentifier>{c9d45ec4-a192-4b2d-94c6-bc9e7f913c5e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\util\input_manager">
-      <UniqueIdentifier>{fa80bb49-8112-44c1-86af-1d8a0f59bd14}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\instruments">
-      <UniqueIdentifier>{942065a2-5d86-4cea-9914-7057436070aa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\instruments">
-      <UniqueIdentifier>{5bdf1083-fd7d-4096-8930-d8525d8fbd4e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\barelymusician_demo.cpp">
-      <Filter>Source Files\demo</Filter>
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\examples\util\audio_io\pa_wrapper.cpp">
-      <Filter>Source Files\util\audio_io</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\util\input_manager\win_console_input.cpp">
-      <Filter>Source Files\util\input_manager</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\instruments\basic_synth_voice.cpp">
-      <Filter>Source Files\instruments</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\instruments\basic_synth_instrument.cpp">
-      <Filter>Source Files\instruments</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\examples\util\audio_io\pa_wrapper.h">
-      <Filter>Header Files\util\audio_io</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\util\input_manager\win_console_input.h">
-      <Filter>Header Files\util\input_manager</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\instruments\basic_synth_voice.h">
-      <Filter>Header Files\instruments</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\instruments\basic_synth_instrument.h">
-      <Filter>Header Files\instruments</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

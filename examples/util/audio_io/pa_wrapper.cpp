@@ -1,5 +1,8 @@
 #include "util/audio_io/pa_wrapper.h"
 
+namespace barelyapi {
+namespace examples {
+
 PaWrapper::AudioProcessCallback PaWrapper::audio_process_ =
     PaWrapper::AudioProcessCallback();
 
@@ -44,3 +47,6 @@ int PaWrapper::AudioProcess(const void* input, void* output,
   audio_process_(reinterpret_cast<float*>(output));
   return static_cast<int>(paContinue);
 }
+
+}  // namespace examples
+}  // namespace barelyapi

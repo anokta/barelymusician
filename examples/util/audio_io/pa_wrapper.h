@@ -5,6 +5,9 @@
 
 #include "portaudio.h"
 
+namespace barelyapi {
+namespace examples {
+
 // Simple portaudio wrapper to be used in the demo projects.
 // @note Only a single instance allowed per application.
 // TODO(#5): Revisit the single instance limitation (avoid static function).
@@ -44,5 +47,8 @@ class PaWrapper {
   // Stream for audio processing.
   PaStream* stream_;
 };
+
+}  // namespace examples
+}  // namespace barelyapi
 
 #endif  // EXAMPLES_UTIL_AUDIO_IO_PA_WRAPPER_H_

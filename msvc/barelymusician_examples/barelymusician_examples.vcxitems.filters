@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{f66db1f0-0e63-4d94-bdf5-e907852e46d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{5b83eec9-de14-47a6-9af5-12c65b85209d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\instruments">
+      <UniqueIdentifier>{50315529-d501-4f9e-9ea5-9f4eb61c888f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\instruments">
+      <UniqueIdentifier>{a64bda28-84cf-4677-8c04-bde834872bbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{c9d1406a-8beb-4bc9-a5fa-6699dc345349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util\audio_io">
+      <UniqueIdentifier>{d344f319-af00-471d-ae85-1369c73f0889}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util\input_manager">
+      <UniqueIdentifier>{dbcd1ef7-08c8-4ecc-80e0-c4ce994b9c62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{1a9b9a6f-e936-4057-b396-63218ed72295}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util\audio_io">
+      <UniqueIdentifier>{81994d87-b73c-4a67-ba65-db122efda83d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util\input_manager">
+      <UniqueIdentifier>{1ef486f6-80c2-432e-81fb-d02e806dcac7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h">
+      <Filter>Header Files\instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.h">
+      <Filter>Header Files\instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.h">
+      <Filter>Header Files\util\audio_io</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h">
+      <Filter>Header Files\util\input_manager</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp">
+      <Filter>Source Files\instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.cpp">
+      <Filter>Source Files\instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp">
+      <Filter>Source Files\util\input_manager</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.cpp">
+      <Filter>Source Files\util\audio_io</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

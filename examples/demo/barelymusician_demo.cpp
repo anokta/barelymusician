@@ -26,6 +26,8 @@ using barelyapi::Sequencer;
 // using barelyapi::OnePoleFilter;
 
 using barelyapi::examples::BasicSynthInstrument;
+using barelyapi::examples::PaWrapper;
+using barelyapi::examples::WinConsoleInput;
 
 namespace {
 

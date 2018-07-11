@@ -1,9 +1,12 @@
 #ifndef EXAMPLES_UTIL_INPUT_MANAGER_WIN_CONSOLE_INPUT_H_
 #define EXAMPLES_UTIL_INPUT_MANAGER_WIN_CONSOLE_INPUT_H_
 
+#include <windows.h>
 #include <functional>
 #include <unordered_map>
-#include <windows.h>
+
+namespace barelyapi {
+namespace examples {
 
 // Windows console input manager for handling keyboard events.
 class WinConsoleInput {
@@ -35,21 +38,24 @@ class WinConsoleInput {
   void SetOnKeyUpCallback(OnKeyUpCallback&& on_key_up);
 
  private:
-   // Console standard input handle.
-   HANDLE std_input_handle_;
+  // Console standard input handle.
+  HANDLE std_input_handle_;
 
-   // Old console mode to be restored.
-   DWORD previous_console_mode_;
+  // Old console mode to be restored.
+  DWORD previous_console_mode_;
 
-   // Temp input buffer.
-   INPUT_RECORD input_buffer_[128];
+  // Temp input buffer.
+  INPUT_RECORD input_buffer_[128];
 
-   // Keyboard key states.
-   std::unordered_map<Key, bool> key_states_;
+  // Keyboard key states.
+  std::unordered_map<Key, bool> key_states_;
 
-   // Keyboard event callback functions.
-   OnKeyDownCallback on_key_down_;
-   OnKeyUpCallback on_key_up_;
+  // Keyboard event callback functions.
+  OnKeyDownCallback on_key_down_;
+  OnKeyUpCallback on_key_up_;
 };
+
+}  // namespace examples
+}  // namespace barelyapi
 
 #endif  // EXAMPLES_UTIL_INPUT_MANAGER_WIN_CONSOLE_INPUT_H_

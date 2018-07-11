@@ -1,5 +1,8 @@
 #include "util/input_manager/win_console_input.h"
 
+namespace barelyapi {
+namespace examples {
+
 WinConsoleInput::WinConsoleInput()
     : std_input_handle_(nullptr), previous_console_mode_(0) {}
 
@@ -60,3 +63,6 @@ void WinConsoleInput::SetOnKeyDownCallback(OnKeyDownCallback&& on_key_down) {
 void WinConsoleInput::SetOnKeyUpCallback(OnKeyUpCallback&& on_key_up) {
   on_key_up_ = std::move(on_key_up);
 }
+
+}  // namespace examples
+}  // namespace barelyapi

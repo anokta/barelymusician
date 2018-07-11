@@ -55,6 +55,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
+    <Import Project="..\barelymusician_examples\barelymusician_examples.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -138,21 +139,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\barelymusician_demo.cpp" />
-    <ClCompile Include="..\..\examples\instruments\basic_synth_instrument.cpp" />
-    <ClCompile Include="..\..\examples\instruments\basic_synth_voice.cpp" />
-    <ClCompile Include="..\..\examples\util\audio_io\pa_wrapper.cpp" />
-    <ClCompile Include="..\..\examples\util\input_manager\win_console_input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\barelymusician\barelymusician.vcxproj">
       <Project>{c58bd654-3773-4b8c-94b3-cbb8a6109e1d}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\examples\instruments\basic_synth_instrument.h" />
-    <ClInclude Include="..\..\examples\instruments\basic_synth_voice.h" />
-    <ClInclude Include="..\..\examples\util\audio_io\pa_wrapper.h" />
-    <ClInclude Include="..\..\examples\util\input_manager\win_console_input.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{4595b90a-6d82-455b-87fa-b9a604aa92d8}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp" />
+  </ItemGroup>
+</Project>

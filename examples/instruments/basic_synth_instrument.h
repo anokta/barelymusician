@@ -14,6 +14,7 @@ class BasicSynthInstrument : public PolyphonicInstrument<BasicSynthVoice> {
   enum class InstrumentFloatParam {
     kGain = 0,
     kEnvelopeAttack,
+    kEnvelopeDecay,
     kEnvelopeSustain,
     kEnvelopeRelease,
     kOscillatorType,

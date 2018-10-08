@@ -10,16 +10,9 @@ namespace examples {
 
 class BasicSynthVoice : public Voice {
 public:
-  // Float parameters of the voice.
-  enum class VoiceFloatParam {
-    kEnvelopeAttack = 0,
-    kEnvelopeDecay,
-    kEnvelopeSustain,
-    kEnvelopeRelease,
-    kOscillatorFrequency,
-    kOscillatorType,
-  };
-
+  // Constructs new |BasicSynthVoice| with the given |sample_interval|.
+  //
+  // @param sample_interval Sampling interval in seconds.
   BasicSynthVoice(float sample_interval);
 
   // Implements |UnitGenerator|.
@@ -31,11 +24,30 @@ public:
   void Start(float index, float intensity) override;
   void Stop() override;
 
-  // Sets the value of the given float parameter.
+  // Sets envelope attack.
   //
-  // @param param Float parameter type.
-  // @param value Float parameter value.
-  void SetFloatParam(VoiceFloatParam type, float value);
+  // @param attack Envelope attack.
+  void SetEnvelopeAttack(float attack);
+
+  // Sets envelope decay.
+//
+// @param decay Envelope decay.
+  void SetEnvelopeDecay(float decay);
+  
+// Sets envelope sustain.
+//
+// @param sustain Envelope sustain.
+  void SetEnvelopeSustain(float sustain);
+
+  // Sets envelope release.
+  //
+  // @param release Envelope release.
+  void SetEnvelopeRelease(float release);
+
+  // Sets oscillator type.
+  //
+  // @param oscillator_type Oscillator type.
+  void SetOscillatorType(OscillatorType oscillator_type);
 
 private:
   // Voice envelope.

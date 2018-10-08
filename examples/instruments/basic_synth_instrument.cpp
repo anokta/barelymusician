@@ -45,6 +45,7 @@ void BasicSynthInstrument::SetFloatParam(int id, float value) {
 void BasicSynthInstrument::InitializeModulationMatrix() {
   modulation_matrix_[InstrumentFloatParam::kGain] = 1.0f;
   modulation_matrix_[InstrumentFloatParam::kEnvelopeAttack] = 0.05f;
+  modulation_matrix_[InstrumentFloatParam::kEnvelopeDecay] = 0.0f;
   modulation_matrix_[InstrumentFloatParam::kEnvelopeSustain] = 1.0f;
   modulation_matrix_[InstrumentFloatParam::kEnvelopeRelease] = 0.25f;
   modulation_matrix_[InstrumentFloatParam::kOscillatorType] =
@@ -62,26 +63,28 @@ void BasicSynthInstrument::UpdateParam(InstrumentFloatParam param,
       break;
     case InstrumentFloatParam::kEnvelopeAttack:
       for (auto& voice : voices_) {
-        voice->SetFloatParam(BasicSynthVoice::VoiceFloatParam::kEnvelopeAttack,
-                             value);
+        voice->SetEnvelopeAttack(value);
+      }
+      break;
+    case InstrumentFloatParam::kEnvelopeDecay:
+      for (auto& voice : voices_) {
+        voice->SetEnvelopeDecay(value);
       }
       break;
     case InstrumentFloatParam::kEnvelopeSustain:
       for (auto& voice : voices_) {
-        voice->SetFloatParam(BasicSynthVoice::VoiceFloatParam::kEnvelopeSustain,
-                             value);
+        voice->SetEnvelopeSustain(value);
       }
       break;
     case InstrumentFloatParam::kEnvelopeRelease:
       for (auto& voice : voices_) {
-        voice->SetFloatParam(BasicSynthVoice::VoiceFloatParam::kEnvelopeRelease,
-                             value);
+        voice->SetEnvelopeRelease(value);
       }
       break;
     case InstrumentFloatParam::kOscillatorType:
       for (auto& voice : voices_) {
-        voice->SetFloatParam(BasicSynthVoice::VoiceFloatParam::kOscillatorType,
-                             value);
+        voice->SetOscillatorType(
+            static_cast<OscillatorType>(static_cast<int>(value)));
       }
       break;
     default:

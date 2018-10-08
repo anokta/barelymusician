@@ -29,29 +29,24 @@ void BasicSynthVoice::Start(float index, float intensity) {
 
 void BasicSynthVoice::Stop() { envelope_.Stop(); }
 
-void BasicSynthVoice::SetFloatParam(VoiceFloatParam type, float value) {
-  switch (type) {
-    case VoiceFloatParam::kEnvelopeAttack:
-      envelope_.SetAttack(value);
-      break;
-    case VoiceFloatParam::kEnvelopeDecay:
-      envelope_.SetDecay(value);
-      break;
-    case VoiceFloatParam::kEnvelopeSustain:
-      envelope_.SetSustain(value);
-      break;
-    case VoiceFloatParam::kEnvelopeRelease:
-      envelope_.SetRelease(value);
-      break;
-    case VoiceFloatParam::kOscillatorFrequency:
-      oscillator_.SetFrequency(value);
-      break;
-    case VoiceFloatParam::kOscillatorType:
-      oscillator_.SetType(static_cast<OscillatorType>(static_cast<int>(value)));
-      break;
-    default:
-      break;
-  }
+void BasicSynthVoice::SetEnvelopeAttack(float attack) {
+  envelope_.SetAttack(attack);
+}
+
+void BasicSynthVoice::SetEnvelopeDecay(float decay) {
+  envelope_.SetDecay(decay);
+}
+
+void BasicSynthVoice::SetEnvelopeSustain(float sustain) {
+  envelope_.SetSustain(sustain);
+}
+
+void BasicSynthVoice::SetEnvelopeRelease(float release) {
+  envelope_.SetRelease(release);
+}
+
+void BasicSynthVoice::SetOscillatorType(OscillatorType oscillator_type) {
+  oscillator_.SetType(oscillator_type);
 }
 
 }  // namespace examples

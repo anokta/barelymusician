@@ -20,10 +20,8 @@ void BasicSynthVoice::Reset() {
 
 bool BasicSynthVoice::IsActive() const { return envelope_.IsActive(); }
 
-void BasicSynthVoice::Start(float index, float intensity) {
-  gain_ = intensity;
+void BasicSynthVoice::Start() {
   oscillator_.Reset();
-  oscillator_.SetFrequency(FrequencyFromNoteIndex(index));
   envelope_.Start();
 }
 
@@ -45,8 +43,14 @@ void BasicSynthVoice::SetEnvelopeRelease(float release) {
   envelope_.SetRelease(release);
 }
 
-void BasicSynthVoice::SetOscillatorType(OscillatorType oscillator_type) {
-  oscillator_.SetType(oscillator_type);
+void BasicSynthVoice::SetGain(float gain) { gain_ = gain; }
+
+void BasicSynthVoice::SetOscillatorFrequency(float frequency) {
+  oscillator_.SetFrequency(frequency);
+}
+
+void BasicSynthVoice::SetOscillatorType(OscillatorType type) {
+  oscillator_.SetType(type);
 }
 
 }  // namespace examples

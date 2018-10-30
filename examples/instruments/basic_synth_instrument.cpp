@@ -1,22 +1,29 @@
 #include "instruments/basic_synth_instrument.h"
+#include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
 namespace examples {
 
 BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
-                                           int num_voices) {
-  voices_.reserve(num_voices);
-  for (int i = 0; i < num_voices; ++i) {
-    voices_.emplace_back(new BasicSynthVoice(sample_interval));
-  }
+                                           int num_voices)
+    : voice_(BasicSynthVoice(sample_interval)) {
+  voice_.Resize(num_voices);
 
   InitializeModulationMatrix();
-  Reset();
 }
 
-float BasicSynthInstrument::Next() {
-  return gain_ * PolyphonicInstrument::Next();
+float BasicSynthInstrument::Next() { return gain_ * voice_.Next(); }
+
+void BasicSynthInstrument::Reset() { voice_.Reset(); }
+
+void BasicSynthInstrument::NoteOn(float index, float intensity) {
+  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
+    voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
+    voice->SetGain(intensity);
+  });
 }
+
+void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index, nullptr); }
 
 float BasicSynthInstrument::GetFloatParam(int id) const {
   const auto param = static_cast<InstrumentFloatParam>(id);
@@ -62,30 +69,28 @@ void BasicSynthInstrument::UpdateParam(InstrumentFloatParam param,
       gain_ = value;
       break;
     case InstrumentFloatParam::kEnvelopeAttack:
-      for (auto& voice : voices_) {
-        voice->SetEnvelopeAttack(value);
-      }
+      voice_.Update(
+          [value](BasicSynthVoice* voice) { voice->SetEnvelopeAttack(value); });
       break;
     case InstrumentFloatParam::kEnvelopeDecay:
-      for (auto& voice : voices_) {
-        voice->SetEnvelopeDecay(value);
-      }
+      voice_.Update(
+          [value](BasicSynthVoice* voice) { voice->SetEnvelopeDecay(value); });
       break;
     case InstrumentFloatParam::kEnvelopeSustain:
-      for (auto& voice : voices_) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->SetEnvelopeSustain(value);
-      }
+      });
       break;
     case InstrumentFloatParam::kEnvelopeRelease:
-      for (auto& voice : voices_) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->SetEnvelopeRelease(value);
-      }
+      });
       break;
     case InstrumentFloatParam::kOscillatorType:
-      for (auto& voice : voices_) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->SetOscillatorType(
             static_cast<OscillatorType>(static_cast<int>(value)));
-      }
+      });
       break;
     default:
       break;

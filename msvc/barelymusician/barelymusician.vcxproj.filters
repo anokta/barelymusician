@@ -69,7 +69,7 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_instrument.h">
+    <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,7 +13,7 @@ enum class FilterType {
 class OnePoleFilter {
  public:
   // Constructs new |OnePoleFilter|.
-  explicit OnePoleFilter();
+  OnePoleFilter();
 
   // Processes the next input sample.
   //

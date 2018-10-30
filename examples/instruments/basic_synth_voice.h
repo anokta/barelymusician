@@ -9,7 +9,7 @@ namespace barelyapi {
 namespace examples {
 
 class BasicSynthVoice : public Voice {
-public:
+ public:
   // Constructs new |BasicSynthVoice| with the given |sample_interval|.
   //
   // @param sample_interval Sampling interval in seconds.
@@ -21,7 +21,7 @@ public:
 
   // Implements |Voice|.
   bool IsActive() const override;
-  void Start(float index, float intensity) override;
+  void Start() override;
   void Stop() override;
 
   // Sets envelope attack.
@@ -30,13 +30,13 @@ public:
   void SetEnvelopeAttack(float attack);
 
   // Sets envelope decay.
-//
-// @param decay Envelope decay.
+  //
+  // @param decay Envelope decay.
   void SetEnvelopeDecay(float decay);
-  
-// Sets envelope sustain.
-//
-// @param sustain Envelope sustain.
+
+  // Sets envelope sustain.
+  //
+  // @param sustain Envelope sustain.
   void SetEnvelopeSustain(float sustain);
 
   // Sets envelope release.
@@ -44,12 +44,22 @@ public:
   // @param release Envelope release.
   void SetEnvelopeRelease(float release);
 
+  // Sets gain.
+  //
+  // @param gain Linear gain.
+  void SetGain(float gain);
+
+  // Sets oscillator frequency.
+  //
+  // @param frequency Oscillator frequency.
+  void SetOscillatorFrequency(float frequency);
+
   // Sets oscillator type.
   //
-  // @param oscillator_type Oscillator type.
-  void SetOscillatorType(OscillatorType oscillator_type);
+  // @param type Oscillator type.
+  void SetOscillatorType(OscillatorType type);
 
-private:
+ private:
   // Voice envelope.
   Envelope envelope_;
 

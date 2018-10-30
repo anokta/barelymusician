@@ -14,11 +14,8 @@ class Voice : public UnitGenerator {
   // @return True if active.
   virtual bool IsActive() const = 0;
 
-  // Starts the voice for the given note input.
-  //
-  // @param index Note index to be played.
-  // @param intensity Note intensity, e.g., gain in amplitude.
-  virtual void Start(float index, float intensity) = 0;
+  // Starts the voice.
+  virtual void Start() = 0;
 
   // Stops the voice.
   virtual void Stop() = 0;

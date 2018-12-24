@@ -72,6 +72,9 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\random.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -97,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp">
       <Filter>Source Files\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\base\random.cpp">
+      <Filter>Source Files\base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -41,6 +41,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp" />

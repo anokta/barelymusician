@@ -39,5 +39,8 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp">
+      <Filter>Source Files\base</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

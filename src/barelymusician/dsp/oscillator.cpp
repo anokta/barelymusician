@@ -2,10 +2,10 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/random.h"
 
 #include <algorithm>
 #include <cmath>
-#include <cstdlib>
 
 namespace barelyapi {
 
@@ -32,8 +32,7 @@ float Oscillator::Next() {
       break;
     case OscillatorType::kNoise:
     default:
-      // TODO(#3): Consider switching to STL random number generators.
-      output = 2.0f * (static_cast<float>(std::rand()) / RAND_MAX) - 1.0f;
+      output = random::Uniform(-1.0f, 1.0f);
       break;
   }
   // Update the phasor.

@@ -13,6 +13,9 @@
     <Filter Include="Source Files\instrument">
       <UniqueIdentifier>{12d76503-b79f-487a-b5a5-4baef5ef25ee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\algorithm">
+      <UniqueIdentifier>{de1892fa-780e-46ba-8013-3cf8659232a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -41,6 +44,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp">
       <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp">
+      <Filter>Source Files\algorithm</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

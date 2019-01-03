@@ -30,6 +30,7 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />

@@ -32,7 +32,7 @@ class ContextFreeGrammar {
  private:
   // Returns a new substition for the given |symbol| using its rule.
   //
-  // @param Input symbol.
+  // @param symbol Input symbol.
   // @return Output substition list of symbols.
   std::vector<SymbolType> GetSubstition(const SymbolType& symbol) const;
 

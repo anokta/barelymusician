@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_BASE_CONSTANTS_H
-#define BARELYMUSICIAN_BASE_CONSTANTS_H
+#ifndef BARELYMUSICIAN_BASE_CONSTANTS_H_
+#define BARELYMUSICIAN_BASE_CONSTANTS_H_
 
 namespace barelyapi {
 
@@ -18,4 +18,4 @@ constexpr float kNumSemitones = 12.0f;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_BASE_CONSTANTS_H
+#endif  // BARELYMUSICIAN_BASE_CONSTANTS_H_

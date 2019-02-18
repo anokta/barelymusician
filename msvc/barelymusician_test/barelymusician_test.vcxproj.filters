@@ -16,6 +16,9 @@
     <Filter Include="Source Files\algorithm">
       <UniqueIdentifier>{de1892fa-780e-46ba-8013-3cf8659232a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\composition">
+      <UniqueIdentifier>{d5efa513-7f64-44d8-8979-3bd2d6def79d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp">
       <Filter>Source Files\algorithm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\note_queue_test.cpp">
+      <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

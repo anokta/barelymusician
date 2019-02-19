@@ -13,7 +13,7 @@ constexpr int kNumVoices = 4;
 constexpr float kOutput = 1.0f;
 
 // Fake voice that produces constant output for testing.
-class FakeVoice : Voice {
+class FakeVoice : public Voice {
  public:
   FakeVoice() : active_(false), output_(0.0f) {}
 

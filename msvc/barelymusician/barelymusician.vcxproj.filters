@@ -93,6 +93,9 @@
     <ClInclude Include="..\..\src\barelymusician\base\note.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -123,6 +126,9 @@
       <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\note_queue.cpp">
+      <Filter>Source Files\composition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>

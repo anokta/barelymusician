@@ -8,6 +8,7 @@
 
 namespace barelyapi {
 
+// Note queue that receives and dispatches notes according to their timestamps.
 class NoteQueue {
  public:
   // Pops the notes within the range from the queue.

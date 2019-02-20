@@ -32,8 +32,7 @@ class BasicSynthInstrument : public Instrument {
   // Implements |Instrument|.
   void NoteOn(float index, float intensity) override;
   void NoteOff(float index) override;
-  float GetFloatParam(int id) const override;
-  void SetFloatParam(int id, float value) override;
+  bool SetFloatParam(ParamId id, float value) override;
 
  private:
   // TODO(#14): Create a helper class to generalize the modulation matrix

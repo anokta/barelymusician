@@ -96,6 +96,9 @@
     <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\types.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">

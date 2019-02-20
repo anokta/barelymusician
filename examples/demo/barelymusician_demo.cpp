@@ -80,9 +80,9 @@ int main(int argc, char* argv[]) {
 
   BasicSynthInstrument basic_synth_instrument(kSampleInterval, kNumVoices);
 
-  basic_synth_instrument.SetFloatParam(
+  DCHECK(basic_synth_instrument.SetFloatParam(
       static_cast<int>(BasicSynthInstrument::InstrumentFloatParam::kGain),
-      1.0f / static_cast<float>(kNumVoices));
+      1.0f / static_cast<float>(kNumVoices)));
 
   const auto process = [&sequencer, &oscillator, &envelope,
                         &basic_synth_instrument](float* output) {

@@ -1,4 +1,5 @@
 #include "instruments/basic_synth_instrument.h"
+
 #include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
@@ -25,28 +26,18 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
 
 void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index, nullptr); }
 
-float BasicSynthInstrument::GetFloatParam(int id) const {
+bool BasicSynthInstrument::SetFloatParam(ParamId id, float value) {
   const auto param = static_cast<InstrumentFloatParam>(id);
   const auto& param_it = modulation_matrix_.find(param);
   if (param_it == modulation_matrix_.end()) {
-    // Not found.
-    return 0.0f;
-  }
-
-  return param_it->second;
-}
-
-void BasicSynthInstrument::SetFloatParam(int id, float value) {
-  const auto param = static_cast<InstrumentFloatParam>(id);
-  const auto& param_it = modulation_matrix_.find(param);
-  if (param_it == modulation_matrix_.end()) {
-    return;
+    return false;
   }
 
   if (param_it->second != value) {
     param_it->second = value;
     UpdateParam(param_it->first, value);
   }
+  return true;
 }
 
 void BasicSynthInstrument::InitializeModulationMatrix() {

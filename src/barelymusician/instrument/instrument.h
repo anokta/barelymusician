@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 
+#include "barelymusician/base/types.h"
 #include "barelymusician/base/unit_generator.h"
 
 namespace barelyapi {
@@ -20,19 +21,12 @@ class Instrument : public UnitGenerator {
   // @param index Note index.
   virtual void NoteOff(float index) = 0;
 
-  // TODO(#13): Should return failure, i.e., return bool and pass param ref.
-  // Gets the value of a float parameter with the given ID.
-  //
-  // @param id Parameter ID.
-  // @return Float parameter value.
-  virtual float GetFloatParam(int id) const = 0;
-
-  // TODO(#13): Should return failure, i.e., return bool if id not found.
   // Sets the value of a float parameter with the given ID.
   //
   // @param id Parameter ID.
   // @param value Float parameter value.
-  virtual void SetFloatParam(int id, float value) = 0;
+  // @return True if successful.
+  virtual bool SetFloatParam(ParamId id, float value) = 0;
 };
 
 }  // namespace barelyapi

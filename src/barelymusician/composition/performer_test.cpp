@@ -24,20 +24,17 @@ class FakeInstrument : public Instrument {
   void Reset() override { output_ = 0.0f; }
 
   // Implements |Instrument|.
-  void NoteOn(float index, float intensity) {
+  void NoteOn(float index, float intensity) override {
     LOG(INFO) << "NoteOn(" << index << ", " << intensity << ")";
     output_ = index;
   }
-  void NoteOff(float index) {
+  void NoteOff(float index) override {
     LOG(INFO) << "NoteOff(" << index << ")";
     output_ = 0.0f;
   }
-  float GetFloatParam(int id) const {
-    LOG(INFO) << "GetFloatParam(" << id << ")";
-    return 0.0f;
-  }
-  void SetFloatParam(int id, float value) {
+  bool SetFloatParam(ParamId id, float value) override {
     LOG(INFO) << "SetFloatParam(" << id << ", " << value << ")";
+    return false;
   }
 
  private:

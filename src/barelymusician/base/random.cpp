@@ -7,7 +7,7 @@ namespace random {
 
 namespace {
 
-// TODO(#3): Global initialization should be discouraged, revisit how the
+// TODO(#27): Global initialization should be discouraged, revisit how the
 // generator is initialized - along with the static distribution declarations
 // below.
 // Random number generator engine.

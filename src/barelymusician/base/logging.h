@@ -11,20 +11,20 @@
 // Logging macros.
 #define LOG(severity) BARELYAPI_LOG(severity)
 #define CHECK(expression) BARELYAPI_CHECK(expression)
-#define CHECK_EQ(val1, val2) BARELYAPI_CHECK_OP(==, val1, val2)
-#define CHECK_GE(val1, val2) BARELYAPI_CHECK_OP(>=, val1, val2)
-#define CHECK_GT(val1, val2) BARELYAPI_CHECK_OP(>, val1, val2)
-#define CHECK_LE(val1, val2) BARELYAPI_CHECK_OP(<=, val1, val2)
-#define CHECK_LT(val1, val2) BARELYAPI_CHECK_OP(<, val1, val2)
-#define CHECK_NE(val1, val2) BARELYAPI_CHECK_OP(!=, val1, val2)
+#define CHECK_EQ(lhs, rhs) BARELYAPI_CHECK_OP(==, lhs, rhs)
+#define CHECK_GE(lhs, rhs) BARELYAPI_CHECK_OP(>=, lhs, rhs)
+#define CHECK_GT(lhs, rhs) BARELYAPI_CHECK_OP(>, lhs, rhs)
+#define CHECK_LE(lhs, rhs) BARELYAPI_CHECK_OP(<=, lhs, rhs)
+#define CHECK_LT(lhs, rhs) BARELYAPI_CHECK_OP(<, lhs, rhs)
+#define CHECK_NE(lhs, rhs) BARELYAPI_CHECK_OP(!=, lhs, rhs)
 #define DLOG(severity) BARELYAPI_DLOG(severity)
 #define DCHECK(expression) BARELYAPI_DCHECK(expression)
-#define DCHECK_EQ(val1, val2) BARELYAPI_DCHECK_OP(==, val1, val2)
-#define DCHECK_GE(val1, val2) BARELYAPI_DCHECK_OP(>=, val1, val2)
-#define DCHECK_GT(val1, val2) BARELYAPI_DCHECK_OP(>, val1, val2)
-#define DCHECK_LE(val1, val2) BARELYAPI_DCHECK_OP(<=, val1, val2)
-#define DCHECK_LT(val1, val2) BARELYAPI_DCHECK_OP(<, val1, val2)
-#define DCHECK_NE(val1, val2) BARELYAPI_DCHECK_OP(!=, val1, val2)
+#define DCHECK_EQ(lhs, rhs) BARELYAPI_DCHECK_OP(==, lhs, rhs)
+#define DCHECK_GE(lhs, rhs) BARELYAPI_DCHECK_OP(>=, lhs, rhs)
+#define DCHECK_GT(lhs, rhs) BARELYAPI_DCHECK_OP(>, lhs, rhs)
+#define DCHECK_LE(lhs, rhs) BARELYAPI_DCHECK_OP(<=, lhs, rhs)
+#define DCHECK_LT(lhs, rhs) BARELYAPI_DCHECK_OP(<, lhs, rhs)
+#define DCHECK_NE(lhs, rhs) BARELYAPI_DCHECK_OP(!=, lhs, rhs)
 
 namespace barelyapi {
 namespace logging {
@@ -86,18 +86,17 @@ class Logger {
        ? BARELYAPI_LOG(FATAL) << "Check failed: '" << #expression << "' " \
        : BARELYAPI_NULL_LOG)
 
-#define BARELYAPI_CHECK_OP(op, val1, val2) \
-  BARELYAPI_CHECK(val1 op val2)            \
-      << "(" << val1 << " " << #op << " " << val2 << ") "
+#define BARELYAPI_CHECK_OP(op, lhs, rhs) \
+  BARELYAPI_CHECK(lhs op rhs) << "(" << lhs << " " << #op << " " << rhs << ") "
 
 #if !defined(NDEBUG) || defined(_DEBUG)
 #define BARELYAPI_DLOG(severity) BARELYAPI_LOG(severity)
 #define BARELYAPI_DCHECK(expression) BARELYAPI_CHECK(expression)
-#define BARELYAPI_DCHECK_OP(op, val1, val2) BARELYAPI_CHECK_OP(op, val1, val2)
+#define BARELYAPI_DCHECK_OP(op, lhs, rhs) BARELYAPI_CHECK_OP(op, lhs, rhs)
 #else  // !defined(NDEBUG) || defined(_DEBUG)
 #define BARELYAPI_DLOG(severity) BARELYAPI_NULL_LOG
 #define BARELYAPI_DCHECK(expression) BARELYAPI_NULL_LOG
-#define BARELYAPI_DCHECK_OP(op, val1, val2) BARELYAPI_NULL_LOG
+#define BARELYAPI_DCHECK_OP(op, lhs, rhs) BARELYAPI_NULL_LOG
 #endif  // !defined(NDEBUG) || defined(_DEBUG)
 
 #endif  // BARELYMUSICIAN_BASE_LOGGING_H_

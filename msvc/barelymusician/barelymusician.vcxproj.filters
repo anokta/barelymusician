@@ -87,9 +87,6 @@
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\note_queue.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\note.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
@@ -98,6 +95,18 @@
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\types.h">
       <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\param.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\message.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\message_queue.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\message_utils.h">
+      <Filter>Header Files\composition</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -128,10 +137,10 @@
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\note_queue.cpp">
+    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
+    <ClCompile Include="..\..\src\barelymusician\composition\message_queue.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>

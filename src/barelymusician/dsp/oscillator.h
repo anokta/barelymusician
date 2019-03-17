@@ -7,10 +7,10 @@ namespace barelyapi {
 
 // Oscillator type.
 enum class OscillatorType {
-  kSine = 0,    // Sine wave.
-  kSaw = 1,     // Sawtooth wave.
-  kSquare = 2,  // Square wave.
-  kNoise = 3,   // White noise.
+  kSine,    // Sine wave.
+  kSaw,     // Sawtooth wave.
+  kSquare,  // Square wave.
+  kNoise,   // White noise.
 };
 
 // Simple oscillator that generates output samples of basic waveforms.

@@ -16,6 +16,10 @@ static constexpr float kMinDecibels = -80.0f;
 // Number of semitones in an octave (twelwe-tone equal temperament).
 static constexpr float kNumSemitones = 12.0f;
 
+// Maximum number of bytes that the message data can contain.
+// TODO(#29): This is an arbitrary value, make sure this is *always* safe.
+static constexpr int kNumMaxMessageDataBytes = 32;
+
 }  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_BASE_CONSTANTS_H_

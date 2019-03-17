@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 #define BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 
-#include "barelymusician/composition/note_queue.h"
+#include "barelymusician/composition/message_queue.h"
 #include "barelymusician/instrument/instrument.h"
 
 namespace barelyapi {
@@ -13,14 +13,11 @@ class Performer {
   // @param instrument Instrument to perform.
   explicit Performer(Instrument* instrument);
 
-  // TODO(#18): Refactor needed here to represent a note?
-  // Performs a new note with the given note properties.
+  // Performs the given |message|.
   //
-  // @param is_on True if the note is turned on.
-  // @param index Note index.
-  // @param intensity Note intensity.
-  // @param timestamp Note timestamp in samples.
-  void Perform(bool is_on, float index, float intensity, int timestamp);
+  // @param message Message to perform.
+  // TODO(#28): Should |Message| be exposed here as a struct?
+  void Perform(const Message& message);
 
   // TODO(#20): Create and pass an AudioBuffer here instead?
   // Processes the next output samples for the given timestamp.
@@ -36,7 +33,7 @@ class Performer {
  private:
   Instrument* instrument_;  // not owned.
 
-  NoteQueue note_queue_;
+  MessageQueue message_queue_;
 };
 
 }  // namespace barelyapi

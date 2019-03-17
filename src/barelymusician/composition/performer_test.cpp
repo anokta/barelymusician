@@ -3,6 +3,9 @@
 #include <vector>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/note.h"
+#include "barelymusician/composition/message.h"
+#include "barelymusician/composition/message_utils.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -55,7 +58,11 @@ TEST(PerformerTest, PerformSingleNote) {
   }
 
   // Perform note on.
-  performer.Perform(true, kNoteIndex, kNoteIntensity, 0);
+  Message note_on_message;
+  note_on_message.type = MessageType::kNoteOn;
+  WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_on_message.data);
+  note_on_message.timestamp = 0;
+  performer.Perform(note_on_message);
 
   output.assign(kNumSamples, 0.0f);
   performer.Process(0, kNumSamples, output.data());
@@ -64,7 +71,11 @@ TEST(PerformerTest, PerformSingleNote) {
   }
 
   // Perform note off.
-  performer.Perform(false, kNoteIndex, kNoteIntensity, kNumSamples);
+  Message note_off_message;
+  note_off_message.type = MessageType::kNoteOff;
+  WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_off_message.data);
+  note_off_message.timestamp = kNumSamples;
+  performer.Perform(note_off_message);
 
   output.assign(kNumSamples, 0.0f);
   performer.Process(kNumSamples, kNumSamples, output.data());
@@ -85,8 +96,13 @@ TEST(PerformerTest, PerformMultipleNotes) {
   }
 
   // Perform a new note per each sample in the buffer.
+  Message note_on_message;
+  note_on_message.type = MessageType::kNoteOn;
   for (int i = 0; i < kNumSamples; ++i) {
-    performer.Perform(true, static_cast<float>(i), kNoteIntensity, i);
+    WriteMessageData<Note>({static_cast<float>(i), kNoteIntensity},
+                           note_on_message.data);
+    note_on_message.timestamp = i;
+    performer.Perform(note_on_message);
   }
 
   output.assign(kNumSamples, 0.0f);
@@ -96,7 +112,11 @@ TEST(PerformerTest, PerformMultipleNotes) {
   }
 
   // Perform note off.
-  performer.Perform(false, 0.0f, kNoteIntensity, kNumSamples);
+  Message note_off_message;
+  note_off_message.type = MessageType::kNoteOff;
+  WriteMessageData<Note>({0.0f, kNoteIntensity}, note_off_message.data);
+  note_off_message.timestamp = kNumSamples;
+  performer.Perform(note_off_message);
 
   output.assign(kNumSamples, 0.0f);
   performer.Process(kNumSamples, kNumSamples, output.data());
@@ -113,7 +133,11 @@ TEST(PerformerTest, Reset) {
   Performer performer(&instrument);
 
   // Perform note on, then reset.
-  performer.Perform(true, kNoteIndex, kNoteIntensity, 0);
+  Message note_on_message;
+  note_on_message.type = MessageType::kNoteOn;
+  WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_on_message.data);
+  note_on_message.timestamp = 0;
+  performer.Perform(note_on_message);
   performer.Reset();
 
   std::vector<float> output(kNumSamples, 0.0f);

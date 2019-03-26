@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
         envelope.Stop();
       }
 
-      const auto instrument_output = basic_synth_instrument.Next();
+      const float instrument_output = basic_synth_instrument.Next();
       for (int channel = 0; channel < kNumChannels; ++channel) {
         output[kNumChannels * frame + channel] = sample;
         // Add |basic_synth_instrument| output.

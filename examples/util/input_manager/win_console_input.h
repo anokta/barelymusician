@@ -11,21 +11,22 @@ namespace examples {
 // Windows console input manager for handling keyboard events.
 class WinConsoleInput {
  public:
-  // Alias for the keyboard event callback functions.
-  typedef char Key;
-  typedef std::function<void(const Key&)> OnKeyDownCallback;
-  typedef std::function<void(const Key&)> OnKeyUpCallback;
+  // Keyboard event callback signatures.
+  using Key = char;
+  using OnKeyDownCallback = std::function<void(const Key&)>;
+  using OnKeyUpCallback = std::function<void(const Key&)>;
 
   WinConsoleInput();
+  ~WinConsoleInput() = default;
 
   // Initializes the input manager.
   void Initialize();
 
-  // Updates the input manager to handle new input events.
-  void Update();
-
   // Shuts down the input manager.
   void Shutdown();
+
+  // Updates the input manager to handle new input events.
+  void Update();
 
   // Sets on keyboard key down callback.
   //

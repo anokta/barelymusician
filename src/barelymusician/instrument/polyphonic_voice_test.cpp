@@ -45,10 +45,10 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
   polyphonic_voice.Resize(kNumVoices);
   EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
 
-  polyphonic_voice.Start(kNoteIndex, nullptr);
+  polyphonic_voice.Start(kNoteIndex);
   EXPECT_FLOAT_EQ(kOutput, polyphonic_voice.Next());
 
-  polyphonic_voice.Stop(kNoteIndex, nullptr);
+  polyphonic_voice.Stop(kNoteIndex);
   EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
 }
 
@@ -67,7 +67,7 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
         index, [index](FakeVoice* voice) { voice->SetOutput(index); });
     const float output = polyphonic_voice.Next();
     EXPECT_FLOAT_EQ(index, polyphonic_voice.Next());
-    polyphonic_voice.Stop(index, nullptr);
+    polyphonic_voice.Stop(index);
   }
 }
 
@@ -84,13 +84,13 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
   float previous_output = 0.0f;
   for (int i = 0; i < kNumVoices; ++i) {
     const float index = static_cast<float>(i);
-    polyphonic_voice.Start(static_cast<float>(i), nullptr);
+    polyphonic_voice.Start(static_cast<float>(i));
     const float output = polyphonic_voice.Next();
     EXPECT_FLOAT_EQ(kOutput, output - previous_output);
     previous_output = output;
   }
 
-  polyphonic_voice.Start(static_cast<float>(kNumVoices), nullptr);
+  polyphonic_voice.Start(static_cast<float>(kNumVoices));
   EXPECT_FLOAT_EQ(previous_output, polyphonic_voice.Next());
 }
 
@@ -103,7 +103,7 @@ TEST(PolyphonicVoiceTest, NoVoice) {
   PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
   EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
 
-  polyphonic_voice.Start(0, nullptr);
+  polyphonic_voice.Start(0);
   EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
 }
 
@@ -118,7 +118,7 @@ TEST(PolyphonicVoiceTest, Reset) {
   EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
 
   for (int i = 0; i < kNumVoices; ++i) {
-    polyphonic_voice.Start(static_cast<float>(i), nullptr);
+    polyphonic_voice.Start(static_cast<float>(i));
     EXPECT_NE(0.0f, polyphonic_voice.Next());
   }
 
@@ -139,9 +139,9 @@ TEST(PolyphonicVoiceTest, Update) {
 
   for (int i = 0; i < kNumVoices; ++i) {
     const float index = static_cast<float>(i);
-    polyphonic_voice.Start(index, nullptr);
+    polyphonic_voice.Start(index);
     EXPECT_FLOAT_EQ(kOutput, polyphonic_voice.Next());
-    polyphonic_voice.Stop(index, nullptr);
+    polyphonic_voice.Stop(index);
   }
 
   polyphonic_voice.Update(
@@ -149,9 +149,9 @@ TEST(PolyphonicVoiceTest, Update) {
 
   for (int i = 0; i < kNumVoices; ++i) {
     const float index = static_cast<float>(i);
-    polyphonic_voice.Start(index, nullptr);
+    polyphonic_voice.Start(index);
     EXPECT_FLOAT_EQ(kUpdatedOutput, polyphonic_voice.Next());
-    polyphonic_voice.Stop(index, nullptr);
+    polyphonic_voice.Stop(index);
   }
 }
 

@@ -24,7 +24,7 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
   });
 }
 
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index, nullptr); }
+void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 bool BasicSynthInstrument::SetFloatParam(ParamId id, float value) {
   const auto param = static_cast<InstrumentFloatParam>(id);

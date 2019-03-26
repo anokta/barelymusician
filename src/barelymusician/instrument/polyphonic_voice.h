@@ -15,7 +15,7 @@ namespace barelyapi {
 template <class VoiceType>
 class PolyphonicVoice : public UnitGenerator {
  public:
-  // Voice mutator callback.
+  // Voice mutator callback signature.
   using VoiceCallback = std::function<void(VoiceType* voice)>;
 
   // Constructs new |PolyphonicVoice| with the given |base_voice|.
@@ -37,18 +37,18 @@ class PolyphonicVoice : public UnitGenerator {
   //
   // @param index Voice (note) index.
   // @param init_voice Callback to initialize the voice for playback.
-  void Start(float index, VoiceCallback&& init_voice);
+  void Start(float index, const VoiceCallback& init_voice = nullptr);
 
   // Stops the voice with the given |index|.
   //
   // @param index Voice (note) index.
   // @param shutdown_voice Callback to shutdown the voice.
-  void Stop(float index, VoiceCallback&& shutdown_voice);
+  void Stop(float index, const VoiceCallback& shutdown_voice = nullptr);
 
   // Updates all the available voices with the given callback.
   //
   // @param update_voice Callback to update each voice.
-  void Update(VoiceCallback&& update_voice);
+  void Update(const VoiceCallback& update_voice);
 
  private:
   // Base voice to initialize new voices.
@@ -98,7 +98,7 @@ void PolyphonicVoice<VoiceType>::Resize(int num_voices) {
 
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Start(float index,
-                                       VoiceCallback&& init_voice) {
+                                       const VoiceCallback& init_voice) {
   const int num_voices = static_cast<int>(voices_.size());
   if (num_voices == 0) {
     // No voices available.
@@ -134,7 +134,7 @@ void PolyphonicVoice<VoiceType>::Start(float index,
 
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Stop(float index,
-                                      VoiceCallback&& shutdown_voice) {
+                                      const VoiceCallback& shutdown_voice) {
   const int num_voices = static_cast<int>(voices_.size());
   for (int i = 0; i < num_voices; ++i) {
     if (voice_states_[i].first == index && voices_[i].IsActive()) {
@@ -148,7 +148,7 @@ void PolyphonicVoice<VoiceType>::Stop(float index,
 }
 
 template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Update(VoiceCallback&& update_voice) {
+void PolyphonicVoice<VoiceType>::Update(const VoiceCallback& update_voice) {
   for (auto& voice : voices_) {
     update_voice(&voice);
   }

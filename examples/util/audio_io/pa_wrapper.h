@@ -9,12 +9,10 @@ namespace barelyapi {
 namespace examples {
 
 // Simple portaudio wrapper to be used in the demo projects.
-// @note Only a single instance allowed per application.
-// TODO(#5): Revisit the single instance limitation (avoid static function).
 class PaWrapper {
  public:
-  // Alias for the audio process callback function.
-  typedef std::function<void(float*)> AudioProcessCallback;
+  // Audio process callback signature.
+  using AudioProcessCallback = std::function<void(float*)>;
 
   PaWrapper();
   ~PaWrapper();
@@ -23,8 +21,8 @@ class PaWrapper {
   //
   // @param sample_rate System sampling rate.
   // @param num_channels System number of output channels.
-  // @param frames_per_buffer System number of frames per buffer.
-  void Initialize(int sample_rate, int num_channels, int frames_per_buffer);
+  // @param num_frames System number of frames per buffer.
+  void Initialize(int sample_rate, int num_channels, int num_frames);
 
   // Shuts down the audio processing routine.
   void Shutdown();
@@ -35,14 +33,8 @@ class PaWrapper {
   void SetAudioProcessCallback(AudioProcessCallback&& audio_process);
 
  private:
-  // Internal audio process method to trigger |callback_|.
-  static int AudioProcess(const void* input, void* output,
-                          unsigned long frames_per_buffer,
-                          const PaStreamCallbackTimeInfo* time_info,
-                          PaStreamCallbackFlags status, void* user_data);
-
   // Audio process callback function.
-  static AudioProcessCallback audio_process_;
+  AudioProcessCallback audio_process_;
 
   // Stream for audio processing.
   PaStream* stream_;

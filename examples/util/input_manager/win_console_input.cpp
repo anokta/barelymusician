@@ -4,7 +4,10 @@ namespace barelyapi {
 namespace examples {
 
 WinConsoleInput::WinConsoleInput()
-    : std_input_handle_(nullptr), previous_console_mode_(0) {}
+    : std_input_handle_(nullptr),
+      previous_console_mode_(0),
+      on_key_down_(nullptr),
+      on_key_up_(nullptr) {}
 
 void WinConsoleInput::Initialize() {
   // Get the standard input handle.
@@ -19,6 +22,11 @@ void WinConsoleInput::Initialize() {
   // Set the console input mode to handle events.
   const DWORD console_mode = ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT;
   SetConsoleMode(std_input_handle_, console_mode);
+}
+
+void WinConsoleInput::Shutdown() {
+  // Restore the console input mode.
+  SetConsoleMode(std_input_handle_, previous_console_mode_);
 }
 
 void WinConsoleInput::Update() {
@@ -53,11 +61,6 @@ void WinConsoleInput::Update() {
         break;
     }
   }
-}
-
-void WinConsoleInput::Shutdown() {
-  // Restore the console input mode.
-  SetConsoleMode(std_input_handle_, previous_console_mode_);
 }
 
 void WinConsoleInput::SetOnKeyDownCallback(OnKeyDownCallback&& on_key_down) {

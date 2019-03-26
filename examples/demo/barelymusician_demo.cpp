@@ -32,28 +32,28 @@ using barelyapi::examples::WinConsoleInput;
 namespace {
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
-constexpr int kNumChannels = 2;
-constexpr int kFramesPerBuffer = 512;
+const int kSampleRate = 48000;
+const int kNumChannels = 2;
+const int kFramesPerBuffer = 512;
 
-constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-constexpr float kBpm = 120.0f;
-constexpr int kBeatsPerBar = 4;
-constexpr Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
+const float kBpm = 120.0f;
+const int kBeatsPerBar = 4;
+const Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
 
 // Metronome settings.
-constexpr float kBarFrequency = 440.0f;
-constexpr float kBeatFrequency = 220.0f;
-constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr float kRelease = 0.025f;
-constexpr float kMetronomeGain = 0.125f;
+const float kBarFrequency = 440.0f;
+const float kBeatFrequency = 220.0f;
+const OscillatorType kOscillatorType = OscillatorType::kSquare;
+const float kRelease = 0.025f;
+const float kMetronomeGain = 0.125f;
 
-// constexpr FilterType kFilterType = FilterType::kLowPass;
-// constexpr float kFilterCutoff = 500.0f;
+// const FilterType kFilterType = FilterType::kLowPass;
+// const float kFilterCutoff = 500.0f;
 
-constexpr int kNumVoices = 8;
+const int kNumVoices = 8;
 
 }  // namespace
 

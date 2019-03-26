@@ -11,8 +11,8 @@ namespace barelyapi {
 namespace {
 
 // Middle A note (A4) properties.
-constexpr float kA4NoteIndex = 69.0f;
-constexpr float kA4Frequency = 440.0f;
+const float kA4NoteIndex = 69.0f;
+const float kA4Frequency = 440.0f;
 
 }  // namespace
 

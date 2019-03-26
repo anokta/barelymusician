@@ -7,7 +7,7 @@ namespace barelyapi {
 namespace {
 
 // Tolerated error margin.
-constexpr float kEpsilon = 5e-2f;
+const float kEpsilon = 5e-2f;
 
 // Tests that converting values from/to amplitude and decibels returns expected
 // results.

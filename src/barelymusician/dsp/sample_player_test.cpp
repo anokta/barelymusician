@@ -8,12 +8,12 @@ namespace barelyapi {
 namespace {
 
 // Sampling rate.
-constexpr int kSampleRate = 48000;
-constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+const int kSampleRate = 48000;
+const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sample data.
-constexpr int kDataLength = 5;
-constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+const int kDataLength = 5;
+const float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
 // Tests that the sample data is played back as expected.
 TEST(SamplePlayerTest, SimplePlayback) {
@@ -62,7 +62,7 @@ TEST(SamplePlayerTest, SetSpeed) {
 // frequencies.
 TEST(SamplePlayerTest, DifferentSampleFrequency) {
   const std::vector<int> kFrequencies = {0, kSampleRate / 3, kSampleRate,
-                                         2 * kSampleRate, 5 * kSampleRate};  
+                                         2 * kSampleRate, 5 * kSampleRate};
   SamplePlayer sample_player(kSampleInterval);
   for (const int frequency : kFrequencies) {
     sample_player.Reset();

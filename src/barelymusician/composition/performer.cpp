@@ -44,7 +44,7 @@ void PerformFloatParam(const unsigned char* message_data,
   instrument->SetFloatParam(float_param.id, float_param.value);
 }
 
-static const std::unordered_map<MessageType, PerformerFn> kPerformerMap = {
+const std::unordered_map<MessageType, PerformerFn> kPerformerMap = {
     {MessageType::kNoteOn, &PerformNoteOn},
     {MessageType::kNoteOff, &PerformNoteOff},
     {MessageType::kFloatParam, &PerformFloatParam}};

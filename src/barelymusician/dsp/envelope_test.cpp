@@ -6,17 +6,17 @@ namespace barelyapi {
 namespace {
 
 // Sampling rate.
-constexpr int kSampleRate = 1000;
-constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+const int kSampleRate = 1000;
+const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Envelope ADSR.
-constexpr float kAttack = 0.02f;
-constexpr float kDecay = 1.0f;
-constexpr float kSustain = 0.5f;
-constexpr float kRelease = 0.8f;
+const float kAttack = 0.02f;
+const float kDecay = 1.0f;
+const float kSustain = 0.5f;
+const float kRelease = 0.8f;
 
 // Tolerated error margin.
-constexpr float kEpsilon = 1e-3f;
+const float kEpsilon = 1e-3f;
 
 // Tests that the envelope generates the expected output samples when
 // initialized with the default constructor.

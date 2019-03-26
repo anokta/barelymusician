@@ -5,8 +5,8 @@ namespace barelyapi {
 
 // One-pole filter type.
 enum class FilterType {
-  kLowPass = 0,   // Low-pass filter.
-  kHighPass = 1,  // High-pass filter.
+  kLowPass,   // Low-pass filter.
+  kHighPass,  // High-pass filter.
 };
 
 // One-pole filter that features basic low-pass and high-pass filtering.

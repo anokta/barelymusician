@@ -22,22 +22,22 @@ using barelyapi::examples::WinConsoleInput;
 namespace {
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
-constexpr int kNumChannels = 2;
-constexpr int kFramesPerBuffer = 512;
+const int kSampleRate = 48000;
+const int kNumChannels = 2;
+const int kFramesPerBuffer = 512;
 
-constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-constexpr float kBpm = 120.0f;
-constexpr int kBeatsPerBar = 4;
-constexpr Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
+const float kBpm = 120.0f;
+const int kBeatsPerBar = 4;
+const Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
 
 // Metronome settings.
-constexpr float kBarFrequency = 440.0f;
-constexpr float kBeatFrequency = 220.0f;
-constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr float kRelease = 0.025f;
+const float kBarFrequency = 440.0f;
+const float kBeatFrequency = 220.0f;
+const OscillatorType kOscillatorType = OscillatorType::kSquare;
+const float kRelease = 0.025f;
 
 }  // namespace
 
@@ -91,8 +91,8 @@ int main(int argc, char* argv[]) {
   audio_io.SetAudioProcessCallback(process);
 
   bool quit = false;
-  const auto on_key_down = [&quit, &sequencer](
-    const WinConsoleInput::Key& key) {
+  const auto on_key_down = [&quit,
+                            &sequencer](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
@@ -100,12 +100,12 @@ int main(int argc, char* argv[]) {
     }
 
     switch (std::toupper(key)) {
-    case 'T':
-      sequencer.SetBpm(2.0f * kBpm);
-      break;
-    case 'R':
-      sequencer.SetBpm(kBpm);
-      break;
+      case 'T':
+        sequencer.SetBpm(2.0f * kBpm);
+        break;
+      case 'R':
+        sequencer.SetBpm(kBpm);
+        break;
     }
   };
   input_manager.SetOnKeyDownCallback(on_key_down);

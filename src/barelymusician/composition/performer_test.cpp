@@ -12,10 +12,10 @@ namespace barelyapi {
 namespace {
 
 // Default number of samples to perform.
-constexpr int kNumSamples = 16;
+const int kNumSamples = 16;
 
 // Test note intensity.
-constexpr float kNoteIntensity = 1.0f;
+const float kNoteIntensity = 1.0f;
 
 // Fake voice that produces constant note index as output for testing.
 class FakeInstrument : public Instrument {

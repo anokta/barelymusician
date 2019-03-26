@@ -43,7 +43,7 @@ float GenerateNoiseSample(float) { return random::Uniform(-1.0f, 1.0f); }
 
 // Oscillator type - sample generation method map.
 // TODO(#27): Discourage global initialization of non-primitive types.
-static const std::unordered_map<OscillatorType, OscillatorFn> kOscillatorMap = {
+const std::unordered_map<OscillatorType, OscillatorFn> kOscillatorMap = {
     {OscillatorType::kSine, &GenerateSineSample},
     {OscillatorType::kSaw, &GenerateSawSample},
     {OscillatorType::kSquare, &GenerateSquareSample},

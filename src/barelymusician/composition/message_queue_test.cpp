@@ -6,10 +6,10 @@ namespace barelyapi {
 namespace {
 
 // Default number of samples to pop.
-constexpr int kNumSamples = 16;
+const int kNumSamples = 16;
 
 // Test message type.
-constexpr MessageType kMessageType = MessageType::kNoteOn;
+const MessageType kMessageType = MessageType::kNoteOn;
 
 // Tests that the message queue returns an added single message as expected.
 TEST(MessageQueueTest, SinglePushPop) {

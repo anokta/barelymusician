@@ -7,11 +7,11 @@ namespace random {
 
 namespace {
 
-// TODO(#27): Global initialization should be discouraged, revisit how the
+// TODO(#3): Global initialization should be discouraged, revisit how the
 // generator is initialized - along with the static distribution declarations
 // below.
 // Random number generator engine.
-static std::default_random_engine generator = std::default_random_engine();
+std::default_random_engine generator = std::default_random_engine();
 
 }  // namespace
 
@@ -26,7 +26,7 @@ void Reset(int seed) { generator.seed(static_cast<unsigned int>(seed)); }
 float Uniform() { return Uniform(0.0f, 1.0f); }
 
 float Uniform(float min, float max) {
-  static ::std::uniform_real_distribution<float> distribution;
+  static std::uniform_real_distribution<float> distribution;
   std::uniform_real_distribution<float>::param_type param(min, max);
   return distribution(generator, param);
 }

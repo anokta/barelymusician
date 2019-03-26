@@ -7,10 +7,10 @@ namespace barelyapi {
 namespace {
 
 // Number of voices for the polyphonic instrument.
-constexpr int kNumVoices = 4;
+const int kNumVoices = 4;
 
 // Default voice output value.
-constexpr float kOutput = 1.0f;
+const float kOutput = 1.0f;
 
 // Fake voice that produces constant output for testing.
 class FakeVoice : public Voice {

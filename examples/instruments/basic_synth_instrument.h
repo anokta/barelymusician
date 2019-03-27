@@ -8,20 +8,17 @@
 namespace barelyapi {
 namespace examples {
 
+enum BasicSynthInstrumentFloatParam {
+  kGain = 0,
+  kEnvelopeAttack = 1,
+  kEnvelopeDecay = 2,
+  kEnvelopeSustain = 3,
+  kEnvelopeRelease = 4,
+  kOscillatorType = 5,
+};
+
 class BasicSynthInstrument : public Instrument {
  public:
-  enum class InstrumentFloatParam {
-    kGain = 0,
-    kEnvelopeAttack,
-    kEnvelopeDecay,
-    kEnvelopeSustain,
-    kEnvelopeRelease,
-    kOscillatorType,
-  };
-
-  // Constructs new |BasicSynthInstrument| with the given number of voices.
-  //
-  // @param Maximum number of simultaneous voices.
   BasicSynthInstrument(float sample_interval, int num_voices);
 
   // Implements |UnitGenerator|.

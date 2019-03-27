@@ -26,6 +26,7 @@ using barelyapi::Sequencer;
 // using barelyapi::OnePoleFilter;
 
 using barelyapi::examples::BasicSynthInstrument;
+using barelyapi::examples::BasicSynthInstrumentFloatParam;
 using barelyapi::examples::PaWrapper;
 using barelyapi::examples::WinConsoleInput;
 
@@ -145,8 +146,7 @@ int main(int argc, char* argv[]) {
         break;
       case 'O':
         DCHECK(basic_synth_instrument.SetFloatParam(
-            static_cast<barelyapi::ParamId>(
-                BasicSynthInstrument::InstrumentFloatParam::kOscillatorType),
+            BasicSynthInstrumentFloatParam::kOscillatorType,
             static_cast<float>(OscillatorType::kSquare)));
         break;
       case 'R':

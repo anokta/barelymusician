@@ -18,7 +18,7 @@ const float kDefaultEnvelopeRelease = 0.25f;
 const OscillatorType kDefaultOscillatorType = OscillatorType::kSine;
 
 // Helper method to get the corresponding |ParamId| for the given |param_enum|.
-ParamId ParamIdFromEnum(BasicSynthInstrument::InstrumentFloatParam param_enum) {
+ParamId ParamIdFromEnum(BasicSynthInstrumentFloatParam param_enum) {
   return static_cast<ParamId>(param_enum);
 }
 
@@ -31,39 +31,35 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
 
   // Register parameters.
   modulation_matrix_.Register(
-      ParamIdFromEnum(InstrumentFloatParam::kGain),
+      BasicSynthInstrumentFloatParam::kGain,
       kDefaultGain / static_cast<float>(num_voices),
       [this](float value) { gain_ = std::max(0.0f, value); });
+  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeAttack,
+                              kDefaultEnvelopeAttack, [this](float value) {
+                                voice_.Update([value](BasicSynthVoice* voice) {
+                                  voice->SetEnvelopeAttack(value);
+                                });
+                              });
+  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeDecay,
+                              kDefaultEnvelopeDecay, [this](float value) {
+                                voice_.Update([value](BasicSynthVoice* voice) {
+                                  voice->SetEnvelopeDecay(value);
+                                });
+                              });
+  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeSustain,
+                              kDefaultEnvelopeSustain, [this](float value) {
+                                voice_.Update([value](BasicSynthVoice* voice) {
+                                  voice->SetEnvelopeSustain(value);
+                                });
+                              });
+  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeRelease,
+                              kDefaultEnvelopeRelease, [this](float value) {
+                                voice_.Update([value](BasicSynthVoice* voice) {
+                                  voice->SetEnvelopeRelease(value);
+                                });
+                              });
   modulation_matrix_.Register(
-      ParamIdFromEnum(InstrumentFloatParam::kEnvelopeAttack),
-      kDefaultEnvelopeAttack, [this](float value) {
-        voice_.Update([value](BasicSynthVoice* voice) {
-          voice->SetEnvelopeAttack(value);
-        });
-      });
-  modulation_matrix_.Register(
-      ParamIdFromEnum(InstrumentFloatParam::kEnvelopeDecay),
-      kDefaultEnvelopeDecay, [this](float value) {
-        voice_.Update([value](BasicSynthVoice* voice) {
-          voice->SetEnvelopeDecay(value);
-        });
-      });
-  modulation_matrix_.Register(
-      ParamIdFromEnum(InstrumentFloatParam::kEnvelopeSustain),
-      kDefaultEnvelopeSustain, [this](float value) {
-        voice_.Update([value](BasicSynthVoice* voice) {
-          voice->SetEnvelopeSustain(value);
-        });
-      });
-  modulation_matrix_.Register(
-      ParamIdFromEnum(InstrumentFloatParam::kEnvelopeRelease),
-      kDefaultEnvelopeRelease, [this](float value) {
-        voice_.Update([value](BasicSynthVoice* voice) {
-          voice->SetEnvelopeRelease(value);
-        });
-      });
-  modulation_matrix_.Register(
-      ParamIdFromEnum(InstrumentFloatParam::kOscillatorType),
+      BasicSynthInstrumentFloatParam::kOscillatorType,
       static_cast<float>(kDefaultOscillatorType), [this](float value) {
         voice_.Update([value](BasicSynthVoice* voice) {
           voice->SetOscillatorType(

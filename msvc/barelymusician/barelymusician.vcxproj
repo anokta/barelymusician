@@ -52,6 +52,7 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h" />
+    <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
   </ItemGroup>

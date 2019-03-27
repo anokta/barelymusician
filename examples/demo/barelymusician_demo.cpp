@@ -80,10 +80,6 @@ int main(int argc, char* argv[]) {
 
   BasicSynthInstrument basic_synth_instrument(kSampleInterval, kNumVoices);
 
-  DCHECK(basic_synth_instrument.SetFloatParam(
-      static_cast<int>(BasicSynthInstrument::InstrumentFloatParam::kGain),
-      1.0f / static_cast<float>(kNumVoices)));
-
   const auto process = [&sequencer, &oscillator, &envelope,
                         &basic_synth_instrument](float* output) {
     const int current_bar = sequencer.current_bar();
@@ -147,12 +143,21 @@ int main(int argc, char* argv[]) {
       case 'F':
         basic_synth_instrument.NoteOn(81.0f, 1.0f);
         break;
-      // Sequencer tests.
-      case 'T':
-        sequencer.SetBpm(2.0f * kBpm);
+      case 'O':
+        DCHECK(basic_synth_instrument.SetFloatParam(
+            static_cast<barelyapi::ParamId>(
+                BasicSynthInstrument::InstrumentFloatParam::kOscillatorType),
+            static_cast<float>(OscillatorType::kSquare)));
         break;
       case 'R':
+        basic_synth_instrument.Reset();
+        break;
+      // Sequencer tests.
+      case '1':
         sequencer.SetBpm(kBpm);
+        break;
+      case '2':
+        sequencer.SetBpm(2.0f * kBpm);
         break;
     }
   };

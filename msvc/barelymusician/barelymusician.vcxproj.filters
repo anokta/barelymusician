@@ -108,6 +108,9 @@
     <ClInclude Include="..\..\src\barelymusician\composition\message_utils.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h">
+      <Filter>Header Files\instrument</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">

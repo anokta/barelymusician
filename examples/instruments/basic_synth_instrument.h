@@ -1,8 +1,7 @@
 #ifndef EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
-#include <unordered_map>
-
+#include "barelymusician/instrument/modulation_matrix.h"
 #include "barelymusician/instrument/polyphonic_voice.h"
 #include "instruments/basic_synth_voice.h"
 
@@ -35,19 +34,11 @@ class BasicSynthInstrument : public Instrument {
   bool SetFloatParam(ParamId id, float value) override;
 
  private:
-  // TODO(#14): Create a helper class to generalize the modulation matrix
-  // implementation.
-  void InitializeModulationMatrix();
-
-  // TODO(#13): TOO MUCH REDUNDANCY!! Refactor all this (combined with #14?).
-  void UpdateParam(InstrumentFloatParam param, float value);
-
   float gain_;
 
   PolyphonicVoice<BasicSynthVoice> voice_;
 
-  // Parameter modulation matrix.
-  std::unordered_map<InstrumentFloatParam, float> modulation_matrix_;
+  ModulationMatrix<float> modulation_matrix_;
 };
 
 }  // namespace examples

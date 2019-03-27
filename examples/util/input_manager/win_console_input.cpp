@@ -1,5 +1,7 @@
 #include "util/input_manager/win_console_input.h"
 
+#include <utility>
+
 namespace barelyapi {
 namespace examples {
 
@@ -31,12 +33,12 @@ void WinConsoleInput::Shutdown() {
 
 void WinConsoleInput::Update() {
   // Wait for new events.
-  DWORD numRecords = 0;
-  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &numRecords)) {
+  DWORD num_records = 0;
+  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &num_records)) {
     return;
   }
 
-  for (DWORD i = 0; i < numRecords; ++i) {
+  for (DWORD i = 0; i < num_records; ++i) {
     switch (input_buffer_[i].EventType) {
       case KEY_EVENT: {
         const auto& key_event = input_buffer_[i].Event.KeyEvent;

@@ -17,7 +17,6 @@ class WinConsoleInput {
   using OnKeyUpCallback = std::function<void(const Key&)>;
 
   WinConsoleInput();
-  ~WinConsoleInput() = default;
 
   // Initializes the input manager.
   void Initialize();

@@ -28,7 +28,7 @@ DataType ReadMessageData(const Byte* message_data) {
   DCHECK(message_data);
   DataType data;
   DCHECK_LE(sizeof(data), kNumMaxMessageDataBytes);
-  memcpy(&data, message_data, sizeof(data));
+  std::memcpy(&data, message_data, sizeof(data));
   return data;
 }
 
@@ -36,7 +36,7 @@ template <typename DataType>
 void WriteMessageData(const DataType& data, Byte* message_data) {
   DCHECK(message_data);
   DCHECK_LE(sizeof(data), kNumMaxMessageDataBytes);
-  memcpy(message_data, &data, sizeof(data));
+  std::memcpy(message_data, &data, sizeof(data));
 }
 
 }  // namespace barelyapi

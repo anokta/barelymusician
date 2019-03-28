@@ -1,4 +1,4 @@
-#include "barelymusician/composition/message_queue.h"
+#include "barelymusician/message/message_queue.h"
 
 #include <algorithm>
 

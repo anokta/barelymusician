@@ -4,8 +4,8 @@
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/note.h"
-#include "barelymusician/composition/message.h"
-#include "barelymusician/composition/message_utils.h"
+#include "barelymusician/message/message.h"
+#include "barelymusician/message/message_utils.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -44,6 +44,10 @@ class FakeInstrument : public Instrument {
   float output_;
 };
 
+MessageId MessageIdFromPerformType(PerformType perform_type) {
+  return static_cast<MessageId>(perform_type);
+}
+
 // Tests that performing a single note produces the expected output.
 TEST(PerformerTest, PerformSingleNote) {
   const float kNoteIndex = 32.0f;
@@ -59,7 +63,7 @@ TEST(PerformerTest, PerformSingleNote) {
 
   // Perform note on.
   Message note_on_message;
-  note_on_message.type = MessageType::kNoteOn;
+  note_on_message.id = MessageIdFromPerformType(PerformType::kNoteOn);
   WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_on_message.data);
   note_on_message.timestamp = 0;
   performer.Perform(note_on_message);
@@ -72,7 +76,7 @@ TEST(PerformerTest, PerformSingleNote) {
 
   // Perform note off.
   Message note_off_message;
-  note_off_message.type = MessageType::kNoteOff;
+  note_off_message.id = MessageIdFromPerformType(PerformType::kNoteOff);
   WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_off_message.data);
   note_off_message.timestamp = kNumSamples;
   performer.Perform(note_off_message);
@@ -97,7 +101,7 @@ TEST(PerformerTest, PerformMultipleNotes) {
 
   // Perform a new note per each sample in the buffer.
   Message note_on_message;
-  note_on_message.type = MessageType::kNoteOn;
+  note_on_message.id = MessageIdFromPerformType(PerformType::kNoteOn);
   for (int i = 0; i < kNumSamples; ++i) {
     WriteMessageData<Note>({static_cast<float>(i), kNoteIntensity},
                            note_on_message.data);
@@ -113,7 +117,7 @@ TEST(PerformerTest, PerformMultipleNotes) {
 
   // Perform note off.
   Message note_off_message;
-  note_off_message.type = MessageType::kNoteOff;
+  note_off_message.id = MessageIdFromPerformType(PerformType::kNoteOff);
   WriteMessageData<Note>({0.0f, kNoteIntensity}, note_off_message.data);
   note_off_message.timestamp = kNumSamples;
   performer.Perform(note_off_message);
@@ -134,7 +138,7 @@ TEST(PerformerTest, Reset) {
 
   // Perform note on, then reset.
   Message note_on_message;
-  note_on_message.type = MessageType::kNoteOn;
+  note_on_message.id = MessageIdFromPerformType(PerformType::kNoteOn);
   WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_on_message.data);
   note_on_message.timestamp = 0;
   performer.Perform(note_on_message);

@@ -1,10 +1,16 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 #define BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 
-#include "barelymusician/composition/message_queue.h"
 #include "barelymusician/instrument/instrument.h"
+#include "barelymusician/message/message_queue.h"
 
 namespace barelyapi {
+
+enum class PerformType {
+  kNoteOn,      // Instrument note on.
+  kNoteOff,     // Instrument note off.
+  kFloatParam,  // Instrument set float parameter.
+};
 
 class Performer {
  public:

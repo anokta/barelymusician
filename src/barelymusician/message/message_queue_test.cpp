@@ -1,5 +1,6 @@
-#include "barelymusician/composition/message_queue.h"
+#include "barelymusician/message/message_queue.h"
 
+#include "barelymusician/base/types.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -8,8 +9,8 @@ namespace {
 // Default number of samples to pop.
 const int kNumSamples = 16;
 
-// Test message type.
-const MessageType kMessageType = MessageType::kNoteOn;
+// Test message ID.
+const MessageId kMessageId = 1;
 
 // Tests that the message queue returns an added single message as expected.
 TEST(MessageQueueTest, SinglePushPop) {
@@ -19,12 +20,13 @@ TEST(MessageQueueTest, SinglePushPop) {
   EXPECT_TRUE(message_queue.Pop(0, kNumSamples).empty());
 
   // Push single message.
-  message_queue.Push({kMessageType, {0}, kTimestamp});
+  message_queue.Push({kMessageId, {0}, kTimestamp});
   EXPECT_TRUE(message_queue.Pop(0, kTimestamp).empty());
 
+  // Pop message.
   const auto messages_in_range = message_queue.Pop(0, kTimestamp + kNumSamples);
   ASSERT_EQ(1, messages_in_range.size());
-  EXPECT_EQ(kMessageType, messages_in_range.front().type);
+  EXPECT_EQ(kMessageId, messages_in_range.front().id);
 
   // Queue should be empty after pop.
   EXPECT_TRUE(message_queue.Pop(0, kTimestamp + kNumSamples).empty());
@@ -41,7 +43,7 @@ TEST(MessageQueueTest, SingleMessagePerNumSamples) {
   // Push |kNumMessages| messages, each message to the beginning of each
   // |kNumSamples|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_queue.Push({kMessageType, {0}, i * kNumSamples});
+    message_queue.Push({kMessageId, {0}, i * kNumSamples});
   }
   // Pop one message at a time.
   for (int i = 0; i < kNumMessages; ++i) {
@@ -67,10 +69,11 @@ TEST(MessageQueueTest, MultipleMessagesSameTimestamp) {
 
   // Push |kNumMessages| messages using the same |kTimestamp|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_queue.Push({kMessageType, {0}, kTimestamp});
+    message_queue.Push({kMessageId, {0}, kTimestamp});
   }
   EXPECT_TRUE(message_queue.Pop(0, kTimestamp).empty());
 
+  // Pop all messages.
   const auto messages_in_range = message_queue.Pop(kTimestamp, kNumSamples);
   EXPECT_EQ(kNumMessages, messages_in_range.size());
   for (const auto& message : messages_in_range) {
@@ -87,7 +90,7 @@ TEST(MessageQueueTest, Reset) {
   EXPECT_TRUE(message_queue.Pop(0, kNumSamples).empty());
 
   for (int i = 0; i < kNumSamples; ++i) {
-    message_queue.Push({kMessageType, {0}, i});
+    message_queue.Push({kMessageId, {0}, i});
   }
 
   message_queue.Reset();

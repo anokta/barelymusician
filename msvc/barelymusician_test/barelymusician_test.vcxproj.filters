@@ -19,6 +19,9 @@
     <Filter Include="Source Files\composition">
       <UniqueIdentifier>{d5efa513-7f64-44d8-8979-3bd2d6def79d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\message">
+      <UniqueIdentifier>{82eab040-1627-449e-9e88-ded6d2c57506}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -54,14 +57,14 @@
     <ClCompile Include="..\..\src\barelymusician\composition\performer_test.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\message_queue_test.cpp">
-      <Filter>Source Files\composition</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\message_utils_test.cpp">
-      <Filter>Source Files\composition</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp">
       <Filter>Source Files\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\message\message_queue_test.cpp">
+      <Filter>Source Files\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\message\message_utils_test.cpp">
+      <Filter>Source Files\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

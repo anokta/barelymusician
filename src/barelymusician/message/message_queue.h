@@ -1,10 +1,10 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_MESSAGE_QUEUE_H_
-#define BARELYMUSICIAN_COMPOSITION_MESSAGE_QUEUE_H_
+#ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_QUEUE_H_
+#define BARELYMUSICIAN_MESSAGE_MESSAGE_QUEUE_H_
 
 #include <list>
 #include <vector>
 
-#include "barelymusician/composition/message.h"
+#include "barelymusician/message/message.h"
 
 namespace barelyapi {
 
@@ -33,4 +33,4 @@ class MessageQueue {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_MESSAGE_QUEUE_H_
+#endif  // BARELYMUSICIAN_MESSAGE_MESSAGE_QUEUE_H_

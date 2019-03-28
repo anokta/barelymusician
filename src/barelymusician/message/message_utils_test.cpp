@@ -1,6 +1,6 @@
-#include "barelymusician/composition/message_utils.h"
+#include "barelymusician/message/message_utils.h"
 
-#include "barelymusician/composition/message.h"
+#include "barelymusician/message/message.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {

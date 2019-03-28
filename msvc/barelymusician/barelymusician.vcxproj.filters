@@ -40,6 +40,12 @@
     <Filter Include="Source Files\composition">
       <UniqueIdentifier>{d8247247-b162-4d32-8bbe-297c4af72b4d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\message">
+      <UniqueIdentifier>{ae666881-d27b-4ba9-9f06-ebcc26ce21bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\message">
+      <UniqueIdentifier>{21236cb0-f01b-4e8d-82c5-c102ee93ed13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -99,17 +105,17 @@
     <ClInclude Include="..\..\src\barelymusician\base\param.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\message.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\message_queue.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\message_utils.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h">
       <Filter>Header Files\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\message\message.h">
+      <Filter>Header Files\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\message\message_queue.h">
+      <Filter>Header Files\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\message\message_utils.h">
+      <Filter>Header Files\message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -143,8 +149,8 @@
     <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\message_queue.cpp">
-      <Filter>Source Files\composition</Filter>
+    <ClCompile Include="..\..\src\barelymusician\message\message_queue.cpp">
+      <Filter>Source Files\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

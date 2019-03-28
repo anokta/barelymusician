@@ -3,10 +3,18 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/note.h"
 #include "barelymusician/base/param.h"
-#include "barelymusician/composition/message.h"
-#include "barelymusician/composition/message_utils.h"
+#include "barelymusician/message/message.h"
+#include "barelymusician/message/message_utils.h"
 
 namespace barelyapi {
+
+namespace {
+
+PerformType PerformTypeFromMessageId(MessageId id) {
+  return static_cast<PerformType>(id);
+}
+
+}  // namespace
 
 Performer::Performer(Instrument* instrument) : instrument_(instrument) {
   DCHECK(instrument_);
@@ -30,16 +38,16 @@ void Performer::Process(int timestamp, int num_samples, float* output) {
       output[i++] = instrument_->Next();
     }
     // Perform the message.
-    switch (message.type) {
-      case MessageType::kNoteOn: {
+    switch (PerformTypeFromMessageId(message.id)) {
+      case PerformType::kNoteOn: {
         const auto note_on = ReadMessageData<Note>(message.data);
         instrument_->NoteOn(note_on.index, note_on.intensity);
       } break;
-      case MessageType::kNoteOff: {
+      case PerformType::kNoteOff: {
         const auto note_off = ReadMessageData<Note>(message.data);
         instrument_->NoteOff(note_off.index);
       } break;
-      case MessageType::kFloatParam: {
+      case PerformType::kFloatParam: {
         const auto float_param = ReadMessageData<Param<float>>(message.data);
         if (!instrument_->SetFloatParam(float_param.id, float_param.value)) {
           LOG(WARNING) << "Failed to set float param with ID: "
@@ -47,8 +55,7 @@ void Performer::Process(int timestamp, int num_samples, float* output) {
         }
       } break;
       default:
-        LOG(ERROR) << "Unknown message type: "
-                   << static_cast<int>(message.type);
+        LOG(ERROR) << "Unknown message ID: " << message.id;
         break;
     }
   }

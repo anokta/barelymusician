@@ -3,6 +3,12 @@
 
 namespace barelyapi {
 
+// Byte.
+using Byte = unsigned char;
+
+// Message ID.
+using MessageId = int;
+
 // Instrument parameter ID.
 using ParamId = int;
 

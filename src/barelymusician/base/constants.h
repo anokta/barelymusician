@@ -18,7 +18,7 @@ static const float kNumSemitones = 12.0f;
 
 // Maximum number of bytes that the message data can contain.
 // TODO(#29): This is an arbitrary value, make sure this is *always* safe.
-static const int kNumMaxMessageDataBytes = 32;
+static const int kNumMaxMessageDataBytes = 16;
 
 }  // namespace barelyapi
 

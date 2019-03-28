@@ -3,9 +3,6 @@
 #include <vector>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/note.h"
-#include "barelymusician/message/message.h"
-#include "barelymusician/message/message_utils.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -35,18 +32,14 @@ class FakeInstrument : public Instrument {
     LOG(INFO) << "NoteOff(" << index << ")";
     output_ = 0.0f;
   }
-  bool SetFloatParam(ParamId id, float value) override {
+  void SetFloatParam(ParamId id, float value) override {
     LOG(INFO) << "SetFloatParam(" << id << ", " << value << ")";
-    return false;
+    output_ = value;
   }
 
  private:
   float output_;
 };
-
-MessageId MessageIdFromPerformType(PerformType perform_type) {
-  return static_cast<MessageId>(perform_type);
-}
 
 // Tests that performing a single note produces the expected output.
 TEST(PerformerTest, PerformSingleNote) {
@@ -61,12 +54,8 @@ TEST(PerformerTest, PerformSingleNote) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
   }
 
-  // Perform note on.
-  Message note_on_message;
-  note_on_message.id = MessageIdFromPerformType(PerformType::kNoteOn);
-  WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_on_message.data);
-  note_on_message.timestamp = 0;
-  performer.Perform(note_on_message);
+  // Play note.
+  performer.PlayNote(0, kNoteIndex, kNoteIntensity);
 
   output.assign(kNumSamples, 0.0f);
   performer.Process(0, kNumSamples, output.data());
@@ -74,12 +63,8 @@ TEST(PerformerTest, PerformSingleNote) {
     EXPECT_FLOAT_EQ(kNoteIndex, output[i]);
   }
 
-  // Perform note off.
-  Message note_off_message;
-  note_off_message.id = MessageIdFromPerformType(PerformType::kNoteOff);
-  WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_off_message.data);
-  note_off_message.timestamp = kNumSamples;
-  performer.Perform(note_off_message);
+  // Stop note.
+  performer.StopNote(kNumSamples, kNoteIndex);
 
   output.assign(kNumSamples, 0.0f);
   performer.Process(kNumSamples, kNumSamples, output.data());
@@ -99,14 +84,9 @@ TEST(PerformerTest, PerformMultipleNotes) {
     EXPECT_FLOAT_EQ(0.0f, sample);
   }
 
-  // Perform a new note per each sample in the buffer.
-  Message note_on_message;
-  note_on_message.id = MessageIdFromPerformType(PerformType::kNoteOn);
+  // Play new note per each sample in the buffer.
   for (int i = 0; i < kNumSamples; ++i) {
-    WriteMessageData<Note>({static_cast<float>(i), kNoteIntensity},
-                           note_on_message.data);
-    note_on_message.timestamp = i;
-    performer.Perform(note_on_message);
+    performer.PlayNote(i, static_cast<float>(i), kNoteIntensity);
   }
 
   output.assign(kNumSamples, 0.0f);
@@ -115,17 +95,39 @@ TEST(PerformerTest, PerformMultipleNotes) {
     EXPECT_FLOAT_EQ(static_cast<float>(i), output[i]);
   }
 
-  // Perform note off.
-  Message note_off_message;
-  note_off_message.id = MessageIdFromPerformType(PerformType::kNoteOff);
-  WriteMessageData<Note>({0.0f, kNoteIntensity}, note_off_message.data);
-  note_off_message.timestamp = kNumSamples;
-  performer.Perform(note_off_message);
+  // Stop all notes.
+  for (int i = 0; i < kNumSamples; ++i) {
+    performer.StopNote(kNumSamples, static_cast<float>(i));
+  }
 
   output.assign(kNumSamples, 0.0f);
   performer.Process(kNumSamples, kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
+  }
+}
+
+// Tests that performing a parameter update produces the expected output.
+TEST(PerformerTest, UpdateFloatParam) {
+  const ParamId kFloatParamId = 0;
+  const float kFloatParamValue = 0.5f;
+
+  FakeInstrument instrument;
+  Performer performer(&instrument);
+
+  std::vector<float> output(kNumSamples, 0.0f);
+  performer.Process(0, kNumSamples, output.data());
+  for (int i = 0; i < kNumSamples; ++i) {
+    EXPECT_FLOAT_EQ(0.0f, output[i]);
+  }
+
+  // Update float parameter.
+  performer.UpdateFloatParam(0, kFloatParamId, kFloatParamValue);
+
+  output.assign(kNumSamples, 0.0f);
+  performer.Process(0, kNumSamples, output.data());
+  for (int i = 0; i < kNumSamples; ++i) {
+    EXPECT_FLOAT_EQ(kFloatParamValue, output[i]);
   }
 }
 
@@ -136,12 +138,8 @@ TEST(PerformerTest, Reset) {
   FakeInstrument instrument;
   Performer performer(&instrument);
 
-  // Perform note on, then reset.
-  Message note_on_message;
-  note_on_message.id = MessageIdFromPerformType(PerformType::kNoteOn);
-  WriteMessageData<Note>({kNoteIndex, kNoteIntensity}, note_on_message.data);
-  note_on_message.timestamp = 0;
-  performer.Perform(note_on_message);
+  // Play note, then reset.
+  performer.PlayNote(0, kNoteIndex, kNoteIntensity);
   performer.Reset();
 
   std::vector<float> output(kNumSamples, 0.0f);

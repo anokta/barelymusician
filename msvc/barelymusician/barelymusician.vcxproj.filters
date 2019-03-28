@@ -93,16 +93,10 @@
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\note.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\types.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\param.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h">

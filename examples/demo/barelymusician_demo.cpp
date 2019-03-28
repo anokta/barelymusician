@@ -145,9 +145,9 @@ int main(int argc, char* argv[]) {
         basic_synth_instrument.NoteOn(81.0f, 1.0f);
         break;
       case 'O':
-        DCHECK(basic_synth_instrument.SetFloatParam(
+        basic_synth_instrument.SetFloatParam(
             BasicSynthInstrumentFloatParam::kOscillatorType,
-            static_cast<float>(OscillatorType::kSquare)));
+            static_cast<float>(OscillatorType::kSquare));
         break;
       case 'R':
         basic_synth_instrument.Reset();

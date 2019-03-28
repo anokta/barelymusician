@@ -1,8 +1,6 @@
 #include "barelymusician/composition/performer.h"
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/note.h"
-#include "barelymusician/base/param.h"
 #include "barelymusician/message/message.h"
 #include "barelymusician/message/message_utils.h"
 
@@ -10,8 +8,36 @@ namespace barelyapi {
 
 namespace {
 
-PerformType PerformTypeFromMessageId(MessageId id) {
-  return static_cast<PerformType>(id);
+// Unique message IDs per message type.
+const MessageId kPlayNoteId = 0;
+const MessageId kStopNoteId = 1;
+const MessageId kUpdateFloatParamId = 2;
+
+// Play note message data.
+struct PlayNoteData {
+  float index;
+  float intensity;
+};
+
+// Stop note message data.
+struct StopNoteData {
+  float index;
+};
+
+// Update float parameter message data.
+struct UpdateFloatParamData {
+  ParamId id;
+  float value;
+};
+
+// Returns new |Message| with the given message |id|, |data| and |timestamp|.
+template <typename DataType>
+Message BuildMessage(MessageId id, const DataType& data, int timestamp) {
+  Message message;
+  message.id = id;
+  WriteMessageData<DataType>(data, message.data);
+  message.timestamp = timestamp;
+  return message;
 }
 
 }  // namespace
@@ -20,8 +46,19 @@ Performer::Performer(Instrument* instrument) : instrument_(instrument) {
   DCHECK(instrument_);
 }
 
-void Performer::Perform(const Message& message) {
-  message_queue_.Push(message);
+void Performer::PlayNote(int timestamp, float index, float intensity) {
+  message_queue_.Push(
+      BuildMessage<PlayNoteData>(kPlayNoteId, {index, intensity}, timestamp));
+}
+
+void Performer::StopNote(int timestamp, float index) {
+  message_queue_.Push(
+      BuildMessage<StopNoteData>(kStopNoteId, {index}, timestamp));
+}
+
+void Performer::UpdateFloatParam(int timestamp, ParamId id, float value) {
+  message_queue_.Push(BuildMessage<UpdateFloatParamData>(
+      kUpdateFloatParamId, {id, value}, timestamp));
 }
 
 void Performer::Process(int timestamp, int num_samples, float* output) {
@@ -38,24 +75,23 @@ void Performer::Process(int timestamp, int num_samples, float* output) {
       output[i++] = instrument_->Next();
     }
     // Perform the message.
-    switch (PerformTypeFromMessageId(message.id)) {
-      case PerformType::kNoteOn: {
-        const auto note_on = ReadMessageData<Note>(message.data);
-        instrument_->NoteOn(note_on.index, note_on.intensity);
+    switch (message.id) {
+      case kPlayNoteId: {
+        const auto play_note = ReadMessageData<PlayNoteData>(message.data);
+        instrument_->NoteOn(play_note.index, play_note.intensity);
       } break;
-      case PerformType::kNoteOff: {
-        const auto note_off = ReadMessageData<Note>(message.data);
-        instrument_->NoteOff(note_off.index);
+      case kStopNoteId: {
+        const auto stop_note = ReadMessageData<StopNoteData>(message.data);
+        instrument_->NoteOff(stop_note.index);
       } break;
-      case PerformType::kFloatParam: {
-        const auto float_param = ReadMessageData<Param<float>>(message.data);
-        if (!instrument_->SetFloatParam(float_param.id, float_param.value)) {
-          LOG(WARNING) << "Failed to set float param with ID: "
-                       << float_param.id;
-        }
+      case kUpdateFloatParamId: {
+        const auto update_float_param =
+            ReadMessageData<UpdateFloatParamData>(message.data);
+        instrument_->SetFloatParam(update_float_param.id,
+                                   update_float_param.value);
       } break;
       default:
-        LOG(ERROR) << "Unknown message ID: " << message.id;
+        DLOG(ERROR) << "Unknown message ID: " << message.id;
         break;
     }
   }

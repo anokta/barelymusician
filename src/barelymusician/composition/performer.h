@@ -1,17 +1,13 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 #define BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 
+#include "barelymusician/base/types.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_queue.h"
 
 namespace barelyapi {
 
-enum class PerformType {
-  kNoteOn,      // Instrument note on.
-  kNoteOff,     // Instrument note off.
-  kFloatParam,  // Instrument set float parameter.
-};
-
+// Class that performs a given instrument by sample accurate input directives.
 class Performer {
  public:
   // Constructs new |Performer| with the given |instrument|.
@@ -19,14 +15,28 @@ class Performer {
   // @param instrument Instrument to perform.
   explicit Performer(Instrument* instrument);
 
-  // Performs the given |message|.
+  // Plays note at the given |timestamp|.
   //
-  // @param message Message to perform.
-  // TODO(#28): Should |Message| be exposed here as a struct?
-  void Perform(const Message& message);
+  // @param timestamp Timestamp to play the note.
+  // @param index Note index.
+  // @param intensity Note intensity.
+  void PlayNote(int timestamp, float index, float intensity);
+
+  // Stops note at the given |timestamp|.
+  //
+  // @param timestamp Timestamp to stop the note.
+  // @param index Note index.
+  void StopNote(int timestamp, float index);
+
+  // Updates float parameter at the given |timestamp|.
+  //
+  // @param timestamp Timestamp to update the parameter.
+  // @param id Parameter ID.
+  // @param value Parameter value.
+  void UpdateFloatParam(int timestamp, ParamId id, float value);
 
   // TODO(#20): Create and pass an AudioBuffer here instead?
-  // Processes the next output samples for the given timestamp.
+  // Processes the next output samples from the given |timestamp|.
   //
   // @param timestamp Start sample to process.
   // @param num_samples Number of samples to process.
@@ -37,8 +47,10 @@ class Performer {
   void Reset();
 
  private:
+  // Instrument to be performed.
   Instrument* instrument_;  // not owned.
 
+  // Message queue to schedule performance directives.
   MessageQueue message_queue_;
 };
 

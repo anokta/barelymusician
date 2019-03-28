@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "barelymusician/base/logging.h"
 #include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
@@ -16,11 +17,6 @@ const float kDefaultEnvelopeDecay = 0.0f;
 const float kDefaultEnvelopeSustain = 1.0f;
 const float kDefaultEnvelopeRelease = 0.25f;
 const OscillatorType kDefaultOscillatorType = OscillatorType::kSine;
-
-// Helper method to get the corresponding |ParamId| for the given |param_enum|.
-ParamId ParamIdFromEnum(BasicSynthInstrumentFloatParam param_enum) {
-  return static_cast<ParamId>(param_enum);
-}
 
 }  // namespace
 
@@ -84,8 +80,10 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
 
 void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
-bool BasicSynthInstrument::SetFloatParam(ParamId id, float value) {
-  return modulation_matrix_.SetParam(id, value);
+void BasicSynthInstrument::SetFloatParam(ParamId id, float value) {
+  if (!modulation_matrix_.SetParam(id, value)) {
+    LOG(WARNING) << "Failed to update float parameter with ID: " << id;
+  }
 }
 
 }  // namespace examples

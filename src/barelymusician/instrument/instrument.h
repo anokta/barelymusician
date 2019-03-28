@@ -25,8 +25,7 @@ class Instrument : public UnitGenerator {
   //
   // @param id Parameter ID.
   // @param value Float parameter value.
-  // @return True if successful.
-  virtual bool SetFloatParam(ParamId id, float value) = 0;
+  virtual void SetFloatParam(ParamId id, float value) = 0;
 };
 
 }  // namespace barelyapi

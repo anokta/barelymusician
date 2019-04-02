@@ -3,7 +3,7 @@
 
 namespace barelyapi {
 
-// Musical note in a score.
+// Musical note.
 struct Note {
   // Note index (typically key).
   float index;

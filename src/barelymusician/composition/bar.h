@@ -11,19 +11,19 @@ namespace barelyapi {
 // Musical bar (phrase) of a score that consists of a list of notes.
 class Bar {
 public:
-  // Adds a new note into the score.
+  // Adds a new note into the bar.
   //
   // @param note Note.
   void AddNote(const Note& note);
 
-  // Returns all notes within the range from the score.
+  // Returns all notes within the range from the bar.
   //
   // @param start_beat Start beat to begin.
   // @param duration_beats Duration beats to end.
   // @param List of notes within the range.
   std::vector<Note> GetNotes(float start_beat, float duration_beats) const;
 
-  // Resets the score.
+  // Resets the bar.
   void Reset();
 
 private:

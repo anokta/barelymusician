@@ -66,5 +66,8 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_player_test.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\bar_test.cpp">
+      <Filter>Source Files\composition</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

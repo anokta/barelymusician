@@ -1,4 +1,4 @@
-#include "barelymusician/composition/performer.h"
+#include "barelymusician/instrument/instrument_player.h"
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/message/message.h"
@@ -42,26 +42,28 @@ Message BuildMessage(MessageId id, const DataType& data, int timestamp) {
 
 }  // namespace
 
-Performer::Performer(Instrument* instrument) : instrument_(instrument) {
+InstrumentPlayer::InstrumentPlayer(Instrument* instrument)
+    : instrument_(instrument) {
   DCHECK(instrument_);
 }
 
-void Performer::PlayNote(int timestamp, float index, float intensity) {
+void InstrumentPlayer::PlayNote(int timestamp, float index, float intensity) {
   message_queue_.Push(
       BuildMessage<PlayNoteData>(kPlayNoteId, {index, intensity}, timestamp));
 }
 
-void Performer::StopNote(int timestamp, float index) {
+void InstrumentPlayer::StopNote(int timestamp, float index) {
   message_queue_.Push(
       BuildMessage<StopNoteData>(kStopNoteId, {index}, timestamp));
 }
 
-void Performer::UpdateFloatParam(int timestamp, ParamId id, float value) {
+void InstrumentPlayer::UpdateFloatParam(int timestamp, ParamId id,
+                                        float value) {
   message_queue_.Push(BuildMessage<UpdateFloatParamData>(
       kUpdateFloatParamId, {id, value}, timestamp));
 }
 
-void Performer::Process(int timestamp, int num_samples, float* output) {
+void InstrumentPlayer::Process(int timestamp, int num_samples, float* output) {
   DCHECK(output);
 
   int i = 0;
@@ -74,7 +76,7 @@ void Performer::Process(int timestamp, int num_samples, float* output) {
       // immediately at the beginning of the buffer.
       output[i++] = instrument_->Next();
     }
-    // Perform the message.
+    // Process the message.
     switch (message.id) {
       case kPlayNoteId: {
         const auto play_note = ReadMessageData<PlayNoteData>(message.data);
@@ -101,7 +103,7 @@ void Performer::Process(int timestamp, int num_samples, float* output) {
   }
 }
 
-void Performer::Reset() {
+void InstrumentPlayer::Reset() {
   message_queue_.Reset();
   instrument_->Reset();
 }

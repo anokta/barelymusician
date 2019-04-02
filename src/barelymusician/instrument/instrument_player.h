@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
-#define BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
+#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PLAYER_H_
+#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PLAYER_H_
 
 #include "barelymusician/base/types.h"
 #include "barelymusician/instrument/instrument.h"
@@ -7,13 +7,13 @@
 
 namespace barelyapi {
 
-// Class that performs a given instrument by sample accurate input directives.
-class Performer {
+// Class that plays a given instrument by sample accurate input directives.
+class InstrumentPlayer {
  public:
-  // Constructs new |Performer| with the given |instrument|.
+  // Constructs new |InstrumentPlayer| with the given |instrument|.
   //
-  // @param instrument Instrument to perform.
-  explicit Performer(Instrument* instrument);
+  // @param instrument Instrument to play.
+  explicit InstrumentPlayer(Instrument* instrument);
 
   // Plays note at the given |timestamp|.
   //
@@ -35,25 +35,25 @@ class Performer {
   // @param value Parameter value.
   void UpdateFloatParam(int timestamp, ParamId id, float value);
 
-  // TODO(#20): Create and pass an AudioBuffer here instead?
   // Processes the next output samples from the given |timestamp|.
+  // TODO(#20): Create and pass an AudioBuffer here instead?
   //
   // @param timestamp Start sample to process.
   // @param num_samples Number of samples to process.
   // @param output Pointer to output samples to be written into.
   void Process(int timestamp, int num_samples, float* output);
 
-  // Resets the performer.
+  // Resets the player.
   void Reset();
 
  private:
-  // Instrument to be performed.
+  // Instrument to be played.
   Instrument* instrument_;  // not owned.
 
-  // Message queue to schedule performance directives.
+  // Message queue to schedule instrument input directives.
   MessageQueue message_queue_;
 };
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
+#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PLAYER_H_

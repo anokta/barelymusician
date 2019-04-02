@@ -93,9 +93,6 @@
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\types.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
@@ -110,6 +107,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\message\message_utils.h">
       <Filter>Header Files\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\instrument\instrument_player.h">
+      <Filter>Header Files\instrument</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -140,11 +140,11 @@
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
-      <Filter>Source Files\composition</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\message\message_queue.cpp">
       <Filter>Source Files\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_player.cpp">
+      <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

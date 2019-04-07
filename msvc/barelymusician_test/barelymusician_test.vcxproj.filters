@@ -57,9 +57,6 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\message\message_queue_test.cpp">
-      <Filter>Source Files\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\message\message_utils_test.cpp">
       <Filter>Source Files\message</Filter>
     </ClCompile>

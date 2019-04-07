@@ -50,7 +50,7 @@ TEST(InstrumentPlayerTest, PlaySingleNote) {
   InstrumentPlayer instrument_player(&instrument);
 
   std::vector<float> output(kNumSamples, 0.0f);
-  instrument_player.Process(0, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
   }
@@ -59,16 +59,16 @@ TEST(InstrumentPlayerTest, PlaySingleNote) {
   instrument_player.PlayNote(0, kNoteIndex, kNoteIntensity);
 
   output.assign(kNumSamples, 0.0f);
-  instrument_player.Process(0, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(kNoteIndex, output[i]);
   }
 
   // Stop note.
-  instrument_player.StopNote(kNumSamples, kNoteIndex);
+  instrument_player.StopNote(0, kNoteIndex);
 
   output.assign(kNumSamples, 0.0f);
-  instrument_player.Process(kNumSamples, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
   }
@@ -80,7 +80,7 @@ TEST(InstrumentPlayerTest, PlayMultipleNotes) {
   InstrumentPlayer instrument_player(&instrument);
 
   std::vector<float> output(kNumSamples, 0.0f);
-  instrument_player.Process(0, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (const auto& sample : output) {
     EXPECT_FLOAT_EQ(0.0f, sample);
   }
@@ -91,18 +91,18 @@ TEST(InstrumentPlayerTest, PlayMultipleNotes) {
   }
 
   output.assign(kNumSamples, 0.0f);
-  instrument_player.Process(0, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(static_cast<float>(i), output[i]);
   }
 
   // Stop all notes.
   for (int i = 0; i < kNumSamples; ++i) {
-    instrument_player.StopNote(kNumSamples, static_cast<float>(i));
+    instrument_player.StopNote(0, static_cast<float>(i));
   }
 
   output.assign(kNumSamples, 0.0f);
-  instrument_player.Process(kNumSamples, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
   }
@@ -117,7 +117,7 @@ TEST(InstrumentPlayerTest, UpdateFloatParam) {
   InstrumentPlayer instrument_player(&instrument);
 
   std::vector<float> output(kNumSamples, 0.0f);
-  instrument_player.Process(0, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
   }
@@ -126,7 +126,7 @@ TEST(InstrumentPlayerTest, UpdateFloatParam) {
   instrument_player.UpdateFloatParam(0, kFloatParamId, kFloatParamValue);
 
   output.assign(kNumSamples, 0.0f);
-  instrument_player.Process(0, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(kFloatParamValue, output[i]);
   }
@@ -144,7 +144,7 @@ TEST(InstrumentPlayerTest, Reset) {
   instrument_player.Reset();
 
   std::vector<float> output(kNumSamples, 0.0f);
-  instrument_player.Process(0, kNumSamples, output.data());
+  instrument_player.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
   }

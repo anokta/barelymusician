@@ -8,7 +8,7 @@
 
 namespace barelyapi {
 
-// Musical bar (phrase) of a score that consists of a list of notes.
+// Musical bar (phrase) that consists of a list of notes.
 class Bar {
 public:
   // Adds a new note into the bar.

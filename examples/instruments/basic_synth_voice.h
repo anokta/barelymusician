@@ -15,7 +15,7 @@ class BasicSynthVoice : public Voice {
   // @param sample_interval Sampling interval in seconds.
   BasicSynthVoice(float sample_interval);
 
-  // Implements |UnitGenerator|.
+  // Implements |Generator|.
   float Next() override;
   void Reset() override;
 

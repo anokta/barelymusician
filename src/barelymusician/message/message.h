@@ -6,7 +6,7 @@
 
 namespace barelyapi {
 
-// Message to perform.
+// Generic message with a timestamp.
 struct Message {
   // Message ID.
   MessageId id;
@@ -14,7 +14,7 @@ struct Message {
   // Type-agnostic message data.
   Byte data[kNumMaxMessageDataBytes];
 
-  // Message timestamp in samples.
+  // Message timestamp.
   int timestamp;
 };
 

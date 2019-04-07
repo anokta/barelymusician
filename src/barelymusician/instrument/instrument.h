@@ -2,13 +2,13 @@
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 
 #include "barelymusician/base/types.h"
-#include "barelymusician/base/unit_generator.h"
+#include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
 // Generic instrument interface.
 // TODO(#9): Should instruments process multiple frames in one go?
-class Instrument : public UnitGenerator {
+class Instrument : public Generator {
  public:
   // Plays note with the given index and intensity.
   //

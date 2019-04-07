@@ -1,20 +1,20 @@
 #ifndef BARELYMUSICIAN_DSP_ENVELOPE_H_
 #define BARELYMUSICIAN_DSP_ENVELOPE_H_
 
-#include "barelymusician/base/unit_generator.h"
+#include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
 // Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output
 // samples according to its current state.
-class Envelope : public UnitGenerator {
+class Envelope : public Generator {
  public:
   // Constructs new |Envelope|.
   //
   // @param sample_interval Sampling interval in seconds.
   explicit Envelope(float sample_interval);
 
-  // Implements |UnitGenerator|.
+  // Implements |Generator|.
   float Next() override;
   void Reset() override;
 

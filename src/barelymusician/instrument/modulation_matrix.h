@@ -6,16 +6,20 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/module.h"
 #include "barelymusician/base/types.h"
 
 namespace barelyapi {
 
 // Type agnostic parameter modulation matrix.
 template <typename ParamType>
-class ModulationMatrix {
+class ModulationMatrix : public Module {
  public:
   // Parameter update signature.
   using ParamUpdater = std::function<void(const ParamType&)>;
+
+  // Implements |Module|.
+  void Reset() override;
 
   // Registers new parameter.
   //
@@ -24,9 +28,6 @@ class ModulationMatrix {
   // @param updater Parameter update function.
   void Register(ParamId id, const ParamType& default_value,
                 ParamUpdater&& updater = nullptr);
-
-  // Resets all registered parameters to their default values.
-  void Reset();
 
   // Returns the value of a parameter with the given ID.
   //
@@ -60,6 +61,17 @@ class ModulationMatrix {
 };
 
 template <typename ParamType>
+void ModulationMatrix<ParamType>::Reset() {
+  for (auto& it : params_) {
+    auto* param_data = &it.second;
+    if (param_data->updater != nullptr) {
+      param_data->updater(param_data->default_value);
+    }
+    param_data->current_value = param_data->default_value;
+  }
+}
+
+template <typename ParamType>
 void ModulationMatrix<ParamType>::Register(ParamId id,
                                            const ParamType& default_value,
                                            ParamUpdater&& updater) {
@@ -70,17 +82,6 @@ void ModulationMatrix<ParamType>::Register(ParamId id,
   const auto& param_data = result.first->second;
   if (param_data.updater != nullptr) {
     param_data.updater(default_value);
-  }
-}
-
-template <typename ParamType>
-void ModulationMatrix<ParamType>::Reset() {
-  for (auto& it : params_) {
-    auto* param_data = &it.second;
-    if (param_data->updater != nullptr) {
-      param_data->updater(param_data->default_value);
-    }
-    param_data->current_value = param_data->default_value;
   }
 }
 

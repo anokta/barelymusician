@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
 #define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
-#include "barelymusician/base/unit_generator.h"
+#include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
@@ -14,14 +14,14 @@ enum class OscillatorType {
 };
 
 // Simple oscillator that generates output samples of basic waveforms.
-class Oscillator : public UnitGenerator {
+class Oscillator : public Generator {
  public:
   // Constructs new |Oscillator|.
   //
   // @param sample_interval Sampling interval in seconds.
   explicit Oscillator(float sample_interval);
 
-  // Implements |UnitGenerator|.
+  // Implements |Generator|.
   float Next() override;
   void Reset() override;
 

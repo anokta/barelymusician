@@ -1,13 +1,13 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_VOICE_H_
 #define BARELYMUSICIAN_INSTRUMENT_VOICE_H_
 
-#include "barelymusician/base/unit_generator.h"
+#include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
 // Voice interface for a virtual instrument that generates output samples with
 // respect to the note input.
-class Voice : public UnitGenerator {
+class Voice : public Generator {
  public:
   // Returns whether the voice is currently active (i.e., playing).
   //

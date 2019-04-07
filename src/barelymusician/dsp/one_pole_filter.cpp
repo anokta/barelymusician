@@ -15,6 +15,8 @@ float OnePoleFilter::Next(float input) {
   return output_;
 }
 
+void OnePoleFilter::Reset() { output_ = 0.0f; }
+
 void OnePoleFilter::SetCoefficient(float coefficient) {
   coefficient_ = std::min(std::max(coefficient, 0.0f), 1.0f);
 }

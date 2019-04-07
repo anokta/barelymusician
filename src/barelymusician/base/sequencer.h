@@ -1,10 +1,12 @@
 #ifndef BARELYMUSICIAN_BASE_SEQUENCER_H_
 #define BARELYMUSICIAN_BASE_SEQUENCER_H_
 
+#include "barelymusician/base/module.h"
+
 namespace barelyapi {
 
 // Step sequencer that keeps track of beats, bars and sections.
-class Sequencer {
+class Sequencer : public Module {
  public:
   // Note value in length.
   enum class NoteValue {
@@ -20,8 +22,8 @@ class Sequencer {
   // @param sample_rate Sampling rate per second.
   explicit Sequencer(int sample_rate);
 
-  // Resets the sequencer.
-  void Reset();
+  // Implements |Module|.
+  void Reset() override;
 
   // Sets the tempo of the sequencer.
   //

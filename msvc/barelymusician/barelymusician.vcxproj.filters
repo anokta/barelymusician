@@ -75,9 +75,6 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\unit_generator.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
@@ -116,6 +113,15 @@
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\note.h">
       <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\module.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\dsp\generator.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\dsp\processor.h">
+      <Filter>Header Files\dsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

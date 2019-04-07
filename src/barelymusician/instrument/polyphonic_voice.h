@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/generator.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/voice.h"
 
@@ -13,7 +14,7 @@ namespace barelyapi {
 
 // Class template that provides polyphony of a desired voice type.
 template <class VoiceType>
-class PolyphonicVoice : public UnitGenerator {
+class PolyphonicVoice : public Generator {
  public:
   // Voice mutator callback signature.
   using VoiceCallback = std::function<void(VoiceType* voice)>;
@@ -24,7 +25,7 @@ class PolyphonicVoice : public UnitGenerator {
   // TODO(#15): Should |base_voice| be passed by value (via move) instead?
   explicit PolyphonicVoice(const VoiceType& base_voice);
 
-  // Implements |UnitGenerator|.
+  // Implements |Generator|.
   float Next() override;
   void Reset() override;
 

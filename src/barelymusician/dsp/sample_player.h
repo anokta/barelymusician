@@ -1,12 +1,12 @@
 #ifndef BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 #define BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 
-#include "barelymusician/base/unit_generator.h"
+#include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
 // Sample player that generates output samples from the provided mono data.
-class SamplePlayer : public UnitGenerator {
+class SamplePlayer : public Generator {
  public:
   // Construct new |SamplePlayer| with the given sample data.
   //
@@ -16,7 +16,7 @@ class SamplePlayer : public UnitGenerator {
   // @param length Sample data length.
   SamplePlayer(float sample_interval);
 
-  // Implements |UnitGenerator|.
+  // Implements |Generator|.
   float Next() override;
   void Reset() override;
 

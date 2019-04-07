@@ -21,7 +21,7 @@ class BasicSynthInstrument : public Instrument {
  public:
   BasicSynthInstrument(float sample_interval, int num_voices);
 
-  // Implements |UnitGenerator|.
+  // Implements |Generator|.
   float Next() override;
   void Reset() override;
 

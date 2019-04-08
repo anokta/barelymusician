@@ -33,7 +33,7 @@ class FakeInstrument : public Instrument {
     DLOG(INFO) << "NoteOff(" << index << ")";
     output_ = 0.0f;
   }
-  void SetFloatParam(ParamId id, float value) override {
+  void SetFloatParam(int id, float value) override {
     DLOG(INFO) << "SetFloatParam(" << id << ", " << value << ")";
     output_ = value;
   }
@@ -110,7 +110,7 @@ TEST(InstrumentProcessorTest, PlayMultipleNotes) {
 
 // Tests that updating a float parameter produces the expected output.
 TEST(InstrumentProcessorTest, SetFloatParam) {
-  const ParamId kFloatParamId = 0;
+  const int kFloatParamId = 0;
   const float kFloatParamValue = 0.5f;
 
   FakeInstrument instrument;

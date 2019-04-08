@@ -5,13 +5,13 @@
 
 namespace barelyapi {
 
-// Unit processor interface that filters per sample PCM input.
-class Processor : public Module {
+// Unit filter interface that processes per sample PCM input.
+class Filter : public Module {
  public:
-  // Processes the next input sample.
+  // Filters the next input sample.
   //
   // @param input Input sample.
-  // @return Processed output sample.
+  // @return Filtered output sample.
   virtual float Next(float input) = 0;
 };
 

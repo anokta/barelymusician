@@ -43,9 +43,6 @@
     <Filter Include="Header Files\message">
       <UniqueIdentifier>{ae666881-d27b-4ba9-9f06-ebcc26ce21bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\message">
-      <UniqueIdentifier>{21236cb0-f01b-4e8d-82c5-c102ee93ed13}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -90,9 +87,6 @@
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\types.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
@@ -114,11 +108,11 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\generator.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\dsp\processor.h">
-      <Filter>Header Files\dsp</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument_processor.h">
       <Filter>Header Files\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\dsp\filter.h">
+      <Filter>Header Files\dsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,6 @@
 #include <list>
 
 #include "barelymusician/base/module.h"
-#include "barelymusician/base/types.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message.h"
 
@@ -39,7 +38,7 @@ class InstrumentProcessor : public Module {
   // @param sample_offset Sample offset to update the parameter.
   // @param id Parameter ID.
   // @param value Parameter value.
-  void SetFloatParam(int sample_offset, ParamId id, float value);
+  void SetFloatParam(int sample_offset, int id, float value);
 
   // Processes the next output samples.
   // TODO(#20): Create and pass an AudioBuffer here instead?

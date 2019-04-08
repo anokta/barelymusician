@@ -5,7 +5,6 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/types.h"
 
 namespace barelyapi {
 
@@ -14,17 +13,17 @@ namespace barelyapi {
 // @param message_data Message data to be read.
 // @return Structured data of |DataType|.
 template <typename DataType>
-DataType ReadMessageData(const Byte* message_data);
+DataType ReadMessageData(const unsigned char* message_data);
 
 // Writes the given structured |data| into |message_data|.
 //
 // @param data Structured data of |DataType|.
 // @param message_data Message data to be written into.
 template <typename DataType>
-void WriteMessageData(const DataType& data, Byte* message_data);
+void WriteMessageData(const DataType& data, unsigned char* message_data);
 
 template <typename DataType>
-DataType ReadMessageData(const Byte* message_data) {
+DataType ReadMessageData(const unsigned char* message_data) {
   DCHECK(message_data);
   DataType data;
   DCHECK_LE(sizeof(data), kNumMaxMessageDataBytes);
@@ -33,7 +32,7 @@ DataType ReadMessageData(const Byte* message_data) {
 }
 
 template <typename DataType>
-void WriteMessageData(const DataType& data, Byte* message_data) {
+void WriteMessageData(const DataType& data, unsigned char* message_data) {
   DCHECK(message_data);
   DCHECK_LE(sizeof(data), kNumMaxMessageDataBytes);
   std::memcpy(message_data, &data, sizeof(data));

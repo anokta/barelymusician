@@ -7,7 +7,6 @@
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/module.h"
-#include "barelymusician/base/types.h"
 
 namespace barelyapi {
 
@@ -26,7 +25,7 @@ class ModulationMatrix : public Module {
   // @param id Parameter ID.
   // @param default_value Parameter default value.
   // @param updater Parameter update function.
-  void Register(ParamId id, const ParamType& default_value,
+  void Register(int id, const ParamType& default_value,
                 ParamUpdater&& updater = nullptr);
 
   // Returns the value of a parameter with the given ID.
@@ -34,14 +33,14 @@ class ModulationMatrix : public Module {
   // @param id Parameter ID.
   // @param value Parameter value to be read into, must a valid pointer.
   // @return True if successful.
-  bool GetParam(ParamId id, ParamType* value) const;
+  bool GetParam(int id, ParamType* value) const;
 
   // Sets the value of a parameter with the given ID.
   //
   // @param id Parameter ID.
   // @param value Parameter value to be set.
   // @return True if successful.
-  bool SetParam(ParamId id, const ParamType& value);
+  bool SetParam(int id, const ParamType& value);
 
  private:
   // Parameter data.
@@ -57,7 +56,7 @@ class ModulationMatrix : public Module {
   };
 
   // Parameter map.
-  std::unordered_map<ParamId, ParamData> params_;
+  std::unordered_map<int, ParamData> params_;
 };
 
 template <typename ParamType>
@@ -72,7 +71,7 @@ void ModulationMatrix<ParamType>::Reset() {
 }
 
 template <typename ParamType>
-void ModulationMatrix<ParamType>::Register(ParamId id,
+void ModulationMatrix<ParamType>::Register(int id,
                                            const ParamType& default_value,
                                            ParamUpdater&& updater) {
   const auto result =
@@ -86,7 +85,7 @@ void ModulationMatrix<ParamType>::Register(ParamId id,
 }
 
 template <typename ParamType>
-bool ModulationMatrix<ParamType>::GetParam(ParamId id, ParamType* value) const {
+bool ModulationMatrix<ParamType>::GetParam(int id, ParamType* value) const {
   const auto it = params_.find(id);
   if (it == params_.end()) {
     return false;
@@ -97,7 +96,7 @@ bool ModulationMatrix<ParamType>::GetParam(ParamId id, ParamType* value) const {
 }
 
 template <typename ParamType>
-bool ModulationMatrix<ParamType>::SetParam(ParamId id, const ParamType& value) {
+bool ModulationMatrix<ParamType>::SetParam(int id, const ParamType& value) {
   const auto it = params_.find(id);
   if (it == params_.end()) {
     return false;

@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 
-#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
@@ -25,7 +24,7 @@ class Instrument : public Generator {
   //
   // @param id Parameter ID.
   // @param value Float parameter value.
-  virtual void SetFloatParam(ParamId id, float value) = 0;
+  virtual void SetFloatParam(int id, float value) = 0;
 };
 
 }  // namespace barelyapi

@@ -1,19 +1,18 @@
 #include "barelymusician/instrument/modulation_matrix.h"
 
-#include "barelymusician/base/types.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
 
 // Test parameter properties.
-const ParamId kParamId = 1;
+const int kParamId = 1;
 const float kDefaultParamValue = 1.0f;
 const float kParamValue = 0.5f;
 
 // Tests that invalid parameter operations fail as expected.
 TEST(ModulationMatrixTest, InvalidParamFails) {
-  const ParamId kInvalidParamId = -1;
+  const int kInvalidParamId = -1;
 
   ModulationMatrix<float> modulation_matrix;
   EXPECT_FALSE(modulation_matrix.SetParam(kInvalidParamId, kDefaultParamValue));

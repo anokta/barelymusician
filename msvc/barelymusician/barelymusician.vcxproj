@@ -38,15 +38,14 @@
     <ClInclude Include="..\..\src\barelymusician\base\module.h" />
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />
     <ClInclude Include="..\..\src\barelymusician\base\sequencer.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\types.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\bar.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
+    <ClInclude Include="..\..\src\barelymusician\dsp\filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\generator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\processor.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument_processor.h" />

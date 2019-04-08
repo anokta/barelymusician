@@ -10,9 +10,9 @@ namespace barelyapi {
 namespace {
 
 // Unique message IDs per message type.
-const MessageId kNoteOnId = 0;
-const MessageId kNoteOffId = 1;
-const MessageId kSetFloatParamId = 2;
+const int kNoteOnId = 0;
+const int kNoteOffId = 1;
+const int kSetFloatParamId = 2;
 
 // |NoteOn| message data.
 struct NoteOnData {
@@ -27,7 +27,7 @@ struct NoteOffData {
 
 // |SetFloatParam| message data.
 struct SetFloatParamData {
-  ParamId id;
+  int id;
   float value;
 };
 
@@ -38,7 +38,7 @@ struct SetFloatParamData {
 // @param timestamp Message timestamp.
 // @return Message.
 template <typename DataType>
-Message BuildMessage(MessageId id, const DataType& data, int timestamp) {
+Message BuildMessage(int id, const DataType& data, int timestamp) {
   Message message;
   message.id = id;
   WriteMessageData<DataType>(data, message.data);
@@ -86,7 +86,7 @@ void InstrumentProcessor::NoteOff(int sample_offset, float index) {
   PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, sample_offset));
 }
 
-void InstrumentProcessor::SetFloatParam(int sample_offset, ParamId id,
+void InstrumentProcessor::SetFloatParam(int sample_offset, int id,
                                         float value) {
   PushMessage(BuildMessage<SetFloatParamData>(kSetFloatParamId, {id, value},
                                               sample_offset));

@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 #define BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 
-#include "barelymusician/dsp/processor.h"
+#include "barelymusician/dsp/filter.h"
 
 namespace barelyapi {
 
@@ -12,7 +12,7 @@ enum class FilterType {
 };
 
 // One-pole filter that features basic low-pass and high-pass filtering.
-class OnePoleFilter : public Processor {
+class OnePoleFilter : public Filter {
  public:
   // Constructs new |OnePoleFilter|.
   OnePoleFilter();

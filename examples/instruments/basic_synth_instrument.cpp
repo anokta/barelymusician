@@ -80,7 +80,7 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
 
 void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
-void BasicSynthInstrument::SetFloatParam(ParamId id, float value) {
+void BasicSynthInstrument::SetFloatParam(int id, float value) {
   if (!modulation_matrix_.SetParam(id, value)) {
     LOG(WARNING) << "Failed to update float parameter with ID: " << id;
   }

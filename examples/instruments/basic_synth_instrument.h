@@ -28,7 +28,7 @@ class BasicSynthInstrument : public Instrument {
   // Implements |Instrument|.
   void NoteOn(float index, float intensity) override;
   void NoteOff(float index) override;
-  void SetFloatParam(ParamId id, float value) override;
+  void SetFloatParam(int id, float value) override;
 
  private:
   float gain_;

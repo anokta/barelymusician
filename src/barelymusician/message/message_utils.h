@@ -5,8 +5,32 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/message/message.h"
 
 namespace barelyapi {
+
+// Returns new |Message| with the given message |id|, |data| and |timestamp|.
+//
+// @param id Message ID.
+// @param data Message data.
+// @param timestamp Message timestamp.
+// @return Message.
+template <typename DataType>
+Message BuildMessage(int id, const DataType& data, int timestamp);
+
+// Compares the given two messages with respect to their timestamps.
+//
+// @param lhs First message.
+// @param rhs Second message.
+// @return True if the first message comes prior to the second message.
+bool CompareMessage(const Message& lhs, const Message& rhs);
+
+// Compares the given |message| against the given |timestamp|.
+//
+// @param message Message.
+// @param timestamp Timestamp.
+// @return True if the message comes prior to the timestamp.
+bool CompareTimestamp(const Message& message, int timestamp);
 
 // Reads the corresponding structured data for the given |message_data|.
 //
@@ -21,6 +45,15 @@ DataType ReadMessageData(const unsigned char* message_data);
 // @param message_data Message data to be written into.
 template <typename DataType>
 void WriteMessageData(const DataType& data, unsigned char* message_data);
+
+template <typename DataType>
+Message BuildMessage(int id, const DataType& data, int timestamp) {
+  Message message;
+  message.id = id;
+  WriteMessageData<DataType>(data, message.data);
+  message.timestamp = timestamp;
+  return message;
+}
 
 template <typename DataType>
 DataType ReadMessageData(const unsigned char* message_data) {

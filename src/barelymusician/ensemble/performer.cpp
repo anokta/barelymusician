@@ -1,6 +1,7 @@
-#include "barelymusician/instrument/instrument_processor.h"
+#include "barelymusician/ensemble/performer.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/message/message_utils.h"
@@ -31,68 +32,33 @@ struct SetFloatParamData {
   float value;
 };
 
-// Returns new |Message| with the given message |id|, |data| and |timestamp|.
-//
-// @param id Message ID.
-// @param data Message data.
-// @param timestamp Message timestamp.
-// @return Message.
-template <typename DataType>
-Message BuildMessage(int id, const DataType& data, int timestamp) {
-  Message message;
-  message.id = id;
-  WriteMessageData<DataType>(data, message.data);
-  message.timestamp = timestamp;
-  return message;
-}
-
-// Compares the given two messages with respect to their timestamps.
-//
-// @param lhs First message.
-// @param rhs Second message.
-// @return True if the first message comes prior to the second message.
-bool CompareMessage(const Message& lhs, const Message& rhs) {
-  return lhs.timestamp < rhs.timestamp;
-}
-
-// Compares the given |message| against the given |timestamp|.
-//
-// @param message Message.
-// @param timestamp Timestamp.
-// @return True if the message comes prior to the timestamp.
-bool CompareTimestamp(const Message& message, int timestamp) {
-  return message.timestamp < timestamp;
-}
-
 }  // namespace
 
-InstrumentProcessor::InstrumentProcessor(Instrument* instrument)
-    : instrument_(instrument) {
+Performer::Performer(Instrument* instrument) : instrument_(instrument) {
   DCHECK(instrument_);
 }
 
-void InstrumentProcessor::Reset() {
+void Performer::Reset() {
   messages_.clear();
   instrument_->Reset();
 }
 
-void InstrumentProcessor::NoteOn(int sample_offset, float index,
-                                 float intensity) {
+void Performer::NoteOn(int start_sample, float index, float intensity) {
   PushMessage(
-      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, sample_offset));
+      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, start_sample));
 }
 
-void InstrumentProcessor::NoteOff(int sample_offset, float index) {
-  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, sample_offset));
+void Performer::NoteOff(int start_sample, float index) {
+  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, start_sample));
 }
 
-void InstrumentProcessor::SetFloatParam(int sample_offset, int id,
-                                        float value) {
-  PushMessage(BuildMessage<SetFloatParamData>(kSetFloatParamId, {id, value},
-                                              sample_offset));
+void Performer::PlayNote(int start_sample, int duration_samples, float index,
+                         float intensity) {
+  NoteOn(start_sample, index, intensity);
+  NoteOff(start_sample + duration_samples, index);
 }
 
-void InstrumentProcessor::Process(int num_samples, float* output) {
+void Performer::Process(int num_samples, float* output) {
   DCHECK(output);
   int i = 0;
   // Process samples within message events range.
@@ -119,7 +85,12 @@ void InstrumentProcessor::Process(int num_samples, float* output) {
   }
 }
 
-void InstrumentProcessor::ProcessMessage(const Message& message) {
+void Performer::SetFloatParam(int start_sample, int id, float value) {
+  PushMessage(BuildMessage<SetFloatParamData>(kSetFloatParamId, {id, value},
+                                              start_sample));
+}
+
+void Performer::ProcessMessage(const Message& message) {
   switch (message.id) {
     case kNoteOnId: {
       const auto note_on = ReadMessageData<NoteOnData>(message.data);
@@ -140,7 +111,7 @@ void InstrumentProcessor::ProcessMessage(const Message& message) {
   }
 }
 
-void InstrumentProcessor::PushMessage(const Message& message) {
+void Performer::PushMessage(const Message& message) {
   const auto it = std::upper_bound(messages_.begin(), messages_.end(), message,
                                    &CompareMessage);
   messages_.insert(it, message);

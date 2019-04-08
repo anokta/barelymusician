@@ -43,6 +43,15 @@
     <Filter Include="Header Files\message">
       <UniqueIdentifier>{ae666881-d27b-4ba9-9f06-ebcc26ce21bc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ensemble">
+      <UniqueIdentifier>{549449cf-6d97-48dc-a139-81c841547f9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ensemble">
+      <UniqueIdentifier>{864e8a9d-cacb-457b-aa2b-fba7b6f3d09a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\message">
+      <UniqueIdentifier>{a81861d1-2454-4352-85f6-18f3bc2aab91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -108,11 +117,11 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\generator.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\instrument_processor.h">
-      <Filter>Header Files\instrument</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h">
       <Filter>Header Files\dsp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\ensemble\performer.h">
+      <Filter>Header Files\ensemble</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -146,8 +155,11 @@
     <ClCompile Include="..\..\src\barelymusician\composition\bar.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_processor.cpp">
-      <Filter>Source Files\instrument</Filter>
+    <ClCompile Include="..\..\src\barelymusician\ensemble\performer.cpp">
+      <Filter>Source Files\ensemble</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp">
+      <Filter>Source Files\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

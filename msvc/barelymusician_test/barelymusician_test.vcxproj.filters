@@ -22,6 +22,9 @@
     <Filter Include="Source Files\message">
       <UniqueIdentifier>{82eab040-1627-449e-9e88-ded6d2c57506}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ensemble">
+      <UniqueIdentifier>{a5d05b20-af64-440d-acfa-7f1a2bcd2221}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -63,8 +66,8 @@
     <ClCompile Include="..\..\src\barelymusician\composition\bar_test.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_processor_test.cpp">
-      <Filter>Source Files\instrument</Filter>
+    <ClCompile Include="..\..\src\barelymusician\ensemble\performer_test.cpp">
+      <Filter>Source Files\ensemble</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

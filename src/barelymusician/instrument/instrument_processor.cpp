@@ -1,4 +1,4 @@
-#include "barelymusician/instrument/instrument_player.h"
+#include "barelymusician/instrument/instrument_processor.h"
 
 #include <algorithm>
 
@@ -10,23 +10,23 @@ namespace barelyapi {
 namespace {
 
 // Unique message IDs per message type.
-const MessageId kPlayNoteId = 0;
-const MessageId kStopNoteId = 1;
-const MessageId kUpdateFloatParamId = 2;
+const MessageId kNoteOnId = 0;
+const MessageId kNoteOffId = 1;
+const MessageId kSetFloatParamId = 2;
 
-// Play note message data.
-struct PlayNoteData {
+// |NoteOn| message data.
+struct NoteOnData {
   float index;
   float intensity;
 };
 
-// Stop note message data.
-struct StopNoteData {
+// |NoteOff| message data.
+struct NoteOffData {
   float index;
 };
 
-// Update float parameter message data.
-struct UpdateFloatParamData {
+// |SetFloatParam| message data.
+struct SetFloatParamData {
   ParamId id;
   float value;
 };
@@ -66,33 +66,33 @@ bool CompareTimestamp(const Message& message, int timestamp) {
 
 }  // namespace
 
-InstrumentPlayer::InstrumentPlayer(Instrument* instrument)
+InstrumentProcessor::InstrumentProcessor(Instrument* instrument)
     : instrument_(instrument) {
   DCHECK(instrument_);
 }
 
-void InstrumentPlayer::Reset() {
+void InstrumentProcessor::Reset() {
   messages_.clear();
   instrument_->Reset();
 }
 
-void InstrumentPlayer::PlayNote(int sample_offset, float index,
-                                float intensity) {
-  PushMessage(BuildMessage<PlayNoteData>(kPlayNoteId, {index, intensity},
-                                         sample_offset));
+void InstrumentProcessor::NoteOn(int sample_offset, float index,
+                                 float intensity) {
+  PushMessage(
+      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, sample_offset));
 }
 
-void InstrumentPlayer::StopNote(int sample_offset, float index) {
-  PushMessage(BuildMessage<StopNoteData>(kStopNoteId, {index}, sample_offset));
+void InstrumentProcessor::NoteOff(int sample_offset, float index) {
+  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, sample_offset));
 }
 
-void InstrumentPlayer::UpdateFloatParam(int sample_offset, ParamId id,
+void InstrumentProcessor::SetFloatParam(int sample_offset, ParamId id,
                                         float value) {
-  PushMessage(BuildMessage<UpdateFloatParamData>(kUpdateFloatParamId,
-                                                 {id, value}, sample_offset));
+  PushMessage(BuildMessage<SetFloatParamData>(kSetFloatParamId, {id, value},
+                                              sample_offset));
 }
 
-void InstrumentPlayer::Process(int num_samples, float* output) {
+void InstrumentProcessor::Process(int num_samples, float* output) {
   DCHECK(output);
   int i = 0;
   // Process samples within message events range.
@@ -119,21 +119,20 @@ void InstrumentPlayer::Process(int num_samples, float* output) {
   }
 }
 
-void InstrumentPlayer::ProcessMessage(const Message& message) {
+void InstrumentProcessor::ProcessMessage(const Message& message) {
   switch (message.id) {
-    case kPlayNoteId: {
-      const auto play_note = ReadMessageData<PlayNoteData>(message.data);
-      instrument_->NoteOn(play_note.index, play_note.intensity);
+    case kNoteOnId: {
+      const auto note_on = ReadMessageData<NoteOnData>(message.data);
+      instrument_->NoteOn(note_on.index, note_on.intensity);
     } break;
-    case kStopNoteId: {
-      const auto stop_note = ReadMessageData<StopNoteData>(message.data);
-      instrument_->NoteOff(stop_note.index);
+    case kNoteOffId: {
+      const auto note_off = ReadMessageData<NoteOffData>(message.data);
+      instrument_->NoteOff(note_off.index);
     } break;
-    case kUpdateFloatParamId: {
-      const auto update_float_param =
-          ReadMessageData<UpdateFloatParamData>(message.data);
-      instrument_->SetFloatParam(update_float_param.id,
-                                 update_float_param.value);
+    case kSetFloatParamId: {
+      const auto set_float_param =
+          ReadMessageData<SetFloatParamData>(message.data);
+      instrument_->SetFloatParam(set_float_param.id, set_float_param.value);
     } break;
     default:
       DLOG(ERROR) << "Unknown message ID: " << message.id;
@@ -141,7 +140,7 @@ void InstrumentPlayer::ProcessMessage(const Message& message) {
   }
 }
 
-void InstrumentPlayer::PushMessage(const Message& message) {
+void InstrumentProcessor::PushMessage(const Message& message) {
   const auto it = std::upper_bound(messages_.begin(), messages_.end(), message,
                                    &CompareMessage);
   messages_.insert(it, message);

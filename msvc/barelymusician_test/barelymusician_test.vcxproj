@@ -49,7 +49,7 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_player_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_processor_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp" />

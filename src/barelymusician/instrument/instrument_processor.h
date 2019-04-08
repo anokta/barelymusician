@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PLAYER_H_
-#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PLAYER_H_
+#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_
+#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_
 
 #include <list>
 
@@ -10,13 +10,13 @@
 
 namespace barelyapi {
 
-// Class that plays a given instrument by sample accurate input directives.
-class InstrumentPlayer : public Module {
+// Class that processes a given instrument by sample accurate input directives.
+class InstrumentProcessor : public Module {
  public:
-  // Constructs new |InstrumentPlayer| with the given |instrument|.
+  // Constructs new |InstrumentProcessor| with the given |instrument|.
   //
   // @param instrument Instrument to play.
-  explicit InstrumentPlayer(Instrument* instrument);
+  explicit InstrumentProcessor(Instrument* instrument);
 
   // Implements |Module|.
   void Reset() override;
@@ -26,20 +26,20 @@ class InstrumentPlayer : public Module {
   // @param sample_offset Sample offset to play the note.
   // @param index Note index.
   // @param intensity Note intensity.
-  void PlayNote(int sample_offset, float index, float intensity);
+  void NoteOn(int sample_offset, float index, float intensity);
 
   // Stops note with the given |sample_offset|.
   //
   // @param timestamp Timestamp to stop the note.
   // @param index Note index.
-  void StopNote(int sample_offset, float index);
+  void NoteOff(int sample_offset, float index);
 
-  // Updates float parameter with the given |sample_offset|.
+  // Sets float parameter with the given |sample_offset|.
   //
   // @param sample_offset Sample offset to update the parameter.
   // @param id Parameter ID.
   // @param value Parameter value.
-  void UpdateFloatParam(int sample_offset, ParamId id, float value);
+  void SetFloatParam(int sample_offset, ParamId id, float value);
 
   // Processes the next output samples.
   // TODO(#20): Create and pass an AudioBuffer here instead?
@@ -55,7 +55,7 @@ class InstrumentPlayer : public Module {
   // Enqueues the given |message| to be processed.
   void PushMessage(const Message& message);
 
-  // Instrument to be played.
+  // Instrument to be processed.
   Instrument* instrument_;  // not owned.
 
   // List of messages that stores instrument input directives.
@@ -64,4 +64,4 @@ class InstrumentPlayer : public Module {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PLAYER_H_
+#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_

@@ -60,11 +60,11 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_utils_test.cpp">
       <Filter>Source Files\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_player_test.cpp">
-      <Filter>Source Files\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\bar_test.cpp">
       <Filter>Source Files\composition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_processor_test.cpp">
+      <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

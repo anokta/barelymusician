@@ -123,6 +123,15 @@
     <ClInclude Include="..\..\src\barelymusician\ensemble\performer.h">
       <Filter>Header Files\ensemble</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\section_composer.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\bar_composer.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\beat_composer.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">

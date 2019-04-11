@@ -132,6 +132,9 @@
     <ClInclude Include="..\..\src\barelymusician\composition\beat_composer.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\ensemble\conductor.h">
+      <Filter>Header Files\ensemble</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">

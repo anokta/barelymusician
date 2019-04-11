@@ -112,6 +112,7 @@ void Performer::ProcessMessage(const Message& message) {
 }
 
 void Performer::PushMessage(const Message& message) {
+  DCHECK_GE(message.timestamp, 0);
   const auto it = std::upper_bound(messages_.begin(), messages_.end(), message,
                                    &CompareMessage);
   messages_.insert(it, message);

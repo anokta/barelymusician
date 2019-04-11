@@ -51,6 +51,7 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
+    <ClInclude Include="..\..\src\barelymusician\ensemble\conductor.h" />
     <ClInclude Include="..\..\src\barelymusician\ensemble\performer.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h" />

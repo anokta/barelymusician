@@ -66,6 +66,11 @@ class Sequencer : public Module {
   // @return Current sample offset.
   int sample_offset() const { return sample_offset_; }
 
+  // Returns the number of samples per beat.
+  //
+  // @return Number of samples per beat.
+  int num_samples_per_beat() const { return num_samples_per_beat_; }
+
  private:
   // Calculates number of samples per beat with the current settings.
   void CalculateNumSamplesPerBeat();

@@ -2,6 +2,7 @@
 #define BARELYAPI_BASE_EVENT_H_
 
 #include <functional>
+#include <utility>
 #include <vector>
 
 #include "barelymusician/base/module.h"

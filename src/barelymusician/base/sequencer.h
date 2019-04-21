@@ -75,11 +75,6 @@ class Sequencer : public Module {
   // @num_samples Number of samples to iterate.
   void Update(int num_samples);
 
-  // Returns the number of samples per beat.
-  //
-  // @return Number of samples per beat.
-  int num_samples_per_beat() const { return num_samples_per_beat_; }
-
  private:
   // Calculates number of samples per beat with the current settings.
   void CalculateNumSamplesPerBeat();

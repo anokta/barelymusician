@@ -20,6 +20,13 @@ class ModulationMatrix : public Module {
   // Implements |Module|.
   void Reset() override;
 
+  // Returns the value of a parameter with the given ID.
+  //
+  // @param id Parameter ID.
+  // @param value Parameter value to be read into, must a valid pointer.
+  // @return True if successful.
+  bool GetParam(int id, ParamType* value) const;
+
   // Registers new parameter.
   //
   // @param id Parameter ID.
@@ -27,13 +34,6 @@ class ModulationMatrix : public Module {
   // @param updater Parameter update function.
   void Register(int id, const ParamType& default_value,
                 ParamUpdater&& updater = nullptr);
-
-  // Returns the value of a parameter with the given ID.
-  //
-  // @param id Parameter ID.
-  // @param value Parameter value to be read into, must a valid pointer.
-  // @return True if successful.
-  bool GetParam(int id, ParamType* value) const;
 
   // Sets the value of a parameter with the given ID.
   //
@@ -71,6 +71,17 @@ void ModulationMatrix<ParamType>::Reset() {
 }
 
 template <typename ParamType>
+bool ModulationMatrix<ParamType>::GetParam(int id, ParamType* value) const {
+  const auto it = params_.find(id);
+  if (it == params_.end()) {
+    return false;
+  }
+  DCHECK(value);
+  *value = it->second.current_value;
+  return true;
+}
+
+template <typename ParamType>
 void ModulationMatrix<ParamType>::Register(int id,
                                            const ParamType& default_value,
                                            ParamUpdater&& updater) {
@@ -82,17 +93,6 @@ void ModulationMatrix<ParamType>::Register(int id,
   if (param_data.updater != nullptr) {
     param_data.updater(default_value);
   }
-}
-
-template <typename ParamType>
-bool ModulationMatrix<ParamType>::GetParam(int id, ParamType* value) const {
-  const auto it = params_.find(id);
-  if (it == params_.end()) {
-    return false;
-  }
-  DCHECK(value);
-  *value = it->second.current_value;
-  return true;
 }
 
 template <typename ParamType>

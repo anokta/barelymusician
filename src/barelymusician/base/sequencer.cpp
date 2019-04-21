@@ -11,18 +11,33 @@ Sequencer::Sequencer(int sample_rate)
     : sample_rate_float_(static_cast<float>(sample_rate)),
       bpm_(0.0f),
       beat_length_(0.0f),
-      num_samples_per_beat_(0),
+      num_bars_per_section_(0),
       num_beats_per_bar_(0),
-      num_bars_per_section_(0) {
+      num_samples_per_beat_(0),
+      current_section_(0),
+      current_bar_(0),
+      current_beat_(0),
+      leftover_samples_(0) {
   DCHECK_GE(sample_rate_float_, 0.0f);
-  Reset();
 }
 
 void Sequencer::Reset() {
-  sample_offset_ = 0;
-  current_beat_ = 0;
-  current_bar_ = 0;
   current_section_ = 0;
+  current_bar_ = 0;
+  current_beat_ = 0;
+  leftover_samples_ = 0;
+}
+
+int Sequencer::GetCurrentBar() const { return current_bar_; }
+
+int Sequencer::GetCurrentBeat() const { return current_beat_; }
+
+int Sequencer::GetCurrentSection() const { return current_section_; }
+
+int Sequencer::GetNumSamplesPerBeat() const { return num_samples_per_beat_; }
+
+void Sequencer::RegisterBeatCallback(BeatCallback&& callback) {
+  beat_event_.Register(std::move(callback));
 }
 
 void Sequencer::SetBpm(float bpm) {
@@ -43,25 +58,30 @@ void Sequencer::SetTimeSignature(int num_beats_per_bar, NoteValue beat_length) {
 }
 
 void Sequencer::Update(int num_samples) {
-  // Update beat count.
   if (num_samples_per_beat_ == 0) {
     return;
   }
-  sample_offset_ += num_samples;
-  current_beat_ += sample_offset_ / num_samples_per_beat_;
-  sample_offset_ %= num_samples_per_beat_;
-  // Update bar count.
-  if (num_beats_per_bar_ == 0) {
-    return;
+  if (leftover_samples_ == 0) {
+    beat_event_.Trigger(current_section_, current_bar_, current_beat_, 0);
   }
-  current_bar_ += current_beat_ / num_beats_per_bar_;
-  current_beat_ %= num_beats_per_bar_;
-  // Update section count.
-  if (num_bars_per_section_ == 0) {
-    return;
+  leftover_samples_ += num_samples;
+  while (leftover_samples_ > num_samples_per_beat_) {
+    // Update beat count.
+    ++current_beat_;
+    leftover_samples_ -= num_samples_per_beat_;
+    if (num_beats_per_bar_ > 0 && current_beat_ >= num_beats_per_bar_) {
+      // Update bar count.
+      ++current_bar_;
+      current_beat_ -= num_beats_per_bar_;
+      if (num_bars_per_section_ > 0 && current_bar_ >= num_bars_per_section_) {
+        // Update section count.
+        ++current_section_;
+        current_bar_ -= num_bars_per_section_;
+      }
+    }
+    beat_event_.Trigger(current_section_, current_bar_, current_beat_,
+                        num_samples - leftover_samples_);
   }
-  current_section_ += current_bar_ / num_bars_per_section_;
-  current_bar_ %= num_bars_per_section_;
 }
 
 void Sequencer::CalculateNumSamplesPerBeat() {
@@ -73,7 +93,7 @@ void Sequencer::CalculateNumSamplesPerBeat() {
   if (num_samples_per_beat_ > 0) {
     // Make sure the next beat occurs after the updated |num_samples_per_beat_|
     // from the last processed beat.
-    sample_offset_ %= num_samples_per_beat_;
+    leftover_samples_ %= num_samples_per_beat_;
   }
 }
 

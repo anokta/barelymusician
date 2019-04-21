@@ -20,18 +20,18 @@ class Performer : public Module {
   // Implements |Module|.
   void Reset() override;
 
+  // Stops playing note at the given |start_sample|.
+  //
+  // @param start_sample Relative sample offset to stop playing the note.
+  // @param index Note index.
+  void NoteOff(int start_sample, float index);
+
   // Starts playing note at the given |start_sample|.
   //
   // @param start_sample Relative sample offset to start playing the note.
   // @param index Note index.
   // @param intensity Note intensity.
   void NoteOn(int start_sample, float index, float intensity);
-
-  // Stops playing note at the given |start_sample|.
-  //
-  // @param start_sample Relative sample offset to stop playing the note.
-  // @param index Note index.
-  void NoteOff(int start_sample, float index);
 
   // Plays note at the given |start_sample| for |duration_samples|.
   //

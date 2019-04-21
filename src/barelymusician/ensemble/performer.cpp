@@ -43,13 +43,13 @@ void Performer::Reset() {
   instrument_->Reset();
 }
 
+void Performer::NoteOff(int start_sample, float index) {
+  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, { index }, start_sample));
+}
+
 void Performer::NoteOn(int start_sample, float index, float intensity) {
   PushMessage(
       BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, start_sample));
-}
-
-void Performer::NoteOff(int start_sample, float index) {
-  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, start_sample));
 }
 
 void Performer::PlayNote(int start_sample, int duration_samples, float index,

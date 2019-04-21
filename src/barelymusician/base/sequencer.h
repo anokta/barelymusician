@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_BASE_SEQUENCER_H_
 #define BARELYMUSICIAN_BASE_SEQUENCER_H_
 
+#include "barelymusician/base/event.h"
 #include "barelymusician/base/module.h"
 
 namespace barelyapi {
@@ -8,6 +9,9 @@ namespace barelyapi {
 // Step sequencer that keeps track of beats, bars and sections.
 class Sequencer : public Module {
  public:
+  // Beat event callback signature.
+  using BeatCallback = Event<int, int, int, int>::Callback;
+
   // Note value in length.
   enum class NoteValue {
     kWholeNote = 1,      // Whole note (semibreve).
@@ -24,6 +28,31 @@ class Sequencer : public Module {
 
   // Implements |Module|.
   void Reset() override;
+
+  // Returns the current bar.
+  //
+  // @return Current bar.
+  int GetCurrentBar() const;
+
+  // Returns the current beat.
+  //
+  // @return Current beat.
+  int GetCurrentBeat() const;
+
+  // Returns the current section.
+  //
+  // @return Current section.
+  int GetCurrentSection() const;
+
+  // Returns the number of samples per beat.
+  //
+  // @return Number of samples per beat.
+  int GetNumSamplesPerBeat() const;
+
+  // Registers beat callback.
+  //
+  // @param Beat callback to trigger in each beat.
+  void RegisterBeatCallback(BeatCallback&& callback);
 
   // Sets the tempo of the sequencer.
   //
@@ -46,26 +75,6 @@ class Sequencer : public Module {
   // @num_samples Number of samples to iterate.
   void Update(int num_samples);
 
-  // Returns the current bar.
-  //
-  // @return Current bar.
-  int current_bar() const { return current_bar_; }
-
-  // Returns the current beat.
-  //
-  // @return Current beat.
-  int current_beat() const { return current_beat_; }
-
-  // Returns the current section.
-  //
-  // @return Current section.
-  int current_section() const { return current_section_; }
-
-  // Returns the sample offset from the current beat.
-  //
-  // @return Current sample offset.
-  int sample_offset() const { return sample_offset_; }
-
   // Returns the number of samples per beat.
   //
   // @return Number of samples per beat.
@@ -74,6 +83,9 @@ class Sequencer : public Module {
  private:
   // Calculates number of samples per beat with the current settings.
   void CalculateNumSamplesPerBeat();
+
+  // Event to be triggered for each beat.
+  Event<int, int, int, int> beat_event_;
 
   // Sampling rate.
   const float sample_rate_float_;
@@ -84,22 +96,22 @@ class Sequencer : public Module {
   // Beat length relative to quarter note.
   float beat_length_;
 
-  // Beats per bar.
-  int num_beats_per_bar_;
-
-  // Bars per section.
+  // Number of bars per section.
   int num_bars_per_section_;
 
-  // Current state of the sequencer.
-  int current_beat_;
-  int current_bar_;
-  int current_section_;
-
-  // Sample offset from the current beat.
-  int sample_offset_;
+  // Number of beats per bar.
+  int num_beats_per_bar_;
 
   // Number of samples per beat.
   int num_samples_per_beat_;
+
+  // Current state of the sequencer.
+  int current_section_;
+  int current_bar_;
+  int current_beat_;
+
+  // Leftover samples from the current beat.
+  int leftover_samples_;
 };
 
 }  // namespace barelyapi

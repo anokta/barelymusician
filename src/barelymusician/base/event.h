@@ -20,7 +20,7 @@ class Event : public Module {
   // Implements |Module|.
   void Reset() override;
 
-  // Registers callback for the event.
+  // Registers callback to the event.
   //
   // @param callback Event callback.
   void Register(Callback&& callback);

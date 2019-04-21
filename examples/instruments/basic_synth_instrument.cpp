@@ -71,14 +71,14 @@ void BasicSynthInstrument::Reset() {
   modulation_matrix_.Reset();
 }
 
+void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
+
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
   voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
     voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
     voice->SetGain(intensity);
   });
 }
-
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 void BasicSynthInstrument::SetFloatParam(int id, float value) {
   if (!modulation_matrix_.SetParam(id, value)) {

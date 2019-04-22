@@ -59,17 +59,16 @@ int main(int argc, char* argv[]) {
     const int current_bar = sequencer.GetCurrentBar();
     const int current_beat = sequencer.GetCurrentBeat();
     int impulse_sample = -1;
-    if (current_bar == 0 && current_beat == 0 &&
-        sequencer.GetSampleOffset() == 0) {
+    if (sequencer.GetSampleOffset() == 0) {
       impulse_sample = 0;
     }
     sequencer.Update(kFramesPerBuffer);
     if (current_bar != sequencer.GetCurrentBar()) {
       oscillator.SetFrequency(kBarFrequency);
-      impulse_sample = sequencer.GetSampleOffset();
+      impulse_sample = kFramesPerBuffer - sequencer.GetSampleOffset();
     } else if (current_beat != sequencer.GetCurrentBeat()) {
       oscillator.SetFrequency(kBeatFrequency);
-      impulse_sample = sequencer.GetSampleOffset();
+      impulse_sample = kFramesPerBuffer - sequencer.GetSampleOffset();
     }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {

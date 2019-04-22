@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_BASE_SEQUENCER_H_
 #define BARELYMUSICIAN_BASE_SEQUENCER_H_
 
-#include "barelymusician/base/event.h"
 #include "barelymusician/base/module.h"
 
 namespace barelyapi {
@@ -9,18 +8,6 @@ namespace barelyapi {
 // Step sequencer that keeps track of beats, bars and sections.
 class Sequencer : public Module {
  public:
-  // Beat event callback signature.
-  using BeatCallback = Event<int, int, int, int>::Callback;
-
-  // Note value in length.
-  enum class NoteValue {
-    kWholeNote = 1,      // Whole note (semibreve).
-    kHalfNote = 2,       // Half note (minim).
-    kQuarterNote = 4,    // Quarter note (crotchet).
-    kEighthNote = 8,     // Eighth note (quaver).
-    kSixteenthNote = 16  // Sixteenth note (semiquaver).
-  };
-
   // Constructs new |Sequencer|.
   //
   // @param sample_rate Sampling rate per second.
@@ -49,26 +36,25 @@ class Sequencer : public Module {
   // @return Number of samples per beat.
   int GetNumSamplesPerBeat() const;
 
-  // Registers beat callback.
+  // Returns the sample offset from the current beat.
   //
-  // @param Beat callback to trigger in each beat.
-  void RegisterBeatCallback(BeatCallback&& callback);
-
-  // Sets the tempo of the sequencer.
-  //
-  // @param bpm Number of beats per minute.
-  void SetBpm(float bpm);
+  // @return Sample offset.
+  int GetSampleOffset() const;
 
   // Sets the number of bars per each section of the sequencer.
   //
   // @param num_bars Number of bars per section.
   void SetNumBarsPerSection(int num_bars_per_section);
 
-  // Set the time signature of the sequencer.
+  // Set the number of beats per each bar of the sequencer.
   //
-  // @param num_beats Number of beats per bar (i.e., nominator).
-  // @ beat_length Beat length (i.e., denominator).
-  void SetTimeSignature(int num_beats_per_bar, NoteValue beat_length);
+  // @param num_beats Number of beats per bar.
+  void SetNumBeatsPerBar(int num_beats_per_bar);
+
+  // Sets the tempo of the sequencer.
+  //
+  // @param tempo Tempo (BPM).
+  void SetTempo(float tempo);
 
   // Updates the sequencer.
   //
@@ -76,20 +62,11 @@ class Sequencer : public Module {
   void Update(int num_samples);
 
  private:
-  // Calculates number of samples per beat with the current settings.
-  void CalculateNumSamplesPerBeat();
-
-  // Event to be triggered for each beat.
-  Event<int, int, int, int> beat_event_;
-
   // Sampling rate.
   const float sample_rate_float_;
 
-  // Number of beats per minute (tempo).
-  float bpm_;
-
-  // Beat length relative to quarter note.
-  float beat_length_;
+  // Tempo (BPM).
+  float tempo_;
 
   // Number of bars per section.
   int num_bars_per_section_;

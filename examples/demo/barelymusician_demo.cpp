@@ -1,4 +1,5 @@
 #include <conio.h>
+
 #include <cctype>
 #include <chrono>
 #include <iostream>
@@ -9,10 +10,9 @@
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/oscillator.h"
+#include "instruments/basic_synth_instrument.h"
 #include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
-
-#include "instruments/basic_synth_instrument.h"
 
 //#include "barelymusician/dsp/dsp_utils.h"
 //#include "barelymusician/dsp/one_pole_filter.h"
@@ -40,9 +40,8 @@ const int kFramesPerBuffer = 512;
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-const float kBpm = 120.0f;
-const int kBeatsPerBar = 4;
-const Sequencer::NoteValue kBeatLength = Sequencer::NoteValue::kQuarterNote;
+const float kTempo = 120.0f;
+const int kNumBeatsPerBar = 4;
 
 // Metronome settings.
 const float kBarFrequency = 440.0f;
@@ -64,8 +63,8 @@ int main(int argc, char* argv[]) {
 
   Sequencer sequencer(kSampleRate);
 
-  sequencer.SetBpm(kBpm);
-  sequencer.SetTimeSignature(kBeatsPerBar, kBeatLength);
+  sequencer.SetTempo(kTempo);
+  sequencer.SetNumBeatsPerBar(kNumBeatsPerBar);
 
   Oscillator oscillator(kSampleInterval);
   Envelope envelope(kSampleInterval);
@@ -83,21 +82,21 @@ int main(int argc, char* argv[]) {
 
   const auto process = [&sequencer, &oscillator, &envelope,
                         &basic_synth_instrument](float* output) {
-    const int current_bar = sequencer.current_bar();
-    const int current_beat = sequencer.current_beat();
+    const int current_bar = sequencer.GetCurrentBar();
+    const int current_beat = sequencer.GetCurrentBeat();
     int impulse_sample = -1;
     if (current_bar == 0 && current_beat == 0 &&
-        sequencer.sample_offset() == 0) {
+        sequencer.GetSampleOffset() == 0) {
       // First tick.
       impulse_sample = 0;
     }
     sequencer.Update(kFramesPerBuffer);
-    if (current_bar != sequencer.current_bar()) {
+    if (current_bar != sequencer.GetCurrentBar()) {
       oscillator.SetFrequency(kBarFrequency);
-      impulse_sample = sequencer.sample_offset();
-    } else if (current_beat != sequencer.current_beat()) {
+      impulse_sample = sequencer.GetSampleOffset();
+    } else if (current_beat != sequencer.GetCurrentBeat()) {
       oscillator.SetFrequency(kBeatFrequency);
-      impulse_sample = sequencer.sample_offset();
+      impulse_sample = sequencer.GetSampleOffset();
     }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {
@@ -154,10 +153,10 @@ int main(int argc, char* argv[]) {
         break;
       // Sequencer tests.
       case '1':
-        sequencer.SetBpm(kBpm);
+        sequencer.SetTempo(kTempo);
         break;
       case '2':
-        sequencer.SetBpm(2.0f * kBpm);
+        sequencer.SetTempo(2.0f * kTempo);
         break;
     }
   };

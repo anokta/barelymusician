@@ -52,6 +52,12 @@
     <Filter Include="Source Files\message">
       <UniqueIdentifier>{a81861d1-2454-4352-85f6-18f3bc2aab91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\sequencer">
+      <UniqueIdentifier>{aa1573d8-44a7-4e20-b27e-4bbfd3b0b4d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sequencer">
+      <UniqueIdentifier>{c39fa4da-fd97-48e3-b8db-a385ce2e3b14}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -136,6 +142,9 @@
       <Filter>Header Files\ensemble</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\event.h">
+      <Filter>Header Files\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\transport.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
   </ItemGroup>

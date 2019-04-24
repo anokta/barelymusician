@@ -25,6 +25,9 @@
     <Filter Include="Source Files\ensemble">
       <UniqueIdentifier>{a5d05b20-af64-440d-acfa-7f1a2bcd2221}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\sequencer">
+      <UniqueIdentifier>{d09e42cf-740c-46a4-95a4-f62c1b28c718}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

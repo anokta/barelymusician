@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/dsp/envelope.h"
@@ -31,7 +32,8 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
 const float kTempo = 120.0f;
-const int kNumBeatsPerBar = 4;
+const int kNumBars = 4;
+const int kNumBeats = 4;
 
 // Metronome settings.
 const float kBarFrequency = 440.0f;
@@ -39,12 +41,15 @@ const float kBeatFrequency = 220.0f;
 const OscillatorType kOscillatorType = OscillatorType::kSquare;
 const float kRelease = 0.025f;
 
+const float kMetronomeTempoIncrement = 10.0f;
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
-  sequencer.SetNumBeatsPerBar(kNumBeatsPerBar);
+  sequencer.SetNumBars(kNumBars);
+  sequencer.SetNumBeats(kNumBeats);
 
   Oscillator oscillator(kSampleInterval);
   oscillator.SetType(kOscillatorType);
@@ -56,19 +61,28 @@ int main(int argc, char* argv[]) {
   PaWrapper audio_io;
 
   const auto process = [&sequencer, &oscillator, &envelope](float* output) {
-    const int current_bar = sequencer.GetCurrentBar();
-    const int current_beat = sequencer.GetCurrentBeat();
+    const auto previous_transport = sequencer.GetTransport();
     int impulse_sample = -1;
-    if (sequencer.GetSampleOffset() == 0) {
+    if (previous_transport.offset_beats == 0) {
       impulse_sample = 0;
     }
     sequencer.Update(kFramesPerBuffer);
-    if (current_bar != sequencer.GetCurrentBar()) {
+    const auto current_transport = sequencer.GetTransport();
+    const float num_samples_per_beat =
+        (current_transport.tempo > 0.0f)
+            ? barelyapi::kSecondsFromMinutes * static_cast<float>(kSampleRate) /
+                  current_transport.tempo
+            : 0.0f;
+    if (current_transport.bar != previous_transport.bar) {
       oscillator.SetFrequency(kBarFrequency);
-      impulse_sample = kFramesPerBuffer - sequencer.GetSampleOffset();
-    } else if (current_beat != sequencer.GetCurrentBeat()) {
+      impulse_sample =
+          kFramesPerBuffer - static_cast<int>(current_transport.offset_beats *
+                                              num_samples_per_beat);
+    } else if (current_transport.beat != previous_transport.beat) {
       oscillator.SetFrequency(kBeatFrequency);
-      impulse_sample = kFramesPerBuffer - sequencer.GetSampleOffset();
+      impulse_sample =
+          kFramesPerBuffer - static_cast<int>(current_transport.offset_beats *
+                                              num_samples_per_beat);
     }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {
@@ -78,6 +92,8 @@ int main(int argc, char* argv[]) {
 
       const float sample = envelope.Next() * oscillator.Next();
       if (frame == impulse_sample) {
+        LOG(INFO) << "Transport " << current_transport.section << "."
+                  << current_transport.bar << "." << current_transport.beat;
         envelope.Stop();
       }
 
@@ -98,11 +114,27 @@ int main(int argc, char* argv[]) {
     }
 
     switch (std::toupper(key)) {
-      case 'T':
-        sequencer.SetTempo(2.0f * kTempo);
+      case '-':
+        sequencer.SetTempo(sequencer.GetTransport().tempo -
+                           kMetronomeTempoIncrement);
+        LOG(INFO) << "Tempo decreased to " << sequencer.GetTransport().tempo;
+        break;
+      case '+':
+        sequencer.SetTempo(sequencer.GetTransport().tempo +
+                           kMetronomeTempoIncrement);
+        LOG(INFO) << "Tempo increased to " << sequencer.GetTransport().tempo;
+        break;
+      case '1':
+        sequencer.SetTempo(0.5f * sequencer.GetTransport().tempo);
+        LOG(INFO) << "Tempo halved to " << sequencer.GetTransport().tempo;
+        break;
+      case '2':
+        sequencer.SetTempo(2.0f * sequencer.GetTransport().tempo);
+        LOG(INFO) << "Tempo doubled to " << sequencer.GetTransport().tempo;
         break;
       case 'R':
         sequencer.SetTempo(kTempo);
+        LOG(INFO) << "Tempo reset to " << sequencer.GetTransport().tempo;
         break;
     }
   };

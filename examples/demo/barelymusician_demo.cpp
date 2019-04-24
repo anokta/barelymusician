@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/dsp/envelope.h"
@@ -41,7 +42,7 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
 const float kTempo = 120.0f;
-const int kNumBeatsPerBar = 4;
+const int kNumBeats = 4;
 
 // Metronome settings.
 const float kBarFrequency = 440.0f;
@@ -64,7 +65,7 @@ int main(int argc, char* argv[]) {
   Sequencer sequencer(kSampleRate);
 
   sequencer.SetTempo(kTempo);
-  sequencer.SetNumBeatsPerBar(kNumBeatsPerBar);
+  sequencer.SetNumBeats(kNumBeats);
 
   Oscillator oscillator(kSampleInterval);
   Envelope envelope(kSampleInterval);
@@ -82,19 +83,28 @@ int main(int argc, char* argv[]) {
 
   const auto process = [&sequencer, &oscillator, &envelope,
                         &basic_synth_instrument](float* output) {
-    const int current_bar = sequencer.GetCurrentBar();
-    const int current_beat = sequencer.GetCurrentBeat();
+    const auto previous_transport = sequencer.GetTransport();
     int impulse_sample = -1;
-    if (sequencer.GetSampleOffset() == 0) {
+    if (previous_transport.offset_beats == 0) {
       impulse_sample = 0;
     }
     sequencer.Update(kFramesPerBuffer);
-    if (current_bar != sequencer.GetCurrentBar()) {
+    const auto current_transport = sequencer.GetTransport();
+    const float num_samples_per_beat =
+        (current_transport.tempo > 0.0f)
+            ? barelyapi::kSecondsFromMinutes * static_cast<float>(kSampleRate) /
+                  current_transport.tempo
+            : 0.0f;
+    if (current_transport.bar != previous_transport.bar) {
       oscillator.SetFrequency(kBarFrequency);
-      impulse_sample = kFramesPerBuffer - sequencer.GetSampleOffset();
-    } else if (current_beat != sequencer.GetCurrentBeat()) {
+      impulse_sample =
+          kFramesPerBuffer - static_cast<int>(current_transport.offset_beats *
+                                              num_samples_per_beat);
+    } else if (current_transport.beat != previous_transport.beat) {
       oscillator.SetFrequency(kBeatFrequency);
-      impulse_sample = kFramesPerBuffer - sequencer.GetSampleOffset();
+      impulse_sample =
+          kFramesPerBuffer - static_cast<int>(current_transport.offset_beats *
+                                              num_samples_per_beat);
     }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {

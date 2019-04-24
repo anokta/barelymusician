@@ -1,13 +1,18 @@
 #ifndef BARELYMUSICIAN_BASE_SEQUENCER_H_
 #define BARELYMUSICIAN_BASE_SEQUENCER_H_
 
+#include "barelymusician/base/event.h"
 #include "barelymusician/base/module.h"
+#include "barelymusician/base/transport.h"
 
 namespace barelyapi {
 
 // Step sequencer that keeps track of beats, bars and sections.
 class Sequencer : public Module {
  public:
+  // Beat event callback signature.
+  using BeatCallback = Event<const Transport&, int>::Callback;
+
   // Constructs new |Sequencer|.
   //
   // @param sample_rate Sampling rate per second.
@@ -16,42 +21,34 @@ class Sequencer : public Module {
   // Implements |Module|.
   void Reset() override;
 
-  // Returns the current bar.
+  // Returns the playback transport.
   //
-  // @return Current bar.
-  int GetCurrentBar() const;
+  // @return Playback transport.
+  const Transport& GetTransport() const;
 
-  // Returns the current beat.
+  // Registers beat callback.
   //
-  // @return Current beat.
-  int GetCurrentBeat() const;
+  // @param Beat callback to trigger for each beat.
+  void RegisterBeatCallback(BeatCallback&& callback);
 
-  // Returns the current section.
-  //
-  // @return Current section.
-  int GetCurrentSection() const;
-
-  // Returns the number of samples per beat.
-  //
-  // @return Number of samples per beat.
-  int GetNumSamplesPerBeat() const;
-
-  // Returns the sample offset from the current beat.
-  //
-  // @return Sample offset.
-  int GetSampleOffset() const;
-
-  // Sets the number of bars per each section of the sequencer.
+  // Sets the number of bars per each section.
   //
   // @param num_bars Number of bars per section.
-  void SetNumBarsPerSection(int num_bars_per_section);
+  void SetNumBars(int num_bars);
 
-  // Set the number of beats per each bar of the sequencer.
+  // Set the number of beats per each bar.
   //
   // @param num_beats Number of beats per bar.
-  void SetNumBeatsPerBar(int num_beats_per_bar);
+  void SetNumBeats(int num_beats);
 
-  // Sets the tempo of the sequencer.
+  // Sets the playback position.
+  //
+  // @param section Section.
+  // @param bar Bar.
+  // @param beat Beat.
+  void SetPosition(int section, int bar, int beat);
+
+  // Sets the tempo.
   //
   // @param tempo Tempo (BPM).
   void SetTempo(float tempo);
@@ -62,28 +59,20 @@ class Sequencer : public Module {
   void Update(int num_samples);
 
  private:
-  // Sampling rate.
-  const float sample_rate_float_;
-
-  // Tempo (BPM).
-  float tempo_;
-
-  // Number of bars per section.
-  int num_bars_per_section_;
-
-  // Number of beats per bar.
-  int num_beats_per_bar_;
+  // Number of samples per minute.
+  const float num_samples_per_minute_;  
+  
+  // Event to be triggered for each beat.
+  Event<const Transport&, int> beat_event_;
 
   // Number of samples per beat.
   int num_samples_per_beat_;
 
-  // Current state of the sequencer.
-  int current_section_;
-  int current_bar_;
-  int current_beat_;
+  // Offset samples from the current beat.
+  int offset_samples_;
 
-  // Leftover samples from the current beat.
-  int leftover_samples_;
+  // Playback transport.
+  Transport transport_;
 };
 
 }  // namespace barelyapi

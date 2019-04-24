@@ -29,11 +29,11 @@ class PaWrapper {
 
   // Sets the audio process callback.
   //
-  // @param audio_process Audio process callback function.
+  // @param audio_process Audio process callback.
   void SetAudioProcessCallback(AudioProcessCallback&& audio_process);
 
  private:
-  // Audio process callback function.
+  // Audio process callback.
   AudioProcessCallback audio_process_;
 
   // Stream for audio processing.

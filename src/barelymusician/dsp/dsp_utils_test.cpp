@@ -20,7 +20,7 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
     EXPECT_NEAR(kAmplitudes[i], AmplitudeFromDecibels(kDecibels[i]), kEpsilon);
     EXPECT_NEAR(kDecibels[i], DecibelsFromAmplitude(kAmplitudes[i]), kEpsilon);
 
-    // Verify that the conversion methods do not mutate the value.
+    // Verify that the back and forth conversion do not mutate the value.
     EXPECT_NEAR(kAmplitudes[i],
                 AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])),
                 kEpsilon);

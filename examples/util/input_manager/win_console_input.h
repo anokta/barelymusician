@@ -29,12 +29,12 @@ class WinConsoleInput {
 
   // Sets on keyboard key down callback.
   //
-  // @param on_key_down On keyboard key down callback function.
+  // @param on_key_down On keyboard key down callback.
   void SetOnKeyDownCallback(OnKeyDownCallback&& on_key_down);
 
   // Sets on keyboard key up callback.
   //
-  // @param on_key_up On keyboard key up callback function.
+  // @param on_key_up On keyboard key up callback.
   void SetOnKeyUpCallback(OnKeyUpCallback&& on_key_up);
 
  private:
@@ -50,7 +50,7 @@ class WinConsoleInput {
   // Keyboard key states.
   std::unordered_map<Key, bool> key_states_;
 
-  // Keyboard event callback functions.
+  // Keyboard event callbacks.
   OnKeyDownCallback on_key_down_;
   OnKeyUpCallback on_key_up_;
 };

@@ -41,8 +41,8 @@ TEST(ModulationMatrixTest, SetParam) {
   EXPECT_FLOAT_EQ(kParamValue, value);
 }
 
-// Tests that the parameter updater function gets called accordingly with the
-// expected values.
+// Tests that the parameter updater gets called accordingly with the expected
+// values.
 TEST(ModulationMatrixTest, ParamUpdater) {
   ModulationMatrix<float> modulation_matrix;
 

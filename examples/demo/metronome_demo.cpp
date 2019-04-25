@@ -8,14 +8,14 @@
 #include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
 
-using barelyapi::OscillatorType;
-using barelyapi::Sequencer;
-using barelyapi::Transport;
-using barelyapi::examples::BasicSynthVoice;
-using barelyapi::examples::PaWrapper;
-using barelyapi::examples::WinConsoleInput;
-
 namespace {
+
+using ::barelyapi::OscillatorType;
+using ::barelyapi::Sequencer;
+using ::barelyapi::Transport;
+using ::barelyapi::examples::BasicSynthVoice;
+using ::barelyapi::examples::PaWrapper;
+using ::barelyapi::examples::WinConsoleInput;
 
 // System audio settings.
 const int kSampleRate = 48000;

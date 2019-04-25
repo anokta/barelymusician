@@ -2,15 +2,13 @@
 
 #include <cctype>
 #include <chrono>
-#include <iostream>
 #include <memory>
 #include <thread>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/envelope.h"
-#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/sequencer/sequencer.h"
+#include "instruments/basic_synth_voice.h"
 #include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
 
@@ -18,6 +16,8 @@ using barelyapi::Envelope;
 using barelyapi::Oscillator;
 using barelyapi::OscillatorType;
 using barelyapi::Sequencer;
+using barelyapi::Transport;
+using barelyapi::examples::BasicSynthVoice;
 using barelyapi::examples::PaWrapper;
 using barelyapi::examples::WinConsoleInput;
 
@@ -36,118 +36,109 @@ const int kNumBars = 4;
 const int kNumBeats = 4;
 
 // Metronome settings.
+const float kGain = 0.5f;
+const float kSectionFrequency = 880.0f;
 const float kBarFrequency = 440.0f;
 const float kBeatFrequency = 220.0f;
 const OscillatorType kOscillatorType = OscillatorType::kSquare;
 const float kRelease = 0.025f;
-
-const float kMetronomeTempoIncrement = 10.0f;
+const float kTempoIncrement = 10.0f;
 
 }  // namespace
 
 int main(int argc, char* argv[]) {
+  BasicSynthVoice metronome_voice(kSampleInterval);
+  metronome_voice.Reset();
+  metronome_voice.SetGain(kGain);
+  metronome_voice.SetOscillatorType(kOscillatorType);
+  metronome_voice.SetEnvelopeRelease(kRelease);
+
+  int impulse_sample = 0;
+  const auto beat_callback = [&metronome_voice, &impulse_sample](
+                                 const Transport& transport, int start_sample) {
+    LOG(INFO) << "Tick " << transport.section << "." << transport.bar << "."
+              << transport.beat;
+
+    float frequency = kBeatFrequency;
+    if (transport.beat == 0) {
+      frequency = (transport.bar == 0) ? kSectionFrequency : kBarFrequency;
+    }
+    metronome_voice.SetOscillatorFrequency(frequency);
+    impulse_sample = start_sample;
+  };
+
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
   sequencer.SetNumBars(kNumBars);
   sequencer.SetNumBeats(kNumBeats);
+  sequencer.RegisterBeatCallback(beat_callback);
 
-  Oscillator oscillator(kSampleInterval);
-  oscillator.SetType(kOscillatorType);
-  oscillator.SetFrequency(kBarFrequency);
-  Envelope envelope(kSampleInterval);
-  envelope.SetRelease(kRelease);
-
-  WinConsoleInput input_manager;
-  PaWrapper audio_io;
-
-  const auto process = [&sequencer, &oscillator, &envelope](float* output) {
-    const auto previous_transport = sequencer.GetTransport();
-    int impulse_sample = -1;
-    if (previous_transport.offset_beats == 0) {
-      impulse_sample = 0;
-    }
+  const auto process_callback = [&sequencer, &metronome_voice,
+                                 &impulse_sample](float* output) {
+    impulse_sample = -1;
     sequencer.Update(kFramesPerBuffer);
-    const auto current_transport = sequencer.GetTransport();
-    const float num_samples_per_beat =
-        (current_transport.tempo > 0.0f)
-            ? barelyapi::kSecondsFromMinutes * static_cast<float>(kSampleRate) /
-                  current_transport.tempo
-            : 0.0f;
-    if (current_transport.bar != previous_transport.bar) {
-      oscillator.SetFrequency(kBarFrequency);
-      impulse_sample =
-          kFramesPerBuffer - static_cast<int>(current_transport.offset_beats *
-                                              num_samples_per_beat);
-    } else if (current_transport.beat != previous_transport.beat) {
-      oscillator.SetFrequency(kBeatFrequency);
-      impulse_sample =
-          kFramesPerBuffer - static_cast<int>(current_transport.offset_beats *
-                                              num_samples_per_beat);
-    }
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
       if (frame == impulse_sample) {
-        oscillator.Reset();
-        envelope.Start();
+        metronome_voice.Start();
       }
-
-      const float sample = envelope.Next() * oscillator.Next();
+      const float sample = metronome_voice.Next();
       if (frame == impulse_sample) {
-        LOG(INFO) << "Transport " << current_transport.section << "."
-                  << current_transport.bar << "." << current_transport.beat;
-        envelope.Stop();
+        metronome_voice.Stop();
       }
-
       for (int channel = 0; channel < kNumChannels; ++channel) {
         output[kNumChannels * frame + channel] = sample;
       }
     }
   };
-  audio_io.SetAudioProcessCallback(process);
 
   bool quit = false;
-  const auto on_key_down = [&quit,
-                            &sequencer](const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&quit,
+                                  &sequencer](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
       return;
     }
-
+    // Adjust tempo.
     switch (std::toupper(key)) {
       case '-':
-        sequencer.SetTempo(sequencer.GetTransport().tempo -
-                           kMetronomeTempoIncrement);
-        LOG(INFO) << "Tempo decreased to " << sequencer.GetTransport().tempo;
+        sequencer.SetTempo(sequencer.GetTransport().tempo - kTempoIncrement);
         break;
       case '+':
-        sequencer.SetTempo(sequencer.GetTransport().tempo +
-                           kMetronomeTempoIncrement);
-        LOG(INFO) << "Tempo increased to " << sequencer.GetTransport().tempo;
+        sequencer.SetTempo(sequencer.GetTransport().tempo + kTempoIncrement);
         break;
       case '1':
         sequencer.SetTempo(0.5f * sequencer.GetTransport().tempo);
-        LOG(INFO) << "Tempo halved to " << sequencer.GetTransport().tempo;
         break;
       case '2':
         sequencer.SetTempo(2.0f * sequencer.GetTransport().tempo);
-        LOG(INFO) << "Tempo doubled to " << sequencer.GetTransport().tempo;
         break;
       case 'R':
         sequencer.SetTempo(kTempo);
-        LOG(INFO) << "Tempo reset to " << sequencer.GetTransport().tempo;
         break;
+      default:
+        return;
     }
+    LOG(INFO) << "Tempo set to " << sequencer.GetTransport().tempo;
   };
-  input_manager.SetOnKeyDownCallback(on_key_down);
 
-  // Start the demo.
+  PaWrapper audio_io;
+  audio_io.SetAudioProcessCallback(process_callback);
+
+  WinConsoleInput input_manager;
+  input_manager.SetOnKeyDownCallback(key_down_callback);
+
+  LOG(INFO) << "Starting audio playback";
+
   input_manager.Initialize();
   audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
+
+  LOG(INFO) << "Stopping audio playback";
 
   audio_io.Shutdown();
   input_manager.Shutdown();

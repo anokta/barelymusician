@@ -8,9 +8,9 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/sequencer.h"
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/sequencer/sequencer.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"

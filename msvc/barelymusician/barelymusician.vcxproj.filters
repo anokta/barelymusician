@@ -37,9 +37,6 @@
     <Filter Include="Header Files\composition">
       <UniqueIdentifier>{f1f72c1a-f4ec-4960-8ed9-6b4f2960b9fa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\composition">
-      <UniqueIdentifier>{d8247247-b162-4d32-8bbe-297c4af72b4d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\message">
       <UniqueIdentifier>{ae666881-d27b-4ba9-9f06-ebcc26ce21bc}</UniqueIdentifier>
     </Filter>
@@ -108,9 +105,6 @@
     <ClInclude Include="..\..\src\barelymusician\message\message_utils.h">
       <Filter>Header Files\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\bar.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\note.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
@@ -172,9 +166,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp">
       <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\bar.cpp">
-      <Filter>Source Files\composition</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\ensemble\performer.cpp">
       <Filter>Source Files\ensemble</Filter>

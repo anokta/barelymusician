@@ -12,10 +12,10 @@ struct Note {
   float intensity;
 
   // Start beat of the note.
-  double start_beat;
+  float start_beat;
 
   // Duration of the note in beats.
-  double duration_beats;
+  float duration_beats;
 };
 
 }  // namespace barelyapi

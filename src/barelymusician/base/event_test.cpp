@@ -47,28 +47,5 @@ TEST(EventTest, RegisterMultipleCallbacks) {
   EXPECT_FLOAT_EQ(kValue1 - kValue2, difference);
 }
 
-// Tests that resetting event clears the registered callbacks as expected.
-TEST(EventTest, Reset) {
-  const float kInitValue = 0.0f;
-  const float kSetValue = 20.0f;
-
-  Event<float> event;
-
-  // Trigger should be no-op when the callback is not registered.
-  float value = kInitValue;
-  event.Trigger(kSetValue);
-  EXPECT_FLOAT_EQ(kInitValue, value);
-
-  // Register the callback, trigger should set the value now.
-  event.Register([&value](float set_value) { value = set_value; });
-  event.Trigger(kSetValue);
-  EXPECT_FLOAT_EQ(kSetValue, value);
-
-  // Reset the event, trigger should be no-op again.
-  event.Reset();
-  event.Trigger(kInitValue);
-  EXPECT_FLOAT_EQ(kSetValue, value);
-}
-
 }  // namespace
 }  // namespace barelyapi

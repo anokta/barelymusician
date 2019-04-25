@@ -5,23 +5,21 @@
 
 #include "barelymusician/base/module.h"
 #include "barelymusician/composition/note.h"
+#include "barelymusician/sequencer/transport.h"
 
 namespace barelyapi {
 
 // Beat composer interface to generate notes of a beat.
 class BeatComposer : public Module {
  public:
-  // Returns notes for the given |beat| index.
+  // Returns notes for the given playback |transport|.
   //
+  // @param transport Playback transport.
   // @param section_type Section type.
-  // @param bar Bar index.
-  // @param num_bars Number of bars in section.
   // @param harmonic Harmonic progression of bar.
-  // @param beat Beat Index.
-  // @param num_beats Number of beats in bar.
   // @return List of notes in beat.
-  virtual std::vector<Note> GetNotes(int section_type, int bar, int num_bars,
-                                     int harmonic, int beat, int num_beats) = 0;
+  virtual std::vector<Note> GetNotes(const Transport& transport,
+                                     int section_type, int harmonic) = 0;
 };
 
 }  // namespace barelyapi

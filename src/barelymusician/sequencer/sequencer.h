@@ -1,8 +1,8 @@
 #ifndef BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_
 #define BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_
 
+#include "barelymusician/base/event.h"
 #include "barelymusician/base/module.h"
-#include "barelymusician/sequencer/event.h"
 #include "barelymusician/sequencer/transport.h"
 
 namespace barelyapi {

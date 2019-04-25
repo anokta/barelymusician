@@ -1,4 +1,4 @@
-#include "barelymusician/sequencer/event.h"
+#include "barelymusician/base/event.h"
 
 #include "gtest/gtest.h"
 

@@ -138,14 +138,14 @@
     <ClInclude Include="..\..\src\barelymusician\ensemble\conductor.h">
       <Filter>Header Files\ensemble</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\sequencer\event.h">
-      <Filter>Header Files\sequencer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\sequencer\sequencer.h">
       <Filter>Header Files\sequencer</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\sequencer\transport.h">
       <Filter>Header Files\sequencer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\base\event.h">
+      <Filter>Header Files\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

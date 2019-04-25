@@ -2,8 +2,10 @@
 #define EXAMPLES_UTIL_INPUT_MANAGER_WIN_CONSOLE_INPUT_H_
 
 #include <windows.h>
-#include <functional>
+
 #include <unordered_map>
+
+#include "barelymusician/base/event.h"
 
 namespace barelyapi {
 namespace examples {
@@ -13,8 +15,8 @@ class WinConsoleInput {
  public:
   // Keyboard event callback signatures.
   using Key = char;
-  using OnKeyDownCallback = std::function<void(const Key&)>;
-  using OnKeyUpCallback = std::function<void(const Key&)>;
+  using KeyDownCallback = Event<const Key&>::Callback;
+  using KeyUpCallback = Event<const Key&>::Callback;
 
   WinConsoleInput();
 
@@ -27,15 +29,15 @@ class WinConsoleInput {
   // Updates the input manager to handle new input events.
   void Update();
 
-  // Sets on keyboard key down callback.
+  // Registers keyboard key down callback.
   //
-  // @param on_key_down On keyboard key down callback.
-  void SetOnKeyDownCallback(OnKeyDownCallback&& on_key_down);
+  // @param key_down_callback Keyboard key down callback.
+  void RegisterKeyDownCallback(KeyDownCallback&& key_down_callback);
 
-  // Sets on keyboard key up callback.
+  // Registers keyboard key up callback.
   //
-  // @param on_key_up On keyboard key up callback.
-  void SetOnKeyUpCallback(OnKeyUpCallback&& on_key_up);
+  // @param key_up_callback Keyboard key up callback.
+  void RegisterKeyUpCallback(KeyUpCallback&& key_up_callback);
 
  private:
   // Console standard input handle.
@@ -50,9 +52,9 @@ class WinConsoleInput {
   // Keyboard key states.
   std::unordered_map<Key, bool> key_states_;
 
-  // Keyboard event callbacks.
-  OnKeyDownCallback on_key_down_;
-  OnKeyUpCallback on_key_up_;
+  // Keyboard events.
+  Event<const Key&> key_down_event_;
+  Event<const Key&> key_up_event_;
 };
 
 }  // namespace examples

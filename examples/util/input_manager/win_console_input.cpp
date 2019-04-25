@@ -6,10 +6,7 @@ namespace barelyapi {
 namespace examples {
 
 WinConsoleInput::WinConsoleInput()
-    : std_input_handle_(nullptr),
-      previous_console_mode_(0),
-      on_key_down_(nullptr),
-      on_key_up_(nullptr) {}
+    : std_input_handle_(nullptr), previous_console_mode_(0) {}
 
 void WinConsoleInput::Initialize() {
   // Get the standard input handle.
@@ -47,15 +44,11 @@ void WinConsoleInput::Update() {
           key_states_[key] = false;
         }
         if (key_event.bKeyDown && !key_states_[key]) {
-          if (on_key_down_ != nullptr) {
-            on_key_down_(key);
-          }
           key_states_[key] = true;
+          key_down_event_.Trigger(key);
         } else if (!key_event.bKeyDown && key_states_[key]) {
           key_states_[key] = false;
-          if (on_key_up_ != nullptr) {
-            on_key_up_(key);
-          }
+          key_up_event_.Trigger(key);
         }
       } break;
       default:
@@ -65,12 +58,13 @@ void WinConsoleInput::Update() {
   }
 }
 
-void WinConsoleInput::SetOnKeyDownCallback(OnKeyDownCallback&& on_key_down) {
-  on_key_down_ = std::move(on_key_down);
+void WinConsoleInput::RegisterKeyDownCallback(
+    KeyDownCallback&& key_down_callback) {
+  key_down_event_.Register(std::move(key_down_callback));
 }
 
-void WinConsoleInput::SetOnKeyUpCallback(OnKeyUpCallback&& on_key_up) {
-  on_key_up_ = std::move(on_key_up);
+void WinConsoleInput::RegisterKeyUpCallback(KeyUpCallback&& key_up_callback) {
+  key_up_event_.Register(std::move(key_up_callback));
 }
 
 }  // namespace examples

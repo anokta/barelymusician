@@ -48,13 +48,21 @@ const float kTempoIncrement = 10.0f;
 
 int main(int argc, char* argv[]) {
   BasicSynthVoice metronome_voice(kSampleInterval);
-  metronome_voice.Reset();
   metronome_voice.SetGain(kGain);
   metronome_voice.SetOscillatorType(kOscillatorType);
   metronome_voice.SetEnvelopeRelease(kRelease);
 
-  int impulse_sample = 0;
-  const auto beat_callback = [&metronome_voice, &impulse_sample](
+  Sequencer sequencer(kSampleRate);
+  sequencer.SetTempo(kTempo);
+  sequencer.SetNumBars(kNumBars);
+  sequencer.SetNumBeats(kNumBeats);
+
+  PaWrapper audio_io;
+  WinConsoleInput input_manager;
+
+  // Beat callback.
+  int tick_sample = 0;
+  const auto beat_callback = [&metronome_voice, &tick_sample](
                                  const Transport& transport, int start_sample) {
     LOG(INFO) << "Tick " << transport.section << "." << transport.bar << "."
               << transport.beat;
@@ -64,25 +72,21 @@ int main(int argc, char* argv[]) {
       frequency = (transport.bar == 0) ? kSectionFrequency : kBarFrequency;
     }
     metronome_voice.SetOscillatorFrequency(frequency);
-    impulse_sample = start_sample;
+    tick_sample = start_sample;
   };
-
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
-  sequencer.SetNumBars(kNumBars);
-  sequencer.SetNumBeats(kNumBeats);
   sequencer.RegisterBeatCallback(beat_callback);
 
-  const auto process_callback = [&sequencer, &metronome_voice,
-                                 &impulse_sample](float* output) {
-    impulse_sample = -1;
+  // Audio process callback.
+  const auto audio_process_callback = [&sequencer, &metronome_voice,
+                                       &tick_sample](float* output) {
+    tick_sample = -1;
     sequencer.Update(kFramesPerBuffer);
     for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
-      if (frame == impulse_sample) {
+      if (frame == tick_sample) {
         metronome_voice.Start();
       }
       const float sample = metronome_voice.Next();
-      if (frame == impulse_sample) {
+      if (frame == tick_sample) {
         metronome_voice.Stop();
       }
       for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -90,7 +94,9 @@ int main(int argc, char* argv[]) {
       }
     }
   };
+  audio_io.SetAudioProcessCallback(audio_process_callback);
 
+  // Key down callback.
   bool quit = false;
   const auto key_down_callback = [&quit,
                                   &sequencer](const WinConsoleInput::Key& key) {
@@ -121,13 +127,9 @@ int main(int argc, char* argv[]) {
     }
     LOG(INFO) << "Tempo set to " << sequencer.GetTransport().tempo;
   };
+  input_manager.RegisterKeyDownCallback(key_down_callback);
 
-  PaWrapper audio_io;
-  audio_io.SetAudioProcessCallback(process_callback);
-
-  WinConsoleInput input_manager;
-  input_manager.SetOnKeyDownCallback(key_down_callback);
-
+  // Start the demo.
   LOG(INFO) << "Starting audio playback";
 
   input_manager.Initialize();
@@ -138,6 +140,7 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
+  // Stop the demo.
   LOG(INFO) << "Stopping audio playback";
 
   audio_io.Shutdown();

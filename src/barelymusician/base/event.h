@@ -1,24 +1,19 @@
-#ifndef BARELYAPI_SEQUENCER_EVENT_H_
-#define BARELYAPI_SEQUENCER_EVENT_H_
+#ifndef BARELYAPI_BASE_EVENT_H_
+#define BARELYAPI_BASE_EVENT_H_
 
 #include <functional>
 #include <utility>
 #include <vector>
-
-#include "barelymusician/base/module.h"
 
 namespace barelyapi {
 
 // Argument agnostic event that allows a triggering mechanism for all the
 // registered callbacks.
 template <typename... ArgumentTypes>
-class Event : public Module {
+class Event {
  public:
   // Event callback signature.
   using Callback = std::function<void(ArgumentTypes...)>;
-
-  // Implements |Module|.
-  void Reset() override;
 
   // Registers callback to the event.
   //
@@ -36,11 +31,6 @@ class Event : public Module {
 };
 
 template <typename... ArgumentTypes>
-void Event<ArgumentTypes...>::Reset() {
-  callbacks_.clear();
-}
-
-template <typename... ArgumentTypes>
 void Event<ArgumentTypes...>::Register(Callback&& callback) {
   callbacks_.push_back(std::move(callback));
 }
@@ -54,4 +44,4 @@ void Event<ArgumentTypes...>::Trigger(ArgumentTypes... arguments) const {
 
 }  // namespace barelyapi
 
-#endif  // BARELYAPI_SEQUENCER_EVENT_H_
+#endif  // BARELYAPI_BASE_EVENT_H_

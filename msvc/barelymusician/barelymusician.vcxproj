@@ -35,6 +35,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
+    <ClInclude Include="..\..\src\barelymusician\base\event.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\base\module.h" />
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />
@@ -59,7 +60,6 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
     <ClInclude Include="..\..\src\barelymusician\message\message.h" />
     <ClInclude Include="..\..\src\barelymusician\message\message_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\sequencer\event.h" />
     <ClInclude Include="..\..\src\barelymusician\sequencer\sequencer.h" />
     <ClInclude Include="..\..\src\barelymusician\sequencer\transport.h" />
   </ItemGroup>

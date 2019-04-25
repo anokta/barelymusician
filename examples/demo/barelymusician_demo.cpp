@@ -128,8 +128,8 @@ int main(int argc, char* argv[]) {
   audio_io.SetAudioProcessCallback(process);
 
   bool quit = false;
-  const auto on_key_down = [&quit, &sequencer, &basic_synth_instrument](
-                               const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&quit, &sequencer, &basic_synth_instrument](
+                                     const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
@@ -168,9 +168,9 @@ int main(int argc, char* argv[]) {
         break;
     }
   };
-  input_manager.SetOnKeyDownCallback(on_key_down);
+  input_manager.RegisterKeyDownCallback(key_down_callback);
 
-  const auto on_key_up =
+  const auto key_up_callback =
       [&basic_synth_instrument](const WinConsoleInput::Key& key) {
         LOG(INFO) << key << " released.";
         switch (std::toupper(key)) {
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
             break;
         }
       };
-  input_manager.SetOnKeyUpCallback(on_key_up);
+  input_manager.RegisterKeyUpCallback(key_up_callback);
 
   // Start the demo.
   input_manager.Initialize();

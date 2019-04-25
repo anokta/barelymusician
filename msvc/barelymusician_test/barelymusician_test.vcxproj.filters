@@ -33,9 +33,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
@@ -72,8 +69,11 @@
     <ClCompile Include="..\..\src\barelymusician\ensemble\performer_test.cpp">
       <Filter>Source Files\ensemble</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\event_test.cpp">
-      <Filter>Source Files\base</Filter>
+    <ClCompile Include="..\..\src\barelymusician\sequencer\event_test.cpp">
+      <Filter>Source Files\sequencer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer_test.cpp">
+      <Filter>Source Files\sequencer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

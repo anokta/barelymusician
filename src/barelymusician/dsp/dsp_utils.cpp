@@ -16,6 +16,11 @@ float AmplitudeFromDecibels(float decibels) {
   return 0.0f;
 }
 
+float BeatsFromSamples(int samples, int num_samples_per_beat) {
+  DCHECK_GE(num_samples_per_beat, 0);
+  return static_cast<float>(samples) / static_cast<float>(num_samples_per_beat);
+}
+
 float DecibelsFromAmplitude(float amplitude) {
   if (amplitude > 0.0f) {
     // dB = 20 * log(A).
@@ -33,6 +38,11 @@ float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) {
     return std::exp(-kTwoPi * cuttoff_frequency / sample_rate_float);
   }
   return 0.0f;
+}
+
+int SamplesFromBeats(float beats, int num_samples_per_beat) {
+  DCHECK_GE(num_samples_per_beat, 0);
+  return static_cast<int>(beats * static_cast<float>(num_samples_per_beat));
 }
 
 }  // namespace barelyapi

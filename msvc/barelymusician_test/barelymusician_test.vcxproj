@@ -42,9 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\event_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\bar_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp" />
@@ -55,6 +53,8 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\message\message_utils_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\sequencer\event_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer_test.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

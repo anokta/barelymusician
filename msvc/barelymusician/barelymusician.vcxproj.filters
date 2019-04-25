@@ -66,9 +66,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\logging.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\sequencer.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
@@ -141,18 +138,18 @@
     <ClInclude Include="..\..\src\barelymusician\ensemble\conductor.h">
       <Filter>Header Files\ensemble</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\event.h">
-      <Filter>Header Files\base</Filter>
+    <ClInclude Include="..\..\src\barelymusician\sequencer\event.h">
+      <Filter>Header Files\sequencer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\transport.h">
-      <Filter>Header Files\base</Filter>
+    <ClInclude Include="..\..\src\barelymusician\sequencer\sequencer.h">
+      <Filter>Header Files\sequencer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\sequencer\transport.h">
+      <Filter>Header Files\sequencer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp">
@@ -184,6 +181,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp">
       <Filter>Source Files\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer.cpp">
+      <Filter>Source Files\sequencer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

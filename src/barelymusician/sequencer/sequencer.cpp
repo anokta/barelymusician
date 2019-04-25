@@ -1,33 +1,12 @@
-#include "barelymusician/base/sequencer.h"
+#include "barelymusician/sequencer/sequencer.h"
 
 #include <algorithm>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
-
-namespace {
-
-// Returns the corresponding number of beats for the given |samples|.
-//
-// @param samples Number of samples.
-// @param num_samples_per_beat Number of samples per beat.
-// @return Fractional number of beats.
-float BeatsFromSamples(int samples, int num_samples_per_beat) {
-  return static_cast<float>(samples) / static_cast<float>(num_samples_per_beat);
-}
-
-// Returns the corresponding number of samples for the given |beats|.
-//
-// @param beats Fractional number of beats.
-// @param num_samples_per_beat Number of samples per beat.
-// @return Number of samples.
-int SamplesFromBeats(float beats, int num_samples_per_beat) {
-  return static_cast<int>(beats * static_cast<float>(num_samples_per_beat));
-}
-
-}  // namespace
 
 Sequencer::Sequencer(int sample_rate)
     : num_samples_per_minute_(static_cast<float>(sample_rate) *

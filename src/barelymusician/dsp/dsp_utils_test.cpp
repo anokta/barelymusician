@@ -30,6 +30,31 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
   }
 }
 
+// Tests that converting number of beats from/to samples returns expected
+// results.
+TEST(DspUtilsTest, BeatsSamplesConversion) {
+  const int kNumValues = 6;
+  const int kNumSamplesPerBeat = 10;
+  const float kBeats[kNumValues] = {0.0f, 0.2f, 0.5f, 1.0f, 8.0f, 12.1f};
+  const int kSamples[kNumValues] = {0, 2, 5, 10, 80, 121};
+
+  for (int i = 0; i < kNumValues; ++i) {
+    EXPECT_FLOAT_EQ(kBeats[i],
+                    BeatsFromSamples(kSamples[i], kNumSamplesPerBeat));
+    EXPECT_EQ(kSamples[i], SamplesFromBeats(kBeats[i], kNumSamplesPerBeat));
+
+    // Verify that the back and forth conversion do not mutate the value.
+    EXPECT_FLOAT_EQ(
+        kBeats[i],
+        BeatsFromSamples(SamplesFromBeats(kBeats[i], kNumSamplesPerBeat),
+                         kNumSamplesPerBeat));
+    EXPECT_EQ(
+        kSamples[i],
+        SamplesFromBeats(BeatsFromSamples(kSamples[i], kNumSamplesPerBeat),
+                         kNumSamplesPerBeat));
+  }
+}
+
 // Tests that amplitude/decibels conversion snaps to |kMinDecibels| threshold.
 TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_FLOAT_EQ(0.0f, AmplitudeFromDecibels(kMinDecibels));

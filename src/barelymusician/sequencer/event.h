@@ -1,5 +1,5 @@
-#ifndef BARELYAPI_BASE_EVENT_H_
-#define BARELYAPI_BASE_EVENT_H_
+#ifndef BARELYAPI_SEQUENCER_EVENT_H_
+#define BARELYAPI_SEQUENCER_EVENT_H_
 
 #include <functional>
 #include <utility>
@@ -54,4 +54,4 @@ void Event<ArgumentTypes...>::Trigger(ArgumentTypes... arguments) const {
 
 }  // namespace barelyapi
 
-#endif  // BARELYAPI_BASE_EVENT_H_
+#endif  // BARELYAPI_SEQUENCER_EVENT_H_

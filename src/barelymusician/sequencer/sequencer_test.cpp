@@ -1,4 +1,4 @@
-#include "barelymusician/base/sequencer.h"
+#include "barelymusician/sequencer/sequencer.h"
 
 #include "barelymusician/base/constants.h"
 #include "gtest/gtest.h"

@@ -1,9 +1,9 @@
-#ifndef BARELYMUSICIAN_BASE_SEQUENCER_H_
-#define BARELYMUSICIAN_BASE_SEQUENCER_H_
+#ifndef BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_
+#define BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_
 
-#include "barelymusician/base/event.h"
 #include "barelymusician/base/module.h"
-#include "barelymusician/base/transport.h"
+#include "barelymusician/sequencer/event.h"
+#include "barelymusician/sequencer/transport.h"
 
 namespace barelyapi {
 
@@ -77,4 +77,4 @@ class Sequencer : public Module {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_BASE_SEQUENCER_H_
+#endif  // BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_

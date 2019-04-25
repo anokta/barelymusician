@@ -1,19 +1,13 @@
-#include <conio.h>
-
 #include <cctype>
 #include <chrono>
-#include <memory>
 #include <thread>
 
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "instruments/basic_synth_voice.h"
 #include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
 
-using barelyapi::Envelope;
-using barelyapi::Oscillator;
 using barelyapi::OscillatorType;
 using barelyapi::Sequencer;
 using barelyapi::Transport;
@@ -130,18 +124,18 @@ int main(int argc, char* argv[]) {
   input_manager.RegisterKeyDownCallback(key_down_callback);
 
   // Start the demo.
-  LOG(INFO) << "Starting audio playback";
+  LOG(INFO) << "Starting audio stream";
 
   input_manager.Initialize();
   audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 
   // Stop the demo.
-  LOG(INFO) << "Stopping audio playback";
+  LOG(INFO) << "Stopping audio stream";
 
   audio_io.Shutdown();
   input_manager.Shutdown();

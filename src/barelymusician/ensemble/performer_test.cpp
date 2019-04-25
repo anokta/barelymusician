@@ -33,10 +33,6 @@ class FakeInstrument : public Instrument {
     DLOG(INFO) << "NoteOff(" << index << ")";
     output_ = 0.0f;
   }
-  void SetFloatParam(int id, float value) override {
-    DLOG(INFO) << "SetFloatParam(" << id << ", " << value << ")";
-    output_ = value;
-  }
 
  private:
   float output_;
@@ -134,30 +130,6 @@ TEST(PerformerTest, PlayMultipleNotes) {
   performer.Process(kNumSamples, output.data());
   for (int i = 0; i < kNumSamples; ++i) {
     EXPECT_FLOAT_EQ(0.0f, output[i]);
-  }
-}
-
-// Tests that updating a float parameter produces the expected output.
-TEST(PerformerTest, SetFloatParam) {
-  const int kFloatParamId = 0;
-  const float kFloatParamValue = 0.5f;
-
-  FakeInstrument instrument;
-  Performer performer(&instrument);
-
-  std::vector<float> output(kNumSamples, 0.0f);
-  performer.Process(kNumSamples, output.data());
-  for (int i = 0; i < kNumSamples; ++i) {
-    EXPECT_FLOAT_EQ(0.0f, output[i]);
-  }
-
-  // Update float parameter.
-  performer.SetFloatParam(0, kFloatParamId, kFloatParamValue);
-
-  output.assign(kNumSamples, 0.0f);
-  performer.Process(kNumSamples, output.data());
-  for (int i = 0; i < kNumSamples; ++i) {
-    EXPECT_FLOAT_EQ(kFloatParamValue, output[i]);
   }
 }
 

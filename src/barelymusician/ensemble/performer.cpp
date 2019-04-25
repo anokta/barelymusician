@@ -13,7 +13,6 @@ namespace {
 // Unique message IDs per message type.
 const int kNoteOnId = 0;
 const int kNoteOffId = 1;
-const int kSetFloatParamId = 2;
 
 // |NoteOn| message data.
 struct NoteOnData {
@@ -24,12 +23,6 @@ struct NoteOnData {
 // |NoteOff| message data.
 struct NoteOffData {
   float index;
-};
-
-// |SetFloatParam| message data.
-struct SetFloatParamData {
-  int id;
-  float value;
 };
 
 }  // namespace
@@ -44,7 +37,7 @@ void Performer::Reset() {
 }
 
 void Performer::NoteOff(int start_sample, float index) {
-  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, { index }, start_sample));
+  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, start_sample));
 }
 
 void Performer::NoteOn(int start_sample, float index, float intensity) {
@@ -85,11 +78,6 @@ void Performer::Process(int num_samples, float* output) {
   }
 }
 
-void Performer::SetFloatParam(int start_sample, int id, float value) {
-  PushMessage(BuildMessage<SetFloatParamData>(kSetFloatParamId, {id, value},
-                                              start_sample));
-}
-
 void Performer::ProcessMessage(const Message& message) {
   switch (message.id) {
     case kNoteOnId: {
@@ -99,11 +87,6 @@ void Performer::ProcessMessage(const Message& message) {
     case kNoteOffId: {
       const auto note_off = ReadMessageData<NoteOffData>(message.data);
       instrument_->NoteOff(note_off.index);
-    } break;
-    case kSetFloatParamId: {
-      const auto set_float_param =
-          ReadMessageData<SetFloatParamData>(message.data);
-      instrument_->SetFloatParam(set_float_param.id, set_float_param.value);
     } break;
     default:
       DLOG(ERROR) << "Unknown message ID: " << message.id;

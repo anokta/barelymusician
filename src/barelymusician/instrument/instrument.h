@@ -19,12 +19,6 @@ class Instrument : public Generator {
   // @param index Note index.
   // @param intensity Note intensity.
   virtual void NoteOn(float index, float intensity) = 0;
-
-  // Sets the value of a float parameter with the given ID.
-  //
-  // @param id Parameter ID.
-  // @param value Float parameter value.
-  virtual void SetFloatParam(int id, float value) = 0;
 };
 
 }  // namespace barelyapi

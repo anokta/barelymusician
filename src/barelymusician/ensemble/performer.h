@@ -49,13 +49,6 @@ class Performer : public Module {
   // @param output Pointer to output samples to be written into.
   void Process(int num_samples, float* output);
 
-  // Sets float parameter at the given |start_sample|.
-  //
-  // @param start_sample Relative sample offset to set the float parameter.
-  // @param id Parameter ID.
-  // @param value Parameter value.
-  void SetFloatParam(int start_sample, int id, float value);
-
  private:
   // Processes the given |message|.
   void ProcessMessage(const Message& message);

@@ -29,10 +29,10 @@ class Buffer {
   // @return Number of frames.
   int num_frames() const { return num_frames_; }
 
-  // Returns the number of samples (i.e., buffer size).
+  // Returns the buffer size.
   //
-  // @return Number of samples.
-  int num_samples() const { return num_channels_ * num_frames_; }
+  // @return Buffer size.
+  int size() const { return num_channels_ * num_frames_; }
 
   // Returns an iterator pointing to the first sample of the buffer.
   //

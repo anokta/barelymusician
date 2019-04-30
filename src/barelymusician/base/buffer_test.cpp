@@ -10,7 +10,6 @@ namespace {
 // Buffer properties.
 const int kNumChannels = 4;
 const int kNumFrames = 16;
-const int kNumSamples = kNumChannels * kNumFrames;
 
 // Tests that read/write operations work as expected when iterating the buffer.
 TEST(BufferTest, Iterate) {
@@ -18,12 +17,12 @@ TEST(BufferTest, Iterate) {
 
   EXPECT_EQ(kNumChannels, buffer.num_channels());
   EXPECT_EQ(kNumFrames, buffer.num_frames());
-  EXPECT_EQ(kNumSamples, buffer.num_samples());
+  EXPECT_EQ(kNumChannels * kNumFrames, buffer.size());
 
   EXPECT_NE(buffer.begin(), buffer.end());
-  EXPECT_EQ(kNumSamples, std::distance(buffer.begin(), buffer.end()));
+  EXPECT_EQ(buffer.size(), std::distance(buffer.begin(), buffer.end()));
 
-  for (int i = 0; i < kNumSamples; ++i) {
+  for (int i = 0; i < buffer.size(); ++i) {
     const float sample = static_cast<float>(i + 1);
     buffer[i] = sample;
     EXPECT_FLOAT_EQ(sample, buffer[i]);

@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\base\buffer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\event_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp" />

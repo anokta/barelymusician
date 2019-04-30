@@ -13,6 +13,12 @@ static const float kSecondsFromMinutes = 60.0f;
 // Minimum dB threshold.
 static const float kMinDecibels = -80.0f;
 
+// Number of mono channels.
+static const int kNumMonoChannels = 1;
+
+// Number of stereo channels.
+static const int kNumStereoChannels = 2;
+
 // Number of semitones in an octave (twelwe-tone equal temperament).
 static const float kNumSemitones = 12.0f;
 

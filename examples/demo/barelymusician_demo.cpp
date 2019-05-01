@@ -17,7 +17,7 @@ using ::barelyapi::examples::WinConsoleInput;
 // System audio settings.
 const int kSampleRate = 48000;
 const int kNumChannels = 2;
-const int kFramesPerBuffer = 512;
+const int kNumFrames = 512;
 
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   const auto audio_process_callback = [&sequencer](float* output) {
-    sequencer.Update(kFramesPerBuffer);
-    for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
+    sequencer.Update(kNumFrames);
+    for (int frame = 0; frame < kNumFrames; ++frame) {
       for (int channel = 0; channel < kNumChannels; ++channel) {
         output[kNumChannels * frame + channel] = 0.0f;
       }
@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Starting audio stream";
 
   input_manager.Initialize();
-  audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
+  audio_io.Initialize(kSampleRate, kNumChannels, kNumFrames);
 
   while (!quit) {
     input_manager.Update();

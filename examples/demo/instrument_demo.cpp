@@ -4,6 +4,7 @@
 #include <memory>
 #include <thread>
 
+#include "barelymusician/base/buffer.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "instruments/basic_synth_instrument.h"
@@ -12,6 +13,8 @@
 
 namespace {
 
+using ::barelyapi::Buffer;
+using ::barelyapi::kNumMonoChannels;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentFloatParam;
@@ -21,7 +24,7 @@ using ::barelyapi::examples::WinConsoleInput;
 // System audio settings.
 const int kSampleRate = 48000;
 const int kNumChannels = 2;
-const int kFramesPerBuffer = 512;
+const int kNumFrames = 512;
 
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
@@ -65,12 +68,15 @@ int main(int argc, char* argv[]) {
   WinConsoleInput input_manager;
 
   // Audio process callback.
-  const auto audio_process_callback = [&basic_synth_instrument](float* output) {
-    for (int frame = 0; frame < kFramesPerBuffer; ++frame) {
-      const float sample = basic_synth_instrument.Next();
-      ;
+  Buffer mono_buffer(kNumMonoChannels, kNumFrames);
+  const auto audio_process_callback = [&basic_synth_instrument,
+                                       &mono_buffer](float* output) {
+    basic_synth_instrument.Process(&mono_buffer);
+
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      const auto& mono_sample = mono_buffer[frame][0];
       for (int channel = 0; channel < kNumChannels; ++channel) {
-        output[kNumChannels * frame + channel] = sample;
+        output[kNumChannels * frame + channel] = mono_sample;
       }
     }
   };
@@ -90,9 +96,7 @@ int main(int argc, char* argv[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Clear current notes first.
-      for (const auto& key : kOctaveKeys) {
-        basic_synth_instrument.NoteOff(NoteIndexFromKey(key, offset_octaves));
-      }
+      basic_synth_instrument.Reset();
       // Update offset.
       if (upper_key == 'Z') {
         --offset_octaves;
@@ -110,8 +114,7 @@ int main(int argc, char* argv[]) {
     if (note_index < 0.0f) {
       return;
     }
-    basic_synth_instrument.NoteOn(note_index, kNoteIntensity);
-    LOG(INFO) << "NoteOn(" << note_index << ", " << kNoteIntensity << ")";
+    basic_synth_instrument.StartNote(note_index, kNoteIntensity);
   };
   input_manager.RegisterKeyDownCallback(key_down_callback);
 
@@ -123,8 +126,7 @@ int main(int argc, char* argv[]) {
     if (note_index < 0.0f) {
       return;
     }
-    basic_synth_instrument.NoteOff(note_index);
-    LOG(INFO) << "NoteOff(" << note_index << ")";
+    basic_synth_instrument.StopNote(note_index);
   };
   input_manager.RegisterKeyUpCallback(key_up_callback);
 
@@ -132,7 +134,7 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Starting audio stream";
 
   input_manager.Initialize();
-  audio_io.Initialize(kSampleRate, kNumChannels, kFramesPerBuffer);
+  audio_io.Initialize(kSampleRate, kNumChannels, kNumFrames);
 
   while (!quit) {
     input_manager.Update();

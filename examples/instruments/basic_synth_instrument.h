@@ -21,19 +21,18 @@ class BasicSynthInstrument : public Instrument {
  public:
   BasicSynthInstrument(float sample_interval, int num_voices);
 
-  // Implements |Generator|.
-  float Next() override;
-  void Reset() override;
-
-  // Implements |Instrument|.
-  void NoteOff(float index) override;
-  void NoteOn(float index, float intensity) override;
-
   // Sets the value of a float parameter with the given ID.
   //
   // @param id Parameter ID.
   // @param value Float parameter value.
   void SetFloatParam(int id, float value);
+
+ protected:
+  // Implements |Instrument|.
+  void Clear() override;
+  float Next(int channel) override;
+  void NoteOff(float index) override;
+  void NoteOn(float index, float intensity) override;
 
  private:
   float gain_;

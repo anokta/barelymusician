@@ -83,7 +83,7 @@ float PolyphonicVoice<VoiceType>::Next() {
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Reset() {
   for (auto& voice : voices_) {
-    voice.Reset();
+    voice.Stop();
   }
   for (auto& voice_state : voice_states_) {
     voice_state = {0.0f, 0};

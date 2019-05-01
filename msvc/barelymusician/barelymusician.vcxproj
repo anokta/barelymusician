@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician\base\buffer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
@@ -27,7 +26,7 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\ensemble\performer.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer.cpp" />
@@ -37,6 +36,7 @@
     <ClInclude Include="..\..\src\barelymusician\base\buffer.h" />
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\src\barelymusician\base\event.h" />
+    <ClInclude Include="..\..\src\barelymusician\base\frame.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\base\module.h" />
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />
@@ -52,7 +52,6 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
     <ClInclude Include="..\..\src\barelymusician\ensemble\conductor.h" />
-    <ClInclude Include="..\..\src\barelymusician\ensemble\performer.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h" />

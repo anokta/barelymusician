@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/instrument/instrument_utils.h"
 
@@ -22,7 +23,7 @@ const OscillatorType kDefaultOscillatorType = OscillatorType::kSine;
 
 BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
                                            int num_voices)
-    : voice_(BasicSynthVoice(sample_interval)) {
+    : Instrument(kNumMonoChannels), voice_(BasicSynthVoice(sample_interval)) {
   voice_.Resize(num_voices);
 
   // Register parameters.
@@ -64,26 +65,27 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
       });
 }
 
-float BasicSynthInstrument::Next() { return gain_ * voice_.Next(); }
-
-void BasicSynthInstrument::Reset() {
-  voice_.Reset();
-  modulation_matrix_.Reset();
-}
-
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
-
-void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
-    voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
-    voice->SetGain(intensity);
-  });
-}
-
 void BasicSynthInstrument::SetFloatParam(int id, float value) {
   if (!modulation_matrix_.SetParam(id, value)) {
     LOG(WARNING) << "Failed to update float parameter with ID: " << id;
   }
+}
+
+void BasicSynthInstrument::Clear() { voice_.Reset(); }
+
+float BasicSynthInstrument::Next(int channel) { return gain_ * voice_.Next(); }
+
+void BasicSynthInstrument::NoteOff(float index) {
+  LOG(INFO) << "NoteOff(" << index << ")";
+  voice_.Stop(index);
+}
+
+void BasicSynthInstrument::NoteOn(float index, float intensity) {
+  LOG(INFO) << "NoteOn(" << index << ", " << intensity << ")";
+  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
+    voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
+    voice->SetGain(intensity);
+  });
 }
 
 }  // namespace examples

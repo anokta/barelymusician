@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "barelymusician/base/frame.h"
-#include "barelymusician/base/logging.h"
 
 namespace barelyapi {
 
@@ -16,17 +15,7 @@ class Buffer {
   //
   // @param num_channels Number of channels per frame.
   // @param num_channels Number of frames.
-  Buffer(int num_channels, int num_frames)
-      : num_channels_(num_channels), data_(num_channels_ * num_frames) {
-    DCHECK_GE(num_channels_, 0);
-    DCHECK_GE(num_frames, 0);
-    frames_.reserve(num_frames);
-    float* it = data_.data();
-    for (int i = 0; i < num_frames; ++i) {
-      frames_.emplace_back(it, num_channels_);
-      it += num_channels_;
-    }
-  }
+  Buffer(int num_channels, int num_frames);
 
   // Returns a reference to the frame at the given |index|.
   //

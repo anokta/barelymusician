@@ -1,18 +1,16 @@
 #ifndef BARELYAPI_BASE_FRAME_H_
 #define BARELYAPI_BASE_FRAME_H_
 
-#include "barelymusician/base/logging.h"
-
 namespace barelyapi {
 
 // Audio frame view that refers to a set of samples.
 class Frame {
  public:
   // Constructs new |Frame| with the given |begin| pointer and |size|.
-  Frame(float* begin, int size) : begin_(begin), size_(size) {
-    DCHECK(begin_);
-    DCHECK_GE(size_, 0);
-  }
+  //
+  // @param begin Pointer to the first sample in frame.
+  // @param size Frame size.
+  Frame(float* begin, int size);
 
   // Returns a reference to the sample at the given |index|.
   //

@@ -10,7 +10,6 @@
 namespace barelyapi {
 
 // Interleaved audio buffer.
-// TODO(#39): Introduce |Frame| structure for easier interleaved operations.
 class Buffer {
  public:
   // Constructs new |Buffer| with the given |num_channels| and |num_frames|.

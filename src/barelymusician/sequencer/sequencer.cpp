@@ -63,7 +63,7 @@ void Sequencer::Update(int num_samples) {
   transport_.offset_beats =
       BeatsFromSamples(offset_samples_, num_samples_per_beat_);
   if (offset_samples_ == num_samples) {
-    beat_event_.Trigger(transport_, 0);
+    beat_event_.Trigger(transport_, 0, num_samples_per_beat_);
   }
   while (offset_samples_ >= num_samples_per_beat_) {
     // Update beat count.
@@ -82,7 +82,8 @@ void Sequencer::Update(int num_samples) {
       }
     }
     if (offset_samples_ > 0) {
-      beat_event_.Trigger(transport_, num_samples - offset_samples_);
+      beat_event_.Trigger(transport_, num_samples - offset_samples_,
+                          num_samples_per_beat_);
     }
   }
 }

@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\barelymusician\base\buffer.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\base\frame.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />

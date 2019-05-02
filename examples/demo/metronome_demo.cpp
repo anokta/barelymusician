@@ -57,7 +57,8 @@ int main(int argc, char* argv[]) {
   // Beat callback.
   int tick_sample = 0;
   const auto beat_callback = [&metronome_voice, &tick_sample](
-                                 const Transport& transport, int start_sample) {
+                                 const Transport& transport, int start_sample,
+                                 int num_samples_per_beat) {
     LOG(INFO) << "Tick " << transport.section << "." << transport.bar << "."
               << transport.beat;
 

@@ -73,10 +73,10 @@ TEST(SequencerTest, RegisterBeatCallback) {
 
   int beat = 0;
   const auto beat_callback = [&beat](const Transport& transport,
-                                     int start_sample) {
+                                     int start_sample,
+                                     int num_samples_per_beat) {
     EXPECT_EQ(beat, transport.beat);
-    EXPECT_EQ(start_sample,
-              (beat % kBeatsPerSecond) * kSampleRate / kBeatsPerSecond);
+    EXPECT_EQ(start_sample, (beat % kBeatsPerSecond) * num_samples_per_beat);
     ++beat;
   };
   sequencer.RegisterBeatCallback(beat_callback);

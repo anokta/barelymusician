@@ -38,11 +38,12 @@ int main(int argc, char* argv[]) {
   WinConsoleInput input_manager;
 
   // Beat callback.
-  const auto beat_callback = [](const Transport& transport, int start_sample) {
+  const auto beat_callback = [](const Transport& transport, int start_sample,
+                                int num_samples_per_beat) {
     LOG(INFO) << "Transport position " << transport.section << "."
               << transport.bar << "." << transport.beat << ":" << std::fixed
               << std::setprecision(2) << transport.offset_beats << " ("
-              << start_sample << ")";
+              << start_sample << ", " << num_samples_per_beat << ")";
   };
   sequencer.RegisterBeatCallback(beat_callback);
 

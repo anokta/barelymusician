@@ -31,6 +31,9 @@
     <Filter Include="Source Files\util\input_manager">
       <UniqueIdentifier>{1ef486f6-80c2-432e-81fb-d02e806dcac7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\composers">
+      <UniqueIdentifier>{cc3e58f2-53d6-486a-97b4-93751cb9f376}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h">
@@ -44,6 +47,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h">
       <Filter>Header Files\util\input_manager</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_section_composer.h">
+      <Filter>Source Files\composers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_bar_composer.h">
+      <Filter>Source Files\composers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

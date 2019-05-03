@@ -14,6 +14,8 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_bar_composer.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_section_composer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.h" />

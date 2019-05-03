@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\src\barelymusician\base\frame.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\composition\note_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\mixer.cpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="..\..\src\barelymusician\composition\bar_composer.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\beat_composer.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note.h" />
+    <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\section_composer.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />

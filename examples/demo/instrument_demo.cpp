@@ -14,7 +14,6 @@
 namespace {
 
 using ::barelyapi::Buffer;
-using ::barelyapi::kNumMonoChannels;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentFloatParam;
@@ -68,7 +67,7 @@ int main(int argc, char* argv[]) {
   WinConsoleInput input_manager;
 
   // Audio process callback.
-  Buffer mono_buffer(kNumMonoChannels, kNumFrames);
+  Buffer mono_buffer(barelyapi::kNumMonoChannels, kNumFrames);
   const auto audio_process_callback = [&basic_synth_instrument,
                                        &mono_buffer](float* output) {
     basic_synth_instrument.Process(&mono_buffer);

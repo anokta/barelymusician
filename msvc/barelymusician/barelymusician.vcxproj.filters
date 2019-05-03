@@ -141,6 +141,9 @@
     <ClInclude Include="..\..\src\barelymusician\base\frame.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\dsp\mixer.h">
+      <Filter>Header Files\dsp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -181,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\frame.cpp">
       <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\dsp\mixer.cpp">
+      <Filter>Source Files\dsp</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

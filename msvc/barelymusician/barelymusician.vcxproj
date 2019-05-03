@@ -25,6 +25,7 @@
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\dsp\mixer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\generator.h" />
+    <ClInclude Include="..\..\src\barelymusician\dsp\mixer.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />

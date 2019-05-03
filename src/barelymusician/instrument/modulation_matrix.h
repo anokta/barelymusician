@@ -62,11 +62,11 @@ class ModulationMatrix : public Module {
 template <typename ParamType>
 void ModulationMatrix<ParamType>::Reset() {
   for (auto& it : params_) {
-    auto* param_data = &it.second;
-    if (param_data->updater != nullptr) {
-      param_data->updater(param_data->default_value);
+    auto& param_data = it.second;
+    if (param_data.updater != nullptr) {
+      param_data.updater(param_data.default_value);
     }
-    param_data->current_value = param_data->default_value;
+    param_data.current_value = param_data.default_value;
   }
 }
 
@@ -101,12 +101,12 @@ bool ModulationMatrix<ParamType>::SetParam(int id, const ParamType& value) {
   if (it == params_.end()) {
     return false;
   }
-  auto* param_data = &it->second;
-  if (value != param_data->current_value) {
-    if (param_data->updater != nullptr) {
-      param_data->updater(value);
+  auto& param_data = it->second;
+  if (value != param_data.current_value) {
+    if (param_data.updater != nullptr) {
+      param_data.updater(value);
     }
-    param_data->current_value = value;
+    param_data.current_value = value;
   }
   return true;
 }

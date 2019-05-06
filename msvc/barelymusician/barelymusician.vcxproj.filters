@@ -55,6 +55,9 @@
     <Filter Include="Source Files\composition">
       <UniqueIdentifier>{3963b324-a8d8-49a1-8701-453c8dcfef77}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ensemble">
+      <UniqueIdentifier>{d8c758dd-37b0-4c88-bcc4-6d6996e89d50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -149,6 +152,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h">
       <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\ensemble\performer.h">
+      <Filter>Header Files\ensemble</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\ensemble\ensemble.h">
+      <Filter>Header Files\ensemble</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

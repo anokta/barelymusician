@@ -29,13 +29,13 @@ const int kNumBeats = 4;
 }  // namespace
 
 int main(int argc, char* argv[]) {
+  PaWrapper audio_io;
+  WinConsoleInput input_manager;
+
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
   sequencer.SetNumBars(kNumBars);
   sequencer.SetNumBeats(kNumBeats);
-
-  PaWrapper audio_io;
-  WinConsoleInput input_manager;
 
   // Beat callback.
   const auto beat_callback = [](const Transport& transport, int start_sample,

@@ -54,6 +54,9 @@ float NoteIndexFromKey(const WinConsoleInput::Key& key, float offset_octaves) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
+  PaWrapper audio_io;
+  WinConsoleInput input_manager;
+
   BasicSynthInstrument basic_synth_instrument(kSampleInterval, kNumVoices);
   basic_synth_instrument.SetFloatParam(
       BasicSynthInstrumentFloatParam::kOscillatorType,
@@ -62,9 +65,6 @@ int main(int argc, char* argv[]) {
       BasicSynthInstrumentFloatParam::kEnvelopeRelease, kEnvelopeRelease);
 
   float offset_octaves = 0.0f;
-
-  PaWrapper audio_io;
-  WinConsoleInput input_manager;
 
   // Audio process callback.
   Buffer mono_buffer(barelyapi::kNumMonoChannels, kNumFrames);

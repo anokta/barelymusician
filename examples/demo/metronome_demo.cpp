@@ -41,6 +41,9 @@ const float kTempoIncrement = 10.0f;
 }  // namespace
 
 int main(int argc, char* argv[]) {
+  PaWrapper audio_io;
+  WinConsoleInput input_manager;
+
   BasicSynthVoice metronome_voice(kSampleInterval);
   metronome_voice.SetGain(kGain);
   metronome_voice.SetOscillatorType(kOscillatorType);
@@ -50,9 +53,6 @@ int main(int argc, char* argv[]) {
   sequencer.SetTempo(kTempo);
   sequencer.SetNumBars(kNumBars);
   sequencer.SetNumBeats(kNumBeats);
-
-  PaWrapper audio_io;
-  WinConsoleInput input_manager;
 
   // Beat callback.
   int tick_sample = 0;

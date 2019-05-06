@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -18,86 +18,34 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician\base\buffer.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\frame.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\composition\note_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\mixer.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\buffer.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\event.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\frame.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\module.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\random.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\bar_composer.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\beat_composer.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\note.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\section_composer.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\filter.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\generator.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\mixer.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
-    <ClInclude Include="..\..\src\barelymusician\ensemble\conductor.h" />
-    <ClInclude Include="..\..\src\barelymusician\ensemble\ensemble.h" />
-    <ClInclude Include="..\..\src\barelymusician\ensemble\performer.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
-    <ClInclude Include="..\..\src\barelymusician\message\message.h" />
-    <ClInclude Include="..\..\src\barelymusician\message\message_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\sequencer\sequencer.h" />
-    <ClInclude Include="..\..\src\barelymusician\sequencer\transport.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{C58BD654-3773-4B8C-94B3-CBB8A6109E1D}</ProjectGuid>
-    <RootNamespace>barelymusician</RootNamespace>
+    <ProjectGuid>{8316558D-5F55-4FA1-9E07-90116833FA26}</ProjectGuid>
+    <RootNamespace>barelymusiciandemo</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -107,6 +55,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
+    <Import Project="..\barelymusician_examples\barelymusician_examples.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -124,62 +73,80 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <PreprocessorDefinitions>NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOGDI;NOMINMAX;NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>NOGDI;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <PreprocessorDefinitions>NOGDI;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <PreprocessorDefinitions>NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOGDI;NOMINMAX;NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\barelymusician\barelymusician.vcxproj">
+      <Project>{c58bd654-3773-4b8c-94b3-cbb8a6109e1d}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\examples\demo\ensemble_demo.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -24,8 +24,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "instrument_demo", "instrume
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ensemble_demo", "ensemble_demo\ensemble_demo.vcxproj", "{8316558D-5F55-4FA1-9E07-90116833FA26}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "midi_demo", "midi_demo\midi_demo.vcxproj", "{042A3767-A975-48B2-B6A2-E029599B6CD4}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		barelymusician_examples\barelymusician_examples.vcxitems*{042a3767-a975-48b2-b6a2-e029599b6cd4}*SharedItemsImports = 4
 		barelymusician_examples\barelymusician_examples.vcxitems*{2bb8f37e-17f0-4fa5-ae8f-b42554f857a1}*SharedItemsImports = 4
 		barelymusician_examples\barelymusician_examples.vcxitems*{4595b90a-6d82-455b-87fa-b9a604aa92d8}*SharedItemsImports = 9
 		barelymusician_examples\barelymusician_examples.vcxitems*{5a3910e6-1cd0-4bff-b392-aa74e3a5f996}*SharedItemsImports = 4
@@ -87,6 +90,14 @@ Global
 		{8316558D-5F55-4FA1-9E07-90116833FA26}.Release|x64.Build.0 = Release|x64
 		{8316558D-5F55-4FA1-9E07-90116833FA26}.Release|x86.ActiveCfg = Release|Win32
 		{8316558D-5F55-4FA1-9E07-90116833FA26}.Release|x86.Build.0 = Release|Win32
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Debug|x64.ActiveCfg = Debug|x64
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Debug|x64.Build.0 = Debug|x64
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Debug|x86.ActiveCfg = Debug|Win32
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Debug|x86.Build.0 = Debug|Win32
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Release|x64.ActiveCfg = Release|x64
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Release|x64.Build.0 = Release|x64
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Release|x86.ActiveCfg = Release|Win32
+		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,6 +110,7 @@ Global
 		{2BB8F37E-17F0-4FA5-AE8F-B42554F857A1} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
 		{5A3910E6-1CD0-4BFF-B392-AA74E3A5F996} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
 		{8316558D-5F55-4FA1-9E07-90116833FA26} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
+		{042A3767-A975-48B2-B6A2-E029599B6CD4} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4D0FC367-CC45-41CF-B318-814EA7A34206}

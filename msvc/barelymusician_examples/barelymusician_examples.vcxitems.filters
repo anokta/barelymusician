@@ -60,6 +60,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_chords_beat_composer.h">
       <Filter>Source Files\composers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\midi_beat_composer.h">
+      <Filter>Source Files\composers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp">

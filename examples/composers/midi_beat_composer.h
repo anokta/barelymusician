@@ -47,9 +47,9 @@ class MidiBeatComposer : public BeatComposer {
             transport.num_beats +
         transport.beat);
     const auto begin =
-        std::lower_bound(score_.begin(), score_.end(), beat, &compare_beat);
+        std::lower_bound(score_.begin(), score_.end(), beat, compare_beat);
     const auto end =
-        std::lower_bound(begin, score_.end(), beat + 1.0f, &compare_beat);
+        std::lower_bound(begin, score_.end(), beat + 1.0f, compare_beat);
     for (auto it = begin; it != end; ++it) {
       notes.push_back(*it);
     }

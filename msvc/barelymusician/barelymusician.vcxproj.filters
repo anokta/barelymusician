@@ -191,9 +191,6 @@
     <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer.cpp">
       <Filter>Source Files\sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument.cpp">
-      <Filter>Source Files\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\buffer.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>

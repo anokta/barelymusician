@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/instrument/instrument_utils.h"
 
@@ -12,7 +11,7 @@ namespace examples {
 namespace {
 
 // Default values.
-const float kDefaultGain = 1.0f;
+const float kDefaultGain = 0.25f;
 const float kDefaultEnvelopeAttack = 0.05f;
 const float kDefaultEnvelopeDecay = 0.0f;
 const float kDefaultEnvelopeSustain = 1.0f;
@@ -23,40 +22,39 @@ const OscillatorType kDefaultOscillatorType = OscillatorType::kSine;
 
 BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
                                            int num_voices)
-    : Instrument(kNumMonoChannels), voice_(BasicSynthVoice(sample_interval)) {
+    : gain_(0.0f), voice_(BasicSynthVoice(sample_interval)) {
   voice_.Resize(num_voices);
 
   // Register parameters.
   modulation_matrix_.Register(
-      BasicSynthInstrumentFloatParam::kGain,
-      kDefaultGain / static_cast<float>(num_voices),
+      BasicSynthInstrumentParam::kGain, kDefaultGain,
       [this](float value) { gain_ = std::max(0.0f, value); });
-  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeAttack,
+  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeAttack,
                               kDefaultEnvelopeAttack, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
                                   voice->SetEnvelopeAttack(value);
                                 });
                               });
-  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeDecay,
+  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeDecay,
                               kDefaultEnvelopeDecay, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
                                   voice->SetEnvelopeDecay(value);
                                 });
                               });
-  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeSustain,
+  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeSustain,
                               kDefaultEnvelopeSustain, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
                                   voice->SetEnvelopeSustain(value);
                                 });
                               });
-  modulation_matrix_.Register(BasicSynthInstrumentFloatParam::kEnvelopeRelease,
+  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeRelease,
                               kDefaultEnvelopeRelease, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
                                   voice->SetEnvelopeRelease(value);
                                 });
                               });
   modulation_matrix_.Register(
-      BasicSynthInstrumentFloatParam::kOscillatorType,
+      BasicSynthInstrumentParam::kOscillatorType,
       static_cast<float>(kDefaultOscillatorType), [this](float value) {
         voice_.Update([value](BasicSynthVoice* voice) {
           voice->SetOscillatorType(
@@ -65,27 +63,28 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
       });
 }
 
-void BasicSynthInstrument::SetFloatParam(int id, float value) {
-  if (!modulation_matrix_.SetParam(id, value)) {
-    LOG(WARNING) << "Failed to update float parameter with ID: " << id;
-  }
-}
-
-void BasicSynthInstrument::Clear() { voice_.Reset(); }
-
-float BasicSynthInstrument::Next(int channel) { return gain_ * voice_.Next(); }
-
-void BasicSynthInstrument::NoteOff(float index) {
-  LOG(INFO) << "NoteOff(" << index << ")";
-  voice_.Stop(index);
-}
+void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  LOG(INFO) << "NoteOn(" << index << ", " << intensity << ")";
   voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
     voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
     voice->SetGain(intensity);
   });
+}
+
+void BasicSynthInstrument::Process(Frame* output) {
+  const float sample = gain_ * voice_.Next();
+  for (auto& output_sample : *output) {
+    output_sample = sample;
+  }
+}
+
+void BasicSynthInstrument::Reset() { voice_.Reset(); }
+
+void BasicSynthInstrument::SetFloatParam(int id, float value) {
+  if (!modulation_matrix_.SetParam(id, value)) {
+    DLOG(WARNING) << "Failed to update float parameter with ID: " << id;
+  }
 }
 
 }  // namespace examples

@@ -30,7 +30,6 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer.cpp" />

@@ -9,6 +9,7 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/mixer.h"
 #include "barelymusician/ensemble/ensemble.h"
+#include "barelymusician/ensemble/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "composers/default_bar_composer.h"
 #include "composers/default_section_composer.h"
@@ -24,10 +25,11 @@ using ::barelyapi::Ensemble;
 using ::barelyapi::Instrument;
 using ::barelyapi::Mixer;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Performer;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicSynthInstrument;
-using ::barelyapi::examples::BasicSynthInstrumentFloatParam;
+using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::DefaultBarComposer;
 using ::barelyapi::examples::DefaultSectionComposer;
 using ::barelyapi::examples::MidiBeatComposer;
@@ -68,45 +70,47 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBars(kNumBars);
   sequencer.SetNumBeats(kNumBeats);
 
-  DefaultSectionComposer section_composer;
-  DefaultBarComposer bar_composer;
-
-  Ensemble ensemble(&sequencer, &section_composer, &bar_composer);
-
   std::vector<BasicSynthInstrument> instruments;
   std::vector<MidiBeatComposer> composers;
+  std::vector<Performer> performers;
 
   const int num_tracks = midi_file.getTrackCount();
   const int ticks_per_quarter = midi_file.getTPQ();
+  LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
+            << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  instruments.reserve(num_tracks);
-  composers.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
     BasicSynthInstrument instrument(kSampleInterval, kNumInstrumentVoices);
-    instrument.SetFloatParam(BasicSynthInstrumentFloatParam::kOscillatorType,
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                              static_cast<float>(OscillatorType::kSquare));
-    instrument.SetFloatParam(BasicSynthInstrumentFloatParam::kEnvelopeAttack,
-                             0.001f);
-    instrument.SetFloatParam(BasicSynthInstrumentFloatParam::kEnvelopeRelease,
-                             0.5f);
-    instrument.SetFloatParam(BasicSynthInstrumentFloatParam::kGain, 0.05f);
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.5f);
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     instruments.push_back(instrument);
 
     MidiBeatComposer composer(midi_file[i], ticks_per_quarter);
     composers.push_back(composer);
-
-    ensemble.AddPerformer(&instruments[i], &composers[i]);
   }
+
+  DefaultSectionComposer section_composer;
+  DefaultBarComposer bar_composer;
+  Ensemble ensemble(&sequencer, &section_composer, &bar_composer);
+  performers.reserve(num_tracks);
+  for (int i = 0; i < num_tracks; ++i) {
+    performers.emplace_back(&instruments[i], &composers[i]);
+    ensemble.AddPerformer(&performers[i]);
+  }
+
   // Audio process callback.
   Buffer mono_buffer(barelyapi::kNumMonoChannels, kNumFrames);
   Mixer mono_mixer(barelyapi::kNumMonoChannels, kNumFrames);
-  const auto audio_process_callback = [&sequencer, &instruments, &mono_buffer,
+  const auto audio_process_callback = [&sequencer, &performers, &mono_buffer,
                                        &mono_mixer](float* output) {
     sequencer.Update(kNumFrames);
 
     mono_mixer.Reset();
-    for (auto& instrument : instruments) {
-      instrument.Process(&mono_buffer);
+    for (auto& performer : performers) {
+      performer.Process(&mono_buffer);
       mono_mixer.AddInput(mono_buffer);
     }
 
@@ -128,16 +132,8 @@ int main(int argc, char* argv[]) {
       quit = true;
       return;
     }
-
-    LOG(INFO) << "Pressed " << key;
   };
   input_manager.RegisterKeyDownCallback(key_down_callback);
-
-  // Key up callback.
-  const auto key_up_callback = [](const WinConsoleInput::Key& key) {
-    LOG(INFO) << "Released " << key;
-  };
-  input_manager.RegisterKeyUpCallback(key_up_callback);
 
   // Start the demo.
   LOG(INFO) << "Starting audio stream";

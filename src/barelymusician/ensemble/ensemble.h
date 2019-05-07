@@ -7,10 +7,8 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/module.h"
 #include "barelymusician/composition/bar_composer.h"
-#include "barelymusician/composition/beat_composer.h"
 #include "barelymusician/composition/section_composer.h"
 #include "barelymusician/ensemble/performer.h"
-#include "barelymusician/instrument/instrument.h"
 #include "barelymusician/sequencer/sequencer.h"
 
 namespace barelyapi {
@@ -20,7 +18,7 @@ class Ensemble : public Module {
   Ensemble(Sequencer* sequencer, SectionComposer* section_composer,
            BarComposer* bar_composer);
 
-  void AddPerformer(Instrument* instrument, BeatComposer* beat_composer);
+  void AddPerformer(Performer* performer);
 
   void Reset() override;
 
@@ -36,7 +34,7 @@ class Ensemble : public Module {
   int harmonic_;
 
   // List of performers.
-  std::vector<Performer> performers_;
+  std::vector<Performer*> performers_;
 };
 
 Ensemble::Ensemble(Sequencer* sequencer, SectionComposer* section_composer,
@@ -60,9 +58,9 @@ Ensemble::Ensemble(Sequencer* sequencer, SectionComposer* section_composer,
       harmonic_ = bar_composer_->GetHarmonic(section_type_, transport.bar,
                                              transport.num_bars);
     }
-    for (auto& performer : performers_) {
-      performer.PerformBeat(transport, section_type_, harmonic_, sample_offset,
-                            num_beats_per_sample);
+    for (auto* performer : performers_) {
+      performer->PerformBeat(transport, section_type_, harmonic_, sample_offset,
+                             num_beats_per_sample);
     }
   });
 }
@@ -70,13 +68,13 @@ Ensemble::Ensemble(Sequencer* sequencer, SectionComposer* section_composer,
 void Ensemble::Reset() {
   section_type_ = 0;
   harmonic_ = 0;
-  for (auto& performer : performers_) {
-    performer.Reset();
+  for (auto* performer : performers_) {
+    performer->Reset();
   }
 }
 
-void Ensemble::AddPerformer(Instrument* instrument, BeatComposer* composer) {
-  performers_.emplace_back(instrument, composer);
+void Ensemble::AddPerformer(Performer* performer) {
+  performers_.push_back(performer);
 }
 
 }  // namespace barelyapi

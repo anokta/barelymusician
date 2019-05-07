@@ -8,6 +8,7 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/mixer.h"
 #include "barelymusician/ensemble/ensemble.h"
+#include "barelymusician/ensemble/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "composers/default_bar_composer.h"
 #include "composers/default_section_composer.h"
@@ -21,13 +22,13 @@ namespace {
 
 using ::barelyapi::Buffer;
 using ::barelyapi::Ensemble;
-using ::barelyapi::Instrument;
 using ::barelyapi::Mixer;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Performer;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicSynthInstrument;
-using ::barelyapi::examples::BasicSynthInstrumentFloatParam;
+using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::DefaultBarComposer;
 using ::barelyapi::examples::DefaultSectionComposer;
 using ::barelyapi::examples::PaWrapper;
@@ -64,81 +65,80 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBars(kNumBars);
   sequencer.SetNumBeats(kNumBeats);
 
-  std::vector<Instrument*> instruments;
+  const std::vector<float> scale(std::begin(kMajorScale),
+                                 std::end(kMajorScale));
+
+  std::vector<Performer> performers;
 
   BasicSynthInstrument chords_instrument(kSampleInterval, kNumInstrumentVoices);
-  chords_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kOscillatorType,
-      static_cast<float>(OscillatorType::kSine));
-  chords_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kEnvelopeAttack, 0.125f);
-  chords_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kEnvelopeRelease, 0.125f);
-  instruments.push_back(&chords_instrument);
+  chords_instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                                  static_cast<float>(OscillatorType::kSine));
+  chords_instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.125f);
+  chords_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                                  0.125f);
+  chords_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                                  0.125f);
 
   BasicSynthInstrument chords_2_instrument(kSampleInterval,
                                            kNumInstrumentVoices);
-  chords_2_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kOscillatorType,
-      static_cast<float>(OscillatorType::kNoise));
-  chords_2_instrument.SetFloatParam(BasicSynthInstrumentFloatParam::kGain,
-                                    0.1f);
-  chords_2_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kEnvelopeAttack, 0.5f);
-  chords_2_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kEnvelopeRelease, 0.05f);
-  instruments.push_back(&chords_2_instrument);
+  chords_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                                    static_cast<float>(OscillatorType::kNoise));
+  chords_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
+  chords_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                                    0.5f);
+  chords_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                                    0.05f);
 
-  SimpleChordsBeatComposer chords_composer(
-      kRootNote - barelyapi::kNumSemitones,
-      std::vector<float>(std::begin(kMajorScale), std::end(kMajorScale)));
+  SimpleChordsBeatComposer chords_composer(kRootNote - barelyapi::kNumSemitones,
+                                           scale);
+
+  performers.emplace_back(&chords_instrument, &chords_composer);
+  performers.emplace_back(&chords_2_instrument, &chords_composer);
 
   BasicSynthInstrument line_instrument(kSampleInterval, kNumInstrumentVoices);
-  line_instrument.SetFloatParam(BasicSynthInstrumentFloatParam::kOscillatorType,
+  line_instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                                 static_cast<float>(OscillatorType::kSquare));
-  line_instrument.SetFloatParam(BasicSynthInstrumentFloatParam::kEnvelopeAttack,
+  line_instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.125f);
+  line_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                                0.0025f);
+  line_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
                                 0.025f);
-  line_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kEnvelopeRelease, 0.025f);
-  instruments.push_back(&line_instrument);
 
-  SimpleLineBeatComposer line_composer(
-      kRootNote,
-      std::vector<float>(std::begin(kMajorScale), std::end(kMajorScale)));
+  SimpleLineBeatComposer line_composer(kRootNote, scale);
+
+  performers.emplace_back(&line_instrument, &line_composer);
 
   BasicSynthInstrument line_2_instrument(kSampleInterval, kNumInstrumentVoices);
-  line_2_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kOscillatorType,
-      static_cast<float>(OscillatorType::kSaw));
-  line_2_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kEnvelopeRelease, 0.05f);
-  line_2_instrument.SetFloatParam(
-      BasicSynthInstrumentFloatParam::kEnvelopeRelease, 0.125f);
-  instruments.push_back(&line_2_instrument);
+  line_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                                  static_cast<float>(OscillatorType::kSaw));
+  line_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.125f);
+  line_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                                  0.05f);
+  line_2_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                                  0.125f);
 
-  SimpleLineBeatComposer line_2_composer(
-      kRootNote - barelyapi::kNumSemitones,
-      std::vector<float>(std::begin(kMajorScale), std::end(kMajorScale)));
+  SimpleLineBeatComposer line_2_composer(kRootNote - barelyapi::kNumSemitones,
+                                         scale);
+
+  performers.emplace_back(&line_2_instrument, &line_2_composer);
 
   DefaultSectionComposer section_composer;
   DefaultBarComposer bar_composer;
-
   Ensemble ensemble(&sequencer, &section_composer, &bar_composer);
-  ensemble.AddPerformer(&chords_instrument, &chords_composer);
-  ensemble.AddPerformer(&chords_2_instrument, &chords_composer);
-  ensemble.AddPerformer(&line_instrument, &line_composer);
-  ensemble.AddPerformer(&line_2_instrument, &line_2_composer);
+  for (auto& performer : performers) {
+    ensemble.AddPerformer(&performer);
+  }
 
   // Audio process callback.
   Buffer mono_buffer(barelyapi::kNumMonoChannels, kNumFrames);
   Mixer mono_mixer(barelyapi::kNumMonoChannels, kNumFrames);
-  const auto audio_process_callback = [&sequencer, &instruments, &mono_buffer,
+  const auto audio_process_callback = [&sequencer, &performers, &mono_buffer,
                                        &mono_mixer](float* output) {
     sequencer.Update(kNumFrames);
 
     mono_mixer.Reset();
-    for (auto& instrument : instruments) {
-      instrument->Process(&mono_buffer);
+    for (auto& performer : performers) {
+      performer.Process(&mono_buffer);
       mono_mixer.AddInput(mono_buffer);
     }
 
@@ -160,16 +160,8 @@ int main(int argc, char* argv[]) {
       quit = true;
       return;
     }
-
-    LOG(INFO) << "Pressed " << key;
   };
   input_manager.RegisterKeyDownCallback(key_down_callback);
-
-  // Key up callback.
-  const auto key_up_callback = [](const WinConsoleInput::Key& key) {
-    LOG(INFO) << "Released " << key;
-  };
-  input_manager.RegisterKeyUpCallback(key_up_callback);
 
   // Start the demo.
   LOG(INFO) << "Starting audio stream";

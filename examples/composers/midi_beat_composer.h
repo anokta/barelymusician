@@ -17,7 +17,7 @@ class MidiBeatComposer : public BeatComposer {
   MidiBeatComposer(const smf::MidiEventList& midi_events,
                    int ticks_per_quarter) {
     const float ticks_per_beat = static_cast<float>(ticks_per_quarter);
-    const float max_velocity = 128.0f;
+    const float max_velocity = 127.0f;
     for (int i = 0; i < midi_events.size(); ++i) {
       const auto& midi_event = midi_events[i];
       if (midi_event.isNoteOn()) {
@@ -51,7 +51,9 @@ class MidiBeatComposer : public BeatComposer {
     const auto end =
         std::lower_bound(begin, score_.end(), beat + 1.0f, compare_beat);
     for (auto it = begin; it != end; ++it) {
-      notes.push_back(*it);
+      Note note = *it;
+      note.start_beat -= beat;
+      notes.push_back(note);
     }
 
     return notes;

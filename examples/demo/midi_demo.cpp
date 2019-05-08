@@ -45,12 +45,12 @@ const int kNumFrames = 512;
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-const float kTempo = 240.0f;
+const float kTempo = 132.0f;
 const int kNumBars = 4;
 const int kNumBeats = 4;
 
 // Ensemble settings.
-const int kNumInstrumentVoices = 10;
+const int kNumInstrumentVoices = 12;
 
 // Midi file name.
 const char kMidiFileName[] = "sample.mid";
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
     instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                              static_cast<float>(OscillatorType::kSquare));
     instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.5f);
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.2f);
     instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     instruments.push_back(instrument);
 

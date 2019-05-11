@@ -53,7 +53,7 @@ const int kNumBeats = 4;
 const int kNumInstrumentVoices = 12;
 
 // Midi file name.
-const char kMidiFileName[] = "data/midi/satie.mid";
+const char kMidiFileName[] = "data/midi/sample.mid";
 
 }  // namespace
 

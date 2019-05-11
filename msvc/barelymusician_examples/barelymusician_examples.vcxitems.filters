@@ -43,6 +43,12 @@
     <Filter Include="Resource Files\data\midi">
       <UniqueIdentifier>{fe039554-29a5-482f-ab16-c3b8663ec6bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\data\audio">
+      <UniqueIdentifier>{34cb22a7-3a65-4434-b56a-e73b165474b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\data\audio\drums">
+      <UniqueIdentifier>{024d0d55-996c-4551-a943-52c7e30c55de}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h">
@@ -88,32 +94,44 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build1.mid">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_closed.wav">
+      <Filter>Resource Files\data\audio\drums</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_open.wav">
+      <Filter>Resource Files\data\audio\drums</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_kick.wav">
+      <Filter>Resource Files\data\audio\drums</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_snare.wav">
+      <Filter>Resource Files\data\audio\drums</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build1.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build2.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build2.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build3.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build3.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build4.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build4.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build5.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build5.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build6.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build6.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\satie.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\satie.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\twinkle.mid">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\twinkle.mid">
       <Filter>Resource Files\data\midi</Filter>
-    </None>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

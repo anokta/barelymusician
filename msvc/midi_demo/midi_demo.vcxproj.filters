@@ -5,60 +5,10 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="third_party">
-      <UniqueIdentifier>{ceac49a5-6878-427f-a8b5-96f41b42c21b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="third_party\midifile">
-      <UniqueIdentifier>{d02c4eef-5ffe-4e99-9b38-1a305a2fba87}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="third_party\midifile\src">
-      <UniqueIdentifier>{6bdae132-52ad-49cc-9385-6d267407b801}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="third_party\midifile\include">
-      <UniqueIdentifier>{98efa7fb-a24f-45f6-96b1-66e158c95466}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\midi_demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\examples\third_party\midifile\src\Binasc.cpp">
-      <Filter>third_party\midifile\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiEvent.cpp">
-      <Filter>third_party\midifile\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiEventList.cpp">
-      <Filter>third_party\midifile\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiFile.cpp">
-      <Filter>third_party\midifile\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiMessage.cpp">
-      <Filter>third_party\midifile\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\examples\third_party\midifile\src\Options.cpp">
-      <Filter>third_party\midifile\src</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\examples\third_party\midifile\include\Binasc.h">
-      <Filter>third_party\midifile\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiEvent.h">
-      <Filter>third_party\midifile\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiEventList.h">
-      <Filter>third_party\midifile\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiFile.h">
-      <Filter>third_party\midifile\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiMessage.h">
-      <Filter>third_party\midifile\include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\examples\third_party\midifile\include\Options.h">
-      <Filter>third_party\midifile\include</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

@@ -86,8 +86,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -101,8 +101,8 @@
       <PreprocessorDefinitions>NOGDI;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,8 +116,8 @@
       <PreprocessorDefinitions>NOGDI;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -135,8 +135,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>portaudio.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -146,20 +146,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\examples\demo\midi_demo.cpp" />
-    <ClCompile Include="..\..\examples\third_party\midifile\src\Binasc.cpp" />
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiEvent.cpp" />
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiEventList.cpp" />
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiFile.cpp" />
-    <ClCompile Include="..\..\examples\third_party\midifile\src\MidiMessage.cpp" />
-    <ClCompile Include="..\..\examples\third_party\midifile\src\Options.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\examples\third_party\midifile\include\Binasc.h" />
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiEvent.h" />
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiEventList.h" />
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiFile.h" />
-    <ClInclude Include="..\..\examples\third_party\midifile\include\MidiMessage.h" />
-    <ClInclude Include="..\..\examples\third_party\midifile\include\Options.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

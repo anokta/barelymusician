@@ -53,7 +53,7 @@ const int kNumBeats = 4;
 const int kNumInstrumentVoices = 12;
 
 // Midi file name.
-const char kMidiFileName[] = "sample.mid";
+const char kMidiFileName[] = "data/midi/satie.mid";
 
 }  // namespace
 
@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
   WinConsoleInput input_manager;
 
   MidiFile midi_file;
-  midi_file.read(kMidiFileName);
+  CHECK(midi_file.read(kMidiFileName)) << "Failed to read " << kMidiFileName;
   midi_file.linkNotePairs();
 
   Sequencer sequencer(kSampleRate);

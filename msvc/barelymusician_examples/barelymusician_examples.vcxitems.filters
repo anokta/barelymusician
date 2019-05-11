@@ -34,6 +34,15 @@
     <Filter Include="Source Files\composers">
       <UniqueIdentifier>{cc3e58f2-53d6-486a-97b4-93751cb9f376}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{3417e019-5e55-4b08-9d60-b5d510292b98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\data">
+      <UniqueIdentifier>{c75a4895-f6ec-4b82-b02d-ef83e9f3b3dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\data\midi">
+      <UniqueIdentifier>{fe039554-29a5-482f-ab16-c3b8663ec6bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h">
@@ -77,5 +86,34 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.cpp">
       <Filter>Source Files\util\audio_io</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build1.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build2.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build3.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build4.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build5.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build6.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\satie.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\twinkle.mid">
+      <Filter>Resource Files\data\midi</Filter>
+    </None>
   </ItemGroup>
 </Project>

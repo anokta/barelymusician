@@ -52,15 +52,12 @@ Ensemble::Ensemble(Sequencer* sequencer, SectionComposer* section_composer,
     if (transport.beat == 0) {
       // New bar.
       if (transport.bar == 0) {
-        LOG(INFO) << "Section " << transport.section;
         // New section.
         section_type_ = section_composer_->GetSectionType(transport.section);
       }
-      LOG(INFO) << "Bar " << transport.bar;
       harmonic_ = bar_composer_->GetHarmonic(section_type_, transport.bar,
                                              transport.num_bars);
     }
-    LOG(INFO) << "Beat " << transport.beat;
     for (auto* performer : performers_) {
       performer->PerformBeat(transport, section_type_, harmonic_, sample_offset,
                              num_beats_per_sample);

@@ -1,13 +1,12 @@
+#include <algorithm>
 #include <chrono>
-#include <iomanip>
-#include <iterator>
+#include <functional>
+#include <memory>
 #include <thread>
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/base/buffer.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/mixer.h"
 #include "barelymusician/ensemble/ensemble.h"
 #include "barelymusician/ensemble/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
@@ -24,13 +23,10 @@
 
 namespace {
 
-using ::barelyapi::Buffer;
 using ::barelyapi::Ensemble;
-using ::barelyapi::Mixer;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
 using ::barelyapi::Sequencer;
-using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
@@ -159,24 +155,16 @@ int main(int argc, char* argv[]) {
   }
 
   // Audio process callback.
-  Buffer mono_buffer(barelyapi::kNumMonoChannels, kNumFrames);
-  Mixer mono_mixer(barelyapi::kNumMonoChannels, kNumFrames);
-  const auto audio_process_callback = [&sequencer, &performers, &mono_buffer,
-                                       &mono_mixer](float* output) {
+  std::vector<float> temp_buffer(kNumChannels * kNumFrames);
+  const auto audio_process_callback = [&sequencer, &performers,
+                                       &temp_buffer](float* output) {
     sequencer.Update(kNumFrames);
 
-    mono_mixer.Reset();
+    std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : performers) {
-      performer.Process(&mono_buffer);
-      mono_mixer.AddInput(mono_buffer);
-    }
-
-    const auto& mono_output = mono_mixer.GetOutput();
-    for (int frame = 0; frame < kNumFrames; ++frame) {
-      const float sample = mono_output[frame][0];
-      for (int channel = 0; channel < kNumChannels; ++channel) {
-        output[kNumChannels * frame + channel] = sample;
-      }
+      performer.Process(temp_buffer.data(), kNumChannels, kNumFrames);
+      std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
+                     std::plus<float>());
     }
   };
   audio_io.SetAudioProcessCallback(audio_process_callback);

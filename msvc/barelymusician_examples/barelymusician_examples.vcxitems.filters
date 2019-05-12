@@ -81,15 +81,13 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\anokta\Documents\GitHub\barelymusician-sdk\msvc\barelymusician_examples\..\..\examples\instruments\basic_sampler_voice.h">
-      <Filter>Header Files\instruments</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.h">
       <Filter>Header Files\instruments</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_drumkit_beat_composer.h">
       <Filter>Header Files\composers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_sampler_voice.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp">
@@ -107,12 +105,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\anokta\Documents\GitHub\barelymusician-sdk\msvc\barelymusician_examples\..\..\examples\instruments\basic_sampler_voice.cpp">
-      <Filter>Source Files\instruments</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.cpp">
       <Filter>Source Files\instruments</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_sampler_voice.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_closed.wav">

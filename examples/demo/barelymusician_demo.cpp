@@ -1,5 +1,6 @@
 #include <chrono>
 #include <iomanip>
+#include <memory>
 #include <thread>
 
 #include "barelymusician/base/logging.h"
@@ -50,11 +51,7 @@ int main(int argc, char* argv[]) {
   // Audio process callback.
   const auto audio_process_callback = [&sequencer](float* output) {
     sequencer.Update(kNumFrames);
-    for (int frame = 0; frame < kNumFrames; ++frame) {
-      for (int channel = 0; channel < kNumChannels; ++channel) {
-        output[kNumChannels * frame + channel] = 0.0f;
-      }
-    }
+    std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
   };
   audio_io.SetAudioProcessCallback(audio_process_callback);
 

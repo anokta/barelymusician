@@ -3,7 +3,6 @@
 
 #include <unordered_map>
 
-#include "barelymusician/base/frame.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/modulation_matrix.h"
 #include "instruments/basic_sampler_voice.h"
@@ -19,13 +18,13 @@ class BasicDrumkitInstrument : public Instrument {
   // Implements |Instrument|.
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
-  void Process(Frame* output) override;
+  void Process(float* output, int num_channels, int num_frames) override;
   void Reset() override;
 
   void Add(float note_index, const WavFile& wav_file);
 
  private:
-   const float sample_interval_;
+  const float sample_interval_;
 
   float gain_;
 

@@ -66,12 +66,6 @@
     <ClCompile Include="..\..\src\barelymusician\base\event_test.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\buffer_test.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\mixer_test.cpp">
-      <Filter>Source Files\dsp</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\note_utils_test.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>

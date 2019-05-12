@@ -3,7 +3,6 @@
 
 #include <list>
 
-#include "barelymusician/base/buffer.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/module.h"
 #include "barelymusician/composition/beat_composer.h"
@@ -43,7 +42,7 @@ class Performer : public Module {
   void PerformBeat(const Transport& transport, int section_type, int harmonic,
                    int sample_offset, int num_samples_per_beat);
 
-  void Process(Buffer* buffer);
+  void Process(float* output, int num_channels, int num_frames);
 
  private:
   void PlayNote(float index, float intensity, int start_sample,
@@ -91,28 +90,27 @@ void Performer::PerformBeat(const Transport& transport, int section_type,
   }
 }
 
-void Performer::Process(Buffer* output) {
-  DCHECK(output);
-
-  const int num_frames = output->num_frames();
+void Performer::Process(float* output, int num_channels, int num_frames) {
   // Process frames within message events range.
-  int i = 0;
+  int frame = 0;
   const auto begin = messages_.begin();
   const auto end =
       std::lower_bound(begin, messages_.end(), num_frames, &CompareTimestamp);
   if (begin != end) {
     for (auto it = begin; it != end; ++it) {
-      while (i < it->timestamp) {
-        instrument_->Process(&(*output)[i++]);
+      const int num_frames_to_process = it->timestamp - frame;
+      if (num_frames_to_process > 0) {
+        instrument_->Process(&output[frame * num_channels], num_channels,
+                             num_frames_to_process);
+        frame += num_frames_to_process;
       }
       ProcessMessage(*it);
     }
     messages_.erase(begin, end);
   }
   // Process remaining frames.
-  while (i < num_frames) {
-    instrument_->Process(&(*output)[i++]);
-  }
+  instrument_->Process(&output[frame * num_channels], num_channels,
+                       num_frames - frame);
 
   // Update message timestamps.
   for (auto& message : messages_) {

@@ -24,6 +24,7 @@ void BasicDrumkitInstrument::NoteOff(float index) {
     LOG(WARNING) << "Invalid note index " << index;
     return;
   }
+  DLOG(INFO) << "BasicDrumkitInstrument::NoteOff(" << index << ")";
   it->second.Stop();
 }
 
@@ -33,19 +34,23 @@ void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
     LOG(WARNING) << "Invalid note index " << index;
     return;
   }
-  LOG(INFO) << "Drumkit(" << index << ", " << intensity << ")";
+  DLOG(INFO) << "BasicDrumkitInstrument::NoteOn(" << index << ", " << intensity
+             << ")";
   it->second.SetGain(intensity);
   it->second.Start();
 }
 
-void BasicDrumkitInstrument::Process(Frame* output) {
-  float sample = 0.0f;
-  for (auto& voice : voices_) {
-    sample += voice.second.Next();
-  }
-  sample *= gain_;
-  for (auto& output_sample : *output) {
-    output_sample = sample;
+void BasicDrumkitInstrument::Process(float* output, int num_channels,
+                                     int num_frames) {
+  for (int frame = 0; frame < num_frames; ++frame) {
+    float sample = 0.0f;
+    for (auto& voice : voices_) {
+      sample += voice.second.Next();
+    }
+    sample *= gain_;
+    for (int channel = 0; channel < num_channels; ++channel) {
+      output[num_channels * frame + channel] = sample;
+    }
   }
 }
 

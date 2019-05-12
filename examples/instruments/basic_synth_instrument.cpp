@@ -63,20 +63,27 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
       });
 }
 
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
+void BasicSynthInstrument::NoteOff(float index) {
+  DLOG(INFO) << "BasicSynthInstrument::NoteOff(" << index << ")";
+  voice_.Stop(index);
+}
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  LOG(INFO) << "Note(" << index << ", " << intensity << ")";
+  DLOG(INFO) << "BasicSynthInstrument::NoteOn(" << index << ", " << intensity
+             << ")";
   voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
     voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
     voice->SetGain(intensity);
   });
 }
 
-void BasicSynthInstrument::Process(Frame* output) {
-  const float sample = gain_ * voice_.Next();
-  for (auto& output_sample : *output) {
-    output_sample = sample;
+void BasicSynthInstrument::Process(float* output, int num_channels,
+                                   int num_frames) {
+  for (int frame = 0; frame < num_frames; ++frame) {
+    const float sample = gain_ * voice_.Next();
+    for (int channel = 0; channel < num_channels; ++channel) {
+      output[num_channels * frame + channel] = sample;
+    }
   }
 }
 

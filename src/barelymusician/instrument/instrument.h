@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 
-#include "barelymusician/base/frame.h"
 #include "barelymusician/base/module.h"
 
 namespace barelyapi {
@@ -20,10 +19,12 @@ class Instrument : public Module {
   // @param intensity Note intensity.
   virtual void NoteOn(float index, float intensity) = 0;
 
-  // Processes the next |output| frame.
+  // Processes the next |output| buffer.
   //
-  // @param output Pointer to the output frame.
-  virtual void Process(Frame* output) = 0;
+  // @param output Pointer to the output buffer.
+  // @param num_channels Number of output channels.
+  // @param num_frames Number of output frames.
+  virtual void Process(float* output, int num_channels, int num_frames) = 0;
 };
 
 }  // namespace barelyapi

@@ -5,7 +5,6 @@
 #include <thread>
 
 #include "barelymusician/base/constants.h"
-#include "barelymusician/base/frame.h"
 #include "barelymusician/base/logging.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/audio_io/pa_wrapper.h"
@@ -13,7 +12,6 @@
 
 namespace {
 
-using ::barelyapi::Frame;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
@@ -69,10 +67,7 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   const auto audio_process_callback = [&instrument](float* output) {
-    for (int frame = 0; frame < kNumFrames; ++frame) {
-      Frame output_frame(&output[kNumChannels * frame], kNumChannels);
-      instrument.Process(&output_frame);
-    }
+    instrument.Process(output, kNumChannels, kNumFrames);
   };
   audio_io.SetAudioProcessCallback(audio_process_callback);
 
@@ -109,7 +104,6 @@ int main(int argc, char* argv[]) {
       return;
     }
     instrument.NoteOn(note_index, kNoteIntensity);
-    LOG(INFO) << "NoteOn(" << note_index << ")";
   };
   input_manager.RegisterKeyDownCallback(key_down_callback);
 
@@ -122,7 +116,6 @@ int main(int argc, char* argv[]) {
           return;
         }
         instrument.NoteOff(note_index);
-        LOG(INFO) << "NoteOff(" << note_index << ")";
       };
   input_manager.RegisterKeyUpCallback(key_up_callback);
 

@@ -141,15 +141,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\event.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\buffer.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\frame.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\dsp\mixer.h">
-      <Filter>Header Files\dsp</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
@@ -190,15 +181,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer.cpp">
       <Filter>Source Files\sequencer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\buffer.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\frame.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\dsp\mixer.cpp">
-      <Filter>Source Files\dsp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\note_utils.cpp">
       <Filter>Source Files\composition</Filter>

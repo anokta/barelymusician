@@ -2,6 +2,7 @@
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/base/frame.h"
+#include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/modulation_matrix.h"
 #include "barelymusician/instrument/polyphonic_voice.h"
 #include "instruments/basic_synth_voice.h"

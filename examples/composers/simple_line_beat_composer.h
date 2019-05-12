@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "barelymusician/base/constants.h"
+#include "barelymusician/base/random.h"
 #include "barelymusician/composition/beat_composer.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
@@ -23,28 +24,40 @@ class SimpleLineBeatComposer : public BeatComposer {
                              int harmonic) override {
     const float start_note = static_cast<float>(harmonic);
     std::vector<Note> notes;
-    notes.push_back(BuildNote(start_note, 0.0f, 0.25f));
-    notes.push_back(BuildNote(start_note + static_cast<float>(transport.beat),
-                              0.5f, 0.25f));
-    if (transport.beat % 2 == 0) {
-      notes.push_back(BuildNote(start_note + static_cast<float>(transport.beat),
-                                0.0f, 0.05f));
-      notes.push_back(BuildNote(start_note, 0.5f, 0.05f));
-    }
-    if (transport.beat + 1 == transport.num_beats) {
-      notes.push_back(BuildNote(start_note + static_cast<float>(transport.beat),
-                                0.25f, 0.125f));
+    if (transport.beat % 2 == 1) {
+      notes.push_back(BuildNote(start_note, 0.0f, 0.25f));
       notes.push_back(BuildNote(start_note - static_cast<float>(transport.beat),
-                                0.5f, 0.25f));
+                                0.33f, 0.25f));
+      notes.push_back(BuildNote(start_note, 0.66f, 0.25f));
+    } else {
       notes.push_back(BuildNote(start_note + static_cast<float>(transport.beat),
-                                0.75f, 0.125f));
+                                0.0f, 0.25f));
+    }
+    if (transport.beat % 2 == 0) {
+      notes.push_back(BuildNote(start_note - static_cast<float>(transport.beat),
+                                0.0f, 0.05f));
+      notes.push_back(BuildNote(
+          start_note - static_cast<float>(2.0f * transport.beat), 0.5f, 0.05f));
+    }
+    if (transport.beat + 1 == transport.num_beats && transport.bar % 2 == 1) {
+      notes.push_back(
+          BuildNote(start_note + static_cast<float>(2.0f * transport.beat),
+                    0.25f, 0.125f));
+      // notes.push_back(BuildNote(start_note -
+      // static_cast<float>(transport.beat),
+      //                          0.5f, 0.25f));
+      notes.push_back(
+          BuildNote(start_note - static_cast<float>(2.0f * transport.beat),
+                    0.75f, 0.125f));
+      notes.push_back(BuildNote(
+          start_note + static_cast<float>(2.0f * transport.beat), 0.5f, 0.25f));
     }
     return notes;
   }
 
  private:
   Note BuildNote(float index, float start_beat, float duration_beats) {
-    const float intensity = 1.0f;
+    const float intensity = random::Uniform(0.5f, 1.0f);
     Note note;
     note.index = root_note_ + GetScaledNoteIndex(index, scale_);
     note.intensity = intensity;

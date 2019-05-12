@@ -31,9 +31,6 @@
     <Filter Include="Source Files\util\input_manager">
       <UniqueIdentifier>{1ef486f6-80c2-432e-81fb-d02e806dcac7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\composers">
-      <UniqueIdentifier>{cc3e58f2-53d6-486a-97b4-93751cb9f376}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{3417e019-5e55-4b08-9d60-b5d510292b98}</UniqueIdentifier>
     </Filter>
@@ -48,6 +45,9 @@
     </Filter>
     <Filter Include="Resource Files\data\audio\drums">
       <UniqueIdentifier>{024d0d55-996c-4551-a943-52c7e30c55de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\composers">
+      <UniqueIdentifier>{cc3e58f2-53d6-486a-97b4-93751cb9f376}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -64,22 +64,31 @@
       <Filter>Header Files\util\input_manager</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_section_composer.h">
-      <Filter>Source Files\composers</Filter>
+      <Filter>Header Files\composers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_bar_composer.h">
-      <Filter>Source Files\composers</Filter>
+      <Filter>Header Files\composers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_line_beat_composer.h">
-      <Filter>Source Files\composers</Filter>
+      <Filter>Header Files\composers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_chords_beat_composer.h">
-      <Filter>Source Files\composers</Filter>
+      <Filter>Header Files\composers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\midi_beat_composer.h">
-      <Filter>Source Files\composers</Filter>
+      <Filter>Header Files\composers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h">
       <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\anokta\Documents\GitHub\barelymusician-sdk\msvc\barelymusician_examples\..\..\examples\instruments\basic_sampler_voice.h">
+      <Filter>Header Files\instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.h">
+      <Filter>Header Files\instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_drumkit_beat_composer.h">
+      <Filter>Header Files\composers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +106,12 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp">
       <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\anokta\Documents\GitHub\barelymusician-sdk\msvc\barelymusician_examples\..\..\examples\instruments\basic_sampler_voice.cpp">
+      <Filter>Source Files\instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.cpp">
+      <Filter>Source Files\instruments</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

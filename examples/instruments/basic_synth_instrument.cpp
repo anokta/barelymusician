@@ -66,6 +66,7 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
 void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
+  LOG(INFO) << "Note(" << index << ", " << intensity << ")";
   voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
     voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
     voice->SetGain(intensity);

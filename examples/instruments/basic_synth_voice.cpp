@@ -1,7 +1,5 @@
 #include "instruments/basic_synth_voice.h"
 
-#include "barelymusician/instrument/instrument_utils.h"
-
 namespace barelyapi {
 namespace examples {
 

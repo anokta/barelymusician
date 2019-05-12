@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "MidiFile.h"
+#include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/ensemble/ensemble.h"
 #include "barelymusician/ensemble/performer.h"
@@ -14,7 +15,6 @@
 #include "composers/default_section_composer.h"
 #include "composers/midi_beat_composer.h"
 #include "instruments/basic_synth_instrument.h"
-#include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
@@ -28,7 +28,7 @@ using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::DefaultBarComposer;
 using ::barelyapi::examples::DefaultSectionComposer;
 using ::barelyapi::examples::MidiBeatComposer;
-using ::barelyapi::examples::PaWrapper;
+using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 using ::smf::MidiFile;
 
@@ -51,7 +51,7 @@ const char kMidiFileName[] = "data/midi/sample.mid";
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  PaWrapper audio_io;
+  PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
   MidiFile midi_file;
@@ -94,8 +94,8 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto audio_process_callback = [&sequencer, &performers,
-                                       &temp_buffer](float* output) {
+  const auto process_callback = [&sequencer, &performers,
+                                 &temp_buffer](float* output) {
     sequencer.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
@@ -105,7 +105,7 @@ int main(int argc, char* argv[]) {
                      std::plus<float>());
     }
   };
-  audio_io.SetAudioProcessCallback(audio_process_callback);
+  audio_output.SetProcessCallback(process_callback);
 
   // Key down callback.
   bool quit = false;
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Starting audio stream";
 
   input_manager.Initialize();
-  audio_io.Initialize(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
   while (!quit) {
     input_manager.Update();
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
 
-  audio_io.Shutdown();
+  audio_output.Stop();
   input_manager.Shutdown();
 
   return 0;

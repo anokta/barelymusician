@@ -1,20 +1,26 @@
-#include "util/audio_io/pa_wrapper.h"
+#include "audio_output/pa_audio_output.h"
 
 #include <utility>
+
+#include "barelymusician/base/logging.h"
 
 namespace barelyapi {
 namespace examples {
 
-PaWrapper::PaWrapper() : audio_process_(nullptr), stream_(nullptr) {
+PaAudioOutput::PaAudioOutput() : process_callback_(nullptr), stream_(nullptr) {
   Pa_Initialize();
 }
 
-PaWrapper::~PaWrapper() { Pa_Terminate(); }
+PaAudioOutput::~PaAudioOutput() { Pa_Terminate(); }
 
-void PaWrapper::Initialize(int sample_rate, int num_channels, int num_frames) {
+void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
+  DCHECK_GE(sample_rate, 0);
+  DCHECK_GE(num_channels, 0);
+  DCHECK_GE(num_frames, 0);
+
   if (stream_ != nullptr) {
-    // Shut down the existing |stream_| first.
-    Shutdown();
+    // Stop the existing |stream_| first.
+    Stop();
   }
 
   PaStreamParameters outputParameters;
@@ -31,20 +37,21 @@ void PaWrapper::Initialize(int sample_rate, int num_channels, int num_frames) {
                            PaStreamCallbackFlags status_flags,
                            void* user_data) {
     if (user_data != nullptr) {
-      // Access the audio process callback via |user_data| (to avoid
-      // capturing |audio_process_|).
-      const auto& audio_process =
-          *reinterpret_cast<AudioProcessCallback*>(user_data);
-      audio_process(reinterpret_cast<float*>(output_buffer));
+      // Access the audio process callback via |user_data| (to avoid capturing
+      // |process_callback_|).
+      const auto& process_callback =
+          *reinterpret_cast<ProcessCallback*>(user_data);
+      process_callback(reinterpret_cast<float*>(output_buffer));
     }
     return static_cast<int>(paContinue);
   };
   Pa_OpenStream(&stream_, nullptr, &outputParameters, sample_rate, num_frames,
-                paClipOff, callback, reinterpret_cast<void*>(&audio_process_));
+                paClipOff, callback,
+                reinterpret_cast<void*>(&process_callback_));
   Pa_StartStream(stream_);
 }
 
-void PaWrapper::Shutdown() {
+void PaAudioOutput::Stop() {
   if (stream_ != nullptr) {
     Pa_StopStream(stream_);
     Pa_CloseStream(stream_);
@@ -52,8 +59,8 @@ void PaWrapper::Shutdown() {
   stream_ = nullptr;
 }
 
-void PaWrapper::SetAudioProcessCallback(AudioProcessCallback&& audio_process) {
-  audio_process_ = std::move(audio_process);
+void PaAudioOutput::SetProcessCallback(ProcessCallback&& process_callback) {
+  process_callback_ = std::move(process_callback);
 }
 
 }  // namespace examples

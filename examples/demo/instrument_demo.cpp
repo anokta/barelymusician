@@ -4,10 +4,10 @@
 #include <memory>
 #include <thread>
 
+#include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "instruments/basic_synth_instrument.h"
-#include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
@@ -15,7 +15,7 @@ namespace {
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
-using ::barelyapi::examples::PaWrapper;
+using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
 // System audio settings.
@@ -53,7 +53,7 @@ float NoteIndexFromKey(const WinConsoleInput::Key& key, float offset_octaves) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  PaWrapper audio_io;
+  PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
   BasicSynthInstrument instrument(kSampleInterval, kNumVoices);
@@ -66,10 +66,10 @@ int main(int argc, char* argv[]) {
   float offset_octaves = 0.0f;
 
   // Audio process callback.
-  const auto audio_process_callback = [&instrument](float* output) {
+  const auto process_callback = [&instrument](float* output) {
     instrument.Process(output, kNumChannels, kNumFrames);
   };
-  audio_io.SetAudioProcessCallback(audio_process_callback);
+  audio_output.SetProcessCallback(process_callback);
 
   // Key down callback.
   bool quit = false;
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Starting audio stream";
 
   input_manager.Initialize();
-  audio_io.Initialize(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
   while (!quit) {
     input_manager.Update();
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
 
-  audio_io.Shutdown();
+  audio_output.Stop();
   input_manager.Shutdown();
 
   return 0;

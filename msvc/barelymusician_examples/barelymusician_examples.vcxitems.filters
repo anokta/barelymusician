@@ -16,17 +16,11 @@
     <Filter Include="Header Files\util">
       <UniqueIdentifier>{c9d1406a-8beb-4bc9-a5fa-6699dc345349}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\util\audio_io">
-      <UniqueIdentifier>{d344f319-af00-471d-ae85-1369c73f0889}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\util\input_manager">
       <UniqueIdentifier>{dbcd1ef7-08c8-4ecc-80e0-c4ce994b9c62}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{1a9b9a6f-e936-4057-b396-63218ed72295}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\util\audio_io">
-      <UniqueIdentifier>{81994d87-b73c-4a67-ba65-db122efda83d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\util\input_manager">
       <UniqueIdentifier>{1ef486f6-80c2-432e-81fb-d02e806dcac7}</UniqueIdentifier>
@@ -49,6 +43,12 @@
     <Filter Include="Header Files\composers">
       <UniqueIdentifier>{cc3e58f2-53d6-486a-97b4-93751cb9f376}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\audio_output">
+      <UniqueIdentifier>{ac2cbeca-c57e-4053-8323-4c7e08b86b9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\audio_output">
+      <UniqueIdentifier>{b0d5b5c4-3524-478c-957e-3cfe03b555da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h">
@@ -56,9 +56,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.h">
       <Filter>Header Files\instruments</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.h">
-      <Filter>Header Files\util\audio_io</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h">
       <Filter>Header Files\util\input_manager</Filter>
@@ -88,6 +85,12 @@
       <Filter>Header Files\composers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_sampler_voice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h">
+      <Filter>Header Files\audio_output</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\audio_output.h">
+      <Filter>Header Files\audio_output</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp">
@@ -99,9 +102,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp">
       <Filter>Source Files\util\input_manager</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.cpp">
-      <Filter>Source Files\util\audio_io</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -109,6 +109,9 @@
       <Filter>Source Files\instruments</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_sampler_voice.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.cpp">
+      <Filter>Source Files\audio_output</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_closed.wav">

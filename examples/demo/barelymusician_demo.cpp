@@ -3,16 +3,16 @@
 #include <memory>
 #include <thread>
 
+#include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/sequencer/sequencer.h"
-#include "util/audio_io/pa_wrapper.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
-using ::barelyapi::examples::PaWrapper;
+using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
 // System audio settings.
@@ -30,7 +30,7 @@ const int kNumBeats = 4;
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  PaWrapper audio_io;
+  PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
   Sequencer sequencer(kSampleRate);
@@ -49,11 +49,11 @@ int main(int argc, char* argv[]) {
   sequencer.RegisterBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto audio_process_callback = [&sequencer](float* output) {
+  const auto process_callback = [&sequencer](float* output) {
     sequencer.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
   };
-  audio_io.SetAudioProcessCallback(audio_process_callback);
+  audio_output.SetProcessCallback(process_callback);
 
   // Key down callback.
   bool quit = false;
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Starting audio stream";
 
   input_manager.Initialize();
-  audio_io.Initialize(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
   while (!quit) {
     input_manager.Update();
@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
 
-  audio_io.Shutdown();
+  audio_output.Stop();
   input_manager.Shutdown();
 
   return 0;

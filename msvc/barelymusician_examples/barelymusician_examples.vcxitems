@@ -23,12 +23,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build1.mid">

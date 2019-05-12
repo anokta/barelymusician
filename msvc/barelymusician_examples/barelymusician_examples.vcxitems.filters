@@ -78,6 +78,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\midi_beat_composer.h">
       <Filter>Source Files\composers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp">
@@ -91,6 +94,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\audio_io\pa_wrapper.cpp">
       <Filter>Source Files\util\audio_io</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

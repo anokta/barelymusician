@@ -36,7 +36,7 @@ void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
   }
   DLOG(INFO) << "BasicDrumkitInstrument::NoteOn(" << index << ", " << intensity
              << ")";
-  it->second.SetGain(intensity);
+  it->second.set_gain(intensity);
   it->second.Start();
 }
 
@@ -61,9 +61,11 @@ void BasicDrumkitInstrument::Reset() {
 }
 
 void BasicDrumkitInstrument::Add(float note_index, const WavFile& wav_file) {
-  BasicSamplerVoice voice(sample_interval_);
-  voice.SetEnvelopeRelease(kDefaultRelease);
-  voice.SetSamplePlayerData(wav_file.GetData(), wav_file.GetSampleRate());
+  BasicDrumkitVoice voice(sample_interval_);
+  voice.envelope().SetRelease(kDefaultRelease);
+  const auto& data = wav_file.GetData();
+  const int data_size = static_cast<int>(data.size());
+  voice.generator().SetData(data.data(), wav_file.GetSampleRate(), data_size);
   voices_.insert({note_index, voice});
 }
 

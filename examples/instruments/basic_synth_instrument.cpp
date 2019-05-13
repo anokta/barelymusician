@@ -32,32 +32,32 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
   modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeAttack,
                               kDefaultEnvelopeAttack, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->SetEnvelopeAttack(value);
+                                  voice->envelope().SetAttack(value);
                                 });
                               });
   modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeDecay,
                               kDefaultEnvelopeDecay, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->SetEnvelopeDecay(value);
+                                  voice->envelope().SetDecay(value);
                                 });
                               });
   modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeSustain,
                               kDefaultEnvelopeSustain, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->SetEnvelopeSustain(value);
+                                  voice->envelope().SetSustain(value);
                                 });
                               });
   modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeRelease,
                               kDefaultEnvelopeRelease, [this](float value) {
                                 voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->SetEnvelopeRelease(value);
+                                  voice->envelope().SetRelease(value);
                                 });
                               });
   modulation_matrix_.Register(
       BasicSynthInstrumentParam::kOscillatorType,
       static_cast<float>(kDefaultOscillatorType), [this](float value) {
         voice_.Update([value](BasicSynthVoice* voice) {
-          voice->SetOscillatorType(
+          voice->generator().SetType(
               static_cast<OscillatorType>(static_cast<int>(value)));
         });
       });
@@ -72,8 +72,8 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
   DLOG(INFO) << "BasicSynthInstrument::NoteOn(" << index << ", " << intensity
              << ")";
   voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
-    voice->SetOscillatorFrequency(FrequencyFromNoteIndex(index));
-    voice->SetGain(intensity);
+    voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
+    voice->set_gain(intensity);
   });
 }
 

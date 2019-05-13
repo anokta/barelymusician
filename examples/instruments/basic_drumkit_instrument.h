@@ -3,9 +3,10 @@
 
 #include <unordered_map>
 
+#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/modulation_matrix.h"
-#include "instruments/basic_sampler_voice.h"
+#include "instruments/basic_enveloped_voice.h"
 #include "util/wav_file.h"
 
 namespace barelyapi {
@@ -24,11 +25,13 @@ class BasicDrumkitInstrument : public Instrument {
   void Add(float note_index, const WavFile& wav_file);
 
  private:
+  using BasicDrumkitVoice = BasicEnvelopedVoice<SamplePlayer>;
+
   const float sample_interval_;
 
   float gain_;
 
-  std::unordered_map<float, BasicSamplerVoice> voices_;
+  std::unordered_map<float, BasicDrumkitVoice> voices_;
 };
 
 }  // namespace examples

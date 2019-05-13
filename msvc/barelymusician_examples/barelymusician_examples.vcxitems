@@ -23,18 +23,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_drumkit_beat_composer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_line_beat_composer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_sampler_voice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_enveloped_voice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_sampler_voice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_voice.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp" />
   </ItemGroup>

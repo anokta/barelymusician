@@ -1,10 +1,11 @@
 #ifndef EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
+#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/modulation_matrix.h"
 #include "barelymusician/instrument/polyphonic_voice.h"
-#include "instruments/basic_synth_voice.h"
+#include "instruments/basic_enveloped_voice.h"
 
 namespace barelyapi {
 namespace examples {
@@ -35,6 +36,8 @@ class BasicSynthInstrument : public Instrument {
   void SetFloatParam(int id, float value);
 
  private:
+  using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;
+
   float gain_;
 
   PolyphonicVoice<BasicSynthVoice> voice_;

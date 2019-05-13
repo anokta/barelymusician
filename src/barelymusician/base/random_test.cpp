@@ -10,23 +10,23 @@ namespace {
 
 // Tests that the random number generator generates the same values when it is
 // reset with the same seed.
-TEST(RandomTest, Reset) {
+TEST(RandomTest, SetSeed) {
   const int kSeed = 1;
   const int kNumValues = 10;
 
   // Set the seed.
-  Reset(kSeed);
+  Random::SetSeed(kSeed);
   // Generate some random values.
   std::vector<float> values(kNumValues);
   for (int i = 0; i < kNumValues; ++i) {
-    values[i] = Uniform();
+    values[i] = Random::Uniform();
   }
   // Reset the seed with the same value.
-  Reset(kSeed);
+  Random::SetSeed(kSeed);
 
   // Validate that the same numbers are generated for the next |kNumValues|.
   for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_FLOAT_EQ(values[i], Uniform());
+    EXPECT_FLOAT_EQ(values[i], Random::Uniform());
   }
 }
 
@@ -38,7 +38,7 @@ TEST(RandomTest, UniformMinMax) {
   const int kMax = 35;
 
   for (int i = 0; i < kNumValues; ++i) {
-    const int value = Uniform(kMin, kMax);
+    const int value = Random::Uniform(kMin, kMax);
     EXPECT_GE(value, kMin);
     EXPECT_LE(value, kMax);
   }

@@ -57,7 +57,7 @@ class SimpleLineBeatComposer : public BeatComposer {
 
  private:
   Note BuildNote(float index, float start_beat, float duration_beats) {
-    const float intensity = random::Uniform(0.5f, 1.0f);
+    const float intensity = Random::Uniform(0.5f, 1.0f);
     Note note;
     note.index = root_note_ + GetScaledNoteIndex(index, scale_);
     note.intensity = intensity;

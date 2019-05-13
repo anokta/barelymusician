@@ -1,41 +1,37 @@
 #include "barelymusician/base/random.h"
 
-#include <random>
-
 namespace barelyapi {
-namespace random {
 
-namespace {
+std::default_random_engine Random::generator_ = std::default_random_engine();
 
-// TODO(#3): Global initialization should be discouraged, revisit how the
-// generator is initialized - along with the static distribution declarations
-// below.
-// Random number generator engine.
-std::default_random_engine generator = std::default_random_engine();
+std::normal_distribution<float> Random::normal_distribution_ =
+    std::normal_distribution<float>();
 
-}  // namespace
+std::uniform_real_distribution<float> Random::uniform_float_distribution_ =
+    std::uniform_real_distribution<float>();
 
-float Normal(float mean, float variance) {
-  static std::normal_distribution<float> distribution;
+std::uniform_int_distribution<int> Random::uniform_int_distribution_ =
+    std::uniform_int_distribution<int>();
+
+float Random::Normal(float mean, float variance) {
   std::normal_distribution<float>::param_type param(mean, variance);
-  return distribution(generator, param);
+  return normal_distribution_(generator_, param);
 }
 
-void Reset(int seed) { generator.seed(static_cast<unsigned int>(seed)); }
+void Random::SetSeed(int seed) {
+  generator_.seed(static_cast<unsigned int>(seed));
+}
 
-float Uniform() { return Uniform(0.0f, 1.0f); }
+float Random::Uniform() { return Uniform(0.0f, 1.0f); }
 
-float Uniform(float min, float max) {
-  static std::uniform_real_distribution<float> distribution;
+float Random::Uniform(float min, float max) {
   std::uniform_real_distribution<float>::param_type param(min, max);
-  return distribution(generator, param);
+  return uniform_float_distribution_(generator_, param);
 }
 
-int Uniform(int min, int max) {
-  static std::uniform_int_distribution<int> distribution;
+int Random::Uniform(int min, int max) {
   std::uniform_int_distribution<int>::param_type param(min, max);
-  return distribution(generator, param);
+  return uniform_int_distribution_(generator_, param);
 }
 
-}  // namespace random
 }  // namespace barelyapi

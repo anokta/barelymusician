@@ -47,9 +47,9 @@ class SimpleDrumkitBeatComposer : public BeatComposer {
     }
     // Hihat Closed.
     notes.push_back(
-        {kHihatClosedIndex, random::Uniform(0.5f, 0.75f), 0.0f, 0.5f});
+        {kHihatClosedIndex, Random::Uniform(0.5f, 0.75f), 0.0f, 0.5f});
     notes.push_back(
-        {kHihatClosedIndex, random::Uniform(0.25f, 0.75f), 0.5f, 0.5f});
+        {kHihatClosedIndex, Random::Uniform(0.25f, 0.75f), 0.5f, 0.5f});
     // Hihat Open.
     if (transport.beat + 1 == transport.num_beats) {
       if (transport.bar + 1 == transport.num_bars) {

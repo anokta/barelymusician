@@ -4,16 +4,18 @@
 
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/sequencer/sequencer.h"
-#include "instruments/basic_synth_voice.h"
+#include "instruments/basic_enveloped_voice.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
+using ::barelyapi::Oscillator;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
-using ::barelyapi::examples::BasicSynthVoice;
+using ::barelyapi::examples::BasicEnvelopedVoice;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
@@ -44,10 +46,10 @@ int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
-  BasicSynthVoice metronome_voice(kSampleInterval);
-  metronome_voice.SetGain(kGain);
-  metronome_voice.SetOscillatorType(kOscillatorType);
-  metronome_voice.SetEnvelopeRelease(kRelease);
+  BasicEnvelopedVoice<Oscillator> metronome_voice(kSampleInterval);
+  metronome_voice.set_gain(kGain);
+  metronome_voice.generator().SetType(kOscillatorType);
+  metronome_voice.envelope().SetRelease(kRelease);
 
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
@@ -66,7 +68,7 @@ int main(int argc, char* argv[]) {
     if (transport.beat == 0) {
       frequency = (transport.bar == 0) ? kSectionFrequency : kBarFrequency;
     }
-    metronome_voice.SetOscillatorFrequency(frequency);
+    metronome_voice.generator().SetFrequency(frequency);
     tick_sample = start_sample;
   };
   sequencer.RegisterBeatCallback(beat_callback);

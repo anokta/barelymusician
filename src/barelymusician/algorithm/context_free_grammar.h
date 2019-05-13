@@ -82,7 +82,7 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
   // Select a substition randomly with equal probability for each selection.
   const auto& substitions = rules_.at(symbol);
   const int index =
-      random::Uniform(0, static_cast<int>(substitions.size()) - 1);
+      Random::Uniform(0, static_cast<int>(substitions.size()) - 1);
   return substitions[index];
 }
 

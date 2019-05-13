@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "audio_output/pa_audio_output.h"
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/ensemble/ensemble.h"
 #include "barelymusician/ensemble/performer.h"
@@ -32,7 +33,6 @@ using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::DefaultBarComposer;
 using ::barelyapi::examples::DefaultSectionComposer;
-using ::barelyapi::examples::DrumkitIndices;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::SimpleChordsBeatComposer;
 using ::barelyapi::examples::SimpleDrumkitBeatComposer;
@@ -53,7 +53,7 @@ const int kNumBars = 4;
 const int kNumBeats = 3;
 
 // Ensemble settings.
-const float kRootNote = 64.0f;
+const float kRootNote = barelyapi::kNoteIndexD3;
 const float kMajorScale[] = {0.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f};
 const float kMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f, 7.0f, 8.0f, 10.0f};
 const int kNumInstrumentVoices = 8;
@@ -109,12 +109,12 @@ int main(int argc, char* argv[]) {
   performers.emplace_back(&line_2_instrument, &line_2_composer);
 
   // Drumkit instrument.
-  std::unordered_map<DrumkitIndices, std::string> drumkit_map;
-  drumkit_map[DrumkitIndices::kKick] = "data/audio/drums/basic_kick.wav";
-  drumkit_map[DrumkitIndices::kSnare] = "data/audio/drums/basic_snare.wav";
-  drumkit_map[DrumkitIndices::kHihatClosed] =
+  std::unordered_map<float, std::string> drumkit_map;
+  drumkit_map[barelyapi::kNoteIndexKick] = "data/audio/drums/basic_kick.wav";
+  drumkit_map[barelyapi::kNoteIndexSnare] = "data/audio/drums/basic_snare.wav";
+  drumkit_map[barelyapi::kNoteIndexHihatClosed] =
       "data/audio/drums/basic_hihat_closed.wav";
-  drumkit_map[DrumkitIndices::kHihatOpen] =
+  drumkit_map[barelyapi::kNoteIndexHihatOpen] =
       "data/audio/drums/basic_hihat_open.wav";
   BasicDrumkitInstrument drumkit_instrument(kSampleInterval);
   std::vector<WavFile> drumkit_files;
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
     drumkit_files.emplace_back();
     auto& drumkit_file = drumkit_files.back();
     CHECK(drumkit_file.Load(it.second));
-    drumkit_instrument.Add(static_cast<float>(it.first), drumkit_file);
+    drumkit_instrument.Add(it.first, drumkit_file);
   }
   SimpleDrumkitBeatComposer drumkit_composer;
   performers.emplace_back(&drumkit_instrument, &drumkit_composer);

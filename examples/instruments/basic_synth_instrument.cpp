@@ -64,13 +64,10 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
 }
 
 void BasicSynthInstrument::NoteOff(float index) {
-  DLOG(INFO) << "BasicSynthInstrument::NoteOff(" << index << ")";
   voice_.Stop(index);
 }
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  DLOG(INFO) << "BasicSynthInstrument::NoteOn(" << index << ", " << intensity
-             << ")";
   voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
     voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
     voice->set_gain(intensity);

@@ -24,7 +24,6 @@ void BasicDrumkitInstrument::NoteOff(float index) {
     LOG(WARNING) << "Invalid note index " << index;
     return;
   }
-  DLOG(INFO) << "BasicDrumkitInstrument::NoteOff(" << index << ")";
   it->second.Stop();
 }
 
@@ -34,8 +33,6 @@ void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
     LOG(WARNING) << "Invalid note index " << index;
     return;
   }
-  DLOG(INFO) << "BasicDrumkitInstrument::NoteOn(" << index << ", " << intensity
-             << ")";
   it->second.set_gain(intensity);
   it->second.Start();
 }

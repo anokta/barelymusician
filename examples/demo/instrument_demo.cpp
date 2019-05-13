@@ -32,7 +32,7 @@ const OscillatorType kOscillatorType = OscillatorType::kSaw;
 const float kEnvelopeRelease = 0.25f;
 
 // Note settings.
-const float kRootNoteIndex = 69.0f;
+const float kRootNoteIndex = barelyapi::kNoteIndexC3;
 const float kNoteIntensity = 1.0f;
 const char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                             'G', 'Y', 'H', 'U', 'J', 'K'};
@@ -103,6 +103,7 @@ int main(int argc, char* argv[]) {
     if (note_index < 0.0f) {
       return;
     }
+    LOG(INFO) << "NoteOn(" << note_index << ", " << kNoteIntensity << ")";
     instrument.NoteOn(note_index, kNoteIntensity);
   };
   input_manager.RegisterKeyDownCallback(key_down_callback);
@@ -115,6 +116,7 @@ int main(int argc, char* argv[]) {
         if (note_index < 0.0f) {
           return;
         }
+        LOG(INFO) << "NoteOff(" << note_index << ")";
         instrument.NoteOff(note_index);
       };
   input_manager.RegisterKeyUpCallback(key_up_callback);

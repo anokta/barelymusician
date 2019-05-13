@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "barelymusician/base/constants.h"
-#include "barelymusician/base/random.h"
 #include "barelymusician/composition/beat_composer.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
@@ -43,9 +42,6 @@ class SimpleLineBeatComposer : public BeatComposer {
       notes.push_back(
           BuildNote(start_note + static_cast<float>(2.0f * transport.beat),
                     0.25f, 0.125f));
-      // notes.push_back(BuildNote(start_note -
-      // static_cast<float>(transport.beat),
-      //                          0.5f, 0.25f));
       notes.push_back(
           BuildNote(start_note - static_cast<float>(2.0f * transport.beat),
                     0.75f, 0.125f));
@@ -57,7 +53,7 @@ class SimpleLineBeatComposer : public BeatComposer {
 
  private:
   Note BuildNote(float index, float start_beat, float duration_beats) {
-    const float intensity = Random::Uniform(0.5f, 1.0f);
+    const float intensity = 1.0f;
     Note note;
     note.index = root_note_ + GetScaledNoteIndex(index, scale_);
     note.intensity = intensity;

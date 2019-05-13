@@ -98,19 +98,20 @@ void Performer::Process(float* output, int num_channels, int num_frames) {
       std::lower_bound(begin, messages_.end(), num_frames, &CompareTimestamp);
   if (begin != end) {
     for (auto it = begin; it != end; ++it) {
-      const int num_frames_to_process = it->timestamp - frame;
-      if (num_frames_to_process > 0) {
+      if (frame < it->timestamp) {
         instrument_->Process(&output[frame * num_channels], num_channels,
-                             num_frames_to_process);
-        frame += num_frames_to_process;
+                             it->timestamp - frame);
+        frame = it->timestamp;
       }
       ProcessMessage(*it);
     }
     messages_.erase(begin, end);
   }
   // Process remaining frames.
-  instrument_->Process(&output[frame * num_channels], num_channels,
-                       num_frames - frame);
+  if (frame < num_frames) {
+    instrument_->Process(&output[frame * num_channels], num_channels,
+                         num_frames - frame);
+  }
 
   // Update message timestamps.
   for (auto& message : messages_) {

@@ -186,12 +186,9 @@ int main(int argc, char* argv[]) {
   BasicSynthInstrument chords_2_instrument =
       BuildSynthInstrument(OscillatorType::kNoise, 0.05f, 0.5f, 0.025f);
 
-  const float chords_root_note = kRootNote - barelyapi::kNumSemitones;
   const auto chords_beat_composer_callback =
-      [&chords_root_note, &scale](const Transport& transport, int section_type,
-                                  int harmonic) -> std::vector<Note> {
-    return ComposeChord(scale, chords_root_note, 0.5f, harmonic);
-  };
+      std::bind(ComposeChord, scale, kRootNote - barelyapi::kNumSemitones, 0.5f,
+                std::placeholders::_3);
 
   performers.emplace_back(&chords_instrument, chords_beat_composer_callback);
   performers.emplace_back(&chords_2_instrument, chords_beat_composer_callback);
@@ -201,18 +198,12 @@ int main(int argc, char* argv[]) {
   BasicSynthInstrument line_2_instrument =
       BuildSynthInstrument(OscillatorType::kSquare, 0.15f, 0.05f, 0.05f);
 
-  const float line_root_note = kRootNote - barelyapi::kNumSemitones;
   const auto line_beat_composer_callback =
-      [&line_root_note, &scale](const Transport& transport, int section_type,
-                                int harmonic) -> std::vector<Note> {
-    return ComposeLine(scale, line_root_note, 1.0f, transport, harmonic);
-  };
-  const float line_2_root_note = kRootNote;
+      std::bind(ComposeLine, scale, kRootNote - barelyapi::kNumSemitones, 1.0f,
+                std::placeholders::_1, std::placeholders::_3);
   const auto line_2_beat_composer_callback =
-      [&line_2_root_note, &scale](const Transport& transport, int section_type,
-                                  int harmonic) -> std::vector<Note> {
-    return ComposeLine(scale, line_2_root_note, 1.0f, transport, harmonic);
-  };
+      std::bind(ComposeLine, scale, kRootNote, 1.0f, std::placeholders::_1,
+                std::placeholders::_3);
 
   performers.emplace_back(&line_instrument, line_beat_composer_callback);
   performers.emplace_back(&line_2_instrument, line_2_beat_composer_callback);
@@ -235,8 +226,7 @@ int main(int argc, char* argv[]) {
   }
 
   const auto drumkit_beat_composer_callback =
-      [](const Transport& transport, int section_type,
-         int harmonic) -> std::vector<Note> { return ComposeDrums(transport); };
+      std::bind(ComposeDrums, std::placeholders::_1);
 
   performers.emplace_back(&drumkit_instrument, drumkit_beat_composer_callback);
 

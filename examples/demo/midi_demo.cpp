@@ -66,8 +66,10 @@ std::vector<Note> GetMidiScore(const smf::MidiEventList& midi_events,
   return score;
 }
 
-std::vector<Note> GetBeatNotes(const std::vector<Note>& score, float beat) {
+std::vector<Note> GetBeatNotes(const std::vector<Note>& score,
+                               const Transport& transport) {
   std::vector<Note> notes;
+  const float beat = static_cast<float>(transport.beat);
   const auto compare_beat = [](const Note& note, float start_beat) {
     return note.start_beat < start_beat;
   };
@@ -121,12 +123,8 @@ int main(int argc, char* argv[]) {
   performers.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
     const auto& score = scores[i];
-    performers.emplace_back(
-        &instruments[i],
-        [score](const Transport& transport, int section_type,
-                int harmonic) -> std::vector<Note> {
-          return GetBeatNotes(score, static_cast<float>(transport.beat));
-        });
+    performers.emplace_back(&instruments[i], std::bind(GetBeatNotes, scores[i],
+                                                       std::placeholders::_1));
     ensemble.AddPerformer(&performers[i]);
   }
 

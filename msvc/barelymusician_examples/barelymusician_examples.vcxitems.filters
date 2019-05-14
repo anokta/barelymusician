@@ -57,12 +57,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h">
       <Filter>Header Files\util\input_manager</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_section_composer.h">
-      <Filter>Header Files\composers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\default_bar_composer.h">
-      <Filter>Header Files\composers</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_line_beat_composer.h">
       <Filter>Header Files\composers</Filter>
     </ClInclude>

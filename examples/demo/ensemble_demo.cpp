@@ -12,8 +12,7 @@
 #include "barelymusician/ensemble/ensemble.h"
 #include "barelymusician/ensemble/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
-#include "composers/default_bar_composer.h"
-#include "composers/default_section_composer.h"
+#include "barelymusician/sequencer/transport.h"
 #include "composers/simple_chords_beat_composer.h"
 #include "composers/simple_drumkit_beat_composer.h"
 #include "composers/simple_line_beat_composer.h"
@@ -28,11 +27,10 @@ using ::barelyapi::Ensemble;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
 using ::barelyapi::Sequencer;
+using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
-using ::barelyapi::examples::DefaultBarComposer;
-using ::barelyapi::examples::DefaultSectionComposer;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::SimpleChordsBeatComposer;
 using ::barelyapi::examples::SimpleDrumkitBeatComposer;
@@ -82,6 +80,7 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBars(kNumBars);
   sequencer.SetNumBeats(kNumBeats);
 
+  const std::vector<int> progression = {0, 3, 4, 0};
   const std::vector<float> scale(std::begin(kMajorScale),
                                  std::end(kMajorScale));
 
@@ -128,9 +127,17 @@ int main(int argc, char* argv[]) {
   performers.emplace_back(&drumkit_instrument, &drumkit_composer);
 
   // Ensemble.
-  DefaultSectionComposer section_composer;
-  DefaultBarComposer bar_composer;
-  Ensemble ensemble(&sequencer, &section_composer, &bar_composer);
+  const auto section_composer_callback = [](const Transport& transport) -> int {
+    return transport.section;
+  };
+  const auto bar_composer_callback = [&progression](const Transport& transport,
+                                                    int section_type) -> int {
+    const int index = section_type * transport.num_bars + transport.bar;
+    return progression[index % progression.size()];
+  };
+  Ensemble ensemble(&sequencer);
+  ensemble.SetSectionComposerCallback(section_composer_callback);
+  ensemble.SetBarComposerCallback(bar_composer_callback);
   for (auto& performer : performers) {
     ensemble.AddPerformer(&performer);
   }

@@ -11,8 +11,6 @@
 #include "barelymusician/ensemble/ensemble.h"
 #include "barelymusician/ensemble/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
-#include "composers/default_bar_composer.h"
-#include "composers/default_section_composer.h"
 #include "composers/midi_beat_composer.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
@@ -25,8 +23,6 @@ using ::barelyapi::Performer;
 using ::barelyapi::Sequencer;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
-using ::barelyapi::examples::DefaultBarComposer;
-using ::barelyapi::examples::DefaultSectionComposer;
 using ::barelyapi::examples::MidiBeatComposer;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
@@ -83,9 +79,7 @@ int main(int argc, char* argv[]) {
     composers.push_back(composer);
   }
 
-  DefaultSectionComposer section_composer;
-  DefaultBarComposer bar_composer;
-  Ensemble ensemble(&sequencer, &section_composer, &bar_composer);
+  Ensemble ensemble(&sequencer);
   performers.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
     performers.emplace_back(&instruments[i], &composers[i]);

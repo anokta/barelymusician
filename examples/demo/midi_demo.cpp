@@ -122,7 +122,6 @@ int main(int argc, char* argv[]) {
   Ensemble ensemble(&sequencer);
   performers.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
-    const auto& score = scores[i];
     performers.emplace_back(&instruments[i], std::bind(GetBeatNotes, scores[i],
                                                        std::placeholders::_1));
     ensemble.AddPerformer(&performers[i]);

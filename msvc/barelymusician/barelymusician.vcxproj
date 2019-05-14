@@ -38,7 +38,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\base\module.h" />
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\beat_composer.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />

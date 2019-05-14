@@ -8,22 +8,23 @@
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/composition/note.h"
 #include "barelymusician/ensemble/ensemble.h"
 #include "barelymusician/ensemble/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
-#include "composers/midi_beat_composer.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
 using ::barelyapi::Ensemble;
+using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
 using ::barelyapi::Sequencer;
+using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
-using ::barelyapi::examples::MidiBeatComposer;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 using ::smf::MidiFile;
@@ -44,6 +45,44 @@ const int kNumInstrumentVoices = 12;
 // Midi file name.
 const char kMidiFileName[] = "data/midi/sample.mid";
 
+std::vector<Note> GetMidiScore(const smf::MidiEventList& midi_events,
+                               int ticks_per_quarter) {
+  std::vector<Note> score;
+  const float ticks_per_beat = static_cast<float>(ticks_per_quarter);
+  const float max_velocity = 127.0f;
+  for (int i = 0; i < midi_events.size(); ++i) {
+    const auto& midi_event = midi_events[i];
+    if (midi_event.isNoteOn()) {
+      Note note;
+      note.index = static_cast<float>(midi_event.getKeyNumber());
+      note.intensity =
+          static_cast<float>(midi_event.getVelocity()) / max_velocity;
+      note.start_beat = static_cast<float>(midi_event.tick) / ticks_per_beat;
+      note.duration_beats =
+          static_cast<float>(midi_event.getTickDuration()) / ticks_per_beat;
+      score.push_back(note);
+    }
+  }
+  return score;
+}
+
+std::vector<Note> GetBeatNotes(const std::vector<Note>& score, float beat) {
+  std::vector<Note> notes;
+  const auto compare_beat = [](const Note& note, float start_beat) {
+    return note.start_beat < start_beat;
+  };
+  const auto begin =
+      std::lower_bound(score.begin(), score.end(), beat, compare_beat);
+  const auto end =
+      std::lower_bound(begin, score.end(), beat + 1.0f, compare_beat);
+  for (auto it = begin; it != end; ++it) {
+    Note note = *it;
+    note.start_beat -= beat;
+    notes.push_back(note);
+  }
+  return notes;
+}
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -58,7 +97,7 @@ int main(int argc, char* argv[]) {
   sequencer.SetTempo(kTempo);
 
   std::vector<BasicSynthInstrument> instruments;
-  std::vector<MidiBeatComposer> composers;
+  std::vector<std::vector<Note>> scores;
   std::vector<Performer> performers;
 
   const int num_tracks = midi_file.getTrackCount();
@@ -75,14 +114,19 @@ int main(int argc, char* argv[]) {
     instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     instruments.push_back(instrument);
 
-    MidiBeatComposer composer(midi_file[i], ticks_per_quarter);
-    composers.push_back(composer);
+    scores.push_back(GetMidiScore(midi_file[i], ticks_per_quarter));
   }
 
   Ensemble ensemble(&sequencer);
   performers.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
-    performers.emplace_back(&instruments[i], &composers[i]);
+    const auto& score = scores[i];
+    performers.emplace_back(
+        &instruments[i],
+        [score](const Transport& transport, int section_type,
+                int harmonic) -> std::vector<Note> {
+          return GetBeatNotes(score, static_cast<float>(transport.beat));
+        });
     ensemble.AddPerformer(&performers[i]);
   }
 

@@ -40,9 +40,6 @@
     <Filter Include="Resource Files\data\audio\drums">
       <UniqueIdentifier>{024d0d55-996c-4551-a943-52c7e30c55de}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\composers">
-      <UniqueIdentifier>{cc3e58f2-53d6-486a-97b4-93751cb9f376}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\audio_output">
       <UniqueIdentifier>{ac2cbeca-c57e-4053-8323-4c7e08b86b9c}</UniqueIdentifier>
     </Filter>
@@ -57,20 +54,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h">
       <Filter>Header Files\util\input_manager</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_line_beat_composer.h">
-      <Filter>Header Files\composers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_chords_beat_composer.h">
-      <Filter>Header Files\composers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\midi_beat_composer.h">
-      <Filter>Header Files\composers</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h">
       <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_drumkit_beat_composer.h">
-      <Filter>Header Files\composers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h">
       <Filter>Header Files\audio_output</Filter>

@@ -16,10 +16,6 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\audio_output.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\midi_beat_composer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_chords_beat_composer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_drumkit_beat_composer.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\composers\simple_line_beat_composer.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_enveloped_voice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h" />

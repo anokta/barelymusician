@@ -2,10 +2,10 @@
 #define BARELYMUSICIAN_ENSEMBLE_PERFORMER_H_
 
 #include <list>
+#include <vector>
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/module.h"
-#include "barelymusician/composition/beat_composer.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_utils.h"
@@ -34,7 +34,12 @@ struct NoteOffData {
 
 class Performer : public Module {
  public:
-  Performer(Instrument* instrument, BeatComposer* composer);
+  // Beat composer callback signature.
+  using BeatComposerCallback =
+      std::function<std::vector<Note>(const Transport&, int, int)>;
+
+  Performer(Instrument* instrument,
+            BeatComposerCallback&& beat_composer_callback);
 
   // Implements |Module|.
   void Reset() override;
@@ -54,20 +59,22 @@ class Performer : public Module {
 
   Instrument* const instrument_;  // not owned.
 
-  BeatComposer* const composer_;  // not owned.
+  // Beat composer callback.
+  BeatComposerCallback beat_composer_callback_;
 
   // Note messages.
   std::list<Message> messages_;
 };
 
-Performer::Performer(Instrument* instrument, BeatComposer* composer)
-    : instrument_(instrument), composer_(composer) {
+Performer::Performer(Instrument* instrument,
+                     BeatComposerCallback&& beat_composer_callback)
+    : instrument_(instrument),
+      beat_composer_callback_(std::move(beat_composer_callback)) {
   DCHECK(instrument_);
-  DCHECK(composer_);
+  DCHECK(beat_composer_callback_);
 }
 
 void Performer::Reset() {
-  composer_->Reset();
   messages_.clear();
   instrument_->Reset();
 }
@@ -77,7 +84,7 @@ void Performer::PerformBeat(const Transport& transport, int section_type,
                             int num_samples_per_beat) {
   const float num_samples_per_beat_float =
       static_cast<float>(num_samples_per_beat);
-  const auto notes = composer_->GetNotes(transport, section_type, harmonic);
+  const auto notes = beat_composer_callback_(transport, section_type, harmonic);
   for (const auto& note : notes) {
     const float index = note.index;
     const float intensity = note.intensity;

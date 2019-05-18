@@ -40,7 +40,7 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 const float kTempo = 132.0f;
 
 // Ensemble settings.
-const int kNumInstrumentVoices = 12;
+const int kNumInstrumentVoices = 16;
 
 // Midi file name.
 const char kMidiFileName[] = "data/midi/sample.mid";
@@ -95,19 +95,31 @@ int main(int argc, char* argv[]) {
   CHECK(midi_file.read(kMidiFileName)) << "Failed to read " << kMidiFileName;
   midi_file.linkNotePairs();
 
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
-
-  std::vector<BasicSynthInstrument> instruments;
-  std::vector<std::vector<Note>> scores;
-  std::vector<Performer> performers;
-
   const int num_tracks = midi_file.getTrackCount();
   const int ticks_per_quarter = midi_file.getTPQ();
   LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
+  Sequencer sequencer(kSampleRate);
+  sequencer.SetTempo(kTempo);
+
+  Ensemble ensemble(&sequencer);
+
+  std::vector<BasicSynthInstrument> instruments;
+  std::vector<std::vector<Note>> scores;
+  std::vector<Performer> performers;
+
+  instruments.reserve(num_tracks);
+  scores.reserve(num_tracks);
+  performers.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
+    // Create instrument.
+    const auto score = GetMidiScore(midi_file[i], ticks_per_quarter);
+    if (score.empty()) {
+      continue;
+    }
+    scores.push_back(score);
+    // Create instrument.
     BasicSynthInstrument instrument(kSampleInterval, kNumInstrumentVoices);
     instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                              static_cast<float>(OscillatorType::kSquare));
@@ -115,17 +127,14 @@ int main(int argc, char* argv[]) {
     instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.2f);
     instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     instruments.push_back(instrument);
-
-    scores.push_back(GetMidiScore(midi_file[i], ticks_per_quarter));
+    // Create performer.
+    performers.emplace_back(
+        &instruments.back(),
+        std::bind(GetBeatNotes, scores.back(), std::placeholders::_1));
+    // Register performer.
+    ensemble.AddPerformer(&performers.back());
   }
-
-  Ensemble ensemble(&sequencer);
-  performers.reserve(num_tracks);
-  for (int i = 0; i < num_tracks; ++i) {
-    performers.emplace_back(&instruments[i], std::bind(GetBeatNotes, scores[i],
-                                                       std::placeholders::_1));
-    ensemble.AddPerformer(&performers[i]);
-  }
+  LOG(INFO) << "Number of performers: " << performers.size();
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

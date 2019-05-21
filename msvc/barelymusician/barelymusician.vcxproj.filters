@@ -40,9 +40,6 @@
     <Filter Include="Header Files\message">
       <UniqueIdentifier>{ae666881-d27b-4ba9-9f06-ebcc26ce21bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\ensemble">
-      <UniqueIdentifier>{549449cf-6d97-48dc-a139-81c841547f9b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\message">
       <UniqueIdentifier>{a81861d1-2454-4352-85f6-18f3bc2aab91}</UniqueIdentifier>
     </Filter>
@@ -54,9 +51,6 @@
     </Filter>
     <Filter Include="Source Files\composition">
       <UniqueIdentifier>{3963b324-a8d8-49a1-8701-453c8dcfef77}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\ensemble">
-      <UniqueIdentifier>{d8c758dd-37b0-4c88-bcc4-6d6996e89d50}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -120,9 +114,6 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\ensemble\conductor.h">
-      <Filter>Header Files\ensemble</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\sequencer\sequencer.h">
       <Filter>Header Files\sequencer</Filter>
     </ClInclude>
@@ -135,11 +126,14 @@
     <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\ensemble\performer.h">
-      <Filter>Header Files\ensemble</Filter>
+    <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
+      <Filter>Header Files\composition</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\ensemble\ensemble.h">
-      <Filter>Header Files\ensemble</Filter>
+    <ClInclude Include="..\..\src\barelymusician\composition\conductor.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h">
+      <Filter>Header Files\composition</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -174,6 +168,9 @@
       <Filter>Source Files\sequencer</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\note_utils.cpp">
+      <Filter>Source Files\composition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>

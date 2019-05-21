@@ -4,16 +4,18 @@
 #include <memory>
 #include <thread>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
+#include "barelymusician/composition/conductor.h"
+#include "barelymusician/composition/ensemble.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
-#include "barelymusician/ensemble/ensemble.h"
-#include "barelymusician/ensemble/performer.h"
+#include "barelymusician/composition/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "barelymusician/sequencer/transport.h"
 #include "instruments/basic_drumkit_instrument.h"
@@ -23,8 +25,10 @@
 
 namespace {
 
+using ::barelyapi::Conductor;
 using ::barelyapi::Ensemble;
 using ::barelyapi::Note;
+using ::barelyapi::NoteType;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
 using ::barelyapi::Random;
@@ -55,15 +59,9 @@ const float kMajorScale[] = {0.0f, 2.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f};
 const float kMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f, 7.0f, 8.0f, 10.0f};
 const int kNumInstrumentVoices = 8;
 
-Note BuildNote(const std::vector<float>& scale, float root_note, float index,
-               float intensity, float start_beat, float duration_beats) {
-  Note note;
-  note.index = root_note + barelyapi::GetScaledNoteIndex(index, scale);
-  note.intensity = intensity;
-  note.start_beat = start_beat;
-  note.duration_beats = duration_beats;
-  return note;
-}
+// Conductor settings.
+const float kEnergy = 0.5f;
+const float kStress = 0.5f;
 
 BasicSynthInstrument BuildSynthInstrument(OscillatorType type, float gain,
                                           float attack, float release) {
@@ -78,31 +76,30 @@ BasicSynthInstrument BuildSynthInstrument(OscillatorType type, float gain,
   return synth_instrument;
 }
 
-std::vector<Note> ComposeChord(const std::vector<float>& scale, float root_note,
-                               float intensity, int harmonic) {
+std::vector<Note> ComposeChord(const Conductor& conductor, float intensity,
+                               int harmonic) {
   std::vector<Note> notes;
   const float start_note = static_cast<float>(harmonic);
   notes.push_back(
-      BuildNote(scale, root_note, start_note, intensity, 0.0f, 1.0f));
-  notes.push_back(
-      BuildNote(scale, root_note, start_note + 2.0f, intensity, 0.0f, 1.0f));
-  notes.push_back(
-      BuildNote(scale, root_note, start_note + 4.0f, intensity, 0.0f, 1.0f));
-  notes.push_back(
-      BuildNote(scale, root_note, start_note + 7.0f, intensity, 0.0f, 1.0f));
+      conductor.BuildNote(start_note, intensity, 0.0f, 1.0f, NoteType::kInKey));
+  notes.push_back(conductor.BuildNote(start_note + 2.0f, intensity, 0.0f, 1.0f,
+                                      NoteType::kInKey));
+  notes.push_back(conductor.BuildNote(start_note + 4.0f, intensity, 0.0f, 1.0f,
+                                      NoteType::kInKey));
+  notes.push_back(conductor.BuildNote(start_note + 7.0f, intensity, 0.0f, 1.0f,
+                                      NoteType::kInKey));
   return notes;
 }
 
-std::vector<Note> ComposeLine(const std::vector<float>& scale, float root_note,
-                              float intensity, const Transport& transport,
-                              int harmonic) {
+std::vector<Note> ComposeLine(const Conductor& conductor, float intensity,
+                              const Transport& transport, int harmonic) {
   std::vector<Note> notes;
   const float start_note = static_cast<float>(harmonic);
   const float beat = static_cast<float>(transport.beat);
   const auto add_note = [&](float index, float start_beat,
                             float duration_beats) {
-    notes.push_back(BuildNote(scale, root_note, index, intensity, start_beat,
-                              duration_beats));
+    notes.push_back(conductor.BuildNote(index, intensity, start_beat,
+                                        duration_beats, NoteType::kInKey));
   };
   if (transport.beat % 2 == 1) {
     add_note(start_note, 0.0f, 0.25f);
@@ -174,24 +171,22 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBeats(kNumBeats);
 
   const std::vector<int> progression = {0, 3, 4, 0};
-  const std::vector<float> scale(std::begin(kMajorScale),
-                                 std::end(kMajorScale));
 
-  std::vector<Performer> performers;
+  std::vector<std::pair<Performer, Ensemble::BeatComposerCallback>> performers;
 
   // Synth instruments.
-
   BasicSynthInstrument chords_instrument =
       BuildSynthInstrument(OscillatorType::kSine, 0.125f, 0.125f, 0.125f);
   BasicSynthInstrument chords_2_instrument =
       BuildSynthInstrument(OscillatorType::kNoise, 0.05f, 0.5f, 0.025f);
 
-  const auto chords_beat_composer_callback =
-      std::bind(ComposeChord, scale, kRootNote - barelyapi::kNumSemitones, 0.5f,
-                std::placeholders::_3);
+  const auto chords_beat_composer_callback = std::bind(
+      ComposeChord, std::placeholders::_1, 0.5f, std::placeholders::_4);
 
-  performers.emplace_back(&chords_instrument, chords_beat_composer_callback);
-  performers.emplace_back(&chords_2_instrument, chords_beat_composer_callback);
+  performers.emplace_back(Performer(&chords_instrument),
+                          chords_beat_composer_callback);
+  performers.emplace_back(Performer(&chords_2_instrument),
+                          chords_beat_composer_callback);
 
   BasicSynthInstrument line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.125f, 0.0025f, 0.125f);
@@ -199,14 +194,16 @@ int main(int argc, char* argv[]) {
       BuildSynthInstrument(OscillatorType::kSquare, 0.15f, 0.05f, 0.05f);
 
   const auto line_beat_composer_callback =
-      std::bind(ComposeLine, scale, kRootNote - barelyapi::kNumSemitones, 1.0f,
-                std::placeholders::_1, std::placeholders::_3);
+      std::bind(ComposeLine, std::placeholders::_1, 1.0f, std::placeholders::_2,
+                std::placeholders::_4);
   const auto line_2_beat_composer_callback =
-      std::bind(ComposeLine, scale, kRootNote, 1.0f, std::placeholders::_1,
-                std::placeholders::_3);
+      std::bind(ComposeLine, std::placeholders::_1, 1.0f, std::placeholders::_2,
+                std::placeholders::_4);
 
-  performers.emplace_back(&line_instrument, line_beat_composer_callback);
-  performers.emplace_back(&line_2_instrument, line_2_beat_composer_callback);
+  performers.emplace_back(Performer(&line_instrument),
+                          line_beat_composer_callback);
+  performers.emplace_back(Performer(&line_2_instrument),
+                          line_2_beat_composer_callback);
 
   // Drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
@@ -226,9 +223,10 @@ int main(int argc, char* argv[]) {
   }
 
   const auto drumkit_beat_composer_callback =
-      std::bind(ComposeDrums, std::placeholders::_1);
+      std::bind(ComposeDrums, std::placeholders::_2);
 
-  performers.emplace_back(&drumkit_instrument, drumkit_beat_composer_callback);
+  performers.emplace_back(Performer(&drumkit_instrument),
+                          drumkit_beat_composer_callback);
 
   // Ensemble.
   const auto section_composer_callback = [](const Transport& transport) -> int {
@@ -243,8 +241,15 @@ int main(int argc, char* argv[]) {
   ensemble.SetSectionComposerCallback(section_composer_callback);
   ensemble.SetBarComposerCallback(bar_composer_callback);
   for (auto& performer : performers) {
-    ensemble.AddPerformer(&performer);
+    ensemble.AddPerformer(&performer.first, std::move(performer.second));
   }
+
+  ensemble.conductor().SetRootNote(kRootNote);
+  ensemble.conductor().SetScale(
+      std::vector<float>(std::begin(kMajorScale), std::end(kMajorScale)));
+  ensemble.conductor().SetEnergy(kEnergy);
+  ensemble.conductor().SetStress(kStress);
+  sequencer.SetTempo(ensemble.conductor().tempo_multiplier() * kTempo);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
@@ -254,7 +259,7 @@ int main(int argc, char* argv[]) {
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : performers) {
-      performer.Process(temp_buffer.data(), kNumChannels, kNumFrames);
+      performer.first.Process(temp_buffer.data(), kNumChannels, kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
     }

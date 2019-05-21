@@ -9,15 +9,13 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/ensemble/ensemble.h"
-#include "barelymusician/ensemble/performer.h"
+#include "barelymusician/composition/performer.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
-using ::barelyapi::Ensemble;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
@@ -103,8 +101,6 @@ int main(int argc, char* argv[]) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
 
-  Ensemble ensemble(&sequencer);
-
   std::vector<BasicSynthInstrument> instruments;
   std::vector<std::vector<Note>> scores;
   std::vector<Performer> performers;
@@ -128,13 +124,21 @@ int main(int argc, char* argv[]) {
     instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     instruments.push_back(instrument);
     // Create performer.
-    performers.emplace_back(
-        &instruments.back(),
-        std::bind(GetBeatNotes, scores.back(), std::placeholders::_1));
-    // Register performer.
-    ensemble.AddPerformer(&performers.back());
+    performers.emplace_back(&instruments.back());
   }
   LOG(INFO) << "Number of performers: " << performers.size();
+
+  // Beat callback.
+  const auto beat_callback = [&performers, &scores](const Transport& transport,
+                                                    int start_sample,
+                                                    int num_samples_per_beat) {
+    int num_performers = static_cast<int>(performers.size());
+    for (int i = 0; i < num_performers; ++i) {
+      performers[i].Perform(GetBeatNotes(scores[i], transport), start_sample,
+                            num_samples_per_beat);
+    }
+  };
+  sequencer.RegisterBeatCallback(beat_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

@@ -14,8 +14,8 @@
 #include "barelymusician/composition/conductor.h"
 #include "barelymusician/composition/ensemble.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/composition/note_utils.h"
 #include "barelymusician/composition/performer.h"
+#include "barelymusician/composition/scale.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "barelymusician/sequencer/transport.h"
 #include "instruments/basic_drumkit_instrument.h"
@@ -32,6 +32,7 @@ using ::barelyapi::NoteType;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
 using ::barelyapi::Random;
+using ::barelyapi::Scale;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicDrumkitInstrument;
@@ -171,6 +172,8 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBeats(kNumBeats);
 
   const std::vector<int> progression = {0, 3, 4, 0};
+  const Scale scale(
+      std::vector<float>(std::begin(kMajorScale), std::end(kMajorScale)));
 
   std::vector<std::pair<Performer, Ensemble::BeatComposerCallback>> performers;
 
@@ -237,7 +240,7 @@ int main(int argc, char* argv[]) {
     const int index = section_type * transport.num_bars + transport.bar;
     return progression[index % progression.size()];
   };
-  Ensemble ensemble(&sequencer);
+  Ensemble ensemble(&sequencer, scale);
   ensemble.SetSectionComposerCallback(section_composer_callback);
   ensemble.SetBarComposerCallback(bar_composer_callback);
   for (auto& performer : performers) {
@@ -245,8 +248,6 @@ int main(int argc, char* argv[]) {
   }
 
   ensemble.conductor().SetRootNote(kRootNote);
-  ensemble.conductor().SetScale(
-      std::vector<float>(std::begin(kMajorScale), std::end(kMajorScale)));
   ensemble.conductor().SetEnergy(kEnergy);
   ensemble.conductor().SetStress(kStress);
   sequencer.SetTempo(ensemble.conductor().tempo_multiplier() * kTempo);

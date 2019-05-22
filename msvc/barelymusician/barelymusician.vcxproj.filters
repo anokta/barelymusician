@@ -123,9 +123,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\event.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
@@ -133,6 +130,9 @@
       <Filter>Header Files\composition</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\scale.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
   </ItemGroup>
@@ -167,10 +167,10 @@
     <ClCompile Include="..\..\src\barelymusician\sequencer\sequencer.cpp">
       <Filter>Source Files\sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\note_utils.cpp">
+    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
+    <ClCompile Include="..\..\src\barelymusician\composition\scale.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>

@@ -7,7 +7,7 @@
 #include "barelymusician/base/module.h"
 #include "barelymusician/base/random.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/composition/note_utils.h"
+#include "barelymusician/composition/scale.h"
 
 namespace barelyapi {
 
@@ -21,7 +21,8 @@ enum class NoteType {
 // configuration.
 class Conductor : public Module {
  public:
-  Conductor() : root_note_index_(0.0f), energy_(0.5f), stress_(0.5f) {}
+  explicit Conductor(const Scale& scale)
+      : root_note_index_(0.0f), energy_(0.5f), stress_(0.5f), scale_(scale) {}
 
   float tempo_multiplier() const { return tempo_multiplier_; }
 
@@ -37,12 +38,11 @@ class Conductor : public Module {
 
     const float relative_index =
         std::copysign(index, std::round(harmonic_curve_)) +
-        std::round(harmonic_height_) * scale_.size();
+        std::round(harmonic_height_) * scale_.GetLength();
 
     switch (note_type) {
       case NoteType::kInKey:
-        note.index =
-            root_note_index_ + GetScaledNoteIndex(relative_index, scale_);
+        note.index = root_note_index_ + scale_.GetNoteIndex(relative_index);
         break;
       case NoteType::kChromatic:
         note.index = root_note_index_ + index;
@@ -83,8 +83,6 @@ class Conductor : public Module {
   // @param index Root note index.
   void SetRootNote(float index) { root_note_index_ = index; }
 
-  void SetScale(const std::vector<float>& scale) { scale_ = scale; }
-
   // Sets the stress (valence) of score.
   //
   // @param stress Stress in range [0, 1].
@@ -110,7 +108,7 @@ class Conductor : public Module {
 
   float root_note_index_;
 
-  std::vector<float> scale_;
+  Scale scale_;
 
   float energy_;
 

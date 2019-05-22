@@ -28,7 +28,7 @@ class Ensemble : public Module {
   using BeatComposerCallback = std::function<std::vector<Note>(
       const Conductor& conductor, const Transport&, int, int)>;
 
-  explicit Ensemble(Sequencer* sequencer);
+  explicit Ensemble(Sequencer* sequencer, const Scale& scale);
 
   // Implements |Module|.
   void Reset() override;
@@ -62,8 +62,9 @@ class Ensemble : public Module {
   std::vector<std::pair<Performer*, BeatComposerCallback>> performers_;
 };
 
-Ensemble::Ensemble(Sequencer* sequencer)
-    : section_composer_callback_(nullptr),
+Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
+    : conductor_(scale),
+      section_composer_callback_(nullptr),
       bar_composer_callback_(nullptr),
       section_type_(0),
       harmonic_(0) {

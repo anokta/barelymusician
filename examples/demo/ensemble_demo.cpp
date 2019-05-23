@@ -11,7 +11,6 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
-#include "barelymusician/composition/conductor.h"
 #include "barelymusician/composition/ensemble.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/performer.h"
@@ -25,10 +24,8 @@
 
 namespace {
 
-using ::barelyapi::Conductor;
 using ::barelyapi::Ensemble;
 using ::barelyapi::Note;
-using ::barelyapi::NoteType;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
 using ::barelyapi::Random;
@@ -60,10 +57,6 @@ const float kMajorScale[] = {0.0f, 2.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f};
 const float kMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f, 7.0f, 8.0f, 10.0f};
 const int kNumInstrumentVoices = 8;
 
-// Conductor settings.
-const float kEnergy = 0.5f;
-const float kStress = 0.5f;
-
 BasicSynthInstrument BuildSynthInstrument(OscillatorType type, float gain,
                                           float attack, float release) {
   BasicSynthInstrument synth_instrument(kSampleInterval, kNumInstrumentVoices);
@@ -77,30 +70,27 @@ BasicSynthInstrument BuildSynthInstrument(OscillatorType type, float gain,
   return synth_instrument;
 }
 
-std::vector<Note> ComposeChord(const Conductor& conductor, float intensity,
-                               int harmonic) {
-  std::vector<Note> notes;
+void ComposeChord(float root_note_index, const Scale& scale, float intensity,
+                  int harmonic, std::vector<Note>* notes) {
+  const auto get_note_index = [&](float index) {
+    return root_note_index + scale.GetNoteIndex(index);
+  };
   const float start_note = static_cast<float>(harmonic);
-  notes.push_back(
-      conductor.BuildNote(start_note, intensity, 0.0f, 1.0f, NoteType::kInKey));
-  notes.push_back(conductor.BuildNote(start_note + 2.0f, intensity, 0.0f, 1.0f,
-                                      NoteType::kInKey));
-  notes.push_back(conductor.BuildNote(start_note + 4.0f, intensity, 0.0f, 1.0f,
-                                      NoteType::kInKey));
-  notes.push_back(conductor.BuildNote(start_note + 7.0f, intensity, 0.0f, 1.0f,
-                                      NoteType::kInKey));
-  return notes;
+  notes->push_back({get_note_index(start_note), intensity, 0.0f, 1.0f});
+  notes->push_back({get_note_index(start_note + 2.0f), intensity, 0.0f, 1.0f});
+  notes->push_back({get_note_index(start_note + 4.0f), intensity, 0.0f, 1.0f});
+  notes->push_back({get_note_index(start_note + 7.0f), intensity, 0.0f, 1.0f});
 }
 
-std::vector<Note> ComposeLine(const Conductor& conductor, float intensity,
-                              const Transport& transport, int harmonic) {
-  std::vector<Note> notes;
+void ComposeLine(float root_note_index, const Scale& scale, float intensity,
+                 const Transport& transport, int harmonic,
+                 std::vector<Note>* notes) {
   const float start_note = static_cast<float>(harmonic);
   const float beat = static_cast<float>(transport.beat);
   const auto add_note = [&](float index, float start_beat,
                             float duration_beats) {
-    notes.push_back(conductor.BuildNote(index, intensity, start_beat,
-                                        duration_beats, NoteType::kInKey));
+    notes->push_back({root_note_index + scale.GetNoteIndex(index), intensity,
+                      start_beat, duration_beats});
   };
   if (transport.beat % 2 == 1) {
     add_note(start_note, 0.0f, 0.25f);
@@ -118,46 +108,43 @@ std::vector<Note> ComposeLine(const Conductor& conductor, float intensity,
     add_note(start_note - 2.0f * beat, 0.75f, 0.125f);
     add_note(start_note + 2.0f * beat, 0.5f, 0.25f);
   }
-  return notes;
 }
 
-std::vector<Note> ComposeDrums(const Transport& transport) {
-  std::vector<Note> notes;
+void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
   // Kick.
   if (transport.beat % 2 == 0) {
-    notes.push_back({barelyapi::kNoteIndexKick, 1.0f, 0.0f, 1.0f});
+    notes->push_back({barelyapi::kNoteIndexKick, 1.0f, 0.0f, 1.0f});
     if (transport.bar % 2 == 1 && transport.beat == 0) {
-      notes.push_back({barelyapi::kNoteIndexKick, 1.0f, 0.5f, 0.5f});
+      notes->push_back({barelyapi::kNoteIndexKick, 1.0f, 0.5f, 0.5f});
     }
   }
   // Snare.
   if (transport.beat % 2 == 1) {
-    notes.push_back({barelyapi::kNoteIndexSnare, 1.0f, 0.0f, 1.0f});
+    notes->push_back({barelyapi::kNoteIndexSnare, 1.0f, 0.0f, 1.0f});
   }
   if (transport.beat + 1 == transport.num_beats) {
-    notes.push_back({barelyapi::kNoteIndexSnare, 0.75f, 0.5f, 0.5f});
+    notes->push_back({barelyapi::kNoteIndexSnare, 0.75f, 0.5f, 0.5f});
     if (transport.bar + 1 == transport.num_bars) {
-      notes.push_back({barelyapi::kNoteIndexSnare, 1.0f, 0.25f, 0.25f});
-      notes.push_back({barelyapi::kNoteIndexSnare, 0.75f, 0.75f, 0.25f});
+      notes->push_back({barelyapi::kNoteIndexSnare, 1.0f, 0.25f, 0.25f});
+      notes->push_back({barelyapi::kNoteIndexSnare, 0.75f, 0.75f, 0.25f});
     }
   }
   // Hihat Closed.
-  notes.push_back({barelyapi::kNoteIndexHihatClosed,
-                   Random::Uniform(0.5f, 0.75f), 0.0f, 0.5f});
-  notes.push_back({barelyapi::kNoteIndexHihatClosed,
-                   Random::Uniform(0.25f, 0.75f), 0.5f, 0.5f});
+  notes->push_back({barelyapi::kNoteIndexHihatClosed,
+                    Random::Uniform(0.5f, 0.75f), 0.0f, 0.5f});
+  notes->push_back({barelyapi::kNoteIndexHihatClosed,
+                    Random::Uniform(0.25f, 0.75f), 0.5f, 0.5f});
   // Hihat Open.
   if (transport.beat + 1 == transport.num_beats) {
     if (transport.bar + 1 == transport.num_bars) {
-      notes.push_back({barelyapi::kNoteIndexHihatOpen, 0.75f, 0.25f, 0.25f});
+      notes->push_back({barelyapi::kNoteIndexHihatOpen, 0.75f, 0.25f, 0.25f});
     } else if (transport.bar % 2 == 0) {
-      notes.push_back({barelyapi::kNoteIndexHihatOpen, 0.75f, 0.75f, 0.25f});
+      notes->push_back({barelyapi::kNoteIndexHihatOpen, 0.75f, 0.75f, 0.25f});
     }
   }
   if (transport.beat == 0 && transport.bar == 0) {
-    notes.push_back({barelyapi::kNoteIndexHihatOpen, 1.0f, 0.0f, 0.5f});
+    notes->push_back({barelyapi::kNoteIndexHihatOpen, 1.0f, 0.0f, 0.5f});
   }
-  return notes;
 }
 
 }  // namespace
@@ -183,8 +170,9 @@ int main(int argc, char* argv[]) {
   BasicSynthInstrument chords_2_instrument =
       BuildSynthInstrument(OscillatorType::kNoise, 0.05f, 0.5f, 0.025f);
 
-  const auto chords_beat_composer_callback = std::bind(
-      ComposeChord, std::placeholders::_1, 0.5f, std::placeholders::_4);
+  const auto chords_beat_composer_callback =
+      std::bind(ComposeChord, std::placeholders::_1, std::placeholders::_2,
+                0.5f, std::placeholders::_5, std::placeholders::_6);
 
   performers.emplace_back(Performer(&chords_instrument),
                           chords_beat_composer_callback);
@@ -196,12 +184,12 @@ int main(int argc, char* argv[]) {
   BasicSynthInstrument line_2_instrument =
       BuildSynthInstrument(OscillatorType::kSquare, 0.15f, 0.05f, 0.05f);
 
-  const auto line_beat_composer_callback =
-      std::bind(ComposeLine, std::placeholders::_1, 1.0f, std::placeholders::_2,
-                std::placeholders::_4);
-  const auto line_2_beat_composer_callback =
-      std::bind(ComposeLine, std::placeholders::_1, 1.0f, std::placeholders::_2,
-                std::placeholders::_4);
+  const auto line_beat_composer_callback = std::bind(
+      ComposeLine, std::placeholders::_1, std::placeholders::_2, 1.0f,
+      std::placeholders::_3, std::placeholders::_5, std::placeholders::_6);
+  const auto line_2_beat_composer_callback = std::bind(
+      ComposeLine, std::placeholders::_1, std::placeholders::_2, 1.0f,
+      std::placeholders::_3, std::placeholders::_5, std::placeholders::_6);
 
   performers.emplace_back(Performer(&line_instrument),
                           line_beat_composer_callback);
@@ -226,7 +214,7 @@ int main(int argc, char* argv[]) {
   }
 
   const auto drumkit_beat_composer_callback =
-      std::bind(ComposeDrums, std::placeholders::_2);
+      std::bind(ComposeDrums, std::placeholders::_3, std::placeholders::_6);
 
   performers.emplace_back(Performer(&drumkit_instrument),
                           drumkit_beat_composer_callback);
@@ -241,16 +229,12 @@ int main(int argc, char* argv[]) {
     return progression[index % progression.size()];
   };
   Ensemble ensemble(&sequencer, scale);
+  ensemble.SetRootNote(kRootNote);
   ensemble.SetSectionComposerCallback(section_composer_callback);
   ensemble.SetBarComposerCallback(bar_composer_callback);
   for (auto& performer : performers) {
     ensemble.AddPerformer(&performer.first, std::move(performer.second));
   }
-
-  ensemble.conductor().SetRootNote(kRootNote);
-  ensemble.conductor().SetEnergy(kEnergy);
-  ensemble.conductor().SetStress(kStress);
-  sequencer.SetTempo(ensemble.conductor().tempo_multiplier() * kTempo);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

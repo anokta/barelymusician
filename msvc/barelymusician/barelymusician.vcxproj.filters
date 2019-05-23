@@ -126,9 +126,6 @@
     <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\conductor.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>

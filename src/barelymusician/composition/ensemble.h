@@ -7,10 +7,12 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/module.h"
-#include "barelymusician/composition/conductor.h"
+#include "barelymusician/composition/note.h"
 #include "barelymusician/composition/performer.h"
+#include "barelymusician/composition/scale.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "barelymusician/sequencer/transport.h"
 
@@ -25,8 +27,8 @@ class Ensemble : public Module {
   using BarComposerCallback = std::function<int(const Transport&, int)>;
 
   // Beat composer callback signature.
-  using BeatComposerCallback = std::function<std::vector<Note>(
-      const Conductor& conductor, const Transport&, int, int)>;
+  using BeatComposerCallback = std::function<void(
+      float, const Scale&, const Transport&, int, int, std::vector<Note>*)>;
 
   explicit Ensemble(Sequencer* sequencer, const Scale& scale);
 
@@ -36,15 +38,22 @@ class Ensemble : public Module {
   void AddPerformer(Performer* performer,
                     BeatComposerCallback&& beat_composer_callback);
 
+  // Sets the root note (key) of score.
+  //
+  // @param index Root note index.
+  void SetRootNote(float index) { root_note_index_ = index; }
+
   void SetSectionComposerCallback(
       SectionComposerCallback&& section_composer_callback);
 
   void SetBarComposerCallback(BarComposerCallback&& bar_composer_callback);
 
-  Conductor& conductor() { return conductor_; }
-
  private:
-  Conductor conductor_;
+  // Root note index.
+  float root_note_index_;
+
+  // Musical scale.
+  Scale scale_;
 
   // Section composer callback.
   SectionComposerCallback section_composer_callback_;
@@ -60,10 +69,13 @@ class Ensemble : public Module {
 
   // List of performers.
   std::vector<std::pair<Performer*, BeatComposerCallback>> performers_;
+
+  std::vector<Note> temp_beat_notes_;
 };
 
 Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
-    : conductor_(scale),
+    : root_note_index_(kNoteIndexC3),
+      scale_(scale),
       section_composer_callback_(nullptr),
       bar_composer_callback_(nullptr),
       section_type_(0),
@@ -85,9 +97,11 @@ Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
       }
     }
     for (auto& performer : performers_) {
-      const auto& notes =
-          performer.second(conductor_, transport, section_type_, harmonic_);
-      performer.first->Perform(notes, start_sample, num_beats_per_sample);
+      temp_beat_notes_.clear();
+      performer.second(root_note_index_, scale_, transport, section_type_,
+                       harmonic_, &temp_beat_notes_);
+      performer.first->Perform(temp_beat_notes_, start_sample,
+                               num_beats_per_sample);
     }
   });
 }

@@ -5,6 +5,7 @@
 
 namespace barelyapi {
 
+// Musical scale.
 class Scale {
  public:
   // Constructs new |Scale| with the given |intervals|.
@@ -17,11 +18,11 @@ class Scale {
   // @return Scale length.
   int GetLength() const;
 
-  // Returns the scaled note index for the given |relative_note_index|.
+  // Returns the corresponding note index for the given |scale_index|.
   //
-  // @param relative_note_index Relative note index.
-  // @return Scaled note index.
-  float GetNoteIndex(float relative_note_index) const;
+  // @param scale_index Scale index.
+  // @return Note index.
+  float GetNoteIndex(float scale_index) const;
 
  private:
   // Cumulative intervals per each step of an octave in increasing order.

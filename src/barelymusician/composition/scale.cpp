@@ -13,13 +13,13 @@ Scale::Scale(const std::vector<float>& intervals) : intervals_(intervals) {
 
 int Scale::GetLength() const { return static_cast<int>(intervals_.size()); }
 
-float Scale::GetNoteIndex(float relative_note_index) const {
+float Scale::GetNoteIndex(float scale_index) const {
   const float scale_length = static_cast<float>(intervals_.size());
-  const float octave_offset = std::floor(relative_note_index / scale_length);
-  const float scale_offset = relative_note_index - octave_offset * scale_length;
+  const float octave_offset = std::floor(scale_index / scale_length);
+  const float scale_offset = scale_index - octave_offset * scale_length;
   // TODO(#42): Properly suport fractional |note_index| values?
-  const int scale_index = static_cast<int>(std::floor(scale_offset));
-  return kNumSemitones * octave_offset + intervals_[scale_index];
+  return kNumSemitones * octave_offset +
+         intervals_[static_cast<int>(std::floor(scale_offset))];
 }
 
 }  // namespace barelyapi

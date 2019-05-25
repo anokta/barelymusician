@@ -132,6 +132,9 @@
     <ClInclude Include="..\..\src\barelymusician\composition\scale.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\quantizer.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -168,6 +171,9 @@
       <Filter>Source Files\composition</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\scale.cpp">
+      <Filter>Source Files\composition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\quantizer.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>

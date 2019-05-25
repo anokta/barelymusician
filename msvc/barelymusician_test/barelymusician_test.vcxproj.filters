@@ -69,5 +69,8 @@
     <ClCompile Include="..\..\src\barelymusician\composition\scale_test.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\quantizer_test.cpp">
+      <Filter>Source Files\composition</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

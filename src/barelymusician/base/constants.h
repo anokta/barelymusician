@@ -26,6 +26,13 @@ static const int kNumMaxMessageDataBytes = 16;
 // Number of semitones in an octave (twelwe-tone equal temperament).
 static const float kNumSemitones = 12.0f;
 
+// Common musical scales.
+static const float kMajorScale[] = {0.0f, 2.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f};
+static const float kNaturalMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f,
+                                           7.0f, 8.0f, 10.0f};
+static const float kHarmonicMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f,
+                                            7.0f, 8.0f, 11.0f};
+
 // Common note indices.
 static const float kNoteIndexA2 = 45.0f;
 static const float kNoteIndexAsharp2 = 46.0f;
@@ -79,6 +86,15 @@ static const float kNoteIndexKick = kNoteIndexC3;
 static const float kNoteIndexSnare = kNoteIndexD3;
 static const float kNoteIndexHihatClosed = kNoteIndexE3;
 static const float kNoteIndexHihatOpen = kNoteIndexF3;
+
+// Common note values in relation to quarter note beat duration.
+static const int kNumQuarterNotesPerBeat = 1;
+static const int kNumEighthNotesPerBeat = 2;
+static const int kNumEighthTripletNotesPerBeat = 3;
+static const int kNumSixteenthNotesPerBeat = 4;
+static const int kNumSixteenthTripletNotesPerBeat = 6;
+static const int kNumThirtySecondNotesPerBeat = 8;
+static const int kNumThirtySecondTripletNotesPerBeat = 12;
 
 }  // namespace barelyapi
 

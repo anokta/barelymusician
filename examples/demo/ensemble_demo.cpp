@@ -53,8 +53,6 @@ const int kNumBeats = 3;
 
 // Ensemble settings.
 const float kRootNote = barelyapi::kNoteIndexD3;
-const float kMajorScale[] = {0.0f, 2.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f};
-const float kMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f, 7.0f, 8.0f, 10.0f};
 const int kNumInstrumentVoices = 8;
 
 BasicSynthInstrument BuildSynthInstrument(OscillatorType type, float gain,
@@ -159,8 +157,8 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBeats(kNumBeats);
 
   const std::vector<int> progression = {0, 3, 4, 0};
-  const Scale scale(
-      std::vector<float>(std::begin(kMajorScale), std::end(kMajorScale)));
+  const Scale scale(std::vector<float>(std::begin(barelyapi::kMajorScale),
+                                       std::end(barelyapi::kMajorScale)));
 
   std::vector<std::pair<Performer, Ensemble::BeatComposerCallback>> performers;
 

@@ -33,3 +33,9 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# barelymusician native libraries
+Assets/BarelyMusician/Plugins/**/*.a
+Assets/BarelyMusician/Plugins/**/*.bundle
+Assets/BarelyMusician/Plugins/**/*.dll
+Assets/BarelyMusician/Plugins/**/*.so

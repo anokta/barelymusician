@@ -26,6 +26,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ensemble_demo", "ensemble_d
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "midi_demo", "midi_demo\midi_demo.vcxproj", "{042A3767-A975-48B2-B6A2-E029599B6CD4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "barelymusician_unity", "barelymusician_unity\barelymusician_unity.vcxproj", "{829A713C-76CE-4121-824A-6C629E8FBC4C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C58BD654-3773-4B8C-94B3-CBB8A6109E1D} = {C58BD654-3773-4B8C-94B3-CBB8A6109E1D}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		barelymusician_examples\barelymusician_examples.vcxitems*{042a3767-a975-48b2-b6a2-e029599b6cd4}*SharedItemsImports = 4
@@ -98,6 +103,14 @@ Global
 		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Release|x64.Build.0 = Release|x64
 		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Release|x86.ActiveCfg = Release|Win32
 		{042A3767-A975-48B2-B6A2-E029599B6CD4}.Release|x86.Build.0 = Release|Win32
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Debug|x64.ActiveCfg = Debug|x64
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Debug|x64.Build.0 = Debug|x64
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Debug|x86.ActiveCfg = Debug|Win32
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Debug|x86.Build.0 = Debug|Win32
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Release|x64.ActiveCfg = Release|x64
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Release|x64.Build.0 = Release|x64
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Release|x86.ActiveCfg = Release|Win32
+		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -111,6 +124,7 @@ Global
 		{5A3910E6-1CD0-4BFF-B392-AA74E3A5F996} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
 		{8316558D-5F55-4FA1-9E07-90116833FA26} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
 		{042A3767-A975-48B2-B6A2-E029599B6CD4} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
+		{829A713C-76CE-4121-824A-6C629E8FBC4C} = {88F5CCBF-FB94-432F-8542-56FDA177ECED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4D0FC367-CC45-41CF-B318-814EA7A34206}

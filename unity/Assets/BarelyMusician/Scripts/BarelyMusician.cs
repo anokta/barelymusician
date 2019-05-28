@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace BarelyApi {
-
   // Main |BarelyMusician| class that communicates with the native code.
   public class BarelyMusician {
     // Singleton instance.
@@ -85,5 +84,4 @@ namespace BarelyApi {
     [DllImport(pluginName)]
     private static extern void Update();
   }
-
 }  // namespace BarelyApi

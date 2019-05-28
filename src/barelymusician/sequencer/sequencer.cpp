@@ -27,10 +27,12 @@ void Sequencer::RegisterBeatCallback(BeatCallback&& callback) {
 
 void Sequencer::SetNumBars(int num_bars) {
   transport_.num_bars = std::max(num_bars, 0);
+  transport_.bar %= transport_.num_bars;
 }
 
 void Sequencer::SetNumBeats(int num_beats) {
   transport_.num_beats = std::max(num_beats, 0);
+  transport_.beat %= transport_.num_beats;
 }
 
 void Sequencer::SetPosition(int section, int bar, int beat) {

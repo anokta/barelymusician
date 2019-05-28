@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace BarelyApi {
-
   // Beat callback.
   public delegate void BeatCallback(int section, int bar, int beat);
 
@@ -22,20 +21,12 @@ namespace BarelyApi {
     [Range(0, 16)]
     public int numBeats = 0;
 
-    void Awake() {
-      BarelyMusician.Instance.RegisterSequencerBeatCallback(DebugBeatCallback);
-    }
-
     void Update() {
       UpdateSequencer();
     }
 
     void OnAudioFilterRead(float[] data, int channels) {
       BarelyMusician.Instance.UpdateSequencer();
-    }
-
-    private void DebugBeatCallback(int section, int bar, int beat) {
-      Debug.Log("Beat: " + section + "." + bar + "." + beat);
     }
 
     private void UpdateSequencer() {
@@ -45,5 +36,4 @@ namespace BarelyApi {
       barelymusician.SetSequencerNumBeats(numBeats);
     }
   }
-
-}  // namespace BarelyApi
+}

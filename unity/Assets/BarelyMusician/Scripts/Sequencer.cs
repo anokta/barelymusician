@@ -7,7 +7,7 @@ namespace BarelyApi {
   [RequireComponent(typeof(AudioSource))]
   public class Sequencer : MonoBehaviour {
     // Beat event.
-    public delegate void BeatEvent(int section, int bar, int beat);
+    public delegate void BeatEvent(int section, int bar, int beat, double dspTime);
     public event BeatEvent OnBeat;
 
     // Tempo (BPM).
@@ -40,9 +40,9 @@ namespace BarelyApi {
     }
 
     void OnEnable() {
-      beatCallback = delegate (int section, int bar, int beat) {
+      beatCallback = delegate (int section, int bar, int beat, double dspTime) {
         if (OnBeat != null) {
-          OnBeat(section, bar, beat);
+          OnBeat(section, bar, beat, dspTime);
         }
       };
       Id = BarelyMusician.Instance.CreateSequencer(beatCallback);

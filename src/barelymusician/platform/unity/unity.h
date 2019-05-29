@@ -14,7 +14,7 @@ namespace unity {
 extern "C" {
 
 // Sequencer beat callback.
-using BeatCallback = void(int, int, int);
+using BeatCallback = void(int, int, int, double);
 
 // Initializes the system.
 //
@@ -38,7 +38,7 @@ int EXPORT_API CreateSequencer(BeatCallback* beat_callback);
 void EXPORT_API DestroySequencer(int sequencer_id);
 
 // Processes sequencer.
-void EXPORT_API ProcessSequencer(int sequencer_id);
+void EXPORT_API ProcessSequencer(int sequencer_id, double dsp_time);
 
 // Sets sequencer's number of bars per section.
 //

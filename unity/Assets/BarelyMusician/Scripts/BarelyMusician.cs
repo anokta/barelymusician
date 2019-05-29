@@ -8,7 +8,7 @@ namespace BarelyApi {
   // Main |BarelyMusician| class that communicates with the native code.
   public class BarelyMusician {
     // Internal beat callback.
-    public delegate void BeatCallback(int section, int bar, int beat);
+    public delegate void BeatCallback(int section, int bar, int beat, double dspTime);
 
     // Invalid ID.
     public static readonly int InvalidId = -1;
@@ -36,7 +36,7 @@ namespace BarelyApi {
 
     // Processes sequencer.
     public void ProcessSequencer(Sequencer sequencer) {
-      ProcessSequencer(sequencer.Id);
+      ProcessSequencer(sequencer.Id, AudioSettings.dspTime);
     }
 
     // Sets sequencer transport.
@@ -81,7 +81,7 @@ namespace BarelyApi {
     private static extern void DestroySequencer(int sequencerId);
 
     [DllImport(pluginName)]
-    private static extern void ProcessSequencer(int sequencerId);
+    private static extern void ProcessSequencer(int sequencerId, double dspTime);
 
     [DllImport(pluginName)]
     private static extern void SetSequencerNumBars(int sequencerId, int numBars);

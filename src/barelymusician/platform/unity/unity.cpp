@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <unordered_map>
+#include <utility>
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/sequencer/sequencer.h"
@@ -28,12 +29,20 @@ struct BarelyMusician {
 
   int id_counter;
 
+  double dsp_time;
+
   std::unordered_map<int, Sequencer> sequencers;
 
-  int AddSequencer(Sequencer::BeatCallback&& beat_callback) {
+  int AddSequencer(BeatCallback* beat_callback) {
     const int sequencer_id = ++id_counter;
     Sequencer sequencer(sample_rate);
-    sequencer.RegisterBeatCallback(std::move(beat_callback));
+    const auto sequencer_beat_callback = [beat_callback, this](
+                                             const Transport& transport,
+                                             int start_sample, int) {
+      beat_callback(transport.section, transport.bar, transport.beat,
+                    dsp_time + static_cast<double>(start_sample) / sample_rate);
+    };
+    sequencer.RegisterBeatCallback(sequencer_beat_callback);
     sequencers.insert({sequencer_id, std::move(sequencer)});
     return sequencer_id;
   }
@@ -68,11 +77,7 @@ void Shutdown() {
 
 int CreateSequencer(BeatCallback* beat_callback) {
   DCHECK(barelymusician);
-  const auto sequencer_beat_callback =
-      [beat_callback](const Transport& transport, int, int) {
-        beat_callback(transport.section, transport.bar, transport.beat);
-      };
-  return barelymusician->AddSequencer(sequencer_beat_callback);
+  return barelymusician->AddSequencer(beat_callback);
 }
 
 void DestroySequencer(int sequencer_id) {
@@ -80,8 +85,9 @@ void DestroySequencer(int sequencer_id) {
   barelymusician->RemoveSequencer(sequencer_id);
 }
 
-void ProcessSequencer(int sequencer_id) {
+void ProcessSequencer(int sequencer_id, double dsp_time) {
   DCHECK(barelymusician);
+  barelymusician->dsp_time = dsp_time;
   Sequencer* sequencer = barelymusician->GetSequencer(sequencer_id);
   DCHECK(sequencer);
   sequencer->Update(barelymusician->num_frames);

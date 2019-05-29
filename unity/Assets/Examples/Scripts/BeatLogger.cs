@@ -25,8 +25,9 @@ namespace BarelyApi {
       }
     }
 
-    public void OnBeat(int section, int bar, int beat) {
-      Debug.Log("Beat: " + section + "." + bar + "." + beat);
+    public void OnBeat(int section, int bar, int beat, double dspTime) {
+      double offset = dspTime - AudioSettings.dspTime;
+      Debug.Log("Beat: " + section + "." + bar + "." + beat + ":" + offset.ToString("F2"));
     }
   }
 }

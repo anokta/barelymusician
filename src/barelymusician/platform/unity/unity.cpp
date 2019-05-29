@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/platform/unity/unity_instrument.h"
 #include "barelymusician/sequencer/sequencer.h"
 
 namespace barelyapi {
@@ -31,16 +32,18 @@ struct BarelyMusician {
 
   double dsp_time;
 
+  std::unordered_map<int, UnityInstrument> instruments;
   std::unordered_map<int, Sequencer> sequencers;
 
-  int AddSequencer(BeatCallback* beat_callback) {
+  int AddSequencer(BeatCallback* beat_callback_ptr) {
     const int sequencer_id = ++id_counter;
     Sequencer sequencer(sample_rate);
-    const auto sequencer_beat_callback = [beat_callback, this](
+    const auto sequencer_beat_callback = [beat_callback_ptr, this](
                                              const Transport& transport,
                                              int start_sample, int) {
-      beat_callback(transport.section, transport.bar, transport.beat,
-                    dsp_time + static_cast<double>(start_sample) / sample_rate);
+      beat_callback_ptr(
+          transport.section, transport.bar, transport.beat,
+          dsp_time + static_cast<double>(start_sample) / sample_rate);
     };
     sequencer.RegisterBeatCallback(sequencer_beat_callback);
     sequencers.insert({sequencer_id, std::move(sequencer)});
@@ -56,6 +59,27 @@ struct BarelyMusician {
   }
 
   void RemoveSequencer(int sequencer_id) { sequencers.erase(sequencer_id); }
+
+  int AddInstrument(NoteOffCallback* note_off_callback_ptr,
+                    NoteOnCallback* note_on_callback_ptr,
+                    ProcessCallback* process_callback_ptr,
+                    ResetCallback* reset_callback_ptr) {
+    const int instrument_id = ++id_counter;
+    UnityInstrument instrument(note_off_callback_ptr, note_on_callback_ptr,
+                               process_callback_ptr, reset_callback_ptr);
+    instruments.insert({instrument_id, std::move(instrument)});
+    return instrument_id;
+  }
+
+  UnityInstrument* GetInstrument(int instrument_id) {
+    const auto it = instruments.find(instrument_id);
+    if (it != instruments.end()) {
+      return &it->second;
+    }
+    return nullptr;
+  }
+
+  void RemoveInstrument(int instrument_id) { instruments.erase(instrument_id); }
 };
 
 BarelyMusician* barelymusician = nullptr;
@@ -75,9 +99,9 @@ void Shutdown() {
   barelymusician = nullptr;
 }
 
-int CreateSequencer(BeatCallback* beat_callback) {
+int CreateSequencer(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
-  return barelymusician->AddSequencer(beat_callback);
+  return barelymusician->AddSequencer(beat_callback_ptr);
 }
 
 void DestroySequencer(int sequencer_id) {
@@ -112,6 +136,50 @@ void SetSequencerTempo(int sequencer_id, float tempo) {
   Sequencer* sequencer = barelymusician->GetSequencer(sequencer_id);
   DCHECK(sequencer);
   sequencer->SetTempo(tempo);
+}
+
+int CreateInstrument(NoteOffCallback* note_off_callback_ptr,
+                     NoteOnCallback* note_on_callback_ptr,
+                     ProcessCallback* process_callback_ptr,
+                     ResetCallback* reset_callback_ptr) {
+  DCHECK(barelymusician);
+  return barelymusician->AddInstrument(
+      note_off_callback_ptr, note_on_callback_ptr, process_callback_ptr,
+      reset_callback_ptr);
+}
+
+void DestroyInstrument(int instrument_id) {
+  DCHECK(barelymusician);
+  barelymusician->RemoveInstrument(instrument_id);
+}
+
+void NoteOffInstrument(int instrument_id, float index) {
+  DCHECK(barelymusician);
+  Instrument* instrument = barelymusician->GetInstrument(instrument_id);
+  DCHECK(instrument);
+  instrument->NoteOff(index);
+}
+
+void NoteOnInstrument(int instrument_id, float index, float intensity) {
+  DCHECK(barelymusician);
+  Instrument* instrument = barelymusician->GetInstrument(instrument_id);
+  DCHECK(instrument);
+  instrument->NoteOn(index, intensity);
+}
+
+void ProcessInstrument(int instrument_id, float* output) {
+  DCHECK(barelymusician);
+  Instrument* instrument = barelymusician->GetInstrument(instrument_id);
+  DCHECK(instrument);
+  instrument->Process(output, barelymusician->num_channels,
+                      barelymusician->num_frames);
+}
+
+void ResetInstrument(int instrument_id) {
+  DCHECK(barelymusician);
+  Instrument* instrument = barelymusician->GetInstrument(instrument_id);
+  DCHECK(instrument);
+  instrument->Reset();
 }
 
 }  // namespace unity

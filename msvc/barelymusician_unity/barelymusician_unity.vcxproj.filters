@@ -30,9 +30,15 @@
     <ClInclude Include="..\..\src\barelymusician\platform\unity\unity.h">
       <Filter>Header Files\platform\unity</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\platform\unity\unity_instrument.h">
+      <Filter>Header Files\platform\unity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\platform\unity\unity.cpp">
+      <Filter>Source Files\platform\unity</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\platform\unity\unity_instrument.cpp">
       <Filter>Source Files\platform\unity</Filter>
     </ClCompile>
   </ItemGroup>

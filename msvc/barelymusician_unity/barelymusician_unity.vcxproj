@@ -20,9 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\platform\unity\unity.h" />
+    <ClInclude Include="..\..\src\barelymusician\platform\unity\unity_instrument.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\platform\unity\unity.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\platform\unity\unity_instrument.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\barelymusician\barelymusician.vcxproj">

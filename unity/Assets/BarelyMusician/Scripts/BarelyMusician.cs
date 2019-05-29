@@ -10,6 +10,14 @@ namespace BarelyApi {
     // Internal beat callback.
     public delegate void BeatCallback(int section, int bar, int beat, double dspTime);
 
+    // Internal instrument callbacks.
+    public delegate void NoteOffCallback(float index);
+    public delegate void NoteOnCallback(float index, float intensity);
+    public delegate void ProcessCallback(
+      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out]
+      float[] output, int size, int numChannels);
+    public delegate void ResetCallback();
+
     // Invalid ID.
     public static readonly int InvalidId = -1;
 
@@ -44,6 +52,30 @@ namespace BarelyApi {
       SetSequencerNumBars(sequencer.Id, sequencer.numBars);
       SetSequencerNumBeats(sequencer.Id, sequencer.numBeats);
       SetSequencerTempo(sequencer.Id, sequencer.tempo);
+    }
+
+    // Creates new instrument.
+    public int CreateInstrument(NoteOffCallback noteOffCallback, NoteOnCallback noteOnCallback,
+                                ProcessCallback processCallback, ResetCallback resetCallback) {
+      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(noteOffCallback),
+                              Marshal.GetFunctionPointerForDelegate(noteOnCallback),
+                              Marshal.GetFunctionPointerForDelegate(processCallback),
+                              Marshal.GetFunctionPointerForDelegate(resetCallback));
+    }
+
+    // Destroys instrument.
+    public void DestroyInstrument(Instrument instrument) {
+      DestroyInstrument(instrument.Id);
+    }
+
+    // Processes instrument.
+    public void ProcessInstrument(Instrument instrument, float[] output) {
+      ProcessInstrument(instrument.Id, output);
+    }
+
+    // Resets instrument.
+    public void ResetInstrument(Instrument instrument) {
+      ResetInstrument(instrument.Id);
     }
 
     // Constructs new |BarelyMusician| with Unity audio settings.
@@ -91,5 +123,19 @@ namespace BarelyApi {
 
     [DllImport(pluginName)]
     private static extern void SetSequencerTempo(int sequencerId, float tempo);
+
+    // Instrument handlers.
+    [DllImport(pluginName)]
+    private static extern int CreateInstrument(IntPtr noteOffCallbackPtr, IntPtr noteOnCallbackPtr,
+                                             IntPtr processCallbackPtr, IntPtr resetCallbackPtr);
+
+    [DllImport(pluginName)]
+    private static extern void DestroyInstrument(int instrumentId);
+
+    [DllImport(pluginName)]
+    private static extern void ProcessInstrument(int instrumentId, [In, Out] float[] output);
+
+    [DllImport(pluginName)]
+    private static extern void ResetInstrument(int instrumentId);
   }
-}  // namespace BarelyApi
+}

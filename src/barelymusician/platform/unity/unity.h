@@ -23,32 +23,37 @@ using BeatCallback = void(int, int, int);
 // @param num_frames System number of frames per buffer.
 void EXPORT_API Initialize(int sample_rate, int num_channels, int num_frames);
 
-// Registers beat callback.
-//
-// @param beat_callback Sequencer beat callback.
-void EXPORT_API RegisterBeatCallback(BeatCallback* beat_callback);
-
-// Sets number of bars per section.
-//
-// @param num_bars Sequencer number of bars per section.
-void EXPORT_API SetNumBars(int num_bars);
-
-// Sets number of beats per bar.
-//
-// @param num_beats Sequencer number of beats per bar.
-void EXPORT_API SetNumBeats(int num_beats);
-
-// Sets tempo.
-//
-// @param tempo Sequencer tempo.
-void EXPORT_API SetTempo(float tempo);
-
 // Shuts down the system.
 void EXPORT_API Shutdown();
 
-// Updates the state of the system to be called in each audio processing
-// callback.
-void EXPORT_API Update();
+// Creates new sequencer.
+//
+// @param beat_callback Sequencer beat callback.
+// @return Sequencer ID.
+int EXPORT_API CreateSequencer(BeatCallback* beat_callback);
+
+// Destroys sequencer.
+//
+// @param Sequencer ID.
+void EXPORT_API DestroySequencer(int sequencer_id);
+
+// Processes sequencer.
+void EXPORT_API ProcessSequencer(int sequencer_id);
+
+// Sets sequencer's number of bars per section.
+//
+// @param num_bars Sequencer number of bars per section.
+void EXPORT_API SetSequencerNumBars(int sequencer_id, int num_bars);
+
+// Sets sequencer's number of beats per bar.
+//
+// @param num_beats Sequencer number of beats per bar.
+void EXPORT_API SetSequencerNumBeats(int sequencer_id, int num_beats);
+
+// Sets sequencer's tempo.
+//
+// @param tempo Sequencer tempo.
+void EXPORT_API SetSequencerTempo(int sequencer_id, float tempo);
 
 }  // extern "C"
 

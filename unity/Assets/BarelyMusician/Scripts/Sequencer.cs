@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace BarelyApi {
-  // Beat callback.
-  public delegate void BeatCallback(int section, int bar, int beat);
-
   // Beat sequencer.
   [RequireComponent(typeof(AudioSource))]
   public class Sequencer : MonoBehaviour {
+    // Beat event.
+    public delegate void BeatEvent(int section, int bar, int beat);
+    public event BeatEvent OnBeat;
+
     // Tempo (BPM).
     [Range(0.0f, 480.0f)]
     public float tempo = 120.0f;
@@ -21,19 +22,53 @@ namespace BarelyApi {
     [Range(0, 16)]
     public int numBeats = 0;
 
+    // Sequencer ID.
+    public int Id { get; private set; }
+
+    public bool IsPlaying {
+      get { return audioSource != null && audioSource.isPlaying; }
+    }
+
+    // Audio source.
+    private AudioSource audioSource = null;
+
+    // Internal beat callback.
+    private BarelyMusician.BeatCallback beatCallback = null;
+
+    void Awake() {
+      audioSource = GetComponent<AudioSource>();
+    }
+
+    void OnEnable() {
+      beatCallback = delegate (int section, int bar, int beat) {
+        if (OnBeat != null) {
+          OnBeat(section, bar, beat);
+        }
+      };
+      Id = BarelyMusician.Instance.CreateSequencer(beatCallback);
+    }
+
+    void OnDisable() {
+      BarelyMusician.Instance.DestroySequencer(this);
+      Id = BarelyMusician.InvalidId;
+    }
+
     void Update() {
-      UpdateSequencer();
+      BarelyMusician.Instance.SetSequencerTransport(this);
     }
 
     void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Instance.UpdateSequencer();
+      BarelyMusician.Instance.ProcessSequencer(this);
     }
 
-    private void UpdateSequencer() {
-      var barelymusician = BarelyMusician.Instance;
-      barelymusician.SetSequencerTempo(tempo);
-      barelymusician.SetSequencerNumBars(numBars);
-      barelymusician.SetSequencerNumBeats(numBeats);
+    // Starts the sequencer.
+    public void Play() {
+      audioSource.Play();
+    }
+
+    // Stops the sequencer.
+    public void Stop() {
+      audioSource.Stop();
     }
   }
 }

@@ -24,13 +24,11 @@ TEST(SequencerTest, ProcessDefault) {
   EXPECT_EQ(0, sequencer.GetTransport().section);
   EXPECT_EQ(0, sequencer.GetTransport().bar);
   EXPECT_EQ(0, sequencer.GetTransport().beat);
-  EXPECT_FLOAT_EQ(0.0f, sequencer.GetTransport().offset_beats);
 
   sequencer.Update(kSampleRate);
   EXPECT_EQ(0, sequencer.GetTransport().section);
   EXPECT_EQ(0, sequencer.GetTransport().bar);
   EXPECT_EQ(0, sequencer.GetTransport().beat);
-  EXPECT_FLOAT_EQ(0.0f, sequencer.GetTransport().offset_beats);
 }
 
 // Tests that the sequencer updates its transport position as expected.
@@ -45,7 +43,6 @@ TEST(SequencerTest, Process) {
   EXPECT_EQ(0, transport.section);
   EXPECT_EQ(0, transport.bar);
   EXPECT_EQ(kBeatsPerSecond, transport.beat);
-  EXPECT_FLOAT_EQ(0.0f, transport.offset_beats);
   // Test bar count.
   sequencer.Reset();
   sequencer.SetNumBeats(1);
@@ -53,7 +50,6 @@ TEST(SequencerTest, Process) {
   EXPECT_EQ(0, transport.section);
   EXPECT_EQ(kBeatsPerSecond, transport.bar);
   EXPECT_EQ(0, transport.beat);
-  EXPECT_FLOAT_EQ(0.0f, transport.offset_beats);
   // Test section count.
   sequencer.Reset();
   sequencer.SetNumBars(1);
@@ -61,7 +57,6 @@ TEST(SequencerTest, Process) {
   EXPECT_EQ(kBeatsPerSecond, transport.section);
   EXPECT_EQ(0, transport.bar);
   EXPECT_EQ(0, transport.beat);
-  EXPECT_FLOAT_EQ(0.0f, transport.offset_beats);
 }
 
 // Tests that the sequencer triggers the registered beat callback as expected.
@@ -83,7 +78,6 @@ TEST(SequencerTest, RegisterBeatCallback) {
 
   for (int i = 0; i < kNumSeconds; ++i) {
     sequencer.Update(kSampleRate);
-    EXPECT_FLOAT_EQ(0.0f, sequencer.GetTransport().offset_beats);
   }
 }
 
@@ -97,13 +91,11 @@ TEST(SequencerTest, Reset) {
   EXPECT_GE(sequencer.GetTransport().section, 0);
   EXPECT_GE(sequencer.GetTransport().bar, 0);
   EXPECT_GE(sequencer.GetTransport().beat, 0);
-  EXPECT_GE(sequencer.GetTransport().offset_beats, 0.0f);
 
   sequencer.Reset();
   EXPECT_EQ(0, sequencer.GetTransport().section);
   EXPECT_EQ(0, sequencer.GetTransport().bar);
   EXPECT_EQ(0, sequencer.GetTransport().beat);
-  EXPECT_FLOAT_EQ(0.0f, sequencer.GetTransport().offset_beats);
 }
 
 // Tests that transport parameters of the sequencer get set as expected.
@@ -127,7 +119,6 @@ TEST(SequencerTest, SetTransport) {
   EXPECT_EQ(kSection, sequencer.GetTransport().section);
   EXPECT_EQ(kBar, sequencer.GetTransport().bar);
   EXPECT_EQ(kBeat, sequencer.GetTransport().beat);
-  EXPECT_FLOAT_EQ(0.0f, sequencer.GetTransport().offset_beats);
 
   // Set tempo.
   sequencer.SetTempo(kTempo);

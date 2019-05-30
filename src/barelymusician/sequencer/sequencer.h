@@ -68,8 +68,8 @@ class Sequencer : public Module {
   // Number of samples per beat.
   int num_samples_per_beat_;
 
-  // Offset samples from the current beat.
-  int offset_samples_;
+  // Leftover samples from the current beat.
+  int leftover_samples_;
 
   // Playback transport.
   Transport transport_;

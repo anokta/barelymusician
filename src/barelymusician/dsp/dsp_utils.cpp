@@ -18,7 +18,10 @@ float AmplitudeFromDecibels(float decibels) {
 
 float BeatsFromSamples(int samples, int num_samples_per_beat) {
   DCHECK_GE(num_samples_per_beat, 0);
-  return static_cast<float>(samples) / static_cast<float>(num_samples_per_beat);
+  return (num_samples_per_beat > 0)
+             ? static_cast<float>(samples) /
+                   static_cast<float>(num_samples_per_beat)
+             : 0.0f;
 }
 
 float DecibelsFromAmplitude(float amplitude) {

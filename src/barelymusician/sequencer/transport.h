@@ -22,9 +22,6 @@ struct Transport {
 
   // Current beat.
   int beat;
-
-  // Fractional offset from the current beat.
-  float offset_beats;
 };
 
 }  // namespace barelyapi

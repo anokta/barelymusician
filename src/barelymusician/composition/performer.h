@@ -21,13 +21,18 @@ class Performer : public Module {
   // Implements |Module|.
   void Reset() override;
 
-  // Performs the given beat |notes| to be played.
+  // Stops note with the given |index|.
   //
-  // @param notes Notes to play.
-  // @param beat_start_sample Relative start sample of the beat.
-  // @param num_samples_per_beat Number of samples per beat.
-  void Perform(const std::vector<Note>& notes, int beat_start_sample,
-               int num_samples_per_beat);
+  // @param index Note index.
+  // @param timestamp Timestamp to stop the note.
+  void NoteOff(float index, int timestamp);
+
+  // Starts note with the given |index| and |intensity|.
+  //
+  // @param index Note index.
+  // @param intensity Note intensity.
+  // @param timestamp Timestamp to start the note.
+  void NoteOn(float index, float intensity, int timestamp);
 
   // Processes the next |output| buffer.
   //
@@ -37,7 +42,7 @@ class Performer : public Module {
   void Process(float* output, int num_channels, int num_frames);
 
  private:
-   // Processes the given note |message|.
+  // Processes the given note |message|.
   void ProcessMessage(const Message& message);
 
   // Pushes the given note |message| to be played.

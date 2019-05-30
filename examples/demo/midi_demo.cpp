@@ -10,6 +10,7 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/performer.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
@@ -19,6 +20,7 @@ namespace {
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
+using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -134,8 +136,16 @@ int main(int argc, char* argv[]) {
                                                     int num_samples_per_beat) {
     int num_performers = static_cast<int>(performers.size());
     for (int i = 0; i < num_performers; ++i) {
-      performers[i].Perform(GetBeatNotes(scores[i], transport), start_sample,
-                            num_samples_per_beat);
+      for (const Note& note : GetBeatNotes(scores[i], transport)) {
+        const int start_timestamp =
+            start_sample +
+            SamplesFromBeats(note.start_beat, num_samples_per_beat);
+        performers[i].NoteOn(note.index, note.intensity, start_timestamp);
+        const int end_timestamp =
+            start_timestamp +
+            SamplesFromBeats(note.duration_beats, num_samples_per_beat);
+        performers[i].NoteOff(note.index, end_timestamp);
+      }
     }
   };
   sequencer.RegisterBeatCallback(beat_callback);
@@ -145,7 +155,6 @@ int main(int argc, char* argv[]) {
   const auto process_callback = [&sequencer, &performers,
                                  &temp_buffer](float* output) {
     sequencer.Update(kNumFrames);
-
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : performers) {
       performer.Process(temp_buffer.data(), kNumChannels, kNumFrames);

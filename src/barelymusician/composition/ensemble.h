@@ -13,6 +13,7 @@
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/performer.h"
 #include "barelymusician/composition/scale.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/sequencer/sequencer.h"
 #include "barelymusician/sequencer/transport.h"
 
@@ -83,7 +84,7 @@ Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
   DCHECK(sequencer);
   sequencer->RegisterBeatCallback([&](const Transport& transport,
                                       int start_sample,
-                                      int num_beats_per_sample) {
+                                      int num_samples_per_beat) {
     if (transport.beat == 0) {
       // New bar.
       if (transport.bar == 0) {
@@ -100,8 +101,16 @@ Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
       temp_beat_notes_.clear();
       performer.second(root_note_index_, scale_, transport, section_type_,
                        harmonic_, &temp_beat_notes_);
-      performer.first->Perform(temp_beat_notes_, start_sample,
-                               num_beats_per_sample);
+      for (const Note& note : temp_beat_notes_) {
+        const int start_timestamp =
+            start_sample +
+            SamplesFromBeats(note.start_beat, num_samples_per_beat);
+        performer.first->NoteOn(note.index, note.intensity, start_timestamp);
+        const int end_timestamp =
+            start_timestamp +
+            SamplesFromBeats(note.duration_beats, num_samples_per_beat);
+        performer.first->NoteOff(note.index, end_timestamp);
+      }
     }
   });
 }

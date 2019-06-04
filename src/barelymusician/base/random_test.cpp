@@ -26,7 +26,7 @@ TEST(RandomTest, SetSeed) {
 
   // Validate that the same numbers are generated for the next |kNumValues|.
   for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_FLOAT_EQ(values[i], Random::Uniform());
+    EXPECT_FLOAT_EQ(Random::Uniform(), values[i]);
   }
 }
 

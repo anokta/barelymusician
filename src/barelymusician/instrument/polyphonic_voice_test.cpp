@@ -43,13 +43,13 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
   polyphonic_voice.Resize(kNumVoices);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
   polyphonic_voice.Start(kNoteIndex);
-  EXPECT_FLOAT_EQ(kOutput, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), kOutput);
 
   polyphonic_voice.Stop(kNoteIndex);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 }
 
 // Tests that voice initialization callback produces the expected output.
@@ -59,14 +59,14 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
   polyphonic_voice.Resize(kNumVoices);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
   for (int i = 0; i < kNumVoices; ++i) {
     const float index = static_cast<float>(i + 1);
     polyphonic_voice.Start(
         index, [index](FakeVoice* voice) { voice->SetOutput(index); });
     const float output = polyphonic_voice.Next();
-    EXPECT_FLOAT_EQ(index, polyphonic_voice.Next());
+    EXPECT_FLOAT_EQ(polyphonic_voice.Next(), index);
     polyphonic_voice.Stop(index);
   }
 }
@@ -79,19 +79,19 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
   polyphonic_voice.Resize(kNumVoices);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
   float previous_output = 0.0f;
   for (int i = 0; i < kNumVoices; ++i) {
     const float index = static_cast<float>(i);
     polyphonic_voice.Start(static_cast<float>(i));
     const float output = polyphonic_voice.Next();
-    EXPECT_FLOAT_EQ(kOutput, output - previous_output);
+    EXPECT_FLOAT_EQ(output - previous_output, kOutput);
     previous_output = output;
   }
 
   polyphonic_voice.Start(static_cast<float>(kNumVoices));
-  EXPECT_FLOAT_EQ(previous_output, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), previous_output);
 }
 
 // Tests that the polyphonic voice produces silence when there are no available
@@ -101,10 +101,10 @@ TEST(PolyphonicVoiceTest, NoVoice) {
   base_voice.SetOutput(kOutput);
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
   polyphonic_voice.Start(0);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 }
 
 // Tests that resetting the polyphonic voice resets all the active voices
@@ -115,15 +115,15 @@ TEST(PolyphonicVoiceTest, Reset) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
   polyphonic_voice.Resize(kNumVoices);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
   for (int i = 0; i < kNumVoices; ++i) {
     polyphonic_voice.Start(static_cast<float>(i));
-    EXPECT_NE(0.0f, polyphonic_voice.Next());
+    EXPECT_NE(polyphonic_voice.Next(), 0.0f);
   }
 
   polyphonic_voice.Reset();
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 }
 
 // Tests that the voice update callback updates all the voices as expected.
@@ -135,12 +135,12 @@ TEST(PolyphonicVoiceTest, Update) {
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
   polyphonic_voice.Resize(kNumVoices);
-  EXPECT_FLOAT_EQ(0.0f, polyphonic_voice.Next());
+  EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
   for (int i = 0; i < kNumVoices; ++i) {
     const float index = static_cast<float>(i);
     polyphonic_voice.Start(index);
-    EXPECT_FLOAT_EQ(kOutput, polyphonic_voice.Next());
+    EXPECT_FLOAT_EQ(polyphonic_voice.Next(), kOutput);
     polyphonic_voice.Stop(index);
   }
 
@@ -150,7 +150,7 @@ TEST(PolyphonicVoiceTest, Update) {
   for (int i = 0; i < kNumVoices; ++i) {
     const float index = static_cast<float>(i);
     polyphonic_voice.Start(index);
-    EXPECT_FLOAT_EQ(kUpdatedOutput, polyphonic_voice.Next());
+    EXPECT_FLOAT_EQ(polyphonic_voice.Next(), kUpdatedOutput);
     polyphonic_voice.Stop(index);
   }
 }

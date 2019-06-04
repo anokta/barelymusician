@@ -17,16 +17,14 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
   const float kDecibels[kNumValues] = {-80.0f, -20.0f, -12.0f, 0.0f, 6.0f};
 
   for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_NEAR(kAmplitudes[i], AmplitudeFromDecibels(kDecibels[i]), kEpsilon);
-    EXPECT_NEAR(kDecibels[i], DecibelsFromAmplitude(kAmplitudes[i]), kEpsilon);
+    EXPECT_NEAR(AmplitudeFromDecibels(kDecibels[i]), kAmplitudes[i], kEpsilon);
+    EXPECT_NEAR(DecibelsFromAmplitude(kAmplitudes[i]), kDecibels[i], kEpsilon);
 
     // Verify that the back and forth conversion do not mutate the value.
-    EXPECT_NEAR(kAmplitudes[i],
-                AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])),
-                kEpsilon);
-    EXPECT_NEAR(kDecibels[i],
-                DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])),
-                kEpsilon);
+    EXPECT_NEAR(AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])),
+                kAmplitudes[i], kEpsilon);
+    EXPECT_NEAR(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])),
+                kDecibels[i], kEpsilon);
   }
 }
 
@@ -39,26 +37,26 @@ TEST(DspUtilsTest, BeatsSamplesConversion) {
   const int kSamples[kNumValues] = {0, 2, 5, 10, 80, 121};
 
   for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_FLOAT_EQ(kBeats[i],
-                    BeatsFromSamples(kSamples[i], kNumSamplesPerBeat));
-    EXPECT_EQ(kSamples[i], SamplesFromBeats(kBeats[i], kNumSamplesPerBeat));
+    EXPECT_FLOAT_EQ(BeatsFromSamples(kSamples[i], kNumSamplesPerBeat),
+                    kBeats[i]);
+    EXPECT_EQ(SamplesFromBeats(kBeats[i], kNumSamplesPerBeat), kSamples[i]);
 
     // Verify that the back and forth conversion do not mutate the value.
     EXPECT_FLOAT_EQ(
-        kBeats[i],
         BeatsFromSamples(SamplesFromBeats(kBeats[i], kNumSamplesPerBeat),
-                         kNumSamplesPerBeat));
+                         kNumSamplesPerBeat),
+        kBeats[i]);
     EXPECT_EQ(
-        kSamples[i],
         SamplesFromBeats(BeatsFromSamples(kSamples[i], kNumSamplesPerBeat),
-                         kNumSamplesPerBeat));
+                         kNumSamplesPerBeat),
+        kSamples[i]);
   }
 }
 
 // Tests that amplitude/decibels conversion snaps to |kMinDecibels| threshold.
 TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
-  EXPECT_FLOAT_EQ(0.0f, AmplitudeFromDecibels(kMinDecibels));
-  EXPECT_FLOAT_EQ(kMinDecibels, DecibelsFromAmplitude(0.0f));
+  EXPECT_FLOAT_EQ(AmplitudeFromDecibels(kMinDecibels), 0.0f);
+  EXPECT_FLOAT_EQ(DecibelsFromAmplitude(0.0f), kMinDecibels);
 }
 
 // Tests that the expected filter coefficients are generated for an arbitrary
@@ -72,8 +70,8 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
                                                     0.0f};
 
   for (int i = 0; i < kNumCutoffs; ++i) {
-    EXPECT_NEAR(kExpectedCoefficients[i],
-                GetFilterCoefficient(kSampleRate, kCutoffs[i]), kEpsilon);
+    EXPECT_NEAR(GetFilterCoefficient(kSampleRate, kCutoffs[i]),
+                kExpectedCoefficients[i], kEpsilon);
   }
 }
 

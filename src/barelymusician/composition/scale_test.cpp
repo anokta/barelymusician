@@ -18,14 +18,14 @@ TEST(ScaleTest, GetNoteIndex) {
   Scale scale(kScale);
 
   const int scale_length = scale.GetLength();
-  EXPECT_EQ(kScale.size(), scale_length);
+  EXPECT_EQ(scale_length, kScale.size());
 
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < scale_length; ++i) {
       const float scale_index = static_cast<float>(octave * scale_length + i);
       const float expected_note_index =
           static_cast<float>(octave * kNumSemitones) + kScale[i];
-      EXPECT_FLOAT_EQ(expected_note_index, scale.GetNoteIndex(scale_index));
+      EXPECT_FLOAT_EQ(scale.GetNoteIndex(scale_index), expected_note_index);
     }
   }
 }

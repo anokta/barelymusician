@@ -21,9 +21,8 @@ TEST_P(QuantizerTest, GetDurationBeats) {
       const float expected_duration_beats =
           static_cast<float>(beat) +
           static_cast<float>(i) / static_cast<float>(num_notes_per_beat);
-      EXPECT_FLOAT_EQ(
-          expected_duration_beats,
-          quantizer.GetDurationBeats(num_notes_per_beat * beat + i));
+      EXPECT_FLOAT_EQ(quantizer.GetDurationBeats(num_notes_per_beat * beat + i),
+                      expected_duration_beats);
     }
   }
 }

@@ -21,14 +21,14 @@ const int kBeatsPerSecond = static_cast<int>(kTempo / kSecondsFromMinutes);
 TEST(SequencerTest, ProcessDefault) {
   Sequencer sequencer(kSampleRate);
 
-  EXPECT_EQ(0, sequencer.GetTransport().section);
-  EXPECT_EQ(0, sequencer.GetTransport().bar);
-  EXPECT_EQ(0, sequencer.GetTransport().beat);
+  EXPECT_EQ(sequencer.GetTransport().section, 0);
+  EXPECT_EQ(sequencer.GetTransport().bar, 0);
+  EXPECT_EQ(sequencer.GetTransport().beat, 0);
 
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(0, sequencer.GetTransport().section);
-  EXPECT_EQ(0, sequencer.GetTransport().bar);
-  EXPECT_EQ(0, sequencer.GetTransport().beat);
+  EXPECT_EQ(sequencer.GetTransport().section, 0);
+  EXPECT_EQ(sequencer.GetTransport().bar, 0);
+  EXPECT_EQ(sequencer.GetTransport().beat, 0);
 }
 
 // Tests that the sequencer updates its transport position as expected.
@@ -37,26 +37,25 @@ TEST(SequencerTest, Process) {
   sequencer.SetTempo(kTempo);
   sequencer.SetNumBeats(0);
 
-  const auto& transport = sequencer.GetTransport();
   // Test beat count.
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(0, transport.section);
-  EXPECT_EQ(0, transport.bar);
-  EXPECT_EQ(kBeatsPerSecond, transport.beat);
+  EXPECT_EQ(sequencer.GetTransport().section, 0);
+  EXPECT_EQ(sequencer.GetTransport().bar, 0);
+  EXPECT_EQ(sequencer.GetTransport().beat, kBeatsPerSecond);
   // Test bar count.
   sequencer.Reset();
   sequencer.SetNumBeats(1);
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(0, transport.section);
-  EXPECT_EQ(kBeatsPerSecond, transport.bar);
-  EXPECT_EQ(0, transport.beat);
+  EXPECT_EQ(sequencer.GetTransport().section, 0);
+  EXPECT_EQ(sequencer.GetTransport().bar, kBeatsPerSecond);
+  EXPECT_EQ(sequencer.GetTransport().beat, 0);
   // Test section count.
   sequencer.Reset();
   sequencer.SetNumBars(1);
   sequencer.Update(kSampleRate);
-  EXPECT_EQ(kBeatsPerSecond, transport.section);
-  EXPECT_EQ(0, transport.bar);
-  EXPECT_EQ(0, transport.beat);
+  EXPECT_EQ(sequencer.GetTransport().section, kBeatsPerSecond);
+  EXPECT_EQ(sequencer.GetTransport().bar, 0);
+  EXPECT_EQ(sequencer.GetTransport().beat, 0);
 }
 
 // Tests that the sequencer triggers the registered beat callback as expected.
@@ -70,8 +69,8 @@ TEST(SequencerTest, RegisterBeatCallback) {
   const auto beat_callback = [&beat](const Transport& transport,
                                      int start_sample,
                                      int num_samples_per_beat) {
-    EXPECT_EQ(beat, transport.beat);
-    EXPECT_EQ(start_sample, (beat % kBeatsPerSecond) * num_samples_per_beat);
+    EXPECT_EQ(transport.beat, beat);
+    EXPECT_EQ((beat % kBeatsPerSecond) * num_samples_per_beat, start_sample);
     ++beat;
   };
   sequencer.RegisterBeatCallback(beat_callback);
@@ -93,9 +92,9 @@ TEST(SequencerTest, Reset) {
   EXPECT_GE(sequencer.GetTransport().beat, 0);
 
   sequencer.Reset();
-  EXPECT_EQ(0, sequencer.GetTransport().section);
-  EXPECT_EQ(0, sequencer.GetTransport().bar);
-  EXPECT_EQ(0, sequencer.GetTransport().beat);
+  EXPECT_EQ(sequencer.GetTransport().section, 0);
+  EXPECT_EQ(sequencer.GetTransport().bar, 0);
+  EXPECT_EQ(sequencer.GetTransport().beat, 0);
 }
 
 // Tests that transport parameters of the sequencer get set as expected.
@@ -108,21 +107,21 @@ TEST(SequencerTest, SetTransport) {
 
   // Set number of bars.
   sequencer.SetNumBars(kNumBars);
-  EXPECT_EQ(kNumBars, sequencer.GetTransport().num_bars);
+  EXPECT_EQ(sequencer.GetTransport().num_bars, kNumBars);
 
   // Set number of beats.
   sequencer.SetNumBeats(kNumBeats);
-  EXPECT_EQ(kNumBeats, sequencer.GetTransport().num_beats);
+  EXPECT_EQ(sequencer.GetTransport().num_beats, kNumBeats);
 
   // Set position.
   sequencer.SetPosition(kSection, kBar, kBeat);
-  EXPECT_EQ(kSection, sequencer.GetTransport().section);
-  EXPECT_EQ(kBar, sequencer.GetTransport().bar);
-  EXPECT_EQ(kBeat, sequencer.GetTransport().beat);
+  EXPECT_EQ(sequencer.GetTransport().section, kSection);
+  EXPECT_EQ(sequencer.GetTransport().bar, kBar);
+  EXPECT_EQ(sequencer.GetTransport().beat, kBeat);
 
   // Set tempo.
   sequencer.SetTempo(kTempo);
-  EXPECT_FLOAT_EQ(kTempo, sequencer.GetTransport().tempo);
+  EXPECT_FLOAT_EQ(sequencer.GetTransport().tempo, kTempo);
 }
 
 }  // namespace

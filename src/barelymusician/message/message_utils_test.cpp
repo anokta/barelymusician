@@ -19,11 +19,11 @@ TEST(MessageUtilsTest, BuildMessage) {
   const int kTimestamp = 512;
 
   const Message message = BuildMessage<TestMessageData>(kId, kData, kTimestamp);
-  EXPECT_EQ(kId, message.id);
+  EXPECT_EQ(message.id, kId);
   const auto message_data = ReadMessageData<TestMessageData>(message.data);
-  EXPECT_EQ(kData.float_value, message_data.float_value);
-  EXPECT_EQ(kData.int_value, message_data.int_value);
-  EXPECT_EQ(kTimestamp, message.timestamp);
+  EXPECT_FLOAT_EQ(message_data.float_value, kData.float_value);
+  EXPECT_EQ(message_data.int_value, kData.int_value);
+  EXPECT_EQ(message.timestamp, kTimestamp);
 }
 
 // Tests that messages are compared as expected according to their timestamps.
@@ -51,8 +51,8 @@ TEST(MessageUtilsTest, WriteReadMessageData) {
   WriteMessageData<TestMessageData>(kData, message.data);
 
   const auto message_data = ReadMessageData<TestMessageData>(message.data);
-  EXPECT_EQ(kData.float_value, message_data.float_value);
-  EXPECT_EQ(kData.int_value, message_data.int_value);
+  EXPECT_FLOAT_EQ(message_data.float_value, kData.float_value);
+  EXPECT_EQ(message_data.int_value, kData.int_value);
 }
 
 }  // namespace

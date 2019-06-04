@@ -21,9 +21,9 @@ TEST(SamplePlayerTest, SimplePlayback) {
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
   for (int i = 0; i < kDataLength; ++i) {
-    EXPECT_EQ(kData[i], sample_player.Next()) << "at index " << i;
+    EXPECT_FLOAT_EQ(sample_player.Next(), kData[i]) << "at index " << i;
   }
-  EXPECT_EQ(0.0f, sample_player.Next());
+  EXPECT_FLOAT_EQ(sample_player.Next(), 0.0f);
 }
 
 // Tests that the sample data is played back as expected, when set to loop.
@@ -34,7 +34,8 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
   const int kNumLoops = 10;
   for (int i = 0; i < kDataLength * kNumLoops; ++i) {
-    EXPECT_EQ(kData[i % kDataLength], sample_player.Next()) << "at index " << i;
+    EXPECT_FLOAT_EQ(sample_player.Next(), kData[i % kDataLength])
+        << "at index " << i;
   }
 }
 
@@ -52,7 +53,7 @@ TEST(SamplePlayerTest, SetSpeed) {
     for (int i = 0; i < kDataLength; ++i) {
       const int expected_index =
           static_cast<int>(static_cast<float>(i) * speed);
-      EXPECT_EQ(kData[expected_index % kDataLength], sample_player.Next())
+      EXPECT_FLOAT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where speed is: " << speed;
     }
   }
@@ -72,7 +73,7 @@ TEST(SamplePlayerTest, DifferentSampleFrequency) {
     for (int i = 0; i < kDataLength; ++i) {
       const int expected_index =
           static_cast<int>(static_cast<float>(i * frequency) * kSampleInterval);
-      EXPECT_EQ(kData[expected_index % kDataLength], sample_player.Next())
+      EXPECT_FLOAT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;
     }
   }
@@ -84,10 +85,10 @@ TEST(SamplePlayerTest, Reset) {
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
   const float first_sample = sample_player.Next();
-  EXPECT_NE(first_sample, sample_player.Next());
+  EXPECT_NE(sample_player.Next(), first_sample);
 
   sample_player.Reset();
-  EXPECT_EQ(first_sample, sample_player.Next());
+  EXPECT_FLOAT_EQ(sample_player.Next(), first_sample);
 }
 
 }  // namespace

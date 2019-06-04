@@ -17,7 +17,7 @@ TEST(EventTest, RegisterSingleCallback) {
 
   for (int i = 0; i < kNumEventTriggers; ++i) {
     event.Trigger(i);
-    EXPECT_EQ(-i, result);
+    EXPECT_EQ(result, -i);
   }
 }
 
@@ -43,8 +43,8 @@ TEST(EventTest, RegisterMultipleCallbacks) {
 
   // Verify that triggering the event calls both callbacks.
   event.Trigger(kValue1, kValue2);
-  EXPECT_FLOAT_EQ(kValue1 + kValue2, sum);
-  EXPECT_FLOAT_EQ(kValue1 - kValue2, difference);
+  EXPECT_FLOAT_EQ(sum, kValue1 + kValue2);
+  EXPECT_FLOAT_EQ(difference, kValue1 - kValue2);
 }
 
 }  // namespace

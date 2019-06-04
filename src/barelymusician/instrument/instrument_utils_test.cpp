@@ -15,7 +15,7 @@ TEST(InstrumentUtilsTest, FrequencyFromNoteIndex) {
   const float kFrequencies[kNumIndices] = {27.5f, 261.6f, 440.0f, 1523.3f};
 
   for (int i = 0; i < kNumIndices; ++i) {
-    EXPECT_NEAR(kFrequencies[i], FrequencyFromNoteIndex(kIndices[i]), kEpsilon);
+    EXPECT_NEAR(FrequencyFromNoteIndex(kIndices[i]), kFrequencies[i], kEpsilon);
   }
 }
 

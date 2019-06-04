@@ -26,7 +26,7 @@ TEST(ModulationMatrixTest, DefaultParam) {
 
   float value = 0.0f;
   EXPECT_TRUE(modulation_matrix.GetParam(kParamId, &value));
-  EXPECT_FLOAT_EQ(kDefaultParamValue, value);
+  EXPECT_FLOAT_EQ(value, kDefaultParamValue);
 }
 
 // Tests that setting the value of a parameter can be accessed as expected.
@@ -38,7 +38,7 @@ TEST(ModulationMatrixTest, SetParam) {
 
   float value = 0.0f;
   EXPECT_TRUE(modulation_matrix.GetParam(kParamId, &value));
-  EXPECT_FLOAT_EQ(kParamValue, value);
+  EXPECT_FLOAT_EQ(value, kParamValue);
 }
 
 // Tests that the parameter updater gets called accordingly with the expected
@@ -51,13 +51,13 @@ TEST(ModulationMatrixTest, ParamUpdater) {
     update_value = value;
   };
   modulation_matrix.Register(kParamId, kDefaultParamValue, param_updater);
-  EXPECT_FLOAT_EQ(kDefaultParamValue, update_value);
+  EXPECT_FLOAT_EQ(update_value, kDefaultParamValue);
 
   EXPECT_TRUE(modulation_matrix.SetParam(kParamId, kParamValue));
-  EXPECT_FLOAT_EQ(kParamValue, update_value);
+  EXPECT_FLOAT_EQ(update_value, kParamValue);
 
   modulation_matrix.Reset();
-  EXPECT_FLOAT_EQ(kDefaultParamValue, update_value);
+  EXPECT_FLOAT_EQ(update_value, kDefaultParamValue);
 }
 
 // Tests that resetting reverts the parameter to its default value.
@@ -71,7 +71,7 @@ TEST(ModulationMatrixTest, Reset) {
 
   float value = 0.0f;
   EXPECT_TRUE(modulation_matrix.GetParam(kParamId, &value));
-  EXPECT_FLOAT_EQ(kDefaultParamValue, value);
+  EXPECT_FLOAT_EQ(value, kDefaultParamValue);
 }
 
 }  // namespace

@@ -17,7 +17,7 @@ TEST(ContextFreeGrammarTest, GenerateSequence) {
   grammar.AddRule(kStartSymbol, {kSubstition});
 
   const auto sequence = grammar.GenerateSequence(kStartSymbol);
-  EXPECT_EQ(kSubstition, sequence);
+  EXPECT_EQ(sequence, kSubstition);
 }
 
 // Tests that the expected sequence is generated with a given set of nested
@@ -31,7 +31,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNestedRules) {
   const std::vector<std::string> kExpectedSequence = {
       "Intro", "Verse", "Chorus", "Break", "Chorus", "Outro"};
   const auto sequence = grammar.GenerateSequence("Start");
-  EXPECT_EQ(kExpectedSequence, sequence);
+  EXPECT_EQ(sequence, kExpectedSequence);
 }
 
 // Tests that the context free grammar generation always returns a sequence with
@@ -67,8 +67,8 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoRules) {
   ContextFreeGrammar<int> grammar;
 
   const auto sequence = grammar.GenerateSequence(kStartSymbol);
-  ASSERT_EQ(1, sequence.size());
-  EXPECT_EQ(kStartSymbol, sequence.front());
+  ASSERT_EQ(sequence.size(), 1);
+  EXPECT_EQ(sequence.front(), kStartSymbol);
 }
 
 // Tests that no substitions are done when there are no rules given for the
@@ -82,8 +82,8 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
   grammar.AddRule(2, {{15}});
 
   const auto sequence = grammar.GenerateSequence(kStartSymbol);
-  ASSERT_EQ(1, sequence.size());
-  EXPECT_EQ(kStartSymbol, sequence.front());
+  ASSERT_EQ(sequence.size(), 1);
+  EXPECT_EQ(sequence.front(), kStartSymbol);
 }
 
 }  // namespace

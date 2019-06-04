@@ -22,13 +22,13 @@ const float kEpsilon = 1e-3f;
 // initialized with the default constructor.
 TEST(EnvelopeTest, ProcessDefault) {
   Envelope envelope(kSampleInterval);
-  EXPECT_FLOAT_EQ(0.0f, envelope.Next());
+  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
 
   envelope.Start();
-  EXPECT_FLOAT_EQ(1.0f, envelope.Next());
+  EXPECT_FLOAT_EQ(envelope.Next(), 1.0f);
 
   envelope.Stop();
-  EXPECT_FLOAT_EQ(0.0f, envelope.Next());
+  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
 }
 
 // Tests that the envelope generates the expected output samples consistently
@@ -44,7 +44,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   envelope.SetDecay(kDecay);
   envelope.SetSustain(kSustain);
   envelope.SetRelease(kRelease);
-  EXPECT_FLOAT_EQ(0.0f, envelope.Next());
+  EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
 
   float expected_sample = 0.0f;
 
@@ -63,7 +63,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Sustain.
       expected_sample = kSustain;
     }
-    EXPECT_NEAR(expected_sample, envelope.Next(), kEpsilon);
+    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
   }
 
   envelope.Stop();
@@ -77,7 +77,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
       // Idle.
       expected_sample = 0.0f;
     }
-    EXPECT_NEAR(expected_sample, envelope.Next(), kEpsilon);
+    EXPECT_NEAR(envelope.Next(), expected_sample, kEpsilon);
   }
 }
 

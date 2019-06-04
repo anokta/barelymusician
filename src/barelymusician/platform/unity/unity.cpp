@@ -5,8 +5,9 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/sequencer.h"
+#include "barelymusician/base/transport.h"
 #include "barelymusician/platform/unity/unity_instrument.h"
-#include "barelymusician/sequencer/sequencer.h"
 
 namespace barelyapi {
 namespace unity {

@@ -1,4 +1,4 @@
-#include "barelymusician/sequencer/sequencer.h"
+#include "barelymusician/base/sequencer.h"
 
 #include "barelymusician/base/constants.h"
 #include "gtest/gtest.h"
@@ -43,14 +43,14 @@ TEST(SequencerTest, Process) {
   EXPECT_EQ(sequencer.GetTransport().bar, 0);
   EXPECT_EQ(sequencer.GetTransport().beat, kBeatsPerSecond);
   // Test bar count.
-  sequencer.Reset();
+  sequencer.SetPosition(0, 0, 0);
   sequencer.SetNumBeats(1);
   sequencer.Update(kSampleRate);
   EXPECT_EQ(sequencer.GetTransport().section, 0);
   EXPECT_EQ(sequencer.GetTransport().bar, kBeatsPerSecond);
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
   // Test section count.
-  sequencer.Reset();
+  sequencer.SetPosition(0, 0, 0);
   sequencer.SetNumBars(1);
   sequencer.Update(kSampleRate);
   EXPECT_EQ(sequencer.GetTransport().section, kBeatsPerSecond);
@@ -78,23 +78,6 @@ TEST(SequencerTest, RegisterBeatCallback) {
   for (int i = 0; i < kNumSeconds; ++i) {
     sequencer.Update(kSampleRate);
   }
-}
-
-// Tests that the sequencer successfully resets its transport position.
-TEST(SequencerTest, Reset) {
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
-  sequencer.SetNumBeats(kNumBeats);
-
-  sequencer.Update(kSampleRate);
-  EXPECT_GE(sequencer.GetTransport().section, 0);
-  EXPECT_GE(sequencer.GetTransport().bar, 0);
-  EXPECT_GE(sequencer.GetTransport().beat, 0);
-
-  sequencer.Reset();
-  EXPECT_EQ(sequencer.GetTransport().section, 0);
-  EXPECT_EQ(sequencer.GetTransport().bar, 0);
-  EXPECT_EQ(sequencer.GetTransport().beat, 0);
 }
 
 // Tests that transport parameters of the sequencer get set as expected.

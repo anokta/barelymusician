@@ -10,12 +10,12 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/module.h"
+#include "barelymusician/base/sequencer.h"
+#include "barelymusician/base/transport.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/performer.h"
 #include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/dsp_utils.h"
-#include "barelymusician/sequencer/sequencer.h"
-#include "barelymusician/sequencer/transport.h"
 
 namespace barelyapi {
 

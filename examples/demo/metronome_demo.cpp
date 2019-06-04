@@ -4,8 +4,9 @@
 
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/sequencer.h"
+#include "barelymusician/base/transport.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/sequencer/sequencer.h"
 #include "instruments/basic_enveloped_voice.h"
 #include "util/input_manager/win_console_input.h"
 

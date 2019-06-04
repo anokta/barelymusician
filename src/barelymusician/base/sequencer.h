@@ -1,14 +1,13 @@
-#ifndef BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_
-#define BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_
+#ifndef BARELYMUSICIAN_BASE_SEQUENCER_H_
+#define BARELYMUSICIAN_BASE_SEQUENCER_H_
 
 #include "barelymusician/base/event.h"
-#include "barelymusician/base/module.h"
-#include "barelymusician/sequencer/transport.h"
+#include "barelymusician/base/transport.h"
 
 namespace barelyapi {
 
 // Step sequencer that keeps track of beats, bars and sections.
-class Sequencer : public Module {
+class Sequencer {
  public:
   // Beat event callback signature.
   using BeatCallback = Event<const Transport&, int, int>::Callback;
@@ -17,9 +16,6 @@ class Sequencer : public Module {
   //
   // @param sample_rate Sampling rate per second.
   explicit Sequencer(int sample_rate);
-
-  // Implements |Module|.
-  void Reset() override;
 
   // Returns the playback transport.
   //
@@ -60,8 +56,8 @@ class Sequencer : public Module {
 
  private:
   // Number of samples per minute.
-  const float num_samples_per_minute_;  
-  
+  const float num_samples_per_minute_;
+
   // Event to be triggered for each beat.
   Event<const Transport&, int, int> beat_event_;
 
@@ -77,4 +73,4 @@ class Sequencer : public Module {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_SEQUENCER_SEQUENCER_H_
+#endif  // BARELYMUSICIAN_BASE_SEQUENCER_H_

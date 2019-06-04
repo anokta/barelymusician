@@ -1,4 +1,4 @@
-#include "barelymusician/sequencer/sequencer.h"
+#include "barelymusician/base/sequencer.h"
 
 #include <algorithm>
 
@@ -16,8 +16,6 @@ Sequencer::Sequencer(int sample_rate)
       transport_({}) {
   DCHECK_GE(num_samples_per_minute_, 0.0f);
 }
-
-void Sequencer::Reset() { SetPosition(0, 0, 0); }
 
 const Transport& Sequencer::GetTransport() const { return transport_; }
 

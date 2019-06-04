@@ -5,7 +5,8 @@
 
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/sequencer/sequencer.h"
+#include "barelymusician/base/sequencer.h"
+#include "barelymusician/base/transport.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {

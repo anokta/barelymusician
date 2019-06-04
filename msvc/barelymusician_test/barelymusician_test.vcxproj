@@ -45,6 +45,7 @@
     <ClCompile Include="..\..\src\barelymusician\base\event_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\base\task_runner_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\quantizer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\scale_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp" />

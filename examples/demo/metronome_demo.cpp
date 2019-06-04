@@ -5,6 +5,7 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/sequencer.h"
+#include "barelymusician/base/task_runner.h"
 #include "barelymusician/base/transport.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "instruments/basic_enveloped_voice.h"
@@ -15,6 +16,7 @@ namespace {
 using ::barelyapi::Oscillator;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Sequencer;
+using ::barelyapi::TaskRunner;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicEnvelopedVoice;
 using ::barelyapi::examples::PaAudioOutput;
@@ -26,6 +28,8 @@ const int kNumChannels = 2;
 const int kNumFrames = 512;
 
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+
+const int kNumMaxTasks = 100;
 
 // Sequencer settings.
 const float kTempo = 120.0f;
@@ -46,6 +50,8 @@ const float kTempoIncrement = 10.0f;
 int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
+
+  TaskRunner task_runner(kNumMaxTasks);
 
   BasicEnvelopedVoice<Oscillator> metronome_voice(kSampleInterval);
   metronome_voice.set_gain(kGain);
@@ -75,8 +81,9 @@ int main(int argc, char* argv[]) {
   sequencer.RegisterBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto process_callback = [&sequencer, &metronome_voice,
+  const auto process_callback = [&task_runner, &sequencer, &metronome_voice,
                                  &tick_sample](float* output) {
+    task_runner.Run();
     tick_sample = -1;
     sequencer.Update(kNumFrames);
     for (int frame = 0; frame < kNumFrames; ++frame) {
@@ -96,7 +103,7 @@ int main(int argc, char* argv[]) {
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&quit,
+  const auto key_down_callback = [&quit, &task_runner,
                                   &sequencer](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
@@ -104,26 +111,28 @@ int main(int argc, char* argv[]) {
       return;
     }
     // Adjust tempo.
+    float tempo = sequencer.GetTransport().tempo;
     switch (std::toupper(key)) {
       case '-':
-        sequencer.SetTempo(sequencer.GetTransport().tempo - kTempoIncrement);
+        tempo -= kTempoIncrement;
         break;
       case '+':
-        sequencer.SetTempo(sequencer.GetTransport().tempo + kTempoIncrement);
+        tempo += kTempoIncrement;
         break;
       case '1':
-        sequencer.SetTempo(0.5f * sequencer.GetTransport().tempo);
+        tempo *= 0.5f;
         break;
       case '2':
-        sequencer.SetTempo(2.0f * sequencer.GetTransport().tempo);
+        tempo *= 2.0f;
         break;
       case 'R':
-        sequencer.SetTempo(kTempo);
+        tempo = kTempo;
         break;
       default:
         return;
     }
-    LOG(INFO) << "Tempo set to " << sequencer.GetTransport().tempo;
+    task_runner.Add([&sequencer, tempo]() { sequencer.SetTempo(tempo); });
+    LOG(INFO) << "Tempo set to " << tempo;
   };
   input_manager.RegisterKeyDownCallback(key_down_callback);
 

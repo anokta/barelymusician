@@ -7,12 +7,14 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/task_runner.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
 using ::barelyapi::OscillatorType;
+using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
@@ -21,9 +23,11 @@ using ::barelyapi::examples::WinConsoleInput;
 // System audio settings.
 const int kSampleRate = 48000;
 const int kNumChannels = 2;
-const int kNumFrames = 512;
+const int kNumFrames = 256;
 
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+
+const int kNumMaxTasks = 100;
 
 // Instrument settings.
 const float kGain = 0.125f;
@@ -56,6 +60,8 @@ int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
+  TaskRunner task_runner(kNumMaxTasks);
+
   BasicSynthInstrument instrument(kSampleInterval, kNumVoices);
   instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, kGain);
   instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
@@ -66,14 +72,15 @@ int main(int argc, char* argv[]) {
   float offset_octaves = 0.0f;
 
   // Audio process callback.
-  const auto process_callback = [&instrument](float* output) {
+  const auto process_callback = [&task_runner, &instrument](float* output) {
+    task_runner.Run();
     instrument.Process(output, kNumChannels, kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&instrument, &offset_octaves,
+  const auto key_down_callback = [&task_runner, &instrument, &offset_octaves,
                                   &quit](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
@@ -85,7 +92,7 @@ int main(int argc, char* argv[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Clear current notes first.
-      instrument.Reset();
+      task_runner.Add([&instrument]() { instrument.Reset(); });
       // Update offset.
       if (upper_key == 'Z') {
         --offset_octaves;
@@ -103,22 +110,25 @@ int main(int argc, char* argv[]) {
     if (note_index < 0.0f) {
       return;
     }
+    task_runner.Add([&instrument, note_index]() {
+      instrument.NoteOn(note_index, kNoteIntensity);
+    });
     LOG(INFO) << "NoteOn(" << note_index << ", " << kNoteIntensity << ")";
-    instrument.NoteOn(note_index, kNoteIntensity);
   };
   input_manager.RegisterKeyDownCallback(key_down_callback);
 
   // Key up callback.
-  const auto key_up_callback =
-      [&instrument, &offset_octaves](const WinConsoleInput::Key& key) {
-        // Stop note.
-        const float note_index = NoteIndexFromKey(key, offset_octaves);
-        if (note_index < 0.0f) {
-          return;
-        }
-        LOG(INFO) << "NoteOff(" << note_index << ")";
-        instrument.NoteOff(note_index);
-      };
+  const auto key_up_callback = [&task_runner, &instrument, &offset_octaves](
+                                   const WinConsoleInput::Key& key) {
+    // Stop note.
+    const float note_index = NoteIndexFromKey(key, offset_octaves);
+    if (note_index < 0.0f) {
+      return;
+    }
+    task_runner.Add(
+        [&instrument, note_index]() { instrument.NoteOff(note_index); });
+    LOG(INFO) << "NoteOff(" << note_index << ")";
+  };
   input_manager.RegisterKeyUpCallback(key_up_callback);
 
   // Start the demo.

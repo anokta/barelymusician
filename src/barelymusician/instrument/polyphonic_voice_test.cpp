@@ -1,5 +1,7 @@
 #include "barelymusician/instrument/polyphonic_voice.h"
 
+#include <utility>
+
 #include "barelymusician/instrument/voice.h"
 #include "gtest/gtest.h"
 
@@ -41,7 +43,7 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
   polyphonic_voice.Resize(kNumVoices);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
@@ -57,7 +59,7 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
   polyphonic_voice.Resize(kNumVoices);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
@@ -77,7 +79,7 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
   polyphonic_voice.Resize(kNumVoices);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
@@ -100,7 +102,7 @@ TEST(PolyphonicVoiceTest, NoVoice) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
   polyphonic_voice.Start(0);
@@ -113,7 +115,7 @@ TEST(PolyphonicVoiceTest, Reset) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
   polyphonic_voice.Resize(kNumVoices);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 
@@ -133,7 +135,7 @@ TEST(PolyphonicVoiceTest, Update) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(base_voice);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
   polyphonic_voice.Resize(kNumVoices);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(), 0.0f);
 

@@ -22,8 +22,7 @@ class PolyphonicVoice : public Generator {
   // Constructs new |PolyphonicVoice| with the given |base_voice|.
   //
   // @param base_voice Base voice type to be used.
-  // TODO(#15): Should |base_voice| be passed by value (via move) instead?
-  explicit PolyphonicVoice(const VoiceType& base_voice);
+  explicit PolyphonicVoice(VoiceType&& base_voice);
 
   // Implements |Generator|.
   float Next() override;
@@ -66,8 +65,8 @@ class PolyphonicVoice : public Generator {
 };
 
 template <class VoiceType>
-PolyphonicVoice<VoiceType>::PolyphonicVoice(const VoiceType& base_voice)
-    : base_voice_(base_voice) {}
+PolyphonicVoice<VoiceType>::PolyphonicVoice(VoiceType&& base_voice)
+    : base_voice_(std::move(base_voice)) {}
 
 template <class VoiceType>
 float PolyphonicVoice<VoiceType>::Next() {

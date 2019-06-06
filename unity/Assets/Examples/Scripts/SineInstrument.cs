@@ -62,11 +62,11 @@ namespace BarelyApi {
     }
 
     public void Play() {
-      NoteOn(0.0f, 1.0f);
+      BarelyMusician.Instance.SetInstrumentNoteOn(this, 0.0f, 1.0f);
     }
 
     public void Stop() {
-      NoteOff(0.0f);
+      BarelyMusician.Instance.SetInstrumentNoteOff(this, 0.0f);
     }
   }
 }

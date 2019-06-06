@@ -59,6 +59,14 @@ void EXPORT_API SetSequencerNumBars(int sequencer_id, int num_bars);
 // @param num_beats Sequencer number of beats per bar.
 void EXPORT_API SetSequencerNumBeats(int sequencer_id, int num_beats);
 
+// Sets sequencer's position.
+//
+// @param section Section.
+// @param bar Bar.
+// @param beat Beat.
+void EXPORT_API SetSequencerPosition(int sequencer_id, int section, int bar,
+                                     int beat);
+
 // Sets sequencer's tempo.
 //
 // @param tempo Sequencer tempo.

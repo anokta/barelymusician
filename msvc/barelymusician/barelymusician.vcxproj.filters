@@ -46,6 +46,12 @@
     <Filter Include="Source Files\composition">
       <UniqueIdentifier>{3963b324-a8d8-49a1-8701-453c8dcfef77}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\api">
+      <UniqueIdentifier>{9ab0941e-33c7-4f55-8ff0-40fec9579868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\api">
+      <UniqueIdentifier>{a5a847a7-a1b9-43d8-b9e4-2a817f8d8747}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -132,6 +138,9 @@
     <ClInclude Include="..\..\src\barelymusician\base\task_runner.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\api\barelymusician.h">
+      <Filter>Header Files\api</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -175,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\task_runner.cpp">
       <Filter>Source Files\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp">
+      <Filter>Source Files\api</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

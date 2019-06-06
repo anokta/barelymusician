@@ -78,6 +78,16 @@ namespace BarelyApi {
       ResetInstrument(instrument.Id);
     }
 
+    // Sets instrument note off.
+    public void SetInstrumentNoteOff(Instrument instrument, float index) {
+      NoteOffInstrument(instrument.Id, index);
+    }
+    
+    // Sets instrument note on.
+    public void SetInstrumentNoteOn(Instrument instrument, float index, float intensity) {
+      NoteOnInstrument(instrument.Id, index, intensity);
+    }
+
     // Constructs new |BarelyMusician| with Unity audio settings.
     BarelyMusician() {
       var config = AudioSettings.GetConfiguration();
@@ -122,18 +132,28 @@ namespace BarelyApi {
     private static extern void SetSequencerNumBeats(int sequencerId, int numBeats);
 
     [DllImport(pluginName)]
+    private static extern void SetSequencerPosition(int sequencerId, int section,
+                                                    int bar, int beat);
+
+    [DllImport(pluginName)]
     private static extern void SetSequencerTempo(int sequencerId, float tempo);
 
     // Instrument handlers.
     [DllImport(pluginName)]
     private static extern int CreateInstrument(IntPtr noteOffCallbackPtr, IntPtr noteOnCallbackPtr,
-                                             IntPtr processCallbackPtr, IntPtr resetCallbackPtr);
+                                               IntPtr processCallbackPtr, IntPtr resetCallbackPtr);
 
     [DllImport(pluginName)]
     private static extern void DestroyInstrument(int instrumentId);
 
     [DllImport(pluginName)]
     private static extern void ProcessInstrument(int instrumentId, [In, Out] float[] output);
+
+    [DllImport(pluginName)]
+    private static extern void NoteOffInstrument(int instrumentId, float index);
+
+    [DllImport(pluginName)]
+    private static extern void NoteOnInstrument(int instrumentId, float index, float intensity);
 
     [DllImport(pluginName)]
     private static extern void ResetInstrument(int instrumentId);

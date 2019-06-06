@@ -33,12 +33,16 @@ namespace BarelyApi {
       }
     }
 
+    public override void Clear() {
+      phase = 0.0f;
+    }
+
     public override void NoteOff(float index) {
       playing = false;
     }
 
     public override void NoteOn(float index, float intensity) {
-      Reset();
+      Clear();
       playing = true;
     }
 
@@ -55,10 +59,6 @@ namespace BarelyApi {
           phase -= 1.0f;
         }
       }
-    }
-
-    public override void Reset() {
-      phase = 0.0f;
     }
 
     public void Play() {

@@ -18,6 +18,12 @@ const float kDefaultRelease = 0.1f;
 BasicDrumkitInstrument::BasicDrumkitInstrument(float sample_interval)
     : sample_interval_(sample_interval), gain_(kDefaultGain) {}
 
+void BasicDrumkitInstrument::Clear() {
+  for (auto& voice : voices_) {
+    voice.second.Reset();
+  }
+}
+
 void BasicDrumkitInstrument::NoteOff(float index) {
   const auto it = voices_.find(index);
   if (it == voices_.end()) {
@@ -48,12 +54,6 @@ void BasicDrumkitInstrument::Process(float* output, int num_channels,
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = sample;
     }
-  }
-}
-
-void BasicDrumkitInstrument::Reset() {
-  for (auto& voice : voices_) {
-    voice.second.Reset();
   }
 }
 

@@ -10,10 +10,13 @@ namespace BarelyApi {
     public int Id { get; private set; }
 
     // Internal instrument callbacks.
+    private BarelyMusician.ClearCallback clearCallback;
     private BarelyMusician.NoteOffCallback noteOffCallback;
     private BarelyMusician.NoteOnCallback noteOnCallback;
     private BarelyMusician.ProcessCallback processCallback;
-    private BarelyMusician.ResetCallback resetCallback;
+
+    // Clears the instrument.
+    public abstract void Clear();
 
     // Starts playing note with the given |index| and |intensity|.
     public abstract void NoteOn(float index, float intensity);
@@ -24,18 +27,12 @@ namespace BarelyApi {
     // Processes the next |output| buffer.
     public abstract void Process(float[] output, int numChannels);
 
-    // Resets the instrument.
-    public abstract void Reset();
-
     void OnEnable() {
+      clearCallback = Clear;
       noteOffCallback = NoteOff;
       noteOnCallback = NoteOn;
-      processCallback = delegate (float[] output, int size, int numChannels) {
-        Process(output, numChannels);
-      };
-      resetCallback = Reset;
-      Id = BarelyMusician.Instance.CreateInstrument(noteOffCallback, noteOnCallback,
-                                                    processCallback, resetCallback);
+      processCallback = delegate (float[] output, int size, int numChannels) { Process(output, numChannels); };
+      Id = BarelyMusician.Instance.CreateInstrument(clearCallback, noteOffCallback, noteOnCallback, processCallback);
     }
 
     void OnDisable() {

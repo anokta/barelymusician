@@ -63,6 +63,8 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
       });
 }
 
+void BasicSynthInstrument::Clear() { voice_.Reset(); }
+
 void BasicSynthInstrument::NoteOff(float index) {
   voice_.Stop(index);
 }
@@ -83,8 +85,6 @@ void BasicSynthInstrument::Process(float* output, int num_channels,
     }
   }
 }
-
-void BasicSynthInstrument::Reset() { voice_.Reset(); }
 
 void BasicSynthInstrument::SetFloatParam(int id, float value) {
   if (!modulation_matrix_.SetParam(id, value)) {

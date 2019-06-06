@@ -11,34 +11,34 @@ namespace unity {
 class UnityInstrument : public Instrument {
  public:
   // Instrument callback signatures.
+  using ClearCallback = std::function<void()>;
   using NoteOffCallback = std::function<void(float)>;
   using NoteOnCallback = std::function<void(float, float)>;
   using ProcessCallback = std::function<void(float*, int, int)>;
-  using ResetCallback = std::function<void()>;
 
   // Constructs new |UnityInstrument|.
   //
+  // @param clear_callback Clear callback.
   // @param note_off_callback Note off callback.
   // @param note_on_callback Note on callback.
   // @param process_callback Process callback.
-  // @param reset_callback Reset callback.
-  UnityInstrument(NoteOffCallback&& note_off_callback,
+  UnityInstrument(ClearCallback&& clear_callback,
+                  NoteOffCallback&& note_off_callback,
                   NoteOnCallback&& note_on_callback,
-                  ProcessCallback&& process_callback,
-                  ResetCallback&& reset_callback);
+                  ProcessCallback&& process_callback);
 
   // Implements |Instrument|.
+  void Clear() override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-  void Reset() override;
 
  private:
   // Instrument callbacks.
+  ClearCallback clear_callback_;
   NoteOffCallback note_off_callback_;
   NoteOnCallback note_on_callback_;
   ProcessCallback process_callback_;
-  ResetCallback reset_callback_;
 };
 
 }  // namespace unity

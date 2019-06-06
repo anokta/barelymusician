@@ -17,10 +17,10 @@ class BasicDrumkitInstrument : public Instrument {
   BasicDrumkitInstrument(float sample_interval);
 
   // Implements |Instrument|.
+  void Clear() override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-  void Reset() override;
 
   void Add(float note_index, const WavFile& wav_file);
 

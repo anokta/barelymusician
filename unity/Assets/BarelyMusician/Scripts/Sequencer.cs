@@ -41,9 +41,7 @@ namespace BarelyApi {
 
     void OnEnable() {
       beatCallback = delegate (int section, int bar, int beat, double dspTime) {
-        if (OnBeat != null) {
-          OnBeat(section, bar, beat, dspTime);
-        }
+        OnBeat?.Invoke(section, bar, beat, dspTime);
       };
       Id = BarelyMusician.Instance.CreateSequencer(beatCallback);
     }

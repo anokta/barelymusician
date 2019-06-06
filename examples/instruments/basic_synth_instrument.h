@@ -24,10 +24,10 @@ class BasicSynthInstrument : public Instrument {
   BasicSynthInstrument(float sample_interval, int num_voices);
 
   // Implements |Instrument|.
+  void Clear() override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-  void Reset() override;
 
   // Sets the value of a float parameter with the given ID.
   //

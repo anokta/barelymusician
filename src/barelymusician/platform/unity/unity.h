@@ -17,10 +17,10 @@ extern "C" {
 using BeatCallback = void(int, int, int, double);
 
 // Instrument callback signatures.
+using ClearCallback = void();
 using NoteOffCallback = void(float);
 using NoteOnCallback = void(float, float);
 using ProcessCallback = void(float*, int, int);
-using ResetCallback = void();
 
 // Initializes the system.
 //
@@ -74,34 +74,20 @@ void EXPORT_API SetSequencerTempo(int sequencer_id, float tempo);
 
 // Creates new instrument.
 //
+// @param clear_callback_ptr Clear callback.
 // @param note_off_callback_ptr Note off callback.
 // @param note_on_callback_ptr Note on callback.
 // @param process_callback_ptr Process callback.
-// @param reset_callback_ptr Reset callback.
 // @return Instrument ID.
-int EXPORT_API CreateInstrument(NoteOffCallback* note_off_callback_ptr,
+int EXPORT_API CreateInstrument(ClearCallback* clear_callback_ptr,
+                                NoteOffCallback* note_off_callback_ptr,
                                 NoteOnCallback* note_on_callback_ptr,
-                                ProcessCallback* process_callback_ptr,
-                                ResetCallback* reset_callback_ptr);
+                                ProcessCallback* process_callback_ptr);
 
 // Destroys instrument.
 //
 // @param instrument_id Instrument ID.
 void EXPORT_API DestroyInstrument(int instrument_id);
-
-// Stops playing instrument's note.
-//
-// @param instrument_id Instrument ID.
-// @param index Note index.
-void EXPORT_API NoteOffInstrument(int instrument_id, float index);
-
-// Starts playing instrument's note.
-//
-// @param instrument_id Instrument ID.
-// @param index Note index.
-// @param intensity Note intensity.
-void EXPORT_API NoteOnInstrument(int instrument_id, float index,
-                                 float intensity);
 
 // Processes instrument.
 //
@@ -112,7 +98,21 @@ void EXPORT_API ProcessInstrument(int instrument_id, float* output);
 // Resets instrument.
 //
 // @param instrument_id Instrument ID.
-void EXPORT_API ResetInstrument(int instrument_id);
+void EXPORT_API SetInstrumentClear(int instrument_id);
+
+// Stops playing instrument's note.
+//
+// @param instrument_id Instrument ID.
+// @param index Note index.
+void EXPORT_API SetInstrumentNoteOff(int instrument_id, float index);
+
+// Starts playing instrument's note.
+//
+// @param instrument_id Instrument ID.
+// @param index Note index.
+// @param intensity Note intensity.
+void EXPORT_API SetInstrumentNoteOn(int instrument_id, float index,
+                                    float intensity);
 
 }  // extern "C"
 

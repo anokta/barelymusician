@@ -39,10 +39,10 @@ class BarelyMusician {
   // @param output Output buffer.
   void ProcessInstrument(int instrument_id, float* output);
 
-  // Resets instrument with the given |instrument_id|.
+  // Clears instrument with the given |instrument_id|.
   //
   // @param instrument_id Instrument ID.
-  void ResetInstrument(int instrument_id);
+  void SetInstrumentClear(int instrument_id);
 
   // Stops playing note on instrument with the given |instrument_id|.
   //

@@ -42,17 +42,6 @@ void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
   }
 }
 
-void BarelyMusician::ResetInstrument(int instrument_id) {
-  task_runner_.Add([this, instrument_id]() {
-    Instrument* instrument = GetInstrument(instrument_id);
-    if (instrument != nullptr) {
-      instrument->Reset();
-    } else {
-      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
-    }
-  });
-}
-
 void BarelyMusician::SetInstrumentNoteOff(int instrument_id, float index) {
   task_runner_.Add([this, instrument_id, index]() {
     Instrument* instrument = GetInstrument(instrument_id);
@@ -70,6 +59,17 @@ void BarelyMusician::SetInstrumentNoteOn(int instrument_id, float index,
     Instrument* instrument = GetInstrument(instrument_id);
     if (instrument != nullptr) {
       instrument->NoteOn(index, intensity);
+    } else {
+      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
+    }
+  });
+}
+
+void BarelyMusician::SetInstrumentClear(int instrument_id) {
+  task_runner_.Add([this, instrument_id]() {
+    Instrument* instrument = GetInstrument(instrument_id);
+    if (instrument != nullptr) {
+      instrument->Clear();
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }

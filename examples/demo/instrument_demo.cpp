@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Clear current notes first.
-      task_runner.Add([&instrument]() { instrument.Reset(); });
+      task_runner.Add([&instrument]() { instrument.Clear(); });
       // Update offset.
       if (upper_key == 'Z') {
         --offset_octaves;

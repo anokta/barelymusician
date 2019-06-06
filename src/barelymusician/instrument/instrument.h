@@ -1,13 +1,17 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 
-#include "barelymusician/base/module.h"
-
 namespace barelyapi {
 
 // Generic instrument interface.
-class Instrument : public Module {
+class Instrument {
  public:
+  // Base destructor to ensure the derived classes get destroyed properly.
+  virtual ~Instrument() = default;
+
+  // Clear all notes.
+  virtual void Clear() = 0;
+
   // Stops note with the given |index|.
   //
   // @param index Note index.

@@ -85,29 +85,19 @@ void SetSequencerTempo(int sequencer_id, float tempo) {
   barelymusician->SetSequencerTempo(sequencer_id, tempo);
 }
 
-int CreateInstrument(NoteOffCallback* note_off_callback_ptr,
+int CreateInstrument(ClearCallback* clear_callback_ptr,
+                     NoteOffCallback* note_off_callback_ptr,
                      NoteOnCallback* note_on_callback_ptr,
-                     ProcessCallback* process_callback_ptr,
-                     ResetCallback* reset_callback_ptr) {
+                     ProcessCallback* process_callback_ptr) {
   DCHECK(barelymusician);
   return barelymusician->CreateInstrument<UnityInstrument>(
-      note_off_callback_ptr, note_on_callback_ptr, process_callback_ptr,
-      reset_callback_ptr);
+      clear_callback_ptr, note_off_callback_ptr, note_on_callback_ptr,
+      process_callback_ptr);
 }
 
 void DestroyInstrument(int instrument_id) {
   DCHECK(barelymusician);
   barelymusician->DestroyInstrument(instrument_id);
-}
-
-void NoteOffInstrument(int instrument_id, float index) {
-  DCHECK(barelymusician);
-  barelymusician->SetInstrumentNoteOff(instrument_id, index);
-}
-
-void NoteOnInstrument(int instrument_id, float index, float intensity) {
-  DCHECK(barelymusician);
-  barelymusician->SetInstrumentNoteOn(instrument_id, index, intensity);
 }
 
 void ProcessInstrument(int instrument_id, float* output) {
@@ -117,9 +107,19 @@ void ProcessInstrument(int instrument_id, float* output) {
   barelymusician->ProcessInstrument(instrument_id, output);
 }
 
-void ResetInstrument(int instrument_id) {
+void SetInstrumentClear(int instrument_id) {
   DCHECK(barelymusician);
-  barelymusician->ResetInstrument(instrument_id);
+  barelymusician->SetInstrumentClear(instrument_id);
+}
+
+void SetInstrumentNoteOff(int instrument_id, float index) {
+  DCHECK(barelymusician);
+  barelymusician->SetInstrumentNoteOff(instrument_id, index);
+}
+
+void SetInstrumentNoteOn(int instrument_id, float index, float intensity) {
+  DCHECK(barelymusician);
+  barelymusician->SetInstrumentNoteOn(instrument_id, index, intensity);
 }
 
 }  // namespace unity

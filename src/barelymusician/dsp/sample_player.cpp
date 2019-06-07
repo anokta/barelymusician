@@ -25,7 +25,7 @@ float SamplePlayer::Next() {
     return 0.0f;
   }
   // TODO(#7): Add a better interpolation method here?
-  const float output = data_[static_cast<int>(std::round(cursor_))];
+  const float output = data_[static_cast<int>(cursor_)];
   // Update the playback cursor.
   cursor_ += increment_;
   if (cursor_ >= length_ && loop_) {

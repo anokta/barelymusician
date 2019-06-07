@@ -41,7 +41,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\src\barelymusician\base\event.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\module.h" />
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />
     <ClInclude Include="..\..\src\barelymusician\base\sequencer.h" />
     <ClInclude Include="..\..\src\barelymusician\base\task_runner.h" />
@@ -55,6 +54,7 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\generator.h" />
+    <ClInclude Include="..\..\src\barelymusician\dsp\module.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />

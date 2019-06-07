@@ -6,19 +6,15 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/module.h"
 
 namespace barelyapi {
 
 // Type agnostic parameter modulation matrix.
 template <typename ParamType>
-class ModulationMatrix : public Module {
+class ModulationMatrix {
  public:
   // Parameter update signature.
   using ParamUpdater = std::function<void(const ParamType&)>;
-
-  // Implements |Module|.
-  void Reset() override;
 
   // Returns the value of a parameter with the given ID.
   //
@@ -45,11 +41,8 @@ class ModulationMatrix : public Module {
  private:
   // Parameter data.
   struct ParamData {
-    // Default value.
-    const ParamType default_value;
-
     // Current value.
-    ParamType current_value;
+    ParamType value;
 
     // Update function.
     ParamUpdater updater;
@@ -60,24 +53,13 @@ class ModulationMatrix : public Module {
 };
 
 template <typename ParamType>
-void ModulationMatrix<ParamType>::Reset() {
-  for (auto& it : params_) {
-    auto& param_data = it.second;
-    if (param_data.updater != nullptr) {
-      param_data.updater(param_data.default_value);
-    }
-    param_data.current_value = param_data.default_value;
-  }
-}
-
-template <typename ParamType>
 bool ModulationMatrix<ParamType>::GetParam(int id, ParamType* value) const {
   const auto it = params_.find(id);
   if (it == params_.end()) {
     return false;
   }
   DCHECK(value);
-  *value = it->second.current_value;
+  *value = it->second.value;
   return true;
 }
 
@@ -85,8 +67,7 @@ template <typename ParamType>
 void ModulationMatrix<ParamType>::Register(int id,
                                            const ParamType& default_value,
                                            ParamUpdater&& updater) {
-  const auto result =
-      params_.insert({id, {default_value, default_value, std::move(updater)}});
+  const auto result = params_.insert({id, {default_value, std::move(updater)}});
   DCHECK(result.second) << "Failed to register param ID: " << id;
 
   const auto& param_data = result.first->second;
@@ -102,11 +83,11 @@ bool ModulationMatrix<ParamType>::SetParam(int id, const ParamType& value) {
     return false;
   }
   auto& param_data = it->second;
-  if (value != param_data.current_value) {
+  if (value != param_data.value) {
     if (param_data.updater != nullptr) {
       param_data.updater(value);
     }
-    param_data.current_value = value;
+    param_data.value = value;
   }
   return true;
 }

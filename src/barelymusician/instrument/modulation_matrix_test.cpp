@@ -46,32 +46,15 @@ TEST(ModulationMatrixTest, SetParam) {
 TEST(ModulationMatrixTest, ParamUpdater) {
   ModulationMatrix<float> modulation_matrix;
 
-  float update_value = 0.0f;
-  const auto param_updater = [&update_value](float value) {
-    update_value = value;
+  float param_value = 0.0f;
+  const auto param_updater = [&param_value](float value) {
+    param_value = value;
   };
   modulation_matrix.Register(kParamId, kDefaultParamValue, param_updater);
-  EXPECT_FLOAT_EQ(update_value, kDefaultParamValue);
+  EXPECT_FLOAT_EQ(param_value, kDefaultParamValue);
 
   EXPECT_TRUE(modulation_matrix.SetParam(kParamId, kParamValue));
-  EXPECT_FLOAT_EQ(update_value, kParamValue);
-
-  modulation_matrix.Reset();
-  EXPECT_FLOAT_EQ(update_value, kDefaultParamValue);
-}
-
-// Tests that resetting reverts the parameter to its default value.
-TEST(ModulationMatrixTest, Reset) {
-  ModulationMatrix<float> modulation_matrix;
-  modulation_matrix.Register(kParamId, kDefaultParamValue);
-
-  EXPECT_TRUE(modulation_matrix.SetParam(kParamId, kParamValue));
-
-  modulation_matrix.Reset();
-
-  float value = 0.0f;
-  EXPECT_TRUE(modulation_matrix.GetParam(kParamId, &value));
-  EXPECT_FLOAT_EQ(value, kDefaultParamValue);
+  EXPECT_FLOAT_EQ(param_value, kParamValue);
 }
 
 }  // namespace

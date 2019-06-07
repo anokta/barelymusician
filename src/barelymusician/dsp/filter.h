@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_PROCESSOR_H_
 #define BARELYMUSICIAN_DSP_PROCESSOR_H_
 
-#include "barelymusician/base/module.h"
+#include "barelymusician/dsp/module.h"
 
 namespace barelyapi {
 

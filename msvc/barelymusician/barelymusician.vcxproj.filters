@@ -105,9 +105,6 @@
     <ClInclude Include="..\..\src\barelymusician\composition\note.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\module.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\dsp\generator.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
@@ -140,6 +137,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\api\barelymusician.h">
       <Filter>Header Files\api</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\dsp\module.h">
+      <Filter>Header Files\dsp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

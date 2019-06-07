@@ -4,22 +4,21 @@
 #include <list>
 #include <vector>
 
-#include "barelymusician/base/module.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message.h"
 
 namespace barelyapi {
 
-class Performer : public Module {
+class Performer {
  public:
   // Constructs new |Performer| with the given |instrument|.
   //
   // @param instrument Pointer to the instrument to perform.
   explicit Performer(Instrument* instrument);
 
-  // Implements |Module|.
-  void Reset() override;
+  // Clears all notes.
+  void Clear();
 
   // Stops note with the given |index|.
   //

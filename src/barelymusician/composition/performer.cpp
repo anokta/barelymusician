@@ -30,7 +30,7 @@ Performer::Performer(Instrument* instrument) : instrument_(instrument) {
   DCHECK(instrument_);
 }
 
-void Performer::Reset() {
+void Performer::Clear() {
   messages_.clear();
   instrument_->Clear();
 }

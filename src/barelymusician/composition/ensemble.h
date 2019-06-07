@@ -9,7 +9,6 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/module.h"
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/base/transport.h"
 #include "barelymusician/composition/note.h"
@@ -19,7 +18,7 @@
 
 namespace barelyapi {
 
-class Ensemble : public Module {
+class Ensemble {
  public:
   // Section composer callback signature.
   using SectionComposerCallback = std::function<int(const Transport&)>;
@@ -32,9 +31,6 @@ class Ensemble : public Module {
       float, const Scale&, const Transport&, int, int, std::vector<Note>*)>;
 
   explicit Ensemble(Sequencer* sequencer, const Scale& scale);
-
-  // Implements |Module|.
-  void Reset() override;
 
   void AddPerformer(Performer* performer,
                     BeatComposerCallback&& beat_composer_callback);
@@ -113,14 +109,6 @@ Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
       }
     }
   });
-}
-
-void Ensemble::Reset() {
-  section_type_ = 0;
-  harmonic_ = 0;
-  for (auto& performer : performers_) {
-    performer.first->Reset();
-  }
 }
 
 void Ensemble::AddPerformer(Performer* performer,

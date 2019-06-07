@@ -1,5 +1,6 @@
 #include "barelymusician/dsp/sample_player.h"
 
+#include <cmath>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -52,7 +53,7 @@ TEST(SamplePlayerTest, SetSpeed) {
 
     for (int i = 0; i < kDataLength; ++i) {
       const int expected_index =
-          static_cast<int>(static_cast<float>(i) * speed);
+          static_cast<int>(std::round(static_cast<float>(i) * speed));
       EXPECT_FLOAT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where speed is: " << speed;
     }
@@ -71,8 +72,8 @@ TEST(SamplePlayerTest, DifferentSampleFrequency) {
     sample_player.SetLoop(true);
 
     for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index =
-          static_cast<int>(static_cast<float>(i * frequency) * kSampleInterval);
+      const int expected_index = static_cast<int>(
+          std::round(static_cast<float>(i * frequency) * kSampleInterval));
       EXPECT_FLOAT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;
     }

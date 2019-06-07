@@ -14,7 +14,7 @@ namespace unity {
 extern "C" {
 
 // Sequencer beat callback.
-using BeatCallback = void(int, int, int, double);
+using BeatCallback = void(int, int, int);
 
 // Instrument callback signatures.
 using ClearCallback = void();
@@ -32,45 +32,41 @@ void EXPORT_API Initialize(int sample_rate, int num_channels, int num_frames);
 // Shuts down the system.
 void EXPORT_API Shutdown();
 
-// Creates new sequencer.
+// Starts sequencer.
+void EXPORT_API Start();
+
+// Stops sequencer.
+void EXPORT_API Stop();
+
+// Updates sequencer.
+void EXPORT_API Update();
+
+// Registers new sequencer beat callback.
 //
 // @param beat_callback_ptr Sequencer beat callback.
-// @return Sequencer ID.
-int EXPORT_API CreateSequencer(BeatCallback* beat_callback_ptr);
-
-// Destroys sequencer.
-//
-// @param Sequencer ID.
-void EXPORT_API DestroySequencer(int sequencer_id);
-
-// Processes sequencer.
-//
-// @param sequencer_id Sequencer ID.
-// @param dsp_time Process start DSP time in seconds.
-void EXPORT_API ProcessSequencer(int sequencer_id, double dsp_time);
+void EXPORT_API RegisterBeatCallback(BeatCallback* beat_callback_ptr);
 
 // Sets sequencer's number of bars per section.
 //
 // @param num_bars Sequencer number of bars per section.
-void EXPORT_API SetSequencerNumBars(int sequencer_id, int num_bars);
+void EXPORT_API SetNumBars(int num_bars);
 
 // Sets sequencer's number of beats per bar.
 //
 // @param num_beats Sequencer number of beats per bar.
-void EXPORT_API SetSequencerNumBeats(int sequencer_id, int num_beats);
+void EXPORT_API SetNumBeats(int num_beats);
 
 // Sets sequencer's position.
 //
 // @param section Section.
 // @param bar Bar.
 // @param beat Beat.
-void EXPORT_API SetSequencerPosition(int sequencer_id, int section, int bar,
-                                     int beat);
+void EXPORT_API SetPosition(int section, int bar, int beat);
 
 // Sets sequencer's tempo.
 //
 // @param tempo Sequencer tempo.
-void EXPORT_API SetSequencerTempo(int sequencer_id, float tempo);
+void EXPORT_API SetTempo(float tempo);
 
 // Creates new instrument.
 //

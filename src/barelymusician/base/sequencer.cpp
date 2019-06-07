@@ -25,19 +25,22 @@ void Sequencer::RegisterBeatCallback(BeatCallback&& callback) {
 
 void Sequencer::SetNumBars(int num_bars) {
   transport_.num_bars = std::max(num_bars, 0);
-  transport_.bar = (transport_.num_bars > 0)
-                       ? std::min(transport_.bar, transport_.num_bars - 1)
-                       : 0;
+  // TODO(#51): Revisit this to make sure the calculation makes sense.
+  if (transport_.num_bars > 0) {
+    transport_.bar = std::min(transport_.bar, transport_.num_bars - 1);
+  }
 }
 
 void Sequencer::SetNumBeats(int num_beats) {
   transport_.num_beats = std::max(num_beats, 0);
-  transport_.beat = (transport_.num_beats > 0)
-                        ? std::min(transport_.beat, transport_.num_beats - 1)
-                        : 0;
+  // TODO(#51): Revisit this to make sure the calculation makes sense.
+  if (transport_.num_beats > 0) {
+    transport_.beat = std::min(transport_.beat, transport_.num_beats - 1);
+  }
 }
 
 void Sequencer::SetPosition(int section, int bar, int beat) {
+  // TODO(#51): Revisit this to make sure the calculation makes sense.
   transport_.section = std::max(section, 0);
   transport_.bar = (transport_.num_bars > 0)
                        ? std::min(std::max(bar, 0), transport_.num_bars - 1)

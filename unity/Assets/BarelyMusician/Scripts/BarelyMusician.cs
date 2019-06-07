@@ -8,7 +8,7 @@ namespace BarelyApi {
   // Main |BarelyMusician| class that communicates with the native code.
   public class BarelyMusician {
     // Internal beat callback.
-    public delegate void BeatCallback(int section, int bar, int beat, double dspTime);
+    public delegate void BeatCallback(int section, int bar, int beat);
 
     // Internal instrument callbacks.
     public delegate void ClearCallback();
@@ -31,26 +31,37 @@ namespace BarelyApi {
     }
     private static BarelyMusician instance = null;
 
-    // Creates new sequencer.
-    public int CreateSequencer(BeatCallback beatCallback) {
-      return CreateSequencer(Marshal.GetFunctionPointerForDelegate(beatCallback));
+    // Registers sequencer beat callback.
+    public void RegisterSequencerBeatCallback(BeatCallback beatCallback) {
+      RegisterBeatCallback(Marshal.GetFunctionPointerForDelegate(beatCallback));
     }
 
-    // Destroys sequencer.
-    public void DestroySequencer(Sequencer sequencer) {
-      DestroySequencer(sequencer.Id);
+    // Starts sequencer playback.
+    public void PlaySequencer() {
+      Start();
     }
 
-    // Processes sequencer.
-    public void ProcessSequencer(Sequencer sequencer) {
-      ProcessSequencer(sequencer.Id, AudioSettings.dspTime);
+    // Pauses sequencer playback.
+    public void PauseSequencer() {
+      Stop();
+    }
+
+    // Stops sequencer playback.
+    public void StopSequencer() {
+      Stop();
+      SetPosition(0, 0, 0);
+    }
+
+    // Updates sequencer.
+    public void UpdateSequencer() {
+      Update();
     }
 
     // Sets sequencer transport.
     public void SetSequencerTransport(Sequencer sequencer) {
-      SetSequencerNumBars(sequencer.Id, sequencer.numBars);
-      SetSequencerNumBeats(sequencer.Id, sequencer.numBeats);
-      SetSequencerTempo(sequencer.Id, sequencer.tempo);
+      SetNumBars(sequencer.numBars);
+      SetNumBeats(sequencer.numBeats);
+      SetTempo(sequencer.tempo);
     }
 
     // Creates new instrument.
@@ -116,25 +127,28 @@ namespace BarelyApi {
 
     // Sequencer handlers.
     [DllImport(pluginName)]
-    private static extern int CreateSequencer(IntPtr beatCallbackPtr);
+    private static extern void Start();
 
     [DllImport(pluginName)]
-    private static extern void DestroySequencer(int sequencerId);
+    private static extern void Stop();
 
     [DllImport(pluginName)]
-    private static extern void ProcessSequencer(int sequencerId, double dspTime);
+    private static extern void Update();
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerNumBars(int sequencerId, int numBars);
+    private static extern void RegisterBeatCallback(IntPtr beatCallbackPtr);
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerNumBeats(int sequencerId, int numBeats);
+    private static extern void SetNumBars(int numBars);
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerPosition(int sequencerId, int section, int bar, int beat);
+    private static extern void SetNumBeats(int numBeats);
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerTempo(int sequencerId, float tempo);
+    private static extern void SetPosition(int section, int bar, int beat);
+
+    [DllImport(pluginName)]
+    private static extern void SetTempo(float tempo);
 
     // Instrument handlers.
     [DllImport(pluginName)]

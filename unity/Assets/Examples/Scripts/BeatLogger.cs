@@ -18,16 +18,18 @@ namespace BarelyApi {
     void Update() {
       if (Input.GetKeyDown(KeyCode.Space)) {
         if (sequencer.IsPlaying) {
-          sequencer.Stop();
+          sequencer.Pause();
         } else {
           sequencer.Play();
         }
       }
+      if (Input.GetKeyDown(KeyCode.Backspace)) {
+        sequencer.Stop();
+      }
     }
 
-    public void OnBeat(int section, int bar, int beat, double dspTime) {
-      double offset = dspTime - AudioSettings.dspTime;
-      Debug.Log("Beat: " + section + "." + bar + "." + beat + ":" + offset.ToString("F2"));
+    public void OnBeat(int section, int bar, int beat) {
+      Debug.Log("Beat: " + section + "." + bar + "." + beat);
     }
   }
 }

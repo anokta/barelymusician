@@ -42,6 +42,7 @@ namespace BarelyApi {
     }
 
     void OnDisable() {
+      source.Stop();
       BarelyMusician.Instance.DestroyInstrument(this);
       Id = BarelyMusician.InvalidId;
 

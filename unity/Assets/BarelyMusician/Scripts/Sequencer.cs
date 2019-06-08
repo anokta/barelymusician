@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace BarelyApi {
   // Beat sequencer.
-  [RequireComponent(typeof(AudioSource))]
   public class Sequencer : MonoBehaviour {
     // Beat event.
     public delegate void BeatEvent(int section, int bar, int beat);
@@ -23,13 +22,10 @@ namespace BarelyApi {
     public int numBeats = 4;
 
     // Instrument ID.
-    public int Id {
-      get;
-      private set;
-    }
+    public int Id { get; private set; }
 
     // Is sequencer playing?
-    public bool IsPlaying { get; private set; }
+    public bool IsPlaying { get { return source != null && source.isPlaying; } }
 
     // Internal beat callback.
     private BarelyMusician.BeatCallback beatCallback = null;
@@ -41,15 +37,27 @@ namespace BarelyApi {
       beatCallback = delegate (int section, int bar, int beat) {
         OnBeat?.Invoke(section, bar, beat);
       };
-      source = GetComponent<AudioSource>();
+      source = gameObject.AddComponent<AudioSource>();
+      source.hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
+      source.bypassEffects = true;
+      source.bypassListenerEffects = true;
+      source.bypassReverbZones = true;
+      source.playOnAwake = false;
+      source.spatialBlend = 0.0f;
       source.Stop();
+    }
+
+    void OnDestroy() {
+      beatCallback = null;
+      Destroy(source);
+      source = null;
     }
 
     void OnEnable() {
       Id = BarelyMusician.Instance.CreateSequencer(beatCallback);
     }
 
-    private void OnDisable() {
+    void OnDisable() {
       BarelyMusician.Instance.DestroySequencer(this);
       Id = BarelyMusician.InvalidId;
     }

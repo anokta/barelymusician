@@ -5,7 +5,15 @@ using UnityEngine;
 namespace BarelyApi {
   // Example class that logs every sequencer beat.
   public class BeatLogger : MonoBehaviour {
-    public Sequencer sequencer;
+    private Sequencer sequencer = null;
+
+    void Awake() {
+      sequencer = GetComponent<Sequencer>();
+    }
+
+    void OnDestroy() {
+      sequencer = null;
+    }
 
     void OnEnable() {
       sequencer.OnBeat += OnBeat;

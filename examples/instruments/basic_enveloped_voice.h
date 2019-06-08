@@ -17,8 +17,7 @@ class BasicEnvelopedVoice : public Voice {
 
   // Implements |Voice|.
   bool IsActive() const override;
-  float Next() override;
-  void Reset() override;
+  float Next(int channel) override;
   void Start() override;
   void Stop() override;
 
@@ -41,6 +40,9 @@ class BasicEnvelopedVoice : public Voice {
 
   // Voice gain.
   float gain_;
+
+  // Last output.
+  float output_;
 };
 
 template <class GeneratorType>
@@ -48,15 +50,11 @@ BasicEnvelopedVoice<GeneratorType>::BasicEnvelopedVoice(float sample_interval)
     : envelope_(sample_interval), generator_(sample_interval) {}
 
 template <class GeneratorType>
-float BasicEnvelopedVoice<GeneratorType>::Next() {
-  return gain_ * envelope_.Next() * generator_.Next();
-}
-
-template <class GeneratorType>
-void BasicEnvelopedVoice<GeneratorType>::Reset() {
-  envelope_.Reset();
-  generator_.Reset();
-  gain_ = 0.0f;
+float BasicEnvelopedVoice<GeneratorType>::Next(int channel) {
+  if (channel == 0) {
+    output_ = gain_ * envelope_.Next() * generator_.Next();
+  }
+  return output_;
 }
 
 template <class GeneratorType>

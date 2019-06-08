@@ -63,11 +63,9 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
       });
 }
 
-void BasicSynthInstrument::Clear() { voice_.Reset(); }
+void BasicSynthInstrument::Clear() { voice_.Clear(); }
 
-void BasicSynthInstrument::NoteOff(float index) {
-  voice_.Stop(index);
-}
+void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
   voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
@@ -78,10 +76,11 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
 
 void BasicSynthInstrument::Process(float* output, int num_channels,
                                    int num_frames) {
+  float mono_sample = 0.0f;
   for (int frame = 0; frame < num_frames; ++frame) {
-    const float sample = gain_ * voice_.Next();
+    mono_sample = gain_ * voice_.Next(0);
     for (int channel = 0; channel < num_channels; ++channel) {
-      output[num_channels * frame + channel] = sample;
+      output[num_channels * frame + channel] = mono_sample;
     }
   }
 }

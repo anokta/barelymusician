@@ -29,7 +29,7 @@ namespace BarelyApi {
     }
 
     public void OnBeat(int section, int bar, int beat) {
-      Debug.Log("Beat: " + section + "." + bar + "." + beat);
+      Debug.Log(sequencer.Id + " Beat: " + section + "." + bar + "." + beat);
     }
   }
 }

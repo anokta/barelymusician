@@ -20,7 +20,7 @@ BasicDrumkitInstrument::BasicDrumkitInstrument(float sample_interval)
 
 void BasicDrumkitInstrument::Clear() {
   for (auto& voice : voices_) {
-    voice.second.Reset();
+    voice.second.Stop();
   }
 }
 
@@ -45,14 +45,15 @@ void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
 
 void BasicDrumkitInstrument::Process(float* output, int num_channels,
                                      int num_frames) {
+  float mono_sample = 0.0f;
   for (int frame = 0; frame < num_frames; ++frame) {
-    float sample = 0.0f;
+    mono_sample = 0.0f;
     for (auto& voice : voices_) {
-      sample += voice.second.Next();
+      mono_sample += voice.second.Next(0);
     }
-    sample *= gain_;
+    mono_sample *= gain_;
     for (int channel = 0; channel < num_channels; ++channel) {
-      output[num_channels * frame + channel] = sample;
+      output[num_channels * frame + channel] = mono_sample;
     }
   }
 }

@@ -16,6 +16,9 @@ namespace {
 // BarelyMusician API.
 BarelyMusician* barelymusician = nullptr;
 
+// Last DSP time.
+double last_dsp_time = 0.0;
+
 // Mutex to ensure thread-safe initialization and shutdown.
 std::mutex init_shutdown_mutex;
 
@@ -36,49 +39,58 @@ void Shutdown() {
   barelymusician = nullptr;
 }
 
-void Start() {
-  DCHECK(barelymusician);
-  barelymusician->Start();
-}
-
-void Stop() {
-  DCHECK(barelymusician);
-  barelymusician->Stop();
-}
-
-void Update() {
+void Update(double dsp_time) {
   std::lock_guard<std::mutex> lock(init_shutdown_mutex);
-  DCHECK(barelymusician);
-  barelymusician->Update();
+  if (barelymusician != nullptr && dsp_time > last_dsp_time) {
+    barelymusician->Update();
+  }
 }
 
-void RegisterBeatCallback(BeatCallback* beat_callback_ptr) {
+int CreateSequencer(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
+  const int sequencer_id = barelymusician->CreateSequencer();
   const auto sequencer_beat_callback =
       [beat_callback_ptr](const Transport& transport, int, int) {
         beat_callback_ptr(transport.section, transport.bar, transport.beat);
       };
-  barelymusician->RegisterBeatCallback(sequencer_beat_callback);
+  barelymusician->RegisterSequencerBeatCallback(sequencer_id,
+                                                sequencer_beat_callback);
+  return sequencer_id;
 }
 
-void SetNumBars(int num_bars) {
+void DestroySequencer(int sequencer_id) {
   DCHECK(barelymusician);
-  barelymusician->SetNumBars(num_bars);
+  barelymusician->DestroySequencer(sequencer_id);
 }
 
-void SetNumBeats(int num_beats) {
+void SetSequencerNumBars(int sequencer_id, int num_bars) {
   DCHECK(barelymusician);
-  barelymusician->SetNumBeats(num_beats);
+  barelymusician->SetSequencerNumBars(sequencer_id, num_bars);
 }
 
-void SetPosition(int section, int bar, int beat) {
+void SetSequencerNumBeats(int sequencer_id, int num_beats) {
   DCHECK(barelymusician);
-  barelymusician->SetPosition(section, bar, beat);
+  barelymusician->SetSequencerNumBeats(sequencer_id, num_beats);
 }
 
-void SetTempo(float tempo) {
+void SetSequencerPosition(int sequencer_id, int section, int bar, int beat) {
   DCHECK(barelymusician);
-  barelymusician->SetTempo(tempo);
+  barelymusician->SetSequencerPosition(sequencer_id, section, bar, beat);
+}
+
+void SetSequencerTempo(int sequencer_id, float tempo) {
+  DCHECK(barelymusician);
+  barelymusician->SetSequencerTempo(sequencer_id, tempo);
+}
+
+void StartSequencer(int sequencer_id) {
+  DCHECK(barelymusician);
+  barelymusician->StartSequencer(sequencer_id);
+}
+
+void StopSequencer(int sequencer_id) {
+  DCHECK(barelymusician);
+  barelymusician->StopSequencer(sequencer_id);
 }
 
 int CreateInstrument(ClearCallback* clear_callback_ptr,
@@ -96,11 +108,13 @@ void DestroyInstrument(int instrument_id) {
   barelymusician->DestroyInstrument(instrument_id);
 }
 
-void ProcessInstrument(int instrument_id, float* output) {
+void ProcessInstrument(int instrument_id, float* output, double dsp_time) {
+  Update(dsp_time);
   std::lock_guard<std::mutex> lock(init_shutdown_mutex);
-  DCHECK(barelymusician);
-  barelymusician->Update();
-  barelymusician->ProcessInstrument(instrument_id, output);
+  if (barelymusician != nullptr) {
+    barelymusician->Update();
+    barelymusician->ProcessInstrument(instrument_id, output);
+  }
 }
 
 void SetInstrumentClear(int instrument_id) {

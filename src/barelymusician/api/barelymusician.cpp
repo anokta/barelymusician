@@ -21,52 +21,108 @@ BarelyMusician::BarelyMusician(int sample_rate, int num_channels,
       num_channels_(num_channels),
       num_frames_(num_frames),
       id_counter_(0),
-      task_runner_(kNumMaxTasks),
-      sequencer_(sample_rate_),
-      is_playing_(false) {
+      task_runner_(kNumMaxTasks) {
   DCHECK_GE(sample_rate, 0);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
 }
 
-void BarelyMusician::Start() {
-  task_runner_.Add([this]() { is_playing_ = true; });
-}
-
-void BarelyMusician::Stop() {
-  task_runner_.Add([this]() { is_playing_ = false; });
-}
-
 void BarelyMusician::Update() {
   task_runner_.Run();
-  if (is_playing_) {
-    sequencer_.Update(num_frames_);
+  for (auto& it : sequencers_) {
+    it.second.Update(num_frames_);
   }
 }
 
-void BarelyMusician::RegisterBeatCallback(
-    Sequencer::BeatCallback&& beat_callback) {
-  task_runner_.Add([this, beat_callback]() mutable {
-    sequencer_.RegisterBeatCallback(std::move(beat_callback));
+int BarelyMusician::CreateSequencer() {
+  const int sequencer_id = ++id_counter_;
+  task_runner_.Add([this, sequencer_id]() {
+    sequencers_.insert(std::make_pair(sequencer_id, Sequencer(sample_rate_)));
+  });
+  return sequencer_id;
+}
+
+void BarelyMusician::DestroySequencer(int sequencer_id) {
+  task_runner_.Add([this, sequencer_id]() { sequencers_.erase(sequencer_id); });
+}
+
+void BarelyMusician::RegisterSequencerBeatCallback(
+    int sequencer_id, Sequencer::BeatCallback&& beat_callback) {
+  task_runner_.Add([this, sequencer_id, beat_callback]() mutable {
+    Sequencer* sequencer = GetSequencer(sequencer_id);
+    if (sequencer != nullptr) {
+      sequencer->RegisterBeatCallback(std::move(beat_callback));
+    } else {
+      DLOG(WARNING) << "Invalid sequencer ID: " << sequencer_id;
+    }
   });
 }
 
-void BarelyMusician::SetNumBars(int num_bars) {
-  task_runner_.Add([this, num_bars]() { sequencer_.SetNumBars(num_bars); });
-}
-
-void BarelyMusician::SetNumBeats(int num_beats) {
-  task_runner_.Add([this, num_beats]() { sequencer_.SetNumBeats(num_beats); });
-}
-
-void BarelyMusician::SetPosition(int section, int bar, int beat) {
-  task_runner_.Add([this, section, bar, beat]() {
-    sequencer_.SetPosition(section, bar, beat);
+void BarelyMusician::SetSequencerNumBars(int sequencer_id, int num_bars) {
+  task_runner_.Add([this, sequencer_id, num_bars]() {
+    Sequencer* sequencer = GetSequencer(sequencer_id);
+    if (sequencer != nullptr) {
+      sequencer->SetNumBars(num_bars);
+    } else {
+      DLOG(WARNING) << "Invalid sequencer ID: " << sequencer_id;
+    }
   });
 }
 
-void BarelyMusician::SetTempo(float tempo) {
-  task_runner_.Add([this, tempo]() { sequencer_.SetTempo(tempo); });
+void BarelyMusician::SetSequencerNumBeats(int sequencer_id, int num_beats) {
+  task_runner_.Add([this, sequencer_id, num_beats]() {
+    Sequencer* sequencer = GetSequencer(sequencer_id);
+    if (sequencer != nullptr) {
+      sequencer->SetNumBeats(num_beats);
+    } else {
+      DLOG(WARNING) << "Invalid sequencer ID: " << sequencer_id;
+    }
+  });
+}
+
+void BarelyMusician::SetSequencerPosition(int sequencer_id, int section,
+                                          int bar, int beat) {
+  task_runner_.Add([this, sequencer_id, section, bar, beat]() {
+    Sequencer* sequencer = GetSequencer(sequencer_id);
+    if (sequencer != nullptr) {
+      sequencer->SetPosition(section, bar, beat);
+    } else {
+      DLOG(WARNING) << "Invalid sequencer ID: " << sequencer_id;
+    }
+  });
+}
+
+void BarelyMusician::SetSequencerTempo(int sequencer_id, float tempo) {
+  task_runner_.Add([this, sequencer_id, tempo]() {
+    Sequencer* sequencer = GetSequencer(sequencer_id);
+    if (sequencer != nullptr) {
+      sequencer->SetTempo(tempo);
+    } else {
+      DLOG(WARNING) << "Invalid sequencer ID: " << sequencer_id;
+    }
+  });
+}
+
+void BarelyMusician::StartSequencer(int sequencer_id) {
+  task_runner_.Add([this, sequencer_id]() {
+    Sequencer* sequencer = GetSequencer(sequencer_id);
+    if (sequencer != nullptr) {
+      sequencer->Start();
+    } else {
+      DLOG(WARNING) << "Invalid sequencer ID: " << sequencer_id;
+    }
+  });
+}
+
+void BarelyMusician::StopSequencer(int sequencer_id) {
+  task_runner_.Add([this, sequencer_id]() {
+    Sequencer* sequencer = GetSequencer(sequencer_id);
+    if (sequencer != nullptr) {
+      sequencer->Stop();
+    } else {
+      DLOG(WARNING) << "Invalid sequencer ID: " << sequencer_id;
+    }
+  });
 }
 
 void BarelyMusician::DestroyInstrument(int instrument_id) {
@@ -122,6 +178,14 @@ Instrument* BarelyMusician::GetInstrument(int instrument_id) {
   const auto it = instruments_.find(instrument_id);
   if (it != instruments_.end()) {
     return it->second.get();
+  }
+  return nullptr;
+}
+
+Sequencer* BarelyMusician::GetSequencer(int sequencer_id) {
+  const auto it = sequencers_.find(sequencer_id);
+  if (it != sequencers_.end()) {
+    return &it->second;
   }
   return nullptr;
 }

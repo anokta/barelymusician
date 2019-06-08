@@ -179,6 +179,7 @@ int main(int argc, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
 
+  sequencer.Start();
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 

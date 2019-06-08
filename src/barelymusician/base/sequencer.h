@@ -49,6 +49,12 @@ class Sequencer {
   // @param tempo Tempo (BPM).
   void SetTempo(float tempo);
 
+  // Starts the playback.
+  void Start();
+
+  // Stops the playback.
+  void Stop();
+
   // Updates the sequencer.
   //
   // @num_samples Number of samples to iterate.
@@ -60,6 +66,9 @@ class Sequencer {
 
   // Event to be triggered for each beat.
   Event<const Transport&, int, int> beat_event_;
+
+  // Denotes whether the sequencer is playing.
+  bool is_playing_;
 
   // Number of samples per beat.
   int num_samples_per_beat_;

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BarelyApi {
   // Beat sequencer.
-  [RequireComponent(typeof(AudioListener))]
+  [RequireComponent(typeof(AudioSource))]
   public class Sequencer : MonoBehaviour {
     // Beat event.
     public delegate void BeatEvent(int section, int bar, int beat);
@@ -16,11 +16,17 @@ namespace BarelyApi {
 
     // Number of bars per section.
     [Range(0, 16)]
-    public int numBars = 0;
+    public int numBars = 4;
 
     // Number of beats per bar.
     [Range(0, 16)]
-    public int numBeats = 0;
+    public int numBeats = 4;
+
+    // Instrument ID.
+    public int Id {
+      get;
+      private set;
+    }
 
     // Is sequencer playing?
     public bool IsPlaying { get; private set; }
@@ -28,12 +34,24 @@ namespace BarelyApi {
     // Internal beat callback.
     private BarelyMusician.BeatCallback beatCallback = null;
 
+    // Audio source.
+    private AudioSource source = null;
+
     void Awake() {
-      // TODO(#49): This should be revokable via OnEnable/OnDisable.
       beatCallback = delegate (int section, int bar, int beat) {
         OnBeat?.Invoke(section, bar, beat);
       };
-      BarelyMusician.Instance.RegisterSequencerBeatCallback(beatCallback);
+      source = GetComponent<AudioSource>();
+      source.Stop();
+    }
+
+    void OnEnable() {
+      Id = BarelyMusician.Instance.CreateSequencer(beatCallback);
+    }
+
+    private void OnDisable() {
+      BarelyMusician.Instance.DestroySequencer(this);
+      Id = BarelyMusician.InvalidId;
     }
 
     void Update() {
@@ -46,19 +64,21 @@ namespace BarelyApi {
 
     // Starts the sequencer.
     public void Play() {
-      IsPlaying = true;
-      BarelyMusician.Instance.PlaySequencer();
+      BarelyMusician.Instance.StartSequencer(this);
+      source.Play();
     }
 
+    // Pauses the sequencer.
     public void Pause() {
-      IsPlaying = false;
-      BarelyMusician.Instance.PauseSequencer();
+      source.Stop();
+      BarelyMusician.Instance.StopSequencer(this);
     }
 
     // Stops the sequencer.
     public void Stop() {
-      IsPlaying = false;
-      BarelyMusician.Instance.StopSequencer();
+      source.Stop();
+      BarelyMusician.Instance.StopSequencer(this);
+      BarelyMusician.Instance.SetSequencerPosition(this, 0, 0, 0);
     }
   }
 }

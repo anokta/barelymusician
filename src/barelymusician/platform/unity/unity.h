@@ -32,41 +32,57 @@ void EXPORT_API Initialize(int sample_rate, int num_channels, int num_frames);
 // Shuts down the system.
 void EXPORT_API Shutdown();
 
-// Starts sequencer.
-void EXPORT_API Start();
+// Updates internal state.
+//
+// @param dsp_time DSP time.
+void EXPORT_API Update(double dsp_time);
 
-// Stops sequencer.
-void EXPORT_API Stop();
-
-// Updates sequencer.
-void EXPORT_API Update();
-
-// Registers new sequencer beat callback.
+// Creates new sequencer.
 //
 // @param beat_callback_ptr Sequencer beat callback.
-void EXPORT_API RegisterBeatCallback(BeatCallback* beat_callback_ptr);
+int EXPORT_API CreateSequencer(BeatCallback* beat_callback_ptr);
 
-// Sets sequencer's number of bars per section.
+// Destroys sequencer.
 //
+// @param sequencer_id Sequencer ID.
+void EXPORT_API DestroySequencer(int sequencer_id);
+
+// Sets sequencer number of bars per section.
+//
+// @param sequencer_id Sequencer ID.
 // @param num_bars Sequencer number of bars per section.
-void EXPORT_API SetNumBars(int num_bars);
+void EXPORT_API SetSequencerNumBars(int sequencer_id, int num_bars);
 
-// Sets sequencer's number of beats per bar.
+// Sets sequencer number of beats per bar.
 //
+// @param sequencer_id Sequencer ID.
 // @param num_beats Sequencer number of beats per bar.
-void EXPORT_API SetNumBeats(int num_beats);
+void EXPORT_API SetSequencerNumBeats(int sequencer_id, int num_beats);
 
-// Sets sequencer's position.
+// Sets sequencer position.
 //
+// @param sequencer_id Sequencer ID.
 // @param section Section.
 // @param bar Bar.
 // @param beat Beat.
-void EXPORT_API SetPosition(int section, int bar, int beat);
+void EXPORT_API SetSequencerPosition(int sequencer_id, int section, int bar,
+                                     int beat);
 
 // Sets sequencer's tempo.
 //
+// @param sequencer_id Sequencer ID.
 // @param tempo Sequencer tempo.
-void EXPORT_API SetTempo(float tempo);
+void EXPORT_API SetSequencerTempo(int sequencer_id, float tempo);
+
+// Starts sequencer.
+//
+// @param sequencer_id Sequencer ID.
+void EXPORT_API StartSequencer(int sequencer_id);
+
+// Stops sequencer.
+//
+// @param sequencer_id Sequencer ID.
+void EXPORT_API StopSequencer(int sequencer_id);
 
 // Creates new instrument.
 //
@@ -89,7 +105,9 @@ void EXPORT_API DestroyInstrument(int instrument_id);
 //
 // @param instrument_id Instrument ID.
 // @param output Output buffer.
-void EXPORT_API ProcessInstrument(int instrument_id, float* output);
+// @param dsp_time DSP time.
+void EXPORT_API ProcessInstrument(int instrument_id, float* output,
+                                  double dsp_time);
 
 // Resets instrument.
 //

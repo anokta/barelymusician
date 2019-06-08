@@ -21,29 +21,37 @@ class BarelyMusician {
   // @param num_frames Number of output frames.
   BarelyMusician(int sample_rate, int num_channels, int num_frames);
 
-  // Starts the playback.
-  void Start();
-
-  // Stops the playback.
-  void Stop();
-
-  // Updates the system.
+  // Updates the internal state.
   void Update();
+
+  // Creates new sequencer, and returns its ID.
+  //
+  // @return Sequencer ID.
+  int CreateSequencer();
+
+  // Destroys sequencer.
+  //
+  // @param sequencer_id Sequencer ID.
+  void DestroySequencer(int sequencer_id);
 
   // Registers new sequencer beat callback.
   //
+  // @param sequencer_id Sequencer ID.
   // @param beat_callback Sequencer beat callback.
-  void RegisterBeatCallback(Sequencer::BeatCallback&& beat_callback);
+  void RegisterSequencerBeatCallback(int sequencer_id,
+                                     Sequencer::BeatCallback&& beat_callback);
 
   // Sets sequencer number of bars per section.
   //
+  // @param sequencer_id Sequencer ID.
   // @param num_beats Number of bars per section.
-  void SetNumBars(int num_bars);
+  void SetSequencerNumBars(int sequencer_id, int num_bars);
 
   // Sets sequencer number of beats per bar.
   //
+  // @param sequencer_id Sequencer ID.
   // @param num_beats Number of beats per bar.
-  void SetNumBeats(int num_beats);
+  void SetSequencerNumBeats(int sequencer_id, int num_beats);
 
   // Sets sequencer position.
   //
@@ -51,12 +59,23 @@ class BarelyMusician {
   // @param section Section.
   // @param bar Bar.
   // @param beat Beat.
-  void SetPosition(int section, int bar, int beat);
+  void SetSequencerPosition(int sequencer_id, int section, int bar, int beat);
 
   // Sets sequencer tempo.
   //
+  // @param sequencer_id Sequencer ID.
   // @param tempo Sequencer tempo.
-  void SetTempo(float tempo);
+  void SetSequencerTempo(int sequencer_id, float tempo);
+
+  // Starts the playback.
+  //
+  // @param sequencer_id Sequencer ID.
+  void StartSequencer(int sequencer_id);
+
+  // Stops the playback.
+  //
+  // @param sequencer_id Sequencer ID.
+  void StopSequencer(int sequencer_id);
 
   // Creates new instrument of |InstrumentType|, and returns its ID.
   //
@@ -64,29 +83,29 @@ class BarelyMusician {
   template <typename InstrumentType, typename... ArgumentTypes>
   int CreateInstrument(ArgumentTypes... arguments);
 
-  // Destroys instrument with the given |instrument_id|.
+  // Destroys instrument.
   //
   // @param instrument_id Instrument ID.
   void DestroyInstrument(int instrument_id);
 
-  // Processes instrument with the given |instrument_id|.
+  // Processes instrument.
   //
   // @param instrument_id Instrument ID.
   // @param output Output buffer.
   void ProcessInstrument(int instrument_id, float* output);
 
-  // Clears instrument with the given |instrument_id|.
+  // Clears instrument.
   //
   // @param instrument_id Instrument ID.
   void SetInstrumentClear(int instrument_id);
 
-  // Stops playing note on instrument with the given |instrument_id|.
+  // Stops playing instrument note.
   //
   // @param instrument_id Instrument ID.
   // @param index Note index.
   void SetInstrumentNoteOff(int instrument_id, float index);
 
-  // Starts playing note on instrument with the given |instrument_id|.
+  // Starts playing instrument note.
   //
   // @param instrument_id Instrument ID.
   // @param index Note index.
@@ -96,6 +115,9 @@ class BarelyMusician {
  private:
   // Returns instrument with the given |instrument_id|.
   Instrument* GetInstrument(int instrument_id);
+
+  // Returns instrument with the given |sequencer_id|.
+  Sequencer* GetSequencer(int sequencer_id);
 
   // Sampling rate.
   const int sample_rate_;
@@ -112,14 +134,11 @@ class BarelyMusician {
   // Task runner to ensure thread-safety between main and audio threads.
   TaskRunner task_runner_;
 
-  // Sequencer.
-  Sequencer sequencer_;
-
-  // Denotes whether the sequencer is playing.
-  bool is_playing_;
-
   // Instruments.
   std::unordered_map<int, std::unique_ptr<Instrument>> instruments_;
+
+  // Sequencers.
+  std::unordered_map<int, Sequencer> sequencers_;
 };
 
 template <typename InstrumentType, typename... ArgumentTypes>

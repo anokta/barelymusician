@@ -27,17 +27,25 @@ namespace BarelyApi {
     // Processes the next |output| buffer.
     public abstract void Process(float[] output, int numChannels);
 
+    // Audio source.
+    private AudioSource source = null;
+
     void OnEnable() {
+      source = GetComponent<AudioSource>();
+
       clearCallback = Clear;
       noteOffCallback = NoteOff;
       noteOnCallback = NoteOn;
       processCallback = delegate (float[] output, int size, int numChannels) { Process(output, numChannels); };
       Id = BarelyMusician.Instance.CreateInstrument(clearCallback, noteOffCallback, noteOnCallback, processCallback);
+      source.Play();
     }
 
     void OnDisable() {
       BarelyMusician.Instance.DestroyInstrument(this);
       Id = BarelyMusician.InvalidId;
+
+      source = null;
     }
 
     void OnAudioFilterRead(float[] data, int channels) {

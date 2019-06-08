@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/generator.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/voice.h"
 
@@ -14,7 +13,7 @@ namespace barelyapi {
 
 // Class template that provides polyphony of a desired voice type.
 template <class VoiceType>
-class PolyphonicVoice : public Generator {
+class PolyphonicVoice {
  public:
   // Voice mutator callback signature.
   using VoiceCallback = std::function<void(VoiceType* voice)>;
@@ -24,9 +23,14 @@ class PolyphonicVoice : public Generator {
   // @param base_voice Base voice type to be used.
   explicit PolyphonicVoice(VoiceType&& base_voice);
 
-  // Implements |Generator|.
-  float Next() override;
-  void Reset() override;
+  // Clear all voices.
+  void Clear();
+
+  // Returns the next output sample for the given output |channel|.
+  //
+  // @param channel Output channel.
+  // @return Accumulated output sample.
+  float Next(int channel);
 
   // Resizes number of available voices that can be played simultaneously.
   //
@@ -69,23 +73,20 @@ PolyphonicVoice<VoiceType>::PolyphonicVoice(VoiceType&& base_voice)
     : base_voice_(std::move(base_voice)) {}
 
 template <class VoiceType>
-float PolyphonicVoice<VoiceType>::Next() {
+float PolyphonicVoice<VoiceType>::Next(int channel) {
   float output = 0.0f;
-  for (auto& voice : voices_) {
+  for (VoiceType& voice : voices_) {
     if (voice.IsActive()) {
-      output += voice.Next();
+      output += voice.Next(channel);
     }
   }
   return output;
 }
 
 template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Reset() {
-  for (auto& voice : voices_) {
+void PolyphonicVoice<VoiceType>::Clear() {
+  for (VoiceType& voice : voices_) {
     voice.Stop();
-  }
-  for (auto& voice_state : voice_states_) {
-    voice_state = {0.0f, 0};
   }
 }
 
@@ -123,7 +124,7 @@ void PolyphonicVoice<VoiceType>::Start(float index,
       break;
     }
   }
-  auto* voice = &voices_[voice_index];
+  VoiceType* voice = &voices_[voice_index];
   voice_states_[voice_index] = {index, 0};
 
   if (init_voice != nullptr) {
@@ -138,7 +139,7 @@ void PolyphonicVoice<VoiceType>::Stop(float index,
   const int num_voices = static_cast<int>(voices_.size());
   for (int i = 0; i < num_voices; ++i) {
     if (voice_states_[i].first == index && voices_[i].IsActive()) {
-      auto* voice = &voices_[i];
+      VoiceType* voice = &voices_[i];
       if (shutdown_voice != nullptr) {
         shutdown_voice(voice);
       }
@@ -149,7 +150,7 @@ void PolyphonicVoice<VoiceType>::Stop(float index,
 
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Update(const VoiceCallback& update_voice) {
-  for (auto& voice : voices_) {
+  for (VoiceType& voice : voices_) {
     update_voice(&voice);
   }
 }

@@ -11,6 +11,7 @@ namespace barelyapi {
 Sequencer::Sequencer(int sample_rate)
     : num_samples_per_minute_(static_cast<float>(sample_rate) *
                               kSecondsFromMinutes),
+      is_playing_(false),
       num_samples_per_beat_(0),
       leftover_samples_(0),
       transport_({}) {
@@ -62,8 +63,12 @@ void Sequencer::SetTempo(float tempo) {
   leftover_samples_ = SamplesFromBeats(leftover_beats, num_samples_per_beat_);
 }
 
+void Sequencer::Start() { is_playing_ = true; }
+
+void Sequencer::Stop() { is_playing_ = false; }
+
 void Sequencer::Update(int num_samples) {
-  if (num_samples_per_beat_ == 0) {
+  if (!is_playing_ || num_samples_per_beat_ == 0) {
     return;
   }
   leftover_samples_ += num_samples;

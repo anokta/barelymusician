@@ -31,6 +31,12 @@ namespace BarelyApi {
     }
     private static BarelyMusician instance = null;
 
+    // Audio thread last DSP time.
+    private double lastDspTime = 0.0;
+
+    // Main thread last update time.
+    private float lastUpdateTime = 0.0f;
+
     // Creates new instrument.
     public int CreateInstrument(ClearFn clearFn, NoteOffFn noteOffFn,
                                 NoteOnFn noteOnFn, ProcessFn processFn) {
@@ -47,7 +53,8 @@ namespace BarelyApi {
 
     // Processes instrument.
     public void ProcessInstrument(Instrument instrument, float[] output) {
-      ProcessInstrument(instrument.Id, output, AudioSettings.dspTime);
+      Process();
+      ProcessInstrument(instrument.Id, output);
     }
 
     // Clears instrument.
@@ -64,10 +71,10 @@ namespace BarelyApi {
     public void SetInstrumentNoteOn(Instrument instrument, float index, float intensity) {
       SetInstrumentNoteOn(instrument.Id, index, intensity);
     }
-        
-    // Updates sequencer.
+
+    // Updates instrument.
     public void UpdateInstrument() {
-      UpdateMain(Time.unscaledTime);
+      Update();
     }
 
     // Creates sequencer.
@@ -82,7 +89,7 @@ namespace BarelyApi {
 
     // Processes sequencer.
     public void ProcessSequencer() {
-      UpdateDsp(AudioSettings.dspTime);
+      Process();
     }
 
     // Sets sequencer position.
@@ -109,7 +116,7 @@ namespace BarelyApi {
 
     // Updates sequencer.
     public void UpdateSequencer() {
-      UpdateMain(Time.unscaledTime);
+      Update();
     }
 
     // Constructs new |BarelyMusician| with Unity audio settings.
@@ -126,6 +133,24 @@ namespace BarelyApi {
       Shutdown();
     }
 
+    // Updates the audio thread state.
+    private void Process() {
+      double dspTime = AudioSettings.dspTime;
+      if (dspTime > lastDspTime) {
+        lastDspTime = dspTime;
+        UpdateAudioThread();
+      }
+    }
+
+    // Updates the main thread state.
+    private void Update() {
+      float updateTime = Time.unscaledTime;
+      if (updateTime > lastUpdateTime) {
+        lastUpdateTime = updateTime;
+        UpdateMainThread();
+      }
+    }
+
 #if !UNITY_EDITOR && UNITY_IOS
   private const string pluginName = "__Internal";
 #else
@@ -138,12 +163,12 @@ namespace BarelyApi {
 
     [DllImport(pluginName)]
     private static extern void Shutdown();
-    
-    [DllImport(pluginName)]
-    private static extern void UpdateDsp(double dspTime);
 
     [DllImport(pluginName)]
-    private static extern void UpdateMain(double updateTime);
+    private static extern void UpdateAudioThread();
+
+    [DllImport(pluginName)]
+    private static extern void UpdateMainThread();
 
     // Instrument handlers.
     [DllImport(pluginName)]
@@ -154,7 +179,7 @@ namespace BarelyApi {
     private static extern void DestroyInstrument(int instrumentId);
 
     [DllImport(pluginName)]
-    private static extern void ProcessInstrument(int instrumentId, [In, Out] float[] output, double dspTime);
+    private static extern void ProcessInstrument(int instrumentId, [In, Out] float[] output);
 
     [DllImport(pluginName)]
     private static extern void SetInstrumentClear(int instrumentId);

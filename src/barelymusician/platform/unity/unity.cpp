@@ -26,12 +26,6 @@ TaskRunner* main_task_runner = nullptr;
 // Mutex to ensure thread-safe initialization and shutdown.
 std::mutex init_shutdown_mutex;
 
-// Last audio thread DSP time.
-double last_dsp_time = 0.0;
-
-// Last main thread update time.
-float last_update_time = 0.0f;
-
 }  // namespace
 
 void Initialize(int sample_rate, int num_channels, int num_frames) {
@@ -46,22 +40,21 @@ void Shutdown() {
   std::lock_guard<std::mutex> lock(init_shutdown_mutex);
   if (barelymusician != nullptr) {
     delete barelymusician;
+    delete main_task_runner;
   }
   barelymusician = nullptr;
 }
 
-void UpdateDsp(double dsp_time) {
+void UpdateAudioThread() {
   std::lock_guard<std::mutex> lock(init_shutdown_mutex);
-  if (barelymusician != nullptr && dsp_time > last_dsp_time) {
+  if (barelymusician != nullptr) {
     barelymusician->Update();
   }
 }
 
-void UpdateMain(float update_time) {
+void UpdateMainThread() {
   DCHECK(barelymusician);
-  if (update_time > last_update_time) {
-    main_task_runner->Run();
-  }
+  main_task_runner->Run();
 }
 
 int CreateSequencer(BeatCallback* beat_callback_ptr) {
@@ -128,8 +121,7 @@ void DestroyInstrument(int instrument_id) {
   barelymusician->DestroyInstrument(instrument_id);
 }
 
-void ProcessInstrument(int instrument_id, float* output, double dsp_time) {
-  UpdateDsp(dsp_time);
+void ProcessInstrument(int instrument_id, float* output) {
   std::lock_guard<std::mutex> lock(init_shutdown_mutex);
   if (barelymusician != nullptr) {
     barelymusician->Update();

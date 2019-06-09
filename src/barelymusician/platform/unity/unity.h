@@ -33,15 +33,11 @@ void EXPORT_API Initialize(int sample_rate, int num_channels, int num_frames);
 // Shuts down the system.
 void EXPORT_API Shutdown();
 
-// Updates internal DSP state.
-//
-// @param dsp_time DSP time.
-void EXPORT_API UpdateDsp(double dsp_time);
+// Updates audio thread state.
+void EXPORT_API UpdateAudioThread();
 
-// Updates internal main state.
-//
-// @param update_time Update time.
-void EXPORT_API UpdateMain(float update_time);
+// Updates main thread state.
+void EXPORT_API UpdateMainThread();
 
 // Creates new sequencer.
 //
@@ -111,9 +107,7 @@ void EXPORT_API DestroyInstrument(int instrument_id);
 //
 // @param instrument_id Instrument ID.
 // @param output Output buffer.
-// @param dsp_time DSP time.
-void EXPORT_API ProcessInstrument(int instrument_id, float* output,
-                                  double dsp_time);
+void EXPORT_API ProcessInstrument(int instrument_id, float* output);
 
 // Resets instrument.
 //

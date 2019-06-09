@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace BarelyApi {
   // Example instrument.
-  public class SineInstrument : Instrument {
+  public class SineInstrument : UnityInstrument {
     // Sine frequency.
     public float frequency = 440.0f;
 
@@ -17,7 +17,8 @@ namespace BarelyApi {
     // Sampling interval in Hz.
     private float sampleInterval = 0.0f;
 
-    void Awake() {
+    protected override void Awake() {
+      base.Awake();
       phase = 0.0f;
       playing = false;
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);

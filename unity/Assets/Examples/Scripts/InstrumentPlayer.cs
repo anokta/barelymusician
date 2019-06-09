@@ -16,6 +16,16 @@ public class InstrumentPlayer : MonoBehaviour {
     isPlaying = false;
   }
 
+  void OnEnable() {
+    instrument.OnNoteOff += OnNoteOff;
+    instrument.OnNoteOn += OnNoteOn;
+  }
+
+  void OnDisable() {
+    instrument.OnNoteOff -= OnNoteOff;
+    instrument.OnNoteOn -= OnNoteOn;
+  }
+
   void Update() {
     if (Input.GetKeyDown(KeyCode.Space)) {
       if (isPlaying) {
@@ -25,5 +35,13 @@ public class InstrumentPlayer : MonoBehaviour {
       }
       isPlaying = !isPlaying;
     }
+  }
+
+  private void OnNoteOff(float index) {
+    Debug.Log("NoteOff(" + index + ")");
+  }
+
+  private void OnNoteOn(float index, float intensity) {
+    Debug.Log("NoteOn(" + index + ", " + intensity + ")");
   }
 }

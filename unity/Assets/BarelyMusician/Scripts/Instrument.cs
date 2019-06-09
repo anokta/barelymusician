@@ -6,54 +6,65 @@ namespace BarelyApi {
   // Instrument interface.
   [RequireComponent(typeof(AudioSource))]
   public abstract class Instrument : MonoBehaviour {
-    // Instrument ID.
-    public int Id { get; private set; }
+    // Note off event.
+    public delegate void NoteOffEvent(float index);
+    public event NoteOffEvent OnNoteOff;
 
-    // Internal instrument callbacks.
-    private BarelyMusician.ClearFn clearFn;
-    private BarelyMusician.NoteOffFn noteOffFn;
-    private BarelyMusician.NoteOnFn noteOnFn;
-    private BarelyMusician.ProcessFn processFn;
+    // Note on event.
+    public delegate void NoteOnEvent(float index, float intensity);
+    public event NoteOnEvent OnNoteOn;
+
+    // Instrument ID.
+    public int Id { get; protected set; } = BarelyMusician.InvalidId;
 
     // Clears the instrument.
     public abstract void Clear();
 
-    // Starts playing note with the given |index| and |intensity|.
-    public abstract void NoteOn(float index, float intensity);
-
     // Stops playing note with the given |index|.
     public abstract void NoteOff(float index);
+
+    // Starts playing note with the given |index| and |intensity|.
+    public abstract void NoteOn(float index, float intensity);
 
     // Processes the next |output| buffer.
     public abstract void Process(float[] output, int numChannels);
 
+    // Internal note off callback.
+    protected BarelyMusician.NoteOffCallback noteOffCallback = null;
+
+    // Internal note on callback.
+    protected BarelyMusician.NoteOnCallback noteOnCallback = null;
+
     // Audio source.
     private AudioSource source = null;
 
-    void OnEnable() {
+    protected virtual void Awake() {
+      noteOffCallback = delegate (float index) { OnNoteOff?.Invoke(index); };
+      noteOnCallback = delegate (float index, float intensity) { OnNoteOn?.Invoke(index, intensity); };
       source = GetComponent<AudioSource>();
-
-      clearFn = Clear;
-      noteOffFn = NoteOff;
-      noteOnFn = NoteOn;
-      processFn = delegate (float[] output, int size, int numChannels) { Process(output, numChannels); };
-      Id = BarelyMusician.Instance.CreateInstrument(clearFn, noteOffFn, noteOnFn, processFn);
-      source.Play();
     }
 
-    void OnDisable() {
-      source.Stop();
-      BarelyMusician.Instance.DestroyInstrument(this);
-      Id = BarelyMusician.InvalidId;
-
+    protected virtual void OnDestroy() {
       source = null;
     }
 
-    void Update() {
+    protected virtual void OnEnable() {
+      source.Play();
+    }
+
+    protected virtual void OnDisable() {
+      source.Stop();
+      if (Id != BarelyMusician.InvalidId) {
+        BarelyMusician.Instance.DestroyInstrument(this);
+        Id = BarelyMusician.InvalidId;
+      }
+    }
+
+    protected virtual void Update() {
       BarelyMusician.Instance.UpdateInstrument();
     }
 
-    void OnAudioFilterRead(float[] data, int channels) {
+    private void OnAudioFilterRead(float[] data, int channels) {
       BarelyMusician.Instance.ProcessInstrument(this, data);
     }
   }

@@ -9,8 +9,10 @@ namespace BarelyApi {
   public class BarelyMusician {
     // Internal event callbacks.
     public delegate void BeatCallback(int section, int bar, int beat);
+    public delegate void NoteOffCallback(float index);
+    public delegate void NoteOnCallback(float index, float intensity);
 
-    // Internal instrument functions.
+    // Internal Unity instrument functions.
     public delegate void ClearFn();
     public delegate void NoteOffFn(float index);
     public delegate void NoteOnFn(float index, float intensity);
@@ -38,12 +40,14 @@ namespace BarelyApi {
     private float lastUpdateTime = 0.0f;
 
     // Creates new instrument.
-    public int CreateInstrument(ClearFn clearFn, NoteOffFn noteOffFn,
-                                NoteOnFn noteOnFn, ProcessFn processFn) {
+    public int CreateInstrument(ClearFn clearFn, NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn,
+                                NoteOffCallback noteOffCallback, NoteOnCallback noteOnCallback) {
       return CreateInstrument(Marshal.GetFunctionPointerForDelegate(clearFn),
                               Marshal.GetFunctionPointerForDelegate(noteOffFn),
                               Marshal.GetFunctionPointerForDelegate(noteOnFn),
-                              Marshal.GetFunctionPointerForDelegate(processFn));
+                              Marshal.GetFunctionPointerForDelegate(processFn),
+                              Marshal.GetFunctionPointerForDelegate(noteOffCallback),
+                              Marshal.GetFunctionPointerForDelegate(noteOnCallback));
     }
 
     // Destroys instrument.
@@ -172,8 +176,9 @@ namespace BarelyApi {
 
     // Instrument handlers.
     [DllImport(pluginName)]
-    private static extern int CreateInstrument(IntPtr clearFnPtr, IntPtr noteOffFnPtr,
-                                               IntPtr noteOnFnPtr, IntPtr processFnPtr);
+    private static extern int CreateInstrument(IntPtr clearFnPtr, IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+                                               IntPtr processFnPtr, IntPtr noteOffCallbackPtr,
+                                               IntPtr noteOnCallbackPtr);
 
     [DllImport(pluginName)]
     private static extern void DestroyInstrument(int instrumentId);

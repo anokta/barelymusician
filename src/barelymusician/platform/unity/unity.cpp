@@ -110,10 +110,17 @@ void StopSequencer(int sequencer_id) {
 }
 
 int CreateInstrument(ClearFn* clear_fn_ptr, NoteOffFn* note_off_fn_ptr,
-                     NoteOnFn* note_on_fn_ptr, ProcessFn* process_fn_ptr) {
+                     NoteOnFn* note_on_fn_ptr, ProcessFn* process_fn_ptr,
+                     NoteOffCallback* note_off_callback_ptr,
+                     NoteOnCallback* note_on_callback_ptr) {
   DCHECK(barelymusician);
-  return barelymusician->CreateInstrument<UnityInstrument>(
+  const int instrument_id = barelymusician->CreateInstrument<UnityInstrument>(
       clear_fn_ptr, note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
+  barelymusician->RegisterInstrumentNoteOffCallback(instrument_id,
+                                                    note_off_callback_ptr);
+  barelymusician->RegisterInstrumentNoteOnCallback(instrument_id,
+                                                   note_on_callback_ptr);
+  return instrument_id;
 }
 
 void DestroyInstrument(int instrument_id) {

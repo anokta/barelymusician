@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_H_
-#define BARELYMUSICIAN_MESSAGE_MESSAGE_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_MESSAGE_H_
+#define BARELYMUSICIAN_COMPOSITION_MESSAGE_H_
 
 #include "barelymusician/base/constants.h"
 
@@ -19,4 +19,4 @@ struct Message {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_MESSAGE_MESSAGE_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_MESSAGE_H_

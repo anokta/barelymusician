@@ -1,4 +1,4 @@
-#include "barelymusician/message/message_utils.h"
+#include "barelymusician/composition/message_utils.h"
 
 namespace barelyapi {
 

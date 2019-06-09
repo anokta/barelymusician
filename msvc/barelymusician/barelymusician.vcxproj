@@ -24,6 +24,7 @@
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\task_runner.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\composition\message_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\quantizer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\scale.cpp" />
@@ -33,7 +34,6 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
@@ -46,6 +46,8 @@
     <ClInclude Include="..\..\src\barelymusician\base\task_runner.h" />
     <ClInclude Include="..\..\src\barelymusician\base\transport.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h" />
+    <ClInclude Include="..\..\src\barelymusician\composition\message.h" />
+    <ClInclude Include="..\..\src\barelymusician\composition\message_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\performer.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\quantizer.h" />
@@ -63,8 +65,6 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
-    <ClInclude Include="..\..\src\barelymusician\message\message.h" />
-    <ClInclude Include="..\..\src\barelymusician\message\message_utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

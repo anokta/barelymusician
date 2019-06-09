@@ -6,8 +6,8 @@
 #include <memory>
 
 #include "barelymusician/base/event.h"
+#include "barelymusician/composition/message.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message.h"
 
 namespace barelyapi {
 

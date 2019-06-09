@@ -30,42 +30,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build1.mid">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-      <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build2.mid">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-      <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build3.mid">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-      <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build4.mid">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-      <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build5.mid">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-      <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build6.mid">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-      <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-      <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\satie.mid">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
       <DestinationFolders>$(OutDir)data\midi</DestinationFolders>

@@ -100,28 +100,7 @@
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_snare.wav">
       <Filter>Resource Files\data\audio\drums</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build1.mid">
-      <Filter>Resource Files\data\midi</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build2.mid">
-      <Filter>Resource Files\data\midi</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build3.mid">
-      <Filter>Resource Files\data\midi</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build4.mid">
-      <Filter>Resource Files\data\midi</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build5.mid">
-      <Filter>Resource Files\data\midi</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\build6.mid">
-      <Filter>Resource Files\data\midi</Filter>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">
-      <Filter>Resource Files\data\midi</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\satie.mid">
       <Filter>Resource Files\data\midi</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\twinkle.mid">

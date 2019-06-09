@@ -1,11 +1,11 @@
-#ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_
-#define BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_MESSAGE_UTILS_H_
+#define BARELYMUSICIAN_COMPOSITION_MESSAGE_UTILS_H_
 
 #include <cstring>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/message/message.h"
+#include "barelymusician/composition/message.h"
 
 namespace barelyapi {
 
@@ -73,4 +73,4 @@ void WriteMessageData(const DataType& data, unsigned char* message_data) {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_MESSAGE_UTILS_H_

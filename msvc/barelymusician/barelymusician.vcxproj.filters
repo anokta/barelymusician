@@ -37,12 +37,6 @@
     <Filter Include="Header Files\composition">
       <UniqueIdentifier>{f1f72c1a-f4ec-4960-8ed9-6b4f2960b9fa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\message">
-      <UniqueIdentifier>{ae666881-d27b-4ba9-9f06-ebcc26ce21bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\message">
-      <UniqueIdentifier>{a81861d1-2454-4352-85f6-18f3bc2aab91}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\composition">
       <UniqueIdentifier>{3963b324-a8d8-49a1-8701-453c8dcfef77}</UniqueIdentifier>
     </Filter>
@@ -96,12 +90,6 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\message\message.h">
-      <Filter>Header Files\message</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\message\message_utils.h">
-      <Filter>Header Files\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\note.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
@@ -141,6 +129,12 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\module.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\message.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\composition\message_utils.h">
+      <Filter>Header Files\composition</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -167,9 +161,6 @@
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp">
-      <Filter>Source Files\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
@@ -187,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp">
       <Filter>Source Files\api</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\message_utils.cpp">
+      <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

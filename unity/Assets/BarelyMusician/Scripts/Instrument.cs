@@ -10,10 +10,10 @@ namespace BarelyApi {
     public int Id { get; private set; }
 
     // Internal instrument callbacks.
-    private BarelyMusician.ClearCallback clearCallback;
-    private BarelyMusician.NoteOffCallback noteOffCallback;
-    private BarelyMusician.NoteOnCallback noteOnCallback;
-    private BarelyMusician.ProcessCallback processCallback;
+    private BarelyMusician.ClearFn clearFn;
+    private BarelyMusician.NoteOffFn noteOffFn;
+    private BarelyMusician.NoteOnFn noteOnFn;
+    private BarelyMusician.ProcessFn processFn;
 
     // Clears the instrument.
     public abstract void Clear();
@@ -33,11 +33,11 @@ namespace BarelyApi {
     void OnEnable() {
       source = GetComponent<AudioSource>();
 
-      clearCallback = Clear;
-      noteOffCallback = NoteOff;
-      noteOnCallback = NoteOn;
-      processCallback = delegate (float[] output, int size, int numChannels) { Process(output, numChannels); };
-      Id = BarelyMusician.Instance.CreateInstrument(clearCallback, noteOffCallback, noteOnCallback, processCallback);
+      clearFn = Clear;
+      noteOffFn = NoteOff;
+      noteOnFn = NoteOn;
+      processFn = delegate (float[] output, int size, int numChannels) { Process(output, numChannels); };
+      Id = BarelyMusician.Instance.CreateInstrument(clearFn, noteOffFn, noteOnFn, processFn);
       source.Play();
     }
 
@@ -47,6 +47,10 @@ namespace BarelyApi {
       Id = BarelyMusician.InvalidId;
 
       source = null;
+    }
+
+    void Update() {
+      BarelyMusician.Instance.UpdateInstrument();
     }
 
     void OnAudioFilterRead(float[] data, int channels) {

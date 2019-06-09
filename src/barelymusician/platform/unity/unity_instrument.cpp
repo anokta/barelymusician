@@ -7,31 +7,28 @@
 namespace barelyapi {
 namespace unity {
 
-UnityInstrument::UnityInstrument(ClearCallback&& clear_callback,
-                                 NoteOffCallback&& note_off_callback,
-                                 NoteOnCallback&& note_on_callback,
-                                 ProcessCallback&& process_callback)
-    : clear_callback_(std::move(clear_callback)),
-      note_off_callback_(std::move(note_off_callback)),
-      note_on_callback_(std::move(note_on_callback)),
-      process_callback_(std::move(process_callback)) {
-  DCHECK(clear_callback_);
-  DCHECK(note_off_callback_);
-  DCHECK(note_on_callback_);
-  DCHECK(process_callback_);
+UnityInstrument::UnityInstrument(ClearFn&& clear_fn, NoteOffFn&& note_off_fn,
+                                 NoteOnFn&& note_on_fn, ProcessFn&& process_fn)
+    : clear_fn_(std::move(clear_fn)),
+      note_off_fn_(std::move(note_off_fn)),
+      note_on_fn_(std::move(note_on_fn)),
+      process_fn_(std::move(process_fn)) {
+  DCHECK(clear_fn_);
+  DCHECK(note_off_fn_);
+  DCHECK(note_on_fn_);
+  DCHECK(process_fn_);
 }
 
-void UnityInstrument::Clear() { clear_callback_(); }
+void UnityInstrument::Clear() { clear_fn_(); }
 
-void UnityInstrument::NoteOff(float index) { note_off_callback_(index); };
+void UnityInstrument::NoteOff(float index) { note_off_fn_(index); };
 
 void UnityInstrument::NoteOn(float index, float intensity) {
-  note_on_callback_(index, intensity);
+  note_on_fn_(index, intensity);
 }
 
 void UnityInstrument::Process(float* output, int num_channels, int num_frames) {
-  DCHECK(output);
-  process_callback_(output, num_channels * num_frames, num_channels);
+  process_fn_(output, num_channels * num_frames, num_channels);
 }
 
 }  // namespace unity

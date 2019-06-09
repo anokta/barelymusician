@@ -10,22 +10,20 @@ namespace unity {
 
 class UnityInstrument : public Instrument {
  public:
-  // Instrument callback signatures.
-  using ClearCallback = std::function<void()>;
-  using NoteOffCallback = std::function<void(float)>;
-  using NoteOnCallback = std::function<void(float, float)>;
-  using ProcessCallback = std::function<void(float*, int, int)>;
+  // Instrument function signatures.
+  using ClearFn = std::function<void()>;
+  using NoteOffFn = std::function<void(float)>;
+  using NoteOnFn = std::function<void(float, float)>;
+  using ProcessFn = std::function<void(float*, int, int)>;
 
   // Constructs new |UnityInstrument|.
   //
-  // @param clear_callback Clear callback.
-  // @param note_off_callback Note off callback.
-  // @param note_on_callback Note on callback.
-  // @param process_callback Process callback.
-  UnityInstrument(ClearCallback&& clear_callback,
-                  NoteOffCallback&& note_off_callback,
-                  NoteOnCallback&& note_on_callback,
-                  ProcessCallback&& process_callback);
+  // @param clear_fn Clear function.
+  // @param note_off_fn Note off function.
+  // @param note_on_fn Note on function.
+  // @param process_fn Process function.
+  UnityInstrument(ClearFn&& clear_fn, NoteOffFn&& note_off_fn,
+                  NoteOnFn&& note_on_fn, ProcessFn&& process_fn);
 
   // Implements |Instrument|.
   void Clear() override;
@@ -35,10 +33,10 @@ class UnityInstrument : public Instrument {
 
  private:
   // Instrument callbacks.
-  ClearCallback clear_callback_;
-  NoteOffCallback note_off_callback_;
-  NoteOnCallback note_on_callback_;
-  ProcessCallback process_callback_;
+  ClearFn clear_fn_;
+  NoteOffFn note_off_fn_;
+  NoteOnFn note_on_fn_;
+  ProcessFn process_fn_;
 };
 
 }  // namespace unity

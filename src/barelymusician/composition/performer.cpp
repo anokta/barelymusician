@@ -10,8 +10,13 @@ namespace barelyapi {
 namespace {
 
 // Unique message IDs per message type.
-const int kNoteOnId = 0;
-const int kNoteOffId = 1;
+const int kNoteOffId = 0;
+const int kNoteOnId = 1;
+
+// |NoteOff| message data.
+struct NoteOffData {
+  float index;
+};
 
 // |NoteOn| message data.
 struct NoteOnData {
@@ -19,14 +24,10 @@ struct NoteOnData {
   float intensity;
 };
 
-// |NoteOff| message data.
-struct NoteOffData {
-  float index;
-};
-
 }  // namespace
 
-Performer::Performer(Instrument* instrument) : instrument_(instrument) {
+Performer::Performer(std::unique_ptr<Instrument> instrument)
+    : instrument_(std::move(instrument)) {
   DCHECK(instrument_);
 }
 
@@ -35,20 +36,19 @@ void Performer::Clear() {
   instrument_->Clear();
 }
 
+void Performer::NoteOff(float index, int timestamp) {
+  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
+}
+
 void Performer::NoteOn(float index, float intensity, int timestamp) {
   PushMessage(
       BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, timestamp));
 }
 
-void Performer::NoteOff(float index, int timestamp) {
-  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
-}
-
 void Performer::Process(float* output, int num_channels, int num_frames) {
   // Process frames within message events range.
   int frame = 0;
-  const auto begin = std::lower_bound(messages_.begin(), messages_.end(), 0,
-                                      &CompareTimestamp);
+  const auto begin = messages_.begin();
   const auto end =
       std::lower_bound(begin, messages_.end(), num_frames, &CompareTimestamp);
   if (begin != end) {
@@ -73,15 +73,25 @@ void Performer::Process(float* output, int num_channels, int num_frames) {
   }
 }
 
+void Performer::RegisterNoteOffCallback(NoteOffCallback&& note_off_callback) {
+  note_off_event_.Register(std::move(note_off_callback));
+}
+
+void Performer::RegisterNoteOnCallback(NoteOnCallback&& note_on_callback) {
+  note_on_event_.Register(std::move(note_on_callback));
+}
+
 void Performer::ProcessMessage(const Message& message) {
   switch (message.id) {
-    case kNoteOnId: {
-      const auto note_on = ReadMessageData<NoteOnData>(message.data);
-      instrument_->NoteOn(note_on.index, note_on.intensity);
-    } break;
     case kNoteOffId: {
       const auto note_off = ReadMessageData<NoteOffData>(message.data);
       instrument_->NoteOff(note_off.index);
+      note_off_event_.Trigger(note_off.index);
+    } break;
+    case kNoteOnId: {
+      const auto note_on = ReadMessageData<NoteOnData>(message.data);
+      instrument_->NoteOn(note_on.index, note_on.intensity);
+      note_on_event_.Trigger(note_on.index, note_on.intensity);
     } break;
     default:
       DLOG(ERROR) << "Unknown message ID: " << message.id;

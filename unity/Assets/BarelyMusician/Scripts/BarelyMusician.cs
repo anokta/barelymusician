@@ -7,15 +7,15 @@ using UnityEngine;
 namespace BarelyApi {
   // Main |BarelyMusician| class that communicates with the native code.
   public class BarelyMusician {
-    // Internal beat callback.
+    // Internal event callbacks.
     public delegate void BeatCallback(int section, int bar, int beat);
 
-    // Internal instrument callbacks.
-    public delegate void ClearCallback();
-    public delegate void NoteOffCallback(float index);
-    public delegate void NoteOnCallback(float index, float intensity);
-    public delegate void ProcessCallback([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output,
-                                         int size, int numChannels);
+    // Internal instrument functions.
+    public delegate void ClearFn();
+    public delegate void NoteOffFn(float index);
+    public delegate void NoteOnFn(float index, float intensity);
+    public delegate void ProcessFn([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output,
+                                   int size, int numChannels);
 
     // Invalid ID.
     public static readonly int InvalidId = -1;
@@ -32,12 +32,12 @@ namespace BarelyApi {
     private static BarelyMusician instance = null;
 
     // Creates new instrument.
-    public int CreateInstrument(ClearCallback clearCallback, NoteOffCallback noteOffCallback,
-                                NoteOnCallback noteOnCallback, ProcessCallback processCallback) {
-      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(clearCallback),
-                              Marshal.GetFunctionPointerForDelegate(noteOffCallback),
-                              Marshal.GetFunctionPointerForDelegate(noteOnCallback),
-                              Marshal.GetFunctionPointerForDelegate(processCallback));
+    public int CreateInstrument(ClearFn clearFn, NoteOffFn noteOffFn,
+                                NoteOnFn noteOnFn, ProcessFn processFn) {
+      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(clearFn),
+                              Marshal.GetFunctionPointerForDelegate(noteOffFn),
+                              Marshal.GetFunctionPointerForDelegate(noteOnFn),
+                              Marshal.GetFunctionPointerForDelegate(processFn));
     }
 
     // Destroys instrument.
@@ -64,6 +64,11 @@ namespace BarelyApi {
     public void SetInstrumentNoteOn(Instrument instrument, float index, float intensity) {
       SetInstrumentNoteOn(instrument.Id, index, intensity);
     }
+        
+    // Updates sequencer.
+    public void UpdateInstrument() {
+      UpdateMain(Time.unscaledTime);
+    }
 
     // Creates sequencer.
     public int CreateSequencer(BeatCallback beatCallback) {
@@ -73,6 +78,11 @@ namespace BarelyApi {
     // Destroys sequencer.
     public void DestroySequencer(Sequencer sequencer) {
       DestroySequencer(sequencer.Id);
+    }
+
+    // Processes sequencer.
+    public void ProcessSequencer() {
+      UpdateDsp(AudioSettings.dspTime);
     }
 
     // Sets sequencer position.
@@ -99,7 +109,7 @@ namespace BarelyApi {
 
     // Updates sequencer.
     public void UpdateSequencer() {
-      Update(AudioSettings.dspTime);
+      UpdateMain(Time.unscaledTime);
     }
 
     // Constructs new |BarelyMusician| with Unity audio settings.
@@ -128,14 +138,17 @@ namespace BarelyApi {
 
     [DllImport(pluginName)]
     private static extern void Shutdown();
+    
+    [DllImport(pluginName)]
+    private static extern void UpdateDsp(double dspTime);
 
     [DllImport(pluginName)]
-    private static extern void Update(double dspTime);
+    private static extern void UpdateMain(double updateTime);
 
     // Instrument handlers.
     [DllImport(pluginName)]
-    private static extern int CreateInstrument(IntPtr clearCallbackPtr, IntPtr noteOffCallbackPtr,
-                                               IntPtr noteOnCallbackPtr, IntPtr processCallbackPtr);
+    private static extern int CreateInstrument(IntPtr clearFnPtr, IntPtr noteOffFnPtr,
+                                               IntPtr noteOnFnPtr, IntPtr processFnPtr);
 
     [DllImport(pluginName)]
     private static extern void DestroyInstrument(int instrumentId);

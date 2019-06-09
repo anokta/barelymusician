@@ -10,17 +10,18 @@
 namespace barelyapi {
 namespace unity {
 
-// TODO(#49): Refactor below using barelymusician api.
 extern "C" {
 
-// Sequencer beat callback.
+// Event callback signatures.
 using BeatCallback = void(int, int, int);
-
-// Instrument callback signatures.
-using ClearCallback = void();
 using NoteOffCallback = void(float);
 using NoteOnCallback = void(float, float);
-using ProcessCallback = void(float*, int, int);
+
+// Instrument function signatures.
+using ClearFn = void();
+using NoteOffFn = void(float);
+using NoteOnFn = void(float, float);
+using ProcessFn = void(float*, int, int);
 
 // Initializes the system.
 //
@@ -32,10 +33,15 @@ void EXPORT_API Initialize(int sample_rate, int num_channels, int num_frames);
 // Shuts down the system.
 void EXPORT_API Shutdown();
 
-// Updates internal state.
+// Updates internal DSP state.
 //
 // @param dsp_time DSP time.
-void EXPORT_API Update(double dsp_time);
+void EXPORT_API UpdateDsp(double dsp_time);
+
+// Updates internal main state.
+//
+// @param update_time Update time.
+void EXPORT_API UpdateMain(float update_time);
 
 // Creates new sequencer.
 //
@@ -86,15 +92,15 @@ void EXPORT_API StopSequencer(int sequencer_id);
 
 // Creates new instrument.
 //
-// @param clear_callback_ptr Clear callback.
-// @param note_off_callback_ptr Note off callback.
-// @param note_on_callback_ptr Note on callback.
-// @param process_callback_ptr Process callback.
+// @param clear_fn_ptr Clear callback.
+// @param note_off_fn_ptr Note off callback.
+// @param note_on_fn_ptr Note on callback.
+// @param process_fn_ptr Process callback.
 // @return Instrument ID.
-int EXPORT_API CreateInstrument(ClearCallback* clear_callback_ptr,
-                                NoteOffCallback* note_off_callback_ptr,
-                                NoteOnCallback* note_on_callback_ptr,
-                                ProcessCallback* process_callback_ptr);
+int EXPORT_API CreateInstrument(ClearFn* clear_fn_ptr,
+                                NoteOffFn* note_off_fn_ptr,
+                                NoteOnFn* note_on_fn_ptr,
+                                ProcessFn* process_fn_ptr);
 
 // Destroys instrument.
 //

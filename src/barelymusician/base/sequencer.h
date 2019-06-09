@@ -24,8 +24,8 @@ class Sequencer {
 
   // Registers beat callback.
   //
-  // @param Beat callback to trigger for each beat.
-  void RegisterBeatCallback(BeatCallback&& callback);
+  // @param beat_callback Beat callback to trigger for each beat.
+  void RegisterBeatCallback(BeatCallback&& beat_callback);
 
   // Sets the number of bars per each section.
   //

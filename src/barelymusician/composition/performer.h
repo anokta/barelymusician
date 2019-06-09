@@ -1,10 +1,11 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 #define BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 
+#include <functional>
 #include <list>
-#include <vector>
+#include <memory>
 
-#include "barelymusician/composition/note.h"
+#include "barelymusician/base/event.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message.h"
 
@@ -12,10 +13,16 @@ namespace barelyapi {
 
 class Performer {
  public:
+  // Note off event callback signature.
+  using NoteOffCallback = Event<float>::Callback;
+
+  // Note on event callback signature.
+  using NoteOnCallback = Event<float, float>::Callback;
+
   // Constructs new |Performer| with the given |instrument|.
   //
-  // @param instrument Pointer to the instrument to perform.
-  explicit Performer(Instrument* instrument);
+  // @param instrument Instrument to perform.
+  explicit Performer(std::unique_ptr<Instrument> instrument);
 
   // Clears all notes.
   void Clear();
@@ -23,14 +30,14 @@ class Performer {
   // Stops note with the given |index|.
   //
   // @param index Note index.
-  // @param timestamp Timestamp to stop the note.
+  // @param start_sample Relative timestamp to stop the note.
   void NoteOff(float index, int timestamp);
 
   // Starts note with the given |index| and |intensity|.
   //
   // @param index Note index.
   // @param intensity Note intensity.
-  // @param timestamp Timestamp to start the note.
+  // @param timestamp Relative timestamp to start the note.
   void NoteOn(float index, float intensity, int timestamp);
 
   // Processes the next |output| buffer.
@@ -40,6 +47,16 @@ class Performer {
   // @param num_frames Number of output frames.
   void Process(float* output, int num_channels, int num_frames);
 
+  // Registers note off callback.
+  //
+  // @param note_off_callback Note off callback for each note off.
+  void RegisterNoteOffCallback(NoteOffCallback&& note_off_callback);
+
+  // Registers note on callback.
+  //
+  // @param note_on_callback Note on callback for each note on.
+  void RegisterNoteOnCallback(NoteOnCallback&& note_on_callback);
+
  private:
   // Processes the given note |message|.
   void ProcessMessage(const Message& message);
@@ -48,7 +65,13 @@ class Performer {
   void PushMessage(const Message& message);
 
   // Instrument to perform.
-  Instrument* const instrument_;  // not owned.
+  std::unique_ptr<Instrument> instrument_;
+
+  // Event to be triggered for each note off.
+  Event<float> note_off_event_;
+
+  // Event to be triggered for each note on.
+  Event<float, float> note_on_event_;
 
   // Note messages to play.
   std::list<Message> messages_;

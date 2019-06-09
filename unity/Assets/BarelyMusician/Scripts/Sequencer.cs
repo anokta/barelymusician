@@ -64,10 +64,11 @@ namespace BarelyApi {
 
     void Update() {
       BarelyMusician.Instance.SetSequencerTransport(this);
+      BarelyMusician.Instance.UpdateSequencer();
     }
 
     void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Instance.UpdateSequencer();
+      BarelyMusician.Instance.ProcessSequencer();
     }
 
     // Starts the sequencer.

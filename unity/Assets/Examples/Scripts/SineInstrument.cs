@@ -23,16 +23,6 @@ namespace BarelyApi {
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);
     }
 
-    void Update() {
-      if (Input.GetKeyDown(KeyCode.Space)) {
-        if (playing) {
-          Stop();
-        } else {
-          Play();
-        }
-      }
-    }
-
     public override void Clear() {
       phase = 0.0f;
     }

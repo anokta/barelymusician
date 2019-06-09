@@ -47,7 +47,7 @@ void BarelyMusician::DestroySequencer(int sequencer_id) {
 }
 
 void BarelyMusician::RegisterSequencerBeatCallback(
-    int sequencer_id, Sequencer::BeatCallback&& beat_callback) {
+    int sequencer_id, BeatCallback&& beat_callback) {
   task_runner_.Add([this, sequencer_id, beat_callback]() mutable {
     Sequencer* sequencer = GetSequencer(sequencer_id);
     if (sequencer != nullptr) {
@@ -127,24 +127,49 @@ void BarelyMusician::StopSequencer(int sequencer_id) {
 
 void BarelyMusician::DestroyInstrument(int instrument_id) {
   task_runner_.Add(
-      [this, instrument_id]() { instruments_.erase(instrument_id); });
+      [this, instrument_id]() { performers_.erase(instrument_id); });
 }
 
 void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
-  Instrument* instrument = GetInstrument(instrument_id);
-  if (instrument != nullptr) {
-    instrument->Process(output, num_channels_, num_frames_);
+  Performer* performer = GetPerformer(instrument_id);
+  if (performer != nullptr) {
+    performer->Process(output, num_channels_, num_frames_);
   } else {
     DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     std::fill_n(output, num_channels_ * num_frames_, 0.0f);
   }
 }
 
-void BarelyMusician::SetInstrumentNoteOff(int instrument_id, float index) {
-  task_runner_.Add([this, instrument_id, index]() {
-    Instrument* instrument = GetInstrument(instrument_id);
-    if (instrument != nullptr) {
-      instrument->NoteOff(index);
+void BarelyMusician::RegisterInstrumentNoteOffCallback(
+    int instrument_id, NoteOffCallback&& note_off_callback) {
+  task_runner_.Add([this, instrument_id, note_off_callback]() mutable {
+    Performer* performer = GetPerformer(instrument_id);
+    if (performer != nullptr) {
+      performer->RegisterNoteOffCallback(std::move(note_off_callback));
+    } else {
+      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
+    }
+  });
+}
+
+void BarelyMusician::RegisterInstrumentNoteOnCallback(
+    int instrument_id, NoteOnCallback&& note_on_callback) {
+  task_runner_.Add([this, instrument_id, note_on_callback]() mutable {
+    Performer* performer = GetPerformer(instrument_id);
+    if (performer != nullptr) {
+      performer->RegisterNoteOnCallback(std::move(note_on_callback));
+    } else {
+      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
+    }
+  });
+}
+
+void BarelyMusician::SetInstrumentNoteOff(int instrument_id, float index,
+                                          int timestamp) {
+  task_runner_.Add([this, instrument_id, index, timestamp]() {
+    Performer* performer = GetPerformer(instrument_id);
+    if (performer != nullptr) {
+      performer->NoteOff(index, timestamp);
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }
@@ -152,11 +177,11 @@ void BarelyMusician::SetInstrumentNoteOff(int instrument_id, float index) {
 }
 
 void BarelyMusician::SetInstrumentNoteOn(int instrument_id, float index,
-                                         float intensity) {
-  task_runner_.Add([this, instrument_id, index, intensity]() {
-    Instrument* instrument = GetInstrument(instrument_id);
-    if (instrument != nullptr) {
-      instrument->NoteOn(index, intensity);
+                                         float intensity, int timestamp) {
+  task_runner_.Add([this, instrument_id, index, intensity, timestamp]() {
+    Performer* performer = GetPerformer(instrument_id);
+    if (performer != nullptr) {
+      performer->NoteOn(index, intensity, timestamp);
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }
@@ -165,19 +190,19 @@ void BarelyMusician::SetInstrumentNoteOn(int instrument_id, float index,
 
 void BarelyMusician::SetInstrumentClear(int instrument_id) {
   task_runner_.Add([this, instrument_id]() {
-    Instrument* instrument = GetInstrument(instrument_id);
-    if (instrument != nullptr) {
-      instrument->Clear();
+    Performer* performer = GetPerformer(instrument_id);
+    if (performer != nullptr) {
+      performer->Clear();
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }
   });
 }
 
-Instrument* BarelyMusician::GetInstrument(int instrument_id) {
-  const auto it = instruments_.find(instrument_id);
-  if (it != instruments_.end()) {
-    return it->second.get();
+Performer* BarelyMusician::GetPerformer(int instrument_id) {
+  const auto it = performers_.find(instrument_id);
+  if (it != performers_.end()) {
+    return &it->second;
   }
   return nullptr;
 }

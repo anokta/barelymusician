@@ -7,13 +7,22 @@
 
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/base/task_runner.h"
-#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/composition/performer.h"
 
 namespace barelyapi {
 
 // BarelyMusician API that maintains a native real-time music engine.
 class BarelyMusician {
  public:
+  // Sequencer beat event callback signature.
+  using BeatCallback = Sequencer::BeatCallback;
+
+  // Instrument note off event callback signature.
+  using NoteOffCallback = Performer::NoteOffCallback;
+
+  // Instrument note on event callback signature.
+  using NoteOnCallback = Performer::NoteOnCallback;
+
   // Constructs new |BarelyMusician| with the given system configuration.
   //
   // @param sample_rate Sampling rate.
@@ -39,7 +48,7 @@ class BarelyMusician {
   // @param sequencer_id Sequencer ID.
   // @param beat_callback Sequencer beat callback.
   void RegisterSequencerBeatCallback(int sequencer_id,
-                                     Sequencer::BeatCallback&& beat_callback);
+                                     BeatCallback&& beat_callback);
 
   // Sets sequencer number of bars per section.
   //
@@ -94,6 +103,20 @@ class BarelyMusician {
   // @param output Output buffer.
   void ProcessInstrument(int instrument_id, float* output);
 
+  // Registers new instrument note off callback.
+  //
+  // @param instrument_id Instrument ID.
+  // @param note_off_callback Instrument note off callback.
+  void RegisterInstrumentNoteOffCallback(int instrument_id,
+                                         NoteOffCallback&& note_off_callback);
+
+  // Registers new instrument note on callback.
+  //
+  // @param instrument_id Instrument ID.
+  // @param note_on_callback Instrument note on callback.
+  void RegisterInstrumentNoteOnCallback(int instrument_id,
+                                        NoteOnCallback&& note_on_callback);
+
   // Clears instrument.
   //
   // @param instrument_id Instrument ID.
@@ -103,18 +126,21 @@ class BarelyMusician {
   //
   // @param instrument_id Instrument ID.
   // @param index Note index.
-  void SetInstrumentNoteOff(int instrument_id, float index);
+  // @param timestamp Relative timestamp to stop the note.
+  void SetInstrumentNoteOff(int instrument_id, float index, int timestamp);
 
   // Starts playing instrument note.
   //
   // @param instrument_id Instrument ID.
   // @param index Note index.
   // @param intensity Note intensity.
-  void SetInstrumentNoteOn(int instrument_id, float index, float intensity);
+  // @param timestamp Relative timestamp to start the note.
+  void SetInstrumentNoteOn(int instrument_id, float index, float intensity,
+                           int timestamp);
 
  private:
-  // Returns instrument with the given |instrument_id|.
-  Instrument* GetInstrument(int instrument_id);
+  // Returns performer with the given |instrument_id|.
+  Performer* GetPerformer(int instrument_id);
 
   // Returns instrument with the given |sequencer_id|.
   Sequencer* GetSequencer(int sequencer_id);
@@ -134,8 +160,8 @@ class BarelyMusician {
   // Task runner to ensure thread-safety between main and audio threads.
   TaskRunner task_runner_;
 
-  // Instruments.
-  std::unordered_map<int, std::unique_ptr<Instrument>> instruments_;
+  // Instrument performers.
+  std::unordered_map<int, Performer> performers_;
 
   // Sequencers.
   std::unordered_map<int, Sequencer> sequencers_;
@@ -145,8 +171,9 @@ template <typename InstrumentType, typename... ArgumentTypes>
 int BarelyMusician::CreateInstrument(ArgumentTypes... arguments) {
   const int instrument_id = ++id_counter_;
   task_runner_.Add([this, arguments..., instrument_id]() {
-    instruments_.insert(std::make_pair(
-        instrument_id, std::make_unique<InstrumentType>(arguments...)));
+    performers_.insert(std::make_pair(
+        instrument_id,
+        Performer(std::make_unique<InstrumentType>(arguments...))));
   });
   return instrument_id;
 }

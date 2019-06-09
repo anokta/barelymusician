@@ -20,8 +20,8 @@ Sequencer::Sequencer(int sample_rate)
 
 const Transport& Sequencer::GetTransport() const { return transport_; }
 
-void Sequencer::RegisterBeatCallback(BeatCallback&& callback) {
-  beat_event_.Register(std::move(callback));
+void Sequencer::RegisterBeatCallback(BeatCallback&& beat_callback) {
+  beat_event_.Register(std::move(beat_callback));
 }
 
 void Sequencer::SetNumBars(int num_bars) {

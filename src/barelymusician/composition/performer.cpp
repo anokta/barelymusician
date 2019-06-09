@@ -31,18 +31,9 @@ Performer::Performer(std::unique_ptr<Instrument> instrument)
   DCHECK(instrument_);
 }
 
-void Performer::Clear() {
+void Performer::ClearAllNotes() {
   messages_.clear();
   instrument_->Clear();
-}
-
-void Performer::NoteOff(float index, int timestamp) {
-  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
-}
-
-void Performer::NoteOn(float index, float intensity, int timestamp) {
-  PushMessage(
-      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, timestamp));
 }
 
 void Performer::Process(float* output, int num_channels, int num_frames) {
@@ -79,6 +70,15 @@ void Performer::RegisterNoteOffCallback(NoteOffCallback&& note_off_callback) {
 
 void Performer::RegisterNoteOnCallback(NoteOnCallback&& note_on_callback) {
   note_on_event_.Register(std::move(note_on_callback));
+}
+
+void Performer::StartNote(float index, float intensity, int offset_samples) {
+  PushMessage(
+      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, offset_samples));
+}
+
+void Performer::StopNote(float index, int offset_samples) {
+  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, offset_samples));
 }
 
 void Performer::ProcessMessage(const Message& message) {

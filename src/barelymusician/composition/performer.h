@@ -11,6 +11,7 @@
 
 namespace barelyapi {
 
+// Class that performs an instrument in a sample accurate manner.
 class Performer {
  public:
   // Note off event callback signature.
@@ -25,20 +26,7 @@ class Performer {
   explicit Performer(std::unique_ptr<Instrument> instrument);
 
   // Clears all notes.
-  void Clear();
-
-  // Stops note with the given |index|.
-  //
-  // @param index Note index.
-  // @param start_sample Relative timestamp to stop the note.
-  void NoteOff(float index, int timestamp);
-
-  // Starts note with the given |index| and |intensity|.
-  //
-  // @param index Note index.
-  // @param intensity Note intensity.
-  // @param timestamp Relative timestamp to start the note.
-  void NoteOn(float index, float intensity, int timestamp);
+  void ClearAllNotes();
 
   // Processes the next |output| buffer.
   //
@@ -56,6 +44,19 @@ class Performer {
   //
   // @param note_on_callback Note on callback for each note on.
   void RegisterNoteOnCallback(NoteOnCallback&& note_on_callback);
+
+  // Starts note with the given |index| and |intensity|.
+  //
+  // @param index Note index.
+  // @param intensity Note intensity.
+  // @param offset_samples Relative sample offset to start the note.
+  void StartNote(float index, float intensity, int offset_samples);
+
+  // Stops note with the given |index|.
+  //
+  // @param index Note index.
+  // @param offset_samples Relative sample offset to stop the note.
+  void StopNote(float index, int offset_samples);
 
  private:
   // Processes the given note |message|.

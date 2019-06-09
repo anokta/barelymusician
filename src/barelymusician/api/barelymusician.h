@@ -30,8 +30,57 @@ class BarelyMusician {
   // @param num_frames Number of output frames.
   BarelyMusician(int sample_rate, int num_channels, int num_frames);
 
-  // Updates the internal state.
-  void Update();
+  // Creates new instrument of |InstrumentType|, and returns its ID.
+  //
+  // @return Instrument ID.
+  template <typename InstrumentType, typename... ArgumentTypes>
+  int CreateInstrument(ArgumentTypes... arguments);
+
+  // Destroys instrument.
+  //
+  // @param instrument_id Instrument ID.
+  void DestroyInstrument(int instrument_id);
+
+  // Clears all instrument notes.
+  //
+  // @param instrument_id Instrument ID.
+  void ClearAllInstrumentNotes(int instrument_id);
+
+  // Processes instrument.
+  //
+  // @param instrument_id Instrument ID.
+  // @param output Output buffer.
+  void ProcessInstrument(int instrument_id, float* output);
+
+  // Registers new instrument note off callback.
+  //
+  // @param instrument_id Instrument ID.
+  // @param note_off_callback Instrument note off callback.
+  void RegisterInstrumentNoteOffCallback(int instrument_id,
+                                         NoteOffCallback&& note_off_callback);
+
+  // Registers new instrument note on callback.
+  //
+  // @param instrument_id Instrument ID.
+  // @param note_on_callback Instrument note on callback.
+  void RegisterInstrumentNoteOnCallback(int instrument_id,
+                                        NoteOnCallback&& note_on_callback);
+
+  // Starts playing instrument note.
+  //
+  // @param instrument_id Instrument ID.
+  // @param index Note index.
+  // @param intensity Note intensity.
+  // @param offset_samples Relative sample offset to start the note.
+  void StartInstrumentNote(int instrument_id, float index, float intensity,
+                           int offset_samples);
+
+  // Stops playing instrument note.
+  //
+  // @param instrument_id Instrument ID.
+  // @param index Note index.
+  // @param offset_samples Relative sample offset to stop the note.
+  void StopInstrumentNote(int instrument_id, float index, int offset_samples);
 
   // Creates new sequencer, and returns its ID.
   //
@@ -86,57 +135,8 @@ class BarelyMusician {
   // @param sequencer_id Sequencer ID.
   void StopSequencer(int sequencer_id);
 
-  // Creates new instrument of |InstrumentType|, and returns its ID.
-  //
-  // @return Instrument ID.
-  template <typename InstrumentType, typename... ArgumentTypes>
-  int CreateInstrument(ArgumentTypes... arguments);
-
-  // Destroys instrument.
-  //
-  // @param instrument_id Instrument ID.
-  void DestroyInstrument(int instrument_id);
-
-  // Processes instrument.
-  //
-  // @param instrument_id Instrument ID.
-  // @param output Output buffer.
-  void ProcessInstrument(int instrument_id, float* output);
-
-  // Registers new instrument note off callback.
-  //
-  // @param instrument_id Instrument ID.
-  // @param note_off_callback Instrument note off callback.
-  void RegisterInstrumentNoteOffCallback(int instrument_id,
-                                         NoteOffCallback&& note_off_callback);
-
-  // Registers new instrument note on callback.
-  //
-  // @param instrument_id Instrument ID.
-  // @param note_on_callback Instrument note on callback.
-  void RegisterInstrumentNoteOnCallback(int instrument_id,
-                                        NoteOnCallback&& note_on_callback);
-
-  // Clears instrument.
-  //
-  // @param instrument_id Instrument ID.
-  void SetInstrumentClear(int instrument_id);
-
-  // Stops playing instrument note.
-  //
-  // @param instrument_id Instrument ID.
-  // @param index Note index.
-  // @param timestamp Relative timestamp to stop the note.
-  void SetInstrumentNoteOff(int instrument_id, float index, int timestamp);
-
-  // Starts playing instrument note.
-  //
-  // @param instrument_id Instrument ID.
-  // @param index Note index.
-  // @param intensity Note intensity.
-  // @param timestamp Relative timestamp to start the note.
-  void SetInstrumentNoteOn(int instrument_id, float index, float intensity,
-                           int timestamp);
+  // Updates the internal state.
+  void Update();
 
  private:
   // Returns performer with the given |instrument_id|.

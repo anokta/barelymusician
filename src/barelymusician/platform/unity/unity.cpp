@@ -138,17 +138,17 @@ void ProcessInstrument(int instrument_id, float* output) {
 
 void SetInstrumentClear(int instrument_id) {
   DCHECK(barelymusician);
-  barelymusician->SetInstrumentClear(instrument_id);
+  barelymusician->ClearAllInstrumentNotes(instrument_id);
 }
 
 void SetInstrumentNoteOff(int instrument_id, float index) {
   DCHECK(barelymusician);
-  barelymusician->SetInstrumentNoteOff(instrument_id, index, 0);
+  barelymusician->StopInstrumentNote(instrument_id, index, 0);
 }
 
 void SetInstrumentNoteOn(int instrument_id, float index, float intensity) {
   DCHECK(barelymusician);
-  barelymusician->SetInstrumentNoteOn(instrument_id, index, intensity, 0);
+  barelymusician->StartInstrumentNote(instrument_id, index, intensity, 0);
 }
 
 }  // namespace unity

@@ -134,14 +134,15 @@ int main(int argc, char* argv[]) {
     int num_performers = static_cast<int>(performers.size());
     for (int i = 0; i < num_performers; ++i) {
       for (const Note& note : GetBeatNotes(scores[i], transport)) {
-        const int start_timestamp =
+        const int start_offset_samples =
             start_sample +
             SamplesFromBeats(note.start_beat, num_samples_per_beat);
-        performers[i].NoteOn(note.index, note.intensity, start_timestamp);
-        const int end_timestamp =
-            start_timestamp +
+        performers[i].StartNote(note.index, note.intensity,
+                                start_offset_samples);
+        const int end_offset_samples =
+            start_offset_samples +
             SamplesFromBeats(note.duration_beats, num_samples_per_beat);
-        performers[i].NoteOff(note.index, end_timestamp);
+        performers[i].StopNote(note.index, end_offset_samples);
       }
     }
   };

@@ -98,14 +98,15 @@ Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
       performer.second(root_note_index_, scale_, transport, section_type_,
                        harmonic_, &temp_beat_notes_);
       for (const Note& note : temp_beat_notes_) {
-        const int start_timestamp =
+        const int start_offset_samples =
             start_sample +
             SamplesFromBeats(note.start_beat, num_samples_per_beat);
-        performer.first->NoteOn(note.index, note.intensity, start_timestamp);
-        const int end_timestamp =
-            start_timestamp +
+        performer.first->StartNote(note.index, note.intensity,
+                                   start_offset_samples);
+        const int stop_offset_samples =
+            start_offset_samples +
             SamplesFromBeats(note.duration_beats, num_samples_per_beat);
-        performer.first->NoteOff(note.index, end_timestamp);
+        performer.first->StopNote(note.index, stop_offset_samples);
       }
     }
   });

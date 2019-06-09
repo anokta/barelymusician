@@ -5,8 +5,12 @@ using BarelyApi;
 
 // Example class that plays instrument.
 public class InstrumentPlayer : MonoBehaviour {
+  // Note.
+  public float noteIndex = 0.0f;
+  public float noteIntensity = 1.0f;
+
   // Instrument to play.
-  private SineInstrument instrument = null;
+  private Instrument instrument = null;
 
   // Is playing?
   private bool isPlaying = false;
@@ -27,11 +31,11 @@ public class InstrumentPlayer : MonoBehaviour {
   }
 
   void Update() {
-    if (Input.GetKeyDown(KeyCode.Space)) {
+    if (Input.GetKeyDown(KeyCode.S)) {
       if (isPlaying) {
-        instrument.Stop();
+        instrument.StopNote(noteIndex);
       } else {
-        instrument.Play();
+        instrument.StartNote(noteIndex, noteIntensity);
       }
       isPlaying = !isPlaying;
     }

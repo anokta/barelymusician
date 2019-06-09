@@ -17,17 +17,32 @@ namespace BarelyApi {
     // Instrument ID.
     public int Id { get; protected set; } = BarelyMusician.InvalidId;
 
+    // Clears all notes.
+    public void ClearAllNotes() {
+      BarelyMusician.Instance.SetInstrumentClear(this);
+    }
+
+    // Starts note with the given |index| and |intensity|.
+    public void StartNote(float index, float intensity) {
+      BarelyMusician.Instance.SetInstrumentNoteOn(this, index, intensity);
+    }
+
+    // Stops note with the given |index|.
+    public void StopNote(float index) {
+      BarelyMusician.Instance.SetInstrumentNoteOff(this, index);
+    }
+
     // Clears the instrument.
-    public abstract void Clear();
+    protected abstract void Clear();
 
     // Stops playing note with the given |index|.
-    public abstract void NoteOff(float index);
+    protected abstract void NoteOff(float index);
 
     // Starts playing note with the given |index| and |intensity|.
-    public abstract void NoteOn(float index, float intensity);
+    protected abstract void NoteOn(float index, float intensity);
 
     // Processes the next |output| buffer.
-    public abstract void Process(float[] output, int numChannels);
+    protected abstract void Process(float[] output, int numChannels);
 
     // Internal note off callback.
     protected BarelyMusician.NoteOffCallback noteOffCallback = null;

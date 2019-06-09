@@ -24,20 +24,20 @@ namespace BarelyApi {
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);
     }
 
-    public override void Clear() {
+    protected override void Clear() {
       phase = 0.0f;
     }
 
-    public override void NoteOff(float index) {
+    protected override void NoteOff(float index) {
       playing = false;
     }
 
-    public override void NoteOn(float index, float intensity) {
+    protected override void NoteOn(float index, float intensity) {
       Clear();
       playing = true;
     }
 
-    public override void Process(float[] data, int channels) {
+    protected override void Process(float[] data, int channels) {
       for (int i = 0; i < data.Length; i += channels) {
         // Generate next sample.
         float sample = playing ? Mathf.Sin(phase * 2.0f * Mathf.PI) : 0.0f;
@@ -50,14 +50,6 @@ namespace BarelyApi {
           phase -= 1.0f;
         }
       }
-    }
-
-    public void Play() {
-      BarelyMusician.Instance.SetInstrumentNoteOn(this, 0.0f, 1.0f);
-    }
-
-    public void Stop() {
-      BarelyMusician.Instance.SetInstrumentNoteOff(this, 0.0f);
     }
   }
 }

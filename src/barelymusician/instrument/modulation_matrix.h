@@ -13,8 +13,8 @@ namespace barelyapi {
 template <typename ParamType>
 class ModulationMatrix {
  public:
-  // Parameter update signature.
-  using ParamUpdater = std::function<void(const ParamType&)>;
+  // Parameter update function signature.
+  using UpdateParamFn = std::function<void(const ParamType&)>;
 
   // Returns the value of a parameter with the given ID.
   //
@@ -27,9 +27,9 @@ class ModulationMatrix {
   //
   // @param id Parameter ID.
   // @param default_value Parameter default value.
-  // @param updater Parameter update function.
+  // @param update_param_fn Parameter update function.
   void Register(int id, const ParamType& default_value,
-                ParamUpdater&& updater = nullptr);
+                UpdateParamFn&& update_param_fn = nullptr);
 
   // Sets the value of a parameter with the given ID.
   //
@@ -45,7 +45,7 @@ class ModulationMatrix {
     ParamType value;
 
     // Update function.
-    ParamUpdater updater;
+    UpdateParamFn update_param_fn;
   };
 
   // Parameter map.
@@ -66,13 +66,14 @@ bool ModulationMatrix<ParamType>::GetParam(int id, ParamType* value) const {
 template <typename ParamType>
 void ModulationMatrix<ParamType>::Register(int id,
                                            const ParamType& default_value,
-                                           ParamUpdater&& updater) {
-  const auto result = params_.insert({id, {default_value, std::move(updater)}});
+                                           UpdateParamFn&& update_param_fn) {
+  const auto result =
+      params_.insert({id, {default_value, std::move(update_param_fn)}});
   DCHECK(result.second) << "Failed to register param ID: " << id;
 
   const auto& param_data = result.first->second;
-  if (param_data.updater != nullptr) {
-    param_data.updater(default_value);
+  if (param_data.update_param_fn != nullptr) {
+    param_data.update_param_fn(default_value);
   }
 }
 
@@ -84,8 +85,8 @@ bool ModulationMatrix<ParamType>::SetParam(int id, const ParamType& value) {
   }
   auto& param_data = it->second;
   if (value != param_data.value) {
-    if (param_data.updater != nullptr) {
-      param_data.updater(value);
+    if (param_data.update_param_fn != nullptr) {
+      param_data.update_param_fn(value);
     }
     param_data.value = value;
   }

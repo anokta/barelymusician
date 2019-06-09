@@ -41,16 +41,16 @@ TEST(ModulationMatrixTest, SetParam) {
   EXPECT_FLOAT_EQ(value, kParamValue);
 }
 
-// Tests that the parameter updater gets called accordingly with the expected
-// values.
-TEST(ModulationMatrixTest, ParamUpdater) {
+// Tests that the parameter update function gets called accordingly with the
+// expected values.
+TEST(ModulationMatrixTest, UpdateParam) {
   ModulationMatrix<float> modulation_matrix;
 
   float param_value = 0.0f;
-  const auto param_updater = [&param_value](float value) {
+  const auto update_param_fn = [&param_value](float value) {
     param_value = value;
   };
-  modulation_matrix.Register(kParamId, kDefaultParamValue, param_updater);
+  modulation_matrix.Register(kParamId, kDefaultParamValue, update_param_fn);
   EXPECT_FLOAT_EQ(param_value, kDefaultParamValue);
 
   EXPECT_TRUE(modulation_matrix.SetParam(kParamId, kParamValue));

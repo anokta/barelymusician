@@ -57,17 +57,20 @@ const int kNumBeats = 3;
 const float kRootNote = barelyapi::kNoteIndexD3;
 const int kNumInstrumentVoices = 8;
 
-BasicSynthInstrument BuildSynthInstrument(OscillatorType type, float gain,
-                                          float attack, float release) {
-  BasicSynthInstrument synth_instrument(kSampleInterval, kNumInstrumentVoices);
-  synth_instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
-                                 static_cast<float>(type));
-  synth_instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, gain);
-  synth_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                                 attack);
-  synth_instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                                 release);
-  return synth_instrument;
+std::unique_ptr<BasicSynthInstrument> BuildSynthInstrument(OscillatorType type,
+                                                           float gain,
+                                                           float attack,
+                                                           float release) {
+  auto synth_instrument = std::make_unique<BasicSynthInstrument>(
+      kSampleInterval, kNumInstrumentVoices);
+  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                                  static_cast<float>(type));
+  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kGain, gain);
+  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                                  attack);
+  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                                  release);
+  return std::move(synth_instrument);
 }
 
 // Note BuildNote(float root_note_index, const Scale& scale, float index, float
@@ -182,23 +185,23 @@ int main(int argc, char* argv[]) {
   std::vector<std::pair<Performer, Ensemble::BeatComposerCallback>> performers;
 
   // Synth instruments.
-  BasicSynthInstrument chords_instrument =
+  auto chords_instrument =
       BuildSynthInstrument(OscillatorType::kSine, 0.125f, 0.125f, 0.125f);
-  BasicSynthInstrument chords_2_instrument =
+  auto chords_2_instrument =
       BuildSynthInstrument(OscillatorType::kNoise, 0.05f, 0.5f, 0.025f);
 
   const auto chords_beat_composer_callback =
       std::bind(ComposeChord, std::placeholders::_1, std::placeholders::_2,
                 0.5f, std::placeholders::_5, std::placeholders::_6);
 
-  performers.emplace_back(Performer(&chords_instrument),
+  performers.emplace_back(Performer(std::move(chords_instrument)),
                           chords_beat_composer_callback);
-  performers.emplace_back(Performer(&chords_2_instrument),
+  performers.emplace_back(Performer(std::move(chords_2_instrument)),
                           chords_beat_composer_callback);
 
-  BasicSynthInstrument line_instrument =
+  auto line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.125f, 0.0025f, 0.125f);
-  BasicSynthInstrument line_2_instrument =
+  auto line_2_instrument =
       BuildSynthInstrument(OscillatorType::kSquare, 0.15f, 0.05f, 0.05f);
 
   const auto line_beat_composer_callback = std::bind(
@@ -208,9 +211,9 @@ int main(int argc, char* argv[]) {
       ComposeLine, std::placeholders::_1, std::placeholders::_2, 1.0f,
       std::placeholders::_3, std::placeholders::_5, std::placeholders::_6);
 
-  performers.emplace_back(Performer(&line_instrument),
+  performers.emplace_back(Performer(std::move(line_instrument)),
                           line_beat_composer_callback);
-  performers.emplace_back(Performer(&line_2_instrument),
+  performers.emplace_back(Performer(std::move(line_2_instrument)),
                           line_2_beat_composer_callback);
 
   // Drumkit instrument.
@@ -221,19 +224,20 @@ int main(int argc, char* argv[]) {
       "data/audio/drums/basic_hihat_closed.wav";
   drumkit_map[barelyapi::kNoteIndexHihatOpen] =
       "data/audio/drums/basic_hihat_open.wav";
-  BasicDrumkitInstrument drumkit_instrument(kSampleInterval);
+  auto drumkit_instrument =
+      std::make_unique<BasicDrumkitInstrument>(kSampleInterval);
   std::vector<WavFile> drumkit_files;
   for (const auto& it : drumkit_map) {
     drumkit_files.emplace_back();
     auto& drumkit_file = drumkit_files.back();
     CHECK(drumkit_file.Load(it.second));
-    drumkit_instrument.Add(it.first, drumkit_file);
+    drumkit_instrument->Add(it.first, drumkit_file);
   }
 
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_3, std::placeholders::_6);
 
-  performers.emplace_back(Performer(&drumkit_instrument),
+  performers.emplace_back(Performer(std::move(drumkit_instrument)),
                           drumkit_beat_composer_callback);
 
   // Ensemble.

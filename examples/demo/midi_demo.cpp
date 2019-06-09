@@ -104,13 +104,8 @@ int main(int argc, char* argv[]) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
 
-  std::vector<BasicSynthInstrument> instruments;
   std::vector<std::vector<Note>> scores;
   std::vector<Performer> performers;
-
-  instruments.reserve(num_tracks);
-  scores.reserve(num_tracks);
-  performers.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
     // Create instrument.
     const auto score = GetMidiScore(midi_file[i], ticks_per_quarter);
@@ -119,15 +114,16 @@ int main(int argc, char* argv[]) {
     }
     scores.push_back(score);
     // Create instrument.
-    BasicSynthInstrument instrument(kSampleInterval, kNumInstrumentVoices);
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
-                             static_cast<float>(OscillatorType::kSquare));
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.2f);
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
-    instruments.push_back(instrument);
+    auto instrument = std::make_unique<BasicSynthInstrument>(
+        kSampleInterval, kNumInstrumentVoices);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                              static_cast<float>(OscillatorType::kSquare));
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                              0.2f);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     // Create performer.
-    performers.emplace_back(&instruments.back());
+    performers.emplace_back(std::move(instrument));
   }
   LOG(INFO) << "Number of performers: " << performers.size();
 

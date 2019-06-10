@@ -191,8 +191,8 @@ int main(int argc, char* argv[]) {
       BuildSynthInstrument(OscillatorType::kNoise, 0.05f, 0.5f, 0.025f);
 
   const auto chords_beat_composer_callback =
-      std::bind(ComposeChord, std::placeholders::_1, std::placeholders::_2,
-                0.5f, std::placeholders::_5, std::placeholders::_6);
+      std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_3,
+                std::placeholders::_4);
 
   performers.emplace_back(Performer(std::move(chords_instrument)),
                           chords_beat_composer_callback);
@@ -205,11 +205,11 @@ int main(int argc, char* argv[]) {
       BuildSynthInstrument(OscillatorType::kSquare, 0.15f, 0.05f, 0.05f);
 
   const auto line_beat_composer_callback = std::bind(
-      ComposeLine, std::placeholders::_1, std::placeholders::_2, 1.0f,
-      std::placeholders::_3, std::placeholders::_5, std::placeholders::_6);
-  const auto line_2_beat_composer_callback = std::bind(
-      ComposeLine, std::placeholders::_1, std::placeholders::_2, 1.0f,
-      std::placeholders::_3, std::placeholders::_5, std::placeholders::_6);
+      ComposeLine, kRootNote - barelyapi::kNumSemitones, scale, 1.0f,
+      std::placeholders::_1, std::placeholders::_3, std::placeholders::_4);
+  const auto line_2_beat_composer_callback =
+      std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
+                std::placeholders::_3, std::placeholders::_4);
 
   performers.emplace_back(Performer(std::move(line_instrument)),
                           line_beat_composer_callback);
@@ -235,7 +235,7 @@ int main(int argc, char* argv[]) {
   }
 
   const auto drumkit_beat_composer_callback =
-      std::bind(ComposeDrums, std::placeholders::_3, std::placeholders::_6);
+      std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_4);
 
   performers.emplace_back(Performer(std::move(drumkit_instrument)),
                           drumkit_beat_composer_callback);
@@ -249,12 +249,10 @@ int main(int argc, char* argv[]) {
     const int index = section_type * transport.num_bars + transport.bar;
     return progression[index % progression.size()];
   };
-  Ensemble ensemble(&sequencer, scale);
-  ensemble.SetRootNote(kRootNote);
-  ensemble.SetSectionComposerCallback(section_composer_callback);
-  ensemble.SetBarComposerCallback(bar_composer_callback);
+  Ensemble ensemble(&sequencer, section_composer_callback,
+                    bar_composer_callback);
   for (auto& performer : performers) {
-    ensemble.AddPerformer(&performer.first, std::move(performer.second));
+    ensemble.Add(&performer.first, std::move(performer.second));
   }
 
   // Audio process callback.
@@ -268,6 +266,11 @@ int main(int argc, char* argv[]) {
       performer.first.Process(temp_buffer.data(), kNumChannels, kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
+    }
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      for (int channel = 0; channel < kNumChannels; ++channel) {
+        output[kNumChannels * frame + channel] *= 0.2f;
+      }
     }
   };
   audio_output.SetProcessCallback(process_callback);

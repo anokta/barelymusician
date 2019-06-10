@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -13,7 +14,6 @@
 #include "barelymusician/base/transport.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/performer.h"
-#include "barelymusician/composition/scale.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
@@ -27,31 +27,16 @@ class Ensemble {
   using BarComposerCallback = std::function<int(const Transport&, int)>;
 
   // Beat composer callback signature.
-  using BeatComposerCallback = std::function<void(
-      float, const Scale&, const Transport&, int, int, std::vector<Note>*)>;
+  using BeatComposerCallback =
+      std::function<void(const Transport&, int, int, std::vector<Note>*)>;
 
-  explicit Ensemble(Sequencer* sequencer, const Scale& scale);
+  Ensemble(Sequencer* sequencer,
+           SectionComposerCallback&& section_composer_callback,
+           BarComposerCallback&& bar_composer_callback);
 
-  void AddPerformer(Performer* performer,
-                    BeatComposerCallback&& beat_composer_callback);
-
-  // Sets the root note (key) of score.
-  //
-  // @param index Root note index.
-  void SetRootNote(float index) { root_note_index_ = index; }
-
-  void SetSectionComposerCallback(
-      SectionComposerCallback&& section_composer_callback);
-
-  void SetBarComposerCallback(BarComposerCallback&& bar_composer_callback);
+  void Add(Performer* performer, BeatComposerCallback&& beat_composer_callback);
 
  private:
-  // Root note index.
-  float root_note_index_;
-
-  // Musical scale.
-  Scale scale_;
-
   // Section composer callback.
   SectionComposerCallback section_composer_callback_;
 
@@ -64,17 +49,17 @@ class Ensemble {
   // Current harmonic.
   int harmonic_;
 
-  // List of performers.
-  std::vector<std::pair<Performer*, BeatComposerCallback>> performers_;
+  // List of performers with their corresponding composers.
+  std::unordered_map<Performer*, BeatComposerCallback> performers_;
 
   std::vector<Note> temp_beat_notes_;
 };
 
-Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
-    : root_note_index_(kNoteIndexC3),
-      scale_(scale),
-      section_composer_callback_(nullptr),
-      bar_composer_callback_(nullptr),
+Ensemble::Ensemble(Sequencer* sequencer,
+                   SectionComposerCallback&& section_composer_callback,
+                   BarComposerCallback&& bar_composer_callback)
+    : section_composer_callback_(std::move(section_composer_callback)),
+      bar_composer_callback_(std::move(bar_composer_callback)),
       section_type_(0),
       harmonic_(0) {
   DCHECK(sequencer);
@@ -93,38 +78,27 @@ Ensemble::Ensemble(Sequencer* sequencer, const Scale& scale)
         harmonic_ = bar_composer_callback_(transport, section_type_);
       }
     }
-    for (auto& performer : performers_) {
+    for (auto& it : performers_) {
       temp_beat_notes_.clear();
-      performer.second(root_note_index_, scale_, transport, section_type_,
-                       harmonic_, &temp_beat_notes_);
+      it.second(transport, section_type_, harmonic_, &temp_beat_notes_);
       for (const Note& note : temp_beat_notes_) {
         const int start_offset_samples =
             start_sample +
             SamplesFromBeats(note.start_beat, num_samples_per_beat);
-        performer.first->StartNote(note.index, note.intensity,
-                                   start_offset_samples);
+        it.first->StartNote(note.index, note.intensity, start_offset_samples);
         const int stop_offset_samples =
             start_offset_samples +
             SamplesFromBeats(note.duration_beats, num_samples_per_beat);
-        performer.first->StopNote(note.index, stop_offset_samples);
+        it.first->StopNote(note.index, stop_offset_samples);
       }
     }
   });
 }
 
-void Ensemble::AddPerformer(Performer* performer,
-                            BeatComposerCallback&& beat_composer_callback) {
-  performers_.emplace_back(performer, std::move(beat_composer_callback));
-}
-
-void Ensemble::SetSectionComposerCallback(
-    SectionComposerCallback&& section_composer_callback) {
-  section_composer_callback_ = std::move(section_composer_callback);
-}
-
-void Ensemble::SetBarComposerCallback(
-    BarComposerCallback&& bar_composer_callback) {
-  bar_composer_callback_ = std::move(bar_composer_callback);
+void Ensemble::Add(Performer* performer,
+                   BeatComposerCallback&& beat_composer_callback) {
+  performers_.insert(
+      std::make_pair(performer, std::move(beat_composer_callback)));
 }
 
 }  // namespace barelyapi

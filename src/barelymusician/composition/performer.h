@@ -3,11 +3,10 @@
 
 #include <functional>
 #include <memory>
-#include <vector>
 
 #include "barelymusician/base/event.h"
-#include "barelymusician/composition/message.h"
 #include "barelymusician/instrument/instrument.h"
+#include "barelymusician/message/message_queue.h"
 
 namespace barelyapi {
 
@@ -62,9 +61,6 @@ class Performer {
   // Processes the given note |message|.
   void ProcessMessage(const Message& message);
 
-  // Pushes the given note |message| to be played.
-  void PushMessage(const Message& message);
-
   // Instrument to perform.
   std::unique_ptr<Instrument> instrument_;
 
@@ -74,8 +70,11 @@ class Performer {
   // Event to be triggered for each note on.
   Event<float, float> note_on_event_;
 
-  // Note messages to play.
-  std::vector<Message> messages_;
+  // Message queue to process.
+  MessageQueue message_queue_;
+
+  // Temp message to process messages.
+  Message temp_message_;
 };
 
 }  // namespace barelyapi

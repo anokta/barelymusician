@@ -20,8 +20,7 @@ static const int kNumMonoChannels = 1;
 static const int kNumStereoChannels = 2;
 
 // Maximum number of bytes that the message data can contain.
-// TODO(#29): This is an arbitrary value, make sure this is *always* safe.
-static const int kNumMaxMessageDataBytes = 16;
+static const int kNumMaxMessageDataBytes = 2 * sizeof(float);
 
 // Number of semitones in an octave (twelwe-tone equal temperament).
 static const float kNumSemitones = 12.0f;

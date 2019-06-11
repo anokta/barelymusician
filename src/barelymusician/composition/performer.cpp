@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/composition/message_utils.h"
+#include "barelymusician/message/message_utils.h"
 
 namespace barelyapi {
 
@@ -32,36 +32,28 @@ Performer::Performer(std::unique_ptr<Instrument> instrument)
 }
 
 void Performer::ClearAllNotes() {
-  messages_.clear();
+  message_queue_.Clear();
   instrument_->Clear();
 }
 
 void Performer::Process(float* output, int num_channels, int num_frames) {
-  // Process frames within message events range.
   int frame = 0;
-  const auto begin = messages_.begin();
-  const auto end =
-      std::lower_bound(begin, messages_.end(), num_frames, &CompareTimestamp);
-  if (begin != end) {
-    for (auto it = begin; it != end; ++it) {
-      if (frame < it->timestamp) {
-        instrument_->Process(&output[frame * num_channels], num_channels,
-                             it->timestamp - frame);
-        frame = it->timestamp;
+  while (frame < num_frames) {
+    if (message_queue_.Pop(num_frames, &temp_message_)) {
+      const int timestamp = temp_message_.timestamp;
+      if (frame < timestamp) {
+        instrument_->Process(&output[num_channels * frame], num_channels,
+                             timestamp - frame);
+        frame = timestamp;
       }
-      ProcessMessage(*it);
+      ProcessMessage(temp_message_);
+    } else {
+      instrument_->Process(&output[num_channels * frame], num_channels,
+                           num_frames - frame);
+      break;
     }
-    messages_.erase(begin, end);
   }
-  // Process remaining frames.
-  if (frame < num_frames) {
-    instrument_->Process(&output[frame * num_channels], num_channels,
-                         num_frames - frame);
-  }
-  // Update message timestamps.
-  for (Message& message : messages_) {
-    message.timestamp -= num_frames;
-  }
+  message_queue_.Update(num_frames);
 }
 
 void Performer::RegisterNoteOffCallback(NoteOffCallback&& note_off_callback) {
@@ -73,12 +65,13 @@ void Performer::RegisterNoteOnCallback(NoteOnCallback&& note_on_callback) {
 }
 
 void Performer::StartNote(float index, float intensity, int offset_samples) {
-  PushMessage(
+  message_queue_.Push(
       BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, offset_samples));
 }
 
 void Performer::StopNote(float index, int offset_samples) {
-  PushMessage(BuildMessage<NoteOffData>(kNoteOffId, {index}, offset_samples));
+  message_queue_.Push(
+      BuildMessage<NoteOffData>(kNoteOffId, {index}, offset_samples));
 }
 
 void Performer::ProcessMessage(const Message& message) {
@@ -97,12 +90,6 @@ void Performer::ProcessMessage(const Message& message) {
       DLOG(ERROR) << "Unknown message ID: " << message.id;
       break;
   }
-}
-
-void Performer::PushMessage(const Message& message) {
-  const auto it = std::upper_bound(messages_.begin(), messages_.end(), message,
-                                   &CompareMessage);
-  messages_.insert(it, message);
 }
 
 }  // namespace barelyapi

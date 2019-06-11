@@ -267,11 +267,6 @@ int main(int argc, char* argv[]) {
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
     }
-    for (int frame = 0; frame < kNumFrames; ++frame) {
-      for (int channel = 0; channel < kNumChannels; ++channel) {
-        output[kNumChannels * frame + channel] *= 0.2f;
-      }
-    }
   };
   audio_output.SetProcessCallback(process_callback);
 

@@ -46,6 +46,12 @@
     <Filter Include="Source Files\api">
       <UniqueIdentifier>{a5a847a7-a1b9-43d8-b9e4-2a817f8d8747}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\message">
+      <UniqueIdentifier>{03bd3114-e33d-4945-980b-715815b32276}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\message">
+      <UniqueIdentifier>{5761b34b-e8e7-4b19-8272-50733cd570c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -129,11 +135,14 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\module.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\message.h">
-      <Filter>Header Files\composition</Filter>
+    <ClInclude Include="..\..\src\barelymusician\message\message.h">
+      <Filter>Header Files\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\message_utils.h">
-      <Filter>Header Files\composition</Filter>
+    <ClInclude Include="..\..\src\barelymusician\message\message_utils.h">
+      <Filter>Header Files\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\message\message_queue.h">
+      <Filter>Header Files\message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -179,8 +188,11 @@
     <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp">
       <Filter>Source Files\api</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\message_utils.cpp">
-      <Filter>Source Files\composition</Filter>
+    <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp">
+      <Filter>Source Files\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\message\message_queue.cpp">
+      <Filter>Source Files\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,11 +1,11 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_MESSAGE_UTILS_H_
-#define BARELYMUSICIAN_COMPOSITION_MESSAGE_UTILS_H_
+#ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_
+#define BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_
 
 #include <cstring>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/composition/message.h"
+#include "barelymusician/message/message.h"
 
 namespace barelyapi {
 
@@ -24,13 +24,6 @@ Message BuildMessage(int id, const DataType& data, int timestamp);
 // @param rhs Second message.
 // @return True if the first message comes prior to the second message.
 bool CompareMessage(const Message& lhs, const Message& rhs);
-
-// Compares the given |message| against the given |timestamp|.
-//
-// @param message Message.
-// @param timestamp Timestamp.
-// @return True if the message comes prior to the timestamp.
-bool CompareTimestamp(const Message& message, int timestamp);
 
 // Reads the corresponding structured data for the given |message_data|.
 //
@@ -73,4 +66,4 @@ void WriteMessageData(const DataType& data, unsigned char* message_data) {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_MESSAGE_UTILS_H_
+#endif  // BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_

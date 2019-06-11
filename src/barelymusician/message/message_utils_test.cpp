@@ -1,6 +1,6 @@
-#include "barelymusician/composition/message_utils.h"
+#include "barelymusician/message/message_utils.h"
 
-#include "barelymusician/composition/message.h"
+#include "barelymusician/message/message.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -27,7 +27,7 @@ TEST(MessageUtilsTest, BuildMessage) {
 }
 
 // Tests that messages are compared as expected according to their timestamps.
-TEST(MessageUtilsTest, CompareMessageTimestamp) {
+TEST(MessageUtilsTest, CompareMessage) {
   const int kFirstTimestamp = 10;
   const int kSecondTimestamp = 32;
 
@@ -37,10 +37,7 @@ TEST(MessageUtilsTest, CompareMessageTimestamp) {
   second_message.timestamp = kSecondTimestamp;
 
   EXPECT_TRUE(CompareMessage(first_message, second_message));
-  EXPECT_TRUE(CompareTimestamp(first_message, kSecondTimestamp));
-
   EXPECT_FALSE(CompareMessage(second_message, first_message));
-  EXPECT_FALSE(CompareTimestamp(second_message, kFirstTimestamp));
 }
 
 // Tests that writing a structured data into a message is read back as expected.

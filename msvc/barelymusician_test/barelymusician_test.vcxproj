@@ -46,7 +46,6 @@
     <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\task_runner_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\composition\message_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\performer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\quantizer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\scale_test.cpp" />
@@ -57,6 +56,8 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\message\message_queue_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\message\message_utils_test.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

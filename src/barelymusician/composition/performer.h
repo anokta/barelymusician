@@ -2,8 +2,8 @@
 #define BARELYMUSICIAN_COMPOSITION_PERFORMER_H_
 
 #include <functional>
-#include <list>
 #include <memory>
+#include <vector>
 
 #include "barelymusician/base/event.h"
 #include "barelymusician/composition/message.h"
@@ -75,7 +75,7 @@ class Performer {
   Event<float, float> note_on_event_;
 
   // Note messages to play.
-  std::list<Message> messages_;
+  std::vector<Message> messages_;
 };
 
 }  // namespace barelyapi

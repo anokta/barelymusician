@@ -65,7 +65,7 @@ void TaskRunner::PushNode(std::atomic<Node*>* head, Node* node) {
     old_head = head->load();
     node->next = old_head;
   } while (!head->compare_exchange_weak(
-    old_head, node, std::memory_order_release, std::memory_order_relaxed));
+      old_head, node, std::memory_order_release, std::memory_order_relaxed));
 }
 
 }  // namespace barelyapi

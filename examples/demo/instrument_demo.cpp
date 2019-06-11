@@ -23,7 +23,7 @@ using ::barelyapi::examples::WinConsoleInput;
 // System audio settings.
 const int kSampleRate = 48000;
 const int kNumChannels = 2;
-const int kNumFrames = 256;
+const int kNumFrames = 512;
 
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
@@ -33,7 +33,8 @@ const int kNumMaxTasks = 100;
 const float kGain = 0.125f;
 const int kNumVoices = 16;
 const OscillatorType kOscillatorType = OscillatorType::kSaw;
-const float kEnvelopeRelease = 0.25f;
+const float kEnvelopeAttack = 0.05f;
+const float kEnvelopeRelease = 0.125f;
 
 // Note settings.
 const float kRootNoteIndex = barelyapi::kNoteIndexC3;
@@ -66,6 +67,8 @@ int main(int argc, char* argv[]) {
   instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, kGain);
   instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                            static_cast<float>(kOscillatorType));
+  instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                           kEnvelopeAttack);
   instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
                            kEnvelopeRelease);
 

@@ -1,11 +1,10 @@
 #include "barelymusician/dsp/oscillator.h"
 
+#include <cmath>
+
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
-
-#include <algorithm>
-#include <cmath>
 
 namespace barelyapi {
 
@@ -46,7 +45,8 @@ float Oscillator::Next() {
 void Oscillator::Reset() { phase_ = 0.0f; }
 
 void Oscillator::SetFrequency(float frequency) {
-  increment_ = std::max(frequency, 0.0f) * sample_interval_;
+  DCHECK_GE(frequency, 0.0f);
+  increment_ = frequency * sample_interval_;
 }
 
 void Oscillator::SetType(OscillatorType type) { type_ = type; }

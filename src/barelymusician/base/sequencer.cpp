@@ -25,7 +25,8 @@ void Sequencer::RegisterBeatCallback(BeatCallback&& beat_callback) {
 }
 
 void Sequencer::SetNumBars(int num_bars) {
-  transport_.num_bars = std::max(num_bars, 0);
+  DCHECK_GE(num_bars, 0);
+  transport_.num_bars = num_bars;
   // TODO(#51): Revisit this to make sure the calculation makes sense.
   if (transport_.num_bars > 0) {
     transport_.bar = std::min(transport_.bar, transport_.num_bars - 1);
@@ -33,7 +34,8 @@ void Sequencer::SetNumBars(int num_bars) {
 }
 
 void Sequencer::SetNumBeats(int num_beats) {
-  transport_.num_beats = std::max(num_beats, 0);
+  DCHECK_GE(num_beats, 0);
+  transport_.num_beats = num_beats;
   // TODO(#51): Revisit this to make sure the calculation makes sense.
   if (transport_.num_beats > 0) {
     transport_.beat = std::min(transport_.beat, transport_.num_beats - 1);
@@ -41,19 +43,21 @@ void Sequencer::SetNumBeats(int num_beats) {
 }
 
 void Sequencer::SetPosition(int section, int bar, int beat) {
+  DCHECK_GE(section, 0);
+  DCHECK_GE(bar, 0);
+  DCHECK_GE(beat, 0);
   // TODO(#51): Revisit this to make sure the calculation makes sense.
-  transport_.section = std::max(section, 0);
-  transport_.bar = (transport_.num_bars > 0)
-                       ? std::min(std::max(bar, 0), transport_.num_bars - 1)
-                       : 0;
-  transport_.beat = (transport_.num_beats > 0)
-                        ? std::min(std::max(beat, 0), transport_.num_beats - 1)
-                        : 0;
+  transport_.section = section;
+  transport_.bar =
+      (transport_.num_bars > 0) ? std::min(bar, transport_.num_bars - 1) : 0;
+  transport_.beat =
+      (transport_.num_beats > 0) ? std::min(beat, transport_.num_beats - 1) : 0;
   leftover_samples_ = 0;
 }
 
 void Sequencer::SetTempo(float tempo) {
-  transport_.tempo = std::max(tempo, 0.0f);
+  DCHECK_GE(tempo, 0.0f);
+  transport_.tempo = tempo;
   const float leftover_beats =
       BeatsFromSamples(leftover_samples_, num_samples_per_beat_);
   num_samples_per_beat_ =

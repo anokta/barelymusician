@@ -1,6 +1,5 @@
 #include "barelymusician/dsp/sample_player.h"
 
-#include <algorithm>
 #include <cmath>
 
 #include "barelymusician/base/logging.h"
@@ -30,7 +29,7 @@ float SamplePlayer::Next() {
   cursor_ += increment_;
   if (cursor_ >= length_ && loop_) {
     // Loop the playback.
-    cursor_ = std::fmod(cursor_, length_);
+    cursor_ = (length_ > 0.0f) ? std::fmod(cursor_, length_) : 0.0f;
   }
   return output;
 }
@@ -38,16 +37,19 @@ float SamplePlayer::Next() {
 void SamplePlayer::Reset() { cursor_ = 0.0f; }
 
 void SamplePlayer::SetData(const float* data, int frequency, int length) {
+  DCHECK_GE(frequency, 0.0f);
+  DCHECK_GE(length, 0);
   data_ = data;
-  frequency_ = std::max(static_cast<float>(frequency), 0.0f);
-  length_ = std::max(static_cast<float>(length), 0.0f);
+  frequency_ = static_cast<float>(frequency);
+  length_ = static_cast<float>(length);
   CalculateIncrementPerSample();
 }
 
 void SamplePlayer::SetLoop(bool loop) { loop_ = loop; }
 
 void SamplePlayer::SetSpeed(float speed) {
-  speed_ = std::max(speed, 0.0f);
+  DCHECK_GE(speed, 0.0f);
+  speed_ = speed;
   CalculateIncrementPerSample();
 }
 

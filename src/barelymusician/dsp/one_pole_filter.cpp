@@ -1,6 +1,6 @@
 #include "barelymusician/dsp/one_pole_filter.h"
 
-#include <algorithm>
+#include "barelymusician/base/logging.h"
 
 namespace barelyapi {
 
@@ -18,7 +18,9 @@ float OnePoleFilter::Next(float input) {
 void OnePoleFilter::Reset() { output_ = 0.0f; }
 
 void OnePoleFilter::SetCoefficient(float coefficient) {
-  coefficient_ = std::min(std::max(coefficient, 0.0f), 1.0f);
+  DCHECK_GE(coefficient, 0.0f);
+  DCHECK_LE(coefficient, 1.0f);
+  coefficient_ = coefficient;
 }
 
 void OnePoleFilter::SetType(FilterType type) { type_ = type; }

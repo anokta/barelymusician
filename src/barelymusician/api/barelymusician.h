@@ -57,14 +57,14 @@ class BarelyMusician {
   // @param instrument_id Instrument ID.
   // @param note_off_callback Instrument note off callback.
   void RegisterInstrumentNoteOffCallback(int instrument_id,
-                                         NoteOffCallback&& note_off_callback);
+                                         NoteOffCallback note_off_callback);
 
   // Registers new instrument note on callback.
   //
   // @param instrument_id Instrument ID.
   // @param note_on_callback Instrument note on callback.
   void RegisterInstrumentNoteOnCallback(int instrument_id,
-                                        NoteOnCallback&& note_on_callback);
+                                        NoteOnCallback note_on_callback);
 
   // Starts playing instrument note.
   //
@@ -97,7 +97,7 @@ class BarelyMusician {
   // @param sequencer_id Sequencer ID.
   // @param beat_callback Sequencer beat callback.
   void RegisterSequencerBeatCallback(int sequencer_id,
-                                     BeatCallback&& beat_callback);
+                                     BeatCallback beat_callback);
 
   // Sets sequencer number of bars per section.
   //

@@ -54,7 +54,7 @@ void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
 }
 
 void BarelyMusician::RegisterInstrumentNoteOffCallback(
-    int instrument_id, NoteOffCallback&& note_off_callback) {
+    int instrument_id, NoteOffCallback note_off_callback) {
   task_runner_.Add([this, instrument_id, note_off_callback]() mutable {
     Performer* performer = GetPerformer(instrument_id);
     if (performer != nullptr) {
@@ -66,7 +66,7 @@ void BarelyMusician::RegisterInstrumentNoteOffCallback(
 }
 
 void BarelyMusician::RegisterInstrumentNoteOnCallback(
-    int instrument_id, NoteOnCallback&& note_on_callback) {
+    int instrument_id, NoteOnCallback note_on_callback) {
   task_runner_.Add([this, instrument_id, note_on_callback]() mutable {
     Performer* performer = GetPerformer(instrument_id);
     if (performer != nullptr) {
@@ -113,8 +113,8 @@ void BarelyMusician::DestroySequencer(int sequencer_id) {
   task_runner_.Add([this, sequencer_id]() { sequencers_.erase(sequencer_id); });
 }
 
-void BarelyMusician::RegisterSequencerBeatCallback(
-    int sequencer_id, BeatCallback&& beat_callback) {
+void BarelyMusician::RegisterSequencerBeatCallback(int sequencer_id,
+                                                   BeatCallback beat_callback) {
   task_runner_.Add([this, sequencer_id, beat_callback]() mutable {
     Sequencer* sequencer = GetSequencer(sequencer_id);
     if (sequencer != nullptr) {

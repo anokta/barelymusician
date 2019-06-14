@@ -94,8 +94,8 @@ int main(int argc, char* argv[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      // Clear current notes first.
-      task_runner.Add([&instrument]() { instrument.Clear(); });
+      // Stop current notes first.
+      task_runner.Add([&instrument]() { instrument.AllNotesOff(); });
       // Update offset.
       if (upper_key == 'Z') {
         --offset_octaves;

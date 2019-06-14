@@ -11,29 +11,29 @@ namespace unity {
 class UnityInstrument : public Instrument {
  public:
   // Instrument function signatures.
-  using ClearFn = std::function<void()>;
+  using AllNotesOffFn = std::function<void()>;
   using NoteOffFn = std::function<void(float)>;
   using NoteOnFn = std::function<void(float, float)>;
   using ProcessFn = std::function<void(float*, int, int)>;
 
   // Constructs new |UnityInstrument|.
   //
-  // @param clear_fn Clear function.
+  // @param all_notes_off_fn All notes off function.
   // @param note_off_fn Note off function.
   // @param note_on_fn Note on function.
   // @param process_fn Process function.
-  UnityInstrument(ClearFn&& clear_fn, NoteOffFn&& note_off_fn,
+  UnityInstrument(AllNotesOffFn&& all_notes_off_fn, NoteOffFn&& note_off_fn,
                   NoteOnFn&& note_on_fn, ProcessFn&& process_fn);
 
   // Implements |Instrument|.
-  void Clear() override;
+  void AllNotesOff() override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
 
  private:
   // Instrument callbacks.
-  ClearFn clear_fn_;
+  AllNotesOffFn all_notes_off_fn_;
   NoteOffFn note_off_fn_;
   NoteOnFn note_on_fn_;
   ProcessFn process_fn_;

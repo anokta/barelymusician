@@ -25,7 +25,7 @@ class TestInstrument : public Instrument {
   TestInstrument() : sample_(0.0f) {}
 
   // Implements |Instrument|.
-  void Clear() override { sample_ = 0.0f; }
+  void AllNotesOff() override { sample_ = 0.0f; }
   void NoteOff(float) override { sample_ = 0.0f; }
   void NoteOn(float index, float) override { sample_ = index; }
   void Process(float* output, int num_channels, int num_frames) override {

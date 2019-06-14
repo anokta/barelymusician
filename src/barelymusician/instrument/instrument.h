@@ -9,8 +9,8 @@ class Instrument {
   // Base destructor to ensure the derived classes get destroyed properly.
   virtual ~Instrument() = default;
 
-  // Clear all notes.
-  virtual void Clear() = 0;
+  // Stops all notes.
+  virtual void AllNotesOff() = 0;
 
   // Stops note with the given |index|.
   //

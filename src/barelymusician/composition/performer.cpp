@@ -33,7 +33,7 @@ Performer::Performer(std::unique_ptr<Instrument> instrument)
 
 void Performer::ClearAllNotes() {
   message_queue_.Clear();
-  instrument_->Clear();
+  instrument_->AllNotesOff();
 }
 
 void Performer::Process(float* output, int num_channels, int num_frames) {

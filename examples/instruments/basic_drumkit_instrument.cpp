@@ -18,7 +18,7 @@ const float kDefaultRelease = 0.1f;
 BasicDrumkitInstrument::BasicDrumkitInstrument(float sample_interval)
     : sample_interval_(sample_interval), gain_(kDefaultGain) {}
 
-void BasicDrumkitInstrument::Clear() {
+void BasicDrumkitInstrument::AllNotesOff() {
   for (auto& voice : voices_) {
     voice.second.Stop();
   }

@@ -63,7 +63,7 @@ BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
       });
 }
 
-void BasicSynthInstrument::Clear() { voice_.Clear(); }
+void BasicSynthInstrument::AllNotesOff() { voice_.Clear(); }
 
 void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 

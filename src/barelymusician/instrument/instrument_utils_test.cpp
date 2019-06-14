@@ -1,6 +1,9 @@
 #include "barelymusician/instrument/instrument_utils.h"
 
+#include <vector>
+
 #include "barelymusician/instrument/instrument.h"
+#include "barelymusician/message/message_queue.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -9,23 +12,27 @@ namespace {
 // Tolerated error margin.
 const float kEpsilon = 1e-1f;
 
-// Test instrument that sets test output according to note off/on calls.
+// Process buffer properties.
+const int kNumChannels = 1;
+const int kNumFrames = 16;
+
+// Test instrument that produces constant output per note for testing.
 class TestInstrument : public Instrument {
  public:
-  TestInstrument() : output_(0.0f) {}
+  TestInstrument() : sample_(0.0f) {}
 
   // Implements |Instrument|.
   void AllNotesOff() override {}
-  void NoteOff(float) override { output_ = 0.0f; }
+  void NoteOff(float) override { sample_ = 0.0f; }
   void NoteOn(float index, float intensity) override {
-    output_ = index * intensity;
+    sample_ = index * intensity;
   }
-  void Process(float*, int, int) override {}
-
-  float GetOutput() const { return output_; }
+  void Process(float* output, int num_channels, int num_frames) override {
+    std::fill_n(output, num_channels * num_frames, sample_);
+  }
 
  private:
-  float output_;
+  float sample_;
 };
 
 // Tests that converting arbitrary note indices returns expected frequencies.
@@ -39,22 +46,89 @@ TEST(InstrumentUtilsTest, FrequencyFromNoteIndex) {
   }
 }
 
-TEST(InstrumentUtilsTest, ProcessMessage) {
-  const float kNoteIndex = 60.0f;
+// Tests that processing a single note produces the expected output.
+TEST(InstrumentUtilsTest, ProcessSingleNote) {
+  const float kNoteIndex = 32.0f;
   const float kNoteIntensity = 0.5f;
-  const int kTimestamp = 32;
 
   TestInstrument instrument;
-  EXPECT_FLOAT_EQ(instrument.GetOutput(), 0.0f);
+  MessageQueue message_queue;
+  std::vector<float> buffer(kNumChannels * kNumFrames);
 
-  // Process note on message.
-  ProcessMessage(BuildNoteOnMessage(kNoteIndex, kNoteIntensity, kTimestamp),
-                 &instrument);
-  EXPECT_FLOAT_EQ(instrument.GetOutput(), kNoteIndex * kNoteIntensity);
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+    }
+  }
 
-  // Process note off message.
-  ProcessMessage(BuildNoteOffMessage(kNoteIndex, kTimestamp), &instrument);
-  EXPECT_FLOAT_EQ(instrument.GetOutput(), 0.0f);
+  // Start note.
+  PushNoteOnMessage(kNoteIndex, kNoteIntensity, 0, &message_queue);
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
+                      kNoteIndex * kNoteIntensity);
+    }
+  }
+
+  // Stop note.
+  PushNoteOffMessage(kNoteIndex, 0, &message_queue);
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+    }
+  }
+}
+
+// Tests that processing multiple notes produces the expected output.
+TEST(InstrumentUtilsTest, ProcessMultipleNotes) {
+  const float kNoteIntensity = 1.0f;
+
+  TestInstrument instrument;
+  MessageQueue message_queue;
+  std::vector<float> buffer(kNumChannels * kNumFrames);
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+    }
+  }
+
+  // Start new note per each sample in the buffer.
+  for (int i = 0; i < kNumFrames; ++i) {
+    PushNoteOnMessage(static_cast<float>(i), kNoteIntensity, i, &message_queue);
+  }
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    const float expected = static_cast<float>(frame) * kNoteIntensity;
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], expected);
+    }
+  }
+
+  // Stop all notes.
+  for (int i = 0; i < kNumFrames; ++i) {
+    PushNoteOffMessage(static_cast<float>(i), 0, &message_queue);
+  }
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+    }
+  }
 }
 
 }  // namespace

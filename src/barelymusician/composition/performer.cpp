@@ -37,25 +37,8 @@ void Performer::ClearAllNotes() {
 }
 
 void Performer::Process(float* output, int num_channels, int num_frames) {
-  DCHECK(output);
-  DCHECK_GE(num_channels, 0);
-  DCHECK_GE(num_frames, 0);
-  int frame = 0;
-  while (frame < num_frames) {
-    if (message_queue_.Pop(num_frames, &temp_message_)) {
-      const int timestamp = temp_message_.timestamp;
-      if (frame < timestamp) {
-        instrument_->Process(&output[num_channels * frame], num_channels,
-                             timestamp - frame);
-        frame = timestamp;
-      }
-      ProcessMessage(temp_message_, instrument_.get());
-    } else {
-      instrument_->Process(&output[num_channels * frame], num_channels,
-                           num_frames - frame);
-      break;
-    }
-  }
+  barelyapi::Process(instrument_.get(), &message_queue_, output, num_channels,
+                     num_frames);
   message_queue_.Update(num_frames);
 }
 
@@ -68,11 +51,11 @@ void Performer::RegisterNoteOnCallback(NoteOnCallback&& note_on_callback) {
 }
 
 void Performer::StartNote(float index, float intensity, int offset_samples) {
-  message_queue_.Push(BuildNoteOnMessage(index, intensity, offset_samples));
+  PushNoteOnMessage(index, intensity, offset_samples, &message_queue_);
 }
 
 void Performer::StopNote(float index, int offset_samples) {
-  message_queue_.Push(BuildNoteOffMessage(index, offset_samples));
+  PushNoteOffMessage(index, offset_samples, &message_queue_);
 }
 
 }  // namespace barelyapi

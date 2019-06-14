@@ -2,24 +2,9 @@
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_UTILS_H_
 
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message.h"
+#include "barelymusician/message/message_queue.h"
 
 namespace barelyapi {
-
-// Returns instrument note off message.
-//
-// @param index Note off index.
-// @param timestamp Message timestamp.
-// @return Note off message.
-Message BuildNoteOffMessage(float index, int timestamp);
-
-// Returns instrument note on message.
-//
-// @param index Note on index.
-// @param intensity Note on intensity.
-// @param timestamp Message timestamp.
-// @return Note on message.
-Message BuildNoteOnMessage(float index, float intensity, int timestamp);
 
 // Converts a note index value into the corresponding pitch frequency.
 //
@@ -27,11 +12,33 @@ Message BuildNoteOnMessage(float index, float intensity, int timestamp);
 // @return Frequency in Hz.
 float FrequencyFromNoteIndex(float index);
 
-// Processes the given instrument |message|.
+// Processes the next |output| buffer with the given |instrument| and
+// |message_queue|.
 //
-// @param message Message to process.
-// @param instrument Instrument to process the message for.
-void ProcessMessage(const Message& message, Instrument* instrument);
+// @param instrument Instrument to process.
+// @param message_queue Messages to process.
+// @param output Output buffer.
+// @param num_channels Number of output channels.
+// @param num_frames Number of output frames.
+void Process(Instrument* instrument, MessageQueue* message_queue, float* output,
+             int num_channels, int num_frames);
+
+// Pushes note off message to the given |message_queue|.
+//
+// @param index Note off index.
+// @param timestamp Message timestamp.
+// @param message_queue Message queue to push the note off message.
+void PushNoteOffMessage(float index, int timestamp,
+                        MessageQueue* message_queue);
+
+// Pushes note on message to the given |message_queue|.
+//
+// @param index Note on index.
+// @param intensity Note on intensity.
+// @param timestamp Message timestamp.
+// @param message_queue Message queue to push the note on message.
+void PushNoteOnMessage(float index, float intensity, int timestamp,
+                       MessageQueue* message_queue);
 
 }  // namespace barelyapi
 

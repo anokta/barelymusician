@@ -24,9 +24,8 @@
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\task_runner.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\composition\note_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\composition\quantizer.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\composition\scale.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
@@ -48,9 +47,8 @@
     <ClInclude Include="..\..\src\barelymusician\base\transport.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note.h" />
+    <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\performer.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\quantizer.h" />
-    <ClInclude Include="..\..\src\barelymusician\composition\scale.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h" />

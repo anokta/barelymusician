@@ -57,12 +57,6 @@
     <ClCompile Include="..\..\src\barelymusician\base\event_test.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\scale_test.cpp">
-      <Filter>Source Files\composition</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\quantizer_test.cpp">
-      <Filter>Source Files\composition</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
@@ -77,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\message\message_queue_test.cpp">
       <Filter>Source Files\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\note_utils_test.cpp">
+      <Filter>Source Files\composition</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

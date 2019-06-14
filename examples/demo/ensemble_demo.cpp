@@ -15,9 +15,8 @@
 #include "barelymusician/base/transport.h"
 #include "barelymusician/composition/ensemble.h"
 #include "barelymusician/composition/note.h"
+#include "barelymusician/composition/note_utils.h"
 #include "barelymusician/composition/performer.h"
-#include "barelymusician/composition/quantizer.h"
-#include "barelymusician/composition/scale.h"
 #include "instruments/basic_drumkit_instrument.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
@@ -29,9 +28,7 @@ using ::barelyapi::Ensemble;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
-using ::barelyapi::Quantizer;
 using ::barelyapi::Random;
-using ::barelyapi::Scale;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicDrumkitInstrument;
@@ -76,10 +73,11 @@ std::unique_ptr<BasicSynthInstrument> BuildSynthInstrument(OscillatorType type,
 // Note BuildNote(float root_note_index, const Scale& scale, float index, float
 // intensity, float )
 
-void ComposeChord(float root_note_index, const Scale& scale, float intensity,
-                  int harmonic, std::vector<Note>* notes) {
+void ComposeChord(float root_note_index, const std::vector<float>& scale,
+                  float intensity, int harmonic, std::vector<Note>* notes) {
   const auto add_chord_note = [&](float index) {
-    const float note_index = root_note_index + scale.GetNoteIndex(index);
+    const float note_index =
+        root_note_index + barelyapi::GetQuantizedNoteIntex(scale, index);
     notes->push_back({note_index, intensity, 0.0f, 1.0f});
   };
   const float start_note = static_cast<float>(harmonic);
@@ -89,15 +87,16 @@ void ComposeChord(float root_note_index, const Scale& scale, float intensity,
   add_chord_note(start_note + 7.0f);
 }
 
-void ComposeLine(float root_note_index, const Scale& scale, float intensity,
-                 const Transport& transport, int harmonic,
+void ComposeLine(float root_note_index, const std::vector<float>& scale,
+                 float intensity, const Transport& transport, int harmonic,
                  std::vector<Note>* notes) {
   const float start_note = static_cast<float>(harmonic);
   const float beat = static_cast<float>(transport.beat);
   const auto add_note = [&](float index, float start_beat,
                             float duration_beats) {
-    notes->push_back({root_note_index + scale.GetNoteIndex(index), intensity,
-                      start_beat, duration_beats});
+    notes->push_back(
+        {root_note_index + barelyapi::GetQuantizedNoteIntex(scale, index),
+         intensity, start_beat, duration_beats});
   };
   if (transport.beat % 2 == 1) {
     add_note(start_note, 0.0f, 0.25f);
@@ -118,9 +117,9 @@ void ComposeLine(float root_note_index, const Scale& scale, float intensity,
 }
 
 void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
-  const Quantizer sixteenth_quantizer(barelyapi::kNumSixteenthNotesPerBeat);
-  const auto get_beat = [&sixteenth_quantizer](int num_notes) {
-    return sixteenth_quantizer.GetDurationBeats(num_notes);
+  const auto get_beat = [](int num_notes) {
+    return barelyapi::GetQuantizedBeatDuration(
+        num_notes, barelyapi::kNumSixteenthNotesPerBeat);
   };
   // Kick.
   if (transport.beat % 2 == 0) {
@@ -179,8 +178,8 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBeats(kNumBeats);
 
   const std::vector<int> progression = {0, 3, 4, 0};
-  const Scale scale(std::vector<float>(std::begin(barelyapi::kMajorScale),
-                                       std::end(barelyapi::kMajorScale)));
+  const std::vector<float> scale(std::begin(barelyapi::kMajorScale),
+                                 std::end(barelyapi::kMajorScale));
 
   std::vector<std::pair<Performer, Ensemble::BeatComposerCallback>> performers;
 

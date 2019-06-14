@@ -5,7 +5,7 @@
 
 namespace barelyapi {
 
-float GetQuantizedBeatDuration(int num_notes, int num_notes_per_beat) {
+float GetBeatDuration(int num_notes, int num_notes_per_beat) {
   DCHECK_GE(num_notes, 0);
   DCHECK_GT(num_notes_per_beat, 0);
   const float num_beats = static_cast<float>(num_notes / num_notes_per_beat);
@@ -13,8 +13,7 @@ float GetQuantizedBeatDuration(int num_notes, int num_notes_per_beat) {
                          static_cast<float>(num_notes_per_beat);
 }
 
-float GetQuantizedNoteIntex(const std::vector<float>& scale,
-                            float scale_index) {
+float GetNoteIndex(const std::vector<float>& scale, float scale_index) {
   DCHECK(!scale.empty());
   const float scale_length = static_cast<float>(scale.size());
   const float octave_offset = std::floor(scale_index / scale_length);

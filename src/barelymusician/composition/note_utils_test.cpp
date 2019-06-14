@@ -7,7 +7,7 @@ namespace barelyapi {
 namespace {
 
 // Tests that note indices get quantized as expected given an arbitrary scale.
-TEST(NoteUtilsTest, GetQuantizedNoteIndex) {
+TEST(NoteUtilsTest, GetNoteIndex) {
   const int kOctaveRange = 2;
 
   const std::vector<float> kScale(std::begin(kMajorScale),
@@ -19,17 +19,16 @@ TEST(NoteUtilsTest, GetQuantizedNoteIndex) {
       const float scale_index = static_cast<float>(octave * scale_length + i);
       const float expected_note_index =
           static_cast<float>(octave * kNumSemitones) + kScale[i];
-      EXPECT_FLOAT_EQ(GetQuantizedNoteIntex(kScale, scale_index),
-                      expected_note_index);
+      EXPECT_FLOAT_EQ(GetNoteIndex(kScale, scale_index), expected_note_index);
     }
   }
 }
 
-class GetQuantizedBeatDurationTest : public testing::TestWithParam<int> {};
+class GetBeatDurationTest : public testing::TestWithParam<int> {};
 
 // Tests that the beat duration gets quantized as expected with respect to the
 // given number of notes.
-TEST_P(GetQuantizedBeatDurationTest, GetQuantizedBeatDuration) {
+TEST_P(GetBeatDurationTest, GetBeatDuration) {
   const int kNumBeats = 4;
   const int num_notes_per_beat = GetParam();
 
@@ -38,14 +37,14 @@ TEST_P(GetQuantizedBeatDurationTest, GetQuantizedBeatDuration) {
       const float expected_duration_beats =
           static_cast<float>(beat) +
           static_cast<float>(i) / static_cast<float>(num_notes_per_beat);
-      EXPECT_FLOAT_EQ(GetQuantizedBeatDuration(num_notes_per_beat * beat + i,
-                                               num_notes_per_beat),
-                      expected_duration_beats);
+      EXPECT_FLOAT_EQ(
+          GetBeatDuration(num_notes_per_beat * beat + i, num_notes_per_beat),
+          expected_duration_beats);
     }
   }
 }
 
-INSTANTIATE_TEST_CASE_P(NoteUtilsTest, GetQuantizedBeatDurationTest,
+INSTANTIATE_TEST_CASE_P(NoteUtilsTest, GetBeatDurationTest,
                         testing::Values(kNumQuarterNotesPerBeat,
                                         kNumEighthNotesPerBeat,
                                         kNumEighthTripletNotesPerBeat,

@@ -77,7 +77,7 @@ void ComposeChord(float root_note_index, const std::vector<float>& scale,
                   float intensity, int harmonic, std::vector<Note>* notes) {
   const auto add_chord_note = [&](float index) {
     const float note_index =
-        root_note_index + barelyapi::GetQuantizedNoteIntex(scale, index);
+        root_note_index + barelyapi::GetNoteIndex(scale, index);
     notes->push_back({note_index, intensity, 0.0f, 1.0f});
   };
   const float start_note = static_cast<float>(harmonic);
@@ -94,9 +94,8 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
   const float beat = static_cast<float>(transport.beat);
   const auto add_note = [&](float index, float start_beat,
                             float duration_beats) {
-    notes->push_back(
-        {root_note_index + barelyapi::GetQuantizedNoteIntex(scale, index),
-         intensity, start_beat, duration_beats});
+    notes->push_back({root_note_index + barelyapi::GetNoteIndex(scale, index),
+                      intensity, start_beat, duration_beats});
   };
   if (transport.beat % 2 == 1) {
     add_note(start_note, 0.0f, 0.25f);
@@ -118,8 +117,8 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
 
 void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
   const auto get_beat = [](int num_notes) {
-    return barelyapi::GetQuantizedBeatDuration(
-        num_notes, barelyapi::kNumSixteenthNotesPerBeat);
+    return barelyapi::GetBeatDuration(num_notes,
+                                      barelyapi::kNumSixteenthNotesPerBeat);
   };
   // Kick.
   if (transport.beat % 2 == 0) {

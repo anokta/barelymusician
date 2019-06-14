@@ -17,7 +17,6 @@ TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
 }
 
 void TaskRunner::Add(Task&& task) {
-  DCHECK(task);
   Node* const node = PopNode(&free_head_);
   if (node == nullptr) {
     LOG(WARNING) << "Failed to add task, max_size exceeded: " << nodes_.size();
@@ -39,7 +38,9 @@ void TaskRunner::Run() {
   }
   // Execute tasks in reverse order.
   for (auto rit = temp_tasks_.rbegin(); rit != temp_tasks_.rend(); ++rit) {
-    (*rit)();
+    if (*rit != nullptr) {
+      (*rit)();
+    }
   }
   temp_tasks_.clear();
 }

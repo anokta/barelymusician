@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "barelymusician/base/logging.h"
 #include "barelymusician/message/message_utils.h"
 
 namespace barelyapi {
@@ -9,6 +10,7 @@ namespace barelyapi {
 void MessageQueue::Clear() { messages_.clear(); }
 
 bool MessageQueue::Pop(int num_samples, Message* message) {
+  DCHECK(message);
   if (messages_.empty() || messages_.front().timestamp >= num_samples) {
     return false;
   }

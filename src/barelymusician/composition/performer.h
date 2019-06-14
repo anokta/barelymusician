@@ -58,9 +58,6 @@ class Performer {
   void StopNote(float index, int offset_samples);
 
  private:
-  // Processes the given note |message|.
-  void ProcessMessage(const Message& message);
-
   // Instrument to perform.
   std::unique_ptr<Instrument> instrument_;
 

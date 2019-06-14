@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/message/message_utils.h"
+#include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
 
@@ -37,6 +37,9 @@ void Performer::ClearAllNotes() {
 }
 
 void Performer::Process(float* output, int num_channels, int num_frames) {
+  DCHECK(output);
+  DCHECK_GE(num_channels, 0);
+  DCHECK_GE(num_frames, 0);
   int frame = 0;
   while (frame < num_frames) {
     if (message_queue_.Pop(num_frames, &temp_message_)) {
@@ -46,7 +49,7 @@ void Performer::Process(float* output, int num_channels, int num_frames) {
                              timestamp - frame);
         frame = timestamp;
       }
-      ProcessMessage(temp_message_);
+      ProcessMessage(temp_message_, instrument_.get());
     } else {
       instrument_->Process(&output[num_channels * frame], num_channels,
                            num_frames - frame);
@@ -65,31 +68,11 @@ void Performer::RegisterNoteOnCallback(NoteOnCallback&& note_on_callback) {
 }
 
 void Performer::StartNote(float index, float intensity, int offset_samples) {
-  message_queue_.Push(
-      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, offset_samples));
+  message_queue_.Push(BuildNoteOnMessage(index, intensity, offset_samples));
 }
 
 void Performer::StopNote(float index, int offset_samples) {
-  message_queue_.Push(
-      BuildMessage<NoteOffData>(kNoteOffId, {index}, offset_samples));
-}
-
-void Performer::ProcessMessage(const Message& message) {
-  switch (message.id) {
-    case kNoteOffId: {
-      const auto note_off = ReadMessageData<NoteOffData>(message.data);
-      instrument_->NoteOff(note_off.index);
-      note_off_event_.Trigger(note_off.index);
-    } break;
-    case kNoteOnId: {
-      const auto note_on = ReadMessageData<NoteOnData>(message.data);
-      instrument_->NoteOn(note_on.index, note_on.intensity);
-      note_on_event_.Trigger(note_on.index, note_on.intensity);
-    } break;
-    default:
-      DLOG(ERROR) << "Unknown message ID: " << message.id;
-      break;
-  }
+  message_queue_.Push(BuildNoteOffMessage(index, offset_samples));
 }
 
 }  // namespace barelyapi

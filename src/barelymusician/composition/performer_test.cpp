@@ -146,43 +146,5 @@ TEST(PerformerTest, PlayMultipleNotes) {
   }
 }
 
-// Tests that the registered note callbacks get triggered as expected.
-TEST(PerformerTest, RegisterNoteCallbacks) {
-  Performer performer(std::make_unique<TestInstrument>());
-
-  // Register note event callbacks.
-  float note_index = 0.0f;
-  float note_intensity = 0.0f;
-  const auto note_on_callback = [&note_index, &note_intensity](
-                                    float index, float intensity) {
-    note_index = index;
-    note_intensity = intensity;
-  };
-  const auto note_off_callback = [&note_index, &note_intensity](float index) {
-    note_index = index;
-    note_intensity = 0.0f;
-  };
-  performer.RegisterNoteOnCallback(note_on_callback);
-  performer.RegisterNoteOffCallback(note_off_callback);
-
-  // Play new note per each two samples in the buffer.
-  for (int i = 0; i < 2 * kNumFrames; i += 2) {
-    const float index = static_cast<float>(i);
-    performer.StartNote(index, kNoteIntensity, i);
-    performer.StopNote(index, i + 1);
-  }
-
-  std::vector<float> buffer(kNumChannels * kNumFrames, 0.0f);
-  for (int i = 0; i < 2 * kNumFrames; i += 2) {
-    const float expected_index = static_cast<float>(i);
-    performer.Process(buffer.data(), kNumChannels, 1);
-    EXPECT_FLOAT_EQ(note_index, expected_index);
-    EXPECT_FLOAT_EQ(note_intensity, kNoteIntensity);
-    performer.Process(buffer.data(), kNumChannels, 1);
-    EXPECT_FLOAT_EQ(note_index, expected_index);
-    EXPECT_FLOAT_EQ(note_intensity, 0.0f);
-  }
-}
-
 }  // namespace
 }  // namespace barelyapi

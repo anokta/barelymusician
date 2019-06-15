@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "MidiFile.h"
@@ -11,16 +11,22 @@
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/base/transport.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/composition/performer.h"
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/instrument/instrument_utils.h"
+#include "barelymusician/message/message_queue.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
+using ::barelyapi::Instrument;
+using ::barelyapi::MessageQueue;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Performer;
+using ::barelyapi::Process;
+using ::barelyapi::PushNoteOffMessage;
+using ::barelyapi::PushNoteOnMessage;
 using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
@@ -105,7 +111,7 @@ int main(int argc, char* argv[]) {
   sequencer.SetTempo(kTempo);
 
   std::vector<std::vector<Note>> scores;
-  std::vector<Performer> performers;
+  std::vector<std::pair<BasicSynthInstrument, MessageQueue>> performers;
   for (int i = 0; i < num_tracks; ++i) {
     // Create instrument.
     const auto score = GetMidiScore(midi_file[i], ticks_per_quarter);
@@ -114,35 +120,34 @@ int main(int argc, char* argv[]) {
     }
     scores.push_back(score);
     // Create instrument.
-    auto instrument = std::make_unique<BasicSynthInstrument>(
-        kSampleInterval, kNumInstrumentVoices);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
-                              static_cast<float>(OscillatorType::kSquare));
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                              0.2f);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
+    BasicSynthInstrument instrument(kSampleInterval, kNumInstrumentVoices);
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                             static_cast<float>(OscillatorType::kSquare));
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.2f);
+    instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     // Create performer.
-    performers.emplace_back(std::move(instrument));
+    performers.emplace_back(std::move(instrument), MessageQueue());
   }
   LOG(INFO) << "Number of performers: " << performers.size();
 
   // Beat callback.
   const auto beat_callback = [&performers, &scores](const Transport& transport,
                                                     int start_sample) {
-    int num_performers = static_cast<int>(performers.size());
+    const int num_performers = static_cast<int>(performers.size());
     for (int i = 0; i < num_performers; ++i) {
+      MessageQueue* message_queue = &performers[i].second;
       for (const Note& note : GetBeatNotes(scores[i], transport)) {
         const int start_offset_samples =
             start_sample +
             SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
-        performers[i].StartNote(note.index, note.intensity,
-                                start_offset_samples);
+        PushNoteOnMessage(note.index, note.intensity, start_offset_samples,
+                          message_queue);
         const int end_offset_samples =
             start_offset_samples +
             SamplesFromBeats(note.duration_beats,
                              transport.num_samples_per_beat);
-        performers[i].StopNote(note.index, end_offset_samples);
+        PushNoteOffMessage(note.index, end_offset_samples, message_queue);
       }
     }
   };
@@ -155,9 +160,13 @@ int main(int argc, char* argv[]) {
     sequencer.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : performers) {
-      performer.Process(temp_buffer.data(), kNumChannels, kNumFrames);
+      Instrument* instrument = &performer.first;
+      MessageQueue* message_queue = &performer.second;
+      Process(instrument, message_queue, temp_buffer.data(), kNumChannels,
+              kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
+      message_queue->Update(kNumFrames);
     }
   };
   audio_output.SetProcessCallback(process_callback);

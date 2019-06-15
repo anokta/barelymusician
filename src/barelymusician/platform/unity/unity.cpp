@@ -60,15 +60,15 @@ void UpdateMainThread() {
 int CreateSequencer(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
   const int sequencer_id = barelymusician->CreateSequencer();
-  const auto sequencer_beat_callback =
-      [beat_callback_ptr](const Transport& transport, int, int) {
-        const int section = transport.section;
-        const int bar = transport.bar;
-        const int beat = transport.beat;
-        main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
-          beat_callback_ptr(section, bar, beat);
-        });
-      };
+  const auto sequencer_beat_callback = [beat_callback_ptr](
+                                           const Transport& transport, int) {
+    const int section = transport.section;
+    const int bar = transport.bar;
+    const int beat = transport.beat;
+    main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
+      beat_callback_ptr(section, bar, beat);
+    });
+  };
   barelymusician->RegisterSequencerBeatCallback(sequencer_id,
                                                 sequencer_beat_callback);
   return sequencer_id;

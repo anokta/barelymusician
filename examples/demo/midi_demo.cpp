@@ -129,19 +129,19 @@ int main(int argc, char* argv[]) {
 
   // Beat callback.
   const auto beat_callback = [&performers, &scores](const Transport& transport,
-                                                    int start_sample,
-                                                    int num_samples_per_beat) {
+                                                    int start_sample) {
     int num_performers = static_cast<int>(performers.size());
     for (int i = 0; i < num_performers; ++i) {
       for (const Note& note : GetBeatNotes(scores[i], transport)) {
         const int start_offset_samples =
             start_sample +
-            SamplesFromBeats(note.start_beat, num_samples_per_beat);
+            SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
         performers[i].StartNote(note.index, note.intensity,
                                 start_offset_samples);
         const int end_offset_samples =
             start_offset_samples +
-            SamplesFromBeats(note.duration_beats, num_samples_per_beat);
+            SamplesFromBeats(note.duration_beats,
+                             transport.num_samples_per_beat);
         performers[i].StopNote(note.index, end_offset_samples);
       }
     }

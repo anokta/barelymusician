@@ -22,6 +22,9 @@ struct Transport {
 
   // Current beat.
   int beat;
+
+  // Number of samples per beat.
+  int num_samples_per_beat;
 };
 
 }  // namespace barelyapi

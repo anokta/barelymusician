@@ -26,10 +26,10 @@ TEST(SequencerTest, RegisterBeatCallback) {
 
   int beat = 0;
   const auto beat_callback = [&beat](const Transport& transport,
-                                     int start_sample,
-                                     int num_samples_per_beat) {
+                                     int start_sample) {
     EXPECT_EQ(transport.beat, beat);
-    EXPECT_EQ((beat % kBeatsPerSecond) * num_samples_per_beat, start_sample);
+    EXPECT_EQ((beat % kBeatsPerSecond) * transport.num_samples_per_beat,
+              start_sample);
     ++beat;
   };
   sequencer.RegisterBeatCallback(beat_callback);
@@ -64,6 +64,9 @@ TEST(SequencerTest, SetTransport) {
   // Set tempo.
   sequencer.SetTempo(kTempo);
   EXPECT_FLOAT_EQ(sequencer.GetTransport().tempo, kTempo);
+  EXPECT_EQ(sequencer.GetTransport().num_samples_per_beat,
+            static_cast<int>(static_cast<float>(kSampleRate) *
+                             kSecondsFromMinutes / kTempo));
 }
 
 // Tests that the sequencer updates its transport as expected when it's started

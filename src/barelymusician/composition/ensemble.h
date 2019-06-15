@@ -64,8 +64,7 @@ Ensemble::Ensemble(Sequencer* sequencer,
       harmonic_(0) {
   DCHECK(sequencer);
   sequencer->RegisterBeatCallback([&](const Transport& transport,
-                                      int start_sample,
-                                      int num_samples_per_beat) {
+                                      int start_sample) {
     if (transport.beat == 0) {
       // New bar.
       if (transport.bar == 0) {
@@ -84,11 +83,12 @@ Ensemble::Ensemble(Sequencer* sequencer,
       for (const Note& note : temp_beat_notes_) {
         const int start_offset_samples =
             start_sample +
-            SamplesFromBeats(note.start_beat, num_samples_per_beat);
+            SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
         it.first->StartNote(note.index, note.intensity, start_offset_samples);
         const int stop_offset_samples =
             start_offset_samples +
-            SamplesFromBeats(note.duration_beats, num_samples_per_beat);
+            SamplesFromBeats(note.duration_beats,
+                             transport.num_samples_per_beat);
         it.first->StopNote(note.index, stop_offset_samples);
       }
     }

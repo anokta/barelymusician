@@ -12,7 +12,6 @@ Sequencer::Sequencer(int sample_rate)
     : num_samples_per_minute_(static_cast<float>(sample_rate) *
                               kSecondsFromMinutes),
       is_playing_(false),
-      num_samples_per_beat_(0),
       leftover_samples_(0),
       transport_({}) {
   DCHECK_GE(num_samples_per_minute_, 0.0f);
@@ -59,12 +58,13 @@ void Sequencer::SetTempo(float tempo) {
   DCHECK_GE(tempo, 0.0f);
   transport_.tempo = tempo;
   const float leftover_beats =
-      BeatsFromSamples(leftover_samples_, num_samples_per_beat_);
-  num_samples_per_beat_ =
+      BeatsFromSamples(leftover_samples_, transport_.num_samples_per_beat);
+  transport_.num_samples_per_beat =
       (transport_.tempo > 0.0f)
           ? static_cast<int>(num_samples_per_minute_ / transport_.tempo)
           : 0;
-  leftover_samples_ = SamplesFromBeats(leftover_beats, num_samples_per_beat_);
+  leftover_samples_ =
+      SamplesFromBeats(leftover_beats, transport_.num_samples_per_beat);
 }
 
 void Sequencer::Start() { is_playing_ = true; }
@@ -72,17 +72,17 @@ void Sequencer::Start() { is_playing_ = true; }
 void Sequencer::Stop() { is_playing_ = false; }
 
 void Sequencer::Update(int num_samples) {
-  if (!is_playing_ || num_samples_per_beat_ == 0) {
+  if (!is_playing_ || transport_.num_samples_per_beat == 0) {
     return;
   }
   leftover_samples_ += num_samples;
   if (leftover_samples_ == num_samples) {
-    beat_event_.Trigger(transport_, 0, num_samples_per_beat_);
+    beat_event_.Trigger(transport_, 0);
   }
-  while (leftover_samples_ >= num_samples_per_beat_) {
+  while (leftover_samples_ >= transport_.num_samples_per_beat) {
     // Update beat count.
     ++transport_.beat;
-    leftover_samples_ -= num_samples_per_beat_;
+    leftover_samples_ -= transport_.num_samples_per_beat;
     if (transport_.num_beats > 0 && transport_.beat >= transport_.num_beats) {
       // Update bar count.
       ++transport_.bar;
@@ -94,8 +94,7 @@ void Sequencer::Update(int num_samples) {
       }
     }
     if (leftover_samples_ > 0) {
-      beat_event_.Trigger(transport_, num_samples - leftover_samples_,
-                          num_samples_per_beat_);
+      beat_event_.Trigger(transport_, num_samples - leftover_samples_);
     }
   }
 }

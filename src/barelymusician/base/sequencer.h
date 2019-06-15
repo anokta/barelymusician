@@ -10,7 +10,7 @@ namespace barelyapi {
 class Sequencer {
  public:
   // Beat event callback signature.
-  using BeatCallback = Event<const Transport&, int, int>::Callback;
+  using BeatCallback = Event<const Transport&, int>::Callback;
 
   // Constructs new |Sequencer|.
   //
@@ -65,13 +65,10 @@ class Sequencer {
   const float num_samples_per_minute_;
 
   // Event to be triggered for each beat.
-  Event<const Transport&, int, int> beat_event_;
+  Event<const Transport&, int> beat_event_;
 
   // Denotes whether the sequencer is playing.
   bool is_playing_;
-
-  // Number of samples per beat.
-  int num_samples_per_beat_;
 
   // Leftover samples from the current beat.
   int leftover_samples_;

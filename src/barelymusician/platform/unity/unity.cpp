@@ -110,16 +110,10 @@ void StopSequencer(int sequencer_id) {
 }
 
 int CreateInstrument(ClearFn* clear_fn_ptr, NoteOffFn* note_off_fn_ptr,
-                     NoteOnFn* note_on_fn_ptr, ProcessFn* process_fn_ptr,
-                     NoteOffCallback* note_off_callback_ptr,
-                     NoteOnCallback* note_on_callback_ptr) {
+                     NoteOnFn* note_on_fn_ptr, ProcessFn* process_fn_ptr) {
   DCHECK(barelymusician);
   const int instrument_id = barelymusician->CreateInstrument<UnityInstrument>(
       clear_fn_ptr, note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
-  barelymusician->RegisterInstrumentNoteOffCallback(instrument_id,
-                                                    note_off_callback_ptr);
-  barelymusician->RegisterInstrumentNoteOnCallback(instrument_id,
-                                                   note_on_callback_ptr);
   return instrument_id;
 }
 
@@ -143,12 +137,12 @@ void SetInstrumentClear(int instrument_id) {
 
 void SetInstrumentNoteOff(int instrument_id, float index) {
   DCHECK(barelymusician);
-  barelymusician->StopInstrumentNote(instrument_id, index, 0);
+  barelymusician->StopInstrumentNote(instrument_id, index);
 }
 
 void SetInstrumentNoteOn(int instrument_id, float index, float intensity) {
   DCHECK(barelymusician);
-  barelymusician->StartInstrumentNote(instrument_id, index, intensity, 0);
+  barelymusician->StartInstrumentNote(instrument_id, index, intensity);
 }
 
 }  // namespace unity

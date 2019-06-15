@@ -29,14 +29,14 @@ BarelyMusician::BarelyMusician(int sample_rate, int num_channels,
 
 void BarelyMusician::DestroyInstrument(int instrument_id) {
   task_runner_.Add(
-      [this, instrument_id]() { performers_.erase(instrument_id); });
+      [this, instrument_id]() { instruments_.erase(instrument_id); });
 }
 
 void BarelyMusician::ClearAllInstrumentNotes(int instrument_id) {
   task_runner_.Add([this, instrument_id]() {
-    Performer* performer = GetPerformer(instrument_id);
-    if (performer != nullptr) {
-      performer->ClearAllNotes();
+    Instrument* instrument = GetInstrument(instrument_id);
+    if (instrument != nullptr) {
+      instrument->AllNotesOff();
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }
@@ -44,57 +44,32 @@ void BarelyMusician::ClearAllInstrumentNotes(int instrument_id) {
 }
 
 void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
-  Performer* performer = GetPerformer(instrument_id);
-  if (performer != nullptr) {
-    performer->Process(output, num_channels_, num_frames_);
+  Instrument* instrument = GetInstrument(instrument_id);
+  if (instrument != nullptr) {
+    instrument->Process(output, num_channels_, num_frames_);
   } else {
     DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     std::fill_n(output, num_channels_ * num_frames_, 0.0f);
   }
 }
 
-void BarelyMusician::RegisterInstrumentNoteOffCallback(
-    int instrument_id, NoteOffCallback note_off_callback) {
-  task_runner_.Add([this, instrument_id, note_off_callback]() mutable {
-    Performer* performer = GetPerformer(instrument_id);
-    if (performer != nullptr) {
-      performer->RegisterNoteOffCallback(std::move(note_off_callback));
-    } else {
-      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
-    }
-  });
-}
-
-void BarelyMusician::RegisterInstrumentNoteOnCallback(
-    int instrument_id, NoteOnCallback note_on_callback) {
-  task_runner_.Add([this, instrument_id, note_on_callback]() mutable {
-    Performer* performer = GetPerformer(instrument_id);
-    if (performer != nullptr) {
-      performer->RegisterNoteOnCallback(std::move(note_on_callback));
-    } else {
-      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
-    }
-  });
-}
-
 void BarelyMusician::StartInstrumentNote(int instrument_id, float index,
-                                         float intensity, int offset_samples) {
-  task_runner_.Add([this, instrument_id, index, intensity, offset_samples]() {
-    Performer* performer = GetPerformer(instrument_id);
-    if (performer != nullptr) {
-      performer->StartNote(index, intensity, offset_samples);
+                                         float intensity) {
+  task_runner_.Add([this, instrument_id, index, intensity]() {
+    Instrument* instrument = GetInstrument(instrument_id);
+    if (instrument != nullptr) {
+      instrument->NoteOn(index, intensity);
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }
   });
 }
 
-void BarelyMusician::StopInstrumentNote(int instrument_id, float index,
-                                        int offset_samples) {
-  task_runner_.Add([this, instrument_id, index, offset_samples]() {
-    Performer* performer = GetPerformer(instrument_id);
-    if (performer != nullptr) {
-      performer->StopNote(index, offset_samples);
+void BarelyMusician::StopInstrumentNote(int instrument_id, float index) {
+  task_runner_.Add([this, instrument_id, index]() {
+    Instrument* instrument = GetInstrument(instrument_id);
+    if (instrument != nullptr) {
+      instrument->NoteOff(index);
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }
@@ -192,10 +167,10 @@ void BarelyMusician::StopSequencer(int sequencer_id) {
   });
 }
 
-Performer* BarelyMusician::GetPerformer(int instrument_id) {
-  const auto it = performers_.find(instrument_id);
-  if (it != performers_.end()) {
-    return &it->second;
+Instrument* BarelyMusician::GetInstrument(int instrument_id) {
+  const auto it = instruments_.find(instrument_id);
+  if (it != instruments_.end()) {
+    return it->second.get();
   }
   return nullptr;
 }

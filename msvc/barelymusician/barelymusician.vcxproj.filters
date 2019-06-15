@@ -108,9 +108,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\event.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\composition\performer.h">
-      <Filter>Header Files\composition</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>
@@ -166,9 +163,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\random.cpp">
       <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\performer.cpp">
-      <Filter>Source Files\composition</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\sequencer.cpp">
       <Filter>Source Files\base</Filter>

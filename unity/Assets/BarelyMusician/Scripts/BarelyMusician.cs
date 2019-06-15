@@ -40,14 +40,11 @@ namespace BarelyApi {
     private float lastUpdateTime = 0.0f;
 
     // Creates new instrument.
-    public int CreateInstrument(ClearFn clearFn, NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn,
-                                NoteOffCallback noteOffCallback, NoteOnCallback noteOnCallback) {
+    public int CreateInstrument(ClearFn clearFn, NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
       return CreateInstrument(Marshal.GetFunctionPointerForDelegate(clearFn),
                               Marshal.GetFunctionPointerForDelegate(noteOffFn),
                               Marshal.GetFunctionPointerForDelegate(noteOnFn),
-                              Marshal.GetFunctionPointerForDelegate(processFn),
-                              Marshal.GetFunctionPointerForDelegate(noteOffCallback),
-                              Marshal.GetFunctionPointerForDelegate(noteOnCallback));
+                              Marshal.GetFunctionPointerForDelegate(processFn));
     }
 
     // Destroys instrument.
@@ -177,8 +174,7 @@ namespace BarelyApi {
     // Instrument handlers.
     [DllImport(pluginName)]
     private static extern int CreateInstrument(IntPtr clearFnPtr, IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
-                                               IntPtr processFnPtr, IntPtr noteOffCallbackPtr,
-                                               IntPtr noteOnCallbackPtr);
+                                               IntPtr processFnPtr);
 
     [DllImport(pluginName)]
     private static extern void DestroyInstrument(int instrumentId);

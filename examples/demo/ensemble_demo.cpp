@@ -16,7 +16,10 @@
 #include "barelymusician/composition/ensemble.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
-#include "barelymusician/composition/performer.h"
+#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/instrument/instrument_utils.h"
+#include "barelymusician/message/message_queue.h"
 #include "instruments/basic_drumkit_instrument.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
@@ -25,10 +28,15 @@
 namespace {
 
 using ::barelyapi::Ensemble;
+using ::barelyapi::Instrument;
+using ::barelyapi::MessageQueue;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Performer;
+using ::barelyapi::Process;
+using ::barelyapi::PushNoteOffMessage;
+using ::barelyapi::PushNoteOnMessage;
 using ::barelyapi::Random;
+using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicDrumkitInstrument;
@@ -180,7 +188,18 @@ int main(int argc, char* argv[]) {
   const std::vector<float> scale(std::begin(barelyapi::kMajorScale),
                                  std::end(barelyapi::kMajorScale));
 
-  std::vector<std::pair<Performer, Ensemble::BeatComposerCallback>> performers;
+  std::vector<std::unique_ptr<Instrument>> instruments;
+
+  // Ensemble.
+  Ensemble ensemble;
+  ensemble.section_composer_callback = [](const Transport& transport) -> int {
+    return transport.section;
+  };
+  ensemble.bar_composer_callback = [&progression](const Transport& transport,
+                                                  int section_type) -> int {
+    const int index = section_type * transport.num_bars + transport.bar;
+    return progression[index % progression.size()];
+  };
 
   // Synth instruments.
   auto chords_instrument =
@@ -192,10 +211,14 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_3,
                 std::placeholders::_4);
 
-  performers.emplace_back(Performer(std::move(chords_instrument)),
-                          chords_beat_composer_callback);
-  performers.emplace_back(Performer(std::move(chords_2_instrument)),
-                          chords_beat_composer_callback);
+  ensemble.performers.insert(
+      std::make_pair(chords_instrument.get(),
+                     Ensemble::Performer(chords_beat_composer_callback)));
+  ensemble.performers.insert(
+      std::make_pair(chords_2_instrument.get(),
+                     Ensemble::Performer(chords_beat_composer_callback)));
+  instruments.push_back(std::move(chords_instrument));
+  instruments.push_back(std::move(chords_2_instrument));
 
   auto line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.125f, 0.0025f, 0.125f);
@@ -209,10 +232,13 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
                 std::placeholders::_3, std::placeholders::_4);
 
-  performers.emplace_back(Performer(std::move(line_instrument)),
-                          line_beat_composer_callback);
-  performers.emplace_back(Performer(std::move(line_2_instrument)),
-                          line_2_beat_composer_callback);
+  ensemble.performers.insert(std::make_pair(
+      line_instrument.get(), Ensemble::Performer(line_beat_composer_callback)));
+  ensemble.performers.insert(
+      std::make_pair(line_2_instrument.get(),
+                     Ensemble::Performer(line_2_beat_composer_callback)));
+  instruments.push_back(std::move(line_instrument));
+  instruments.push_back(std::move(line_2_instrument));
 
   // Drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
@@ -235,35 +261,61 @@ int main(int argc, char* argv[]) {
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_4);
 
-  performers.emplace_back(Performer(std::move(drumkit_instrument)),
-                          drumkit_beat_composer_callback);
+  ensemble.performers.insert(
+      std::make_pair(drumkit_instrument.get(),
+                     Ensemble::Performer(drumkit_beat_composer_callback)));
+  instruments.push_back(std::move(drumkit_instrument));
 
-  // Ensemble.
-  const auto section_composer_callback = [](const Transport& transport) -> int {
-    return transport.section;
+  // Beat callback.
+  int section_type = 0;
+  int harmonic = 0;
+  std::vector<Note> temp_notes;
+  const auto beat_callback = [&ensemble, &section_type, &harmonic, &temp_notes](
+                                 const Transport& transport, int start_sample) {
+    if (transport.beat == 0) {
+      // New bar.
+      if (transport.bar == 0) {
+        // New section.
+        section_type = ensemble.section_composer_callback(transport);
+      }
+      harmonic = ensemble.bar_composer_callback(transport, section_type);
+    }
+    for (auto& it : ensemble.performers) {
+      temp_notes.clear();
+      auto& performer = it.second;
+      performer.beat_composer_callback(transport, section_type, harmonic,
+                                       &temp_notes);
+      for (const Note& note : temp_notes) {
+        const int note_on_timestamp =
+            start_sample +
+            SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
+        PushNoteOnMessage(note.index, note.intensity, note_on_timestamp,
+                          &performer.messages);
+        const int note_off_timestamp =
+            note_on_timestamp +
+            SamplesFromBeats(note.duration_beats,
+                             transport.num_samples_per_beat);
+        PushNoteOffMessage(note.index, note_off_timestamp, &performer.messages);
+      }
+    }
   };
-  const auto bar_composer_callback = [&progression](const Transport& transport,
-                                                    int section_type) -> int {
-    const int index = section_type * transport.num_bars + transport.bar;
-    return progression[index % progression.size()];
-  };
-  Ensemble ensemble(&sequencer, section_composer_callback,
-                    bar_composer_callback);
-  for (auto& performer : performers) {
-    ensemble.Add(&performer.first, std::move(performer.second));
-  }
+  sequencer.RegisterBeatCallback(beat_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&sequencer, &performers,
+  const auto process_callback = [&sequencer, &ensemble,
                                  &temp_buffer](float* output) {
     sequencer.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (auto& performer : performers) {
-      performer.first.Process(temp_buffer.data(), kNumChannels, kNumFrames);
+    for (auto& performer : ensemble.performers) {
+      Instrument* instrument = performer.first;
+      MessageQueue* messages = &performer.second.messages;
+      Process(instrument, messages, temp_buffer.data(), kNumChannels,
+              kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
+      messages->Update(kNumFrames);
     }
   };
   audio_output.SetProcessCallback(process_callback);

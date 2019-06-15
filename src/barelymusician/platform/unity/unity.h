@@ -92,15 +92,11 @@ void EXPORT_API StopSequencer(int sequencer_id);
 // @param note_off_fn_ptr Note off function.
 // @param note_on_fn_ptr Note on function.
 // @param process_fn_ptr Process function.
-// @param note_off_callback_ptr Note off callback.
-// @param note_on_callback_ptr Note on callback.
 // @return Instrument ID.
 int EXPORT_API CreateInstrument(ClearFn* clear_fn_ptr,
                                 NoteOffFn* note_off_fn_ptr,
                                 NoteOnFn* note_on_fn_ptr,
-                                ProcessFn* process_fn_ptr,
-                                NoteOffCallback* note_off_callback_ptr,
-                                NoteOnCallback* note_on_callback_ptr);
+                                ProcessFn* process_fn_ptr);
 
 // Destroys instrument.
 //

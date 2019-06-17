@@ -78,45 +78,45 @@ namespace BarelyApi {
       Update();
     }
 
-    // Creates sequencer.
-    public int CreateSequencer(BeatCallback beatCallback) {
-      return CreateSequencer(Marshal.GetFunctionPointerForDelegate(beatCallback));
-    }
-
-    // Destroys sequencer.
-    public void DestroySequencer(Sequencer sequencer) {
-      DestroySequencer(sequencer.Id);
-    }
-
     // Processes sequencer.
-    public void ProcessSequencer() {
+    public void ProcessSequencer(Sequencer sequencer) {
       Process();
+    }
+
+    // Registers sequencer beat callback.
+    public void RegisterSequencerBeatCallback(Sequencer sequencer, BeatCallback beatCallback) {
+      RegisterSequencerBeatCallback(Marshal.GetFunctionPointerForDelegate(beatCallback));
+    }
+
+    // Resets sequencer.
+    public void ResetSequencer(Sequencer sequencer) {
+      ResetSequencer();
     }
 
     // Sets sequencer position.
     public void SetSequencerPosition(Sequencer sequencer, int section, int bar, int beat) {
-      SetSequencerPosition(sequencer.Id, section, bar, beat);
+      SetSequencerPosition(section, bar, beat);
     }
 
     // Sets sequencer transport.
     public void SetSequencerTransport(Sequencer sequencer) {
-      SetSequencerNumBars(sequencer.Id, sequencer.numBars);
-      SetSequencerNumBeats(sequencer.Id, sequencer.numBeats);
-      SetSequencerTempo(sequencer.Id, sequencer.tempo);
+      SetSequencerNumBars(sequencer.numBars);
+      SetSequencerNumBeats(sequencer.numBeats);
+      SetSequencerTempo(sequencer.tempo);
     }
 
     // Starts sequencer playback.
     public void StartSequencer(Sequencer sequencer) {
-      StartSequencer(sequencer.Id);
+      StartSequencer();
     }
 
     // Stops sequencer playback.
     public void StopSequencer(Sequencer sequencer) {
-      StopSequencer(sequencer.Id);
+      StopSequencer();
     }
 
     // Updates sequencer.
-    public void UpdateSequencer() {
+    public void UpdateSequencer(Sequencer sequencer) {
       Update();
     }
 
@@ -193,27 +193,27 @@ namespace BarelyApi {
 
     // Sequencer handlers.
     [DllImport(pluginName)]
-    private static extern int CreateSequencer(IntPtr beatCallbackPtr);
+    private static extern void RegisterSequencerBeatCallback(IntPtr beatCallbackPtr);
 
     [DllImport(pluginName)]
-    private static extern void DestroySequencer(int sequencerId);
+    private static extern void ResetSequencer();
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerNumBars(int sequencerId, int numBars);
+    private static extern void SetSequencerNumBars(int numBars);
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerNumBeats(int sequencerId, int numBeats);
+    private static extern void SetSequencerNumBeats(int numBeats);
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerPosition(int sequencerId, int section, int bar, int beat);
+    private static extern void SetSequencerPosition(int section, int bar, int beat);
 
     [DllImport(pluginName)]
-    private static extern void SetSequencerTempo(int sequencerId, float tempo);
+    private static extern void SetSequencerTempo(float tempo);
 
     [DllImport(pluginName)]
-    private static extern void StartSequencer(int sequencerId);
+    private static extern void StartSequencer();
 
     [DllImport(pluginName)]
-    private static extern void StopSequencer(int sequencerId);
+    private static extern void StopSequencer();
   }
 }

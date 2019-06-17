@@ -57,56 +57,48 @@ void UpdateMainThread() {
   main_task_runner->Run();
 }
 
-int CreateSequencer(BeatCallback* beat_callback_ptr) {
+void RegisterSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
-  const int sequencer_id = barelymusician->CreateSequencer();
-  const auto sequencer_beat_callback = [beat_callback_ptr](
-                                           const Transport& transport, int) {
-    const int section = transport.section;
-    const int bar = transport.bar;
-    const int beat = transport.beat;
-    main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
-      beat_callback_ptr(section, bar, beat);
-    });
-  };
-  barelymusician->RegisterSequencerBeatCallback(sequencer_id,
-                                                sequencer_beat_callback);
-  return sequencer_id;
+  const auto sequencer_beat_callback =
+      [beat_callback_ptr](const Transport& transport, int, int) {
+        const int section = transport.section;
+        const int bar = transport.bar;
+        const int beat = transport.beat;
+        main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
+          beat_callback_ptr(section, bar, beat);
+        });
+      };
+  barelymusician->RegisterSequencerBeatCallback(sequencer_beat_callback);
 }
 
-void DestroySequencer(int sequencer_id) {
+void ResetSequencer() {
   DCHECK(barelymusician);
-  barelymusician->DestroySequencer(sequencer_id);
+  barelymusician->ResetSequencer();
 }
 
-void SetSequencerNumBars(int sequencer_id, int num_bars) {
+void SetSequencerNumBars(int num_bars) {
   DCHECK(barelymusician);
-  barelymusician->SetSequencerNumBars(sequencer_id, num_bars);
+  barelymusician->SetSequencerNumBars(num_bars);
 }
 
-void SetSequencerNumBeats(int sequencer_id, int num_beats) {
+void SetSequencerNumBeats(int num_beats) {
   DCHECK(barelymusician);
-  barelymusician->SetSequencerNumBeats(sequencer_id, num_beats);
+  barelymusician->SetSequencerNumBeats(num_beats);
 }
 
-void SetSequencerPosition(int sequencer_id, int section, int bar, int beat) {
+void SetSequencerTempo(float tempo) {
   DCHECK(barelymusician);
-  barelymusician->SetSequencerPosition(sequencer_id, section, bar, beat);
+  barelymusician->SetSequencerTempo(tempo);
 }
 
-void SetSequencerTempo(int sequencer_id, float tempo) {
+void StartSequencer() {
   DCHECK(barelymusician);
-  barelymusician->SetSequencerTempo(sequencer_id, tempo);
+  barelymusician->StartSequencer();
 }
 
-void StartSequencer(int sequencer_id) {
+void StopSequencer() {
   DCHECK(barelymusician);
-  barelymusician->StartSequencer(sequencer_id);
-}
-
-void StopSequencer(int sequencer_id) {
-  DCHECK(barelymusician);
-  barelymusician->StopSequencer(sequencer_id);
+  barelymusician->StopSequencer();
 }
 
 int CreateInstrument(ClearFn* clear_fn_ptr, NoteOffFn* note_off_fn_ptr,

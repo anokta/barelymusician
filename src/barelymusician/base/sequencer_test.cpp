@@ -22,14 +22,13 @@ TEST(SequencerTest, RegisterBeatCallback) {
 
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
-  sequencer.Start();
 
   int beat = 0;
   const auto beat_callback = [&beat](const Transport& transport,
-                                     int start_sample) {
+                                     int start_sample,
+                                     int num_samples_per_beat) {
     EXPECT_EQ(transport.beat, beat);
-    EXPECT_EQ((beat % kBeatsPerSecond) * transport.num_samples_per_beat,
-              start_sample);
+    EXPECT_EQ((beat % kBeatsPerSecond) * num_samples_per_beat, start_sample);
     ++beat;
   };
   sequencer.RegisterBeatCallback(beat_callback);
@@ -38,6 +37,27 @@ TEST(SequencerTest, RegisterBeatCallback) {
     sequencer.Update(kSampleRate);
   }
 }
+
+// Tests that the sequencer resets its transport position as expected.
+TEST(SequencerTest, Reset) {
+  const int kUpdateSeconds = 12;
+
+  Sequencer sequencer(kSampleRate);
+  sequencer.SetTempo(kTempo);
+  sequencer.SetNumBars(kNumBars);
+  sequencer.SetNumBeats(kNumBeats);
+
+  sequencer.Update(kUpdateSeconds * kSampleRate);
+  EXPECT_GE(sequencer.GetTransport().section, 0);
+  EXPECT_GE(sequencer.GetTransport().bar, 0);
+  EXPECT_GE(sequencer.GetTransport().beat, 0);
+
+  sequencer.Reset();
+  EXPECT_EQ(sequencer.GetTransport().section, 0);
+  EXPECT_EQ(sequencer.GetTransport().bar, 0);
+  EXPECT_EQ(sequencer.GetTransport().beat, 0);
+}
+
 
 // Tests that transport parameters of the sequencer get set as expected.
 TEST(SequencerTest, SetTransport) {
@@ -55,45 +75,9 @@ TEST(SequencerTest, SetTransport) {
   sequencer.SetNumBeats(kNumBeats);
   EXPECT_EQ(sequencer.GetTransport().num_beats, kNumBeats);
 
-  // Set position.
-  sequencer.SetPosition(kSection, kBar, kBeat);
-  EXPECT_EQ(sequencer.GetTransport().section, kSection);
-  EXPECT_EQ(sequencer.GetTransport().bar, kBar);
-  EXPECT_EQ(sequencer.GetTransport().beat, kBeat);
-
   // Set tempo.
   sequencer.SetTempo(kTempo);
   EXPECT_FLOAT_EQ(sequencer.GetTransport().tempo, kTempo);
-  EXPECT_EQ(sequencer.GetTransport().num_samples_per_beat,
-            static_cast<int>(static_cast<float>(kSampleRate) *
-                             kSecondsFromMinutes / kTempo));
-}
-
-// Tests that the sequencer updates its transport as expected when it's started
-// and stopped respectively.
-TEST(SequencerTest, StartStop) {
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
-  sequencer.SetNumBeats(0);
-
-  sequencer.Update(kSampleRate);
-  EXPECT_EQ(sequencer.GetTransport().section, 0);
-  EXPECT_EQ(sequencer.GetTransport().bar, 0);
-  EXPECT_EQ(sequencer.GetTransport().beat, 0);
-
-  // Start the playback.
-  sequencer.Start();
-  sequencer.Update(kSampleRate);
-  EXPECT_EQ(sequencer.GetTransport().section, 0);
-  EXPECT_EQ(sequencer.GetTransport().bar, 0);
-  EXPECT_EQ(sequencer.GetTransport().beat, kBeatsPerSecond);
-
-  // Stop the playback.
-  sequencer.Stop();
-  sequencer.Update(kSampleRate);
-  EXPECT_EQ(sequencer.GetTransport().section, 0);
-  EXPECT_EQ(sequencer.GetTransport().bar, 0);
-  EXPECT_EQ(sequencer.GetTransport().beat, kBeatsPerSecond);
 }
 
 // Tests that the sequencer updates its transport position as expected.
@@ -101,7 +85,6 @@ TEST(SequencerTest, Update) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
   sequencer.SetNumBeats(0);
-  sequencer.Start();
 
   // Test beat count.
   sequencer.Update(kSampleRate);
@@ -109,14 +92,14 @@ TEST(SequencerTest, Update) {
   EXPECT_EQ(sequencer.GetTransport().bar, 0);
   EXPECT_EQ(sequencer.GetTransport().beat, kBeatsPerSecond);
   // Test bar count.
-  sequencer.SetPosition(0, 0, 0);
+  sequencer.Reset();
   sequencer.SetNumBeats(1);
   sequencer.Update(kSampleRate);
   EXPECT_EQ(sequencer.GetTransport().section, 0);
   EXPECT_EQ(sequencer.GetTransport().bar, kBeatsPerSecond);
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
   // Test section count.
-  sequencer.SetPosition(0, 0, 0);
+  sequencer.Reset();
   sequencer.SetNumBars(1);
   sequencer.Update(kSampleRate);
   EXPECT_EQ(sequencer.GetTransport().section, kBeatsPerSecond);

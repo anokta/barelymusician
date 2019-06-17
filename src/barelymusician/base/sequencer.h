@@ -10,7 +10,7 @@ namespace barelyapi {
 class Sequencer {
  public:
   // Beat event callback signature.
-  using BeatCallback = Event<const Transport&, int>::Callback;
+  using BeatCallback = Event<const Transport&, int, int>::Callback;
 
   // Constructs new |Sequencer|.
   //
@@ -27,6 +27,9 @@ class Sequencer {
   // @param beat_callback Beat callback to trigger for each beat.
   void RegisterBeatCallback(BeatCallback&& beat_callback);
 
+  // Resets the playback transport.
+  void Reset();
+
   // Sets the number of bars per each section.
   //
   // @param num_bars Number of bars per section.
@@ -37,25 +40,12 @@ class Sequencer {
   // @param num_beats Number of beats per bar.
   void SetNumBeats(int num_beats);
 
-  // Sets the playback position.
-  //
-  // @param section Section.
-  // @param bar Bar.
-  // @param beat Beat.
-  void SetPosition(int section, int bar, int beat);
-
   // Sets the tempo.
   //
   // @param tempo Tempo (BPM).
   void SetTempo(float tempo);
 
-  // Starts the playback.
-  void Start();
-
-  // Stops the playback.
-  void Stop();
-
-  // Updates the sequencer.
+  // Updates the playback transport.
   //
   // @num_samples Number of samples to iterate.
   void Update(int num_samples);
@@ -65,13 +55,13 @@ class Sequencer {
   const float num_samples_per_minute_;
 
   // Event to be triggered for each beat.
-  Event<const Transport&, int> beat_event_;
-
-  // Denotes whether the sequencer is playing.
-  bool is_playing_;
+  Event<const Transport&, int, int> beat_event_;
 
   // Leftover samples from the current beat.
   int leftover_samples_;
+
+  // Number of samples per beat.
+  int num_samples_per_beat_;
 
   // Playback transport.
   Transport transport_;

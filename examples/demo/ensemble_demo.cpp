@@ -271,7 +271,8 @@ int main(int argc, char* argv[]) {
   int harmonic = 0;
   std::vector<Note> temp_notes;
   const auto beat_callback = [&ensemble, &section_type, &harmonic, &temp_notes](
-                                 const Transport& transport, int start_sample) {
+                                 const Transport& transport, int start_sample,
+                                 int num_samples_per_beat) {
     if (transport.beat == 0) {
       // New bar.
       if (transport.bar == 0) {
@@ -288,13 +289,12 @@ int main(int argc, char* argv[]) {
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
             start_sample +
-            SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
+            SamplesFromBeats(note.start_beat, num_samples_per_beat);
         PushNoteOnMessage(note.index, note.intensity, note_on_timestamp,
                           &performer.messages);
         const int note_off_timestamp =
             note_on_timestamp +
-            SamplesFromBeats(note.duration_beats,
-                             transport.num_samples_per_beat);
+            SamplesFromBeats(note.duration_beats, num_samples_per_beat);
         PushNoteOffMessage(note.index, note_off_timestamp, &performer.messages);
       }
     }
@@ -334,7 +334,6 @@ int main(int argc, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
 
-  sequencer.Start();
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 

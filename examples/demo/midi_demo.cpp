@@ -133,20 +133,20 @@ int main(int argc, char* argv[]) {
 
   // Beat callback.
   const auto beat_callback = [&performers, &scores](const Transport& transport,
-                                                    int start_sample) {
+                                                    int start_sample,
+                                                    int num_samples_per_beat) {
     const int num_performers = static_cast<int>(performers.size());
     for (int i = 0; i < num_performers; ++i) {
       MessageQueue* message_queue = &performers[i].second;
       for (const Note& note : GetBeatNotes(scores[i], transport)) {
         const int start_offset_samples =
             start_sample +
-            SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
+            SamplesFromBeats(note.start_beat, num_samples_per_beat);
         PushNoteOnMessage(note.index, note.intensity, start_offset_samples,
                           message_queue);
         const int end_offset_samples =
             start_offset_samples +
-            SamplesFromBeats(note.duration_beats,
-                             transport.num_samples_per_beat);
+            SamplesFromBeats(note.duration_beats, num_samples_per_beat);
         PushNoteOffMessage(note.index, end_offset_samples, message_queue);
       }
     }
@@ -185,7 +185,6 @@ int main(int argc, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
 
-  sequencer.Start();
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 

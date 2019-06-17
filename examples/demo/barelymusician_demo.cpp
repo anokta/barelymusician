@@ -40,9 +40,12 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBeats(kNumBeats);
 
   // Beat callback.
-  const auto beat_callback = [](const Transport& transport, int start_sample) {
+  const auto beat_callback = [](const Transport& transport, int start_sample,
+                                int num_samples_per_beat) {
     LOG(INFO) << "Transport position " << transport.section << "."
-              << transport.bar << "." << transport.beat << ":" << start_sample;
+              << transport.bar << "." << transport.beat << ":" << start_sample
+              << " (" << num_samples_per_beat << ")";
+    ;
   };
   sequencer.RegisterBeatCallback(beat_callback);
 
@@ -75,7 +78,6 @@ int main(int argc, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
 
-  sequencer.Start();
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 

@@ -21,9 +21,6 @@ namespace BarelyApi {
     [Range(0, 16)]
     public int numBeats = 4;
 
-    // Instrument ID.
-    public int Id { get; private set; }
-
     // Is sequencer playing?
     public bool IsPlaying { get { return source != null && source.isPlaying; } }
 
@@ -47,28 +44,24 @@ namespace BarelyApi {
       source.Stop();
     }
 
+    void OnEnable() {
+      // TODO(#53): Need to de-register on shutdown?
+      BarelyMusician.Instance.RegisterSequencerBeatCallback(this, beatCallback);
+    }
+
     void OnDestroy() {
       beatCallback = null;
       Destroy(source);
       source = null;
     }
 
-    void OnEnable() {
-      Id = BarelyMusician.Instance.CreateSequencer(beatCallback);
-    }
-
-    void OnDisable() {
-      BarelyMusician.Instance.DestroySequencer(this);
-      Id = BarelyMusician.InvalidId;
-    }
-
     void Update() {
       BarelyMusician.Instance.SetSequencerTransport(this);
-      BarelyMusician.Instance.UpdateSequencer();
+      BarelyMusician.Instance.UpdateSequencer(this);
     }
 
     void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Instance.ProcessSequencer();
+      BarelyMusician.Instance.ProcessSequencer(this);
     }
 
     // Starts the sequencer.
@@ -87,7 +80,7 @@ namespace BarelyApi {
     public void Stop() {
       source.Stop();
       BarelyMusician.Instance.StopSequencer(this);
-      BarelyMusician.Instance.SetSequencerPosition(this, 0, 0, 0);
+      BarelyMusician.Instance.ResetSequencer(this);
     }
   }
 }

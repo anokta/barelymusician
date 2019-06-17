@@ -59,58 +59,34 @@ class BarelyMusician {
   // @param index Note index.
   void StopInstrumentNote(int instrument_id, float index);
 
-  // Creates new sequencer, and returns its ID.
-  //
-  // @return Sequencer ID.
-  int CreateSequencer();
-
-  // Destroys sequencer.
-  //
-  // @param sequencer_id Sequencer ID.
-  void DestroySequencer(int sequencer_id);
-
   // Registers new sequencer beat callback.
   //
-  // @param sequencer_id Sequencer ID.
   // @param beat_callback Sequencer beat callback.
-  void RegisterSequencerBeatCallback(int sequencer_id,
-                                     BeatCallback beat_callback);
+  void RegisterSequencerBeatCallback(BeatCallback beat_callback);
+
+  // Resets sequencer playback.
+  void ResetSequencer();
 
   // Sets sequencer number of bars per section.
   //
-  // @param sequencer_id Sequencer ID.
   // @param num_beats Number of bars per section.
-  void SetSequencerNumBars(int sequencer_id, int num_bars);
+  void SetSequencerNumBars(int num_bars);
 
   // Sets sequencer number of beats per bar.
   //
-  // @param sequencer_id Sequencer ID.
   // @param num_beats Number of beats per bar.
-  void SetSequencerNumBeats(int sequencer_id, int num_beats);
-
-  // Sets sequencer position.
-  //
-  // @param sequencer_id Sequencer ID.
-  // @param section Section.
-  // @param bar Bar.
-  // @param beat Beat.
-  void SetSequencerPosition(int sequencer_id, int section, int bar, int beat);
+  void SetSequencerNumBeats(int num_beats);
 
   // Sets sequencer tempo.
   //
-  // @param sequencer_id Sequencer ID.
   // @param tempo Sequencer tempo.
-  void SetSequencerTempo(int sequencer_id, float tempo);
+  void SetSequencerTempo(float tempo);
 
-  // Starts the playback.
-  //
-  // @param sequencer_id Sequencer ID.
-  void StartSequencer(int sequencer_id);
+  // Starts sequencer playback.
+  void StartSequencer();
 
-  // Stops the playback.
-  //
-  // @param sequencer_id Sequencer ID.
-  void StopSequencer(int sequencer_id);
+  // Stops sequencer playback.
+  void StopSequencer();
 
   // Updates the internal state.
   void Update();
@@ -118,9 +94,6 @@ class BarelyMusician {
  private:
   // Returns instrument with the given |instrument_id|.
   Instrument* GetInstrument(int instrument_id);
-
-  // Returns sequencer with the given |sequencer_id|.
-  Sequencer* GetSequencer(int sequencer_id);
 
   // Sampling rate.
   const int sample_rate_;
@@ -140,8 +113,11 @@ class BarelyMusician {
   // Instruments.
   std::unordered_map<int, std::unique_ptr<Instrument>> instruments_;
 
-  // Sequencers.
-  std::unordered_map<int, Sequencer> sequencers_;
+  // Sequencer.
+  Sequencer sequencer_;
+
+  // Denotes whether the sequencer is playing.
+  bool is_playing_;
 };
 
 template <typename InstrumentType, typename... ArgumentTypes>

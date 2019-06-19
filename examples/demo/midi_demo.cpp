@@ -14,14 +14,14 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/instrument_utils.h"
-#include "barelymusician/message/message_queue.h"
+#include "barelymusician/message/message_buffer.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
 using ::barelyapi::Instrument;
-using ::barelyapi::MessageQueue;
+using ::barelyapi::MessageBuffer;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Process;
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
   sequencer.SetTempo(kTempo);
 
   std::vector<std::vector<Note>> scores;
-  std::vector<std::pair<BasicSynthInstrument, MessageQueue>> performers;
+  std::vector<std::pair<BasicSynthInstrument, MessageBuffer>> performers;
   for (int i = 0; i < num_tracks; ++i) {
     // Create instrument.
     const auto score = GetMidiScore(midi_file[i], ticks_per_quarter);
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
     instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.2f);
     instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
     // Create performer.
-    performers.emplace_back(std::move(instrument), MessageQueue());
+    performers.emplace_back(std::move(instrument), MessageBuffer());
   }
   LOG(INFO) << "Number of performers: " << performers.size();
 
@@ -137,17 +137,17 @@ int main(int argc, char* argv[]) {
                                                     int num_samples_per_beat) {
     const int num_performers = static_cast<int>(performers.size());
     for (int i = 0; i < num_performers; ++i) {
-      MessageQueue* message_queue = &performers[i].second;
+      MessageBuffer* message_buffer = &performers[i].second;
       for (const Note& note : GetBeatNotes(scores[i], transport)) {
         const int start_offset_samples =
             start_sample +
             SamplesFromBeats(note.start_beat, num_samples_per_beat);
         PushNoteOnMessage(note.index, note.intensity, start_offset_samples,
-                          message_queue);
+                          message_buffer);
         const int end_offset_samples =
             start_offset_samples +
             SamplesFromBeats(note.duration_beats, num_samples_per_beat);
-        PushNoteOffMessage(note.index, end_offset_samples, message_queue);
+        PushNoteOffMessage(note.index, end_offset_samples, message_buffer);
       }
     }
   };
@@ -161,12 +161,12 @@ int main(int argc, char* argv[]) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : performers) {
       Instrument* instrument = &performer.first;
-      MessageQueue* message_queue = &performer.second;
-      Process(instrument, message_queue, temp_buffer.data(), kNumChannels,
+      MessageBuffer* message_buffer = &performer.second;
+      Process(instrument, message_buffer, temp_buffer.data(), kNumChannels,
               kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
-      message_queue->Update(kNumFrames);
+      message_buffer->Update(kNumFrames);
     }
   };
   audio_output.SetProcessCallback(process_callback);

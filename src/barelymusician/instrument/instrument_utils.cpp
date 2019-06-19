@@ -59,17 +59,17 @@ float FrequencyFromNoteIndex(float index) {
   return kFrequencyA4 * std::pow(2.0f, (index - kNoteIndexA4) / kNumSemitones);
 }
 
-void Process(Instrument* instrument, MessageQueue* message_queue, float* output,
-             int num_channels, int num_frames) {
+void Process(Instrument* instrument, MessageBuffer* message_buffer,
+             float* output, int num_channels, int num_frames) {
   DCHECK(instrument);
-  DCHECK(message_queue);
+  DCHECK(message_buffer);
   DCHECK(output);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
   int frame = 0;
   // Process messages.
   Message message;
-  while (message_queue->Pop(num_frames, &message)) {
+  while (message_buffer->Pop(num_frames, &message)) {
     const int timestamp = message.timestamp;
     if (frame < timestamp) {
       instrument->Process(&output[num_channels * frame], num_channels,
@@ -85,14 +85,14 @@ void Process(Instrument* instrument, MessageQueue* message_queue, float* output,
   }
 }
 void PushNoteOffMessage(float index, int timestamp,
-                        MessageQueue* message_queue) {
-  message_queue->Push(
+                        MessageBuffer* message_buffer) {
+  message_buffer->Push(
       BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
 }
 
 void PushNoteOnMessage(float index, float intensity, int timestamp,
-                       MessageQueue* message_queue) {
-  message_queue->Push(
+                       MessageBuffer* message_buffer) {
+  message_buffer->Push(
       BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, timestamp));
 }
 

@@ -132,11 +132,11 @@
     <ClInclude Include="..\..\src\barelymusician\message\message_utils.h">
       <Filter>Header Files\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\message\message_queue.h">
-      <Filter>Header Files\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h">
       <Filter>Header Files\composition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\message\message_buffer.h">
+      <Filter>Header Files\message</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -176,11 +176,11 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp">
       <Filter>Source Files\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\message\message_queue.cpp">
-      <Filter>Source Files\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\note_utils.cpp">
       <Filter>Source Files\composition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\message\message_buffer.cpp">
+      <Filter>Source Files\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

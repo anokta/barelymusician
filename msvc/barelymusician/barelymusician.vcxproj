@@ -31,7 +31,7 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\message\message_queue.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\message\message_buffer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -61,7 +61,7 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
     <ClInclude Include="..\..\src\barelymusician\message\message.h" />
-    <ClInclude Include="..\..\src\barelymusician\message\message_queue.h" />
+    <ClInclude Include="..\..\src\barelymusician\message\message_buffer.h" />
     <ClInclude Include="..\..\src\barelymusician\message\message_utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

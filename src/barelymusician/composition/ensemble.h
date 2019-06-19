@@ -8,7 +8,7 @@
 #include "barelymusician/base/transport.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message_queue.h"
+#include "barelymusician/message/message_buffer.h"
 
 namespace barelyapi {
 
@@ -27,7 +27,7 @@ struct Ensemble {
     Performer(BeatComposerCallback beat_composer_callback)
         : beat_composer_callback(std::move(beat_composer_callback)) {}
     BeatComposerCallback beat_composer_callback;
-    MessageQueue messages;
+    MessageBuffer messages;
   };
 
   // Section composer callback.

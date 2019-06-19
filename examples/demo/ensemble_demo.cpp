@@ -19,7 +19,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/instrument_utils.h"
-#include "barelymusician/message/message_queue.h"
+#include "barelymusician/message/message_buffer.h"
 #include "instruments/basic_drumkit_instrument.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
@@ -29,7 +29,7 @@ namespace {
 
 using ::barelyapi::Ensemble;
 using ::barelyapi::Instrument;
-using ::barelyapi::MessageQueue;
+using ::barelyapi::MessageBuffer;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Process;
@@ -77,9 +77,6 @@ std::unique_ptr<BasicSynthInstrument> BuildSynthInstrument(OscillatorType type,
                                   release);
   return std::move(synth_instrument);
 }
-
-// Note BuildNote(float root_note_index, const Scale& scale, float index, float
-// intensity, float )
 
 void ComposeChord(float root_note_index, const std::vector<float>& scale,
                   float intensity, int harmonic, std::vector<Note>* notes) {
@@ -310,7 +307,7 @@ int main(int argc, char* argv[]) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : ensemble.performers) {
       Instrument* instrument = performer.first;
-      MessageQueue* messages = &performer.second.messages;
+      MessageBuffer* messages = &performer.second.messages;
       Process(instrument, messages, temp_buffer.data(), kNumChannels,
               kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,

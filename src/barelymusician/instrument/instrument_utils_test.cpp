@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message_queue.h"
+#include "barelymusician/message/message_buffer.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -52,11 +52,12 @@ TEST(InstrumentUtilsTest, ProcessSingleNote) {
   const float kNoteIntensity = 0.5f;
 
   TestInstrument instrument;
-  MessageQueue message_queue;
+  MessageBuffer message_buffer;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
+          kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -64,10 +65,11 @@ TEST(InstrumentUtilsTest, ProcessSingleNote) {
   }
 
   // Start note.
-  PushNoteOnMessage(kNoteIndex, kNoteIntensity, 0, &message_queue);
+  PushNoteOnMessage(kNoteIndex, kNoteIntensity, 0, &message_buffer);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
+          kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -76,10 +78,11 @@ TEST(InstrumentUtilsTest, ProcessSingleNote) {
   }
 
   // Stop note.
-  PushNoteOffMessage(kNoteIndex, 0, &message_queue);
+  PushNoteOffMessage(kNoteIndex, 0, &message_buffer);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
+          kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -92,11 +95,12 @@ TEST(InstrumentUtilsTest, ProcessMultipleNotes) {
   const float kNoteIntensity = 1.0f;
 
   TestInstrument instrument;
-  MessageQueue message_queue;
+  MessageBuffer message_buffer;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
+          kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -105,11 +109,13 @@ TEST(InstrumentUtilsTest, ProcessMultipleNotes) {
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
-    PushNoteOnMessage(static_cast<float>(i), kNoteIntensity, i, &message_queue);
+    PushNoteOnMessage(static_cast<float>(i), kNoteIntensity, i,
+                      &message_buffer);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
+          kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kNoteIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -119,11 +125,12 @@ TEST(InstrumentUtilsTest, ProcessMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    PushNoteOffMessage(static_cast<float>(i), 0, &message_queue);
+    PushNoteOffMessage(static_cast<float>(i), 0, &message_buffer);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_queue, buffer.data(), kNumChannels, kNumFrames);
+  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
+          kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

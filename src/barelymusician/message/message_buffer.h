@@ -7,8 +7,9 @@
 
 namespace barelyapi {
 
-// Queue that receives and dispatches messages according to their timestamps.
-class MessageQueue {
+// Message buffer that receives and dispatches messages according to their
+// timestamps.
+class MessageBuffer {
  public:
   // Clears the queue.
   void Clear();

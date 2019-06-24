@@ -9,26 +9,27 @@ namespace barelyapi {
 
 void MessageBuffer::Clear() { messages_.clear(); }
 
-bool MessageBuffer::Pop(int num_samples, Message* message) {
-  DCHECK(message);
-  if (messages_.empty() || messages_.front().timestamp >= num_samples) {
-    return false;
-  }
-  *message = messages_.front();
-  messages_.pop_front();
-  return true;
+void MessageBuffer::Clear(const Iterator& iterator) {
+  messages_.erase(iterator.begin, iterator.end);
+}
+
+bool MessageBuffer::Empty() const { return messages_.empty(); }
+
+MessageBuffer::Iterator MessageBuffer::GetIterator(int timestamp,
+                                                   int num_samples) const {
+  Iterator iterator;
+  iterator.begin = std::lower_bound(messages_.begin(), messages_.end(),
+                                    timestamp, &CompareTimestamp);
+  iterator.end = std::lower_bound(iterator.begin, messages_.end(),
+                                  timestamp + num_samples, &CompareTimestamp);
+  iterator.timestamp = timestamp;
+  return iterator;
 }
 
 void MessageBuffer::Push(const Message& message) {
   const auto it = std::upper_bound(messages_.begin(), messages_.end(), message,
                                    &CompareMessage);
   messages_.insert(it, message);
-}
-
-void MessageBuffer::Update(int num_samples) {
-  for (Message& message : messages_) {
-    message.timestamp -= num_samples;
-  }
 }
 
 }  // namespace barelyapi

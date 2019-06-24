@@ -25,6 +25,13 @@ Message BuildMessage(int id, const DataType& data, int timestamp);
 // @return True if the first message comes prior to the second message.
 bool CompareMessage(const Message& lhs, const Message& rhs);
 
+// Compares the given |message| against the given |timestamp|.
+//
+// @param message Message.
+// @param timestamp Timestamp.
+// @return True if the message comes prior to the timestamp.
+bool CompareTimestamp(const Message& message, int timestamp);
+
 // Reads the corresponding structured data for the given |message_data|.
 //
 // @param message_data Message data to be read.

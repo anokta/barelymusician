@@ -1,5 +1,7 @@
 #include "barelymusician/message/message_buffer.h"
 
+#include <iterator>
+
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -14,22 +16,21 @@ const int kMessageId = 1;
 // Tests that the message buffer returns an added single message as expected.
 TEST(MessageBufferTest, SinglePushPop) {
   const int kTimestamp = 10;
-  EXPECT_LE(kTimestamp, kNumSamples);
 
   MessageBuffer message_buffer;
-
-  Message message;
-  EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
+  EXPECT_TRUE(message_buffer.Empty());
 
   // Push message.
   message_buffer.Push({kMessageId, {0}, kTimestamp});
+  EXPECT_FALSE(message_buffer.Empty());
 
   // Pop message.
-  EXPECT_TRUE(message_buffer.Pop(kNumSamples, &message));
-  EXPECT_EQ(message.id, kMessageId);
+  const auto iterator = message_buffer.GetIterator(kTimestamp, kNumSamples);
+  EXPECT_NE(iterator.begin, iterator.end);
+  EXPECT_EQ(iterator.begin->timestamp, kTimestamp);
 
-  // Queue should be empty after pop.
-  EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
+  message_buffer.Clear(iterator);
+  EXPECT_TRUE(message_buffer.Empty());
 }
 
 // Tests that the message buffer returns added messages as expected when asked
@@ -38,25 +39,27 @@ TEST(MessageBufferTest, SingleMessagePerNumSamples) {
   const int kNumMessages = 5;
 
   MessageBuffer message_buffer;
-
-  Message message;
-  EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
+  EXPECT_TRUE(message_buffer.Empty());
 
   // Push |kNumMessages| messages, each message to the beginning of each
   // |kNumSamples|.
   for (int i = 0; i < kNumMessages; ++i) {
     message_buffer.Push({kMessageId, {0}, i * kNumSamples});
+    EXPECT_FALSE(message_buffer.Empty());
   }
   // Pop one message at a time.
   for (int i = 0; i < kNumMessages; ++i) {
-    EXPECT_TRUE(message_buffer.Pop(kNumSamples, &message));
+    const int timestamp = i * kNumSamples;
+    const auto iterator = message_buffer.GetIterator(timestamp, kNumSamples);
+    EXPECT_EQ(std::distance(iterator.begin, iterator.end), 1);
+
+    const Message& message = *iterator.begin;
     EXPECT_EQ(message.id, kMessageId);
-    EXPECT_EQ(message.timestamp, 0);
-    // There should be nothing left within the range after pop.
-    EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
-    // Update timestamps.
-    message_buffer.Update(kNumSamples);
+    EXPECT_EQ(message.timestamp, timestamp);
+
+    message_buffer.Clear(iterator);
   }
+  EXPECT_TRUE(message_buffer.Empty());
 }
 
 // Tests that the message buffer returns added messages as expected when they
@@ -67,39 +70,47 @@ TEST(MessageBufferTest, MultipleMessagesSameTimestamp) {
   EXPECT_LE(kTimestamp, kNumSamples);
 
   MessageBuffer message_buffer;
-
-  Message message;
-  EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
+  EXPECT_TRUE(message_buffer.Empty());
 
   // Push |kNumMessages| messages using the same |kTimestamp|.
   for (int i = 0; i < kNumMessages; ++i) {
     message_buffer.Push({kMessageId, {0}, kTimestamp});
+    EXPECT_FALSE(message_buffer.Empty());
   }
 
   // Pop all messages.
-  for (int i = 0; i < kNumMessages; ++i) {
-    EXPECT_TRUE(message_buffer.Pop(kNumSamples, &message));
-    EXPECT_EQ(message.id, kMessageId);
-    EXPECT_EQ(message.timestamp, kTimestamp);
+  const auto iterator = message_buffer.GetIterator(0, kNumSamples);
+  EXPECT_EQ(std::distance(iterator.begin, iterator.end), kNumMessages);
+  for (auto it = iterator.begin; it != iterator.end; ++it) {
+    EXPECT_EQ(it->id, kMessageId);
+    EXPECT_EQ(it->timestamp, kTimestamp);
   }
 
-  // Queue should be empty at the end.
-  EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
+  message_buffer.Clear(iterator);
+  EXPECT_TRUE(message_buffer.Empty());
 }
 
 // Tests that clearing the queue removes all existing messages as expected.
 TEST(MessageBufferTest, Clear) {
   MessageBuffer message_buffer;
+  EXPECT_TRUE(message_buffer.Empty());
 
-  Message message;
-  EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
+  MessageBuffer::Iterator iterator;
+  iterator = message_buffer.GetIterator(0, kNumSamples);
+  EXPECT_EQ(std::distance(iterator.begin, iterator.end), 0);
 
   for (int i = 0; i < kNumSamples; ++i) {
     message_buffer.Push({kMessageId, {0}, i});
+    EXPECT_FALSE(message_buffer.Empty());
   }
+  iterator = message_buffer.GetIterator(0, kNumSamples);
+  EXPECT_EQ(std::distance(iterator.begin, iterator.end), kNumSamples);
 
   message_buffer.Clear();
-  EXPECT_FALSE(message_buffer.Pop(kNumSamples, &message));
+  EXPECT_TRUE(message_buffer.Empty());
+
+  iterator = message_buffer.GetIterator(0, kNumSamples);
+  EXPECT_EQ(std::distance(iterator.begin, iterator.end), 0);
 }
 
 }  // namespace

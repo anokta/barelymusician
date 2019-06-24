@@ -54,10 +54,11 @@ TEST(InstrumentUtilsTest, ProcessSingleNote) {
   TestInstrument instrument;
   MessageBuffer message_buffer;
   std::vector<float> buffer(kNumChannels * kNumFrames);
+  MessageBuffer::Iterator messages;
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
-          kNumFrames);
+  messages = message_buffer.GetIterator(0, kNumFrames);
+  Process(&instrument, messages, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -68,8 +69,8 @@ TEST(InstrumentUtilsTest, ProcessSingleNote) {
   PushNoteOnMessage(kNoteIndex, kNoteIntensity, 0, &message_buffer);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
-          kNumFrames);
+  messages = message_buffer.GetIterator(0, kNumFrames);
+  Process(&instrument, messages, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -78,11 +79,11 @@ TEST(InstrumentUtilsTest, ProcessSingleNote) {
   }
 
   // Stop note.
-  PushNoteOffMessage(kNoteIndex, 0, &message_buffer);
+  PushNoteOffMessage(kNoteIndex, kNumFrames, &message_buffer);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
-          kNumFrames);
+  messages = message_buffer.GetIterator(kNumFrames, kNumFrames);
+  Process(&instrument, messages, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -97,15 +98,7 @@ TEST(InstrumentUtilsTest, ProcessMultipleNotes) {
   TestInstrument instrument;
   MessageBuffer message_buffer;
   std::vector<float> buffer(kNumChannels * kNumFrames);
-
-  std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
-          kNumFrames);
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
-    }
-  }
+  MessageBuffer::Iterator messages;
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
@@ -114,8 +107,8 @@ TEST(InstrumentUtilsTest, ProcessMultipleNotes) {
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
-          kNumFrames);
+  messages = message_buffer.GetIterator(0, kNumFrames);
+  Process(&instrument, messages, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kNoteIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -125,12 +118,12 @@ TEST(InstrumentUtilsTest, ProcessMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    PushNoteOffMessage(static_cast<float>(i), 0, &message_buffer);
+    PushNoteOffMessage(static_cast<float>(i), kNumFrames, &message_buffer);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  Process(&instrument, &message_buffer, buffer.data(), kNumChannels,
-          kNumFrames);
+  messages = message_buffer.GetIterator(kNumFrames, kNumFrames);
+  Process(&instrument, messages, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

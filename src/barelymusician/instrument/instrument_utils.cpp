@@ -59,24 +59,22 @@ float FrequencyFromNoteIndex(float index) {
   return kFrequencyA4 * std::pow(2.0f, (index - kNoteIndexA4) / kNumSemitones);
 }
 
-void Process(Instrument* instrument, MessageBuffer* message_buffer,
+void Process(Instrument* instrument, const MessageBuffer::Iterator& messages,
              float* output, int num_channels, int num_frames) {
   DCHECK(instrument);
-  DCHECK(message_buffer);
   DCHECK(output);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
   int frame = 0;
   // Process messages.
-  Message message;
-  while (message_buffer->Pop(num_frames, &message)) {
-    const int timestamp = message.timestamp;
+  for (auto it = messages.begin; it != messages.end; ++it) {
+    const int timestamp = it->timestamp - messages.timestamp;
     if (frame < timestamp) {
       instrument->Process(&output[num_channels * frame], num_channels,
                           timestamp - frame);
       frame = timestamp;
     }
-    ProcessMessage(message, instrument);
+    ProcessMessage(*it, instrument);
   }
   // Process the rest of the buffer.
   if (frame < num_frames) {

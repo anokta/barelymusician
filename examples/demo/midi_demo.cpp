@@ -85,9 +85,7 @@ std::vector<Note> GetBeatNotes(const std::vector<Note>& score,
   const auto end =
       std::lower_bound(begin, score.end(), beat + 1.0f, compare_beat);
   for (auto it = begin; it != end; ++it) {
-    Note note = *it;
-    note.start_beat -= beat;
-    notes.push_back(note);
+    notes.push_back(*it);
   }
   return notes;
 }
@@ -155,19 +153,20 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&sequencer, &performers,
-                                 &temp_buffer](float* output) {
+  int timestamp = 0;
+  const auto process_callback = [&sequencer, &performers, &temp_buffer,
+                                 &timestamp](float* output) {
     sequencer.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : performers) {
       Instrument* instrument = &performer.first;
-      MessageBuffer* message_buffer = &performer.second;
-      Process(instrument, message_buffer, temp_buffer.data(), kNumChannels,
+      const auto messages = performer.second.GetIterator(timestamp, kNumFrames);
+      Process(instrument, messages, temp_buffer.data(), kNumChannels,
               kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
-      message_buffer->Update(kNumFrames);
     }
+    timestamp += kNumFrames;
   };
   audio_output.SetProcessCallback(process_callback);
 

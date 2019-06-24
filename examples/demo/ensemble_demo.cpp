@@ -267,9 +267,11 @@ int main(int argc, char* argv[]) {
   int section_type = 0;
   int harmonic = 0;
   std::vector<Note> temp_notes;
-  const auto beat_callback = [&ensemble, &section_type, &harmonic, &temp_notes](
-                                 const Transport& transport, int start_sample,
-                                 int num_samples_per_beat) {
+  int timestamp = 0;
+  const auto beat_callback = [&ensemble, &section_type, &harmonic, &temp_notes,
+                              &timestamp](const Transport& transport,
+                                          int start_sample,
+                                          int num_samples_per_beat) {
     if (transport.beat == 0) {
       // New bar.
       if (transport.bar == 0) {
@@ -285,7 +287,7 @@ int main(int argc, char* argv[]) {
                                        &temp_notes);
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
-            start_sample +
+            start_sample + timestamp +
             SamplesFromBeats(note.start_beat, num_samples_per_beat);
         PushNoteOnMessage(note.index, note.intensity, note_on_timestamp,
                           &performer.messages);
@@ -300,20 +302,22 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&sequencer, &ensemble,
-                                 &temp_buffer](float* output) {
+  const auto process_callback = [&sequencer, &ensemble, &temp_buffer,
+                                 &timestamp](float* output) {
     sequencer.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : ensemble.performers) {
       Instrument* instrument = performer.first;
-      MessageBuffer* messages = &performer.second.messages;
+      const auto messages =
+          performer.second.messages.GetIterator(timestamp, kNumFrames);
       Process(instrument, messages, temp_buffer.data(), kNumChannels,
               kNumFrames);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
-      messages->Update(kNumFrames);
+      performer.second.messages.Clear(messages);
     }
+    timestamp += kNumFrames;
   };
   audio_output.SetProcessCallback(process_callback);
 

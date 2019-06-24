@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_QUEUE_H_
 #define BARELYMUSICIAN_MESSAGE_MESSAGE_QUEUE_H_
 
-#include <deque>
+#include <vector>
 
 #include "barelymusician/message/message.h"
 
@@ -11,29 +11,45 @@ namespace barelyapi {
 // timestamps.
 class MessageBuffer {
  public:
-  // Clears the queue.
+  // Buffer iterator.
+  struct Iterator {
+    // Iterator begin.
+    std::vector<Message>::const_iterator begin;
+
+    // Iterator end.
+    std::vector<Message>::const_iterator end;
+
+    // Start timestamp.
+    int timestamp;
+  };
+
+  // Clears the buffer.
   void Clear();
 
-  // Pops next message from the queue.
+  // Clears the buffer within the given range.
   //
-  // @param num_samples Maximum number of samples allowed for message timestamp.
-  // @param message Message to be written into.
-  // @return True if successful.
-  bool Pop(int num_samples, Message* message);
+  // @param iterator Iterator range to clear the buffer.
+  void Clear(const Iterator& iterator);
+
+  // Returns whether the buffer is empty or not.
+  //
+  // @return True if empty.
+  bool Empty() const;
+
+  // Returns iterator within the given range.
+  //
+  // @param timestamp Start timestamp.
+  // @param num_samples Number of samples to iterate.
+  Iterator GetIterator(int timestamp, int num_samples) const;
 
   // Pushes new message into the queue.
   //
   // @param message Message.
   void Push(const Message& message);
 
-  // Updates the message timestamps in the queue.
-  //
-  // @param num_samples Number of samples to iterate.
-  void Update(int num_samples);
-
  private:
   // Ordered message queue.
-  std::deque<Message> messages_;
+  std::vector<Message> messages_;
 };
 
 }  // namespace barelyapi

@@ -27,7 +27,7 @@ TEST(MessageUtilsTest, BuildMessage) {
 }
 
 // Tests that messages are compared as expected according to their timestamps.
-TEST(MessageUtilsTest, CompareMessage) {
+TEST(MessageUtilsTest, CompareMessageTimestamp) {
   const int kFirstTimestamp = 10;
   const int kSecondTimestamp = 32;
 
@@ -37,7 +37,10 @@ TEST(MessageUtilsTest, CompareMessage) {
   second_message.timestamp = kSecondTimestamp;
 
   EXPECT_TRUE(CompareMessage(first_message, second_message));
+  EXPECT_TRUE(CompareTimestamp(first_message, kSecondTimestamp));
+
   EXPECT_FALSE(CompareMessage(second_message, first_message));
+  EXPECT_FALSE(CompareTimestamp(second_message, kFirstTimestamp));
 }
 
 // Tests that writing a structured data into a message is read back as expected.

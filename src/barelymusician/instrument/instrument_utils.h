@@ -16,11 +16,11 @@ float FrequencyFromNoteIndex(float index);
 // |message_buffer|.
 //
 // @param instrument Instrument to process.
-// @param message_buffer Messages to process.
+// @param messages Messages to process.
 // @param output Output buffer.
 // @param num_channels Number of output channels.
 // @param num_frames Number of output frames.
-void Process(Instrument* instrument, MessageBuffer* message_buffer,
+void Process(Instrument* instrument, const MessageBuffer::Iterator& messages,
              float* output, int num_channels, int num_frames);
 
 // Pushes note off message to the given |message_buffer|.

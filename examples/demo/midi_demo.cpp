@@ -8,7 +8,6 @@
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/composition/note.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/instrument_utils.h"
@@ -20,7 +19,6 @@ namespace {
 
 using ::barelyapi::Instrument;
 using ::barelyapi::MessageBuffer;
-using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Process;
 using ::barelyapi::PushNoteOffMessage;

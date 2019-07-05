@@ -14,8 +14,8 @@ struct Note {
   // Start beat of the note.
   float start_beat;
 
-  // Duration of the note in beats.
-  float duration_beats;
+  // End beat of the note.
+  float end_beat;
 };
 
 }  // namespace barelyapi

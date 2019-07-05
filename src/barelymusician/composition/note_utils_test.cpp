@@ -26,20 +26,20 @@ TEST(NoteUtilsTest, GetNoteIndex) {
 
 class GetBeatDurationTest : public testing::TestWithParam<int> {};
 
-// Tests that the beat duration gets quantized as expected with respect to the
-// given number of notes.
-TEST_P(GetBeatDurationTest, GetBeatDuration) {
+// Tests that the beat gets quantized as expected with respect to the given
+// step.
+TEST_P(GetBeatDurationTest, GetBeat) {
   const int kNumBeats = 4;
-  const int num_notes_per_beat = GetParam();
+  const int num_steps_per_beat = GetParam();
 
   for (int beat = 0; beat < kNumBeats; ++beat) {
-    for (int i = 0; i < num_notes_per_beat; ++i) {
-      const float expected_duration_beats =
+    for (int i = 0; i < num_steps_per_beat; ++i) {
+      const float expected_beat =
           static_cast<float>(beat) +
-          static_cast<float>(i) / static_cast<float>(num_notes_per_beat);
+          static_cast<float>(i) / static_cast<float>(num_steps_per_beat);
       EXPECT_FLOAT_EQ(
-          GetBeatDuration(num_notes_per_beat * beat + i, num_notes_per_beat),
-          expected_duration_beats);
+          GetBeat(num_steps_per_beat * beat + i, num_steps_per_beat),
+          expected_beat);
     }
   }
 }

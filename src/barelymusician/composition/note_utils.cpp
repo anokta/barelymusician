@@ -5,12 +5,12 @@
 
 namespace barelyapi {
 
-float GetBeatDuration(int num_notes, int num_notes_per_beat) {
-  DCHECK_GE(num_notes, 0);
-  DCHECK_GT(num_notes_per_beat, 0);
-  const float num_beats = static_cast<float>(num_notes / num_notes_per_beat);
-  return num_beats + static_cast<float>(num_notes % num_notes_per_beat) /
-                         static_cast<float>(num_notes_per_beat);
+float GetBeat(int step, int num_steps_per_beat) {
+  DCHECK_GE(step, 0);
+  DCHECK_GT(num_steps_per_beat, 0);
+  const float num_beats = static_cast<float>(step / num_steps_per_beat);
+  return num_beats + static_cast<float>(step % num_steps_per_beat) /
+                         static_cast<float>(num_steps_per_beat);
 }
 
 float GetNoteIndex(const std::vector<float>& scale, float scale_index) {

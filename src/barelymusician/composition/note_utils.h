@@ -5,13 +5,13 @@
 
 namespace barelyapi {
 
-// Returns the quantized beat duration for the given |num_notes|.
+// Returns the quantized beat for the given |step| and |num_steps_per_beat|.
 //
-// @param num_notes Number of notes.
-// @param num_notes_per_beat Number of notes per beat.
-float GetBeatDuration(int num_notes, int num_notes_per_beat);
+// @param step Quantized step.
+// @param num_steps_per_beat Number of steps per beat.
+float GetBeat(int step, int num_steps_per_beat);
 
-// Returns the quantized note index for the given |scale_index|.
+// Returns the quantized note index for the given |scale| and |scale_index|.
 //
 // @param scale Cumulative scale intervals of an octave in increasing order.
 // @param scale_index Scale index.

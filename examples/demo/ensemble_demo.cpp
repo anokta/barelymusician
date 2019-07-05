@@ -121,9 +121,8 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
 }
 
 void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
-  const auto get_beat = [](int num_notes) {
-    return barelyapi::GetBeatDuration(num_notes,
-                                      barelyapi::kNumSixteenthNotesPerBeat);
+  const auto get_beat = [](int step) {
+    return barelyapi::GetBeat(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
   // Kick.
   if (transport.beat % 2 == 0) {

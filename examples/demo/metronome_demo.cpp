@@ -8,21 +8,16 @@
 #include "barelymusician/base/task_runner.h"
 #include "barelymusician/base/transport.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instrument/instrument.h"
-#include "barelymusician/instrument/instrument_utils.h"
 #include "barelymusician/message/message_buffer.h"
+#include "barelymusician/message/message_utils.h"
 #include "instruments/basic_enveloped_voice.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
-using ::barelyapi::Instrument;
 using ::barelyapi::MessageBuffer;
 using ::barelyapi::Oscillator;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Process;
-using ::barelyapi::PushNoteOffMessage;
-using ::barelyapi::PushNoteOnMessage;
 using ::barelyapi::Sequencer;
 using ::barelyapi::TaskRunner;
 using ::barelyapi::Transport;
@@ -44,40 +39,68 @@ const float kTempo = 120.0f;
 const int kNumBars = 4;
 const int kNumBeats = 4;
 
-// Metronome settings.
-const float kGain = 0.5f;
-const float kSectionNoteIndex = barelyapi::kNoteIndexA5;
-const float kBarNoteIndex = barelyapi::kNoteIndexA4;
-const float kBeatNoteIndex = barelyapi::kNoteIndexA3;
-const OscillatorType kOscillatorType = OscillatorType::kSquare;
-const float kRelease = 0.025f;
 const float kTempoIncrement = 10.0f;
 
-class Metronome : public barelyapi::Instrument {
+// Metronome settings.
+const float kGain = 0.5f;
+const float kBeatTickFrequency = 220.0f;
+const float kBarTickFrequency = 2.0f * kBeatTickFrequency;
+const float kSectionTickFrequency = 4.0f * kBeatTickFrequency;
+const OscillatorType kOscillatorType = OscillatorType::kSquare;
+const float kRelease = 0.025f;
+
+class Metronome {
  public:
-  explicit Metronome(float sample_interval) : voice_(sample_interval) {
+  Metronome() : voice_(kSampleInterval) {
     voice_.generator().SetType(kOscillatorType);
     voice_.envelope().SetRelease(kRelease);
+    voice_.set_gain(kGain);
   }
 
-  void AllNotesOff() override {}
-  void NoteOff(float index) override { voice_.Stop(); }
-  void NoteOn(float index, float intensity) override {
-    voice_.generator().SetFrequency(barelyapi::FrequencyFromNoteIndex(index));
-    voice_.set_gain(intensity);
-    voice_.Start();
+  void OnBeat(const Transport& transport, int start_sample) {
+    float tick_frequency = kBeatTickFrequency;
+    if (transport.beat == 0) {
+      tick_frequency =
+          (transport.bar == 0) ? kSectionTickFrequency : kBarTickFrequency;
+    }
+    message_buffer_.Push(
+        barelyapi::BuildMessage<float>(0, tick_frequency, start_sample));
   }
-  void Process(float* output, int num_channels, int num_frames) override {
-    for (int frame = 0; frame < num_frames; ++frame) {
+
+  void Process(float* output, int num_channels, int num_frames) {
+    int frame = 0;
+    // Process messages.
+    const auto messages = message_buffer_.GetIterator(0, num_frames);
+    for (auto it = messages.begin; it != messages.end; ++it) {
+      while (frame <= it->timestamp) {
+        if (frame == it->timestamp) {
+          // Tick.
+          voice_.generator().SetFrequency(
+              barelyapi::ReadMessageData<float>(it->data));
+          voice_.Start();
+        }
+        const float mono_sample = voice_.Next(0);
+        for (int channel = 0; channel < num_channels; ++channel) {
+          output[frame * num_channels + channel] = mono_sample;
+        }
+        ++frame;
+      }
+      voice_.Stop();
+    }
+    message_buffer_.Clear(messages);
+    // Process the rest of the buffer.
+    while (frame < num_frames) {
       const float mono_sample = voice_.Next(0);
       for (int channel = 0; channel < num_channels; ++channel) {
         output[frame * num_channels + channel] = mono_sample;
       }
+      ++frame;
     }
   }
 
  private:
   BasicEnvelopedVoice<Oscillator> voice_;
+  MessageBuffer message_buffer_;
 };
 
 }  // namespace
@@ -88,8 +111,7 @@ int main(int argc, char* argv[]) {
 
   TaskRunner task_runner(kNumMaxTasks);
 
-  Metronome metronome(kSampleInterval);
-  MessageBuffer message_buffer;
+  Metronome metronome;
 
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
@@ -97,29 +119,21 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBeats(kNumBeats);
 
   // Beat callback.
-  const auto beat_callback = [&metronome, &message_buffer](
-                                 const Transport& transport, int start_sample,
-                                 int num_samples_per_beat) {
+  const auto beat_callback = [&metronome](const Transport& transport,
+                                          int start_sample,
+                                          int num_samples_per_beat) {
     LOG(INFO) << "Tick " << transport.section << "." << transport.bar << "."
               << transport.beat;
-
-    float index = kBeatNoteIndex;
-    if (transport.beat == 0) {
-      index = (transport.bar == 0) ? kSectionNoteIndex : kBarNoteIndex;
-    }
-    PushNoteOnMessage(index, kGain, start_sample, &message_buffer);
-    PushNoteOffMessage(index, start_sample + 1, &message_buffer);
+    metronome.OnBeat(transport, start_sample);
   };
   sequencer.RegisterBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto process_callback = [&task_runner, &sequencer, &metronome,
-                                 &message_buffer](float* output) {
+  const auto process_callback = [&task_runner, &sequencer,
+                                 &metronome](float* output) {
     task_runner.Run();
     sequencer.Update(kNumFrames);
-    const auto messages = message_buffer.GetIterator(0, kNumFrames);
-    Process(&metronome, messages, output, kNumChannels, kNumFrames);
-    message_buffer.Clear(messages);
+    metronome.Process(output, kNumChannels, kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 

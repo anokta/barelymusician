@@ -1,5 +1,7 @@
 #include "barelymusician/composition/performer.h"
 
+#include <utility>
+
 #include "barelymusician/base/logging.h"
 #include "barelymusician/message/message_utils.h"
 
@@ -24,9 +26,12 @@ struct NoteOnData {
 
 }  // namespace
 
-Performer::Performer(Instrument* instrument) : instrument_(instrument) {
+Performer::Performer(std::unique_ptr<Instrument> instrument)
+    : instrument_(std::move(instrument)) {
   DCHECK(instrument_);
 }
+
+Instrument* Performer::GetInstrument() const { return instrument_.get(); }
 
 void Performer::Process(float* output, int num_channels, int num_frames,
                         int timestamp) {

@@ -41,8 +41,7 @@ TEST(PerformerTest, PlaySingleNote) {
   const float kNoteIntensity = 0.5f;
   const int kNoteTimestamp = 24;
 
-  TestInstrument instrument;
-  Performer performer(&instrument);
+  Performer performer(std::make_unique<TestInstrument>());
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -81,8 +80,7 @@ TEST(PerformerTest, PlaySingleNote) {
 TEST(PerformerTest, PlayMultipleNotes) {
   const float kNoteIntensity = 1.0f;
 
-  TestInstrument instrument;
-  Performer performer(&instrument);
+  Performer performer(std::make_unique<TestInstrument>());
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);

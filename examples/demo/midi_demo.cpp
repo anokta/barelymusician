@@ -15,7 +15,6 @@
 
 namespace {
 
-using ::barelyapi::Instrument;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Performer;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -92,7 +91,6 @@ int main(int argc, char* argv[]) {
       static_cast<int>(static_cast<float>(kSampleRate) *
                        barelyapi::kSecondsFromMinutes / kTempo);
 
-  std::vector<std::unique_ptr<Instrument>> instruments;
   std::vector<Performer> performers;
 
   for (int i = 0; i < num_tracks; ++i) {
@@ -108,10 +106,9 @@ int main(int argc, char* argv[]) {
     instrument->SetFloatParam(BasicSynthInstrumentParam::kGain,
                               kInstrumentGain);
     // Create performer.
-    Performer performer(instrument.get());
+    Performer performer(std::move(instrument));
     if (PerformScore(midi_file[i], ticks_per_quarter, samples_per_beat,
                      &performer)) {
-      instruments.push_back(std::move(instrument));
       performers.push_back(std::move(performer));
     }
   }

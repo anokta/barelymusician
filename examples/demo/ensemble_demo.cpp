@@ -202,9 +202,10 @@ int main(int argc, char* argv[]) {
                 std::placeholders::_4);
 
   ensemble.performers.emplace_back(std::make_pair(
-      Performer(chords_instrument.get()), chords_beat_composer_callback));
-  ensemble.performers.emplace_back(std::make_pair(
-      Performer(chords_2_instrument.get()), chords_beat_composer_callback));
+      Performer(std::move(chords_instrument)), chords_beat_composer_callback));
+  ensemble.performers.emplace_back(
+      std::make_pair(Performer(std::move(chords_2_instrument)),
+                     chords_beat_composer_callback));
 
   auto line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.125f, 0.0025f, 0.125f);
@@ -219,9 +220,9 @@ int main(int argc, char* argv[]) {
                 std::placeholders::_3, std::placeholders::_4);
 
   ensemble.performers.emplace_back(std::make_pair(
-      Performer(line_instrument.get()), line_beat_composer_callback));
+      Performer(std::move(line_instrument)), line_beat_composer_callback));
   ensemble.performers.emplace_back(std::make_pair(
-      Performer(line_2_instrument.get()), line_2_beat_composer_callback));
+      Performer(std::move(line_2_instrument)), line_2_beat_composer_callback));
 
   // Drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
@@ -244,8 +245,9 @@ int main(int argc, char* argv[]) {
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_4);
 
-  ensemble.performers.emplace_back(std::make_pair(
-      Performer(drumkit_instrument.get()), drumkit_beat_composer_callback));
+  ensemble.performers.emplace_back(
+      std::make_pair(Performer(std::move(drumkit_instrument)),
+                     drumkit_beat_composer_callback));
 
   // Beat callback.
   int section_type = 0;

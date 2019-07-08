@@ -2,11 +2,12 @@
 #define BARELYMUSICIAN_COMPOSITION_ENSEMBLE_H_
 
 #include <functional>
-#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "barelymusician/base/transport.h"
 #include "barelymusician/composition/note.h"
+#include "barelymusician/composition/performer.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
 
@@ -23,13 +24,6 @@ struct Ensemble {
   using BeatComposerCallback =
       std::function<void(const Transport&, int, int, std::vector<Note>*)>;
 
-  struct Performer {
-    Performer(BeatComposerCallback beat_composer_callback)
-        : beat_composer_callback(std::move(beat_composer_callback)) {}
-    BeatComposerCallback beat_composer_callback;
-    MessageBuffer messages;
-  };
-
   // Section composer callback.
   SectionComposerCallback section_composer_callback;
 
@@ -37,7 +31,7 @@ struct Ensemble {
   BarComposerCallback bar_composer_callback;
 
   // List of performers with their corresponding composers.
-  std::unordered_map<Instrument*, Performer> performers;
+  std::vector<std::pair<Performer, BeatComposerCallback>> performers;
 };
 
 }  // namespace barelyapi

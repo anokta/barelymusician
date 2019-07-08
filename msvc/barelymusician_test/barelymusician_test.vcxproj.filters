@@ -72,5 +72,8 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer_test.cpp">
       <Filter>Source Files\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\composition\performer_test.cpp">
+      <Filter>Source Files\composition</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

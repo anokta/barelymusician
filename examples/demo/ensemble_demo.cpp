@@ -16,9 +16,9 @@
 #include "barelymusician/composition/ensemble.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
+#include "barelymusician/composition/performer.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/instrument/instrument_utils.h"
 #include "barelymusician/message/message_buffer.h"
 #include "instruments/basic_drumkit_instrument.h"
 #include "instruments/basic_synth_instrument.h"
@@ -28,13 +28,10 @@
 namespace {
 
 using ::barelyapi::Ensemble;
-using ::barelyapi::Instrument;
 using ::barelyapi::MessageBuffer;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Process;
-using ::barelyapi::PushNoteOffMessage;
-using ::barelyapi::PushNoteOnMessage;
+using ::barelyapi::Performer;
 using ::barelyapi::Random;
 using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::Sequencer;
@@ -97,10 +94,9 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
                  std::vector<Note>* notes) {
   const float start_note = static_cast<float>(harmonic);
   const float beat = static_cast<float>(transport.beat);
-  const auto add_note = [&](float index, float start_beat,
-                            float end_beat) {
+  const auto add_note = [&](float index, float start_beat, float end_beat) {
     notes->push_back({root_note_index + barelyapi::GetNoteIndex(scale, index),
-                      intensity, start_beat, end_beat });
+                      intensity, start_beat, end_beat});
   };
   if (transport.beat % 2 == 1) {
     add_note(start_note, 0.0f, 0.25f);
@@ -184,8 +180,6 @@ int main(int argc, char* argv[]) {
   const std::vector<float> scale(std::begin(barelyapi::kMajorScale),
                                  std::end(barelyapi::kMajorScale));
 
-  std::vector<std::unique_ptr<Instrument>> instruments;
-
   // Ensemble.
   Ensemble ensemble;
   ensemble.section_composer_callback = [](const Transport& transport) -> int {
@@ -207,14 +201,10 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_3,
                 std::placeholders::_4);
 
-  ensemble.performers.insert(
-      std::make_pair(chords_instrument.get(),
-                     Ensemble::Performer(chords_beat_composer_callback)));
-  ensemble.performers.insert(
-      std::make_pair(chords_2_instrument.get(),
-                     Ensemble::Performer(chords_beat_composer_callback)));
-  instruments.push_back(std::move(chords_instrument));
-  instruments.push_back(std::move(chords_2_instrument));
+  ensemble.performers.emplace_back(std::make_pair(
+      Performer(chords_instrument.get()), chords_beat_composer_callback));
+  ensemble.performers.emplace_back(std::make_pair(
+      Performer(chords_2_instrument.get()), chords_beat_composer_callback));
 
   auto line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.125f, 0.0025f, 0.125f);
@@ -228,13 +218,10 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
                 std::placeholders::_3, std::placeholders::_4);
 
-  ensemble.performers.insert(std::make_pair(
-      line_instrument.get(), Ensemble::Performer(line_beat_composer_callback)));
-  ensemble.performers.insert(
-      std::make_pair(line_2_instrument.get(),
-                     Ensemble::Performer(line_2_beat_composer_callback)));
-  instruments.push_back(std::move(line_instrument));
-  instruments.push_back(std::move(line_2_instrument));
+  ensemble.performers.emplace_back(std::make_pair(
+      Performer(line_instrument.get()), line_beat_composer_callback));
+  ensemble.performers.emplace_back(std::make_pair(
+      Performer(line_2_instrument.get()), line_2_beat_composer_callback));
 
   // Drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
@@ -257,10 +244,8 @@ int main(int argc, char* argv[]) {
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_4);
 
-  ensemble.performers.insert(
-      std::make_pair(drumkit_instrument.get(),
-                     Ensemble::Performer(drumkit_beat_composer_callback)));
-  instruments.push_back(std::move(drumkit_instrument));
+  ensemble.performers.emplace_back(std::make_pair(
+      Performer(drumkit_instrument.get()), drumkit_beat_composer_callback));
 
   // Beat callback.
   int section_type = 0;
@@ -281,20 +266,17 @@ int main(int argc, char* argv[]) {
     }
     for (auto& it : ensemble.performers) {
       temp_notes.clear();
-      auto& performer = it.second;
-      performer.beat_composer_callback(transport, section_type, harmonic,
-                                       &temp_notes);
+      it.second(transport, section_type, harmonic, &temp_notes);
       const int beat_timestamp = timestamp + start_sample;
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
             beat_timestamp +
             SamplesFromBeats(note.start_beat, num_samples_per_beat);
-        PushNoteOnMessage(note.index, note.intensity, note_on_timestamp,
-                          &performer.messages);
+        it.first.StartNote(note.index, note.intensity, note_on_timestamp);
         const int note_off_timestamp =
             beat_timestamp +
             SamplesFromBeats(note.end_beat, num_samples_per_beat);
-        PushNoteOffMessage(note.index, note_off_timestamp, &performer.messages);
+        it.first.StopNote(note.index, note_off_timestamp);
       }
     }
   };
@@ -307,15 +289,10 @@ int main(int argc, char* argv[]) {
     sequencer.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (auto& performer : ensemble.performers) {
-      Instrument* instrument = performer.first;
-      const auto messages =
-          performer.second.messages.GetIterator(timestamp, kNumFrames);
-      Process(instrument, messages, temp_buffer.data(), kNumChannels,
-              kNumFrames);
+    for (auto& it : ensemble.performers) {
+      it.first.Process(temp_buffer.data(), kNumChannels, kNumFrames, timestamp);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
-      performer.second.messages.Clear(messages);
     }
     timestamp += kNumFrames;
   };

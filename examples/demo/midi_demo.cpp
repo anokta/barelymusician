@@ -8,22 +8,16 @@
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/composition/performer.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/instrument/instrument_utils.h"
-#include "barelymusician/message/message_buffer.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
 using ::barelyapi::Instrument;
-using ::barelyapi::MessageBuffer;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Process;
-using ::barelyapi::PushNoteOffMessage;
-using ::barelyapi::PushNoteOnMessage;
-using ::barelyapi::SamplesFromBeats;
+using ::barelyapi::Performer;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
@@ -42,36 +36,42 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 // Sequencer settings.
 const float kTempo = 132.0f;
 
-// Ensemble settings.
+// Performer settings.
 const int kNumInstrumentVoices = 16;
+const float kInstrumentGain = 1.0f / static_cast<float>(kNumInstrumentVoices);
+const float kInstrumentEnvelopeAttack = 0.0f;
+const float kInstrumentEnvelopeRelease = 0.2f;
+const OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 
 // Midi file name.
 const char kMidiFileName[] = "data/midi/sample.mid";
 
-MessageBuffer BuildMidiScore(const smf::MidiEventList& midi_events,
-                             int ticks_per_beat, int samples_per_beat) {
+bool PerformScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
+                  int samples_per_beat, Performer* performer) {
   const auto get_timestamp = [ticks_per_beat, samples_per_beat](int tick) {
     return static_cast<int>(static_cast<Int64>(samples_per_beat) *
                             static_cast<Int64>(tick) /
                             static_cast<Int64>(ticks_per_beat));
   };
-  MessageBuffer score;
   const float max_velocity = 127.0f;
+
+  bool has_notes = false;
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
+      has_notes = true;
       const float index = static_cast<float>(midi_event.getKeyNumber());
       const float intensity =
           static_cast<float>(midi_event.getVelocity()) / max_velocity;
       const int timestamp = get_timestamp(midi_event.tick);
-      PushNoteOnMessage(index, intensity, timestamp, &score);
+      performer->StartNote(index, intensity, timestamp);
     } else if (midi_event.isNoteOff()) {
       const float index = static_cast<float>(midi_event.getKeyNumber());
       const int timestamp = get_timestamp(midi_event.tick);
-      PushNoteOffMessage(index, timestamp, &score);
+      performer->StopNote(index, timestamp);
     }
   }
-  return score;
+  return has_notes;
 }
 
 }  // namespace
@@ -92,23 +92,28 @@ int main(int argc, char* argv[]) {
       static_cast<int>(static_cast<float>(kSampleRate) *
                        barelyapi::kSecondsFromMinutes / kTempo);
 
-  std::vector<std::pair<BasicSynthInstrument, MessageBuffer>> performers;
+  std::vector<std::unique_ptr<Instrument>> instruments;
+  std::vector<Performer> performers;
+
   for (int i = 0; i < num_tracks; ++i) {
-    // Create score.
-    const MessageBuffer score =
-        BuildMidiScore(midi_file[i], ticks_per_quarter, samples_per_beat);
-    if (score.Empty()) {
-      continue;
-    }
     // Create instrument.
-    BasicSynthInstrument instrument(kSampleInterval, kNumInstrumentVoices);
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
-                             static_cast<float>(OscillatorType::kSquare));
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease, 0.2f);
-    instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, 0.1f);
+    auto instrument = std::make_unique<BasicSynthInstrument>(
+        kSampleInterval, kNumInstrumentVoices);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                              static_cast<float>(kInstrumentOscillatorType));
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                              kInstrumentEnvelopeAttack);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                              kInstrumentEnvelopeRelease);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kGain,
+                              kInstrumentGain);
     // Create performer.
-    performers.emplace_back(std::move(instrument), std::move(score));
+    Performer performer(instrument.get());
+    if (PerformScore(midi_file[i], ticks_per_quarter, samples_per_beat,
+                     &performer)) {
+      instruments.push_back(std::move(instrument));
+      performers.push_back(std::move(performer));
+    }
   }
   LOG(INFO) << "Number of performers: " << performers.size();
 
@@ -119,10 +124,8 @@ int main(int argc, char* argv[]) {
                                  &timestamp](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (auto& performer : performers) {
-      Instrument* instrument = &performer.first;
-      const auto messages = performer.second.GetIterator(timestamp, kNumFrames);
-      Process(instrument, messages, temp_buffer.data(), kNumChannels,
-              kNumFrames);
+      performer.Process(temp_buffer.data(), kNumChannels, kNumFrames,
+                        timestamp);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
     }

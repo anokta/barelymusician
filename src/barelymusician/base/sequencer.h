@@ -1,7 +1,8 @@
 #ifndef BARELYMUSICIAN_BASE_SEQUENCER_H_
 #define BARELYMUSICIAN_BASE_SEQUENCER_H_
 
-#include "barelymusician/base/event.h"
+#include <functional>
+
 #include "barelymusician/base/transport.h"
 
 namespace barelyapi {
@@ -10,7 +11,7 @@ namespace barelyapi {
 class Sequencer {
  public:
   // Beat event callback signature.
-  using BeatCallback = Event<const Transport&, int, int>::Callback;
+  using BeatCallback = std::function<void(const Transport&, int, int)>;
 
   // Constructs new |Sequencer|.
   //
@@ -54,8 +55,8 @@ class Sequencer {
   // Number of samples per minute.
   const float num_samples_per_minute_;
 
-  // Event to be triggered for each beat.
-  Event<const Transport&, int, int> beat_event_;
+  // Callback to be triggered for each beat.
+  BeatCallback beat_callback_;
 
   // Leftover samples from the current beat.
   int leftover_samples_;

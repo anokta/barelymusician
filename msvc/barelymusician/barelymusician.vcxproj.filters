@@ -105,9 +105,6 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\event.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h">
       <Filter>Header Files\composition</Filter>
     </ClInclude>

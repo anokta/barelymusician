@@ -3,9 +3,8 @@
 
 #include <windows.h>
 
+#include <functional>
 #include <unordered_map>
-
-#include "barelymusician/base/event.h"
 
 namespace barelyapi {
 namespace examples {
@@ -15,8 +14,8 @@ class WinConsoleInput {
  public:
   // Keyboard event callback signatures.
   using Key = char;
-  using KeyDownCallback = Event<const Key&>::Callback;
-  using KeyUpCallback = Event<const Key&>::Callback;
+  using KeyDownCallback = std::function<void(const Key&)>;
+  using KeyUpCallback = std::function<void(const Key&)>;
 
   WinConsoleInput();
 
@@ -29,15 +28,15 @@ class WinConsoleInput {
   // Updates the input manager to handle new input events.
   void Update();
 
-  // Registers keyboard key down callback.
+  // Sets keyboard key down callback.
   //
   // @param key_down_callback Keyboard key down callback.
-  void RegisterKeyDownCallback(KeyDownCallback&& key_down_callback);
+  void SetKeyDownCallback(KeyDownCallback&& key_down_callback);
 
-  // Registers keyboard key up callback.
+  // Sets keyboard key up callback.
   //
   // @param key_up_callback Keyboard key up callback.
-  void RegisterKeyUpCallback(KeyUpCallback&& key_up_callback);
+  void SetKeyUpCallback(KeyUpCallback&& key_up_callback);
 
  private:
   // Console standard input handle.
@@ -53,8 +52,8 @@ class WinConsoleInput {
   std::unordered_map<Key, bool> key_states_;
 
   // Keyboard events.
-  Event<const Key&> key_down_event_;
-  Event<const Key&> key_up_event_;
+  KeyDownCallback key_down_callback_;
+  KeyUpCallback key_up_callback_;
 };
 
 }  // namespace examples

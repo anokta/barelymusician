@@ -45,10 +45,14 @@ void WinConsoleInput::Update() {
         }
         if (key_event.bKeyDown && !key_states_[key]) {
           key_states_[key] = true;
-          key_down_event_.Trigger(key);
+          if (key_down_callback_ != nullptr) {
+            key_down_callback_(key);
+          }
         } else if (!key_event.bKeyDown && key_states_[key]) {
           key_states_[key] = false;
-          key_up_event_.Trigger(key);
+          if (key_up_callback_ != nullptr) {
+            key_up_callback_(key);
+          }
         }
       } break;
       default:
@@ -58,13 +62,12 @@ void WinConsoleInput::Update() {
   }
 }
 
-void WinConsoleInput::RegisterKeyDownCallback(
-    KeyDownCallback&& key_down_callback) {
-  key_down_event_.Register(std::move(key_down_callback));
+void WinConsoleInput::SetKeyDownCallback(KeyDownCallback&& key_down_callback) {
+  key_down_callback_ = std::move(key_down_callback);
 }
 
-void WinConsoleInput::RegisterKeyUpCallback(KeyUpCallback&& key_up_callback) {
-  key_up_event_.Register(std::move(key_up_callback));
+void WinConsoleInput::SetKeyUpCallback(KeyUpCallback&& key_up_callback) {
+  key_up_callback_ = std::move(key_up_callback);
 }
 
 }  // namespace examples

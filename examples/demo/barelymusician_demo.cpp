@@ -45,7 +45,6 @@ int main(int argc, char* argv[]) {
     LOG(INFO) << "Transport position " << transport.section << "."
               << transport.bar << "." << transport.beat << ":" << start_sample
               << " (" << num_samples_per_beat << ")";
-    ;
   };
   sequencer.SetBeatCallback(beat_callback);
 
@@ -67,13 +66,13 @@ int main(int argc, char* argv[]) {
 
     LOG(INFO) << "Pressed " << key;
   };
-  input_manager.RegisterKeyDownCallback(key_down_callback);
+  input_manager.SetKeyDownCallback(key_down_callback);
 
   // Key up callback.
   const auto key_up_callback = [](const WinConsoleInput::Key& key) {
     LOG(INFO) << "Released " << key;
   };
-  input_manager.RegisterKeyUpCallback(key_up_callback);
+  input_manager.SetKeyUpCallback(key_up_callback);
 
   // Start the demo.
   LOG(INFO) << "Starting audio stream";

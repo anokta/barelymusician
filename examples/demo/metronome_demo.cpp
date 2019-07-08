@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
     task_runner.Add([&sequencer, tempo]() { sequencer.SetTempo(tempo); });
     LOG(INFO) << "Tempo set to " << tempo;
   };
-  input_manager.RegisterKeyDownCallback(key_down_callback);
+  input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
   LOG(INFO) << "Starting audio stream";

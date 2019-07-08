@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
     });
     LOG(INFO) << "NoteOn(" << note_index << ", " << kNoteIntensity << ")";
   };
-  input_manager.RegisterKeyDownCallback(key_down_callback);
+  input_manager.SetKeyDownCallback(key_down_callback);
 
   // Key up callback.
   const auto key_up_callback = [&task_runner, &instrument, &offset_octaves](
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
         [&instrument, note_index]() { instrument.NoteOff(note_index); });
     LOG(INFO) << "NoteOff(" << note_index << ")";
   };
-  input_manager.RegisterKeyUpCallback(key_up_callback);
+  input_manager.SetKeyUpCallback(key_up_callback);
 
   // Start the demo.
   LOG(INFO) << "Starting audio stream";

@@ -27,10 +27,7 @@ void Sequencer::Reset() {
 }
 
 void Sequencer::SetBeatCallback(BeatCallback&& beat_callback) {
-  beat_event_.Clear();
-  if (beat_callback != nullptr) {
-    beat_event_.Register(std::move(beat_callback));
-  }
+  beat_callback_ = std::move(beat_callback);
 }
 
 void Sequencer::SetNumBars(int num_bars) {
@@ -66,8 +63,8 @@ void Sequencer::Update(int num_samples) {
     return;
   }
   leftover_samples_ += num_samples;
-  if (leftover_samples_ == num_samples) {
-    beat_event_.Trigger(transport_, 0, num_samples_per_beat_);
+  if (leftover_samples_ == num_samples && beat_callback_ != nullptr) {
+    beat_callback_(transport_, 0, num_samples_per_beat_);
   }
   while (leftover_samples_ >= num_samples_per_beat_) {
     // Update beat count.
@@ -83,9 +80,9 @@ void Sequencer::Update(int num_samples) {
         transport_.bar -= transport_.num_bars;
       }
     }
-    if (leftover_samples_ > 0) {
-      beat_event_.Trigger(transport_, num_samples - leftover_samples_,
-                          num_samples_per_beat_);
+    if (leftover_samples_ > 0 && beat_callback_ != nullptr) {
+      beat_callback_(transport_, num_samples - leftover_samples_,
+                     num_samples_per_beat_);
     }
   }
 }

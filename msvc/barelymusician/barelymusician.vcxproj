@@ -39,7 +39,6 @@
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
     <ClInclude Include="..\..\src\barelymusician\api\barelymusician.h" />
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\event.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />
     <ClInclude Include="..\..\src\barelymusician\base\sequencer.h" />

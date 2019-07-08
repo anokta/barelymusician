@@ -13,7 +13,7 @@ namespace BarelyApi {
     public delegate void NoteOnCallback(float index, float intensity);
 
     // Internal Unity instrument functions.
-    public delegate void ClearFn();
+    public delegate void AllNotesOffFn();
     public delegate void NoteOffFn(float index);
     public delegate void NoteOnFn(float index, float intensity);
     public delegate void ProcessFn([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output,
@@ -40,8 +40,8 @@ namespace BarelyApi {
     private float lastUpdateTime = 0.0f;
 
     // Creates new instrument.
-    public int CreateInstrument(ClearFn clearFn, NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
-      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(clearFn),
+    public int CreateInstrument(AllNotesOffFn allNotesOffFn, NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
+      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(allNotesOffFn),
                               Marshal.GetFunctionPointerForDelegate(noteOffFn),
                               Marshal.GetFunctionPointerForDelegate(noteOnFn),
                               Marshal.GetFunctionPointerForDelegate(processFn));
@@ -59,7 +59,7 @@ namespace BarelyApi {
     }
 
     // Clears instrument.
-    public void SetInstrumentClear(Instrument instrument) {
+    public void SetInstrumentAllNotesOff(Instrument instrument) {
       SetInstrumentClear(instrument.Id);
     }
 
@@ -83,19 +83,21 @@ namespace BarelyApi {
       Process();
     }
 
-    // Registers sequencer beat callback.
-    public void RegisterSequencerBeatCallback(Sequencer sequencer, BeatCallback beatCallback) {
-      RegisterSequencerBeatCallback(Marshal.GetFunctionPointerForDelegate(beatCallback));
+    // Creates sequencer.
+    public void CreateSequencer(BeatCallback beatCallback) {
+      SetSequencerBeatCallback(Marshal.GetFunctionPointerForDelegate(beatCallback));
+    }
+
+    // Destroys sequencer.
+    public void DestroySequencer() {
+      SetSequencerBeatCallback(IntPtr.Zero);
+      StopSequencer();
+      ResetSequencer();
     }
 
     // Resets sequencer.
     public void ResetSequencer(Sequencer sequencer) {
       ResetSequencer();
-    }
-
-    // Sets sequencer position.
-    public void SetSequencerPosition(Sequencer sequencer, int section, int bar, int beat) {
-      SetSequencerPosition(section, bar, beat);
     }
 
     // Sets sequencer transport.
@@ -173,7 +175,7 @@ namespace BarelyApi {
 
     // Instrument handlers.
     [DllImport(pluginName)]
-    private static extern int CreateInstrument(IntPtr clearFnPtr, IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+    private static extern int CreateInstrument(IntPtr allNotesOffFnPtr, IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
                                                IntPtr processFnPtr);
 
     [DllImport(pluginName)]
@@ -193,19 +195,16 @@ namespace BarelyApi {
 
     // Sequencer handlers.
     [DllImport(pluginName)]
-    private static extern void RegisterSequencerBeatCallback(IntPtr beatCallbackPtr);
+    private static extern void ResetSequencer();
 
     [DllImport(pluginName)]
-    private static extern void ResetSequencer();
+    private static extern void SetSequencerBeatCallback(IntPtr beatCallbackPtr);
 
     [DllImport(pluginName)]
     private static extern void SetSequencerNumBars(int numBars);
 
     [DllImport(pluginName)]
     private static extern void SetSequencerNumBeats(int numBeats);
-
-    [DllImport(pluginName)]
-    private static extern void SetSequencerPosition(int section, int bar, int beat);
 
     [DllImport(pluginName)]
     private static extern void SetSequencerTempo(float tempo);

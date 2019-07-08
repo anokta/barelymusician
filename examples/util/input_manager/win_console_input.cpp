@@ -6,7 +6,10 @@ namespace barelyapi {
 namespace examples {
 
 WinConsoleInput::WinConsoleInput()
-    : std_input_handle_(nullptr), previous_console_mode_(0) {}
+    : std_input_handle_(nullptr),
+      previous_console_mode_(0),
+      key_down_callback_(nullptr),
+      key_up_callback_(nullptr) {}
 
 void WinConsoleInput::Initialize() {
   // Get the standard input handle.

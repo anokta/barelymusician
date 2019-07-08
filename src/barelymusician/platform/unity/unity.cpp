@@ -64,15 +64,19 @@ void ResetSequencer() {
 
 void SetSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
+  if (beat_callback_ptr == nullptr) {
+    barelymusician->SetSequencerBeatCallback(nullptr);
+    return;
+  }
   const auto sequencer_beat_callback =
-    [beat_callback_ptr](const Transport& transport, int, int) {
-    const int section = transport.section;
-    const int bar = transport.bar;
-    const int beat = transport.beat;
-    main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
-      beat_callback_ptr(section, bar, beat);
-    });
-  };
+      [beat_callback_ptr](const Transport& transport, int, int) {
+        const int section = transport.section;
+        const int bar = transport.bar;
+        const int beat = transport.beat;
+        main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
+          beat_callback_ptr(section, bar, beat);
+        });
+      };
   barelymusician->SetSequencerBeatCallback(sequencer_beat_callback);
 }
 

@@ -24,7 +24,7 @@ namespace BarelyApi {
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);
     }
 
-    protected override void Clear() {
+    protected override void AllNotesOff() {
       phase = 0.0f;
     }
 

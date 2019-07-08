@@ -11,6 +11,7 @@ namespace barelyapi {
 Sequencer::Sequencer(int sample_rate)
     : num_samples_per_minute_(static_cast<float>(sample_rate) *
                               kSecondsFromMinutes),
+      beat_callback_(nullptr),
       leftover_samples_(0),
       num_samples_per_beat_(0),
       transport_({}) {

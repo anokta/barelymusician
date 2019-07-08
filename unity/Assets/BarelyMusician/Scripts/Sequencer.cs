@@ -45,8 +45,11 @@ namespace BarelyApi {
     }
 
     void OnEnable() {
-      // TODO(#53): Need to de-register on shutdown?
-      BarelyMusician.Instance.RegisterSequencerBeatCallback(this, beatCallback);
+      BarelyMusician.Instance.CreateSequencer(beatCallback);
+    }
+
+    void OnDisable() {
+      BarelyMusician.Instance.DestroySequencer();
     }
 
     void OnDestroy() {

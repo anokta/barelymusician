@@ -18,8 +18,8 @@ namespace BarelyApi {
     public int Id { get; protected set; } = BarelyMusician.InvalidId;
 
     // Clears all notes.
-    public void ClearAllNotes() {
-      BarelyMusician.Instance.SetInstrumentClear(this);
+    public void Clear() {
+      BarelyMusician.Instance.SetInstrumentAllNotesOff(this);
     }
 
     // Starts note with the given |index| and |intensity|.
@@ -32,8 +32,8 @@ namespace BarelyApi {
       BarelyMusician.Instance.SetInstrumentNoteOff(this, index);
     }
 
-    // Clears the instrument.
-    protected abstract void Clear();
+    // Clears all notes.
+    protected abstract void AllNotesOff();
 
     // Stops playing note with the given |index|.
     protected abstract void NoteOff(float index);

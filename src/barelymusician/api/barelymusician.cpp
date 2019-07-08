@@ -78,14 +78,14 @@ void BarelyMusician::StopInstrumentNote(int instrument_id, float index) {
   });
 }
 
-void BarelyMusician::RegisterSequencerBeatCallback(BeatCallback beat_callback) {
-  task_runner_.Add([this, beat_callback]() mutable {
-    sequencer_.RegisterBeatCallback(std::move(beat_callback));
-  });
-}
-
 void BarelyMusician::ResetSequencer() {
   task_runner_.Add([this]() { sequencer_.Reset(); });
+}
+
+void BarelyMusician::SetSequencerBeatCallback(BeatCallback beat_callback) {
+  task_runner_.Add([this, beat_callback]() mutable {
+    sequencer_.SetBeatCallback(std::move(beat_callback));
+  });
 }
 
 void BarelyMusician::SetSequencerNumBars(int num_bars) {

@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
               << transport.beat;
     metronome.OnBeat(transport, start_sample);
   };
-  sequencer.RegisterBeatCallback(beat_callback);
+  sequencer.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&task_runner, &sequencer,

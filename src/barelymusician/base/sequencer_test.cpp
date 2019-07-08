@@ -16,28 +16,6 @@ const int kNumBeats = 4;
 
 const int kBeatsPerSecond = static_cast<int>(kTempo / kSecondsFromMinutes);
 
-// Tests that the sequencer triggers the registered beat callback as expected.
-TEST(SequencerTest, RegisterBeatCallback) {
-  const int kNumSeconds = 8;
-
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
-
-  int beat = 0;
-  const auto beat_callback = [&beat](const Transport& transport,
-                                     int start_sample,
-                                     int num_samples_per_beat) {
-    EXPECT_EQ(transport.beat, beat);
-    EXPECT_EQ((beat % kBeatsPerSecond) * num_samples_per_beat, start_sample);
-    ++beat;
-  };
-  sequencer.RegisterBeatCallback(beat_callback);
-
-  for (int i = 0; i < kNumSeconds; ++i) {
-    sequencer.Update(kSampleRate);
-  }
-}
-
 // Tests that the sequencer resets its transport position as expected.
 TEST(SequencerTest, Reset) {
   const int kUpdateSeconds = 12;
@@ -58,6 +36,27 @@ TEST(SequencerTest, Reset) {
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
 }
 
+// Tests that the sequencer triggers the registered beat callback as expected.
+TEST(SequencerTest, SetBeatCallback) {
+  const int kNumSeconds = 8;
+
+  Sequencer sequencer(kSampleRate);
+  sequencer.SetTempo(kTempo);
+
+  int beat = 0;
+  const auto beat_callback = [&beat](const Transport& transport,
+                                     int start_sample,
+                                     int num_samples_per_beat) {
+    EXPECT_EQ(transport.beat, beat);
+    EXPECT_EQ((beat % kBeatsPerSecond) * num_samples_per_beat, start_sample);
+    ++beat;
+  };
+  sequencer.SetBeatCallback(beat_callback);
+
+  for (int i = 0; i < kNumSeconds; ++i) {
+    sequencer.Update(kSampleRate);
+  }
+}
 
 // Tests that transport parameters of the sequencer get set as expected.
 TEST(SequencerTest, SetTransport) {

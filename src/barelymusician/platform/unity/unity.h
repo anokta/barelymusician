@@ -39,13 +39,13 @@ void EXPORT_API UpdateAudioThread();
 // Updates main thread state.
 void EXPORT_API UpdateMainThread();
 
-// Registers sequencer beat callback.
-//
-// @param beat_callback_ptr Sequencer beat callback.
-void EXPORT_API RegisterSequencerBeatCallback(BeatCallback* beat_callback_ptr);
-
 // Resets sequencer.
 void EXPORT_API ResetSequencer();
+
+// Sets sequencer beat callback.
+//
+// @param beat_callback_ptr Sequencer beat callback.
+void EXPORT_API SetSequencerBeatCallback(BeatCallback* beat_callback_ptr);
 
 // Sets sequencer number of bars per section.
 //

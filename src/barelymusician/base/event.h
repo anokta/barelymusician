@@ -9,11 +9,15 @@ namespace barelyapi {
 
 // Argument agnostic event that allows a triggering mechanism for all the
 // registered callbacks.
+// TODO(#22): Implement |Deregister| to support more flexible registration.
 template <typename... ArgumentTypes>
 class Event {
  public:
   // Event callback signature.
   using Callback = std::function<void(ArgumentTypes...)>;
+
+  // Clears all callbacks.
+  void Clear();
 
   // Registers callback to the event.
   //
@@ -29,6 +33,11 @@ class Event {
   // List of callbacks.
   std::vector<Callback> callbacks_;
 };
+
+template <typename... ArgumentTypes>
+void Event<ArgumentTypes...>::Clear() {
+  callbacks_.clear();
+}
 
 template <typename... ArgumentTypes>
 void Event<ArgumentTypes...>::Register(Callback&& callback) {

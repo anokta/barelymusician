@@ -59,13 +59,13 @@ class BarelyMusician {
   // @param index Note index.
   void StopInstrumentNote(int instrument_id, float index);
 
-  // Registers new sequencer beat callback.
-  //
-  // @param beat_callback Sequencer beat callback.
-  void RegisterSequencerBeatCallback(BeatCallback beat_callback);
-
   // Resets sequencer playback.
   void ResetSequencer();
+
+  // Sets sequencer beat callback.
+  //
+  // @param beat_callback Sequencer beat callback.
+  void SetSequencerBeatCallback(BeatCallback beat_callback);
 
   // Sets sequencer number of bars per section.
   //

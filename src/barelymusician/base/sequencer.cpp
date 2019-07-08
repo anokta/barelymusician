@@ -19,15 +19,18 @@ Sequencer::Sequencer(int sample_rate)
 
 const Transport& Sequencer::GetTransport() const { return transport_; }
 
-void Sequencer::RegisterBeatCallback(BeatCallback&& beat_callback) {
-  beat_event_.Register(std::move(beat_callback));
-}
-
 void Sequencer::Reset() {
   transport_.section = 0;
   transport_.bar = 0;
   transport_.beat = 0;
   leftover_samples_ = 0;
+}
+
+void Sequencer::SetBeatCallback(BeatCallback&& beat_callback) {
+  beat_event_.Clear();
+  if (beat_callback != nullptr) {
+    beat_event_.Register(std::move(beat_callback));
+  }
 }
 
 void Sequencer::SetNumBars(int num_bars) {

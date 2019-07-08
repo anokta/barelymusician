@@ -22,13 +22,13 @@ class Sequencer {
   // @return Playback transport.
   const Transport& GetTransport() const;
 
-  // Registers beat callback.
-  //
-  // @param beat_callback Beat callback to trigger for each beat.
-  void RegisterBeatCallback(BeatCallback&& beat_callback);
-
   // Resets the playback transport.
   void Reset();
+
+  // Sets beat callback.
+  //
+  // @param beat_callback Beat callback to trigger for each beat.
+  void SetBeatCallback(BeatCallback&& beat_callback);
 
   // Sets the number of bars per each section.
   //

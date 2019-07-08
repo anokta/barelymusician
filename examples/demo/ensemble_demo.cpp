@@ -282,7 +282,7 @@ int main(int argc, char* argv[]) {
       }
     }
   };
-  sequencer.RegisterBeatCallback(beat_callback);
+  sequencer.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

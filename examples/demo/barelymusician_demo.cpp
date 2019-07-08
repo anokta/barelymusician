@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
               << " (" << num_samples_per_beat << ")";
     ;
   };
-  sequencer.RegisterBeatCallback(beat_callback);
+  sequencer.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&sequencer](float* output) {

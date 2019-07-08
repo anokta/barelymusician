@@ -57,23 +57,23 @@ void UpdateMainThread() {
   main_task_runner->Run();
 }
 
-void RegisterSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
-  DCHECK(barelymusician);
-  const auto sequencer_beat_callback =
-      [beat_callback_ptr](const Transport& transport, int, int) {
-        const int section = transport.section;
-        const int bar = transport.bar;
-        const int beat = transport.beat;
-        main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
-          beat_callback_ptr(section, bar, beat);
-        });
-      };
-  barelymusician->RegisterSequencerBeatCallback(sequencer_beat_callback);
-}
-
 void ResetSequencer() {
   DCHECK(barelymusician);
   barelymusician->ResetSequencer();
+}
+
+void SetSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
+  DCHECK(barelymusician);
+  const auto sequencer_beat_callback =
+    [beat_callback_ptr](const Transport& transport, int, int) {
+    const int section = transport.section;
+    const int bar = transport.bar;
+    const int beat = transport.beat;
+    main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
+      beat_callback_ptr(section, bar, beat);
+    });
+  };
+  barelymusician->SetSequencerBeatCallback(sequencer_beat_callback);
 }
 
 void SetSequencerNumBars(int num_bars) {

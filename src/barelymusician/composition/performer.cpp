@@ -68,7 +68,7 @@ void Performer::StopNote(float index, int timestamp) {
       BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
 }
 
-void Performer::ProcessMessage(const Message& message) {
+void Performer::ProcessMessage(const Message& message) const {
   switch (message.id) {
     case kNoteOffId: {
       const NoteOffData note_off = ReadMessageData<NoteOffData>(message.data);

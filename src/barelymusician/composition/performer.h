@@ -18,6 +18,8 @@ class Performer {
   explicit Performer(std::unique_ptr<Instrument> instrument);
 
   // Returns the mutable instrument.
+  //
+  // @return Pointer to the instrument.
   Instrument* GetInstrument() const;
 
   // Processes the next |output| buffer with the given |timestamp|.
@@ -43,7 +45,7 @@ class Performer {
 
  private:
   // Processes the given |message|.
-  void ProcessMessage(const Message& message);
+  void ProcessMessage(const Message& message) const;
 
   // Instrument to perform.
   std::unique_ptr<Instrument> instrument_;

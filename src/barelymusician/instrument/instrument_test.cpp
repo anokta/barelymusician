@@ -1,4 +1,4 @@
-#include "barelymusician/composition/performer.h"
+#include "barelymusician/instrument/instrument.h"
 
 #include <algorithm>
 #include <memory>
@@ -6,7 +6,6 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/instrument/instrument.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -35,17 +34,18 @@ class TestInstrument : public Instrument {
   float sample_;
 };
 
-// Tests that performing a single note produces the expected output.
-TEST(PerformerTest, PlaySingleNote) {
+// Tests that playing a single note produces the expected output.
+TEST(InstrumentTest, PlaySingleNote) {
   const float kNoteIndex = 32.0f;
   const float kNoteIntensity = 0.5f;
   const int kNoteTimestamp = 24;
 
-  Performer performer(std::make_unique<TestInstrument>());
+  TestInstrument instrument;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, kNoteTimestamp);
+  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames,
+                           kNoteTimestamp);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -53,10 +53,11 @@ TEST(PerformerTest, PlaySingleNote) {
   }
 
   // Start note.
-  performer.StartNote(kNoteIndex, kNoteIntensity, kNoteTimestamp);
+  instrument.StartNote(kNoteIndex, kNoteIntensity, kNoteTimestamp);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, kNoteTimestamp);
+  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames,
+                           kNoteTimestamp);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -65,10 +66,11 @@ TEST(PerformerTest, PlaySingleNote) {
   }
 
   // Stop note.
-  performer.StopNote(kNoteIndex, kNoteTimestamp);
+  instrument.StopNote(kNoteIndex, kNoteTimestamp);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, kNoteTimestamp);
+  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames,
+                           kNoteTimestamp);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -76,15 +78,15 @@ TEST(PerformerTest, PlaySingleNote) {
   }
 }
 
-// Tests that performing multiple notes produces the expected output.
-TEST(PerformerTest, PlayMultipleNotes) {
+// Tests that playing multiple notes produces the expected output.
+TEST(InstrumentTest, PlayMultipleNotes) {
   const float kNoteIntensity = 1.0f;
 
-  Performer performer(std::make_unique<TestInstrument>());
+  TestInstrument instrument;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, 0);
+  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames, 0);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -93,11 +95,11 @@ TEST(PerformerTest, PlayMultipleNotes) {
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
-    performer.StartNote(static_cast<float>(i), kNoteIntensity, i);
+    instrument.StartNote(static_cast<float>(i), kNoteIntensity, i);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, 0);
+  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames, 0);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kNoteIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -107,11 +109,11 @@ TEST(PerformerTest, PlayMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    performer.StopNote(static_cast<float>(i), 0);
+    instrument.StopNote(static_cast<float>(i), 0);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, 0);
+  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames, 0);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

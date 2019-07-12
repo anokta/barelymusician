@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <chrono>
 #include <functional>
+#include <memory>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -8,15 +9,14 @@
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/composition/performer.h"
 #include "barelymusician/instrument/instrument.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
+using ::barelyapi::Instrument;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Performer;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
@@ -46,7 +46,7 @@ const OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 const char kMidiFileName[] = "data/midi/sample.mid";
 
 bool PerformScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
-                  int samples_per_beat, Performer* performer) {
+                  int samples_per_beat, Instrument* instrument) {
   const auto get_timestamp = [ticks_per_beat, samples_per_beat](int tick) {
     return static_cast<int>(static_cast<Int64>(samples_per_beat) *
                             static_cast<Int64>(tick) /
@@ -63,11 +63,11 @@ bool PerformScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const float intensity =
           static_cast<float>(midi_event.getVelocity()) / max_velocity;
       const int timestamp = get_timestamp(midi_event.tick);
-      performer->StartNote(index, intensity, timestamp);
+      instrument->StartNote(index, intensity, timestamp);
     } else if (midi_event.isNoteOff()) {
       const float index = static_cast<float>(midi_event.getKeyNumber());
       const int timestamp = get_timestamp(midi_event.tick);
-      performer->StopNote(index, timestamp);
+      instrument->StopNote(index, timestamp);
     }
   }
   return has_notes;
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
       static_cast<int>(static_cast<float>(kSampleRate) *
                        barelyapi::kSecondsFromMinutes / kTempo);
 
-  std::vector<Performer> performers;
+  std::vector<std::unique_ptr<Instrument>> instruments;
 
   for (int i = 0; i < num_tracks; ++i) {
     // Create instrument.
@@ -106,23 +106,22 @@ int main(int argc, char* argv[]) {
     instrument->SetFloatParam(BasicSynthInstrumentParam::kGain,
                               kInstrumentGain);
     // Create performer.
-    Performer performer(std::move(instrument));
     if (PerformScore(midi_file[i], ticks_per_quarter, samples_per_beat,
-                     &performer)) {
-      performers.push_back(std::move(performer));
+                     instrument.get())) {
+      instruments.push_back(std::move(instrument));
     }
   }
-  LOG(INFO) << "Number of performers: " << performers.size();
+  LOG(INFO) << "Number of instruments: " << instruments.size();
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   int timestamp = 0;
-  const auto process_callback = [&performers, &temp_buffer,
+  const auto process_callback = [&instruments, &temp_buffer,
                                  &timestamp](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (auto& performer : performers) {
-      performer.Process(temp_buffer.data(), kNumChannels, kNumFrames,
-                        timestamp);
+    for (const auto& instrument : instruments) {
+      instrument->ProcessBuffer(temp_buffer.data(), kNumChannels, kNumFrames,
+                                timestamp);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
     }

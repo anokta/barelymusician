@@ -7,7 +7,6 @@
 
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/base/task_runner.h"
-#include "barelymusician/composition/performer.h"
 #include "barelymusician/instrument/instrument.h"
 
 namespace barelyapi {
@@ -93,8 +92,8 @@ class BarelyMusician {
   void Update();
 
  private:
-  // Returns performer with the given |instrument_id|.
-  Performer* GetPerformer(int instrument_id);
+  // Returns instrument with the given |instrument_id|.
+  Instrument* GetInstrument(int instrument_id);
 
   // Sampling rate.
   const int sample_rate_;
@@ -111,8 +110,8 @@ class BarelyMusician {
   // Task runner to ensure thread-safety between main and audio threads.
   TaskRunner task_runner_;
 
-  // Performers.
-  std::unordered_map<int, Performer> performers_;
+  // Instruments.
+  std::unordered_map<int, std::unique_ptr<Instrument>> instruments_;
 
   // Sequencer.
   Sequencer sequencer_;
@@ -128,9 +127,8 @@ template <typename InstrumentType, typename... ArgumentTypes>
 int BarelyMusician::CreateInstrument(ArgumentTypes... arguments) {
   const int instrument_id = ++id_counter_;
   task_runner_.Add([this, arguments..., instrument_id]() {
-    performers_.insert(std::make_pair(
-        instrument_id,
-        Performer(std::make_unique<InstrumentType>(arguments...))));
+    instruments_.insert(std::make_pair(
+        instrument_id, std::make_unique<InstrumentType>(arguments...)));
   });
   return instrument_id;
 }

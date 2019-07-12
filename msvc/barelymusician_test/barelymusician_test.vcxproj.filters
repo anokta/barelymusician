@@ -69,8 +69,8 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer_test.cpp">
       <Filter>Source Files\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\composition\performer_test.cpp">
-      <Filter>Source Files\composition</Filter>
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_test.cpp">
+      <Filter>Source Files\instrument</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

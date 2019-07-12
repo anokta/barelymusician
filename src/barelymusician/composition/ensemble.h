@@ -7,7 +7,6 @@
 
 #include "barelymusician/base/transport.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/composition/performer.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
 
@@ -30,8 +29,8 @@ struct Ensemble {
   // Bar composer callback.
   BarComposerCallback bar_composer_callback;
 
-  // List of performers with their corresponding composers.
-  std::vector<std::pair<Performer, BeatComposerCallback>> performers;
+  // List of performers.
+  std::vector<std::pair<Instrument*, BeatComposerCallback>> performers;
 };
 
 }  // namespace barelyapi

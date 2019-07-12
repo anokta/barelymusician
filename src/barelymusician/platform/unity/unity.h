@@ -18,7 +18,7 @@ using NoteOffCallback = void(float);
 using NoteOnCallback = void(float, float);
 
 // Instrument function signatures.
-using ClearFn = void();
+using AllNotesOffFn = void();
 using NoteOffFn = void(float);
 using NoteOnFn = void(float, float);
 using ProcessFn = void(float*, int, int);
@@ -70,12 +70,12 @@ void EXPORT_API StopSequencer();
 
 // Creates new instrument.
 //
-// @param clear_fn_ptr Clear function.
+// @param all_notes_off_fn_ptr All notes off function.
 // @param note_off_fn_ptr Note off function.
 // @param note_on_fn_ptr Note on function.
 // @param process_fn_ptr Process function.
 // @return Instrument ID.
-int EXPORT_API CreateInstrument(ClearFn* clear_fn_ptr,
+int EXPORT_API CreateInstrument(AllNotesOffFn* all_notes_off_fn_ptr,
                                 NoteOffFn* note_off_fn_ptr,
                                 NoteOnFn* note_on_fn_ptr,
                                 ProcessFn* process_fn_ptr);
@@ -91,18 +91,18 @@ void EXPORT_API DestroyInstrument(int instrument_id);
 // @param output Output buffer.
 void EXPORT_API ProcessInstrument(int instrument_id, float* output);
 
-// Resets instrument.
+// Stops all instrument notes.
 //
 // @param instrument_id Instrument ID.
-void EXPORT_API SetInstrumentClear(int instrument_id);
+void EXPORT_API SetInstrumentAllNotesOff(int instrument_id);
 
-// Stops playing instrument's note.
+// Stops instrument note.
 //
 // @param instrument_id Instrument ID.
 // @param index Note index.
 void EXPORT_API SetInstrumentNoteOff(int instrument_id, float index);
 
-// Starts playing instrument's note.
+// Starts instrument note.
 //
 // @param instrument_id Instrument ID.
 // @param index Note index.

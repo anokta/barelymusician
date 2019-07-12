@@ -35,29 +35,29 @@ class BarelyMusician {
   // @param instrument_id Instrument ID.
   void DestroyInstrument(int instrument_id);
 
-  // Clears all instrument notes.
-  //
-  // @param instrument_id Instrument ID.
-  void ClearAllInstrumentNotes(int instrument_id);
-
   // Processes instrument.
   //
   // @param instrument_id Instrument ID.
   // @param output Output buffer.
   void ProcessInstrument(int instrument_id, float* output);
 
-  // Starts playing instrument note.
+  // Stops all instrument notes.
+  //
+  // @param instrument_id Instrument ID.
+  void SetInstrumentAllNotesOff(int instrument_id);
+
+  // Stops instrument note.
+  //
+  // @param instrument_id Instrument ID.
+  // @param index Note index.
+  void SetInstrumentNoteOff(int instrument_id, float index);
+
+  // Starts instrument note.
   //
   // @param instrument_id Instrument ID.
   // @param index Note index.
   // @param intensity Note intensity.
-  void StartInstrumentNote(int instrument_id, float index, float intensity);
-
-  // Stops playing instrument note.
-  //
-  // @param instrument_id Instrument ID.
-  // @param index Note index.
-  void StopInstrumentNote(int instrument_id, float index);
+  void SetInstrumentNoteOn(int instrument_id, float index, float intensity);
 
   // Resets sequencer playback.
   void ResetSequencer();

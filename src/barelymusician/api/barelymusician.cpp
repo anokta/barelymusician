@@ -35,17 +35,6 @@ void BarelyMusician::DestroyInstrument(int instrument_id) {
       [this, instrument_id]() { instruments_.erase(instrument_id); });
 }
 
-void BarelyMusician::ClearAllInstrumentNotes(int instrument_id) {
-  task_runner_.Add([this, instrument_id]() {
-    Instrument* instrument = GetInstrument(instrument_id);
-    if (instrument != nullptr) {
-      instrument->AllNotesOff();
-    } else {
-      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
-    }
-  });
-}
-
 void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
   Instrument* instrument = GetInstrument(instrument_id);
   if (instrument != nullptr) {
@@ -56,23 +45,34 @@ void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
   }
 }
 
-void BarelyMusician::StartInstrumentNote(int instrument_id, float index,
-                                         float intensity) {
-  task_runner_.Add([this, instrument_id, index, intensity]() {
+void BarelyMusician::SetInstrumentAllNotesOff(int instrument_id) {
+  task_runner_.Add([this, instrument_id]() {
     Instrument* instrument = GetInstrument(instrument_id);
     if (instrument != nullptr) {
-      instrument->NoteOn(index, intensity);
+      instrument->AllNotesOff();
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }
   });
 }
 
-void BarelyMusician::StopInstrumentNote(int instrument_id, float index) {
+void BarelyMusician::SetInstrumentNoteOff(int instrument_id, float index) {
   task_runner_.Add([this, instrument_id, index]() {
     Instrument* instrument = GetInstrument(instrument_id);
     if (instrument != nullptr) {
       instrument->NoteOff(index);
+    } else {
+      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
+    }
+  });
+}
+
+void BarelyMusician::SetInstrumentNoteOn(int instrument_id, float index,
+                                         float intensity) {
+  task_runner_.Add([this, instrument_id, index, intensity]() {
+    Instrument* instrument = GetInstrument(instrument_id);
+    if (instrument != nullptr) {
+      instrument->NoteOn(index, intensity);
     } else {
       DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     }

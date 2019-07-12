@@ -58,9 +58,9 @@ namespace BarelyApi {
       ProcessInstrument(instrument.Id, output);
     }
 
-    // Clears instrument.
+    // Sets all instrument notes off.
     public void SetInstrumentAllNotesOff(Instrument instrument) {
-      SetInstrumentClear(instrument.Id);
+      SetInstrumentAllNotesOff(instrument.Id);
     }
 
     // Sets instrument note off.
@@ -185,7 +185,7 @@ namespace BarelyApi {
     private static extern void ProcessInstrument(int instrumentId, [In, Out] float[] output);
 
     [DllImport(pluginName)]
-    private static extern void SetInstrumentClear(int instrumentId);
+    private static extern void SetInstrumentAllNotesOff(int instrumentId);
 
     [DllImport(pluginName)]
     private static extern void SetInstrumentNoteOff(int instrumentId, float index);

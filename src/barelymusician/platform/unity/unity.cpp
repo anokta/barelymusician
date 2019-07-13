@@ -59,50 +59,50 @@ void UpdateMainThread() {
 
 void ResetSequencer() {
   DCHECK(barelymusician);
-  barelymusician->ResetSequencer();
+  barelymusician->Reset();
 }
 
 void SetSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
   if (beat_callback_ptr == nullptr) {
-    barelymusician->SetSequencerBeatCallback(nullptr);
+    barelymusician->SetBeatCallback(nullptr);
     return;
   }
-  const auto sequencer_beat_callback =
-      [beat_callback_ptr](const Transport& transport, int, int) {
-        const int section = transport.section;
-        const int bar = transport.bar;
-        const int beat = transport.beat;
-        main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
-          beat_callback_ptr(section, bar, beat);
-        });
-      };
-  barelymusician->SetSequencerBeatCallback(sequencer_beat_callback);
+  const auto beat_callback = [beat_callback_ptr](const Transport& transport,
+                                                 int, int) {
+    const int section = transport.section;
+    const int bar = transport.bar;
+    const int beat = transport.beat;
+    main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
+      beat_callback_ptr(section, bar, beat);
+    });
+  };
+  barelymusician->SetBeatCallback(beat_callback);
 }
 
 void SetSequencerNumBars(int num_bars) {
   DCHECK(barelymusician);
-  barelymusician->SetSequencerNumBars(num_bars);
+  barelymusician->SetNumBars(num_bars);
 }
 
 void SetSequencerNumBeats(int num_beats) {
   DCHECK(barelymusician);
-  barelymusician->SetSequencerNumBeats(num_beats);
+  barelymusician->SetNumBeats(num_beats);
 }
 
 void SetSequencerTempo(float tempo) {
   DCHECK(barelymusician);
-  barelymusician->SetSequencerTempo(tempo);
+  barelymusician->SetTempo(tempo);
 }
 
 void StartSequencer() {
   DCHECK(barelymusician);
-  barelymusician->StartSequencer();
+  barelymusician->Start();
 }
 
 void StopSequencer() {
   DCHECK(barelymusician);
-  barelymusician->StopSequencer();
+  barelymusician->Stop();
 }
 
 int CreateInstrument(AllNotesOffFn* all_notes_off_fn_ptr,

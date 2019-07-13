@@ -24,6 +24,38 @@ class BarelyMusician {
   // @param num_frames Number of output frames.
   BarelyMusician(int sample_rate, int num_channels, int num_frames);
 
+  // Resets playback.
+  void Reset();
+
+  // Starts playback.
+  void Start();
+
+  // Stops playback.
+  void Stop();
+
+  // Updates the internal state.
+  void Update();
+
+  // Sets beat callback.
+  //
+  // @param beat_callback Beat callback.
+  void SetBeatCallback(BeatCallback beat_callback);
+
+  // Sets number of bars per section.
+  //
+  // @param num_beats Number of bars per section.
+  void SetNumBars(int num_bars);
+
+  // Sets number of beats per bar.
+  //
+  // @param num_beats Number of beats per bar.
+  void SetNumBeats(int num_beats);
+
+  // Sets tempo.
+  //
+  // @param tempo Sequencer tempo.
+  void SetTempo(float tempo);
+
   // Creates new instrument of |InstrumentType|, and returns its ID.
   //
   // @return Instrument ID.
@@ -58,38 +90,6 @@ class BarelyMusician {
   // @param index Note index.
   // @param intensity Note intensity.
   void SetInstrumentNoteOn(int instrument_id, float index, float intensity);
-
-  // Resets sequencer playback.
-  void ResetSequencer();
-
-  // Sets sequencer beat callback.
-  //
-  // @param beat_callback Sequencer beat callback.
-  void SetSequencerBeatCallback(BeatCallback beat_callback);
-
-  // Sets sequencer number of bars per section.
-  //
-  // @param num_beats Number of bars per section.
-  void SetSequencerNumBars(int num_bars);
-
-  // Sets sequencer number of beats per bar.
-  //
-  // @param num_beats Number of beats per bar.
-  void SetSequencerNumBeats(int num_beats);
-
-  // Sets sequencer tempo.
-  //
-  // @param tempo Sequencer tempo.
-  void SetSequencerTempo(float tempo);
-
-  // Starts sequencer playback.
-  void StartSequencer();
-
-  // Stops sequencer playback.
-  void StopSequencer();
-
-  // Updates the internal state.
-  void Update();
 
  private:
   // Returns instrument with the given |instrument_id|.

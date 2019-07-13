@@ -63,10 +63,10 @@ void Sequencer::Update(int num_samples) {
   if (num_samples_per_beat_ == 0) {
     return;
   }
-  leftover_samples_ += num_samples;
-  if (leftover_samples_ == num_samples && beat_callback_ != nullptr) {
+  if (leftover_samples_ == 0 && beat_callback_ != nullptr) {
     beat_callback_(transport_, 0, num_samples_per_beat_);
   }
+  leftover_samples_ += num_samples;
   while (leftover_samples_ >= num_samples_per_beat_) {
     // Update beat count.
     ++transport_.beat;

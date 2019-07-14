@@ -99,19 +99,19 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
   };
   if (transport.beat % 2 == 1) {
     add_note(start_note, 0.0f, 0.25f);
-    add_note(start_note - beat, 0.33f, 0.66f);
-    add_note(start_note, 0.66f, 1.0f);
+    add_note(start_note - beat, 0.33f, 0.33f);
+    add_note(start_note, 0.66f, 0.33f);
   } else {
     add_note(start_note + beat, 0.0f, 0.25f);
   }
   if (transport.beat % 2 == 0) {
     add_note(start_note - beat, 0.0f, 0.05f);
-    add_note(start_note - 2.0f * beat, 0.5f, 0.55f);
+    add_note(start_note - 2.0f * beat, 0.5f, 0.05f);
   }
   if (transport.beat + 1 == transport.num_beats && transport.bar % 2 == 1) {
-    add_note(start_note + 2.0f * beat, 0.25f, 0.375f);
-    add_note(start_note - 2.0f * beat, 0.75f, 0.875f);
-    add_note(start_note + 2.0f * beat, 0.5f, 0.75f);
+    add_note(start_note + 2.0f * beat, 0.25f, 0.125f);
+    add_note(start_note - 2.0f * beat, 0.75f, 0.125f);
+    add_note(start_note + 2.0f * beat, 0.5f, 0.25f);
   }
 }
 
@@ -122,40 +122,40 @@ void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
   // Kick.
   if (transport.beat % 2 == 0) {
     notes->push_back(
-        {barelyapi::kNoteIndexKick, 1.0f, get_beat(0), get_beat(4)});
+        {barelyapi::kNoteIndexKick, 1.0f, get_beat(0), get_beat(2)});
     if (transport.bar % 2 == 1 && transport.beat == 0) {
       notes->push_back(
-          {barelyapi::kNoteIndexKick, 1.0f, get_beat(2), get_beat(4)});
+          {barelyapi::kNoteIndexKick, 1.0f, get_beat(2), get_beat(2)});
     }
   }
   // Snare.
   if (transport.beat % 2 == 1) {
     notes->push_back(
-        {barelyapi::kNoteIndexSnare, 1.0f, get_beat(0), get_beat(4)});
+        {barelyapi::kNoteIndexSnare, 1.0f, get_beat(0), get_beat(2)});
   }
   if (transport.beat + 1 == transport.num_beats) {
     notes->push_back(
-        {barelyapi::kNoteIndexSnare, 0.75f, get_beat(2), get_beat(4)});
+        {barelyapi::kNoteIndexSnare, 0.75f, get_beat(2), get_beat(2)});
     if (transport.bar + 1 == transport.num_bars) {
       notes->push_back(
-          {barelyapi::kNoteIndexSnare, 1.0f, get_beat(1), get_beat(2)});
+          {barelyapi::kNoteIndexSnare, 1.0f, get_beat(1), get_beat(1)});
       notes->push_back(
-          {barelyapi::kNoteIndexSnare, 0.75f, get_beat(3), get_beat(4)});
+          {barelyapi::kNoteIndexSnare, 0.75f, get_beat(3), get_beat(1)});
     }
   }
   // Hihat Closed.
   notes->push_back({barelyapi::kNoteIndexHihatClosed,
                     Random::Uniform(0.5f, 0.75f), get_beat(0), get_beat(2)});
   notes->push_back({barelyapi::kNoteIndexHihatClosed,
-                    Random::Uniform(0.25f, 0.75f), get_beat(2), get_beat(4)});
+                    Random::Uniform(0.25f, 0.75f), get_beat(2), get_beat(2)});
   // Hihat Open.
   if (transport.beat + 1 == transport.num_beats) {
     if (transport.bar + 1 == transport.num_bars) {
       notes->push_back(
-          {barelyapi::kNoteIndexHihatOpen, 0.75f, get_beat(1), get_beat(2)});
+          {barelyapi::kNoteIndexHihatOpen, 0.75f, get_beat(1), get_beat(1)});
     } else if (transport.bar % 2 == 0) {
       notes->push_back(
-          {barelyapi::kNoteIndexHihatOpen, 0.75f, get_beat(3), get_beat(4)});
+          {barelyapi::kNoteIndexHihatOpen, 0.75f, get_beat(3), get_beat(1)});
     }
   }
   if (transport.beat == 0 && transport.bar == 0) {
@@ -274,7 +274,8 @@ int main(int argc, char* argv[]) {
         it.first->StartNote(note.index, note.intensity, note_on_timestamp);
         const int note_off_timestamp =
             beat_timestamp +
-            SamplesFromBeats(note.end_beat, num_samples_per_beat);
+            SamplesFromBeats(note.start_beat + note.duration_beats,
+                             num_samples_per_beat);
         it.first->StopNote(note.index, note_off_timestamp);
       }
     }

@@ -11,11 +11,11 @@ struct Note {
   // Note intensity (typically loudness).
   float intensity;
 
-  // Start beat of the note.
+  // Note start beat.
   float start_beat;
 
-  // End beat of the note.
-  float end_beat;
+  // Note duration in beats.
+  float duration_beats;
 };
 
 }  // namespace barelyapi

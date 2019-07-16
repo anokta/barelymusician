@@ -40,11 +40,9 @@ int main(int argc, char* argv[]) {
   sequencer.SetNumBeats(kNumBeats);
 
   // Beat callback.
-  const auto beat_callback = [](const Transport& transport, int start_sample,
-                                int num_samples_per_beat) {
+  const auto beat_callback = [](const Transport& transport, int start_sample) {
     LOG(INFO) << "Transport position " << transport.section << "."
-              << transport.bar << "." << transport.beat << ":" << start_sample
-              << " (" << num_samples_per_beat << ")";
+              << transport.bar << "." << transport.beat << ":" << start_sample;
   };
   sequencer.SetBeatCallback(beat_callback);
 

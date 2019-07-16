@@ -69,7 +69,7 @@ void SetSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
     return;
   }
   const auto beat_callback = [beat_callback_ptr](const Transport& transport,
-                                                 int, int) {
+                                                 int) {
     const int section = transport.section;
     const int bar = transport.bar;
     const int beat = transport.beat;

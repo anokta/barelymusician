@@ -253,8 +253,7 @@ int main(int argc, char* argv[]) {
   int timestamp = 0;
   const auto beat_callback = [&ensemble, &section_type, &harmonic, &temp_notes,
                               &timestamp](const Transport& transport,
-                                          int start_sample,
-                                          int num_samples_per_beat) {
+                                          int start_sample) {
     if (transport.beat == 0) {
       // New bar.
       if (transport.bar == 0) {
@@ -270,12 +269,12 @@ int main(int argc, char* argv[]) {
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
             beat_timestamp +
-            SamplesFromBeats(note.start_beat, num_samples_per_beat);
+            SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
         it.first->StartNote(note.index, note.intensity, note_on_timestamp);
         const int note_off_timestamp =
             beat_timestamp +
             SamplesFromBeats(note.start_beat + note.duration_beats,
-                             num_samples_per_beat);
+                             transport.num_samples_per_beat);
         it.first->StopNote(note.index, note_off_timestamp);
       }
     }

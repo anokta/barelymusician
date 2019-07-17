@@ -64,7 +64,7 @@ void Sequencer::Update(int num_samples) {
   }
   transport_.leftover_samples += num_samples;
   if (transport_.leftover_samples == num_samples && beat_callback_ != nullptr) {
-    beat_callback_(transport_, 0);
+    beat_callback_(transport_);
   }
   while (transport_.leftover_samples >= transport_.num_samples_per_beat) {
     // Update beat count.
@@ -81,7 +81,7 @@ void Sequencer::Update(int num_samples) {
       }
     }
     if (transport_.leftover_samples > 0 && beat_callback_ != nullptr) {
-      beat_callback_(transport_, num_samples - transport_.leftover_samples);
+      beat_callback_(transport_);
     }
   }
 }

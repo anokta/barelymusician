@@ -252,8 +252,7 @@ int main(int argc, char* argv[]) {
   std::vector<Note> temp_notes;
   int timestamp = 0;
   const auto beat_callback = [&ensemble, &section_type, &harmonic, &temp_notes,
-                              &timestamp](const Transport& transport,
-                                          int start_sample) {
+                              &timestamp](const Transport& transport) {
     if (transport.beat == 0) {
       // New bar.
       if (transport.bar == 0) {
@@ -265,7 +264,8 @@ int main(int argc, char* argv[]) {
     for (const auto& it : ensemble.performers) {
       temp_notes.clear();
       it.second(transport, section_type, harmonic, &temp_notes);
-      const int beat_timestamp = timestamp + start_sample;
+      const int beat_timestamp =
+          timestamp + kNumFrames - transport.leftover_samples;
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
             beat_timestamp +

@@ -92,8 +92,7 @@ int main(int argc, char* argv[]) {
   MetronomeInstrument metronome;
 
   // Beat callback.
-  const auto beat_callback = [&metronome](const Transport& transport,
-                                          int start_sample) {
+  const auto beat_callback = [&metronome](const Transport& transport) {
     LOG(INFO) << "Tick " << transport.section << "." << transport.bar << "."
               << transport.beat;
 
@@ -101,6 +100,7 @@ int main(int argc, char* argv[]) {
     if (transport.beat == 0) {
       note_index = (transport.bar == 0) ? kSectionNoteIndex : kBarNoteIndex;
     }
+    const int start_sample = kNumFrames - transport.leftover_samples;
     metronome.StartNote(note_index, kGain, start_sample);
     metronome.StopNote(note_index, start_sample + 1);
   };

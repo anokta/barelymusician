@@ -68,8 +68,7 @@ void SetSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
     barelymusician->SetBeatCallback(nullptr);
     return;
   }
-  const auto beat_callback = [beat_callback_ptr](const Transport& transport,
-                                                 int) {
+  const auto beat_callback = [beat_callback_ptr](const Transport& transport) {
     const int section = transport.section;
     const int bar = transport.bar;
     const int beat = transport.beat;

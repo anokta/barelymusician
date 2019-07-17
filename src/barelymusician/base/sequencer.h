@@ -11,7 +11,7 @@ namespace barelyapi {
 class Sequencer {
  public:
   // Beat event callback signature.
-  using BeatCallback = std::function<void(const Transport&, int)>;
+  using BeatCallback = std::function<void(const Transport&)>;
 
   // Constructs new |Sequencer|.
   //

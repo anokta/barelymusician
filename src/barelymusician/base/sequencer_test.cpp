@@ -24,16 +24,19 @@ TEST(SequencerTest, Reset) {
   sequencer.SetTempo(kTempo);
   sequencer.SetNumBars(kNumBars);
   sequencer.SetNumBeats(kNumBeats);
+  EXPECT_NE(sequencer.GetTransport().num_samples_per_beat, 0);
 
   sequencer.Update(kUpdateSeconds * kSampleRate);
   EXPECT_GE(sequencer.GetTransport().section, 0);
   EXPECT_GE(sequencer.GetTransport().bar, 0);
   EXPECT_GE(sequencer.GetTransport().beat, 0);
+  EXPECT_GE(sequencer.GetTransport().leftover_samples, 0);
 
   sequencer.Reset();
   EXPECT_EQ(sequencer.GetTransport().section, 0);
   EXPECT_EQ(sequencer.GetTransport().bar, 0);
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
+  EXPECT_EQ(sequencer.GetTransport().leftover_samples, 0);
 }
 
 // Tests that the sequencer triggers the registered beat callback as expected.
@@ -44,11 +47,8 @@ TEST(SequencerTest, SetBeatCallback) {
   sequencer.SetTempo(kTempo);
 
   int beat = 0;
-  const auto beat_callback = [&beat](const Transport& transport,
-                                     int start_sample) {
+  const auto beat_callback = [&beat](const Transport& transport) {
     EXPECT_EQ(transport.beat, beat);
-    EXPECT_EQ((beat % kBeatsPerSecond) * transport.num_samples_per_beat,
-              start_sample);
     ++beat;
   };
   sequencer.SetBeatCallback(beat_callback);
@@ -56,6 +56,7 @@ TEST(SequencerTest, SetBeatCallback) {
   for (int i = 0; i < kNumSeconds; ++i) {
     sequencer.Update(kSampleRate);
   }
+  EXPECT_NE(beat, 0);
 }
 
 // Tests that transport parameters of the sequencer get set as expected.
@@ -84,12 +85,14 @@ TEST(SequencerTest, Update) {
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
   sequencer.SetNumBeats(0);
+  EXPECT_NE(sequencer.GetTransport().num_samples_per_beat, 0);
 
   // Test beat count.
   sequencer.Update(kSampleRate);
   EXPECT_EQ(sequencer.GetTransport().section, 0);
   EXPECT_EQ(sequencer.GetTransport().bar, 0);
   EXPECT_EQ(sequencer.GetTransport().beat, kBeatsPerSecond);
+  EXPECT_EQ(sequencer.GetTransport().leftover_samples, 0);
   // Test bar count.
   sequencer.Reset();
   sequencer.SetNumBeats(1);
@@ -97,6 +100,7 @@ TEST(SequencerTest, Update) {
   EXPECT_EQ(sequencer.GetTransport().section, 0);
   EXPECT_EQ(sequencer.GetTransport().bar, kBeatsPerSecond);
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
+  EXPECT_EQ(sequencer.GetTransport().leftover_samples, 0);
   // Test section count.
   sequencer.Reset();
   sequencer.SetNumBars(1);
@@ -104,6 +108,7 @@ TEST(SequencerTest, Update) {
   EXPECT_EQ(sequencer.GetTransport().section, kBeatsPerSecond);
   EXPECT_EQ(sequencer.GetTransport().bar, 0);
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
+  EXPECT_EQ(sequencer.GetTransport().leftover_samples, 0);
 }
 
 // Tests that the sequencer updates its transport position as expected when
@@ -114,11 +119,15 @@ TEST(SequencerTest, UpdateDefault) {
   EXPECT_EQ(sequencer.GetTransport().section, 0);
   EXPECT_EQ(sequencer.GetTransport().bar, 0);
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
+  EXPECT_EQ(sequencer.GetTransport().leftover_samples, 0);
+  EXPECT_EQ(sequencer.GetTransport().num_samples_per_beat, 0);
 
   sequencer.Update(kSampleRate);
   EXPECT_EQ(sequencer.GetTransport().section, 0);
   EXPECT_EQ(sequencer.GetTransport().bar, 0);
   EXPECT_EQ(sequencer.GetTransport().beat, 0);
+  EXPECT_EQ(sequencer.GetTransport().leftover_samples, 0);
+  EXPECT_EQ(sequencer.GetTransport().num_samples_per_beat, 0);
 }
 
 }  // namespace

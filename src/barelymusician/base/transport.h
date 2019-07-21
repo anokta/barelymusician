@@ -14,6 +14,9 @@ struct Transport {
   // Number of beats per bar.
   int num_beats;
 
+  // Number of samples per beat.
+  int num_samples;
+
   // Current section.
   int section;
 
@@ -24,10 +27,7 @@ struct Transport {
   int beat;
 
   // Leftover samples from the current beat.
-  int leftover_samples;
-
-  // Number of samples per beat.
-  int num_samples_per_beat;
+  int sample;
 };
 
 }  // namespace barelyapi

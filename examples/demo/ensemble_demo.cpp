@@ -264,17 +264,16 @@ int main(int argc, char* argv[]) {
     for (const auto& it : ensemble.performers) {
       temp_notes.clear();
       it.second(transport, section_type, harmonic, &temp_notes);
-      const int beat_timestamp =
-          timestamp + kNumFrames - transport.leftover_samples;
+      const int beat_timestamp = timestamp + kNumFrames - transport.sample;
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
             beat_timestamp +
-            SamplesFromBeats(note.start_beat, transport.num_samples_per_beat);
+            SamplesFromBeats(note.start_beat, transport.num_samples);
         it.first->StartNote(note.index, note.intensity, note_on_timestamp);
         const int note_off_timestamp =
             beat_timestamp +
             SamplesFromBeats(note.start_beat + note.duration_beats,
-                             transport.num_samples_per_beat);
+                             transport.num_samples);
         it.first->StopNote(note.index, note_off_timestamp);
       }
     }

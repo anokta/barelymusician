@@ -22,7 +22,7 @@ void Sequencer::Reset() {
   transport_.section = 0;
   transport_.bar = 0;
   transport_.beat = 0;
-  transport_.leftover_samples = 0;
+  transport_.sample = 0;
 }
 
 void Sequencer::SetBeatCallback(BeatCallback&& beat_callback) {
@@ -48,28 +48,27 @@ void Sequencer::SetNumBeats(int num_beats) {
 void Sequencer::SetTempo(float tempo) {
   DCHECK_GE(tempo, 0.0f);
   transport_.tempo = tempo;
-  const float leftover_beats = BeatsFromSamples(
-      transport_.leftover_samples, transport_.num_samples_per_beat);
-  transport_.num_samples_per_beat =
+  const float beat =
+      BeatsFromSamples(transport_.sample, transport_.num_samples);
+  transport_.num_samples =
       (transport_.tempo > 0.0f)
           ? static_cast<int>(num_samples_per_minute_ / transport_.tempo)
           : 0;
-  transport_.leftover_samples =
-      SamplesFromBeats(leftover_beats, transport_.num_samples_per_beat);
+  transport_.sample = SamplesFromBeats(beat, transport_.num_samples);
 }
 
 void Sequencer::Update(int num_samples) {
-  if (transport_.num_samples_per_beat == 0) {
+  if (transport_.num_samples == 0) {
     return;
   }
-  transport_.leftover_samples += num_samples;
-  if (transport_.leftover_samples == num_samples && beat_callback_ != nullptr) {
+  transport_.sample += num_samples;
+  if (transport_.sample == num_samples && beat_callback_ != nullptr) {
     beat_callback_(transport_);
   }
-  while (transport_.leftover_samples >= transport_.num_samples_per_beat) {
+  while (transport_.sample >= transport_.num_samples) {
     // Update beat count.
     ++transport_.beat;
-    transport_.leftover_samples -= transport_.num_samples_per_beat;
+    transport_.sample -= transport_.num_samples;
     if (transport_.num_beats > 0 && transport_.beat >= transport_.num_beats) {
       // Update bar count.
       ++transport_.bar;
@@ -80,7 +79,7 @@ void Sequencer::Update(int num_samples) {
         transport_.bar -= transport_.num_bars;
       }
     }
-    if (transport_.leftover_samples > 0 && beat_callback_ != nullptr) {
+    if (transport_.sample > 0 && beat_callback_ != nullptr) {
       beat_callback_(transport_);
     }
   }

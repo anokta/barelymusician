@@ -41,9 +41,8 @@ int main(int argc, char* argv[]) {
 
   // Beat callback.
   const auto beat_callback = [](const Transport& transport) {
-    LOG(INFO) << "Transport position " << transport.section << "."
-              << transport.bar << "." << transport.beat << ":"
-              << transport.leftover_samples;
+    LOG(INFO) << "Transport " << transport.section << "." << transport.bar
+              << "." << transport.beat << ":" << transport.sample;
   };
   sequencer.SetBeatCallback(beat_callback);
 

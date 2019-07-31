@@ -24,9 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
@@ -75,5 +72,8 @@
     <ClCompile Include="..\..\src\barelymusician\composition\score_test.cpp">
       <Filter>Source Files\composition</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

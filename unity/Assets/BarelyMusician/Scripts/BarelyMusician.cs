@@ -8,7 +8,7 @@ namespace BarelyApi {
   // Main |BarelyMusician| class that communicates with the native code.
   public class BarelyMusician {
     // Internal event callbacks.
-    public delegate void BeatCallback(int section, int bar, int beat);
+    public delegate void BeatCallback(int beat);
     public delegate void NoteOffCallback(float index);
     public delegate void NoteOnCallback(float index, float intensity);
 
@@ -100,13 +100,6 @@ namespace BarelyApi {
       ResetSequencer();
     }
 
-    // Sets sequencer transport.
-    public void SetSequencerTransport(Sequencer sequencer) {
-      SetSequencerNumBars(sequencer.numBars);
-      SetSequencerNumBeats(sequencer.numBeats);
-      SetSequencerTempo(sequencer.tempo);
-    }
-
     // Starts sequencer playback.
     public void StartSequencer(Sequencer sequencer) {
       StartSequencer();
@@ -119,6 +112,7 @@ namespace BarelyApi {
 
     // Updates sequencer.
     public void UpdateSequencer(Sequencer sequencer) {
+      SetSequencerTempo(sequencer.tempo);
       Update();
     }
 
@@ -199,12 +193,6 @@ namespace BarelyApi {
 
     [DllImport(pluginName)]
     private static extern void SetSequencerBeatCallback(IntPtr beatCallbackPtr);
-
-    [DllImport(pluginName)]
-    private static extern void SetSequencerNumBars(int numBars);
-
-    [DllImport(pluginName)]
-    private static extern void SetSequencerNumBeats(int numBeats);
 
     [DllImport(pluginName)]
     private static extern void SetSequencerTempo(float tempo);

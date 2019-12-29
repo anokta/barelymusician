@@ -36,7 +36,7 @@ public class BeatLogger : MonoBehaviour {
     }
   }
 
-  public void OnBeat(int section, int bar, int beat) {
-    Debug.Log("Tick: " + section + "." + bar + "." + beat);
+  public void OnBeat(int beat) {
+    Debug.Log("Beat: " + beat);
   }
 }

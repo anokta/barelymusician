@@ -6,20 +6,12 @@ namespace BarelyApi {
   // Beat sequencer.
   public class Sequencer : MonoBehaviour {
     // Beat event.
-    public delegate void BeatEvent(int section, int bar, int beat);
+    public delegate void BeatEvent(int beat);
     public event BeatEvent OnBeat;
 
     // Tempo (BPM).
     [Range(0.0f, 480.0f)]
     public float tempo = 120.0f;
-
-    // Number of bars per section.
-    [Range(0, 16)]
-    public int numBars = 4;
-
-    // Number of beats per bar.
-    [Range(0, 16)]
-    public int numBeats = 4;
 
     // Is sequencer playing?
     public bool IsPlaying { get { return source != null && source.isPlaying; } }
@@ -31,8 +23,8 @@ namespace BarelyApi {
     private AudioSource source = null;
 
     void Awake() {
-      beatCallback = delegate (int section, int bar, int beat) {
-        OnBeat?.Invoke(section, bar, beat);
+      beatCallback = delegate (int beat) {
+        OnBeat?.Invoke(beat);
       };
       source = gameObject.AddComponent<AudioSource>();
       source.hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
@@ -59,7 +51,6 @@ namespace BarelyApi {
     }
 
     void Update() {
-      BarelyMusician.Instance.SetSequencerTransport(this);
       BarelyMusician.Instance.UpdateSequencer(this);
     }
 

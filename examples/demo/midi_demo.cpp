@@ -63,11 +63,11 @@ bool PerformScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const float intensity =
           static_cast<float>(midi_event.getVelocity()) / max_velocity;
       const int timestamp = get_timestamp(midi_event.tick);
-      instrument->StartNote(index, intensity, timestamp);
+      instrument->NoteOnScheduled(index, intensity, timestamp);
     } else if (midi_event.isNoteOff()) {
       const float index = static_cast<float>(midi_event.getKeyNumber());
       const int timestamp = get_timestamp(midi_event.tick);
-      instrument->StopNote(index, timestamp);
+      instrument->NoteOffScheduled(index, timestamp);
     }
   }
   return has_notes;
@@ -120,8 +120,8 @@ int main(int argc, char* argv[]) {
                                  &timestamp](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& instrument : instruments) {
-      instrument->ProcessBuffer(temp_buffer.data(), kNumChannels, kNumFrames,
-                                timestamp);
+      instrument->ProcessScheduled(temp_buffer.data(), kNumChannels, kNumFrames,
+                                   timestamp);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
     }

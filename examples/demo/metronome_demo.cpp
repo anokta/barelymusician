@@ -101,8 +101,8 @@ int main(int argc, char* argv[]) {
       note_index = (transport.bar == 0) ? kSectionNoteIndex : kBarNoteIndex;
     }
     const int start_sample = kNumFrames - transport.sample;
-    metronome.StartNote(note_index, kGain, start_sample);
-    metronome.StopNote(note_index, start_sample + 1);
+    metronome.NoteOnScheduled(note_index, kGain, start_sample);
+    metronome.NoteOffScheduled(note_index, start_sample + 1);
   };
   sequencer.SetBeatCallback(beat_callback);
 
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
                                  &metronome](float* output) {
     task_runner.Run();
     sequencer.Update(kNumFrames);
-    metronome.ProcessBuffer(output, kNumChannels, kNumFrames, 0);
+    metronome.ProcessScheduled(output, kNumChannels, kNumFrames, 0);
   };
   audio_output.SetProcessCallback(process_callback);
 

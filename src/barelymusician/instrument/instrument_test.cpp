@@ -35,7 +35,7 @@ class TestInstrument : public Instrument {
 };
 
 // Tests that playing a single note produces the expected output.
-TEST(InstrumentTest, PlaySingleNote) {
+TEST(InstrumentTest, PlaySingleNoteScheduled) {
   const float kNoteIndex = 32.0f;
   const float kNoteIntensity = 0.5f;
   const int kNoteTimestamp = 24;
@@ -44,8 +44,8 @@ TEST(InstrumentTest, PlaySingleNote) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames,
-                           kNoteTimestamp);
+  instrument.ProcessScheduled(buffer.data(), kNumChannels, kNumFrames,
+                              kNoteTimestamp);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -53,11 +53,11 @@ TEST(InstrumentTest, PlaySingleNote) {
   }
 
   // Start note.
-  instrument.StartNote(kNoteIndex, kNoteIntensity, kNoteTimestamp);
+  instrument.NoteOnScheduled(kNoteIndex, kNoteIntensity, kNoteTimestamp);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames,
-                           kNoteTimestamp);
+  instrument.ProcessScheduled(buffer.data(), kNumChannels, kNumFrames,
+                              kNoteTimestamp);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -66,11 +66,11 @@ TEST(InstrumentTest, PlaySingleNote) {
   }
 
   // Stop note.
-  instrument.StopNote(kNoteIndex, kNoteTimestamp);
+  instrument.NoteOffScheduled(kNoteIndex, kNoteTimestamp);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames,
-                           kNoteTimestamp);
+  instrument.ProcessScheduled(buffer.data(), kNumChannels, kNumFrames,
+                              kNoteTimestamp);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -79,14 +79,14 @@ TEST(InstrumentTest, PlaySingleNote) {
 }
 
 // Tests that playing multiple notes produces the expected output.
-TEST(InstrumentTest, PlayMultipleNotes) {
+TEST(InstrumentTest, PlayMultipleNotesScheduled) {
   const float kNoteIntensity = 1.0f;
 
   TestInstrument instrument;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames, 0);
+  instrument.ProcessScheduled(buffer.data(), kNumChannels, kNumFrames, 0);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -95,11 +95,11 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
-    instrument.StartNote(static_cast<float>(i), kNoteIntensity, i);
+    instrument.NoteOnScheduled(static_cast<float>(i), kNoteIntensity, i);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames, 0);
+  instrument.ProcessScheduled(buffer.data(), kNumChannels, kNumFrames, 0);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kNoteIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -109,11 +109,11 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    instrument.StopNote(static_cast<float>(i), 0);
+    instrument.NoteOffScheduled(static_cast<float>(i), 0);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessBuffer(buffer.data(), kNumChannels, kNumFrames, 0);
+  instrument.ProcessScheduled(buffer.data(), kNumChannels, kNumFrames, 0);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

@@ -79,7 +79,8 @@ void BarelyMusician::DestroyInstrument(int instrument_id) {
 void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
   Instrument* instrument = GetInstrument(instrument_id);
   if (instrument != nullptr) {
-    instrument->ProcessBuffer(output, num_channels_, num_frames_, timestamp_);
+    instrument->ProcessScheduled(output, num_channels_, num_frames_,
+                                 timestamp_);
   } else {
     DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     std::fill_n(output, num_channels_ * num_frames_, 0.0f);

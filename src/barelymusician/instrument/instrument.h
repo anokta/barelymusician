@@ -33,27 +33,27 @@ class Instrument {
   // @param num_frames Number of output frames.
   virtual void Process(float* output, int num_channels, int num_frames) = 0;
 
-  // Processes the next |output| buffer with the given |timestamp|.
+  // Stops note at the given |timestamp|.
   //
-  // @param output Output buffer.
-  // @param num_channels Number of output channels.
-  // @param num_frames Number of output frames.
-  // @param timestamp Start timestamp.
-  void ProcessBuffer(float* output, int num_channels, int num_frames,
-                     int timestamp);
+  // @param index Note index.
+  // @param timestamp Note off timestamp.
+  void NoteOffScheduled(float index, int timestamp);
 
   // Starts note at the given |timestamp|.
   //
   // @param index Note index.
   // @param intensity Note intensity.
   // @param timestamp Note on timestamp.
-  void StartNote(float index, float intensity, int timestamp);
+  void NoteOnScheduled(float index, float intensity, int timestamp);
 
-  // Stops note at the given |timestamp|.
+  // Processes the next |output| buffer with the given |timestamp|.
   //
-  // @param index Note index.
-  // @param timestamp Note off timestamp.
-  void StopNote(float index, int timestamp);
+  // @param output Output buffer.
+  // @param num_channels Number of output channels.
+  // @param num_frames Number of output frames.
+  // @param timestamp Start timestamp.
+  void ProcessScheduled(float* output, int num_channels, int num_frames,
+                     int timestamp);
 
  private:
   // Processes the given |message|.

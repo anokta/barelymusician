@@ -26,8 +26,18 @@ struct NoteOnData {
 
 }  // namespace
 
-void Instrument::ProcessBuffer(float* output, int num_channels, int num_frames,
-                               int timestamp) {
+void Instrument::NoteOffScheduled(float index, int timestamp) {
+  message_buffer_.Push(
+      BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
+}
+
+void Instrument::NoteOnScheduled(float index, float intensity, int timestamp) {
+  message_buffer_.Push(
+      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, timestamp));
+}
+
+void Instrument::ProcessScheduled(float* output, int num_channels,
+                                  int num_frames, int timestamp) {
   DCHECK(output);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
@@ -49,16 +59,6 @@ void Instrument::ProcessBuffer(float* output, int num_channels, int num_frames,
   if (frame < num_frames) {
     Process(&output[num_channels * frame], num_channels, num_frames - frame);
   }
-}
-
-void Instrument::StartNote(float index, float intensity, int timestamp) {
-  message_buffer_.Push(
-      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, timestamp));
-}
-
-void Instrument::StopNote(float index, int timestamp) {
-  message_buffer_.Push(
-      BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
 }
 
 void Instrument::ProcessMessage(const Message& message) {

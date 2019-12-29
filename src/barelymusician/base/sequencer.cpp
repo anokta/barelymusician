@@ -1,6 +1,7 @@
 #include "barelymusician/base/sequencer.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"

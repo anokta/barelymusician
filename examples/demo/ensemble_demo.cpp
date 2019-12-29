@@ -269,12 +269,13 @@ int main(int argc, char* argv[]) {
         const int note_on_timestamp =
             beat_timestamp +
             SamplesFromBeats(note.start_beat, transport.num_samples);
-        it.first->StartNote(note.index, note.intensity, note_on_timestamp);
+        it.first->NoteOnScheduled(note.index, note.intensity,
+                                  note_on_timestamp);
         const int note_off_timestamp =
             beat_timestamp +
             SamplesFromBeats(note.start_beat + note.duration_beats,
                              transport.num_samples);
-        it.first->StopNote(note.index, note_off_timestamp);
+        it.first->NoteOffScheduled(note.index, note_off_timestamp);
       }
     }
   };
@@ -288,8 +289,8 @@ int main(int argc, char* argv[]) {
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& it : ensemble.performers) {
-      it.first->ProcessBuffer(temp_buffer.data(), kNumChannels, kNumFrames,
-                              timestamp);
+      it.first->ProcessScheduled(temp_buffer.data(), kNumChannels, kNumFrames,
+                                 timestamp);
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
                      std::plus<float>());
     }

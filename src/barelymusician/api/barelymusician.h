@@ -41,16 +41,6 @@ class BarelyMusician {
   // @param beat_callback Beat callback.
   void SetBeatCallback(BeatCallback beat_callback);
 
-  // Sets number of bars per section.
-  //
-  // @param num_beats Number of bars per section.
-  void SetNumBars(int num_bars);
-
-  // Sets number of beats per bar.
-  //
-  // @param num_beats Number of beats per bar.
-  void SetNumBeats(int num_beats);
-
   // Sets tempo.
   //
   // @param tempo Sequencer tempo.

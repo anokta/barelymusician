@@ -13,7 +13,7 @@ namespace unity {
 extern "C" {
 
 // Event callback signatures.
-using BeatCallback = void(int, int, int);
+using BeatCallback = void(int);
 using NoteOffCallback = void(float);
 using NoteOnCallback = void(float, float);
 
@@ -46,16 +46,6 @@ void EXPORT_API ResetSequencer();
 //
 // @param beat_callback_ptr Sequencer beat callback.
 void EXPORT_API SetSequencerBeatCallback(BeatCallback* beat_callback_ptr);
-
-// Sets sequencer number of bars per section.
-//
-// @param num_bars Sequencer number of bars per section.
-void EXPORT_API SetSequencerNumBars(int num_bars);
-
-// Sets sequencer number of beats per bar.
-//
-// @param num_beats Sequencer number of beats per bar.
-void EXPORT_API SetSequencerNumBeats(int num_beats);
 
 // Sets sequencer's tempo.
 //

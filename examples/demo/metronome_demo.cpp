@@ -6,7 +6,6 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/sequencer.h"
 #include "barelymusician/base/task_runner.h"
-#include "barelymusician/base/transport.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/instrument_utils.h"
@@ -18,7 +17,6 @@ namespace {
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Sequencer;
 using ::barelyapi::TaskRunner;
-using ::barelyapi::Transport;
 using ::barelyapi::examples::BasicEnvelopedVoice;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
@@ -32,20 +30,16 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 const int kNumMaxTasks = 100;
 
-// Sequencer settings.
-const float kTempo = 120.0f;
-const int kNumBars = 4;
-const int kNumBeats = 4;
-
-const float kTempoIncrement = 10.0f;
-
 // Metronome settings.
 const float kGain = 0.5f;
-const float kBeatNoteIndex = barelyapi::kNoteIndexA3;
 const float kBarNoteIndex = barelyapi::kNoteIndexA4;
-const float kSectionNoteIndex = barelyapi::kNoteIndexA5;
+const float kBeatNoteIndex = barelyapi::kNoteIndexA3;
 const OscillatorType kOscillatorType = OscillatorType::kSquare;
 const float kRelease = 0.025f;
+
+const int kNumBeats = 4;
+const float kInitialTempo = 120.0f;
+const float kTempoIncrement = 10.0f;
 
 // Metronome instrument.
 class MetronomeInstrument : public barelyapi::Instrument {
@@ -85,22 +79,19 @@ int main(int argc, char* argv[]) {
   TaskRunner task_runner(kNumMaxTasks);
 
   Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
-  sequencer.SetNumBars(kNumBars);
-  sequencer.SetNumBeats(kNumBeats);
+  sequencer.SetTempo(kInitialTempo);
 
   MetronomeInstrument metronome;
 
   // Beat callback.
-  const auto beat_callback = [&metronome](const Transport& transport) {
-    LOG(INFO) << "Tick " << transport.section << "." << transport.bar << "."
-              << transport.beat;
+  const auto beat_callback = [&metronome](int beat, int sample) {
+    const int current_bar = beat / kNumBeats;
+    const int current_beat = beat % kNumBeats;
+    LOG(INFO) << "Tick " << current_bar << "." << current_beat;
 
-    float note_index = kBeatNoteIndex;
-    if (transport.beat == 0) {
-      note_index = (transport.bar == 0) ? kSectionNoteIndex : kBarNoteIndex;
-    }
-    const int start_sample = kNumFrames - transport.sample;
+    const float note_index =
+        (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
+    const int start_sample = kNumFrames - sample;
     metronome.NoteOnScheduled(note_index, kGain, start_sample);
     metronome.NoteOffScheduled(note_index, start_sample + 1);
   };
@@ -117,7 +108,8 @@ int main(int argc, char* argv[]) {
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&quit, &task_runner,
+  float tempo = kInitialTempo;
+  const auto key_down_callback = [&quit, &tempo, &task_runner,
                                   &sequencer](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
@@ -125,7 +117,6 @@ int main(int argc, char* argv[]) {
       return;
     }
     // Adjust tempo.
-    float tempo = sequencer.GetTransport().tempo;
     switch (std::toupper(key)) {
       case '-':
         tempo -= kTempoIncrement;
@@ -140,7 +131,7 @@ int main(int argc, char* argv[]) {
         tempo *= 2.0f;
         break;
       case 'R':
-        tempo = kTempo;
+        tempo = kInitialTempo;
         break;
       default:
         return;

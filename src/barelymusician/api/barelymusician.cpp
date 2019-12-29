@@ -4,7 +4,6 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/transport.h"
 
 namespace barelyapi {
 
@@ -57,14 +56,6 @@ void BarelyMusician::SetBeatCallback(BeatCallback beat_callback) {
   task_runner_.Add([this, beat_callback]() mutable {
     sequencer_.SetBeatCallback(std::move(beat_callback));
   });
-}
-
-void BarelyMusician::SetNumBars(int num_bars) {
-  task_runner_.Add([this, num_bars]() { sequencer_.SetNumBars(num_bars); });
-}
-
-void BarelyMusician::SetNumBeats(int num_beats) {
-  task_runner_.Add([this, num_beats]() { sequencer_.SetNumBeats(num_beats); });
 }
 
 void BarelyMusician::SetTempo(float tempo) {

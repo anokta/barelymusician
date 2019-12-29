@@ -6,7 +6,6 @@
 #include "barelymusician/api/barelymusician.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/task_runner.h"
-#include "barelymusician/base/transport.h"
 #include "barelymusician/platform/unity/unity_instrument.h"
 
 namespace barelyapi {
@@ -68,25 +67,11 @@ void SetSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
     barelymusician->SetBeatCallback(nullptr);
     return;
   }
-  const auto beat_callback = [beat_callback_ptr](const Transport& transport) {
-    const int section = transport.section;
-    const int bar = transport.bar;
-    const int beat = transport.beat;
-    main_task_runner->Add([beat_callback_ptr, section, bar, beat]() {
-      beat_callback_ptr(section, bar, beat);
-    });
+  const auto beat_callback = [beat_callback_ptr](int beat, int) {
+    main_task_runner->Add(
+        [beat_callback_ptr, beat]() { beat_callback_ptr(beat); });
   };
   barelymusician->SetBeatCallback(beat_callback);
-}
-
-void SetSequencerNumBars(int num_bars) {
-  DCHECK(barelymusician);
-  barelymusician->SetNumBars(num_bars);
-}
-
-void SetSequencerNumBeats(int num_beats) {
-  DCHECK(barelymusician);
-  barelymusician->SetNumBeats(num_beats);
 }
 
 void SetSequencerTempo(float tempo) {

@@ -111,9 +111,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\sequencer.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\transport.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\base\task_runner.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>

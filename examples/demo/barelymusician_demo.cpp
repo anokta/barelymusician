@@ -6,13 +6,11 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/sequencer.h"
-#include "barelymusician/base/transport.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
 using ::barelyapi::Sequencer;
-using ::barelyapi::Transport;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
@@ -25,8 +23,6 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
 const float kTempo = 120.0f;
-const int kNumBars = 4;
-const int kNumBeats = 4;
 
 }  // namespace
 
@@ -36,13 +32,10 @@ int main(int argc, char* argv[]) {
 
   Sequencer sequencer(kSampleRate);
   sequencer.SetTempo(kTempo);
-  sequencer.SetNumBars(kNumBars);
-  sequencer.SetNumBeats(kNumBeats);
 
   // Beat callback.
-  const auto beat_callback = [](const Transport& transport) {
-    LOG(INFO) << "Transport " << transport.section << "." << transport.bar
-              << "." << transport.beat << ":" << transport.sample;
+  const auto beat_callback = [](int beat, int sample) {
+    LOG(INFO) << "Beat " << beat << ":" << sample;
   };
   sequencer.SetBeatCallback(beat_callback);
 

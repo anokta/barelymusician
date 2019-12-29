@@ -44,7 +44,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\random.h" />
     <ClInclude Include="..\..\src\barelymusician\base\sequencer.h" />
     <ClInclude Include="..\..\src\barelymusician\base\task_runner.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\transport.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\ensemble.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note.h" />
     <ClInclude Include="..\..\src\barelymusician\composition\note_utils.h" />

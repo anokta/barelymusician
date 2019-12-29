@@ -121,7 +121,6 @@ void DestroyInstrument(int instrument_id) {
 void ProcessInstrument(int instrument_id, float* output) {
   std::lock_guard<std::mutex> lock(init_shutdown_mutex);
   if (barelymusician != nullptr) {
-    barelymusician->Update();
     barelymusician->ProcessInstrument(instrument_id, output);
   }
 }

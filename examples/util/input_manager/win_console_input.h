@@ -14,8 +14,8 @@ class WinConsoleInput {
  public:
   // Keyboard event callback signatures.
   using Key = char;
-  using KeyDownCallback = std::function<void(const Key&)>;
-  using KeyUpCallback = std::function<void(const Key&)>;
+  using KeyDownCallback = std::function<void(const Key& key)>;
+  using KeyUpCallback = std::function<void(const Key& key)>;
 
   WinConsoleInput();
 

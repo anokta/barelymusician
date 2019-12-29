@@ -10,7 +10,7 @@ namespace examples {
 class AudioOutput {
  public:
   // Audio process callback signature.
-  using ProcessCallback = std::function<void(float*)>;
+  using ProcessCallback = std::function<void(float* output)>;
 
   // Base destructor to ensure the derived classes get destroyed properly.
   virtual ~AudioOutput() = default;

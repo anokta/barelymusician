@@ -14,7 +14,7 @@ template <typename ParamType>
 class ModulationMatrix {
  public:
   // Parameter update function signature.
-  using UpdateParamFn = std::function<void(const ParamType&)>;
+  using UpdateParamFn = std::function<void(const ParamType& value)>;
 
   // Returns the value of a parameter with the given ID.
   //

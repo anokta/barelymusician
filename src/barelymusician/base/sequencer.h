@@ -51,7 +51,7 @@ class Sequencer {
   int beat_;
 
   // Leftover samples from the current beat.
-  int sample_;
+  int leftover_samples_;
 };
 
 }  // namespace barelyapi

@@ -14,15 +14,15 @@ Sequencer::Sequencer(int sample_rate)
                               kSecondsFromMinutes),
       beat_callback_(nullptr),
       tempo_(0.0f),
+      num_samples_per_beat_(0),
       beat_(0),
-      sample_(0),
-      num_samples_per_beat_(0) {
+      leftover_samples_(0) {
   DCHECK_GE(num_samples_per_minute_, 0.0f);
 }
 
 void Sequencer::Reset() {
   beat_ = 0;
-  sample_ = 0;
+  leftover_samples_ = 0;
 }
 
 void Sequencer::SetBeatCallback(BeatCallback&& beat_callback) {
@@ -32,10 +32,11 @@ void Sequencer::SetBeatCallback(BeatCallback&& beat_callback) {
 void Sequencer::SetTempo(float tempo) {
   DCHECK_GE(tempo, 0.0f);
   tempo_ = tempo;
-  const float beat = BeatsFromSamples(sample_, num_samples_per_beat_);
+  const float leftover_beats =
+      BeatsFromSamples(leftover_samples_, num_samples_per_beat_);
   num_samples_per_beat_ =
       (tempo_ > 0.0f) ? static_cast<int>(num_samples_per_minute_ / tempo_) : 0;
-  sample_ = SamplesFromBeats(beat, num_samples_per_beat_);
+  leftover_samples_ = SamplesFromBeats(leftover_beats, num_samples_per_beat_);
 }
 
 void Sequencer::Update(int num_samples) {
@@ -43,15 +44,15 @@ void Sequencer::Update(int num_samples) {
   if (num_samples_per_beat_ == 0) {
     return;
   }
-  sample_ += num_samples;
-  if (sample_ == num_samples && beat_callback_ != nullptr) {
-    beat_callback_(beat_, sample_);
+  leftover_samples_ += num_samples;
+  if (leftover_samples_ == num_samples && beat_callback_ != nullptr) {
+    beat_callback_(beat_, leftover_samples_);
   }
-  while (sample_ >= num_samples_per_beat_) {
+  while (leftover_samples_ >= num_samples_per_beat_) {
     ++beat_;
-    sample_ -= num_samples_per_beat_;
-    if (sample_ > 0 && beat_callback_ != nullptr) {
-      beat_callback_(beat_, sample_);
+    leftover_samples_ -= num_samples_per_beat_;
+    if (leftover_samples_ > 0 && beat_callback_ != nullptr) {
+      beat_callback_(beat_, leftover_samples_);
     }
   }
 }

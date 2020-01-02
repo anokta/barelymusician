@@ -21,7 +21,7 @@ BarelyMusician::BarelyMusician(int sample_rate, int num_channels,
       num_frames_(num_frames),
       id_counter_(0),
       task_runner_(kNumMaxTasks),
-      sequencer_(sample_rate),
+      clock_(sample_rate),
       is_playing_(false),
       timestamp_(0) {
   DCHECK_GE(sample_rate, 0);
@@ -31,7 +31,7 @@ BarelyMusician::BarelyMusician(int sample_rate, int num_channels,
 
 void BarelyMusician::Reset() {
   task_runner_.Add([this]() {
-    sequencer_.Reset();
+    clock_.SetPosition(0.0f);
     timestamp_ = 0;
   });
 }
@@ -47,19 +47,19 @@ void BarelyMusician::Stop() {
 void BarelyMusician::Update() {
   task_runner_.Run();
   if (is_playing_) {
-    sequencer_.Update(num_frames_);
+    clock_.Update(num_frames_);
     timestamp_ += num_frames_;
   }
 }
 
 void BarelyMusician::SetBeatCallback(BeatCallback beat_callback) {
   task_runner_.Add([this, beat_callback]() mutable {
-    sequencer_.SetBeatCallback(std::move(beat_callback));
+    clock_.SetBeatCallback(std::move(beat_callback));
   });
 }
 
 void BarelyMusician::SetTempo(float tempo) {
-  task_runner_.Add([this, tempo]() { sequencer_.SetTempo(tempo); });
+  task_runner_.Add([this, tempo]() { clock_.SetTempo(tempo); });
 }
 
 void BarelyMusician::DestroyInstrument(int instrument_id) {

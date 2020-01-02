@@ -12,9 +12,10 @@ class UnityInstrument : public Instrument {
  public:
   // Instrument function signatures.
   using AllNotesOffFn = std::function<void()>;
-  using NoteOffFn = std::function<void(float)>;
-  using NoteOnFn = std::function<void(float, float)>;
-  using ProcessFn = std::function<void(float*, int, int)>;
+  using NoteOffFn = std::function<void(float index)>;
+  using NoteOnFn = std::function<void(float index, float intensity)>;
+  using ProcessFn =
+      std::function<void(float* output, int num_channels, int num_frames)>;
 
   // Constructs new |UnityInstrument|.
   //

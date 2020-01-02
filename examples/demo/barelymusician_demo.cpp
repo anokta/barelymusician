@@ -4,13 +4,13 @@
 #include <thread>
 
 #include "audio_output/pa_audio_output.h"
+#include "barelymusician/base/clock.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/sequencer.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
-using ::barelyapi::Sequencer;
+using ::barelyapi::Clock;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
@@ -30,18 +30,18 @@ int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
+  Clock clock(kSampleRate);
+  clock.SetTempo(kTempo);
 
   // Beat callback.
-  const auto beat_callback = [](int beat, int sample) {
-    LOG(INFO) << "Beat " << beat << ":" << sample;
+  const auto beat_callback = [](int beat, int leftover_samples) {
+    LOG(INFO) << "Beat " << beat << ":" << leftover_samples;
   };
-  sequencer.SetBeatCallback(beat_callback);
+  clock.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto process_callback = [&sequencer](float* output) {
-    sequencer.Update(kNumFrames);
+  const auto process_callback = [&clock](float* output) {
+    clock.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
   };
   audio_output.SetProcessCallback(process_callback);

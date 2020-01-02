@@ -3,8 +3,8 @@
 #include <thread>
 
 #include "audio_output/pa_audio_output.h"
+#include "barelymusician/base/Clock.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/sequencer.h"
 #include "barelymusician/base/task_runner.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instrument/instrument.h"
@@ -14,8 +14,8 @@
 
 namespace {
 
+using ::barelyapi::Clock;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Sequencer;
 using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::BasicEnvelopedVoice;
 using ::barelyapi::examples::PaAudioOutput;
@@ -78,45 +78,45 @@ int main(int argc, char* argv[]) {
 
   TaskRunner task_runner(kNumMaxTasks);
 
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kInitialTempo);
+  Clock clock(kSampleRate);
+  clock.SetTempo(kInitialTempo);
 
   MetronomeInstrument metronome;
 
   // Beat callback.
-  const auto beat_callback = [&metronome](int beat, int sample) {
+  const auto beat_callback = [&metronome](int beat, int leftover_samples) {
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
 
     const float note_index =
         (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    const int start_sample = kNumFrames - sample;
+    const int start_sample = kNumFrames - leftover_samples;
     metronome.NoteOnScheduled(note_index, kGain, start_sample);
     metronome.NoteOffScheduled(note_index, start_sample + 1);
   };
-  sequencer.SetBeatCallback(beat_callback);
+  clock.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto process_callback = [&task_runner, &sequencer,
+  const auto process_callback = [&task_runner, &clock,
                                  &metronome](float* output) {
     task_runner.Run();
-    sequencer.Update(kNumFrames);
+    clock.Update(kNumFrames);
     metronome.ProcessScheduled(output, kNumChannels, kNumFrames, 0);
   };
   audio_output.SetProcessCallback(process_callback);
 
   // Key down callback.
   bool quit = false;
-  float tempo = kInitialTempo;
-  const auto key_down_callback = [&quit, &tempo, &task_runner,
-                                  &sequencer](const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&quit, &task_runner,
+                                  &clock](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
       return;
     }
     // Adjust tempo.
+    float tempo = clock.GetTempo();
     switch (std::toupper(key)) {
       case '-':
         tempo -= kTempoIncrement;
@@ -136,8 +136,8 @@ int main(int argc, char* argv[]) {
       default:
         return;
     }
-    task_runner.Add([&sequencer, tempo]() { sequencer.SetTempo(tempo); });
-    LOG(INFO) << "Tempo set to " << tempo;
+    task_runner.Add([&clock, tempo]() { clock.SetTempo(tempo); });
+    LOG(INFO) << "Tempo set to " <<   tempo;
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

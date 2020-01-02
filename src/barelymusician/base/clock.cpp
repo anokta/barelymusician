@@ -1,4 +1,4 @@
-#include "barelymusician/base/sequencer.h"
+#include "barelymusician/base/clock.h"
 
 #include <algorithm>
 #include <utility>
@@ -9,7 +9,7 @@
 
 namespace barelyapi {
 
-Sequencer::Sequencer(int sample_rate)
+Clock::Clock(int sample_rate)
     : num_samples_per_minute_(static_cast<float>(sample_rate) *
                               kSecondsFromMinutes),
       beat_callback_(nullptr),
@@ -20,16 +20,29 @@ Sequencer::Sequencer(int sample_rate)
   DCHECK_GE(num_samples_per_minute_, 0.0f);
 }
 
-void Sequencer::Reset() {
-  beat_ = 0;
-  leftover_samples_ = 0;
+int Clock::GetNumSamplesPerBeat() const { return num_samples_per_beat_; }
+
+float Clock::GetPosition() const {
+  return static_cast<float>(beat_) +
+         BeatsFromSamples(leftover_samples_, num_samples_per_beat_);
 }
 
-void Sequencer::SetBeatCallback(BeatCallback&& beat_callback) {
+float Clock::GetTempo() const { return tempo_; }
+
+void Clock::SetBeatCallback(BeatCallback&& beat_callback) {
   beat_callback_ = std::move(beat_callback);
 }
 
-void Sequencer::SetTempo(float tempo) {
+void Clock::SetPosition(float beat) {
+  DCHECK_GE(beat, 0.0f);
+  beat_ = static_cast<int>(beat);
+  // TODO(#56): This will ignore the fractional part when
+  // |num_samples_per_beat_| is zero (i.e., when |tempo_| is zero/unset).
+  leftover_samples_ =
+      SamplesFromBeats(beat - static_cast<float>(beat_), num_samples_per_beat_);
+}
+
+void Clock::SetTempo(float tempo) {
   DCHECK_GE(tempo, 0.0f);
   tempo_ = tempo;
   const float leftover_beats =
@@ -39,7 +52,7 @@ void Sequencer::SetTempo(float tempo) {
   leftover_samples_ = SamplesFromBeats(leftover_beats, num_samples_per_beat_);
 }
 
-void Sequencer::Update(int num_samples) {
+void Clock::Update(int num_samples) {
   DCHECK_GE(num_samples, 0);
   if (num_samples_per_beat_ == 0) {
     return;

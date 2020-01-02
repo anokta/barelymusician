@@ -51,9 +51,6 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\sequencer_test.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\task_runner_test.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
@@ -71,6 +68,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\composition\score_test.cpp">
       <Filter>Source Files\composition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\base\clock_test.cpp">
+      <Filter>Source Files\base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

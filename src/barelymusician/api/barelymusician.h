@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "barelymusician/base/sequencer.h"
+#include "barelymusician/base/clock.h"
 #include "barelymusician/base/task_runner.h"
 #include "barelymusician/instrument/instrument.h"
 
@@ -14,8 +14,8 @@ namespace barelyapi {
 // BarelyMusician API that maintains a native real-time music engine.
 class BarelyMusician {
  public:
-  // Sequencer beat event callback signature.
-  using BeatCallback = Sequencer::BeatCallback;
+  // Beat event callback signature.
+  using BeatCallback = Clock::BeatCallback;
 
   // Constructs new |BarelyMusician| with the given system configuration.
   //
@@ -103,8 +103,8 @@ class BarelyMusician {
   // Instruments.
   std::unordered_map<int, std::unique_ptr<Instrument>> instruments_;
 
-  // Sequencer.
-  Sequencer sequencer_;
+  // Clock.
+  Clock clock_;
 
   // Denotes whether the sequencer is playing.
   bool is_playing_;

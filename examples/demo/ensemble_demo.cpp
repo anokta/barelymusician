@@ -8,10 +8,10 @@
 #include <vector>
 
 #include "audio_output/pa_audio_output.h"
+#include "barelymusician/base/clock.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
-#include "barelymusician/base/sequencer.h"
 #include "barelymusician/composition/ensemble.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
@@ -25,6 +25,7 @@
 
 namespace {
 
+using ::barelyapi::Clock;
 using ::barelyapi::Ensemble;
 using ::barelyapi::Instrument;
 using ::barelyapi::MessageBuffer;
@@ -32,7 +33,6 @@ using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
 using ::barelyapi::SamplesFromBeats;
-using ::barelyapi::Sequencer;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
@@ -49,14 +49,12 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
 const float kTempo = 124.0f;
-const int kSamplesPerBeat = static_cast<int>(
-    static_cast<float>(kSampleRate) * barelyapi::kSecondsFromMinutes / kTempo);
+const int kNumBars = 4;
+const int kNumBeats = 3;
 
 // Ensemble settings.
 const float kRootNote = barelyapi::kNoteIndexD3;
 const int kNumInstrumentVoices = 8;
-const int kNumBars = 4;
-const int kNumBeats = 3;
 
 std::unique_ptr<BasicSynthInstrument> BuildSynthInstrument(OscillatorType type,
                                                            float gain,
@@ -170,8 +168,8 @@ int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
-  Sequencer sequencer(kSampleRate);
-  sequencer.SetTempo(kTempo);
+  Clock clock(kSampleRate);
+  clock.SetTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
   const std::vector<float> scale(std::begin(barelyapi::kMajorScale),
@@ -245,15 +243,16 @@ int main(int argc, char* argv[]) {
       std::make_pair(drumkit_instrument.get(), drumkit_beat_composer_callback));
 
   // Beat callback.
+  const int num_samples_per_beat = clock.GetNumSamplesPerBeat();
   int section = 0;
   int bar = 0;
   int section_type = 0;
   int harmonic = 0;
   std::vector<Note> temp_notes;
   int timestamp = 0;
-  const auto beat_callback = [&ensemble, &section, &bar, &section_type,
-                              &harmonic, &temp_notes,
-                              &timestamp](int beat, int sample) {
+  const auto beat_callback = [&num_samples_per_beat, &ensemble, &section, &bar,
+                              &section_type, &harmonic, &temp_notes,
+                              &timestamp](int beat, int leftover_samples) {
     bar = beat / kNumBeats;
     beat %= kNumBeats;
     section = bar / kNumBars;
@@ -269,27 +268,28 @@ int main(int argc, char* argv[]) {
     for (const auto& it : ensemble.performers) {
       temp_notes.clear();
       it.second(bar, beat, section_type, harmonic, &temp_notes);
-      const int beat_timestamp = timestamp + kNumFrames - sample;
+      const int beat_timestamp = timestamp + kNumFrames - leftover_samples;
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
-            beat_timestamp + SamplesFromBeats(note.start_beat, kSamplesPerBeat);
+            beat_timestamp +
+            SamplesFromBeats(note.start_beat, num_samples_per_beat);
         it.first->NoteOnScheduled(note.index, note.intensity,
                                   note_on_timestamp);
         const int note_off_timestamp =
             beat_timestamp +
             SamplesFromBeats(note.start_beat + note.duration_beats,
-                             kSamplesPerBeat);
+                             num_samples_per_beat);
         it.first->NoteOffScheduled(note.index, note_off_timestamp);
       }
     }
   };
-  sequencer.SetBeatCallback(beat_callback);
+  clock.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&sequencer, &ensemble, &temp_buffer,
+  const auto process_callback = [&clock, &ensemble, &temp_buffer,
                                  &timestamp](float* output) {
-    sequencer.Update(kNumFrames);
+    clock.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& it : ensemble.performers) {

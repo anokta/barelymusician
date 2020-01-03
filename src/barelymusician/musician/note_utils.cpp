@@ -1,4 +1,4 @@
-#include "barelymusician/composition/note_utils.h"
+#include "barelymusician/musician/note_utils.h"
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"

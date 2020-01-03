@@ -1,4 +1,4 @@
-#include "barelymusician/composition/score.h"
+#include "barelymusician/musician/score.h"
 
 #include "barelymusician/base/logging.h"
 

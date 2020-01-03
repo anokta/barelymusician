@@ -1,13 +1,13 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_ENSEMBLE_H_
-#define BARELYMUSICIAN_COMPOSITION_ENSEMBLE_H_
+#ifndef BARELYMUSICIAN_MUSICIAN_ENSEMBLE_H_
+#define BARELYMUSICIAN_MUSICIAN_ENSEMBLE_H_
 
 #include <functional>
 #include <utility>
 #include <vector>
 
-#include "barelymusician/composition/note.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
+#include "barelymusician/musician/note.h"
 
 namespace barelyapi {
 
@@ -36,4 +36,4 @@ struct Ensemble {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_ENSEMBLE_H_
+#endif  // BARELYMUSICIAN_MUSICIAN_ENSEMBLE_H_

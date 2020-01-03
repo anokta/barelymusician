@@ -1,10 +1,10 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_SCORE_H_
-#define BARELYMUSICIAN_COMPOSITION_SCORE_H_
+#ifndef BARELYMUSICIAN_MUSICIAN_SCORE_H_
+#define BARELYMUSICIAN_MUSICIAN_SCORE_H_
 
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/composition/note.h"
+#include "barelymusician/musician/note.h"
 
 namespace barelyapi {
 
@@ -29,4 +29,4 @@ class Score {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_SCORE_H_
+#endif  // BARELYMUSICIAN_MUSICIAN_SCORE_H_

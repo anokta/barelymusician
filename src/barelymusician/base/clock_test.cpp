@@ -61,14 +61,20 @@ TEST(ClockTest, SetTempo) {
 // Tests that the clock gets updated as expected.
 TEST(ClockTest, Update) {
   Clock clock(kSampleRate);
+  EXPECT_EQ(clock.GetBeat(), 0);
+  EXPECT_EQ(clock.GetLeftoverSamples(), 0);
   EXPECT_FLOAT_EQ(clock.GetPosition(), 0.0f);
 
   clock.Update(kSampleRate);
+  EXPECT_EQ(clock.GetBeat(), 0);
+  EXPECT_EQ(clock.GetLeftoverSamples(), 0);
   EXPECT_FLOAT_EQ(clock.GetPosition(), 0.0f);
 
   clock.SetTempo(kTempo);
 
   clock.Update(kSampleRate);
+  EXPECT_GE(clock.GetBeat(), 0);
+  EXPECT_GE(clock.GetLeftoverSamples(), 0);
   EXPECT_FLOAT_EQ(clock.GetPosition(), kTempo / kSecondsFromMinutes);
 }
 

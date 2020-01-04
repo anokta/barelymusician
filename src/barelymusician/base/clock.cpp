@@ -20,6 +20,10 @@ Clock::Clock(int sample_rate)
   DCHECK_GE(num_samples_per_minute_, 0.0f);
 }
 
+int Clock::GetBeat() const { return beat_; }
+
+int Clock::GetLeftoverSamples() const { return leftover_samples_; }
+
 int Clock::GetNumSamplesPerBeat() const { return num_samples_per_beat_; }
 
 float Clock::GetPosition() const {

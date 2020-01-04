@@ -16,6 +16,16 @@ class Clock {
   // @param sample_rate Sampling rate per second.
   explicit Clock(int sample_rate);
 
+  // Returns the current beat.
+  //
+  // @return Beat.
+  int GetBeat() const;
+
+  // Returns the leftover samples from the current beat.
+  //
+  // @return Leftover samples.
+  int GetLeftoverSamples() const;
+
   // Returns number of samples per beat.
   //
   // @return Number of samples per beat.

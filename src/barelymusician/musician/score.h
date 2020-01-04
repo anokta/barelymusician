@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_MUSICIAN_SCORE_H_
 #define BARELYMUSICIAN_MUSICIAN_SCORE_H_
 
-#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/musician/note.h"
@@ -9,22 +8,44 @@
 namespace barelyapi {
 
 // Musical score.
-// TODO(#55): Refactor to add const accessors to existing notes.
 class Score {
  public:
-  // Clears all notes.
+  // Score iterator.
+  struct Iterator {
+    // Iterator begin.
+    std::vector<Note>::const_iterator begin;
+
+    // Iterator end.
+    std::vector<Note>::const_iterator end;
+  };
+
+  // Adds new note.
+  //
+  // @param note Note.
+  void AddNote(const Note& note);
+
+  // Clears all the notes.
   void Clear();
 
-  // Returns mutable score notes.
+  // Clears the notes within the given range.
   //
-  // @param section_type Section type.
-  // @param bar Bar index.
-  // @param beat Beat index.
-  std::vector<Note>* GetNotes(int section_type, int bar, int beat);
+  // @param iterator Iterator range to clear the notes.
+  void Clear(const Iterator& iterator);
+
+  // Returns whether the score is empty or not.
+  //
+  // @return True if empty.
+  bool Empty() const;
+
+  // Returns iterator within the given range.
+  //
+  // @param start_position Start position in beats.
+  // @param end_position End position in beats.
+  Iterator GetIterator(float start_position, float end_position) const;
 
  private:
   // Score notes.
-  std::unordered_map<int, std::vector<std::vector<std::vector<Note>>>> notes_;
+  std::vector<Note> notes_;
 };
 
 }  // namespace barelyapi

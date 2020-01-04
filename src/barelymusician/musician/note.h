@@ -12,7 +12,10 @@ struct Note {
   float intensity;
 
   // Note start beat.
-  float start_beat;
+  int start_beat;
+
+  // Note offset in beats from the start beat.
+  float offset_beats;
 
   // Note duration in beats.
   float duration_beats;

@@ -253,7 +253,7 @@ int main(int argc, char* argv[]) {
   int timestamp = 0;
   const auto beat_callback = [&num_samples_per_beat, &ensemble, &section, &bar,
                               &section_type, &harmonic, &temp_notes,
-                              &timestamp](int beat, int leftover_samples) {
+                              &timestamp](int beat, int offset_samples) {
     bar = beat / kNumBeats;
     beat %= kNumBeats;
     section = bar / kNumBars;
@@ -269,7 +269,7 @@ int main(int argc, char* argv[]) {
     for (const auto& it : ensemble.performers) {
       temp_notes.clear();
       it.second(bar, beat, section_type, harmonic, &temp_notes);
-      const int beat_timestamp = timestamp + kNumFrames - leftover_samples;
+      const int beat_timestamp = timestamp + offset_samples;
       for (const Note& note : temp_notes) {
         const int note_on_timestamp =
             beat_timestamp +

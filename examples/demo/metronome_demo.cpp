@@ -84,16 +84,15 @@ int main(int argc, char* argv[]) {
   MetronomeInstrument metronome;
 
   // Beat callback.
-  const auto beat_callback = [&metronome](int beat, int leftover_samples) {
+  const auto beat_callback = [&metronome](int beat, int offset_samples) {
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
 
     const float note_index =
         (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    const int start_sample = kNumFrames - leftover_samples;
-    metronome.NoteOnScheduled(note_index, kGain, start_sample);
-    metronome.NoteOffScheduled(note_index, start_sample + 1);
+    metronome.NoteOnScheduled(note_index, kGain, offset_samples);
+    metronome.NoteOffScheduled(note_index, offset_samples + 1);
   };
   clock.SetBeatCallback(beat_callback);
 

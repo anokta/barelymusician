@@ -63,13 +63,13 @@ void Clock::Update(int num_samples) {
   }
   leftover_samples_ += num_samples;
   if (leftover_samples_ == num_samples && beat_callback_ != nullptr) {
-    beat_callback_(beat_, leftover_samples_);
+    beat_callback_(beat_, 0);
   }
   while (leftover_samples_ >= num_samples_per_beat_) {
     ++beat_;
     leftover_samples_ -= num_samples_per_beat_;
     if (leftover_samples_ > 0 && beat_callback_ != nullptr) {
-      beat_callback_(beat_, leftover_samples_);
+      beat_callback_(beat_, num_samples - leftover_samples_);
     }
   }
 }

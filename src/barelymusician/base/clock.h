@@ -9,7 +9,7 @@ namespace barelyapi {
 class Clock {
  public:
   // Beat event callback signature.
-  using BeatCallback = std::function<void(int beat, int leftover_samples)>;
+  using BeatCallback = std::function<void(int beat, int offset_samples)>;
 
   // Constructs new |Clock|.
   //

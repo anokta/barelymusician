@@ -34,8 +34,8 @@ int main(int argc, char* argv[]) {
   clock.SetTempo(kTempo);
 
   // Beat callback.
-  const auto beat_callback = [](int beat, int leftover_samples) {
-    LOG(INFO) << "Beat " << beat << ":" << leftover_samples;
+  const auto beat_callback = [](int beat, int offset_samples) {
+    LOG(INFO) << "Beat " << beat << ":" << offset_samples;
   };
   clock.SetBeatCallback(beat_callback);
 

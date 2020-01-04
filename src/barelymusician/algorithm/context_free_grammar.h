@@ -75,7 +75,7 @@ template <typename SymbolType>
 std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
     const SymbolType& symbol) const {
   if (rules_.find(symbol) == rules_.end() || rules_.at(symbol).size() == 0) {
-    LOG(INFO) << "Substition rule does not exist for symbol: " << symbol;
+    DLOG(INFO) << "Substition rule does not exist for symbol: " << symbol;
     return std::vector<SymbolType>();
   }
 

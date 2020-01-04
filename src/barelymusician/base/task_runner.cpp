@@ -19,7 +19,7 @@ TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
 void TaskRunner::Add(Task&& task) {
   Node* const node = PopNode(&free_head_);
   if (node == nullptr) {
-    LOG(WARNING) << "Failed to add task, max_size exceeded: " << nodes_.size();
+    DLOG(WARNING) << "Failed to add task, max_size exceeded: " << nodes_.size();
     return;
   }
   node->task = std::move(task);

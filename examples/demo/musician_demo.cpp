@@ -85,8 +85,8 @@ void ComposeChord(float root_note_index, const std::vector<float>& scale,
 }
 
 void ComposeLine(float root_note_index, const std::vector<float>& scale,
-                 float intensity, int bar, int beat, int harmonic,
-                 std::vector<Note>* notes) {
+                 float intensity, int bar, int beat, int num_beats,
+                 int harmonic, std::vector<Note>* notes) {
   const float start_note = static_cast<float>(harmonic);
   const float note_offset = static_cast<float>(beat);
   const auto add_note = [&](float index, float offset_beats, float end_beat) {
@@ -104,14 +104,15 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
     add_note(start_note - note_offset, 0.0f, 0.05f);
     add_note(start_note - 2.0f * note_offset, 0.5f, 0.05f);
   }
-  if (beat + 1 == kNumBeats && bar % 2 == 1) {
+  if (beat + 1 == num_beats && bar % 2 == 1) {
     add_note(start_note + 2.0f * note_offset, 0.25f, 0.125f);
     add_note(start_note - 2.0f * note_offset, 0.75f, 0.125f);
     add_note(start_note + 2.0f * note_offset, 0.5f, 0.25f);
   }
 }
 
-void ComposeDrums(int bar, int beat, std::vector<Note>* notes) {
+void ComposeDrums(int bar, int beat, int num_bars, int num_beats,
+                  std::vector<Note>* notes) {
   const auto get_beat = [](int step) {
     return barelyapi::GetBeat(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
@@ -129,7 +130,7 @@ void ComposeDrums(int bar, int beat, std::vector<Note>* notes) {
     notes->push_back(
         {barelyapi::kNoteIndexSnare, 1.0f, 0, get_beat(0), get_beat(2)});
   }
-  if (beat + 1 == kNumBeats) {
+  if (beat + 1 == num_beats) {
     notes->push_back(
         {barelyapi::kNoteIndexSnare, 0.75f, 0, get_beat(2), get_beat(2)});
     if (bar + 1 == kNumBars) {
@@ -146,8 +147,8 @@ void ComposeDrums(int bar, int beat, std::vector<Note>* notes) {
                     Random::Uniform(0.25f, 0.75f), 0, get_beat(2),
                     get_beat(2)});
   // Hihat Open.
-  if (beat + 1 == kNumBeats) {
-    if (bar + 1 == kNumBars) {
+  if (beat + 1 == num_beats) {
+    if (bar + 1 == num_bars) {
       notes->push_back({barelyapi::kNoteIndexHihatOpen, 0.75f, beat,
                         get_beat(1), get_beat(1)});
     } else if (bar % 2 == 0) {
@@ -181,8 +182,8 @@ int main(int argc, char* argv[]) {
   ensemble.section_composer_callback = [](int section) -> int {
     return section;
   };
-  ensemble.bar_composer_callback = [&progression](int bar, int) -> int {
-    return progression[bar % progression.size()];
+  ensemble.bar_composer_callback = [&progression](int bar, int, int) -> int {
+    return progression[std::min(bar, static_cast<int>(progression.size()) - 1)];
   };
 
   // Synth instruments.
@@ -192,8 +193,8 @@ int main(int argc, char* argv[]) {
       BuildSynthInstrument(OscillatorType::kNoise, 0.05f, 0.5f, 0.025f);
 
   const auto chords_beat_composer_callback =
-      std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
-                std::placeholders::_5);
+      std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_6,
+                std::placeholders::_7);
 
   ensemble.performers.emplace_back(chords_instrument.get(),
                                    chords_beat_composer_callback);
@@ -205,13 +206,14 @@ int main(int argc, char* argv[]) {
   auto line_2_instrument =
       BuildSynthInstrument(OscillatorType::kSquare, 0.15f, 0.05f, 0.05f);
 
-  const auto line_beat_composer_callback =
-      std::bind(ComposeLine, kRootNote - barelyapi::kNumSemitones, scale, 1.0f,
-                std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_4, std::placeholders::_5);
-  const auto line_2_beat_composer_callback = std::bind(
-      ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
-      std::placeholders::_2, std::placeholders::_4, std::placeholders::_5);
+  const auto line_beat_composer_callback = std::bind(
+      ComposeLine, kRootNote - barelyapi::kNumSemitones, scale, 1.0f,
+      std::placeholders::_1, std::placeholders::_2, std::placeholders::_4,
+      std::placeholders::_6, std::placeholders::_7);
+  const auto line_2_beat_composer_callback =
+      std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
+                std::placeholders::_2, std::placeholders::_4,
+                std::placeholders::_6, std::placeholders::_7);
 
   ensemble.performers.emplace_back(line_instrument.get(),
                                    line_beat_composer_callback);
@@ -236,9 +238,9 @@ int main(int argc, char* argv[]) {
     drumkit_instrument->Add(it.first, drumkit_file);
   }
 
-  const auto drumkit_beat_composer_callback =
-      std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_5);
+  const auto drumkit_beat_composer_callback = std::bind(
+      ComposeDrums, std::placeholders::_1, std::placeholders::_2,
+      std::placeholders::_3, std::placeholders::_4, std::placeholders::_7);
 
   ensemble.performers.emplace_back(drumkit_instrument.get(),
                                    drumkit_beat_composer_callback);

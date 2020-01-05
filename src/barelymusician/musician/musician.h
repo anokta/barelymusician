@@ -21,12 +21,13 @@ class Musician {
     using SectionComposerCallback = std::function<int(int section)>;
 
     // Bar composer callback signature.
-    using BarComposerCallback = std::function<int(int bar, int section_type)>;
+    using BarComposerCallback =
+        std::function<int(int bar, int num_bars, int section_type)>;
 
     // Beat composer callback signature.
-    using BeatComposerCallback =
-        std::function<void(int bar, int beat, int section_type, int harmonic,
-                           std::vector<Note>* notes)>;
+    using BeatComposerCallback = std::function<void(
+        int bar, int beat, int num_bars, int num_beats, int section_type,
+        int harmonic, std::vector<Note>* notes)>;
 
     // Section composer callback.
     SectionComposerCallback section_composer_callback;
@@ -50,8 +51,7 @@ class Musician {
   };
 
   // TODO: get num_bars from section composer.
-  explicit Musician(int sample_rate)
-      : clock_(sample_rate), section_(0), bar_(0), beat_(0) {
+  explicit Musician(int sample_rate) : clock_(sample_rate), bar_(0), beat_(0) {
     clock_.SetBeatCallback([this](int beat, int leftover_samples) {
       // Update transport.
       beat_ = beat % num_beats_;
@@ -65,14 +65,15 @@ class Musician {
           section_type_ = ensemble_.section_composer_callback(section_);
         }
         // Compose next bar.
-        harmonic_ = ensemble_.bar_composer_callback(bar_, section_type_);
+        harmonic_ =
+            ensemble_.bar_composer_callback(bar_, num_bars_, section_type_);
       }
-
       // Update performers.
       for (Ensemble::Performer& performer : ensemble_.performers) {
         // Compose next beat notes.
         temp_notes_.clear();
-        performer.beat_composer_callback(bar_, beat_, section_type_, harmonic_,
+        performer.beat_composer_callback(bar_, beat_, num_bars_, num_beats_,
+                                         section_type_, harmonic_,
                                          &temp_notes_);
         for (Note& note : temp_notes_) {
           // TODO: inefficient?!
@@ -120,6 +121,7 @@ class Musician {
             SamplesFromBeats(it->duration_beats, num_samples_per_beat);
         performer.instrument->NoteOffScheduled(it->index, note_off_timestamp);
       }
+      // TODO: clear |notes|?
     }
   }
 

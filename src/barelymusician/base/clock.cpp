@@ -1,8 +1,5 @@
 #include "barelymusician/base/clock.h"
 
-#include <algorithm>
-#include <utility>
-
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"

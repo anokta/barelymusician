@@ -60,7 +60,7 @@
     <ClInclude Include="..\..\src\barelymusician\message\message.h" />
     <ClInclude Include="..\..\src\barelymusician\message\message_buffer.h" />
     <ClInclude Include="..\..\src\barelymusician\message\message_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\musician\ensemble.h" />
+    <ClInclude Include="..\..\src\barelymusician\musician\musician.h" />
     <ClInclude Include="..\..\src\barelymusician\musician\note.h" />
     <ClInclude Include="..\..\src\barelymusician\musician\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\musician\score.h" />

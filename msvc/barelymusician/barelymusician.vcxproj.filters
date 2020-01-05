@@ -123,9 +123,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\clock.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\musician\ensemble.h">
-      <Filter>Header Files\musician</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\musician\note.h">
       <Filter>Header Files\musician</Filter>
     </ClInclude>
@@ -133,6 +130,9 @@
       <Filter>Header Files\musician</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\musician\score.h">
+      <Filter>Header Files\musician</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\musician\musician.h">
       <Filter>Header Files\musician</Filter>
     </ClInclude>
   </ItemGroup>

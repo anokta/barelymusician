@@ -83,24 +83,35 @@ int main(int argc, char* argv[]) {
 
   MetronomeInstrument metronome;
 
-  // Beat callback.
-  const auto beat_callback = [&metronome](int beat, int offset_samples) {
-    const int current_bar = beat / kNumBeats;
-    const int current_beat = beat % kNumBeats;
-    LOG(INFO) << "Tick " << current_bar << "." << current_beat;
-
-    const float note_index =
-        (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    metronome.NoteOnScheduled(note_index, kGain, offset_samples);
-    metronome.NoteOffScheduled(note_index, offset_samples + 1);
-  };
-  clock.SetBeatCallback(beat_callback);
-
   // Audio process callback.
   const auto process_callback = [&task_runner, &clock,
                                  &metronome](float* output) {
     task_runner.Run();
+
+    // Update clock.
+    const int num_samples_per_beat = clock.GetNumSamplesPerBeat();
+    int offset_samples = -clock.GetLeftoverSamples();
+
+    const int start_beat = clock.GetBeat();
     clock.Update(kNumFrames);
+    const int end_beat = clock.GetBeat();
+
+    for (int beat = start_beat; beat <= end_beat; ++beat) {
+      if (offset_samples >= 0 && offset_samples < kNumFrames) {
+        // Tick.
+        const int current_bar = beat / kNumBeats;
+        const int current_beat = beat % kNumBeats;
+        LOG(INFO) << "Tick " << current_bar << "." << current_beat;
+
+        const float note_index =
+            (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
+        metronome.NoteOnScheduled(note_index, kGain, offset_samples);
+        metronome.NoteOffScheduled(note_index, offset_samples + 1);
+      }
+      offset_samples += num_samples_per_beat;
+    }
+
+    // Process metronome.
     metronome.ProcessScheduled(output, kNumChannels, kNumFrames, 0);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -136,7 +147,7 @@ int main(int argc, char* argv[]) {
         return;
     }
     task_runner.Add([&clock, tempo]() { clock.SetTempo(tempo); });
-    LOG(INFO) << "Tempo set to " <<   tempo;
+    LOG(INFO) << "Tempo set to " << tempo;
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

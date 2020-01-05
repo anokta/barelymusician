@@ -12,26 +12,6 @@ const int kSampleRate = 48000;
 // Clock tempo.
 const float kTempo = 120.0f;
 
-// Tests that the clock triggers the registered beat callback as expected.
-TEST(ClockTest, SetBeatCallback) {
-  const int kNumSeconds = 8;
-
-  Clock clock(kSampleRate);
-  clock.SetTempo(kTempo);
-
-  int expected_beat = 0;
-  const auto beat_callback = [&expected_beat](int beat, int) {
-    EXPECT_EQ(beat, expected_beat);
-    ++expected_beat;
-  };
-  clock.SetBeatCallback(beat_callback);
-
-  for (int i = 0; i < kNumSeconds; ++i) {
-    clock.Update(kSampleRate);
-  }
-  EXPECT_NE(expected_beat, 0);
-}
-
 // Tests that the clock position gets set as expected.
 TEST(ClockTest, SetPosition) {
   const float kPosition = 2.4f;

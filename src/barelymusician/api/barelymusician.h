@@ -14,9 +14,6 @@ namespace barelyapi {
 // BarelyMusician API that maintains a native real-time music engine.
 class BarelyMusician {
  public:
-  // Beat event callback signature.
-  using BeatCallback = Clock::BeatCallback;
-
   // Constructs new |BarelyMusician| with the given system configuration.
   //
   // @param sample_rate Sampling rate.
@@ -35,11 +32,6 @@ class BarelyMusician {
 
   // Updates the internal state.
   void Update();
-
-  // Sets beat callback.
-  //
-  // @param beat_callback Beat callback.
-  void SetBeatCallback(BeatCallback beat_callback);
 
   // Sets tempo.
   //

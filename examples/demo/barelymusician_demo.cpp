@@ -33,14 +33,9 @@ int main(int argc, char* argv[]) {
   Clock clock(kSampleRate);
   clock.SetTempo(kTempo);
 
-  // Beat callback.
-  const auto beat_callback = [](int beat, int offset_samples) {
-    LOG(INFO) << "Beat " << beat << ":" << offset_samples;
-  };
-  clock.SetBeatCallback(beat_callback);
-
   // Audio process callback.
   const auto process_callback = [&clock](float* output) {
+    LOG(INFO) << "Position " << clock.GetPosition();
     clock.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
   };

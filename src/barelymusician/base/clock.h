@@ -1,16 +1,11 @@
 #ifndef BARELYMUSICIAN_BASE_CLOCK_H_
 #define BARELYMUSICIAN_BASE_CLOCK_H_
 
-#include <functional>
-
 namespace barelyapi {
 
 // Audio clock that keeps track of beats.
 class Clock {
  public:
-  // Beat event callback signature.
-  using BeatCallback = std::function<void(int beat, int offset_samples)>;
-
   // Constructs new |Clock|.
   //
   // @param sample_rate Sampling rate per second.
@@ -41,11 +36,6 @@ class Clock {
   // @return Tempo (BPM).
   float GetTempo() const;
 
-  // Sets the beat callback.
-  //
-  // @param beat_callback Beat callback to be triggered in each beat.
-  void SetBeatCallback(BeatCallback&& beat_callback);
-
   // Sets the current clock position in beats.
   //
   // @param beat Absolute position in beats.
@@ -64,9 +54,6 @@ class Clock {
  private:
   // Number of samples per minute.
   const float num_samples_per_minute_;
-
-  // Callback to be triggered for each beat.
-  BeatCallback beat_callback_;
 
   // Current beat.
   int beat_;

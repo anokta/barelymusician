@@ -72,34 +72,35 @@ class Musician {
 
   // TODO: get num_bars from section composer.
   explicit Musician(int sample_rate) : clock_(sample_rate) {
-    clock_.SetBeatCallback([this](int beat, int) {
-      // Update transport.
-      transport_.beat = beat % transport_.num_beats;
-      transport_.bar = beat / transport_.num_beats;
-      transport_.section = transport_.bar / transport_.num_bars;
-      transport_.bar %= transport_.num_bars;
+  }
 
-      if (transport_.beat == 0) {
-        if (transport_.bar == 0) {
-          // Compose next section.
-          section_type_ = ensemble_.section_composer_callback(transport_);
-        }
-        // Compose next bar.
-        harmonic_ = ensemble_.bar_composer_callback(transport_, section_type_);
+  void ProcessBeat(int beat) {
+    // Update transport.
+    transport_.beat = beat % transport_.num_beats;
+    transport_.bar = beat / transport_.num_beats;
+    transport_.section = transport_.bar / transport_.num_bars;
+    transport_.bar %= transport_.num_bars;
+
+    if (transport_.beat == 0) {
+      if (transport_.bar == 0) {
+        // Compose next section.
+        section_type_ = ensemble_.section_composer_callback(transport_);
       }
-      // Update performers.
-      for (Ensemble::Performer& performer : ensemble_.performers) {
-        // Compose next beat notes.
-        temp_notes_.clear();
-        performer.beat_composer_callback(transport_, section_type_, harmonic_,
-                                         &temp_notes_);
-        for (Note& note : temp_notes_) {
-          // TODO: inefficient?!
-          note.start_beat = beat;
-          performer.score.AddNote(note);
-        }
+      // Compose next bar.
+      harmonic_ = ensemble_.bar_composer_callback(transport_, section_type_);
+    }
+    // Update performers.
+    for (Ensemble::Performer& performer : ensemble_.performers) {
+      // Compose next beat notes.
+      temp_notes_.clear();
+      performer.beat_composer_callback(transport_, section_type_, harmonic_,
+                                       &temp_notes_);
+      for (Note& note : temp_notes_) {
+        // TODO: inefficient?!
+        note.start_beat = beat;
+        performer.score.AddNote(note);
       }
-    });
+    }
   }
 
   // TODO: get this from section type.
@@ -118,9 +119,23 @@ class Musician {
 
     const float start_position = clock_.GetPosition();
     const int start_beat = clock_.GetBeat();
-    const int leftover_samples = clock_.GetLeftoverSamples();
+    const int start_leftover_samples = clock_.GetLeftoverSamples();
     clock_.Update(num_samples);
     const float end_position = clock_.GetPosition();
+    const int end_beat = clock_.GetBeat();
+    const int end_leftover_samples = clock_.GetLeftoverSamples();
+
+    if (start_leftover_samples == 0) {
+      ProcessBeat(start_beat);
+    }
+    if (end_beat > start_beat) {
+      for (int beat = start_beat + 1; beat < end_beat; ++beat) {
+        ProcessBeat(beat);
+      }
+      if (end_leftover_samples > 0) {
+        ProcessBeat(end_beat);
+      }
+    }
 
     const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
     for (Ensemble::Performer& performer : ensemble_.performers) {
@@ -131,7 +146,7 @@ class Musician {
         const int note_on_timestamp =
             timestamp + (it->start_beat - start_beat) * num_samples_per_beat +
             SamplesFromBeats(it->offset_beats, num_samples_per_beat) -
-            leftover_samples;
+            start_leftover_samples;
         performer.instrument->NoteOnScheduled(it->index, it->intensity,
                                               note_on_timestamp);
         const int note_off_timestamp =

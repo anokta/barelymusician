@@ -64,14 +64,14 @@ void ResetSequencer() {
 void SetSequencerBeatCallback(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
   if (beat_callback_ptr == nullptr) {
-    barelymusician->SetBeatCallback(nullptr);
+    //barelymusician->SetBeatCallback(nullptr);
     return;
   }
   const auto beat_callback = [beat_callback_ptr](int beat, int) {
     main_task_runner->Add(
         [beat_callback_ptr, beat]() { beat_callback_ptr(beat); });
   };
-  barelymusician->SetBeatCallback(beat_callback);
+  //barelymusician->SetBeatCallback(beat_callback);
 }
 
 void SetSequencerTempo(float tempo) {

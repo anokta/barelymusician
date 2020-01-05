@@ -12,11 +12,10 @@ namespace barelyapi {
 Clock::Clock(int sample_rate)
     : num_samples_per_minute_(static_cast<float>(sample_rate) *
                               kSecondsFromMinutes),
-      beat_callback_(nullptr),
-      tempo_(0.0f),
-      num_samples_per_beat_(0),
       beat_(0),
-      leftover_samples_(0) {
+      leftover_samples_(0),
+      num_samples_per_beat_(0),
+      tempo_(0.0f) {
   DCHECK_GE(num_samples_per_minute_, 0.0f);
 }
 
@@ -32,10 +31,6 @@ float Clock::GetPosition() const {
 }
 
 float Clock::GetTempo() const { return tempo_; }
-
-void Clock::SetBeatCallback(BeatCallback&& beat_callback) {
-  beat_callback_ = std::move(beat_callback);
-}
 
 void Clock::SetPosition(float beat) {
   DCHECK_GE(beat, 0.0f);
@@ -62,16 +57,8 @@ void Clock::Update(int num_samples) {
     return;
   }
   leftover_samples_ += num_samples;
-  if (leftover_samples_ == num_samples && beat_callback_ != nullptr) {
-    beat_callback_(beat_, 0);
-  }
-  while (leftover_samples_ >= num_samples_per_beat_) {
-    ++beat_;
-    leftover_samples_ -= num_samples_per_beat_;
-    if (leftover_samples_ > 0 && beat_callback_ != nullptr) {
-      beat_callback_(beat_, num_samples - leftover_samples_);
-    }
-  }
+  beat_ += leftover_samples_ / num_samples_per_beat_;
+  leftover_samples_ %= num_samples_per_beat_;
 }
 
 }  // namespace barelyapi

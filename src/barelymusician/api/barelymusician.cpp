@@ -52,12 +52,6 @@ void BarelyMusician::Update() {
   }
 }
 
-void BarelyMusician::SetBeatCallback(BeatCallback beat_callback) {
-  task_runner_.Add([this, beat_callback]() mutable {
-    clock_.SetBeatCallback(std::move(beat_callback));
-  });
-}
-
 void BarelyMusician::SetTempo(float tempo) {
   task_runner_.Add([this, tempo]() { clock_.SetTempo(tempo); });
 }

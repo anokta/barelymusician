@@ -16,18 +16,38 @@ namespace barelyapi {
 
 class Musician {
  public:
+  // Playback transport.
+  struct Transport {
+    // Current section.
+    int section;
+
+    // Current bar.
+    int bar;
+
+    // Current beat.
+    int beat;
+
+    // Number of bars per section.
+    int num_bars;
+
+    // Number of beats per bar.
+    int num_beats;
+  };
+
+  // Musical ensemble.
   struct Ensemble {
     // Section composer callback signature.
-    using SectionComposerCallback = std::function<int(int section)>;
+    using SectionComposerCallback =
+        std::function<int(const Transport& transport)>;
 
     // Bar composer callback signature.
     using BarComposerCallback =
-        std::function<int(int bar, int num_bars, int section_type)>;
+        std::function<int(const Transport& transport, int section_type)>;
 
     // Beat composer callback signature.
-    using BeatComposerCallback = std::function<void(
-        int bar, int beat, int num_bars, int num_beats, int section_type,
-        int harmonic, std::vector<Note>* notes)>;
+    using BeatComposerCallback =
+        std::function<void(const Transport& transport, int section_type,
+                           int harmonic, std::vector<Note>* notes)>;
 
     // Section composer callback.
     SectionComposerCallback section_composer_callback;
@@ -51,29 +71,27 @@ class Musician {
   };
 
   // TODO: get num_bars from section composer.
-  explicit Musician(int sample_rate) : clock_(sample_rate), bar_(0), beat_(0) {
-    clock_.SetBeatCallback([this](int beat, int leftover_samples) {
+  explicit Musician(int sample_rate) : clock_(sample_rate) {
+    clock_.SetBeatCallback([this](int beat, int) {
       // Update transport.
-      beat_ = beat % num_beats_;
-      bar_ = beat / num_beats_;
-      section_ = bar_ / num_bars_;
-      bar_ %= num_bars_;
+      transport_.beat = beat % transport_.num_beats;
+      transport_.bar = beat / transport_.num_beats;
+      transport_.section = transport_.bar / transport_.num_bars;
+      transport_.bar %= transport_.num_bars;
 
-      if (beat_ == 0) {
-        if (bar_ == 0) {
+      if (transport_.beat == 0) {
+        if (transport_.bar == 0) {
           // Compose next section.
-          section_type_ = ensemble_.section_composer_callback(section_);
+          section_type_ = ensemble_.section_composer_callback(transport_);
         }
         // Compose next bar.
-        harmonic_ =
-            ensemble_.bar_composer_callback(bar_, num_bars_, section_type_);
+        harmonic_ = ensemble_.bar_composer_callback(transport_, section_type_);
       }
       // Update performers.
       for (Ensemble::Performer& performer : ensemble_.performers) {
         // Compose next beat notes.
         temp_notes_.clear();
-        performer.beat_composer_callback(bar_, beat_, num_bars_, num_beats_,
-                                         section_type_, harmonic_,
+        performer.beat_composer_callback(transport_, section_type_, harmonic_,
                                          &temp_notes_);
         for (Note& note : temp_notes_) {
           // TODO: inefficient?!
@@ -85,9 +103,9 @@ class Musician {
   }
 
   // TODO: get this from section type.
-  void SetNumBars(int num_bars) { num_bars_ = num_bars; }
+  void SetNumBars(int num_bars) { transport_.num_bars = num_bars; }
 
-  void SetNumBeats(int num_beats) { num_beats_ = num_beats; }
+  void SetNumBeats(int num_beats) { transport_.num_beats = num_beats; }
 
   void SetTempo(float tempo) { tempo_ = tempo; }
 
@@ -130,16 +148,13 @@ class Musician {
 
  private:
   Clock clock_;
+
   Ensemble ensemble_;
 
-  int section_;
-  int bar_;
-  int beat_;
-
-  int num_bars_;
-  int num_beats_;
+  Transport transport_;
 
   int section_type_;
+
   int harmonic_;
 
   float tempo_;

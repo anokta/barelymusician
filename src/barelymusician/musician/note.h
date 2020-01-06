@@ -11,9 +11,6 @@ struct Note {
   // Note intensity (typically loudness).
   float intensity;
 
-  // Note start beat.
-  int start_beat;
-
   // Note offset in beats from the start beat.
   float offset_beats;
 

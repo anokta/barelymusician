@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_MUSICIAN_MUSICIAN_H_
 #define BARELYMUSICIAN_MUSICIAN_MUSICIAN_H_
 
-#include <functional>
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -10,6 +10,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
+#include "barelymusician/musician/note_utils.h"
 #include "barelymusician/musician/score.h"
 
 namespace barelyapi {
@@ -71,9 +72,76 @@ class Musician {
   };
 
   // TODO: get num_bars from section composer.
-  explicit Musician(int sample_rate) : clock_(sample_rate) {
+  explicit Musician(int sample_rate) : clock_(sample_rate) {}
+
+  // TODO: get this from section type.
+  void SetNumBars(int num_bars) { transport_.num_bars = num_bars; }
+
+  void SetNumBeats(int num_beats) { transport_.num_beats = num_beats; }
+
+  void SetTempo(float tempo) { tempo_ = tempo; }
+
+  // TODO: timestamp not necessary?
+  void Update(int num_samples, int timestamp) {
+    // TODO: is this efficient?
+    if (clock_.GetTempo() != tempo_) {
+      clock_.SetTempo(tempo_);
+    }
+
+    const int start_beat = clock_.GetBeat();
+    const int start_leftover_samples = clock_.GetLeftoverSamples();
+    clock_.Update(num_samples);
+    const int end_beat = clock_.GetBeat();
+    const int end_leftover_samples = clock_.GetLeftoverSamples();
+
+    const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
+    const float start_leftover_beats =
+        BeatsFromSamples(start_leftover_samples, num_samples_per_beat);
+    const float end_leftover_beats =
+        BeatsFromSamples(end_leftover_samples, num_samples_per_beat);
+    int beat_timestamp = timestamp - start_leftover_samples;
+    for (int beat = start_beat; beat <= end_beat; ++beat) {
+      if ((beat != start_beat || start_leftover_samples == 0) &&
+          (beat != end_beat || end_leftover_samples > 0)) {
+        ProcessBeat(beat);
+      }
+      for (Ensemble::Performer& performer : ensemble_.performers) {
+        const auto* notes = performer.score.GetNotes(beat);
+        if (notes == nullptr) {
+          // TODO: this does not make sense - fill empty vector there.
+          continue;
+        }
+        auto begin = notes->begin();
+        auto end = notes->end();
+        if (beat == start_beat) {
+          begin = std::lower_bound(begin, end, start_leftover_beats,
+                                   &CompareOffsetBeats);
+        }
+        if (beat == end_beat) {
+          end = std::lower_bound(begin, end, end_leftover_beats,
+                                 &CompareOffsetBeats);
+        }
+        for (auto it = begin; it != end; ++it) {
+          const int note_on_timestamp =
+              beat_timestamp +
+              SamplesFromBeats(it->offset_beats, num_samples_per_beat);
+          performer.instrument->NoteOnScheduled(it->index, it->intensity,
+                                                note_on_timestamp);
+          const int note_off_timestamp =
+              note_on_timestamp +
+              SamplesFromBeats(it->duration_beats, num_samples_per_beat);
+          performer.instrument->NoteOffScheduled(it->index, note_off_timestamp);
+        }
+        // TODO: clear |notes|?
+      }
+      beat_timestamp += num_samples_per_beat;
+    }
   }
 
+  Ensemble& ensemble() { return ensemble_; }
+  const Ensemble& ensemble() const { return ensemble_; }
+
+ private:
   void ProcessBeat(int beat) {
     // Update transport.
     transport_.beat = beat % transport_.num_beats;
@@ -95,73 +163,12 @@ class Musician {
       temp_notes_.clear();
       performer.beat_composer_callback(transport_, section_type_, harmonic_,
                                        &temp_notes_);
-      for (Note& note : temp_notes_) {
-        // TODO: inefficient?!
-        note.start_beat = beat;
-        performer.score.AddNote(note);
+      for (const Note& note : temp_notes_) {
+        performer.score.AddNote(beat, note);
       }
     }
   }
 
-  // TODO: get this from section type.
-  void SetNumBars(int num_bars) { transport_.num_bars = num_bars; }
-
-  void SetNumBeats(int num_beats) { transport_.num_beats = num_beats; }
-
-  void SetTempo(float tempo) { tempo_ = tempo; }
-
-  // TODO: timestamp not necessary?
-  void Update(int num_samples, int timestamp) {
-    // TODO: is this efficient?
-    if (clock_.GetTempo() != tempo_) {
-      clock_.SetTempo(tempo_);
-    }
-
-    const float start_position = clock_.GetPosition();
-    const int start_beat = clock_.GetBeat();
-    const int start_leftover_samples = clock_.GetLeftoverSamples();
-    clock_.Update(num_samples);
-    const float end_position = clock_.GetPosition();
-    const int end_beat = clock_.GetBeat();
-    const int end_leftover_samples = clock_.GetLeftoverSamples();
-
-    if (start_leftover_samples == 0) {
-      ProcessBeat(start_beat);
-    }
-    if (end_beat > start_beat) {
-      for (int beat = start_beat + 1; beat < end_beat; ++beat) {
-        ProcessBeat(beat);
-      }
-      if (end_leftover_samples > 0) {
-        ProcessBeat(end_beat);
-      }
-    }
-
-    const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
-    for (Ensemble::Performer& performer : ensemble_.performers) {
-      // TODO: store note events somewhere to avoid timestamp.
-      const auto notes =
-          performer.score.GetIterator(start_position, end_position);
-      for (auto it = notes.begin; it != notes.end; ++it) {
-        const int note_on_timestamp =
-            timestamp + (it->start_beat - start_beat) * num_samples_per_beat +
-            SamplesFromBeats(it->offset_beats, num_samples_per_beat) -
-            start_leftover_samples;
-        performer.instrument->NoteOnScheduled(it->index, it->intensity,
-                                              note_on_timestamp);
-        const int note_off_timestamp =
-            note_on_timestamp +
-            SamplesFromBeats(it->duration_beats, num_samples_per_beat);
-        performer.instrument->NoteOffScheduled(it->index, note_off_timestamp);
-      }
-      // TODO: clear |notes|?
-    }
-  }
-
-  Ensemble& ensemble() { return ensemble_; }
-  const Ensemble& ensemble() const { return ensemble_; }
-
- private:
   Clock clock_;
 
   Ensemble ensemble_;

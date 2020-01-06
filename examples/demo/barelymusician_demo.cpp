@@ -6,10 +6,12 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/clock.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
+using ::barelyapi::BeatsFromSamples;
 using ::barelyapi::Clock;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
@@ -35,7 +37,10 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   const auto process_callback = [&clock](float* output) {
-    LOG(INFO) << "Position " << clock.GetPosition();
+    const float position = static_cast<float>(clock.GetBeat()) +
+                           BeatsFromSamples(clock.GetLeftoverSamples(),
+                                            clock.GetNumSamplesPerBeat());
+    LOG(INFO) << std::fixed << std::setprecision(2) << "Position " << position;
     clock.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
   };

@@ -12,19 +12,6 @@ const int kSampleRate = 48000;
 // Clock tempo.
 const float kTempo = 120.0f;
 
-// Tests that the clock position gets set as expected.
-TEST(ClockTest, SetPosition) {
-  const float kPosition = 2.4f;
-
-  Clock clock(kSampleRate);
-  clock.SetTempo(kTempo);
-
-  EXPECT_FLOAT_EQ(clock.GetPosition(), 0.0f);
-
-  clock.SetPosition(kPosition);
-  EXPECT_FLOAT_EQ(clock.GetPosition(), kPosition);
-}
-
 // Tests that the clock tempo gets set as expected.
 TEST(ClockTest, SetTempo) {
   Clock clock(kSampleRate);
@@ -38,24 +25,37 @@ TEST(ClockTest, SetTempo) {
                              kSecondsFromMinutes / kTempo));
 }
 
+// Tests that the clock gets reset as expected.
+TEST(ClockTest, Reset) {
+  Clock clock(kSampleRate);
+  clock.SetTempo(kTempo);
+  EXPECT_EQ(clock.GetBeat(), 0);
+  EXPECT_EQ(clock.GetLeftoverSamples(), 0);
+
+  clock.Update(kSampleRate);
+  EXPECT_EQ(clock.GetBeat(), static_cast<int>(kTempo / kSecondsFromMinutes));
+  EXPECT_GE(clock.GetLeftoverSamples(), 0);
+
+  clock.Reset();
+  EXPECT_EQ(clock.GetBeat(), 0);
+  EXPECT_EQ(clock.GetLeftoverSamples(), 0);
+}
+
 // Tests that the clock gets updated as expected.
 TEST(ClockTest, Update) {
   Clock clock(kSampleRate);
   EXPECT_EQ(clock.GetBeat(), 0);
   EXPECT_EQ(clock.GetLeftoverSamples(), 0);
-  EXPECT_FLOAT_EQ(clock.GetPosition(), 0.0f);
 
   clock.Update(kSampleRate);
   EXPECT_EQ(clock.GetBeat(), 0);
   EXPECT_EQ(clock.GetLeftoverSamples(), 0);
-  EXPECT_FLOAT_EQ(clock.GetPosition(), 0.0f);
 
   clock.SetTempo(kTempo);
 
   clock.Update(kSampleRate);
-  EXPECT_GE(clock.GetBeat(), 0);
+  EXPECT_GE(clock.GetBeat(), static_cast<int>(kTempo / kSecondsFromMinutes));
   EXPECT_GE(clock.GetLeftoverSamples(), 0);
-  EXPECT_FLOAT_EQ(clock.GetPosition(), kTempo / kSecondsFromMinutes);
 }
 
 }  // namespace

@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_MUSICIAN_SCORE_H_
 #define BARELYMUSICIAN_MUSICIAN_SCORE_H_
 
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/musician/note.h"
@@ -10,42 +11,37 @@ namespace barelyapi {
 // Musical score.
 class Score {
  public:
-  // Score iterator.
-  struct Iterator {
-    // Iterator begin.
-    std::vector<Note>::const_iterator begin;
-
-    // Iterator end.
-    std::vector<Note>::const_iterator end;
-  };
-
-  // Adds new note.
+  // Adds new note to the given beat.
   //
+  // @param beat Beat.
   // @param note Note.
-  void AddNote(const Note& note);
+  void AddNote(int beat, const Note& note);
 
   // Clears all the notes.
   void Clear();
 
-  // Clears the notes within the given range.
-  //
-  // @param iterator Iterator range to clear the notes.
-  void Clear(const Iterator& iterator);
+  // Clears all the notes in the given beat.
+  void Clear(int beat);
 
   // Returns whether the score is empty or not.
   //
   // @return True if empty.
   bool Empty() const;
 
-  // Returns iterator within the given range.
+  // Returns whether the score has the given beat is empty or not.
   //
-  // @param start_position Start position in beats.
-  // @param end_position End position in beats.
-  Iterator GetIterator(float start_position, float end_position) const;
+  // @return True if beat exists.
+  bool Empty(int beat) const;
+
+  // Returns the notes for the given beat.
+  //
+  // @param beat Beat.
+  // @return Pointer to list of notes, nullptr if does not exist.
+  const std::vector<Note>* GetNotes(int beat) const;
 
  private:
-  // Score notes.
-  std::vector<Note> notes_;
+  // Score notes for each beat.
+  std::unordered_map<int, std::vector<Note>> notes_;
 };
 
 }  // namespace barelyapi

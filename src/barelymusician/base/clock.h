@@ -26,20 +26,13 @@ class Clock {
   // @return Number of samples per beat.
   int GetNumSamplesPerBeat() const;
 
-  // Returns the current clock position in beats.
-  //
-  // @return Absolute position in beats.
-  float GetPosition() const;
-
   // Returns the tempo.
   //
   // @return Tempo (BPM).
   float GetTempo() const;
 
-  // Sets the current clock position in beats.
-  //
-  // @param beat Absolute position in beats.
-  void SetPosition(float beat);
+  // Resets the clock.
+  void Reset();
 
   // Sets the tempo.
   //

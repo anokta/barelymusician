@@ -1,59 +1,38 @@
 #include "barelymusician/musician/score.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/musician/note_utils.h"
 
 namespace barelyapi {
 
-namespace {
-
-// Compares the given two messages with respect to their start positions.
-//
-// @param lhs First note.
-// @param rhs Second note.
-// @return True if the first note comes prior to the second note.
-bool CompareNote(const Note& lhs, const Note& rhs) {
-  return (lhs.start_beat == rhs.start_beat)
-             ? lhs.offset_beats < rhs.offset_beats
-             : lhs.start_beat < rhs.start_beat;
-}
-
-// Compares the given |note| against the given |position|.
-//
-// @param note Note.
-// @param position Position in beats.
-// @return True if the note comes prior to the position.
-bool ComparePosition(const Note& note, float position) {
-  return static_cast<float>(note.start_beat) + note.offset_beats < position;
-}
-
-}  // namespace
-
-void Score::AddNote(const Note& note) {
-  const auto it =
-      std::upper_bound(notes_.begin(), notes_.end(), note, &CompareNote);
-  notes_.insert(it, note);
+void Score::AddNote(int beat, const Note& note) {
+  const auto result =
+      notes_.insert(std::make_pair(beat, std::vector<Note>(1, note)));
+  if (!result.second) {
+    auto* notes = &result.first->second;
+    const auto it =
+        std::upper_bound(notes->begin(), notes->end(), note, &CompareNote);
+    notes->insert(it, note);
+  }
 }
 
 void Score::Clear() { notes_.clear(); }
 
-void Score::Clear(const Iterator& iterator) {
-  notes_.erase(iterator.begin, iterator.end);
-}
+void Score::Clear(int beat) { notes_.erase(beat); }
 
 bool Score::Empty() const { return notes_.empty(); }
 
-Score::Iterator Score::GetIterator(float start_position,
-                                   float end_position) const {
-  DCHECK_GE(start_position, 0.0f);
-  DCHECK_LE(start_position, end_position);
-  Iterator iterator;
-  iterator.begin = std::lower_bound(notes_.begin(), notes_.end(),
-                                    start_position, &ComparePosition);
-  iterator.end = std::lower_bound(iterator.begin, notes_.end(), end_position,
-                                  &ComparePosition);
-  return iterator;
+bool Score::Empty(int beat) const { return notes_.find(beat) == notes_.end(); }
+
+const std::vector<Note>* Score::GetNotes(int beat) const {
+  const auto it = notes_.find(beat);
+  if (it == notes_.end()) {
+    return nullptr;
+  }
+  return &it->second;
 }
 
 }  // namespace barelyapi

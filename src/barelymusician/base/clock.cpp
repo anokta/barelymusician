@@ -22,20 +22,11 @@ int Clock::GetLeftoverSamples() const { return leftover_samples_; }
 
 int Clock::GetNumSamplesPerBeat() const { return num_samples_per_beat_; }
 
-float Clock::GetPosition() const {
-  return static_cast<float>(beat_) +
-         BeatsFromSamples(leftover_samples_, num_samples_per_beat_);
-}
-
 float Clock::GetTempo() const { return tempo_; }
 
-void Clock::SetPosition(float beat) {
-  DCHECK_GE(beat, 0.0f);
-  beat_ = static_cast<int>(beat);
-  // TODO(#56): This will ignore the fractional part when
-  // |num_samples_per_beat_| is zero (i.e., when |tempo_| is zero/unset).
-  leftover_samples_ =
-      SamplesFromBeats(beat - static_cast<float>(beat_), num_samples_per_beat_);
+void Clock::Reset() {
+  beat_ = 0;
+  leftover_samples_ = 0;
 }
 
 void Clock::SetTempo(float tempo) {

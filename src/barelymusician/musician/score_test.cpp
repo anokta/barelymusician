@@ -1,47 +1,44 @@
 #include "barelymusician/musician/score.h"
 
-#include <iterator>
-
 #include "barelymusician/musician/note.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
 
+const int kBeat = 5;
+const float kNoteIndex = 60.0f;
 const float kNoteIntensity = 1.0f;
 const float kNoteDurationBeats = 0.5f;
 
 // Tests that the score returns an added single note as expected.
 TEST(ScoreTest, SingleNote) {
-  const float kNoteIndex = 60.0f;
-  const int kNoteStartBeat = 3;
   const float kNoteOffsetBeats = 0.25f;
 
   Score score;
   EXPECT_TRUE(score.Empty());
 
   // Add note.
-  score.AddNote({kNoteIndex, kNoteIntensity, kNoteStartBeat, kNoteOffsetBeats,
-                 kNoteDurationBeats});
+  score.AddNote(kBeat, {kNoteIndex, kNoteIntensity, kNoteOffsetBeats,
+                        kNoteDurationBeats});
   EXPECT_FALSE(score.Empty());
+  EXPECT_FALSE(score.Empty(kBeat));
 
   // Get note.
-  const float start_position =
-      static_cast<float>(kNoteStartBeat) + kNoteOffsetBeats;
-  const float end_position = start_position + kNoteDurationBeats;
-  const auto iterator = score.GetIterator(start_position, end_position);
-  ASSERT_EQ(std::distance(iterator.begin, iterator.end), 1);
+  const auto* notes = score.GetNotes(kBeat);
+  ASSERT_NE(notes, nullptr);
+  ASSERT_EQ(notes->size(), 1);
 
-  const Note& note = *iterator.begin;
+  const Note& note = notes->front();
   EXPECT_FLOAT_EQ(note.index, kNoteIndex);
   EXPECT_FLOAT_EQ(note.intensity, kNoteIntensity);
-  EXPECT_EQ(note.start_beat, kNoteStartBeat);
   EXPECT_FLOAT_EQ(note.offset_beats, kNoteOffsetBeats);
   EXPECT_FLOAT_EQ(note.duration_beats, kNoteDurationBeats);
 
   // Remove note.
-  score.Clear(iterator);
+  score.Clear(kBeat);
   EXPECT_TRUE(score.Empty());
+  EXPECT_TRUE(score.Empty(kBeat));
 }
 
 // Tests that the score returns added notes as expected.
@@ -54,94 +51,91 @@ TEST(ScoreTest, MultipleNotes) {
 
   // Add |kNumNotes| notes, each note with |kNoteOffsetBeats| from each beat.
   for (int i = 0; i < kNumNotes; ++i) {
-    score.AddNote({static_cast<float>(i), kNoteIntensity, i, kNoteOffsetBeats,
-                   kNoteDurationBeats});
-    EXPECT_FALSE(score.Empty());
+    score.AddNote(i, {static_cast<float>(i), kNoteIntensity, kNoteOffsetBeats,
+                      kNoteDurationBeats});
+    EXPECT_FALSE(score.Empty(i));
   }
+  EXPECT_FALSE(score.Empty());
 
   // Get one note at a time.
   for (int i = 0; i < kNumNotes; ++i) {
-    const float start_position = static_cast<float>(i);
-    const float end_position = static_cast<float>(i + 1);
-    const auto iterator = score.GetIterator(start_position, end_position);
-    ASSERT_EQ(std::distance(iterator.begin, iterator.end), 1);
+    const auto* notes = score.GetNotes(i);
+    ASSERT_NE(notes, nullptr);
+    ASSERT_EQ(notes->size(), 1);
 
-    const Note& note = *iterator.begin;
+    const Note& note = notes->front();
     EXPECT_FLOAT_EQ(note.index, static_cast<float>(i));
-    EXPECT_EQ(note.start_beat, i);
-    EXPECT_EQ(note.offset_beats, kNoteOffsetBeats);
+    EXPECT_FLOAT_EQ(note.offset_beats, kNoteOffsetBeats);
 
     // Remove note.
-    score.Clear(iterator);
+    score.Clear(i);
+    EXPECT_TRUE(score.Empty(i));
   }
   EXPECT_TRUE(score.Empty());
 }
 
 // Tests that the score returns added notes as expected when they have the same
-// position.
-TEST(ScoreTest, MultipleNotesSamePosition) {
+// offset.
+TEST(ScoreTest, MultipleNotesSameOffsetBeats) {
   const int kNumNotes = 4;
-  const int kStartBeat = 6;
   const float kNoteOffsetBeats = 0.5f;
 
   Score score;
   EXPECT_TRUE(score.Empty());
 
-  // Add |kNumNotes| notes using the same |kStartBeat| and |kNoteOffsetBeats|.
+  // Add |kNumNotes| notes using the same |kNoteOffsetBeats|.
   for (int i = 0; i < kNumNotes; ++i) {
-    score.AddNote({static_cast<float>(i), kNoteIntensity, kStartBeat,
-                   kNoteOffsetBeats, kNoteDurationBeats});
-    EXPECT_FALSE(score.Empty());
+    score.AddNote(kBeat, {static_cast<float>(i), kNoteIntensity,
+                          kNoteOffsetBeats, kNoteDurationBeats});
   }
+  EXPECT_FALSE(score.Empty());
+  EXPECT_FALSE(score.Empty(kBeat));
 
   // Get all notes.
-  const float start_position =
-      static_cast<float>(kStartBeat) + kNoteOffsetBeats;
-  const float end_position = start_position + kNoteDurationBeats;
-  const auto iterator = score.GetIterator(start_position, end_position);
-  ASSERT_EQ(std::distance(iterator.begin, iterator.end), kNumNotes);
+  const auto* notes = score.GetNotes(kBeat);
+  ASSERT_NE(notes, nullptr);
+  ASSERT_EQ(notes->size(), kNumNotes);
 
-  auto it = iterator.begin;
   for (int i = 0; i < kNumNotes; ++i) {
-    const Note& note = *it++;
+    const Note& note = (*notes)[i];
     EXPECT_FLOAT_EQ(note.index, static_cast<float>(i));
-    EXPECT_EQ(note.start_beat, kStartBeat);
-    EXPECT_EQ(note.offset_beats, kNoteOffsetBeats);
+    EXPECT_FLOAT_EQ(note.offset_beats, kNoteOffsetBeats);
   }
 
-  score.Clear(iterator);
+  score.Clear(kBeat);
   EXPECT_TRUE(score.Empty());
+  EXPECT_TRUE(score.Empty(kBeat));
 }
 
 // Tests that clearing the score removes all existing notes as expected.
 TEST(ScoreTest, Clear) {
-  const int kNumNotes = 10;
-  const int kStartBeat = 5;
+  const int kNumBeats = 2;
+  const int kNumNotes = 4;
 
   Score score;
   EXPECT_TRUE(score.Empty());
 
-  const float start_position = static_cast<float>(kStartBeat);
-  const float end_position = static_cast<float>(kStartBeat + 1);
-  Score::Iterator iterator;
-  iterator = score.GetIterator(start_position, end_position);
-  EXPECT_EQ(std::distance(iterator.begin, iterator.end), 0);
-
-  for (int i = 0; i < kNumNotes; ++i) {
-    const float offset_beats =
-        static_cast<float>(i) / static_cast<float>(kNumNotes);
-    score.AddNote(
-        {0.0f, kNoteIntensity, kStartBeat, offset_beats, kNoteDurationBeats});
-    EXPECT_FALSE(score.Empty());
+  for (int beat = 0; beat < kNumBeats; ++beat) {
+    EXPECT_TRUE(score.Empty(beat));
+    EXPECT_EQ(score.GetNotes(beat), nullptr);
+    for (int i = 0; i < kNumNotes; ++i) {
+      const float offset_beats =
+          static_cast<float>(i) / static_cast<float>(kNumNotes);
+      score.AddNote(
+          beat, {kNoteIndex, kNoteIntensity, offset_beats, kNoteDurationBeats});
+    }
+    EXPECT_FALSE(score.Empty(beat));
+    EXPECT_NE(score.GetNotes(beat), nullptr);
   }
-  iterator = score.GetIterator(start_position, end_position);
-  EXPECT_EQ(std::distance(iterator.begin, iterator.end), kNumNotes);
+  EXPECT_FALSE(score.Empty());
 
   score.Clear();
-  EXPECT_TRUE(score.Empty());
 
-  iterator = score.GetIterator(start_position, end_position);
-  EXPECT_EQ(std::distance(iterator.begin, iterator.end), 0);
+  for (int beat = 0; beat < kNumBeats; ++beat) {
+    EXPECT_TRUE(score.Empty(beat));
+    EXPECT_EQ(score.GetNotes(beat), nullptr);
+  }
+  EXPECT_TRUE(score.Empty());
 }
 
 }  // namespace

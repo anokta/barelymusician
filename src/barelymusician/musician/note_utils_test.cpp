@@ -6,6 +6,23 @@
 namespace barelyapi {
 namespace {
 
+// Tests that notes are compared as expected according to their offset beats.
+TEST(NoteUtilsTest, CompareNoteOffsetBeats) {
+  const float kFirstOffsetBeats = 0.45f;
+  const float kSecondOffsetBeats = 0.7f;
+
+  Note first_note;
+  first_note.offset_beats = kFirstOffsetBeats;
+  Note second_note;
+  second_note.offset_beats = kSecondOffsetBeats;
+
+  EXPECT_TRUE(CompareNote(first_note, second_note));
+  EXPECT_TRUE(CompareOffsetBeats(first_note, kSecondOffsetBeats));
+
+  EXPECT_FALSE(CompareNote(second_note, first_note));
+  EXPECT_FALSE(CompareOffsetBeats(second_note, kFirstOffsetBeats));
+}
+
 // Tests that note indices get quantized as expected given an arbitrary scale.
 TEST(NoteUtilsTest, GetNoteIndex) {
   const int kOctaveRange = 2;

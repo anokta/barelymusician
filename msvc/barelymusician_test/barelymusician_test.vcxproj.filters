@@ -19,6 +19,9 @@
     <Filter Include="Source Files\message">
       <UniqueIdentifier>{dbca40b4-6f81-4798-bf47-6b973f67c423}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\musician">
+      <UniqueIdentifier>{e7801b4b-e168-4602-bfaa-e24ae1bd15c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp">
@@ -64,10 +67,10 @@
       <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils_test.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\musician</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\musician\score_test.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\musician</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

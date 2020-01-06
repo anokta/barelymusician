@@ -3,7 +3,23 @@
 
 #include <vector>
 
+#include "barelymusician/musician/note.h"
+
 namespace barelyapi {
+
+// Compares the given two messages with respect to their offset beats.
+//
+// @param lhs First note.
+// @param rhs Second note.
+// @return True if the first note comes prior to the second note.
+bool CompareNote(const Note& lhs, const Note& rhs);
+
+// Compares the given |note| against the given |offset_beats|.
+//
+// @param note Note.
+// @param offset_beats Offset in beats.
+// @return True if the note comes prior to the offset.
+bool CompareOffsetBeats(const Note& note, float offset_beats);
 
 // Returns the quantized beat for the given |step| and |num_steps_per_beat|.
 //

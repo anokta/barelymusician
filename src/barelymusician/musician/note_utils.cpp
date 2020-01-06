@@ -5,6 +5,14 @@
 
 namespace barelyapi {
 
+bool CompareNote(const Note& lhs, const Note& rhs) {
+  return lhs.offset_beats < rhs.offset_beats;
+}
+
+bool CompareOffsetBeats(const Note& note, float offset_beats) {
+  return note.offset_beats < offset_beats;
+}
+
 float GetBeat(int step, int num_steps_per_beat) {
   DCHECK_GE(step, 0);
   DCHECK_GT(num_steps_per_beat, 0);

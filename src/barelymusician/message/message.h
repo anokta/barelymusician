@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_H_
 #define BARELYMUSICIAN_MESSAGE_MESSAGE_H_
 
+#include <cstddef>
+
 #include "barelymusician/base/constants.h"
 
 namespace barelyapi {
@@ -11,7 +13,7 @@ struct Message {
   int id;
 
   // Type-agnostic message data.
-  unsigned char data[kNumMaxMessageDataBytes];
+  std::byte data[kNumMaxMessageDataBytes];
 
   // Message timestamp.
   int timestamp;

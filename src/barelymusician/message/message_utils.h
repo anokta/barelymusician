@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_
 #define BARELYMUSICIAN_MESSAGE_MESSAGE_UTILS_H_
 
+#include <cstddef>
 #include <cstring>
 
 #include "barelymusician/base/constants.h"
@@ -37,14 +38,14 @@ bool CompareTimestamp(const Message& message, int timestamp);
 // @param message_data Message data to be read.
 // @return Structured data of |DataType|.
 template <typename DataType>
-DataType ReadMessageData(const unsigned char* message_data);
+DataType ReadMessageData(const std::byte* message_data);
 
 // Writes the given structured |data| into |message_data|.
 //
 // @param data Structured data of |DataType|.
 // @param message_data Message data to be written into.
 template <typename DataType>
-void WriteMessageData(const DataType& data, unsigned char* message_data);
+void WriteMessageData(const DataType& data, std::byte* message_data);
 
 template <typename DataType>
 Message BuildMessage(int id, const DataType& data, int timestamp) {
@@ -56,7 +57,7 @@ Message BuildMessage(int id, const DataType& data, int timestamp) {
 }
 
 template <typename DataType>
-DataType ReadMessageData(const unsigned char* message_data) {
+DataType ReadMessageData(const std::byte* message_data) {
   DCHECK(message_data);
   DataType data;
   DCHECK_LE(sizeof(data), kNumMaxMessageDataBytes);
@@ -65,7 +66,7 @@ DataType ReadMessageData(const unsigned char* message_data) {
 }
 
 template <typename DataType>
-void WriteMessageData(const DataType& data, unsigned char* message_data) {
+void WriteMessageData(const DataType& data, std::byte* message_data) {
   DCHECK(message_data);
   DCHECK_LE(sizeof(data), kNumMaxMessageDataBytes);
   std::memcpy(message_data, &data, sizeof(data));

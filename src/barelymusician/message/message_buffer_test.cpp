@@ -21,7 +21,7 @@ TEST(MessageBufferTest, SinglePushPop) {
   EXPECT_TRUE(message_buffer.Empty());
 
   // Push message.
-  message_buffer.Push({kMessageId, {0}, kTimestamp});
+  message_buffer.Push({kMessageId, {}, kTimestamp});
   EXPECT_FALSE(message_buffer.Empty());
 
   // Pop message.
@@ -44,7 +44,7 @@ TEST(MessageBufferTest, SingleMessagePerNumSamples) {
   // Push |kNumMessages| messages, each message to the beginning of each
   // |kNumSamples|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_buffer.Push({kMessageId, {0}, i * kNumSamples});
+    message_buffer.Push({kMessageId, {}, i * kNumSamples});
     EXPECT_FALSE(message_buffer.Empty());
   }
   // Pop one message at a time.
@@ -74,7 +74,7 @@ TEST(MessageBufferTest, MultipleMessagesSameTimestamp) {
 
   // Push |kNumMessages| messages using the same |kTimestamp|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_buffer.Push({kMessageId, {0}, kTimestamp});
+    message_buffer.Push({kMessageId, {}, kTimestamp});
     EXPECT_FALSE(message_buffer.Empty());
   }
 
@@ -100,7 +100,7 @@ TEST(MessageBufferTest, Clear) {
   EXPECT_EQ(std::distance(iterator.begin, iterator.end), 0);
 
   for (int i = 0; i < kNumSamples; ++i) {
-    message_buffer.Push({kMessageId, {0}, i});
+    message_buffer.Push({kMessageId, {}, i});
     EXPECT_FALSE(message_buffer.Empty());
   }
   iterator = message_buffer.GetIterator(0, kNumSamples);

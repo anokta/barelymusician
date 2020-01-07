@@ -9,9 +9,12 @@
 namespace barelyapi {
 
 void Score::AddNote(int beat, const Note& note) {
-  const auto [it, success] =
-      notes_.insert(std::pair(beat, std::vector<Note>(1, note)));
-  if (!success) {
+  DCHECK_GE(note.offset_beats, 0.0f);
+  DCHECK_LT(note.offset_beats, 1.0f);
+  DCHECK_GE(note.duration_beats, 0.0f);
+  if (const auto [it, success] =
+          notes_.insert(std::pair(beat, std::vector<Note>(1, note)));
+      !success) {
     auto* notes = &it->second;
     const auto note_it =
         std::upper_bound(notes->cbegin(), notes->cend(), note, &CompareNote);
@@ -28,11 +31,10 @@ bool Score::Empty() const { return notes_.empty(); }
 bool Score::Empty(int beat) const { return notes_.find(beat) == notes_.cend(); }
 
 const std::vector<Note>* Score::GetNotes(int beat) const {
-  const auto it = notes_.find(beat);
-  if (it == notes_.cend()) {
-    return nullptr;
+  if (const auto it = notes_.find(beat); it != notes_.cend()) {
+    return &it->second;
   }
-  return &it->second;
+  return nullptr;
 }
 
 }  // namespace barelyapi

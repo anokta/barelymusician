@@ -8,10 +8,10 @@ namespace barelyapi {
 namespace {
 
 // Default number of samples to pop.
-const int kNumSamples = 16;
+constexpr int kNumSamples = 16;
 
 // Test message ID.
-const int kMessageId = 1;
+constexpr int kMessageId = 1;
 
 // Tests that the message buffer returns an added single message as expected.
 TEST(MessageBufferTest, SinglePushPop) {

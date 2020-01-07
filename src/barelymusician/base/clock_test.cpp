@@ -7,10 +7,10 @@ namespace barelyapi {
 namespace {
 
 // Sampling rate.
-const int kSampleRate = 48000;
+constexpr int kSampleRate = 48000;
 
 // Clock tempo.
-const float kTempo = 120.0f;
+constexpr float kTempo = 120.0f;
 
 // Tests that the clock tempo gets set as expected.
 TEST(ClockTest, SetTempo) {

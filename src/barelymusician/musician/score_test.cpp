@@ -6,10 +6,10 @@
 namespace barelyapi {
 namespace {
 
-const int kBeat = 5;
-const float kNoteIndex = 60.0f;
-const float kNoteIntensity = 1.0f;
-const float kNoteDurationBeats = 0.5f;
+constexpr int kBeat = 5;
+constexpr float kNoteIndex = 60.0f;
+constexpr float kNoteIntensity = 1.0f;
+constexpr float kNoteDurationBeats = 0.5f;
 
 // Tests that the score returns an added single note as expected.
 TEST(ScoreTest, SingleNote) {

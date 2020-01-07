@@ -6,7 +6,7 @@ namespace barelyapi {
 namespace {
 
 // Tolerated error margin.
-const float kEpsilon = 1e-1f;
+constexpr float kEpsilon = 1e-1f;
 
 // Tests that converting arbitrary note indices returns expected frequencies.
 TEST(InstrumentUtilsTest, FrequencyFromNoteIndex) {

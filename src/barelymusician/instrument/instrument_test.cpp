@@ -12,8 +12,8 @@ namespace barelyapi {
 namespace {
 
 // Process buffer properties.
-const int kNumChannels = 1;
-const int kNumFrames = 16;
+constexpr int kNumChannels = 1;
+constexpr int kNumFrames = 16;
 
 // Test instrument that produces constant output per note for testing.
 class TestInstrument : public Instrument {

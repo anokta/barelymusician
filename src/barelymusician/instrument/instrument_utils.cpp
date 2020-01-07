@@ -9,7 +9,7 @@ namespace barelyapi {
 namespace {
 
 // Middle A note (A4) frequency.
-const float kFrequencyA4 = 440.0f;
+constexpr float kFrequencyA4 = 440.0f;
 
 }  // namespace
 

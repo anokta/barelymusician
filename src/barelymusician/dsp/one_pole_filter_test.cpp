@@ -8,14 +8,14 @@ namespace barelyapi {
 namespace {
 
 // Test input (single impulse).
-const int kInputLength = 5;
-const float kInput[kInputLength] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+constexpr int kInputLength = 5;
+constexpr float kInput[kInputLength] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
 // Test coefficent.
-const float kCoefficient = 0.5f;
+constexpr float kCoefficient = 0.5f;
 
 // Tolerated error margin.
-const float kEpsilon = 1e-6f;
+constexpr float kEpsilon = 1e-6f;
 
 // Tests that a low-pass filter generates the expected output when an arbitrary
 // coefficient is set.

@@ -10,8 +10,8 @@ namespace barelyapi {
 namespace {
 
 // Unique message IDs.
-const int kNoteOffId = 1;
-const int kNoteOnId = 2;
+constexpr int kNoteOffId = 1;
+constexpr int kNoteOnId = 2;
 
 // Note off message data.
 struct NoteOffData {

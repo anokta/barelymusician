@@ -6,9 +6,9 @@ namespace barelyapi {
 namespace {
 
 // Test parameter properties.
-const int kParamId = 1;
-const float kDefaultParamValue = 1.0f;
-const float kParamValue = 0.5f;
+constexpr int kParamId = 1;
+constexpr float kDefaultParamValue = 1.0f;
+constexpr float kParamValue = 0.5f;
 
 // Tests that invalid parameter operations fail as expected.
 TEST(ModulationMatrixTest, InvalidParamFails) {

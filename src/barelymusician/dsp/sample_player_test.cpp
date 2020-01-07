@@ -8,12 +8,12 @@ namespace barelyapi {
 namespace {
 
 // Sampling rate.
-const int kSampleRate = 48000;
-const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
+constexpr int kSampleRate = 48000;
+constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sample data.
-const int kDataLength = 5;
-const float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+constexpr int kDataLength = 5;
+constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
 // Tests that the sample data is played back as expected.
 TEST(SamplePlayerTest, SimplePlayback) {

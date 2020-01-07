@@ -10,7 +10,7 @@ namespace barelyapi {
 namespace {
 
 // Maximum number of tasks allowed to be added per each run.
-const int kNumMaxTasks = 500;
+constexpr int kNumMaxTasks = 500;
 
 }  // namespace
 

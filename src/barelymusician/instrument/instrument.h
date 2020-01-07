@@ -53,7 +53,7 @@ class Instrument {
   // @param num_frames Number of output frames.
   // @param timestamp Start timestamp.
   void ProcessScheduled(float* output, int num_channels, int num_frames,
-                     int timestamp);
+                        int timestamp);
 
  private:
   // Processes the given |message|.

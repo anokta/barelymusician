@@ -111,17 +111,17 @@ class Musician {
           // TODO: this does not make sense - fill empty vector there.
           continue;
         }
-        auto begin = notes->begin();
-        auto end = notes->end();
+        auto cbegin = notes->cbegin();
+        auto cend = notes->cend();
         if (beat == start_beat) {
-          begin = std::lower_bound(begin, end, start_leftover_beats,
-                                   &CompareOffsetBeats);
+          cbegin = std::lower_bound(cbegin, cend, start_leftover_beats,
+                                    &CompareOffsetBeats);
         }
         if (beat == end_beat) {
-          end = std::lower_bound(begin, end, end_leftover_beats,
-                                 &CompareOffsetBeats);
+          cend = std::lower_bound(cbegin, cend, end_leftover_beats,
+                                  &CompareOffsetBeats);
         }
-        for (auto it = begin; it != end; ++it) {
+        for (auto it = cbegin; it != cend; ++it) {
           const int note_on_timestamp =
               beat_timestamp +
               SamplesFromBeats(it->offset_beats, num_samples_per_beat);

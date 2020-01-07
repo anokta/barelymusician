@@ -109,7 +109,7 @@ template <typename InstrumentType, typename... ArgumentTypes>
 int BarelyMusician::CreateInstrument(ArgumentTypes... arguments) {
   const int instrument_id = ++id_counter_;
   task_runner_.Add([this, arguments..., instrument_id]() {
-    instruments_.insert(std::make_pair(
+    instruments_.insert(std::pair(
         instrument_id, std::make_unique<InstrumentType>(arguments...)));
   });
   return instrument_id;

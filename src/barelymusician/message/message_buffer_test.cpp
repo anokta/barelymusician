@@ -26,8 +26,8 @@ TEST(MessageBufferTest, SinglePushPop) {
 
   // Pop message.
   const auto iterator = message_buffer.GetIterator(kTimestamp, kNumSamples);
-  EXPECT_NE(iterator.begin, iterator.end);
-  EXPECT_EQ(iterator.begin->timestamp, kTimestamp);
+  EXPECT_NE(iterator.cbegin, iterator.cend);
+  EXPECT_EQ(iterator.cbegin->timestamp, kTimestamp);
 
   message_buffer.Clear(iterator);
   EXPECT_TRUE(message_buffer.Empty());
@@ -51,9 +51,9 @@ TEST(MessageBufferTest, SingleMessagePerNumSamples) {
   for (int i = 0; i < kNumMessages; ++i) {
     const int timestamp = i * kNumSamples;
     const auto iterator = message_buffer.GetIterator(timestamp, kNumSamples);
-    EXPECT_EQ(std::distance(iterator.begin, iterator.end), 1);
+    EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 1);
 
-    const Message& message = *iterator.begin;
+    const Message& message = *iterator.cbegin;
     EXPECT_EQ(message.id, kMessageId);
     EXPECT_EQ(message.timestamp, timestamp);
 
@@ -80,8 +80,8 @@ TEST(MessageBufferTest, MultipleMessagesSameTimestamp) {
 
   // Pop all messages.
   const auto iterator = message_buffer.GetIterator(0, kNumSamples);
-  EXPECT_EQ(std::distance(iterator.begin, iterator.end), kNumMessages);
-  for (auto it = iterator.begin; it != iterator.end; ++it) {
+  EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), kNumMessages);
+  for (auto it = iterator.cbegin; it != iterator.cend; ++it) {
     EXPECT_EQ(it->id, kMessageId);
     EXPECT_EQ(it->timestamp, kTimestamp);
   }
@@ -97,20 +97,20 @@ TEST(MessageBufferTest, Clear) {
 
   MessageBuffer::Iterator iterator;
   iterator = message_buffer.GetIterator(0, kNumSamples);
-  EXPECT_EQ(std::distance(iterator.begin, iterator.end), 0);
+  EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 0);
 
   for (int i = 0; i < kNumSamples; ++i) {
     message_buffer.Push({kMessageId, {}, i});
     EXPECT_FALSE(message_buffer.Empty());
   }
   iterator = message_buffer.GetIterator(0, kNumSamples);
-  EXPECT_EQ(std::distance(iterator.begin, iterator.end), kNumSamples);
+  EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), kNumSamples);
 
   message_buffer.Clear();
   EXPECT_TRUE(message_buffer.Empty());
 
   iterator = message_buffer.GetIterator(0, kNumSamples);
-  EXPECT_EQ(std::distance(iterator.begin, iterator.end), 0);
+  EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 0);
 }
 
 }  // namespace

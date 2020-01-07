@@ -45,13 +45,13 @@ const float kMaxOffsetOctaves = 3.0f;
 
 // Returns the note index for the given |key| and |offset_octaves|.
 float NoteIndexFromKey(const WinConsoleInput::Key& key, float offset_octaves) {
-  const auto it = std::find(std::begin(kOctaveKeys), std::end(kOctaveKeys),
+  const auto it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
                             std::toupper(key));
-  if (it == std::end(kOctaveKeys)) {
+  if (it == std::cend(kOctaveKeys)) {
     return -1.0f;
   }
   const float distance =
-      static_cast<float>(std::distance(std::begin(kOctaveKeys), it));
+      static_cast<float>(std::distance(std::cbegin(kOctaveKeys), it));
   return kRootNoteIndex + barelyapi::kNumSemitones * offset_octaves + distance;
 }
 

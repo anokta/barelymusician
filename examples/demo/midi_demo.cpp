@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
     for (const auto& instrument : instruments) {
       instrument->ProcessScheduled(temp_buffer.data(), kNumChannels, kNumFrames,
                                    timestamp);
-      std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
+      std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
     timestamp += kNumFrames;

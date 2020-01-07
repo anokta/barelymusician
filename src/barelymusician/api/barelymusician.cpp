@@ -108,7 +108,7 @@ void BarelyMusician::SetInstrumentNoteOn(int instrument_id, float index,
 
 Instrument* BarelyMusician::GetInstrument(int instrument_id) {
   const auto it = instruments_.find(instrument_id);
-  if (it != instruments_.end()) {
+  if (it != instruments_.cend()) {
     return it->second.get();
   }
   return nullptr;

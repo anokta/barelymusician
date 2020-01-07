@@ -184,8 +184,8 @@ int main(int argc, char* argv[]) {
   musician.SetTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
-  const std::vector<float> scale(std::begin(barelyapi::kMajorScale),
-                                 std::end(barelyapi::kMajorScale));
+  const std::vector<float> scale(std::cbegin(barelyapi::kMajorScale),
+                                 std::cend(barelyapi::kMajorScale));
 
   // Ensemble.
   Ensemble& ensemble = musician.ensemble();
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
     for (const auto& it : ensemble.performers) {
       it.instrument->ProcessScheduled(temp_buffer.data(), kNumChannels,
                                       kNumFrames, timestamp);
-      std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
+      std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
     timestamp += kNumFrames;

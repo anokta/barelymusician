@@ -58,14 +58,14 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
   // corresponding rules until reaching to the end.
   int i = 0;
   while (i < static_cast<int>(sequence.size())) {
-    if (rules_.find(sequence[i]) == rules_.end()) {
+    if (rules_.find(sequence[i]) == rules_.cend()) {
       ++i;
       continue;
     }
     const auto& substition = GetSubstition(sequence[i]);
-    sequence.erase(std::next(sequence.begin(), i));
-    sequence.insert(std::next(sequence.begin(), i), substition.begin(),
-                    substition.end());
+    sequence.erase(std::next(sequence.cbegin(), i));
+    sequence.insert(std::next(sequence.cbegin(), i), substition.cbegin(),
+                    substition.cend());
   }
 
   return sequence;
@@ -74,7 +74,7 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
 template <typename SymbolType>
 std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
     const SymbolType& symbol) const {
-  if (rules_.find(symbol) == rules_.end() || rules_.at(symbol).size() == 0) {
+  if (rules_.find(symbol) == rules_.cend() || rules_.at(symbol).size() == 0) {
     DLOG(INFO) << "Substition rule does not exist for symbol: " << symbol;
     return std::vector<SymbolType>();
   }

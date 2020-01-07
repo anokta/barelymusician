@@ -27,8 +27,8 @@ TEST(NoteUtilsTest, CompareNoteOffsetBeats) {
 TEST(NoteUtilsTest, GetNoteIndex) {
   const int kOctaveRange = 2;
 
-  const std::vector<float> kScale(std::begin(kMajorScale),
-                                  std::end(kMajorScale));
+  const std::vector<float> kScale(std::cbegin(kMajorScale),
+                                  std::cend(kMajorScale));
   const int scale_length = static_cast<int>(kScale.size());
 
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {

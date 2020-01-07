@@ -45,7 +45,7 @@ void Instrument::ProcessScheduled(float* output, int num_channels,
   int frame = 0;
   // Process messages.
   const auto messages = message_buffer_.GetIterator(timestamp, num_frames);
-  for (auto it = messages.begin; it != messages.end; ++it) {
+  for (auto it = messages.cbegin; it != messages.cend; ++it) {
     const int message_frame = it->timestamp - messages.timestamp;
     if (frame < message_frame) {
       Process(&output[num_channels * frame], num_channels,

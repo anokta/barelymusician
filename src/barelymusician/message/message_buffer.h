@@ -14,10 +14,10 @@ class MessageBuffer {
   // Buffer iterator.
   struct Iterator {
     // Iterator begin.
-    std::vector<Message>::const_iterator begin;
+    std::vector<Message>::const_iterator cbegin;
 
     // Iterator end.
-    std::vector<Message>::const_iterator end;
+    std::vector<Message>::const_iterator cend;
 
     // Start timestamp.
     int timestamp;

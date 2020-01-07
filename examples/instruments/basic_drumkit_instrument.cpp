@@ -26,7 +26,7 @@ void BasicDrumkitInstrument::AllNotesOff() {
 
 void BasicDrumkitInstrument::NoteOff(float index) {
   const auto it = voices_.find(index);
-  if (it == voices_.end()) {
+  if (it == voices_.cend()) {
     LOG(WARNING) << "Invalid note index " << index;
     return;
   }
@@ -35,7 +35,7 @@ void BasicDrumkitInstrument::NoteOff(float index) {
 
 void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
   const auto it = voices_.find(index);
-  if (it == voices_.end()) {
+  if (it == voices_.cend()) {
     LOG(WARNING) << "Invalid note index " << index;
     return;
   }

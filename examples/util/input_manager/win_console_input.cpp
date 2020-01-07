@@ -43,7 +43,7 @@ void WinConsoleInput::Update() {
       case KEY_EVENT: {
         const auto& key_event = input_buffer_[i].Event.KeyEvent;
         const Key& key = key_event.uChar.AsciiChar;
-        if (key_states_.find(key) == key_states_.end()) {
+        if (key_states_.find(key) == key_states_.cend()) {
           key_states_[key] = false;
         }
         if (key_event.bKeyDown && !key_states_[key]) {

@@ -55,7 +55,7 @@ class ModulationMatrix {
 template <typename ParamType>
 bool ModulationMatrix<ParamType>::GetParam(int id, ParamType* value) const {
   const auto it = params_.find(id);
-  if (it == params_.end()) {
+  if (it == params_.cend()) {
     return false;
   }
   DCHECK(value);
@@ -67,11 +67,11 @@ template <typename ParamType>
 void ModulationMatrix<ParamType>::Register(int id,
                                            const ParamType& default_value,
                                            UpdateParamFn&& update_param_fn) {
-  const auto result =
+  const auto [it, success] =
       params_.insert({id, {default_value, std::move(update_param_fn)}});
-  DCHECK(result.second) << "Failed to register param ID: " << id;
+  DCHECK(success) << "Failed to register param ID: " << id;
 
-  const auto& param_data = result.first->second;
+  const auto& param_data = it->second;
   if (param_data.update_param_fn != nullptr) {
     param_data.update_param_fn(default_value);
   }
@@ -80,7 +80,7 @@ void ModulationMatrix<ParamType>::Register(int id,
 template <typename ParamType>
 bool ModulationMatrix<ParamType>::SetParam(int id, const ParamType& value) {
   const auto it = params_.find(id);
-  if (it == params_.end()) {
+  if (it == params_.cend()) {
     return false;
   }
   auto& param_data = it->second;

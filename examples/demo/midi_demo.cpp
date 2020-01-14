@@ -81,6 +81,7 @@ int main(int argc, char* argv[]) {
 
   MidiFile midi_file;
   CHECK(midi_file.read(kMidiFileName)) << "Failed to read " << kMidiFileName;
+  CHECK(midi_file.isAbsoluteTicks()) << "Events should be in absolute ticks";
 
   const int num_tracks = midi_file.getTrackCount();
   const int ticks_per_quarter = midi_file.getTPQ();

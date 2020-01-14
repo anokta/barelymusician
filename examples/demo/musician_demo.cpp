@@ -39,7 +39,6 @@ using ::barelyapi::examples::WavFile;
 using ::barelyapi::examples::WinConsoleInput;
 
 using Ensemble = Musician::Ensemble;
-using Transport = Musician::Transport;
 
 // System audio settings.
 const int kSampleRate = 48000;
@@ -50,7 +49,6 @@ const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
 const float kTempo = 124.0f;
-const int kNumBars = 4;
 const int kNumBeats = 3;
 
 // Ensemble settings.
@@ -88,12 +86,8 @@ void ComposeChord(float root_note_index, const std::vector<float>& scale,
 }
 
 void ComposeLine(float root_note_index, const std::vector<float>& scale,
-                 float intensity, const Transport& transport, int harmonic,
-                 std::vector<Note>* notes) {
-  const int bar = transport.bar;
-  const int beat = transport.beat;
-  const int num_beats = transport.num_beats;
-
+                 float intensity, int bar, int beat, int num_beats,
+                 int harmonic, std::vector<Note>* notes) {
   const float start_note = static_cast<float>(harmonic);
   const float note_offset = static_cast<float>(beat);
   const auto add_note = [&](float index, float offset_beats, float end_beat) {
@@ -118,12 +112,7 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
   }
 }
 
-void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
-  const int bar = transport.bar;
-  const int beat = transport.beat;
-  const int num_bars = transport.num_bars;
-  const int num_beats = transport.num_beats;
-
+void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   const auto get_beat = [](int step) {
     return barelyapi::GetBeat(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
@@ -144,7 +133,7 @@ void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
   if (beat + 1 == num_beats) {
     notes->push_back(
         {barelyapi::kNoteIndexSnare, 0.75f, get_beat(2), get_beat(2)});
-    if (bar + 1 == kNumBars) {
+    if (bar % 4 == 3) {
       notes->push_back(
           {barelyapi::kNoteIndexSnare, 1.0f, get_beat(1), get_beat(1)});
       notes->push_back(
@@ -158,7 +147,7 @@ void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
                     Random::Uniform(0.25f, 0.75f), get_beat(2), get_beat(2)});
   // Hihat Open.
   if (beat + 1 == num_beats) {
-    if (bar + 1 == num_bars) {
+    if (bar % 4 == 3) {
       notes->push_back(
           {barelyapi::kNoteIndexHihatOpen, 0.75f, get_beat(1), get_beat(1)});
     } else if (bar % 2 == 0) {
@@ -166,7 +155,7 @@ void ComposeDrums(const Transport& transport, std::vector<Note>* notes) {
           {barelyapi::kNoteIndexHihatOpen, 0.75f, get_beat(3), get_beat(1)});
     }
   }
-  if (beat == 0 && bar == 0) {
+  if (beat == 0 && bar % 4 == 0) {
     notes->push_back(
         {barelyapi::kNoteIndexHihatOpen, 1.0f, get_beat(0), get_beat(2)});
   }
@@ -179,7 +168,6 @@ int main(int argc, char* argv[]) {
   WinConsoleInput input_manager;
 
   Musician musician(kSampleRate);
-  musician.SetNumBars(kNumBars);
   musician.SetNumBeats(kNumBeats);
   musician.SetTempo(kTempo);
 
@@ -189,12 +177,9 @@ int main(int argc, char* argv[]) {
 
   // Ensemble.
   Ensemble& ensemble = musician.ensemble();
-  ensemble.section_composer_callback = [](const Transport& transport) -> int {
-    return transport.section;
-  };
-  ensemble.bar_composer_callback = [&progression](const Transport& transport,
-                                                  int) -> int {
-    return progression[transport.bar % progression.size()];
+  ensemble.bar_composer_callback =
+      [&progression](int bar, [[maybe_unused]] int num_beats) -> int {
+    return progression[bar % progression.size()];
   };
 
   // Synth instruments.
@@ -204,8 +189,8 @@ int main(int argc, char* argv[]) {
       BuildSynthInstrument(OscillatorType::kNoise, 0.05f, 0.5f, 0.025f);
 
   const auto chords_beat_composer_callback =
-      std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_3,
-                std::placeholders::_4);
+      std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
+                std::placeholders::_5);
 
   ensemble.performers.emplace_back(chords_instrument.get(),
                                    chords_beat_composer_callback);
@@ -219,10 +204,12 @@ int main(int argc, char* argv[]) {
 
   const auto line_beat_composer_callback = std::bind(
       ComposeLine, kRootNote - barelyapi::kNumSemitones, scale, 1.0f,
-      std::placeholders::_1, std::placeholders::_3, std::placeholders::_4);
+      std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+      std::placeholders::_4, std::placeholders::_5);
   const auto line_2_beat_composer_callback =
       std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
-                std::placeholders::_3, std::placeholders::_4);
+                std::placeholders::_2, std::placeholders::_3,
+                std::placeholders::_4, std::placeholders::_5);
 
   ensemble.performers.emplace_back(line_instrument.get(),
                                    line_beat_composer_callback);
@@ -248,7 +235,8 @@ int main(int argc, char* argv[]) {
   }
 
   const auto drumkit_beat_composer_callback =
-      std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_4);
+      std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3, std::placeholders::_5);
 
   ensemble.performers.emplace_back(drumkit_instrument.get(),
                                    drumkit_beat_composer_callback);

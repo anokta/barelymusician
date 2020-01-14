@@ -17,41 +17,15 @@ namespace barelyapi {
 
 class Musician {
  public:
-  // Playback transport.
-  struct Transport {
-    // Current section.
-    int section;
-
-    // Current bar.
-    int bar;
-
-    // Current beat.
-    int beat;
-
-    // Number of bars per section.
-    int num_bars;
-
-    // Number of beats per bar.
-    int num_beats;
-  };
-
   // Musical ensemble.
   struct Ensemble {
-    // Section composer callback signature.
-    using SectionComposerCallback =
-        std::function<int(const Transport& transport)>;
-
     // Bar composer callback signature.
-    using BarComposerCallback =
-        std::function<int(const Transport& transport, int section_type)>;
+    using BarComposerCallback = std::function<int(int bar, int num_beats)>;
 
     // Beat composer callback signature.
     using BeatComposerCallback =
-        std::function<void(const Transport& transport, int section_type,
-                           int harmonic, std::vector<Note>* notes)>;
-
-    // Section composer callback.
-    SectionComposerCallback section_composer_callback;
+        std::function<void(int bar, int beat, int num_beats, int harmonic,
+                           std::vector<Note>* notes)>;
 
     // Bar composer callback.
     BarComposerCallback bar_composer_callback;
@@ -71,13 +45,9 @@ class Musician {
     std::vector<Performer> performers;
   };
 
-  // TODO: get num_bars from section composer.
   explicit Musician(int sample_rate) : clock_(sample_rate) {}
 
-  // TODO: get this from section type.
-  void SetNumBars(int num_bars) { transport_.num_bars = num_bars; }
-
-  void SetNumBeats(int num_beats) { transport_.num_beats = num_beats; }
+  void SetNumBeats(int num_beats) { num_beats_ = num_beats; }
 
   void SetTempo(float tempo) { tempo_ = tempo; }
 
@@ -144,24 +114,18 @@ class Musician {
  private:
   void ProcessBeat(int beat) {
     // Update transport.
-    transport_.beat = beat % transport_.num_beats;
-    transport_.bar = beat / transport_.num_beats;
-    transport_.section = transport_.bar / transport_.num_bars;
-    transport_.bar %= transport_.num_bars;
+    bar_ = beat / num_beats_;
+    beat_ = beat % num_beats_;
 
-    if (transport_.beat == 0) {
-      if (transport_.bar == 0) {
-        // Compose next section.
-        section_type_ = ensemble_.section_composer_callback(transport_);
-      }
+    if (beat_ == 0) {
       // Compose next bar.
-      harmonic_ = ensemble_.bar_composer_callback(transport_, section_type_);
+      harmonic_ = ensemble_.bar_composer_callback(bar_, num_beats_);
     }
     // Update performers.
     for (Ensemble::Performer& performer : ensemble_.performers) {
       // Compose next beat notes.
       temp_notes_.clear();
-      performer.beat_composer_callback(transport_, section_type_, harmonic_,
+      performer.beat_composer_callback(bar_, beat_, num_beats_, harmonic_,
                                        &temp_notes_);
       for (const Note& note : temp_notes_) {
         performer.score.AddNote(beat, note);
@@ -173,13 +137,18 @@ class Musician {
 
   Ensemble ensemble_;
 
-  Transport transport_;
-
-  int section_type_;
-
   int harmonic_;
 
   float tempo_;
+
+  // Current bar.
+  int bar_;
+
+  // Current beat.
+  int beat_;
+
+  // Number of beats per bar.
+  int num_beats_;
 
   // TODO: not necessary, use Score instead?
   std::vector<Note> temp_notes_;

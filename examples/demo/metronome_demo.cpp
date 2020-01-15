@@ -66,6 +66,14 @@ class MetronomeInstrument : public barelyapi::Instrument {
     }
   }
 
+  // Ticks the metronome with the given |beat|.
+  void Tick(int beat) {
+    const float note_index = (beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
+    NoteOn(note_index, kGain);
+    voice_.Next(0);
+    NoteOff(note_index);
+  }
+
  private:
   BasicEnvelopedVoice<barelyapi::Oscillator> voice_;
 };
@@ -96,23 +104,27 @@ int main(int argc, char* argv[]) {
     clock.Update(kNumFrames);
     const int end_beat = clock.GetBeat();
 
+    int frame = 0;
     for (int beat = start_beat; beat <= end_beat; ++beat) {
+      if (frame < offset_samples) {
+        metronome.Process(&output[kNumChannels * frame], kNumChannels,
+                          offset_samples - frame);
+        frame = offset_samples;
+      }
       if (offset_samples >= 0 && offset_samples < kNumFrames) {
         // Tick.
         const int current_bar = beat / kNumBeats;
         const int current_beat = beat % kNumBeats;
-        LOG(INFO) << "Tick " << current_bar << "." << current_beat;
+        metronome.Tick(current_beat);
 
-        const float note_index =
-            (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-        metronome.NoteOnScheduled(note_index, kGain, offset_samples);
-        metronome.NoteOffScheduled(note_index, offset_samples + 1);
+        LOG(INFO) << "Tick " << current_bar << "." << current_beat;
       }
       offset_samples += num_samples_per_beat;
     }
-
-    // Process metronome.
-    metronome.ProcessScheduled(output, kNumChannels, kNumFrames, 0);
+    if (frame < kNumFrames) {
+      metronome.Process(&output[kNumChannels * frame], kNumChannels,
+                        kNumFrames - frame);
+    }
   };
   audio_output.SetProcessCallback(process_callback);
 

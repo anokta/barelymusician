@@ -38,8 +38,8 @@ const OscillatorType kOscillatorType = OscillatorType::kSquare;
 const float kRelease = 0.025f;
 
 const int kNumBeats = 4;
-const float kInitialTempo = 120.0f;
-const float kTempoIncrement = 10.0f;
+const double kInitialTempo = 120.0;
+const double kTempoIncrement = 10.0;
 
 // Metronome instrument.
 class MetronomeInstrument : public barelyapi::Instrument {
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
       return;
     }
     // Adjust tempo.
-    float tempo = clock.GetTempo();
+    double tempo = clock.GetTempo();
     switch (std::toupper(key)) {
       case '-':
         tempo -= kTempoIncrement;
@@ -147,10 +147,10 @@ int main(int argc, char* argv[]) {
         tempo += kTempoIncrement;
         break;
       case '1':
-        tempo *= 0.5f;
+        tempo *= 0.5;
         break;
       case '2':
-        tempo *= 2.0f;
+        tempo *= 2.0;
         break;
       case 'R':
         tempo = kInitialTempo;

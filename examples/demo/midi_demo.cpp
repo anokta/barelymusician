@@ -33,7 +33,7 @@ const int kNumFrames = 512;
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-const float kTempo = 132.0f;
+const double kTempo = 132.0;
 
 // Performer settings.
 const int kNumInstrumentVoices = 16;
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
   const int samples_per_beat =
-      static_cast<int>(static_cast<float>(kSampleRate) *
+      static_cast<int>(static_cast<double>(kSampleRate) *
                        barelyapi::kSecondsFromMinutes / kTempo);
 
   std::vector<std::unique_ptr<Instrument>> instruments;

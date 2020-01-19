@@ -19,13 +19,13 @@ bool CompareNote(const Note& lhs, const Note& rhs);
 // @param note Note.
 // @param offset_beats Offset in beats.
 // @return True if the note comes prior to the offset.
-bool CompareOffsetBeats(const Note& note, float offset_beats);
+bool CompareOffsetBeats(const Note& note, double offset_beats);
 
 // Returns the quantized beat for the given |step| and |num_steps_per_beat|.
 //
 // @param step Quantized step.
 // @param num_steps_per_beat Number of steps per beat.
-float GetBeat(int step, int num_steps_per_beat);
+double GetBeat(int step, int num_steps_per_beat);
 
 // Returns the quantized note index for the given |scale| and |scale_index|.
 //

@@ -30,7 +30,6 @@ using ::barelyapi::Musician;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
-using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
@@ -48,7 +47,7 @@ const int kNumFrames = 512;
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-const float kTempo = 124.0f;
+const double kTempo = 124.0;
 const int kNumBeats = 3;
 
 // Ensemble settings.
@@ -76,7 +75,7 @@ void ComposeChord(float root_note_index, const std::vector<float>& scale,
   const auto add_chord_note = [&](float index) {
     const float note_index =
         root_note_index + barelyapi::GetNoteIndex(scale, index);
-    notes->push_back({note_index, intensity, 0.0f, 1.0f});
+    notes->push_back({note_index, intensity, 0.0, 1.0});
   };
   const float start_note = static_cast<float>(harmonic);
   add_chord_note(start_note);
@@ -90,25 +89,25 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
                  int harmonic, std::vector<Note>* notes) {
   const float start_note = static_cast<float>(harmonic);
   const float note_offset = static_cast<float>(beat);
-  const auto add_note = [&](float index, float offset_beats, float end_beat) {
+  const auto add_note = [&](float index, double offset_beats, double end_beat) {
     notes->push_back({root_note_index + barelyapi::GetNoteIndex(scale, index),
                       intensity, offset_beats, end_beat});
   };
   if (beat % 2 == 1) {
-    add_note(start_note, 0.0f, 0.25f);
-    add_note(start_note - note_offset, 0.33f, 0.33f);
-    add_note(start_note, 0.66f, 0.33f);
+    add_note(start_note, 0.0, 0.25);
+    add_note(start_note - note_offset, 0.33, 0.33);
+    add_note(start_note, 0.66, 0.33);
   } else {
-    add_note(start_note + note_offset, 0.0f, 0.25f);
+    add_note(start_note + note_offset, 0.0, 0.25);
   }
   if (beat % 2 == 0) {
-    add_note(start_note - note_offset, 0.0f, 0.05f);
-    add_note(start_note - 2.0f * note_offset, 0.5f, 0.05f);
+    add_note(start_note - note_offset, 0.0, 0.05);
+    add_note(start_note - 2.0f * note_offset, 0.5, 0.05);
   }
   if (beat + 1 == num_beats && bar % 2 == 1) {
-    add_note(start_note + 2.0f * note_offset, 0.25f, 0.125f);
-    add_note(start_note - 2.0f * note_offset, 0.75f, 0.125f);
-    add_note(start_note + 2.0f * note_offset, 0.5f, 0.25f);
+    add_note(start_note + 2.0f * note_offset, 0.25, 0.125);
+    add_note(start_note - 2.0f * note_offset, 0.75, 0.125);
+    add_note(start_note + 2.0f * note_offset, 0.5, 0.25);
   }
 }
 

@@ -16,6 +16,11 @@ class Clock {
   // @return Beat.
   int GetBeat() const;
 
+  // Returns the leftover beats from the current beat.
+  //
+  // @return Leftover beats.
+  double GetLeftoverBeats() const;
+
   // Returns the leftover samples from the current beat.
   //
   // @return Leftover samples.
@@ -29,7 +34,7 @@ class Clock {
   // Returns the tempo.
   //
   // @return Tempo (BPM).
-  float GetTempo() const;
+  double GetTempo() const;
 
   // Resets the clock.
   void Reset();
@@ -37,7 +42,7 @@ class Clock {
   // Sets the tempo.
   //
   // @param tempo Tempo (BPM).
-  void SetTempo(float tempo);
+  void SetTempo(double tempo);
 
   // Updates the clock.
   //
@@ -46,10 +51,13 @@ class Clock {
 
  private:
   // Number of samples per minute.
-  const float num_samples_per_minute_;
+  const double num_samples_per_minute_;
 
   // Current beat.
   int beat_;
+
+  // Leftover beats from the current beat.
+  double leftover_beats_;
 
   // Leftover samples from the current beat.
   int leftover_samples_;
@@ -58,7 +66,7 @@ class Clock {
   int num_samples_per_beat_;
 
   // Tempo (BPM).
-  float tempo_;
+  double tempo_;
 };
 
 }  // namespace barelyapi

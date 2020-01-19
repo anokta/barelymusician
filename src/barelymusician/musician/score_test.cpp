@@ -9,11 +9,11 @@ namespace {
 constexpr int kBeat = 5;
 constexpr float kNoteIndex = 60.0f;
 constexpr float kNoteIntensity = 1.0f;
-constexpr float kNoteDurationBeats = 0.5f;
+constexpr double kNoteDurationBeats = 0.5;
 
 // Tests that the score returns an added single note as expected.
 TEST(ScoreTest, SingleNote) {
-  const float kNoteOffsetBeats = 0.25f;
+  const double kNoteOffsetBeats = 0.25;
 
   Score score;
   EXPECT_TRUE(score.Empty());
@@ -32,8 +32,8 @@ TEST(ScoreTest, SingleNote) {
   const Note& note = notes->front();
   EXPECT_FLOAT_EQ(note.index, kNoteIndex);
   EXPECT_FLOAT_EQ(note.intensity, kNoteIntensity);
-  EXPECT_FLOAT_EQ(note.offset_beats, kNoteOffsetBeats);
-  EXPECT_FLOAT_EQ(note.duration_beats, kNoteDurationBeats);
+  EXPECT_DOUBLE_EQ(note.offset_beats, kNoteOffsetBeats);
+  EXPECT_DOUBLE_EQ(note.duration_beats, kNoteDurationBeats);
 
   // Remove note.
   score.Clear(kBeat);
@@ -44,7 +44,7 @@ TEST(ScoreTest, SingleNote) {
 // Tests that the score returns added notes as expected.
 TEST(ScoreTest, MultipleNotes) {
   const int kNumNotes = 5;
-  const float kNoteOffsetBeats = 0.75f;
+  const double kNoteOffsetBeats = 0.75;
 
   Score score;
   EXPECT_TRUE(score.Empty());
@@ -65,7 +65,7 @@ TEST(ScoreTest, MultipleNotes) {
 
     const Note& note = notes->front();
     EXPECT_FLOAT_EQ(note.index, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(note.offset_beats, kNoteOffsetBeats);
+    EXPECT_DOUBLE_EQ(note.offset_beats, kNoteOffsetBeats);
 
     // Remove note.
     score.Clear(i);
@@ -78,7 +78,7 @@ TEST(ScoreTest, MultipleNotes) {
 // offset.
 TEST(ScoreTest, MultipleNotesSameOffsetBeats) {
   const int kNumNotes = 4;
-  const float kNoteOffsetBeats = 0.5f;
+  const double kNoteOffsetBeats = 0.5;
 
   Score score;
   EXPECT_TRUE(score.Empty());
@@ -99,7 +99,7 @@ TEST(ScoreTest, MultipleNotesSameOffsetBeats) {
   for (int i = 0; i < kNumNotes; ++i) {
     const Note& note = (*notes)[i];
     EXPECT_FLOAT_EQ(note.index, static_cast<float>(i));
-    EXPECT_FLOAT_EQ(note.offset_beats, kNoteOffsetBeats);
+    EXPECT_DOUBLE_EQ(note.offset_beats, kNoteOffsetBeats);
   }
 
   score.Clear(kBeat);
@@ -119,8 +119,8 @@ TEST(ScoreTest, Clear) {
     EXPECT_TRUE(score.Empty(beat));
     EXPECT_EQ(score.GetNotes(beat), nullptr);
     for (int i = 0; i < kNumNotes; ++i) {
-      const float offset_beats =
-          static_cast<float>(i) / static_cast<float>(kNumNotes);
+      const double offset_beats =
+          static_cast<double>(i) / static_cast<double>(kNumNotes);
       score.AddNote(
           beat, {kNoteIndex, kNoteIntensity, offset_beats, kNoteDurationBeats});
     }

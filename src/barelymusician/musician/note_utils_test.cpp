@@ -8,8 +8,8 @@ namespace {
 
 // Tests that notes are compared as expected according to their offset beats.
 TEST(NoteUtilsTest, CompareNoteOffsetBeats) {
-  const float kFirstOffsetBeats = 0.45f;
-  const float kSecondOffsetBeats = 0.7f;
+  const double kFirstOffsetBeats = 0.45;
+  const double kSecondOffsetBeats = 0.7;
 
   Note first_note;
   first_note.offset_beats = kFirstOffsetBeats;
@@ -51,10 +51,10 @@ TEST_P(GetBeatDurationTest, GetBeat) {
 
   for (int beat = 0; beat < kNumBeats; ++beat) {
     for (int i = 0; i < num_steps_per_beat; ++i) {
-      const float expected_beat =
-          static_cast<float>(beat) +
-          static_cast<float>(i) / static_cast<float>(num_steps_per_beat);
-      EXPECT_FLOAT_EQ(
+      const double expected_beat =
+          static_cast<double>(beat) +
+          static_cast<double>(i) / static_cast<double>(num_steps_per_beat);
+      EXPECT_DOUBLE_EQ(
           GetBeat(num_steps_per_beat * beat + i, num_steps_per_beat),
           expected_beat);
     }

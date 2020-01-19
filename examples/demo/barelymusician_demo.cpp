@@ -24,7 +24,7 @@ const int kNumFrames = 512;
 const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sequencer settings.
-const float kTempo = 120.0f;
+const double kTempo = 120.0;
 
 }  // namespace
 
@@ -37,9 +37,8 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   const auto process_callback = [&clock](float* output) {
-    const float position = static_cast<float>(clock.GetBeat()) +
-                           BeatsFromSamples(clock.GetLeftoverSamples(),
-                                            clock.GetNumSamplesPerBeat());
+    const double position =
+        static_cast<double>(clock.GetBeat()) + clock.GetLeftoverBeats();
     LOG(INFO) << std::fixed << std::setprecision(2) << "Position " << position;
     clock.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);

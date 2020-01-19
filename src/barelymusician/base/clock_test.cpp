@@ -10,18 +10,18 @@ namespace {
 constexpr int kSampleRate = 48000;
 
 // Clock tempo.
-constexpr float kTempo = 120.0f;
+constexpr double kTempo = 120.0;
 
 // Tests that the clock tempo gets set as expected.
 TEST(ClockTest, SetTempo) {
   Clock clock(kSampleRate);
-  EXPECT_FLOAT_EQ(clock.GetTempo(), 0.0f);
+  EXPECT_DOUBLE_EQ(clock.GetTempo(), 0.0);
   EXPECT_EQ(clock.GetNumSamplesPerBeat(), 0);
 
   clock.SetTempo(kTempo);
-  EXPECT_FLOAT_EQ(clock.GetTempo(), kTempo);
+  EXPECT_DOUBLE_EQ(clock.GetTempo(), kTempo);
   EXPECT_EQ(clock.GetNumSamplesPerBeat(),
-            static_cast<int>(static_cast<float>(kSampleRate) *
+            static_cast<int>(static_cast<double>(kSampleRate) *
                              kSecondsFromMinutes / kTempo));
 }
 

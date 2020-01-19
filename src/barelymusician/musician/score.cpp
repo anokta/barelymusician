@@ -9,9 +9,9 @@
 namespace barelyapi {
 
 void Score::AddNote(int beat, const Note& note) {
-  DCHECK_GE(note.offset_beats, 0.0f);
-  DCHECK_LT(note.offset_beats, 1.0f);
-  DCHECK_GE(note.duration_beats, 0.0f);
+  DCHECK_GE(note.offset_beats, 0.0);
+  DCHECK_LT(note.offset_beats, 1.0);
+  DCHECK_GE(note.duration_beats, 0.0);
   if (const auto [it, success] =
           notes_.insert(std::pair(beat, std::vector<Note>(1, note)));
       !success) {

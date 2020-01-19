@@ -49,7 +49,7 @@ class Musician {
 
   void SetNumBeats(int num_beats) { num_beats_ = num_beats; }
 
-  void SetTempo(float tempo) { tempo_ = tempo; }
+  void SetTempo(double tempo) { tempo_ = tempo; }
 
   // TODO: timestamp not necessary?
   void Update(int num_samples, int timestamp) {
@@ -59,16 +59,14 @@ class Musician {
     }
 
     const int start_beat = clock_.GetBeat();
+    const double start_leftover_beats = clock_.GetLeftoverBeats();
     const int start_leftover_samples = clock_.GetLeftoverSamples();
     clock_.Update(num_samples);
     const int end_beat = clock_.GetBeat();
+    const double end_leftover_beats = clock_.GetLeftoverBeats();
     const int end_leftover_samples = clock_.GetLeftoverSamples();
 
     const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
-    const float start_leftover_beats =
-        BeatsFromSamples(start_leftover_samples, num_samples_per_beat);
-    const float end_leftover_beats =
-        BeatsFromSamples(end_leftover_samples, num_samples_per_beat);
     int beat_timestamp = timestamp - start_leftover_samples;
     for (int beat = start_beat; beat <= end_beat; ++beat) {
       if ((beat != start_beat || start_leftover_samples == 0) &&
@@ -139,7 +137,7 @@ class Musician {
 
   int harmonic_;
 
-  float tempo_;
+  double tempo_;
 
   // Current bar.
   int bar_;

@@ -33,16 +33,16 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
 TEST(DspUtilsTest, BeatsSamplesConversion) {
   const int kNumValues = 6;
   const int kNumSamplesPerBeat = 10;
-  const float kBeats[kNumValues] = {0.0f, 0.2f, 0.5f, 1.0f, 8.0f, 12.1f};
+  const double kBeats[kNumValues] = {0.0, 0.2, 0.5, 1.0, 8.0, 12.1};
   const int kSamples[kNumValues] = {0, 2, 5, 10, 80, 121};
 
   for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_FLOAT_EQ(BeatsFromSamples(kSamples[i], kNumSamplesPerBeat),
-                    kBeats[i]);
+    EXPECT_DOUBLE_EQ(BeatsFromSamples(kSamples[i], kNumSamplesPerBeat),
+                     kBeats[i]);
     EXPECT_EQ(SamplesFromBeats(kBeats[i], kNumSamplesPerBeat), kSamples[i]);
 
     // Verify that the back and forth conversion do not mutate the value.
-    EXPECT_FLOAT_EQ(
+    EXPECT_DOUBLE_EQ(
         BeatsFromSamples(SamplesFromBeats(kBeats[i], kNumSamplesPerBeat),
                          kNumSamplesPerBeat),
         kBeats[i]);

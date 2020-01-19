@@ -3,12 +3,12 @@
 
 namespace barelyapi {
 
+// Converts minutes to seconds.
+inline constexpr double kSecondsFromMinutes = 60.0;
+
 // PI (radians).
 inline constexpr float kPi = 3.14159265358979323846f;
 inline constexpr float kTwoPi = 2.0f * kPi;
-
-// Converts minutes to seconds.
-inline constexpr float kSecondsFromMinutes = 60.0f;
 
 // Minimum dB threshold.
 inline constexpr float kMinDecibels = -80.0f;

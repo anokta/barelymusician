@@ -9,16 +9,16 @@ bool CompareNote(const Note& lhs, const Note& rhs) {
   return lhs.offset_beats < rhs.offset_beats;
 }
 
-bool CompareOffsetBeats(const Note& note, float offset_beats) {
+bool CompareOffsetBeats(const Note& note, double offset_beats) {
   return note.offset_beats < offset_beats;
 }
 
-float GetBeat(int step, int num_steps_per_beat) {
+double GetBeat(int step, int num_steps_per_beat) {
   DCHECK_GE(step, 0);
   DCHECK_GT(num_steps_per_beat, 0);
-  const float num_beats = static_cast<float>(step / num_steps_per_beat);
-  return num_beats + static_cast<float>(step % num_steps_per_beat) /
-                         static_cast<float>(num_steps_per_beat);
+  const double num_beats = static_cast<double>(step / num_steps_per_beat);
+  return num_beats + static_cast<double>(step % num_steps_per_beat) /
+                         static_cast<double>(num_steps_per_beat);
 }
 
 float GetNoteIndex(const std::vector<float>& scale, float scale_index) {

@@ -22,18 +22,14 @@ BarelyMusician::BarelyMusician(int sample_rate, int num_channels,
       id_counter_(0),
       task_runner_(kNumMaxTasks),
       clock_(sample_rate),
-      is_playing_(false),
-      timestamp_(0) {
+      is_playing_(false) {
   DCHECK_GE(sample_rate, 0);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
 }
 
 void BarelyMusician::Reset() {
-  task_runner_.Add([this]() {
-    clock_.Reset();
-    timestamp_ = 0;
-  });
+  task_runner_.Add([this]() { clock_.Reset(); });
 }
 
 void BarelyMusician::Start() {
@@ -48,7 +44,6 @@ void BarelyMusician::Update() {
   task_runner_.Run();
   if (is_playing_) {
     clock_.Update(num_frames_);
-    timestamp_ += num_frames_;
   }
 }
 
@@ -64,8 +59,7 @@ void BarelyMusician::DestroyInstrument(int instrument_id) {
 void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
   Instrument* instrument = GetInstrument(instrument_id);
   if (instrument != nullptr) {
-    instrument->ProcessScheduled(output, num_channels_, num_frames_,
-                                 timestamp_);
+    instrument->Process(output, num_channels_, num_frames_);
   } else {
     DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
     std::fill_n(output, num_channels_ * num_frames_, 0.0f);

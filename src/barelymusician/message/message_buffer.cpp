@@ -22,7 +22,7 @@ bool CompareMessage(const Message& lhs, const Message& rhs) {
 // @param message Message.
 // @param timestamp Timestamp.
 // @return True if the message comes prior to the timestamp.
-bool CompareTimestamp(const Message& message, int timestamp) {
+bool CompareTimestamp(const Message& message, double timestamp) {
   return message.timestamp < timestamp;
 }
 
@@ -36,14 +36,14 @@ void MessageBuffer::Clear(const Iterator& iterator) {
 
 bool MessageBuffer::Empty() const { return messages_.empty(); }
 
-MessageBuffer::Iterator MessageBuffer::GetIterator(int timestamp,
-                                                   int num_samples) const {
+MessageBuffer::Iterator MessageBuffer::GetIterator(double begin_timestamp,
+                                                   double end_timestamp) const {
   Iterator iterator;
   iterator.cbegin = std::lower_bound(messages_.cbegin(), messages_.cend(),
-                                     timestamp, &CompareTimestamp);
+                                     begin_timestamp, &CompareTimestamp);
   iterator.cend = std::lower_bound(iterator.cbegin, messages_.cend(),
-                                   timestamp + num_samples, &CompareTimestamp);
-  iterator.timestamp = timestamp;
+                                   end_timestamp, &CompareTimestamp);
+  iterator.timestamp = begin_timestamp;
   return iterator;
 }
 

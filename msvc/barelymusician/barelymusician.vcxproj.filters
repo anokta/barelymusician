@@ -167,9 +167,6 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer.cpp">
       <Filter>Source Files\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument.cpp">
-      <Filter>Source Files\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\base\clock.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>

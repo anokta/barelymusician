@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 
-#include "barelymusician/message/message_buffer.h"
-
 namespace barelyapi {
 
 // Generic instrument interface.
@@ -31,32 +29,6 @@ class Instrument {
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   virtual void Process(float* output, int num_channels, int num_frames) = 0;
-
-  // Stops note at the given |timestamp|.
-  //
-  // @param index Note index.
-  // @param timestamp Note off timestamp.
-  void NoteOffScheduled(float index, int timestamp);
-
-  // Starts note at the given |timestamp|.
-  //
-  // @param index Note index.
-  // @param intensity Note intensity.
-  // @param timestamp Note on timestamp.
-  void NoteOnScheduled(float index, float intensity, int timestamp);
-
-  // Processes the next |output| buffer with the given |timestamp|.
-  //
-  // @param output Output buffer.
-  // @param num_channels Number of output channels.
-  // @param num_frames Number of output frames.
-  // @param timestamp Start timestamp.
-  void ProcessScheduled(float* output, int num_channels, int num_frames,
-                        int timestamp);
-
- private:
-  // Messages to process.
-  MessageBuffer message_buffer_;
 };
 
 }  // namespace barelyapi

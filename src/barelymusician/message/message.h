@@ -26,7 +26,7 @@ struct Message {
   std::variant<NoteOnData, NoteOffData> data;
 
   // Message timestamp.
-  int timestamp;
+  double timestamp;
 };
 
 }  // namespace barelyapi

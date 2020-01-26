@@ -100,9 +100,6 @@ class BarelyMusician {
 
   // Denotes whether the sequencer is playing.
   bool is_playing_;
-
-  // Timestamp.
-  int timestamp_;
 };
 
 template <typename InstrumentType, typename... ArgumentTypes>

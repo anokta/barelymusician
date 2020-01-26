@@ -20,7 +20,7 @@ class MessageBuffer {
     std::vector<Message>::const_iterator cend;
 
     // Start timestamp.
-    int timestamp;
+    double timestamp;
   };
 
   // Clears the buffer.
@@ -38,9 +38,9 @@ class MessageBuffer {
 
   // Returns iterator within the given range.
   //
-  // @param timestamp Start timestamp.
-  // @param num_samples Number of samples to iterate.
-  Iterator GetIterator(int timestamp, int num_samples) const;
+  // @param begin_timestamp Begin timestamp.
+  // @param end_timestamp End timestamp.
+  Iterator GetIterator(double begin_timestamp, double end_timestamp) const;
 
   // Pushes new message into the queue.
   //

@@ -242,19 +242,16 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  int timestamp = 0;
-  const auto process_callback = [&musician, &ensemble, &temp_buffer,
-                                 &timestamp](float* output) {
-    musician.Update(kNumFrames, timestamp);
+  const auto process_callback = [&musician, &ensemble,
+                                 &temp_buffer](float* output) {
+    musician.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (const auto& it : ensemble.performers) {
-      it.instrument->ProcessScheduled(temp_buffer.data(), kNumChannels,
-                                      kNumFrames, timestamp);
+    for (auto& it : ensemble.performers) {
+      musician.Process(temp_buffer.data(), kNumChannels, kNumFrames, &it);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp += kNumFrames;
   };
   audio_output.SetProcessCallback(process_callback);
 

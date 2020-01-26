@@ -9,9 +9,9 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument.h"
+#include "barelymusician/message/message.h"
 #include "barelymusician/message/message_buffer.h"
-#include "barelymusician/musician/note_utils.h"
-#include "barelymusician/musician/score.h"
+#include "barelymusician/musician/note.h"
 
 namespace barelyapi {
 
@@ -38,7 +38,9 @@ class Musician {
 
       Instrument* instrument;
       BeatComposerCallback beat_composer_callback;
-      Score score;
+      MessageBuffer score;
+      // TODO: Figure out a proper way to communicate this to instruments.
+      MessageBuffer::Iterator messages;
     };
 
     // List of performers.
@@ -51,8 +53,7 @@ class Musician {
 
   void SetTempo(double tempo) { tempo_ = tempo; }
 
-  // TODO: timestamp not necessary?
-  void Update(int num_samples, int timestamp) {
+  void Update(int num_samples) {
     // TODO: is this efficient?
     if (clock_.GetTempo() != tempo_) {
       clock_.SetTempo(tempo_);
@@ -66,43 +67,46 @@ class Musician {
     const double end_leftover_beats = clock_.GetLeftoverBeats();
     const int end_leftover_samples = clock_.GetLeftoverSamples();
 
-    const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
-    int beat_timestamp = timestamp - start_leftover_samples;
+    const double start_timestamp =
+        static_cast<double>(start_beat) + start_leftover_beats;
+    const double end_timestamp =
+        static_cast<double>(end_beat) + end_leftover_beats;
     for (int beat = start_beat; beat <= end_beat; ++beat) {
       if ((beat != start_beat || start_leftover_samples == 0) &&
           (beat != end_beat || end_leftover_samples > 0)) {
         ProcessBeat(beat);
       }
       for (Ensemble::Performer& performer : ensemble_.performers) {
-        const auto* notes = performer.score.GetNotes(beat);
-        if (notes == nullptr) {
-          // TODO: this does not make sense - fill empty vector there.
-          continue;
-        }
-        auto cbegin = notes->cbegin();
-        auto cend = notes->cend();
-        if (beat == start_beat) {
-          cbegin = std::lower_bound(cbegin, cend, start_leftover_beats,
-                                    &CompareOffsetBeats);
-        }
-        if (beat == end_beat) {
-          cend = std::lower_bound(cbegin, cend, end_leftover_beats,
-                                  &CompareOffsetBeats);
-        }
-        for (auto it = cbegin; it != cend; ++it) {
-          const int note_on_timestamp =
-              beat_timestamp +
-              SamplesFromBeats(it->offset_beats, num_samples_per_beat);
-          performer.instrument->NoteOnScheduled(it->index, it->intensity,
-                                                note_on_timestamp);
-          const int note_off_timestamp =
-              note_on_timestamp +
-              SamplesFromBeats(it->duration_beats, num_samples_per_beat);
-          performer.instrument->NoteOffScheduled(it->index, note_off_timestamp);
-        }
-        // TODO: clear |notes|?
+        performer.messages =
+            performer.score.GetIterator(start_timestamp, end_timestamp);
       }
-      beat_timestamp += num_samples_per_beat;
+    }
+  }
+
+  void Process(float* output, int num_channels, int num_frames,
+               Ensemble::Performer* performer) {
+    int frame = 0;
+    // Process notes.
+    const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
+    const auto& messages = performer->messages;
+    const int offset_samples =
+        SamplesFromBeats(messages.timestamp, num_samples_per_beat);
+    for (auto it = messages.cbegin; it != messages.cend; ++it) {
+      const int message_frame =
+          SamplesFromBeats(it->timestamp, num_samples_per_beat) -
+          offset_samples;
+      if (frame < message_frame) {
+        performer->instrument->Process(&output[num_channels * frame],
+                                       num_channels, message_frame - frame);
+        frame = message_frame;
+      }
+      std::visit(MessageProcessor{performer->instrument}, it->data);
+    }
+    performer->score.Clear(messages);
+    // Process the rest of the buffer.
+    if (frame < num_frames) {
+      performer->instrument->Process(&output[num_channels * frame],
+                                     num_channels, num_frames - frame);
     }
   }
 
@@ -110,6 +114,22 @@ class Musician {
   const Ensemble& ensemble() const { return ensemble_; }
 
  private:
+  // Instrument message processor.
+  struct MessageProcessor {
+    // Processes |NoteOffData|.
+    void operator()(const NoteOffData& note_off_data) {
+      instrument->NoteOff(note_off_data.index);
+    }
+
+    // Processes |NoteOnData|.
+    void operator()(const NoteOnData& note_on_data) {
+      instrument->NoteOn(note_on_data.index, note_on_data.intensity);
+    }
+
+    // Instrument to process.
+    Instrument* instrument;
+  };
+
   void ProcessBeat(int beat) {
     // Update transport.
     bar_ = beat / num_beats_;
@@ -126,7 +146,11 @@ class Musician {
       performer.beat_composer_callback(bar_, beat_, num_beats_, harmonic_,
                                        &temp_notes_);
       for (const Note& note : temp_notes_) {
-        performer.score.AddNote(beat, note);
+        const double timestamp = static_cast<double>(beat) + note.offset_beats;
+        performer.score.Push(
+            {NoteOnData{note.index, note.intensity}, timestamp});
+        performer.score.Push(
+            {NoteOffData{note.index}, timestamp + note.duration_beats});
       }
     }
   }

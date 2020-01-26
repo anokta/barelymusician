@@ -10,9 +10,6 @@ namespace {
 // Default number of samples to pop.
 constexpr int kNumSamples = 16;
 
-// Test message ID.
-constexpr int kMessageId = 1;
-
 // Tests that the message buffer returns an added single message as expected.
 TEST(MessageBufferTest, SinglePushPop) {
   const int kTimestamp = 10;
@@ -21,7 +18,7 @@ TEST(MessageBufferTest, SinglePushPop) {
   EXPECT_TRUE(message_buffer.Empty());
 
   // Push message.
-  message_buffer.Push({kMessageId, {}, kTimestamp});
+  message_buffer.Push({{}, kTimestamp});
   EXPECT_FALSE(message_buffer.Empty());
 
   // Pop message.
@@ -44,7 +41,7 @@ TEST(MessageBufferTest, SingleMessagePerNumSamples) {
   // Push |kNumMessages| messages, each message to the beginning of each
   // |kNumSamples|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_buffer.Push({kMessageId, {}, i * kNumSamples});
+    message_buffer.Push({{}, i * kNumSamples});
     EXPECT_FALSE(message_buffer.Empty());
   }
   // Pop one message at a time.
@@ -52,10 +49,7 @@ TEST(MessageBufferTest, SingleMessagePerNumSamples) {
     const int timestamp = i * kNumSamples;
     const auto iterator = message_buffer.GetIterator(timestamp, kNumSamples);
     EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 1);
-
-    const Message& message = *iterator.cbegin;
-    EXPECT_EQ(message.id, kMessageId);
-    EXPECT_EQ(message.timestamp, timestamp);
+    EXPECT_EQ(iterator.cbegin->timestamp, timestamp);
 
     message_buffer.Clear(iterator);
   }
@@ -74,7 +68,7 @@ TEST(MessageBufferTest, MultipleMessagesSameTimestamp) {
 
   // Push |kNumMessages| messages using the same |kTimestamp|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_buffer.Push({kMessageId, {}, kTimestamp});
+    message_buffer.Push({{}, kTimestamp});
     EXPECT_FALSE(message_buffer.Empty());
   }
 
@@ -82,7 +76,6 @@ TEST(MessageBufferTest, MultipleMessagesSameTimestamp) {
   const auto iterator = message_buffer.GetIterator(0, kNumSamples);
   EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), kNumMessages);
   for (auto it = iterator.cbegin; it != iterator.cend; ++it) {
-    EXPECT_EQ(it->id, kMessageId);
     EXPECT_EQ(it->timestamp, kTimestamp);
   }
 
@@ -100,7 +93,7 @@ TEST(MessageBufferTest, Clear) {
   EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 0);
 
   for (int i = 0; i < kNumSamples; ++i) {
-    message_buffer.Push({kMessageId, {}, i});
+    message_buffer.Push({{}, i});
     EXPECT_FALSE(message_buffer.Empty());
   }
   iterator = message_buffer.GetIterator(0, kNumSamples);

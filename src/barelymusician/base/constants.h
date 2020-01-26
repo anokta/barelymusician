@@ -19,9 +19,6 @@ inline constexpr int kNumMonoChannels = 1;
 // Number of stereo channels.
 inline constexpr int kNumStereoChannels = 2;
 
-// Maximum number of bytes that the message data can contain.
-inline constexpr int kNumMaxMessageDataBytes = 2 * sizeof(float);
-
 // Number of semitones in an octave (twelwe-tone equal temperament).
 inline constexpr float kNumSemitones = 12.0f;
 

@@ -1,19 +1,29 @@
 #ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_H_
 #define BARELYMUSICIAN_MESSAGE_MESSAGE_H_
 
-#include <cstddef>
-
-#include "barelymusician/base/constants.h"
+#include <variant>
 
 namespace barelyapi {
 
+// Note on data.
+struct NoteOnData {
+  // Note index.
+  float index;
+
+  // Note intensity.
+  float intensity;
+};
+
+// Note off data.
+struct NoteOffData {
+  // Note index.
+  float index;
+};
+
 // Generic message with a timestamp.
 struct Message {
-  // Message ID.
-  int id;
-
-  // Type-agnostic message data.
-  std::byte data[kNumMaxMessageDataBytes];
+  // Message data.
+  std::variant<NoteOnData, NoteOffData> data;
 
   // Message timestamp.
   int timestamp;

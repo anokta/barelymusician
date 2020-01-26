@@ -1,39 +1,37 @@
 #include "barelymusician/instrument/instrument.h"
 
-#include <utility>
+#include <variant>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/message/message_utils.h"
 
 namespace barelyapi {
 
 namespace {
 
-// Unique message IDs.
-constexpr int kNoteOffId = 1;
-constexpr int kNoteOnId = 2;
+// Instrument message processor.
+struct MessageProcessor {
+  // Processes |NoteOffData|.
+  void operator()(const NoteOffData& note_off_data) {
+    instrument->NoteOff(note_off_data.index);
+  }
 
-// Note off message data.
-struct NoteOffData {
-  float index;
-};
+  // Processes |NoteOnData|.
+  void operator()(const NoteOnData& note_on_data) {
+    instrument->NoteOn(note_on_data.index, note_on_data.intensity);
+  }
 
-// Note on message data.
-struct NoteOnData {
-  float index;
-  float intensity;
+  // Instrument to process.
+  Instrument* instrument;
 };
 
 }  // namespace
 
 void Instrument::NoteOffScheduled(float index, int timestamp) {
-  message_buffer_.Push(
-      BuildMessage<NoteOffData>(kNoteOffId, {index}, timestamp));
+  message_buffer_.Push({NoteOffData{index}, timestamp});
 }
 
 void Instrument::NoteOnScheduled(float index, float intensity, int timestamp) {
-  message_buffer_.Push(
-      BuildMessage<NoteOnData>(kNoteOnId, {index, intensity}, timestamp));
+  message_buffer_.Push({NoteOnData{index, intensity}, timestamp});
 }
 
 void Instrument::ProcessScheduled(float* output, int num_channels,
@@ -52,28 +50,12 @@ void Instrument::ProcessScheduled(float* output, int num_channels,
               message_frame - frame);
       frame = message_frame;
     }
-    ProcessMessage(*it);
+    std::visit(MessageProcessor{this}, it->data);
   }
   message_buffer_.Clear(messages);
   // Process the rest of the buffer.
   if (frame < num_frames) {
     Process(&output[num_channels * frame], num_channels, num_frames - frame);
-  }
-}
-
-void Instrument::ProcessMessage(const Message& message) {
-  switch (message.id) {
-    case kNoteOffId: {
-      const NoteOffData note_off = ReadMessageData<NoteOffData>(message.data);
-      NoteOff(note_off.index);
-    } break;
-    case kNoteOnId: {
-      const NoteOnData note_on = ReadMessageData<NoteOnData>(message.data);
-      NoteOn(note_on.index, note_on.intensity);
-    } break;
-    default:
-      DLOG(ERROR) << "Invalid message ID: " << message.id;
-      break;
   }
 }
 

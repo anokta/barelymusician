@@ -8,6 +8,7 @@
 
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/instrument/instrument.h"
 #include "instruments/basic_synth_instrument.h"

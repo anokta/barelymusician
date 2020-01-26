@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
 
-#include "barelymusician/message/message.h"
 #include "barelymusician/message/message_buffer.h"
 
 namespace barelyapi {
@@ -56,9 +55,6 @@ class Instrument {
                         int timestamp);
 
  private:
-  // Processes the given |message|.
-  void ProcessMessage(const Message& message);
-
   // Messages to process.
   MessageBuffer message_buffer_;
 };

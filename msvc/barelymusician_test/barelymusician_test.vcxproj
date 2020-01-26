@@ -51,7 +51,6 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\message\message_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\score_test.cpp" />
   </ItemGroup>

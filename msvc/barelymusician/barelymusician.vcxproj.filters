@@ -114,9 +114,6 @@
     <ClInclude Include="..\..\src\barelymusician\message\message.h">
       <Filter>Header Files\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\message\message_utils.h">
-      <Filter>Header Files\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\message\message_buffer.h">
       <Filter>Header Files\message</Filter>
     </ClInclude>
@@ -166,9 +163,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp">
       <Filter>Source Files\api</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\message\message_utils.cpp">
-      <Filter>Source Files\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer.cpp">
       <Filter>Source Files\message</Filter>

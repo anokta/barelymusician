@@ -1,10 +1,8 @@
 #include "barelymusician/instrument/instrument.h"
 
 #include <algorithm>
-#include <memory>
 #include <vector>
 
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "gtest/gtest.h"
 

@@ -39,9 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\clock_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\task_runner_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp" />
@@ -52,6 +50,8 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\score_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\util\task_runner_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

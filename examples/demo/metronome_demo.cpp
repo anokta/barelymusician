@@ -6,10 +6,10 @@
 #include "barelymusician/base/clock.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/task_runner.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/instrument_utils.h"
+#include "barelymusician/util/task_runner.h"
 #include "instruments/basic_enveloped_voice.h"
 #include "util/input_manager/win_console_input.h"
 

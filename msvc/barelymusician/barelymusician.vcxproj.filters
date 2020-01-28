@@ -52,6 +52,12 @@
     <Filter Include="Source Files\musician">
       <UniqueIdentifier>{9cf1afd1-2141-4f41-8171-7264faf6cf07}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{f5479aa3-36c1-4205-8554-f3cce92bf42d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{714235ea-5a66-4d4c-b621-6dea7347392d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\base\constants.h">
@@ -87,9 +93,6 @@
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h">
       <Filter>Header Files\instrument</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\random.h">
-      <Filter>Header Files\base</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
@@ -101,9 +104,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h">
       <Filter>Header Files\dsp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\base\task_runner.h">
-      <Filter>Header Files\base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\api\barelymusician.h">
       <Filter>Header Files\api</Filter>
@@ -135,6 +135,12 @@
     <ClInclude Include="..\..\src\barelymusician\message\message_data.h">
       <Filter>Header Files\message</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\util\random.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\util\task_runner.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -158,12 +164,6 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\random.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\task_runner.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp">
       <Filter>Source Files\api</Filter>
     </ClCompile>
@@ -178,6 +178,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\musician\score.cpp">
       <Filter>Source Files\musician</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\util\random.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

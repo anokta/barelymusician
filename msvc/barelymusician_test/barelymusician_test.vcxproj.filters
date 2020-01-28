@@ -22,6 +22,9 @@
     <Filter Include="Source Files\musician">
       <UniqueIdentifier>{e7801b4b-e168-4602-bfaa-e24ae1bd15c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{195c8e44-b17f-4829-86af-4260514661dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp">
@@ -42,17 +45,11 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\random_test.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp">
       <Filter>Source Files\algorithm</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp">
       <Filter>Source Files\instrument</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\task_runner_test.cpp">
-      <Filter>Source Files\base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer_test.cpp">
       <Filter>Source Files\message</Filter>
@@ -65,6 +62,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\musician\score_test.cpp">
       <Filter>Source Files\musician</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\util\task_runner_test.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

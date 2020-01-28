@@ -4,7 +4,7 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/random.h"
+#include "barelymusician/util/random.h"
 
 namespace barelyapi {
 

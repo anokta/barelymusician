@@ -21,9 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\clock.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\task_runner.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
@@ -33,15 +31,15 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\score.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\util\random.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
     <ClInclude Include="..\..\src\barelymusician\api\barelymusician.h" />
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\random.h" />
     <ClInclude Include="..\..\src\barelymusician\base\clock.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\task_runner.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h" />
@@ -62,6 +60,8 @@
     <ClInclude Include="..\..\src\barelymusician\musician\note.h" />
     <ClInclude Include="..\..\src\barelymusician\musician\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\musician\score.h" />
+    <ClInclude Include="..\..\src\barelymusician\util\random.h" />
+    <ClInclude Include="..\..\src\barelymusician\util\task_runner.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

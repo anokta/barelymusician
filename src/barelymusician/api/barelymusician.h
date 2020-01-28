@@ -6,8 +6,8 @@
 #include <utility>
 
 #include "barelymusician/base/clock.h"
-#include "barelymusician/base/task_runner.h"
 #include "barelymusician/instrument/instrument.h"
+#include "barelymusician/util/task_runner.h"
 
 namespace barelyapi {
 

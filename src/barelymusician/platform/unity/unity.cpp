@@ -5,8 +5,8 @@
 
 #include "barelymusician/api/barelymusician.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/task_runner.h"
 #include "barelymusician/platform/unity/unity_instrument.h"
+#include "barelymusician/util/task_runner.h"
 
 namespace barelyapi {
 namespace unity {

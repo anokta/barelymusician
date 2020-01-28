@@ -9,8 +9,8 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message.h"
 #include "barelymusician/message/message_buffer.h"
+#include "barelymusician/message/message_data.h"
 #include "barelymusician/musician/note.h"
 
 namespace barelyapi {

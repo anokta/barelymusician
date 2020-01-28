@@ -3,8 +3,8 @@
 #include <thread>
 
 #include "audio_output/pa_audio_output.h"
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/clock.h"
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/task_runner.h"
 #include "barelymusician/dsp/oscillator.h"

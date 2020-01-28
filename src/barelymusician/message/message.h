@@ -3,22 +3,9 @@
 
 #include <variant>
 
+#include "barelymusician/message/message_data.h"
+
 namespace barelyapi {
-
-// Note on data.
-struct NoteOnData {
-  // Note index.
-  float index;
-
-  // Note intensity.
-  float intensity;
-};
-
-// Note off data.
-struct NoteOffData {
-  // Note index.
-  float index;
-};
 
 // Generic message with a timestamp.
 struct Message {

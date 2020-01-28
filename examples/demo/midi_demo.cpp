@@ -12,8 +12,8 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message.h"
 #include "barelymusician/message/message_buffer.h"
+#include "barelymusician/message/message_data.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 

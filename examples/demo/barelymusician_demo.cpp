@@ -6,12 +6,10 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/clock.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
-using ::barelyapi::BeatsFromSamples;
 using ::barelyapi::Clock;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;

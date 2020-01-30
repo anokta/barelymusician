@@ -76,10 +76,10 @@ class Musician {
           (beat != end_beat || end_leftover_samples > 0)) {
         ProcessBeat(beat);
       }
-      for (Ensemble::Performer& performer : ensemble_.performers) {
-        performer.messages =
-            performer.score.GetIterator(start_timestamp, end_timestamp);
-      }
+    }
+    for (Ensemble::Performer& performer : ensemble_.performers) {
+      performer.messages =
+          performer.score.GetIterator(start_timestamp, end_timestamp);
     }
   }
 

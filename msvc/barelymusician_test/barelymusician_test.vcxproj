@@ -49,7 +49,6 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\musician\score_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\task_runner_test.cpp" />
   </ItemGroup>

@@ -57,9 +57,6 @@
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils_test.cpp">
       <Filter>Source Files\musician</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\musician\score_test.cpp">
-      <Filter>Source Files\musician</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>

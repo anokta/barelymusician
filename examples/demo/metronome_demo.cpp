@@ -9,7 +9,6 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/engine/clock.h"
-#include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/instrument_utils.h"
 #include "barelymusician/util/task_runner.h"
 #include "instruments/basic_enveloped_voice.h"
@@ -18,6 +17,7 @@
 namespace {
 
 using ::barelyapi::Clock;
+using ::barelyapi::FrequencyFromNoteIndex;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::TaskRunner;
@@ -34,8 +34,8 @@ const int kNumMaxTasks = 100;
 
 // Metronome settings.
 const float kGain = 0.5f;
-const float kBarNoteIndex = barelyapi::kNoteIndexA4;
-const float kBeatNoteIndex = barelyapi::kNoteIndexA3;
+const float kBarFrequency = FrequencyFromNoteIndex(barelyapi::kNoteIndexA4);
+const float kBeatFrequency = FrequencyFromNoteIndex(barelyapi::kNoteIndexA3);
 const OscillatorType kOscillatorType = OscillatorType::kSquare;
 const float kRelease = 0.025f;
 
@@ -43,23 +43,17 @@ const int kNumBeats = 4;
 const double kInitialTempo = 120.0;
 const double kTempoIncrement = 10.0;
 
-// Metronome instrument.
-class MetronomeInstrument : public barelyapi::Instrument {
+// Metronome processor.
+class Metronome {
  public:
-  MetronomeInstrument() : voice_(kSampleRate) {
+  Metronome() : voice_(kSampleRate) {
     voice_.generator().SetType(kOscillatorType);
     voice_.envelope().SetRelease(kRelease);
+    voice_.set_gain(kGain);
   }
 
-  // Implements |Instrument|.
-  void AllNotesOff() override { voice_.Stop(); }
-  void NoteOff(float index) override { voice_.Stop(); }
-  void NoteOn(float index, float intensity) override {
-    voice_.generator().SetFrequency(barelyapi::FrequencyFromNoteIndex(index));
-    voice_.set_gain(intensity);
-    voice_.Start();
-  }
-  void Process(float* output, int num_channels, int num_frames) override {
+  // Processes the next |output| buffer.
+  void Process(float* output, int num_channels, int num_frames) {
     for (int frame = 0; frame < num_frames; ++frame) {
       const float mono_sample = voice_.Next(0);
       for (int channel = 0; channel < num_channels; ++channel) {
@@ -70,10 +64,11 @@ class MetronomeInstrument : public barelyapi::Instrument {
 
   // Ticks the metronome with the given |beat|.
   void Tick(int beat) {
-    const float note_index = (beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    NoteOn(note_index, kGain);
+    const float frequency = (beat == 0) ? kBarFrequency : kBeatFrequency;
+    voice_.generator().SetFrequency(frequency);
+    voice_.Start();
     voice_.Next(0);
-    NoteOff(note_index);
+    voice_.Stop();
   }
 
  private:
@@ -91,7 +86,7 @@ int main(int argc, char* argv[]) {
   Clock clock(kSampleRate);
   clock.SetTempo(kInitialTempo);
 
-  MetronomeInstrument metronome;
+  Metronome metronome;
 
   // Audio process callback.
   const auto process_callback = [&task_runner, &clock,

@@ -13,7 +13,6 @@ namespace BarelyApi {
     public delegate void NoteOnCallback(float index, float intensity);
 
     // Internal Unity instrument functions.
-    public delegate void AllNotesOffFn();
     public delegate void NoteOffFn(float index);
     public delegate void NoteOnFn(float index, float intensity);
     public delegate void ProcessFn([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output,
@@ -40,9 +39,8 @@ namespace BarelyApi {
     private float lastUpdateTime = 0.0f;
 
     // Creates new instrument.
-    public int CreateInstrument(AllNotesOffFn allNotesOffFn, NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
-      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(allNotesOffFn),
-                              Marshal.GetFunctionPointerForDelegate(noteOffFn),
+    public int CreateInstrument(NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
+      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(noteOffFn),
                               Marshal.GetFunctionPointerForDelegate(noteOnFn),
                               Marshal.GetFunctionPointerForDelegate(processFn));
     }
@@ -56,11 +54,6 @@ namespace BarelyApi {
     public void ProcessInstrument(Instrument instrument, float[] output) {
       Process();
       ProcessInstrument(instrument.Id, output);
-    }
-
-    // Sets all instrument notes off.
-    public void SetInstrumentAllNotesOff(Instrument instrument) {
-      SetInstrumentAllNotesOff(instrument.Id);
     }
 
     // Sets instrument note off.
@@ -169,7 +162,7 @@ namespace BarelyApi {
 
     // Instrument handlers.
     [DllImport(pluginName)]
-    private static extern int CreateInstrument(IntPtr allNotesOffFnPtr, IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+    private static extern int CreateInstrument(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
                                                IntPtr processFnPtr);
 
     [DllImport(pluginName)]
@@ -177,9 +170,6 @@ namespace BarelyApi {
 
     [DllImport(pluginName)]
     private static extern void ProcessInstrument(int instrumentId, [In, Out] float[] output);
-
-    [DllImport(pluginName)]
-    private static extern void SetInstrumentAllNotesOff(int instrumentId);
 
     [DllImport(pluginName)]
     private static extern void SetInstrumentNoteOff(int instrumentId, float index);

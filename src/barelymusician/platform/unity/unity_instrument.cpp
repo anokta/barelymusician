@@ -7,20 +7,15 @@
 namespace barelyapi {
 namespace unity {
 
-UnityInstrument::UnityInstrument(AllNotesOffFn&& all_notes_off_fn,
-                                 NoteOffFn&& note_off_fn, NoteOnFn&& note_on_fn,
+UnityInstrument::UnityInstrument(NoteOffFn&& note_off_fn, NoteOnFn&& note_on_fn,
                                  ProcessFn&& process_fn)
-    : all_notes_off_fn_(std::move(all_notes_off_fn)),
-      note_off_fn_(std::move(note_off_fn)),
+    : note_off_fn_(std::move(note_off_fn)),
       note_on_fn_(std::move(note_on_fn)),
       process_fn_(std::move(process_fn)) {
-  DCHECK(all_notes_off_fn);
   DCHECK(note_off_fn);
   DCHECK(note_on_fn);
   DCHECK(process_fn);
 }
-
-void UnityInstrument::AllNotesOff() { all_notes_off_fn_(); }
 
 void UnityInstrument::NoteOff(float index) { note_off_fn_(index); };
 

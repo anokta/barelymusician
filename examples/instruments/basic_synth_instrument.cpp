@@ -62,8 +62,6 @@ BasicSynthInstrument::BasicSynthInstrument(int sample_rate, int num_voices)
       });
 }
 
-void BasicSynthInstrument::AllNotesOff() { voice_.Clear(); }
-
 void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {

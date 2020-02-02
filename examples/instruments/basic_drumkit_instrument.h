@@ -17,7 +17,6 @@ class BasicDrumkitInstrument : public Instrument {
   BasicDrumkitInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void AllNotesOff() override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;

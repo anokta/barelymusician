@@ -89,12 +89,11 @@ void StopSequencer() {
   barelymusician->Stop();
 }
 
-int CreateInstrument(AllNotesOffFn* all_notes_off_fn_ptr,
-                     NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
+int CreateInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
                      ProcessFn* process_fn_ptr) {
   DCHECK(barelymusician);
   const int instrument_id = barelymusician->CreateInstrument<UnityInstrument>(
-      all_notes_off_fn_ptr, note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
+      note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
   return instrument_id;
 }
 
@@ -108,11 +107,6 @@ void ProcessInstrument(int instrument_id, float* output) {
   if (barelymusician != nullptr) {
     barelymusician->ProcessInstrument(instrument_id, output);
   }
-}
-
-void SetInstrumentAllNotesOff(int instrument_id) {
-  DCHECK(barelymusician);
-  barelymusician->SetInstrumentAllNotesOff(instrument_id);
 }
 
 void SetInstrumentNoteOff(int instrument_id, float index) {

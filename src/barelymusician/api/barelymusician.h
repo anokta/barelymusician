@@ -55,11 +55,6 @@ class BarelyMusician {
   // @param output Output buffer.
   void ProcessInstrument(int instrument_id, float* output);
 
-  // Stops all instrument notes.
-  //
-  // @param instrument_id Instrument ID.
-  void SetInstrumentAllNotesOff(int instrument_id);
-
   // Stops instrument note.
   //
   // @param instrument_id Instrument ID.

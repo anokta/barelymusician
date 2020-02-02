@@ -23,9 +23,6 @@ class PolyphonicVoice {
   // @param base_voice Base voice type to be used.
   explicit PolyphonicVoice(VoiceType&& base_voice);
 
-  // Clear all voices.
-  void Clear();
-
   // Returns the next output sample for the given output |channel|.
   //
   // @param channel Output channel.
@@ -81,13 +78,6 @@ float PolyphonicVoice<VoiceType>::Next(int channel) {
     }
   }
   return output;
-}
-
-template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Clear() {
-  for (VoiceType& voice : voices_) {
-    voice.Stop();
-  }
 }
 
 template <class VoiceType>

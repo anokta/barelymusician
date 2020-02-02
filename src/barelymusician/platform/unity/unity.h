@@ -60,13 +60,11 @@ void EXPORT_API StopSequencer();
 
 // Creates new instrument.
 //
-// @param all_notes_off_fn_ptr All notes off function.
 // @param note_off_fn_ptr Note off function.
 // @param note_on_fn_ptr Note on function.
 // @param process_fn_ptr Process function.
 // @return Instrument ID.
-int EXPORT_API CreateInstrument(AllNotesOffFn* all_notes_off_fn_ptr,
-                                NoteOffFn* note_off_fn_ptr,
+int EXPORT_API CreateInstrument(NoteOffFn* note_off_fn_ptr,
                                 NoteOnFn* note_on_fn_ptr,
                                 ProcessFn* process_fn_ptr);
 
@@ -80,11 +78,6 @@ void EXPORT_API DestroyInstrument(int instrument_id);
 // @param instrument_id Instrument ID.
 // @param output Output buffer.
 void EXPORT_API ProcessInstrument(int instrument_id, float* output);
-
-// Stops all instrument notes.
-//
-// @param instrument_id Instrument ID.
-void EXPORT_API SetInstrumentAllNotesOff(int instrument_id);
 
 // Stops instrument note.
 //

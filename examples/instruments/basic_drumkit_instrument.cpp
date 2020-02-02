@@ -18,12 +18,6 @@ const float kDefaultRelease = 0.1f;
 BasicDrumkitInstrument::BasicDrumkitInstrument(int sample_rate)
     : sample_rate_(sample_rate), gain_(kDefaultGain) {}
 
-void BasicDrumkitInstrument::AllNotesOff() {
-  for (auto& voice : voices_) {
-    voice.second.Stop();
-  }
-}
-
 void BasicDrumkitInstrument::NoteOff(float index) {
   const auto it = voices_.find(index);
   if (it == voices_.cend()) {

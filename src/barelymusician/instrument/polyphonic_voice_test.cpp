@@ -111,25 +111,6 @@ TEST(PolyphonicVoiceTest, NoVoice) {
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 }
 
-// Tests that resetting the polyphonic voice resets all the active voices
-// properly.
-TEST(PolyphonicVoiceTest, Clear) {
-  FakeVoice base_voice;
-  base_voice.SetOutput(kOutput);
-
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
-  polyphonic_voice.Resize(kNumVoices);
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
-
-  for (int i = 0; i < kNumVoices; ++i) {
-    polyphonic_voice.Start(static_cast<float>(i));
-    EXPECT_NE(polyphonic_voice.Next(kChannel), 0.0f);
-  }
-
-  polyphonic_voice.Clear();
-  EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
-}
-
 // Tests that the voice update callback updates all the voices as expected.
 TEST(PolyphonicVoiceTest, Update) {
   const float kUpdatedOutput = 4.0f * kOutput;

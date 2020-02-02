@@ -66,17 +66,6 @@ void BarelyMusician::ProcessInstrument(int instrument_id, float* output) {
   }
 }
 
-void BarelyMusician::SetInstrumentAllNotesOff(int instrument_id) {
-  task_runner_.Add([this, instrument_id]() {
-    Instrument* instrument = GetInstrument(instrument_id);
-    if (instrument != nullptr) {
-      instrument->AllNotesOff();
-    } else {
-      DLOG(WARNING) << "Invalid instrument ID: " << instrument_id;
-    }
-  });
-}
-
 void BarelyMusician::SetInstrumentNoteOff(int instrument_id, float index) {
   task_runner_.Add([this, instrument_id, index]() {
     Instrument* instrument = GetInstrument(instrument_id);

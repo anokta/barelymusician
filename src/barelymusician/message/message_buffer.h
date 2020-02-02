@@ -18,9 +18,6 @@ class MessageBuffer {
 
     // Iterator end.
     std::vector<Message>::const_iterator cend;
-
-    // Start position.
-    double position;
   };
 
   // Clears the buffer.

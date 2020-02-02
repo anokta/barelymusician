@@ -43,7 +43,6 @@ MessageBuffer::Iterator MessageBuffer::GetIterator(double start_position,
                                      start_position, &ComparePosition);
   iterator.cend = std::lower_bound(iterator.cbegin, messages_.cend(),
                                    end_position, &ComparePosition);
-  iterator.position = start_position;
   return iterator;
 }
 

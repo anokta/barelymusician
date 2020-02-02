@@ -41,32 +41,26 @@ class Musician {
       Instrument* instrument;
       BeatComposerCallback beat_composer_callback;
       MessageBuffer score;
-      // TODO: Figure out a proper way to communicate this to instruments.
-      MessageBuffer::Iterator messages;
     };
 
     // List of performers.
     std::vector<Performer> performers;
   };
 
-  explicit Musician(int sample_rate) : clock_(sample_rate) {}
+  explicit Musician(int sample_rate)
+      : clock_(sample_rate), position_(0.0), last_position_(0.0) {}
 
   void SetNumBeats(int num_beats) { num_beats_ = num_beats; }
 
   void SetTempo(double tempo) { clock_.SetTempo(tempo); }
 
   void Update(int num_samples) {
-    const double start_position = clock_.GetPosition();
+    last_position_ = position_;
     clock_.UpdatePosition(num_samples);
-    const double end_position = clock_.GetPosition();
+    position_ = clock_.GetPosition();
 
-    for (double beat = std::ceil(start_position); beat < end_position; ++beat) {
+    for (double beat = std::ceil(last_position_); beat < position_; ++beat) {
       ProcessBeat(static_cast<int>(beat));
-    }
-
-    for (Ensemble::Performer& performer : ensemble_.performers) {
-      performer.messages =
-          performer.score.GetIterator(start_position, end_position);
     }
   }
 
@@ -75,9 +69,10 @@ class Musician {
     int frame = 0;
     // Process notes.
     const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
-    const auto& messages = performer->messages;
+    const auto& messages =
+        performer->score.GetIterator(last_position_, position_);
     const int offset_samples =
-        SamplesFromBeats(messages.position, num_samples_per_beat);
+        SamplesFromBeats(last_position_, num_samples_per_beat);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
       const int message_frame =
           SamplesFromBeats(it->position, num_samples_per_beat) - offset_samples;
@@ -155,6 +150,12 @@ class Musician {
 
   // Number of beats per bar.
   int num_beats_;
+
+  // Current clock position.
+  double position_;
+
+  // Last clock position.
+  double last_position_;
 
   // TODO: not necessary, use Score instead?
   std::vector<Note> temp_notes_;

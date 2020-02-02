@@ -10,11 +10,8 @@ class SamplePlayer : public Generator {
  public:
   // Construct new |SamplePlayer| with the given sample data.
   //
-  // @param sample_interval Target sampling interval in seconds.
-  // @param frequency Original sampling frequency in Hz.
-  // @param data Sample data.
-  // @param length Sample data length.
-  SamplePlayer(float sample_interval);
+  // @param sample_rate Sampling rate in Hz.
+  explicit SamplePlayer(int sample_rate);
 
   // Implements |Generator|.
   float Next() override;

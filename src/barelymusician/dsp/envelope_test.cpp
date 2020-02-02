@@ -7,7 +7,6 @@ namespace {
 
 // Sampling rate.
 constexpr int kSampleRate = 1000;
-constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Envelope ADSR.
 constexpr float kAttack = 0.02f;
@@ -21,7 +20,7 @@ constexpr float kEpsilon = 1e-3f;
 // Tests that the envelope generates the expected output samples when
 // initialized with the default constructor.
 TEST(EnvelopeTest, ProcessDefault) {
-  Envelope envelope(kSampleInterval);
+  Envelope envelope(kSampleRate);
   EXPECT_FLOAT_EQ(envelope.Next(), 0.0f);
 
   envelope.Start();
@@ -39,7 +38,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   const int kNumSamplesForSustain = kNumAttackSamples + kNumDecaySamples;
   const int kNumReleaseSamples = static_cast<int>(kSampleRate * kRelease);
 
-  Envelope envelope(kSampleInterval);
+  Envelope envelope(kSampleRate);
   envelope.SetAttack(kAttack);
   envelope.SetDecay(kDecay);
   envelope.SetSustain(kSustain);

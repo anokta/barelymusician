@@ -6,8 +6,8 @@
 
 namespace barelyapi {
 
-SamplePlayer::SamplePlayer(float sample_interval)
-    : sample_interval_(sample_interval),
+SamplePlayer::SamplePlayer(int sample_rate)
+    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       data_(nullptr),
       frequency_(0.0f),
       length_(0.0f),
@@ -15,7 +15,7 @@ SamplePlayer::SamplePlayer(float sample_interval)
       speed_(1.0f),
       cursor_(0.0f),
       increment_(0.0f) {
-  DCHECK_GE(sample_interval_, 0.0f);
+  DCHECK_GT(sample_rate, 0);
 }
 
 float SamplePlayer::Next() {

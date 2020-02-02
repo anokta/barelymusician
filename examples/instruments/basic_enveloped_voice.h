@@ -10,10 +10,10 @@ namespace examples {
 template <class GeneratorType>
 class BasicEnvelopedVoice : public Voice {
  public:
-  // Constructs new |BasicEnvelopedVoice| with the given |sample_interval|.
+  // Constructs new |BasicEnvelopedVoice| with the given |sample_rate|.
   //
-  // @param sample_interval Sampling interval in seconds.
-  explicit BasicEnvelopedVoice(float sample_interval);
+  // @param sample_rate Sampling rate in Hz.
+  explicit BasicEnvelopedVoice(int sample_rate);
 
   // Implements |Voice|.
   bool IsActive() const override;
@@ -46,8 +46,8 @@ class BasicEnvelopedVoice : public Voice {
 };
 
 template <class GeneratorType>
-BasicEnvelopedVoice<GeneratorType>::BasicEnvelopedVoice(float sample_interval)
-    : envelope_(sample_interval), generator_(sample_interval) {}
+BasicEnvelopedVoice<GeneratorType>::BasicEnvelopedVoice(int sample_rate)
+    : envelope_(sample_rate), generator_(sample_rate) {}
 
 template <class GeneratorType>
 float BasicEnvelopedVoice<GeneratorType>::Next(int channel) {

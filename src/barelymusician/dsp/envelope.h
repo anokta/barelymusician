@@ -11,8 +11,8 @@ class Envelope : public Generator {
  public:
   // Constructs new |Envelope|.
   //
-  // @param sample_interval Sampling interval in seconds.
-  explicit Envelope(float sample_interval);
+  // @param sample_rate Sampling rate in Hz.
+  explicit Envelope(int sample_rate);
 
   // Implements |Generator|.
   float Next() override;

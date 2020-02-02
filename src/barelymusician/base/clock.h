@@ -8,7 +8,7 @@ class Clock {
  public:
   // Constructs new |Clock|.
   //
-  // @param sample_rate Sampling rate per second.
+  // @param sample_rate Sampling rate in Hz.
   explicit Clock(int sample_rate);
 
   // Returns number of samples per beat.

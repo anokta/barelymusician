@@ -4,8 +4,8 @@
 
 namespace barelyapi {
 
-Envelope::Envelope(float sample_interval)
-    : sample_interval_(sample_interval),
+Envelope::Envelope(int sample_rate)
+    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       attack_increment_(0.0f),
       decay_increment_(0.0f),
       sustain_(1.0f),
@@ -14,7 +14,7 @@ Envelope::Envelope(float sample_interval)
       output_(0.0f),
       release_output_(0.0f),
       phase_(0.0f) {
-  DCHECK_GE(sample_interval_, 0.0f);
+  DCHECK_GT(sample_rate, 0);
 }
 
 float Envelope::Next() {

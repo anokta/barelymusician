@@ -18,8 +18,8 @@ class Oscillator : public Generator {
  public:
   // Constructs new |Oscillator|.
   //
-  // @param sample_interval Sampling interval in seconds.
-  explicit Oscillator(float sample_interval);
+  // @param sample_rate Sampling rate in Hz.
+  explicit Oscillator(int sample_rate);
 
   // Implements |Generator|.
   float Next() override;

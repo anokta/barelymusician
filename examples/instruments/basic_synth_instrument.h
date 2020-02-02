@@ -21,7 +21,7 @@ enum BasicSynthInstrumentParam {
 
 class BasicSynthInstrument : public Instrument {
  public:
-  BasicSynthInstrument(float sample_interval, int num_voices);
+  BasicSynthInstrument(int sample_rate, int num_voices);
 
   // Implements |Instrument|.
   void AllNotesOff() override;

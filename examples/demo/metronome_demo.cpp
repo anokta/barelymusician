@@ -30,8 +30,6 @@ const int kSampleRate = 48000;
 const int kNumChannels = 2;
 const int kNumFrames = 2048;
 
-const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
-
 const int kNumMaxTasks = 100;
 
 // Metronome settings.
@@ -48,7 +46,7 @@ const double kTempoIncrement = 10.0;
 // Metronome instrument.
 class MetronomeInstrument : public barelyapi::Instrument {
  public:
-  MetronomeInstrument() : voice_(kSampleInterval) {
+  MetronomeInstrument() : voice_(kSampleRate) {
     voice_.generator().SetType(kOscillatorType);
     voice_.envelope().SetRelease(kRelease);
   }

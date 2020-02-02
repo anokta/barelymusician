@@ -20,9 +20,8 @@ const OscillatorType kDefaultOscillatorType = OscillatorType::kSine;
 
 }  // namespace
 
-BasicSynthInstrument::BasicSynthInstrument(float sample_interval,
-                                           int num_voices)
-    : gain_(0.0f), voice_(BasicSynthVoice(sample_interval)) {
+BasicSynthInstrument::BasicSynthInstrument(int sample_rate, int num_voices)
+    : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {
   voice_.Resize(num_voices);
 
   // Register parameters.

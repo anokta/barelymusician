@@ -43,8 +43,6 @@ const int kSampleRate = 48000;
 const int kNumChannels = 2;
 const int kNumFrames = 512;
 
-const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
-
 // Sequencer settings.
 const double kTempo = 124.0;
 const int kNumBeats = 3;
@@ -57,8 +55,8 @@ std::unique_ptr<BasicSynthInstrument> BuildSynthInstrument(OscillatorType type,
                                                            float gain,
                                                            float attack,
                                                            float release) {
-  auto synth_instrument = std::make_unique<BasicSynthInstrument>(
-      kSampleInterval, kNumInstrumentVoices);
+  auto synth_instrument =
+      std::make_unique<BasicSynthInstrument>(kSampleRate, kNumInstrumentVoices);
   synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                                   static_cast<float>(type));
   synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kGain, gain);
@@ -223,7 +221,7 @@ int main(int argc, char* argv[]) {
   drumkit_map[barelyapi::kNoteIndexHihatOpen] =
       "data/audio/drums/basic_hihat_open.wav";
   auto drumkit_instrument =
-      std::make_unique<BasicDrumkitInstrument>(kSampleInterval);
+      std::make_unique<BasicDrumkitInstrument>(kSampleRate);
   std::vector<WavFile> drumkit_files;
   for (const auto& it : drumkit_map) {
     drumkit_files.emplace_back();

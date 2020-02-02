@@ -14,7 +14,7 @@ namespace examples {
 
 class BasicDrumkitInstrument : public Instrument {
  public:
-  BasicDrumkitInstrument(float sample_interval);
+  BasicDrumkitInstrument(int sample_rate);
 
   // Implements |Instrument|.
   void AllNotesOff() override;
@@ -27,7 +27,7 @@ class BasicDrumkitInstrument : public Instrument {
  private:
   using BasicDrumkitVoice = BasicEnvelopedVoice<SamplePlayer>;
 
-  const float sample_interval_;
+  const int sample_rate_;
 
   float gain_;
 

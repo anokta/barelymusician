@@ -9,7 +9,6 @@ namespace {
 
 // Sampling rate.
 constexpr int kSampleRate = 48000;
-constexpr float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
 
 // Sample data.
 constexpr int kDataLength = 5;
@@ -17,7 +16,7 @@ constexpr float kData[kDataLength] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
 
 // Tests that the sample data is played back as expected.
 TEST(SamplePlayerTest, SimplePlayback) {
-  SamplePlayer sample_player(kSampleInterval);
+  SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
   for (int i = 0; i < kDataLength; ++i) {
@@ -28,7 +27,7 @@ TEST(SamplePlayerTest, SimplePlayback) {
 
 // Tests that the sample data is played back as expected, when set to loop.
 TEST(SamplePlayerTest, SimplePlaybackLoop) {
-  SamplePlayer sample_player(kSampleInterval);
+  SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
@@ -41,7 +40,7 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
 // Tests that the sample data is played back as expected at different speeds.
 TEST(SamplePlayerTest, SetSpeed) {
-  SamplePlayer sample_player(kSampleInterval);
+  SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
@@ -64,15 +63,15 @@ TEST(SamplePlayerTest, SetSpeed) {
 TEST(SamplePlayerTest, DifferentSampleFrequency) {
   const std::vector<int> kFrequencies = {0, kSampleRate / 3, kSampleRate,
                                          2 * kSampleRate, 5 * kSampleRate};
-  SamplePlayer sample_player(kSampleInterval);
+  SamplePlayer sample_player(kSampleRate);
   for (const int frequency : kFrequencies) {
     sample_player.Reset();
     sample_player.SetData(kData, frequency, kDataLength);
     sample_player.SetLoop(true);
 
     for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index =
-          static_cast<int>(static_cast<float>(i * frequency) * kSampleInterval);
+      const int expected_index = static_cast<int>(
+          static_cast<float>(i * frequency) / static_cast<float>(kSampleRate));
       EXPECT_FLOAT_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;
     }
@@ -81,7 +80,7 @@ TEST(SamplePlayerTest, DifferentSampleFrequency) {
 
 // Tests that the sample player resets its state correctly.
 TEST(SamplePlayerTest, Reset) {
-  SamplePlayer sample_player(kSampleInterval);
+  SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
   const float first_sample = sample_player.Next();

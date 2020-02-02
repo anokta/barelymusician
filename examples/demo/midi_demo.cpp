@@ -35,8 +35,6 @@ const int kSampleRate = 48000;
 const int kNumChannels = 2;
 const int kNumFrames = 512;
 
-const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
-
 // Sequencer settings.
 const double kTempo = 132.0;
 
@@ -145,7 +143,7 @@ int main(int argc, char* argv[]) {
     }
     // Create instrument.
     auto instrument = std::make_unique<BasicSynthInstrument>(
-        kSampleInterval, kNumInstrumentVoices);
+        kSampleRate, kNumInstrumentVoices);
     instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                               static_cast<float>(kInstrumentOscillatorType));
     instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,

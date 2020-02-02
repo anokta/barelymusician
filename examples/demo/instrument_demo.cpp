@@ -25,8 +25,6 @@ const int kSampleRate = 48000;
 const int kNumChannels = 2;
 const int kNumFrames = 512;
 
-const float kSampleInterval = 1.0f / static_cast<float>(kSampleRate);
-
 const int kNumMaxTasks = 100;
 
 // Instrument settings.
@@ -63,7 +61,7 @@ int main(int argc, char* argv[]) {
 
   TaskRunner task_runner(kNumMaxTasks);
 
-  BasicSynthInstrument instrument(kSampleInterval, kNumVoices);
+  BasicSynthInstrument instrument(kSampleRate, kNumVoices);
   instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, kGain);
   instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
                            static_cast<float>(kOscillatorType));

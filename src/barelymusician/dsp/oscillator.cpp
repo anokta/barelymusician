@@ -8,12 +8,12 @@
 
 namespace barelyapi {
 
-Oscillator::Oscillator(float sample_interval)
-    : sample_interval_(sample_interval),
+Oscillator::Oscillator(int sample_rate)
+    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
       type_(OscillatorType::kNoise),
       phase_(0.0f),
       increment_(0.0f) {
-  DCHECK_GE(sample_interval_, 0.0f);
+  DCHECK_GT(sample_rate, 0);
 }
 
 float Oscillator::Next() {

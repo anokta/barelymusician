@@ -15,8 +15,8 @@ const float kDefaultRelease = 0.1f;
 
 }  // namespace
 
-BasicDrumkitInstrument::BasicDrumkitInstrument(float sample_interval)
-    : sample_interval_(sample_interval), gain_(kDefaultGain) {}
+BasicDrumkitInstrument::BasicDrumkitInstrument(int sample_rate)
+    : sample_rate_(sample_rate), gain_(kDefaultGain) {}
 
 void BasicDrumkitInstrument::AllNotesOff() {
   for (auto& voice : voices_) {
@@ -59,7 +59,7 @@ void BasicDrumkitInstrument::Process(float* output, int num_channels,
 }
 
 void BasicDrumkitInstrument::Add(float note_index, const WavFile& wav_file) {
-  BasicDrumkitVoice voice(sample_interval_);
+  BasicDrumkitVoice voice(sample_rate_);
   voice.envelope().SetRelease(kDefaultRelease);
   const auto& data = wav_file.GetData();
   const int data_size = static_cast<int>(data.size());

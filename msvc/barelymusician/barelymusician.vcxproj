@@ -27,7 +27,6 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\clock.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\random.cpp" />
@@ -48,7 +47,6 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\clock.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\instrument_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />

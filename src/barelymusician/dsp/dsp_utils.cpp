@@ -32,6 +32,12 @@ float DecibelsFromAmplitude(float amplitude) {
   return kMinDecibels;
 }
 
+float FrequencyFromNoteIndex(float index) {
+  // Middle A note (A4) is selected as the base note frequency, where:
+  //  f = fA4 * 2 ^ ((i - iA4) / 12).
+  return kFrequencyA4 * std::pow(2.0f, (index - kNoteIndexA4) / kNumSemitones);
+}
+
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) {
   DCHECK_GT(sample_rate, 0);
   const float sample_rate_float = static_cast<float>(sample_rate);

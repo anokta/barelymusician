@@ -9,7 +9,6 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/engine/clock.h"
-#include "barelymusician/instrument/instrument_utils.h"
 #include "barelymusician/util/task_runner.h"
 #include "instruments/basic_enveloped_voice.h"
 #include "util/input_manager/win_console_input.h"

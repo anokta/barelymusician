@@ -16,7 +16,7 @@ Clock::Clock(int sample_rate)
       leftover_samples_(0),
       num_samples_per_beat_(0),
       tempo_(0.0) {
-  DCHECK_GE(num_samples_per_minute_, 0.0);
+  DCHECK_GE(sample_rate, 0);
 }
 
 int Clock::GetNumSamplesPerBeat() const { return num_samples_per_beat_; }

@@ -14,10 +14,10 @@ UnityInstrument::UnityInstrument(AllNotesOffFn&& all_notes_off_fn,
       note_off_fn_(std::move(note_off_fn)),
       note_on_fn_(std::move(note_on_fn)),
       process_fn_(std::move(process_fn)) {
-  DCHECK(all_notes_off_fn_);
-  DCHECK(note_off_fn_);
-  DCHECK(note_on_fn_);
-  DCHECK(process_fn_);
+  DCHECK(all_notes_off_fn);
+  DCHECK(note_off_fn);
+  DCHECK(note_on_fn);
+  DCHECK(process_fn);
 }
 
 void UnityInstrument::AllNotesOff() { all_notes_off_fn_(); }

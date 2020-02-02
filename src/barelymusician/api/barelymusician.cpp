@@ -29,7 +29,7 @@ BarelyMusician::BarelyMusician(int sample_rate, int num_channels,
 }
 
 void BarelyMusician::Reset() {
-  task_runner_.Add([this]() { clock_.Reset(); });
+  task_runner_.Add([this]() { clock_.SetPosition(0.0); });
 }
 
 void BarelyMusician::Start() {
@@ -43,7 +43,7 @@ void BarelyMusician::Stop() {
 void BarelyMusician::Update() {
   task_runner_.Run();
   if (is_playing_) {
-    clock_.Update(num_frames_);
+    clock_.UpdatePosition(num_frames_);
   }
 }
 

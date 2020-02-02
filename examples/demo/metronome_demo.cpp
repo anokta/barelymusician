@@ -1,11 +1,13 @@
 #include <cctype>
 #include <chrono>
+#include <cmath>
 #include <thread>
 
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/clock.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/instrument/instrument_utils.h"
@@ -17,6 +19,7 @@ namespace {
 
 using ::barelyapi::Clock;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::BasicEnvelopedVoice;
 using ::barelyapi::examples::PaAudioOutput;
@@ -99,28 +102,25 @@ int main(int argc, char* argv[]) {
 
     // Update clock.
     const int num_samples_per_beat = clock.GetNumSamplesPerBeat();
-    int offset_samples = -clock.GetLeftoverSamples();
 
-    const int start_beat = clock.GetBeat();
-    clock.Update(kNumFrames);
-    const int end_beat = clock.GetBeat();
+    const double start_position = clock.GetPosition();
+    clock.UpdatePosition(kNumFrames);
+    const double end_position = clock.GetPosition();
 
     int frame = 0;
-    for (int beat = start_beat; beat <= end_beat; ++beat) {
+    for (double beat = std::ceil(start_position); beat < end_position; ++beat) {
+      const int offset_samples =
+          SamplesFromBeats(beat - start_position, num_samples_per_beat);
       if (frame < offset_samples) {
         metronome.Process(&output[kNumChannels * frame], kNumChannels,
                           offset_samples - frame);
         frame = offset_samples;
       }
-      if (offset_samples >= 0 && offset_samples < kNumFrames) {
-        // Tick.
-        const int current_bar = beat / kNumBeats;
-        const int current_beat = beat % kNumBeats;
-        metronome.Tick(current_beat);
-
-        LOG(INFO) << "Tick " << current_bar << "." << current_beat;
-      }
-      offset_samples += num_samples_per_beat;
+      // Tick.
+      const int current_bar = static_cast<int>(beat) / kNumBeats;
+      const int current_beat = static_cast<int>(beat) % kNumBeats;
+      metronome.Tick(current_beat);
+      LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     }
     if (frame < kNumFrames) {
       metronome.Process(&output[kNumChannels * frame], kNumChannels,

@@ -2,6 +2,8 @@
 #define BARELYMUSICIAN_MUSICIAN_MUSICIAN_H_
 
 #include <algorithm>
+#include <cmath>
+#include <functional>
 #include <utility>
 #include <vector>
 
@@ -51,35 +53,20 @@ class Musician {
 
   void SetNumBeats(int num_beats) { num_beats_ = num_beats; }
 
-  void SetTempo(double tempo) { tempo_ = tempo; }
+  void SetTempo(double tempo) { clock_.SetTempo(tempo); }
 
   void Update(int num_samples) {
-    // TODO: is this efficient?
-    if (clock_.GetTempo() != tempo_) {
-      clock_.SetTempo(tempo_);
+    const double start_position = clock_.GetPosition();
+    clock_.UpdatePosition(num_samples);
+    const double end_position = clock_.GetPosition();
+
+    for (double beat = std::ceil(start_position); beat < end_position; ++beat) {
+      ProcessBeat(static_cast<int>(beat));
     }
 
-    const int start_beat = clock_.GetBeat();
-    const double start_leftover_beats = clock_.GetLeftoverBeats();
-    const int start_leftover_samples = clock_.GetLeftoverSamples();
-    clock_.Update(num_samples);
-    const int end_beat = clock_.GetBeat();
-    const double end_leftover_beats = clock_.GetLeftoverBeats();
-    const int end_leftover_samples = clock_.GetLeftoverSamples();
-
-    const double start_timestamp =
-        static_cast<double>(start_beat) + start_leftover_beats;
-    const double end_timestamp =
-        static_cast<double>(end_beat) + end_leftover_beats;
-    for (int beat = start_beat; beat <= end_beat; ++beat) {
-      if ((beat != start_beat || start_leftover_samples == 0) &&
-          (beat != end_beat || end_leftover_samples > 0)) {
-        ProcessBeat(beat);
-      }
-    }
     for (Ensemble::Performer& performer : ensemble_.performers) {
       performer.messages =
-          performer.score.GetIterator(start_timestamp, end_timestamp);
+          performer.score.GetIterator(start_position, end_position);
     }
   }
 
@@ -160,8 +147,6 @@ class Musician {
   Ensemble ensemble_;
 
   int harmonic_;
-
-  double tempo_;
 
   // Current bar.
   int bar_;

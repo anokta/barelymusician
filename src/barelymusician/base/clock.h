@@ -11,43 +11,35 @@ class Clock {
   // @param sample_rate Sampling rate per second.
   explicit Clock(int sample_rate);
 
-  // Returns the current beat.
-  //
-  // @return Beat.
-  int GetBeat() const;
-
-  // Returns the leftover beats from the current beat.
-  //
-  // @return Leftover beats.
-  double GetLeftoverBeats() const;
-
-  // Returns the leftover samples from the current beat.
-  //
-  // @return Leftover samples.
-  int GetLeftoverSamples() const;
-
   // Returns number of samples per beat.
   //
   // @return Number of samples per beat.
   int GetNumSamplesPerBeat() const;
+
+  // Returns the current position.
+  //
+  // @return Position in beats.
+  double GetPosition() const;
 
   // Returns the tempo.
   //
   // @return Tempo (BPM).
   double GetTempo() const;
 
-  // Resets the clock.
-  void Reset();
+  // Sets the current position.
+  //
+  // @param position Position in beats.
+  void SetPosition(double position);
 
   // Sets the tempo.
   //
   // @param tempo Tempo (BPM).
   void SetTempo(double tempo);
 
-  // Updates the clock.
+  // Updates the current position.
   //
   // @num_samples Number of samples to iterate.
-  void Update(int num_samples);
+  void UpdatePosition(int num_samples);
 
  private:
   // Number of samples per minute.

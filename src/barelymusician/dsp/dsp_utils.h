@@ -3,11 +3,11 @@
 
 namespace barelyapi {
 
-// Returns the corresponding number of beats for the given |samples|.
+// Returns the corresponding number of beats for the given samples.
 //
 // @param samples Number of samples.
 // @param num_samples_per_beat Number of samples per beat.
-// @return Fractional number of beats.
+// @return Number of beats.
 double BeatsFromSamples(int samples, int num_samples_per_beat);
 
 // Converts a value from dB to linear amplitude.
@@ -29,9 +29,9 @@ float DecibelsFromAmplitude(float amplitude);
 // @return Filter coefficient.
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency);
 
-// Returns the corresponding number of samples for the given |beats|.
+// Returns the corresponding number of samples for the given beats.
 //
-// @param beats Fractional number of beats.
+// @param beats Number of beats.
 // @param num_samples_per_beat Number of samples per beat.
 // @return Number of samples.
 int SamplesFromBeats(double beats, int num_samples_per_beat);

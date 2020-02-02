@@ -39,11 +39,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\clock_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\engine\clock_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\instrument_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp" />

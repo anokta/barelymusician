@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "barelymusician/base/clock.h"
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/util/task_runner.h"
 

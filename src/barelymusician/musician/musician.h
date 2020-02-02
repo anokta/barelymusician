@@ -7,9 +7,9 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/base/clock.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
 #include "barelymusician/message/message_data.h"

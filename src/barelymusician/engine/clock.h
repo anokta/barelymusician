@@ -1,9 +1,9 @@
-#ifndef BARELYMUSICIAN_BASE_CLOCK_H_
-#define BARELYMUSICIAN_BASE_CLOCK_H_
+#ifndef BARELYMUSICIAN_ENGINE_CLOCK_H_
+#define BARELYMUSICIAN_ENGINE_CLOCK_H_
 
 namespace barelyapi {
 
-// Audio clock that keeps track of beats.
+// Audio clock that keeps track of position in beats.
 class Clock {
  public:
   // Constructs new |Clock|.
@@ -63,4 +63,4 @@ class Clock {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_BASE_CLOCK_H_
+#endif  // BARELYMUSICIAN_ENGINE_CLOCK_H_

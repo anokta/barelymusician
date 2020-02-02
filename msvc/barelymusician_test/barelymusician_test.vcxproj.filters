@@ -4,9 +4,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{b7bcdf57-5ccb-4800-b4bf-fc96c2699177}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\base">
-      <UniqueIdentifier>{314dc98b-1e28-4422-b5d6-48fa2bb85ea4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\dsp">
       <UniqueIdentifier>{e033ea07-8a55-4037-9658-38539357d2e7}</UniqueIdentifier>
     </Filter>
@@ -24,6 +21,9 @@
     </Filter>
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{195c8e44-b17f-4829-86af-4260514661dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\engine">
+      <UniqueIdentifier>{6119652e-e37c-41f8-a42d-3400018c7fae}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -54,9 +54,6 @@
     <ClCompile Include="..\..\src\barelymusician\message\message_buffer_test.cpp">
       <Filter>Source Files\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\base\clock_test.cpp">
-      <Filter>Source Files\base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils_test.cpp">
       <Filter>Source Files\musician</Filter>
     </ClCompile>
@@ -68,6 +65,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\util\task_runner_test.cpp">
       <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\engine\clock_test.cpp">
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

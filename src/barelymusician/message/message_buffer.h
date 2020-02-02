@@ -8,7 +8,7 @@
 namespace barelyapi {
 
 // Message buffer that receives and dispatches messages according to their
-// timestamps.
+// positions.
 class MessageBuffer {
  public:
   // Buffer iterator.
@@ -19,8 +19,8 @@ class MessageBuffer {
     // Iterator end.
     std::vector<Message>::const_iterator cend;
 
-    // Start timestamp.
-    double timestamp;
+    // Start position.
+    double position;
   };
 
   // Clears the buffer.
@@ -38,9 +38,9 @@ class MessageBuffer {
 
   // Returns iterator within the given range.
   //
-  // @param begin_timestamp Begin timestamp.
-  // @param end_timestamp End timestamp.
-  Iterator GetIterator(double begin_timestamp, double end_timestamp) const;
+  // @param begin_position Start position.
+  // @param end_position End position.
+  Iterator GetIterator(double start_position, double end_position) const;
 
   // Pushes new message into the queue.
   //

@@ -7,13 +7,13 @@
 
 namespace barelyapi {
 
-// Generic message with a timestamp.
+// Generic message with a position timestamp.
 struct Message {
   // Message data.
   std::variant<NoteOnData, NoteOffData> data;
 
-  // Message timestamp.
-  double timestamp;
+  // Message position.
+  double position;
 };
 
 }  // namespace barelyapi

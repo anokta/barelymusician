@@ -8,22 +8,22 @@ namespace barelyapi {
 
 namespace {
 
-// Compares the given two messages with respect to their timestamps.
+// Compares the given two messages with respect to their positions.
 //
 // @param lhs First message.
 // @param rhs Second message.
 // @return True if the first message comes prior to the second message.
 bool CompareMessage(const Message& lhs, const Message& rhs) {
-  return lhs.timestamp < rhs.timestamp;
+  return lhs.position < rhs.position;
 }
 
-// Compares the given message against the given timestamp.
+// Compares the given message against the given position.
 //
 // @param message Message.
-// @param timestamp Timestamp.
-// @return True if the message comes prior to the timestamp.
-bool CompareTimestamp(const Message& message, double timestamp) {
-  return message.timestamp < timestamp;
+// @param position position.
+// @return True if the message comes prior to the position.
+bool ComparePosition(const Message& message, double position) {
+  return message.position < position;
 }
 
 }  // namespace
@@ -36,14 +36,14 @@ void MessageBuffer::Clear(const Iterator& iterator) {
 
 bool MessageBuffer::Empty() const { return messages_.empty(); }
 
-MessageBuffer::Iterator MessageBuffer::GetIterator(double begin_timestamp,
-                                                   double end_timestamp) const {
+MessageBuffer::Iterator MessageBuffer::GetIterator(double start_position,
+                                                   double end_position) const {
   Iterator iterator;
   iterator.cbegin = std::lower_bound(messages_.cbegin(), messages_.cend(),
-                                     begin_timestamp, &CompareTimestamp);
+                                     start_position, &ComparePosition);
   iterator.cend = std::lower_bound(iterator.cbegin, messages_.cend(),
-                                   end_timestamp, &CompareTimestamp);
-  iterator.timestamp = begin_timestamp;
+                                   end_position, &ComparePosition);
+  iterator.position = start_position;
   return iterator;
 }
 

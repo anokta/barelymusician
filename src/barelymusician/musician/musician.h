@@ -77,11 +77,10 @@ class Musician {
     const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
     const auto& messages = performer->messages;
     const int offset_samples =
-        SamplesFromBeats(messages.timestamp, num_samples_per_beat);
+        SamplesFromBeats(messages.position, num_samples_per_beat);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
       const int message_frame =
-          SamplesFromBeats(it->timestamp, num_samples_per_beat) -
-          offset_samples;
+          SamplesFromBeats(it->position, num_samples_per_beat) - offset_samples;
       if (frame < message_frame) {
         performer->instrument->Process(&output[num_channels * frame],
                                        num_channels, message_frame - frame);
@@ -133,11 +132,11 @@ class Musician {
       performer.beat_composer_callback(bar_, beat_, num_beats_, harmonic_,
                                        &temp_notes_);
       for (const Note& note : temp_notes_) {
-        const double timestamp = static_cast<double>(beat) + note.offset_beats;
+        const double position = static_cast<double>(beat) + note.offset_beats;
         performer.score.Push(
-            {NoteOnData{note.index, note.intensity}, timestamp});
+            {NoteOnData{note.index, note.intensity}, position});
         performer.score.Push(
-            {NoteOffData{note.index}, timestamp + note.duration_beats});
+            {NoteOffData{note.index}, position + note.duration_beats});
       }
     }
   }

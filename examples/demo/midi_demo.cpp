@@ -9,8 +9,9 @@
 
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
 #include "barelymusician/message/message_data.h"
@@ -19,16 +20,20 @@
 
 namespace {
 
+using ::barelyapi::Clock;
 using ::barelyapi::Instrument;
 using ::barelyapi::MessageBuffer;
 using ::barelyapi::NoteOffData;
 using ::barelyapi::NoteOnData;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 using ::smf::MidiFile;
+
+using Performer = std::pair<std::unique_ptr<Instrument>, MessageBuffer>;
 
 // System audio settings.
 const int kSampleRate = 48000;
@@ -67,10 +72,9 @@ struct MessageProcessor {
 };
 
 MessageBuffer BuildScore(const smf::MidiEventList& midi_events,
-                         int ticks_per_beat, int samples_per_beat) {
-  const auto get_timestamp = [ticks_per_beat, samples_per_beat](int tick) {
-    return static_cast<double>(samples_per_beat) * static_cast<double>(tick) /
-           static_cast<double>(ticks_per_beat);
+                         int ticks_per_beat) {
+  const auto get_position = [ticks_per_beat](int tick) -> double {
+    return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
 
   MessageBuffer score;
@@ -80,35 +84,37 @@ MessageBuffer BuildScore(const smf::MidiEventList& midi_events,
       const float index = static_cast<float>(midi_event.getKeyNumber());
       const float intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
-      const double timestamp = get_timestamp(midi_event.tick);
-      score.Push({NoteOnData{index, intensity}, timestamp});
+      score.Push({NoteOnData{index, intensity}, get_position(midi_event.tick)});
     } else if (midi_event.isNoteOff()) {
       const float index = static_cast<float>(midi_event.getKeyNumber());
-      const double timestamp = get_timestamp(midi_event.tick);
-      score.Push({NoteOffData{index}, timestamp});
+      score.Push({NoteOffData{index}, get_position(midi_event.tick)});
     }
   }
   return score;
 }
 
-void ProcessInstrument(float* output, int num_channels, int num_frames,
-                       const MessageBuffer::Iterator& notes,
-                       Instrument* instrument) {
+void ProcessPerformer(float* output, int num_channels, int num_frames,
+                      double start_position, double end_position,
+                      int num_samples_per_beat, Performer* performer) {
+  const auto notes =
+      performer->second.GetIterator(start_position, end_position);
+
   int frame = 0;
   // Process notes.
   for (auto it = notes.cbegin; it != notes.cend; ++it) {
-    const int note_frame = static_cast<int>(it->timestamp - notes.timestamp);
+    const int note_frame =
+        SamplesFromBeats(it->position - start_position, num_samples_per_beat);
     if (frame < note_frame) {
-      instrument->Process(&output[num_channels * frame], num_channels,
-                          note_frame - frame);
+      performer->first->Process(&output[num_channels * frame], num_channels,
+                                note_frame - frame);
       frame = note_frame;
     }
-    std::visit(MessageProcessor{instrument}, it->data);
+    std::visit(MessageProcessor{performer->first.get()}, it->data);
   }
   // Process the rest of the buffer.
   if (frame < num_frames) {
-    instrument->Process(&output[num_channels * frame], num_channels,
-                        num_frames - frame);
+    performer->first->Process(&output[num_channels * frame], num_channels,
+                              num_frames - frame);
   }
 }
 
@@ -127,16 +133,13 @@ int main(int argc, char* argv[]) {
   LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  const int samples_per_beat =
-      static_cast<int>(static_cast<double>(kSampleRate) *
-                       barelyapi::kSecondsFromMinutes / kTempo);
+  Clock clock(kSampleRate);
+  clock.SetTempo(kTempo);
 
-  std::vector<std::pair<std::unique_ptr<Instrument>, MessageBuffer>> performers;
-
+  std::vector<Performer> performers;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
-    MessageBuffer score =
-        BuildScore(midi_file[i], ticks_per_quarter, samples_per_beat);
+    MessageBuffer score = BuildScore(midi_file[i], ticks_per_quarter);
     if (score.Empty()) {
       LOG(WARNING) << "Empty track: " << i;
       continue;
@@ -159,19 +162,19 @@ int main(int argc, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  int timestamp = 0;
-  const auto process_callback = [&performers, &temp_buffer,
-                                 &timestamp](float* output) {
-    const double begin_timestamp = static_cast<double>(timestamp);
-    timestamp += kNumFrames;
-    const double end_timestamp = static_cast<double>(timestamp);
+  const auto process_callback = [&clock, &performers,
+                                 &temp_buffer](float* output) {
+    const int num_samples_per_beat = clock.GetNumSamplesPerBeat();
+
+    const double start_position = clock.GetPosition();
+    clock.UpdatePosition(kNumFrames);
+    const double end_position = clock.GetPosition();
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (const auto& performer : performers) {
-      const auto notes =
-          performer.second.GetIterator(begin_timestamp, end_timestamp);
-      ProcessInstrument(temp_buffer.data(), kNumChannels, kNumFrames, notes,
-                        performer.first.get());
+    for (Performer& performer : performers) {
+      ProcessPerformer(temp_buffer.data(), kNumChannels, kNumFrames,
+                       start_position, end_position, num_samples_per_beat,
+                       &performer);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }

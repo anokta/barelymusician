@@ -11,11 +11,6 @@ class Clock {
   // @param sample_rate Sampling rate in Hz.
   explicit Clock(int sample_rate);
 
-  // Returns number of samples per beat.
-  //
-  // @return Number of samples per beat.
-  int GetNumSamplesPerBeat() const;
-
   // Returns the current position.
   //
   // @return Position in beats.

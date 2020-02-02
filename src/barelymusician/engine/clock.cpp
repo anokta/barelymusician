@@ -4,9 +4,33 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
+
+namespace {
+
+// Returns the corresponding number of beats for the given samples.
+//
+// @param samples Number of samples.
+// @param num_samples_per_beat Number of samples per beat.
+// @return Number of beats.
+double BeatsFromSamples(int samples, int num_samples_per_beat) {
+  return (num_samples_per_beat > 0)
+             ? static_cast<double>(samples) /
+                   static_cast<double>(num_samples_per_beat)
+             : 0.0;
+}
+
+// Returns the corresponding number of samples for the given beats.
+//
+// @param beats Number of beats.
+// @param num_samples_per_beat Number of samples per beat.
+// @return Number of samples.
+int SamplesFromBeats(double beats, int num_samples_per_beat) {
+  return static_cast<int>(beats * static_cast<double>(num_samples_per_beat));
+}
+
+}  // namespace
 
 Clock::Clock(int sample_rate)
     : num_samples_per_minute_(static_cast<double>(sample_rate) *
@@ -18,8 +42,6 @@ Clock::Clock(int sample_rate)
       tempo_(0.0) {
   DCHECK_GE(sample_rate, 0);
 }
-
-int Clock::GetNumSamplesPerBeat() const { return num_samples_per_beat_; }
 
 double Clock::GetPosition() const {
   return static_cast<double>(beat_) + leftover_beats_;

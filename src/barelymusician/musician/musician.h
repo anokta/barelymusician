@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
@@ -68,14 +67,14 @@ class Musician {
                Ensemble::Performer* performer) {
     int frame = 0;
     // Process notes.
-    const int num_samples_per_beat = clock_.GetNumSamplesPerBeat();
     const auto& messages =
         performer->score.GetIterator(last_position_, position_);
-    const int offset_samples =
-        SamplesFromBeats(last_position_, num_samples_per_beat);
+    const double frames_per_beat =
+        static_cast<double>(num_frames) / (position_ - last_position_);
+
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
       const int message_frame =
-          SamplesFromBeats(it->position, num_samples_per_beat) - offset_samples;
+          static_cast<int>(frames_per_beat * (it->position - last_position_));
       if (frame < message_frame) {
         performer->instrument->Process(&output[num_channels * frame],
                                        num_channels, message_frame - frame);

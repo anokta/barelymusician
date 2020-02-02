@@ -16,13 +16,9 @@ constexpr double kTempo = 120.0;
 TEST(ClockTest, SetTempo) {
   Clock clock(kSampleRate);
   EXPECT_DOUBLE_EQ(clock.GetTempo(), 0.0);
-  EXPECT_EQ(clock.GetNumSamplesPerBeat(), 0);
 
   clock.SetTempo(kTempo);
   EXPECT_DOUBLE_EQ(clock.GetTempo(), kTempo);
-  EXPECT_EQ(clock.GetNumSamplesPerBeat(),
-            static_cast<int>(static_cast<double>(kSampleRate) *
-                             kSecondsFromMinutes / kTempo));
 }
 
 // Tests that the clock sets its current position as expected.

@@ -34,31 +34,6 @@ TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_FLOAT_EQ(DecibelsFromAmplitude(0.0f), kMinDecibels);
 }
 
-// Tests that converting number of beats from/to samples returns expected
-// results.
-TEST(DspUtilsTest, BeatsSamplesConversion) {
-  const int kNumValues = 6;
-  const int kNumSamplesPerBeat = 10;
-  const double kBeats[kNumValues] = {0.0, 0.2, 0.5, 1.0, 8.0, 12.1};
-  const int kSamples[kNumValues] = {0, 2, 5, 10, 80, 121};
-
-  for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_DOUBLE_EQ(BeatsFromSamples(kSamples[i], kNumSamplesPerBeat),
-                     kBeats[i]);
-    EXPECT_EQ(SamplesFromBeats(kBeats[i], kNumSamplesPerBeat), kSamples[i]);
-
-    // Verify that the back and forth conversion do not mutate the value.
-    EXPECT_DOUBLE_EQ(
-        BeatsFromSamples(SamplesFromBeats(kBeats[i], kNumSamplesPerBeat),
-                         kNumSamplesPerBeat),
-        kBeats[i]);
-    EXPECT_EQ(
-        SamplesFromBeats(BeatsFromSamples(kSamples[i], kNumSamplesPerBeat),
-                         kNumSamplesPerBeat),
-        kSamples[i]);
-  }
-}
-
 // Tests that converting arbitrary note indices returns expected frequencies.
 TEST(DspUtilsTest, FrequencyFromNoteIndex) {
   const int kNumIndices = 4;

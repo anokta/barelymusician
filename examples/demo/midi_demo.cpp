@@ -10,7 +10,6 @@
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/message/message_buffer.h"
@@ -26,7 +25,6 @@ using ::barelyapi::MessageBuffer;
 using ::barelyapi::NoteOffData;
 using ::barelyapi::NoteOnData;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
@@ -95,15 +93,18 @@ MessageBuffer BuildScore(const smf::MidiEventList& midi_events,
 
 void ProcessPerformer(float* output, int num_channels, int num_frames,
                       double start_position, double end_position,
-                      int num_samples_per_beat, Performer* performer) {
+                      Performer* performer) {
   const auto notes =
       performer->second.GetIterator(start_position, end_position);
+
+  const double frames_per_beat =
+      static_cast<double>(num_frames) / (end_position - start_position);
 
   int frame = 0;
   // Process notes.
   for (auto it = notes.cbegin; it != notes.cend; ++it) {
     const int note_frame =
-        SamplesFromBeats(it->position - start_position, num_samples_per_beat);
+        static_cast<int>(frames_per_beat * (it->position - start_position));
     if (frame < note_frame) {
       performer->first->Process(&output[num_channels * frame], num_channels,
                                 note_frame - frame);
@@ -164,8 +165,6 @@ int main(int argc, char* argv[]) {
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   const auto process_callback = [&clock, &performers,
                                  &temp_buffer](float* output) {
-    const int num_samples_per_beat = clock.GetNumSamplesPerBeat();
-
     const double start_position = clock.GetPosition();
     clock.UpdatePosition(kNumFrames);
     const double end_position = clock.GetPosition();
@@ -173,8 +172,7 @@ int main(int argc, char* argv[]) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (Performer& performer : performers) {
       ProcessPerformer(temp_buffer.data(), kNumChannels, kNumFrames,
-                       start_position, end_position, num_samples_per_beat,
-                       &performer);
+                       start_position, end_position, &performer);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }

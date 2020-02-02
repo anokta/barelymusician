@@ -18,7 +18,6 @@ namespace {
 using ::barelyapi::Clock;
 using ::barelyapi::FrequencyFromNoteIndex;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::SamplesFromBeats;
 using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::BasicEnvelopedVoice;
 using ::barelyapi::examples::PaAudioOutput;
@@ -93,20 +92,21 @@ int main(int argc, char* argv[]) {
     task_runner.Run();
 
     // Update clock.
-    const int num_samples_per_beat = clock.GetNumSamplesPerBeat();
-
     const double start_position = clock.GetPosition();
     clock.UpdatePosition(kNumFrames);
     const double end_position = clock.GetPosition();
 
+    const double frames_per_beat =
+        static_cast<double>(kNumFrames) / (end_position - start_position);
+
     int frame = 0;
     for (double beat = std::ceil(start_position); beat < end_position; ++beat) {
-      const int offset_samples =
-          SamplesFromBeats(beat - start_position, num_samples_per_beat);
-      if (frame < offset_samples) {
+      const int beat_frame =
+          static_cast<int>(frames_per_beat * (beat - start_position));
+      if (frame < beat_frame) {
         metronome.Process(&output[kNumChannels * frame], kNumChannels,
-                          offset_samples - frame);
-        frame = offset_samples;
+                          beat_frame - frame);
+        frame = beat_frame;
       }
       // Tick.
       const int current_bar = static_cast<int>(beat) / kNumBeats;

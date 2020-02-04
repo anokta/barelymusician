@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_BUFFER_H_
-#define BARELYMUSICIAN_ENGINE_MESSAGE_BUFFER_H_
+#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_
+#define BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_
 
 #include <vector>
 
@@ -7,11 +7,11 @@
 
 namespace barelyapi {
 
-// Message buffer that receives and dispatches messages according to their
+// Message queue that receives and dispatches messages according to their
 // positions.
-class MessageBuffer {
+class MessageQueue {
  public:
-  // Buffer iterator.
+  // Message iterator.
   struct Iterator {
     // Iterator begin.
     std::vector<Message>::const_iterator cbegin;
@@ -20,15 +20,15 @@ class MessageBuffer {
     std::vector<Message>::const_iterator cend;
   };
 
-  // Clears the buffer.
+  // Clears the queue.
   void Clear();
 
-  // Clears the buffer within the given range.
+  // Clears the queue within the given range.
   //
-  // @param iterator Iterator range to clear the buffer.
+  // @param iterator Iterator range to clear the queue.
   void Clear(const Iterator& iterator);
 
-  // Returns whether the buffer is empty or not.
+  // Returns whether the queue is empty or not.
   //
   // @return True if empty.
   bool Empty() const;
@@ -45,10 +45,10 @@ class MessageBuffer {
   void Push(const Message& message);
 
  private:
-  // Ordered message queue.
+  // Ordered message list.
   std::vector<Message> messages_;
 };
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_BUFFER_H_
+#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_QUEUE_H_

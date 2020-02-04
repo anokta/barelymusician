@@ -1,4 +1,4 @@
-#include "barelymusician/engine/message_buffer.h"
+#include "barelymusician/engine/message_queue.h"
 
 #include <algorithm>
 
@@ -28,16 +28,16 @@ bool ComparePosition(const Message& message, double position) {
 
 }  // namespace
 
-void MessageBuffer::Clear() { messages_.clear(); }
+void MessageQueue::Clear() { messages_.clear(); }
 
-void MessageBuffer::Clear(const Iterator& iterator) {
+void MessageQueue::Clear(const Iterator& iterator) {
   messages_.erase(iterator.cbegin, iterator.cend);
 }
 
-bool MessageBuffer::Empty() const { return messages_.empty(); }
+bool MessageQueue::Empty() const { return messages_.empty(); }
 
-MessageBuffer::Iterator MessageBuffer::GetIterator(double start_position,
-                                                   double end_position) const {
+MessageQueue::Iterator MessageQueue::GetIterator(double start_position,
+                                                 double end_position) const {
   Iterator iterator;
   iterator.cbegin = std::lower_bound(messages_.cbegin(), messages_.cend(),
                                      start_position, &ComparePosition);
@@ -46,7 +46,7 @@ MessageBuffer::Iterator MessageBuffer::GetIterator(double start_position,
   return iterator;
 }
 
-void MessageBuffer::Push(const Message& message) {
+void MessageQueue::Push(const Message& message) {
   const auto it = std::upper_bound(messages_.cbegin(), messages_.cend(),
                                    message, &CompareMessage);
   messages_.insert(it, message);

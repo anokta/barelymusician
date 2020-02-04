@@ -60,7 +60,7 @@
     <ClCompile Include="..\..\src\barelymusician\engine\performer_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\message_buffer_test.cpp">
+    <ClCompile Include="..\..\src\barelymusician\engine\message_queue_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>

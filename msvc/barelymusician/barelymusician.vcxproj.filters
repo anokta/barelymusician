@@ -129,7 +129,7 @@
     <ClInclude Include="..\..\src\barelymusician\engine\message.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\engine\message_buffer.h">
+    <ClInclude Include="..\..\src\barelymusician\engine\message_queue.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
@@ -170,7 +170,7 @@
     <ClCompile Include="..\..\src\barelymusician\engine\performer.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\message_buffer.cpp">
+    <ClCompile Include="..\..\src\barelymusician\engine\message_queue.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>

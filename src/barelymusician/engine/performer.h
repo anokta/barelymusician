@@ -5,7 +5,7 @@
 #include <memory>
 #include <unordered_set>
 
-#include "barelymusician/engine/message_buffer.h"
+#include "barelymusician/engine/message_queue.h"
 #include "barelymusician/instrument/instrument.h"
 
 namespace barelyapi {
@@ -76,7 +76,7 @@ class Performer {
   std::unique_ptr<Instrument> instrument_;
 
   // Messages to perform.
-  MessageBuffer messages_;
+  MessageQueue messages_;
 
   // Note off callback.
   NoteOffCallback note_off_callback_;

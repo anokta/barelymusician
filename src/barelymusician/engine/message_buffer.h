@@ -1,9 +1,9 @@
-#ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_BUFFER_H_
-#define BARELYMUSICIAN_MESSAGE_MESSAGE_BUFFER_H_
+#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_BUFFER_H_
+#define BARELYMUSICIAN_ENGINE_MESSAGE_BUFFER_H_
 
 #include <vector>
 
-#include "barelymusician/message/message.h"
+#include "barelymusician/engine/message.h"
 
 namespace barelyapi {
 
@@ -51,4 +51,4 @@ class MessageBuffer {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_MESSAGE_MESSAGE_BUFFER_H_
+#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_BUFFER_H_

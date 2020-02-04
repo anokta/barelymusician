@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_MESSAGE_MESSAGE_H_
-#define BARELYMUSICIAN_MESSAGE_MESSAGE_H_
+#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_H_
+#define BARELYMUSICIAN_ENGINE_MESSAGE_H_
 
 #include <variant>
 
@@ -39,4 +39,4 @@ MessageVisitor(MessageDataTypes...)->MessageVisitor<MessageDataTypes...>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_MESSAGE_MESSAGE_H_
+#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_H_

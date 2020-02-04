@@ -1,4 +1,4 @@
-#include "barelymusician/message/message_buffer.h"
+#include "barelymusician/engine/message_buffer.h"
 
 #include <algorithm>
 

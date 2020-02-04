@@ -66,22 +66,6 @@ class Musician {
   const Ensemble& ensemble() const { return ensemble_; }
 
  private:
-  // Instrument message processor.
-  struct MessageProcessor {
-    // Processes |NoteOffData|.
-    void operator()(const NoteOffData& note_off_data) {
-      instrument->NoteOff(note_off_data.index);
-    }
-
-    // Processes |NoteOnData|.
-    void operator()(const NoteOnData& note_on_data) {
-      instrument->NoteOn(note_on_data.index, note_on_data.intensity);
-    }
-
-    // Instrument to process.
-    Instrument* instrument;
-  };
-
   void ProcessBeat(int beat) {
     // Update transport.
     bar_ = beat / num_beats_;

@@ -3,7 +3,7 @@
 #include <variant>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/message/message.h"
+#include "barelymusician/engine/message.h"
 
 namespace barelyapi {
 

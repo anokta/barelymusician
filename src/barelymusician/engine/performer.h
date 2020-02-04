@@ -5,8 +5,8 @@
 #include <memory>
 #include <unordered_set>
 
+#include "barelymusician/engine/message_buffer.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message_buffer.h"
 
 namespace barelyapi {
 

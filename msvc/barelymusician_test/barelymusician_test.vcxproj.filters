@@ -63,6 +63,9 @@
     <ClCompile Include="..\..\src\barelymusician\engine\clock_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\engine\performer_test.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

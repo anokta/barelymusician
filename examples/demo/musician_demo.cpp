@@ -11,6 +11,7 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/clock.h"
+#include "barelymusician/engine/performer.h"
 #include "barelymusician/instrument/instrument.h"
 #include "barelymusician/musician/musician.h"
 #include "barelymusician/musician/note.h"
@@ -28,6 +29,7 @@ using ::barelyapi::Instrument;
 using ::barelyapi::Musician;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Performer;
 using ::barelyapi::Random;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -188,10 +190,10 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
                 std::placeholders::_5);
 
-  ensemble.performers.emplace_back(chords_instrument.get(),
-                                   chords_beat_composer_callback);
-  ensemble.performers.emplace_back(chords_2_instrument.get(),
-                                   chords_beat_composer_callback);
+  ensemble.members.push_back(
+      {Performer(std::move(chords_instrument)), chords_beat_composer_callback});
+  ensemble.members.push_back({Performer(std::move(chords_2_instrument)),
+                              chords_beat_composer_callback});
 
   auto line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.125f, 0.0025f, 0.125f);
@@ -207,10 +209,10 @@ int main(int argc, char* argv[]) {
                 std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4, std::placeholders::_5);
 
-  ensemble.performers.emplace_back(line_instrument.get(),
-                                   line_beat_composer_callback);
-  ensemble.performers.emplace_back(line_2_instrument.get(),
-                                   line_2_beat_composer_callback);
+  ensemble.members.push_back(
+      {Performer(std::move(line_instrument)), line_beat_composer_callback});
+  ensemble.members.push_back(
+      {Performer(std::move(line_2_instrument)), line_2_beat_composer_callback});
 
   // Drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
@@ -234,8 +236,8 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_5);
 
-  ensemble.performers.emplace_back(drumkit_instrument.get(),
-                                   drumkit_beat_composer_callback);
+  ensemble.members.push_back({Performer(std::move(drumkit_instrument)),
+                              drumkit_beat_composer_callback});
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
@@ -244,7 +246,7 @@ int main(int argc, char* argv[]) {
     musician.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (auto& it : ensemble.performers) {
+    for (auto& it : ensemble.members) {
       musician.Process(temp_buffer.data(), kNumChannels, kNumFrames, &it);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());

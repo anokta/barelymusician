@@ -126,9 +126,6 @@
     <ClInclude Include="..\..\src\barelymusician\musician\musician.h">
       <Filter>Header Files\musician</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\message\message_data.h">
-      <Filter>Header Files\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\util\random.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -136,6 +133,9 @@
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\engine\clock.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\engine\performer.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
@@ -174,6 +174,9 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\clock.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\engine\performer.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>

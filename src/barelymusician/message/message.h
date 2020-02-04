@@ -3,9 +3,22 @@
 
 #include <variant>
 
-#include "barelymusician/message/message_data.h"
-
 namespace barelyapi {
+
+// Note on data.
+struct NoteOnData {
+  // Note index.
+  float index;
+
+  // Note intensity.
+  float intensity;
+};
+
+// Note off data.
+struct NoteOffData {
+  // Note index.
+  float index;
+};
 
 // Generic message with a position timestamp.
 struct Message {
@@ -15,6 +28,14 @@ struct Message {
   // Message position.
   double position;
 };
+
+// Message visitor.
+template <class... MessageDataTypes>
+struct MessageVisitor : MessageDataTypes... {
+  using MessageDataTypes::operator()...;
+};
+template <class... MessageDataTypes>
+MessageVisitor(MessageDataTypes...)->MessageVisitor<MessageDataTypes...>;
 
 }  // namespace barelyapi
 

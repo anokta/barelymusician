@@ -9,9 +9,8 @@
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/clock.h"
+#include "barelymusician/engine/performer.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/message/message_buffer.h"
-#include "barelymusician/message/message_data.h"
 #include "barelymusician/musician/note.h"
 
 namespace barelyapi {
@@ -31,19 +30,13 @@ class Musician {
     // Bar composer callback.
     BarComposerCallback bar_composer_callback;
 
-    struct Performer {
-      Performer(Instrument* instrument,
-                BeatComposerCallback beat_composer_callback)
-          : instrument(instrument),
-            beat_composer_callback(beat_composer_callback) {}
-
-      Instrument* instrument;
+    struct Member {
+      Performer performer;
       BeatComposerCallback beat_composer_callback;
-      MessageBuffer score;
     };
 
-    // List of performers.
-    std::vector<Performer> performers;
+    // List of ensemble members.
+    std::vector<Member> members;
   };
 
   explicit Musician(int sample_rate)
@@ -64,30 +57,9 @@ class Musician {
   }
 
   void Process(float* output, int num_channels, int num_frames,
-               Ensemble::Performer* performer) {
-    int frame = 0;
-    // Process notes.
-    const auto& messages =
-        performer->score.GetIterator(last_position_, position_);
-    const double frames_per_beat =
-        static_cast<double>(num_frames) / (position_ - last_position_);
-
-    for (auto it = messages.cbegin; it != messages.cend; ++it) {
-      const int message_frame =
-          static_cast<int>(frames_per_beat * (it->position - last_position_));
-      if (frame < message_frame) {
-        performer->instrument->Process(&output[num_channels * frame],
-                                       num_channels, message_frame - frame);
-        frame = message_frame;
-      }
-      std::visit(MessageProcessor{performer->instrument}, it->data);
-    }
-    performer->score.Clear(messages);
-    // Process the rest of the buffer.
-    if (frame < num_frames) {
-      performer->instrument->Process(&output[num_channels * frame],
-                                     num_channels, num_frames - frame);
-    }
+               Ensemble::Member* member) {
+    member->performer.Process(last_position_, position_, output, num_channels,
+                              num_frames);
   }
 
   Ensemble& ensemble() { return ensemble_; }
@@ -119,18 +91,17 @@ class Musician {
       // Compose next bar.
       harmonic_ = ensemble_.bar_composer_callback(bar_, num_beats_);
     }
-    // Update performers.
-    for (Ensemble::Performer& performer : ensemble_.performers) {
+    // Update members.
+    for (auto& member : ensemble_.members) {
       // Compose next beat notes.
       temp_notes_.clear();
-      performer.beat_composer_callback(bar_, beat_, num_beats_, harmonic_,
-                                       &temp_notes_);
+      member.beat_composer_callback(bar_, beat_, num_beats_, harmonic_,
+                                    &temp_notes_);
       for (const Note& note : temp_notes_) {
         const double position = static_cast<double>(beat) + note.offset_beats;
-        performer.score.Push(
-            {NoteOnData{note.index, note.intensity}, position});
-        performer.score.Push(
-            {NoteOffData{note.index}, position + note.duration_beats});
+        member.performer.ScheduleNoteOn(note.index, note.intensity, position);
+        member.performer.ScheduleNoteOff(note.index,
+                                         position + note.duration_beats);
       }
     }
   }

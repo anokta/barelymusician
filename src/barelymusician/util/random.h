@@ -12,7 +12,14 @@ class Random {
   //
   // @param mean Distrubition mean value.
   // @param variance Distrubition variance.
-  // @return Random real number.
+  // @return Random double number.
+  static double Normal(double mean, double variance);
+
+  // Draws a number with normal distribution.
+  //
+  // @param mean Distrubition mean value.
+  // @param variance Distrubition variance.
+  // @return Random float number.
   static float Normal(float mean, float variance);
 
   // Resets the random number generator with a new seed.
@@ -20,16 +27,18 @@ class Random {
   // @param seed Seed value to reset the generator with.
   static void SetSeed(int seed);
 
-  // Draws a number with continuous uniform distribution in range [0, 1).
+  // Draws a number with continuous uniform distribution in range [min, max).
   //
-  // @return Random real number.
-  static float Uniform();
+  // @param min Minimum value (inclusive).
+  // @param max Maximum value (exclusive).
+  // @return Random double number.
+  static double Uniform(double min, double max);
 
   // Draws a number with continuous uniform distribution in range [min, max).
   //
   // @param min Minimum value (inclusive).
   // @param max Maximum value (exclusive).
-  // @return Random real number.
+  // @return Random float number.
   static float Uniform(float min, float max);
 
   // Draws a number with discrete uniform distribution in range [min, max].
@@ -42,10 +51,16 @@ class Random {
   // Random number generator engine.
   static std::default_random_engine generator_;
 
-  // Normal distribution.
-  static std::normal_distribution<float> normal_distribution_;
+  // Normal double distribution.
+  static std::normal_distribution<double> normal_double_distribution_;
 
-  // Uniform floating-point distribution.
+  // Normal float distribution.
+  static std::normal_distribution<float> normal_float_distribution_;
+
+  // Uniform double distribution.
+  static std::uniform_real_distribution<double> uniform_double_distribution_;
+
+  // Uniform float distribution.
   static std::uniform_real_distribution<float> uniform_float_distribution_;
 
   // Uniform integer distribution.

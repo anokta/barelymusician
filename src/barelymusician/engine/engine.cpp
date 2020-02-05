@@ -36,6 +36,7 @@ int Engine::Create(std::unique_ptr<Instrument> instrument) {
 void Engine::Destroy(int performer_id) { performers_.erase(performer_id); }
 
 double Engine::GetPosition() const { return current_position_; }
+
 double Engine::GetTempo() const { return clock_.GetTempo(); }
 
 bool Engine::IsPlaying() const { return is_playing_; }

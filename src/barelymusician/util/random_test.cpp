@@ -13,20 +13,22 @@ namespace {
 TEST(RandomTest, SetSeed) {
   const int kSeed = 1;
   const int kNumValues = 10;
+  const float kMean = -0.5f;
+  const float kVariance = 10.0f;
 
   // Set the seed.
   Random::SetSeed(kSeed);
   // Generate some random values.
   std::vector<float> values(kNumValues);
   for (int i = 0; i < kNumValues; ++i) {
-    values[i] = Random::Uniform();
+    values[i] = Random::Normal(kMean, kVariance);
   }
+
   // Reset the seed with the same value.
   Random::SetSeed(kSeed);
-
   // Validate that the same numbers are generated for the next |kNumValues|.
   for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_FLOAT_EQ(Random::Uniform(), values[i]);
+    EXPECT_FLOAT_EQ(Random::Normal(kMean, kVariance), values[i]);
   }
 }
 

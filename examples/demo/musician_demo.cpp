@@ -268,21 +268,29 @@ int main(int argc, char* argv[]) {
         task_runner.Add([&]() {
           if (musician.IsPlaying()) {
             musician.Stop();
+            LOG(INFO) << "Stopped playback";
           } else {
             musician.Start();
+            LOG(INFO) << "Started playback";
           }
         });
         break;
       case '1':
         task_runner.Add([&]() {
-          musician.SetTempo(Random::Uniform(0.5f, 0.75f) * musician.GetTempo());
+          musician.SetTempo(Random::Uniform(0.5, 0.75) * musician.GetTempo());
           LOG(INFO) << "Tempo changed to " << musician.GetTempo();
         });
         break;
       case '2':
         task_runner.Add([&]() {
-          musician.SetTempo(Random::Uniform(1.5f, 2.0f) * musician.GetTempo());
+          musician.SetTempo(Random::Uniform(1.5, 2.0) * musician.GetTempo());
           LOG(INFO) << "Tempo changed to " << musician.GetTempo();
+        });
+        break;
+      case 'R':
+        task_runner.Add([&]() {
+          musician.SetTempo(kTempo);
+          LOG(INFO) << "Tempo reset to " << musician.GetTempo();
         });
         break;
     }

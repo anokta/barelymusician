@@ -40,13 +40,13 @@ class Performer {
 
   // Processes the next output buffer for the given interval.
   //
-  // @param start_position Start position to perform.
-  // @param end_position End position to perform.
   // @param output Pointer to the output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  void Process(double start_position, double end_position, float* output,
-               int num_channels, int num_frames);
+  // @param start_position Start position to perform.
+  // @param end_position End position to perform.
+  void Process(float* output, int num_channels, int num_frames,
+               double start_position, double end_position);
 
   // Schedules note off to be performed.
   //

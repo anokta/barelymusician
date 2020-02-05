@@ -35,36 +35,38 @@ void Performer::NoteOn(float index, float intensity) {
   }
 }
 
-void Performer::Process(double start_position, double end_position,
-                        float* output, int num_channels, int num_frames) {
+void Performer::Process(float* output, int num_channels, int num_frames,
+                        double start_position, double end_position) {
   DCHECK(output);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
 
   int frame = 0;
   // Process mmessages.
-  const auto messages = messages_.GetIterator(start_position, end_position);
-  const double frames_per_beat =
-      static_cast<double>(num_frames) / (end_position - start_position);
-  for (auto it = messages.cbegin; it != messages.cend; ++it) {
-    const int message_frame =
-        static_cast<int>(frames_per_beat * (it->position - start_position));
-    if (frame < message_frame) {
-      instrument_->Process(&output[num_channels * frame], num_channels,
-                           message_frame - frame);
-      frame = message_frame;
+  if (start_position < end_position) {
+    const auto messages = messages_.GetIterator(start_position, end_position);
+    const double frames_per_beat =
+        static_cast<double>(num_frames) / (end_position - start_position);
+    for (auto it = messages.cbegin; it != messages.cend; ++it) {
+      const int message_frame =
+          static_cast<int>(frames_per_beat * (it->position - start_position));
+      if (frame < message_frame) {
+        instrument_->Process(&output[num_channels * frame], num_channels,
+                             message_frame - frame);
+        frame = message_frame;
+      }
+      std::visit(MessageVisitor{[&](const NoteOffData& data) {
+                                  NoteOff(data.index);
+                                  scheduled_note_indices_.erase(data.index);
+                                },
+                                [&](const NoteOnData& data) {
+                                  NoteOn(data.index, data.intensity);
+                                  scheduled_note_indices_.insert(data.index);
+                                }},
+                 it->data);
     }
-    std::visit(MessageVisitor{[&](const NoteOffData& data) {
-                                NoteOff(data.index);
-                                scheduled_note_indices_.erase(data.index);
-                              },
-                              [&](const NoteOnData& data) {
-                                NoteOn(data.index, data.intensity);
-                                scheduled_note_indices_.insert(data.index);
-                              }},
-               it->data);
+    messages_.Clear(messages);
   }
-  messages_.Clear(messages);
   // Process the rest of the buffer.
   if (frame < num_frames) {
     instrument_->Process(&output[num_channels * frame], num_channels,

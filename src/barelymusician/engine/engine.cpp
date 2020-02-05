@@ -72,8 +72,8 @@ void Engine::Process(int performer_id, float* output, int num_channels,
     LOG(WARNING) << "Invalid performer id: " << performer_id;
     return;
   }
-  performer->Process(previous_position_, current_position_, output,
-                     num_channels, num_frames);
+  performer->Process(output, num_channels, num_frames, previous_position_,
+                     current_position_);
 }
 
 void Engine::ScheduleNoteOff(int performer_id, float index, double position) {

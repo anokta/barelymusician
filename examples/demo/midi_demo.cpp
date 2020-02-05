@@ -129,8 +129,8 @@ int main(int argc, char* argv[]) {
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (Performer& performer : performers) {
-      performer.Process(start_position, end_position, temp_buffer.data(),
-                        kNumChannels, kNumFrames);
+      performer.Process(temp_buffer.data(), kNumChannels, kNumFrames,
+                        start_position, end_position);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }

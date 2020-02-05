@@ -45,6 +45,14 @@ class Musician {
     return performer_id;
   }
 
+  void NoteOff(int id, float index) {
+    engine_.NoteOff(id, index);
+  }
+
+  void NoteOn(int id, float index) {
+    engine_.NoteOn(id, index, 1.0f);
+  }
+
   void SetBarComposerCallback(BarComposerCallback bar_composer_callback) {
     bar_composer_callback_ = bar_composer_callback;
   }
@@ -55,6 +63,8 @@ class Musician {
                int num_frames) {
     engine_.Process(performer_id, output, num_channels, num_frames);
   }
+
+  double GetPosition() const { return engine_.GetPosition(); }
 
   double GetTempo() const { return engine_.GetTempo(); }
 

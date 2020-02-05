@@ -11,7 +11,10 @@ Engine::Engine(int sample_rate)
       is_playing_(false),
       current_position_(0.0),
       previous_position_(0.0),
-      id_counter_(0) {
+      id_counter_(0),
+      beat_callback_(nullptr),
+      note_off_callback_(nullptr),
+      note_on_callback_(nullptr) {
   DCHECK_GE(sample_rate, 0);
 }
 

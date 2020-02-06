@@ -11,6 +11,8 @@
 
 namespace barelyapi {
 
+// Core sequencing engine that manages instrument performers.
+// @note This class is *not* thread-safe.
 class Engine {
  public:
   // Beat callback signature.
@@ -135,13 +137,13 @@ class Engine {
   // Audio clock.
   Clock clock_;
 
-  // Denotes whether the clock is currently playing.
+  // Denotes whether the playback is currently playing.
   bool is_playing_;
 
-  // Current clock position.
+  // Current playback position.
   double current_position_;
 
-  // Previous clock position.
+  // Previous playback position.
   double previous_position_;
 
   // Counter to generate unique performer ids.

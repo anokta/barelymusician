@@ -10,8 +10,8 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/engine/engine.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/musician/musician.h"
 #include "barelymusician/musician/note.h"
 #include "barelymusician/musician/note_utils.h"
 #include "barelymusician/util/random.h"
@@ -23,8 +23,8 @@
 
 namespace {
 
+using ::barelyapi::Engine;
 using ::barelyapi::Instrument;
-using ::barelyapi::Musician;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
@@ -35,6 +35,10 @@ using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WavFile;
 using ::barelyapi::examples::WinConsoleInput;
+
+// Beat composer callback signature.
+using BeatComposerCallback = std::function<void(
+    int bar, int beat, int num_beats, int harmonic, std::vector<Note>* notes)>;
 
 // System audio settings.
 const int kSampleRate = 48000;
@@ -163,25 +167,64 @@ int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
-  TaskRunner task_runner(kNumInstrumentVoices);
+  TaskRunner task_runner(kNumMaxTasks);
 
-  Musician musician(kSampleRate);
-  musician.SetNumBeats(kNumBeats);
-  musician.SetTempo(kTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
   const std::vector<float> scale(std::cbegin(barelyapi::kMajorScale),
                                  std::cend(barelyapi::kMajorScale));
 
-  std::vector<int> performer_ids;
+  const auto bar_composer_callback = [&progression](int bar) -> int {
+    return progression[bar % progression.size()];
+  };
 
-  // Ensemble.
-  musician.SetBarComposerCallback(
-      [&progression](int bar, [[maybe_unused]] int num_beats) -> int {
-        return progression[bar % progression.size()];
-      });
+  std::unordered_map<int, BeatComposerCallback> performers;
 
-  // Synth instruments.
+  // Beat callback.
+  int harmonic = 0;
+  std::vector<Note> temp_notes;
+  const auto beat_callback = [&](int beat) {
+    // Update transport.
+    const int current_bar = beat / kNumBeats;
+    const int current_beat = beat % kNumBeats;
+
+    if (current_beat == 0) {
+      // Compose next bar.
+      harmonic = bar_composer_callback(current_bar);
+    }
+    // Update members.
+    for (auto& [id, callback] : performers) {
+      // Compose next beat notes.
+      temp_notes.clear();
+      if (callback != nullptr) {
+        callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
+      }
+      for (const Note& note : temp_notes) {
+        const double position = static_cast<double>(beat) + note.offset_beats;
+        engine.ScheduleNoteOn(id, note.index, note.intensity, position);
+        engine.ScheduleNoteOff(id, note.index, position + note.duration_beats);
+      }
+    }
+  };
+  engine.SetBeatCallback(beat_callback);
+
+  // Note on callback.
+  const auto note_on_callback = [](int performer_id, float index,
+                                   float intensity) {
+    LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << index << ", "
+              << intensity << ")";
+  };
+  engine.SetNoteOnCallback(note_on_callback);
+
+  // Note off callback.
+  const auto note_off_callback = [](int performer_id, float index) {
+    LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << index << ")";
+  };
+  engine.SetNoteOffCallback(note_off_callback);
+
+  // Add synth instruments.
   auto chords_instrument =
       BuildSynthInstrument(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
   auto chords_2_instrument =
@@ -191,10 +234,10 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
                 std::placeholders::_5);
 
-  performer_ids.push_back(musician.AddPerformer(std::move(chords_instrument),
-                                                chords_beat_composer_callback));
-  performer_ids.push_back(musician.AddPerformer(std::move(chords_2_instrument),
-                                                chords_beat_composer_callback));
+  performers.emplace(engine.Create(std::move(chords_instrument)),
+                     chords_beat_composer_callback);
+  performers.emplace(engine.Create(std::move(chords_2_instrument)),
+                     chords_beat_composer_callback);
 
   auto line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
@@ -210,12 +253,12 @@ int main(int argc, char* argv[]) {
                 std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4, std::placeholders::_5);
 
-  performer_ids.push_back(musician.AddPerformer(std::move(line_instrument),
-                                                line_beat_composer_callback));
-  performer_ids.push_back(musician.AddPerformer(std::move(line_2_instrument),
-                                                line_2_beat_composer_callback));
+  performers.emplace(engine.Create(std::move(line_instrument)),
+                     line_beat_composer_callback);
+  performers.emplace(engine.Create(std::move(line_2_instrument)),
+                     line_2_beat_composer_callback);
 
-  // Drumkit instrument.
+  // Add drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
   drumkit_map[barelyapi::kNoteIndexKick] = "data/audio/drums/basic_kick.wav";
   drumkit_map[barelyapi::kNoteIndexSnare] = "data/audio/drums/basic_snare.wav";
@@ -237,18 +280,18 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_5);
 
-  performer_ids.push_back(musician.AddPerformer(
-      std::move(drumkit_instrument), drumkit_beat_composer_callback));
+  performers.emplace(engine.Create(std::move(drumkit_instrument)),
+                     drumkit_beat_composer_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   const auto process_callback = [&](float* output) {
     task_runner.Run();
-    musician.Update(kNumFrames);
+    engine.Update(kNumFrames);
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (const int id : performer_ids) {
-      musician.Process(id, temp_buffer.data(), kNumChannels, kNumFrames);
+    for (const auto& [id, callback] : performers) {
+      engine.Process(id, temp_buffer.data(), kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
@@ -266,31 +309,33 @@ int main(int argc, char* argv[]) {
     switch (std::toupper(key)) {
       case ' ':
         task_runner.Add([&]() {
-          if (musician.IsPlaying()) {
-            musician.Stop();
+          if (engine.IsPlaying()) {
+            engine.Stop();
             LOG(INFO) << "Stopped playback";
           } else {
-            musician.Start();
+            engine.Start();
             LOG(INFO) << "Started playback";
           }
         });
         break;
       case '1':
         task_runner.Add([&]() {
-          musician.SetTempo(Random::Uniform(0.5, 0.75) * musician.GetTempo());
-          LOG(INFO) << "Tempo changed to " << musician.GetTempo();
+          const double tempo = Random::Uniform(0.5, 0.75) * engine.GetTempo();
+          engine.SetTempo(tempo);
+          LOG(INFO) << "Tempo changed to " << tempo;
         });
         break;
       case '2':
         task_runner.Add([&]() {
-          musician.SetTempo(Random::Uniform(1.5, 2.0) * musician.GetTempo());
-          LOG(INFO) << "Tempo changed to " << musician.GetTempo();
+          const double tempo = Random::Uniform(1.5, 2.0) * engine.GetTempo();
+          engine.SetTempo(tempo);
+          LOG(INFO) << "Tempo changed to " << tempo;
         });
         break;
       case 'R':
         task_runner.Add([&]() {
-          musician.SetTempo(kTempo);
-          LOG(INFO) << "Tempo reset to " << musician.GetTempo();
+          engine.SetTempo(kTempo);
+          LOG(INFO) << "Tempo reset to " << kTempo;
         });
         break;
     }
@@ -302,6 +347,8 @@ int main(int argc, char* argv[]) {
 
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+
+  engine.Start();
 
   while (!quit) {
     input_manager.Update();

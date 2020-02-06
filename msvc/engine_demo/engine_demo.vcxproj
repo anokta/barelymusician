@@ -149,7 +149,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\examples\demo\musician_demo.cpp" />
+    <ClCompile Include="..\..\examples\demo\engine_demo.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

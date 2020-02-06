@@ -111,9 +111,6 @@
     <ClInclude Include="..\..\src\barelymusician\musician\note_utils.h">
       <Filter>Header Files\musician</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\musician\musician.h">
-      <Filter>Header Files\musician</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\util\random.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>

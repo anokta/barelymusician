@@ -113,6 +113,7 @@ void Engine::SetPosition(double position) {
   DCHECK_GE(position, 0.0);
   clock_.SetPosition(position);
   current_position_ = clock_.GetPosition();
+  previous_position_ = current_position_;
 }
 
 void Engine::SetTempo(double tempo) {
@@ -138,9 +139,8 @@ void Engine::Update(int num_frames) {
   clock_.UpdatePosition(num_frames);
   current_position_ = clock_.GetPosition();
   if (beat_callback_ != nullptr) {
-    for (double beat = std::ceil(previous_position_); beat < current_position_;
-         ++beat) {
-      beat_callback_(static_cast<int>(beat));
+    for (double b = std::ceil(previous_position_); b < current_position_; ++b) {
+      beat_callback_(static_cast<int>(b));
     }
   }
 }

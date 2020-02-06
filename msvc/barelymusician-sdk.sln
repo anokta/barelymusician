@@ -29,7 +29,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "barelymusician_unity", "bar
 		{C58BD654-3773-4B8C-94B3-CBB8A6109E1D} = {C58BD654-3773-4B8C-94B3-CBB8A6109E1D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "musician_demo", "musician_demo\musician_demo.vcxproj", "{B5D7F610-D27A-4310-B011-4DD760C29FA9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine_demo", "engine_demo\engine_demo.vcxproj", "{B5D7F610-D27A-4310-B011-4DD760C29FA9}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

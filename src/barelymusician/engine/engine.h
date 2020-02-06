@@ -134,10 +134,10 @@ class Engine {
   // Returns |Performer| with the given |performer_id|.
   Performer* GetPerformer(int performer_id);
 
-  // Audio clock.
+  // Clock for playback.
   Clock clock_;
 
-  // Denotes whether the playback is currently playing.
+  // Denotes whether the clock is currently playing.
   bool is_playing_;
 
   // Current playback position.

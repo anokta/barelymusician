@@ -45,21 +45,15 @@ double Engine::GetTempo() const { return clock_.GetTempo(); }
 bool Engine::IsPlaying() const { return is_playing_; }
 
 void Engine::NoteOff(int performer_id, float index) {
-  Performer* performer = GetPerformer(performer_id);
-  if (performer == nullptr) {
-    LOG(WARNING) << "Invalid performer id: " << performer_id;
-    return;
+  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    performer->NoteOff(index);
   }
-  performer->NoteOff(index);
 }
 
 void Engine::NoteOn(int performer_id, float index, float intensity) {
-  Performer* performer = GetPerformer(performer_id);
-  if (performer == nullptr) {
-    LOG(WARNING) << "Invalid performer id: " << performer_id;
-    return;
+  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    performer->NoteOn(index, intensity);
   }
-  performer->NoteOn(index, intensity);
 }
 
 void Engine::Process(int performer_id, float* output, int num_channels,
@@ -67,34 +61,25 @@ void Engine::Process(int performer_id, float* output, int num_channels,
   DCHECK(output);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
-  Performer* performer = GetPerformer(performer_id);
-  if (performer == nullptr) {
-    LOG(WARNING) << "Invalid performer id: " << performer_id;
-    return;
+  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    performer->Process(output, num_channels, num_frames, previous_position_,
+                       current_position_);
   }
-  performer->Process(output, num_channels, num_frames, previous_position_,
-                     current_position_);
 }
 
 void Engine::ScheduleNoteOff(int performer_id, float index, double position) {
   DCHECK_GE(position, 0.0);
-  Performer* performer = GetPerformer(performer_id);
-  if (performer == nullptr) {
-    LOG(WARNING) << "Invalid performer id: " << performer_id;
-    return;
+  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    performer->ScheduleNoteOff(index, position);
   }
-  performer->ScheduleNoteOff(index, position);
 }
 
 void Engine::ScheduleNoteOn(int performer_id, float index, float intensity,
                             double position) {
   DCHECK_GE(position, 0.0);
-  Performer* performer = GetPerformer(performer_id);
-  if (performer == nullptr) {
-    LOG(WARNING) << "Invalid performer id: " << performer_id;
-    return;
+  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    performer->ScheduleNoteOn(index, intensity, position);
   }
-  performer->ScheduleNoteOn(index, intensity, position);
 }
 
 void Engine::SetBeatCallback(BeatCallback&& beat_callback) {
@@ -149,6 +134,8 @@ Performer* Engine::GetPerformer(int performer_id) {
   if (const auto it = performers_.find(performer_id);
       it != performers_.cend()) {
     return &it->second;
+  } else {
+    LOG(WARNING) << "Invalid performer id: " << performer_id;
   }
   return nullptr;
 }

@@ -13,15 +13,14 @@ namespace unity {
 extern "C" {
 
 // Event callback signatures.
-using BeatCallback = void(int);
-using NoteOffCallback = void(float);
-using NoteOnCallback = void(float, float);
+using BeatCallback = void(int beat);
+using NoteOffCallback = void(int id, float index);
+using NoteOnCallback = void(int id, float index, float intensity);
 
 // Instrument function signatures.
-using AllNotesOffFn = void();
-using NoteOffFn = void(float);
-using NoteOnFn = void(float, float);
-using ProcessFn = void(float*, int, int);
+using NoteOffFn = void(float index);
+using NoteOnFn = void(float index, float intensity);
+using ProcessFn = void(float* output, int size, int num_channels);
 
 // Initializes the system.
 //
@@ -33,65 +32,86 @@ void EXPORT_API Initialize(int sample_rate, int num_channels, int num_frames);
 // Shuts down the system.
 void EXPORT_API Shutdown();
 
-// Updates audio thread state.
-void EXPORT_API UpdateAudioThread();
-
-// Updates main thread state.
-void EXPORT_API UpdateMainThread();
-
-// Resets sequencer.
-void EXPORT_API ResetSequencer();
-
-// Sets sequencer beat callback.
-//
-// @param beat_callback_ptr Sequencer beat callback.
-void EXPORT_API SetSequencerBeatCallback(BeatCallback* beat_callback_ptr);
-
-// Sets sequencer's tempo.
-//
-// @param tempo Sequencer tempo.
-void EXPORT_API SetSequencerTempo(float tempo);
-
-// Starts sequencer.
-void EXPORT_API StartSequencer();
-
-// Stops sequencer.
-void EXPORT_API StopSequencer();
-
 // Creates new instrument.
 //
 // @param note_off_fn_ptr Note off function.
 // @param note_on_fn_ptr Note on function.
 // @param process_fn_ptr Process function.
-// @return Instrument ID.
-int EXPORT_API CreateInstrument(NoteOffFn* note_off_fn_ptr,
-                                NoteOnFn* note_on_fn_ptr,
-                                ProcessFn* process_fn_ptr);
+// @return Instrument id.
+int EXPORT_API Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
+                      ProcessFn* process_fn_ptr);
 
 // Destroys instrument.
 //
-// @param instrument_id Instrument ID.
-void EXPORT_API DestroyInstrument(int instrument_id);
-
-// Processes instrument.
-//
-// @param instrument_id Instrument ID.
-// @param output Output buffer.
-void EXPORT_API ProcessInstrument(int instrument_id, float* output);
+// @param id Performer id.
+void EXPORT_API Destroy(int id);
 
 // Stops instrument note.
 //
-// @param instrument_id Instrument ID.
+// @param id Instrument id.
 // @param index Note index.
-void EXPORT_API SetInstrumentNoteOff(int instrument_id, float index);
+void EXPORT_API NoteOff(int id, float index);
 
 // Starts instrument note.
 //
-// @param instrument_id Instrument ID.
+// @param id Instrument id.
 // @param index Note index.
 // @param intensity Note intensity.
-void EXPORT_API SetInstrumentNoteOn(int instrument_id, float index,
-                                    float intensity);
+void EXPORT_API NoteOn(int id, float index, float intensity);
+
+// Processes instrument.
+//
+// @param id Instrument id.
+// @param output Output buffer.
+void EXPORT_API Process(int id, float* output);
+
+// Schedules instrument note off.
+//
+// @param id Instrument id.
+// @param index Note index.
+// @param position Position in beats.
+void EXPORT_API ScheduleNoteOff(int id, float index, double position);
+
+// Schedules instrument note on.
+//
+// @param id Instrument id.
+// @param index Note index.
+// @param intensity Note intensity.
+// @param position Position in beats.
+void EXPORT_API ScheduleNoteOn(int id, float index, float intensity,
+                               double position);
+
+// Sets beat callback.
+//
+// @param beat_callback_ptr Pointer to beat callback.
+void EXPORT_API SetBeatCallback(BeatCallback* beat_callback_ptr);
+
+// Sets note off callback.
+//
+// @param note_off_callback_ptr Pointer to note off callback.
+void EXPORT_API SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr);
+
+// Sets note on callback.
+//
+// @param note_on_callback_ptr Pointer to note on callback.
+void EXPORT_API SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr);
+
+// Sets playback tempo.
+//
+// @param tempo Tempo (BPM).
+void EXPORT_API SetTempo(double tempo);
+
+// Starts playback.
+void EXPORT_API Start();
+
+// Stops playback.
+void EXPORT_API Stop();
+
+// Updates audio thread state.
+void EXPORT_API UpdateAudioThread();
+
+// Updates main thread state.
+void EXPORT_API UpdateMainThread();
 
 }  // extern "C"
 

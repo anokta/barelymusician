@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using BarelyApi;
 
-// Example class that logs every sequencer beat.
-public class BeatLogger : MonoBehaviour {
+// Example class that logs every sequencer event.
+public class EventLogger : MonoBehaviour {
   private Sequencer sequencer = null;
 
   void Awake() {
@@ -17,10 +17,14 @@ public class BeatLogger : MonoBehaviour {
 
   void OnEnable() {
     sequencer.OnBeat += OnBeat;
+    sequencer.OnNoteOff += OnNoteOff;
+    sequencer.OnNoteOn += OnNoteOn;
   }
 
   void OnDisable() {
     sequencer.OnBeat -= OnBeat;
+    sequencer.OnNoteOff -= OnNoteOff;
+    sequencer.OnNoteOn -= OnNoteOn;
   }
 
   void Update() {
@@ -31,12 +35,17 @@ public class BeatLogger : MonoBehaviour {
         sequencer.Play();
       }
     }
-    if (Input.GetKeyDown(KeyCode.Backspace)) {
-      sequencer.Stop();
-    }
   }
 
-  public void OnBeat(int beat) {
+  private void OnBeat(int beat) {
     Debug.Log("Beat: " + beat);
+  }
+
+  private void OnNoteOff(Instrument instrument, float index) {
+    Debug.Log(instrument.name + ": NoteOff(" + index + ")");
+  }
+
+  private void OnNoteOn(Instrument instrument, float index, float intensity) {
+    Debug.Log(instrument.name + ": NoteOn(" + index + ", " + intensity + ")");
   }
 }

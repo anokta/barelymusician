@@ -13,10 +13,10 @@ namespace BarelyApi {
 
     protected override void OnEnable() {
       base.OnEnable();
-      noteOffFn = NoteOff;
-      noteOnFn = NoteOn;
-      processFn = delegate (float[] output, int size, int numChannels) { Process(output, numChannels); };
-      Id = BarelyMusician.Instance.CreateInstrument(noteOffFn, noteOnFn, processFn);
+      noteOffFn = noteOff;
+      noteOnFn = noteOn;
+      processFn = delegate (float[] output, int size, int numChannels) { process(output, numChannels); };
+      Id = BarelyMusician.Instance.Create(noteOffFn, noteOnFn, processFn);
     }
   }
 }

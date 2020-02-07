@@ -31,12 +31,6 @@
     <Filter Include="Header Files\algorithm">
       <UniqueIdentifier>{602d365f-6b74-43a9-9c2c-d12eef1c7515}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\api">
-      <UniqueIdentifier>{9ab0941e-33c7-4f55-8ff0-40fec9579868}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\api">
-      <UniqueIdentifier>{a5a847a7-a1b9-43d8-b9e4-2a817f8d8747}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\musician">
       <UniqueIdentifier>{e16bab02-6de2-49d9-8e76-e2455effb560}</UniqueIdentifier>
     </Filter>
@@ -99,9 +93,6 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\filter.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\api\barelymusician.h">
-      <Filter>Header Files\api</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\dsp\module.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
@@ -151,9 +142,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp">
       <Filter>Source Files\dsp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp">
-      <Filter>Source Files\api</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\musician\note_utils.cpp">
       <Filter>Source Files\musician</Filter>

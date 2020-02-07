@@ -17,35 +17,28 @@ public class InstrumentPlayer : MonoBehaviour {
 
   void Awake() {
     instrument = GetComponent<SineInstrument>();
-    isPlaying = false;
   }
 
-  void OnEnable() {
-    instrument.OnNoteOff += OnNoteOff;
-    instrument.OnNoteOn += OnNoteOn;
-  }
-
-  void OnDisable() {
-    instrument.OnNoteOff -= OnNoteOff;
-    instrument.OnNoteOn -= OnNoteOn;
-  }
+  //void Start() {
+  //  for (int i = 0; i < 20; ++i) {
+  //    instrument.ScheduleNoteOn((i % 4), 1.0f, i);
+  //    instrument.ScheduleNoteOff((i % 4), i + 0.5);
+  //  }
+  //  //instrument.ScheduleNoteOn(1.0f, 1.0f, 1.0);
+  //  //instrument.ScheduleNoteOff(1.0f, 1.5);
+  //  //instrument.ScheduleNoteOn(2.0f, 1.0f, 2.0);
+  //  //instrument.ScheduleNoteOff(2.0f, 2.5);
+  //}
 
   void Update() {
-    if (Input.GetKeyDown(KeyCode.S)) {
-      if (isPlaying) {
-        instrument.StopNote(noteIndex);
-      } else {
-        instrument.StartNote(noteIndex, noteIntensity);
-      }
-      isPlaying = !isPlaying;
+    if (Input.GetKeyDown(KeyCode.S) && !isPlaying) {
+      instrument.NoteOn(noteIndex, noteIntensity);
+      isPlaying = true;
+    }
+    else if (Input.GetKeyUp(KeyCode.S) && isPlaying) {
+      instrument.NoteOff(noteIndex);
+      isPlaying = false;
     }
   }
 
-  private void OnNoteOff(float index) {
-    Debug.Log("NoteOff(" + index + ")");
-  }
-
-  private void OnNoteOn(float index, float intensity) {
-    Debug.Log("NoteOn(" + index + ", " + intensity + ")");
-  }
 }

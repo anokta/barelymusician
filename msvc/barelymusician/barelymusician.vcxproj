@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician\api\barelymusician.cpp" />
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
@@ -36,7 +35,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
-    <ClInclude Include="..\..\src\barelymusician\api\barelymusician.h" />
     <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />

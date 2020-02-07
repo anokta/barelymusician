@@ -9,8 +9,8 @@ namespace BarelyApi {
   public class BarelyMusician {
     // Internal event callbacks.
     public delegate void BeatCallback(int beat);
-    public delegate void NoteOffCallback(float index);
-    public delegate void NoteOnCallback(float index, float intensity);
+    public delegate void NoteOffCallback(int id, float index);
+    public delegate void NoteOnCallback(int id, float index, float intensity);
 
     // Internal Unity instrument functions.
     public delegate void NoteOffFn(float index);
@@ -39,73 +39,77 @@ namespace BarelyApi {
     private float lastUpdateTime = 0.0f;
 
     // Creates new instrument.
-    public int CreateInstrument(NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
-      return CreateInstrument(Marshal.GetFunctionPointerForDelegate(noteOffFn),
-                              Marshal.GetFunctionPointerForDelegate(noteOnFn),
-                              Marshal.GetFunctionPointerForDelegate(processFn));
+    public int Create(NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
+      return Create(Marshal.GetFunctionPointerForDelegate(noteOffFn), Marshal.GetFunctionPointerForDelegate(noteOnFn),
+                    Marshal.GetFunctionPointerForDelegate(processFn));
     }
 
     // Destroys instrument.
-    public void DestroyInstrument(Instrument instrument) {
-      DestroyInstrument(instrument.Id);
+    public void Destroy(Instrument instrument) {
+      Destroy(instrument.Id);
     }
 
     // Processes instrument.
-    public void ProcessInstrument(Instrument instrument, float[] output) {
+    public void Process(Instrument instrument, float[] output) {
       Process();
-      ProcessInstrument(instrument.Id, output);
+      Process(instrument.Id, output);
     }
 
     // Sets instrument note off.
-    public void SetInstrumentNoteOff(Instrument instrument, float index) {
-      SetInstrumentNoteOff(instrument.Id, index);
+    public void NoteOff(Instrument instrument, float index) {
+      NoteOff(instrument.Id, index);
     }
 
     // Sets instrument note on.
-    public void SetInstrumentNoteOn(Instrument instrument, float index, float intensity) {
-      SetInstrumentNoteOn(instrument.Id, index, intensity);
+    public void NoteOn(Instrument instrument, float index, float intensity) {
+      NoteOn(instrument.Id, index, intensity);
     }
 
-    // Updates instrument.
-    public void UpdateInstrument() {
-      Update();
+    // Schedules instrument note off.
+    public void ScheduleNoteOff(Instrument instrument, float index, double position) {
+      ScheduleNoteOff(instrument.Id, index, position);
     }
 
-    // Processes sequencer.
-    public void ProcessSequencer(Sequencer sequencer) {
-      Process();
+    // Schedules instrument note on.
+    public void ScheduleNoteOn(Instrument instrument, float index, float intensity, double position) {
+      ScheduleNoteOn(instrument.Id, index, intensity, position);
     }
 
-    // Creates sequencer.
-    public void CreateSequencer(BeatCallback beatCallback) {
-      SetSequencerBeatCallback(Marshal.GetFunctionPointerForDelegate(beatCallback));
+    // Sets beat callback.
+    public void SetBeatCallback(BeatCallback beatCallback)
+    {
+      IntPtr beatCallbackPtr = 
+          (beatCallback != null) ? Marshal.GetFunctionPointerForDelegate(beatCallback) : IntPtr.Zero; 
+      SetBeatCallback(beatCallbackPtr);
     }
 
-    // Destroys sequencer.
-    public void DestroySequencer() {
-      SetSequencerBeatCallback(IntPtr.Zero);
-      StopSequencer();
-      ResetSequencer();
+    // Sets note off callback.
+    public void SetNoteOffCallback(NoteOffCallback noteOffCallback) {
+      IntPtr noteOffCallbackPtr =
+          (noteOffCallback != null) ? Marshal.GetFunctionPointerForDelegate(noteOffCallback) : IntPtr.Zero;
+      SetNoteOffCallback(noteOffCallbackPtr);
+    }
+    
+    // Sets note on callback.
+    public void SetNoteOnCallback(NoteOnCallback noteOnCallback) {
+      IntPtr noteOnCallbackPtr =
+          (noteOnCallback != null) ? Marshal.GetFunctionPointerForDelegate(noteOnCallback) : IntPtr.Zero;
+      SetNoteOnCallback(noteOnCallbackPtr);
     }
 
-    // Resets sequencer.
-    public void ResetSequencer(Sequencer sequencer) {
-      ResetSequencer();
+    // Starts playback.
+    public void Start(Sequencer sequencer) {
+      Start();
     }
 
-    // Starts sequencer playback.
-    public void StartSequencer(Sequencer sequencer) {
-      StartSequencer();
-    }
-
-    // Stops sequencer playback.
-    public void StopSequencer(Sequencer sequencer) {
-      StopSequencer();
+    // Stops playback.
+    public void Stop(Sequencer sequencer) {
+      Stop();
     }
 
     // Updates sequencer.
-    public void UpdateSequencer(Sequencer sequencer) {
-      SetSequencerTempo(sequencer.tempo);
+    public void Update(Sequencer sequencer) {
+      SetTempo(sequencer.tempo);
       Update();
     }
 
@@ -124,7 +128,7 @@ namespace BarelyApi {
     }
 
     // Updates the audio thread state.
-    private void Process() {
+    public void Process() {
       double dspTime = AudioSettings.dspTime;
       if (dspTime > lastDspTime) {
         lastDspTime = dspTime;
@@ -133,7 +137,7 @@ namespace BarelyApi {
     }
 
     // Updates the main thread state.
-    private void Update() {
+    public void Update() {
       float updateTime = Time.unscaledTime;
       if (updateTime > lastUpdateTime) {
         lastUpdateTime = updateTime;
@@ -154,43 +158,50 @@ namespace BarelyApi {
     [DllImport(pluginName)]
     private static extern void Shutdown();
 
+    // Instrument handlers.
+    [DllImport(pluginName)]
+    private static extern int Create(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr, IntPtr processFnPtr);
+
+    [DllImport(pluginName)]
+    private static extern void Destroy(int id);
+
+    [DllImport(pluginName)]
+    private static extern void Process(int id, [In, Out] float[] output);
+
+    [DllImport(pluginName)]
+    private static extern void NoteOff(int id, float index);
+
+    [DllImport(pluginName)]
+    private static extern void NoteOn(int id, float index, float intensity);
+
+    [DllImport(pluginName)]
+    private static extern void ScheduleNoteOff(int id, float index, double position);
+
+    [DllImport(pluginName)]                                        
+    private static extern void ScheduleNoteOn(int id, float index, float intensity, double position);
+
+    [DllImport(pluginName)]
+    private static extern void SetBeatCallback(IntPtr beatCallbackPtr);
+
+    [DllImport(pluginName)]
+    private static extern void SetNoteOffCallback(IntPtr noteOffCallbackPtr);
+
+    [DllImport(pluginName)]
+    private static extern void SetNoteOnCallback(IntPtr noteOnCallbackPtr);
+
+    [DllImport(pluginName)]
+    private static extern void SetTempo(double tempo);
+
+    [DllImport(pluginName)]
+    private static extern void Start();
+
+    [DllImport(pluginName)]
+    private static extern void Stop();
+
     [DllImport(pluginName)]
     private static extern void UpdateAudioThread();
 
     [DllImport(pluginName)]
     private static extern void UpdateMainThread();
-
-    // Instrument handlers.
-    [DllImport(pluginName)]
-    private static extern int CreateInstrument(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
-                                               IntPtr processFnPtr);
-
-    [DllImport(pluginName)]
-    private static extern void DestroyInstrument(int instrumentId);
-
-    [DllImport(pluginName)]
-    private static extern void ProcessInstrument(int instrumentId, [In, Out] float[] output);
-
-    [DllImport(pluginName)]
-    private static extern void SetInstrumentNoteOff(int instrumentId, float index);
-
-    [DllImport(pluginName)]
-    private static extern void SetInstrumentNoteOn(int instrumentId, float index, float intensity);
-
-    // Sequencer handlers.
-    [DllImport(pluginName)]
-    private static extern void ResetSequencer();
-
-    [DllImport(pluginName)]
-    private static extern void SetSequencerBeatCallback(IntPtr beatCallbackPtr);
-
-    [DllImport(pluginName)]
-    private static extern void SetSequencerTempo(float tempo);
-
-    [DllImport(pluginName)]
-    private static extern void StartSequencer();
-
-    [DllImport(pluginName)]
-    private static extern void StopSequencer();
   }
 }

@@ -214,7 +214,7 @@ int main(int argc, char* argv[]) {
   // Note on callback.
   const auto note_on_callback = [](int performer_id, float index,
                                    float intensity) {
-    LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << index << ", "
+    LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << index << ", "
               << intensity << ")";
   };
   engine.SetNoteOnCallback(note_on_callback);

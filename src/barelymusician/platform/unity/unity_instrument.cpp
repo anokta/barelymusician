@@ -12,9 +12,9 @@ UnityInstrument::UnityInstrument(NoteOffFn&& note_off_fn, NoteOnFn&& note_on_fn,
     : note_off_fn_(std::move(note_off_fn)),
       note_on_fn_(std::move(note_on_fn)),
       process_fn_(std::move(process_fn)) {
-  DCHECK(note_off_fn);
-  DCHECK(note_on_fn);
-  DCHECK(process_fn);
+  DCHECK(note_off_fn_);
+  DCHECK(note_on_fn_);
+  DCHECK(process_fn_);
 }
 
 void UnityInstrument::NoteOff(float index) { note_off_fn_(index); };

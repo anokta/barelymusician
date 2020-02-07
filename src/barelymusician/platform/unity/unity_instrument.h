@@ -8,13 +8,18 @@
 namespace barelyapi {
 namespace unity {
 
+// Unity instrument.
 class UnityInstrument : public Instrument {
  public:
-  // Instrument function signatures.
+  // Note off function signature.
   using NoteOffFn = std::function<void(float index)>;
+
+  // Note on function signature.
   using NoteOnFn = std::function<void(float index, float intensity)>;
+
+  // Process function signature.
   using ProcessFn =
-      std::function<void(float* output, int num_channels, int num_frames)>;
+      std::function<void(float* output, int size, int num_channels)>;
 
   // Constructs new |UnityInstrument|.
   //
@@ -30,9 +35,13 @@ class UnityInstrument : public Instrument {
   void Process(float* output, int num_channels, int num_frames) override;
 
  private:
-  // Instrument callbacks.
+  // Note off function.
   NoteOffFn note_off_fn_;
+
+  // Note on function.
   NoteOnFn note_on_fn_;
+
+  // Process function.
   ProcessFn process_fn_;
 };
 

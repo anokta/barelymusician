@@ -11,32 +11,35 @@ Engine::Engine(int sample_rate)
       is_playing_(false),
       current_position_(0.0),
       previous_position_(0.0),
-      id_counter_(0),
       beat_callback_(nullptr),
       note_off_callback_(nullptr),
       note_on_callback_(nullptr) {
   DCHECK_GE(sample_rate, 0);
 }
 
-int Engine::Create(std::unique_ptr<Instrument> instrument) {
-  const int performer_id = ++id_counter_;
-  Performer performer(std::move(instrument));
-  performer.SetNoteOffCallback([this, performer_id](float index) {
-    if (note_off_callback_ != nullptr) {
-      note_off_callback_(performer_id, index);
-    }
-  });
-  performer.SetNoteOnCallback(
-      [this, performer_id](float index, float intensity) {
-        if (note_on_callback_ != nullptr) {
-          note_on_callback_(performer_id, index, intensity);
-        }
-      });
-  performers_.emplace(performer_id, std::move(performer));
-  return performer_id;
+bool Engine::Create(int performer_id, std::unique_ptr<Instrument> instrument) {
+  if (const auto [it, success] =
+          performers_.emplace(performer_id, Performer(std::move(instrument)));
+      success) {
+    it->second.SetNoteOffCallback([this, performer_id](float index) {
+      if (note_off_callback_ != nullptr) {
+        note_off_callback_(performer_id, index);
+      }
+    });
+    it->second.SetNoteOnCallback(
+        [this, performer_id](float index, float intensity) {
+          if (note_on_callback_ != nullptr) {
+            note_on_callback_(performer_id, index, intensity);
+          }
+        });
+    return true;
+  }
+  return false;
 }
 
-void Engine::Destroy(int performer_id) { performers_.erase(performer_id); }
+bool Engine::Destroy(int performer_id) {
+  return performers_.erase(performer_id) > 0;
+}
 
 double Engine::GetPosition() const { return current_position_; }
 
@@ -44,42 +47,52 @@ double Engine::GetTempo() const { return clock_.GetTempo(); }
 
 bool Engine::IsPlaying() const { return is_playing_; }
 
-void Engine::NoteOff(int performer_id, float index) {
+bool Engine::NoteOff(int performer_id, float index) {
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
     performer->NoteOff(index);
+    return true;
   }
+  return false;
 }
 
-void Engine::NoteOn(int performer_id, float index, float intensity) {
+bool Engine::NoteOn(int performer_id, float index, float intensity) {
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
     performer->NoteOn(index, intensity);
+    return true;
   }
+  return false;
 }
 
-void Engine::Process(int performer_id, float* output, int num_channels,
+bool Engine::Process(int performer_id, float* output, int num_channels,
                      int num_frames) {
-  DCHECK(output);
-  DCHECK_GE(num_channels, 0);
-  DCHECK_GE(num_frames, 0);
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    DCHECK(output);
+    DCHECK_GE(num_channels, 0);
+    DCHECK_GE(num_frames, 0);
     performer->Process(output, num_channels, num_frames, previous_position_,
                        current_position_);
+    return true;
   }
+  return false;
 }
 
-void Engine::ScheduleNoteOff(int performer_id, float index, double position) {
-  DCHECK_GE(position, 0.0);
+bool Engine::ScheduleNoteOff(int performer_id, float index, double position) {
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    DCHECK_GE(position, 0.0);
     performer->ScheduleNoteOff(index, position);
+    return true;
   }
+  return false;
 }
 
-void Engine::ScheduleNoteOn(int performer_id, float index, float intensity,
+bool Engine::ScheduleNoteOn(int performer_id, float index, float intensity,
                             double position) {
-  DCHECK_GE(position, 0.0);
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    DCHECK_GE(position, 0.0);
     performer->ScheduleNoteOn(index, intensity, position);
+    return true;
   }
+  return false;
 }
 
 void Engine::SetBeatCallback(BeatCallback&& beat_callback) {
@@ -135,7 +148,7 @@ Performer* Engine::GetPerformer(int performer_id) {
       it != performers_.cend()) {
     return &it->second;
   } else {
-    LOG(WARNING) << "Invalid performer id: " << performer_id;
+    DLOG(WARNING) << "Invalid performer id: " << performer_id;
   }
   return nullptr;
 }

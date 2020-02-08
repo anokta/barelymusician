@@ -34,9 +34,8 @@ class Engine {
   // Creates new performer.
   //
   // @param Performer id.
-  // @param instrument Instrument to perform.
   // @return True if successful.
-  bool Create(int performer_id, std::unique_ptr<Instrument> instrument);
+  bool Create(int performer_id);
 
   // Destroys performer.
   //
@@ -113,6 +112,13 @@ class Engine {
   //
   // @param beat_callback Beat callback.
   void SetBeatCallback(BeatCallback&& beat_callback);
+
+  // Sets instrument to perform.
+  //
+  // @param performer_id Performer id.
+  // @param instrument Instrument to perform.
+  // @return True if successful.
+  bool SetInstrument(int performer_id, std::unique_ptr<Instrument> instrument);
 
   // Sets note off callback.
   //

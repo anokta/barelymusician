@@ -7,12 +7,10 @@
 
 namespace barelyapi {
 
-Performer::Performer(std::unique_ptr<Instrument> instrument)
-    : instrument_(std::move(instrument)),
+Performer::Performer()
+    : instrument_(nullptr),
       note_off_callback_(nullptr),
-      note_on_callback_(nullptr) {
-  DCHECK(instrument_);
-}
+      note_on_callback_(nullptr) {}
 
 void Performer::AllScheduledNotesOff() {
   for (const float index : scheduled_note_indices_) {
@@ -22,14 +20,18 @@ void Performer::AllScheduledNotesOff() {
 }
 
 void Performer::NoteOff(float index) {
-  instrument_->NoteOff(index);
+  if (instrument_ != nullptr) {
+    instrument_->NoteOff(index);
+  }
   if (note_off_callback_ != nullptr) {
     note_off_callback_(index);
   }
 }
 
 void Performer::NoteOn(float index, float intensity) {
-  instrument_->NoteOn(index, intensity);
+  if (instrument_ != nullptr) {
+    instrument_->NoteOn(index, intensity);
+  }
   if (note_on_callback_ != nullptr) {
     note_on_callback_(index, intensity);
   }
@@ -51,8 +53,10 @@ void Performer::Process(double start_position, double end_position,
       const int message_frame =
           static_cast<int>(frames_per_beat * (it->position - start_position));
       if (frame < message_frame) {
-        instrument_->Process(&output[num_channels * frame], num_channels,
-                             message_frame - frame);
+        if (instrument_ != nullptr) {
+          instrument_->Process(&output[num_channels * frame], num_channels,
+                               message_frame - frame);
+        }
         frame = message_frame;
       }
       std::visit(MessageVisitor{[&](const NoteOffData& data) {
@@ -68,7 +72,7 @@ void Performer::Process(double start_position, double end_position,
     messages_.Clear(messages);
   }
   // Process the rest of the buffer.
-  if (frame < num_frames) {
+  if (instrument_ != nullptr && frame < num_frames) {
     instrument_->Process(&output[num_channels * frame], num_channels,
                          num_frames - frame);
   }
@@ -80,6 +84,10 @@ void Performer::ScheduleNoteOff(double position, float index) {
 
 void Performer::ScheduleNoteOn(double position, float index, float intensity) {
   messages_.Push({position, NoteOnData{index, intensity}});
+}
+
+void Performer::SetInstrument(std::unique_ptr<Instrument> instrument) {
+  instrument_ = std::move(instrument);
 }
 
 void Performer::SetNoteOffCallback(NoteOffCallback&& note_off_callback) {

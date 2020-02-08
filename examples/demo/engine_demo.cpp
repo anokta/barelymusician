@@ -183,6 +183,13 @@ int main(int argc, char* argv[]) {
 
   std::unordered_map<int, BeatComposerCallback> performers;
   int id_counter = 0;
+  const auto create_performer_fn =
+      [&](std::unique_ptr<Instrument> instrument,
+          BeatComposerCallback beat_composer_callback) {
+        DCHECK(engine.Create(++id_counter));
+        DCHECK(engine.SetInstrument(id_counter, std::move(instrument)));
+        performers.emplace(id_counter, std::move(beat_composer_callback));
+      };
 
   // Beat callback.
   int harmonic = 0;
@@ -235,10 +242,10 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
                 std::placeholders::_5);
 
-  DCHECK(engine.Create(++id_counter, std::move(chords_instrument)));
-  performers.emplace(id_counter, chords_beat_composer_callback);
-  DCHECK(engine.Create(++id_counter, std::move(chords_2_instrument)));
-  performers.emplace(id_counter, chords_beat_composer_callback);
+  create_performer_fn(std::move(chords_instrument),
+                      chords_beat_composer_callback);
+  create_performer_fn(std::move(chords_2_instrument),
+                      chords_beat_composer_callback);
 
   auto line_instrument =
       BuildSynthInstrument(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
@@ -254,10 +261,9 @@ int main(int argc, char* argv[]) {
                 std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4, std::placeholders::_5);
 
-  DCHECK(engine.Create(++id_counter, std::move(line_instrument)));
-  performers.emplace(id_counter, line_beat_composer_callback);
-  DCHECK(engine.Create(++id_counter, std::move(line_2_instrument)));
-  performers.emplace(id_counter, line_2_beat_composer_callback);
+  create_performer_fn(std::move(line_instrument), line_beat_composer_callback);
+  create_performer_fn(std::move(line_2_instrument),
+                      line_2_beat_composer_callback);
 
   // Add drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
@@ -281,8 +287,8 @@ int main(int argc, char* argv[]) {
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_5);
 
-  DCHECK(engine.Create(++id_counter, std::move(drumkit_instrument)));
-  performers.emplace(id_counter, drumkit_beat_composer_callback);
+  create_performer_fn(std::move(drumkit_instrument),
+                      drumkit_beat_composer_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

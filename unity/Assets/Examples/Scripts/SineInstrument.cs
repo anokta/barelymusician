@@ -17,24 +17,23 @@ namespace BarelyApi {
     // Sampling interval in Hz.
     private float sampleInterval = 0.0f;
 
-    protected override void Awake() {
-      base.Awake();
+    protected void Awake() {
       phase = 0.0f;
       playing = false;
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);
     }
 
-    protected override void noteOff(float index) {
+    public override void NoteOff(float index) {
       playing = false;
     }
 
-    protected override void noteOn(float index, float intensity) {
+    public override void NoteOn(float index, float intensity) {
       //frequency = (index + 1) * 220.0f;
       phase = 0.0f;
       playing = true;
     }
 
-    protected override void process(float[] data, int channels) {
+    public override void Process(float[] data, int channels) {
       for (int i = 0; i < data.Length; i += channels) {
         // Generate next sample.
         float sample = playing ? Mathf.Sin(phase * 2.0f * Mathf.PI) : 0.0f;

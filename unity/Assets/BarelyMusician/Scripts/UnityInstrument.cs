@@ -4,19 +4,21 @@ using UnityEngine;
 
 namespace BarelyApi {
   // Instrument interface.
-  [RequireComponent(typeof(AudioSource))]
-  public abstract class UnityInstrument : Instrument {
+  public abstract class UnityInstrument : MonoBehaviour, IInstrument {
     // Internal instrument callbacks.
-    private BarelyMusician.NoteOffFn noteOffFn = null;
-    private BarelyMusician.NoteOnFn noteOnFn = null;
-    private BarelyMusician.ProcessFn processFn = null;
+    public BarelyMusician.NoteOffFn noteOffFn = null;
+    public BarelyMusician.NoteOnFn noteOnFn = null;
+    public BarelyMusician.ProcessFn processFn = null;
 
-    protected override void OnEnable() {
-      base.OnEnable();
-      noteOffFn = noteOff;
-      noteOnFn = noteOn;
-      processFn = delegate (float[] output, int size, int numChannels) { process(output, numChannels); };
-      _id = BarelyMusician.Instance.Create(noteOffFn, noteOnFn, processFn);
+    public abstract void NoteOff(float index);
+    public abstract void NoteOn(float index, float intensity);
+    public abstract void Process(float[] output, int numChannels);
+
+
+    protected void OnEnable() {
+      noteOffFn = NoteOff;
+      noteOnFn = NoteOn;
+      processFn = delegate (float[] output, int size, int numChannels) { Process(output, numChannels); };
     }
   }
 }

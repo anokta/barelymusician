@@ -38,7 +38,9 @@ TEST(PerformerTest, ScheduleSingleNote) {
   const double kStartPosition = 1.5f;
   const double kEndPosition = 2.0f;
 
-  Performer performer(std::make_unique<TestInstrument>());
+  Performer performer;
+  performer.SetInstrument(std::make_unique<TestInstrument>());
+
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -80,7 +82,9 @@ TEST(PerformerTest, ScheduleSingleNote) {
 TEST(PerformerTest, ScheduleMultipleNotes) {
   const float kNoteIntensity = 1.0f;
 
-  Performer performer(std::make_unique<TestInstrument>());
+  Performer performer;
+  performer.SetInstrument(std::make_unique<TestInstrument>());
+
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -124,7 +128,7 @@ TEST(PerformerTest, SetNoteCallbacks) {
   const float kNoteIndex = 40.0f;
   const float kNoteIntensity = 0.75f;
 
-  Performer performer(std::make_unique<TestInstrument>());
+  Performer performer;
 
   // Perform note on.
   float note_on_index = 0.0f;

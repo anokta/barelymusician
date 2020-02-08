@@ -91,19 +91,8 @@ int main(int argc, char* argv[]) {
 
   std::vector<Performer> performers;
   for (int i = 0; i < num_tracks; ++i) {
-    // Create instrument.
-    auto instrument = std::make_unique<BasicSynthInstrument>(
-        kSampleRate, kNumInstrumentVoices);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
-                              static_cast<float>(kInstrumentOscillatorType));
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                              kInstrumentEnvelopeAttack);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                              kInstrumentEnvelopeRelease);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kGain,
-                              kInstrumentGain);
     // Create performer.
-    Performer performer(std::move(instrument));
+    Performer performer;
     if (!ScheduleMidiEvents(midi_file[i], ticks_per_quarter, &performer)) {
       LOG(WARNING) << "Empty MIDI track: " << i;
       continue;
@@ -115,6 +104,19 @@ int main(int argc, char* argv[]) {
     performer.SetNoteOffCallback([i](float index) {
       LOG(INFO) << "MIDI track #" << i << ": NoteOff(" << index << ") ";
     });
+    // Set instrument.
+    auto instrument = std::make_unique<BasicSynthInstrument>(
+        kSampleRate, kNumInstrumentVoices);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+                              static_cast<float>(kInstrumentOscillatorType));
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                              kInstrumentEnvelopeAttack);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                              kInstrumentEnvelopeRelease);
+    instrument->SetFloatParam(BasicSynthInstrumentParam::kGain,
+                              kInstrumentGain);
+    performer.SetInstrument(std::move(instrument));
+    // Add performer.
     performers.push_back(std::move(performer));
   }
   LOG(INFO) << "Number of active MIDI tracks: " << performers.size();

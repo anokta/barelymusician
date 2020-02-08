@@ -75,16 +75,11 @@ void Shutdown() {
   barelymusician = nullptr;
 }
 
-int Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
-           ProcessFn* process_fn_ptr) {
+int Create() {
   DCHECK(barelymusician);
   const int id = ++barelymusician->id_counter;
   barelymusician->audio_runner.Add(
-      [id, note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr]() {
-        auto instrument = std::make_unique<UnityInstrument>(
-            note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
-        DCHECK(barelymusician->engine.Create(id, std::move(instrument)));
-      });
+      [id]() { DCHECK(barelymusician->engine.Create(id)); });
   return id;
 }
 
@@ -203,6 +198,16 @@ void SetTempo(double tempo) {
       barelymusician->engine.SetTempo(tempo);
     }
   });
+}
+
+void SetUnityInstrument(int id, NoteOffFn* note_off_fn_ptr,
+                        NoteOnFn* note_on_fn_ptr, ProcessFn* process_fn_ptr) {
+  barelymusician->audio_runner.Add(
+      [id, note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr]() {
+        auto instrument = std::make_unique<UnityInstrument>(
+            note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
+        barelymusician->engine.SetInstrument(id, std::move(instrument));
+      });
 }
 
 void Start() {

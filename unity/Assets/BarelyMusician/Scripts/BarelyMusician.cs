@@ -20,7 +20,7 @@ namespace BarelyApi {
       int numChannels);
 
     // Invalid ID.
-    public static readonly int InvalidId = -1;
+    public const int InvalidId = -1;
 
     // Singleton instance.
     public static BarelyMusician Instance {
@@ -40,11 +40,25 @@ namespace BarelyApi {
     private float lastUpdateTime = 0.0f;
 
     // Creates new instrument.
-    public int Create(NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
-      return CreateNative(Marshal.GetFunctionPointerForDelegate(noteOffFn),
-                          Marshal.GetFunctionPointerForDelegate(noteOnFn),
-                          Marshal.GetFunctionPointerForDelegate(processFn));
+    public int Create() {
+      return CreateNative();
     }
+
+    public void SetInstrument(int id, IInstrument instrument) {
+      if (instrument == null) {
+        // TODO: Set null.
+      }
+      if (instrument.GetType().IsSubclassOf(typeof(UnityInstrument))) {
+        var unityInstrument = instrument as UnityInstrument;
+        SetUnityInstrumentNative(id, 
+                                 Marshal.GetFunctionPointerForDelegate(unityInstrument.noteOffFn),
+                                 Marshal.GetFunctionPointerForDelegate(unityInstrument.noteOnFn),
+                                 Marshal.GetFunctionPointerForDelegate(unityInstrument.processFn));
+      } else {
+        Debug.LogWarning("Instrument type not supported: " + instrument.GetType());
+      }
+    }
+
 
     // Destroys instrument.
     public void Destroy(int id) {
@@ -102,7 +116,7 @@ namespace BarelyApi {
       IntPtr noteOnCallbackPtr = (noteOnCallback != null)
                             ? Marshal.GetFunctionPointerForDelegate(noteOnCallback)
                             : IntPtr.Zero;
-      SetNoteOffCallbackNative(noteOnCallbackPtr);
+      SetNoteOnCallbackNative(noteOnCallbackPtr);
     }
 
     // Sets playback position.
@@ -170,8 +184,7 @@ namespace BarelyApi {
     private static extern void ShutdownNative();
 
     [DllImport(pluginName, EntryPoint = "Create")]
-    private static extern int CreateNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
-                                           IntPtr processFnPtr);
+    private static extern int CreateNative();
 
     [DllImport(pluginName, EntryPoint = "Destroy")]
     private static extern void DestroyNative(int id);
@@ -209,6 +222,10 @@ namespace BarelyApi {
 
     [DllImport(pluginName, EntryPoint = "SetTempo")]
     private static extern void SetTempoNative(double tempo);
+
+    [DllImport(pluginName, EntryPoint = "SetUnityInstrument")]
+    private static extern int SetUnityInstrumentNative(int id, IntPtr noteOffFnPtr,
+                                                       IntPtr noteOnFnPtr, IntPtr processFnPtr);
 
     [DllImport(pluginName, EntryPoint = "Start")]
     private static extern void StartNative();

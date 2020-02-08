@@ -9,14 +9,17 @@ public class InstrumentPlayer : MonoBehaviour {
   public float noteIndex = 0.0f;
   public float noteIntensity = 1.0f;
 
+  public Performer performer;
+
   // Instrument to play.
-  private Instrument instrument = null;
+  private IInstrument instrument = null;
 
   // Is playing?
   private bool isPlaying = false;
 
-  void Awake() {
+  void Start() {
     instrument = GetComponent<SineInstrument>();
+    performer.Instrument = instrument;
   }
 
   //void Start() {
@@ -29,10 +32,10 @@ public class InstrumentPlayer : MonoBehaviour {
 
   void Update() {
     if (Input.GetKeyDown(KeyCode.S) && !isPlaying) {
-      instrument.NoteOn(noteIndex, noteIntensity);
+      performer.NoteOn(noteIndex, noteIntensity);
       isPlaying = true;
     } else if (Input.GetKeyUp(KeyCode.S) && isPlaying) {
-      instrument.NoteOff(noteIndex);
+      performer.NoteOff(noteIndex);
       isPlaying = false;
     }
   }

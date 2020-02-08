@@ -34,12 +34,8 @@ void EXPORT_API Shutdown();
 
 // Creates new instrument.
 //
-// @param note_off_fn_ptr Note off function.
-// @param note_on_fn_ptr Note on function.
-// @param process_fn_ptr Process function.
 // @return Instrument id.
-int EXPORT_API Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
-                      ProcessFn* process_fn_ptr);
+int EXPORT_API Create();
 
 // Destroys instrument.
 //
@@ -110,6 +106,17 @@ void EXPORT_API SetPosition(double position);
 //
 // @param tempo Tempo (BPM).
 void EXPORT_API SetTempo(double tempo);
+
+// Sets Unity instrument.
+//
+// @param id Instrument id;
+// @param note_off_fn_ptr Note off function.
+// @param note_on_fn_ptr Note on function.
+// @param process_fn_ptr Process function.
+// @return Instrument id.
+void EXPORT_API SetUnityInstrument(int id, NoteOffFn* note_off_fn_ptr,
+                                   NoteOnFn* note_on_fn_ptr,
+                                   ProcessFn* process_fn_ptr);
 
 // Starts playback.
 void EXPORT_API Start();

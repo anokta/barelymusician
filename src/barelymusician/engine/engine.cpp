@@ -17,9 +17,8 @@ Engine::Engine(int sample_rate)
   DCHECK_GE(sample_rate, 0);
 }
 
-bool Engine::Create(int performer_id, std::unique_ptr<Instrument> instrument) {
-  if (const auto [it, success] =
-          performers_.emplace(performer_id, Performer(std::move(instrument)));
+bool Engine::Create(int performer_id) {
+  if (const auto [it, success] = performers_.emplace(performer_id, Performer());
       success) {
     it->second.SetNoteOffCallback([this, performer_id](float index) {
       if (note_off_callback_ != nullptr) {
@@ -108,6 +107,15 @@ bool Engine::ScheduleNoteOn(int performer_id, double position, float index,
 
 void Engine::SetBeatCallback(BeatCallback&& beat_callback) {
   beat_callback_ = std::move(beat_callback);
+}
+
+bool Engine::SetInstrument(int performer_id,
+                           std::unique_ptr<Instrument> instrument) {
+  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    performer->SetInstrument(std::move(instrument));
+    return true;
+  }
+  return false;
 }
 
 void Engine::SetNoteOffCallback(NoteOffCallback&& note_off_callback) {

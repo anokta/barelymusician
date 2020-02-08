@@ -20,9 +20,7 @@ class Performer {
   using NoteOnCallback = std::function<void(float index, float intensity)>;
 
   // Constructs new |Performer|.
-  //
-  // @param instrument Instrument to perform.
-  explicit Performer(std::unique_ptr<Instrument> instrument);
+  Performer();
 
   // Stops all scheduled notes that are being played.
   void AllScheduledNotesOff();
@@ -60,6 +58,11 @@ class Performer {
   // @param index Note index.
   // @param index Note intensity.
   void ScheduleNoteOn(double position, float index, float intensity);
+
+  // Sets instrument.
+  //
+  // @param instrument Instrument to perform.
+  void SetInstrument(std::unique_ptr<Instrument> instrument);
 
   // Sets note off callback.
   //

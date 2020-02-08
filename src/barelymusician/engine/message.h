@@ -22,11 +22,11 @@ struct NoteOffData {
 
 // Generic message with a position timestamp.
 struct Message {
-  // Message data.
-  std::variant<NoteOnData, NoteOffData> data;
-
   // Message position.
   double position;
+
+  // Message data.
+  std::variant<NoteOnData, NoteOffData> data;
 };
 
 // Message visitor.

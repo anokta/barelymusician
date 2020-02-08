@@ -19,7 +19,7 @@ TEST(MessageQueueTest, SingleMessage) {
   EXPECT_TRUE(message_queue.Empty());
 
   // Push message.
-  message_queue.Push({{}, kPosition});
+  message_queue.Push({kPosition});
   EXPECT_FALSE(message_queue.Empty());
 
   // Pop message.
@@ -41,7 +41,7 @@ TEST(MessageQueueTest, MultipleMessages) {
 
   // Push |kNumMessages| messages.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_queue.Push({{}, static_cast<double>(i)});
+    message_queue.Push({static_cast<double>(i)});
     EXPECT_FALSE(message_queue.Empty());
   }
   // Pop one message at a time.
@@ -73,7 +73,7 @@ TEST(MessageQueueTest, MultipleMessagesSamePosition) {
 
   // Push |kNumMessages| messages using the same |kPosition|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_queue.Push({{}, kPosition});
+    message_queue.Push({kPosition});
     EXPECT_FALSE(message_queue.Empty());
   }
 
@@ -101,7 +101,7 @@ TEST(MessageQueueTest, Clear) {
 
   for (int i = 0; i < kNumMessages; ++i) {
     message_queue.Push(
-        {{}, static_cast<double>(i) / static_cast<double>(kNumMessages)});
+        {static_cast<double>(i) / static_cast<double>(kNumMessages)});
     EXPECT_FALSE(message_queue.Empty());
   }
   iterator = message_queue.GetIterator(0.0, 1.0);

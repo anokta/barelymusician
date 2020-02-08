@@ -42,8 +42,8 @@ TEST(PerformerTest, ScheduleSingleNote) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, kStartPosition,
-                    kEndPosition);
+  performer.Process(kStartPosition, kEndPosition, buffer.data(), kNumChannels,
+                    kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -51,11 +51,11 @@ TEST(PerformerTest, ScheduleSingleNote) {
   }
 
   // Start note.
-  performer.ScheduleNoteOn(kNoteIndex, kNoteIntensity, kStartPosition);
+  performer.ScheduleNoteOn(kStartPosition, kNoteIndex, kNoteIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, kStartPosition,
-                    kEndPosition);
+  performer.Process(kStartPosition, kEndPosition, buffer.data(), kNumChannels,
+                    kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -64,11 +64,11 @@ TEST(PerformerTest, ScheduleSingleNote) {
   }
 
   // Stop note.
-  performer.ScheduleNoteOff(kNoteIndex, kStartPosition);
+  performer.ScheduleNoteOff(kStartPosition, kNoteIndex);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, kStartPosition,
-                    kEndPosition);
+  performer.Process(kStartPosition, kEndPosition, buffer.data(), kNumChannels,
+                    kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -84,7 +84,7 @@ TEST(PerformerTest, ScheduleMultipleNotes) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, 0.0, 1.0);
+  performer.Process(0.0, 1.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -94,12 +94,12 @@ TEST(PerformerTest, ScheduleMultipleNotes) {
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
     performer.ScheduleNoteOn(
-        static_cast<float>(i), kNoteIntensity,
-        static_cast<double>(i) / static_cast<double>(kNumFrames));
+        static_cast<double>(i) / static_cast<double>(kNumFrames),
+        static_cast<float>(i), kNoteIntensity);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, 0.0, 1.0);
+  performer.Process(0.0, 1.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kNoteIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -111,7 +111,7 @@ TEST(PerformerTest, ScheduleMultipleNotes) {
   performer.AllScheduledNotesOff();
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  performer.Process(buffer.data(), kNumChannels, kNumFrames, 0.0, 1.0);
+  performer.Process(0.0, 1.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

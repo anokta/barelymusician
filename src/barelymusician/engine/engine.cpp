@@ -69,8 +69,8 @@ bool Engine::Process(int performer_id, float* output, int num_channels,
     DCHECK(output);
     DCHECK_GE(num_channels, 0);
     DCHECK_GE(num_frames, 0);
-    performer->Process(output, num_channels, num_frames, previous_position_,
-                       current_position_);
+    performer->Process(previous_position_, current_position_, output,
+                       num_channels, num_frames);
     return true;
   }
   return false;
@@ -79,7 +79,7 @@ bool Engine::Process(int performer_id, float* output, int num_channels,
 bool Engine::ScheduleNoteOff(int performer_id, double position, float index) {
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
     DCHECK_GE(position, 0.0);
-    performer->ScheduleNoteOff(index, position);
+    performer->ScheduleNoteOff(position, index);
     return true;
   }
   return false;
@@ -89,7 +89,7 @@ bool Engine::ScheduleNoteOn(int performer_id, double position, float index,
                             float intensity) {
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
     DCHECK_GE(position, 0.0);
-    performer->ScheduleNoteOn(index, intensity, position);
+    performer->ScheduleNoteOn(position, index, intensity);
     return true;
   }
   return false;

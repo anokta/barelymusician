@@ -59,12 +59,12 @@ bool ScheduleMidiEvents(const smf::MidiEventList& midi_events,
       const float intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       const double position = get_position(midi_event.tick);
-      performer->ScheduleNoteOn(index, intensity, position);
+      performer->ScheduleNoteOn(position, index, intensity);
       any_scheduled = true;
     } else if (midi_event.isNoteOff()) {
       const float index = static_cast<float>(midi_event.getKeyNumber());
       const double position = get_position(midi_event.tick);
-      performer->ScheduleNoteOff(index, position);
+      performer->ScheduleNoteOff(position, index);
       any_scheduled = true;
     }
   }
@@ -129,8 +129,8 @@ int main(int argc, char* argv[]) {
 
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (Performer& performer : performers) {
-      performer.Process(temp_buffer.data(), kNumChannels, kNumFrames,
-                        start_position, end_position);
+      performer.Process(start_position, end_position, temp_buffer.data(),
+                        kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }

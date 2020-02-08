@@ -35,8 +35,8 @@ void Performer::NoteOn(float index, float intensity) {
   }
 }
 
-void Performer::Process(float* output, int num_channels, int num_frames,
-                        double start_position, double end_position) {
+void Performer::Process(double start_position, double end_position,
+                        float* output, int num_channels, int num_frames) {
   DCHECK(output);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
@@ -74,12 +74,12 @@ void Performer::Process(float* output, int num_channels, int num_frames,
   }
 }
 
-void Performer::ScheduleNoteOff(float index, double position) {
-  messages_.Push({NoteOffData{index}, position});
+void Performer::ScheduleNoteOff(double position, float index) {
+  messages_.Push({position, NoteOffData{index}});
 }
 
-void Performer::ScheduleNoteOn(float index, float intensity, double position) {
-  messages_.Push({NoteOnData{index, intensity}, position});
+void Performer::ScheduleNoteOn(double position, float index, float intensity) {
+  messages_.Push({position, NoteOnData{index, intensity}});
 }
 
 void Performer::SetNoteOffCallback(NoteOffCallback&& note_off_callback) {

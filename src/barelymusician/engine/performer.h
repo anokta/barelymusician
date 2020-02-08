@@ -40,26 +40,26 @@ class Performer {
 
   // Processes the next output buffer for the given interval.
   //
+  // @param start_position Start position to perform.
+  // @param end_position End position to perform.
   // @param output Pointer to the output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  // @param start_position Start position to perform.
-  // @param end_position End position to perform.
-  void Process(float* output, int num_channels, int num_frames,
-               double start_position, double end_position);
+  void Process(double start_position, double end_position, float* output,
+               int num_channels, int num_frames);
 
   // Schedules note off to be performed.
   //
-  // @param index Note index.
   // @param position Position to perform note off.
-  void ScheduleNoteOff(float index, double position);
+  // @param index Note index.
+  void ScheduleNoteOff(double position, float index);
 
   // Schedules note on to be performed.
   //
+  // @param position Position to perform note on.
   // @param index Note index.
   // @param index Note intensity.
-  // @param position Position to perform note on.
-  void ScheduleNoteOn(float index, float intensity, double position);
+  void ScheduleNoteOn(double position, float index, float intensity);
 
   // Sets note off callback.
   //

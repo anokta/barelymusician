@@ -1,5 +1,6 @@
 #include "barelymusician/platform/unity/unity.h"
 
+#include <atomic>
 #include <mutex>
 #include <utility>
 
@@ -19,8 +20,8 @@ const int kNumMaxUnityTasks = 200;
 struct BarelyMusician {
   BarelyMusician(int sample_rate, int num_channels, int num_frames)
       : engine(sample_rate),
-        audio_task_runner(kNumMaxUnityTasks),
-        main_task_runner(kNumMaxUnityTasks),
+        audio_runner(kNumMaxUnityTasks),
+        main_runner(kNumMaxUnityTasks),
         sample_rate(sample_rate),
         num_channels(num_channels),
         num_frames(num_frames),
@@ -30,10 +31,10 @@ struct BarelyMusician {
   Engine engine;
 
   // Audio thread task runner.
-  TaskRunner audio_task_runner;
+  TaskRunner audio_runner;
 
   // Main thread task runner.
-  TaskRunner main_task_runner;
+  TaskRunner main_runner;
 
   // System sample rate.
   int sample_rate;
@@ -46,6 +47,9 @@ struct BarelyMusician {
 
   // Counter to generate unique performer ids.
   int id_counter;
+
+  // Playback position.
+  std::atomic<double> position;
 };
 
 // Unity engine.
@@ -75,30 +79,35 @@ int Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
            ProcessFn* process_fn_ptr) {
   DCHECK(barelymusician);
   const int id = ++barelymusician->id_counter;
-  barelymusician->audio_task_runner.Add(
+  barelymusician->audio_runner.Add(
       [id, note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr]() {
-        DCHECK(barelymusician->engine.Create(
-            id, std::make_unique<UnityInstrument>(
-                    note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr)));
+        auto instrument = std::make_unique<UnityInstrument>(
+            note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
+        DCHECK(barelymusician->engine.Create(id, std::move(instrument)));
       });
   return id;
 }
 
 void Destroy(int id) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add(
+  barelymusician->audio_runner.Add(
       [id]() { barelymusician->engine.Destroy(id); });
+}
+
+double GetPosition() {
+  DCHECK(barelymusician);
+  return barelymusician->position;
 }
 
 void NoteOff(int id, float index) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add(
+  barelymusician->audio_runner.Add(
       [id, index]() { barelymusician->engine.NoteOff(id, index); });
 }
 
 void NoteOn(int id, float index, float intensity) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add([id, index, intensity]() {
+  barelymusician->audio_runner.Add([id, index, intensity]() {
     barelymusician->engine.NoteOn(id, index, intensity);
   });
 }
@@ -113,14 +122,14 @@ void Process(int id, float* output) {
 
 void ScheduleNoteOff(int id, double position, float index) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add([id, position, index]() {
+  barelymusician->audio_runner.Add([id, position, index]() {
     barelymusician->engine.ScheduleNoteOff(id, position, index);
   });
 }
 
 void ScheduleNoteOn(int id, double position, float index, float intensity) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add([id, position, index, intensity]() {
+  barelymusician->audio_runner.Add([id, position, index, intensity]() {
     barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
   });
 }
@@ -129,14 +138,14 @@ void SetBeatCallback(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
   if (beat_callback_ptr != nullptr) {
     const auto beat_callback = [beat_callback_ptr](int beat) {
-      barelymusician->main_task_runner.Add(
+      barelymusician->main_runner.Add(
           [beat_callback_ptr, beat]() { beat_callback_ptr(beat); });
     };
-    barelymusician->audio_task_runner.Add([beat_callback]() {
+    barelymusician->audio_runner.Add([beat_callback]() {
       barelymusician->engine.SetBeatCallback(beat_callback);
     });
   } else {
-    barelymusician->audio_task_runner.Add(
+    barelymusician->audio_runner.Add(
         []() { barelymusician->engine.SetBeatCallback(nullptr); });
   }
 }
@@ -146,16 +155,15 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
   if (note_off_callback_ptr != nullptr) {
     const auto note_off_callback = [note_off_callback_ptr](int id,
                                                            float index) {
-      barelymusician->main_task_runner.Add(
-          [note_off_callback_ptr, id, index]() {
-            note_off_callback_ptr(id, index);
-          });
+      barelymusician->main_runner.Add([note_off_callback_ptr, id, index]() {
+        note_off_callback_ptr(id, index);
+      });
     };
-    barelymusician->audio_task_runner.Add([note_off_callback]() {
+    barelymusician->audio_runner.Add([note_off_callback]() {
       barelymusician->engine.SetNoteOffCallback(note_off_callback);
     });
   } else {
-    barelymusician->audio_task_runner.Add(
+    barelymusician->audio_runner.Add(
         []() { barelymusician->engine.SetNoteOffCallback(nullptr); });
   }
 }
@@ -165,49 +173,60 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
   if (note_on_callback_ptr != nullptr) {
     const auto note_on_callback = [note_on_callback_ptr](int id, float index,
                                                          float intensity) {
-      barelymusician->main_task_runner.Add(
+      barelymusician->main_runner.Add(
           [note_on_callback_ptr, id, index, intensity]() {
             note_on_callback_ptr(id, index, intensity);
           });
     };
-    barelymusician->audio_task_runner.Add([note_on_callback]() {
+    barelymusician->audio_runner.Add([note_on_callback]() {
       barelymusician->engine.SetNoteOnCallback(note_on_callback);
     });
   } else {
-    barelymusician->audio_task_runner.Add(
+    barelymusician->audio_runner.Add(
         []() { barelymusician->engine.SetNoteOnCallback(nullptr); });
   }
 }
 
+void SetPosition(double position) {
+  DCHECK(barelymusician);
+  barelymusician->audio_runner.Add([position]() {
+    if (position != barelymusician->engine.GetPosition()) {
+      barelymusician->engine.SetPosition(position);
+    }
+  });
+}
+
 void SetTempo(double tempo) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add(
-      [tempo]() { barelymusician->engine.SetTempo(tempo); });
+  barelymusician->audio_runner.Add([tempo]() {
+    if (tempo != barelymusician->engine.GetTempo()) {
+      barelymusician->engine.SetTempo(tempo);
+    }
+  });
 }
 
 void Start() {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add(
-      []() { barelymusician->engine.Start(); });
+  barelymusician->audio_runner.Add([]() { barelymusician->engine.Start(); });
 }
 
 void Stop() {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add(
-      []() { barelymusician->engine.Stop(); });
+  barelymusician->audio_runner.Add([]() { barelymusician->engine.Stop(); });
 }
 
 void UpdateAudioThread() {
   std::lock_guard<std::mutex> lock(init_shutdown_mutex);
   if (barelymusician != nullptr) {
-    barelymusician->audio_task_runner.Run();
+    barelymusician->audio_runner.Run();
     barelymusician->engine.Update(barelymusician->num_frames);
+    barelymusician->position = barelymusician->engine.GetPosition();
   }
 }
 
 void UpdateMainThread() {
   DCHECK(barelymusician);
-  barelymusician->main_task_runner.Run();
+  barelymusician->main_runner.Run();
 }
 
 }  // namespace unity

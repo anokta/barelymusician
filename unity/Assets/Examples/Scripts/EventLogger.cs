@@ -34,6 +34,10 @@ public class EventLogger : MonoBehaviour {
       } else {
         sequencer.Play();
       }
+    } else if (Input.GetKeyDown(KeyCode.Backspace)) {
+      sequencer.Stop();
+    } else if (Input.GetKeyDown(KeyCode.Return)) {
+      Debug.Log("Position: " + sequencer.GetPosition());
     }
   }
 

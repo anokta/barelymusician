@@ -100,11 +100,17 @@ namespace BarelyApi {
     }
 
     void Update() {
-      BarelyMusician.Instance.Update(this);
+      BarelyMusician.Instance.SetTempo(this, tempo);
+      BarelyMusician.Instance.Update();
     }
 
     void OnAudioFilterRead(float[] data, int channels) {
       BarelyMusician.Instance.Process();
+    }
+
+    // Returns playback position.
+    public double GetPosition() {
+      return BarelyMusician.Instance.GetPosition(this);
     }
 
     // Starts the sequencer.
@@ -123,7 +129,7 @@ namespace BarelyApi {
     public void Stop() {
       source.Stop();
       BarelyMusician.Instance.Stop(this);
-      // TODO: Add SetPosition(0.0) here.
+      BarelyMusician.Instance.SetPosition(this, 0.0);
     }
   }
 }

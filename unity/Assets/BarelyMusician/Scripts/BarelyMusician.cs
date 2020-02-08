@@ -49,6 +49,11 @@ namespace BarelyApi {
       Destroy(instrument.Id);
     }
 
+    // Returns playback position.
+    public double GetPosition(Sequencer sequencer) {
+      return GetPosition();
+    }
+
     // Processes instrument.
     public void Process(Instrument instrument, float[] output) {
       Process();
@@ -96,6 +101,16 @@ namespace BarelyApi {
       SetNoteOnCallback(noteOnCallbackPtr);
     }
 
+    // Sets playback position.
+    public void SetPosition(Sequencer sequencer, double position) {
+      SetPosition(position);
+    }
+
+    // Sets playback tempo.
+    public void SetTempo(Sequencer sequencer, double tempo) {
+      SetTempo(tempo);
+    }
+
     // Starts playback.
     public void Start(Sequencer sequencer) {
       Start();
@@ -104,12 +119,6 @@ namespace BarelyApi {
     // Stops playback.
     public void Stop(Sequencer sequencer) {
       Stop();
-    }
-
-    // Updates sequencer.
-    public void Update(Sequencer sequencer) {
-      SetTempo(sequencer.tempo);
-      Update();
     }
 
     // Constructs new |BarelyMusician| with Unity audio settings.
@@ -165,6 +174,9 @@ namespace BarelyApi {
     private static extern void Destroy(int id);
 
     [DllImport(pluginName)]
+    private static extern double GetPosition();
+
+    [DllImport(pluginName)]
     private static extern void Process(int id, [In, Out] float[] output);
 
     [DllImport(pluginName)]
@@ -187,6 +199,9 @@ namespace BarelyApi {
 
     [DllImport(pluginName)]
     private static extern void SetNoteOnCallback(IntPtr noteOnCallbackPtr);
+
+    [DllImport(pluginName)]
+    private static extern void SetPosition(double position);
 
     [DllImport(pluginName)]
     private static extern void SetTempo(double tempo);

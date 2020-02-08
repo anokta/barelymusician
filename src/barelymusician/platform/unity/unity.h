@@ -46,6 +46,11 @@ int EXPORT_API Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
 // @param id Performer id.
 void EXPORT_API Destroy(int id);
 
+// Returns playback position.
+//
+// @return Position in beats.
+double EXPORT_API GetPosition();
+
 // Stops instrument note.
 //
 // @param id Instrument id.
@@ -95,6 +100,11 @@ void EXPORT_API SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr);
 //
 // @param note_on_callback_ptr Pointer to note on callback.
 void EXPORT_API SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr);
+
+// Sets playback position.
+//
+// @param position Position in beats.
+void EXPORT_API SetPosition(double position);
 
 // Sets playback tempo.
 //

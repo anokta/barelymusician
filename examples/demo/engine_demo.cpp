@@ -203,10 +203,9 @@ int main(int argc, char* argv[]) {
       if (callback != nullptr) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
-      for (const Note& note : temp_notes) {
-        const double position = static_cast<double>(beat) + note.position;
-        engine.ScheduleNoteOn(id, position, note.index, note.intensity);
-        engine.ScheduleNoteOff(id, position + note.duration, note.index);
+      for (Note& note : temp_notes) {
+        note.position += static_cast<double>(beat);
+        engine.ScheduleNote(id, note);
       }
     }
   };

@@ -76,6 +76,17 @@ bool Engine::Process(int performer_id, float* output, int num_channels,
   return false;
 }
 
+bool Engine::ScheduleNote(int performer_id, const Note& note) {
+  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
+    DCHECK_GE(note.position, 0.0);
+    DCHECK_GE(note.duration, 0.0);
+    performer->ScheduleNoteOn(note.position, note.index, note.intensity);
+    performer->ScheduleNoteOff(note.position + note.duration, note.index);
+    return true;
+  }
+  return false;
+}
+
 bool Engine::ScheduleNoteOff(int performer_id, double position, float index) {
   if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
     DCHECK_GE(position, 0.0);

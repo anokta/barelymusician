@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "barelymusician/engine/clock.h"
+#include "barelymusician/engine/note.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/instrument/instrument.h"
 
@@ -82,6 +83,13 @@ class Engine {
   // @return True if successful.
   bool Process(int performer_id, float* output, int num_channels,
                int num_frames);
+
+  // Schedules note to be performed.
+  //
+  // @param performer_id Performer id.
+  // @param note Note.
+  // @return True if successful.
+  bool ScheduleNote(int performer_id, const Note& note);
 
   // Schedules note off to be performed.
   //

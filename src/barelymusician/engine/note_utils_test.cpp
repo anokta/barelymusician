@@ -1,27 +1,10 @@
-#include "barelymusician/musician/note_utils.h"
+#include "barelymusician/engine/note_utils.h"
 
 #include "barelymusician/base/constants.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
-
-// Tests that notes are compared as expected according to their offset beats.
-TEST(NoteUtilsTest, CompareNoteOffsetBeats) {
-  const double kFirstOffsetBeats = 0.45;
-  const double kSecondOffsetBeats = 0.7;
-
-  Note first_note;
-  first_note.offset_beats = kFirstOffsetBeats;
-  Note second_note;
-  second_note.offset_beats = kSecondOffsetBeats;
-
-  EXPECT_TRUE(CompareNote(first_note, second_note));
-  EXPECT_TRUE(CompareOffsetBeats(first_note, kSecondOffsetBeats));
-
-  EXPECT_FALSE(CompareNote(second_note, first_note));
-  EXPECT_FALSE(CompareOffsetBeats(second_note, kFirstOffsetBeats));
-}
 
 // Tests that note indices get quantized as expected given an arbitrary scale.
 TEST(NoteUtilsTest, GetNoteIndex) {

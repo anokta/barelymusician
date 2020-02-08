@@ -28,8 +28,8 @@
     <ClCompile Include="..\..\src\barelymusician\engine\clock.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\engine.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\performer.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\musician\note_utils.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp" />
   </ItemGroup>
@@ -49,13 +49,13 @@
     <ClInclude Include="..\..\src\barelymusician\engine\engine.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\message.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\message_queue.h" />
+    <ClInclude Include="..\..\src\barelymusician\engine\note.h" />
+    <ClInclude Include="..\..\src\barelymusician\engine\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\performer.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
-    <ClInclude Include="..\..\src\barelymusician\musician\note.h" />
-    <ClInclude Include="..\..\src\barelymusician\musician\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\util\random.h" />
     <ClInclude Include="..\..\src\barelymusician\util\task_runner.h" />
   </ItemGroup>

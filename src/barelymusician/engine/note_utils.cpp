@@ -1,17 +1,9 @@
-#include "barelymusician/musician/note_utils.h"
+#include "barelymusician/engine/note_utils.h"
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 
 namespace barelyapi {
-
-bool CompareNote(const Note& lhs, const Note& rhs) {
-  return lhs.offset_beats < rhs.offset_beats;
-}
-
-bool CompareOffsetBeats(const Note& note, double offset_beats) {
-  return note.offset_beats < offset_beats;
-}
 
 double GetBeat(int step, int num_steps_per_beat) {
   DCHECK_GE(step, 0);

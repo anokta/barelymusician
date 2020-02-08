@@ -31,12 +31,6 @@
     <Filter Include="Header Files\algorithm">
       <UniqueIdentifier>{602d365f-6b74-43a9-9c2c-d12eef1c7515}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\musician">
-      <UniqueIdentifier>{e16bab02-6de2-49d9-8e76-e2455effb560}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\musician">
-      <UniqueIdentifier>{9cf1afd1-2141-4f41-8171-7264faf6cf07}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\util">
       <UniqueIdentifier>{f5479aa3-36c1-4205-8554-f3cce92bf42d}</UniqueIdentifier>
     </Filter>
@@ -96,12 +90,6 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\module.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\musician\note.h">
-      <Filter>Header Files\musician</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\musician\note_utils.h">
-      <Filter>Header Files\musician</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\util\random.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -121,6 +109,12 @@
       <Filter>Header Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\engine\engine.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\engine\note.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\engine\note_utils.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
@@ -143,9 +137,6 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\musician\note_utils.cpp">
-      <Filter>Source Files\musician</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\util\random.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -162,6 +153,9 @@
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\engine.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>

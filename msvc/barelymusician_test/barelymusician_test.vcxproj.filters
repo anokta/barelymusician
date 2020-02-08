@@ -13,9 +13,6 @@
     <Filter Include="Source Files\algorithm">
       <UniqueIdentifier>{de1892fa-780e-46ba-8013-3cf8659232a4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\musician">
-      <UniqueIdentifier>{e7801b4b-e168-4602-bfaa-e24ae1bd15c8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{195c8e44-b17f-4829-86af-4260514661dd}</UniqueIdentifier>
     </Filter>
@@ -45,9 +42,6 @@
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp">
       <Filter>Source Files\instrument</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\musician\note_utils_test.cpp">
-      <Filter>Source Files\musician</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -61,6 +55,9 @@
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue_test.cpp">
+      <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician\engine\note_utils_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>

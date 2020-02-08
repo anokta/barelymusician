@@ -11,9 +11,9 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/note.h"
+#include "barelymusician/engine/note_utils.h"
 #include "barelymusician/instrument/instrument.h"
-#include "barelymusician/musician/note.h"
-#include "barelymusician/musician/note_utils.h"
 #include "barelymusician/util/random.h"
 #include "barelymusician/util/task_runner.h"
 #include "instruments/basic_drumkit_instrument.h"
@@ -76,7 +76,7 @@ void ComposeChord(float root_note_index, const std::vector<float>& scale,
   const auto add_chord_note = [&](float index) {
     const float note_index =
         root_note_index + barelyapi::GetNoteIndex(scale, index);
-    notes->push_back({note_index, intensity, 0.0, 1.0});
+    notes->push_back({0.0, 1.0, note_index, intensity});
   };
   const float start_note = static_cast<float>(harmonic);
   add_chord_note(start_note);
@@ -90,25 +90,26 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
                  int harmonic, std::vector<Note>* notes) {
   const float start_note = static_cast<float>(harmonic);
   const float note_offset = static_cast<float>(beat);
-  const auto add_note = [&](float index, double offset_beats, double end_beat) {
-    notes->push_back({root_note_index + barelyapi::GetNoteIndex(scale, index),
-                      intensity, offset_beats, end_beat});
+  const auto add_note = [&](double position, double duration, float index) {
+    notes->push_back({position, duration,
+                      root_note_index + barelyapi::GetNoteIndex(scale, index),
+                      intensity});
   };
   if (beat % 2 == 1) {
-    add_note(start_note, 0.0, 0.25);
-    add_note(start_note - note_offset, 0.33, 0.33);
-    add_note(start_note, 0.66, 0.33);
+    add_note(0.0, 0.25, start_note);
+    add_note(0.33, 0.33, start_note - note_offset);
+    add_note(0.66, 0.33, start_note);
   } else {
-    add_note(start_note + note_offset, 0.0, 0.25);
+    add_note(0.0, 0.25, start_note + note_offset);
   }
   if (beat % 2 == 0) {
-    add_note(start_note - note_offset, 0.0, 0.05);
-    add_note(start_note - 2.0f * note_offset, 0.5, 0.05);
+    add_note(0.0, 0.05, start_note - note_offset);
+    add_note(0.5, 0.05, start_note - 2.0f * note_offset);
   }
   if (beat + 1 == num_beats && bar % 2 == 1) {
-    add_note(start_note + 2.0f * note_offset, 0.25, 0.125);
-    add_note(start_note - 2.0f * note_offset, 0.75, 0.125);
-    add_note(start_note + 2.0f * note_offset, 0.5, 0.25);
+    add_note(0.25, 0.125, start_note + 2.0f * note_offset);
+    add_note(0.75, 0.125, start_note - 2.0f * note_offset);
+    add_note(0.5, 0.25, start_note + 2.0f * note_offset);
   }
 }
 
@@ -119,45 +120,45 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   // Kick.
   if (beat % 2 == 0) {
     notes->push_back(
-        {barelyapi::kNoteIndexKick, 1.0f, get_beat(0), get_beat(2)});
+        {get_beat(0), get_beat(2), barelyapi::kNoteIndexKick, 1.0f});
     if (bar % 2 == 1 && beat == 0) {
       notes->push_back(
-          {barelyapi::kNoteIndexKick, 1.0f, get_beat(2), get_beat(2)});
+          {get_beat(2), get_beat(2), barelyapi::kNoteIndexKick, 1.0f});
     }
   }
   // Snare.
   if (beat % 2 == 1) {
     notes->push_back(
-        {barelyapi::kNoteIndexSnare, 1.0f, get_beat(0), get_beat(2)});
+        {get_beat(0), get_beat(2), barelyapi::kNoteIndexSnare, 1.0f});
   }
   if (beat + 1 == num_beats) {
     notes->push_back(
-        {barelyapi::kNoteIndexSnare, 0.75f, get_beat(2), get_beat(2)});
+        {get_beat(2), get_beat(2), barelyapi::kNoteIndexSnare, 0.75f});
     if (bar % 4 == 3) {
       notes->push_back(
-          {barelyapi::kNoteIndexSnare, 1.0f, get_beat(1), get_beat(1)});
+          {get_beat(1), get_beat(1), barelyapi::kNoteIndexSnare, 1.0f});
       notes->push_back(
-          {barelyapi::kNoteIndexSnare, 0.75f, get_beat(3), get_beat(1)});
+          {get_beat(3), get_beat(1), barelyapi::kNoteIndexSnare, 0.75f});
     }
   }
   // Hihat Closed.
-  notes->push_back({barelyapi::kNoteIndexHihatClosed,
-                    Random::Uniform(0.5f, 0.75f), get_beat(0), get_beat(2)});
-  notes->push_back({barelyapi::kNoteIndexHihatClosed,
-                    Random::Uniform(0.25f, 0.75f), get_beat(2), get_beat(2)});
+  notes->push_back({get_beat(0), get_beat(2), barelyapi::kNoteIndexHihatClosed,
+                    Random::Uniform(0.5f, 0.75f)});
+  notes->push_back({get_beat(2), get_beat(2), barelyapi::kNoteIndexHihatClosed,
+                    Random::Uniform(0.25f, 0.75f)});
   // Hihat Open.
   if (beat + 1 == num_beats) {
     if (bar % 4 == 3) {
       notes->push_back(
-          {barelyapi::kNoteIndexHihatOpen, 0.5f, get_beat(1), get_beat(1)});
+          {get_beat(1), get_beat(1), barelyapi::kNoteIndexHihatOpen, 0.5f});
     } else if (bar % 2 == 0) {
       notes->push_back(
-          {barelyapi::kNoteIndexHihatOpen, 0.5f, get_beat(3), get_beat(1)});
+          {get_beat(3), get_beat(1), barelyapi::kNoteIndexHihatOpen, 0.5f});
     }
   }
   if (beat == 0 && bar % 4 == 0) {
     notes->push_back(
-        {barelyapi::kNoteIndexHihatOpen, 0.75f, get_beat(0), get_beat(2)});
+        {get_beat(0), get_beat(2), barelyapi::kNoteIndexHihatOpen, 0.75f});
   }
 }
 
@@ -203,9 +204,9 @@ int main(int argc, char* argv[]) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
       for (const Note& note : temp_notes) {
-        const double position = static_cast<double>(beat) + note.offset_beats;
+        const double position = static_cast<double>(beat) + note.position;
         engine.ScheduleNoteOn(id, position, note.index, note.intensity);
-        engine.ScheduleNoteOff(id, position + note.duration_beats, note.index);
+        engine.ScheduleNoteOff(id, position + note.duration, note.index);
       }
     }
   };

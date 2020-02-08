@@ -18,12 +18,13 @@ namespace BarelyApi {
     public void NoteOn(float index, float intensity) {
       BarelyMusician.Instance.NoteOn(this, index, intensity);
     }
-    public void ScheduleNoteOff(float index, double position) {
-      BarelyMusician.Instance.ScheduleNoteOff(this, index, position);
+
+    public void ScheduleNoteOff(double position, float index) {
+      BarelyMusician.Instance.ScheduleNoteOff(this, position, index);
     }
 
-    public void ScheduleNoteOn(float index, float intensity, double position) {
-      BarelyMusician.Instance.ScheduleNoteOn(this, index, intensity, position);
+    public void ScheduleNoteOn(double position, float index, float intensity) {
+      BarelyMusician.Instance.ScheduleNoteOn(this, position, index, intensity);
     }
 
     // Stops playing note with the given |index|.

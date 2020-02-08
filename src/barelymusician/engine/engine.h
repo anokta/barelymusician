@@ -86,20 +86,20 @@ class Engine {
   // Schedules note off to be performed.
   //
   // @param performer_id Performer id.
-  // @param index Note index.
   // @param position Position to perform note off.
+  // @param index Note index.
   // @return True if successful.
-  bool ScheduleNoteOff(int performer_id, float index, double position);
+  bool ScheduleNoteOff(int performer_id, double position, float index);
 
   // Schedules note on to be performed.
   //
   // @param performer_id Performer id.
+  // @param position Position to perform note on.
   // @param index Note index.
   // @param index Note intensity.
-  // @param position Position to perform note on.
   // @return True if successful.
-  bool ScheduleNoteOn(int performer_id, float index, float intensity,
-                      double position);
+  bool ScheduleNoteOn(int performer_id, double position, float index,
+                      float intensity);
 
   // Sets beat callback.
   //

@@ -204,8 +204,8 @@ int main(int argc, char* argv[]) {
       }
       for (const Note& note : temp_notes) {
         const double position = static_cast<double>(beat) + note.offset_beats;
-        engine.ScheduleNoteOn(id, note.index, note.intensity, position);
-        engine.ScheduleNoteOff(id, note.index, position + note.duration_beats);
+        engine.ScheduleNoteOn(id, position, note.index, note.intensity);
+        engine.ScheduleNoteOff(id, position + note.duration_beats, note.index);
       }
     }
   };

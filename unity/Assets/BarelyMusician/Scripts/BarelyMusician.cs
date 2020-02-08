@@ -66,20 +66,19 @@ namespace BarelyApi {
     }
 
     // Schedules instrument note off.
-    public void ScheduleNoteOff(Instrument instrument, float index, double position) {
-      ScheduleNoteOff(instrument.Id, index, position);
+    public void ScheduleNoteOff(Instrument instrument, double position, float index) {
+      ScheduleNoteOff(instrument.Id, position, index);
     }
 
     // Schedules instrument note on.
-    public void ScheduleNoteOn(Instrument instrument, float index, float intensity, double position) {
-      ScheduleNoteOn(instrument.Id, index, intensity, position);
+    public void ScheduleNoteOn(Instrument instrument, double position, float index, float intensity) {
+      ScheduleNoteOn(instrument.Id, position, index, intensity);
     }
 
     // Sets beat callback.
-    public void SetBeatCallback(BeatCallback beatCallback)
-    {
-      IntPtr beatCallbackPtr = 
-          (beatCallback != null) ? Marshal.GetFunctionPointerForDelegate(beatCallback) : IntPtr.Zero; 
+    public void SetBeatCallback(BeatCallback beatCallback) {
+      IntPtr beatCallbackPtr =
+          (beatCallback != null) ? Marshal.GetFunctionPointerForDelegate(beatCallback) : IntPtr.Zero;
       SetBeatCallback(beatCallbackPtr);
     }
 
@@ -89,7 +88,7 @@ namespace BarelyApi {
           (noteOffCallback != null) ? Marshal.GetFunctionPointerForDelegate(noteOffCallback) : IntPtr.Zero;
       SetNoteOffCallback(noteOffCallbackPtr);
     }
-    
+
     // Sets note on callback.
     public void SetNoteOnCallback(NoteOnCallback noteOnCallback) {
       IntPtr noteOnCallbackPtr =
@@ -175,10 +174,10 @@ namespace BarelyApi {
     private static extern void NoteOn(int id, float index, float intensity);
 
     [DllImport(pluginName)]
-    private static extern void ScheduleNoteOff(int id, float index, double position);
+    private static extern void ScheduleNoteOff(int id, double position, float index);
 
-    [DllImport(pluginName)]                                        
-    private static extern void ScheduleNoteOn(int id, float index, float intensity, double position);
+    [DllImport(pluginName)]
+    private static extern void ScheduleNoteOn(int id, double position, float index, float intensity);
 
     [DllImport(pluginName)]
     private static extern void SetBeatCallback(IntPtr beatCallbackPtr);

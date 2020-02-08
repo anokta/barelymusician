@@ -20,22 +20,18 @@ public class InstrumentPlayer : MonoBehaviour {
   }
 
   //void Start() {
-  //  for (int i = 0; i < 20; ++i) {
-  //    instrument.ScheduleNoteOn((i % 4), 1.0f, i);
-  //    instrument.ScheduleNoteOff((i % 4), i + 0.5);
+  //  for (int i = 0; i < 16; ++i) {
+  //    float index = i % 4;
+  //    instrument.ScheduleNoteOn(i, index, 1.0f);
+  //    instrument.ScheduleNoteOff(i + 0.5, index);
   //  }
-  //  //instrument.ScheduleNoteOn(1.0f, 1.0f, 1.0);
-  //  //instrument.ScheduleNoteOff(1.0f, 1.5);
-  //  //instrument.ScheduleNoteOn(2.0f, 1.0f, 2.0);
-  //  //instrument.ScheduleNoteOff(2.0f, 2.5);
   //}
 
   void Update() {
     if (Input.GetKeyDown(KeyCode.S) && !isPlaying) {
       instrument.NoteOn(noteIndex, noteIntensity);
       isPlaying = true;
-    }
-    else if (Input.GetKeyUp(KeyCode.S) && isPlaying) {
+    } else if (Input.GetKeyUp(KeyCode.S) && isPlaying) {
       instrument.NoteOff(noteIndex);
       isPlaying = false;
     }

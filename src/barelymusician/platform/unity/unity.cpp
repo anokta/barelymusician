@@ -111,17 +111,17 @@ void Process(int id, float* output) {
   }
 }
 
-void ScheduleNoteOff(int id, float index, double position) {
+void ScheduleNoteOff(int id, double position, float index) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add([id, index, position]() {
-    barelymusician->engine.ScheduleNoteOff(id, index, position);
+  barelymusician->audio_task_runner.Add([id, position, index]() {
+    barelymusician->engine.ScheduleNoteOff(id, position, index);
   });
 }
 
-void ScheduleNoteOn(int id, float index, float intensity, double position) {
+void ScheduleNoteOn(int id, double position, float index, float intensity) {
   DCHECK(barelymusician);
-  barelymusician->audio_task_runner.Add([id, index, intensity, position]() {
-    barelymusician->engine.ScheduleNoteOn(id, index, intensity, position);
+  barelymusician->audio_task_runner.Add([id, position, index, intensity]() {
+    barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
   });
 }
 

@@ -68,18 +68,18 @@ void EXPORT_API Process(int id, float* output);
 // Schedules instrument note off.
 //
 // @param id Instrument id.
-// @param index Note index.
 // @param position Position in beats.
-void EXPORT_API ScheduleNoteOff(int id, float index, double position);
+// @param index Note index.
+void EXPORT_API ScheduleNoteOff(int id, double position, float index);
 
 // Schedules instrument note on.
 //
 // @param id Instrument id.
+// @param position Position in beats.
 // @param index Note index.
 // @param intensity Note intensity.
-// @param position Position in beats.
-void EXPORT_API ScheduleNoteOn(int id, float index, float intensity,
-                               double position);
+void EXPORT_API ScheduleNoteOn(int id, double position, float index,
+                               float intensity);
 
 // Sets beat callback.
 //

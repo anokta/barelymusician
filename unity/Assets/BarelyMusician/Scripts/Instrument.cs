@@ -7,24 +7,25 @@ namespace BarelyApi {
   [RequireComponent(typeof(AudioSource))]
   public abstract class Instrument : MonoBehaviour {
     // Instrument ID.
-    public int Id { get; protected set; } = BarelyMusician.InvalidId;
+    // TODO: temporarily public for note on/off callbacks, refactor.
+    public int _id = BarelyMusician.InvalidId;
 
     // Stops playing note with the given |index|.
     public void NoteOff(float index) {
-      BarelyMusician.Instance.NoteOff(this, index);
+      BarelyMusician.Instance.NoteOff(_id, index);
     }
 
     // Starts playing note with the given |index| and |intensity|.
     public void NoteOn(float index, float intensity) {
-      BarelyMusician.Instance.NoteOn(this, index, intensity);
+      BarelyMusician.Instance.NoteOn(_id, index, intensity);
     }
 
     public void ScheduleNoteOff(double position, float index) {
-      BarelyMusician.Instance.ScheduleNoteOff(this, position, index);
+      BarelyMusician.Instance.ScheduleNoteOff(_id, position, index);
     }
 
     public void ScheduleNoteOn(double position, float index, float intensity) {
-      BarelyMusician.Instance.ScheduleNoteOn(this, position, index, intensity);
+      BarelyMusician.Instance.ScheduleNoteOn(_id, position, index, intensity);
     }
 
     // Stops playing note with the given |index|.
@@ -59,18 +60,19 @@ namespace BarelyApi {
 
     protected virtual void OnDisable() {
       source.Stop();
-      if (Id != BarelyMusician.InvalidId) {
-        BarelyMusician.Instance.Destroy(this);
-        Id = BarelyMusician.InvalidId;
+      if (_id != BarelyMusician.InvalidId) {
+        BarelyMusician.Instance.Destroy(_id);
+        _id = BarelyMusician.InvalidId;
       }
     }
 
     protected virtual void Update() {
-      BarelyMusician.Instance.Update();
+      BarelyMusician.Instance.UpdateMainThread();
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Instance.Process(this, data);
+      BarelyMusician.Instance.UpdateAudioThread();
+      BarelyMusician.Instance.Process(_id, data);
     }
   }
 }

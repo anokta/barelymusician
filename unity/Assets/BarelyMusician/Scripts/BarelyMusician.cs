@@ -15,8 +15,9 @@ namespace BarelyApi {
     // Internal Unity instrument functions.
     public delegate void NoteOffFn(float index);
     public delegate void NoteOnFn(float index, float intensity);
-    public delegate void ProcessFn([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output,
-                                   int size, int numChannels);
+    public delegate void ProcessFn(
+      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output, int size,
+      int numChannels);
 
     // Invalid ID.
     public static readonly int InvalidId = -1;
@@ -40,182 +41,185 @@ namespace BarelyApi {
 
     // Creates new instrument.
     public int Create(NoteOffFn noteOffFn, NoteOnFn noteOnFn, ProcessFn processFn) {
-      return Create(Marshal.GetFunctionPointerForDelegate(noteOffFn), Marshal.GetFunctionPointerForDelegate(noteOnFn),
-                    Marshal.GetFunctionPointerForDelegate(processFn));
+      return CreateNative(Marshal.GetFunctionPointerForDelegate(noteOffFn),
+                          Marshal.GetFunctionPointerForDelegate(noteOnFn),
+                          Marshal.GetFunctionPointerForDelegate(processFn));
     }
 
     // Destroys instrument.
-    public void Destroy(Instrument instrument) {
-      Destroy(instrument.Id);
+    public void Destroy(int id) {
+      DestroyNative(id);
     }
 
     // Returns playback position.
-    public double GetPosition(Sequencer sequencer) {
-      return GetPosition();
+    public double GetPosition() {
+      return GetPositionNative();
     }
 
     // Processes instrument.
-    public void Process(Instrument instrument, float[] output) {
-      Process();
-      Process(instrument.Id, output);
+    public void Process(int id, float[] output) {
+      ProcessNative(id, output);
     }
 
     // Sets instrument note off.
-    public void NoteOff(Instrument instrument, float index) {
-      NoteOff(instrument.Id, index);
+    public void NoteOff(int id, float index) {
+      NoteOffNative(id, index);
     }
 
     // Sets instrument note on.
-    public void NoteOn(Instrument instrument, float index, float intensity) {
-      NoteOn(instrument.Id, index, intensity);
+    public void NoteOn(int id, float index, float intensity) {
+      NoteOnNative(id, index, intensity);
     }
 
     // Schedules instrument note off.
-    public void ScheduleNoteOff(Instrument instrument, double position, float index) {
-      ScheduleNoteOff(instrument.Id, position, index);
+    public void ScheduleNoteOff(int id, double position, float index) {
+      ScheduleNoteOffNative(id, position, index);
     }
 
     // Schedules instrument note on.
-    public void ScheduleNoteOn(Instrument instrument, double position, float index, float intensity) {
-      ScheduleNoteOn(instrument.Id, position, index, intensity);
+    public void ScheduleNoteOn(int id, double position, float index, float intensity) {
+      ScheduleNoteOnNative(id, position, index, intensity);
     }
 
     // Sets beat callback.
     public void SetBeatCallback(BeatCallback beatCallback) {
-      IntPtr beatCallbackPtr =
-          (beatCallback != null) ? Marshal.GetFunctionPointerForDelegate(beatCallback) : IntPtr.Zero;
-      SetBeatCallback(beatCallbackPtr);
+      IntPtr beatCallbackPtr = (beatCallback != null)
+                                  ? Marshal.GetFunctionPointerForDelegate(beatCallback)
+                                  : IntPtr.Zero;
+      SetBeatCallbackNative(beatCallbackPtr);
     }
 
     // Sets note off callback.
     public void SetNoteOffCallback(NoteOffCallback noteOffCallback) {
-      IntPtr noteOffCallbackPtr =
-          (noteOffCallback != null) ? Marshal.GetFunctionPointerForDelegate(noteOffCallback) : IntPtr.Zero;
-      SetNoteOffCallback(noteOffCallbackPtr);
+      IntPtr noteOffCallbackPtr = (noteOffCallback != null)
+                            ? Marshal.GetFunctionPointerForDelegate(noteOffCallback)
+                            : IntPtr.Zero;
+      SetNoteOffCallbackNative(noteOffCallbackPtr);
     }
 
     // Sets note on callback.
     public void SetNoteOnCallback(NoteOnCallback noteOnCallback) {
-      IntPtr noteOnCallbackPtr =
-          (noteOnCallback != null) ? Marshal.GetFunctionPointerForDelegate(noteOnCallback) : IntPtr.Zero;
-      SetNoteOnCallback(noteOnCallbackPtr);
+      IntPtr noteOnCallbackPtr = (noteOnCallback != null)
+                            ? Marshal.GetFunctionPointerForDelegate(noteOnCallback)
+                            : IntPtr.Zero;
+      SetNoteOffCallbackNative(noteOnCallbackPtr);
     }
 
     // Sets playback position.
-    public void SetPosition(Sequencer sequencer, double position) {
-      SetPosition(position);
+    public void SetPosition(double position) {
+      SetPositionNative(position);
     }
 
     // Sets playback tempo.
-    public void SetTempo(Sequencer sequencer, double tempo) {
-      SetTempo(tempo);
+    public void SetTempo(double tempo) {
+      SetTempoNative(tempo);
     }
 
     // Starts playback.
-    public void Start(Sequencer sequencer) {
-      Start();
+    public void Start() {
+      StartNative();
     }
 
     // Stops playback.
-    public void Stop(Sequencer sequencer) {
-      Stop();
+    public void Stop() {
+      StopNative();
     }
 
-    // Constructs new |BarelyMusician| with Unity audio settings.
+    // Constructs new |BarelyMusician| with Unity audio settings.                                                       
     BarelyMusician() {
       var config = AudioSettings.GetConfiguration();
       int sampleRate = config.sampleRate;
       int numChannels = (int)config.speakerMode;
       int numFrames = config.dspBufferSize;
-      Initialize(sampleRate, numChannels, numFrames);
+      InitializeNative(sampleRate, numChannels, numFrames);
     }
 
     // Shuts down |BarelyMusician|.
     ~BarelyMusician() {
-      Shutdown();
+      ShutdownNative();
     }
 
     // Updates the audio thread state.
-    public void Process() {
+    public void UpdateAudioThread() {
       double dspTime = AudioSettings.dspTime;
       if (dspTime > lastDspTime) {
         lastDspTime = dspTime;
-        UpdateAudioThread();
+        UpdateAudioThreadNative();
       }
     }
 
     // Updates the main thread state.
-    public void Update() {
+    public void UpdateMainThread() {
       float updateTime = Time.unscaledTime;
       if (updateTime > lastUpdateTime) {
         lastUpdateTime = updateTime;
-        UpdateMainThread();
+        UpdateMainThreadNative();
       }
     }
 
 #if !UNITY_EDITOR && UNITY_IOS
-  private const string pluginName = "__Internal";
+    private const string pluginName = "__Internal";
 #else
     private const string pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
-    // System handlers.
-    [DllImport(pluginName)]
-    private static extern void Initialize(int sampleRate, int numChannels, int numFrames);
+    [DllImport(pluginName, EntryPoint = "Initialize")]
+    private static extern void InitializeNative(int sampleRate, int numChannels, int numFrames);
 
-    [DllImport(pluginName)]
-    private static extern void Shutdown();
+    [DllImport(pluginName, EntryPoint = "Shutdown")]
+    private static extern void ShutdownNative();
 
-    // Instrument handlers.
-    [DllImport(pluginName)]
-    private static extern int Create(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr, IntPtr processFnPtr);
+    [DllImport(pluginName, EntryPoint = "Create")]
+    private static extern int CreateNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+                                           IntPtr processFnPtr);
 
-    [DllImport(pluginName)]
-    private static extern void Destroy(int id);
+    [DllImport(pluginName, EntryPoint = "Destroy")]
+    private static extern void DestroyNative(int id);
 
-    [DllImport(pluginName)]
-    private static extern double GetPosition();
+    [DllImport(pluginName, EntryPoint = "GetPosition")]
+    private static extern double GetPositionNative();
 
-    [DllImport(pluginName)]
-    private static extern void Process(int id, [In, Out] float[] output);
+    [DllImport(pluginName, EntryPoint = "Process")]
+    private static extern void ProcessNative(int id, [In, Out] float[] output);
 
-    [DllImport(pluginName)]
-    private static extern void NoteOff(int id, float index);
+    [DllImport(pluginName, EntryPoint = "NoteOff")]
+    private static extern void NoteOffNative(int id, float index);
 
-    [DllImport(pluginName)]
-    private static extern void NoteOn(int id, float index, float intensity);
+    [DllImport(pluginName, EntryPoint = "NoteOn")]
+    private static extern void NoteOnNative(int id, float index, float intensity);
 
-    [DllImport(pluginName)]
-    private static extern void ScheduleNoteOff(int id, double position, float index);
+    [DllImport(pluginName, EntryPoint = "ScheduleNoteOff")]
+    private static extern void ScheduleNoteOffNative(int id, double position, float index);
 
-    [DllImport(pluginName)]
-    private static extern void ScheduleNoteOn(int id, double position, float index, float intensity);
+    [DllImport(pluginName, EntryPoint = "ScheduleNoteOn")]
+    private static extern void ScheduleNoteOnNative(int id, double position, float index,
+                                                    float intensity);
 
-    [DllImport(pluginName)]
-    private static extern void SetBeatCallback(IntPtr beatCallbackPtr);
+    [DllImport(pluginName, EntryPoint = "SetBeatCallback")]
+    private static extern void SetBeatCallbackNative(IntPtr beatCallbackPtr);
 
-    [DllImport(pluginName)]
-    private static extern void SetNoteOffCallback(IntPtr noteOffCallbackPtr);
+    [DllImport(pluginName, EntryPoint = "SetNoteOffCallback")]
+    private static extern void SetNoteOffCallbackNative(IntPtr noteOffCallbackPtr);
 
-    [DllImport(pluginName)]
-    private static extern void SetNoteOnCallback(IntPtr noteOnCallbackPtr);
+    [DllImport(pluginName, EntryPoint = "SetNoteOnCallback")]
+    private static extern void SetNoteOnCallbackNative(IntPtr noteOnCallbackPtr);
 
-    [DllImport(pluginName)]
-    private static extern void SetPosition(double position);
+    [DllImport(pluginName, EntryPoint = "SetPosition")]
+    private static extern void SetPositionNative(double position);
 
-    [DllImport(pluginName)]
-    private static extern void SetTempo(double tempo);
+    [DllImport(pluginName, EntryPoint = "SetTempo")]
+    private static extern void SetTempoNative(double tempo);
 
-    [DllImport(pluginName)]
-    private static extern void Start();
+    [DllImport(pluginName, EntryPoint = "Start")]
+    private static extern void StartNative();
 
-    [DllImport(pluginName)]
-    private static extern void Stop();
+    [DllImport(pluginName, EntryPoint = "Stop")]
+    private static extern void StopNative();
 
-    [DllImport(pluginName)]
-    private static extern void UpdateAudioThread();
+    [DllImport(pluginName, EntryPoint = "UpdateAudioThread")]
+    private static extern void UpdateAudioThreadNative();
 
-    [DllImport(pluginName)]
-    private static extern void UpdateMainThread();
+    [DllImport(pluginName, EntryPoint = "UpdateMainThread")]
+    private static extern void UpdateMainThreadNative();
   }
 }

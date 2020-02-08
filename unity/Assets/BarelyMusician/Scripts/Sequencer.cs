@@ -49,7 +49,7 @@ namespace BarelyApi {
         var instruments = FindObjectsOfType<Instrument>();
         Instrument instrument = null;
         for (int i = 0; i < instruments.Length; ++i) {
-          if (instruments[i].Id == id) {
+          if (instruments[i]._id == id) {
             instrument = instruments[i];
             break;
           }
@@ -60,7 +60,7 @@ namespace BarelyApi {
         var instruments = FindObjectsOfType<Instrument>();
         Instrument instrument = null;
         for (int i = 0; i < instruments.Length; ++i) {
-          if (instruments[i].Id == id) {
+          if (instruments[i]._id == id) {
             instrument = instruments[i];
             break;
           }
@@ -85,7 +85,7 @@ namespace BarelyApi {
     }
 
     void OnDisable() {
-      BarelyMusician.Instance.Stop(this);
+      BarelyMusician.Instance.Stop();
       BarelyMusician.Instance.SetBeatCallback(null);
       BarelyMusician.Instance.SetNoteOffCallback(null);
       BarelyMusician.Instance.SetNoteOnCallback(null);
@@ -100,36 +100,36 @@ namespace BarelyApi {
     }
 
     void Update() {
-      BarelyMusician.Instance.SetTempo(this, tempo);
-      BarelyMusician.Instance.Update();
+      BarelyMusician.Instance.SetTempo(tempo);
+      BarelyMusician.Instance.UpdateMainThread();
     }
 
     void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Instance.Process();
+      BarelyMusician.Instance.UpdateAudioThread();
     }
 
     // Returns playback position.
     public double GetPosition() {
-      return BarelyMusician.Instance.GetPosition(this);
+      return BarelyMusician.Instance.GetPosition();
     }
 
     // Starts the sequencer.
     public void Play() {
-      BarelyMusician.Instance.Start(this);
+      BarelyMusician.Instance.Start();
       source.Play();
     }
 
     // Pauses the sequencer.
     public void Pause() {
       source.Stop();
-      BarelyMusician.Instance.Stop(this);
+      BarelyMusician.Instance.Stop();
     }
 
     // Stops the sequencer.
     public void Stop() {
       source.Stop();
-      BarelyMusician.Instance.Stop(this);
-      BarelyMusician.Instance.SetPosition(this, 0.0);
+      BarelyMusician.Instance.Stop();
+      BarelyMusician.Instance.SetPosition(0.0);
     }
   }
 }

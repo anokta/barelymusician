@@ -16,7 +16,7 @@ namespace BarelyApi {
       noteOffFn = noteOff;
       noteOnFn = noteOn;
       processFn = delegate (float[] output, int size, int numChannels) { process(output, numChannels); };
-      Id = BarelyMusician.Instance.Create(noteOffFn, noteOnFn, processFn);
+      _id = BarelyMusician.Instance.Create(noteOffFn, noteOnFn, processFn);
     }
   }
 }

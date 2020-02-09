@@ -8,17 +8,16 @@
 #include "MidiFile.h"
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/engine/clock.h"
-#include "barelymusician/engine/performer.h"
-#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/note.h"
 #include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
-using ::barelyapi::Clock;
+using ::barelyapi::Engine;
+using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Performer;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
@@ -45,30 +44,26 @@ const float kMaxVelocity = 127.0f;
 // Midi file name.
 const char kMidiFileName[] = "data/midi/sample.mid";
 
-// Schedules |midi_events| to be performed by |performer|.
-bool ScheduleMidiEvents(const smf::MidiEventList& midi_events,
-                        int ticks_per_beat, Performer* performer) {
+// Builds the score from the given |midi_events|.
+std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
+                             int ticks_per_beat) {
   const auto get_position = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
-  bool any_scheduled = false;
+  std::vector<Note> score;
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      const float index = static_cast<float>(midi_event.getKeyNumber());
-      const float intensity =
+      Note note;
+      note.position = get_position(midi_event.tick);
+      note.duration = get_position(midi_event.getTickDuration());
+      note.index = static_cast<float>(midi_event.getKeyNumber());
+      note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
-      const double position = get_position(midi_event.tick);
-      performer->ScheduleNoteOn(position, index, intensity);
-      any_scheduled = true;
-    } else if (midi_event.isNoteOff()) {
-      const float index = static_cast<float>(midi_event.getKeyNumber());
-      const double position = get_position(midi_event.tick);
-      performer->ScheduleNoteOff(position, index);
-      any_scheduled = true;
+      score.push_back(std::move(note));
     }
   }
-  return any_scheduled;
+  return score;
 }
 
 }  // namespace
@@ -80,31 +75,33 @@ int main(int argc, char* argv[]) {
   MidiFile midi_file;
   CHECK(midi_file.read(kMidiFileName)) << "Failed to read " << kMidiFileName;
   CHECK(midi_file.isAbsoluteTicks()) << "Events should be in absolute ticks";
+  midi_file.linkNotePairs();
 
   const int num_tracks = midi_file.getTrackCount();
   const int ticks_per_quarter = midi_file.getTPQ();
   LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  Clock clock(kSampleRate);
-  clock.SetTempo(kTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kTempo);
+  engine.SetNoteOnCallback([](int instrument_id, float index, float intensity) {
+    LOG(INFO) << "MIDI track #" << instrument_id << ": NoteOn(" << index << ", "
+              << intensity << ")";
+  });
+  engine.SetNoteOffCallback([](int instrument_id, float index) {
+    LOG(INFO) << "MIDI track #" << instrument_id << ": NoteOff(" << index
+              << ") ";
+  });
 
-  std::vector<Performer> performers;
+  std::vector<int> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
-    // Create performer.
-    Performer performer;
-    if (!ScheduleMidiEvents(midi_file[i], ticks_per_quarter, &performer)) {
+    // Build score.
+    const auto score = BuildScore(midi_file[i], ticks_per_quarter);
+    if (score.empty()) {
       LOG(WARNING) << "Empty MIDI track: " << i;
       continue;
     }
-    performer.SetNoteOnCallback([i](float index, float intensity) {
-      LOG(INFO) << "MIDI track #" << i << ": NoteOn(" << index << ", "
-                << intensity << ")";
-    });
-    performer.SetNoteOffCallback([i](float index) {
-      LOG(INFO) << "MIDI track #" << i << ": NoteOff(" << index << ") ";
-    });
-    // Set instrument.
+    // Create instrument.
     auto instrument = std::make_unique<BasicSynthInstrument>(
         kSampleRate, kNumInstrumentVoices);
     instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
@@ -115,24 +112,22 @@ int main(int argc, char* argv[]) {
                               kInstrumentEnvelopeRelease);
     instrument->SetFloatParam(BasicSynthInstrumentParam::kGain,
                               kInstrumentGain);
-    performer.SetInstrument(std::move(instrument));
-    // Add performer.
-    performers.push_back(std::move(performer));
+    engine.Create(i, std::move(instrument));
+    for (const Note& note : score) {
+      engine.ScheduleNoteOn(i, note.position, note.index, note.intensity);
+      engine.ScheduleNoteOff(i, note.position + note.duration, note.index);
+    }
+    instrument_ids.push_back(i);
   }
-  LOG(INFO) << "Number of active MIDI tracks: " << performers.size();
+  LOG(INFO) << "Number of active MIDI tracks: " << instrument_ids.size();
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&clock, &performers,
-                                 &temp_buffer](float* output) {
-    const double start_position = clock.GetPosition();
-    clock.UpdatePosition(kNumFrames);
-    const double end_position = clock.GetPosition();
-
+  const auto process_callback = [&](float* output) {
+    engine.Update(kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (Performer& performer : performers) {
-      performer.Process(start_position, end_position, temp_buffer.data(),
-                        kNumChannels, kNumFrames);
+    for (const int id : instrument_ids) {
+      engine.Process(id, temp_buffer.data(), kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
@@ -155,6 +150,7 @@ int main(int argc, char* argv[]) {
 
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  engine.Start();
 
   while (!quit) {
     input_manager.Update();
@@ -163,6 +159,8 @@ int main(int argc, char* argv[]) {
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
+
+  engine.Stop();
 
   audio_output.Stop();
   input_manager.Shutdown();

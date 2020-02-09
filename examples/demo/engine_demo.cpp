@@ -186,8 +186,7 @@ int main(int argc, char* argv[]) {
   const auto create_performer_fn =
       [&](std::unique_ptr<Instrument> instrument,
           BeatComposerCallback beat_composer_callback) {
-        DCHECK(engine.Create(++id_counter));
-        DCHECK(engine.SetInstrument(id_counter, std::move(instrument)));
+        engine.Create(++id_counter, std::move(instrument));
         performers.emplace(id_counter, std::move(beat_composer_callback));
       };
 
@@ -210,9 +209,10 @@ int main(int argc, char* argv[]) {
       if (callback != nullptr) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
-      for (Note& note : temp_notes) {
-        note.position += static_cast<double>(beat);
-        engine.ScheduleNote(id, note);
+      for (const Note& note : temp_notes) {
+        const double position = static_cast<double>(beat) + note.position;
+        engine.ScheduleNoteOn(id, position, note.index, note.intensity);
+        engine.ScheduleNoteOff(id, position + note.duration, note.index);
       }
     }
   };
@@ -364,6 +364,8 @@ int main(int argc, char* argv[]) {
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
+
+  engine.Stop();
 
   audio_output.Stop();
   input_manager.Shutdown();

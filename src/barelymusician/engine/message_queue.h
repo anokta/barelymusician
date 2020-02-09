@@ -41,8 +41,9 @@ class MessageQueue {
 
   // Pushes new message into the queue.
   //
-  // @param message Message.
-  void Push(const Message& message);
+  // @param position Message position.
+  // @param data Message data.
+  void Push(double position, const Message::Data& data);
 
  private:
   // Ordered message list.

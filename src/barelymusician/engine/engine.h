@@ -4,15 +4,15 @@
 #include <functional>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "barelymusician/engine/clock.h"
-#include "barelymusician/engine/note.h"
-#include "barelymusician/engine/performer.h"
+#include "barelymusician/engine/message_queue.h"
 #include "barelymusician/instrument/instrument.h"
 
 namespace barelyapi {
 
-// Core sequencing engine that manages instrument performers.
+// Engine that plays instruments with respect to its beat sequencer.
 // @note This class is *not* thread-safe.
 class Engine {
  public:
@@ -20,28 +20,27 @@ class Engine {
   using BeatCallback = std::function<void(int beat)>;
 
   // Note off callback signature.
-  using NoteOffCallback = std::function<void(int performer_id, float index)>;
+  using NoteOffCallback = std::function<void(int instrument_id, float index)>;
 
   // Note on callback signature.
   using NoteOnCallback =
-      std::function<void(int performer_id, float index, float intensity)>;
+      std::function<void(int instrument_id, float index, float intensity)>;
 
   // Constructs new |Engine|.
   //
   // @param sample_rate Sampling rate in Hz.
   explicit Engine(int sample_rate);
 
-  // Creates new performer.
+  // Creates new instrument.
   //
-  // @param Performer id.
-  // @return True if successful.
-  bool Create(int performer_id);
+  // @param instrument_id Instrument id.
+  // @param instrument Instrument to play.
+  void Create(int instrument_id, std::unique_ptr<Instrument> instrument);
 
-  // Destroys performer.
+  // Destroys instrument.
   //
-  // @param performer_id Performer id.
-  // @return True if successful.
-  bool Destroy(int performer_id);
+  // @param instrument_id Instrument id.
+  void Destroy(int instrument_id);
 
   // Returns playback position.
   //
@@ -50,7 +49,7 @@ class Engine {
 
   // Returns playback tempo.
   //
-  // @return Tempo (BPM).
+  // @return Tempo in BPM.
   double GetTempo() const;
 
   // Returns whether the engine is playing.
@@ -60,65 +59,46 @@ class Engine {
 
   // Stops playing note.
   //
-  // @param performer_id Performer id.
+  // @param instrument_id Instrument id.
   // @param index Note index.
-  // @return True if successful.
-  bool NoteOff(int performer_id, float index);
+  void NoteOff(int instrument_id, float index);
 
   // Starts playing note.
   //
-  // @param performer_id Performer id.
+  // @param instrument_id Instrument id.
   // @param index Note index.
   // @param intensity Note intensity.
-  // @return True if successful.
-  bool NoteOn(int performer_id, float index, float intensity);
+  void NoteOn(int instrument_id, float index, float intensity);
 
   // Processes the next output buffer.
   //
-  // @param performer_id Performer id.
+  // @param instrument_id Instrument id.
   // @param output Pointer to output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  // @return True if successful.
-  bool Process(int performer_id, float* output, int num_channels,
+  void Process(int instrument_id, float* output, int num_channels,
                int num_frames);
 
-  // Schedules note to be performed.
+  // Schedules note off.
   //
-  // @param performer_id Performer id.
-  // @param note Note.
-  // @return True if successful.
-  bool ScheduleNote(int performer_id, const Note& note);
-
-  // Schedules note off to be performed.
-  //
-  // @param performer_id Performer id.
-  // @param position Position to perform note off.
+  // @param instrument_id Instrument id.
+  // @param position Note position.
   // @param index Note index.
-  // @return True if successful.
-  bool ScheduleNoteOff(int performer_id, double position, float index);
+  void ScheduleNoteOff(int instrument_id, double position, float index);
 
-  // Schedules note on to be performed.
+  // Schedules note on.
   //
-  // @param performer_id Performer id.
-  // @param position Position to perform note on.
+  // @param instrument_id Instrument id.
+  // @param position Note position.
   // @param index Note index.
   // @param index Note intensity.
-  // @return True if successful.
-  bool ScheduleNoteOn(int performer_id, double position, float index,
+  void ScheduleNoteOn(int instrument_id, double position, float index,
                       float intensity);
 
   // Sets beat callback.
   //
   // @param beat_callback Beat callback.
   void SetBeatCallback(BeatCallback&& beat_callback);
-
-  // Sets instrument to perform.
-  //
-  // @param performer_id Performer id.
-  // @param instrument Instrument to perform.
-  // @return True if successful.
-  bool SetInstrument(int performer_id, std::unique_ptr<Instrument> instrument);
 
   // Sets note off callback.
   //
@@ -137,7 +117,7 @@ class Engine {
 
   // Sets playback tempo.
   //
-  // @param tempo Tempo (BPM).
+  // @param tempo Tempo in BPM.
   void SetTempo(double tempo);
 
   // Starts playback.
@@ -146,14 +126,26 @@ class Engine {
   // Stops playback.
   void Stop();
 
-  // Updates engine state.
+  // Updates engine.
   //
   // @param num_frames Number of frames to iterate.
   void Update(int num_frames);
 
  private:
-  // Returns |Performer| with the given |performer_id|.
-  Performer* GetPerformer(int performer_id);
+  // Instrument data.
+  struct InstrumentData {
+    // Instrument to play.
+    std::unique_ptr<Instrument> instrument;
+
+    // Scheduled messages.
+    MessageQueue messages;
+
+    // Active scheduled note indices that are being played.
+    std::unordered_set<float> scheduled_note_indices;
+  };
+
+  // Returns |InstrumentData| for the given |instrument_id|.
+  InstrumentData* GetInstrumentData(int instrument_id);
 
   // Clock for playback.
   Clock clock_;
@@ -167,8 +159,8 @@ class Engine {
   // Previous playback position.
   double previous_position_;
 
-  // List of performers.
-  std::unordered_map<int, Performer> performers_;
+  // List of instruments.
+  std::unordered_map<int, InstrumentData> instruments_;
 
   // Beat callback.
   BeatCallback beat_callback_;

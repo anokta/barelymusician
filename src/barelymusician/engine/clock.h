@@ -18,7 +18,7 @@ class Clock {
 
   // Returns the tempo.
   //
-  // @return Tempo (BPM).
+  // @return Tempo in BPM.
   double GetTempo() const;
 
   // Sets the current position.
@@ -28,7 +28,7 @@ class Clock {
 
   // Sets the tempo.
   //
-  // @param tempo Tempo (BPM).
+  // @param tempo Tempo in BPM.
   void SetTempo(double tempo);
 
   // Updates the current position.

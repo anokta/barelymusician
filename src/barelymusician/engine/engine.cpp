@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/engine/message.h"
 
 namespace barelyapi {
 
@@ -17,27 +18,18 @@ Engine::Engine(int sample_rate)
   DCHECK_GE(sample_rate, 0);
 }
 
-bool Engine::Create(int performer_id) {
-  if (const auto [it, success] = performers_.emplace(performer_id, Performer());
-      success) {
-    it->second.SetNoteOffCallback([this, performer_id](float index) {
-      if (note_off_callback_ != nullptr) {
-        note_off_callback_(performer_id, index);
-      }
-    });
-    it->second.SetNoteOnCallback(
-        [this, performer_id](float index, float intensity) {
-          if (note_on_callback_ != nullptr) {
-            note_on_callback_(performer_id, index, intensity);
-          }
-        });
-    return true;
+void Engine::Create(int instrument_id, std::unique_ptr<Instrument> instrument) {
+  const auto [it, success] = instruments_.insert_or_assign(
+      instrument_id, InstrumentData{std::move(instrument)});
+  if (!success) {
+    DLOG(WARNING) << "Overwriting existing instrument id: " << instrument_id;
   }
-  return false;
 }
 
-bool Engine::Destroy(int performer_id) {
-  return performers_.erase(performer_id) > 0;
+void Engine::Destroy(int instrument_id) {
+  if (instruments_.erase(instrument_id) == 0) {
+    DLOG(WARNING) << "Instrument id does not exist: " << instrument_id;
+  }
 }
 
 double Engine::GetPosition() const { return current_position_; }
@@ -46,76 +38,102 @@ double Engine::GetTempo() const { return clock_.GetTempo(); }
 
 bool Engine::IsPlaying() const { return is_playing_; }
 
-bool Engine::NoteOff(int performer_id, float index) {
-  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
-    performer->NoteOff(index);
-    return true;
+void Engine::NoteOff(int instrument_id, float index) {
+  InstrumentData* instrument_data = GetInstrumentData(instrument_id);
+  if (instrument_data == nullptr) {
+    return;
   }
-  return false;
+  instrument_data->instrument->NoteOff(index);
+  if (note_off_callback_ != nullptr) {
+    note_off_callback_(instrument_id, index);
+  }
 }
 
-bool Engine::NoteOn(int performer_id, float index, float intensity) {
-  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
-    performer->NoteOn(index, intensity);
-    return true;
+void Engine::NoteOn(int instrument_id, float index, float intensity) {
+  InstrumentData* instrument_data = GetInstrumentData(instrument_id);
+  if (instrument_data == nullptr) {
+    return;
   }
-  return false;
+  instrument_data->instrument->NoteOn(index, intensity);
+  if (note_on_callback_ != nullptr) {
+    note_on_callback_(instrument_id, index, intensity);
+  }
 }
 
-bool Engine::Process(int performer_id, float* output, int num_channels,
+void Engine::Process(int instrument_id, float* output, int num_channels,
                      int num_frames) {
-  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
-    DCHECK(output);
-    DCHECK_GE(num_channels, 0);
-    DCHECK_GE(num_frames, 0);
-    performer->Process(previous_position_, current_position_, output,
-                       num_channels, num_frames);
-    return true;
+  InstrumentData* instrument_data = GetInstrumentData(instrument_id);
+  if (instrument_data == nullptr) {
+    return;
   }
-  return false;
+  DCHECK(output);
+  DCHECK_GE(num_channels, 0);
+  DCHECK_GE(num_frames, 0);
+
+  int frame = 0;
+  Instrument* instrument = instrument_data->instrument.get();
+  // Process mmessages.
+  if (previous_position_ < current_position_) {
+    const auto messages = instrument_data->messages.GetIterator(
+        previous_position_, current_position_);
+    const double frames_per_beat = static_cast<double>(num_frames) /
+                                   (current_position_ - previous_position_);
+    for (auto it = messages.cbegin; it != messages.cend; ++it) {
+      const int message_frame = static_cast<int>(
+          frames_per_beat * (it->position - previous_position_));
+      if (frame < message_frame) {
+        instrument->Process(&output[num_channels * frame], num_channels,
+                            message_frame - frame);
+        frame = message_frame;
+      }
+      std::visit(
+          MessageVisitor{
+              [&](const NoteOffData& data) {
+                instrument->NoteOff(data.index);
+                if (note_off_callback_ != nullptr) {
+                  note_off_callback_(instrument_id, data.index);
+                }
+                instrument_data->scheduled_note_indices.erase(data.index);
+              },
+              [&](const NoteOnData& data) {
+                instrument->NoteOn(data.index, data.intensity);
+                if (note_on_callback_ != nullptr) {
+                  note_on_callback_(instrument_id, data.index, data.intensity);
+                }
+                instrument_data->scheduled_note_indices.insert(data.index);
+              }},
+          it->data);
+    }
+    instrument_data->messages.Clear(messages);
+  }
+  // Process the rest of the buffer.
+  if (frame < num_frames) {
+    instrument->Process(&output[num_channels * frame], num_channels,
+                        num_frames - frame);
+  }
 }
 
-bool Engine::ScheduleNote(int performer_id, const Note& note) {
-  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
-    DCHECK_GE(note.position, 0.0);
-    DCHECK_GE(note.duration, 0.0);
-    performer->ScheduleNoteOn(note.position, note.index, note.intensity);
-    performer->ScheduleNoteOff(note.position + note.duration, note.index);
-    return true;
+void Engine::ScheduleNoteOff(int instrument_id, double position, float index) {
+  InstrumentData* instrument_data = GetInstrumentData(instrument_id);
+  if (instrument_data == nullptr) {
+    return;
   }
-  return false;
+  DCHECK_GE(position, 0.0);
+  instrument_data->messages.Push(position, NoteOffData{index});
 }
 
-bool Engine::ScheduleNoteOff(int performer_id, double position, float index) {
-  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
-    DCHECK_GE(position, 0.0);
-    performer->ScheduleNoteOff(position, index);
-    return true;
-  }
-  return false;
-}
-
-bool Engine::ScheduleNoteOn(int performer_id, double position, float index,
+void Engine::ScheduleNoteOn(int instrument_id, double position, float index,
                             float intensity) {
-  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
-    DCHECK_GE(position, 0.0);
-    performer->ScheduleNoteOn(position, index, intensity);
-    return true;
+  InstrumentData* instrument_data = GetInstrumentData(instrument_id);
+  if (instrument_data == nullptr) {
+    return;
   }
-  return false;
+  DCHECK_GE(position, 0.0);
+  instrument_data->messages.Push(position, NoteOnData{index, intensity});
 }
 
 void Engine::SetBeatCallback(BeatCallback&& beat_callback) {
   beat_callback_ = std::move(beat_callback);
-}
-
-bool Engine::SetInstrument(int performer_id,
-                           std::unique_ptr<Instrument> instrument) {
-  if (Performer* performer = GetPerformer(performer_id); performer != nullptr) {
-    performer->SetInstrument(std::move(instrument));
-    return true;
-  }
-  return false;
 }
 
 void Engine::SetNoteOffCallback(NoteOffCallback&& note_off_callback) {
@@ -142,8 +160,14 @@ void Engine::Start() { is_playing_ = true; }
 
 void Engine::Stop() {
   is_playing_ = false;
-  for (auto& [id, performer] : performers_) {
-    performer.AllScheduledNotesOff();
+  for (auto& [instrument_id, instrument_data] : instruments_) {
+    for (const float index : instrument_data.scheduled_note_indices) {
+      instrument_data.instrument->NoteOff(index);
+      if (note_off_callback_ != nullptr) {
+        note_off_callback_(instrument_id, index);
+      }
+    }
+    instrument_data.scheduled_note_indices.clear();
   }
 }
 
@@ -162,14 +186,13 @@ void Engine::Update(int num_frames) {
   }
 }
 
-Performer* Engine::GetPerformer(int performer_id) {
-  if (const auto it = performers_.find(performer_id);
-      it != performers_.cend()) {
-    return &it->second;
-  } else {
-    DLOG(WARNING) << "Invalid performer id: " << performer_id;
+Engine::InstrumentData* Engine::GetInstrumentData(int instrument_id) {
+  const auto it = instruments_.find(instrument_id);
+  if (it == instruments_.cend()) {
+    DLOG(WARNING) << "Invalid instrument id: " << instrument_id;
+    return nullptr;
   }
-  return nullptr;
+  return &it->second;
 }
 
 }  // namespace barelyapi

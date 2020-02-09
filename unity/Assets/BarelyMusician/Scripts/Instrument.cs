@@ -3,35 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace BarelyApi {
-  // Instrument performer.
+  // Instrument.
   [RequireComponent(typeof(AudioSource))]
-  public class Performer : MonoBehaviour {
-    // Instrument to perform.
-    public IInstrument Instrument {
-      get { return _instrument; }
-      set {
-        if (_instrument != value) {
-          _instrument = value;
-          BarelyMusician.Instance.SetInstrument(_id, _instrument);
-        }
-      }
-    }
-    private IInstrument _instrument;
-
+  public class Instrument : MonoBehaviour {
     // Performer id.
-    public int _id = BarelyMusician.InvalidId;
+    private int _id = BarelyMusician.InvalidId;
 
     // Audio source.
-    private AudioSource _source;
+    private AudioSource _source = null;
 
-    private void Awake() {
+    protected virtual void Awake() {
       _source = GetComponent<AudioSource>();
       if (_id == BarelyMusician.InvalidId) {
-        _id = BarelyMusician.Instance.Create();
+        _id = BarelyMusician.Instance.Create(this);
       }
     }
 
-    private void OnDestroy() {
+    protected virtual void OnDestroy() {
       _source = null;
       if (_id != BarelyMusician.InvalidId) {
         BarelyMusician.Instance.Destroy(_id);
@@ -39,21 +27,12 @@ namespace BarelyApi {
       }
     }
 
-    private void OnEnable() {
+    protected virtual void OnEnable() {
       _source.Play();
     }
 
-    private void OnDisable() {
+    protected virtual void OnDisable() {
       _source.Stop();
-    }
-
-    private void Update() {
-      BarelyMusician.Instance.UpdateMainThread();
-    }
-
-    private void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Instance.UpdateAudioThread();
-      BarelyMusician.Instance.Process(_id, data);
     }
 
     // Stops playing note with the given |index|.
@@ -66,12 +45,23 @@ namespace BarelyApi {
       BarelyMusician.Instance.NoteOn(_id, index, intensity);
     }
 
+    // Schedules note off.
     public void ScheduleNoteOff(double position, float index) {
       BarelyMusician.Instance.ScheduleNoteOff(_id, position, index);
     }
 
+    // Schedules note on.
     public void ScheduleNoteOn(double position, float index, float intensity) {
       BarelyMusician.Instance.ScheduleNoteOn(_id, position, index, intensity);
+    }
+
+    protected void Update() {
+      BarelyMusician.Instance.UpdateMainThread();
+    }
+
+    private void OnAudioFilterRead(float[] data, int channels) {
+      BarelyMusician.Instance.UpdateAudioThread();
+      BarelyMusician.Instance.Process(_id, data);
     }
   }
 }

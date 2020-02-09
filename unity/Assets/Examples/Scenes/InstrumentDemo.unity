@@ -382,6 +382,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843a4aa0b405a3f4f8be3440a6844667, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _id: -1
   frequency: 440
 --- !u!82 &1219313104
 AudioSource:
@@ -507,3 +508,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   noteIndex: 0
   noteIntensity: 1
+  instrument: {fileID: 1219313103}

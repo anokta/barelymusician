@@ -13,9 +13,9 @@ namespace BarelyApi {
     public delegate void NoteOnCallback(int id, float index, float intensity);
 
     // Internal Unity instrument functions.
-    public delegate void NoteOffFn(float index);
-    public delegate void NoteOnFn(float index, float intensity);
-    public delegate void ProcessFn(
+    public delegate void UnityNoteOffFn(float index);
+    public delegate void UnityNoteOnFn(float index, float intensity);
+    public delegate void UnityProcessFn(
       [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output, int size,
       int numChannels);
 
@@ -39,29 +39,27 @@ namespace BarelyApi {
     // Main thread last update time.
     private float lastUpdateTime = 0.0f;
 
+    public Dictionary<int, Instrument> instruments = null;
+
     // Creates new instrument.
-    public int Create() {
-      return CreateNative();
-    }
-
-    public void SetInstrument(int id, IInstrument instrument) {
-      if (instrument == null) {
-        // TODO: Set null.
-      }
-      if (instrument.GetType().IsSubclassOf(typeof(UnityInstrument))) {
+    public int Create(Instrument instrument) {
+      int id = InvalidId;
+      var instrumentType = instrument.GetType();
+      if (instrumentType.IsSubclassOf(typeof(UnityInstrument))) {
         var unityInstrument = instrument as UnityInstrument;
-        SetUnityInstrumentNative(id, 
-                                 Marshal.GetFunctionPointerForDelegate(unityInstrument.noteOffFn),
-                                 Marshal.GetFunctionPointerForDelegate(unityInstrument.noteOnFn),
-                                 Marshal.GetFunctionPointerForDelegate(unityInstrument.processFn));
+        id = CreateNative(Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOffFn),
+                          Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOnFn),
+                          Marshal.GetFunctionPointerForDelegate(unityInstrument.ProcessFn));
+        instruments.Add(id, instrument);
       } else {
-        Debug.LogWarning("Instrument type not supported: " + instrument.GetType());
+        Debug.LogError("Unsupported instrument type: " + instrumentType);
       }
+      return id;
     }
-
 
     // Destroys instrument.
     public void Destroy(int id) {
+      instruments.Remove(id);
       DestroyNative(id);
     }
 
@@ -141,6 +139,7 @@ namespace BarelyApi {
 
     // Constructs new |BarelyMusician| with Unity audio settings.                                                       
     BarelyMusician() {
+      instruments = new Dictionary<int, Instrument>();
       var config = AudioSettings.GetConfiguration();
       int sampleRate = config.sampleRate;
       int numChannels = (int)config.speakerMode;
@@ -184,7 +183,8 @@ namespace BarelyApi {
     private static extern void ShutdownNative();
 
     [DllImport(pluginName, EntryPoint = "Create")]
-    private static extern int CreateNative();
+    private static extern int CreateNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+                                           IntPtr processFnPtr);
 
     [DllImport(pluginName, EntryPoint = "Destroy")]
     private static extern void DestroyNative(int id);
@@ -222,10 +222,6 @@ namespace BarelyApi {
 
     [DllImport(pluginName, EntryPoint = "SetTempo")]
     private static extern void SetTempoNative(double tempo);
-
-    [DllImport(pluginName, EntryPoint = "SetUnityInstrument")]
-    private static extern int SetUnityInstrumentNative(int id, IntPtr noteOffFnPtr,
-                                                       IntPtr noteOnFnPtr, IntPtr processFnPtr);
 
     [DllImport(pluginName, EntryPoint = "Start")]
     private static extern void StartNative();

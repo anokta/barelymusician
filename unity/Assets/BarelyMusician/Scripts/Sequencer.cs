@@ -12,11 +12,11 @@ namespace BarelyApi {
     public event BeatEvent OnBeat;
 
     // Note off event.
-    public delegate void NoteOffEvent(Performer instrument, float index);
+    public delegate void NoteOffEvent(Instrument instrument, float index);
     public event NoteOffEvent OnNoteOff;
 
     // Note on event.
-    public delegate void NoteOnEvent(Performer instrument, float index, float intenstiy);
+    public delegate void NoteOnEvent(Instrument instrument, float index, float intenstiy);
     public event NoteOnEvent OnNoteOn;
 
     // Tempo (BPM).
@@ -46,25 +46,13 @@ namespace BarelyApi {
 
       // TODO: Store instrument list rather than dynamic fetch!
       noteOffCallback = delegate (int id, float index) {
-        var instruments = FindObjectsOfType<Performer>();
-        Performer instrument = null;
-        for (int i = 0; i < instruments.Length; ++i) {
-          if (instruments[i]._id == id) {
-            instrument = instruments[i];
-            break;
-          }
-        }
+        Instrument instrument = null;
+        BarelyMusician.Instance.instruments.TryGetValue(id, out instrument);
         OnNoteOff?.Invoke(instrument, index);
       };
       noteOnCallback = delegate (int id, float index, float intensity) {
-        var instruments = FindObjectsOfType<Performer>();
-        Performer instrument = null;
-        for (int i = 0; i < instruments.Length; ++i) {
-          if (instruments[i]._id == id) {
-            instrument = instruments[i];
-            break;
-          }
-        }
+        Instrument instrument = null;
+        BarelyMusician.Instance.instruments.TryGetValue(id, out instrument);
         OnNoteOn?.Invoke(instrument, index, intensity);
       };
 

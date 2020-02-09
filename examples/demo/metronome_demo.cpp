@@ -6,20 +6,19 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/dsp/dsp_utils.h"
-#include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/engine/clock.h"
+#include "barelymusician/engine/engine.h"
+#include "barelymusician/instrument/instrument.h"
 #include "barelymusician/util/task_runner.h"
-#include "instruments/basic_enveloped_voice.h"
+#include "instruments/basic_synth_instrument.h"
 #include "util/input_manager/win_console_input.h"
 
 namespace {
 
-using ::barelyapi::Clock;
-using ::barelyapi::FrequencyFromNoteIndex;
+using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::TaskRunner;
-using ::barelyapi::examples::BasicEnvelopedVoice;
+using ::barelyapi::examples::BasicSynthInstrument;
+using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
@@ -31,47 +30,21 @@ const int kNumFrames = 2048;
 const int kNumMaxTasks = 100;
 
 // Metronome settings.
+const int kMetronomeId = 1;
+
+const int kNumVoices = 1;
 const float kGain = 0.5f;
-const float kBarFrequency = FrequencyFromNoteIndex(barelyapi::kNoteIndexA4);
-const float kBeatFrequency = FrequencyFromNoteIndex(barelyapi::kNoteIndexA3);
 const OscillatorType kOscillatorType = OscillatorType::kSquare;
+const float kAttack = 0.0f;
 const float kRelease = 0.025f;
+
+const double kTickDuration = 0.005f;
+const float kBarNoteIndex = barelyapi::kNoteIndexA4;
+const float kBeatNoteIndex = barelyapi::kNoteIndexA3;
 
 const int kNumBeats = 4;
 const double kInitialTempo = 120.0;
 const double kTempoIncrement = 10.0;
-
-// Metronome processor.
-class Metronome {
- public:
-  Metronome() : voice_(kSampleRate) {
-    voice_.generator().SetType(kOscillatorType);
-    voice_.envelope().SetRelease(kRelease);
-    voice_.set_gain(kGain);
-  }
-
-  // Processes the next |output| buffer.
-  void Process(float* output, int num_channels, int num_frames) {
-    for (int frame = 0; frame < num_frames; ++frame) {
-      const float mono_sample = voice_.Next(0);
-      for (int channel = 0; channel < num_channels; ++channel) {
-        output[frame * num_channels + channel] = mono_sample;
-      }
-    }
-  }
-
-  // Ticks the metronome with the given |beat|.
-  void Tick(int beat) {
-    const float frequency = (beat == 0) ? kBarFrequency : kBeatFrequency;
-    voice_.generator().SetFrequency(frequency);
-    voice_.Start();
-    voice_.Next(0);
-    voice_.Stop();
-  }
-
- private:
-  BasicEnvelopedVoice<barelyapi::Oscillator> voice_;
-};
 
 }  // namespace
 
@@ -81,58 +54,63 @@ int main(int argc, char* argv[]) {
 
   TaskRunner task_runner(kNumMaxTasks);
 
-  Clock clock(kSampleRate);
-  clock.SetTempo(kInitialTempo);
+  Engine engine(kSampleRate);
+  engine.SetTempo(kInitialTempo);
 
-  Metronome metronome;
+  auto metronome_instrument =
+      std::make_unique<BasicSynthInstrument>(kSampleRate, kNumVoices);
+  metronome_instrument->SetFloatParam(
+      BasicSynthInstrumentParam::kOscillatorType,
+      static_cast<float>(kOscillatorType));
+  metronome_instrument->SetFloatParam(
+      BasicSynthInstrumentParam::kEnvelopeAttack, kAttack);
+  metronome_instrument->SetFloatParam(
+      BasicSynthInstrumentParam::kEnvelopeRelease, kRelease);
+  metronome_instrument->SetFloatParam(BasicSynthInstrumentParam::kGain, kGain);
+  engine.Create(kMetronomeId, std::move(metronome_instrument));
+
+  // Beat callback.
+  const auto beat_callback = [&](int beat) {
+    const int current_bar = beat / kNumBeats;
+    const int current_beat = beat % kNumBeats;
+    LOG(INFO) << "Tick " << current_bar << "." << current_beat;
+    const double position = static_cast<double>(beat);
+    const float index = (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
+    engine.ScheduleNoteOn(kMetronomeId, position, index, kGain);
+    engine.ScheduleNoteOff(kMetronomeId, position + kTickDuration, index);
+  };
+  engine.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto process_callback = [&task_runner, &clock,
-                                 &metronome](float* output) {
+  const auto process_callback = [&](float* output) {
     task_runner.Run();
-
-    // Update clock.
-    const double start_position = clock.GetPosition();
-    clock.UpdatePosition(kNumFrames);
-    const double end_position = clock.GetPosition();
-
-    const double frames_per_beat =
-        static_cast<double>(kNumFrames) / (end_position - start_position);
-
-    int frame = 0;
-    for (double beat = std::ceil(start_position); beat < end_position; ++beat) {
-      const int beat_frame =
-          static_cast<int>(frames_per_beat * (beat - start_position));
-      if (frame < beat_frame) {
-        metronome.Process(&output[kNumChannels * frame], kNumChannels,
-                          beat_frame - frame);
-        frame = beat_frame;
-      }
-      // Tick.
-      const int current_bar = static_cast<int>(beat) / kNumBeats;
-      const int current_beat = static_cast<int>(beat) % kNumBeats;
-      metronome.Tick(current_beat);
-      LOG(INFO) << "Tick " << current_bar << "." << current_beat;
-    }
-    if (frame < kNumFrames) {
-      metronome.Process(&output[kNumChannels * frame], kNumChannels,
-                        kNumFrames - frame);
-    }
+    engine.Update(kNumFrames);
+    engine.Process(kMetronomeId, output, kNumChannels, kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&quit, &task_runner,
-                                  &clock](const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
       return;
     }
     // Adjust tempo.
-    double tempo = clock.GetTempo();
+    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
+      case ' ':
+        task_runner.Add([&]() {
+          if (engine.IsPlaying()) {
+            engine.Stop();
+            LOG(INFO) << "Stopped playback";
+          } else {
+            engine.Start();
+            LOG(INFO) << "Started playback";
+          }
+        });
+        return;
       case '-':
         tempo -= kTempoIncrement;
         break;
@@ -151,7 +129,7 @@ int main(int argc, char* argv[]) {
       default:
         return;
     }
-    task_runner.Add([&clock, tempo]() { clock.SetTempo(tempo); });
+    task_runner.Add([&, tempo]() { engine.SetTempo(tempo); });
     LOG(INFO) << "Tempo set to " << tempo;
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -162,6 +140,8 @@ int main(int argc, char* argv[]) {
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
+  engine.Start();
+
   while (!quit) {
     input_manager.Update();
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -169,6 +149,8 @@ int main(int argc, char* argv[]) {
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
+
+  engine.Stop();
 
   audio_output.Stop();
   input_manager.Shutdown();

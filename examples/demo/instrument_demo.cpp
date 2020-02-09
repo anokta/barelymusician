@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
   float offset_octaves = 0.0f;
 
   // Audio process callback.
-  const auto process_callback = [&task_runner, &instrument](float* output) {
+  const auto process_callback = [&](float* output) {
     task_runner.Run();
     instrument.Process(output, kNumChannels, kNumFrames);
   };
@@ -81,8 +81,7 @@ int main(int argc, char* argv[]) {
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&task_runner, &instrument, &offset_octaves,
-                                  &quit](const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
@@ -113,23 +112,20 @@ int main(int argc, char* argv[]) {
     if (note_index < 0.0f) {
       return;
     }
-    task_runner.Add([&instrument, note_index]() {
-      instrument.NoteOn(note_index, kNoteIntensity);
-    });
+    task_runner.Add(
+        [&, note_index]() { instrument.NoteOn(note_index, kNoteIntensity); });
     LOG(INFO) << "NoteOn(" << note_index << ", " << kNoteIntensity << ")";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Key up callback.
-  const auto key_up_callback = [&task_runner, &instrument, &offset_octaves](
-                                   const WinConsoleInput::Key& key) {
+  const auto key_up_callback = [&](const WinConsoleInput::Key& key) {
     // Stop note.
     const float note_index = NoteIndexFromKey(key, offset_octaves);
     if (note_index < 0.0f) {
       return;
     }
-    task_runner.Add(
-        [&instrument, note_index]() { instrument.NoteOff(note_index); });
+    task_runner.Add([&, note_index]() { instrument.NoteOff(note_index); });
     LOG(INFO) << "NoteOff(" << note_index << ")";
   };
   input_manager.SetKeyUpCallback(key_up_callback);

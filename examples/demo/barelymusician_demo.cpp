@@ -32,7 +32,7 @@ int main(int argc, char* argv[]) {
   clock.SetTempo(kTempo);
 
   // Audio process callback.
-  const auto process_callback = [&clock](float* output) {
+  const auto process_callback = [&](float* output) {
     LOG(INFO) << std::fixed << std::setprecision(2) << "Position "
               << clock.GetPosition();
     clock.UpdatePosition(kNumFrames);
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&quit](const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&](const WinConsoleInput::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;

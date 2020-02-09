@@ -118,7 +118,11 @@ void Engine::ScheduleNoteOff(int instrument_id, double position, float index) {
   if (instrument_data == nullptr) {
     return;
   }
-  DCHECK_GE(position, 0.0);
+  if (position < current_position_) {
+    DLOG(ERROR) << "Playback is ahead of scheduled position: "
+                << current_position_ << " > " << position;
+    return;
+  }
   instrument_data->messages.Push(position, NoteOffData{index});
 }
 
@@ -128,7 +132,11 @@ void Engine::ScheduleNoteOn(int instrument_id, double position, float index,
   if (instrument_data == nullptr) {
     return;
   }
-  DCHECK_GE(position, 0.0);
+  if (position < current_position_) {
+    DLOG(ERROR) << "Playback is ahead of scheduled position: "
+                << current_position_ << " > " << position;
+    return;
+  }
   instrument_data->messages.Push(position, NoteOnData{index, intensity});
 }
 
@@ -189,7 +197,7 @@ void Engine::Update(int num_frames) {
 Engine::InstrumentData* Engine::GetInstrumentData(int instrument_id) {
   const auto it = instruments_.find(instrument_id);
   if (it == instruments_.cend()) {
-    DLOG(WARNING) << "Invalid instrument id: " << instrument_id;
+    DLOG(ERROR) << "Invalid instrument id: " << instrument_id;
     return nullptr;
   }
   return &it->second;

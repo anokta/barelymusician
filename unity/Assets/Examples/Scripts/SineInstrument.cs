@@ -11,11 +11,9 @@ namespace BarelyApi {
     // Sine phase.
     private float phase = 0.0f;
 
-    // Is playing?
-    private bool playing = false;
-
     // Current gain.
     private float gain = 0.0f;
+    private float targetGain = 0.0f;
 
     // Sampling interval in Hz.
     private float sampleInterval = 0.0f;
@@ -24,24 +22,24 @@ namespace BarelyApi {
       base.Awake();
 
       phase = 0.0f;
-      playing = false;
       gain = 0.0f;
+      targetGain = 0.0f;
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);
     }
 
     public override void UnityNoteOff(float index) {
-      playing = false;
+      targetGain = 0.0f;
     }
 
     public override void UnityNoteOn(float index, float intensity) {
       frequency = (index + 1) * 220.0f;
       phase = 0.0f;
-      playing = true;
+      targetGain = intensity;
     }
 
     public override void UnityProcess(float[] data, int channels) {
       for (int i = 0; i < data.Length; i += channels) {
-        gain = Mathf.Lerp(gain, playing ? 1.0f : 0.0f, 0.1f);
+        gain = Mathf.Lerp(gain, targetGain, 0.01f);
         // Generate next sample.
         float sample = gain * Mathf.Sin(phase * 2.0f * Mathf.PI);
         for (int channel = 0; channel < channels; ++channel) {

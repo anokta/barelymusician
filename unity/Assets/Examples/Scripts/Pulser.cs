@@ -34,7 +34,7 @@ public class Pulser : MonoBehaviour {
         Vector3.Lerp(targetObject.localScale, targetScale, Time.deltaTime * 4);
     targetObject.GetComponent<Renderer>().material.color = 
         Color.Lerp(targetObject.GetComponent<Renderer>().material.color, targetColor, 
-                   16 * Time.deltaTime);
+                   64 * Time.deltaTime);
   }
 
   private void OnBeat(int beat) {

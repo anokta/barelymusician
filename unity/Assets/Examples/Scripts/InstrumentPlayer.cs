@@ -12,15 +12,17 @@ public class InstrumentPlayer : MonoBehaviour {
   // Instrument to play.
   public Instrument instrument;
 
+  public Sequencer sequencer;
+
   // Is playing?
   private bool isPlaying = false;
 
-  void Start() {
-    for (int i = 0; i < 16; ++i) {
-      float index = i % 4;
-      instrument.ScheduleNoteOn(i, index, 1.0f);
-      instrument.ScheduleNoteOff(i + 0.5, index);
-    }
+  void OnEnable() {
+    sequencer.OnBeat += OnBeat;
+  }
+
+  void OnDisable() {
+    sequencer.OnBeat -= OnBeat;
   }
 
   void Update() {
@@ -33,4 +35,10 @@ public class InstrumentPlayer : MonoBehaviour {
     }
   }
 
+  void OnBeat(int beat) {
+    float index = beat % 4;
+    // TODO: Too late to get in the beat without offset?
+    instrument.ScheduleNoteOn(beat + 1, index, 1.0f);
+    instrument.ScheduleNoteOff(beat + 1.5, index);
+  }
 }

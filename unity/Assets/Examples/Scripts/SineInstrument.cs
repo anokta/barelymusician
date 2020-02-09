@@ -34,7 +34,7 @@ namespace BarelyApi {
     }
 
     public override void UnityNoteOn(float index, float intensity) {
-      //frequency = (index + 1) * 220.0f;
+      frequency = (index + 1) * 220.0f;
       phase = 0.0f;
       playing = true;
     }

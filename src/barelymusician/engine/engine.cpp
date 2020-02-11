@@ -118,9 +118,9 @@ void Engine::ScheduleNoteOff(int instrument_id, double position, float index) {
   if (instrument_data == nullptr) {
     return;
   }
-  if (position < current_position_) {
+  if (position < previous_position_) {
     DLOG(ERROR) << "Playback is ahead of scheduled position: "
-                << current_position_ << " > " << position;
+                << previous_position_ << " > " << position;
     return;
   }
   instrument_data->messages.Push(position, NoteOffData{index});
@@ -132,9 +132,9 @@ void Engine::ScheduleNoteOn(int instrument_id, double position, float index,
   if (instrument_data == nullptr) {
     return;
   }
-  if (position < current_position_) {
+  if (position < previous_position_) {
     DLOG(ERROR) << "Playback is ahead of scheduled position: "
-                << current_position_ << " > " << position;
+                << previous_position_ << " > " << position;
     return;
   }
   instrument_data->messages.Push(position, NoteOnData{index, intensity});

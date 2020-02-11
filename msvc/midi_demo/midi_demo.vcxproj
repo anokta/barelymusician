@@ -79,7 +79,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;$(SolutionDir)..\examples\third_party\dr_wav;$(SolutionDir)..\examples\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\portaudio\include;$(SolutionDir)..\third_party\dr_wav;$(SolutionDir)..\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>NOGDI;NOMINMAX;NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -87,7 +87,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -97,13 +97,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;$(SolutionDir)..\examples\third_party\dr_wav;$(SolutionDir)..\examples\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\portaudio\include;$(SolutionDir)..\third_party\dr_wav;$(SolutionDir)..\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>NOGDI;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -113,13 +113,13 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;$(SolutionDir)..\examples\third_party\dr_wav;$(SolutionDir)..\examples\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\portaudio\include;$(SolutionDir)..\third_party\dr_wav;$(SolutionDir)..\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>NOGDI;NOMINMAX;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -131,7 +131,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\examples\third_party\portaudio\include;$(SolutionDir)..\examples\third_party\dr_wav;$(SolutionDir)..\examples\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\portaudio\include;$(SolutionDir)..\third_party\dr_wav;$(SolutionDir)..\third_party\midifile\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>NOGDI;NOMINMAX;NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -139,7 +139,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\examples\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\examples\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\third_party\portaudio\build\msvc\$(Platform)\$(Configuration);$(SolutionDir)..\third_party\midifile\visual-studio\$(Platform)\$(Configuration)Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>portaudio.lib;midifile.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

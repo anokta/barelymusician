@@ -55,13 +55,8 @@ namespace BarelyApi {
       BarelyMusician.Instance.ScheduleNoteOn(_id, position, index, intensity);
     }
 
-    protected void Update() {
-      BarelyMusician.Instance.UpdateMainThread();
-    }
-
     private void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Instance.UpdateAudioThread();
-      BarelyMusician.Instance.Process(_id, data);
+      BarelyMusician.Instance.Process(_id, data, channels);
     }
   }
 }

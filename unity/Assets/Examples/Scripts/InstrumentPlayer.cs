@@ -12,17 +12,15 @@ public class InstrumentPlayer : MonoBehaviour {
   // Instrument to play.
   public Instrument instrument;
 
-  public Sequencer sequencer;
-
   // Is playing?
   private bool isPlaying = false;
 
   void OnEnable() {
-    sequencer.OnBeat += OnBeat;
+    BarelyMusician.OnBeat += OnBeat;
   }
 
   void OnDisable() {
-    sequencer.OnBeat -= OnBeat;
+    BarelyMusician.OnBeat -= OnBeat;
   }
 
   void Update() {

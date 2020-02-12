@@ -14,18 +14,23 @@ namespace unity {
 
 namespace {
 
-// Maximum number of main thread tasks to be added per each update.
-const int kNumMaxUnityTasks = 200;
+// Maximum number of tasks to be added per each update.
+const int kNumMaxTasks = 500;
 
+// Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate, int num_channels, int num_frames)
-      : engine(sample_rate),
-        audio_runner(kNumMaxUnityTasks),
-        main_runner(kNumMaxUnityTasks),
-        sample_rate(sample_rate),
-        num_channels(num_channels),
-        num_frames(num_frames),
-        id_counter(0) {}
+  BarelyMusician(int sample_rate)
+      : sample_rate(sample_rate),
+        engine(sample_rate),
+        audio_runner(kNumMaxTasks),
+        main_runner(kNumMaxTasks),
+        id_counter(0),
+        is_playing(false),
+        position(0.0),
+        tempo(0.0) {}
+
+  // System sample rate.
+  const int sample_rate;
 
   // Engine.
   Engine engine;
@@ -36,39 +41,36 @@ struct BarelyMusician {
   // Main thread task runner.
   TaskRunner main_runner;
 
-  // System sample rate.
-  int sample_rate;
-
-  // System number of channels.
-  int num_channels;
-
-  // System number of frames.
-  int num_frames;
-
   // Counter to generate unique performer ids.
   int id_counter;
 
+  // Playback state.
+  std::atomic<bool> is_playing;
+
   // Playback position.
   std::atomic<double> position;
+
+  // Playback tempo.
+  std::atomic<double> tempo;
 };
 
-// Unity engine.
+// Unity plugin instance.
 BarelyMusician* barelymusician = nullptr;
 
 // Mutex to ensure thread-safe initialization and shutdown.
-std::mutex init_shutdown_mutex;
+std::mutex initialize_shutdown_mutex;
 
 }  // namespace
 
-void Initialize(int sample_rate, int num_channels, int num_frames) {
-  std::lock_guard<std::mutex> lock(init_shutdown_mutex);
+void Initialize(int sample_rate) {
+  std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician == nullptr) {
-    barelymusician = new BarelyMusician(sample_rate, num_channels, num_frames);
+    barelymusician = new BarelyMusician(sample_rate);
   }
 }
 
 void Shutdown() {
-  std::lock_guard<std::mutex> lock(init_shutdown_mutex);
+  std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician != nullptr) {
     delete barelymusician;
   }
@@ -99,6 +101,16 @@ double GetPosition() {
   return barelymusician->position;
 }
 
+double GetTempo() {
+  DCHECK(barelymusician);
+  return barelymusician->tempo;
+}
+
+bool IsPlaying() {
+  DCHECK(barelymusician);
+  return barelymusician->is_playing;
+}
+
 void NoteOff(int id, float index) {
   DCHECK(barelymusician);
   barelymusician->audio_runner.Add(
@@ -112,11 +124,10 @@ void NoteOn(int id, float index, float intensity) {
   });
 }
 
-void Process(int id, float* output) {
-  std::lock_guard<std::mutex> lock(init_shutdown_mutex);
+void Process(int id, float* output, int num_channels, int num_frames) {
+  std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician != nullptr) {
-    barelymusician->engine.Process(id, output, barelymusician->num_channels,
-                                   barelymusician->num_frames);
+    barelymusician->engine.Process(id, output, num_channels, num_frames);
   }
 }
 
@@ -215,12 +226,14 @@ void Stop() {
   barelymusician->audio_runner.Add([]() { barelymusician->engine.Stop(); });
 }
 
-void UpdateAudioThread() {
-  std::lock_guard<std::mutex> lock(init_shutdown_mutex);
+void UpdateAudioThread(int num_frames) {
+  std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician != nullptr) {
     barelymusician->audio_runner.Run();
-    barelymusician->engine.Update(barelymusician->num_frames);
+    barelymusician->engine.Update(num_frames);
+    barelymusician->is_playing = barelymusician->engine.IsPlaying();
     barelymusician->position = barelymusician->engine.GetPosition();
+    barelymusician->tempo = barelymusician->engine.GetTempo();
   }
 }
 

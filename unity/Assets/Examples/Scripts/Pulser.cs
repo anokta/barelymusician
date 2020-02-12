@@ -8,8 +8,6 @@ public class Pulser : MonoBehaviour {
 
   public Color noteOffColor = Color.white;
 
-  public Sequencer sequencer = null;
-
   private Vector3 targetScale = Vector3.one;
   private Color targetColor = Color.white;
 
@@ -19,15 +17,15 @@ public class Pulser : MonoBehaviour {
   }
 
   void OnEnable() {
-    sequencer.OnBeat += OnBeat;
-    sequencer.OnNoteOff += OnNoteOff;
-    sequencer.OnNoteOn += OnNoteOn;
+    BarelyMusician.OnBeat += OnBeat;
+    BarelyMusician.OnNoteOff += OnNoteOff;
+    BarelyMusician.OnNoteOn += OnNoteOn;
   }
 
   void OnDisable() {
-    sequencer.OnBeat -= OnBeat;
-    sequencer.OnNoteOff -= OnNoteOff;
-    sequencer.OnNoteOn -= OnNoteOn;
+    BarelyMusician.OnBeat -= OnBeat;
+    BarelyMusician.OnNoteOff -= OnNoteOff;
+    BarelyMusician.OnNoteOn -= OnNoteOn;
   }
   void Update() {
     targetObject.localScale = 

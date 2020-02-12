@@ -25,9 +25,7 @@ using ProcessFn = void(float* output, int size, int num_channels);
 // Initializes the system.
 //
 // @param sample_rate System sampling rate.
-// @param num_channels System number of channels.
-// @param num_frames System number of frames per buffer.
-void EXPORT_API Initialize(int sample_rate, int num_channels, int num_frames);
+void EXPORT_API Initialize(int sample_rate);
 
 // Shuts down the system.
 void EXPORT_API Shutdown();
@@ -51,6 +49,16 @@ void EXPORT_API Destroy(int id);
 // @return Position in beats.
 double EXPORT_API GetPosition();
 
+// Returns playback tempo.
+//
+// @return Tempo in BPM.
+double EXPORT_API GetTempo();
+
+// Returns playback state.
+//
+// @return True if playing.
+bool EXPORT_API IsPlaying();
+
 // Stops instrument note.
 //
 // @param id Instrument id.
@@ -68,7 +76,10 @@ void EXPORT_API NoteOn(int id, float index, float intensity);
 //
 // @param id Instrument id.
 // @param output Output buffer.
-void EXPORT_API Process(int id, float* output);
+// @param num_channels Number of output channels.
+// @param num_frames Number of output frames.
+void EXPORT_API Process(int id, float* output, int num_channels,
+                        int num_frames);
 
 // Schedules instrument note off.
 //
@@ -118,7 +129,9 @@ void EXPORT_API Start();
 void EXPORT_API Stop();
 
 // Updates audio thread state.
-void EXPORT_API UpdateAudioThread();
+//
+// @param num_frames Number of frames to iterate.
+void EXPORT_API UpdateAudioThread(int num_frames);
 
 // Updates main thread state.
 void EXPORT_API UpdateMainThread();

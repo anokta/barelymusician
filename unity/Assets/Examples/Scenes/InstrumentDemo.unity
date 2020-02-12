@@ -120,63 +120,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &99435053
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 99435055}
-  - component: {fileID: 99435054}
-  - component: {fileID: 99435056}
-  m_Layer: 0
-  m_Name: Sequencer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &99435054
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 99435053}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bdac8fc53896b041912f11bf7cd968c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tempo: 122
---- !u!4 &99435055
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 99435053}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &99435056
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 99435053}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e240a29169207374c878c245e1f1693d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &505738525
 GameObject:
   m_ObjectHideFlags: 0
@@ -279,6 +222,7 @@ GameObject:
   - component: {fileID: 675413000}
   - component: {fileID: 675412999}
   - component: {fileID: 675412998}
+  - component: {fileID: 675413001}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -351,6 +295,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &675413001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 675412997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e8bd584e9b26e64084843b1ac7979dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1219313102
 GameObject:
   m_ObjectHideFlags: 0
@@ -508,7 +464,6 @@ MonoBehaviour:
   noteIndex: 0
   noteIntensity: 1
   instrument: {fileID: 1219313103}
-  sequencer: {fileID: 99435054}
 --- !u!1 &1554266977
 GameObject:
   m_ObjectHideFlags: 0
@@ -522,6 +477,7 @@ GameObject:
   - component: {fileID: 1554266979}
   - component: {fileID: 1554266978}
   - component: {fileID: 1554266982}
+  - component: {fileID: 1554266983}
   m_Layer: 0
   m_Name: Pulser
   m_TagString: Untagged
@@ -599,7 +555,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1554266982
 MonoBehaviour:
@@ -615,4 +571,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetObject: {fileID: 1554266981}
   noteOffColor: {r: 1, g: 1, b: 1, a: 1}
-  sequencer: {fileID: 99435054}
+--- !u!114 &1554266983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1554266977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e240a29169207374c878c245e1f1693d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tempo: 120

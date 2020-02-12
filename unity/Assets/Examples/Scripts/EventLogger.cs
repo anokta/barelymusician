@@ -5,39 +5,33 @@ using BarelyApi;
 
 // Example class that logs every sequencer event.
 public class EventLogger : MonoBehaviour {
-  private Sequencer sequencer = null;
-
-  void Awake() {
-    sequencer = GetComponent<Sequencer>();
-  }
-
-  void OnDestroy() {
-    sequencer = null;
-  }
+  [Range(0.0f, 480.0f)]
+  public double tempo = 120.0;
 
   void OnEnable() {
-    sequencer.OnBeat += OnBeat;
-    sequencer.OnNoteOff += OnNoteOff;
-    sequencer.OnNoteOn += OnNoteOn;
+    BarelyMusician.OnBeat += OnBeat;
+    BarelyMusician.OnNoteOff += OnNoteOff;
+    BarelyMusician.OnNoteOn += OnNoteOn;
   }
 
   void OnDisable() {
-    sequencer.OnBeat -= OnBeat;
-    sequencer.OnNoteOff -= OnNoteOff;
-    sequencer.OnNoteOn -= OnNoteOn;
+    BarelyMusician.OnBeat -= OnBeat;
+    BarelyMusician.OnNoteOff -= OnNoteOff;
+    BarelyMusician.OnNoteOn -= OnNoteOn;
   }
 
   void Update() {
+    BarelyMusician.Instance.SetTempo(tempo);
     if (Input.GetKeyDown(KeyCode.Space)) {
-      if (sequencer.IsPlaying) {
-        sequencer.Pause();
+      if (BarelyMusician.Instance.IsPlaying()) {
+        BarelyMusician.Instance.Pause();
       } else {
-        sequencer.Play();
+        BarelyMusician.Instance.Play();
       }
     } else if (Input.GetKeyDown(KeyCode.Backspace)) {
-      sequencer.Stop();
+      BarelyMusician.Instance.Stop();
     } else if (Input.GetKeyDown(KeyCode.Return)) {
-      Debug.Log("Position: " + sequencer.GetPosition());
+      Debug.Log("Position: " + BarelyMusician.Instance.GetPosition());
     }
   }
 

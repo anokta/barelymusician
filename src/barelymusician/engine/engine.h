@@ -52,7 +52,7 @@ class Engine {
   // @return Tempo in BPM.
   double GetTempo() const;
 
-  // Returns whether the engine is playing.
+  // Returns playback state.
   //
   // @return True if playing.
   bool IsPlaying() const;

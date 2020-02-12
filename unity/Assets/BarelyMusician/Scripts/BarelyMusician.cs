@@ -6,11 +6,19 @@ using UnityEngine;
 
 namespace BarelyApi {
   // Main |BarelyMusician| class that communicates with the native code.
-  public class BarelyMusician {
-    // Internal event callbacks.
-    public delegate void BeatCallback(int beat);
-    public delegate void NoteOffCallback(int id, float index);
-    public delegate void NoteOnCallback(int id, float index, float intensity);
+  [RequireComponent(typeof(AudioListener))]
+  public class BarelyMusician : MonoBehaviour {
+    // Beat event.
+    public delegate void BeatEvent(int beat);
+    public static event BeatEvent OnBeat;
+
+    // Note off event.
+    public delegate void NoteOffEvent(Instrument instrument, float index);
+    public static event NoteOffEvent OnNoteOff;
+
+    // Note on event.
+    public delegate void NoteOnEvent(Instrument instrument, float index, float intenstiy);
+    public static event NoteOnEvent OnNoteOn;
 
     // Internal Unity instrument functions.
     public delegate void UnityNoteOffFn(float index);
@@ -25,21 +33,87 @@ namespace BarelyApi {
     // Singleton instance.
     public static BarelyMusician Instance {
       get {
-        if (instance == null) {
-          instance = new BarelyMusician();
+        if (_instance == null) {
+          var existingInstance = GameObject.FindObjectOfType<BarelyMusician>();
+          if (existingInstance != null) {
+            _instance = existingInstance;
+          } else {
+            var audioListener = GameObject.FindObjectOfType<AudioListener>();
+            if (audioListener != null) {
+              _instance = audioListener.gameObject.AddComponent<BarelyMusician>();
+            } else {
+              Debug.LogError("No AudioListener found in the scene!");
+            }
+          }
         }
-        return instance;
+        return _instance;
       }
     }
-    private static BarelyMusician instance = null;
+    private static BarelyMusician _instance = null;
+
+    // Internal event callbacks.
+    private delegate void BeatCallback(int beat);
+    private delegate void NoteOffCallback(int id, float index);
+    private delegate void NoteOnCallback(int id, float index, float intensity);
+
+    // List of instruments.
+    private Dictionary<int, Instrument> _instruments = null;
+
+    // Internal beat callback.
+    private BeatCallback _beatCallback = null;
+
+    // Internal note off callback.
+    private NoteOffCallback _noteOffCallback = null;
+
+    // Internal note on callback.
+    private NoteOnCallback _noteOnCallback = null;
 
     // Audio thread last DSP time.
-    private double lastDspTime = 0.0;
+    private double _lastDspTime = 0.0;
 
-    // Main thread last update time.
-    private float lastUpdateTime = 0.0f;
+    private void Awake() {
+      _instruments = new Dictionary<int, Instrument>();
+      _beatCallback = delegate (int beat) {
+        OnBeat?.Invoke(beat);
+      };
+      _noteOffCallback = delegate (int id, float index) {
+        Instrument instrument = null;
+        if (_instruments.TryGetValue(id, out instrument)) {
+          OnNoteOff?.Invoke(instrument, index);
+        } else {
+          Debug.LogError("Instrument does not exist: " + id);
+        }
+      };
+      _noteOnCallback = delegate (int id, float index, float intensity) {
+        Instrument instrument = null;
+        if (_instruments.TryGetValue(id, out instrument)) {
+          OnNoteOn?.Invoke(instrument, index, intensity);
+        } else {
+          Debug.LogError("Instrument does not exist: " + id);
+        }
+      };
+      InitializeNative(AudioSettings.outputSampleRate);
+      SetBeatCallbackNative(Marshal.GetFunctionPointerForDelegate(_beatCallback));
+      SetNoteOffCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOffCallback));
+      SetNoteOnCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
+    }
 
-    public Dictionary<int, Instrument> instruments = null;
+    private void OnDestroy() {
+      ShutdownNative();
+      _beatCallback = null;
+      _noteOffCallback = null;
+      _noteOnCallback = null;
+      _instruments = null;
+      _instance = null;
+    }
+
+    private void Update() {
+      UpdateMainThreadNative();
+    }
+
+    private void OnAudioFilterRead(float[] data, int channels) {
+      UpdateAudioThread(data.Length / channels);
+    }
 
     // Creates new instrument.
     public int Create(Instrument instrument) {
@@ -50,7 +124,7 @@ namespace BarelyApi {
         id = CreateNative(Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOffFn),
                           Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOnFn),
                           Marshal.GetFunctionPointerForDelegate(unityInstrument.ProcessFn));
-        instruments.Add(id, instrument);
+        _instruments.Add(id, instrument);
       } else {
         Debug.LogError("Unsupported instrument type: " + instrumentType);
       }
@@ -59,7 +133,7 @@ namespace BarelyApi {
 
     // Destroys instrument.
     public void Destroy(int id) {
-      instruments.Remove(id);
+      _instruments.Remove(id);
       DestroyNative(id);
     }
 
@@ -68,9 +142,21 @@ namespace BarelyApi {
       return GetPositionNative();
     }
 
+    // Returns playback tempo.
+    public double GetTempo() {
+      return GetTempoNative();
+    }
+
+    // Returns the playback state.
+    public bool IsPlaying() {
+      return IsPlayingNative();
+    }
+
     // Processes instrument.
-    public void Process(int id, float[] output) {
-      ProcessNative(id, output);
+    public void Process(int id, float[] output, int numChannels) {
+      int numFrames = output.Length / numChannels;
+      UpdateAudioThread(numFrames);
+      ProcessNative(id, output, numChannels, numFrames);
     }
 
     // Sets instrument note off.
@@ -93,30 +179,6 @@ namespace BarelyApi {
       ScheduleNoteOnNative(id, position, index, intensity);
     }
 
-    // Sets beat callback.
-    public void SetBeatCallback(BeatCallback beatCallback) {
-      IntPtr beatCallbackPtr = (beatCallback != null)
-                                  ? Marshal.GetFunctionPointerForDelegate(beatCallback)
-                                  : IntPtr.Zero;
-      SetBeatCallbackNative(beatCallbackPtr);
-    }
-
-    // Sets note off callback.
-    public void SetNoteOffCallback(NoteOffCallback noteOffCallback) {
-      IntPtr noteOffCallbackPtr = (noteOffCallback != null)
-                            ? Marshal.GetFunctionPointerForDelegate(noteOffCallback)
-                            : IntPtr.Zero;
-      SetNoteOffCallbackNative(noteOffCallbackPtr);
-    }
-
-    // Sets note on callback.
-    public void SetNoteOnCallback(NoteOnCallback noteOnCallback) {
-      IntPtr noteOnCallbackPtr = (noteOnCallback != null)
-                            ? Marshal.GetFunctionPointerForDelegate(noteOnCallback)
-                            : IntPtr.Zero;
-      SetNoteOnCallbackNative(noteOnCallbackPtr);
-    }
-
     // Sets playback position.
     public void SetPosition(double position) {
       SetPositionNative(position);
@@ -128,45 +190,27 @@ namespace BarelyApi {
     }
 
     // Starts playback.
-    public void Start() {
+    public void Play() {
       StartNative();
+    }
+
+    // Pauses playback.
+    public void Pause() {
+      StopNative();
     }
 
     // Stops playback.
     public void Stop() {
       StopNative();
-    }
-
-    // Constructs new |BarelyMusician| with Unity audio settings.                                                       
-    BarelyMusician() {
-      instruments = new Dictionary<int, Instrument>();
-      var config = AudioSettings.GetConfiguration();
-      int sampleRate = config.sampleRate;
-      int numChannels = (int)config.speakerMode;
-      int numFrames = config.dspBufferSize;
-      InitializeNative(sampleRate, numChannels, numFrames);
-    }
-
-    // Shuts down |BarelyMusician|.
-    ~BarelyMusician() {
-      ShutdownNative();
+      SetPosition(0.0);
     }
 
     // Updates the audio thread state.
-    public void UpdateAudioThread() {
+    private void UpdateAudioThread(int numFrames) {
       double dspTime = AudioSettings.dspTime;
-      if (dspTime > lastDspTime) {
-        lastDspTime = dspTime;
-        UpdateAudioThreadNative();
-      }
-    }
-
-    // Updates the main thread state.
-    public void UpdateMainThread() {
-      float updateTime = Time.unscaledTime;
-      if (updateTime > lastUpdateTime) {
-        lastUpdateTime = updateTime;
-        UpdateMainThreadNative();
+      if (dspTime > _lastDspTime) {
+        _lastDspTime = dspTime;
+        UpdateAudioThreadNative(numFrames);
       }
     }
 
@@ -177,7 +221,7 @@ namespace BarelyApi {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
     [DllImport(pluginName, EntryPoint = "Initialize")]
-    private static extern void InitializeNative(int sampleRate, int numChannels, int numFrames);
+    private static extern void InitializeNative(int sampleRate);
 
     [DllImport(pluginName, EntryPoint = "Shutdown")]
     private static extern void ShutdownNative();
@@ -192,8 +236,15 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "GetPosition")]
     private static extern double GetPositionNative();
 
+    [DllImport(pluginName, EntryPoint = "GetTempo")]
+    private static extern double GetTempoNative();
+
+    [DllImport(pluginName, EntryPoint = "IsPlaying")]
+    private static extern bool IsPlayingNative();
+
     [DllImport(pluginName, EntryPoint = "Process")]
-    private static extern void ProcessNative(int id, [In, Out] float[] output);
+    private static extern void ProcessNative(int id, [In, Out] float[] output, int numChannels,
+                                             int numFrames);
 
     [DllImport(pluginName, EntryPoint = "NoteOff")]
     private static extern void NoteOffNative(int id, float index);
@@ -230,7 +281,7 @@ namespace BarelyApi {
     private static extern void StopNative();
 
     [DllImport(pluginName, EntryPoint = "UpdateAudioThread")]
-    private static extern void UpdateAudioThreadNative();
+    private static extern void UpdateAudioThreadNative(int numFrames);
 
     [DllImport(pluginName, EntryPoint = "UpdateMainThread")]
     private static extern void UpdateMainThreadNative();

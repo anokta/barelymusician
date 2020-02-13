@@ -27,6 +27,7 @@ public class Pulser : MonoBehaviour {
     BarelyMusician.OnNoteOff -= OnNoteOff;
     BarelyMusician.OnNoteOn -= OnNoteOn;
   }
+
   void Update() {
     targetObject.localScale = 
         Vector3.Lerp(targetObject.localScale, targetScale, Time.deltaTime * 4);

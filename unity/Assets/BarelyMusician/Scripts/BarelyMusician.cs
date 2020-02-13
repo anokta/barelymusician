@@ -146,7 +146,22 @@ namespace BarelyApi {
     public static void Stop() {
       if (BarelyMusicianInternal.Instance != null) {
         StopNative();
-        SetPosition(0.0);
+        SetPositionNative(0.0);
+      }
+    }
+
+    // List of instruments.
+    private static Dictionary<int, Instrument> _instruments = new Dictionary<int, Instrument>();
+
+    // Audio thread last DSP time.
+    private static double _lastDspTime = 0.0;
+
+    // Updates the audio thread state.
+    private static void UpdateAudioThread(int numFrames) {
+      double dspTime = AudioSettings.dspTime;
+      if (dspTime > _lastDspTime) {
+        _lastDspTime = dspTime;
+        UpdateAudioThreadNative(numFrames);
       }
     }
 
@@ -186,7 +201,7 @@ namespace BarelyApi {
       private NoteOnCallback _noteOnCallback = null;
 
       // Audio source.
-      private AudioSource _source;
+      private AudioSource _source = null;
 
       private void Awake() {
         InitializeNative(AudioSettings.outputSampleRate);
@@ -244,21 +259,6 @@ namespace BarelyApi {
 
       private void OnAudioFilterRead(float[] data, int channels) {
         UpdateAudioThread(data.Length / channels);
-      }
-    }
-
-    // List of instruments.
-    public static Dictionary<int, Instrument> _instruments = new Dictionary<int, Instrument>();
-
-    // Audio thread last DSP time.
-    private static double _lastDspTime = 0.0;
-
-    // Updates the audio thread state.
-    private static void UpdateAudioThread(int numFrames) {
-      double dspTime = AudioSettings.dspTime;
-      if (dspTime > _lastDspTime) {
-        _lastDspTime = dspTime;
-        UpdateAudioThreadNative(numFrames);
       }
     }
 

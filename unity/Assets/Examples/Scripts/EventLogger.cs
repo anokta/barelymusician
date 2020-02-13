@@ -21,17 +21,17 @@ public class EventLogger : MonoBehaviour {
   }
 
   void Update() {
-    BarelyMusician.Instance.SetTempo(tempo);
+    BarelyMusician.SetTempo(tempo);
     if (Input.GetKeyDown(KeyCode.Space)) {
-      if (BarelyMusician.Instance.IsPlaying()) {
-        BarelyMusician.Instance.Pause();
+      if (BarelyMusician.IsPlaying()) {
+        BarelyMusician.Pause();
       } else {
-        BarelyMusician.Instance.Play();
+        BarelyMusician.Play();
       }
     } else if (Input.GetKeyDown(KeyCode.Backspace)) {
-      BarelyMusician.Instance.Stop();
+      BarelyMusician.Stop();
     } else if (Input.GetKeyDown(KeyCode.Return)) {
-      Debug.Log("Position: " + BarelyMusician.Instance.GetPosition());
+      Debug.Log("Position: " + BarelyMusician.GetPosition());
     }
   }
 

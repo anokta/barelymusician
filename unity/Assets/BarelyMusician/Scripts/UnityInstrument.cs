@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BarelyApi {
   // Base Unity instrument.
   public abstract class UnityInstrument : Instrument {
-    // Internal instrument callbacks.
+    // Note off function.
     public BarelyMusician.UnityNoteOffFn NoteOffFn {
       get {
         if (_noteOffFn == null) {
@@ -15,6 +15,8 @@ namespace BarelyApi {
       }
     }
     private BarelyMusician.UnityNoteOffFn _noteOffFn = null;
+    
+    // Note on function.
     public BarelyMusician.UnityNoteOnFn NoteOnFn {
       get {
         if (_noteOnFn == null) {
@@ -24,6 +26,8 @@ namespace BarelyApi {
       }
     }
     private BarelyMusician.UnityNoteOnFn _noteOnFn = null;
+    
+    // Process function.
     public BarelyMusician.UnityProcessFn ProcessFn {
       get {
         if (_processFn == null) {

@@ -7,12 +7,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{5b83eec9-de14-47a6-9af5-12c65b85209d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\instruments">
-      <UniqueIdentifier>{50315529-d501-4f9e-9ea5-9f4eb61c888f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\instruments">
-      <UniqueIdentifier>{a64bda28-84cf-4677-8c04-bde834872bbf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\util">
       <UniqueIdentifier>{c9d1406a-8beb-4bc9-a5fa-6699dc345349}</UniqueIdentifier>
     </Filter>
@@ -48,14 +42,8 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h">
-      <Filter>Header Files\instruments</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h">
       <Filter>Header Files\util\input_manager</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h">
-      <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h">
       <Filter>Header Files\audio_output</Filter>
@@ -63,25 +51,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\audio_output.h">
       <Filter>Header Files\audio_output</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.h">
-      <Filter>Header Files\instruments</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_enveloped_voice.h">
-      <Filter>Header Files\instruments</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp">
-      <Filter>Source Files\instruments</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp">
       <Filter>Source Files\util\input_manager</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.cpp">
-      <Filter>Source Files\instruments</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.cpp">
       <Filter>Source Files\audio_output</Filter>

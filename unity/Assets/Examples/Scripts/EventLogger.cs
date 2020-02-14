@@ -5,7 +5,7 @@ using BarelyApi;
 
 // Example class that logs every sequencer event.
 public class EventLogger : MonoBehaviour {
-  [Range(0.0f, 480.0f)]
+  [Range(0.0f, 960.0f)]
   public double tempo = 120.0;
 
   void OnEnable() {

@@ -8,6 +8,7 @@
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/platform/unity/unity_instrument.h"
 #include "barelymusician/util/task_runner.h"
+#include "instruments/basic_synth_instrument.h"
 
 namespace barelyapi {
 namespace unity {
@@ -77,8 +78,8 @@ void Shutdown() {
   barelymusician = nullptr;
 }
 
-int Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
-           ProcessFn* process_fn_ptr) {
+int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
+                          ProcessFn* process_fn_ptr) {
   DCHECK(barelymusician);
   const int id = ++barelymusician->id_counter;
   barelymusician->audio_runner.Add(
@@ -87,6 +88,20 @@ int Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
             note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
         barelymusician->engine.Create(id, std::move(instrument));
       });
+  return id;
+}
+
+int CreateBasicSynthInstrument(int num_voices, int oscillator_type) {
+  DCHECK(barelymusician);
+  const int id = ++barelymusician->id_counter;
+  barelymusician->audio_runner.Add([id, num_voices, oscillator_type]() {
+    auto instrument = std::make_unique<examples::BasicSynthInstrument>(
+        barelymusician->sample_rate, num_voices);
+    instrument->SetFloatParam(
+        examples::BasicSynthInstrumentParam::kOscillatorType,
+        static_cast<float>(oscillator_type));
+    barelymusician->engine.Create(id, std::move(instrument));
+  });
   return id;
 }
 

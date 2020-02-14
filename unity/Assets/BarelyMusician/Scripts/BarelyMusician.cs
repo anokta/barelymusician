@@ -36,9 +36,15 @@ namespace BarelyApi {
         Type instrumentType = instrument.GetType();
         if (instrumentType.IsSubclassOf(typeof(UnityInstrument))) {
           var unityInstrument = instrument as UnityInstrument;
-          id = CreateNative(Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOffFn),
-                            Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOnFn),
-                            Marshal.GetFunctionPointerForDelegate(unityInstrument.ProcessFn));
+          id = CreateUnityInstrumentNative(
+              Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOffFn),
+              Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOnFn),
+              Marshal.GetFunctionPointerForDelegate(unityInstrument.ProcessFn));
+          _instruments.Add(id, instrument);
+        } else if (instrumentType == typeof(BasicSynthInstrument)) {
+          var basicSynthInstrument = instrument as BasicSynthInstrument;
+          id = CreateBasicSynthInstrumentNative(basicSynthInstrument.numVoices,
+                                                (int)basicSynthInstrument.oscillatorType);
           _instruments.Add(id, instrument);
         } else {
           Debug.LogError("Unsupported instrument type: " + instrumentType);
@@ -274,9 +280,12 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "Shutdown")]
     private static extern void ShutdownNative();
 
-    [DllImport(pluginName, EntryPoint = "Create")]
-    private static extern int CreateNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
-                                           IntPtr processFnPtr);
+    [DllImport(pluginName, EntryPoint = "CreateUnityInstrument")]
+    private static extern int CreateUnityInstrumentNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+                                                          IntPtr processFnPtr);
+
+    [DllImport(pluginName, EntryPoint = "CreateBasicSynthInstrument")]
+    private static extern int CreateBasicSynthInstrumentNative(int numVoices, int oscillatorType);
 
     [DllImport(pluginName, EntryPoint = "Destroy")]
     private static extern void DestroyNative(int id);

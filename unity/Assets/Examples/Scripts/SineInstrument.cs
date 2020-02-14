@@ -32,7 +32,7 @@ namespace BarelyApi {
     }
 
     public override void UnityNoteOn(float index, float intensity) {
-      frequency = (index + 1) * 220.0f;
+      frequency = 440.0f * Mathf.Pow(2.0f, (index - 69.0f) / 12.0f);
       phase = 0.0f;
       targetGain = intensity;
     }

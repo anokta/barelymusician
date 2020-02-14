@@ -30,14 +30,22 @@ void EXPORT_API Initialize(int sample_rate);
 // Shuts down the system.
 void EXPORT_API Shutdown();
 
-// Creates new instrument.
+// Creates new Unity instrument.
 //
 // @param note_off_fn_ptr Note off function.
 // @param note_on_fn_ptr Note on function.
 // @param process_fn_ptr Process function.
 // @return Instrument id.
-int EXPORT_API Create(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
-                      ProcessFn* process_fn_ptr);
+int EXPORT_API CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
+                                     NoteOnFn* note_on_fn_ptr,
+                                     ProcessFn* process_fn_ptr);
+
+// Creates new synth instrument.
+//
+// @param num_voices Number of voices.
+// @param oscillator_type Oscillator type index.
+// @return Instrument id.
+int EXPORT_API CreateBasicSynthInstrument(int num_voices, int oscillator_type);
 
 // Destroys instrument.
 //

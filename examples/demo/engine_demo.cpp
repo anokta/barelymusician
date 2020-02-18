@@ -27,7 +27,6 @@ using ::barelyapi::Engine;
 using ::barelyapi::Instrument;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Random;
 using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -35,6 +34,7 @@ using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WavFile;
 using ::barelyapi::examples::WinConsoleInput;
+using ::barelyapi::random::Uniform;
 
 // Beat composer callback signature.
 using BeatComposerCallback = std::function<void(
@@ -143,9 +143,9 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   }
   // Hihat Closed.
   notes->push_back({get_beat(0), get_beat(2), barelyapi::kNoteIndexHihatClosed,
-                    Random::Uniform(0.5f, 0.75f)});
+                    Uniform(0.5f, 0.75f)});
   notes->push_back({get_beat(2), get_beat(2), barelyapi::kNoteIndexHihatClosed,
-                    Random::Uniform(0.25f, 0.75f)});
+                    Uniform(0.25f, 0.75f)});
   // Hihat Open.
   if (beat + 1 == num_beats) {
     if (bar % 4 == 3) {
@@ -327,14 +327,14 @@ int main(int argc, char* argv[]) {
         break;
       case '1':
         task_runner.Add([&]() {
-          const double tempo = Random::Uniform(0.5, 0.75) * engine.GetTempo();
+          const double tempo = Uniform(0.5, 0.75) * engine.GetTempo();
           engine.SetTempo(tempo);
           LOG(INFO) << "Tempo changed to " << tempo;
         });
         break;
       case '2':
         task_runner.Add([&]() {
-          const double tempo = Random::Uniform(1.5, 2.0) * engine.GetTempo();
+          const double tempo = Uniform(1.5, 2.0) * engine.GetTempo();
           engine.SetTempo(tempo);
           LOG(INFO) << "Tempo changed to " << tempo;
         });

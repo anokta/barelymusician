@@ -1,51 +1,46 @@
 #include "barelymusician/util/random.h"
 
 namespace barelyapi {
+namespace random {
 
-std::default_random_engine Random::generator_ = std::default_random_engine();
+namespace {
 
-std::normal_distribution<double> Random::normal_double_distribution_ =
-    std::normal_distribution<double>();
+// Pseudo-random number generator engine.
+std::default_random_engine generator;
 
-std::normal_distribution<float> Random::normal_float_distribution_ =
-    std::normal_distribution<float>();
+}  // namespace
 
-std::uniform_real_distribution<double> Random::uniform_double_distribution_ =
-    std::uniform_real_distribution<double>();
-
-std::uniform_real_distribution<float> Random::uniform_float_distribution_ =
-    std::uniform_real_distribution<float>();
-
-std::uniform_int_distribution<int> Random::uniform_int_distribution_ =
-    std::uniform_int_distribution<int>();
-
-double Random::Normal(double mean, double variance) {
+double Normal(double mean, double variance) {
+  static std::normal_distribution<double> normal_double_distribution;
   std::normal_distribution<double>::param_type param(mean, variance);
-  return normal_double_distribution_(generator_, param);
+  return normal_double_distribution(generator, param);
 }
 
-float Random::Normal(float mean, float variance) {
+float Normal(float mean, float variance) {
+  static std::normal_distribution<float> normal_float_distribution;
   std::normal_distribution<float>::param_type param(mean, variance);
-  return normal_float_distribution_(generator_, param);
+  return normal_float_distribution(generator, param);
 }
 
-void Random::SetSeed(int seed) {
-  generator_.seed(static_cast<unsigned int>(seed));
-}
+void SetSeed(int seed) { generator.seed(static_cast<unsigned int>(seed)); }
 
-double Random::Uniform(double min, double max) {
+double Uniform(double min, double max) {
+  static std::uniform_real_distribution<double> uniform_double_distribution;
   std::uniform_real_distribution<double>::param_type param(min, max);
-  return uniform_double_distribution_(generator_, param);
+  return uniform_double_distribution(generator, param);
 }
 
-float Random::Uniform(float min, float max) {
+float Uniform(float min, float max) {
+  static std::uniform_real_distribution<float> uniform_float_distribution;
   std::uniform_real_distribution<float>::param_type param(min, max);
-  return uniform_float_distribution_(generator_, param);
+  return uniform_float_distribution(generator, param);
 }
 
-int Random::Uniform(int min, int max) {
+int Uniform(int min, int max) {
+  static std::uniform_int_distribution<int> uniform_int_distribution;
   std::uniform_int_distribution<int>::param_type param(min, max);
-  return uniform_int_distribution_(generator_, param);
+  return uniform_int_distribution(generator, param);
 }
 
+}  // namespace random
 }  // namespace barelyapi

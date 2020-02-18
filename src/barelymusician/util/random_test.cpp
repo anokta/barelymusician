@@ -17,18 +17,18 @@ TEST(RandomTest, SetSeed) {
   const float kVariance = 10.0f;
 
   // Set the seed.
-  Random::SetSeed(kSeed);
+  SetSeed(kSeed);
   // Generate some random values.
   std::vector<float> values(kNumValues);
   for (int i = 0; i < kNumValues; ++i) {
-    values[i] = Random::Normal(kMean, kVariance);
+    values[i] = Normal(kMean, kVariance);
   }
 
   // Reset the seed with the same value.
-  Random::SetSeed(kSeed);
+  SetSeed(kSeed);
   // Validate that the same numbers are generated for the next |kNumValues|.
   for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_FLOAT_EQ(Random::Normal(kMean, kVariance), values[i]);
+    EXPECT_FLOAT_EQ(Normal(kMean, kVariance), values[i]);
   }
 }
 
@@ -40,7 +40,7 @@ TEST(RandomTest, UniformMinMax) {
   const int kMax = 35;
 
   for (int i = 0; i < kNumValues; ++i) {
-    const int value = Random::Uniform(kMin, kMax);
+    const int value = Uniform(kMin, kMax);
     EXPECT_GE(value, kMin);
     EXPECT_LE(value, kMax);
   }

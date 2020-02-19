@@ -37,14 +37,17 @@ class Clock {
   void UpdatePosition(int num_samples);
 
  private:
+  // Returns the corresponding number of beats for the given |samples|.
+  double BeatsFromSamples(int samples) const;
+
+  // Returns the corresponding number of samples for the given |beats|.
+  int SamplesFromBeats(double beats) const;
+
   // Number of samples per minute.
   const double num_samples_per_minute_;
 
   // Current beat.
   int beat_;
-
-  // Leftover beats from the current beat.
-  double leftover_beats_;
 
   // Leftover samples from the current beat.
   int leftover_samples_;
@@ -52,7 +55,10 @@ class Clock {
   // Number of samples per beat.
   int num_samples_per_beat_;
 
-  // Tempo (BPM).
+  // Position in beats.
+  double position_;
+
+  // Tempo in BPM.
   double tempo_;
 };
 

@@ -1,6 +1,7 @@
 #include "barelymusician/base/logging.h"
 
 #include <cstdlib>
+#include <iostream>
 #include <string>
 
 namespace barelyapi {
@@ -20,15 +21,15 @@ std::string GetBaseFilename(const std::string& filepath) {
 //
 // @param severity Log severity.
 // @return Log severity in string format.
-std::string GetStringFromSeverity(Logger::Severity severity) {
+std::string GetStringFromSeverity(LogSeverity severity) {
   switch (severity) {
-    case Logger::Severity::INFO:
+    case LogSeverity::INFO:
       return "INFO";
-    case Logger::Severity::WARNING:
+    case LogSeverity::WARNING:
       return "WARNING";
-    case Logger::Severity::ERROR:
+    case LogSeverity::ERROR:
       return "ERROR";
-    case Logger::Severity::FATAL:
+    case LogSeverity::FATAL:
       return "FATAL";
     default:
       break;
@@ -36,28 +37,43 @@ std::string GetStringFromSeverity(Logger::Severity severity) {
   return "";
 }
 
+// Custom log writer.
+LogWriter* custom_log_writer = nullptr;
+
 }  // namespace
 
-Logger::Logger(std::ostream& out, Severity severity, const char* file, int line)
-    : out_(out), severity_(severity) {
-  out_ << GetStringFromSeverity(severity) << " [" << GetBaseFilename(file)
-       << ":" << line << "] ";
+Logger::Logger(LogSeverity severity, const char* file, int line)
+    : severity_(severity) {
+  stream_ << "[" << GetBaseFilename(file) << ":" << line << "] ";
 }
 
 Logger::~Logger() {
-  out_ << std::endl;
-  if (severity_ == Severity::FATAL) {
+  LogWriter& writer = (custom_log_writer != nullptr) ? *custom_log_writer
+                                                     : GetDefaultLogWriter();
+  writer.Write(severity_, stream_.str());
+  if (severity_ == LogSeverity::FATAL) {
     // Fatal error received, abort the program.
     std::abort();
   }
 }
 
-std::ostream& Logger::GetStream() { return out_; }
+std::ostream& Logger::GetStream() { return stream_; }
 
-std::ostream& Logger::NullStream() {
-  static std::ostream null_out(nullptr);
-  return null_out;
+void CerrLogWriter::Write(LogSeverity severity, const std::string& message) {
+  std::cerr << GetStringFromSeverity(severity) << " " << message << std::endl;
 }
+
+LogWriter& GetDefaultLogWriter() {
+  static LogWriter* const default_log_writer = new CerrLogWriter();
+  return *default_log_writer;
+}
+
+std::ostream& GetNullStream() {
+  static std::ostream* const null_stream = new std::ostream(nullptr);
+  return *null_stream;
+}
+
+void SetLogWriter(LogWriter* log_writer) { custom_log_writer = log_writer; }
 
 }  // namespace logging
 }  // namespace barelyapi

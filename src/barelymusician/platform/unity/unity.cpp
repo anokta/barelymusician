@@ -7,6 +7,7 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/platform/unity/unity_instrument.h"
+#include "barelymusician/platform/unity/unity_log_writer.h"
 #include "barelymusician/util/task_runner.h"
 #include "instruments/basic_synth_instrument.h"
 
@@ -42,6 +43,9 @@ struct BarelyMusician {
   // Main thread task runner.
   TaskRunner main_runner;
 
+  // Unity log writer.
+  UnityLogWriter writer;
+
   // Counter to generate unique performer ids.
   int id_counter;
 
@@ -67,12 +71,14 @@ void Initialize(int sample_rate) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician == nullptr) {
     barelymusician = new BarelyMusician(sample_rate);
+    logging::SetLogWriter(&barelymusician->writer);
   }
 }
 
 void Shutdown() {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician != nullptr) {
+    logging::SetLogWriter(nullptr);
     delete barelymusician;
   }
   barelymusician = nullptr;
@@ -173,6 +179,19 @@ void SetBeatCallback(BeatCallback* beat_callback_ptr) {
   } else {
     barelymusician->audio_runner.Add(
         []() { barelymusician->engine.SetBeatCallback(nullptr); });
+  }
+}
+
+void SetDebugCallback(DebugCallback* debug_callback_ptr) {
+  DCHECK(barelymusician);
+  if (debug_callback_ptr != nullptr) {
+    const auto debug_callback = [debug_callback_ptr](int severity,
+                                                     const char* message) {
+      debug_callback_ptr(severity, message);
+    };
+    barelymusician->writer.SetDebugCallback(debug_callback);
+  } else {
+    barelymusician->writer.SetDebugCallback(nullptr);
   }
 }
 

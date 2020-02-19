@@ -194,9 +194,21 @@ namespace BarelyApi {
       // Denotes whether the component is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
+      // Log severity.
+      private enum Severity {
+        Info = 0,
+        Warning = 1,
+        Error = 2,
+        Fatal = 3,
+      }
+
       // Beat callback.
       private delegate void BeatCallback(int beat);
       private BeatCallback _beatCallback = null;
+
+      // Debug callback.
+      private delegate void DebugCallback(int severity, string message);
+      private DebugCallback _debugCallback = null;
 
       // Note off callback.
       private delegate void NoteOffCallback(int id, float index);
@@ -215,6 +227,24 @@ namespace BarelyApi {
           OnBeat?.Invoke(beat);
         };
         SetBeatCallbackNative(Marshal.GetFunctionPointerForDelegate(_beatCallback));
+        _debugCallback = delegate (int severity, string message) {
+          message = "{::" + pluginName + "::}" + message;
+          switch ((Severity)severity) {
+            case Severity.Info:
+              Debug.Log(message);
+              break;
+            case Severity.Warning:
+              Debug.LogWarning(message);
+              break;
+            case Severity.Error:
+              Debug.LogError(message);
+              break;
+            case Severity.Fatal:
+              Debug.LogAssertion(message);
+              break;
+          }
+        };
+        SetDebugCallbackNative(Marshal.GetFunctionPointerForDelegate(_debugCallback));
         _noteOffCallback = delegate (int id, float index) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
@@ -318,6 +348,9 @@ namespace BarelyApi {
 
     [DllImport(pluginName, EntryPoint = "SetBeatCallback")]
     private static extern void SetBeatCallbackNative(IntPtr beatCallbackPtr);
+
+    [DllImport(pluginName, EntryPoint = "SetDebugCallback")]
+    private static extern void SetDebugCallbackNative(IntPtr debugCallbackPtr);
 
     [DllImport(pluginName, EntryPoint = "SetNoteOffCallback")]
     private static extern void SetNoteOffCallbackNative(IntPtr noteOffCallbackPtr);

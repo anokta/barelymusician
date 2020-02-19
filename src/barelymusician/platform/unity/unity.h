@@ -22,6 +22,9 @@ using NoteOffFn = void(float index);
 using NoteOnFn = void(float index, float intensity);
 using ProcessFn = void(float* output, int size, int num_channels);
 
+// Debug callback signature.
+using DebugCallback = void(int severity, const char* message);
+
 // Initializes the system.
 //
 // @param sample_rate System sampling rate.
@@ -109,6 +112,11 @@ void EXPORT_API ScheduleNoteOn(int id, double position, float index,
 //
 // @param beat_callback_ptr Pointer to beat callback.
 void EXPORT_API SetBeatCallback(BeatCallback* beat_callback_ptr);
+
+// Sets debug callback.
+//
+// @param debug_callback_ptr Pointer to debug callback.
+void EXPORT_API SetDebugCallback(DebugCallback* debug_callback_ptr);
 
 // Sets note off callback.
 //

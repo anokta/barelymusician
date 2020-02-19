@@ -1,12 +1,8 @@
 #ifndef BARELYMUSICIAN_BASE_LOGGING_H_
 #define BARELYMUSICIAN_BASE_LOGGING_H_
 
-#include <iostream>
-
-#if !defined(BARELYAPI_LOG_OUTPUT)
-// Logs are sent to the terminal output by default.
-#define BARELYAPI_LOG_OUTPUT std::cout
-#endif  // !defined(BARELYAPI_LOG_OUTPUT)
+#include <ostream>
+#include <sstream>
 
 // Logging macros.
 #define LOG(severity) BARELYAPI_LOG(severity)
@@ -29,57 +25,83 @@
 namespace barelyapi {
 namespace logging {
 
-// Logging class that wraps assertion and output log stream for debugging.
+// Log severity.
+enum class LogSeverity {
+  INFO = 0,
+  WARNING = 1,
+  ERROR = 2,
+  FATAL = 3,
+};
+
+// Logging class that wraps assertion and log stream for debugging.
 class Logger {
  public:
-  // Log severity.
-  enum Severity {
-    INFO = 0,
-    WARNING = 1,
-    ERROR = 2,
-    FATAL = 3,
-  };
-
-  // Constructs new |Logger| for the given output.
+  // Constructs new |Logger|.
   //
-  // @param out Output stream.
   // @param severity Log severity.
   // @param file File path.
   // @param line Line number.
-  Logger(std::ostream& out, Severity severity, const char* file, int line);
+  Logger(LogSeverity severity, const char* file, int line);
 
-  // Destroys |Logger| after logging a new line.
+  // Destroys |Logger| after writing the log stream.
   ~Logger();
 
-  // Returns the log output stream.
+  // Returns the log stream.
   //
-  // @return Output stream.
+  // @return Log stream.
   std::ostream& GetStream();
 
-  // Returns the null output stream.
-  //
-  // @return Null stream.
-  static std::ostream& NullStream();
+  // static void SetWriter(LogWriter* writer);
 
  private:
-  // Logging (output) stream.
-  std::ostream& out_;
-
   // Log severity.
-  Severity severity_;
+  LogSeverity severity_;
+
+  // Logging stream.
+  std::ostringstream stream_;
 };
+
+// Log writer interface.
+class LogWriter {
+ public:
+  // Base destructor to ensure the derived classes get destroyed properly.
+  ~LogWriter() = default;
+
+  // Writes log message.
+  virtual void Write(LogSeverity severity, const std::string& message) = 0;
+};
+
+// Log writer that outputs to cerr.
+class CerrLogWriter : public LogWriter {
+ public:
+  // Implements |LogWriter|.
+  void Write(LogSeverity severity, const std::string& message) override;
+};
+
+// Returns default log writer.
+//
+// @return Default log writer.
+LogWriter& GetDefaultLogWriter();
+
+// Returns null stream.
+//
+// @return Null stream.
+std::ostream& GetNullStream();
+
+// Sets log writer.
+//
+// @param log_writer Log writer.
+void SetLogWriter(LogWriter* log_writer);
 
 }  // namespace logging
 }  // namespace barelyapi
 
 // Logging macros (internal).
-#define BARELYAPI_NULL_LOG ::barelyapi::logging::Logger::NullStream()
-
 #define BARELYAPI_LOG(severity)                                               \
-  ::barelyapi::logging::Logger(                                               \
-      BARELYAPI_LOG_OUTPUT,                                                   \
-      ::barelyapi::logging::Logger::Severity::##severity, __FILE__, __LINE__) \
+  ::barelyapi::logging::Logger(::barelyapi::logging::LogSeverity::##severity, \
+                               __FILE__, __LINE__)                            \
       .GetStream()
+#define BARELYAPI_NULL_LOG ::barelyapi::logging::GetNullStream()
 
 #define BARELYAPI_CHECK(expression)                                       \
   (!(expression)                                                          \

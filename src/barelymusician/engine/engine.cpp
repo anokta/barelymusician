@@ -34,7 +34,7 @@ void Engine::Destroy(int instrument_id) {
 
 double Engine::GetPosition() const { return current_position_; }
 
-double Engine::GetTempo() const { return clock_.GetTempo(); }
+double Engine::GetTempo() const { return tempo_; }
 
 bool Engine::IsPlaying() const { return is_playing_; }
 
@@ -154,14 +154,19 @@ void Engine::SetNoteOnCallback(NoteOnCallback&& note_on_callback) {
 
 void Engine::SetPosition(double position) {
   DCHECK_GE(position, 0.0);
-  clock_.SetPosition(position);
-  current_position_ = clock_.GetPosition();
-  previous_position_ = current_position_;
+  if (position != current_position_) {
+    clock_.SetPosition(position);
+    current_position_ = clock_.GetPosition();
+    previous_position_ = current_position_;
+  }
 }
 
 void Engine::SetTempo(double tempo) {
   DCHECK_GE(tempo, 0.0);
-  clock_.SetTempo(tempo);
+  if (tempo != tempo_) {
+    clock_.SetTempo(tempo);
+    tempo_ = clock_.GetTempo();
+  }
 }
 
 void Engine::Start() { is_playing_ = true; }

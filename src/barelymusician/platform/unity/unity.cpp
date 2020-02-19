@@ -234,20 +234,14 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
 
 void SetPosition(double position) {
   DCHECK(barelymusician);
-  barelymusician->audio_runner.Add([position]() {
-    if (position != barelymusician->engine.GetPosition()) {
-      barelymusician->engine.SetPosition(position);
-    }
-  });
+  barelymusician->audio_runner.Add(
+      [position]() { barelymusician->engine.SetPosition(position); });
 }
 
 void SetTempo(double tempo) {
   DCHECK(barelymusician);
-  barelymusician->audio_runner.Add([tempo]() {
-    if (tempo != barelymusician->engine.GetTempo()) {
-      barelymusician->engine.SetTempo(tempo);
-    }
-  });
+  barelymusician->audio_runner.Add(
+      [tempo]() { barelymusician->engine.SetTempo(tempo); });
 }
 
 void Start() {

@@ -159,6 +159,9 @@ class Engine {
   // Previous playback position.
   double previous_position_;
 
+  // Playback tempo.
+  double tempo_;
+
   // List of instruments.
   std::unordered_map<int, InstrumentData> instruments_;
 

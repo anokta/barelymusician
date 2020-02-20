@@ -153,14 +153,8 @@ class Engine {
   // Denotes whether the clock is currently playing.
   bool is_playing_;
 
-  // Current playback position.
-  double current_position_;
-
-  // Previous playback position.
-  double previous_position_;
-
-  // Playback tempo.
-  double tempo_;
+  // Last playback position.
+  double last_position_;
 
   // List of instruments.
   std::unordered_map<int, InstrumentData> instruments_;

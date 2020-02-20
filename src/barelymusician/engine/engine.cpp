@@ -10,8 +10,7 @@ namespace barelyapi {
 Engine::Engine(int sample_rate)
     : clock_(sample_rate),
       is_playing_(false),
-      current_position_(0.0),
-      previous_position_(0.0),
+      last_position_(0.0),
       beat_callback_(nullptr),
       note_off_callback_(nullptr),
       note_on_callback_(nullptr) {
@@ -32,9 +31,9 @@ void Engine::Destroy(int instrument_id) {
   }
 }
 
-double Engine::GetPosition() const { return current_position_; }
+double Engine::GetPosition() const { return clock_.GetPosition(); }
 
-double Engine::GetTempo() const { return tempo_; }
+double Engine::GetTempo() const { return clock_.GetTempo(); }
 
 bool Engine::IsPlaying() const { return is_playing_; }
 
@@ -69,34 +68,33 @@ void Engine::Process(int instrument_id, float* output, int num_channels,
   DCHECK(output);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
-
   int frame = 0;
-  Instrument* instrument = instrument_data->instrument.get();
   // Process mmessages.
-  if (previous_position_ < current_position_) {
-    const auto messages = instrument_data->messages.GetIterator(
-        previous_position_, current_position_);
-    const double frames_per_beat = static_cast<double>(num_frames) /
-                                   (current_position_ - previous_position_);
+  const double position = clock_.GetPosition();
+  if (last_position_ < position) {
+    const auto messages =
+        instrument_data->messages.GetIterator(last_position_, position);
+    const double frames_per_beat =
+        static_cast<double>(num_frames) / (position - last_position_);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
-      const int message_frame = static_cast<int>(
-          frames_per_beat * (it->position - previous_position_));
+      const int message_frame =
+          static_cast<int>(frames_per_beat * (it->position - last_position_));
       if (frame < message_frame) {
-        instrument->Process(&output[num_channels * frame], num_channels,
-                            message_frame - frame);
+        instrument_data->instrument->Process(
+            &output[num_channels * frame], num_channels, message_frame - frame);
         frame = message_frame;
       }
       std::visit(
           MessageVisitor{
               [&](const NoteOffData& data) {
-                instrument->NoteOff(data.index);
+                instrument_data->instrument->NoteOff(data.index);
                 if (note_off_callback_ != nullptr) {
                   note_off_callback_(instrument_id, data.index);
                 }
                 instrument_data->scheduled_note_indices.erase(data.index);
               },
               [&](const NoteOnData& data) {
-                instrument->NoteOn(data.index, data.intensity);
+                instrument_data->instrument->NoteOn(data.index, data.intensity);
                 if (note_on_callback_ != nullptr) {
                   note_on_callback_(instrument_id, data.index, data.intensity);
                 }
@@ -108,8 +106,8 @@ void Engine::Process(int instrument_id, float* output, int num_channels,
   }
   // Process the rest of the buffer.
   if (frame < num_frames) {
-    instrument->Process(&output[num_channels * frame], num_channels,
-                        num_frames - frame);
+    instrument_data->instrument->Process(&output[num_channels * frame],
+                                         num_channels, num_frames - frame);
   }
 }
 
@@ -118,9 +116,9 @@ void Engine::ScheduleNoteOff(int instrument_id, double position, float index) {
   if (instrument_data == nullptr) {
     return;
   }
-  if (position < previous_position_) {
-    DLOG(ERROR) << "Playback is ahead of scheduled position: "
-                << previous_position_ << " > " << position;
+  if (position < last_position_) {
+    DLOG(WARNING) << "Playback is ahead of scheduled position: "
+                  << last_position_ << " > " << position;
     return;
   }
   instrument_data->messages.Push(position, NoteOffData{index});
@@ -132,9 +130,9 @@ void Engine::ScheduleNoteOn(int instrument_id, double position, float index,
   if (instrument_data == nullptr) {
     return;
   }
-  if (position < previous_position_) {
-    DLOG(ERROR) << "Playback is ahead of scheduled position: "
-                << previous_position_ << " > " << position;
+  if (position < last_position_) {
+    DLOG(WARNING) << "Playback is ahead of scheduled position: "
+                  << last_position_ << " > " << position;
     return;
   }
   instrument_data->messages.Push(position, NoteOnData{index, intensity});
@@ -154,19 +152,12 @@ void Engine::SetNoteOnCallback(NoteOnCallback&& note_on_callback) {
 
 void Engine::SetPosition(double position) {
   DCHECK_GE(position, 0.0);
-  if (position != current_position_) {
-    clock_.SetPosition(position);
-    current_position_ = clock_.GetPosition();
-    previous_position_ = current_position_;
-  }
+  clock_.SetPosition(position);
 }
 
 void Engine::SetTempo(double tempo) {
   DCHECK_GE(tempo, 0.0);
-  if (tempo != tempo_) {
-    clock_.SetTempo(tempo);
-    tempo_ = clock_.GetTempo();
-  }
+  clock_.SetTempo(tempo);
 }
 
 void Engine::Start() { is_playing_ = true; }
@@ -186,15 +177,15 @@ void Engine::Stop() {
 
 void Engine::Update(int num_frames) {
   DCHECK_GE(num_frames, 0);
-  previous_position_ = current_position_;
+  last_position_ = clock_.GetPosition();
   if (!is_playing_) {
     return;
   }
   clock_.UpdatePosition(num_frames);
-  current_position_ = clock_.GetPosition();
   if (beat_callback_ != nullptr) {
-    for (double b = std::ceil(previous_position_); b < current_position_; ++b) {
-      beat_callback_(static_cast<int>(b));
+    const double position = clock_.GetPosition();
+    for (double beat = std::ceil(last_position_); beat < position; ++beat) {
+      beat_callback_(static_cast<int>(beat));
     }
   }
 }

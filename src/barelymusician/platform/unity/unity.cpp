@@ -234,24 +234,38 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
 
 void SetPosition(double position) {
   DCHECK(barelymusician);
-  barelymusician->audio_runner.Add(
-      [position]() { barelymusician->engine.SetPosition(position); });
+  barelymusician->audio_runner.Add([position]() {
+    if (position != barelymusician->position) {
+      barelymusician->engine.SetPosition(position);
+    }
+  });
 }
 
 void SetTempo(double tempo) {
   DCHECK(barelymusician);
-  barelymusician->audio_runner.Add(
-      [tempo]() { barelymusician->engine.SetTempo(tempo); });
+  barelymusician->audio_runner.Add([tempo]() {
+    if (tempo != barelymusician->tempo) {
+      barelymusician->engine.SetTempo(tempo);
+    }
+  });
 }
 
 void Start() {
   DCHECK(barelymusician);
-  barelymusician->audio_runner.Add([]() { barelymusician->engine.Start(); });
+  barelymusician->audio_runner.Add([]() {
+    if (!barelymusician->is_playing) {
+      barelymusician->engine.Start();
+    }
+  });
 }
 
 void Stop() {
   DCHECK(barelymusician);
-  barelymusician->audio_runner.Add([]() { barelymusician->engine.Stop(); });
+  barelymusician->audio_runner.Add([]() {
+    if (barelymusician->is_playing) {
+      barelymusician->engine.Stop();
+    }
+  });
 }
 
 void UpdateAudioThread(int num_frames) {

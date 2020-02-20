@@ -12,23 +12,23 @@ public class Pulser : MonoBehaviour {
   private Color targetColor = Color.white;
 
 
-  void Awake() {
+  private void Awake() {
     targetScale = targetObject.localScale;
   }
 
-  void OnEnable() {
+  private void OnEnable() {
     BarelyMusician.OnBeat += OnBeat;
     BarelyMusician.OnNoteOff += OnNoteOff;
     BarelyMusician.OnNoteOn += OnNoteOn;
   }
 
-  void OnDisable() {
+  private void OnDisable() {
     BarelyMusician.OnBeat -= OnBeat;
     BarelyMusician.OnNoteOff -= OnNoteOff;
     BarelyMusician.OnNoteOn -= OnNoteOn;
   }
 
-  void Update() {
+  private void Update() {
     targetObject.localScale = 
         Vector3.Lerp(targetObject.localScale, targetScale, Time.deltaTime * 4);
     targetObject.GetComponent<Renderer>().material.color = 

@@ -8,19 +8,19 @@ public class EventLogger : MonoBehaviour {
   [Range(0.0f, 960.0f)]
   public double tempo = 120.0;
 
-  void OnEnable() {
+  private void OnEnable() {
     BarelyMusician.OnBeat += OnBeat;
     BarelyMusician.OnNoteOff += OnNoteOff;
     BarelyMusician.OnNoteOn += OnNoteOn;
   }
 
-  void OnDisable() {
+  private void OnDisable() {
     BarelyMusician.OnBeat -= OnBeat;
     BarelyMusician.OnNoteOff -= OnNoteOff;
     BarelyMusician.OnNoteOn -= OnNoteOn;
   }
 
-  void Update() {
+  private void Update() {
     BarelyMusician.SetTempo(tempo);
     if (Input.GetKeyDown(KeyCode.Space)) {
       if (BarelyMusician.IsPlaying()) {

@@ -114,8 +114,8 @@ int main(int argc, char* argv[]) {
                               kInstrumentGain);
     engine.Create(i, std::move(instrument));
     for (const Note& note : score) {
-      engine.ScheduleNoteOn(i, note.position, note.index, note.intensity);
-      engine.ScheduleNoteOff(i, note.position + note.duration, note.index);
+      engine.ScheduleNote(i, note.position, note.duration, note.index,
+                          note.intensity);
     }
     instrument_ids.push_back(i);
   }

@@ -152,6 +152,16 @@ void Process(int id, float* output, int num_channels, int num_frames) {
   }
 }
 
+void ScheduleNote(int id, double position, double duration, float index,
+                  float intensity) {
+  DCHECK(barelymusician);
+  barelymusician->audio_runner.Add(
+      [id, position, duration, index, intensity]() {
+        barelymusician->engine.ScheduleNote(id, position, duration, index,
+                                            intensity);
+      });
+}
+
 void ScheduleNoteOff(int id, double position, float index) {
   DCHECK(barelymusician);
   barelymusician->audio_runner.Add([id, position, index]() {

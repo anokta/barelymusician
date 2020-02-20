@@ -111,15 +111,31 @@ void Engine::Process(int instrument_id, float* output, int num_channels,
   }
 }
 
+void Engine::ScheduleNote(int instrument_id, double position, double duration,
+                          float index, float intensity) {
+  InstrumentData* instrument_data = GetInstrumentData(instrument_id);
+  if (instrument_data == nullptr) {
+    return;
+  }
+  DCHECK_GE(position, 0.0);
+  DCHECK_GE(duration, 0.0);
+  if (position < last_position_) {
+    DLOG(WARNING) << "Playback is ahead of scheduled position: "
+                  << last_position_ << " > " << position;
+  }
+  instrument_data->messages.Push(position, NoteOnData{index, intensity});
+  instrument_data->messages.Push(position + duration, NoteOffData{index});
+}
+
 void Engine::ScheduleNoteOff(int instrument_id, double position, float index) {
   InstrumentData* instrument_data = GetInstrumentData(instrument_id);
   if (instrument_data == nullptr) {
     return;
   }
+  DCHECK_GE(position, 0.0);
   if (position < last_position_) {
     DLOG(WARNING) << "Playback is ahead of scheduled position: "
                   << last_position_ << " > " << position;
-    return;
   }
   instrument_data->messages.Push(position, NoteOffData{index});
 }
@@ -130,10 +146,10 @@ void Engine::ScheduleNoteOn(int instrument_id, double position, float index,
   if (instrument_data == nullptr) {
     return;
   }
+  DCHECK_GE(position, 0.0);
   if (position < last_position_) {
     DLOG(WARNING) << "Playback is ahead of scheduled position: "
                   << last_position_ << " > " << position;
-    return;
   }
   instrument_data->messages.Push(position, NoteOnData{index, intensity});
 }

@@ -106,6 +106,14 @@ namespace BarelyApi {
       ProcessNative(id, output, numChannels, numFrames);
     }
 
+    // Schedules instrument note.
+    public static void ScheduleNote(int id, double position, double duration, float index,
+                                    float intensity) {
+      if (BarelyMusicianInternal.Instance != null) {
+        ScheduleNoteNative(id, position, duration, index, intensity);
+      }
+    }
+
     // Schedules instrument note off.
     public static void ScheduleNoteOff(int id, double position, float index) {
       if (BarelyMusicianInternal.Instance != null) {
@@ -338,6 +346,10 @@ namespace BarelyApi {
 
     [DllImport(pluginName, EntryPoint = "NoteOn")]
     private static extern void NoteOnNative(int id, float index, float intensity);
+
+    [DllImport(pluginName, EntryPoint = "ScheduleNote")]
+    private static extern void ScheduleNoteNative(int id, double position, double duration,
+                                                  float index, float intensity);
 
     [DllImport(pluginName, EntryPoint = "ScheduleNoteOff")]
     private static extern void ScheduleNoteOffNative(int id, double position, float index);

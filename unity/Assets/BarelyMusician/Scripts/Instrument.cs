@@ -49,6 +49,13 @@ namespace BarelyApi {
       }
     }
 
+    // Schedules note.
+    public void ScheduleNote(double position, double duration, float index, float intensity) {
+      if (_id != BarelyMusician.InvalidId) {
+        BarelyMusician.ScheduleNote(_id, position, duration, index, intensity);
+      }
+    }
+
     // Schedules note off.
     public void ScheduleNoteOff(double position, float index) {
       if (_id != BarelyMusician.InvalidId) {

@@ -92,17 +92,27 @@ void EXPORT_API NoteOn(int id, float index, float intensity);
 void EXPORT_API Process(int id, float* output, int num_channels,
                         int num_frames);
 
+// Schedules instrument note.
+//
+// @param id Instrument id.
+// @param position Note position in beats.
+// @param duration Note duration in beats.
+// @param index Note index.
+// @param intensity Note intensity.
+void EXPORT_API ScheduleNote(int id, double position, double duration,
+                             float index, float intensity);
+
 // Schedules instrument note off.
 //
 // @param id Instrument id.
-// @param position Position in beats.
+// @param position Note position in beats.
 // @param index Note index.
 void EXPORT_API ScheduleNoteOff(int id, double position, float index);
 
 // Schedules instrument note on.
 //
 // @param id Instrument id.
-// @param position Position in beats.
+// @param position Note position in beats.
 // @param index Note index.
 // @param intensity Note intensity.
 void EXPORT_API ScheduleNoteOn(int id, double position, float index,

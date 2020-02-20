@@ -79,17 +79,27 @@ class Engine {
   void Process(int instrument_id, float* output, int num_channels,
                int num_frames);
 
+  // Schedules note.
+  //
+  // @param instrument_id Instrument id.
+  // @param position Note position in beats.
+  // @param duration Note duration in beats.
+  // @param index Note index.
+  // @param intensity Note intensity.
+  void ScheduleNote(int instrument_id, double position, double duration,
+                    float index, float intensity);
+
   // Schedules note off.
   //
   // @param instrument_id Instrument id.
-  // @param position Note position.
+  // @param position Note position in beats.
   // @param index Note index.
   void ScheduleNoteOff(int instrument_id, double position, float index);
 
   // Schedules note on.
   //
   // @param instrument_id Instrument id.
-  // @param position Note position.
+  // @param position Note position in beats.
   // @param index Note index.
   // @param index Note intensity.
   void ScheduleNoteOn(int instrument_id, double position, float index,

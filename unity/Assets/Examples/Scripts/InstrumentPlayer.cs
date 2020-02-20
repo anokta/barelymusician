@@ -19,9 +19,9 @@ public class InstrumentPlayer : MonoBehaviour {
     [Range(0.0f, 1.0f)]
     public float intensity;
     [Range(0.0f, 1.0f)]
-    public float position;
+    public double position;
     [Range(0.0f, 1.0f)]
-    public float duration;
+    public double duration;
 
     [Range(0, 12)]
     public int beatMultiplier;
@@ -39,15 +39,15 @@ public class InstrumentPlayer : MonoBehaviour {
     instrument = GetComponent<Instrument>();
   }
 
-  void OnEnable() {
+  private void OnEnable() {
     BarelyMusician.OnBeat += OnBeat;
   }
 
-  void OnDisable() {
+  private void OnDisable() {
     BarelyMusician.OnBeat -= OnBeat;
   }
 
-  void Update() {
+  private void Update() {
     if (!interactive) return;
     if (Input.GetKeyDown(KeyCode.S) && !isPlaying) {
       instrument.NoteOn(rootIndex, 1.0f);
@@ -58,14 +58,13 @@ public class InstrumentPlayer : MonoBehaviour {
     }
   }
 
-  void OnBeat(int beat) {
+  private void OnBeat(int beat) {
     for (int i = 0; i < beatNotes.Length; ++i) {
       var note = beatNotes[i];
-      var index = rootIndex + note.index + note.beatMultiplier * (beat % note.beatPeriod);
-      float startPosition = note.position + beat + 1.0f;
-      instrument.ScheduleNoteOn(startPosition, index, note.intensity);
-      float endPosition = startPosition + note.duration;
-      instrument.ScheduleNoteOff(endPosition, index);
+      double position = note.position + (double)(beat + 1);
+      float index = 
+          rootIndex + note.index + (float)(note.beatMultiplier * (beat % note.beatPeriod));
+      instrument.ScheduleNote(position, note.duration, index, note.intensity);
     }
   }
 }

@@ -106,6 +106,8 @@ int CreateBasicSynthInstrument(int num_voices, int oscillator_type) {
     instrument->SetFloatParam(
         examples::BasicSynthInstrumentParam::kOscillatorType,
         static_cast<float>(oscillator_type));
+    instrument->SetFloatParam(
+        examples::BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
     barelymusician->engine.Create(id, std::move(instrument));
   });
   return id;

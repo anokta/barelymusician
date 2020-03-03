@@ -36,7 +36,7 @@ public class EventLogger : MonoBehaviour {
   }
 
   private void OnBeat(int beat) {
-    Debug.Log("Beat: " + beat);
+    //Debug.Log("Beat: " + beat);
   }
 
   private void OnNoteOff(Instrument instrument, float index) {

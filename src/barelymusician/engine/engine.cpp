@@ -46,6 +46,7 @@ void Engine::NoteOff(int instrument_id, float index) {
   if (note_off_callback_ != nullptr) {
     note_off_callback_(instrument_id, index);
   }
+  instrument_data->active_note_indices.erase(index);
 }
 
 void Engine::NoteOn(int instrument_id, float index, float intensity) {
@@ -57,6 +58,7 @@ void Engine::NoteOn(int instrument_id, float index, float intensity) {
   if (note_on_callback_ != nullptr) {
     note_on_callback_(instrument_id, index, intensity);
   }
+  instrument_data->active_note_indices.insert(index);
 }
 
 void Engine::Process(int instrument_id, float* output, int num_channels,
@@ -91,14 +93,14 @@ void Engine::Process(int instrument_id, float* output, int num_channels,
                 if (note_off_callback_ != nullptr) {
                   note_off_callback_(instrument_id, data.index);
                 }
-                instrument_data->scheduled_note_indices.erase(data.index);
+                instrument_data->active_note_indices.erase(data.index);
               },
               [&](const NoteOnData& data) {
                 instrument_data->instrument->NoteOn(data.index, data.intensity);
                 if (note_on_callback_ != nullptr) {
                   note_on_callback_(instrument_id, data.index, data.intensity);
                 }
-                instrument_data->scheduled_note_indices.insert(data.index);
+                instrument_data->active_note_indices.insert(data.index);
               }},
           it->data);
     }
@@ -181,13 +183,13 @@ void Engine::Start() { is_playing_ = true; }
 void Engine::Stop() {
   is_playing_ = false;
   for (auto& [instrument_id, instrument_data] : instruments_) {
-    for (const float index : instrument_data.scheduled_note_indices) {
+    for (const float index : instrument_data.active_note_indices) {
       instrument_data.instrument->NoteOff(index);
       if (note_off_callback_ != nullptr) {
         note_off_callback_(instrument_id, index);
       }
     }
-    instrument_data.scheduled_note_indices.clear();
+    instrument_data.active_note_indices.clear();
   }
 }
 

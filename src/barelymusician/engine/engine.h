@@ -150,8 +150,8 @@ class Engine {
     // Scheduled messages.
     MessageQueue messages;
 
-    // Active scheduled note indices that are being played.
-    std::unordered_set<float> scheduled_note_indices;
+    // Active note indices that are being played.
+    std::unordered_set<float> active_note_indices;
   };
 
   // Returns |InstrumentData| for the given |instrument_id|.

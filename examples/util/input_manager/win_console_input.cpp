@@ -32,13 +32,16 @@ void WinConsoleInput::Shutdown() {
 }
 
 void WinConsoleInput::Update() {
-  // Wait for new events.
-  DWORD num_records = 0;
-  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &num_records)) {
+  DWORD num_events = 0;
+  if (!GetNumberOfConsoleInputEvents(std_input_handle_, &num_events) ||
+      num_events == 0) {
+    return;
+  }
+  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &num_events)) {
     return;
   }
 
-  for (DWORD i = 0; i < num_records; ++i) {
+  for (DWORD i = 0; i < num_events; ++i) {
     switch (input_buffer_[i].EventType) {
       case KEY_EVENT: {
         const auto& key_event = input_buffer_[i].Event.KeyEvent;

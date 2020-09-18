@@ -80,7 +80,7 @@ void Engine::Process(int instrument_id, float* output, int num_channels,
         static_cast<double>(num_frames) / (position - last_position_);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
       const int message_frame =
-          static_cast<int>(frames_per_beat * (it->position - last_position_));
+          static_cast<int>(frames_per_beat * (it->timestamp - last_position_));
       if (frame < message_frame) {
         instrument_data->instrument->Process(
             &output[num_channels * frame], num_channels, message_frame - frame);

@@ -24,7 +24,7 @@ void Instrument::ProcessScheduled(double begin_timestamp, double end_timestamp,
         static_cast<double>(num_frames) / (end_timestamp - begin_timestamp);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
       int message_frame =
-          static_cast<int>(frame_rate * (it->position - begin_timestamp));
+          static_cast<int>(frame_rate * (it->timestamp - begin_timestamp));
       if (frame < message_frame) {
         Process(&output[num_channels * frame], num_channels,
                 message_frame - frame);

@@ -20,13 +20,13 @@ struct NoteOffData {
   float index;
 };
 
-// Generic message with a position timestamp.
+// Generic message with a timestamp.
 struct Message {
   // Message data signature.
   using Data = std::variant<NoteOnData, NoteOffData>;
 
-  // Message position.
-  double position;
+  // Message timestamp.
+  double timestamp;
 
   // Message data.
   Data data;
@@ -38,7 +38,7 @@ struct MessageVisitor : MessageDataTypes... {
   using MessageDataTypes::operator()...;
 };
 template <class... MessageDataTypes>
-MessageVisitor(MessageDataTypes...)->MessageVisitor<MessageDataTypes...>;
+MessageVisitor(MessageDataTypes...) -> MessageVisitor<MessageDataTypes...>;
 
 }  // namespace barelyapi
 

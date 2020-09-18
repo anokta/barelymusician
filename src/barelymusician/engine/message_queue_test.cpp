@@ -9,23 +9,24 @@ namespace {
 
 // Tests that the message queue returns an added single message as expected.
 TEST(MessageQueueTest, SingleMessage) {
-  const double kPosition = 0.2;
-  const double kStartPosition = 0.1;
-  const double kEndPosition = 0.5;
-  EXPECT_GE(kPosition, kStartPosition);
-  EXPECT_LT(kPosition, kEndPosition);
+  const double kTimestamp = 0.2;
+  const double kBeginTimestamp = 0.1;
+  const double kEndTimestamp = 0.5;
+  EXPECT_GE(kTimestamp, kBeginTimestamp);
+  EXPECT_LT(kTimestamp, kEndTimestamp);
 
   MessageQueue message_queue;
   EXPECT_TRUE(message_queue.Empty());
 
   // Push message.
-  message_queue.Push(kPosition, {});
+  message_queue.Push(kTimestamp, {});
   EXPECT_FALSE(message_queue.Empty());
 
   // Pop message.
-  const auto iterator = message_queue.GetIterator(kStartPosition, kEndPosition);
+  const auto iterator =
+      message_queue.GetIterator(kBeginTimestamp, kEndTimestamp);
   EXPECT_NE(iterator.cbegin, iterator.cend);
-  EXPECT_DOUBLE_EQ(iterator.cbegin->position, kPosition);
+  EXPECT_DOUBLE_EQ(iterator.cbegin->timestamp, kTimestamp);
 
   message_queue.Clear(iterator);
   EXPECT_TRUE(message_queue.Empty());
@@ -46,12 +47,12 @@ TEST(MessageQueueTest, MultipleMessages) {
   }
   // Pop one message at a time.
   for (int i = 0; i < kNumMessages; ++i) {
-    const double start_position = static_cast<double>(i);
-    const double end_position = static_cast<double>(i + 1);
+    const double begin_timestamp = static_cast<double>(i);
+    const double end_timestamp = static_cast<double>(i + 1);
     const auto iterator =
-        message_queue.GetIterator(start_position, end_position);
+        message_queue.GetIterator(begin_timestamp, end_timestamp);
     EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 1);
-    EXPECT_DOUBLE_EQ(iterator.cbegin->position, start_position);
+    EXPECT_DOUBLE_EQ(iterator.cbegin->timestamp, begin_timestamp);
 
     message_queue.Clear(iterator);
   }
@@ -59,29 +60,30 @@ TEST(MessageQueueTest, MultipleMessages) {
 }
 
 // Tests that the message queue returns added messages as expected when they
-// have the same positions.
-TEST(MessageQueueTest, MultipleMessagesSamePosition) {
+// have the same timestamps.
+TEST(MessageQueueTest, MultipleMessagesSameTimestamp) {
   const int kNumMessages = 4;
-  const double kPosition = 2.4;
-  const double kStartPosition = 2.0;
-  const double kEndPosition = 4.0;
-  EXPECT_GE(kPosition, kStartPosition);
-  EXPECT_LT(kPosition, kEndPosition);
+  const double kTimestamp = 2.4;
+  const double kBeginTimestamp = 2.0;
+  const double kEndTimestamp = 4.0;
+  EXPECT_GE(kTimestamp, kBeginTimestamp);
+  EXPECT_LT(kTimestamp, kEndTimestamp);
 
   MessageQueue message_queue;
   EXPECT_TRUE(message_queue.Empty());
 
-  // Push |kNumMessages| messages using the same |kPosition|.
+  // Push |kNumMessages| messages using the same |kTimestamp|.
   for (int i = 0; i < kNumMessages; ++i) {
-    message_queue.Push(kPosition, {});
+    message_queue.Push(kTimestamp, {});
     EXPECT_FALSE(message_queue.Empty());
   }
 
   // Pop all messages.
-  const auto iterator = message_queue.GetIterator(kStartPosition, kEndPosition);
+  const auto iterator =
+      message_queue.GetIterator(kBeginTimestamp, kEndTimestamp);
   EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), kNumMessages);
   for (auto it = iterator.cbegin; it != iterator.cend; ++it) {
-    EXPECT_DOUBLE_EQ(it->position, kPosition);
+    EXPECT_DOUBLE_EQ(it->timestamp, kTimestamp);
   }
 
   message_queue.Clear(iterator);

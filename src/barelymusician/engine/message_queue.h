@@ -8,7 +8,7 @@
 namespace barelyapi {
 
 // Message queue that receives and dispatches messages according to their
-// positions.
+// timestamps.
 class MessageQueue {
  public:
   // Message iterator.
@@ -35,15 +35,15 @@ class MessageQueue {
 
   // Returns iterator within the given range.
   //
-  // @param begin_position Start position.
-  // @param end_position End position.
-  Iterator GetIterator(double start_position, double end_position) const;
+  // @param begin_timestamp Start timestamp.
+  // @param end_timestamp End timestamp.
+  Iterator GetIterator(double begin_timestamp, double end_timestamp) const;
 
   // Pushes new message into the queue.
   //
-  // @param position Message position.
+  // @param timestamp Message timestamp.
   // @param data Message data.
-  void Push(double position, const Message::Data& data);
+  void Push(double timestamp, const Message::Data& data);
 
  private:
   // Ordered message list.

@@ -8,22 +8,22 @@ namespace barelyapi {
 
 namespace {
 
-// Compares the given message against the given position.
+// Compares the given message against the given timestamp.
 //
 // @param message Message.
-// @param position position.
-// @return True if the message comes prior to the position.
-bool CompareMessage(const Message& message, double position) {
-  return message.position < position;
+// @param timestamp Timestamp.
+// @return True if the message comes prior to the timestamp.
+bool CompareMessage(const Message& message, double timestamp) {
+  return message.timestamp < timestamp;
 }
 
-// Compares the given position against the given message.
+// Compares the given timestamp against the given message.
 //
-// @param position position.
+// @param timestamp Timestamp.
 // @param message Message.
-// @return True if the message comes prior to the position.
-bool ComparePosition(double position, const Message& message) {
-  return position < message.position;
+// @return True if the message comes prior to the timestamp.
+bool CompareTimestamp(double timestamp, const Message& message) {
+  return timestamp < message.timestamp;
 }
 
 }  // namespace
@@ -36,20 +36,20 @@ void MessageQueue::Clear(const Iterator& iterator) {
 
 bool MessageQueue::Empty() const { return messages_.empty(); }
 
-MessageQueue::Iterator MessageQueue::GetIterator(double start_position,
-                                                 double end_position) const {
+MessageQueue::Iterator MessageQueue::GetIterator(double begin_timestamp,
+                                                 double end_timestamp) const {
   Iterator iterator;
   iterator.cbegin = std::lower_bound(messages_.cbegin(), messages_.cend(),
-                                     start_position, &CompareMessage);
+                                     begin_timestamp, &CompareMessage);
   iterator.cend = std::lower_bound(iterator.cbegin, messages_.cend(),
-                                   end_position, &CompareMessage);
+                                   end_timestamp, &CompareMessage);
   return iterator;
 }
 
-void MessageQueue::Push(double position, const Message::Data& data) {
+void MessageQueue::Push(double timestamp, const Message::Data& data) {
   const auto it = std::upper_bound(messages_.cbegin(), messages_.cend(),
-                                   position, &ComparePosition);
-  messages_.insert(it, {position, data});
+                                   timestamp, &CompareTimestamp);
+  messages_.insert(it, {timestamp, data});
 }
 
 }  // namespace barelyapi

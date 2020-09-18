@@ -29,6 +29,7 @@
     <ClCompile Include="..\..\src\barelymusician\engine\engine.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\instrument\instrument.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp" />
   </ItemGroup>

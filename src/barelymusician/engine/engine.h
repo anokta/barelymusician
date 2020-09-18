@@ -147,9 +147,6 @@ class Engine {
     // Instrument to play.
     std::unique_ptr<Instrument> instrument;
 
-    // Scheduled messages.
-    MessageQueue messages;
-
     // Active note indices that are being played.
     std::unordered_set<float> active_note_indices;
   };

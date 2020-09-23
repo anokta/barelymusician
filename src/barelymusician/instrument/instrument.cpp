@@ -19,7 +19,8 @@ void Instrument::ProcessScheduled(double begin_timestamp, double end_timestamp,
   int frame = 0;
   // Process mmessages.
   if (begin_timestamp < end_timestamp) {
-    const auto messages = messages_.GetIterator(begin_timestamp, end_timestamp);
+    // Include *all* messages before |end_timestamp|.
+    const auto messages = messages_.GetIterator(0.0, end_timestamp);
     const double frame_rate =
         static_cast<double>(num_frames) / (end_timestamp - begin_timestamp);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {

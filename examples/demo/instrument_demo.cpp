@@ -62,13 +62,13 @@ int main(int argc, char* argv[]) {
   TaskRunner task_runner(kNumMaxTasks);
 
   BasicSynthInstrument instrument(kSampleRate, kNumVoices);
-  instrument.SetFloatParam(BasicSynthInstrumentParam::kGain, kGain);
-  instrument.SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
-                           static_cast<float>(kOscillatorType));
-  instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                           kEnvelopeAttack);
-  instrument.SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                           kEnvelopeRelease);
+  instrument.SetParam(BasicSynthInstrumentParam::kGain, kGain);
+  instrument.SetParam(BasicSynthInstrumentParam::kOscillatorType,
+                      static_cast<float>(kOscillatorType));
+  instrument.SetParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                      kEnvelopeAttack);
+  instrument.SetParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                      kEnvelopeRelease);
 
   float offset_octaves = 0.0f;
 
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.

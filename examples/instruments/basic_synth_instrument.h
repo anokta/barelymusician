@@ -27,12 +27,7 @@ class BasicSynthInstrument : public Instrument {
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-
-  // Sets the value of a float parameter with the given ID.
-  //
-  // @param id Parameter ID.
-  // @param value Float parameter value.
-  void SetFloatParam(int id, float value);
+  void SetParam(int id, float value) override;
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;

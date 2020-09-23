@@ -29,6 +29,12 @@ class Instrument {
   // @param num_frames Number of output frames.
   virtual void Process(float* output, int num_channels, int num_frames) = 0;
 
+  // Sets |value| of parameter with the given |id|.
+  //
+  // @param id Parameter id.
+  // @param value Float parameter value.
+  virtual void SetParam(int id, float value) = 0;
+
   // Stops note with the given |index| at the given |timestamp|.
   //
   // @param timestamp Timestamp to stop note.

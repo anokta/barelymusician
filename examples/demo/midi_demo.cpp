@@ -104,13 +104,13 @@ int main(int argc, char* argv[]) {
     // Create instrument.
     auto instrument = std::make_unique<BasicSynthInstrument>(
         kSampleRate, kNumInstrumentVoices);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
+    instrument->SetParam(BasicSynthInstrumentParam::kOscillatorType,
                               static_cast<float>(kInstrumentOscillatorType));
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+    instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeAttack,
                               kInstrumentEnvelopeAttack);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+    instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeRelease,
                               kInstrumentEnvelopeRelease);
-    instrument->SetFloatParam(BasicSynthInstrumentParam::kGain,
+    instrument->SetParam(BasicSynthInstrumentParam::kGain,
                               kInstrumentGain);
     engine.Create(i, std::move(instrument));
     for (const Note& note : score) {
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.

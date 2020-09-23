@@ -25,6 +25,7 @@ class TestInstrument : public Instrument {
   void Process(float* output, int num_channels, int num_frames) override {
     std::fill_n(output, num_channels * num_frames, sample_);
   }
+  void SetParam(int, float) override {}
 
  private:
   float sample_;

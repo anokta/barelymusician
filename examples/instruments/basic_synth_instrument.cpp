@@ -82,7 +82,7 @@ void BasicSynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-void BasicSynthInstrument::SetFloatParam(int id, float value) {
+void BasicSynthInstrument::SetParam(int id, float value) {
   if (!modulation_matrix_.SetParam(id, value)) {
     DLOG(WARNING) << "Failed to update float parameter with ID: " << id;
   }

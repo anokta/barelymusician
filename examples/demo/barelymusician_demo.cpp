@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.

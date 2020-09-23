@@ -59,14 +59,14 @@ int main(int argc, char* argv[]) {
 
   auto metronome_instrument =
       std::make_unique<BasicSynthInstrument>(kSampleRate, kNumVoices);
-  metronome_instrument->SetFloatParam(
+  metronome_instrument->SetParam(
       BasicSynthInstrumentParam::kOscillatorType,
       static_cast<float>(kOscillatorType));
-  metronome_instrument->SetFloatParam(
+  metronome_instrument->SetParam(
       BasicSynthInstrumentParam::kEnvelopeAttack, kAttack);
-  metronome_instrument->SetFloatParam(
+  metronome_instrument->SetParam(
       BasicSynthInstrumentParam::kEnvelopeRelease, kRelease);
-  metronome_instrument->SetFloatParam(BasicSynthInstrumentParam::kGain, kGain);
+  metronome_instrument->SetParam(BasicSynthInstrumentParam::kGain, kGain);
   engine.Create(kMetronomeId, std::move(metronome_instrument));
 
   // Beat callback.
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.

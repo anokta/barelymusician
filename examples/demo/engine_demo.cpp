@@ -55,19 +55,18 @@ const int kNumBeats = 3;
 const float kRootNote = barelyapi::kNoteIndexD3;
 const int kNumInstrumentVoices = 8;
 
-std::unique_ptr<BasicSynthInstrument> BuildSynthInstrument(OscillatorType type,
-                                                           float gain,
-                                                           float attack,
-                                                           float release) {
+std::unique_ptr<Instrument> BuildSynthInstrument(OscillatorType type,
+                                                 float gain, float attack,
+                                                 float release) {
   auto synth_instrument =
       std::make_unique<BasicSynthInstrument>(kSampleRate, kNumInstrumentVoices);
-  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kOscillatorType,
-                                  static_cast<float>(type));
-  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kGain, gain);
-  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                                  attack);
-  synth_instrument->SetFloatParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                                  release);
+  synth_instrument->SetParam(BasicSynthInstrumentParam::kOscillatorType,
+                             static_cast<float>(type));
+  synth_instrument->SetParam(BasicSynthInstrumentParam::kGain, gain);
+  synth_instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeAttack,
+                             attack);
+  synth_instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeRelease,
+                             release);
   return std::move(synth_instrument);
 }
 
@@ -358,7 +357,7 @@ int main(int argc, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.

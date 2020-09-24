@@ -60,13 +60,12 @@ std::unique_ptr<Instrument> BuildSynthInstrument(OscillatorType type,
                                                  float release) {
   auto synth_instrument =
       std::make_unique<BasicSynthInstrument>(kSampleRate, kNumInstrumentVoices);
-  synth_instrument->SetParam(BasicSynthInstrumentParam::kOscillatorType,
-                             static_cast<float>(type));
-  synth_instrument->SetParam(BasicSynthInstrumentParam::kGain, gain);
-  synth_instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                             attack);
-  synth_instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                             release);
+  synth_instrument->Control(BasicSynthInstrumentParam::kOscillatorType,
+                            static_cast<float>(type));
+  synth_instrument->Control(BasicSynthInstrumentParam::kGain, gain);
+  synth_instrument->Control(BasicSynthInstrumentParam::kEnvelopeAttack, attack);
+  synth_instrument->Control(BasicSynthInstrumentParam::kEnvelopeRelease,
+                            release);
   return std::move(synth_instrument);
 }
 

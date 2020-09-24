@@ -15,64 +15,48 @@ constexpr int kNumMaxTasks = 500;
 InstrumentManager::InstrumentManager()
     : id_counter_(0), task_runner_(kNumMaxTasks) {}
 
-bool InstrumentManager::Destroy(int instrument_id) {
-  if (instrument_params_.erase(instrument_id) > 0) {
-    task_runner_.Add(
-        [this, instrument_id]() { instruments_.erase(instrument_id); });
-  }
-  return false;
+int InstrumentManager::Create(std::unique_ptr<Instrument> instrument) {
+  const int instrument_id = ++id_counter_;
+  task_runner_.Add([this, instrument_id,
+                    instrument = std::make_shared<std::unique_ptr<Instrument>>(
+                        std::move(instrument))]() {
+    instruments_.emplace(instrument_id, InstrumentData{std::move(*instrument)});
+  });
+  return instrument_id;
 }
 
-bool InstrumentManager::GetParam(int instrument_id, int param_id,
-                                 float* value) const {
-  const InstrumentParamData* instrument_param_data =
-      FindOrNull(instrument_params_, instrument_id);
-  if (instrument_param_data == nullptr) {
-    return false;
-  }
-  const float* param_value =
-      FindOrNull(instrument_param_data->values, param_id);
-  if (param_value == nullptr) {
-    return false;
-  }
-  *value = *param_value;
-  return true;
+void InstrumentManager::Destroy(int instrument_id) {
+  task_runner_.Add(
+      [this, instrument_id]() { instruments_.erase(instrument_id); });
 }
 
-bool InstrumentManager::NoteOff(int instrument_id, float index) {
-  if (FindOrNull(instrument_params_, instrument_id) == nullptr) {
-    return false;
-  }
-  task_runner_.Add([this, instrument_id, index]() {
+void InstrumentManager::NoteOff(int instrument_id, double timestamp,
+                                float index) {
+  task_runner_.Add([this, instrument_id, timestamp, index]() {
     InstrumentData* instrument_data = FindOrNull(instruments_, instrument_id);
     if (instrument_data != nullptr) {
-      instrument_data->instrument->NoteOff(index);
+      instrument_data->messages.Push(timestamp, NoteOffData{index});
     }
   });
-  return true;
 }
 
-bool InstrumentManager::NoteOn(int instrument_id, float index,
+void InstrumentManager::NoteOn(int instrument_id, double timestamp, float index,
                                float intensity) {
-  if (FindOrNull(instrument_params_, instrument_id) == nullptr) {
-    return false;
-  }
-  task_runner_.Add([this, instrument_id, index, intensity]() {
+  task_runner_.Add([this, instrument_id, timestamp, index, intensity]() {
     InstrumentData* instrument_data = FindOrNull(instruments_, instrument_id);
     if (instrument_data != nullptr) {
-      instrument_data->instrument->NoteOn(index, intensity);
+      instrument_data->messages.Push(timestamp, NoteOnData{index, intensity});
     }
   });
-  return true;
 }
 
-bool InstrumentManager::Process(int instrument_id, double begin_timestamp,
+void InstrumentManager::Process(int instrument_id, double begin_timestamp,
                                 double end_timestamp, float* output,
                                 int num_channels, int num_frames) {
   task_runner_.Run();
   InstrumentData* instrument_data = FindOrNull(instruments_, instrument_id);
   if (instrument_data == nullptr) {
-    return false;
+    return;
   }
   Instrument* instrument = instrument_data->instrument.get();
   int frame = 0;
@@ -108,55 +92,6 @@ bool InstrumentManager::Process(int instrument_id, double begin_timestamp,
     instrument->Process(&output[num_channels * frame], num_channels,
                         num_frames - frame);
   }
-  return true;
-}
-
-bool InstrumentManager::SetParam(int instrument_id, int param_id, float value) {
-  InstrumentParamData* instrument_param_data =
-      FindOrNull(instrument_params_, instrument_id);
-  if (instrument_param_data == nullptr) {
-    return false;
-  }
-  float* param_value = FindOrNull(instrument_param_data->values, param_id);
-  if (param_value == nullptr || *param_value == value) {
-    return false;
-  }
-  *param_value = value;
-  task_runner_.Add([this, instrument_id, param_id, value]() {
-    InstrumentData* instrument_data = FindOrNull(instruments_, instrument_id);
-    if (instrument_data != nullptr) {
-      instrument_data->instrument->SetParam(param_id, value);
-    }
-  });
-  return true;
-}
-
-bool InstrumentManager::ScheduleNoteOff(int instrument_id, double timestamp,
-                                        float index) {
-  if (FindOrNull(instrument_params_, instrument_id) == nullptr) {
-    return false;
-  }
-  task_runner_.Add([this, instrument_id, timestamp, index]() {
-    InstrumentData* instrument_data = FindOrNull(instruments_, instrument_id);
-    if (instrument_data != nullptr) {
-      instrument_data->messages.Push(timestamp, NoteOffData{index});
-    }
-  });
-  return true;
-}
-
-bool InstrumentManager::ScheduleNoteOn(int instrument_id, double timestamp,
-                                       float index, float intensity) {
-  if (FindOrNull(instrument_params_, instrument_id) == nullptr) {
-    return false;
-  }
-  task_runner_.Add([this, instrument_id, timestamp, index, intensity]() {
-    InstrumentData* instrument_data = FindOrNull(instruments_, instrument_id);
-    if (instrument_data != nullptr) {
-      instrument_data->messages.Push(timestamp, NoteOnData{index, intensity});
-    }
-  });
-  return true;
 }
 
 }  // namespace barelyapi

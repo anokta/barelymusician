@@ -62,6 +62,12 @@ BasicSynthInstrument::BasicSynthInstrument(int sample_rate, int num_voices)
       });
 }
 
+void BasicSynthInstrument::Control(int id, float value) {
+  if (!modulation_matrix_.SetParam(id, value)) {
+    DLOG(WARNING) << "Failed to update float parameter with ID: " << id;
+  }
+}
+
 void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
@@ -79,12 +85,6 @@ void BasicSynthInstrument::Process(float* output, int num_channels,
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }
-  }
-}
-
-void BasicSynthInstrument::SetParam(int id, float value) {
-  if (!modulation_matrix_.SetParam(id, value)) {
-    DLOG(WARNING) << "Failed to update float parameter with ID: " << id;
   }
 }
 

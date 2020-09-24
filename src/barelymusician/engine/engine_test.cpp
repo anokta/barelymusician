@@ -20,6 +20,7 @@ class TestInstrument : public Instrument {
   TestInstrument() : sample_(0.0f) {}
 
   // Implements |Instrument|.
+  void Control(int, float) override {}
   void NoteOff(float) override { sample_ = 0.0f; }
   void NoteOn(float index, float intensity) override {
     sample_ = index * intensity;
@@ -27,8 +28,7 @@ class TestInstrument : public Instrument {
   void Process(float* output, int num_channels, int num_frames) override {
     std::fill_n(output, num_channels * num_frames, sample_);
   }
-  void SetParam(int, float) override {}
-
+  
  private:
   float sample_;
 };

@@ -62,13 +62,13 @@ int main(int argc, char* argv[]) {
   TaskRunner task_runner(kNumMaxTasks);
 
   BasicSynthInstrument instrument(kSampleRate, kNumVoices);
-  instrument.SetParam(BasicSynthInstrumentParam::kGain, kGain);
-  instrument.SetParam(BasicSynthInstrumentParam::kOscillatorType,
-                      static_cast<float>(kOscillatorType));
-  instrument.SetParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                      kEnvelopeAttack);
-  instrument.SetParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                      kEnvelopeRelease);
+  instrument.Control(BasicSynthInstrumentParam::kGain, kGain);
+  instrument.Control(BasicSynthInstrumentParam::kOscillatorType,
+                     static_cast<float>(kOscillatorType));
+  instrument.Control(BasicSynthInstrumentParam::kEnvelopeAttack,
+                     kEnvelopeAttack);
+  instrument.Control(BasicSynthInstrumentParam::kEnvelopeRelease,
+                     kEnvelopeRelease);
 
   float offset_octaves = 0.0f;
 

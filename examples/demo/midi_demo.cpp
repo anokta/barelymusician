@@ -104,14 +104,13 @@ int main(int argc, char* argv[]) {
     // Create instrument.
     auto instrument = std::make_unique<BasicSynthInstrument>(
         kSampleRate, kNumInstrumentVoices);
-    instrument->SetParam(BasicSynthInstrumentParam::kOscillatorType,
-                              static_cast<float>(kInstrumentOscillatorType));
-    instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                              kInstrumentEnvelopeAttack);
-    instrument->SetParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                              kInstrumentEnvelopeRelease);
-    instrument->SetParam(BasicSynthInstrumentParam::kGain,
-                              kInstrumentGain);
+    instrument->Control(BasicSynthInstrumentParam::kOscillatorType,
+                        static_cast<float>(kInstrumentOscillatorType));
+    instrument->Control(BasicSynthInstrumentParam::kEnvelopeAttack,
+                        kInstrumentEnvelopeAttack);
+    instrument->Control(BasicSynthInstrumentParam::kEnvelopeRelease,
+                        kInstrumentEnvelopeRelease);
+    instrument->Control(BasicSynthInstrumentParam::kGain, kInstrumentGain);
     engine.Create(i, std::move(instrument));
     for (const Note& note : score) {
       engine.ScheduleNote(i, note.position, note.duration, note.index,

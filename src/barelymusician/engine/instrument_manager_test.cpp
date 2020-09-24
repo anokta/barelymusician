@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "barelymusician/base/constants.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/instrument/instrument.h"
 #include "gtest/gtest.h"
 
@@ -20,6 +19,7 @@ class TestInstrument : public Instrument {
   TestInstrument() : sample_(0.0f) {}
 
   // Implements |Instrument|.
+  void Control(int, float) override {}
   void NoteOff(float) override { sample_ = 0.0f; }
   void NoteOn(float index, float intensity) override {
     sample_ = index * intensity;
@@ -27,7 +27,6 @@ class TestInstrument : public Instrument {
   void Process(float* output, int num_channels, int num_frames) override {
     std::fill_n(output, num_channels * num_frames, sample_);
   }
-  void SetParam(int, float) override {}
 
  private:
   float sample_;
@@ -41,7 +40,8 @@ TEST(InstrumentManagerTest, ScheduleSingleNote) {
   const float kNoteIntensity = 0.5f;
 
   InstrumentManager instrument_manager;
-  const int instrument_id = instrument_manager.Create<TestInstrument>({});
+  const int instrument_id =
+      instrument_manager.Create(std::make_unique<TestInstrument>());
 
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
@@ -55,8 +55,8 @@ TEST(InstrumentManagerTest, ScheduleSingleNote) {
   }
 
   // Start note.
-  instrument_manager.ScheduleNoteOn(instrument_id, kBeginTimestamp, kNoteIndex,
-                                    kNoteIntensity);
+  instrument_manager.NoteOn(instrument_id, kBeginTimestamp, kNoteIndex,
+                            kNoteIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   instrument_manager.Process(instrument_id, kBeginTimestamp, kEndTimestamp,
@@ -69,8 +69,7 @@ TEST(InstrumentManagerTest, ScheduleSingleNote) {
   }
 
   // Stop note.
-  instrument_manager.ScheduleNoteOff(instrument_id, kBeginTimestamp,
-                                     kNoteIndex);
+  instrument_manager.NoteOff(instrument_id, kBeginTimestamp, kNoteIndex);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   instrument_manager.Process(instrument_id, kBeginTimestamp, kEndTimestamp,
@@ -87,7 +86,8 @@ TEST(InstrumentManagerTest, ScheduleMultipleNotes) {
   const float kNoteIntensity = 1.0f;
 
   InstrumentManager instrument_manager;
-  const int instrument_id = instrument_manager.Create<TestInstrument>({});
+  const int instrument_id =
+      instrument_manager.Create(std::make_unique<TestInstrument>());
 
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
@@ -102,7 +102,7 @@ TEST(InstrumentManagerTest, ScheduleMultipleNotes) {
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
-    instrument_manager.ScheduleNoteOn(
+    instrument_manager.NoteOn(
         instrument_id, static_cast<double>(i) / static_cast<double>(kNumFrames),
         static_cast<float>(i), kNoteIntensity);
   }
@@ -119,8 +119,7 @@ TEST(InstrumentManagerTest, ScheduleMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    instrument_manager.ScheduleNoteOff(instrument_id, 0.0,
-                                       static_cast<float>(i));
+    instrument_manager.NoteOff(instrument_id, 0.0, static_cast<float>(i));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);

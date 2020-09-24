@@ -103,11 +103,10 @@ int CreateBasicSynthInstrument(int num_voices, int oscillator_type) {
   barelymusician->audio_runner.Add([id, num_voices, oscillator_type]() {
     auto instrument = std::make_unique<examples::BasicSynthInstrument>(
         barelymusician->sample_rate, num_voices);
-    instrument->SetParam(
-        examples::BasicSynthInstrumentParam::kOscillatorType,
-        static_cast<float>(oscillator_type));
-    instrument->SetParam(
-        examples::BasicSynthInstrumentParam::kEnvelopeAttack, 0.0f);
+    instrument->Control(examples::BasicSynthInstrumentParam::kOscillatorType,
+                        static_cast<float>(oscillator_type));
+    instrument->Control(examples::BasicSynthInstrumentParam::kEnvelopeAttack,
+                        0.0f);
     barelymusician->engine.Create(id, std::move(instrument));
   });
   return id;

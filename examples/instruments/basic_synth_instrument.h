@@ -24,10 +24,10 @@ class BasicSynthInstrument : public Instrument {
   BasicSynthInstrument(int sample_rate, int num_voices);
 
   // Implements |Instrument|.
+  void Control(int id, float value) override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-  void SetParam(int id, float value) override;
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;

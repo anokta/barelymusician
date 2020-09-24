@@ -59,14 +59,13 @@ int main(int argc, char* argv[]) {
 
   auto metronome_instrument =
       std::make_unique<BasicSynthInstrument>(kSampleRate, kNumVoices);
-  metronome_instrument->SetParam(
-      BasicSynthInstrumentParam::kOscillatorType,
-      static_cast<float>(kOscillatorType));
-  metronome_instrument->SetParam(
-      BasicSynthInstrumentParam::kEnvelopeAttack, kAttack);
-  metronome_instrument->SetParam(
-      BasicSynthInstrumentParam::kEnvelopeRelease, kRelease);
-  metronome_instrument->SetParam(BasicSynthInstrumentParam::kGain, kGain);
+  metronome_instrument->Control(BasicSynthInstrumentParam::kOscillatorType,
+                                static_cast<float>(kOscillatorType));
+  metronome_instrument->Control(BasicSynthInstrumentParam::kEnvelopeAttack,
+                                kAttack);
+  metronome_instrument->Control(BasicSynthInstrumentParam::kEnvelopeRelease,
+                                kRelease);
+  metronome_instrument->Control(BasicSynthInstrumentParam::kGain, kGain);
   engine.Create(kMetronomeId, std::move(metronome_instrument));
 
   // Beat callback.

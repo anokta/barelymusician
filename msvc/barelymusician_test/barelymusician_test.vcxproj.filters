@@ -60,8 +60,8 @@
     <ClCompile Include="..\..\src\barelymusician\engine\engine_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_test.cpp">
-      <Filter>Source Files\instrument</Filter>
+    <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager_test.cpp">
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

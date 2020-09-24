@@ -27,9 +27,9 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\clock.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\engine.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp" />
   </ItemGroup>
@@ -47,6 +47,9 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\clock.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\engine.h" />
+    <ClInclude Include="..\..\src\barelymusician\engine\engine_utils.h" />
+    <ClInclude Include="..\..\src\barelymusician\engine\instrument_definition.h" />
+    <ClInclude Include="..\..\src\barelymusician\engine\instrument_manager.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\message.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\message_queue.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\note.h" />

@@ -44,10 +44,10 @@
     <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\clock_test.cpp" />
+    <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\note_utils_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\engine_test.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\instrument\instrument_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp" />

@@ -1,9 +1,11 @@
-#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/engine/instrument_manager.h"
 
 #include <algorithm>
 #include <vector>
 
 #include "barelymusician/base/constants.h"
+#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/instrument/instrument.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -32,18 +34,20 @@ class TestInstrument : public Instrument {
 };
 
 // Tests that scheduling a single note produces the expected output.
-TEST(InstrumentTest, ScheduleSingleNote) {
+TEST(InstrumentManagerTest, ScheduleSingleNote) {
   const double kBeginTimestamp = 1.0;
   const double kEndTimestamp = 2.0;
   const float kNoteIndex = 32.0f;
   const float kNoteIntensity = 0.5f;
 
-  TestInstrument instrument;
+  InstrumentManager instrument_manager;
+  const int instrument_id = instrument_manager.Create<TestInstrument>({});
+
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessScheduled(kBeginTimestamp, kEndTimestamp, buffer.data(),
-                              kNumChannels, kNumFrames);
+  instrument_manager.Process(instrument_id, kBeginTimestamp, kEndTimestamp,
+                             buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -51,11 +55,12 @@ TEST(InstrumentTest, ScheduleSingleNote) {
   }
 
   // Start note.
-  instrument.NoteOnScheduled(kBeginTimestamp, kNoteIndex, kNoteIntensity);
+  instrument_manager.ScheduleNoteOn(instrument_id, kBeginTimestamp, kNoteIndex,
+                                    kNoteIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessScheduled(kBeginTimestamp, kEndTimestamp, buffer.data(),
-                              kNumChannels, kNumFrames);
+  instrument_manager.Process(instrument_id, kBeginTimestamp, kEndTimestamp,
+                             buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -64,11 +69,12 @@ TEST(InstrumentTest, ScheduleSingleNote) {
   }
 
   // Stop note.
-  instrument.NoteOffScheduled(kBeginTimestamp, kNoteIndex);
+  instrument_manager.ScheduleNoteOff(instrument_id, kBeginTimestamp,
+                                     kNoteIndex);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessScheduled(kBeginTimestamp, kEndTimestamp, buffer.data(),
-                              kNumChannels, kNumFrames);
+  instrument_manager.Process(instrument_id, kBeginTimestamp, kEndTimestamp,
+                             buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -77,15 +83,17 @@ TEST(InstrumentTest, ScheduleSingleNote) {
 }
 
 // Tests that scheduling multiple notes produces the expected output.
-TEST(InstrumentTest, ScheduleMultipleNotes) {
+TEST(InstrumentManagerTest, ScheduleMultipleNotes) {
   const float kNoteIntensity = 1.0f;
 
-  TestInstrument instrument;
+  InstrumentManager instrument_manager;
+  const int instrument_id = instrument_manager.Create<TestInstrument>({});
+
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessScheduled(0.0, 1.0, buffer.data(), kNumChannels,
-                              kNumFrames);
+  instrument_manager.Process(instrument_id, 0.0, 1.0, buffer.data(),
+                             kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -94,14 +102,14 @@ TEST(InstrumentTest, ScheduleMultipleNotes) {
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
-    instrument.NoteOnScheduled(
-        static_cast<double>(i) / static_cast<double>(kNumFrames),
+    instrument_manager.ScheduleNoteOn(
+        instrument_id, static_cast<double>(i) / static_cast<double>(kNumFrames),
         static_cast<float>(i), kNoteIntensity);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessScheduled(0.0, 1.0, buffer.data(), kNumChannels,
-                              kNumFrames);
+  instrument_manager.Process(instrument_id, 0.0, 1.0, buffer.data(),
+                             kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kNoteIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -111,12 +119,13 @@ TEST(InstrumentTest, ScheduleMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    instrument.NoteOffScheduled(static_cast<float>(i), 0.0);
+    instrument_manager.ScheduleNoteOff(instrument_id, 0.0,
+                                       static_cast<float>(i));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.ProcessScheduled(0.0, 1.0, buffer.data(), kNumChannels,
-                              kNumFrames);
+  instrument_manager.Process(instrument_id, 0.0, 1.0, buffer.data(),
+                             kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

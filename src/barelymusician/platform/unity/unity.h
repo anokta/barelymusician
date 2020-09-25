@@ -89,8 +89,8 @@ void EXPORT_API NoteOn(int id, float index, float intensity);
 // @param output Output buffer.
 // @param num_channels Number of output channels.
 // @param num_frames Number of output frames.
-void EXPORT_API Process(int id, float* output, int num_channels,
-                        int num_frames);
+void EXPORT_API Process(int id, double timestamp, float* output,
+                        int num_channels, int num_frames);
 
 // Schedules instrument note.
 //
@@ -149,18 +149,13 @@ void EXPORT_API SetPosition(double position);
 void EXPORT_API SetTempo(double tempo);
 
 // Starts playback.
-void EXPORT_API Start();
+void EXPORT_API Start(double timestamp);
 
 // Stops playback.
 void EXPORT_API Stop();
 
-// Updates audio thread state.
-//
-// @param num_frames Number of frames to iterate.
-void EXPORT_API UpdateAudioThread(int num_frames);
-
 // Updates main thread state.
-void EXPORT_API UpdateMainThread();
+void EXPORT_API UpdateMainThread(double timestamp, double lookahead);
 
 }  // extern "C"
 

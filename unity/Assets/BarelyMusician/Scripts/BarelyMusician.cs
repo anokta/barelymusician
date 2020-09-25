@@ -102,8 +102,7 @@ namespace BarelyApi {
     // Processes instrument.
     public static void Process(int id, float[] output, int numChannels) {
       int numFrames = output.Length / numChannels;
-      UpdateAudioThread(numFrames);
-      ProcessNative(id, output, numChannels, numFrames);
+      ProcessNative(id, AudioSettings.dspTime, output, numChannels, numFrames);
     }
 
     // Schedules instrument note.
@@ -145,9 +144,16 @@ namespace BarelyApi {
     // Starts playback.
     public static void Play() {
       if (BarelyMusicianInternal.Instance != null) {
-        StartNative();
+        StartNative(AudioSettings.dspTime);
       }
     }
+
+    public static void PlayScheduled(double dspTime) {
+      if (BarelyMusicianInternal.Instance != null) {
+        StartNative(dspTime);
+      }
+    }
+
 
     // Pauses playback.
     public static void Pause() {
@@ -166,18 +172,6 @@ namespace BarelyApi {
 
     // List of instruments.
     private static Dictionary<int, Instrument> _instruments = new Dictionary<int, Instrument>();
-
-    // Audio thread last DSP time.
-    private static double _lastDspTime = 0.0;
-
-    // Updates the audio thread state.
-    private static void UpdateAudioThread(int numFrames) {
-      double dspTime = AudioSettings.dspTime;
-      if (dspTime > _lastDspTime) {
-        _lastDspTime = dspTime;
-        UpdateAudioThreadNative(numFrames);
-      }
-    }
 
     // Internal component to update the native state.
     private class BarelyMusicianInternal : MonoBehaviour {
@@ -226,9 +220,6 @@ namespace BarelyApi {
       private delegate void NoteOnCallback(int id, float index, float intensity);
       private NoteOnCallback _noteOnCallback = null;
 
-      // Audio source.
-      private AudioSource _source = null;
-
       private void Awake() {
         InitializeNative(AudioSettings.outputSampleRate);
         _beatCallback = delegate (int beat) {
@@ -271,23 +262,6 @@ namespace BarelyApi {
           }
         };
         SetNoteOnCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
-
-        _source = gameObject.AddComponent<AudioSource>();
-        _source.bypassEffects = true;
-        _source.bypassListenerEffects = true;
-        _source.bypassReverbZones = true;
-        _source.dopplerLevel = 0.0f;
-        _source.playOnAwake = false;
-        _source.priority = 0;
-        _source.spatialBlend = 0.0f;
-      }
-
-      private void OnEnable() {
-        _source.Play();
-      }
-
-      private void OnDisable() {
-        _source.Stop();
       }
 
       private void OnApplicationQuit() {
@@ -298,11 +272,8 @@ namespace BarelyApi {
       }
 
       private void Update() {
-        UpdateMainThreadNative();
-      }
-
-      private void OnAudioFilterRead(float[] data, int channels) {
-        UpdateAudioThread(data.Length / channels);
+        double lookahead = 2.0 * AudioSettings.GetConfiguration().dspBufferSize / AudioSettings.outputSampleRate; 
+        UpdateMainThreadNative(AudioSettings.dspTime, lookahead);
       }
     }
 
@@ -338,8 +309,8 @@ namespace BarelyApi {
     private static extern bool IsPlayingNative();
 
     [DllImport(pluginName, EntryPoint = "Process")]
-    private static extern void ProcessNative(int id, [In, Out] float[] output, int numChannels,
-                                             int numFrames);
+    private static extern void ProcessNative(int id, double timestamp, [In, Out] float[] output,
+                                             int numChannels, int numFrames);
 
     [DllImport(pluginName, EntryPoint = "NoteOff")]
     private static extern void NoteOffNative(int id, float index);
@@ -377,15 +348,12 @@ namespace BarelyApi {
     private static extern void SetTempoNative(double tempo);
 
     [DllImport(pluginName, EntryPoint = "Start")]
-    private static extern void StartNative();
+    private static extern void StartNative(double timestamp);
 
     [DllImport(pluginName, EntryPoint = "Stop")]
     private static extern void StopNative();
 
-    [DllImport(pluginName, EntryPoint = "UpdateAudioThread")]
-    private static extern void UpdateAudioThreadNative(int numFrames);
-
     [DllImport(pluginName, EntryPoint = "UpdateMainThread")]
-    private static extern void UpdateMainThreadNative();
+    private static extern void UpdateMainThreadNative(double timestamp, double lookahead);
   }
 }

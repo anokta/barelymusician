@@ -61,9 +61,9 @@ public class InstrumentPlayer : MonoBehaviour {
   private void OnBeat(int beat) {
     for (int i = 0; i < beatNotes.Length; ++i) {
       var note = beatNotes[i];
-      double position = note.position + (double)(beat + 1);
+      double position = note.position + (double)(beat);
       float index = 
-          rootIndex + note.index + (float)(note.beatMultiplier * (beat % note.beatPeriod));
+          rootIndex + note.index + (float)(note.beatMultiplier * ((beat) % note.beatPeriod));
       instrument.ScheduleNote(position, note.duration, index, note.intensity);
     }
   }

@@ -1,8 +1,12 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "barelymusician/instrument/instrument.h"
 
 namespace barelyapi {
 
@@ -23,6 +27,10 @@ struct InstrumentParamDefinition {
 
 // Instrument definition.
 struct InstrumentDefinition {
+  // TODO(#34): Sampling rate should probably be passed after this call instead.
+  using GetInstrument =
+      std::function<std::unique_ptr<Instrument>(int sample_rate)>;
+
   // Instrument name.
   std::string name;
 
@@ -30,15 +38,11 @@ struct InstrumentDefinition {
   std::string description;
 
   // Instrument parameters.
-  std::vector<InstrumentParamDefinition> params;
-};
+  std::vector<InstrumentParamDefinition> param_definitions;
 
-//// Returns definition of the given instrument type.
-//// @note All derived instrument types *must* implement this function.
-////
-//// @return Instrument definition.
-//template <typename InstrumentType>
-//static InstrumentDefinition GetDefinition();
+  // Get instrument function.
+  GetInstrument get_instrument_fn;
+};
 
 }  // namespace barelyapi
 

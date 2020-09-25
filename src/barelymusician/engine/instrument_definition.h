@@ -21,8 +21,14 @@ struct InstrumentParamDefinition {
   // Param description.
   std::string description;
 
-  // Param value.
+  // Param default value.
   float default_value;
+
+  // Param minimum value.
+  float min_value;
+
+  // Param maximum value.
+  float max_value;
 };
 
 // Instrument definition.

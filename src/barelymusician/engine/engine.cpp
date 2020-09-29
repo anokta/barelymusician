@@ -42,11 +42,13 @@ int Engine::Create(InstrumentDefinition definition) {
   return instrument_id;
 }
 
-void Engine::Destroy(int instrument_id) {
+bool Engine::Destroy(int instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
+    return true;
   }
+  return false;
 }
 
 std::optional<float> Engine::GetParam(int instrument_id, int id) const {
@@ -69,10 +71,10 @@ std::optional<bool> Engine::IsNoteOn(int instrument_id, float index) const {
   return std::nullopt;
 }
 
-void Engine::AllNotesOff(int instrument_id) {
+bool Engine::AllNotesOff(int instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
-    return;
+    return false;
   }
   controller->messages.Clear();
   task_runner_.Add([this, instrument_id, notes = controller->active_notes]() {
@@ -89,9 +91,27 @@ void Engine::AllNotesOff(int instrument_id) {
     }
   }
   controller->active_notes.clear();
+  return true;
 }
 
-void Engine::NoteOff(int instrument_id, float index) {
+bool Engine::Control(int instrument_id, int id, float value) {
+  auto* controller = FindOrNull(controllers_, instrument_id);
+  if (controller != nullptr) {
+    auto* param = FindOrNull(controller->params, id);
+    if (param != nullptr) {
+      *param = value;
+      task_runner_.Add([this, instrument_id, id, value]() {
+        auto* processor = FindOrNull(processors_, instrument_id);
+        DCHECK(processor);
+        processor->instrument->Control(id, value);
+      });
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Engine::NoteOff(int instrument_id, float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.erase(index);
@@ -103,10 +123,12 @@ void Engine::NoteOff(int instrument_id, float index) {
       DCHECK(processor);
       processor->instrument->NoteOff(index);
     });
+    return true;
   }
+  return false;
 }
 
-void Engine::NoteOn(int instrument_id, float index, float intensity) {
+bool Engine::NoteOn(int instrument_id, float index, float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.insert(index);
@@ -118,16 +140,18 @@ void Engine::NoteOn(int instrument_id, float index, float intensity) {
       DCHECK(processor);
       processor->instrument->NoteOn(index, intensity);
     });
+    return true;
   }
+  return false;
 }
 
-void Engine::Process(int instrument_id, double begin_timestamp,
+bool Engine::Process(int instrument_id, double begin_timestamp,
                      double end_timestamp, float* output, int num_channels,
                      int num_frames) {
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
   if (processor == nullptr) {
-    return;
+    return false;
   }
   Instrument* instrument = processor->instrument.get();
   int frame = 0;
@@ -165,9 +189,10 @@ void Engine::Process(int instrument_id, double begin_timestamp,
     instrument->Process(&output[num_channels * frame], num_channels,
                         num_frames - frame);
   }
+  return true;
 }
 
-void Engine::ResetAllParams(int instrument_id) {
+bool Engine::ResetAllParams(int instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     for (const auto& param : controller->definition.param_definitions) {
@@ -182,27 +207,31 @@ void Engine::ResetAllParams(int instrument_id) {
             processor->instrument->Control(param.id, param.default_value);
           }
         });
+    return true;
   }
+  return false;
 }
 
-void Engine::ScheduleControl(int instrument_id, double timestamp, int id,
+bool Engine::ScheduleControl(int instrument_id, double timestamp, int id,
                              float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
-  if (controller != nullptr) {
-    auto* param = FindOrNull(controller->params, id);
-    if (param == nullptr) {
-      return;
-    }
-    controller->messages.Push(timestamp, ControlData{id, value});
-    task_runner_.Add([this, instrument_id, timestamp, id, value]() {
-      auto* processor = FindOrNull(processors_, instrument_id);
-      DCHECK(processor);
-      processor->messages.Push(timestamp, ControlData{id, value});
-    });
+  if (controller == nullptr) {
+    return false;
   }
+  auto* param = FindOrNull(controller->params, id);
+  if (param == nullptr) {
+    return false;
+  }
+  controller->messages.Push(timestamp, ControlData{id, value});
+  task_runner_.Add([this, instrument_id, timestamp, id, value]() {
+    auto* processor = FindOrNull(processors_, instrument_id);
+    DCHECK(processor);
+    processor->messages.Push(timestamp, ControlData{id, value});
+  });
+  return true;
 }
 
-void Engine::ScheduleNoteOff(int instrument_id, double timestamp, float index) {
+bool Engine::ScheduleNoteOff(int instrument_id, double timestamp, float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(timestamp, NoteOffData{index});
@@ -211,10 +240,12 @@ void Engine::ScheduleNoteOff(int instrument_id, double timestamp, float index) {
       DCHECK(processor);
       processor->messages.Push(timestamp, NoteOffData{index});
     });
+    return true;
   }
+  return false;
 }
 
-void Engine::ScheduleNoteOn(int instrument_id, double timestamp, float index,
+bool Engine::ScheduleNoteOn(int instrument_id, double timestamp, float index,
                             float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
@@ -224,7 +255,9 @@ void Engine::ScheduleNoteOn(int instrument_id, double timestamp, float index,
       DCHECK(processor);
       processor->messages.Push(timestamp, NoteOnData{index, intensity});
     });
+    return true;
   }
+  return false;
 }
 
 void Engine::SetNoteOffCallback(NoteOffCallback note_off_callback) {
@@ -233,21 +266,6 @@ void Engine::SetNoteOffCallback(NoteOffCallback note_off_callback) {
 
 void Engine::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
-}
-
-void Engine::SetParam(int instrument_id, int id, float value) {
-  auto* controller = FindOrNull(controllers_, instrument_id);
-  if (controller != nullptr) {
-    auto* param = FindOrNull(controller->params, id);
-    if (param != nullptr) {
-      *param = value;
-      task_runner_.Add([this, instrument_id, id, value]() {
-        auto* processor = FindOrNull(processors_, instrument_id);
-        DCHECK(processor);
-        processor->instrument->Control(id, value);
-      });
-    }
-  }
 }
 
 void Engine::Update(double timestamp) {

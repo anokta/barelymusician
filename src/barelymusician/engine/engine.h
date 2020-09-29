@@ -37,7 +37,7 @@ class Engine {
   // Destroys instrument.
   //
   // @param instrument_id Instrument id.
-  void Destroy(int instrument_id);
+  bool Destroy(int instrument_id);
 
   // Returns parameter value.
   //
@@ -55,20 +55,27 @@ class Engine {
   // Stops all notes.
   //
   // @param instrument_id Instrument id.
-  void AllNotesOff(int instrument_id);
+  bool AllNotesOff(int instrument_id);
+
+  // Sets control parameter value.
+  //
+  // @param instrument_id Instrument id.
+  // @param id Parameter id.
+  // @param value Parameter value.
+  bool Control(int instrument_id, int id, float value);
 
   // Stops playing note.
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
-  void NoteOff(int instrument_id, float index);
+  bool NoteOff(int instrument_id, float index);
 
   // Starts playing note.
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
   // @param intensity Note intensity.
-  void NoteOn(int instrument_id, float index, float intensity);
+  bool NoteOn(int instrument_id, float index, float intensity);
 
   // Processes the next output buffer.
   //
@@ -78,16 +85,16 @@ class Engine {
   // @param output Pointer to output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  void Process(int instrument_id, double begin_timestamp, double end_timestamp,
+  bool Process(int instrument_id, double begin_timestamp, double end_timestamp,
                float* output, int num_channels, int num_frames);
 
   // Resets all parameters.
   //
   // @param instrument_id Instrument id.
-  void ResetAllParams(int instrument_id);
+  bool ResetAllParams(int instrument_id);
 
   // Schedules control.
-  void ScheduleControl(int instrument_id, double timestamp, int id,
+  bool ScheduleControl(int instrument_id, double timestamp, int id,
                        float value);
 
   // Schedules note off.
@@ -95,7 +102,7 @@ class Engine {
   // @param instrument_id Instrument id.
   // @param timestamp Note timestamp.
   // @param index Note index.
-  void ScheduleNoteOff(int instrument_id, double timestamp, float index);
+  bool ScheduleNoteOff(int instrument_id, double timestamp, float index);
 
   // Schedules note on.
   //
@@ -103,7 +110,7 @@ class Engine {
   // @param timestamp Note timestamp.
   // @param index Note index.
   // @param index Note intensity.
-  void ScheduleNoteOn(int instrument_id, double timestamp, float index,
+  bool ScheduleNoteOn(int instrument_id, double timestamp, float index,
                       float intensity);
 
   // Sets note off callback.
@@ -115,13 +122,6 @@ class Engine {
   //
   // @param note_on_callback Note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback);
-
-  // Sets parameter value.
-  //
-  // @param instrument_id Instrument id.
-  // @param id Parameter id.
-  // @param value Parameter value.
-  void SetParam(int instrument_id, int id, float value);
 
   // Updates the internal state.
   //

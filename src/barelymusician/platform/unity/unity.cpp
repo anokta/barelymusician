@@ -150,7 +150,7 @@ void ScheduleNoteOn(int id, double position, float index, float intensity) {
 
 void SetParam(int id, int param_id, float value) {
   DCHECK(barelymusician);
-  barelymusician->engine.SetParam(id, param_id, value);
+  barelymusician->engine.Control(id, param_id, value);
 }
 
 void SetBeatCallback(BeatCallback* beat_callback_ptr) {

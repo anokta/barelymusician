@@ -98,12 +98,12 @@ void InstrumentManager::NoteOff(int instrument_id, float index) {
     if (note_off_callback_ != nullptr) {
       note_off_callback_(instrument_id, index);
     }
+    task_runner_.Add([this, instrument_id, index]() {
+      auto* processor = FindOrNull(processors_, instrument_id);
+      DCHECK(processor);
+      processor->instrument->NoteOff(index);
+    });
   }
-  task_runner_.Add([this, instrument_id, index]() {
-    auto* processor = FindOrNull(processors_, instrument_id);
-    DCHECK(processor);
-    processor->instrument->NoteOff(index);
-  });
 }
 
 void InstrumentManager::NoteOn(int instrument_id, float index,
@@ -114,12 +114,12 @@ void InstrumentManager::NoteOn(int instrument_id, float index,
     if (note_on_callback_ != nullptr) {
       note_on_callback_(instrument_id, index, intensity);
     }
+    task_runner_.Add([this, instrument_id, index, intensity]() {
+      auto* processor = FindOrNull(processors_, instrument_id);
+      DCHECK(processor);
+      processor->instrument->NoteOn(index, intensity);
+    });
   }
-  task_runner_.Add([this, instrument_id, index, intensity]() {
-    auto* processor = FindOrNull(processors_, instrument_id);
-    DCHECK(processor);
-    processor->instrument->NoteOn(index, intensity);
-  });
 }
 
 void InstrumentManager::Process(int instrument_id, double begin_timestamp,
@@ -169,12 +169,12 @@ void InstrumentManager::ScheduleNoteOff(int instrument_id, double timestamp,
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(timestamp, NoteOffData{index});
+    task_runner_.Add([this, instrument_id, timestamp, index]() {
+      auto* processor = FindOrNull(processors_, instrument_id);
+      DCHECK(processor);
+      processor->messages.Push(timestamp, NoteOffData{index});
+    });
   }
-  task_runner_.Add([this, instrument_id, timestamp, index]() {
-    auto* processor = FindOrNull(processors_, instrument_id);
-    DCHECK(processor);
-    processor->messages.Push(timestamp, NoteOffData{index});
-  });
 }
 
 void InstrumentManager::ScheduleNoteOn(int instrument_id, double timestamp,
@@ -182,12 +182,12 @@ void InstrumentManager::ScheduleNoteOn(int instrument_id, double timestamp,
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(timestamp, NoteOnData{index, intensity});
+    task_runner_.Add([this, instrument_id, timestamp, index, intensity]() {
+      auto* processor = FindOrNull(processors_, instrument_id);
+      DCHECK(processor);
+      processor->messages.Push(timestamp, NoteOnData{index, intensity});
+    });
   }
-  task_runner_.Add([this, instrument_id, timestamp, index, intensity]() {
-    auto* processor = FindOrNull(processors_, instrument_id);
-    DCHECK(processor);
-    processor->messages.Push(timestamp, NoteOnData{index, intensity});
-  });
 }
 
 void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
@@ -204,13 +204,13 @@ void InstrumentManager::SetParam(int instrument_id, int id, float value) {
     auto* param = FindOrNull(controller->params, id);
     if (param != nullptr) {
       *param = value;
+      task_runner_.Add([this, instrument_id, id, value]() {
+        auto* processor = FindOrNull(processors_, instrument_id);
+        DCHECK(processor);
+        processor->instrument->Control(id, value);
+      });
     }
   }
-  task_runner_.Add([this, instrument_id, id, value]() {
-    auto* processor = FindOrNull(processors_, instrument_id);
-    DCHECK(processor);
-    processor->instrument->Control(id, value);
-  });
 }
 
 void InstrumentManager::Update(double begin_timestamp, double end_timestamp) {

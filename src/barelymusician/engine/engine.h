@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -43,13 +44,13 @@ class Engine {
   // @param instrument_id Instrument id.
   // @param param_id Parameter id.
   // @param value Parameter value.
-  void GetParam(int instrument_id, int param_id, float* value) const;
+  std::optional<float> GetParam(int instrument_id, int param_id) const;
 
   // Returns whether note is active or not.
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
-  void IsNoteOn(int instrument_id, float index, bool* active) const;
+  std::optional<bool> IsNoteOn(int instrument_id, float index) const;
 
   // Stops all notes.
   //
@@ -84,6 +85,10 @@ class Engine {
   //
   // @param instrument_id Instrument id.
   void ResetAllParams(int instrument_id);
+
+  // Schedules control.
+  void ScheduleControl(int instrument_id, double timestamp, int id,
+                       float value);
 
   // Schedules note off.
   //

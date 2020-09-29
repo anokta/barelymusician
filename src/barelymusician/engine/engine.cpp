@@ -49,22 +49,24 @@ void Engine::Destroy(int instrument_id) {
   }
 }
 
-void Engine::GetParam(int instrument_id, int id, float* value) const {
+std::optional<float> Engine::GetParam(int instrument_id, int id) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     const auto* param = FindOrNull(controller->params, id);
     if (param != nullptr) {
-      *value = *param;
+      return *param;
     }
   }
+  return std::nullopt;
 }
 
-void Engine::IsNoteOn(int instrument_id, float index, bool* active) const {
+std::optional<bool> Engine::IsNoteOn(int instrument_id, float index) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
-    *active =
-        controller->active_notes.find(index) != controller->active_notes.cend();
+    return controller->active_notes.find(index) !=
+           controller->active_notes.cend();
   }
+  return std::nullopt;
 }
 
 void Engine::AllNotesOff(int instrument_id) {
@@ -143,7 +145,11 @@ void Engine::Process(int instrument_id, double begin_timestamp,
                             message_frame - frame);
         frame = message_frame;
       }
-      std::visit(MessageVisitor{[instrument](const NoteOffData& note_off_data) {
+      std::visit(MessageVisitor{[instrument](const ControlData& control_data) {
+                                  instrument->Control(control_data.id,
+                                                      control_data.value);
+                                },
+                                [instrument](const NoteOffData& note_off_data) {
                                   instrument->NoteOff(note_off_data.index);
                                 },
                                 [instrument](const NoteOnData& note_on_data) {
@@ -176,6 +182,23 @@ void Engine::ResetAllParams(int instrument_id) {
             processor->instrument->Control(param.id, param.default_value);
           }
         });
+  }
+}
+
+void Engine::ScheduleControl(int instrument_id, double timestamp, int id,
+                             float value) {
+  auto* controller = FindOrNull(controllers_, instrument_id);
+  if (controller != nullptr) {
+    auto* param = FindOrNull(controller->params, id);
+    if (param == nullptr) {
+      return;
+    }
+    controller->messages.Push(timestamp, ControlData{id, value});
+    task_runner_.Add([this, instrument_id, timestamp, id, value]() {
+      auto* processor = FindOrNull(processors_, instrument_id);
+      DCHECK(processor);
+      processor->messages.Push(timestamp, ControlData{id, value});
+    });
   }
 }
 
@@ -233,6 +256,10 @@ void Engine::Update(double timestamp) {
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
       std::visit(
           MessageVisitor{
+              [this, instrument_id = instrument_id,
+               controller = &controller](const ControlData& control_data) {
+                controller->params.at(control_data.id) = control_data.value;
+              },
               [this, instrument_id = instrument_id,
                controller = &controller](const NoteOffData& note_off_data) {
                 controller->active_notes.erase(note_off_data.index);

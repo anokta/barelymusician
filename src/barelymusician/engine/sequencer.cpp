@@ -122,7 +122,8 @@ void Sequencer::Update(double timestamp, double lookahead) {
       const double message_timestamp =
           begin_timestamp + SecondsFromBeats(tempo_, it->timestamp - position_);
       std::visit(
-          MessageVisitor{[this, id = id,
+          MessageVisitor{[](const auto&) {},
+                         [this, id = id,
                           message_timestamp](const NoteOffData& note_off_data) {
                            engine_->ScheduleNoteOff(id, message_timestamp,
                                                     note_off_data.index);

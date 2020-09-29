@@ -5,6 +5,15 @@
 
 namespace barelyapi {
 
+// Control data.
+struct ControlData {
+  // Param id.
+  int id;
+
+  // Param value.
+  float value;
+};
+
 // Note on data.
 struct NoteOnData {
   // Note index.
@@ -23,7 +32,7 @@ struct NoteOffData {
 // Generic message with a timestamp.
 struct Message {
   // Message data signature.
-  using Data = std::variant<NoteOnData, NoteOffData>;
+  using Data = std::variant<ControlData, NoteOnData, NoteOffData>;
 
   // Message timestamp.
   double timestamp;

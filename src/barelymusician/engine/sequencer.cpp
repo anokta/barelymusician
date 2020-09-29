@@ -20,12 +20,12 @@ double SecondsFromBeats(double tempo, double beats) {
 
 }  // namespace
 
-Sequencer::Sequencer(InstrumentManager* instrument_manager)
+Sequencer::Sequencer(Engine* engine)
     : is_playing_(false),
       position_(0.0),
       tempo_(0.0),
       beat_callback_(nullptr),
-      instrument_manager_(instrument_manager) {}
+      engine_(engine) {}
 
 void Sequencer::Create(int instrument_id) {
   messages_.emplace(instrument_id, MessageQueue());
@@ -86,12 +86,12 @@ void Sequencer::Stop() {
     messages.Clear();
   }
   for (const auto& [id, message] : messages_) {
-    instrument_manager_->AllNotesOff(id);
+    engine_->AllNotesOff(id);
   }
 }
 
 void Sequencer::Update(double timestamp, double lookahead) {
-  instrument_manager_->Update(last_timestamp_, timestamp);
+  engine_->Update(timestamp);
   if (!is_playing_ || tempo_ == 0.0) {
     return;
   }
@@ -124,14 +124,14 @@ void Sequencer::Update(double timestamp, double lookahead) {
       std::visit(
           MessageVisitor{[this, id = id,
                           message_timestamp](const NoteOffData& note_off_data) {
-                           instrument_manager_->ScheduleNoteOff(
-                               id, message_timestamp, note_off_data.index);
+                           engine_->ScheduleNoteOff(id, message_timestamp,
+                                                    note_off_data.index);
                          },
                          [this, id = id,
                           message_timestamp](const NoteOnData& note_on_data) {
-                           instrument_manager_->ScheduleNoteOn(
-                               id, message_timestamp, note_on_data.index,
-                               note_on_data.intensity);
+                           engine_->ScheduleNoteOn(id, message_timestamp,
+                                                   note_on_data.index,
+                                                   note_on_data.intensity);
                          }},
           it->data);
     }

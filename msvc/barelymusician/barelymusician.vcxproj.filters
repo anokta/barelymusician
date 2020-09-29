@@ -96,9 +96,6 @@
     <ClInclude Include="..\..\src\barelymusician\util\task_runner.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\engine\clock.h">
-      <Filter>Header Files\engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\engine\message.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
@@ -112,9 +109,6 @@
       <Filter>Header Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\engine\note_utils.h">
-      <Filter>Header Files\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\engine\instrument_manager.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\engine\engine_utils.h">
@@ -152,9 +146,6 @@
     <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\clock.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
@@ -162,9 +153,6 @@
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\sequencer.cpp">

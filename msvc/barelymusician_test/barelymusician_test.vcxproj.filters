@@ -48,9 +48,6 @@
     <ClCompile Include="..\..\src\barelymusician\util\task_runner_test.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\clock_test.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
@@ -58,9 +55,6 @@
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\engine_test.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>

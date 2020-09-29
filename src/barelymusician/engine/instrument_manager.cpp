@@ -60,22 +60,6 @@ void InstrumentManager::GetParam(int instrument_id, int id,
   }
 }
 
-void InstrumentManager::AllNotesOff() {
-  for (auto& [instrument_id, controller] : controllers_) {
-    controller.messages.Clear();
-    task_runner_.Add([this, instrument_id = instrument_id]() {
-      auto* processor = FindOrNull(processors_, instrument_id);
-      if (processor != nullptr) {
-        processor->messages.Clear();
-      }
-    });
-    auto active_notes_copy = controller.active_notes;
-    for (auto& note : active_notes_copy) {
-      NoteOff(instrument_id, note);
-    }
-  }
-}
-
 void InstrumentManager::IsNoteOn(int instrument_id, float index,
                                  bool* active) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
@@ -83,6 +67,29 @@ void InstrumentManager::IsNoteOn(int instrument_id, float index,
     *active =
         controller->active_notes.find(index) != controller->active_notes.cend();
   }
+}
+
+void InstrumentManager::AllNotesOff(int instrument_id) {
+  auto* controller = FindOrNull(controllers_, instrument_id);
+  if (controller == nullptr) {
+    return;
+  }
+  controller->messages.Clear();
+  task_runner_.Add([this, instrument_id, notes = controller->active_notes]() {
+    auto* processor = FindOrNull(processors_, instrument_id);
+    if (processor != nullptr) {
+      processor->messages.Clear();
+      for (const auto& note : notes) {
+        processor->instrument->NoteOff(note);
+      }
+    }
+  });
+  if (note_off_callback_ != nullptr) {
+    for (const auto& note : controller->active_notes) {
+      note_off_callback_(instrument_id, note);
+    }
+  }
+  controller->active_notes.clear();
 }
 
 void InstrumentManager::NoteOff(int instrument_id, float index) {
@@ -131,7 +138,7 @@ void InstrumentManager::Process(int instrument_id, double begin_timestamp,
   // Process messages.
   if (begin_timestamp < end_timestamp) {
     // Include *all* messages before |end_timestamp|.
-    const auto messages = processor->messages.GetIterator(0.0, end_timestamp);
+    const auto messages = processor->messages.GetIterator(end_timestamp);
     const double frame_rate =
         static_cast<double>(num_frames) / (end_timestamp - begin_timestamp);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
@@ -216,7 +223,7 @@ void InstrumentManager::Update(double begin_timestamp, double end_timestamp) {
   if (begin_timestamp < end_timestamp) {
     for (auto& [instrument_id, controller] : controllers_) {
       // Include *all* messages before |end_timestamp|.
-      const auto messages = controller.messages.GetIterator(0.0, end_timestamp);
+      const auto messages = controller.messages.GetIterator(end_timestamp);
       for (auto it = messages.cbegin; it != messages.cend; ++it) {
         std::visit(
             MessageVisitor{

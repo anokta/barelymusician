@@ -39,6 +39,11 @@ class MessageQueue {
   // @param end_timestamp End timestamp.
   Iterator GetIterator(double begin_timestamp, double end_timestamp) const;
 
+  // Returns iterator within the given range.
+  //
+  // @param timestamp End timestamp.
+  Iterator GetIterator(double timestamp) const;
+
   // Pushes new message into the queue.
   //
   // @param timestamp Message timestamp.

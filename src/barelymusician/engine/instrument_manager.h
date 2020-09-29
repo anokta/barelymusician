@@ -43,13 +43,16 @@ class InstrumentManager {
   // @param value Parameter value.
   void GetParam(int instrument_id, int param_id, float* value) const;
 
-  void AllNotesOff();
-
   // Returns whether note is active or not.
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
   void IsNoteOn(int instrument_id, float index, bool* active) const;
+
+  // Stops all notes.
+  //
+  // @param instrument_id Instrument id.
+  void AllNotesOff(int instrument_id);
 
   // Stops playing note.
   //

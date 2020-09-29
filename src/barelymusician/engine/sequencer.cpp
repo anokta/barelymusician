@@ -82,9 +82,11 @@ void Sequencer::Start(double timestamp) {
 
 void Sequencer::Stop() {
   is_playing_ = false;
-  instrument_manager_->AllNotesOff();
   for (auto& [id, messages] : messages_) {
     messages.Clear();
+  }
+  for (const auto& [id, message] : messages_) {
+    instrument_manager_->AllNotesOff(id);
   }
 }
 

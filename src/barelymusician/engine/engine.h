@@ -97,6 +97,16 @@ class Engine {
   bool ScheduleControl(int instrument_id, double timestamp, int id,
                        float value);
 
+  // Schedules note.
+  //
+  // @param instrument_id Instrument id.
+  // @param timestamp Note timestamp.
+  // @param duration Note duration.
+  // @param index Note index.
+  // @param intensity Note intensity.
+  bool ScheduleNote(int instrument_id, double timestamp, double duration,
+                    float index, float intensity);
+
   // Schedules note off.
   //
   // @param instrument_id Instrument id.

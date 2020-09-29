@@ -231,6 +231,24 @@ bool Engine::ScheduleControl(int instrument_id, double timestamp, int id,
   return true;
 }
 
+bool Engine::ScheduleNote(int instrument_id, double timestamp, double duration,
+                          float index, float intensity) {
+  auto* controller = FindOrNull(controllers_, instrument_id);
+  if (controller != nullptr) {
+    controller->messages.Push(timestamp, NoteOnData{index, intensity});
+    controller->messages.Push(timestamp + duration, NoteOffData{index});
+    task_runner_.Add(
+        [this, instrument_id, timestamp, duration, index, intensity]() {
+          auto* processor = FindOrNull(processors_, instrument_id);
+          DCHECK(processor);
+          processor->messages.Push(timestamp, NoteOnData{index, intensity});
+          processor->messages.Push(timestamp + duration, NoteOffData{index});
+        });
+    return true;
+  }
+  return false;
+}
+
 bool Engine::ScheduleNoteOff(int instrument_id, double timestamp, float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {

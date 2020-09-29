@@ -1,6 +1,7 @@
 #include "instruments/basic_synth_instrument.h"
 
 #include <algorithm>
+#include <memory>
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
@@ -17,54 +18,47 @@ const float kDefaultEnvelopeDecay = 0.0f;
 const float kDefaultEnvelopeSustain = 1.0f;
 const float kDefaultEnvelopeRelease = 0.25f;
 const OscillatorType kDefaultOscillatorType = OscillatorType::kSine;
+const int kDefaultNumVoices = 8;
 
 }  // namespace
 
-BasicSynthInstrument::BasicSynthInstrument(int sample_rate, int num_voices)
-    : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {
-  voice_.Resize(num_voices);
-
-  // Register parameters.
-  modulation_matrix_.Register(
-      BasicSynthInstrumentParam::kGain, kDefaultGain,
-      [this](float value) { gain_ = std::max(0.0f, value); });
-  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeAttack,
-                              kDefaultEnvelopeAttack, [this](float value) {
-                                voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->envelope().SetAttack(value);
-                                });
-                              });
-  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeDecay,
-                              kDefaultEnvelopeDecay, [this](float value) {
-                                voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->envelope().SetDecay(value);
-                                });
-                              });
-  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeSustain,
-                              kDefaultEnvelopeSustain, [this](float value) {
-                                voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->envelope().SetSustain(value);
-                                });
-                              });
-  modulation_matrix_.Register(BasicSynthInstrumentParam::kEnvelopeRelease,
-                              kDefaultEnvelopeRelease, [this](float value) {
-                                voice_.Update([value](BasicSynthVoice* voice) {
-                                  voice->envelope().SetRelease(value);
-                                });
-                              });
-  modulation_matrix_.Register(
-      BasicSynthInstrumentParam::kOscillatorType,
-      static_cast<float>(kDefaultOscillatorType), [this](float value) {
-        voice_.Update([value](BasicSynthVoice* voice) {
-          voice->generator().SetType(
-              static_cast<OscillatorType>(static_cast<int>(value)));
-        });
-      });
-}
+BasicSynthInstrument::BasicSynthInstrument(int sample_rate)
+    : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {}
 
 void BasicSynthInstrument::Control(int id, float value) {
-  if (!modulation_matrix_.SetParam(id, value)) {
-    DLOG(WARNING) << "Failed to update float parameter with ID: " << id;
+  switch (static_cast<BasicSynthInstrumentParam>(id)) {
+    case BasicSynthInstrumentParam::kGain:
+      gain_ = value;
+      break;
+    case BasicSynthInstrumentParam::kEnvelopeAttack:
+      voice_.Update([value](BasicSynthVoice* voice) {
+        voice->envelope().SetAttack(value);
+      });
+      break;
+    case BasicSynthInstrumentParam::kEnvelopeDecay:
+      voice_.Update([value](BasicSynthVoice* voice) {
+        voice->envelope().SetRelease(value);
+      });
+      break;
+    case BasicSynthInstrumentParam::kEnvelopeSustain:
+      voice_.Update([value](BasicSynthVoice* voice) {
+        voice->envelope().SetSustain(value);
+      });
+      break;
+    case BasicSynthInstrumentParam::kEnvelopeRelease:
+      voice_.Update([value](BasicSynthVoice* voice) {
+        voice->envelope().SetRelease(value);
+      });
+      break;
+    case BasicSynthInstrumentParam::kOscillatorType:
+      voice_.Update([value](BasicSynthVoice* voice) {
+        voice->generator().SetType(
+            static_cast<OscillatorType>(static_cast<int>(value)));
+      });
+      break;
+    case BasicSynthInstrumentParam::kNumVoices:
+      voice_.Resize(static_cast<int>(value));
+      break;
   }
 }
 
@@ -86,6 +80,29 @@ void BasicSynthInstrument::Process(float* output, int num_channels,
       output[num_channels * frame + channel] = mono_sample;
     }
   }
+}
+
+InstrumentDefinition BasicSynthInstrument::GetDefinition() {
+  InstrumentDefinition definition;
+  definition.name = "BasicSynth";
+  definition.param_definitions = {
+      {BasicSynthInstrumentParam::kGain, "gain", "", kDefaultGain, 0.0f, 1.0f},
+      {BasicSynthInstrumentParam::kEnvelopeAttack, "attack", "",
+       kDefaultEnvelopeAttack, 0.0f, 60.0f},
+      {BasicSynthInstrumentParam::kEnvelopeDecay, "decay", "",
+       kDefaultEnvelopeDecay, 0.0f, 60.0f},
+      {BasicSynthInstrumentParam::kEnvelopeSustain, "sustain", "",
+       kDefaultEnvelopeSustain, 0.0f, 1.0f},
+      {BasicSynthInstrumentParam::kEnvelopeRelease, "release", "",
+       kDefaultEnvelopeRelease, 0.0f, 60.0f},
+      {BasicSynthInstrumentParam::kOscillatorType, "osc type", "",
+       static_cast<float>(kDefaultOscillatorType), 0.0f, 10.0f},
+      {BasicSynthInstrumentParam::kNumVoices, "num voices", "",
+       static_cast<float>(kDefaultNumVoices), 0.0f, 32.0f}};
+  definition.get_instrument_fn = [](int sample_rate) {
+    return std::make_unique<BasicSynthInstrument>(sample_rate);
+  };
+  return definition;
 }
 
 }  // namespace examples

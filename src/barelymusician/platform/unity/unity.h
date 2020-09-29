@@ -45,10 +45,8 @@ int EXPORT_API CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
 
 // Creates new synth instrument.
 //
-// @param num_voices Number of voices.
-// @param oscillator_type Oscillator type index.
 // @return Instrument id.
-int EXPORT_API CreateBasicSynthInstrument(int num_voices, int oscillator_type);
+int EXPORT_API CreateBasicSynthInstrument();
 
 // Destroys instrument.
 //
@@ -117,6 +115,13 @@ void EXPORT_API ScheduleNoteOff(int id, double position, float index);
 // @param intensity Note intensity.
 void EXPORT_API ScheduleNoteOn(int id, double position, float index,
                                float intensity);
+
+// Sets instrument param value.
+//
+// @param id Instrument id.
+// @param param_id Param id.
+// @param value Param value.
+void EXPORT_API SetParam(int id, int param_id, float value);
 
 // Sets beat callback.
 //

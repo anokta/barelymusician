@@ -78,9 +78,6 @@
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h">
-      <Filter>Header Files\instrument</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\dsp\generator.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>

@@ -161,6 +161,24 @@ void Engine::Process(int instrument_id, double begin_timestamp,
   }
 }
 
+void Engine::ResetAllParams(int instrument_id) {
+  auto* controller = FindOrNull(controllers_, instrument_id);
+  if (controller != nullptr) {
+    for (const auto& param : controller->definition.param_definitions) {
+      controller->params.at(param.id) = param.default_value;
+    }
+    task_runner_.Add(
+        [this, instrument_id,
+         param_definitions = controller->definition.param_definitions]() {
+          auto* processor = FindOrNull(processors_, instrument_id);
+          DCHECK(processor);
+          for (const auto& param : param_definitions) {
+            processor->instrument->Control(param.id, param.default_value);
+          }
+        });
+  }
+}
+
 void Engine::ScheduleNoteOff(int instrument_id, double timestamp, float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {

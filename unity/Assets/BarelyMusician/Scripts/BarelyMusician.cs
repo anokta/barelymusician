@@ -43,8 +43,7 @@ namespace BarelyApi {
           _instruments.Add(id, instrument);
         } else if (instrumentType == typeof(BasicSynthInstrument)) {
           var basicSynthInstrument = instrument as BasicSynthInstrument;
-          id = CreateBasicSynthInstrumentNative(basicSynthInstrument.numVoices,
-                                                (int)basicSynthInstrument.oscillatorType);
+          id = CreateBasicSynthInstrumentNative();
           _instruments.Add(id, instrument);
         } else {
           Debug.LogError("Unsupported instrument type: " + instrumentType);
@@ -124,6 +123,13 @@ namespace BarelyApi {
     public static void ScheduleNoteOn(int id, double position, float index, float intensity) {
       if (BarelyMusicianInternal.Instance != null) {
         ScheduleNoteOnNative(id, position, index, intensity);
+      }
+    }
+
+    // Sets instrument param value.
+    public static void SetParam(int id, int paramId, float value) {
+      if (BarelyMusicianInternal.Instance != null) {
+        SetParamNative(id, paramId, value);
       }
     }
 
@@ -272,7 +278,7 @@ namespace BarelyApi {
       }
 
       private void Update() {
-        double lookahead = 2.0 * AudioSettings.GetConfiguration().dspBufferSize / AudioSettings.outputSampleRate; 
+        double lookahead = 2.0 * AudioSettings.GetConfiguration().dspBufferSize / AudioSettings.outputSampleRate;
         UpdateMainThreadNative(AudioSettings.dspTime, lookahead);
       }
     }
@@ -294,7 +300,7 @@ namespace BarelyApi {
                                                           IntPtr processFnPtr);
 
     [DllImport(pluginName, EntryPoint = "CreateBasicSynthInstrument")]
-    private static extern int CreateBasicSynthInstrumentNative(int numVoices, int oscillatorType);
+    private static extern int CreateBasicSynthInstrumentNative();
 
     [DllImport(pluginName, EntryPoint = "Destroy")]
     private static extern void DestroyNative(int id);
@@ -328,6 +334,9 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "ScheduleNoteOn")]
     private static extern void ScheduleNoteOnNative(int id, double position, float index,
                                                     float intensity);
+
+    [DllImport(pluginName, EntryPoint = "SetParam")]
+    private static extern void SetParamNative(int id, int param_id, float value);
 
     [DllImport(pluginName, EntryPoint = "SetBeatCallback")]
     private static extern void SetBeatCallbackNative(IntPtr beatCallbackPtr);

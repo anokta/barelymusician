@@ -53,7 +53,6 @@
     <ClInclude Include="..\..\src\barelymusician\engine\note_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\sequencer.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\modulation_matrix.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
     <ClInclude Include="..\..\src\barelymusician\util\random.h" />

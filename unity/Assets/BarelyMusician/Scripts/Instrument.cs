@@ -35,6 +35,10 @@ namespace BarelyApi {
       _source.Stop();
     }
 
+    protected virtual void SetParam(int id, float value) {
+      BarelyMusician.SetParam(_id, id, value);
+    }
+
     // Stops playing note with the given |index|.
     public void NoteOff(float index) {
       if (_id != BarelyMusician.InvalidId) {

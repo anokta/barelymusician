@@ -39,9 +39,6 @@
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp">
       <Filter>Source Files\algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\modulation_matrix_test.cpp">
-      <Filter>Source Files\instrument</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>

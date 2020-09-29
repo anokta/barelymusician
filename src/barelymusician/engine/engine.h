@@ -12,7 +12,7 @@
 
 namespace barelyapi {
 
-// Class that manages processing of instruments.
+// Instrument playback engine.
 class Engine {
  public:
   // Note off callback signature.
@@ -23,6 +23,8 @@ class Engine {
       std::function<void(int instrument_id, float index, float intensity)>;
 
   // Constructs new |Engine|.
+  //
+  // @param sample_rate Sampling rate in Hz.
   explicit Engine(int sample_rate);
 
   // Creates new instrument.
@@ -77,6 +79,11 @@ class Engine {
   // @param num_frames Number of output frames.
   void Process(int instrument_id, double begin_timestamp, double end_timestamp,
                float* output, int num_channels, int num_frames);
+
+  // Resets all parameters.
+  //
+  // @param instrument_id Instrument id.
+  void ResetAllParams(int instrument_id);
 
   // Schedules note off.
   //

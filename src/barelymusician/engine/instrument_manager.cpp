@@ -77,11 +77,10 @@ void InstrumentManager::AllNotesOff(int instrument_id) {
   controller->messages.Clear();
   task_runner_.Add([this, instrument_id, notes = controller->active_notes]() {
     auto* processor = FindOrNull(processors_, instrument_id);
-    if (processor != nullptr) {
-      processor->messages.Clear();
-      for (const auto& note : notes) {
-        processor->instrument->NoteOff(note);
-      }
+    DCHECK(processor);
+    processor->messages.Clear();
+    for (const auto& note : notes) {
+      processor->instrument->NoteOff(note);
     }
   });
   if (note_off_callback_ != nullptr) {
@@ -102,9 +101,8 @@ void InstrumentManager::NoteOff(int instrument_id, float index) {
   }
   task_runner_.Add([this, instrument_id, index]() {
     auto* processor = FindOrNull(processors_, instrument_id);
-    if (processor != nullptr) {
-      processor->instrument->NoteOff(index);
-    }
+    DCHECK(processor);
+    processor->instrument->NoteOff(index);
   });
 }
 
@@ -119,9 +117,8 @@ void InstrumentManager::NoteOn(int instrument_id, float index,
   }
   task_runner_.Add([this, instrument_id, index, intensity]() {
     auto* processor = FindOrNull(processors_, instrument_id);
-    if (processor != nullptr) {
-      processor->instrument->NoteOn(index, intensity);
-    }
+    DCHECK(processor);
+    processor->instrument->NoteOn(index, intensity);
   });
 }
 
@@ -175,9 +172,8 @@ void InstrumentManager::ScheduleNoteOff(int instrument_id, double timestamp,
   }
   task_runner_.Add([this, instrument_id, timestamp, index]() {
     auto* processor = FindOrNull(processors_, instrument_id);
-    if (processor != nullptr) {
-      processor->messages.Push(timestamp, NoteOffData{index});
-    }
+    DCHECK(processor);
+    processor->messages.Push(timestamp, NoteOffData{index});
   });
 }
 
@@ -189,9 +185,8 @@ void InstrumentManager::ScheduleNoteOn(int instrument_id, double timestamp,
   }
   task_runner_.Add([this, instrument_id, timestamp, index, intensity]() {
     auto* processor = FindOrNull(processors_, instrument_id);
-    if (processor != nullptr) {
-      processor->messages.Push(timestamp, NoteOnData{index, intensity});
-    }
+    DCHECK(processor);
+    processor->messages.Push(timestamp, NoteOnData{index, intensity});
   });
 }
 
@@ -213,9 +208,8 @@ void InstrumentManager::SetParam(int instrument_id, int id, float value) {
   }
   task_runner_.Add([this, instrument_id, id, value]() {
     auto* processor = FindOrNull(processors_, instrument_id);
-    if (processor != nullptr) {
-      processor->instrument->Control(id, value);
-    }
+    DCHECK(processor);
+    processor->instrument->Control(id, value);
   });
 }
 

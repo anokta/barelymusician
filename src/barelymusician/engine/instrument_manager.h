@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
-#define BARELYMUSICIAN_ENGINE_ENGINE_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
 #include <memory>
 #include <optional>
@@ -13,8 +13,8 @@
 
 namespace barelyapi {
 
-// Instrument playback engine.
-class Engine {
+// Class that manages processing of instruments.
+class InstrumentManager {
  public:
   // Note off callback signature.
   using NoteOffCallback = std::function<void(int instrument_id, float index)>;
@@ -26,7 +26,7 @@ class Engine {
   // Constructs new |Engine|.
   //
   // @param sample_rate Sampling rate in Hz.
-  explicit Engine(int sample_rate);
+  explicit InstrumentManager(int sample_rate);
 
   // Creates new instrument.
   //
@@ -185,4 +185,4 @@ class Engine {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_

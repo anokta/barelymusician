@@ -1,4 +1,4 @@
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/instrument_manager.h"
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine_utils.h"
@@ -13,14 +13,14 @@ constexpr int kNumMaxTasks = 500;
 
 }  // namespace
 
-Engine::Engine(int sample_rate)
+InstrumentManager::InstrumentManager(int sample_rate)
     : note_off_callback_(nullptr),
       note_on_callback_(nullptr),
       sample_rate_(sample_rate),
       id_counter_(0),
       task_runner_(kNumMaxTasks) {}
 
-int Engine::Create(InstrumentDefinition definition) {
+int InstrumentManager::Create(InstrumentDefinition definition) {
   const int instrument_id = ++id_counter_;
   const auto it =
       controllers_.emplace(instrument_id, InstrumentController{definition});
@@ -42,7 +42,7 @@ int Engine::Create(InstrumentDefinition definition) {
   return instrument_id;
 }
 
-bool Engine::Destroy(int instrument_id) {
+bool InstrumentManager::Destroy(int instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
@@ -51,7 +51,8 @@ bool Engine::Destroy(int instrument_id) {
   return false;
 }
 
-std::optional<float> Engine::GetParam(int instrument_id, int id) const {
+std::optional<float> InstrumentManager::GetParam(int instrument_id,
+                                                 int id) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     const auto* param = FindOrNull(controller->params, id);
@@ -62,7 +63,8 @@ std::optional<float> Engine::GetParam(int instrument_id, int id) const {
   return std::nullopt;
 }
 
-std::optional<bool> Engine::IsNoteOn(int instrument_id, float index) const {
+std::optional<bool> InstrumentManager::IsNoteOn(int instrument_id,
+                                                float index) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     return controller->active_notes.find(index) !=
@@ -71,7 +73,7 @@ std::optional<bool> Engine::IsNoteOn(int instrument_id, float index) const {
   return std::nullopt;
 }
 
-bool Engine::AllNotesOff(int instrument_id) {
+bool InstrumentManager::AllNotesOff(int instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
     return false;
@@ -94,7 +96,7 @@ bool Engine::AllNotesOff(int instrument_id) {
   return true;
 }
 
-bool Engine::Control(int instrument_id, int id, float value) {
+bool InstrumentManager::Control(int instrument_id, int id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     auto* param = FindOrNull(controller->params, id);
@@ -111,7 +113,7 @@ bool Engine::Control(int instrument_id, int id, float value) {
   return false;
 }
 
-bool Engine::NoteOff(int instrument_id, float index) {
+bool InstrumentManager::NoteOff(int instrument_id, float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.erase(index);
@@ -128,7 +130,8 @@ bool Engine::NoteOff(int instrument_id, float index) {
   return false;
 }
 
-bool Engine::NoteOn(int instrument_id, float index, float intensity) {
+bool InstrumentManager::NoteOn(int instrument_id, float index,
+                               float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.insert(index);
@@ -145,9 +148,9 @@ bool Engine::NoteOn(int instrument_id, float index, float intensity) {
   return false;
 }
 
-bool Engine::Process(int instrument_id, double begin_timestamp,
-                     double end_timestamp, float* output, int num_channels,
-                     int num_frames) {
+bool InstrumentManager::Process(int instrument_id, double begin_timestamp,
+                                double end_timestamp, float* output,
+                                int num_channels, int num_frames) {
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
   if (processor == nullptr) {
@@ -192,7 +195,7 @@ bool Engine::Process(int instrument_id, double begin_timestamp,
   return true;
 }
 
-bool Engine::ResetAllParams(int instrument_id) {
+bool InstrumentManager::ResetAllParams(int instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     for (const auto& param : controller->definition.param_definitions) {
@@ -212,8 +215,8 @@ bool Engine::ResetAllParams(int instrument_id) {
   return false;
 }
 
-bool Engine::ScheduleControl(int instrument_id, double timestamp, int id,
-                             float value) {
+bool InstrumentManager::ScheduleControl(int instrument_id, double timestamp,
+                                        int id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
     return false;
@@ -231,8 +234,9 @@ bool Engine::ScheduleControl(int instrument_id, double timestamp, int id,
   return true;
 }
 
-bool Engine::ScheduleNote(int instrument_id, double timestamp, double duration,
-                          float index, float intensity) {
+bool InstrumentManager::ScheduleNote(int instrument_id, double timestamp,
+                                     double duration, float index,
+                                     float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(timestamp, NoteOnData{index, intensity});
@@ -249,7 +253,8 @@ bool Engine::ScheduleNote(int instrument_id, double timestamp, double duration,
   return false;
 }
 
-bool Engine::ScheduleNoteOff(int instrument_id, double timestamp, float index) {
+bool InstrumentManager::ScheduleNoteOff(int instrument_id, double timestamp,
+                                        float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(timestamp, NoteOffData{index});
@@ -263,8 +268,8 @@ bool Engine::ScheduleNoteOff(int instrument_id, double timestamp, float index) {
   return false;
 }
 
-bool Engine::ScheduleNoteOn(int instrument_id, double timestamp, float index,
-                            float intensity) {
+bool InstrumentManager::ScheduleNoteOn(int instrument_id, double timestamp,
+                                       float index, float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(timestamp, NoteOnData{index, intensity});
@@ -278,15 +283,15 @@ bool Engine::ScheduleNoteOn(int instrument_id, double timestamp, float index,
   return false;
 }
 
-void Engine::SetNoteOffCallback(NoteOffCallback note_off_callback) {
+void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
   note_off_callback_ = std::move(note_off_callback);
 }
 
-void Engine::SetNoteOnCallback(NoteOnCallback note_on_callback) {
+void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-void Engine::Update(double timestamp) {
+void InstrumentManager::Update(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
     const auto messages = controller.messages.GetIterator(timestamp);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {

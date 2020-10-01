@@ -20,7 +20,7 @@ double SecondsFromBeats(double tempo, double beats) {
 
 }  // namespace
 
-Sequencer::Sequencer(Engine* engine)
+Sequencer::Sequencer(InstrumentManager* engine)
     : is_playing_(false),
       position_(0.0),
       tempo_(0.0),

@@ -4,7 +4,7 @@
 #include <functional>
 #include <unordered_map>
 
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/message_queue.h"
 
 namespace barelyapi {
@@ -14,7 +14,7 @@ class Sequencer {
   // Beat callback signature.
   using BeatCallback = std::function<void(int beat)>;
 
-  explicit Sequencer(Engine* engine);
+  explicit Sequencer(InstrumentManager* engine);
 
   // Returns playback position.
   //
@@ -81,7 +81,7 @@ class Sequencer {
   // Beat callback.
   BeatCallback beat_callback_;
 
-  Engine* engine_;  // not owned.
+  InstrumentManager* engine_;  // not owned.
 
   std::unordered_map<int, MessageQueue> messages_;
 };

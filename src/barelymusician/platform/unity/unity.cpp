@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/sequencer.h"
 #include "barelymusician/platform/unity/unity_instrument.h"
 #include "barelymusician/platform/unity/unity_log_writer.h"
@@ -31,7 +31,7 @@ struct BarelyMusician {
   const int sample_rate;
 
   // Engine.
-  Engine engine;
+  InstrumentManager engine;
   Sequencer sequencer;
 
   double start_timestamp;

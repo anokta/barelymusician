@@ -33,9 +33,7 @@ struct InstrumentParamDefinition {
 
 // Instrument definition.
 struct InstrumentDefinition {
-  // TODO(#34): Sampling rate should probably be passed after this call instead.
-  using GetInstrument =
-      std::function<std::unique_ptr<Instrument>(int sample_rate)>;
+  using GetInstrument = std::function<std::unique_ptr<Instrument>()>;
 
   // Instrument name.
   std::string name;

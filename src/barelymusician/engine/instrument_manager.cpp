@@ -13,10 +13,9 @@ constexpr int kNumMaxTasks = 500;
 
 }  // namespace
 
-InstrumentManager::InstrumentManager(int sample_rate)
+InstrumentManager::InstrumentManager()
     : note_off_callback_(nullptr),
       note_on_callback_(nullptr),
-      sample_rate_(sample_rate),
       id_counter_(0),
       task_runner_(kNumMaxTasks) {}
 
@@ -28,7 +27,7 @@ int InstrumentManager::Create(InstrumentDefinition definition) {
   for (const auto& param : controller.definition.param_definitions) {
     controller.params.emplace(param.id, param.default_value);
   }
-  auto instrument = definition.get_instrument_fn(sample_rate_);
+  auto instrument = definition.get_instrument_fn();
   task_runner_.Add([this, instrument_id,
                     param_definitions = definition.param_definitions,
                     instrument = std::make_shared<std::unique_ptr<Instrument>>(

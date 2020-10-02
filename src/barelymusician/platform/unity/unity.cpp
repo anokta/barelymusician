@@ -22,10 +22,7 @@ namespace {
 // Unity plugin.
 struct BarelyMusician {
   BarelyMusician(int sample_rate)
-      : sample_rate(sample_rate),
-        engine(sample_rate),
-        sequencer(&engine),
-        start_timestamp(0.0) {}
+      : sample_rate(sample_rate), sequencer(&engine), start_timestamp(0.0) {}
 
   // System sample rate.
   const int sample_rate;
@@ -71,7 +68,7 @@ int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
   InstrumentDefinition definition;
   definition.get_instrument_fn =
       [note_off_fn_ptr, note_on_fn_ptr,
-       process_fn_ptr](int) -> std::unique_ptr<Instrument> {
+       process_fn_ptr]() -> std::unique_ptr<Instrument> {
     return std::make_unique<UnityInstrument>(note_off_fn_ptr, note_on_fn_ptr,
                                              process_fn_ptr);
   };
@@ -83,7 +80,8 @@ int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
 int CreateBasicSynthInstrument() {
   DCHECK(barelymusician);
   const int id = barelymusician->engine.Create(
-      barelyapi::examples::BasicSynthInstrument::GetDefinition());
+      barelyapi::examples::BasicSynthInstrument::GetDefinition(
+          barelymusician->sample_rate));
   barelymusician->sequencer.Create(id);
   return id;
 }

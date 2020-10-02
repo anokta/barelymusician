@@ -23,10 +23,8 @@ class InstrumentManager {
   using NoteOnCallback =
       std::function<void(int instrument_id, float index, float intensity)>;
 
-  // Constructs new |Engine|.
-  //
-  // @param sample_rate Sampling rate in Hz.
-  explicit InstrumentManager(int sample_rate);
+  // Constructs new |InstrumentManager|.
+  InstrumentManager();
 
   // Creates new instrument.
   //

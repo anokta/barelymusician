@@ -30,7 +30,7 @@ class BasicSynthInstrument : public Instrument {
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
 
-  static InstrumentDefinition GetDefinition();
+  static InstrumentDefinition GetDefinition(int sample_rate);
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;

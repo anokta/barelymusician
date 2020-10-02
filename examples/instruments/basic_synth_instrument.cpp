@@ -82,7 +82,7 @@ void BasicSynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-InstrumentDefinition BasicSynthInstrument::GetDefinition() {
+InstrumentDefinition BasicSynthInstrument::GetDefinition(int sample_rate) {
   InstrumentDefinition definition;
   definition.name = "BasicSynth";
   definition.param_definitions = {
@@ -99,7 +99,7 @@ InstrumentDefinition BasicSynthInstrument::GetDefinition() {
        static_cast<float>(kDefaultOscillatorType), 0.0f, 10.0f},
       {BasicSynthInstrumentParam::kNumVoices, "num voices", "",
        static_cast<float>(kDefaultNumVoices), 0.0f, 32.0f}};
-  definition.get_instrument_fn = [](int sample_rate) {
+  definition.get_instrument_fn = [sample_rate]() {
     return std::make_unique<BasicSynthInstrument>(sample_rate);
   };
   return definition;

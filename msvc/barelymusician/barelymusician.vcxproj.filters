@@ -117,6 +117,9 @@
     <ClInclude Include="..\..\src\barelymusician\engine\instrument_manager.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\barelymusician.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\barelymusician\base\logging.cpp">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager.cpp">
       <Filter>Source Files\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\barelymusician.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

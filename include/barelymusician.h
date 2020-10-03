@@ -47,9 +47,6 @@ typedef BarelyId BarelyInstrumentId;
 // Instrument control id type.
 typedef BarelyId BarelyInstrumentControlId;
 
-// Position type.
-typedef double BarelyPosition;
-
 // Timestamp type.
 typedef double BarelyTimestamp;
 
@@ -134,6 +131,18 @@ BarelyStatus BarelyGetInstrumentControl(const BarelyHandle handle,
                                         BarelyInstrumentControlId control_id,
                                         float* control_value);
 
+// Gets playback position.
+//
+// @param handle System handle.
+// @param position Playback position.
+BarelyStatus BarelyGetPlaybackPosition(BarelyHandle handle, double* position);
+
+// Gets playback tempo.
+//
+// @param handle System handle.
+// @param tempo Playback tempo in BPM.
+BarelyStatus BarelyGetPlaybackTempo(BarelyHandle handle, double* tempo);
+
 // Returns whether instrument note is on or not.
 //
 // @param handle System handle.
@@ -183,6 +192,18 @@ BarelyStatus BarelySetInstrumentNoteOn(BarelyHandle handle,
 BarelyStatus BarelySetInstrumentNoteOff(BarelyHandle handle,
                                         BarelyInstrumentId id,
                                         float note_index);
+
+// Sets playback position.
+//
+// @param handle System handle.
+// @param position Playback position.
+BarelyStatus BarelySetPlaybackPosition(BarelyHandle handle, double position);
+
+// Sets playback tempo.
+//
+// @param handle System handle.
+// @param tempo Playback tempo in BPM.
+BarelyStatus BarelySetPlaybackTempo(BarelyHandle handle, double tempo);
 
 #ifdef __cplusplus
 }  // extern "C"

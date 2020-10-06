@@ -27,11 +27,14 @@ enum BarelyStatusValues {
   /// Success.
   kBarelyStatus_Ok = 0,
 
-  /// Internal error.
-  kBarelyStatus_Internal = 1,
-
   /// Unimplemented error.
-  kBarelyStatus_Unimplemented = 2,
+  kBarelyStatus_Unimplemented = 1,
+
+  /// Internal error.
+  kBarelyStatus_Internal = 2,
+
+  /// Invalid argument error.
+  kBarelyStatus_InvalidArgument = 2,
 };
 typedef uint32_t BarelyStatus;
 
@@ -219,6 +222,18 @@ BarelyStatus BarelyGetPlaybackPosition(const BarelyHandle handle,
 /// @param tempo Playback tempo in BPM.
 BarelyStatus BarelyGetPlaybackTempo(const BarelyHandle handle, double* tempo);
 
+/// Gets energy.
+///
+/// @param handle System handle.
+/// @param energy System energy.
+BarelyStatus BarelyGetEnergy(const BarelyHandle handle, float* energy);
+
+/// Gets stress.
+///
+/// @param handle System handle.
+/// @param stress System stress.
+BarelyStatus BarelyGetStress(const BarelyHandle handle, float* stress);
+
 /// Returns whether instrument note is on or not.
 ///
 /// @param handle System handle.
@@ -253,6 +268,27 @@ BarelyStatus BarelyProcessInstrument(BarelyHandle handle,
                                      BarelyInstrumentId instrument_id,
                                      BarelyTimestamp timestamp,
                                      BarelyBuffer output);
+
+/// Resets all instrument controls to their default values.
+///
+/// @param handle System handle.
+/// @param instrument_id Instrument id.
+BarelyStatus BarelyResetAllInstrumentControls(BarelyHandle handle,
+                                              BarelyInstrumentId instrument_id);
+
+/// Starts all instrument notes off.
+///
+/// @param handle System handle.
+/// @param instrument_id Instrument id.
+BarelyStatus BarelySetAllInstrumentNotesOff(BarelyHandle handle,
+                                            BarelyInstrumentId instrument_id);
+
+/// Sets beat callback.
+///
+/// @param handle System handle.
+/// @param beat_callback Beat callback.
+BarelyStatus BarelySetBeatCallback(BarelyHandle handle,
+                                   BarelyBeatCallback beat_callback);
 
 /// Sets conductor.
 ///
@@ -291,6 +327,20 @@ BarelyStatus BarelySetInstrumentNoteOff(BarelyHandle handle,
                                         BarelyInstrumentId instrument_id,
                                         float note_index);
 
+/// Sets note on callback.
+///
+/// @param handle System handle.
+/// @param note_on_callback Note on callback.
+BarelyStatus BarelySetNoteOnCallback(BarelyHandle handle,
+                                     BarelyNoteOnCallback note_on_callback);
+
+/// Sets note off callback.
+///
+/// @param handle System handle.
+/// @param note_off_callback Note off callback.
+BarelyStatus BarelySetNoteOffCallback(BarelyHandle handle,
+                                      BarelyNoteOffCallback note_off_callback);
+
 /// Sets performer instrument.
 ///
 /// @param handle System handle.
@@ -312,6 +362,18 @@ BarelyStatus BarelySetPlaybackPosition(BarelyHandle handle,
 /// @param handle System handle.
 /// @param tempo Playback tempo in BPM.
 BarelyStatus BarelySetPlaybackTempo(BarelyHandle handle, double tempo);
+
+/// Sets energy.
+///
+/// @param handle System handle.
+/// @param energy System energy.
+BarelyStatus BarelySetEnergy(BarelyHandle handle, float energy);
+
+/// Sets stress.
+///
+/// @param handle System handle.
+/// @param stress System stress.
+BarelyStatus BarelySetStress(BarelyHandle handle, float stress);
 
 #ifdef __cplusplus
 }  // extern "C"

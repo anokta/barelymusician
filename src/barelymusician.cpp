@@ -71,6 +71,16 @@ BarelyStatus BarelyGetPlaybackTempo(const BarelyHandle handle, double* tempo) {
   return kBarelyStatus_Unimplemented;
 }
 
+BarelyStatus BarelyGetEnergy(const BarelyHandle handle, float* energy) {
+  PrintUnimplementedError("BarelyGetEnergy", handle, energy);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelyGetStress(const BarelyHandle handle, float* stress) {
+  PrintUnimplementedError("BarelyGetStress", handle, stress);
+  return kBarelyStatus_Unimplemented;
+}
+
 BarelyStatus BarelyIsInstrumentNoteOn(const BarelyHandle handle,
                                       BarelyInstrumentId instrument_id,
                                       float note_index, bool* is_note_on) {
@@ -97,6 +107,26 @@ BarelyStatus BarelyProcessInstrument(BarelyHandle handle,
                                      BarelyBuffer output) {
   PrintUnimplementedError("BarelyIsInstrumentNoteOn", handle, instrument_id,
                           timestamp, &output);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelyResetAllInstrumentControls(
+    BarelyHandle handle, BarelyInstrumentId instrument_id) {
+  PrintUnimplementedError("BarelyResetAllInstrumentControls", handle,
+                          instrument_id);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelySetAllInstrumentNotesOff(BarelyHandle handle,
+                                            BarelyInstrumentId instrument_id) {
+  PrintUnimplementedError("BarelySetAllInstrumentNotesOff", handle,
+                          instrument_id);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelySetBeatCallback(BarelyHandle handle,
+                                   BarelyBeatCallback beat_callback) {
+  PrintUnimplementedError("BarelySetBeatCallback", handle, beat_callback);
   return kBarelyStatus_Unimplemented;
 }
 
@@ -131,6 +161,19 @@ BarelyStatus BarelySetInstrumentNoteOff(BarelyHandle handle,
   return kBarelyStatus_Unimplemented;
 }
 
+BarelyStatus BarelySetNoteOnCallback(BarelyHandle handle,
+                                     BarelyNoteOnCallback note_on_callback) {
+  PrintUnimplementedError("BarelySetNoteOnCallback", handle, note_on_callback);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelySetNoteOffCallback(BarelyHandle handle,
+                                      BarelyNoteOffCallback note_off_callback) {
+  PrintUnimplementedError("BarelySetNoteOffCallback", handle,
+                          note_off_callback);
+  return kBarelyStatus_Unimplemented;
+}
+
 BarelyStatus BarelySetPerformerInstrument(BarelyHandle handle,
                                           BarelyPerformerId performer_id,
                                           BarelyInstrumentId instrument_id) {
@@ -147,6 +190,16 @@ BarelyStatus BarelySetPlaybackPosition(BarelyHandle handle,
 
 BarelyStatus BarelySetPlaybackTempo(BarelyHandle handle, double tempo) {
   PrintUnimplementedError("BarelySetPlaybackTempo", handle, tempo);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelySetEnergy(BarelyHandle handle, float energy) {
+  PrintUnimplementedError("BarelySetEnergy", handle, energy);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelySetStress(BarelyHandle handle, float stress) {
+  PrintUnimplementedError("BarelySetStress", handle, stress);
   return kBarelyStatus_Unimplemented;
 }
 

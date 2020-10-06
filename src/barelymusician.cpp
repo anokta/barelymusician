@@ -22,76 +22,125 @@ void BarelyDestroySystem(BarelyHandle handle) { delete handle; }
 
 BarelyInstrumentId BarelyCreateInstrument(
     BarelyHandle handle, BarelyInstrumentDefinition definition) {
-  PrintUnimplementedError("BarelyCreateInstrument", handle, definition.name);
+  PrintUnimplementedError("BarelyCreateInstrument", handle, &definition);
+  return kBarelyInvalidId;
+}
+
+BarelyInstrumentId BarelyCreatePerformer(BarelyHandle handle) {
+  PrintUnimplementedError("BarelyCreatePerformer", handle);
   return kBarelyInvalidId;
 }
 
 BarelyStatus BarelyDestroyInstrument(BarelyHandle handle,
-                                     BarelyInstrumentId id) {
-  PrintUnimplementedError("BarelyDestroyInstrument", handle, id);
+                                     BarelyInstrumentId instrument_id) {
+  PrintUnimplementedError("BarelyDestroyInstrument", handle, instrument_id);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelyDestroyPerformer(BarelyHandle handle,
+                                    BarelyPerformerId performer_id) {
+  PrintUnimplementedError("BarelyDestroyPerformer", handle, performer_id);
   return kBarelyStatus_Unimplemented;
 }
 
 BarelyStatus BarelyGetInstrumentControl(const BarelyHandle handle,
-                                        BarelyInstrumentId id,
+                                        BarelyInstrumentId instrument_id,
                                         BarelyInstrumentControlId control_id,
                                         float* control_value) {
-  PrintUnimplementedError("BarelyGetInstrumentControl", handle, id, control_id,
-                          control_value);
+  PrintUnimplementedError("BarelyGetInstrumentControl", handle, instrument_id,
+                          control_id, control_value);
   return kBarelyStatus_Unimplemented;
 }
 
-BarelyStatus BarelyGetPlaybackPosition(BarelyHandle handle, double* position) {
+BarelyStatus BarelyGetPerformerInstrument(const BarelyHandle handle,
+                                          BarelyPerformerId performer_id,
+                                          BarelyInstrumentId* instrument_id) {
+  PrintUnimplementedError("BarelySetPerformerInstrument", handle, performer_id,
+                          instrument_id);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelyGetPlaybackPosition(const BarelyHandle handle,
+                                       BarelyPosition* position) {
   PrintUnimplementedError("BarelyGetPlaybackPosition", handle, position);
   return kBarelyStatus_Unimplemented;
 }
 
-BarelyStatus BarelyGetPlaybackTempo(BarelyHandle handle, double* tempo) {
+BarelyStatus BarelyGetPlaybackTempo(const BarelyHandle handle, double* tempo) {
   PrintUnimplementedError("BarelyGetPlaybackTempo", handle, tempo);
   return kBarelyStatus_Unimplemented;
 }
 
 BarelyStatus BarelyIsInstrumentNoteOn(const BarelyHandle handle,
-                                      BarelyInstrumentId id, float note_index,
-                                      bool* is_note_on) {
-  PrintUnimplementedError("BarelyIsInstrumentNoteOn", handle, id, note_index,
-                          is_note_on);
+                                      BarelyInstrumentId instrument_id,
+                                      float note_index, bool* is_note_on) {
+  PrintUnimplementedError("BarelyIsInstrumentNoteOn", handle, instrument_id,
+                          note_index, is_note_on);
   return kBarelyStatus_Unimplemented;
 }
 
-BarelyStatus BarelyProcessInstrument(BarelyHandle handle, BarelyInstrumentId id,
+BarelyStatus BarelyIsPlaying(const BarelyHandle handle, bool* is_playing) {
+  PrintUnimplementedError("BarelyIsPlaying", handle, is_playing);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelyPerformNote(BarelyHandle handle,
+                               BarelyPerformerId performer_id,
+                               BarelyNote note) {
+  PrintUnimplementedError("BarelyPerformNote", handle, performer_id, &note);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelyProcessInstrument(BarelyHandle handle,
+                                     BarelyInstrumentId instrument_id,
                                      BarelyTimestamp timestamp,
                                      BarelyBuffer output) {
-  PrintUnimplementedError("BarelyIsInstrumentNoteOn", handle, id, timestamp,
-                          output.data);
+  PrintUnimplementedError("BarelyIsInstrumentNoteOn", handle, instrument_id,
+                          timestamp, &output);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelySetConductor(BarelyHandle handle,
+                                BarelyConductorDefinition definition) {
+  PrintUnimplementedError("BarelySetConductor", handle, &definition);
   return kBarelyStatus_Unimplemented;
 }
 
 BarelyStatus BarelySetInstrumentControl(BarelyHandle handle,
-                                        BarelyInstrumentId id,
+                                        BarelyInstrumentId instrument_id,
                                         BarelyInstrumentControlId control_id,
                                         float control_value) {
-  PrintUnimplementedError("BarelySetInstrumentControl", handle, id, control_id,
-                          control_value);
+  PrintUnimplementedError("BarelySetInstrumentControl", handle, instrument_id,
+                          control_id, control_value);
   return kBarelyStatus_Unimplemented;
 }
 
 BarelyStatus BarelySetInstrumentNoteOn(BarelyHandle handle,
-                                       BarelyInstrumentId id, float note_index,
-                                       float note_intensity) {
-  PrintUnimplementedError("BarelySetInstrumentNoteOn", handle, id, note_index,
-                          note_intensity);
+                                       BarelyInstrumentId instrument_id,
+                                       float note_index, float note_intensity) {
+  PrintUnimplementedError("BarelySetInstrumentNoteOn", handle, instrument_id,
+                          note_index, note_intensity);
   return kBarelyStatus_Unimplemented;
 }
 
 BarelyStatus BarelySetInstrumentNoteOff(BarelyHandle handle,
-                                        BarelyInstrumentId id,
+                                        BarelyInstrumentId instrument_id,
                                         float note_index) {
-  PrintUnimplementedError("BarelySetInstrumentNoteOn", handle, id, note_index);
+  PrintUnimplementedError("BarelySetInstrumentNoteOn", handle, instrument_id,
+                          note_index);
   return kBarelyStatus_Unimplemented;
 }
 
-BarelyStatus BarelySetPlaybackPosition(BarelyHandle handle, double position) {
+BarelyStatus BarelySetPerformerInstrument(BarelyHandle handle,
+                                          BarelyPerformerId performer_id,
+                                          BarelyInstrumentId instrument_id) {
+  PrintUnimplementedError("BarelySetPerformerInstrument", handle, performer_id,
+                          instrument_id);
+  return kBarelyStatus_Unimplemented;
+}
+
+BarelyStatus BarelySetPlaybackPosition(BarelyHandle handle,
+                                       BarelyPosition position) {
   PrintUnimplementedError("BarelySetPlaybackPosition", handle, position);
   return kBarelyStatus_Unimplemented;
 }

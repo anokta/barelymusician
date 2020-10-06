@@ -111,9 +111,6 @@
     <ClInclude Include="..\..\src\barelymusician\engine\instrument_definition.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\engine\sequencer.h">
-      <Filter>Header Files\engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\engine\instrument_manager.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
@@ -150,9 +147,6 @@
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\sequencer.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager.cpp">

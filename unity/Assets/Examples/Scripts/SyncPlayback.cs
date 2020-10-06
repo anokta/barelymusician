@@ -17,6 +17,8 @@ public class SyncPlayback : MonoBehaviour {
       double dspTime = AudioSettings.dspTime;
       source.PlayScheduled(dspTime);
       BarelyApi.BarelyMusician.PlayScheduled(dspTime);
+    } else if (source.isPlaying && Input.GetKeyDown(KeyCode.Space)) {
+      source.Stop();
     }
   }
 }

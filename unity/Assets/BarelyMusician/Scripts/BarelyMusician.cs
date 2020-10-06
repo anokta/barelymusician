@@ -211,7 +211,7 @@ namespace BarelyApi {
       }
 
       // Beat callback.
-      private delegate void BeatCallback(int beat);
+      private delegate void BeatCallback(double dspTime, int beat);
       private BeatCallback _beatCallback = null;
 
       // Debug callback.
@@ -219,16 +219,16 @@ namespace BarelyApi {
       private DebugCallback _debugCallback = null;
 
       // Note off callback.
-      private delegate void NoteOffCallback(int id, float index);
+      private delegate void NoteOffCallback(double dspTime, int id, float index);
       private NoteOffCallback _noteOffCallback = null;
 
       // Note on callback.
-      private delegate void NoteOnCallback(int id, float index, float intensity);
+      private delegate void NoteOnCallback(double dspTime, int id, float index, float intensity);
       private NoteOnCallback _noteOnCallback = null;
 
       private void Awake() {
         InitializeNative(AudioSettings.outputSampleRate);
-        _beatCallback = delegate (int beat) {
+        _beatCallback = delegate (double dspTime, int beat) {
           OnBeat?.Invoke(beat);
         };
         SetBeatCallbackNative(Marshal.GetFunctionPointerForDelegate(_beatCallback));
@@ -250,7 +250,7 @@ namespace BarelyApi {
           }
         };
         SetDebugCallbackNative(Marshal.GetFunctionPointerForDelegate(_debugCallback));
-        _noteOffCallback = delegate (int id, float index) {
+        _noteOffCallback = delegate (double dspTime, int id, float index) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
             OnNoteOff?.Invoke(instrument, index);
@@ -259,7 +259,7 @@ namespace BarelyApi {
           }
         };
         SetNoteOffCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOffCallback));
-        _noteOnCallback = delegate (int id, float index, float intensity) {
+        _noteOnCallback = delegate (double dspTime, int id, float index, float intensity) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
             OnNoteOn?.Invoke(instrument, index, intensity);
@@ -278,7 +278,7 @@ namespace BarelyApi {
       }
 
       private void Update() {
-        double lookahead = 2.0 * AudioSettings.GetConfiguration().dspBufferSize / AudioSettings.outputSampleRate;
+        double lookahead = 1.25 * AudioSettings.GetConfiguration().dspBufferSize / AudioSettings.outputSampleRate;
         UpdateMainThreadNative(AudioSettings.dspTime, lookahead);
       }
     }

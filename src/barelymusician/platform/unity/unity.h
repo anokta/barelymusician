@@ -13,9 +13,10 @@ namespace unity {
 extern "C" {
 
 // Event callback signatures.
-using BeatCallback = void(int beat);
-using NoteOffCallback = void(int id, float index);
-using NoteOnCallback = void(int id, float index, float intensity);
+using BeatCallback = void(double timestamp, int beat);
+using NoteOffCallback = void(double timestamp, int id, float index);
+using NoteOnCallback = void(double timestamp, int id, float index,
+                            float intensity);
 
 // Instrument function signatures.
 using NoteOffFn = void(float index);

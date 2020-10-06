@@ -1,5 +1,6 @@
 #include "barelymusician/engine/instrument_manager.h"
 
+#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine_utils.h"
 #include "barelymusician/engine/message.h"
@@ -11,10 +12,22 @@ namespace {
 // Maximum number of tasks to be added per each Process call.
 constexpr int kNumMaxTasks = 500;
 
+double BeatsFromSeconds(double tempo, double seconds) {
+  return tempo * seconds / kSecondsFromMinutes;
+}
+
+double SecondsFromBeats(double tempo, double beats) {
+  return beats * kSecondsFromMinutes / tempo;
+}
+
 }  // namespace
 
 InstrumentManager::InstrumentManager()
-    : note_off_callback_(nullptr),
+    : is_playing_(false),
+      position_(0.0),
+      tempo_(0.0),
+      beat_callback_(nullptr),
+      note_off_callback_(nullptr),
       note_on_callback_(nullptr),
       id_counter_(0),
       task_runner_(kNumMaxTasks) {}
@@ -50,6 +63,12 @@ bool InstrumentManager::Destroy(int instrument_id) {
   return false;
 }
 
+double InstrumentManager::GetPosition() const { return position_; }
+
+double InstrumentManager::GetTempo() const { return tempo_; }
+
+bool InstrumentManager::IsPlaying() const { return is_playing_; }
+
 std::optional<float> InstrumentManager::GetParam(int instrument_id,
                                                  int id) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
@@ -77,18 +96,17 @@ bool InstrumentManager::AllNotesOff(int instrument_id) {
   if (controller == nullptr) {
     return false;
   }
-  controller->messages.Clear();
-  task_runner_.Add([this, instrument_id, notes = controller->active_notes]() {
-    auto* processor = FindOrNull(processors_, instrument_id);
-    DCHECK(processor);
-    processor->messages.Clear();
-    for (const auto& note : notes) {
+  for (const auto& note : controller->active_notes) {
+    task_runner_.Add([this, instrument_id, note = note]() {
+      auto* processor = FindOrNull(processors_, instrument_id);
+      DCHECK(processor);
+      processor->messages.Clear();
       processor->instrument->NoteOff(note);
-    }
-  });
+    });
+  }
   if (note_off_callback_ != nullptr) {
     for (const auto& note : controller->active_notes) {
-      note_off_callback_(instrument_id, note);
+      note_off_callback_(last_timestamp_, instrument_id, note);
     }
   }
   controller->active_notes.clear();
@@ -117,7 +135,7 @@ bool InstrumentManager::NoteOff(int instrument_id, float index) {
   if (controller != nullptr) {
     controller->active_notes.erase(index);
     if (note_off_callback_ != nullptr) {
-      note_off_callback_(instrument_id, index);
+      note_off_callback_(last_timestamp_, instrument_id, index);
     }
     task_runner_.Add([this, instrument_id, index]() {
       auto* processor = FindOrNull(processors_, instrument_id);
@@ -135,7 +153,7 @@ bool InstrumentManager::NoteOn(int instrument_id, float index,
   if (controller != nullptr) {
     controller->active_notes.insert(index);
     if (note_on_callback_ != nullptr) {
-      note_on_callback_(instrument_id, index, intensity);
+      note_on_callback_(last_timestamp_, instrument_id, index, intensity);
     }
     task_runner_.Add([this, instrument_id, index, intensity]() {
       auto* processor = FindOrNull(processors_, instrument_id);
@@ -214,7 +232,7 @@ bool InstrumentManager::ResetAllParams(int instrument_id) {
   return false;
 }
 
-bool InstrumentManager::ScheduleControl(int instrument_id, double timestamp,
+bool InstrumentManager::ScheduleControl(int instrument_id, double position,
                                         int id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
@@ -224,62 +242,44 @@ bool InstrumentManager::ScheduleControl(int instrument_id, double timestamp,
   if (param == nullptr) {
     return false;
   }
-  controller->messages.Push(timestamp, ControlData{id, value});
-  task_runner_.Add([this, instrument_id, timestamp, id, value]() {
-    auto* processor = FindOrNull(processors_, instrument_id);
-    DCHECK(processor);
-    processor->messages.Push(timestamp, ControlData{id, value});
-  });
+  controller->messages.Push(position, ControlData{id, value});
   return true;
 }
 
-bool InstrumentManager::ScheduleNote(int instrument_id, double timestamp,
+bool InstrumentManager::ScheduleNote(int instrument_id, double position,
                                      double duration, float index,
                                      float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
-    controller->messages.Push(timestamp, NoteOnData{index, intensity});
-    controller->messages.Push(timestamp + duration, NoteOffData{index});
-    task_runner_.Add(
-        [this, instrument_id, timestamp, duration, index, intensity]() {
-          auto* processor = FindOrNull(processors_, instrument_id);
-          DCHECK(processor);
-          processor->messages.Push(timestamp, NoteOnData{index, intensity});
-          processor->messages.Push(timestamp + duration, NoteOffData{index});
-        });
+    controller->messages.Push(position, NoteOnData{index, intensity});
+    controller->messages.Push(position + duration, NoteOffData{index});
     return true;
   }
   return false;
 }
 
-bool InstrumentManager::ScheduleNoteOff(int instrument_id, double timestamp,
+bool InstrumentManager::ScheduleNoteOff(int instrument_id, double position,
                                         float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
-    controller->messages.Push(timestamp, NoteOffData{index});
-    task_runner_.Add([this, instrument_id, timestamp, index]() {
-      auto* processor = FindOrNull(processors_, instrument_id);
-      DCHECK(processor);
-      processor->messages.Push(timestamp, NoteOffData{index});
-    });
+    controller->messages.Push(position, NoteOffData{index});
     return true;
   }
   return false;
 }
 
-bool InstrumentManager::ScheduleNoteOn(int instrument_id, double timestamp,
+bool InstrumentManager::ScheduleNoteOn(int instrument_id, double position,
                                        float index, float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
-    controller->messages.Push(timestamp, NoteOnData{index, intensity});
-    task_runner_.Add([this, instrument_id, timestamp, index, intensity]() {
-      auto* processor = FindOrNull(processors_, instrument_id);
-      DCHECK(processor);
-      processor->messages.Push(timestamp, NoteOnData{index, intensity});
-    });
+    controller->messages.Push(position, NoteOnData{index, intensity});
     return true;
   }
   return false;
+}
+
+void InstrumentManager::SetBeatCallback(BeatCallback beat_callback) {
+  beat_callback_ = std::move(beat_callback);
 }
 
 void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
@@ -290,28 +290,86 @@ void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
+void InstrumentManager::SetPosition(double position) { position_ = position; }
+
+void InstrumentManager::SetTempo(double tempo) { tempo_ = tempo; }
+
+void InstrumentManager::Start(double timestamp) {
+  start_timestamp_ = timestamp;
+  is_playing_ = true;
+}
+
+void InstrumentManager::Stop() {
+  is_playing_ = false;
+  for (const auto& [id, message] : controllers_) {
+    AllNotesOff(id);
+  }
+}
+
 void InstrumentManager::Update(double timestamp) {
-  for (auto& [instrument_id, controller] : controllers_) {
-    const auto messages = controller.messages.GetIterator(timestamp);
+  if (!is_playing_ || tempo_ == 0.0) {
+    return;
+  }
+  const double elapsed_seconds =
+      std::min(timestamp - last_timestamp_, timestamp - start_timestamp_);
+  if (elapsed_seconds <= 0.0) {
+    return;
+  }
+
+  const double elapsed_beats = BeatsFromSeconds(tempo_, elapsed_seconds);
+
+  const double begin_timestamp =
+      position_ > 0.0 ? last_timestamp_ : start_timestamp_;
+  const double end_position = position_ + elapsed_beats;
+
+  if (beat_callback_ != nullptr) {
+    for (double beat = std::ceil(position_); beat < end_position; ++beat) {
+      const double beat_timestamp =
+          begin_timestamp + SecondsFromBeats(tempo_, beat - position_);
+      beat_callback_(beat_timestamp, static_cast<int>(beat));
+    }
+  }
+
+  for (auto& [id, controller] : controllers_) {
+    const auto messages = controller.messages.GetIterator(end_position);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
+      const double message_timestamp =
+          begin_timestamp + SecondsFromBeats(tempo_, it->timestamp - position_);
       std::visit(
           MessageVisitor{
-              [this, instrument_id = instrument_id,
+              [this, id = id, message_timestamp = message_timestamp,
                controller = &controller](const ControlData& control_data) {
+                task_runner_.Add([this, id, message_timestamp, control_data]() {
+                  auto* processor = FindOrNull(processors_, id);
+                  DCHECK(processor);
+                  processor->messages.Push(message_timestamp, control_data);
+                });
                 controller->params.at(control_data.id) = control_data.value;
               },
-              [this, instrument_id = instrument_id,
+              [this, id = id, message_timestamp = message_timestamp,
                controller = &controller](const NoteOffData& note_off_data) {
+                task_runner_.Add([this, id, message_timestamp,
+                                  note_off_data]() {
+                  auto* processor = FindOrNull(processors_, id);
+                  DCHECK(processor);
+                  processor->messages.Push(message_timestamp, note_off_data);
+                });
                 controller->active_notes.erase(note_off_data.index);
                 if (note_off_callback_ != nullptr) {
-                  note_off_callback_(instrument_id, note_off_data.index);
+                  note_off_callback_(message_timestamp, id,
+                                     note_off_data.index);
                 }
               },
-              [this, instrument_id = instrument_id,
+              [this, id = id, message_timestamp = message_timestamp,
                controller = &controller](const NoteOnData& note_on_data) {
+                task_runner_.Add([this, id, message_timestamp, note_on_data]() {
+                  auto* processor = FindOrNull(processors_, id);
+                  DCHECK(processor);
+                  processor->messages.Push(message_timestamp, note_on_data);
+                });
                 controller->active_notes.insert(note_on_data.index);
                 if (note_on_callback_ != nullptr) {
-                  note_on_callback_(instrument_id, note_on_data.index,
+                  note_on_callback_(message_timestamp, id, note_on_data.index,
                                     note_on_data.intensity);
                 }
               }},
@@ -319,6 +377,8 @@ void InstrumentManager::Update(double timestamp) {
     }
     controller.messages.Clear(messages);
   }
+  last_timestamp_ = timestamp;
+  position_ = end_position;
 }
 
 }  // namespace barelyapi

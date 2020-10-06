@@ -16,12 +16,15 @@ namespace barelyapi {
 // Class that manages processing of instruments.
 class InstrumentManager {
  public:
+  // Beat callback signature.
+  using BeatCallback = std::function<void(double timestamp, int beat)>;
+
   // Note off callback signature.
-  using NoteOffCallback = std::function<void(int instrument_id, float index)>;
+  using NoteOffCallback = std::function<void(double timestamp, int instrument_id, float index)>;
 
   // Note on callback signature.
-  using NoteOnCallback =
-      std::function<void(int instrument_id, float index, float intensity)>;
+  using NoteOnCallback = std::function<void(double timestamp, int instrument_id,
+                                            float index, float intensity)>;
 
   // Constructs new |InstrumentManager|.
   InstrumentManager();
@@ -44,11 +47,26 @@ class InstrumentManager {
   // @param value Parameter value.
   std::optional<float> GetParam(int instrument_id, int param_id) const;
 
+  // Returns playback position.
+  //
+  // @return Position in beats.
+  double GetPosition() const;
+
+  // Returns playback tempo.
+  //
+  // @return Tempo in BPM.
+  double GetTempo() const;
+
   // Returns whether note is active or not.
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
   std::optional<bool> IsNoteOn(int instrument_id, float index) const;
+
+  // Returns playback state.
+  //
+  // @return True if playing.
+  bool IsPlaying() const;
 
   // Stops all notes.
   //
@@ -92,34 +110,38 @@ class InstrumentManager {
   bool ResetAllParams(int instrument_id);
 
   // Schedules control.
-  bool ScheduleControl(int instrument_id, double timestamp, int id,
-                       float value);
+  bool ScheduleControl(int instrument_id, double position, int id, float value);
 
   // Schedules note.
   //
   // @param instrument_id Instrument id.
-  // @param timestamp Note timestamp.
+  // @param position Note position.
   // @param duration Note duration.
   // @param index Note index.
   // @param intensity Note intensity.
-  bool ScheduleNote(int instrument_id, double timestamp, double duration,
+  bool ScheduleNote(int instrument_id, double position, double duration,
                     float index, float intensity);
 
   // Schedules note off.
   //
   // @param instrument_id Instrument id.
-  // @param timestamp Note timestamp.
+  // @param position Note position.
   // @param index Note index.
-  bool ScheduleNoteOff(int instrument_id, double timestamp, float index);
+  bool ScheduleNoteOff(int instrument_id, double position, float index);
 
   // Schedules note on.
   //
   // @param instrument_id Instrument id.
-  // @param timestamp Note timestamp.
+  // @param position Note position.
   // @param index Note index.
   // @param index Note intensity.
-  bool ScheduleNoteOn(int instrument_id, double timestamp, float index,
+  bool ScheduleNoteOn(int instrument_id, double position, float index,
                       float intensity);
+
+  // Sets beat callback.
+  //
+  // @param beat_callback Beat callback.
+  void SetBeatCallback(BeatCallback beat_callback);
 
   // Sets note off callback.
   //
@@ -130,6 +152,22 @@ class InstrumentManager {
   //
   // @param note_on_callback Note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback);
+
+  // Sets playback position.
+  //
+  // @param position Position in beats.
+  void SetPosition(double position);
+
+  // Sets playback tempo.
+  //
+  // @param tempo Tempo in BPM.
+  void SetTempo(double tempo);
+
+  // Starts playback.
+  void Start(double timestamp);
+
+  // Stops playback.
+  void Stop();
 
   // Updates the internal state.
   //
@@ -165,14 +203,26 @@ class InstrumentManager {
   std::unordered_map<int, InstrumentController> controllers_;
   std::unordered_map<int, InstrumentProcessor> processors_;
 
+  // Denotes whether the clock is currently playing.
+  bool is_playing_;
+
+  // Playback position.
+  double position_;
+
+  // Playback tempo.
+  double tempo_;
+
+  double start_timestamp_;
+  double last_timestamp_;
+
+  // Beat callback.
+  BeatCallback beat_callback_;
+
   // Note off callback.
   NoteOffCallback note_off_callback_;
 
   // Note on callback.
   NoteOnCallback note_on_callback_;
-
-  // Sampling rate.
-  int sample_rate_;
 
   // Id counter.
   int id_counter_;

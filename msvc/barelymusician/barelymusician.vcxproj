@@ -29,7 +29,6 @@
     <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\message_queue.cpp" />
     <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\engine\sequencer.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\random.cpp" />
     <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp" />
   </ItemGroup>
@@ -53,7 +52,6 @@
     <ClInclude Include="..\..\src\barelymusician\engine\message_queue.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\note.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\note_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\sequencer.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />

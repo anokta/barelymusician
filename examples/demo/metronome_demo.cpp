@@ -6,17 +6,16 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/engine/engine.h"
-#include "barelymusician/instrument/instrument.h"
-#include "barelymusician/util/task_runner.h"
+#include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/instrument_manager.h"
+#include "input_manager/win_console_input.h"
 #include "instruments/basic_synth_instrument.h"
-#include "util/input_manager/win_console_input.h"
 
 namespace {
 
-using ::barelyapi::Engine;
+using ::barelyapi::InstrumentDefinition;
+using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
@@ -27,7 +26,8 @@ const int kSampleRate = 48000;
 const int kNumChannels = 2;
 const int kNumFrames = 2048;
 
-const int kNumMaxTasks = 100;
+const double kLookahead =
+    0.5 * static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
 
 // Metronome settings.
 const int kMetronomeId = 1;
@@ -46,30 +46,46 @@ const int kNumBeats = 4;
 const double kInitialTempo = 120.0;
 const double kTempoIncrement = 10.0;
 
+double GetCurrentTimestamp() {
+  const auto now_seconds =
+      std::chrono::high_resolution_clock::now().time_since_epoch();
+  return std::chrono::duration<double>(now_seconds).count();
+}
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
-  TaskRunner task_runner(kNumMaxTasks);
-
-  Engine engine(kSampleRate);
+  InstrumentManager engine;
   engine.SetTempo(kInitialTempo);
 
-  auto metronome_instrument =
-      std::make_unique<BasicSynthInstrument>(kSampleRate, kNumVoices);
-  metronome_instrument->Control(BasicSynthInstrumentParam::kOscillatorType,
-                                static_cast<float>(kOscillatorType));
-  metronome_instrument->Control(BasicSynthInstrumentParam::kEnvelopeAttack,
-                                kAttack);
-  metronome_instrument->Control(BasicSynthInstrumentParam::kEnvelopeRelease,
-                                kRelease);
-  metronome_instrument->Control(BasicSynthInstrumentParam::kGain, kGain);
-  engine.Create(kMetronomeId, std::move(metronome_instrument));
+  const auto metronome_id =
+      engine.Create(BasicSynthInstrument::GetDefinition(kSampleRate));
+  engine.Control(
+      metronome_id,
+      static_cast<InstrumentManager::Id>(BasicSynthInstrumentParam::kNumVoices),
+      static_cast<float>(kNumVoices));
+  engine.Control(
+      metronome_id,
+      static_cast<InstrumentManager::Id>(BasicSynthInstrumentParam::kGain),
+      kGain);
+  engine.Control(metronome_id,
+                 static_cast<InstrumentManager::Id>(
+                     BasicSynthInstrumentParam::kOscillatorType),
+                 static_cast<float>(kOscillatorType));
+  engine.Control(metronome_id,
+                 static_cast<InstrumentManager::Id>(
+                     BasicSynthInstrumentParam::kEnvelopeAttack),
+                 kAttack);
+  engine.Control(metronome_id,
+                 static_cast<InstrumentManager::Id>(
+                     BasicSynthInstrumentParam::kEnvelopeRelease),
+                 kRelease);
 
   // Beat callback.
-  const auto beat_callback = [&](int beat) {
+  const auto beat_callback = [&](double, int beat) {
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
@@ -80,10 +96,12 @@ int main(int argc, char* argv[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Audio process callback.
+  double timestamp = GetCurrentTimestamp();
   const auto process_callback = [&](float* output) {
-    task_runner.Run();
-    engine.Update(kNumFrames);
-    engine.Process(kMetronomeId, output, kNumChannels, kNumFrames);
+    const double end_timestamp = GetCurrentTimestamp();
+    engine.Process(kMetronomeId, timestamp, end_timestamp, output, kNumChannels,
+                   kNumFrames);
+    timestamp = end_timestamp;
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -99,15 +117,13 @@ int main(int argc, char* argv[]) {
     double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        task_runner.Add([&]() {
-          if (engine.IsPlaying()) {
-            engine.Stop();
-            LOG(INFO) << "Stopped playback";
-          } else {
-            engine.Start();
-            LOG(INFO) << "Started playback";
-          }
-        });
+        if (engine.IsPlaying()) {
+          engine.Stop();
+          LOG(INFO) << "Stopped playback";
+        } else {
+          engine.Start(GetCurrentTimestamp() + kLookahead);
+          LOG(INFO) << "Started playback";
+        }
         return;
       case '-':
         tempo -= kTempoIncrement;
@@ -127,7 +143,7 @@ int main(int argc, char* argv[]) {
       default:
         return;
     }
-    task_runner.Add([&, tempo]() { engine.SetTempo(tempo); });
+    engine.SetTempo(tempo);
     LOG(INFO) << "Tempo set to " << tempo;
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -138,10 +154,11 @@ int main(int argc, char* argv[]) {
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
-  engine.Start();
+  engine.Start(GetCurrentTimestamp() + kLookahead);
 
   while (!quit) {
     input_manager.Update();
+    engine.Update(GetCurrentTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

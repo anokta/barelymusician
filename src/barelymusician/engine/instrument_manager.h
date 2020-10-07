@@ -1,14 +1,15 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/message_queue.h"
-#include "barelymusician/instrument/instrument.h"
 #include "barelymusician/util/task_runner.h"
 
 namespace barelyapi {
@@ -16,14 +17,18 @@ namespace barelyapi {
 // Class that manages processing of instruments.
 class InstrumentManager {
  public:
+  // Id type.
+  using Id = std::int64_t;
+
   // Beat callback signature.
   using BeatCallback = std::function<void(double timestamp, int beat)>;
 
   // Note off callback signature.
-  using NoteOffCallback = std::function<void(double timestamp, int instrument_id, float index)>;
+  using NoteOffCallback =
+      std::function<void(double timestamp, Id instrument_id, float index)>;
 
   // Note on callback signature.
-  using NoteOnCallback = std::function<void(double timestamp, int instrument_id,
+  using NoteOnCallback = std::function<void(double timestamp, Id instrument_id,
                                             float index, float intensity)>;
 
   // Constructs new |InstrumentManager|.
@@ -33,19 +38,19 @@ class InstrumentManager {
   //
   // @param definition Instrument definition.
   // @return Instrument id.
-  int Create(InstrumentDefinition definition);
+  Id Create(InstrumentDefinition definition);
 
   // Destroys instrument.
   //
   // @param instrument_id Instrument id.
-  bool Destroy(int instrument_id);
+  bool Destroy(Id instrument_id);
 
   // Returns parameter value.
   //
   // @param instrument_id Instrument id.
   // @param param_id Parameter id.
   // @param value Parameter value.
-  std::optional<float> GetParam(int instrument_id, int param_id) const;
+  std::optional<float> GetParam(Id instrument_id, Id param_id) const;
 
   // Returns playback position.
   //
@@ -61,7 +66,7 @@ class InstrumentManager {
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
-  std::optional<bool> IsNoteOn(int instrument_id, float index) const;
+  std::optional<bool> IsNoteOn(Id instrument_id, float index) const;
 
   // Returns playback state.
   //
@@ -71,27 +76,27 @@ class InstrumentManager {
   // Stops all notes.
   //
   // @param instrument_id Instrument id.
-  bool AllNotesOff(int instrument_id);
+  bool AllNotesOff(Id instrument_id);
 
   // Sets control parameter value.
   //
   // @param instrument_id Instrument id.
   // @param id Parameter id.
   // @param value Parameter value.
-  bool Control(int instrument_id, int id, float value);
+  bool Control(Id instrument_id, Id id, float value);
 
   // Stops playing note.
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
-  bool NoteOff(int instrument_id, float index);
+  bool NoteOff(Id instrument_id, float index);
 
   // Starts playing note.
   //
   // @param instrument_id Instrument id.
   // @param index Note index.
   // @param intensity Note intensity.
-  bool NoteOn(int instrument_id, float index, float intensity);
+  bool NoteOn(Id instrument_id, float index, float intensity);
 
   // Processes the next output buffer.
   //
@@ -101,16 +106,16 @@ class InstrumentManager {
   // @param output Pointer to output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  bool Process(int instrument_id, double begin_timestamp, double end_timestamp,
+  bool Process(Id instrument_id, double begin_timestamp, double end_timestamp,
                float* output, int num_channels, int num_frames);
 
   // Resets all parameters.
   //
   // @param instrument_id Instrument id.
-  bool ResetAllParams(int instrument_id);
+  bool ResetAllParams(Id instrument_id);
 
   // Schedules control.
-  bool ScheduleControl(int instrument_id, double position, int id, float value);
+  bool ScheduleControl(Id instrument_id, double position, Id id, float value);
 
   // Schedules note.
   //
@@ -119,7 +124,7 @@ class InstrumentManager {
   // @param duration Note duration.
   // @param index Note index.
   // @param intensity Note intensity.
-  bool ScheduleNote(int instrument_id, double position, double duration,
+  bool ScheduleNote(Id instrument_id, double position, double duration,
                     float index, float intensity);
 
   // Schedules note off.
@@ -127,7 +132,7 @@ class InstrumentManager {
   // @param instrument_id Instrument id.
   // @param position Note position.
   // @param index Note index.
-  bool ScheduleNoteOff(int instrument_id, double position, float index);
+  bool ScheduleNoteOff(Id instrument_id, double position, float index);
 
   // Schedules note on.
   //
@@ -135,7 +140,7 @@ class InstrumentManager {
   // @param position Note position.
   // @param index Note index.
   // @param index Note intensity.
-  bool ScheduleNoteOn(int instrument_id, double position, float index,
+  bool ScheduleNoteOn(Id instrument_id, double position, float index,
                       float intensity);
 
   // Sets beat callback.
@@ -181,7 +186,7 @@ class InstrumentManager {
     InstrumentDefinition definition;
 
     // Instrument params.
-    std::unordered_map<int, float> params;
+    std::unordered_map<Id, float> params;
 
     // Active note indices.
     std::unordered_set<float> active_notes;
@@ -200,8 +205,8 @@ class InstrumentManager {
   };
 
   // List of instruments.
-  std::unordered_map<int, InstrumentController> controllers_;
-  std::unordered_map<int, InstrumentProcessor> processors_;
+  std::unordered_map<Id, InstrumentController> controllers_;
+  std::unordered_map<Id, InstrumentProcessor> processors_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;
@@ -225,7 +230,7 @@ class InstrumentManager {
   NoteOnCallback note_on_callback_;
 
   // Id counter.
-  int id_counter_;
+  Id id_counter_;
 
   // Task runner.
   TaskRunner task_runner_;

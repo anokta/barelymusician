@@ -7,18 +7,6 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{5b83eec9-de14-47a6-9af5-12c65b85209d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\util">
-      <UniqueIdentifier>{c9d1406a-8beb-4bc9-a5fa-6699dc345349}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\util\input_manager">
-      <UniqueIdentifier>{dbcd1ef7-08c8-4ecc-80e0-c4ce994b9c62}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\util">
-      <UniqueIdentifier>{1a9b9a6f-e936-4057-b396-63218ed72295}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\util\input_manager">
-      <UniqueIdentifier>{1ef486f6-80c2-432e-81fb-d02e806dcac7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{3417e019-5e55-4b08-9d60-b5d510292b98}</UniqueIdentifier>
     </Filter>
@@ -40,24 +28,30 @@
     <Filter Include="Header Files\audio_output">
       <UniqueIdentifier>{b0d5b5c4-3524-478c-957e-3cfe03b555da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\input_manager">
+      <UniqueIdentifier>{dbcd1ef7-08c8-4ecc-80e0-c4ce994b9c62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\input_manager">
+      <UniqueIdentifier>{1ef486f6-80c2-432e-81fb-d02e806dcac7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h">
-      <Filter>Header Files\util\input_manager</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h">
       <Filter>Header Files\audio_output</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\audio_output.h">
       <Filter>Header Files\audio_output</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.h">
+      <Filter>Header Files\input_manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp">
-      <Filter>Source Files\util\input_manager</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.cpp">
       <Filter>Source Files\audio_output</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.cpp">
+      <Filter>Source Files\input_manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

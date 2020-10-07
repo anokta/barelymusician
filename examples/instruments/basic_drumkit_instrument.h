@@ -1,10 +1,11 @@
 #ifndef EXAMPLES_INSTRUMENTS_BASIC_DRUMKIT_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_BASIC_DRUMKIT_INSTRUMENT_H_
 
+#include <cstdint>
 #include <unordered_map>
 
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/engine/instrument.h"
 #include "instruments/basic_enveloped_voice.h"
 #include "util/wav_file.h"
 
@@ -16,7 +17,7 @@ class BasicDrumkitInstrument : public Instrument {
   BasicDrumkitInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void Control(int, float) override {}
+  void Control(std::int64_t, float) override {}
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;

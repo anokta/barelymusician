@@ -45,6 +45,7 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
+    <ClInclude Include="..\..\src\barelymusician\engine\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\instrument_manager.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\engine_utils.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\instrument_definition.h" />
@@ -52,9 +53,6 @@
     <ClInclude Include="..\..\src\barelymusician\engine\message_queue.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\note.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\note_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h" />
-    <ClInclude Include="..\..\src\barelymusician\instrument\voice.h" />
     <ClInclude Include="..\..\src\barelymusician\util\random.h" />
     <ClInclude Include="..\..\src\barelymusician\util\task_runner.h" />
   </ItemGroup>

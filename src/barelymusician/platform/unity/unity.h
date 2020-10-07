@@ -7,6 +7,8 @@
 #define EXPORT_API __declspec(dllimport)
 #endif  // BARELYMUSICIAN_UNITY_EXPORTS
 
+#include <cstdint>
+
 namespace barelyapi {
 namespace unity {
 
@@ -14,8 +16,8 @@ extern "C" {
 
 // Event callback signatures.
 using BeatCallback = void(double timestamp, int beat);
-using NoteOffCallback = void(double timestamp, int id, float index);
-using NoteOnCallback = void(double timestamp, int id, float index,
+using NoteOffCallback = void(double timestamp, std::int64_t id, float index);
+using NoteOnCallback = void(double timestamp, std::int64_t id, float index,
                             float intensity);
 
 // Instrument function signatures.
@@ -40,19 +42,19 @@ void EXPORT_API Shutdown();
 // @param note_on_fn_ptr Note on function.
 // @param process_fn_ptr Process function.
 // @return Instrument id.
-int EXPORT_API CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
-                                     NoteOnFn* note_on_fn_ptr,
-                                     ProcessFn* process_fn_ptr);
+std::int64_t EXPORT_API CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
+                                              NoteOnFn* note_on_fn_ptr,
+                                              ProcessFn* process_fn_ptr);
 
 // Creates new synth instrument.
 //
 // @return Instrument id.
-int EXPORT_API CreateBasicSynthInstrument();
+std::int64_t EXPORT_API CreateBasicSynthInstrument();
 
 // Destroys instrument.
 //
 // @param id Performer id.
-void EXPORT_API Destroy(int id);
+void EXPORT_API Destroy(std::int64_t id);
 
 // Returns playback position.
 //
@@ -73,14 +75,14 @@ bool EXPORT_API IsPlaying();
 //
 // @param id Instrument id.
 // @param index Note index.
-void EXPORT_API NoteOff(int id, float index);
+void EXPORT_API NoteOff(std::int64_t id, float index);
 
 // Starts instrument note.
 //
 // @param id Instrument id.
 // @param index Note index.
 // @param intensity Note intensity.
-void EXPORT_API NoteOn(int id, float index, float intensity);
+void EXPORT_API NoteOn(std::int64_t id, float index, float intensity);
 
 // Processes instrument.
 //
@@ -88,7 +90,7 @@ void EXPORT_API NoteOn(int id, float index, float intensity);
 // @param output Output buffer.
 // @param num_channels Number of output channels.
 // @param num_frames Number of output frames.
-void EXPORT_API Process(int id, double timestamp, float* output,
+void EXPORT_API Process(std::int64_t id, double timestamp, float* output,
                         int num_channels, int num_frames);
 
 // Schedules instrument note.
@@ -98,7 +100,7 @@ void EXPORT_API Process(int id, double timestamp, float* output,
 // @param duration Note duration in beats.
 // @param index Note index.
 // @param intensity Note intensity.
-void EXPORT_API ScheduleNote(int id, double position, double duration,
+void EXPORT_API ScheduleNote(std::int64_t id, double position, double duration,
                              float index, float intensity);
 
 // Schedules instrument note off.
@@ -106,7 +108,7 @@ void EXPORT_API ScheduleNote(int id, double position, double duration,
 // @param id Instrument id.
 // @param position Note position in beats.
 // @param index Note index.
-void EXPORT_API ScheduleNoteOff(int id, double position, float index);
+void EXPORT_API ScheduleNoteOff(std::int64_t id, double position, float index);
 
 // Schedules instrument note on.
 //
@@ -114,7 +116,7 @@ void EXPORT_API ScheduleNoteOff(int id, double position, float index);
 // @param position Note position in beats.
 // @param index Note index.
 // @param intensity Note intensity.
-void EXPORT_API ScheduleNoteOn(int id, double position, float index,
+void EXPORT_API ScheduleNoteOn(std::int64_t id, double position, float index,
                                float intensity);
 
 // Sets instrument param value.
@@ -122,7 +124,7 @@ void EXPORT_API ScheduleNoteOn(int id, double position, float index,
 // @param id Instrument id.
 // @param param_id Param id.
 // @param value Param value.
-void EXPORT_API SetParam(int id, int param_id, float value);
+void EXPORT_API SetParam(std::int64_t id, std::int64_t param_id, float value);
 
 // Sets beat callback.
 //
@@ -160,8 +162,8 @@ void EXPORT_API Start(double timestamp);
 // Stops playback.
 void EXPORT_API Stop();
 
-// Updates main thread state.
-void EXPORT_API UpdateMainThread(double timestamp, double lookahead);
+// Updates internal state.
+void EXPORT_API Update(double timestamp);
 
 }  // extern "C"
 

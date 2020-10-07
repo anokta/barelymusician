@@ -19,6 +19,9 @@
     <Filter Include="Source Files\util">
       <UniqueIdentifier>{7bdfc4fe-51be-4133-a553-e45be46fb952}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\voice">
+      <UniqueIdentifier>{eb00d5e8-e418-4766-834f-de90d6d230d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.h">
@@ -32,6 +35,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h">
       <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\voice\polyphonic_voice.h">
+      <Filter>Header Files\voice</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\voice\voice.h">
+      <Filter>Header Files\voice</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

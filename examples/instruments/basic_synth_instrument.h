@@ -2,10 +2,10 @@
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/instrument/instrument.h"
-#include "barelymusician/instrument/polyphonic_voice.h"
 #include "instruments/basic_enveloped_voice.h"
+#include "voice/polyphonic_voice.h"
 
 namespace barelyapi {
 namespace examples {
@@ -25,7 +25,7 @@ class BasicSynthInstrument : public Instrument {
   explicit BasicSynthInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void Control(int id, float value) override;
+  void Control(std::int64_t id, float value) override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;

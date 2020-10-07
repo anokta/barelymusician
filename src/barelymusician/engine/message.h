@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_MESSAGE_H_
 #define BARELYMUSICIAN_ENGINE_MESSAGE_H_
 
+#include <cstdint>
 #include <variant>
 
 namespace barelyapi {
@@ -8,7 +9,7 @@ namespace barelyapi {
 // Control data.
 struct ControlData {
   // Param id.
-  int id;
+  std::int64_t id;
 
   // Param value.
   float value;

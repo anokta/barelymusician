@@ -1,5 +1,7 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
-#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+
+#include <cstdint>
 
 namespace barelyapi {
 
@@ -13,7 +15,7 @@ class Instrument {
   //
   // @param id Control id.
   // @param value Control value.
-  virtual void Control(int id, float value) = 0;
+  virtual void Control(std::int64_t id, float value) = 0;
 
   // Stops note with the given |index|.
   //
@@ -42,4 +44,4 @@ class Instrument {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

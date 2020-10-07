@@ -60,8 +60,9 @@ void Shutdown() {
   barelymusician = nullptr;
 }
 
-int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
-                          ProcessFn* process_fn_ptr) {
+std::int64_t CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
+                                   NoteOnFn* note_on_fn_ptr,
+                                   ProcessFn* process_fn_ptr) {
   DCHECK(barelymusician);
   InstrumentDefinition definition;
   definition.get_instrument_fn =
@@ -70,19 +71,19 @@ int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
     return std::make_unique<UnityInstrument>(note_off_fn_ptr, note_on_fn_ptr,
                                              process_fn_ptr);
   };
-  const int id = barelymusician->engine.Create(definition);
+  const std::int64_t id = barelymusician->engine.Create(definition);
   return id;
 }
 
-int CreateBasicSynthInstrument() {
+std::int64_t CreateBasicSynthInstrument() {
   DCHECK(barelymusician);
-  const int id = barelymusician->engine.Create(
+  const std::int64_t id = barelymusician->engine.Create(
       barelyapi::examples::BasicSynthInstrument::GetDefinition(
           barelymusician->sample_rate));
   return id;
 }
 
-void Destroy(int id) {
+void Destroy(std::int64_t id) {
   DCHECK(barelymusician);
   barelymusician->engine.Destroy(id);
 }
@@ -102,17 +103,17 @@ bool IsPlaying() {
   return barelymusician->engine.IsPlaying();
 }
 
-void NoteOff(int id, float index) {
+void NoteOff(std::int64_t id, float index) {
   DCHECK(barelymusician);
   barelymusician->engine.NoteOff(id, index);
 }
 
-void NoteOn(int id, float index, float intensity) {
+void NoteOn(std::int64_t id, float index, float intensity) {
   DCHECK(barelymusician);
   barelymusician->engine.NoteOn(id, index, intensity);
 }
 
-void Process(int id, double timestamp, float* output, int num_channels,
+void Process(std::int64_t id, double timestamp, float* output, int num_channels,
              int num_frames) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician != nullptr) {
@@ -124,23 +125,24 @@ void Process(int id, double timestamp, float* output, int num_channels,
   }
 }
 
-void ScheduleNote(int id, double position, double duration, float index,
-                  float intensity) {
+void ScheduleNote(std::int64_t id, double position, double duration,
+                  float index, float intensity) {
   DCHECK(barelymusician);
   barelymusician->engine.ScheduleNote(id, position, duration, index, intensity);
 }
 
-void ScheduleNoteOff(int id, double position, float index) {
+void ScheduleNoteOff(std::int64_t id, double position, float index) {
   DCHECK(barelymusician);
   barelymusician->engine.ScheduleNoteOff(id, position, index);
 }
 
-void ScheduleNoteOn(int id, double position, float index, float intensity) {
+void ScheduleNoteOn(std::int64_t id, double position, float index,
+                    float intensity) {
   DCHECK(barelymusician);
   barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
 }
 
-void SetParam(int id, int param_id, float value) {
+void SetParam(std::int64_t id, std::int64_t param_id, float value) {
   DCHECK(barelymusician);
   barelymusician->engine.Control(id, param_id, value);
 }
@@ -174,7 +176,8 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
   DCHECK(barelymusician);
   if (note_off_callback_ptr != nullptr) {
     barelymusician->engine.SetNoteOffCallback(
-        [note_off_callback_ptr](double timestamp, int id, float index) {
+        [note_off_callback_ptr](double timestamp, std::int64_t id,
+                                float index) {
           note_off_callback_ptr(timestamp, id, index);
         });
   } else {
@@ -186,7 +189,7 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
   DCHECK(barelymusician);
   if (note_on_callback_ptr != nullptr) {
     barelymusician->engine.SetNoteOnCallback(
-        [note_on_callback_ptr](double timestamp, int id, float index,
+        [note_on_callback_ptr](double timestamp, std::int64_t id, float index,
                                float intensity) {
           note_on_callback_ptr(timestamp, id, index, intensity);
         });
@@ -216,9 +219,9 @@ void Stop() {
   barelymusician->start_timestamp = std::numeric_limits<double>::max();
 }
 
-void UpdateMainThread(double timestamp, double lookahead) {
+void Update(double timestamp) {
   DCHECK(barelymusician);
-  barelymusician->engine.Update(timestamp + lookahead);
+  barelymusician->engine.Update(timestamp);
 }
 
 }  // namespace unity

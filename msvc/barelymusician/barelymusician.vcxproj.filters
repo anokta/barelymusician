@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\instrument">
-      <UniqueIdentifier>{a0eca6ba-82ba-4ffd-9e08-3d4d7a295ad0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\base">
       <UniqueIdentifier>{603293e4-2ae4-4ce2-b74b-6365fcae2def}</UniqueIdentifier>
     </Filter>
@@ -51,9 +48,6 @@
     <ClInclude Include="..\..\src\barelymusician\base\logging.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\voice.h">
-      <Filter>Header Files\instrument</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
@@ -68,12 +62,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h">
       <Filter>Header Files\dsp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\instrument.h">
-      <Filter>Header Files\instrument</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\barelymusician\instrument\polyphonic_voice.h">
-      <Filter>Header Files\instrument</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
@@ -116,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\barelymusician.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\barelymusician\engine\instrument.h">
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

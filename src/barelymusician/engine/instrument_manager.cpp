@@ -26,14 +26,17 @@ InstrumentManager::InstrumentManager()
     : is_playing_(false),
       position_(0.0),
       tempo_(0.0),
+      start_timestamp_(0.0),
+      last_timestamp_(0.0),
       beat_callback_(nullptr),
       note_off_callback_(nullptr),
       note_on_callback_(nullptr),
       id_counter_(0),
       task_runner_(kNumMaxTasks) {}
 
-int InstrumentManager::Create(InstrumentDefinition definition) {
-  const int instrument_id = ++id_counter_;
+InstrumentManager::Id InstrumentManager::Create(
+    InstrumentDefinition definition) {
+  const Id instrument_id = ++id_counter_;
   const auto it =
       controllers_.emplace(instrument_id, InstrumentController{definition});
   auto& controller = it.first->second;
@@ -54,7 +57,7 @@ int InstrumentManager::Create(InstrumentDefinition definition) {
   return instrument_id;
 }
 
-bool InstrumentManager::Destroy(int instrument_id) {
+bool InstrumentManager::Destroy(Id instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
@@ -69,8 +72,8 @@ double InstrumentManager::GetTempo() const { return tempo_; }
 
 bool InstrumentManager::IsPlaying() const { return is_playing_; }
 
-std::optional<float> InstrumentManager::GetParam(int instrument_id,
-                                                 int id) const {
+std::optional<float> InstrumentManager::GetParam(Id instrument_id,
+                                                 Id id) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     const auto* param = FindOrNull(controller->params, id);
@@ -81,7 +84,7 @@ std::optional<float> InstrumentManager::GetParam(int instrument_id,
   return std::nullopt;
 }
 
-std::optional<bool> InstrumentManager::IsNoteOn(int instrument_id,
+std::optional<bool> InstrumentManager::IsNoteOn(Id instrument_id,
                                                 float index) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
@@ -91,7 +94,7 @@ std::optional<bool> InstrumentManager::IsNoteOn(int instrument_id,
   return std::nullopt;
 }
 
-bool InstrumentManager::AllNotesOff(int instrument_id) {
+bool InstrumentManager::AllNotesOff(Id instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
     return false;
@@ -113,7 +116,7 @@ bool InstrumentManager::AllNotesOff(int instrument_id) {
   return true;
 }
 
-bool InstrumentManager::Control(int instrument_id, int id, float value) {
+bool InstrumentManager::Control(Id instrument_id, Id id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     auto* param = FindOrNull(controller->params, id);
@@ -130,7 +133,7 @@ bool InstrumentManager::Control(int instrument_id, int id, float value) {
   return false;
 }
 
-bool InstrumentManager::NoteOff(int instrument_id, float index) {
+bool InstrumentManager::NoteOff(Id instrument_id, float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.erase(index);
@@ -147,8 +150,7 @@ bool InstrumentManager::NoteOff(int instrument_id, float index) {
   return false;
 }
 
-bool InstrumentManager::NoteOn(int instrument_id, float index,
-                               float intensity) {
+bool InstrumentManager::NoteOn(Id instrument_id, float index, float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.insert(index);
@@ -165,7 +167,7 @@ bool InstrumentManager::NoteOn(int instrument_id, float index,
   return false;
 }
 
-bool InstrumentManager::Process(int instrument_id, double begin_timestamp,
+bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
                                 double end_timestamp, float* output,
                                 int num_channels, int num_frames) {
   task_runner_.Run();
@@ -212,7 +214,7 @@ bool InstrumentManager::Process(int instrument_id, double begin_timestamp,
   return true;
 }
 
-bool InstrumentManager::ResetAllParams(int instrument_id) {
+bool InstrumentManager::ResetAllParams(Id instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     for (const auto& param : controller->definition.param_definitions) {
@@ -232,8 +234,8 @@ bool InstrumentManager::ResetAllParams(int instrument_id) {
   return false;
 }
 
-bool InstrumentManager::ScheduleControl(int instrument_id, double position,
-                                        int id, float value) {
+bool InstrumentManager::ScheduleControl(Id instrument_id, double position,
+                                        Id id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
     return false;
@@ -246,7 +248,7 @@ bool InstrumentManager::ScheduleControl(int instrument_id, double position,
   return true;
 }
 
-bool InstrumentManager::ScheduleNote(int instrument_id, double position,
+bool InstrumentManager::ScheduleNote(Id instrument_id, double position,
                                      double duration, float index,
                                      float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
@@ -258,7 +260,7 @@ bool InstrumentManager::ScheduleNote(int instrument_id, double position,
   return false;
 }
 
-bool InstrumentManager::ScheduleNoteOff(int instrument_id, double position,
+bool InstrumentManager::ScheduleNoteOff(Id instrument_id, double position,
                                         float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
@@ -268,7 +270,7 @@ bool InstrumentManager::ScheduleNoteOff(int instrument_id, double position,
   return false;
 }
 
-bool InstrumentManager::ScheduleNoteOn(int instrument_id, double position,
+bool InstrumentManager::ScheduleNoteOn(Id instrument_id, double position,
                                        float index, float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {

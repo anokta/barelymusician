@@ -7,9 +7,6 @@
     <Filter Include="Source Files\dsp">
       <UniqueIdentifier>{e033ea07-8a55-4037-9658-38539357d2e7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\instrument">
-      <UniqueIdentifier>{12d76503-b79f-487a-b5a5-4baef5ef25ee}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\algorithm">
       <UniqueIdentifier>{de1892fa-780e-46ba-8013-3cf8659232a4}</UniqueIdentifier>
     </Filter>
@@ -32,9 +29,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp">
       <Filter>Source Files\dsp</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\instrument\polyphonic_voice_test.cpp">
-      <Filter>Source Files\instrument</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp">
       <Filter>Source Files\algorithm</Filter>

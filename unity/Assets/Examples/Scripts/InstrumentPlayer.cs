@@ -58,7 +58,7 @@ public class InstrumentPlayer : MonoBehaviour {
     }
   }
 
-  private void OnBeat(int beat) {
+  private void OnBeat(double dspTime, int beat) {
     for (int i = 0; i < beatNotes.Length; ++i) {
       var note = beatNotes[i];
       double position = note.position + (double)(beat);

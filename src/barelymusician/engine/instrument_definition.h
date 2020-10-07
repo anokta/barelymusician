@@ -1,19 +1,20 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/engine/instrument.h"
 
 namespace barelyapi {
 
 // Instrument parameter definition.
 struct InstrumentParamDefinition {
   // Param id.
-  int id;
+  std::int64_t id;
 
   // Param name.
   std::string name;

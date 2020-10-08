@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_VOICE_H_
-#define BARELYMUSICIAN_INSTRUMENT_VOICE_H_
+#ifndef BARELYMUSICIAN_DSP_VOICE_H_
+#define BARELYMUSICIAN_DSP_VOICE_H_
 
 namespace barelyapi {
 
@@ -26,4 +26,4 @@ class Voice {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_VOICE_H_
+#endif  // EXAMPLES_VOICE_VOICE_H_

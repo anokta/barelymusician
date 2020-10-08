@@ -2,9 +2,9 @@
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instrument/instrument.h"
-#include "barelymusician/instrument/modulation_matrix.h"
-#include "barelymusician/instrument/polyphonic_voice.h"
+#include "barelymusician/dsp/polyphonic_voice.h"
+#include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/instrument_definition.h"
 #include "instruments/basic_enveloped_voice.h"
 
 namespace barelyapi {
@@ -17,17 +17,20 @@ enum BasicSynthInstrumentParam {
   kEnvelopeSustain = 3,
   kEnvelopeRelease = 4,
   kOscillatorType = 5,
+  kNumVoices = 6,
 };
 
 class BasicSynthInstrument : public Instrument {
  public:
-  BasicSynthInstrument(int sample_rate, int num_voices);
+  explicit BasicSynthInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void Control(int id, float value) override;
+  void Control(std::int64_t id, float value) override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
+
+  static InstrumentDefinition GetDefinition(int sample_rate);
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;
@@ -35,8 +38,6 @@ class BasicSynthInstrument : public Instrument {
   float gain_;
 
   PolyphonicVoice<BasicSynthVoice> voice_;
-
-  ModulationMatrix<float> modulation_matrix_;
 };
 
 }  // namespace examples

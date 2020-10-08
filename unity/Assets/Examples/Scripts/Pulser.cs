@@ -23,7 +23,7 @@ public class Pulser : MonoBehaviour {
     transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * speed);
   }
 
-  private void OnBeat(int beat) {
+  private void OnBeat(double dspTime, int beat) {
     transform.localScale = targetScale * 2.0f;
   }
 }

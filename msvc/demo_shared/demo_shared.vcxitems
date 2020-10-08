@@ -17,11 +17,11 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\audio_output.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\input_manager\win_console_input.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">

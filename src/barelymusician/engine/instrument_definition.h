@@ -1,15 +1,20 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 
+#include <cstdint>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "barelymusician/engine/instrument.h"
 
 namespace barelyapi {
 
 // Instrument parameter definition.
 struct InstrumentParamDefinition {
   // Param id.
-  int id;
+  std::int64_t id;
 
   // Param name.
   std::string name;
@@ -17,12 +22,20 @@ struct InstrumentParamDefinition {
   // Param description.
   std::string description;
 
-  // Param value.
+  // Param default value.
   float default_value;
+
+  // Param minimum value.
+  float min_value;
+
+  // Param maximum value.
+  float max_value;
 };
 
 // Instrument definition.
 struct InstrumentDefinition {
+  using GetInstrument = std::function<std::unique_ptr<Instrument>()>;
+
   // Instrument name.
   std::string name;
 
@@ -30,15 +43,11 @@ struct InstrumentDefinition {
   std::string description;
 
   // Instrument parameters.
-  std::vector<InstrumentParamDefinition> params;
-};
+  std::vector<InstrumentParamDefinition> param_definitions;
 
-//// Returns definition of the given instrument type.
-//// @note All derived instrument types *must* implement this function.
-////
-//// @return Instrument definition.
-//template <typename InstrumentType>
-//static InstrumentDefinition GetDefinition();
+  // Get instrument function.
+  GetInstrument get_instrument_fn;
+};
 
 }  // namespace barelyapi
 

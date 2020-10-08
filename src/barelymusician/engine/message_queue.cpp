@@ -46,6 +46,14 @@ MessageQueue::Iterator MessageQueue::GetIterator(double begin_timestamp,
   return iterator;
 }
 
+MessageQueue::Iterator MessageQueue::GetIterator(double timestamp) const {
+  Iterator iterator;
+  iterator.cbegin = messages_.cbegin();
+  iterator.cend = std::lower_bound(iterator.cbegin, messages_.cend(), timestamp,
+                                   &CompareMessage);
+  return iterator;
+}
+
 void MessageQueue::Push(double timestamp, const Message::Data& data) {
   const auto it = std::upper_bound(messages_.cbegin(), messages_.cend(),
                                    timestamp, &CompareTimestamp);

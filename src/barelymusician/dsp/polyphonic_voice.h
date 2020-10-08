@@ -1,13 +1,11 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_POLYPHONIC_VOICE_H_
-#define BARELYMUSICIAN_INSTRUMENT_POLYPHONIC_VOICE_H_
+#ifndef BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
+#define BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
 
 #include <functional>
 #include <utility>
 #include <vector>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/instrument/instrument.h"
-#include "barelymusician/instrument/voice.h"
 
 namespace barelyapi {
 
@@ -147,4 +145,4 @@ void PolyphonicVoice<VoiceType>::Update(const VoiceCallback& update_voice) {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_POLYPHONIC_VOICE_H_
+#endif  // BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_

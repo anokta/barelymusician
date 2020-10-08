@@ -8,18 +8,19 @@ namespace BarelyApi {
   // Main |BarelyMusician| class that communicates with the native code.
   public static class BarelyMusician {
     // Invalid id.
-    public const int InvalidId = -1;
+    public const Int64 InvalidId = -1;
 
     // Beat event.
-    public delegate void BeatEvent(int beat);
+    public delegate void BeatEvent(double dspTime, int beat);
     public static event BeatEvent OnBeat;
 
     // Note off event.
-    public delegate void NoteOffEvent(Instrument instrument, float index);
+    public delegate void NoteOffEvent(double dspTime, Instrument instrument, float noteIndex);
     public static event NoteOffEvent OnNoteOff;
 
     // Note on event.
-    public delegate void NoteOnEvent(Instrument instrument, float index, float intenstiy);
+    public delegate void NoteOnEvent(double dspTime, Instrument instrument, float noteIndex,
+                                     float noteIntenstiy);
     public static event NoteOnEvent OnNoteOn;
 
     // Internal Unity instrument functions.
@@ -30,153 +31,94 @@ namespace BarelyApi {
       int numChannels);
 
     // Creates new instrument.
-    public static int Create(Instrument instrument) {
-      int id = InvalidId;
-      if (BarelyMusicianInternal.Instance != null) {
-        Type instrumentType = instrument.GetType();
-        if (instrumentType.IsSubclassOf(typeof(UnityInstrument))) {
-          var unityInstrument = instrument as UnityInstrument;
-          id = CreateUnityInstrumentNative(
-              Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOffFn),
-              Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOnFn),
-              Marshal.GetFunctionPointerForDelegate(unityInstrument.ProcessFn));
-          _instruments.Add(id, instrument);
-        } else if (instrumentType == typeof(BasicSynthInstrument)) {
-          var basicSynthInstrument = instrument as BasicSynthInstrument;
-          id = CreateBasicSynthInstrumentNative(basicSynthInstrument.numVoices,
-                                                (int)basicSynthInstrument.oscillatorType);
-          _instruments.Add(id, instrument);
-        } else {
-          Debug.LogError("Unsupported instrument type: " + instrumentType);
-        }
-      }
-      return id;
+    public static Int64 Create(Instrument instrument) {
+      return BarelyMusicianInternal.Instance?.Create(instrument) ?? InvalidId;
     }
 
     // Destroys instrument.
-    public static void Destroy(int id) {
-      if (BarelyMusicianInternal.Instance != null) {
-        _instruments.Remove(id);
-        DestroyNative(id);
-      }
+    public static void Destroy(Int64 id) {
+      BarelyMusicianInternal.Instance?.Destroy(id);
     }
 
     // Returns playback position.
     public static double GetPosition() {
-      if (BarelyMusicianInternal.Instance != null) {
-        return GetPositionNative();
-      }
-      return 0.0;
+      return BarelyMusicianInternal.Instance?.GetPosition() ?? 0.0;
     }
 
     // Returns playback tempo.
     public static double GetTempo() {
-      if (BarelyMusicianInternal.Instance != null) {
-        return GetTempoNative();
-      }
-      return 0.0;
+      return BarelyMusicianInternal.Instance?.GetTempo() ?? 0.0;
     }
 
     // Returns the playback state.
     public static bool IsPlaying() {
-      if (BarelyMusicianInternal.Instance != null) {
-        return IsPlayingNative();
-      }
-      return false;
+      return BarelyMusicianInternal.Instance?.IsPlaying() ?? false;
     }
 
     // Sets instrument note off.
-    public static void NoteOff(int id, float index) {
-      if (BarelyMusicianInternal.Instance != null) {
-        NoteOffNative(id, index);
-      }
+    public static void NoteOff(Int64 id, float index) {
+      BarelyMusicianInternal.Instance?.NoteOff(id, index);
     }
 
     // Sets instrument note on.
-    public static void NoteOn(int id, float index, float intensity) {
-      if (BarelyMusicianInternal.Instance != null) {
-        NoteOnNative(id, index, intensity);
-      }
+    public static void NoteOn(Int64 id, float index, float intensity) {
+      BarelyMusicianInternal.Instance?.NoteOn(id, index, intensity);
     }
 
     // Processes instrument.
-    public static void Process(int id, float[] output, int numChannels) {
-      int numFrames = output.Length / numChannels;
-      UpdateAudioThread(numFrames);
-      ProcessNative(id, output, numChannels, numFrames);
+    public static void Process(Int64 id, float[] output, int numChannels) {
+      BarelyMusicianInternal.Instance?.Process(id, output, numChannels);
     }
 
     // Schedules instrument note.
-    public static void ScheduleNote(int id, double position, double duration, float index,
+    public static void ScheduleNote(Int64 id, double position, double duration, float index,
                                     float intensity) {
-      if (BarelyMusicianInternal.Instance != null) {
-        ScheduleNoteNative(id, position, duration, index, intensity);
-      }
+      BarelyMusicianInternal.Instance?.ScheduleNote(id, position, duration, index, intensity);
     }
 
     // Schedules instrument note off.
-    public static void ScheduleNoteOff(int id, double position, float index) {
-      if (BarelyMusicianInternal.Instance != null) {
-        ScheduleNoteOffNative(id, position, index);
-      }
+    public static void ScheduleNoteOff(Int64 id, double position, float index) {
+      BarelyMusicianInternal.Instance?.ScheduleNoteOff(id, position, index);
     }
 
     // Schedules instrument note on.
-    public static void ScheduleNoteOn(int id, double position, float index, float intensity) {
-      if (BarelyMusicianInternal.Instance != null) {
-        ScheduleNoteOnNative(id, position, index, intensity);
-      }
+    public static void ScheduleNoteOn(Int64 id, double position, float index, float intensity) {
+      BarelyMusicianInternal.Instance?.ScheduleNoteOn(id, position, index, intensity);
+    }
+
+    // Sets instrument param value.
+    public static void SetParam(Int64 id, int paramId, float value) {
+      BarelyMusicianInternal.Instance?.SetParam(id, paramId, value);
     }
 
     // Sets playback position.
     public static void SetPosition(double position) {
-      if (BarelyMusicianInternal.Instance != null) {
-        SetPositionNative(position);
-      }
+      BarelyMusicianInternal.Instance?.SetPosition(position);
     }
 
     // Sets playback tempo.
     public static void SetTempo(double tempo) {
-      if (BarelyMusicianInternal.Instance != null) {
-        SetTempoNative(tempo);
-      }
+      BarelyMusicianInternal.Instance?.SetTempo(tempo);
     }
 
     // Starts playback.
     public static void Play() {
-      if (BarelyMusicianInternal.Instance != null) {
-        StartNative();
-      }
+      BarelyMusicianInternal.Instance?.Play();
+    }
+
+    // Starts playback at scheduled time.
+    public static void PlayScheduled(double dspTime) {
+      BarelyMusicianInternal.Instance?.PlayScheduled(dspTime);
     }
 
     // Pauses playback.
     public static void Pause() {
-      if (BarelyMusicianInternal.Instance != null) {
-        StopNative();
-      }
+      BarelyMusicianInternal.Instance?.Pause();
     }
 
     // Stops playback.
     public static void Stop() {
-      if (BarelyMusicianInternal.Instance != null) {
-        StopNative();
-        SetPositionNative(0.0);
-      }
-    }
-
-    // List of instruments.
-    private static Dictionary<int, Instrument> _instruments = new Dictionary<int, Instrument>();
-
-    // Audio thread last DSP time.
-    private static double _lastDspTime = 0.0;
-
-    // Updates the audio thread state.
-    private static void UpdateAudioThread(int numFrames) {
-      double dspTime = AudioSettings.dspTime;
-      if (dspTime > _lastDspTime) {
-        _lastDspTime = dspTime;
-        UpdateAudioThreadNative(numFrames);
-      }
+      BarelyMusicianInternal.Instance?.Stop();
     }
 
     // Internal component to update the native state.
@@ -211,7 +153,7 @@ namespace BarelyApi {
       }
 
       // Beat callback.
-      private delegate void BeatCallback(int beat);
+      private delegate void BeatCallback(double dspTime, int beat);
       private BeatCallback _beatCallback = null;
 
       // Debug callback.
@@ -219,20 +161,24 @@ namespace BarelyApi {
       private DebugCallback _debugCallback = null;
 
       // Note off callback.
-      private delegate void NoteOffCallback(int id, float index);
+      private delegate void NoteOffCallback(double dspTime, Int64 id, float index);
       private NoteOffCallback _noteOffCallback = null;
 
       // Note on callback.
-      private delegate void NoteOnCallback(int id, float index, float intensity);
+      private delegate void NoteOnCallback(double dspTime, Int64 id, float index, float intensity);
       private NoteOnCallback _noteOnCallback = null;
 
-      // Audio source.
-      private AudioSource _source = null;
+      // List of instruments.
+      private static Dictionary<Int64, Instrument> _instruments;
+
+      // Lookahead in seconds.
+      private double _lookahead = 0.0;
 
       private void Awake() {
-        InitializeNative(AudioSettings.outputSampleRate);
-        _beatCallback = delegate (int beat) {
-          OnBeat?.Invoke(beat);
+        var config = AudioSettings.GetConfiguration();
+        InitializeNative(config.sampleRate);
+        _beatCallback = delegate (double dspTime, int beat) {
+          OnBeat?.Invoke(dspTime, beat);
         };
         SetBeatCallbackNative(Marshal.GetFunctionPointerForDelegate(_beatCallback));
         _debugCallback = delegate (int severity, string message) {
@@ -253,41 +199,26 @@ namespace BarelyApi {
           }
         };
         SetDebugCallbackNative(Marshal.GetFunctionPointerForDelegate(_debugCallback));
-        _noteOffCallback = delegate (int id, float index) {
+        _noteOffCallback = delegate (double dspTime, Int64 id, float index) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
-            OnNoteOff?.Invoke(instrument, index);
+            OnNoteOff?.Invoke(dspTime, instrument, index);
           } else {
             Debug.LogError("Instrument does not exist: " + id);
           }
         };
         SetNoteOffCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOffCallback));
-        _noteOnCallback = delegate (int id, float index, float intensity) {
+        _noteOnCallback = delegate (double dspTime, Int64 id, float index, float intensity) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
-            OnNoteOn?.Invoke(instrument, index, intensity);
+            OnNoteOn?.Invoke(dspTime, instrument, index, intensity);
           } else {
             Debug.LogError("Instrument does not exist: " + id);
           }
         };
         SetNoteOnCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
-
-        _source = gameObject.AddComponent<AudioSource>();
-        _source.bypassEffects = true;
-        _source.bypassListenerEffects = true;
-        _source.bypassReverbZones = true;
-        _source.dopplerLevel = 0.0f;
-        _source.playOnAwake = false;
-        _source.priority = 0;
-        _source.spatialBlend = 0.0f;
-      }
-
-      private void OnEnable() {
-        _source.Play();
-      }
-
-      private void OnDisable() {
-        _source.Stop();
+        _instruments = new Dictionary<Int64, Instrument>();
+        _lookahead = 1.25 * config.dspBufferSize / config.sampleRate;
       }
 
       private void OnApplicationQuit() {
@@ -298,11 +229,93 @@ namespace BarelyApi {
       }
 
       private void Update() {
-        UpdateMainThreadNative();
+        UpdateNative(AudioSettings.dspTime + _lookahead);
       }
 
-      private void OnAudioFilterRead(float[] data, int channels) {
-        UpdateAudioThread(data.Length / channels);
+      public Int64 Create(Instrument instrument) {
+        Int64 id = InvalidId;
+        Type instrumentType = instrument.GetType();
+        if (instrumentType.IsSubclassOf(typeof(UnityInstrument))) {
+          var unityInstrument = instrument as UnityInstrument;
+          id = CreateUnityInstrumentNative(
+              Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOffFn),
+              Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOnFn),
+              Marshal.GetFunctionPointerForDelegate(unityInstrument.ProcessFn));
+        } else if (instrumentType == typeof(BasicSynthInstrument)) {
+          id = CreateBasicSynthInstrumentNative();
+        } else {
+          Debug.LogError("Unsupported instrument type: " + instrumentType);
+        }
+        if (id != InvalidId) {
+          _instruments.Add(id, instrument);
+        }
+        return id;
+      }
+
+      public void Destroy(Int64 id) {
+        _instruments.Remove(id);
+        DestroyNative(id);
+      }
+
+      public double GetPosition() { return GetPositionNative(); }
+
+      public double GetTempo() { return GetTempoNative(); }
+
+      public bool IsPlaying() { return IsPlayingNative(); }
+
+      public void NoteOff(Int64 id, float index) {
+        NoteOffNative(id, index);
+      }
+
+      public void NoteOn(Int64 id, float index, float intensity) {
+        NoteOnNative(id, index, intensity);
+      }
+
+      public void Process(Int64 id, float[] output, int numChannels) {
+        int numFrames = output.Length / numChannels;
+        ProcessNative(id, AudioSettings.dspTime, output, numChannels, numFrames);
+      }
+
+      public void ScheduleNote(Int64 id, double position, double duration, float index,
+                                      float intensity) {
+        ScheduleNoteNative(id, position, duration, index, intensity);
+      }
+
+      public void ScheduleNoteOff(Int64 id, double position, float index) {
+        ScheduleNoteOffNative(id, position, index);
+      }
+
+      public void ScheduleNoteOn(Int64 id, double position, float index, float intensity) {
+        ScheduleNoteOnNative(id, position, index, intensity);
+      }
+
+      public void SetParam(Int64 id, int paramId, float value) {
+        SetParamNative(id, paramId, value);
+      }
+
+      public void SetPosition(double position) {
+        SetPositionNative(position);
+      }
+
+      public void SetTempo(double tempo) {
+        SetTempoNative(tempo);
+      }
+
+      public void Play() {
+        PlayScheduled(AudioSettings.dspTime + _lookahead);
+      }
+
+      public void PlayScheduled(double dspTime) {
+        StartNative(dspTime);
+      }
+
+      public void Pause() {
+        StopNative();
+      }
+
+      public void Stop() {
+        StopNative();
+        SetPositionNative(0.0);
       }
     }
 
@@ -319,14 +332,14 @@ namespace BarelyApi {
     private static extern void ShutdownNative();
 
     [DllImport(pluginName, EntryPoint = "CreateUnityInstrument")]
-    private static extern int CreateUnityInstrumentNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
-                                                          IntPtr processFnPtr);
+    private static extern Int64 CreateUnityInstrumentNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+                                                            IntPtr processFnPtr);
 
     [DllImport(pluginName, EntryPoint = "CreateBasicSynthInstrument")]
-    private static extern int CreateBasicSynthInstrumentNative(int numVoices, int oscillatorType);
+    private static extern Int64 CreateBasicSynthInstrumentNative();
 
     [DllImport(pluginName, EntryPoint = "Destroy")]
-    private static extern void DestroyNative(int id);
+    private static extern void DestroyNative(Int64 id);
 
     [DllImport(pluginName, EntryPoint = "GetPosition")]
     private static extern double GetPositionNative();
@@ -338,25 +351,28 @@ namespace BarelyApi {
     private static extern bool IsPlayingNative();
 
     [DllImport(pluginName, EntryPoint = "Process")]
-    private static extern void ProcessNative(int id, [In, Out] float[] output, int numChannels,
-                                             int numFrames);
+    private static extern void ProcessNative(Int64 id, double timestamp, [In, Out] float[] output,
+                                             int numChannels, int numFrames);
 
     [DllImport(pluginName, EntryPoint = "NoteOff")]
-    private static extern void NoteOffNative(int id, float index);
+    private static extern void NoteOffNative(Int64 id, float index);
 
     [DllImport(pluginName, EntryPoint = "NoteOn")]
-    private static extern void NoteOnNative(int id, float index, float intensity);
+    private static extern void NoteOnNative(Int64 id, float index, float intensity);
 
     [DllImport(pluginName, EntryPoint = "ScheduleNote")]
-    private static extern void ScheduleNoteNative(int id, double position, double duration,
+    private static extern void ScheduleNoteNative(Int64 id, double position, double duration,
                                                   float index, float intensity);
 
     [DllImport(pluginName, EntryPoint = "ScheduleNoteOff")]
-    private static extern void ScheduleNoteOffNative(int id, double position, float index);
+    private static extern void ScheduleNoteOffNative(Int64 id, double position, float index);
 
     [DllImport(pluginName, EntryPoint = "ScheduleNoteOn")]
-    private static extern void ScheduleNoteOnNative(int id, double position, float index,
+    private static extern void ScheduleNoteOnNative(Int64 id, double position, float index,
                                                     float intensity);
+
+    [DllImport(pluginName, EntryPoint = "SetParam")]
+    private static extern void SetParamNative(Int64 id, int param_id, float value);
 
     [DllImport(pluginName, EntryPoint = "SetBeatCallback")]
     private static extern void SetBeatCallbackNative(IntPtr beatCallbackPtr);
@@ -377,15 +393,12 @@ namespace BarelyApi {
     private static extern void SetTempoNative(double tempo);
 
     [DllImport(pluginName, EntryPoint = "Start")]
-    private static extern void StartNative();
+    private static extern void StartNative(double timestamp);
 
     [DllImport(pluginName, EntryPoint = "Stop")]
     private static extern void StopNative();
 
-    [DllImport(pluginName, EntryPoint = "UpdateAudioThread")]
-    private static extern void UpdateAudioThreadNative(int numFrames);
-
-    [DllImport(pluginName, EntryPoint = "UpdateMainThread")]
-    private static extern void UpdateMainThreadNative();
+    [DllImport(pluginName, EntryPoint = "Update")]
+    private static extern void UpdateNative(double timestamp);
   }
 }

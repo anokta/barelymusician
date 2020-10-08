@@ -58,12 +58,12 @@ public class InstrumentPlayer : MonoBehaviour {
     }
   }
 
-  private void OnBeat(int beat) {
+  private void OnBeat(double dspTime, int beat) {
     for (int i = 0; i < beatNotes.Length; ++i) {
       var note = beatNotes[i];
-      double position = note.position + (double)(beat + 1);
-      float index = 
-          rootIndex + note.index + (float)(note.beatMultiplier * (beat % note.beatPeriod));
+      double position = note.position + (double)(beat);
+      float index =
+          rootIndex + note.index + (float)(note.beatMultiplier * ((beat) % note.beatPeriod));
       instrument.ScheduleNote(position, note.duration, index, note.intensity);
     }
   }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +8,7 @@ namespace BarelyApi {
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
     // Performer id.
-    private int _id = BarelyMusician.InvalidId;
+    private Int64 _id = BarelyMusician.InvalidId;
 
     // Audio source.
     private AudioSource _source = null;
@@ -33,6 +34,10 @@ namespace BarelyApi {
 
     protected virtual void OnDisable() {
       _source.Stop();
+    }
+
+    protected virtual void SetParam(int id, float value) {
+      BarelyMusician.SetParam(_id, id, value);
     }
 
     // Stops playing note with the given |index|.

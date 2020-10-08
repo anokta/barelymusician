@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_VOICE_POLYPHONIC_VOICE_H_
-#define EXAMPLES_VOICE_POLYPHONIC_VOICE_H_
+#ifndef BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
+#define BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
 
 #include <functional>
 #include <utility>
@@ -145,4 +145,4 @@ void PolyphonicVoice<VoiceType>::Update(const VoiceCallback& update_voice) {
 
 }  // namespace barelyapi
 
-#endif  // EXAMPLES_VOICE_POLYPHONIC_VOICE_H_
+#endif  // BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_

@@ -44,7 +44,9 @@
     <ClInclude Include="..\..\src\barelymusician\dsp\module.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
+    <ClInclude Include="..\..\src\barelymusician\dsp\polyphonic_voice.h" />
     <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
+    <ClInclude Include="..\..\src\barelymusician\dsp\voice.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\instrument.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\instrument_manager.h" />
     <ClInclude Include="..\..\src\barelymusician\engine\engine_utils.h" />

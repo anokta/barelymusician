@@ -2,10 +2,10 @@
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "instruments/basic_enveloped_voice.h"
-#include "voice/polyphonic_voice.h"
 
 namespace barelyapi {
 namespace examples {

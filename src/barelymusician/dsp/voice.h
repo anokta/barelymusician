@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_VOICE_VOICE_H_
-#define EXAMPLES_VOICE_VOICE_H_
+#ifndef BARELYMUSICIAN_DSP_VOICE_H_
+#define BARELYMUSICIAN_DSP_VOICE_H_
 
 namespace barelyapi {
 

@@ -7,20 +7,17 @@
     <Filter Include="Header Files\instruments">
       <UniqueIdentifier>{018322f4-d8c9-43ef-98b6-b372e53a9cfd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{db6eed62-1a30-4c9d-beca-6f9603f4f27c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\instruments">
-      <UniqueIdentifier>{54332e60-e4b9-49ef-b5c5-12d45fef2227}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\util">
       <UniqueIdentifier>{36518f85-6b7b-4ba9-be07-89c5a31ee7c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\util">
-      <UniqueIdentifier>{7bdfc4fe-51be-4133-a553-e45be46fb952}</UniqueIdentifier>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{c6158be6-3db6-4bb0-9bae-0d341fe07657}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\voice">
-      <UniqueIdentifier>{eb00d5e8-e418-4766-834f-de90d6d230d8}</UniqueIdentifier>
+    <Filter Include="Source Files\instruments">
+      <UniqueIdentifier>{202fd1b0-7958-41be-9dd2-286290ffc01c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{0a148c78-fc8c-4e8e-af32-3db7cba45396}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -35,12 +32,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h">
       <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\voice\polyphonic_voice.h">
-      <Filter>Header Files\voice</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\voice\voice.h">
-      <Filter>Header Files\voice</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -19,8 +19,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_enveloped_voice.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\voice\polyphonic_voice.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\voice\voice.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.cpp" />

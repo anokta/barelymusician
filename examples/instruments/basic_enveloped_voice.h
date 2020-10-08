@@ -2,7 +2,7 @@
 #define EXAMPLES_INSTRUMENTS_BASIC_ENVEOPED_VOICE_H_
 
 #include "barelymusician/dsp/envelope.h"
-#include "voice/voice.h"
+#include "barelymusician/dsp/voice.h"
 
 namespace barelyapi {
 namespace examples {

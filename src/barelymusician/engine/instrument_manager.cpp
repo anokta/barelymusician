@@ -1,5 +1,7 @@
 #include "barelymusician/engine/instrument_manager.h"
 
+#include <algorithm>
+
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/message.h"

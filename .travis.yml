@@ -10,4 +10,5 @@ install:
 
 script:
   - export PATH=$MSBUILD_PATH:$PATH
-  - MSBuild.exe -p:Configuration=Release -p:Platform=x64 msvc/barelymusician_test/barelymusician_test.vcxproj
+  - MSBuild.exe -p:SolutionDir="../" -p:Configuration=Debug -p:Platform=x64 msvc/barelymusician_test/barelymusician_test.vcxproj
+  - msvc/x64/Debug/barelymusician_test.exe

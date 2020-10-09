@@ -2,7 +2,6 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/engine/engine_utils.h"
 #include "barelymusician/engine/message.h"
 
 namespace barelyapi {
@@ -11,6 +10,34 @@ namespace {
 
 // Maximum number of tasks to be added per each Process call.
 constexpr int kNumMaxTasks = 500;
+
+// Returns a map value by key.
+//
+// @param map Map.
+// @param key Key.
+// @return Const pointer to value if succeeds, nullptr otherwise.
+template <typename KeyType, typename ValueType>
+const ValueType* FindOrNull(const std::unordered_map<KeyType, ValueType>& map,
+                            const KeyType& key) {
+  if (const auto it = map.find(key); it != map.cend()) {
+    return &it->second;
+  }
+  return nullptr;
+}
+
+// Returns a map value by key.
+//
+// @param map Map.
+// @param key Key.
+// @return Pointer to value if succeeds, nullptr otherwise.
+template <typename KeyType, typename ValueType>
+ValueType* FindOrNull(std::unordered_map<KeyType, ValueType>& map,
+                      const KeyType& key) {
+  if (auto it = map.find(key); it != map.end()) {
+    return &it->second;
+  }
+  return nullptr;
+}
 
 double BeatsFromSeconds(double tempo, double seconds) {
   return tempo * seconds / kSecondsFromMinutes;

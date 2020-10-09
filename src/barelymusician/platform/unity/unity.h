@@ -124,7 +124,7 @@ void EXPORT_API ScheduleNoteOn(std::int64_t id, double position, float index,
 // @param id Instrument id.
 // @param param_id Param id.
 // @param value Param value.
-void EXPORT_API SetParam(std::int64_t id, std::int64_t param_id, float value);
+void EXPORT_API SetParam(std::int64_t id, int param_id, float value);
 
 // Sets beat callback.
 //

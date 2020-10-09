@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
-#include <cstdint>
-
 namespace barelyapi {
 
 // Generic instrument interface.
@@ -15,7 +13,7 @@ class Instrument {
   //
   // @param id Control id.
   // @param value Control value.
-  virtual void Control(std::int64_t id, float value) = 0;
+  virtual void Control(int id, float value) = 0;
 
   // Stops note with the given |index|.
   //
@@ -32,7 +30,7 @@ class Instrument {
   //// Prepares the instrument for processing.
   ////
   //// @param sample_rate Sampling rate in Hz.
-  //virtual void PrepareToPlay(int sample_rate) = 0;
+  // virtual void PrepareToPlay(int sample_rate) = 0;
 
   // Processes the next |output| buffer.
   //

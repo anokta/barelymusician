@@ -73,7 +73,7 @@ double InstrumentManager::GetTempo() const { return tempo_; }
 bool InstrumentManager::IsPlaying() const { return is_playing_; }
 
 std::optional<float> InstrumentManager::GetParam(Id instrument_id,
-                                                 Id id) const {
+                                                 int id) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     const auto* param = FindOrNull(controller->params, id);
@@ -116,7 +116,7 @@ bool InstrumentManager::AllNotesOff(Id instrument_id) {
   return true;
 }
 
-bool InstrumentManager::Control(Id instrument_id, Id id, float value) {
+bool InstrumentManager::Control(Id instrument_id, int id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     auto* param = FindOrNull(controller->params, id);
@@ -235,7 +235,7 @@ bool InstrumentManager::ResetAllParams(Id instrument_id) {
 }
 
 bool InstrumentManager::ScheduleControl(Id instrument_id, double position,
-                                        Id id, float value) {
+                                        int id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
     return false;

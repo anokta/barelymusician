@@ -48,9 +48,9 @@ class InstrumentManager {
   // Returns parameter value.
   //
   // @param instrument_id Instrument id.
-  // @param param_id Parameter id.
+  // @param id Parameter id.
   // @param value Parameter value.
-  std::optional<float> GetParam(Id instrument_id, Id param_id) const;
+  std::optional<float> GetParam(Id instrument_id, int id) const;
 
   // Returns playback position.
   //
@@ -83,7 +83,7 @@ class InstrumentManager {
   // @param instrument_id Instrument id.
   // @param id Parameter id.
   // @param value Parameter value.
-  bool Control(Id instrument_id, Id id, float value);
+  bool Control(Id instrument_id, int id, float value);
 
   // Stops playing note.
   //
@@ -115,7 +115,7 @@ class InstrumentManager {
   bool ResetAllParams(Id instrument_id);
 
   // Schedules control.
-  bool ScheduleControl(Id instrument_id, double position, Id id, float value);
+  bool ScheduleControl(Id instrument_id, double position, int id, float value);
 
   // Schedules note.
   //
@@ -186,7 +186,7 @@ class InstrumentManager {
     InstrumentDefinition definition;
 
     // Instrument params.
-    std::unordered_map<Id, float> params;
+    std::unordered_map<int, float> params;
 
     // Active note indices.
     std::unordered_set<float> active_notes;

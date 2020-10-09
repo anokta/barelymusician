@@ -25,7 +25,7 @@ class BasicSynthInstrument : public Instrument {
   explicit BasicSynthInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void Control(std::int64_t id, float value) override;
+  void Control(int id, float value) override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;

@@ -142,7 +142,7 @@ void ScheduleNoteOn(std::int64_t id, double position, float index,
   barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
 }
 
-void SetParam(std::int64_t id, std::int64_t param_id, float value) {
+void SetParam(std::int64_t id, int param_id, float value) {
   DCHECK(barelymusician);
   barelymusician->engine.Control(id, param_id, value);
 }

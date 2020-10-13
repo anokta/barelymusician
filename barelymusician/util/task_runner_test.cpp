@@ -47,12 +47,13 @@ TEST(TaskRunnerTest, RunMultipleTasksConcurrently) {
   // Run producer threads.
   std::mutex producer_mutex;
   std::vector<std::thread> producers;
+  int value = 0;
   for (int i = 0; i < kNumProducers; ++i) {
-    const auto produce = [&producer_mutex, &task_runner, push_value, i,
+    const auto produce = [&producer_mutex, &task_runner, push_value, &value,
                           kProducerDelayMs]() {
       std::lock_guard<std::mutex> lock(producer_mutex);
       std::this_thread::sleep_for(std::chrono::milliseconds(kProducerDelayMs));
-      task_runner.Add(std::bind(push_value, i));
+      task_runner.Add(std::bind(push_value, value++));
     };
     producers.emplace_back(produce);
   }

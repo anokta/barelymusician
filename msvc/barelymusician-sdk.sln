@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "barelymusician_test", "bare
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{69F92F5D-9456-45C9-A4B0-FEC75B07943C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{88F5CCBF-FB94-432F-8542-56FDA177ECED}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "barelymusician", "barelymusician", "{88F5CCBF-FB94-432F-8542-56FDA177ECED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "barelymusician_unity", "barelymusician_unity\barelymusician_unity.vcxproj", "{829A713C-76CE-4121-824A-6C629E8FBC4C}"
 	ProjectSection(ProjectDependencies) = postProject

@@ -18,37 +18,37 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician\dsp\envelope_test.cpp">
+    <ClCompile Include="..\..\barelymusician\dsp\envelope_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter_test.cpp">
+    <ClCompile Include="..\..\barelymusician\dsp\one_pole_filter_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\dsp\sample_player_test.cpp">
+    <ClCompile Include="..\..\barelymusician\dsp\sample_player_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils_test.cpp">
+    <ClCompile Include="..\..\barelymusician\dsp\dsp_utils_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\algorithm\context_free_grammar_test.cpp">
+    <ClCompile Include="..\..\barelymusician\algorithm\context_free_grammar_test.cpp">
       <Filter>Source Files\algorithm</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\util\random_test.cpp">
+    <ClCompile Include="..\..\barelymusician\util\random_test.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\util\task_runner_test.cpp">
+    <ClCompile Include="..\..\barelymusician\util\task_runner_test.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\message_queue_test.cpp">
+    <ClCompile Include="..\..\barelymusician\engine\message_queue_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\note_utils_test.cpp">
+    <ClCompile Include="..\..\barelymusician\engine\note_utils_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\engine\engine_test.cpp">
+    <ClCompile Include="..\..\barelymusician\engine\engine_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\barelymusician\dsp\polyphonic_voice_test.cpp">
+    <ClCompile Include="..\..\barelymusician\dsp\polyphonic_voice_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
   </ItemGroup>

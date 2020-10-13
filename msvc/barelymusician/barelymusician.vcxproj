@@ -19,43 +19,41 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\base\logging.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\dsp_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\envelope.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\one_pole_filter.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\oscillator.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\dsp\sample_player.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\engine\instrument_manager.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\engine\message_queue.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\engine\note_utils.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\util\random.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\util\task_runner.cpp" />
+    <ClCompile Include="..\..\barelymusician\base\logging.cpp" />
+    <ClCompile Include="..\..\barelymusician\dsp\dsp_utils.cpp" />
+    <ClCompile Include="..\..\barelymusician\dsp\envelope.cpp" />
+    <ClCompile Include="..\..\barelymusician\dsp\one_pole_filter.cpp" />
+    <ClCompile Include="..\..\barelymusician\dsp\oscillator.cpp" />
+    <ClCompile Include="..\..\barelymusician\dsp\sample_player.cpp" />
+    <ClCompile Include="..\..\barelymusician\engine\instrument_manager.cpp" />
+    <ClCompile Include="..\..\barelymusician\engine\message_queue.cpp" />
+    <ClCompile Include="..\..\barelymusician\engine\note_utils.cpp" />
+    <ClCompile Include="..\..\barelymusician\util\random.cpp" />
+    <ClCompile Include="..\..\barelymusician\util\task_runner.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\barelymusician.h" />
-    <ClInclude Include="..\..\src\barelymusician\algorithm\context_free_grammar.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\constants.h" />
-    <ClInclude Include="..\..\src\barelymusician\base\logging.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\dsp_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\envelope.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\filter.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\generator.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\module.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\one_pole_filter.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\oscillator.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\polyphonic_voice.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\sample_player.h" />
-    <ClInclude Include="..\..\src\barelymusician\dsp\voice.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\instrument.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\instrument_manager.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\instrument_definition.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\message.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\message_queue.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\note.h" />
-    <ClInclude Include="..\..\src\barelymusician\engine\note_utils.h" />
-    <ClInclude Include="..\..\src\barelymusician\util\random.h" />
-    <ClInclude Include="..\..\src\barelymusician\util\task_runner.h" />
+    <ClInclude Include="..\..\barelymusician\algorithm\context_free_grammar.h" />
+    <ClInclude Include="..\..\barelymusician\base\constants.h" />
+    <ClInclude Include="..\..\barelymusician\base\logging.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\dsp_utils.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\envelope.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\filter.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\generator.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\module.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\one_pole_filter.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\oscillator.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\polyphonic_voice.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\sample_player.h" />
+    <ClInclude Include="..\..\barelymusician\dsp\voice.h" />
+    <ClInclude Include="..\..\barelymusician\engine\instrument.h" />
+    <ClInclude Include="..\..\barelymusician\engine\instrument_manager.h" />
+    <ClInclude Include="..\..\barelymusician\engine\instrument_definition.h" />
+    <ClInclude Include="..\..\barelymusician\engine\message.h" />
+    <ClInclude Include="..\..\barelymusician\engine\message_queue.h" />
+    <ClInclude Include="..\..\barelymusician\engine\note.h" />
+    <ClInclude Include="..\..\barelymusician\engine\note_utils.h" />
+    <ClInclude Include="..\..\barelymusician\util\random.h" />
+    <ClInclude Include="..\..\barelymusician\util\task_runner.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -117,7 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -134,7 +132,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -146,7 +144,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -160,7 +158,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\include;$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>NDEBUG;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>

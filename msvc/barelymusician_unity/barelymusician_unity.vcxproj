@@ -19,14 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\barelymusician\platform\unity\unity.h" />
-    <ClInclude Include="..\..\src\barelymusician\platform\unity\unity_instrument.h" />
-    <ClInclude Include="..\..\src\barelymusician\platform\unity\unity_log_writer.h" />
+    <ClInclude Include="..\..\barelymusician\platform\unity\unity.h" />
+    <ClInclude Include="..\..\barelymusician\platform\unity\unity_instrument.h" />
+    <ClInclude Include="..\..\barelymusician\platform\unity\unity_log_writer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\barelymusician\platform\unity\unity.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\platform\unity\unity_instrument.cpp" />
-    <ClCompile Include="..\..\src\barelymusician\platform\unity\unity_log_writer.cpp" />
+    <ClCompile Include="..\..\barelymusician\platform\unity\unity.cpp" />
+    <ClCompile Include="..\..\barelymusician\platform\unity\unity_instrument.cpp" />
+    <ClCompile Include="..\..\barelymusician\platform\unity\unity_log_writer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\barelymusician\barelymusician.vcxproj">
@@ -105,7 +105,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>BARELYMUSICIAN_UNITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -126,7 +126,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>BARELYMUSICIAN_UNITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -143,7 +143,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>BARELYMUSICIAN_UNITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -162,7 +162,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\src;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..;$(SolutionDir)..\examples;$(SolutionDir)..\third_party\dr_wav;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
       <PreprocessorDefinitions>BARELYMUSICIAN_UNITY_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>

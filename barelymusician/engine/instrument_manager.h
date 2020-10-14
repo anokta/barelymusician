@@ -217,7 +217,6 @@ class InstrumentManager {
   // Playback tempo.
   double tempo_;
 
-  double start_timestamp_;
   double last_timestamp_;
 
   // Beat callback.

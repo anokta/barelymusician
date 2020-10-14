@@ -55,7 +55,6 @@ InstrumentManager::InstrumentManager()
     : is_playing_(false),
       position_(0.0),
       tempo_(0.0),
-      start_timestamp_(0.0),
       last_timestamp_(0.0),
       beat_callback_(nullptr),
       note_off_callback_(nullptr),
@@ -220,16 +219,15 @@ bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
                             message_frame - frame);
         frame = message_frame;
       }
-      std::visit(MessageVisitor{[instrument](const ControlData& control_data) {
-                                  instrument->Control(control_data.id,
-                                                      control_data.value);
+      std::visit(MessageVisitor{[instrument](const ControlData& data) {
+                                  instrument->Control(data.id, data.value);
                                 },
-                                [instrument](const NoteOffData& note_off_data) {
-                                  instrument->NoteOff(note_off_data.index);
+                                [instrument](const NoteOffData& data) {
+                                  instrument->NoteOff(data.index);
                                 },
-                                [instrument](const NoteOnData& note_on_data) {
-                                  instrument->NoteOn(note_on_data.index,
-                                                     note_on_data.intensity);
+                                [instrument](const NoteOnData& data) {
+                                  instrument->NoteOn(data.index,
+                                                     data.intensity);
                                 }},
                  it->data);
     }
@@ -326,7 +324,7 @@ void InstrumentManager::SetPosition(double position) { position_ = position; }
 void InstrumentManager::SetTempo(double tempo) { tempo_ = tempo; }
 
 void InstrumentManager::Start(double timestamp) {
-  start_timestamp_ = timestamp;
+  last_timestamp_ = timestamp;
   is_playing_ = true;
 }
 
@@ -338,76 +336,59 @@ void InstrumentManager::Stop() {
 }
 
 void InstrumentManager::Update(double timestamp) {
-  if (!is_playing_ || tempo_ == 0.0) {
-    return;
-  }
-  const double elapsed_seconds =
-      std::min(timestamp - last_timestamp_, timestamp - start_timestamp_);
-  if (elapsed_seconds <= 0.0) {
+  if (!is_playing_ || tempo_ <= 0.0 || timestamp <= last_timestamp_) {
     return;
   }
 
-  const double elapsed_beats = BeatsFromSeconds(tempo_, elapsed_seconds);
-
-  const double begin_timestamp =
-      position_ > 0.0 ? last_timestamp_ : start_timestamp_;
+  const double elapsed_beats =
+      BeatsFromSeconds(tempo_, timestamp - last_timestamp_);
   const double end_position = position_ + elapsed_beats;
 
+  // Trigger beats.
   if (beat_callback_ != nullptr) {
     for (double beat = std::ceil(position_); beat < end_position; ++beat) {
       const double beat_timestamp =
-          begin_timestamp + SecondsFromBeats(tempo_, beat - position_);
+          last_timestamp_ + SecondsFromBeats(tempo_, beat - position_);
       beat_callback_(beat_timestamp, static_cast<int>(beat));
     }
   }
-
+  // Trigger messages.
   for (auto& [id, controller] : controllers_) {
     const auto messages = controller.messages.GetIterator(end_position);
     for (auto it = messages.cbegin; it != messages.cend; ++it) {
+      const auto message_data = it->data;
       const double message_timestamp =
-          begin_timestamp + SecondsFromBeats(tempo_, it->timestamp - position_);
-      std::visit(
-          MessageVisitor{
-              [this, id = id, message_timestamp = message_timestamp,
-               controller = &controller](const ControlData& control_data) {
-                task_runner_.Add([this, id, message_timestamp, control_data]() {
-                  auto* processor = FindOrNull(processors_, id);
-                  DCHECK(processor);
-                  processor->messages.Push(message_timestamp, control_data);
-                });
-                controller->params.at(control_data.id) = control_data.value;
-              },
-              [this, id = id, message_timestamp = message_timestamp,
-               controller = &controller](const NoteOffData& note_off_data) {
-                task_runner_.Add([this, id, message_timestamp,
-                                  note_off_data]() {
-                  auto* processor = FindOrNull(processors_, id);
-                  DCHECK(processor);
-                  processor->messages.Push(message_timestamp, note_off_data);
-                });
-                controller->active_notes.erase(note_off_data.index);
-                if (note_off_callback_ != nullptr) {
-                  note_off_callback_(message_timestamp, id,
-                                     note_off_data.index);
-                }
-              },
-              [this, id = id, message_timestamp = message_timestamp,
-               controller = &controller](const NoteOnData& note_on_data) {
-                task_runner_.Add([this, id, message_timestamp, note_on_data]() {
-                  auto* processor = FindOrNull(processors_, id);
-                  DCHECK(processor);
-                  processor->messages.Push(message_timestamp, note_on_data);
-                });
-                controller->active_notes.insert(note_on_data.index);
-                if (note_on_callback_ != nullptr) {
-                  note_on_callback_(message_timestamp, id, note_on_data.index,
-                                    note_on_data.intensity);
-                }
-              }},
-          it->data);
+          last_timestamp_ + SecondsFromBeats(tempo_, it->timestamp - position_);
+      std::visit(MessageVisitor{
+                     [this, id = id,
+                      controller = &controller](const ControlData& data) {
+                       controller->params.at(data.id) = data.value;
+                     },
+                     [this, id = id, controller = &controller,
+                      message_timestamp](const NoteOffData& data) {
+                       controller->active_notes.erase(data.index);
+                       if (note_off_callback_ != nullptr) {
+                         note_off_callback_(message_timestamp, id, data.index);
+                       }
+                     },
+                     [this, id = id, controller = &controller,
+                      message_timestamp](const NoteOnData& data) {
+                       controller->active_notes.insert(data.index);
+                       if (note_on_callback_ != nullptr) {
+                         note_on_callback_(message_timestamp, id, data.index,
+                                           data.intensity);
+                       }
+                     }},
+                 message_data);
+      task_runner_.Add([this, id = id, message_data, message_timestamp]() {
+        auto* processor = FindOrNull(processors_, id);
+        DCHECK(processor);
+        processor->messages.Push(message_timestamp, message_data);
+      });
     }
     controller.messages.Clear(messages);
   }
+
   last_timestamp_ = timestamp;
   position_ = end_position;
 }

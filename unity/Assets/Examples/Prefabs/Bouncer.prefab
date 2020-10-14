@@ -220,8 +220,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numVoices: 16
+  gain: 0.25
+  attack: 0
+  decay: 0
+  sustain: 1
+  release: 0.1
   oscillatorType: 2
+  numVoices: 16
 --- !u!114 &775038743496979821
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,22 +5,22 @@
 #include <sstream>
 
 // Logging macros.
-#define LOG(severity) BARELYAPI_LOG(severity)
-#define CHECK(expression) BARELYAPI_CHECK(expression)
-#define CHECK_EQ(lhs, rhs) BARELYAPI_CHECK_OP(==, lhs, rhs)
-#define CHECK_GE(lhs, rhs) BARELYAPI_CHECK_OP(>=, lhs, rhs)
-#define CHECK_GT(lhs, rhs) BARELYAPI_CHECK_OP(>, lhs, rhs)
-#define CHECK_LE(lhs, rhs) BARELYAPI_CHECK_OP(<=, lhs, rhs)
-#define CHECK_LT(lhs, rhs) BARELYAPI_CHECK_OP(<, lhs, rhs)
-#define CHECK_NE(lhs, rhs) BARELYAPI_CHECK_OP(!=, lhs, rhs)
-#define DLOG(severity) BARELYAPI_DLOG(severity)
-#define DCHECK(expression) BARELYAPI_DCHECK(expression)
-#define DCHECK_EQ(lhs, rhs) BARELYAPI_DCHECK_OP(==, lhs, rhs)
-#define DCHECK_GE(lhs, rhs) BARELYAPI_DCHECK_OP(>=, lhs, rhs)
-#define DCHECK_GT(lhs, rhs) BARELYAPI_DCHECK_OP(>, lhs, rhs)
-#define DCHECK_LE(lhs, rhs) BARELYAPI_DCHECK_OP(<=, lhs, rhs)
-#define DCHECK_LT(lhs, rhs) BARELYAPI_DCHECK_OP(<, lhs, rhs)
-#define DCHECK_NE(lhs, rhs) BARELYAPI_DCHECK_OP(!=, lhs, rhs)
+#define LOG(severity) BARELY_LOG(severity)
+#define CHECK(expression) BARELY_CHECK(expression)
+#define CHECK_EQ(lhs, rhs) BARELY_CHECK_OP(==, lhs, rhs)
+#define CHECK_GE(lhs, rhs) BARELY_CHECK_OP(>=, lhs, rhs)
+#define CHECK_GT(lhs, rhs) BARELY_CHECK_OP(>, lhs, rhs)
+#define CHECK_LE(lhs, rhs) BARELY_CHECK_OP(<=, lhs, rhs)
+#define CHECK_LT(lhs, rhs) BARELY_CHECK_OP(<, lhs, rhs)
+#define CHECK_NE(lhs, rhs) BARELY_CHECK_OP(!=, lhs, rhs)
+#define DLOG(severity) BARELY_DLOG(severity)
+#define DCHECK(expression) BARELY_DCHECK(expression)
+#define DCHECK_EQ(lhs, rhs) BARELY_DCHECK_OP(==, lhs, rhs)
+#define DCHECK_GE(lhs, rhs) BARELY_DCHECK_OP(>=, lhs, rhs)
+#define DCHECK_GT(lhs, rhs) BARELY_DCHECK_OP(>, lhs, rhs)
+#define DCHECK_LE(lhs, rhs) BARELY_DCHECK_OP(<=, lhs, rhs)
+#define DCHECK_LT(lhs, rhs) BARELY_DCHECK_OP(<, lhs, rhs)
+#define DCHECK_NE(lhs, rhs) BARELY_DCHECK_OP(!=, lhs, rhs)
 
 namespace barelyapi {
 namespace logging {
@@ -97,28 +97,28 @@ void SetLogWriter(LogWriter* log_writer);
 }  // namespace barelyapi
 
 // Logging macros (internal).
-#define BARELYAPI_LOG(severity)                                               \
+#define BARELY_LOG(severity)                                                  \
   ::barelyapi::logging::Logger(::barelyapi::logging::LogSeverity::##severity, \
                                __FILE__, __LINE__)                            \
       .GetStream()
-#define BARELYAPI_NULL_LOG ::barelyapi::logging::GetNullStream()
+#define BARELY_NULL_LOG ::barelyapi::logging::GetNullStream()
 
-#define BARELYAPI_CHECK(expression)                                       \
-  (!(expression)                                                          \
-       ? BARELYAPI_LOG(FATAL) << "Check failed: '" << #expression << "' " \
-       : BARELYAPI_NULL_LOG)
+#define BARELY_CHECK(expression)                                       \
+  (!(expression)                                                       \
+       ? BARELY_LOG(FATAL) << "Check failed: '" << #expression << "' " \
+       : BARELY_NULL_LOG)
 
-#define BARELYAPI_CHECK_OP(op, lhs, rhs) \
-  BARELYAPI_CHECK(lhs op rhs) << "(" << lhs << " " << #op << " " << rhs << ") "
+#define BARELY_CHECK_OP(op, lhs, rhs) \
+  BARELY_CHECK(lhs op rhs) << "(" << lhs << " " << #op << " " << rhs << ") "
 
 #if !defined(NDEBUG) || defined(_DEBUG)
-#define BARELYAPI_DLOG(severity) BARELYAPI_LOG(severity)
-#define BARELYAPI_DCHECK(expression) BARELYAPI_CHECK(expression)
-#define BARELYAPI_DCHECK_OP(op, lhs, rhs) BARELYAPI_CHECK_OP(op, lhs, rhs)
+#define BARELY_DLOG(severity) BARELY_LOG(severity)
+#define BARELY_DCHECK(expression) BARELY_CHECK(expression)
+#define BARELY_DCHECK_OP(op, lhs, rhs) BARELY_CHECK_OP(op, lhs, rhs)
 #else  // !defined(NDEBUG) || defined(_DEBUG)
-#define BARELYAPI_DLOG(severity) BARELYAPI_NULL_LOG
-#define BARELYAPI_DCHECK(expression) BARELYAPI_NULL_LOG
-#define BARELYAPI_DCHECK_OP(op, lhs, rhs) BARELYAPI_NULL_LOG
+#define BARELY_DLOG(severity) BARELY_NULL_LOG
+#define BARELY_DCHECK(expression) BARELY_NULL_LOG
+#define BARELY_DCHECK_OP(op, lhs, rhs) BARELY_NULL_LOG
 #endif  // !defined(NDEBUG) || defined(_DEBUG)
 
 #endif  // BARELYMUSICIAN_BASE_LOGGING_H_

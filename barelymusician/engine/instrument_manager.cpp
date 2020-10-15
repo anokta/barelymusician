@@ -205,7 +205,7 @@ bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
                                 double end_timestamp, float* output,
                                 int num_channels, int num_frames) {
   DCHECK_GE(begin_timestamp, 0.0);
-  DCHECK_LT(begin_timestamp, end_timestamp);
+  DCHECK_LE(begin_timestamp, end_timestamp);
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
   if (processor == nullptr) {

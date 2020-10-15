@@ -122,6 +122,12 @@ std::optional<bool> InstrumentManager::IsNoteOn(Id instrument_id,
   return std::nullopt;
 }
 
+void InstrumentManager::AllNotesOff() {
+  for (auto& [id, controller] : controllers_) {
+    AllNotesOff(id);
+  }
+}
+
 bool InstrumentManager::AllNotesOff(Id instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
@@ -198,6 +204,8 @@ bool InstrumentManager::NoteOn(Id instrument_id, float index, float intensity) {
 bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
                                 double end_timestamp, float* output,
                                 int num_channels, int num_frames) {
+  DCHECK_GE(begin_timestamp, 0.0);
+  DCHECK_LT(begin_timestamp, end_timestamp);
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
   if (processor == nullptr) {
@@ -263,6 +271,9 @@ bool InstrumentManager::ResetAllParams(Id instrument_id) {
 
 bool InstrumentManager::ScheduleControl(Id instrument_id, double position,
                                         int id, float value) {
+  if (position < position_) {
+    return false;
+  }
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
     return false;
@@ -278,6 +289,11 @@ bool InstrumentManager::ScheduleControl(Id instrument_id, double position,
 bool InstrumentManager::ScheduleNote(Id instrument_id, double position,
                                      double duration, float index,
                                      float intensity) {
+  DCHECK_GE(position, 0.0);
+  DCHECK_GE(duration, 0.0);
+  if (position < position_) {
+    return false;
+  }
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(position, NoteOnData{index, intensity});
@@ -289,6 +305,10 @@ bool InstrumentManager::ScheduleNote(Id instrument_id, double position,
 
 bool InstrumentManager::ScheduleNoteOff(Id instrument_id, double position,
                                         float index) {
+  DCHECK_GE(position, 0.0);
+  if (position < position_) {
+    return false;
+  }
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(position, NoteOffData{index});
@@ -299,6 +319,10 @@ bool InstrumentManager::ScheduleNoteOff(Id instrument_id, double position,
 
 bool InstrumentManager::ScheduleNoteOn(Id instrument_id, double position,
                                        float index, float intensity) {
+  DCHECK_GE(position, 0.0);
+  if (position < position_) {
+    return false;
+  }
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->messages.Push(position, NoteOnData{index, intensity});
@@ -319,23 +343,29 @@ void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-void InstrumentManager::SetPosition(double position) { position_ = position; }
+void InstrumentManager::SetPosition(double position) {
+  DCHECK_GE(position, 0.0);
+  position_ = position;
+  for (auto& [id, controller] : controllers_) {
+    controller.messages.Clear(controller.messages.GetIterator(position_));
+  }
+}
 
-void InstrumentManager::SetTempo(double tempo) { tempo_ = tempo; }
+void InstrumentManager::SetTempo(double tempo) {
+  DCHECK_GE(tempo, 0.0);
+  tempo_ = tempo;
+}
 
 void InstrumentManager::Start(double timestamp) {
+  DCHECK_GE(timestamp, 0.0);
   last_timestamp_ = timestamp;
   is_playing_ = true;
 }
 
-void InstrumentManager::Stop() {
-  is_playing_ = false;
-  for (const auto& [id, message] : controllers_) {
-    AllNotesOff(id);
-  }
-}
+void InstrumentManager::Stop() { is_playing_ = false; }
 
 void InstrumentManager::Update(double timestamp) {
+  DCHECK_GE(timestamp, 0.0);
   if (!is_playing_ || tempo_ <= 0.0 || timestamp <= last_timestamp_) {
     return;
   }

@@ -74,6 +74,9 @@ class InstrumentManager {
   bool IsPlaying() const;
 
   // Stops all notes.
+  void AllNotesOff();
+
+  // Stops all notes.
   //
   // @param instrument_id Instrument id.
   bool AllNotesOff(Id instrument_id);

@@ -1066,7 +1066,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7514fc5c00cdc1247a6c4a66a8bbe8ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootIndex: 60
+  rootIndex: 48
   beatNotes:
   - index: 0
     intensity: 1
@@ -1074,6 +1074,12 @@ MonoBehaviour:
     duration: 0.5
     beatMultiplier: 6
     beatPeriod: 4
+  - index: 3
+    intensity: 0.5
+    position: 0.5
+    duration: 0.25
+    beatMultiplier: 6
+    beatPeriod: 6
   interactive: 0
 --- !u!1 &1554266977
 GameObject:

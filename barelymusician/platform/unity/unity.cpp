@@ -1,7 +1,6 @@
 #include "barelymusician/platform/unity/unity.h"
 
 #include <algorithm>
-#include <limits>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -20,16 +19,13 @@ namespace {
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate)
-      : sample_rate(sample_rate), start_timestamp(0.0) {}
+  BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}
 
   // System sample rate.
   const int sample_rate;
 
   // Engine.
   InstrumentManager engine;
-
-  double start_timestamp;
 
   // Unity log writer.
   UnityLogWriter writer;
@@ -216,7 +212,7 @@ void Start(double timestamp) {
 void Stop() {
   DCHECK(barelymusician);
   barelymusician->engine.Stop();
-  barelymusician->start_timestamp = std::numeric_limits<double>::max();
+  barelymusician->engine.AllNotesOff();
 }
 
 void Update(double timestamp) {

@@ -68,17 +68,14 @@ InstrumentManager::Id InstrumentManager::Create(
   const auto it =
       controllers_.emplace(instrument_id, InstrumentController{definition});
   auto& controller = it.first->second;
+  auto instrument = definition.get_instrument_fn();
   for (const auto& param : controller.definition.param_definitions) {
     controller.params.emplace(param.id, param.default_value);
+    instrument->Control(param.id, param.default_value);
   }
-  auto instrument = definition.get_instrument_fn();
   task_runner_.Add([this, instrument_id,
-                    param_definitions = definition.param_definitions,
                     instrument = std::make_shared<std::unique_ptr<Instrument>>(
                         std::move(instrument))]() {
-    for (const auto& param : param_definitions) {
-      (*instrument)->Control(param.id, param.default_value);
-    }
     processors_.emplace(instrument_id,
                         InstrumentProcessor{std::move(*instrument)});
   });

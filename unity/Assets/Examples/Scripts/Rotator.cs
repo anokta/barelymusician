@@ -4,9 +4,10 @@ using UnityEngine;
 using BarelyApi;
 
 public class Rotator : MonoBehaviour {
+  public Vector3 axis;
+
   private void Update() {
     float angle = 0.5f * Mathf.PI * Mathf.Rad2Deg * (float)BarelyApi.BarelyMusician.GetPosition();
-    Vector3 axis = Vector3.one;
-    transform.rotation = Quaternion.AngleAxis(angle, axis);
+    transform.rotation = Quaternion.AngleAxis(angle, axis.normalized);
   }
 }

@@ -4,6 +4,8 @@ using UnityEngine;
 using BarelyApi;
 
 public class Pulser : MonoBehaviour {
+  public float scaleMultiplier = 2.0f;
+
   private Vector3 targetScale = Vector3.one;
 
   private void Awake() {
@@ -24,6 +26,6 @@ public class Pulser : MonoBehaviour {
   }
 
   private void OnBeat(double dspTime, int beat) {
-    transform.localScale = targetScale * 2.0f;
+    transform.localScale = targetScale * scaleMultiplier;
   }
 }

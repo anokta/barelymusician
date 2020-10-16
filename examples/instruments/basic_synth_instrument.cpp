@@ -22,50 +22,56 @@ const int kDefaultNumVoices = 8;
 
 }  // namespace
 
-BasicSynthInstrument::BasicSynthInstrument(int sample_rate)
-    : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {}
-
 void BasicSynthInstrument::Control(int id, float value) {
+  if (!voice_.has_value()) return;
   switch (static_cast<BasicSynthInstrumentParam>(id)) {
     case BasicSynthInstrumentParam::kGain:
       gain_ = value;
       break;
     case BasicSynthInstrumentParam::kEnvelopeAttack:
-      voice_.Update([value](BasicSynthVoice* voice) {
+      voice_->Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetAttack(value);
       });
       break;
     case BasicSynthInstrumentParam::kEnvelopeDecay:
-      voice_.Update([value](BasicSynthVoice* voice) {
+      voice_->Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetRelease(value);
       });
       break;
     case BasicSynthInstrumentParam::kEnvelopeSustain:
-      voice_.Update([value](BasicSynthVoice* voice) {
+      voice_->Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetSustain(value);
       });
       break;
     case BasicSynthInstrumentParam::kEnvelopeRelease:
-      voice_.Update([value](BasicSynthVoice* voice) {
+      voice_->Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetRelease(value);
       });
       break;
     case BasicSynthInstrumentParam::kOscillatorType:
-      voice_.Update([value](BasicSynthVoice* voice) {
+      voice_->Update([value](BasicSynthVoice* voice) {
         voice->generator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
     case BasicSynthInstrumentParam::kNumVoices:
-      voice_.Resize(static_cast<int>(value));
+      voice_->Resize(static_cast<int>(value));
       break;
   }
 }
 
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
+void BasicSynthInstrument::PrepareToPlay(int sample_rate) {
+  voice_.emplace(BasicSynthVoice(sample_rate));
+}
+
+void BasicSynthInstrument::NoteOff(float index) {
+  if (!voice_.has_value()) return;
+  voice_->Stop(index);
+}
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
+  if (!voice_.has_value()) return;
+  voice_->Start(index, [index, intensity](BasicSynthVoice* voice) {
     voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
     voice->set_gain(intensity);
   });
@@ -73,16 +79,17 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
 
 void BasicSynthInstrument::Process(float* output, int num_channels,
                                    int num_frames) {
+  if (!voice_.has_value()) return;
   float mono_sample = 0.0f;
   for (int frame = 0; frame < num_frames; ++frame) {
-    mono_sample = gain_ * voice_.Next(0);
+    mono_sample = gain_ * voice_->Next(0);
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }
   }
 }
 
-InstrumentDefinition BasicSynthInstrument::GetDefinition(int sample_rate) {
+InstrumentDefinition BasicSynthInstrument::GetDefinition() {
   InstrumentDefinition definition;
   definition.name = "BasicSynth";
   definition.param_definitions = {
@@ -99,8 +106,8 @@ InstrumentDefinition BasicSynthInstrument::GetDefinition(int sample_rate) {
        static_cast<float>(kDefaultOscillatorType), 0.0f, 10.0f},
       {BasicSynthInstrumentParam::kNumVoices, "num voices", "",
        static_cast<float>(kDefaultNumVoices), 0.0f, 32.0f}};
-  definition.get_instrument_fn = [sample_rate]() {
-    return std::make_unique<BasicSynthInstrument>(sample_rate);
+  definition.get_instrument_fn = []() {
+    return std::make_unique<BasicSynthInstrument>();
   };
   return definition;
 }

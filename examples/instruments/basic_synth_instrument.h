@@ -1,6 +1,8 @@
 #ifndef EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
+#include <optional>
+
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument.h"
@@ -22,22 +24,21 @@ enum BasicSynthInstrumentParam {
 
 class BasicSynthInstrument : public Instrument {
  public:
-  explicit BasicSynthInstrument(int sample_rate);
-
   // Implements |Instrument|.
   void Control(int id, float value) override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
+  void PrepareToPlay(int sample_rate) override;
   void Process(float* output, int num_channels, int num_frames) override;
 
-  static InstrumentDefinition GetDefinition(int sample_rate);
+  static InstrumentDefinition GetDefinition();
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;
 
-  float gain_;
+  float gain_ = 0.0f;
 
-  PolyphonicVoice<BasicSynthVoice> voice_;
+  std::optional<PolyphonicVoice<BasicSynthVoice>> voice_;
 };
 
 }  // namespace examples

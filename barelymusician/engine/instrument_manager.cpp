@@ -51,8 +51,9 @@ double SecondsFromBeats(double tempo, double beats) {
 
 }  // namespace
 
-InstrumentManager::InstrumentManager()
-    : is_playing_(false),
+InstrumentManager::InstrumentManager(int sample_rate)
+    : sample_rate_(sample_rate),
+      is_playing_(false),
       position_(0.0),
       tempo_(0.0),
       last_timestamp_(0.0),
@@ -60,7 +61,9 @@ InstrumentManager::InstrumentManager()
       note_off_callback_(nullptr),
       note_on_callback_(nullptr),
       id_counter_(0),
-      task_runner_(kNumMaxTasks) {}
+      task_runner_(kNumMaxTasks) {
+  DCHECK_GE(sample_rate, 0);
+}
 
 InstrumentManager::Id InstrumentManager::Create(
     InstrumentDefinition definition) {
@@ -69,6 +72,7 @@ InstrumentManager::Id InstrumentManager::Create(
       controllers_.emplace(instrument_id, InstrumentController{definition});
   auto& controller = it.first->second;
   auto instrument = definition.get_instrument_fn();
+  instrument->PrepareToPlay(sample_rate_);
   for (const auto& param : controller.definition.param_definitions) {
     controller.params.emplace(param.id, param.default_value);
     instrument->Control(param.id, param.default_value);
@@ -130,11 +134,25 @@ bool InstrumentManager::AllNotesOff(Id instrument_id) {
   if (controller == nullptr) {
     return false;
   }
+  controller->messages.Clear();
+  task_runner_.Add([this, instrument_id, timestamp = last_timestamp_]() {
+    auto* processor = FindOrNull(processors_, instrument_id);
+    DCHECK(processor);
+    Instrument* instrument = processor->instrument.get();
+    const auto messages = processor->messages.GetIterator(timestamp);
+    for (auto it = messages.cbegin; it != messages.cend; ++it) {
+      std::visit(MessageVisitor{[instrument](const NoteOffData& data) {
+                                  instrument->NoteOff(data.index);
+                                },
+                                [](const auto&) {}},
+                 it->data);
+    }
+    processor->messages.Clear(messages);
+  });
   for (const auto& note : controller->active_notes) {
     task_runner_.Add([this, instrument_id, note = note]() {
       auto* processor = FindOrNull(processors_, instrument_id);
       DCHECK(processor);
-      processor->messages.Clear();
       processor->instrument->NoteOff(note);
     });
   }
@@ -199,10 +217,9 @@ bool InstrumentManager::NoteOn(Id instrument_id, float index, float intensity) {
 }
 
 bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
-                                double end_timestamp, float* output,
-                                int num_channels, int num_frames) {
+                                float* output, int num_channels,
+                                int num_frames) {
   DCHECK_GE(begin_timestamp, 0.0);
-  DCHECK_LE(begin_timestamp, end_timestamp);
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
   if (processor == nullptr) {
@@ -211,6 +228,9 @@ bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
   Instrument* instrument = processor->instrument.get();
   int frame = 0;
   // Process messages.
+  const double end_timestamp =
+      begin_timestamp +
+      static_cast<double>(num_frames) / static_cast<double>(sample_rate_);
   if (begin_timestamp < end_timestamp) {
     // Include *all* messages before |end_timestamp|.
     const auto messages = processor->messages.GetIterator(end_timestamp);

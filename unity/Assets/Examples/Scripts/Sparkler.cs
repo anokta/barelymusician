@@ -4,6 +4,8 @@ using UnityEngine;
 using BarelyApi;
 
 public class Sparkler : MonoBehaviour {
+  public Instrument targetInstrument;
+
   public Color noteOffColor = Color.white;
 
   private Color targetColor = Color.white;
@@ -29,10 +31,12 @@ public class Sparkler : MonoBehaviour {
   }
 
   private void OnNoteOff(double dspTime, Instrument instrument, float index) {
+    if (instrument != targetInstrument) return;
     targetColor = noteOffColor;
   }
 
   private void OnNoteOn(double dspTime, Instrument instrument, float index, float intensity) {
-    targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+    if (instrument != targetInstrument) return;
+    targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, intensity, intensity);
   }
 }

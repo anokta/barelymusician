@@ -32,7 +32,7 @@ class InstrumentManager {
                                             float index, float intensity)>;
 
   // Constructs new |InstrumentManager|.
-  InstrumentManager();
+  explicit InstrumentManager(int sample_rate);
 
   // Creates new instrument.
   //
@@ -105,12 +105,11 @@ class InstrumentManager {
   //
   // @param instrument_id Instrument id.
   // @param begin_timestamp Begin timestamp.
-  // @param end_timestamp End timestamp.
   // @param output Pointer to output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  bool Process(Id instrument_id, double begin_timestamp, double end_timestamp,
-               float* output, int num_channels, int num_frames);
+  bool Process(Id instrument_id, double begin_timestamp, float* output,
+               int num_channels, int num_frames);
 
   // Resets all parameters.
   //
@@ -210,6 +209,8 @@ class InstrumentManager {
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
+
+  int sample_rate_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;

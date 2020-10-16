@@ -19,10 +19,7 @@ namespace {
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}
-
-  // System sample rate.
-  const int sample_rate;
+  BarelyMusician(int sample_rate) : engine(sample_rate) {}
 
   // Engine.
   InstrumentManager engine;
@@ -74,8 +71,7 @@ std::int64_t CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
 std::int64_t CreateBasicSynthInstrument() {
   DCHECK(barelymusician);
   const std::int64_t id = barelymusician->engine.Create(
-      barelyapi::examples::BasicSynthInstrument::GetDefinition(
-          barelymusician->sample_rate));
+      barelyapi::examples::BasicSynthInstrument::GetDefinition());
   return id;
 }
 
@@ -113,11 +109,8 @@ void Process(std::int64_t id, double timestamp, float* output, int num_channels,
              int num_frames) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician != nullptr) {
-    const double end_timestamp =
-        timestamp + static_cast<double>(num_frames) /
-                        static_cast<double>(barelymusician->sample_rate);
-    barelymusician->engine.Process(id, timestamp, end_timestamp, output,
-                                   num_channels, num_frames);
+    barelymusician->engine.Process(id, timestamp, output, num_channels,
+                                   num_frames);
   }
 }
 

@@ -10,9 +10,7 @@ namespace {
 // Tests that the message queue returns an added single message as expected.
 TEST(MessageQueueTest, SingleMessage) {
   const double kTimestamp = 0.2;
-  const double kBeginTimestamp = 0.1;
   const double kEndTimestamp = 0.5;
-  EXPECT_GE(kTimestamp, kBeginTimestamp);
   EXPECT_LT(kTimestamp, kEndTimestamp);
 
   MessageQueue message_queue;
@@ -23,8 +21,7 @@ TEST(MessageQueueTest, SingleMessage) {
   EXPECT_FALSE(message_queue.Empty());
 
   // Pop message.
-  const auto iterator =
-      message_queue.GetIterator(kBeginTimestamp, kEndTimestamp);
+  const auto iterator = message_queue.GetIterator(kEndTimestamp);
   EXPECT_NE(iterator.cbegin, iterator.cend);
   EXPECT_DOUBLE_EQ(iterator.cbegin->timestamp, kTimestamp);
 
@@ -49,8 +46,7 @@ TEST(MessageQueueTest, MultipleMessages) {
   for (int i = 0; i < kNumMessages; ++i) {
     const double begin_timestamp = static_cast<double>(i);
     const double end_timestamp = static_cast<double>(i + 1);
-    const auto iterator =
-        message_queue.GetIterator(begin_timestamp, end_timestamp);
+    const auto iterator = message_queue.GetIterator(end_timestamp);
     EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 1);
     EXPECT_DOUBLE_EQ(iterator.cbegin->timestamp, begin_timestamp);
 
@@ -64,9 +60,7 @@ TEST(MessageQueueTest, MultipleMessages) {
 TEST(MessageQueueTest, MultipleMessagesSameTimestamp) {
   const int kNumMessages = 4;
   const double kTimestamp = 2.4;
-  const double kBeginTimestamp = 2.0;
   const double kEndTimestamp = 4.0;
-  EXPECT_GE(kTimestamp, kBeginTimestamp);
   EXPECT_LT(kTimestamp, kEndTimestamp);
 
   MessageQueue message_queue;
@@ -79,8 +73,7 @@ TEST(MessageQueueTest, MultipleMessagesSameTimestamp) {
   }
 
   // Pop all messages.
-  const auto iterator =
-      message_queue.GetIterator(kBeginTimestamp, kEndTimestamp);
+  const auto iterator = message_queue.GetIterator(kEndTimestamp);
   EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), kNumMessages);
   for (auto it = iterator.cbegin; it != iterator.cend; ++it) {
     EXPECT_DOUBLE_EQ(it->timestamp, kTimestamp);
@@ -98,7 +91,7 @@ TEST(MessageQueueTest, Clear) {
   EXPECT_TRUE(message_queue.Empty());
 
   MessageQueue::Iterator iterator;
-  iterator = message_queue.GetIterator(0.0, 1.0);
+  iterator = message_queue.GetIterator(1.0);
   EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 0);
 
   for (int i = 0; i < kNumMessages; ++i) {
@@ -106,13 +99,13 @@ TEST(MessageQueueTest, Clear) {
         static_cast<double>(i) / static_cast<double>(kNumMessages), {});
     EXPECT_FALSE(message_queue.Empty());
   }
-  iterator = message_queue.GetIterator(0.0, 1.0);
+  iterator = message_queue.GetIterator(1.0);
   EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), kNumMessages);
 
   message_queue.Clear();
   EXPECT_TRUE(message_queue.Empty());
 
-  iterator = message_queue.GetIterator(0.0, 1.0);
+  iterator = message_queue.GetIterator(1.0);
   EXPECT_EQ(std::distance(iterator.cbegin, iterator.cend), 0);
 }
 

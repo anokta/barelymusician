@@ -45,9 +45,6 @@
     <ClCompile Include="..\..\barelymusician\engine\note_utils_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\engine\engine_test.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\barelymusician\dsp\polyphonic_voice_test.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>

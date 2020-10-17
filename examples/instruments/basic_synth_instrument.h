@@ -2,11 +2,12 @@
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
 #include <optional>
+#include <utility>
+#include <vector>
 
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "instruments/basic_enveloped_voice.h"
 
 namespace barelyapi {
@@ -31,7 +32,7 @@ class BasicSynthInstrument : public Instrument {
   void PrepareToPlay(int sample_rate) override;
   void Process(float* output, int num_channels, int num_frames) override;
 
-  static InstrumentDefinition GetDefinition();
+  static std::vector<std::pair<int, float>> GetDefaultParams();
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;

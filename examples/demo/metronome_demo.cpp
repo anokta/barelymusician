@@ -1,6 +1,7 @@
 #include <cctype>
 #include <chrono>
 #include <cmath>
+#include <memory>
 #include <thread>
 
 #include "audio_output/pa_audio_output.h"
@@ -13,7 +14,6 @@
 
 namespace {
 
-using ::barelyapi::InstrumentDefinition;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -61,28 +61,18 @@ int main(int argc, char* argv[]) {
   InstrumentManager engine;
   engine.SetTempo(kInitialTempo);
 
-  const auto metronome_id =
-      engine.Create(BasicSynthInstrument::GetDefinition(kSampleRate));
-  engine.Control(
-      metronome_id,
-      static_cast<InstrumentManager::Id>(BasicSynthInstrumentParam::kNumVoices),
-      static_cast<float>(kNumVoices));
-  engine.Control(
-      metronome_id,
-      static_cast<InstrumentManager::Id>(BasicSynthInstrumentParam::kGain),
-      kGain);
-  engine.Control(metronome_id,
-                 static_cast<InstrumentManager::Id>(
-                     BasicSynthInstrumentParam::kOscillatorType),
-                 static_cast<float>(kOscillatorType));
-  engine.Control(metronome_id,
-                 static_cast<InstrumentManager::Id>(
-                     BasicSynthInstrumentParam::kEnvelopeAttack),
-                 kAttack);
-  engine.Control(metronome_id,
-                 static_cast<InstrumentManager::Id>(
-                     BasicSynthInstrumentParam::kEnvelopeRelease),
-                 kRelease);
+  auto metronome = std::make_unique<BasicSynthInstrument>();
+  metronome->PrepareToPlay(kSampleRate);
+  const auto metronome_id = engine.Create(
+      std::move(metronome),
+      {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
+        static_cast<float>(kNumVoices)},
+       {static_cast<int>(BasicSynthInstrumentParam::kGain), kGain},
+       {static_cast<int>(BasicSynthInstrumentParam::kOscillatorType),
+        static_cast<float>(kOscillatorType)},
+       {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack), kAttack},
+       {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeRelease),
+        kRelease}});
 
   // Beat callback.
   const auto beat_callback = [&](double, int beat) {

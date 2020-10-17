@@ -6,9 +6,9 @@
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/message_queue.h"
 #include "barelymusician/util/task_runner.h"
 
@@ -32,13 +32,14 @@ class InstrumentManager {
                                             float index, float intensity)>;
 
   // Constructs new |InstrumentManager|.
-  explicit InstrumentManager(int sample_rate);
+  InstrumentManager();
 
   // Creates new instrument.
   //
   // @param definition Instrument definition.
   // @return Instrument id.
-  Id Create(InstrumentDefinition definition);
+  Id Create(std::unique_ptr<Instrument> instrument,
+            const std::vector<std::pair<int, float>>& params);
 
   // Destroys instrument.
   //
@@ -105,11 +106,12 @@ class InstrumentManager {
   //
   // @param instrument_id Instrument id.
   // @param begin_timestamp Begin timestamp.
+  // @param end_timestamp Begin timestamp.
   // @param output Pointer to output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  bool Process(Id instrument_id, double begin_timestamp, float* output,
-               int num_channels, int num_frames);
+  bool Process(Id instrument_id, double begin_timestamp, double end_timestamp,
+               float* output, int num_channels, int num_frames);
 
   // Resets all parameters.
   //
@@ -182,13 +184,19 @@ class InstrumentManager {
   void Update(double timestamp);
 
  private:
+  // Instrument parameter.
+  struct InstrumentParam {
+    // Current parameter value.
+    float value;
+
+    // Default parameter value.
+    float default_value;
+  };
+
   // Instrument controller (main thread).
   struct InstrumentController {
-    // Instrument definition.
-    InstrumentDefinition definition;
-
     // Instrument params.
-    std::unordered_map<int, float> params;
+    std::unordered_map<int, InstrumentParam> params;
 
     // Active note indices.
     std::unordered_set<float> active_notes;
@@ -209,8 +217,6 @@ class InstrumentManager {
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
-
-  int sample_rate_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;

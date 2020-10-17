@@ -93,9 +93,6 @@
     <ClInclude Include="..\..\barelymusician\engine\note_utils.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\engine\instrument_definition.h">
-      <Filter>Header Files\engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\barelymusician\engine\instrument_manager.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>

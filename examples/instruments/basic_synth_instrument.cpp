@@ -89,27 +89,20 @@ void BasicSynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-InstrumentDefinition BasicSynthInstrument::GetDefinition() {
-  InstrumentDefinition definition;
-  definition.name = "BasicSynth";
-  definition.param_definitions = {
-      {BasicSynthInstrumentParam::kGain, "gain", "", kDefaultGain, 0.0f, 1.0f},
-      {BasicSynthInstrumentParam::kEnvelopeAttack, "attack", "",
-       kDefaultEnvelopeAttack, 0.0f, 60.0f},
-      {BasicSynthInstrumentParam::kEnvelopeDecay, "decay", "",
-       kDefaultEnvelopeDecay, 0.0f, 60.0f},
-      {BasicSynthInstrumentParam::kEnvelopeSustain, "sustain", "",
-       kDefaultEnvelopeSustain, 0.0f, 1.0f},
-      {BasicSynthInstrumentParam::kEnvelopeRelease, "release", "",
-       kDefaultEnvelopeRelease, 0.0f, 60.0f},
-      {BasicSynthInstrumentParam::kOscillatorType, "osc type", "",
-       static_cast<float>(kDefaultOscillatorType), 0.0f, 10.0f},
-      {BasicSynthInstrumentParam::kNumVoices, "num voices", "",
-       static_cast<float>(kDefaultNumVoices), 0.0f, 32.0f}};
-  definition.get_instrument_fn = []() {
-    return std::make_unique<BasicSynthInstrument>();
-  };
-  return definition;
+std::vector<std::pair<int, float>> BasicSynthInstrument::GetDefaultParams() {
+  return {{static_cast<int>(BasicSynthInstrumentParam::kGain), kDefaultGain},
+          {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack),
+           kDefaultEnvelopeAttack},
+          {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeDecay),
+           kDefaultEnvelopeDecay},
+          {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeSustain),
+           kDefaultEnvelopeSustain},
+          {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeRelease),
+           kDefaultEnvelopeRelease},
+          {static_cast<int>(BasicSynthInstrumentParam::kOscillatorType),
+           static_cast<float>(kDefaultOscillatorType)},
+          {static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
+           static_cast<float>(kDefaultNumVoices)}};
 }
 
 }  // namespace examples

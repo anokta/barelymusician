@@ -47,7 +47,10 @@ class BasicEnvelopedVoice : public Voice {
 
 template <class GeneratorType>
 BasicEnvelopedVoice<GeneratorType>::BasicEnvelopedVoice(int sample_rate)
-    : envelope_(sample_rate), generator_(sample_rate), output_(0.0f) {}
+    : envelope_(sample_rate),
+      generator_(sample_rate),
+      gain_(0.0f),
+      output_(0.0f) {}
 
 template <class GeneratorType>
 float BasicEnvelopedVoice<GeneratorType>::Next(int channel) {

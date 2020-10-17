@@ -35,12 +35,6 @@ class MessageQueue {
 
   // Returns iterator within the given range.
   //
-  // @param begin_timestamp Start timestamp.
-  // @param end_timestamp End timestamp.
-  Iterator GetIterator(double begin_timestamp, double end_timestamp) const;
-
-  // Returns iterator within the given range.
-  //
   // @param timestamp End timestamp.
   Iterator GetIterator(double timestamp) const;
 

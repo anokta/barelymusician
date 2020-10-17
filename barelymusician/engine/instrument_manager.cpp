@@ -51,9 +51,8 @@ double SecondsFromBeats(double tempo, double beats) {
 
 }  // namespace
 
-InstrumentManager::InstrumentManager(int sample_rate)
-    : sample_rate_(sample_rate),
-      is_playing_(false),
+InstrumentManager::InstrumentManager()
+    : is_playing_(false),
       position_(0.0),
       tempo_(0.0),
       last_timestamp_(0.0),
@@ -61,21 +60,17 @@ InstrumentManager::InstrumentManager(int sample_rate)
       note_off_callback_(nullptr),
       note_on_callback_(nullptr),
       id_counter_(0),
-      task_runner_(kNumMaxTasks) {
-  DCHECK_GE(sample_rate, 0);
-}
+      task_runner_(kNumMaxTasks) {}
 
 InstrumentManager::Id InstrumentManager::Create(
-    InstrumentDefinition definition) {
+    std::unique_ptr<Instrument> instrument,
+    const std::vector<std::pair<int, float>>& params) {
   const Id instrument_id = ++id_counter_;
-  const auto it =
-      controllers_.emplace(instrument_id, InstrumentController{definition});
+  const auto it = controllers_.emplace(instrument_id, InstrumentController{});
   auto& controller = it.first->second;
-  auto instrument = definition.get_instrument_fn();
-  instrument->PrepareToPlay(sample_rate_);
-  for (const auto& param : controller.definition.param_definitions) {
-    controller.params.emplace(param.id, param.default_value);
-    instrument->Control(param.id, param.default_value);
+  for (const auto& [id, value] : params) {
+    controller.params.emplace(id, InstrumentParam{value, value});
+    instrument->Control(id, value);
   }
   task_runner_.Add([this, instrument_id,
                     instrument = std::make_shared<std::unique_ptr<Instrument>>(
@@ -107,7 +102,7 @@ std::optional<float> InstrumentManager::GetParam(Id instrument_id,
   if (controller != nullptr) {
     const auto* param = FindOrNull(controller->params, id);
     if (param != nullptr) {
-      return *param;
+      return param->value;
     }
   }
   return std::nullopt;
@@ -170,7 +165,7 @@ bool InstrumentManager::Control(Id instrument_id, int id, float value) {
   if (controller != nullptr) {
     auto* param = FindOrNull(controller->params, id);
     if (param != nullptr) {
-      *param = value;
+      param->value = value;
       task_runner_.Add([this, instrument_id, id, value]() {
         auto* processor = FindOrNull(processors_, instrument_id);
         DCHECK(processor);
@@ -217,8 +212,8 @@ bool InstrumentManager::NoteOn(Id instrument_id, float index, float intensity) {
 }
 
 bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
-                                float* output, int num_channels,
-                                int num_frames) {
+                                double end_timestamp, float* output,
+                                int num_channels, int num_frames) {
   DCHECK_GE(begin_timestamp, 0.0);
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
@@ -228,9 +223,6 @@ bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
   Instrument* instrument = processor->instrument.get();
   int frame = 0;
   // Process messages.
-  const double end_timestamp =
-      begin_timestamp +
-      static_cast<double>(num_frames) / static_cast<double>(sample_rate_);
   if (begin_timestamp < end_timestamp) {
     // Include *all* messages before |end_timestamp|.
     const auto messages = processor->messages.GetIterator(end_timestamp);
@@ -269,18 +261,14 @@ bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
 bool InstrumentManager::ResetAllParams(Id instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
-    for (const auto& param : controller->definition.param_definitions) {
-      controller->params.at(param.id) = param.default_value;
+    for (auto& [id, param] : controller->params) {
+      param.value = param.default_value;
+      task_runner_.Add([this, instrument_id, id = id, value = param.value]() {
+        auto* processor = FindOrNull(processors_, instrument_id);
+        DCHECK(processor);
+        processor->instrument->Control(id, value);
+      });
     }
-    task_runner_.Add(
-        [this, instrument_id,
-         param_definitions = controller->definition.param_definitions]() {
-          auto* processor = FindOrNull(processors_, instrument_id);
-          DCHECK(processor);
-          for (const auto& param : param_definitions) {
-            processor->instrument->Control(param.id, param.default_value);
-          }
-        });
     return true;
   }
   return false;
@@ -409,7 +397,10 @@ void InstrumentManager::Update(double timestamp) {
       std::visit(MessageVisitor{
                      [this, id = id,
                       controller = &controller](const ControlData& data) {
-                       controller->params.at(data.id) = data.value;
+                       auto* param = FindOrNull(controller->params, data.id);
+                       if (param != nullptr) {
+                         param->value = data.value;
+                       }
                      },
                      [this, id = id, controller = &controller,
                       message_timestamp](const NoteOffData& data) {

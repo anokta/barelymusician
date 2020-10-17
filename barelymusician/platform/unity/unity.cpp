@@ -19,7 +19,10 @@ namespace {
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) : engine(sample_rate) {}
+  BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}
+
+  // Sampling rate.
+  int sample_rate;
 
   // Engine.
   InstrumentManager engine;
@@ -57,22 +60,18 @@ std::int64_t CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
                                    NoteOnFn* note_on_fn_ptr,
                                    ProcessFn* process_fn_ptr) {
   DCHECK(barelymusician);
-  InstrumentDefinition definition;
-  definition.get_instrument_fn =
-      [note_off_fn_ptr, note_on_fn_ptr,
-       process_fn_ptr]() -> std::unique_ptr<Instrument> {
-    return std::make_unique<UnityInstrument>(note_off_fn_ptr, note_on_fn_ptr,
-                                             process_fn_ptr);
-  };
-  const std::int64_t id = barelymusician->engine.Create(definition);
-  return id;
+  auto instrument = std::make_unique<UnityInstrument>(
+      note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
+  return barelymusician->engine.Create(std::move(instrument), {});
 }
 
 std::int64_t CreateBasicSynthInstrument() {
   DCHECK(barelymusician);
-  const std::int64_t id = barelymusician->engine.Create(
-      barelyapi::examples::BasicSynthInstrument::GetDefinition());
-  return id;
+  auto instrument = std::make_unique<examples::BasicSynthInstrument>();
+  instrument->PrepareToPlay(barelymusician->sample_rate);
+  return barelymusician->engine.Create(
+      std::move(instrument),
+      examples::BasicSynthInstrument::GetDefaultParams());
 }
 
 void Destroy(std::int64_t id) {
@@ -109,8 +108,11 @@ void Process(std::int64_t id, double timestamp, float* output, int num_channels,
              int num_frames) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician != nullptr) {
-    barelymusician->engine.Process(id, timestamp, output, num_channels,
-                                   num_frames);
+    const double end_timestamp =
+        timestamp + static_cast<double>(num_frames) /
+                        static_cast<double>(barelymusician->sample_rate);
+    barelymusician->engine.Process(id, timestamp, end_timestamp, output,
+                                   num_channels, num_frames);
   }
 }
 

@@ -36,16 +36,6 @@ void MessageQueue::Clear(const Iterator& iterator) {
 
 bool MessageQueue::Empty() const { return messages_.empty(); }
 
-MessageQueue::Iterator MessageQueue::GetIterator(double begin_timestamp,
-                                                 double end_timestamp) const {
-  Iterator iterator;
-  iterator.cbegin = std::lower_bound(messages_.cbegin(), messages_.cend(),
-                                     begin_timestamp, &CompareMessage);
-  iterator.cend = std::lower_bound(iterator.cbegin, messages_.cend(),
-                                   end_timestamp, &CompareMessage);
-  return iterator;
-}
-
 MessageQueue::Iterator MessageQueue::GetIterator(double timestamp) const {
   Iterator iterator;
   iterator.cbegin = messages_.cbegin();

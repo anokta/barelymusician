@@ -64,17 +64,15 @@ Engine::Engine()
       task_runner_(kNumMaxTasks) {}
 
 Engine::Id Engine::Create(std::unique_ptr<Instrument> instrument,
-                          const std::vector<std::pair<int, float>>& params) {
+                          std::vector<std::pair<int, float>> params) {
   const Id instrument_id = ++id_counter_;
   controllers_.emplace(instrument_id, Controller{InstrumentController{params}});
-  for (const auto& [id, value] : params) {
-    instrument->Control(id, value);
-  }
   task_runner_.Add([this, instrument_id,
                     instrument = std::make_shared<std::unique_ptr<Instrument>>(
-                        std::move(instrument))]() {
+                        std::move(instrument)),
+                    params = std::move(params)]() {
     processors_.emplace(instrument_id,
-                        InstrumentProcessor{std::move(*instrument)});
+                        InstrumentProcessor{std::move(*instrument), params});
   });
   return instrument_id;
 }
@@ -125,23 +123,14 @@ bool Engine::AllNotesOff(Id instrument_id) {
   task_runner_.Add([this, instrument_id, timestamp = last_timestamp_]() {
     auto* processor = FindOrNull(processors_, instrument_id);
     DCHECK(processor);
-    Instrument* instrument = processor->instrument.get();
-    const auto messages = processor->messages.GetIterator(timestamp);
-    for (auto it = messages.cbegin; it != messages.cend; ++it) {
-      std::visit(MessageVisitor{[instrument](const NoteOffData& data) {
-                                  instrument->NoteOff(data.index);
-                                },
-                                [](const auto&) {}},
-                 it->data);
-    }
-    processor->messages.Clear(messages);
+    processor->Clear();
   });
   const auto notes = controller->controller.GetAllNotes();
   for (const auto& note : notes) {
     task_runner_.Add([this, instrument_id, note = note]() {
       auto* processor = FindOrNull(processors_, instrument_id);
       DCHECK(processor);
-      processor->instrument->NoteOff(note);
+      processor->NoteOff(last_timestamp_, note);
     });
   }
   if (note_off_callback_ != nullptr) {
@@ -161,7 +150,7 @@ std::optional<bool> Engine::Control(Id instrument_id, int id, float value) {
       task_runner_.Add([this, instrument_id, id, value]() {
         auto* processor = FindOrNull(processors_, instrument_id);
         DCHECK(processor);
-        processor->instrument->Control(id, value);
+        processor->SetParam(last_timestamp_, id, value);
       });
       return *success_or;
     }
@@ -179,7 +168,7 @@ bool Engine::NoteOff(Id instrument_id, float index) {
       task_runner_.Add([this, instrument_id, index]() {
         auto* processor = FindOrNull(processors_, instrument_id);
         DCHECK(processor);
-        processor->instrument->NoteOff(index);
+        processor->NoteOff(last_timestamp_, index);
       });
       return true;
     }
@@ -197,7 +186,7 @@ bool Engine::NoteOn(Id instrument_id, float index, float intensity) {
       task_runner_.Add([this, instrument_id, index, intensity]() {
         auto* processor = FindOrNull(processors_, instrument_id);
         DCHECK(processor);
-        processor->instrument->NoteOn(index, intensity);
+        processor->NoteOn(last_timestamp_, index, intensity);
       });
       return true;
     }
@@ -208,47 +197,13 @@ bool Engine::NoteOn(Id instrument_id, float index, float intensity) {
 bool Engine::Process(Id instrument_id, double begin_timestamp,
                      double end_timestamp, float* output, int num_channels,
                      int num_frames) {
-  DCHECK_GE(begin_timestamp, 0.0);
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
   if (processor == nullptr) {
     return false;
   }
-  Instrument* instrument = processor->instrument.get();
-  int frame = 0;
-  // Process messages.
-  if (begin_timestamp < end_timestamp) {
-    // Include *all* messages before |end_timestamp|.
-    const auto messages = processor->messages.GetIterator(end_timestamp);
-    const double frame_rate =
-        static_cast<double>(num_frames) / (end_timestamp - begin_timestamp);
-    for (auto it = messages.cbegin; it != messages.cend; ++it) {
-      int message_frame =
-          static_cast<int>(frame_rate * (it->timestamp - begin_timestamp));
-      if (frame < message_frame) {
-        instrument->Process(&output[num_channels * frame], num_channels,
-                            message_frame - frame);
-        frame = message_frame;
-      }
-      std::visit(MessageVisitor{[instrument](const ControlData& data) {
-                                  instrument->Control(data.id, data.value);
-                                },
-                                [instrument](const NoteOffData& data) {
-                                  instrument->NoteOff(data.index);
-                                },
-                                [instrument](const NoteOnData& data) {
-                                  instrument->NoteOn(data.index,
-                                                     data.intensity);
-                                }},
-                 it->data);
-    }
-    processor->messages.Clear(messages);
-  }
-  // Process the rest of the buffer.
-  if (frame < num_frames) {
-    instrument->Process(&output[num_channels * frame], num_channels,
-                        num_frames - frame);
-  }
+  processor->Process(begin_timestamp, end_timestamp, output, num_channels,
+                     num_frames);
   return true;
 }
 
@@ -260,7 +215,7 @@ bool Engine::ResetAllParams(Id instrument_id) {
       task_runner_.Add([this, instrument_id, id = id, param = param]() {
         auto* processor = FindOrNull(processors_, instrument_id);
         DCHECK(processor);
-        processor->instrument->Control(id, param);
+        processor->SetParam(last_timestamp_, id, param);
       });
     }
     return true;
@@ -406,7 +361,7 @@ void Engine::Update(double timestamp) {
       task_runner_.Add([this, id = id, message_data, message_timestamp]() {
         auto* processor = FindOrNull(processors_, id);
         DCHECK(processor);
-        processor->messages.Push(message_timestamp, message_data);
+        processor->Message(message_timestamp, message_data);
       });
     }
     controller.messages.Clear(messages);

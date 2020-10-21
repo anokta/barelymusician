@@ -11,6 +11,7 @@
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_controller.h"
+#include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/message_queue.h"
 #include "barelymusician/util/task_runner.h"
 
@@ -41,7 +42,7 @@ class Engine {
   // @param definition Instrument definition.
   // @return Instrument id.
   Id Create(std::unique_ptr<Instrument> instrument,
-            const std::vector<std::pair<int, float>>& params);
+            std::vector<std::pair<int, float>> params);
 
   // Destroys instrument.
   //
@@ -203,15 +204,6 @@ class Engine {
   // Instrument controller (main thread).
   struct Controller {
     InstrumentController controller;
-
-    // Scheduled messages.
-    MessageQueue messages;
-  };
-
-  // Instrument processor (audio thread).
-  struct InstrumentProcessor {
-    // Instrument to play.
-    std::unique_ptr<Instrument> instrument;
 
     // Scheduled messages.
     MessageQueue messages;

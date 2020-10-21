@@ -36,6 +36,10 @@ void MessageQueue::Clear(const Iterator& iterator) {
 
 bool MessageQueue::Empty() const { return messages_.empty(); }
 
+MessageQueue::Iterator MessageQueue::GetIterator() const {
+  return Iterator{messages_.cbegin(), messages_.cend()};
+}
+
 MessageQueue::Iterator MessageQueue::GetIterator(double timestamp) const {
   Iterator iterator;
   iterator.cbegin = messages_.cbegin();

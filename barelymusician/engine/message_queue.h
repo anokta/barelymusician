@@ -33,6 +33,8 @@ class MessageQueue {
   // @return True if empty.
   bool Empty() const;
 
+  Iterator GetIterator() const; 
+
   // Returns iterator within the given range.
   //
   // @param timestamp End timestamp.

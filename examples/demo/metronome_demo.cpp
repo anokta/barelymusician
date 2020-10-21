@@ -7,14 +7,14 @@
 #include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/instrument_manager.h"
 #include "input_manager/win_console_input.h"
 #include "instruments/basic_synth_instrument.h"
 
 namespace {
 
-using ::barelyapi::InstrumentManager;
+using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
-  InstrumentManager engine;
+  Engine engine;
   engine.SetTempo(kInitialTempo);
 
   auto metronome = std::make_unique<BasicSynthInstrument>(kSampleRate);

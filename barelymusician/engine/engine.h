@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
+#ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
+#define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
 #include <cstdint>
 #include <memory>
@@ -15,7 +15,7 @@
 namespace barelyapi {
 
 // Class that manages processing of instruments.
-class InstrumentManager {
+class Engine {
  public:
   // Id type.
   using Id = std::int64_t;
@@ -31,8 +31,8 @@ class InstrumentManager {
   using NoteOnCallback = std::function<void(double timestamp, Id instrument_id,
                                             float index, float intensity)>;
 
-  // Constructs new |InstrumentManager|.
-  InstrumentManager();
+  // Constructs new |Engine|.
+  Engine();
 
   // Creates new instrument.
   //
@@ -247,4 +247,4 @@ class InstrumentManager {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
+#endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_

@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/engine.h"
 #include "barelymusician/platform/unity/unity_instrument.h"
 #include "barelymusician/platform/unity/unity_log_writer.h"
 #include "barelymusician/util/task_runner.h"
@@ -25,7 +25,7 @@ struct BarelyMusician {
   int sample_rate;
 
   // Engine.
-  InstrumentManager engine;
+  Engine engine;
 
   // Unity log writer.
   UnityLogWriter writer;

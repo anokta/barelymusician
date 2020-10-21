@@ -1,4 +1,4 @@
-#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/engine.h"
 
 #include <algorithm>
 
@@ -51,7 +51,7 @@ double SecondsFromBeats(double tempo, double beats) {
 
 }  // namespace
 
-InstrumentManager::InstrumentManager()
+Engine::Engine()
     : is_playing_(false),
       position_(0.0),
       tempo_(0.0),
@@ -62,9 +62,8 @@ InstrumentManager::InstrumentManager()
       id_counter_(0),
       task_runner_(kNumMaxTasks) {}
 
-InstrumentManager::Id InstrumentManager::Create(
-    std::unique_ptr<Instrument> instrument,
-    const std::vector<std::pair<int, float>>& params) {
+Engine::Id Engine::Create(std::unique_ptr<Instrument> instrument,
+                          const std::vector<std::pair<int, float>>& params) {
   const Id instrument_id = ++id_counter_;
   const auto it = controllers_.emplace(instrument_id, InstrumentController{});
   auto& controller = it.first->second;
@@ -81,7 +80,7 @@ InstrumentManager::Id InstrumentManager::Create(
   return instrument_id;
 }
 
-bool InstrumentManager::Destroy(Id instrument_id) {
+bool Engine::Destroy(Id instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
@@ -90,14 +89,13 @@ bool InstrumentManager::Destroy(Id instrument_id) {
   return false;
 }
 
-double InstrumentManager::GetPosition() const { return position_; }
+double Engine::GetPosition() const { return position_; }
 
-double InstrumentManager::GetTempo() const { return tempo_; }
+double Engine::GetTempo() const { return tempo_; }
 
-bool InstrumentManager::IsPlaying() const { return is_playing_; }
+bool Engine::IsPlaying() const { return is_playing_; }
 
-std::optional<float> InstrumentManager::GetParam(Id instrument_id,
-                                                 int id) const {
+std::optional<float> Engine::GetParam(Id instrument_id, int id) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     const auto* param = FindOrNull(controller->params, id);
@@ -108,8 +106,7 @@ std::optional<float> InstrumentManager::GetParam(Id instrument_id,
   return std::nullopt;
 }
 
-std::optional<bool> InstrumentManager::IsNoteOn(Id instrument_id,
-                                                float index) const {
+std::optional<bool> Engine::IsNoteOn(Id instrument_id, float index) const {
   const auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     return controller->active_notes.find(index) !=
@@ -118,13 +115,13 @@ std::optional<bool> InstrumentManager::IsNoteOn(Id instrument_id,
   return std::nullopt;
 }
 
-void InstrumentManager::AllNotesOff() {
+void Engine::AllNotesOff() {
   for (auto& [id, controller] : controllers_) {
     AllNotesOff(id);
   }
 }
 
-bool InstrumentManager::AllNotesOff(Id instrument_id) {
+bool Engine::AllNotesOff(Id instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller == nullptr) {
     return false;
@@ -160,7 +157,7 @@ bool InstrumentManager::AllNotesOff(Id instrument_id) {
   return true;
 }
 
-bool InstrumentManager::Control(Id instrument_id, int id, float value) {
+bool Engine::Control(Id instrument_id, int id, float value) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     auto* param = FindOrNull(controller->params, id);
@@ -177,7 +174,7 @@ bool InstrumentManager::Control(Id instrument_id, int id, float value) {
   return false;
 }
 
-bool InstrumentManager::NoteOff(Id instrument_id, float index) {
+bool Engine::NoteOff(Id instrument_id, float index) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.erase(index);
@@ -194,7 +191,7 @@ bool InstrumentManager::NoteOff(Id instrument_id, float index) {
   return false;
 }
 
-bool InstrumentManager::NoteOn(Id instrument_id, float index, float intensity) {
+bool Engine::NoteOn(Id instrument_id, float index, float intensity) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     controller->active_notes.insert(index);
@@ -211,9 +208,9 @@ bool InstrumentManager::NoteOn(Id instrument_id, float index, float intensity) {
   return false;
 }
 
-bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
-                                double end_timestamp, float* output,
-                                int num_channels, int num_frames) {
+bool Engine::Process(Id instrument_id, double begin_timestamp,
+                     double end_timestamp, float* output, int num_channels,
+                     int num_frames) {
   DCHECK_GE(begin_timestamp, 0.0);
   task_runner_.Run();
   auto* processor = FindOrNull(processors_, instrument_id);
@@ -258,7 +255,7 @@ bool InstrumentManager::Process(Id instrument_id, double begin_timestamp,
   return true;
 }
 
-bool InstrumentManager::ResetAllParams(Id instrument_id) {
+bool Engine::ResetAllParams(Id instrument_id) {
   auto* controller = FindOrNull(controllers_, instrument_id);
   if (controller != nullptr) {
     for (auto& [id, param] : controller->params) {
@@ -274,8 +271,8 @@ bool InstrumentManager::ResetAllParams(Id instrument_id) {
   return false;
 }
 
-bool InstrumentManager::ScheduleControl(Id instrument_id, double position,
-                                        int id, float value) {
+bool Engine::ScheduleControl(Id instrument_id, double position, int id,
+                             float value) {
   if (position < position_) {
     return false;
   }
@@ -291,9 +288,8 @@ bool InstrumentManager::ScheduleControl(Id instrument_id, double position,
   return true;
 }
 
-bool InstrumentManager::ScheduleNote(Id instrument_id, double position,
-                                     double duration, float index,
-                                     float intensity) {
+bool Engine::ScheduleNote(Id instrument_id, double position, double duration,
+                          float index, float intensity) {
   DCHECK_GE(position, 0.0);
   DCHECK_GE(duration, 0.0);
   if (position < position_) {
@@ -308,8 +304,7 @@ bool InstrumentManager::ScheduleNote(Id instrument_id, double position,
   return false;
 }
 
-bool InstrumentManager::ScheduleNoteOff(Id instrument_id, double position,
-                                        float index) {
+bool Engine::ScheduleNoteOff(Id instrument_id, double position, float index) {
   DCHECK_GE(position, 0.0);
   if (position < position_) {
     return false;
@@ -322,8 +317,8 @@ bool InstrumentManager::ScheduleNoteOff(Id instrument_id, double position,
   return false;
 }
 
-bool InstrumentManager::ScheduleNoteOn(Id instrument_id, double position,
-                                       float index, float intensity) {
+bool Engine::ScheduleNoteOn(Id instrument_id, double position, float index,
+                            float intensity) {
   DCHECK_GE(position, 0.0);
   if (position < position_) {
     return false;
@@ -336,19 +331,19 @@ bool InstrumentManager::ScheduleNoteOn(Id instrument_id, double position,
   return false;
 }
 
-void InstrumentManager::SetBeatCallback(BeatCallback beat_callback) {
+void Engine::SetBeatCallback(BeatCallback beat_callback) {
   beat_callback_ = std::move(beat_callback);
 }
 
-void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
+void Engine::SetNoteOffCallback(NoteOffCallback note_off_callback) {
   note_off_callback_ = std::move(note_off_callback);
 }
 
-void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
+void Engine::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-void InstrumentManager::SetPosition(double position) {
+void Engine::SetPosition(double position) {
   DCHECK_GE(position, 0.0);
   position_ = position;
   for (auto& [id, controller] : controllers_) {
@@ -356,20 +351,20 @@ void InstrumentManager::SetPosition(double position) {
   }
 }
 
-void InstrumentManager::SetTempo(double tempo) {
+void Engine::SetTempo(double tempo) {
   DCHECK_GE(tempo, 0.0);
   tempo_ = tempo;
 }
 
-void InstrumentManager::Start(double timestamp) {
+void Engine::Start(double timestamp) {
   DCHECK_GE(timestamp, 0.0);
   last_timestamp_ = timestamp;
   is_playing_ = true;
 }
 
-void InstrumentManager::Stop() { is_playing_ = false; }
+void Engine::Stop() { is_playing_ = false; }
 
-void InstrumentManager::Update(double timestamp) {
+void Engine::Update(double timestamp) {
   DCHECK_GE(timestamp, 0.0);
   if (!is_playing_ || tempo_ <= 0.0 || timestamp <= last_timestamp_) {
     return;

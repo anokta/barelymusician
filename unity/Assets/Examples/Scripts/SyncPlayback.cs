@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using BarelyApi;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,8 +12,7 @@ public class SyncPlayback : MonoBehaviour {
       source.Stop();
       BarelyApi.BarelyMusician.Stop();
 
-      //source.pitch = (float)(tempo / 120.0);
-      //BarelyApi.BarelyMusician.SetTempo(tempo);
+      source.pitch = (float)(BarelyMusician.GetTempo() / 120.0);
 
       double dspTime = AudioSettings.dspTime;
       source.PlayScheduled(dspTime);

@@ -8,7 +8,9 @@
 #include <unordered_set>
 #include <utility>
 
+#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/message_queue.h"
 #include "barelymusician/util/task_runner.h"
 
@@ -87,7 +89,7 @@ class Engine {
   // @param instrument_id Instrument id.
   // @param id Parameter id.
   // @param value Parameter value.
-  bool Control(Id instrument_id, int id, float value);
+  std::optional<bool> Control(Id instrument_id, int id, float value);
 
   // Stops playing note.
   //
@@ -152,6 +154,11 @@ class Engine {
   // @param beat_callback Beat callback.
   void SetBeatCallback(BeatCallback beat_callback);
 
+  // Sets conductor.
+  //
+  // @param conductor Conductor.
+  void SetConductor(std::unique_ptr<Conductor> conductor);
+
   // Sets note off callback.
   //
   // @param note_off_callback Note off callback.
@@ -194,12 +201,8 @@ class Engine {
   };
 
   // Instrument controller (main thread).
-  struct InstrumentController {
-    // Instrument params.
-    std::unordered_map<int, InstrumentParam> params;
-
-    // Active note indices.
-    std::unordered_set<float> active_notes;
+  struct Controller {
+    InstrumentController controller;
 
     // Scheduled messages.
     MessageQueue messages;
@@ -215,7 +218,7 @@ class Engine {
   };
 
   // List of instruments.
-  std::unordered_map<Id, InstrumentController> controllers_;
+  std::unordered_map<Id, Controller> controllers_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
 
   // Denotes whether the clock is currently playing.
@@ -228,6 +231,9 @@ class Engine {
   double tempo_;
 
   double last_timestamp_;
+
+  // Conductor.
+  std::unique_ptr<Conductor> conductor_;
 
   // Beat callback.
   BeatCallback beat_callback_;

@@ -22,8 +22,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "instruments", "instruments"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "demo_shared", "demo_shared\demo_shared.vcxitems", "{16446220-31D3-4EF8-A1A6-2144FAD69A8E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "barelymusician_demo", "barelymusician_demo\barelymusician_demo.vcxproj", "{B85ED38F-9323-4C17-8968-20F745875A9A}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "instruments_shared", "instruments_shared\instruments_shared.vcxitems", "{52BEDBC0-5A2B-4D52-8591-99F586F8E8A8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine_demo", "engine_demo\engine_demo.vcxproj", "{B5D7F610-D27A-4310-B011-4DD760C29FA9}"
@@ -47,7 +45,6 @@ Global
 		instruments_shared\instruments_shared.vcxitems*{829a713c-76ce-4121-824a-6c629e8fbc4c}*SharedItemsImports = 4
 		demo_shared\demo_shared.vcxitems*{b5d7f610-d27a-4310-b011-4dd760c29fa9}*SharedItemsImports = 4
 		instruments_shared\instruments_shared.vcxitems*{b5d7f610-d27a-4310-b011-4dd760c29fa9}*SharedItemsImports = 4
-		demo_shared\demo_shared.vcxitems*{b85ed38f-9323-4c17-8968-20f745875a9a}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -80,14 +77,6 @@ Global
 		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Release|x64.Build.0 = Release|x64
 		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Release|x86.ActiveCfg = Release|Win32
 		{829A713C-76CE-4121-824A-6C629E8FBC4C}.Release|x86.Build.0 = Release|Win32
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Debug|x64.ActiveCfg = Debug|x64
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Debug|x64.Build.0 = Debug|x64
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Debug|x86.ActiveCfg = Debug|Win32
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Debug|x86.Build.0 = Debug|Win32
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Release|x64.ActiveCfg = Release|x64
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Release|x64.Build.0 = Release|x64
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Release|x86.ActiveCfg = Release|Win32
-		{B85ED38F-9323-4C17-8968-20F745875A9A}.Release|x86.Build.0 = Release|Win32
 		{B5D7F610-D27A-4310-B011-4DD760C29FA9}.Debug|x64.ActiveCfg = Debug|x64
 		{B5D7F610-D27A-4310-B011-4DD760C29FA9}.Debug|x64.Build.0 = Debug|x64
 		{B5D7F610-D27A-4310-B011-4DD760C29FA9}.Debug|x86.ActiveCfg = Debug|Win32
@@ -131,7 +120,6 @@ Global
 		{0F83B12E-90B9-4ED0-A2CE-B2E71D4817BC} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
 		{831246B5-2547-4978-B6F3-96C1D9207F5C} = {69F92F5D-9456-45C9-A4B0-FEC75B07943C}
 		{16446220-31D3-4EF8-A1A6-2144FAD69A8E} = {0F83B12E-90B9-4ED0-A2CE-B2E71D4817BC}
-		{B85ED38F-9323-4C17-8968-20F745875A9A} = {0F83B12E-90B9-4ED0-A2CE-B2E71D4817BC}
 		{52BEDBC0-5A2B-4D52-8591-99F586F8E8A8} = {831246B5-2547-4978-B6F3-96C1D9207F5C}
 		{B5D7F610-D27A-4310-B011-4DD760C29FA9} = {0F83B12E-90B9-4ED0-A2CE-B2E71D4817BC}
 		{5A3910E6-1CD0-4BFF-B392-AA74E3A5F996} = {0F83B12E-90B9-4ED0-A2CE-B2E71D4817BC}

@@ -1,9 +1,5 @@
 #include "instruments/basic_synth_instrument.h"
 
-#include <algorithm>
-#include <memory>
-
-#include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
@@ -22,56 +18,51 @@ const int kDefaultNumVoices = 8;
 
 }  // namespace
 
+BasicSynthInstrument::BasicSynthInstrument(int sample_rate)
+    : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {
+}
+
 void BasicSynthInstrument::Control(int id, float value) {
-  if (!voice_.has_value()) return;
   switch (static_cast<BasicSynthInstrumentParam>(id)) {
     case BasicSynthInstrumentParam::kGain:
       gain_ = value;
       break;
     case BasicSynthInstrumentParam::kEnvelopeAttack:
-      voice_->Update([value](BasicSynthVoice* voice) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetAttack(value);
       });
       break;
     case BasicSynthInstrumentParam::kEnvelopeDecay:
-      voice_->Update([value](BasicSynthVoice* voice) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetRelease(value);
       });
       break;
     case BasicSynthInstrumentParam::kEnvelopeSustain:
-      voice_->Update([value](BasicSynthVoice* voice) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetSustain(value);
       });
       break;
     case BasicSynthInstrumentParam::kEnvelopeRelease:
-      voice_->Update([value](BasicSynthVoice* voice) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->envelope().SetRelease(value);
       });
       break;
     case BasicSynthInstrumentParam::kOscillatorType:
-      voice_->Update([value](BasicSynthVoice* voice) {
+      voice_.Update([value](BasicSynthVoice* voice) {
         voice->generator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
     case BasicSynthInstrumentParam::kNumVoices:
-      voice_->Resize(static_cast<int>(value));
+      voice_.Resize(static_cast<int>(value));
       break;
   }
 }
 
-void BasicSynthInstrument::PrepareToPlay(int sample_rate) {
-  voice_.emplace(BasicSynthVoice(sample_rate));
-}
-
-void BasicSynthInstrument::NoteOff(float index) {
-  if (!voice_.has_value()) return;
-  voice_->Stop(index);
-}
+void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
 
 void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  if (!voice_.has_value()) return;
-  voice_->Start(index, [index, intensity](BasicSynthVoice* voice) {
+  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
     voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
     voice->set_gain(intensity);
   });
@@ -79,10 +70,9 @@ void BasicSynthInstrument::NoteOn(float index, float intensity) {
 
 void BasicSynthInstrument::Process(float* output, int num_channels,
                                    int num_frames) {
-  if (!voice_.has_value()) return;
   float mono_sample = 0.0f;
   for (int frame = 0; frame < num_frames; ++frame) {
-    mono_sample = gain_ * voice_->Next(0);
+    mono_sample = gain_ * voice_.Next(0);
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }

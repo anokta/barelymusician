@@ -61,8 +61,7 @@ int main(int argc, char* argv[]) {
   InstrumentManager engine;
   engine.SetTempo(kInitialTempo);
 
-  auto metronome = std::make_unique<BasicSynthInstrument>();
-  metronome->PrepareToPlay(kSampleRate);
+  auto metronome = std::make_unique<BasicSynthInstrument>(kSampleRate);
   const auto metronome_id = engine.Create(
       std::move(metronome),
       {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),

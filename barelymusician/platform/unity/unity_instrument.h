@@ -33,7 +33,6 @@ class UnityInstrument : public Instrument {
   void Control(int, float) override {}
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
-  void PrepareToPlay(int) override {}
   void Process(float* output, int num_channels, int num_frames) override;
 
  private:

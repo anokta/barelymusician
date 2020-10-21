@@ -67,8 +67,8 @@ std::int64_t CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
 
 std::int64_t CreateBasicSynthInstrument() {
   DCHECK(barelymusician);
-  auto instrument = std::make_unique<examples::BasicSynthInstrument>();
-  instrument->PrepareToPlay(barelymusician->sample_rate);
+  auto instrument = std::make_unique<examples::BasicSynthInstrument>(
+      barelymusician->sample_rate);
   return barelymusician->engine.Create(
       std::move(instrument),
       examples::BasicSynthInstrument::GetDefaultParams());

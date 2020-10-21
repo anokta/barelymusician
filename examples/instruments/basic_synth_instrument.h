@@ -1,7 +1,6 @@
 #ifndef EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
 
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -25,21 +24,24 @@ enum BasicSynthInstrumentParam {
 
 class BasicSynthInstrument : public Instrument {
  public:
+  // Constructs new |BasicSynthInstrument|.
+  explicit BasicSynthInstrument(int sample_rate);
+
   // Implements |Instrument|.
   void Control(int id, float value) override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
-  void PrepareToPlay(int sample_rate) override;
   void Process(float* output, int num_channels, int num_frames) override;
 
+  // Returns default parameters.
   static std::vector<std::pair<int, float>> GetDefaultParams();
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;
 
-  float gain_ = 0.0f;
+  float gain_;
 
-  std::optional<PolyphonicVoice<BasicSynthVoice>> voice_;
+  PolyphonicVoice<BasicSynthVoice> voice_;
 };
 
 }  // namespace examples

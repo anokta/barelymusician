@@ -26,11 +26,6 @@ class Instrument {
   // @param intensity Note intensity.
   virtual void NoteOn(float index, float intensity) = 0;
 
-  // Prepares the instrument for start processing.
-  //
-  // @param sample_rate Sampling rate in Hz.
-  virtual void PrepareToPlay(int sample_rate) = 0;
-
   // Processes the next |output| buffer.
   //
   // @param output Pointer to the output buffer.

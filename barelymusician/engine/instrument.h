@@ -9,6 +9,9 @@ class Instrument {
   // Base destructor to ensure the derived classes get destroyed properly.
   virtual ~Instrument() = default;
 
+  // Stops all notes.
+  virtual void AllNotesOff() = 0;
+
   // Sets control |value| with the given |id|.
   //
   // @param id Control id.

@@ -14,20 +14,9 @@ InstrumentProcessor::InstrumentProcessor(
     instrument_->Control(id, default_value);
   }
 }
-void InstrumentProcessor::Clear() {
-  // Clean up currently active notes.
-  const auto messages = messages_.GetIterator();
-  for (auto it = messages.cbegin; it != messages.cend; ++it) {
-    std::visit(MessageVisitor{[this](const NoteOffData& data) {
-                                instrument_->NoteOff(data.index);
-                              },
-                              [](const auto&) {}},
-               it->data);
-  }
-  // Clear scheduled notes.
+void InstrumentProcessor::AllNotesOff() {
   messages_.Clear();
-
-  // TODO: Instrument::AllNotesOff might be useful?
+  instrument_->AllNotesOff();
 }
 
 void InstrumentProcessor::Message(double timestamp, Message::Data data) {

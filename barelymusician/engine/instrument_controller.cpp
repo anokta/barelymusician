@@ -12,8 +12,6 @@ InstrumentController::InstrumentController(
   }
 }
 
-void InstrumentController::AllNotesOff() { notes_.clear(); }
-
 std::vector<float> InstrumentController::GetAllNotes() const {
   return std::vector<float>(notes_.cbegin(), notes_.cend());
 }

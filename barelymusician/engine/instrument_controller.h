@@ -18,9 +18,6 @@ class InstrumentController {
   explicit InstrumentController(
       const std::vector<std::pair<int, float>>& params);
 
-  // Stops all notes.
-  void AllNotesOff();
-
   // Returns all active notes.
   //
   // @return List of active note indices.

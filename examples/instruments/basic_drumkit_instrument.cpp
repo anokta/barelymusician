@@ -18,23 +18,27 @@ const float kDefaultRelease = 0.1f;
 BasicDrumkitInstrument::BasicDrumkitInstrument(int sample_rate)
     : sample_rate_(sample_rate), gain_(kDefaultGain) {}
 
-void BasicDrumkitInstrument::NoteOff(float index) {
-  const auto it = voices_.find(index);
-  if (it == voices_.cend()) {
-    LOG(WARNING) << "Invalid note index " << index;
-    return;
+void BasicDrumkitInstrument::AllNotesOff() {
+  for (auto& [index, voice] : voices_) {
+    voice.Stop();
   }
-  it->second.Stop();
+}
+
+void BasicDrumkitInstrument::NoteOff(float index) {
+  if (const auto it = voices_.find(index); it != voices_.cend()) {
+    it->second.Stop();
+  } else {
+    LOG(WARNING) << "Invalid note index " << index;
+  }
 }
 
 void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
-  const auto it = voices_.find(index);
-  if (it == voices_.cend()) {
+  if (auto it = voices_.find(index); it != voices_.end()) {
+    it->second.set_gain(intensity);
+    it->second.Start();
+  } else {
     LOG(WARNING) << "Invalid note index " << index;
-    return;
   }
-  it->second.set_gain(intensity);
-  it->second.Start();
 }
 
 void BasicDrumkitInstrument::Process(float* output, int num_channels,

@@ -118,25 +118,18 @@ bool Engine::AllNotesOff(Id instrument_id) {
     return false;
   }
   controller->messages.Clear();
+  if (note_off_callback_) {
+    for (const auto& note : controller->controller.GetAllNotes()) {
+      if (controller->controller.NoteOff(note)) {
+        note_off_callback_(last_timestamp_, instrument_id, note);
+      }
+    }
+  }
   task_runner_.Add([this, instrument_id, timestamp = last_timestamp_]() {
     auto* processor = FindOrNull(processors_, instrument_id);
     DCHECK(processor);
-    processor->Clear();
+    processor->AllNotesOff();
   });
-  const auto notes = controller->controller.GetAllNotes();
-  for (const auto& note : notes) {
-    task_runner_.Add([this, instrument_id, note = note]() {
-      auto* processor = FindOrNull(processors_, instrument_id);
-      DCHECK(processor);
-      processor->NoteOff(last_timestamp_, note);
-    });
-  }
-  if (note_off_callback_) {
-    for (const auto& note : notes) {
-      note_off_callback_(last_timestamp_, instrument_id, note);
-    }
-  }
-  controller->controller.AllNotesOff();
   return true;
 }
 
@@ -205,13 +198,14 @@ bool Engine::Process(Id instrument_id, double begin_timestamp,
 bool Engine::ResetAllParams(Id instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     controller->controller.ResetAllParams();
-    for (auto& [id, param] : controller->controller.GetAllParams()) {
-      task_runner_.Add([this, instrument_id, id = id, param = param]() {
+    task_runner_.Add([this, instrument_id,
+                      params = controller->controller.GetAllParams()]() {
+      for (auto& [id, param] : params) {
         auto* processor = FindOrNull(processors_, instrument_id);
         DCHECK(processor);
         processor->SetParam(last_timestamp_, id, param);
-      });
-    }
+      }
+    });
     return true;
   }
   return false;

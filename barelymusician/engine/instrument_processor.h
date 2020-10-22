@@ -22,8 +22,7 @@ class InstrumentProcessor {
                       const std::vector<std::pair<int, float>>& params);
 
   // Stops all notes.
-  // TODO: AllNotesOff?
-  void Clear();
+  void AllNotesOff();
 
   // TODO: refactor?
   void Message(double timestamp, Message::Data data);

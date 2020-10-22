@@ -94,9 +94,7 @@ int main(int argc, char* argv[]) {
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
       // Stop current notes first.
-      for (const auto key : kOctaveKeys) {
-        instrument.NoteOff(NoteIndexFromKey(key, offset_octaves));
-      }
+      task_runner.Add([&]() { instrument.AllNotesOff(); });
       // Update offset.
       if (upper_key == 'Z') {
         --offset_octaves;

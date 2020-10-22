@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
     for (auto& [id, callback] : performers) {
       // Compose next beat notes.
       temp_notes.clear();
-      if (callback != nullptr) {
+      if (callback) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
       for (const Note& note : temp_notes) {

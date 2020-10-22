@@ -51,12 +51,12 @@ void WinConsoleInput::Update() {
         }
         if (key_event.bKeyDown && !key_states_[key]) {
           key_states_[key] = true;
-          if (key_down_callback_ != nullptr) {
+          if (key_down_callback_) {
             key_down_callback_(key);
           }
         } else if (!key_event.bKeyDown && key_states_[key]) {
           key_states_[key] = false;
-          if (key_up_callback_ != nullptr) {
+          if (key_up_callback_) {
             key_up_callback_(key);
           }
         }

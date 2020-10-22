@@ -19,7 +19,7 @@ SamplePlayer::SamplePlayer(int sample_rate)
 }
 
 float SamplePlayer::Next() {
-  if (data_ == nullptr || cursor_ >= length_) {
+  if (!data_ || cursor_ >= length_) {
     // Nothing to play, skip processing.
     return 0.0f;
   }

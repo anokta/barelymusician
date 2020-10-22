@@ -18,7 +18,7 @@ TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
 
 void TaskRunner::Add(Task&& task) {
   Node* const node = PopNode(&free_head_);
-  if (node == nullptr) {
+  if (!node) {
     DLOG(WARNING) << "Failed to add task, max_size exceeded: " << nodes_.size();
     return;
   }
@@ -29,7 +29,7 @@ void TaskRunner::Add(Task&& task) {
 void TaskRunner::Run() {
   // Iterate through the stacked tasks.
   Node* it = active_head_.exchange(nullptr);
-  while (it != nullptr) {
+  while (it) {
     Node* const next = it->next;
     temp_tasks_.emplace_back(std::move(it->task));
     it->task = nullptr;
@@ -38,7 +38,7 @@ void TaskRunner::Run() {
   }
   // Execute tasks in reverse order.
   for (auto rit = temp_tasks_.rbegin(); rit != temp_tasks_.rend(); ++rit) {
-    if (*rit != nullptr) {
+    if (*rit) {
       (*rit)();
     }
   }
@@ -50,7 +50,7 @@ TaskRunner::Node* TaskRunner::PopNode(std::atomic<Node*>* head) {
   Node* old_head_next = nullptr;
   do {
     old_head = head->load();
-    if (old_head == nullptr) {
+    if (!old_head) {
       return nullptr;
     }
     old_head_next = old_head->next.load();

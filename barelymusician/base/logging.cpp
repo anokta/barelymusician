@@ -48,8 +48,8 @@ Logger::Logger(LogSeverity severity, const char* file, int line)
 }
 
 Logger::~Logger() {
-  LogWriter& writer = (custom_log_writer != nullptr) ? *custom_log_writer
-                                                     : GetDefaultLogWriter();
+  LogWriter& writer =
+      custom_log_writer ? *custom_log_writer : GetDefaultLogWriter();
   writer.Write(severity_, stream_.str());
   if (severity_ == LogSeverity::FATAL) {
     // Fatal error received, abort the program.

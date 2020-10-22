@@ -21,7 +21,7 @@ bool WavFile::Load(const std::string& file_path) {
   drwav_uint64 wav_num_frames;
   float* wav_data = drwav_open_file_and_read_pcm_frames_f32(
       file_path.c_str(), &wav_num_channels, &wav_sample_rate, &wav_num_frames);
-  if (wav_data == nullptr) {
+  if (!wav_data) {
     LOG(ERROR) << "Failed to read WAV file: " << file_path;
     return false;
   }

@@ -115,7 +115,7 @@ void PolyphonicVoice<VoiceType>::Start(float index,
   VoiceType* voice = &voices_[voice_index];
   voice_states_[voice_index] = {index, 0};
 
-  if (init_voice != nullptr) {
+  if (init_voice) {
     init_voice(voice);
   }
   voice->Start();
@@ -128,7 +128,7 @@ void PolyphonicVoice<VoiceType>::Stop(float index,
   for (int i = 0; i < num_voices; ++i) {
     if (voice_states_[i].first == index && voices_[i].IsActive()) {
       VoiceType* voice = &voices_[i];
-      if (shutdown_voice != nullptr) {
+      if (shutdown_voice) {
         shutdown_voice(voice);
       }
       voice->Stop();

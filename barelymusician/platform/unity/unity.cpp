@@ -41,7 +41,7 @@ std::mutex initialize_shutdown_mutex;
 
 void Initialize(int sample_rate) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
-  if (barelymusician == nullptr) {
+  if (!barelymusician) {
     barelymusician = new BarelyMusician(sample_rate);
     logging::SetLogWriter(&barelymusician->writer);
   }
@@ -49,7 +49,7 @@ void Initialize(int sample_rate) {
 
 void Shutdown() {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
-  if (barelymusician != nullptr) {
+  if (barelymusician) {
     logging::SetLogWriter(nullptr);
     delete barelymusician;
   }
@@ -107,7 +107,7 @@ void NoteOn(std::int64_t id, float index, float intensity) {
 void Process(std::int64_t id, double timestamp, float* output, int num_channels,
              int num_frames) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
-  if (barelymusician != nullptr) {
+  if (barelymusician) {
     const double end_timestamp =
         timestamp + static_cast<double>(num_frames) /
                         static_cast<double>(barelymusician->sample_rate);
@@ -140,7 +140,7 @@ void SetParam(std::int64_t id, int param_id, float value) {
 
 void SetBeatCallback(BeatCallback* beat_callback_ptr) {
   DCHECK(barelymusician);
-  if (beat_callback_ptr != nullptr) {
+  if (beat_callback_ptr) {
     barelymusician->engine.SetBeatCallback(
         [beat_callback_ptr](double timestamp, int beat) {
           beat_callback_ptr(timestamp, beat);
@@ -152,7 +152,7 @@ void SetBeatCallback(BeatCallback* beat_callback_ptr) {
 
 void SetDebugCallback(DebugCallback* debug_callback_ptr) {
   DCHECK(barelymusician);
-  if (debug_callback_ptr != nullptr) {
+  if (debug_callback_ptr) {
     const auto debug_callback = [debug_callback_ptr](int severity,
                                                      const char* message) {
       debug_callback_ptr(severity, message);
@@ -165,7 +165,7 @@ void SetDebugCallback(DebugCallback* debug_callback_ptr) {
 
 void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
   DCHECK(barelymusician);
-  if (note_off_callback_ptr != nullptr) {
+  if (note_off_callback_ptr) {
     barelymusician->engine.SetNoteOffCallback(
         [note_off_callback_ptr](double timestamp, std::int64_t id,
                                 float index) {
@@ -178,7 +178,7 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
 
 void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
   DCHECK(barelymusician);
-  if (note_on_callback_ptr != nullptr) {
+  if (note_on_callback_ptr) {
     barelymusician->engine.SetNoteOnCallback(
         [note_on_callback_ptr](double timestamp, std::int64_t id, float index,
                                float intensity) {

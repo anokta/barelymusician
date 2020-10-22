@@ -18,7 +18,7 @@ void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
 
-  if (stream_ != nullptr) {
+  if (stream_) {
     // Stop the existing |stream_| first.
     Stop();
   }
@@ -36,7 +36,7 @@ void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
                            const PaStreamCallbackTimeInfo* time_info,
                            PaStreamCallbackFlags status_flags,
                            void* user_data) {
-    if (user_data != nullptr) {
+    if (user_data) {
       // Access the audio process callback via |user_data| (to avoid capturing
       // |process_callback_|).
       const auto& process_callback =
@@ -52,7 +52,7 @@ void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
 }
 
 void PaAudioOutput::Stop() {
-  if (stream_ != nullptr) {
+  if (stream_) {
     Pa_StopStream(stream_);
     Pa_CloseStream(stream_);
   }

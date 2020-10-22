@@ -5,7 +5,7 @@ namespace unity {
 
 void UnityLogWriter::Write(logging::LogSeverity severity,
                            const std::string& message) {
-  if (debug_callback_ != nullptr) {
+  if (debug_callback_) {
     debug_callback_(static_cast<int>(severity), message.c_str());
   }
 }

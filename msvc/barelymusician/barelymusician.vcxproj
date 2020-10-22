@@ -47,6 +47,7 @@
     <ClInclude Include="..\..\barelymusician\dsp\polyphonic_voice.h" />
     <ClInclude Include="..\..\barelymusician\dsp\sample_player.h" />
     <ClInclude Include="..\..\barelymusician\dsp\voice.h" />
+    <ClInclude Include="..\..\barelymusician\engine\clip.h" />
     <ClInclude Include="..\..\barelymusician\engine\conductor.h" />
     <ClInclude Include="..\..\barelymusician\engine\instrument.h" />
     <ClInclude Include="..\..\barelymusician\engine\engine.h" />

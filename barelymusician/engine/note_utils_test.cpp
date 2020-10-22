@@ -7,7 +7,7 @@ namespace barelyapi {
 namespace {
 
 // Tests that note indices get quantized as expected given an arbitrary scale.
-TEST(NoteUtilsTest, GetNoteIndex) {
+TEST(NoteUtilsTest, GetRawNoteIndex) {
   const int kOctaveRange = 2;
 
   const std::vector<float> kScale(std::cbegin(kMajorScale),
@@ -16,35 +16,36 @@ TEST(NoteUtilsTest, GetNoteIndex) {
 
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < scale_length; ++i) {
-      const float scale_index = static_cast<float>(octave * scale_length + i);
+      const int scale_index = octave * scale_length + i;
       const float expected_note_index =
           static_cast<float>(octave * kNumSemitones) + kScale[i];
-      EXPECT_FLOAT_EQ(GetNoteIndex(kScale, scale_index), expected_note_index);
+      EXPECT_FLOAT_EQ(GetRawNoteIndex(kScale, QuantizedNoteIndex{scale_index}),
+                      expected_note_index);
     }
   }
 }
 
-class GetBeatDurationTest : public testing::TestWithParam<int> {};
+class GetRawPositionTest : public testing::TestWithParam<int> {};
 
 // Tests that the beat gets quantized as expected with respect to the given
 // step.
-TEST_P(GetBeatDurationTest, GetBeat) {
+TEST_P(GetRawPositionTest, GetRawPosition) {
   const int kNumBeats = 4;
-  const int num_steps_per_beat = GetParam();
+  const int num_steps = GetParam();
 
   for (int beat = 0; beat < kNumBeats; ++beat) {
-    for (int i = 0; i < num_steps_per_beat; ++i) {
-      const double expected_beat =
+    for (int i = 0; i < num_steps; ++i) {
+      const double expected_position =
           static_cast<double>(beat) +
-          static_cast<double>(i) / static_cast<double>(num_steps_per_beat);
+          static_cast<double>(i) / static_cast<double>(num_steps);
       EXPECT_DOUBLE_EQ(
-          GetBeat(num_steps_per_beat * beat + i, num_steps_per_beat),
-          expected_beat);
+          GetRawPosition(QuantizedPosition{num_steps * beat + i, num_steps}),
+          expected_position);
     }
   }
 }
 
-INSTANTIATE_TEST_CASE_P(NoteUtilsTest, GetBeatDurationTest,
+INSTANTIATE_TEST_CASE_P(NoteUtilsTest, GetRawPositionTest,
                         testing::Values(kNumQuarterNotesPerBeat,
                                         kNumEighthNotesPerBeat,
                                         kNumEighthTripletNotesPerBeat,

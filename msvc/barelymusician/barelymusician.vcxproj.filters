@@ -114,6 +114,9 @@
     <ClInclude Include="..\..\barelymusician\engine\instrument_processor.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\barelymusician\engine\clip.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\barelymusician\base\logging.cpp">

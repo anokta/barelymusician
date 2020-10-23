@@ -80,7 +80,8 @@ int main(int argc, char* argv[]) {
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
     const float index = (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    engine.ScheduleNote(kMetronomeId, position, kTickDuration, index, kGain);
+    engine.ScheduleNoteOn(kMetronomeId, position, index, kGain);
+    engine.ScheduleNoteOff(kMetronomeId, position + kTickDuration, index);
   };
   engine.SetBeatCallback(beat_callback);
 

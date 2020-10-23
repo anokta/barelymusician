@@ -44,7 +44,6 @@
     <ClCompile Include="..\..\barelymusician\dsp\one_pole_filter_test.cpp" />
     <ClCompile Include="..\..\barelymusician\dsp\polyphonic_voice_test.cpp" />
     <ClCompile Include="..\..\barelymusician\dsp\sample_player_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\engine\message_queue_test.cpp" />
     <ClCompile Include="..\..\barelymusician\engine\note_utils_test.cpp" />
     <ClCompile Include="..\..\barelymusician\util\random_test.cpp" />
     <ClCompile Include="..\..\barelymusician\util\task_runner_test.cpp" />

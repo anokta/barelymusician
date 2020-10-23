@@ -39,9 +39,6 @@
     <ClCompile Include="..\..\barelymusician\util\task_runner_test.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\engine\message_queue_test.cpp">
-      <Filter>Source Files\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\barelymusician\engine\note_utils_test.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>

@@ -1,7 +1,12 @@
 #ifndef BARELYMUSICIAN_BASE_CONSTANTS_H_
 #define BARELYMUSICIAN_BASE_CONSTANTS_H_
 
+#include "barelymusician/base/types.h"
+
 namespace barelyapi {
+
+// Invalid id.
+inline constexpr Id kInvalidId = -1;
 
 // Converts minutes to seconds.
 inline constexpr double kSecondsFromMinutes = 60.0;

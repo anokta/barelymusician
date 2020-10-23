@@ -22,7 +22,7 @@ struct QuantizedPosition {
 
 using Position = std::variant<double, QuantizedPosition>;
 
-// Musical note.
+// Abstract musical note.
 struct Note {
   // Note start position in beats.
   Position position;
@@ -32,6 +32,21 @@ struct Note {
 
   // Note index (typically key).
   NoteIndex index;
+
+  // Note intensity (typically loudness).
+  float intensity;
+};
+
+// Raw musical note.
+struct RawNote {
+  // Note start position in beats.
+  double position;
+
+  // Note duration in beats.
+  double duration;
+
+  // Note index (typically key).
+  float index;
 
   // Note intensity (typically loudness).
   float intensity;

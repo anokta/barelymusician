@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument.h"
@@ -35,7 +36,7 @@ class BasicSynthInstrument : public Instrument {
   void Process(float* output, int num_channels, int num_frames) override;
 
   // Returns default parameters.
-  static std::vector<std::pair<int, float>> GetDefaultParams();
+  static std::vector<ParamData> GetDefaultParams();
 
  private:
   using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;

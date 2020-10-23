@@ -26,9 +26,6 @@
     <ClCompile Include="..\..\barelymusician\dsp\oscillator.cpp" />
     <ClCompile Include="..\..\barelymusician\dsp\sample_player.cpp" />
     <ClCompile Include="..\..\barelymusician\engine\engine.cpp" />
-    <ClCompile Include="..\..\barelymusician\engine\instrument_controller.cpp" />
-    <ClCompile Include="..\..\barelymusician\engine\instrument_processor.cpp" />
-    <ClCompile Include="..\..\barelymusician\engine\message_queue.cpp" />
     <ClCompile Include="..\..\barelymusician\engine\note_utils.cpp" />
     <ClCompile Include="..\..\barelymusician\util\random.cpp" />
     <ClCompile Include="..\..\barelymusician\util\task_runner.cpp" />
@@ -37,6 +34,7 @@
     <ClInclude Include="..\..\barelymusician\algorithm\context_free_grammar.h" />
     <ClInclude Include="..\..\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\barelymusician\base\logging.h" />
+    <ClInclude Include="..\..\barelymusician\base\types.h" />
     <ClInclude Include="..\..\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\barelymusician\dsp\envelope.h" />
     <ClInclude Include="..\..\barelymusician\dsp\filter.h" />
@@ -47,15 +45,8 @@
     <ClInclude Include="..\..\barelymusician\dsp\polyphonic_voice.h" />
     <ClInclude Include="..\..\barelymusician\dsp\sample_player.h" />
     <ClInclude Include="..\..\barelymusician\dsp\voice.h" />
-    <ClInclude Include="..\..\barelymusician\engine\clip.h" />
-    <ClInclude Include="..\..\barelymusician\engine\conductor.h" />
     <ClInclude Include="..\..\barelymusician\engine\instrument.h" />
     <ClInclude Include="..\..\barelymusician\engine\engine.h" />
-    <ClInclude Include="..\..\barelymusician\engine\instrument_controller.h" />
-    <ClInclude Include="..\..\barelymusician\engine\instrument_processor.h" />
-    <ClInclude Include="..\..\barelymusician\engine\message.h" />
-    <ClInclude Include="..\..\barelymusician\engine\message_queue.h" />
-    <ClInclude Include="..\..\barelymusician\engine\note.h" />
     <ClInclude Include="..\..\barelymusician\engine\note_utils.h" />
     <ClInclude Include="..\..\barelymusician\util\random.h" />
     <ClInclude Include="..\..\barelymusician\util\task_runner.h" />

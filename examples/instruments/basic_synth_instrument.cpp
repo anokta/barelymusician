@@ -80,7 +80,7 @@ void BasicSynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-std::vector<std::pair<int, float>> BasicSynthInstrument::GetDefaultParams() {
+std::vector<ParamData> BasicSynthInstrument::GetDefaultParams() {
   return {{static_cast<int>(BasicSynthInstrumentParam::kGain), kDefaultGain},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack),
            kDefaultEnvelopeAttack},

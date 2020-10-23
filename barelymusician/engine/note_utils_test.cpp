@@ -19,8 +19,9 @@ TEST(NoteUtilsTest, GetRawNoteIndex) {
       const int scale_index = octave * scale_length + i;
       const float expected_note_index =
           static_cast<float>(octave * kNumSemitones) + kScale[i];
-      EXPECT_FLOAT_EQ(GetRawNoteIndex(kScale, QuantizedNoteIndex{scale_index}),
-                      expected_note_index);
+      EXPECT_FLOAT_EQ(
+          GetRawNoteIndex(kScale, QuantizedNoteIndex{0.0f, scale_index}),
+          expected_note_index);
     }
   }
 }

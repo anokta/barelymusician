@@ -218,7 +218,7 @@ namespace BarelyApi {
         };
         SetNoteOnCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
         _instruments = new Dictionary<Int64, Instrument>();
-        _lookahead = 1.25 * config.dspBufferSize / config.sampleRate;
+        _lookahead = config.dspBufferSize / config.sampleRate + (double)Time.fixedDeltaTime;
       }
 
       private void OnApplicationQuit() {

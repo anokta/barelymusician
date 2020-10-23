@@ -13,14 +13,14 @@ namespace barelyapi {
 // @param scale_index Scale index.
 // @return Note index.
 float GetRawNoteIndex(const std::vector<float>& scale,
-                      const QuantizedNoteIndex& note_index);
+                      const NoteIndex& note_index);
 
 // Returns the quantized position for the given number of beat steps.
 //
 // @param step Quantized step.
 // @param num_steps_per_beat Number of steps per beat.
 // @param Beat.
-double GetRawPosition(const QuantizedPosition& position);
+double GetRawPosition(const Position& position);
 
 }  // namespace barelyapi
 

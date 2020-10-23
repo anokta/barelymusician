@@ -5,6 +5,8 @@
 
 namespace barelyapi {
 
+namespace {
+
 float GetRawNoteIndex(const std::vector<float>& scale,
                       const QuantizedNoteIndex& note_index) {
   DCHECK(!scale.empty());
@@ -23,6 +25,28 @@ double GetRawPosition(const QuantizedPosition& position) {
       static_cast<double>(position.step / position.num_steps);
   return num_beats + static_cast<double>(position.step % position.num_steps) /
                          static_cast<double>(position.num_steps);
+}
+
+}  // namespace
+
+float GetRawNoteIndex(const std::vector<float>& scale,
+                      const NoteIndex& note_index) {
+  float ret = 0.0f;
+  std::visit(Visitor{[&](const QuantizedNoteIndex& index) {
+                       ret = index.root_index + GetRawNoteIndex(scale, index);
+                     },
+                     [&](float index) { ret = index; }},
+             note_index);
+  return ret;
+}
+
+double GetRawPosition(const Position& position) {
+  double ret = 0.0;
+  std::visit(
+      Visitor{[&](const QuantizedPosition& p) { ret = GetRawPosition(p); },
+              [&](double p) { ret = p; }},
+      position);
+  return ret;
 }
 
 }  // namespace barelyapi

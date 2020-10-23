@@ -328,7 +328,7 @@ void Engine::Update(double timestamp) {
   for (auto& controller_it : controllers_) {
     const Id& instrument_id = controller_it.first;
     InstrumentController& controller = controller_it.second;
-    const auto cbegin = controller.messages.cbegin();
+    const auto cbegin = controller.messages.lower_bound(position_);
     const auto cend = controller.messages.lower_bound(end_position);
     for (auto it = cbegin; it != cend; ++it) {
       const double message_timestamp =

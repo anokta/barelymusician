@@ -6,6 +6,9 @@
 namespace barelyapi {
 
 struct QuantizedNoteIndex {
+  // Root note index.
+  float root_index;
+
   // Scale index.
   int scale_index;
 };

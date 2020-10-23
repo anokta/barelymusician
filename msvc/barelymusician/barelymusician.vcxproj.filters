@@ -99,6 +99,9 @@
     <ClInclude Include="..\..\barelymusician\base\types.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\barelymusician\engine\note.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\barelymusician\base\logging.cpp">

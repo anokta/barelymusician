@@ -56,6 +56,13 @@ Id EXPORT_API CreateBasicSynthInstrument();
 // @param id Performer id.
 void EXPORT_API Destroy(Id id);
 
+// Returns instrument parameter value.
+//
+// @param id Instrument id.
+// @param param_id Param id.
+// @return Param value.
+float EXPORT_API GetParam(Id id, int param_id);
+
 // Returns playback position.
 //
 // @return Position in beats.
@@ -66,10 +73,20 @@ double EXPORT_API GetPosition();
 // @return Tempo in BPM.
 double EXPORT_API GetTempo();
 
+// Returns whether the note is active or not.
+//
+// @param id Instrument id.
+// @param index Note index.
+// @return True if active.
+bool EXPORT_API IsNoteOn(Id id, float index);
+
 // Returns playback state.
 //
 // @return True if playing.
 bool EXPORT_API IsPlaying();
+
+// Stops all notes.
+void EXPORT_API AllNotesOff(Id id);
 
 // Stops instrument note.
 //
@@ -92,6 +109,9 @@ void EXPORT_API NoteOn(Id id, float index, float intensity);
 // @param num_frames Number of output frames.
 void EXPORT_API Process(Id id, double timestamp, float* output,
                         int num_channels, int num_frames);
+
+// Resets all params.
+void EXPORT_API ResetAllParams(Id id);
 
 // Schedules instrument note.
 //
@@ -119,13 +139,6 @@ void EXPORT_API ScheduleNoteOff(Id id, double position, float index);
 void EXPORT_API ScheduleNoteOn(Id id, double position, float index,
                                float intensity);
 
-// Sets instrument param value.
-//
-// @param id Instrument id.
-// @param param_id Param id.
-// @param value Param value.
-void EXPORT_API SetParam(Id id, int param_id, float value);
-
 // Sets beat callback.
 //
 // @param beat_callback_ptr Pointer to beat callback.
@@ -145,6 +158,13 @@ void EXPORT_API SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr);
 //
 // @param note_on_callback_ptr Pointer to note on callback.
 void EXPORT_API SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr);
+
+// Sets instrument param value.
+//
+// @param id Instrument id.
+// @param param_id Param id.
+// @param value Param value.
+void EXPORT_API SetParam(Id id, int param_id, float value);
 
 // Sets playback position.
 //

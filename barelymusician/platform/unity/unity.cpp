@@ -78,6 +78,15 @@ void Destroy(Id id) {
   barelymusician->engine.Destroy(id);
 }
 
+float GetParam(Id id, int param_id) {
+  DCHECK(barelymusician);
+  const auto param_or = barelymusician->engine.GetParam(id, param_id);
+  if (param_or.has_value()) {
+    return param_or.value();
+  }
+  return 0.0f;
+}
+
 double GetPosition() {
   DCHECK(barelymusician);
   return barelymusician->engine.GetPosition();
@@ -88,9 +97,19 @@ double GetTempo() {
   return barelymusician->engine.GetTempo();
 }
 
+bool IsNoteOn(Id id, float index) {
+  DCHECK(barelymusician);
+  return barelymusician->engine.IsNoteOn(id, index).value_or(false);
+}
+
 bool IsPlaying() {
   DCHECK(barelymusician);
   return barelymusician->engine.IsPlaying();
+}
+
+void AllNotesOff(Id id) {
+  DCHECK(barelymusician);
+  barelymusician->engine.AllNotesOff(id);
 }
 
 void NoteOff(Id id, float index) {
@@ -115,6 +134,11 @@ void Process(Id id, double timestamp, float* output, int num_channels,
   }
 }
 
+void ResetAllParams(Id id) {
+  DCHECK(barelymusician);
+  barelymusician->engine.ResetAllParams(id);
+}
+
 void ScheduleNote(Id id, double position, double duration, float index,
                   float intensity) {
   DCHECK(barelymusician);
@@ -129,11 +153,6 @@ void ScheduleNoteOff(Id id, double position, float index) {
 void ScheduleNoteOn(Id id, double position, float index, float intensity) {
   DCHECK(barelymusician);
   barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
-}
-
-void SetParam(Id id, int param_id, float value) {
-  DCHECK(barelymusician);
-  barelymusician->engine.SetParam(id, param_id, value);
 }
 
 void SetBeatCallback(BeatCallback* beat_callback_ptr) {
@@ -184,6 +203,11 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
   } else {
     barelymusician->engine.SetNoteOnCallback(nullptr);
   }
+}
+
+void SetParam(Id id, int param_id, float value) {
+  DCHECK(barelymusician);
+  barelymusician->engine.SetParam(id, param_id, value);
 }
 
 void SetPosition(double position) {

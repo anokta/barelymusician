@@ -92,12 +92,6 @@ bool Engine::Destroy(Id instrument_id) {
   return false;
 }
 
-double Engine::GetPosition() const { return position_; }
-
-double Engine::GetTempo() const { return tempo_; }
-
-bool Engine::IsPlaying() const { return is_playing_; }
-
 std::optional<float> Engine::GetParam(Id instrument_id, int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (const auto* param = FindOrNull(controller->params, param_id)) {
@@ -107,12 +101,18 @@ std::optional<float> Engine::GetParam(Id instrument_id, int param_id) const {
   return std::nullopt;
 }
 
+double Engine::GetPosition() const { return position_; }
+
+double Engine::GetTempo() const { return tempo_; }
+
 std::optional<bool> Engine::IsNoteOn(Id instrument_id, float note_index) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->notes.find(note_index) != controller->notes.cend();
   }
   return std::nullopt;
 }
+
+bool Engine::IsPlaying() const { return is_playing_; }
 
 bool Engine::AllNotesOff(Id instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {

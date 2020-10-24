@@ -341,11 +341,17 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "Destroy")]
     private static extern void DestroyNative(Int64 id);
 
+    [DllImport(pluginName, EntryPoint = "GetParam")]
+    private static extern float GetParamNative(Int64 id, int param_id);
+
     [DllImport(pluginName, EntryPoint = "GetPosition")]
     private static extern double GetPositionNative();
 
     [DllImport(pluginName, EntryPoint = "GetTempo")]
     private static extern double GetTempoNative();
+
+    [DllImport(pluginName, EntryPoint = "IsNoteOn")]
+    private static extern bool IsNoteOnNative(Int64 id, float index);
 
     [DllImport(pluginName, EntryPoint = "IsPlaying")]
     private static extern bool IsPlayingNative();
@@ -354,11 +360,17 @@ namespace BarelyApi {
     private static extern void ProcessNative(Int64 id, double timestamp, [In, Out] float[] output,
                                              int numChannels, int numFrames);
 
+    [DllImport(pluginName, EntryPoint = "AllNotesOff")]
+    private static extern void AllNotesOffNative(Int64 id);
+
     [DllImport(pluginName, EntryPoint = "NoteOff")]
     private static extern void NoteOffNative(Int64 id, float index);
 
     [DllImport(pluginName, EntryPoint = "NoteOn")]
     private static extern void NoteOnNative(Int64 id, float index, float intensity);
+
+    [DllImport(pluginName, EntryPoint = "ResetAllParams")]
+    private static extern void ResetAllParams(Int64 id);
 
     [DllImport(pluginName, EntryPoint = "ScheduleNote")]
     private static extern void ScheduleNoteNative(Int64 id, double position, double duration,
@@ -371,9 +383,6 @@ namespace BarelyApi {
     private static extern void ScheduleNoteOnNative(Int64 id, double position, float index,
                                                     float intensity);
 
-    [DllImport(pluginName, EntryPoint = "SetParam")]
-    private static extern void SetParamNative(Int64 id, int param_id, float value);
-
     [DllImport(pluginName, EntryPoint = "SetBeatCallback")]
     private static extern void SetBeatCallbackNative(IntPtr beatCallbackPtr);
 
@@ -385,6 +394,9 @@ namespace BarelyApi {
 
     [DllImport(pluginName, EntryPoint = "SetNoteOnCallback")]
     private static extern void SetNoteOnCallbackNative(IntPtr noteOnCallbackPtr);
+
+    [DllImport(pluginName, EntryPoint = "SetParam")]
+    private static extern void SetParamNative(Int64 id, int param_id, float value);
 
     [DllImport(pluginName, EntryPoint = "SetPosition")]
     private static extern void SetPositionNative(double position);

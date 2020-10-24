@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 #include <chrono>
 #include <memory>
@@ -163,16 +164,6 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   }
 }
 
-void ScheduleNote(Engine* engine, Id instrument_id,
-                  const std::vector<float>& scale, const Note& note,
-                  double beat) {
-  const double position = barelyapi::GetRawPosition(note.position) + beat;
-  const double duration = barelyapi::GetRawPosition(note.duration);
-  const float index = barelyapi::GetRawNoteIndex(scale, note.index);
-  engine->ScheduleNoteOn(instrument_id, position, index, note.intensity);
-  engine->ScheduleNoteOff(instrument_id, position + duration, index);
-}
-
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -218,7 +209,10 @@ int main(int argc, char* argv[]) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
       for (const Note& note : temp_notes) {
-        ScheduleNote(&engine, id, scale, note, static_cast<double>(beat));
+        const double position = barelyapi::GetRawPosition(note.position) + beat;
+        const double duration = barelyapi::GetRawPosition(note.duration);
+        const float index = barelyapi::GetRawNoteIndex(scale, note.index);
+        engine.ScheduleNote(id, position, duration, index, note.intensity);
       }
     }
   };

@@ -21,8 +21,6 @@ const int kDefaultNumVoices = 8;
 BasicSynthInstrument::BasicSynthInstrument(int sample_rate)
     : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {}
 
-void BasicSynthInstrument::AllNotesOff() { voice_.Reset(); }
-
 void BasicSynthInstrument::Control(int id, float value) {
   switch (static_cast<BasicSynthInstrumentParam>(id)) {
     case BasicSynthInstrumentParam::kGain:

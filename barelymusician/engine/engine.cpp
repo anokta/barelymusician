@@ -40,11 +40,19 @@ ValueType* FindOrNull(std::unordered_map<KeyType, ValueType>& map,
 }
 
 // Returns number of beats for the given number of |seconds| and |tempo|.
+//
+// @param tempo Tempo in BPM.
+// @param seconds Number of seconds.
+// @return Number of beats.
 double BeatsFromSeconds(double tempo, double seconds) {
   return tempo * seconds / kSecondsFromMinutes;
 }
 
 // Returns number of seconds for the given number of |beats| and |tempo|.
+//
+// @param tempo Tempo in BPM.
+// @param beats Number of beats.
+// @return Number of seconds.
 double SecondsFromBeats(double tempo, double beats) {
   return beats * kSecondsFromMinutes / tempo;
 }
@@ -109,16 +117,20 @@ std::optional<bool> Engine::IsNoteOn(Id instrument_id, float note_index) const {
 bool Engine::AllNotesOff(Id instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     controller->messages.clear();
+    std::vector<float> notes{controller->notes.begin(),
+                             controller->notes.end()};
+    controller->notes.clear();
     if (note_off_callback_) {
-      for (const float note : controller->notes) {
+      for (const float note : notes) {
         note_off_callback_(last_timestamp_, instrument_id, note);
       }
     }
-    controller->notes.clear();
-    task_runner_.Add([this, instrument_id]() {
+    task_runner_.Add([this, instrument_id, timestamp = last_timestamp_,
+                      notes = std::move(notes)]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        processor->messages.clear();
-        processor->instrument->AllNotesOff();
+        for (const float note : notes) {
+          processor->messages.emplace_back(timestamp, NoteOffData{note});
+        }
       }
     });
     return true;
@@ -244,6 +256,22 @@ bool Engine::ResetAllParams(Id instrument_id) {
     return true;
   }
   return false;
+}
+
+std::optional<bool> Engine::ScheduleNote(Id instrument_id, double position,
+                                         double duration, float note_index,
+                                         float note_intensity) {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (position_ <= position && duration >= 0.0) {
+      controller->messages.emplace(position,
+                                   NoteOnData{note_index, note_intensity});
+      controller->messages.emplace(position + duration,
+                                   NoteOffData{note_index});
+      return true;
+    }
+    return false;
+  }
+  return std::nullopt;
 }
 
 std::optional<bool> Engine::ScheduleNoteOff(Id instrument_id, double position,

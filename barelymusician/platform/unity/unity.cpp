@@ -118,8 +118,7 @@ void Process(Id id, double timestamp, float* output, int num_channels,
 void ScheduleNote(Id id, double position, double duration, float index,
                   float intensity) {
   DCHECK(barelymusician);
-  barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
-  barelymusician->engine.ScheduleNoteOff(id, position + duration, index);
+  barelymusician->engine.ScheduleNote(id, position, duration, index, intensity);
 }
 
 void ScheduleNoteOff(Id id, double position, float index) {

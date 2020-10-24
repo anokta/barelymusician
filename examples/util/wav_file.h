@@ -33,10 +33,10 @@ class WavFile {
 
  private:
   // Number of audio channels.
-  int num_channels_;
+  int num_channels_ = 0;
 
   // Audio sampling rate.
-  int sample_rate_;
+  int sample_rate_ = 0;
 
   // Audio data.
   std::vector<float> data_;

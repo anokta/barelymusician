@@ -27,9 +27,6 @@ class PolyphonicVoice {
   // @return Accumulated output sample.
   float Next(int channel);
 
-  // Resets all voices.
-  void Reset();
-
   // Resizes number of available voices that can be played simultaneously.
   //
   // @param num_voices Number of available voices.
@@ -79,13 +76,6 @@ float PolyphonicVoice<VoiceType>::Next(int channel) {
     }
   }
   return output;
-}
-
-template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Reset() {
-  for (auto& voice : voices_) {
-    voice.Stop();
-  }
 }
 
 template <class VoiceType>

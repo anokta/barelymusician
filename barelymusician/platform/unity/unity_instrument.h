@@ -30,7 +30,6 @@ class UnityInstrument : public Instrument {
                   ProcessFn&& process_fn);
 
   // Implements |Instrument|.
-  void AllNotesOff() override {}
   void Control(int, float) override {}
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;

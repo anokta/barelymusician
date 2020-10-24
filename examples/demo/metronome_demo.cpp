@@ -1,3 +1,4 @@
+#include <atomic>
 #include <cctype>
 #include <chrono>
 #include <cmath>
@@ -26,8 +27,7 @@ const int kSampleRate = 48000;
 const int kNumChannels = 2;
 const int kNumFrames = 2048;
 
-const double kLookahead =
-    0.5 * static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
+const double kLookahead = 0.05;
 
 // Metronome settings.
 const int kMetronomeId = 1;
@@ -45,12 +45,6 @@ const float kBeatNoteIndex = barelyapi::kNoteIndexA3;
 const int kNumBeats = 4;
 const double kInitialTempo = 120.0;
 const double kTempoIncrement = 10.0;
-
-double GetCurrentTimestamp() {
-  const auto now_seconds =
-      std::chrono::high_resolution_clock::now().time_since_epoch();
-  return std::chrono::duration<double>(now_seconds).count();
-}
 
 }  // namespace
 
@@ -80,15 +74,16 @@ int main(int argc, char* argv[]) {
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
     const float index = (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    engine.ScheduleNoteOn(kMetronomeId, position, index, kGain);
-    engine.ScheduleNoteOff(kMetronomeId, position + kTickDuration, index);
+    engine.ScheduleNote(kMetronomeId, position, kTickDuration, index, kGain);
   };
   engine.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  double timestamp = GetCurrentTimestamp();
+  std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
-    const double end_timestamp = GetCurrentTimestamp();
+    const double end_timestamp =
+        timestamp +
+        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
     engine.Process(kMetronomeId, timestamp, end_timestamp, output, kNumChannels,
                    kNumFrames);
     timestamp = end_timestamp;
@@ -111,7 +106,7 @@ int main(int argc, char* argv[]) {
           engine.Stop();
           LOG(INFO) << "Stopped playback";
         } else {
-          engine.Start(GetCurrentTimestamp() + kLookahead);
+          engine.Start(timestamp + kLookahead);
           LOG(INFO) << "Started playback";
         }
         return;
@@ -144,11 +139,11 @@ int main(int argc, char* argv[]) {
   input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
-  engine.Start(GetCurrentTimestamp() + kLookahead);
+  engine.Start(timestamp + kLookahead);
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(GetCurrentTimestamp() + kLookahead);
+    engine.Update(timestamp + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

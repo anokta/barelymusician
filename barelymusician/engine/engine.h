@@ -114,6 +114,18 @@ class Engine {
   // @return True if instrument found.
   bool ResetAllParams(Id instrument_id);
 
+  // Schedules note.
+  //
+  // @param instrument_id Instrument id.
+  // @param position Note position.
+  // @param duration Note duration.
+  // @param note_index Note index.
+  // @param note_intensity Note intensity.
+  // @return True if successful, if instrument found.
+  std::optional<bool> ScheduleNote(Id instrument_id, double position,
+                                   double duration, float note_index,
+                                   float note_intensity);
+
   // Schedules note off.
   //
   // @param instrument_id Instrument id.

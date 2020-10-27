@@ -234,6 +234,7 @@ void Stop() {
   DCHECK(barelymusician);
   barelymusician->engine.Stop();
   barelymusician->engine.ClearAllScheduledNotes();
+  barelymusician->engine.SetPosition(0.0);
 }
 
 void Update(double timestamp) {

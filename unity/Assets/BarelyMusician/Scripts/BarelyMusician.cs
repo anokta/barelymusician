@@ -310,12 +310,11 @@ namespace BarelyApi {
       }
 
       public void Pause() {
-        StopNative();
+        PauseNative();
       }
 
       public void Stop() {
         StopNative();
-        SetPositionNative(0.0);
       }
     }
 
@@ -406,6 +405,9 @@ namespace BarelyApi {
 
     [DllImport(pluginName, EntryPoint = "Start")]
     private static extern void StartNative(double timestamp);
+
+    [DllImport(pluginName, EntryPoint = "Pause")]
+    private static extern void PauseNative();
 
     [DllImport(pluginName, EntryPoint = "Stop")]
     private static extern void StopNative();

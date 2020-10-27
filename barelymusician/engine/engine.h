@@ -75,6 +75,9 @@ class Engine {
   bool IsPlaying() const;
 
   // Stops all notes.
+  void AllNotesOff();
+
+  // Stops all notes.
   //
   // @param instrument_id Instrument id.
   // @return True if instrument found.
@@ -113,6 +116,24 @@ class Engine {
   // @param instrument_id Instrument id.
   // @return True if instrument found.
   bool ResetAllParams(Id instrument_id);
+
+  // Sets control parameter value.
+  //
+  // @param instrument_id Instrument id.
+  // @param param_id Parameter id.
+  // @param param_value Parameter value.
+  // @return True if successful, if instrument parameter found.
+  std::optional<bool> SetParam(Id instrument_id, int param_id,
+                               float param_value);
+
+  // Clears all scheduled notes.
+  void ClearAllScheduledNotes();
+
+  // Clears all scheduled notes.
+  //
+  // @param instrument_id Instrument id.
+  // @return True if instrument found.
+  bool ClearAllScheduledNotes(Id instrument_id);
 
   // Schedules note.
   //
@@ -159,15 +180,6 @@ class Engine {
   //
   // @param note_on_callback Note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback);
-
-  // Sets control parameter value.
-  //
-  // @param instrument_id Instrument id.
-  // @param param_id Parameter id.
-  // @param param_value Parameter value.
-  // @return True if successful, if instrument parameter found.
-  std::optional<bool> SetParam(Id instrument_id, int param_id,
-                               float param_value);
 
   // Sets playback position.
   //

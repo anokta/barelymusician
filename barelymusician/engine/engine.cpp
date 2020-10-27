@@ -114,9 +114,14 @@ std::optional<bool> Engine::IsNoteOn(Id instrument_id, float note_index) const {
 
 bool Engine::IsPlaying() const { return is_playing_; }
 
+void Engine::AllNotesOff() {
+  for (auto& [instrument_id, controller] : controllers_) {
+    AllNotesOff(instrument_id);
+  }
+}
+
 bool Engine::AllNotesOff(Id instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->messages.clear();
     std::vector<float> notes{controller->notes.begin(),
                              controller->notes.end()};
     controller->notes.clear();
@@ -136,25 +141,6 @@ bool Engine::AllNotesOff(Id instrument_id) {
     return true;
   }
   return false;
-}
-
-std::optional<bool> Engine::SetParam(Id instrument_id, int param_id,
-                                     float param_value) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (auto* param = FindOrNull(controller->params, param_id)) {
-      if (param->value != param_value) {
-        param->value = param_value;
-        task_runner_.Add([this, instrument_id, param_id, param_value]() {
-          if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            processor->instrument->Control(param_id, param_value);
-          }
-        });
-        return true;
-      }
-      return false;
-    }
-  }
-  return std::nullopt;
 }
 
 std::optional<bool> Engine::NoteOff(Id instrument_id, float note_index) {
@@ -258,6 +244,39 @@ bool Engine::ResetAllParams(Id instrument_id) {
   return false;
 }
 
+std::optional<bool> Engine::SetParam(Id instrument_id, int param_id,
+                                     float param_value) {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (auto* param = FindOrNull(controller->params, param_id)) {
+      if (param->value != param_value) {
+        param->value = param_value;
+        task_runner_.Add([this, instrument_id, param_id, param_value]() {
+          if (auto* processor = FindOrNull(processors_, instrument_id)) {
+            processor->instrument->Control(param_id, param_value);
+          }
+        });
+        return true;
+      }
+      return false;
+    }
+  }
+  return std::nullopt;
+}
+
+void Engine::ClearAllScheduledNotes() {
+  for (auto& [instrument_id, controller] : controllers_) {
+    ClearAllScheduledNotes(instrument_id);
+  }
+}
+
+bool Engine::ClearAllScheduledNotes(Id instrument_id) {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->messages.clear();
+    return true;
+  }
+  return false;
+}
+
 std::optional<bool> Engine::ScheduleNote(Id instrument_id, double position,
                                          double duration, float note_index,
                                          float note_intensity) {
@@ -330,10 +349,8 @@ void Engine::Start(double timestamp) {
 }
 
 void Engine::Stop() {
-  for (auto& [instrument_id, controller] : controllers_) {
-    AllNotesOff(instrument_id);
-  }
   is_playing_ = false;
+  AllNotesOff();
 }
 
 void Engine::Update(double timestamp) {

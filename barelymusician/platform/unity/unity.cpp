@@ -225,9 +225,15 @@ void Start(double timestamp) {
   barelymusician->engine.Start(timestamp);
 }
 
+void Pause() {
+  DCHECK(barelymusician);
+  barelymusician->engine.Stop();
+}
+
 void Stop() {
   DCHECK(barelymusician);
   barelymusician->engine.Stop();
+  barelymusician->engine.ClearAllScheduledNotes();
 }
 
 void Update(double timestamp) {

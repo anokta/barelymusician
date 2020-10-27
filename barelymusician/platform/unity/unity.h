@@ -179,6 +179,9 @@ void EXPORT_API SetTempo(double tempo);
 // Starts playback.
 void EXPORT_API Start(double timestamp);
 
+// Pauses playback.
+void EXPORT_API Pause();
+
 // Stops playback.
 void EXPORT_API Stop();
 

@@ -58,68 +58,85 @@ void Shutdown() {
 
 Id CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
                          ProcessFn* process_fn_ptr) {
-  DCHECK(barelymusician);
-  auto instrument = std::make_unique<UnityInstrument>(
-      note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
-  return barelymusician->engine.Create(std::move(instrument), {});
+  if (barelymusician) {
+    auto instrument = std::make_unique<UnityInstrument>(
+        note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
+    return barelymusician->engine.Create(std::move(instrument), {});
+  }
+  return kInvalidId;
 }
 
 Id CreateBasicSynthInstrument() {
-  DCHECK(barelymusician);
-  auto instrument = std::make_unique<examples::BasicSynthInstrument>(
-      barelymusician->sample_rate);
-  return barelymusician->engine.Create(
-      std::move(instrument),
-      examples::BasicSynthInstrument::GetDefaultParams());
+  if (barelymusician) {
+    auto instrument = std::make_unique<examples::BasicSynthInstrument>(
+        barelymusician->sample_rate);
+    return barelymusician->engine.Create(
+        std::move(instrument),
+        examples::BasicSynthInstrument::GetDefaultParams());
+  }
+  return kInvalidId;
 }
 
 void Destroy(Id id) {
-  DCHECK(barelymusician);
-  barelymusician->engine.Destroy(id);
+  if (barelymusician) {
+    barelymusician->engine.Destroy(id);
+  }
 }
 
 float GetParam(Id id, int param_id) {
-  DCHECK(barelymusician);
-  const auto param_or = barelymusician->engine.GetParam(id, param_id);
-  if (param_or.has_value()) {
-    return param_or.value();
+  if (barelymusician) {
+    const auto param_or = barelymusician->engine.GetParam(id, param_id);
+    if (param_or.has_value()) {
+      return param_or.value();
+    }
   }
   return 0.0f;
 }
 
 double GetPosition() {
-  DCHECK(barelymusician);
-  return barelymusician->engine.GetPosition();
+  if (barelymusician) {
+    return barelymusician->engine.GetPosition();
+  }
+  return 0.0f;
 }
 
 double GetTempo() {
-  DCHECK(barelymusician);
-  return barelymusician->engine.GetTempo();
+  if (barelymusician) {
+    return barelymusician->engine.GetTempo();
+  }
+  return 0.0f;
 }
 
 bool IsNoteOn(Id id, float index) {
-  DCHECK(barelymusician);
-  return barelymusician->engine.IsNoteOn(id, index).value_or(false);
+  if (barelymusician) {
+    return barelymusician->engine.IsNoteOn(id, index).value_or(false);
+  }
+  return false;
 }
 
 bool IsPlaying() {
-  DCHECK(barelymusician);
-  return barelymusician->engine.IsPlaying();
+  if (barelymusician) {
+    return barelymusician->engine.IsPlaying();
+  }
+  return false;
 }
 
 void AllNotesOff(Id id) {
-  DCHECK(barelymusician);
-  barelymusician->engine.AllNotesOff(id);
+  if (barelymusician) {
+    barelymusician->engine.AllNotesOff(id);
+  }
 }
 
 void NoteOff(Id id, float index) {
-  DCHECK(barelymusician);
-  barelymusician->engine.NoteOff(id, index);
+  if (barelymusician) {
+    barelymusician->engine.NoteOff(id, index);
+  }
 }
 
 void NoteOn(Id id, float index, float intensity) {
-  DCHECK(barelymusician);
-  barelymusician->engine.NoteOn(id, index, intensity);
+  if (barelymusician) {
+    barelymusician->engine.NoteOn(id, index, intensity);
+  }
 }
 
 void Process(Id id, double timestamp, float* output, int num_channels,
@@ -135,111 +152,127 @@ void Process(Id id, double timestamp, float* output, int num_channels,
 }
 
 void ResetAllParams(Id id) {
-  DCHECK(barelymusician);
-  barelymusician->engine.ResetAllParams(id);
+  if (barelymusician) {
+    barelymusician->engine.ResetAllParams(id);
+  }
 }
 
 void ScheduleNote(Id id, double position, double duration, float index,
                   float intensity) {
-  DCHECK(barelymusician);
-  barelymusician->engine.ScheduleNote(id, position, duration, index, intensity);
+  if (barelymusician) {
+    barelymusician->engine.ScheduleNote(id, position, duration, index,
+                                        intensity);
+  }
 }
 
 void ScheduleNoteOff(Id id, double position, float index) {
-  DCHECK(barelymusician);
-  barelymusician->engine.ScheduleNoteOff(id, position, index);
+  if (barelymusician) {
+    barelymusician->engine.ScheduleNoteOff(id, position, index);
+  }
 }
 
 void ScheduleNoteOn(Id id, double position, float index, float intensity) {
-  DCHECK(barelymusician);
-  barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
+  if (barelymusician) {
+    barelymusician->engine.ScheduleNoteOn(id, position, index, intensity);
+  }
 }
 
 void SetBeatCallback(BeatCallback* beat_callback_ptr) {
-  DCHECK(barelymusician);
-  if (beat_callback_ptr) {
-    barelymusician->engine.SetBeatCallback(
-        [beat_callback_ptr](double timestamp, int beat) {
-          beat_callback_ptr(timestamp, beat);
-        });
-  } else {
-    barelymusician->engine.SetBeatCallback(nullptr);
+  if (barelymusician) {
+    if (beat_callback_ptr) {
+      barelymusician->engine.SetBeatCallback(
+          [beat_callback_ptr](double timestamp, int beat) {
+            beat_callback_ptr(timestamp, beat);
+          });
+    } else {
+      barelymusician->engine.SetBeatCallback(nullptr);
+    }
   }
 }
 
 void SetDebugCallback(DebugCallback* debug_callback_ptr) {
-  DCHECK(barelymusician);
-  if (debug_callback_ptr) {
-    const auto debug_callback = [debug_callback_ptr](int severity,
-                                                     const char* message) {
-      debug_callback_ptr(severity, message);
-    };
-    barelymusician->writer.SetDebugCallback(debug_callback);
-  } else {
-    barelymusician->writer.SetDebugCallback(nullptr);
+  if (barelymusician) {
+    if (debug_callback_ptr) {
+      const auto debug_callback = [debug_callback_ptr](int severity,
+                                                       const char* message) {
+        debug_callback_ptr(severity, message);
+      };
+      barelymusician->writer.SetDebugCallback(debug_callback);
+    } else {
+      barelymusician->writer.SetDebugCallback(nullptr);
+    }
   }
 }
 
 void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
-  DCHECK(barelymusician);
-  if (note_off_callback_ptr) {
-    barelymusician->engine.SetNoteOffCallback(
-        [note_off_callback_ptr](double timestamp, Id id, float index) {
-          note_off_callback_ptr(timestamp, id, index);
-        });
-  } else {
-    barelymusician->engine.SetNoteOffCallback(nullptr);
+  if (barelymusician) {
+    if (note_off_callback_ptr) {
+      barelymusician->engine.SetNoteOffCallback(
+          [note_off_callback_ptr](double timestamp, Id id, float index) {
+            note_off_callback_ptr(timestamp, id, index);
+          });
+    } else {
+      barelymusician->engine.SetNoteOffCallback(nullptr);
+    }
   }
 }
 
 void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
-  DCHECK(barelymusician);
-  if (note_on_callback_ptr) {
-    barelymusician->engine.SetNoteOnCallback(
-        [note_on_callback_ptr](double timestamp, Id id, float index,
-                               float intensity) {
-          note_on_callback_ptr(timestamp, id, index, intensity);
-        });
-  } else {
-    barelymusician->engine.SetNoteOnCallback(nullptr);
+  if (barelymusician) {
+    if (note_on_callback_ptr) {
+      barelymusician->engine.SetNoteOnCallback(
+          [note_on_callback_ptr](double timestamp, Id id, float index,
+                                 float intensity) {
+            note_on_callback_ptr(timestamp, id, index, intensity);
+          });
+    } else {
+      barelymusician->engine.SetNoteOnCallback(nullptr);
+    }
   }
 }
 
 void SetParam(Id id, int param_id, float value) {
-  DCHECK(barelymusician);
-  barelymusician->engine.SetParam(id, param_id, value);
+  if (barelymusician) {
+    barelymusician->engine.SetParam(id, param_id, value);
+  }
 }
 
 void SetPosition(double position) {
-  DCHECK(barelymusician);
-  barelymusician->engine.SetPosition(position);
+  if (barelymusician) {
+    barelymusician->engine.SetPosition(position);
+  }
 }
 
 void SetTempo(double tempo) {
-  DCHECK(barelymusician);
-  barelymusician->engine.SetTempo(tempo);
+  if (barelymusician) {
+    barelymusician->engine.SetTempo(tempo);
+  }
 }
 
 void Start(double timestamp) {
-  DCHECK(barelymusician);
-  barelymusician->engine.Start(timestamp);
+  if (barelymusician) {
+    barelymusician->engine.Start(timestamp);
+  }
 }
 
 void Pause() {
-  DCHECK(barelymusician);
-  barelymusician->engine.Stop();
+  if (barelymusician) {
+    barelymusician->engine.Stop();
+  }
 }
 
 void Stop() {
-  DCHECK(barelymusician);
-  barelymusician->engine.Stop();
-  barelymusician->engine.ClearAllScheduledNotes();
-  barelymusician->engine.SetPosition(0.0);
+  if (barelymusician) {
+    barelymusician->engine.Stop();
+    barelymusician->engine.ClearAllScheduledNotes();
+    barelymusician->engine.SetPosition(0.0);
+  }
 }
 
 void Update(double timestamp) {
-  DCHECK(barelymusician);
-  barelymusician->engine.Update(timestamp);
+  if (barelymusician) {
+    barelymusician->engine.Update(timestamp);
+  }
 }
 
 }  // namespace unity

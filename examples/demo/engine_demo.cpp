@@ -209,7 +209,8 @@ int main(int argc, char* argv[]) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
       for (const Note& note : temp_notes) {
-        const double position = barelyapi::GetRawPosition(note.position) + beat;
+        const double position = barelyapi::GetRawPosition(note.position) +
+                                static_cast<double>(beat);
         const double duration = barelyapi::GetRawPosition(note.duration);
         const float index = barelyapi::GetRawNoteIndex(scale, note.index);
         engine.ScheduleNote(id, position, duration, index, note.intensity);

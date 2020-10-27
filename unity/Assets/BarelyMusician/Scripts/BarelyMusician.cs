@@ -228,7 +228,7 @@ namespace BarelyApi {
         GameObject.DestroyImmediate(gameObject);
       }
 
-      private void Update() {
+      private void FixedUpdate() {
         UpdateNative(AudioSettings.dspTime + _lookahead);
       }
 

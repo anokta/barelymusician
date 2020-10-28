@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
     instrument->Control(BasicSynthInstrumentParam::kEnvelopeRelease,
                         kInstrumentEnvelopeRelease);
     instrument->Control(BasicSynthInstrumentParam::kGain, kInstrumentGain);
-    const auto id = engine.Create(std::move(instrument), {});
+    const auto id = GetValue(engine.Create(std::move(instrument), {}));
     for (const Note& note : score) {
       engine.ScheduleNote(id, std::get<double>(note.position),
                           std::get<double>(note.duration),

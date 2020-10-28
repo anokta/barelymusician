@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
   engine.SetTempo(kInitialTempo);
 
   auto metronome = std::make_unique<BasicSynthInstrument>(kSampleRate);
-  const auto metronome_id = engine.Create(
+  const auto metronome_id = GetValue(engine.Create(
       std::move(metronome),
       {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
         static_cast<float>(kOscillatorType)},
        {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack), kAttack},
        {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeRelease),
-        kRelease}});
+        kRelease}}));
 
   // Beat callback.
   const auto beat_callback = [&](double, int beat) {

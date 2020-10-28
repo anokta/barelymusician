@@ -34,6 +34,7 @@
     <ClInclude Include="..\..\barelymusician\algorithm\context_free_grammar.h" />
     <ClInclude Include="..\..\barelymusician\base\constants.h" />
     <ClInclude Include="..\..\barelymusician\base\logging.h" />
+    <ClInclude Include="..\..\barelymusician\base\status.h" />
     <ClInclude Include="..\..\barelymusician\base\types.h" />
     <ClInclude Include="..\..\barelymusician\dsp\dsp_utils.h" />
     <ClInclude Include="..\..\barelymusician\dsp\envelope.h" />

@@ -61,7 +61,7 @@ Id CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
   if (barelymusician) {
     auto instrument = std::make_unique<UnityInstrument>(
         note_off_fn_ptr, note_on_fn_ptr, process_fn_ptr);
-    return barelymusician->engine.Create(std::move(instrument), {});
+    return GetValue(barelymusician->engine.Create(std::move(instrument), {}));
   }
   return kInvalidId;
 }
@@ -70,9 +70,9 @@ Id CreateBasicSynthInstrument() {
   if (barelymusician) {
     auto instrument = std::make_unique<examples::BasicSynthInstrument>(
         barelymusician->sample_rate);
-    return barelymusician->engine.Create(
+    return GetValue(barelymusician->engine.Create(
         std::move(instrument),
-        examples::BasicSynthInstrument::GetDefaultParams());
+        examples::BasicSynthInstrument::GetDefaultParams()));
   }
   return kInvalidId;
 }
@@ -86,8 +86,8 @@ void Destroy(Id id) {
 float GetParam(Id id, int param_id) {
   if (barelymusician) {
     const auto param_or = barelymusician->engine.GetParam(id, param_id);
-    if (param_or.has_value()) {
-      return param_or.value();
+    if (IsOk(param_or)) {
+      return GetValue(param_or);
     }
   }
   return 0.0f;
@@ -109,7 +109,10 @@ double GetTempo() {
 
 bool IsNoteOn(Id id, float index) {
   if (barelymusician) {
-    return barelymusician->engine.IsNoteOn(id, index).value_or(false);
+    const auto is_note_on_or = barelymusician->engine.IsNoteOn(id, index);
+    if (IsOk(is_note_on_or)) {
+      return GetValue(is_note_on_or);
+    }
   }
   return false;
 }

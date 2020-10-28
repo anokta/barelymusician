@@ -185,7 +185,7 @@ int main(int argc, char* argv[]) {
   const auto create_performer_fn =
       [&](std::unique_ptr<Instrument> instrument,
           BeatComposerCallback beat_composer_callback) {
-        const Id id = engine.Create(std::move(instrument), {});
+        const Id id = GetValue(engine.Create(std::move(instrument), {}));
         performers.emplace(id, std::move(beat_composer_callback));
       };
 

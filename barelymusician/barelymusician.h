@@ -34,7 +34,7 @@ enum BarelyStatusValues {
   kBarelyStatus_Internal = 2,
 
   /// Invalid argument error.
-  kBarelyStatus_InvalidArgument = 2,
+  kBarelyStatus_InvalidArgument = 3,
 };
 typedef uint32_t BarelyStatus;
 

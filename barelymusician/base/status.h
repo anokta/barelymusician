@@ -42,6 +42,13 @@ const ValueType& GetValue(const StatusOr<ValueType>& status_or) {
   return std::get<ValueType>(status_or);
 }
 
+// Returns |status_or| value.
+template <typename ValueType>
+ValueType&& GetValue(StatusOr<ValueType>&& status_or) {
+  DCHECK(std::holds_alternative<ValueType>(status_or));
+  return std::move(std::get<ValueType>(status_or));
+}
+
 // Returns whether |status| is ok.
 inline bool IsOk(Status status) { return status == Status::kOk; }
 

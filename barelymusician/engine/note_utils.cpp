@@ -54,6 +54,9 @@ double GetRawPosition(const Position& position) {
 }
 
 double QuantizePosition(double position, double resolution, double amount) {
+  DCHECK_GT(resolution, 0.0);
+  DCHECK_GE(amount, 0.0);
+  DCHECK_LE(amount, 1.0);
   return Lerp(position, resolution * std::round(position / resolution), amount);
 }
 

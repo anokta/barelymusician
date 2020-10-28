@@ -22,6 +22,10 @@ float GetRawNoteIndex(const std::vector<float>& scale,
 // @param Beat.
 double GetRawPosition(const Position& position);
 
+// Returns the quantized |position|.
+double QuantizePosition(double position, double resolution,
+                        double amount = 1.0);
+
 }  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_NOTE_UTILS_H_

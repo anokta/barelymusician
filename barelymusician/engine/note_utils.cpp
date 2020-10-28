@@ -1,5 +1,7 @@
 #include "barelymusician/engine/note_utils.h"
 
+#include <cmath>
+
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 
@@ -27,6 +29,8 @@ double GetRawPosition(const QuantizedPosition& position) {
                          static_cast<double>(position.num_steps);
 }
 
+double Lerp(double a, double b, double t) { return a + t * (b - a); }
+
 }  // namespace
 
 float GetRawNoteIndex(const std::vector<float>& scale,
@@ -47,6 +51,10 @@ double GetRawPosition(const Position& position) {
               [&](double p) { ret = p; }},
       position);
   return ret;
+}
+
+double QuantizePosition(double position, double resolution, double amount) {
+  return Lerp(position, resolution * std::round(position / resolution), amount);
 }
 
 }  // namespace barelyapi

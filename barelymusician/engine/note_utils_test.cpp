@@ -26,11 +26,11 @@ TEST(NoteUtilsTest, GetRawNoteIndex) {
   }
 }
 
-class GetRawPositionTest : public testing::TestWithParam<int> {};
+class PositionTest : public testing::TestWithParam<int> {};
 
 // Tests that the beat gets quantized as expected with respect to the given
 // step.
-TEST_P(GetRawPositionTest, GetRawPosition) {
+TEST_P(PositionTest, GetRawPosition) {
   const int kNumBeats = 4;
   const int num_steps = GetParam();
 
@@ -46,7 +46,16 @@ TEST_P(GetRawPositionTest, GetRawPosition) {
   }
 }
 
-INSTANTIATE_TEST_CASE_P(NoteUtilsTest, GetRawPositionTest,
+// Tests that the position gets quantized as expected with respect to the given
+// resolution.
+TEST_P(PositionTest, QuantizePosition) {
+  const double kPosition = 0.99;
+  const double resolution = 1.0 / static_cast<double>(GetParam());
+  EXPECT_DOUBLE_EQ(QuantizePosition(kPosition, resolution), 1.0);
+  EXPECT_DOUBLE_EQ(QuantizePosition(1.0 - kPosition, resolution), 0.0);
+}
+
+INSTANTIATE_TEST_CASE_P(NoteUtilsTest, PositionTest,
                         testing::Values(kNumQuarterNotesPerBeat,
                                         kNumEighthNotesPerBeat,
                                         kNumEighthTripletNotesPerBeat,

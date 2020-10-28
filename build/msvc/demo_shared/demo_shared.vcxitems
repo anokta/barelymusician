@@ -15,43 +15,43 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\audio_output.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\audio_output\audio_output.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\audio_output\pa_audio_output.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\input_manager\win_console_input.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\examples\audio_output\pa_audio_output.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\examples\input_manager\win_console_input.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\midi\sample.mid">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
       <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\twinkle.mid">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\midi\twinkle.mid">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
       <DestinationFolders>$(OutDir)data\midi</DestinationFolders>
     </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_closed.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_hihat_closed.wav">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
       <DestinationFolders>$(OutDir)data\audio\drums</DestinationFolders>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_open.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_hihat_open.wav">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
       <DestinationFolders>$(OutDir)data\audio\drums</DestinationFolders>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_kick.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_kick.wav">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
       <DestinationFolders>$(OutDir)data\audio\drums</DestinationFolders>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_snare.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_snare.wav">
       <DeploymentContent>true</DeploymentContent>
       <FileType>Document</FileType>
       <DestinationFolders>$(OutDir)data\audio\drums</DestinationFolders>

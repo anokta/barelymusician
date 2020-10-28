@@ -36,41 +36,41 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\audio_output\pa_audio_output.h">
       <Filter>Header Files\audio_output</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\audio_output.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\audio_output\audio_output.h">
       <Filter>Header Files\audio_output</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\input_manager\win_console_input.h">
       <Filter>Header Files\input_manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\audio_output\pa_audio_output.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\examples\audio_output\pa_audio_output.cpp">
       <Filter>Source Files\audio_output</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\input_manager\win_console_input.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\examples\input_manager\win_console_input.cpp">
       <Filter>Source Files\input_manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_closed.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_hihat_closed.wav">
       <Filter>Resource Files\data\audio\drums</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_hihat_open.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_hihat_open.wav">
       <Filter>Resource Files\data\audio\drums</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_kick.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_kick.wav">
       <Filter>Resource Files\data\audio\drums</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\audio\drums\basic_snare.wav">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\audio\drums\basic_snare.wav">
       <Filter>Resource Files\data\audio\drums</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\sample.mid">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\midi\sample.mid">
       <Filter>Resource Files\data\midi</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\examples\data\midi\twinkle.mid">
+    <CopyFileToFolders Include="$(MSBuildThisFileDirectory)..\..\..\examples\data\midi\twinkle.mid">
       <Filter>Resource Files\data\midi</Filter>
     </CopyFileToFolders>
   </ItemGroup>

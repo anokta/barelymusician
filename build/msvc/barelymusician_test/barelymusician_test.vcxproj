@@ -38,15 +38,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\barelymusician\algorithm\context_free_grammar_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\dsp\dsp_utils_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\dsp\envelope_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\dsp\one_pole_filter_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\dsp\polyphonic_voice_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\dsp\sample_player_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\engine\note_utils_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\util\random_test.cpp" />
-    <ClCompile Include="..\..\barelymusician\util\task_runner_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\algorithm\context_free_grammar_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\dsp\dsp_utils_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\dsp\envelope_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\dsp\one_pole_filter_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\dsp\polyphonic_voice_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\dsp\sample_player_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\engine\note_utils_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\util\random_test.cpp" />
+    <ClCompile Include="..\..\..\barelymusician\util\task_runner_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -68,7 +68,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -89,7 +89,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -108,7 +108,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -129,7 +129,7 @@
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderOutputFile />
-      <AdditionalIncludeDirectories>$(SolutionDir)..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>

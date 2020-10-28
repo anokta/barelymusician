@@ -15,14 +15,14 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_enveloped_voice.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\instruments\basic_drumkit_instrument.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\instruments\basic_enveloped_voice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\instruments\basic_synth_instrument.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\examples\util\wav_file.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_drumkit_instrument.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\instruments\basic_synth_instrument.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\examples\util\wav_file.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\examples\instruments\basic_drumkit_instrument.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\examples\instruments\basic_synth_instrument.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\examples\util\wav_file.cpp" />
   </ItemGroup>
 </Project>

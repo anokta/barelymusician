@@ -42,99 +42,99 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\barelymusician\base\constants.h">
+    <ClInclude Include="..\..\..\barelymusician\base\constants.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\base\logging.h">
+    <ClInclude Include="..\..\..\barelymusician\base\logging.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\envelope.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\envelope.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\one_pole_filter.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\one_pole_filter.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\oscillator.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\oscillator.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\sample_player.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\sample_player.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\dsp_utils.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\dsp_utils.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\algorithm\context_free_grammar.h">
+    <ClInclude Include="..\..\..\barelymusician\algorithm\context_free_grammar.h">
       <Filter>Header Files\algorithm</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\generator.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\generator.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\filter.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\filter.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\module.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\module.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\util\random.h">
+    <ClInclude Include="..\..\..\barelymusician\util\random.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\util\task_runner.h">
+    <ClInclude Include="..\..\..\barelymusician\util\task_runner.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\engine\note_utils.h">
+    <ClInclude Include="..\..\..\barelymusician\engine\note_utils.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\engine\instrument.h">
+    <ClInclude Include="..\..\..\barelymusician\engine\instrument.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\polyphonic_voice.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\polyphonic_voice.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\dsp\voice.h">
+    <ClInclude Include="..\..\..\barelymusician\dsp\voice.h">
       <Filter>Header Files\dsp</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\engine\engine.h">
+    <ClInclude Include="..\..\..\barelymusician\engine\engine.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\base\types.h">
+    <ClInclude Include="..\..\..\barelymusician\base\types.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\engine\note.h">
+    <ClInclude Include="..\..\..\barelymusician\engine\note.h">
       <Filter>Header Files\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\barelymusician\base\status.h">
+    <ClInclude Include="..\..\..\barelymusician\base\status.h">
       <Filter>Header Files\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\barelymusician\base\logging.cpp">
+    <ClCompile Include="..\..\..\barelymusician\base\logging.cpp">
       <Filter>Source Files\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\dsp\envelope.cpp">
+    <ClCompile Include="..\..\..\barelymusician\dsp\envelope.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\dsp\one_pole_filter.cpp">
+    <ClCompile Include="..\..\..\barelymusician\dsp\one_pole_filter.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\dsp\oscillator.cpp">
+    <ClCompile Include="..\..\..\barelymusician\dsp\oscillator.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\dsp\sample_player.cpp">
+    <ClCompile Include="..\..\..\barelymusician\dsp\sample_player.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\dsp\dsp_utils.cpp">
+    <ClCompile Include="..\..\..\barelymusician\dsp\dsp_utils.cpp">
       <Filter>Source Files\dsp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\util\random.cpp">
+    <ClCompile Include="..\..\..\barelymusician\util\random.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\util\task_runner.cpp">
+    <ClCompile Include="..\..\..\barelymusician\util\task_runner.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\engine\note_utils.cpp">
+    <ClCompile Include="..\..\..\barelymusician\engine\note_utils.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\barelymusician\engine\engine.cpp">
+    <ClCompile Include="..\..\..\barelymusician\engine\engine.cpp">
       <Filter>Source Files\engine</Filter>
     </ClCompile>
   </ItemGroup>

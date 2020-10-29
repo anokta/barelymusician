@@ -1,4 +1,4 @@
-#include "instruments/basic_drumkit_instrument.h"
+#include "examples/instruments/basic_drumkit_instrument.h"
 
 #include <algorithm>
 

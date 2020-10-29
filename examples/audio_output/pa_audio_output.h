@@ -1,7 +1,7 @@
 #ifndef EXAMPLES_AUDIO_OUTPUT_PA_AUDIO_OUTPUT_H_
 #define EXAMPLES_AUDIO_OUTPUT_PA_AUDIO_OUTPUT_H_
 
-#include "audio_output/audio_output.h"
+#include "examples/audio_output/audio_output.h"
 #include "portaudio.h"
 
 namespace barelyapi {

@@ -7,12 +7,12 @@
 #include <vector>
 
 #include "MidiFile.h"
-#include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
-#include "input_manager/win_console_input.h"
-#include "instruments/basic_synth_instrument.h"
+#include "examples/audio_output/pa_audio_output.h"
+#include "examples/input_manager/win_console_input.h"
+#include "examples/instruments/basic_synth_instrument.h"
 
 namespace {
 

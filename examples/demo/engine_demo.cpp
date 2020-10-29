@@ -8,7 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include "audio_output/pa_audio_output.h"
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
@@ -16,10 +15,11 @@
 #include "barelymusician/engine/note.h"
 #include "barelymusician/engine/note_utils.h"
 #include "barelymusician/util/random.h"
-#include "input_manager/win_console_input.h"
-#include "instruments/basic_drumkit_instrument.h"
-#include "instruments/basic_synth_instrument.h"
-#include "util/wav_file.h"
+#include "examples/audio_output/pa_audio_output.h"
+#include "examples/input_manager/win_console_input.h"
+#include "examples/instruments/basic_drumkit_instrument.h"
+#include "examples/instruments/basic_synth_instrument.h"
+#include "examples/util/wav_file.h"
 
 namespace {
 

@@ -1,4 +1,4 @@
-#include "instruments/basic_synth_instrument.h"
+#include "examples/instruments/basic_synth_instrument.h"
 
 #include "barelymusician/dsp/dsp_utils.h"
 

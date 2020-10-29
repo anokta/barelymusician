@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include "barelymusician/base/constants.h"
-
 namespace barelyapi {
 
 namespace {

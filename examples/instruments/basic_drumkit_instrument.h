@@ -5,8 +5,8 @@
 
 #include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/engine/instrument.h"
-#include "instruments/basic_enveloped_voice.h"
-#include "util/wav_file.h"
+#include "examples/instruments/basic_enveloped_voice.h"
+#include "examples/util/wav_file.h"
 
 namespace barelyapi {
 namespace examples {

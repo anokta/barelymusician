@@ -10,7 +10,7 @@
 #include "barelymusician/platform/unity/unity_instrument.h"
 #include "barelymusician/platform/unity/unity_log_writer.h"
 #include "barelymusician/util/task_runner.h"
-#include "instruments/basic_synth_instrument.h"
+#include "examples/instruments/basic_synth_instrument.h"
 
 namespace barelyapi {
 namespace unity {

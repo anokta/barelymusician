@@ -8,7 +8,7 @@
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument.h"
-#include "instruments/basic_enveloped_voice.h"
+#include "examples/instruments/basic_enveloped_voice.h"
 
 namespace barelyapi {
 namespace examples {

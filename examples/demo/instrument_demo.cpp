@@ -105,8 +105,8 @@ int main(int argc, char* argv[]) {
       } else {
         ++offset_octaves;
       }
-      offset_octaves = std::min(std::max(offset_octaves, -kMaxOffsetOctaves),
-                                kMaxOffsetOctaves);
+      offset_octaves =
+          std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
       LOG(INFO) << "Octave offset set to " << offset_octaves;
       return;
     }

@@ -8,7 +8,6 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/engine/instrument.h"
 #include "examples/audio_output/pa_audio_output.h"
 #include "examples/input_manager/win_console_input.h"
 #include "examples/instruments/basic_synth_instrument.h"
@@ -23,28 +22,28 @@ using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
 // System audio settings.
-const int kSampleRate = 48000;
-const int kNumChannels = 2;
-const int kNumFrames = 2048;
+constexpr int kSampleRate = 48000;
+constexpr int kNumChannels = 2;
+constexpr int kNumFrames = 2048;
 
-const double kLookahead = 0.05;
+constexpr double kLookahead = 0.05;
 
 // Metronome settings.
-const int kMetronomeId = 1;
+constexpr int kMetronomeId = 1;
 
-const int kNumVoices = 1;
-const float kGain = 0.5f;
-const OscillatorType kOscillatorType = OscillatorType::kSquare;
-const float kAttack = 0.0f;
-const float kRelease = 0.025f;
+constexpr int kNumVoices = 1;
+constexpr float kGain = 0.5f;
+constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
+constexpr float kAttack = 0.0f;
+constexpr float kRelease = 0.025f;
 
-const double kTickDuration = 0.005f;
-const float kBarNoteIndex = barelyapi::kNoteIndexA4;
-const float kBeatNoteIndex = barelyapi::kNoteIndexA3;
+constexpr double kTickDuration = 0.005f;
+constexpr float kBarNoteIndex = barelyapi::kNoteIndexA4;
+constexpr float kBeatNoteIndex = barelyapi::kNoteIndexA3;
 
-const int kNumBeats = 4;
-const double kInitialTempo = 120.0;
-const double kTempoIncrement = 10.0;
+constexpr int kNumBeats = 4;
+constexpr double kInitialTempo = 120.0;
+constexpr double kTempoIncrement = 10.0;
 
 }  // namespace
 

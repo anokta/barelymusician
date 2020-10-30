@@ -1,0 +1,64 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "engine_demo",
+    srcs = ["engine_demo.cpp"],
+    data = ["//examples/data:audio"],
+    deps = [
+        "//barelymusician/base",
+        "//barelymusician/base:logging",
+        "//barelymusician/engine",
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:note",
+        "//barelymusician/engine:note_utils",
+        "//barelymusician/util:random",
+        "//examples/audio_output:pa_audio_output",
+        "//examples/input_manager:win_console_input",
+        "//examples/instruments:basic_drumkit_instrument",
+        "//examples/instruments:basic_synth_instrument",
+        "//examples/util:wav_file",
+        "@bazel_tools//tools/cpp/runfiles",
+    ],
+)
+
+cc_binary(
+    name = "instrument_demo",
+    srcs = ["instrument_demo.cpp"],
+    deps = [
+        "//barelymusician/base",
+        "//barelymusician/base:logging",
+        "//barelymusician/util:task_runner",
+        "//examples/audio_output:pa_audio_output",
+        "//examples/input_manager:win_console_input",
+        "//examples/instruments:basic_synth_instrument",
+    ],
+)
+
+cc_binary(
+    name = "metronome_demo",
+    srcs = ["metronome_demo.cpp"],
+    deps = [
+        "//barelymusician/base",
+        "//barelymusician/base:logging",
+        "//barelymusician/engine",
+        "//examples/audio_output:pa_audio_output",
+        "//examples/input_manager:win_console_input",
+        "//examples/instruments:basic_synth_instrument",
+    ],
+)
+
+cc_binary(
+    name = "midi_demo",
+    srcs = ["midi_demo.cpp"],
+    data = ["//examples/data:midi"],
+    deps = [
+        "//barelymusician/base:logging",
+        "//barelymusician/engine",
+        "//barelymusician/engine:note",
+        "//examples/audio_output:pa_audio_output",
+        "//examples/input_manager:win_console_input",
+        "//examples/instruments:basic_synth_instrument",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@midifile",
+    ],
+)

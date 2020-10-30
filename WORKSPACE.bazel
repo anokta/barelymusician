@@ -1,3 +1,5 @@
+workspace(name = "barelymusician")
+
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 
 git_repository(
@@ -10,6 +12,8 @@ git_repository(
 new_git_repository(
     name = "dr_libs",
     build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
@@ -21,4 +25,64 @@ cc_library(
     """,
     commit = "cac1785cee4abb455817b43d5dee33b49d61be2f",
     remote = "https://github.com/mackron/dr_libs.git",
+)
+
+new_git_repository(
+    name = "portaudio",
+    build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["reciprocal"])
+
+exports_files(["LICENSE.txt"])
+
+cc_library(
+    name = "portaudio",
+    srcs = glob([
+        "src/common/*.c",
+        "src/common/*.h",
+        "include/*.h",
+    ]) +
+    # TODO(#52): Add cross-platform support here.
+    glob([
+        "src/hostapi/wmme/*.c",
+        "src/hostapi/wmme/*.h",
+        "src/os/win/*.c",
+        "src/os/win/*.h",
+    ]),
+    hdrs = ["include/portaudio.h"],
+    defines = ["PA_USE_WMME=1"],
+    includes = [
+        "include",
+        "src/common",
+        "src/os/unix",
+    ],
+)
+    """,
+    commit = "88c71a6ec478ed693adf86d1ff08134273c1e5e7",
+    remote = "https://github.com/PortAudio/portaudio.git",
+)
+
+new_git_repository(
+    name = "midifile",
+    build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(["LICENSE.txt"])
+
+cc_library(
+    name = "midifile",
+    srcs = glob(["src/*.cpp"]),
+    hdrs = glob(["include/*.h"]),
+    includes = ["include"],
+)
+    """,
+    commit = "988d55b80a9b85fc194454293950cf233cdcb8c4",
+    remote = "https://github.com/craigsapp/midifile.git",
 )

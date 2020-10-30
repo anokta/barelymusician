@@ -13,6 +13,7 @@
 #include "examples/audio_output/pa_audio_output.h"
 #include "examples/input_manager/win_console_input.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "tools/cpp/runfiles/runfiles.h"
 
 namespace {
 
@@ -24,29 +25,31 @@ using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
+using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
 // System audio settings.
-const int kSampleRate = 48000;
-const int kNumChannels = 2;
-const int kNumFrames = 512;
+constexpr int kSampleRate = 48000;
+constexpr int kNumChannels = 2;
+constexpr int kNumFrames = 512;
 
-const double kLookahead = 0.05;
+constexpr double kLookahead = 0.05;
 
 // Sequencer settings.
-const double kTempo = 132.0;
+constexpr double kTempo = 132.0;
 
 // Performer settings.
-const int kNumInstrumentVoices = 16;
-const float kInstrumentGain = 1.0f / static_cast<float>(kNumInstrumentVoices);
-const float kInstrumentEnvelopeAttack = 0.0f;
-const float kInstrumentEnvelopeRelease = 0.2f;
-const OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
+constexpr int kNumInstrumentVoices = 16;
+constexpr float kInstrumentGain =
+    1.0f / static_cast<float>(kNumInstrumentVoices);
+constexpr float kInstrumentEnvelopeAttack = 0.0f;
+constexpr float kInstrumentEnvelopeRelease = 0.2f;
+constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 
-const float kMaxVelocity = 127.0f;
+constexpr float kMaxVelocity = 127.0f;
 
 // Midi file name.
-const char kMidiFileName[] = "data/midi/sample.mid";
+constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
 
 // Builds the score from the given |midi_events|.
 std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
@@ -73,11 +76,16 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
 }  // namespace
 
 int main(int argc, char* argv[]) {
+  std::string error;
+  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
+  CHECK(runfiles);
+
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
   MidiFile midi_file;
-  CHECK(midi_file.read(kMidiFileName)) << "Failed to read " << kMidiFileName;
+  const std::string midi_file_path = runfiles->Rlocation(kMidiFileName);
+  CHECK(midi_file.read(midi_file_path)) << "Failed to read " << kMidiFileName;
   CHECK(midi_file.isAbsoluteTicks()) << "Events should be in absolute ticks";
   midi_file.linkNotePairs();
 

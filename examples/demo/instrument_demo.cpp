@@ -21,25 +21,25 @@ using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 
 // System audio settings.
-const int kSampleRate = 48000;
-const int kNumChannels = 2;
-const int kNumFrames = 512;
+constexpr int kSampleRate = 48000;
+constexpr int kNumChannels = 2;
+constexpr int kNumFrames = 512;
 
-const int kNumMaxTasks = 100;
+constexpr int kNumMaxTasks = 100;
 
 // Instrument settings.
-const float kGain = 0.125f;
-const int kNumVoices = 16;
-const OscillatorType kOscillatorType = OscillatorType::kSaw;
-const float kEnvelopeAttack = 0.05f;
-const float kEnvelopeRelease = 0.125f;
+constexpr float kGain = 0.125f;
+constexpr int kNumVoices = 16;
+constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
+constexpr float kEnvelopeAttack = 0.05f;
+constexpr float kEnvelopeRelease = 0.125f;
 
 // Note settings.
-const float kRootNoteIndex = barelyapi::kNoteIndexC3;
-const float kNoteIntensity = 1.0f;
-const char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
-                            'G', 'Y', 'H', 'U', 'J', 'K'};
-const float kMaxOffsetOctaves = 3.0f;
+constexpr float kRootNoteIndex = barelyapi::kNoteIndexC3;
+constexpr float kNoteIntensity = 1.0f;
+constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
+                                'G', 'Y', 'H', 'U', 'J', 'K'};
+constexpr float kMaxOffsetOctaves = 3.0f;
 
 // Returns the note index for the given |key| and |offset_octaves|.
 float NoteIndexFromKey(const WinConsoleInput::Key& key, float offset_octaves) {

@@ -20,6 +20,7 @@
 #include "examples/instruments/basic_drumkit_instrument.h"
 #include "examples/instruments/basic_synth_instrument.h"
 #include "examples/util/wav_file.h"
+#include "tools/cpp/runfiles/runfiles.h"
 
 namespace {
 
@@ -37,25 +38,29 @@ using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WavFile;
 using ::barelyapi::examples::WinConsoleInput;
 using ::barelyapi::random::Uniform;
+using ::bazel::tools::cpp::runfiles::Runfiles;
 
 // Beat composer callback signature.
 using BeatComposerCallback = std::function<void(
     int bar, int beat, int num_beats, int harmonic, std::vector<Note>* notes)>;
 
 // System audio settings.
-const int kSampleRate = 48000;
-const int kNumChannels = 2;
-const int kNumFrames = 1024;
+constexpr int kSampleRate = 48000;
+constexpr int kNumChannels = 2;
+constexpr int kNumFrames = 1024;
 
-const double kLookahead = 0.05;
+constexpr double kLookahead = 0.05;
 
 // Sequencer settings.
-const double kTempo = 124.0;
-const int kNumBeats = 3;
+constexpr double kTempo = 124.0;
+constexpr int kNumBeats = 3;
 
 // Ensemble settings.
-const float kRootNote = barelyapi::kNoteIndexD3;
-const int kNumInstrumentVoices = 8;
+constexpr float kRootNote = barelyapi::kNoteIndexD3;
+constexpr int kNumInstrumentVoices = 8;
+
+constexpr char kDrumsBaseFilename[] =
+    "barelymusician/examples/data/audio/drums/";
 
 std::unique_ptr<Instrument> BuildSynthInstrument(OscillatorType type,
                                                  float gain, float attack,
@@ -167,6 +172,10 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
+  std::string error;
+  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
+  CHECK(runfiles);
+
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 
@@ -268,20 +277,19 @@ int main(int argc, char* argv[]) {
 
   // Add drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
-  drumkit_map[barelyapi::kNoteIndexKick] = "data/audio/drums/basic_kick.wav";
-  drumkit_map[barelyapi::kNoteIndexSnare] = "data/audio/drums/basic_snare.wav";
-  drumkit_map[barelyapi::kNoteIndexHihatClosed] =
-      "data/audio/drums/basic_hihat_closed.wav";
-  drumkit_map[barelyapi::kNoteIndexHihatOpen] =
-      "data/audio/drums/basic_hihat_open.wav";
+  drumkit_map[barelyapi::kNoteIndexKick] = "basic_kick.wav";
+  drumkit_map[barelyapi::kNoteIndexSnare] = "basic_snare.wav";
+  drumkit_map[barelyapi::kNoteIndexHihatClosed] = "basic_hihat_closed.wav";
+  drumkit_map[barelyapi::kNoteIndexHihatOpen] = "basic_hihat_open.wav";
   auto drumkit_instrument =
       std::make_unique<BasicDrumkitInstrument>(kSampleRate);
   std::vector<WavFile> drumkit_files;
-  for (const auto& it : drumkit_map) {
+  for (const auto& [index, name] : drumkit_map) {
     drumkit_files.emplace_back();
     auto& drumkit_file = drumkit_files.back();
-    CHECK(drumkit_file.Load(it.second));
-    drumkit_instrument->Add(it.first, drumkit_file);
+    const std::string path = runfiles->Rlocation(kDrumsBaseFilename + name);
+    CHECK(drumkit_file.Load(path)) << path;
+    drumkit_instrument->Add(index, drumkit_file);
   }
 
   const auto drumkit_beat_composer_callback =

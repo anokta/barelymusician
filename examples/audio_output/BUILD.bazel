@@ -1,0 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# TODO(#52): Make this cross-platform (mainly for osx for now).
+cc_library(
+    name = "audio_output",
+    hdrs = ["audio_output.h"],
+)
+
+cc_library(
+    name = "pa_audio_output",
+    srcs = ["pa_audio_output.cpp"],
+    hdrs = ["pa_audio_output.h"],
+    deps = [
+        ":audio_output",
+        "//barelymusician/base:logging",
+        "@portaudio",
+    ],
+)

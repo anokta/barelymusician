@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include "barelymusician/base/logging.h"
-
 namespace barelyapi {
 namespace examples {
 
@@ -21,8 +19,6 @@ BasicDrumkitInstrument::BasicDrumkitInstrument(int sample_rate)
 void BasicDrumkitInstrument::NoteOff(float index) {
   if (const auto it = voices_.find(index); it != voices_.cend()) {
     it->second.Stop();
-  } else {
-    LOG(WARNING) << "Invalid note index " << index;
   }
 }
 
@@ -30,8 +26,6 @@ void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
   if (auto it = voices_.find(index); it != voices_.end()) {
     it->second.set_gain(intensity);
     it->second.Start();
-  } else {
-    LOG(WARNING) << "Invalid note index " << index;
   }
 }
 

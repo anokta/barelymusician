@@ -1,8 +1,24 @@
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 
 git_repository(
     name = "googletest",
     commit = "703bd9caab50b139428cea1aaff9974ebee5742e",
     remote = "https://github.com/google/googletest.git",
     shallow_since = "1570114335 -0400",
+)
+
+new_git_repository(
+    name = "dr_libs",
+    build_file_content = """
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+cc_library(
+    name = "dr_wav",
+    hdrs = ["dr_wav.h"],
+)
+    """,
+    commit = "cac1785cee4abb455817b43d5dee33b49d61be2f",
+    remote = "https://github.com/mackron/dr_libs.git",
 )

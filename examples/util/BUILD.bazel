@@ -1,0 +1,13 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "wav_file",
+    srcs = ["wav_file.cpp"],
+    hdrs = ["wav_file.h"],
+    deps = [
+        "//barelymusician/base:logging",
+        "@dr_libs//:dr_wav",
+    ],
+)

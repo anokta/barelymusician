@@ -110,7 +110,7 @@ cc_test(
     ],
 )
 
-cc_library(
+cc_test(
     name = "polyphonic_voice_test",
     srcs = ["polyphonic_voice_test.cpp"],
     deps = [

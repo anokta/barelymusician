@@ -1,0 +1,60 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "clip",
+    hdrs = ["clip.h"],
+    visibility = ["//visibility:private"],  # wip
+    deps = [":note"],
+)
+
+cc_library(
+    name = "conductor",
+    hdrs = ["conductor.h"],
+    visibility = ["//visibility:private"],  # wip
+    deps = [":note"],
+)
+
+cc_library(
+    name = "engine",
+    srcs = ["engine.cpp"],
+    hdrs = ["engine.h"],
+    deps = [
+        ":instrument",
+        "//barelymusician/base",
+        "//barelymusician/base:status",
+        "//barelymusician/util:task_runner",
+    ],
+)
+
+cc_library(
+    name = "instrument",
+    hdrs = ["instrument.h"],
+)
+
+cc_library(
+    name = "note",
+    hdrs = ["note.h"],
+)
+
+cc_library(
+    name = "note_utils",
+    srcs = ["note_utils.cpp"],
+    hdrs = ["note_utils.h"],
+    deps = [
+        ":note",
+        "//barelymusician/base",
+        "//barelymusician/base:logging",
+    ],
+)
+
+cc_test(
+    name = "note_utils_test",
+    srcs = ["note_utils_test.cpp"],
+    deps = [
+        ":note_utils",
+        "//barelymusician/base",
+        "@googletest//:gtest_main",
+    ],
+)

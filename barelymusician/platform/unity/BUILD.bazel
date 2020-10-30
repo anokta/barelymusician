@@ -1,0 +1,42 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# Windows build.
+# TODO(#52): make this cross platform - split the unity lib rule if possible.
+# TODO(#52): add rule/script to copy to unity project.
+cc_binary(
+    name = "unity.dll",
+    srcs = [
+        "unity.cpp",
+        "unity.h",
+    ],
+    defines = ["BARELYMUSICIAN_UNITY_EXPORTS"],
+    linkshared = 1,
+    linkstatic = 1,
+    deps = [
+        ":unity_instrument",
+        ":unity_log_writer",
+        "//barelymusician/base",
+        "//barelymusician/base:logging",
+        "//barelymusician/engine",
+        "//examples/instruments:basic_synth_instrument",
+    ],
+)
+
+cc_library(
+    name = "unity_instrument",
+    srcs = ["unity_instrument.cpp"],
+    hdrs = ["unity_instrument.h"],
+    deps = [
+        "//barelymusician/base:logging",
+        "//barelymusician/engine:instrument",
+    ],
+)
+
+cc_library(
+    name = "unity_log_writer",
+    srcs = ["unity_log_writer.cpp"],
+    hdrs = ["unity_log_writer.h"],
+    deps = ["//barelymusician/base:logging"],
+)

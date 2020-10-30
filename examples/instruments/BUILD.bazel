@@ -1,0 +1,26 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "basic_enveloped_voice",
+    hdrs = ["basic_enveloped_voice.h"],
+    deps = [
+        "//barelymusician/dsp:envelope",
+        "//barelymusician/dsp:voice",
+    ],
+)
+
+cc_library(
+    name = "basic_synth_instrument",
+    srcs = ["basic_synth_instrument.cpp"],
+    hdrs = ["basic_synth_instrument.h"],
+    deps = [
+        ":basic_enveloped_voice",
+        "//barelymusician/base",
+        "//barelymusician/dsp:dsp_utils",
+        "//barelymusician/dsp:oscillator",
+        "//barelymusician/dsp:polyphonic_voice",
+        "//barelymusician/engine:instrument",
+    ],
+)

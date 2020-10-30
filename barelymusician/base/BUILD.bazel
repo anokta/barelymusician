@@ -1,0 +1,24 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# TODO(#52): Should this include all deps and/or be renamed?
+cc_library(
+    name = "base",
+    hdrs = [
+        "constants.h",
+        "types.h",
+    ],
+)
+
+cc_library(
+    name = "logging",
+    srcs = ["logging.cpp"],
+    hdrs = ["logging.h"],
+)
+
+cc_library(
+    name = "status",
+    hdrs = ["status.h"],
+    deps = [":logging"],
+)

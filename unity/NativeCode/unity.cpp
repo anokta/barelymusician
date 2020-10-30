@@ -1,4 +1,4 @@
-#include "barelymusician/platform/unity/unity.h"
+#include "unity/NativeCode/unity.h"
 
 #include <algorithm>
 #include <memory>
@@ -7,9 +7,9 @@
 
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/platform/unity/unity_instrument.h"
-#include "barelymusician/platform/unity/unity_log_writer.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "unity/NativeCode/unity_instrument.h"
+#include "unity/NativeCode/unity_log_writer.h"
 
 namespace barelyapi {
 namespace unity {

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PLATFORM_UNITY_UNITY_LOG_WRITER_H_
-#define BARELYMUSICIAN_PLATFORM_UNITY_UNITY_LOG_WRITER_H_
+#ifndef UNITY_NATIVECODE_UNITY_LOG_WRITER_H_
+#define UNITY_NATIVECODE_UNITY_LOG_WRITER_H_
 
 #include <functional>
 
@@ -31,4 +31,4 @@ class UnityLogWriter : public logging::LogWriter {
 }  // namespace unity
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PLATFORM_UNITY_UNITY_LOG_WRITER_H_
+#endif  // UNITY_NATIVECODE_UNITY_LOG_WRITER_H_

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PLATFORM_UNITY_UNITY_INSTRUMENT_H_
-#define BARELYMUSICIAN_PLATFORM_UNITY_UNITY_INSTRUMENT_H_
+#ifndef UNITY_NATIVECODE_UNITY_INSTRUMENT_H_
+#define UNITY_NATIVECODE_UNITY_INSTRUMENT_H_
 
 #include <functional>
 
@@ -49,4 +49,4 @@ class UnityInstrument : public Instrument {
 }  // namespace unity
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PLATFORM_UNITY_UNITY_INSTRUMENT_H_
+#endif  // UNITY_NATIVECODE_UNITY_INSTRUMENT_H_

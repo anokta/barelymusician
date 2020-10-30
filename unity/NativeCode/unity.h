@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PLATFORM_UNITY_UNITY_H_
-#define BARELYMUSICIAN_PLATFORM_UNITY_UNITY_H_
+#ifndef UNITY_NATIVECODE_UNITY_H_
+#define UNITY_NATIVECODE_UNITY_H_
 
 #ifdef BARELYMUSICIAN_UNITY_EXPORTS
 #define EXPORT_API __declspec(dllexport)
@@ -193,4 +193,4 @@ void EXPORT_API Update(double timestamp);
 }  // namespace unity
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PLATFORM_UNITY_UNITY_H_
+#endif  // UNITY_NATIVECODE_UNITY_H_

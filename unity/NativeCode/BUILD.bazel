@@ -6,7 +6,7 @@ package(default_visibility = ["//visibility:public"])
 # TODO(#52): make this cross platform - split the unity lib rule if possible.
 # TODO(#52): add rule/script to copy to unity project.
 cc_binary(
-    name = "unity.dll",
+    name = "barelymusicianunity.dll",
     srcs = [
         "unity.cpp",
         "unity.h",

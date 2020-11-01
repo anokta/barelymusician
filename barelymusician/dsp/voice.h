@@ -6,6 +6,9 @@ namespace barelyapi {
 // Instrument voice interface.
 class Voice {
  public:
+  // Base destructor to ensure the derived classes get destroyed properly.
+  virtual ~Voice() = default;
+
   // Returns whether the voice is currently active (i.e., playing).
   //
   // @return True if active.

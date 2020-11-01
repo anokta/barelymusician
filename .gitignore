@@ -1,2 +1,5 @@
-# ignore bazel build artifacts.
+# bazel build artifacts.
 bazel-*
+
+# osx.
+.DS_Store

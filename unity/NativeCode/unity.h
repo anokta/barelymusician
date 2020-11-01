@@ -1,11 +1,15 @@
 #ifndef UNITY_NATIVECODE_UNITY_H_
 #define UNITY_NATIVECODE_UNITY_H_
 
+#if defined(_WIN32) || defined(__CYGWIN__)
 #ifdef BARELYMUSICIAN_UNITY_EXPORTS
 #define EXPORT_API __declspec(dllexport)
-#else
+#else  // BARELYMUSICIAN_UNITY_EXPORTS
 #define EXPORT_API __declspec(dllimport)
 #endif  // BARELYMUSICIAN_UNITY_EXPORTS
+#else   // defined(_WIN32) || defined(__CYGWIN__)
+#define EXPORT_API
+#endif  // defined(_WIN32) || defined(__CYGWIN__)
 
 #include "barelymusician/base/constants.h"
 

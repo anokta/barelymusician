@@ -69,7 +69,6 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
     const float index = static_cast<float>(i + 1);
     polyphonic_voice.Start(
         index, [index](FakeVoice* voice) { voice->SetOutput(index); });
-    const float output = polyphonic_voice.Next(kChannel);
     EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), index);
     polyphonic_voice.Stop(index);
   }
@@ -87,7 +86,6 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
 
   float previous_output = 0.0f;
   for (int i = 0; i < kNumVoices; ++i) {
-    const float index = static_cast<float>(i);
     polyphonic_voice.Start(static_cast<float>(i));
     const float output = polyphonic_voice.Next(kChannel);
     EXPECT_FLOAT_EQ(output - previous_output, kOutput);

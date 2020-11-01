@@ -28,6 +28,29 @@ cc_library(
 )
 
 new_git_repository(
+    name = "midifile",
+    build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+licenses(["notice"])
+
+exports_files(["LICENSE.txt"])
+
+cc_library(
+    name = "midifile",
+    srcs = glob(["src/*.cpp"]),
+    hdrs = glob(["include/*.h"]),
+    includes = ["include"],
+)
+    """,
+    commit = "988d55b80a9b85fc194454293950cf233cdcb8c4",
+    remote = "https://github.com/craigsapp/midifile.git",
+    shallow_since = "1591146060 -0700",
+)
+
+new_git_repository(
     name = "portaudio",
     build_file_content = """
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -63,26 +86,5 @@ cc_library(
     """,
     commit = "88c71a6ec478ed693adf86d1ff08134273c1e5e7",
     remote = "https://github.com/PortAudio/portaudio.git",
-)
-
-new_git_repository(
-    name = "midifile",
-    build_file_content = """
-load("@rules_cc//cc:defs.bzl", "cc_library")
-
-package(default_visibility = ["//visibility:public"])
-
-licenses(["notice"])
-
-exports_files(["LICENSE.txt"])
-
-cc_library(
-    name = "midifile",
-    srcs = glob(["src/*.cpp"]),
-    hdrs = glob(["include/*.h"]),
-    includes = ["include"],
-)
-    """,
-    commit = "988d55b80a9b85fc194454293950cf233cdcb8c4",
-    remote = "https://github.com/craigsapp/midifile.git",
+    shallow_since = "1603931550 -0700",
 )

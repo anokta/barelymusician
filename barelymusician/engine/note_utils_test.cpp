@@ -55,14 +55,14 @@ TEST_P(PositionTest, QuantizePosition) {
   EXPECT_DOUBLE_EQ(QuantizePosition(1.0 - kPosition, resolution), 0.0);
 }
 
-INSTANTIATE_TEST_CASE_P(NoteUtilsTest, PositionTest,
-                        testing::Values(kNumQuarterNotesPerBeat,
-                                        kNumEighthNotesPerBeat,
-                                        kNumEighthTripletNotesPerBeat,
-                                        kNumSixteenthNotesPerBeat,
-                                        kNumSixteenthTripletNotesPerBeat,
-                                        kNumThirtySecondNotesPerBeat,
-                                        kNumThirtySecondTripletNotesPerBeat));
+INSTANTIATE_TEST_SUITE_P(NoteUtilsTest, PositionTest,
+                         testing::Values(kNumQuarterNotesPerBeat,
+                                         kNumEighthNotesPerBeat,
+                                         kNumEighthTripletNotesPerBeat,
+                                         kNumSixteenthNotesPerBeat,
+                                         kNumSixteenthTripletNotesPerBeat,
+                                         kNumThirtySecondNotesPerBeat,
+                                         kNumThirtySecondTripletNotesPerBeat));
 
 }  // namespace
 }  // namespace barelyapi

@@ -97,9 +97,9 @@ void SetLogWriter(LogWriter* log_writer);
 }  // namespace barelyapi
 
 // Logging macros (internal).
-#define BARELY_LOG(severity)                                                  \
-  ::barelyapi::logging::Logger(::barelyapi::logging::LogSeverity::##severity, \
-                               __FILE__, __LINE__)                            \
+#define BARELY_LOG(severity)                                                \
+  ::barelyapi::logging::Logger(::barelyapi::logging::LogSeverity::severity, \
+                               __FILE__, __LINE__)                          \
       .GetStream()
 #define BARELY_NULL_LOG ::barelyapi::logging::GetNullStream()
 
@@ -111,14 +111,14 @@ void SetLogWriter(LogWriter* log_writer);
 #define BARELY_CHECK_OP(op, lhs, rhs) \
   BARELY_CHECK(lhs op rhs) << "(" << lhs << " " << #op << " " << rhs << ") "
 
-#if !defined(NDEBUG) || defined(_DEBUG)
+#if !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 #define BARELY_DLOG(severity) BARELY_LOG(severity)
 #define BARELY_DCHECK(expression) BARELY_CHECK(expression)
 #define BARELY_DCHECK_OP(op, lhs, rhs) BARELY_CHECK_OP(op, lhs, rhs)
-#else  // !defined(NDEBUG) || defined(_DEBUG)
+#else  // !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 #define BARELY_DLOG(severity) BARELY_NULL_LOG
 #define BARELY_DCHECK(expression) BARELY_NULL_LOG
 #define BARELY_DCHECK_OP(op, lhs, rhs) BARELY_NULL_LOG
-#endif  // !defined(NDEBUG) || defined(_DEBUG)
+#endif  // !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 
 #endif  // BARELYMUSICIAN_BASE_LOGGING_H_

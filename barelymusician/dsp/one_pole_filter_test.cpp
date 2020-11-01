@@ -14,9 +14,6 @@ constexpr float kInput[kInputLength] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 // Test coefficent.
 constexpr float kCoefficient = 0.5f;
 
-// Tolerated error margin.
-constexpr float kEpsilon = 1e-6f;
-
 // Tests that a low-pass filter generates the expected output when an arbitrary
 // coefficient is set.
 TEST(OnePoleFilterTest, LowPass) {

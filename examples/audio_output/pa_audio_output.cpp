@@ -23,13 +23,14 @@ void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
     Stop();
   }
 
-  PaStreamParameters outputParameters;
-  outputParameters.device = Pa_GetDefaultOutputDevice();
-  outputParameters.channelCount = num_channels;
-  outputParameters.sampleFormat = paFloat32;
-  outputParameters.suggestedLatency =
-      Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
-  outputParameters.hostApiSpecificStreamInfo = nullptr;
+  PaStreamParameters output_parameters;
+  output_parameters.device = Pa_GetDefaultOutputDevice();
+  DCHECK_NE(output_parameters.device, paNoDevice);
+  output_parameters.channelCount = num_channels;
+  output_parameters.sampleFormat = paFloat32;
+  output_parameters.suggestedLatency =
+      Pa_GetDeviceInfo(output_parameters.device)->defaultLowOutputLatency;
+  output_parameters.hostApiSpecificStreamInfo = nullptr;
 
   const auto callback = [](const void* input_buffer, void* output_buffer,
                            unsigned long frames_per_buffer,
@@ -45,7 +46,7 @@ void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
     }
     return static_cast<int>(paContinue);
   };
-  Pa_OpenStream(&stream_, nullptr, &outputParameters, sample_rate, num_frames,
+  Pa_OpenStream(&stream_, nullptr, &output_parameters, sample_rate, num_frames,
                 paClipOff, callback,
                 reinterpret_cast<void*>(&process_callback_));
   Pa_StartStream(stream_);

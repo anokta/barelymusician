@@ -29,8 +29,6 @@ constexpr int kNumFrames = 2048;
 constexpr double kLookahead = 0.05;
 
 // Metronome settings.
-constexpr int kMetronomeId = 1;
-
 constexpr int kNumVoices = 1;
 constexpr float kGain = 0.5f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
@@ -73,7 +71,7 @@ int main(int argc, char* argv[]) {
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
     const float index = (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    engine.ScheduleNote(kMetronomeId, position, kTickDuration, index, kGain);
+    engine.ScheduleNote(metronome_id, position, kTickDuration, index, kGain);
   };
   engine.SetBeatCallback(beat_callback);
 
@@ -83,7 +81,7 @@ int main(int argc, char* argv[]) {
     const double end_timestamp =
         timestamp +
         static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
-    engine.Process(kMetronomeId, timestamp, end_timestamp, output, kNumChannels,
+    engine.Process(metronome_id, timestamp, end_timestamp, output, kNumChannels,
                    kNumFrames);
     timestamp = end_timestamp;
   };

@@ -2,13 +2,13 @@
 #define UNITY_NATIVECODE_UNITY_H_
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-#ifdef BARELYMUSICIAN_UNITY_EXPORTS
-#define EXPORT_API __declspec(dllexport)
-#else  // BARELYMUSICIAN_UNITY_EXPORTS
-#define EXPORT_API __declspec(dllimport)
-#endif  // BARELYMUSICIAN_UNITY_EXPORTS
+#ifdef BARELYMUSICIAN_EXPORTS
+#define BARELY_EXPORT __declspec(dllexport)
+#else  // BARELYMUSICIAN_EXPORTS
+#define BARELY_EXPORT __declspec(dllimport)
+#endif  // BARELYMUSICIAN_EXPORTS
 #else   // defined(_WIN32) || defined(__CYGWIN__)
-#define EXPORT_API
+#define BARELY_EXPORT
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
 #include "barelymusician/base/constants.h"
@@ -35,10 +35,10 @@ using DebugCallback = void(int severity, const char* message);
 // Initializes the system.
 //
 // @param sample_rate System sampling rate.
-void EXPORT_API Initialize(int sample_rate);
+BARELY_EXPORT void Initialize(int sample_rate);
 
 // Shuts down the system.
-void EXPORT_API Shutdown();
+BARELY_EXPORT void Shutdown();
 
 // Creates new Unity instrument.
 //
@@ -46,64 +46,64 @@ void EXPORT_API Shutdown();
 // @param note_on_fn_ptr Note on function.
 // @param process_fn_ptr Process function.
 // @return Instrument id.
-Id EXPORT_API CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
-                                    NoteOnFn* note_on_fn_ptr,
-                                    ProcessFn* process_fn_ptr);
+BARELY_EXPORT Id CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
+                                       NoteOnFn* note_on_fn_ptr,
+                                       ProcessFn* process_fn_ptr);
 
 // Creates new synth instrument.
 //
 // @return Instrument id.
-Id EXPORT_API CreateBasicSynthInstrument();
+BARELY_EXPORT Id CreateBasicSynthInstrument();
 
 // Destroys instrument.
 //
 // @param id Performer id.
-void EXPORT_API Destroy(Id id);
+BARELY_EXPORT void Destroy(Id id);
 
 // Returns instrument parameter value.
 //
 // @param id Instrument id.
 // @param param_id Param id.
 // @return Param value.
-float EXPORT_API GetParam(Id id, int param_id);
+BARELY_EXPORT float GetParam(Id id, int param_id);
 
 // Returns playback position.
 //
 // @return Position in beats.
-double EXPORT_API GetPosition();
+BARELY_EXPORT double GetPosition();
 
 // Returns playback tempo.
 //
 // @return Tempo in BPM.
-double EXPORT_API GetTempo();
+BARELY_EXPORT double GetTempo();
 
 // Returns whether the note is active or not.
 //
 // @param id Instrument id.
 // @param index Note index.
 // @return True if active.
-bool EXPORT_API IsNoteOn(Id id, float index);
+BARELY_EXPORT bool IsNoteOn(Id id, float index);
 
 // Returns playback state.
 //
 // @return True if playing.
-bool EXPORT_API IsPlaying();
+BARELY_EXPORT bool IsPlaying();
 
 // Stops all notes.
-void EXPORT_API AllNotesOff(Id id);
+BARELY_EXPORT void AllNotesOff(Id id);
 
 // Stops instrument note.
 //
 // @param id Instrument id.
 // @param index Note index.
-void EXPORT_API NoteOff(Id id, float index);
+BARELY_EXPORT void NoteOff(Id id, float index);
 
 // Starts instrument note.
 //
 // @param id Instrument id.
 // @param index Note index.
 // @param intensity Note intensity.
-void EXPORT_API NoteOn(Id id, float index, float intensity);
+BARELY_EXPORT void NoteOn(Id id, float index, float intensity);
 
 // Processes instrument.
 //
@@ -111,11 +111,11 @@ void EXPORT_API NoteOn(Id id, float index, float intensity);
 // @param output Output buffer.
 // @param num_channels Number of output channels.
 // @param num_frames Number of output frames.
-void EXPORT_API Process(Id id, double timestamp, float* output,
-                        int num_channels, int num_frames);
+BARELY_EXPORT void Process(Id id, double timestamp, float* output,
+                           int num_channels, int num_frames);
 
 // Resets all params.
-void EXPORT_API ResetAllParams(Id id);
+BARELY_EXPORT void ResetAllParams(Id id);
 
 // Schedules instrument note.
 //
@@ -124,15 +124,15 @@ void EXPORT_API ResetAllParams(Id id);
 // @param duration Note duration in beats.
 // @param index Note index.
 // @param intensity Note intensity.
-void EXPORT_API ScheduleNote(Id id, double position, double duration,
-                             float index, float intensity);
+BARELY_EXPORT void ScheduleNote(Id id, double position, double duration,
+                                float index, float intensity);
 
 // Schedules instrument note off.
 //
 // @param id Instrument id.
 // @param position Note position in beats.
 // @param index Note index.
-void EXPORT_API ScheduleNoteOff(Id id, double position, float index);
+BARELY_EXPORT void ScheduleNoteOff(Id id, double position, float index);
 
 // Schedules instrument note on.
 //
@@ -140,57 +140,57 @@ void EXPORT_API ScheduleNoteOff(Id id, double position, float index);
 // @param position Note position in beats.
 // @param index Note index.
 // @param intensity Note intensity.
-void EXPORT_API ScheduleNoteOn(Id id, double position, float index,
-                               float intensity);
+BARELY_EXPORT void ScheduleNoteOn(Id id, double position, float index,
+                                  float intensity);
 
 // Sets beat callback.
 //
 // @param beat_callback_ptr Pointer to beat callback.
-void EXPORT_API SetBeatCallback(BeatCallback* beat_callback_ptr);
+BARELY_EXPORT void SetBeatCallback(BeatCallback* beat_callback_ptr);
 
 // Sets debug callback.
 //
 // @param debug_callback_ptr Pointer to debug callback.
-void EXPORT_API SetDebugCallback(DebugCallback* debug_callback_ptr);
+BARELY_EXPORT void SetDebugCallback(DebugCallback* debug_callback_ptr);
 
 // Sets note off callback.
 //
 // @param note_off_callback_ptr Pointer to note off callback.
-void EXPORT_API SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr);
+BARELY_EXPORT void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr);
 
 // Sets note on callback.
 //
 // @param note_on_callback_ptr Pointer to note on callback.
-void EXPORT_API SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr);
+BARELY_EXPORT void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr);
 
 // Sets instrument param value.
 //
 // @param id Instrument id.
 // @param param_id Param id.
 // @param value Param value.
-void EXPORT_API SetParam(Id id, int param_id, float value);
+BARELY_EXPORT void SetParam(Id id, int param_id, float value);
 
 // Sets playback position.
 //
 // @param position Position in beats.
-void EXPORT_API SetPosition(double position);
+BARELY_EXPORT void SetPosition(double position);
 
 // Sets playback tempo.
 //
 // @param tempo Tempo (BPM).
-void EXPORT_API SetTempo(double tempo);
+BARELY_EXPORT void SetTempo(double tempo);
 
 // Starts playback.
-void EXPORT_API Start(double timestamp);
+BARELY_EXPORT void Start(double timestamp);
 
 // Pauses playback.
-void EXPORT_API Pause();
+BARELY_EXPORT void Pause();
 
 // Stops playback.
-void EXPORT_API Stop();
+BARELY_EXPORT void Stop();
 
 // Updates internal state.
-void EXPORT_API Update(double timestamp);
+BARELY_EXPORT void Update(double timestamp);
 
 }  // extern "C"
 

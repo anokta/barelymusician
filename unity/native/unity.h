@@ -1,5 +1,5 @@
-#ifndef UNITY_NATIVECODE_UNITY_H_
-#define UNITY_NATIVECODE_UNITY_H_
+#ifndef UNITY_NATIVE_UNITY_H_
+#define UNITY_NATIVE_UNITY_H_
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #ifdef BARELYMUSICIAN_EXPORTS
@@ -197,4 +197,4 @@ BARELY_EXPORT void Update(double timestamp);
 }  // namespace unity
 }  // namespace barelyapi
 
-#endif  // UNITY_NATIVECODE_UNITY_H_
+#endif  // UNITY_NATIVE_UNITY_H_

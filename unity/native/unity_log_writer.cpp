@@ -1,4 +1,4 @@
-#include "unity/NativeCode/unity_log_writer.h"
+#include "unity/native/unity_log_writer.h"
 
 namespace barelyapi {
 namespace unity {

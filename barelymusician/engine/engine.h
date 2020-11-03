@@ -163,6 +163,16 @@ class Engine {
   Status ScheduleNoteOn(Id instrument_id, double position, float note_index,
                         float note_intensity);
 
+  // Schedules set param.
+  //
+  // @param instrument_id Instrument id.
+  // @param position Set param position.
+  // @param param_id Parameter id.
+  // @param param_value Parameter value.
+  // @return True if successful, if instrument found.
+  Status ScheduleSetParam(Id instrument_id, double position, int param_id,
+                          float param_value);
+
   // Sets beat callback.
   //
   // @param beat_callback Beat callback.

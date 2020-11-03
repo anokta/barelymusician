@@ -42,7 +42,7 @@ Visitor(DataTypes...) -> Visitor<DataTypes...>;
 using Id = std::int64_t;
 
 // Message data type.
-using MessageData = std::variant<NoteOnData, NoteOffData>;
+using MessageData = std::variant<NoteOnData, NoteOffData, ParamData>;
 
 }  // namespace barelyapi
 

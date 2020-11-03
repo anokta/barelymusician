@@ -210,6 +210,9 @@ Status Engine::Process(Id instrument_id, double begin_timestamp,
                            },
                            [instrument](const NoteOnData& data) {
                              instrument->NoteOn(data.index, data.intensity);
+                           },
+                           [instrument](const ParamData& data) {
+                             instrument->Control(data.id, data.value);
                            }},
                    it->second);
       }
@@ -314,6 +317,18 @@ Status Engine::ScheduleNoteOn(Id instrument_id, double position,
   return Status::kNotFound;
 }
 
+Status Engine::ScheduleSetParam(Id instrument_id, double position, int param_id,
+                                float param_value) {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (position_ <= position) {
+      controller->messages.emplace(position, ParamData{param_id, param_value});
+      return Status::kOk;
+    }
+    return Status::kInvalidArgument;
+  }
+  return Status::kNotFound;
+}
+
 void Engine::SetBeatCallback(BeatCallback beat_callback) {
   beat_callback_ = std::move(beat_callback);
 }
@@ -374,21 +389,27 @@ void Engine::Update(double timestamp) {
       const double message_timestamp =
           last_timestamp_ + SecondsFromBeats(tempo_, it->first - position_);
       const auto message_data = it->second;
-      std::visit(Visitor{[&](const NoteOffData& data) {
-                           if (controller.notes.erase(data.index) > 0 &&
-                               note_off_callback_) {
-                             note_off_callback_(message_timestamp,
-                                                instrument_id, data.index);
-                           }
-                         },
-                         [&](const NoteOnData& data) {
-                           if (controller.notes.emplace(data.index).second &&
-                               note_on_callback_) {
-                             note_on_callback_(message_timestamp, instrument_id,
-                                               data.index, data.intensity);
-                           }
-                         }},
-                 message_data);
+      std::visit(
+          Visitor{[&](const NoteOffData& data) {
+                    if (controller.notes.erase(data.index) > 0 &&
+                        note_off_callback_) {
+                      note_off_callback_(message_timestamp, instrument_id,
+                                         data.index);
+                    }
+                  },
+                  [&](const NoteOnData& data) {
+                    if (controller.notes.emplace(data.index).second &&
+                        note_on_callback_) {
+                      note_on_callback_(message_timestamp, instrument_id,
+                                        data.index, data.intensity);
+                    }
+                  },
+                  [&](const ParamData& data) {
+                    if (auto* param = FindOrNull(controller.params, data.id)) {
+                      param->value = data.value;
+                    }
+                  }},
+          message_data);
       task_runner_.Add(
           [this, instrument_id, message_timestamp, message_data]() {
             if (auto* processor = FindOrNull(processors_, instrument_id)) {

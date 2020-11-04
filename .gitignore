@@ -1,5 +1,8 @@
 # bazel build artifacts.
 bazel-*
 
+# visual studio code.
+.vscode/*
+
 # osx.
 .DS_Store

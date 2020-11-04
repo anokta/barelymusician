@@ -3,14 +3,6 @@
 
 namespace barelyapi {
 
-// Variant visitor.
-template <class... DataTypes>
-struct Visitor : DataTypes... {
-  using DataTypes::operator()...;
-};
-template <class... DataTypes>
-Visitor(DataTypes...) -> Visitor<DataTypes...>;
-
 // Converts minutes to seconds.
 inline constexpr double kSecondsFromMinutes = 60.0;
 

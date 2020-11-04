@@ -6,6 +6,7 @@
 #include <thread>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "barelymusician/base/constants.h"
@@ -30,6 +31,8 @@ using ::barelyapi::Note;
 using ::barelyapi::NoteIndex;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Position;
+using ::barelyapi::QuantizedNoteIndex;
+using ::barelyapi::QuantizedPosition;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
@@ -170,6 +173,22 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   }
 }
 
+float GetRawNoteIndex(const std::vector<float>& scale,
+                      const NoteIndex& note_index) {
+  if (std::holds_alternative<QuantizedNoteIndex>(note_index)) {
+    return barelyapi::GetRawNoteIndex(scale,
+                                      std::get<QuantizedNoteIndex>(note_index));
+  }
+  return std::get<float>(note_index);
+}
+
+double GetRawPosition(const Position& position) {
+  if (std::holds_alternative<QuantizedPosition>(position)) {
+    return barelyapi::GetRawPosition(std::get<QuantizedPosition>(position));
+  }
+  return std::get<double>(position);
+}
+
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -219,10 +238,10 @@ int main(int argc, char* argv[]) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
       for (const Note& note : temp_notes) {
-        const double position = barelyapi::GetRawPosition(note.position) +
-                                static_cast<double>(beat);
-        const double duration = barelyapi::GetRawPosition(note.duration);
-        const float index = barelyapi::GetRawNoteIndex(scale, note.index);
+        const double position =
+            static_cast<double>(beat) + GetRawPosition(note.position);
+        const double duration = GetRawPosition(note.duration);
+        const float index = GetRawNoteIndex(scale, note.index);
         engine.ScheduleNote(id, position, duration, index, note.intensity);
       }
     }

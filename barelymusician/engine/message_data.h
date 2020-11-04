@@ -32,6 +32,14 @@ struct ParamData {
 // Message data type.
 using MessageData = std::variant<NoteOnData, NoteOffData, ParamData>;
 
+// Message data visitor.
+template <class... DataTypes>
+struct MessageDataVisitor : DataTypes... {
+  using DataTypes::operator()...;
+};
+template <class... DataTypes>
+MessageDataVisitor(DataTypes...) -> MessageDataVisitor<DataTypes...>;
+
 }  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_

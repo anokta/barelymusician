@@ -208,16 +208,17 @@ Status Engine::Process(Id instrument_id, double begin_timestamp,
                               message_frame - frame);
           frame = message_frame;
         }
-        std::visit(Visitor{[instrument](const NoteOffData& data) {
-                             instrument->NoteOff(data.index);
-                           },
-                           [instrument](const NoteOnData& data) {
-                             instrument->NoteOn(data.index, data.intensity);
-                           },
-                           [instrument](const ParamData& data) {
-                             instrument->Control(data.id, data.value);
-                           }},
-                   it->second);
+        std::visit(
+            MessageDataVisitor{[instrument](const NoteOffData& data) {
+                                 instrument->NoteOff(data.index);
+                               },
+                               [instrument](const NoteOnData& data) {
+                                 instrument->NoteOn(data.index, data.intensity);
+                               },
+                               [instrument](const ParamData& data) {
+                                 instrument->Control(data.id, data.value);
+                               }},
+            it->second);
       }
       processor->messages.erase(cbegin, cend);
     }
@@ -393,25 +394,26 @@ void Engine::Update(double timestamp) {
           last_timestamp_ + SecondsFromBeats(tempo_, it->first - position_);
       const auto message_data = it->second;
       std::visit(
-          Visitor{[&](const NoteOffData& data) {
-                    if (controller.notes.erase(data.index) > 0 &&
-                        note_off_callback_) {
-                      note_off_callback_(message_timestamp, instrument_id,
-                                         data.index);
-                    }
-                  },
-                  [&](const NoteOnData& data) {
-                    if (controller.notes.emplace(data.index).second &&
-                        note_on_callback_) {
-                      note_on_callback_(message_timestamp, instrument_id,
-                                        data.index, data.intensity);
-                    }
-                  },
-                  [&](const ParamData& data) {
-                    if (auto* param = FindOrNull(controller.params, data.id)) {
-                      param->value = data.value;
-                    }
-                  }},
+          MessageDataVisitor{
+              [&](const NoteOffData& data) {
+                if (controller.notes.erase(data.index) > 0 &&
+                    note_off_callback_) {
+                  note_off_callback_(message_timestamp, instrument_id,
+                                     data.index);
+                }
+              },
+              [&](const NoteOnData& data) {
+                if (controller.notes.emplace(data.index).second &&
+                    note_on_callback_) {
+                  note_on_callback_(message_timestamp, instrument_id,
+                                    data.index, data.intensity);
+                }
+              },
+              [&](const ParamData& data) {
+                if (auto* param = FindOrNull(controller.params, data.id)) {
+                  param->value = data.value;
+                }
+              }},
           message_data);
       task_runner_.Add(
           [this, instrument_id, message_timestamp, message_data]() {

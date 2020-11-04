@@ -79,7 +79,7 @@ std::unique_ptr<Instrument> BuildSynthInstrument(OscillatorType type,
   return std::move(synth_instrument);
 }
 
-void ComposeChord(float root_note_index, const std::vector<float>& scale,
+void ComposeChord(float root_note_index, const std::vector<float>& /*scale*/,
                   float intensity, int harmonic, std::vector<Note>* notes) {
   const auto add_chord_note = [&](int index) {
     notes->emplace_back(
@@ -92,7 +92,7 @@ void ComposeChord(float root_note_index, const std::vector<float>& scale,
   add_chord_note(harmonic + 7);
 }
 
-void ComposeLine(float root_note_index, const std::vector<float>& scale,
+void ComposeLine(float root_note_index, const std::vector<float>& /*scale*/,
                  float intensity, int bar, int beat, int num_beats,
                  int harmonic, std::vector<Note>* notes) {
   const int note_offset = beat;
@@ -181,7 +181,7 @@ float GetRawNoteIndex(const std::vector<float>& scale,
 
 }  // namespace
 
-int main(int argc, char* argv[]) {
+int main(int /*argc*/, char* argv[]) {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
   CHECK(runfiles);

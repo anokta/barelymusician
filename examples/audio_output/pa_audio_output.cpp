@@ -32,10 +32,10 @@ void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
       Pa_GetDeviceInfo(output_parameters.device)->defaultLowOutputLatency;
   output_parameters.hostApiSpecificStreamInfo = nullptr;
 
-  const auto callback = [](const void* input_buffer, void* output_buffer,
-                           unsigned long frames_per_buffer,
-                           const PaStreamCallbackTimeInfo* time_info,
-                           PaStreamCallbackFlags status_flags,
+  const auto callback = [](const void* /*input_buffer*/, void* output_buffer,
+                           unsigned long /*frames_per_buffer*/,
+                           const PaStreamCallbackTimeInfo* /*time_info*/,
+                           PaStreamCallbackFlags /*status_flags*/,
                            void* user_data) {
     if (user_data) {
       // Access the audio process callback via |user_data| (to avoid capturing

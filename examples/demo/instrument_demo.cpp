@@ -55,7 +55,7 @@ float NoteIndexFromKey(const WinConsoleInput::Key& key, float offset_octaves) {
 
 }  // namespace
 
-int main(int argc, char* argv[]) {
+int main(int /*argc*/, char* /*argv*/[]) {
   PaAudioOutput audio_output;
   WinConsoleInput input_manager;
 

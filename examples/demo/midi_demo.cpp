@@ -76,7 +76,7 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
 
 }  // namespace
 
-int main(int argc, char* argv[]) {
+int main(int /*argc*/, char* argv[]) {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
   CHECK(runfiles);

@@ -1,2 +1,9 @@
 # target c++17.
 build --cxxopt=-std:c++17
+
+# treat warnings as errors.
+# TODO(#52): MSVC only, needs cross-platform support.
+build --cxxopt=-W4
+build --cxxopt=-WX
+
+

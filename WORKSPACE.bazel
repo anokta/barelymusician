@@ -42,6 +42,10 @@ cc_library(
     name = "midifile",
     srcs = glob(["src/*.cpp"]),
     hdrs = glob(["include/*.h"]),
+    copts = select({
+        "@platforms//os:windows": ["-w"],
+        "//conditions:default": [],
+    }),
     includes = ["include"],
 )
     """,

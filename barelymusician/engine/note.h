@@ -15,33 +15,8 @@ struct QuantizedNoteIndex {
 
 using NoteIndex = std::variant<float, QuantizedNoteIndex>;
 
-struct QuantizedPosition {
-  // Beat step.
-  int step;
-
-  // Number of steps per beat.
-  int num_steps;
-};
-
-using Position = std::variant<double, QuantizedPosition>;
-
 // Abstract musical note.
 struct Note {
-  // Note start position in beats.
-  Position position;
-
-  // Note duration in beats.
-  Position duration;
-
-  // Note index (typically key).
-  NoteIndex index;
-
-  // Note intensity (typically loudness).
-  float intensity;
-};
-
-// Raw musical note.
-struct RawNote {
   // Note start position in beats.
   double position;
 
@@ -49,7 +24,7 @@ struct RawNote {
   double duration;
 
   // Note index (typically key).
-  float index;
+  NoteIndex index;
 
   // Note intensity (typically loudness).
   float intensity;

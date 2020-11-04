@@ -126,8 +126,7 @@ int main(int argc, char* argv[]) {
     instrument->Control(BasicSynthInstrumentParam::kGain, kInstrumentGain);
     const auto id = GetValue(engine.Create(std::move(instrument), {}));
     for (const Note& note : score) {
-      engine.ScheduleNote(id, std::get<double>(note.position),
-                          std::get<double>(note.duration),
+      engine.ScheduleNote(id, note.position, note.duration,
                           std::get<float>(note.index), note.intensity);
     }
     instrument_ids.push_back(i);

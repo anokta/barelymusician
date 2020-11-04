@@ -24,13 +24,12 @@ float GetRawNoteIndex(const std::vector<float>& scale,
          scale[static_cast<int>(std::floor(scale_offset))];
 }
 
-double GetRawPosition(const QuantizedPosition& position) {
-  DCHECK_GE(position.step, 0);
-  DCHECK_GT(position.num_steps, 0);
-  const double num_beats =
-      static_cast<double>(position.step / position.num_steps);
-  return num_beats + static_cast<double>(position.step % position.num_steps) /
-                         static_cast<double>(position.num_steps);
+double GetPosition(int step, int num_steps) {
+  DCHECK_GE(step, 0);
+  DCHECK_GT(num_steps, 0);
+  const double num_beats = static_cast<double>(step / num_steps);
+  return num_beats +
+         static_cast<double>(step % num_steps) / static_cast<double>(num_steps);
 }
 
 double QuantizePosition(double position, double resolution, double amount) {

@@ -30,7 +30,7 @@ class PositionTest : public testing::TestWithParam<int> {};
 
 // Tests that the beat gets quantized as expected with respect to the given
 // step.
-TEST_P(PositionTest, GetRawPosition) {
+TEST_P(PositionTest, GetPosition) {
   const int kNumBeats = 4;
   const int num_steps = GetParam();
 
@@ -39,9 +39,8 @@ TEST_P(PositionTest, GetRawPosition) {
       const double expected_position =
           static_cast<double>(beat) +
           static_cast<double>(i) / static_cast<double>(num_steps);
-      EXPECT_DOUBLE_EQ(
-          GetRawPosition(QuantizedPosition{num_steps * beat + i, num_steps}),
-          expected_position);
+      EXPECT_DOUBLE_EQ(GetPosition(num_steps * beat + i, num_steps),
+                       expected_position);
     }
   }
 }

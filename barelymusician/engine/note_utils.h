@@ -15,11 +15,12 @@ namespace barelyapi {
 float GetRawNoteIndex(const std::vector<float>& scale,
                       const QuantizedNoteIndex& note_index);
 
-// Returns the raw position for the given quantized position.
+// Returns quantized position for the given number of beat steps.
 //
-// @param position Quantized position.
+// @param step Quantized step.
+// @param num_steps Number of steps per beat.
 // @return Raw position.
-double GetRawPosition(const QuantizedPosition& position);
+double GetPosition(int step, int num_steps);
 
 // Returns quantized position.
 double QuantizePosition(double position, double resolution,

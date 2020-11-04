@@ -30,9 +30,7 @@ using ::barelyapi::Instrument;
 using ::barelyapi::Note;
 using ::barelyapi::NoteIndex;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Position;
 using ::barelyapi::QuantizedNoteIndex;
-using ::barelyapi::QuantizedPosition;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
@@ -123,8 +121,7 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
 
 void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   const auto get_beat = [](int step) {
-    return barelyapi::QuantizedPosition{step,
-                                        barelyapi::kNumSixteenthNotesPerBeat};
+    return barelyapi::GetPosition(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
   // Kick.
   if (beat % 2 == 0) {
@@ -182,13 +179,6 @@ float GetRawNoteIndex(const std::vector<float>& scale,
   return std::get<float>(note_index);
 }
 
-double GetRawPosition(const Position& position) {
-  if (std::holds_alternative<QuantizedPosition>(position)) {
-    return barelyapi::GetRawPosition(std::get<QuantizedPosition>(position));
-  }
-  return std::get<double>(position);
-}
-
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -238,11 +228,9 @@ int main(int argc, char* argv[]) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
       for (const Note& note : temp_notes) {
-        const double position =
-            static_cast<double>(beat) + GetRawPosition(note.position);
-        const double duration = GetRawPosition(note.duration);
+        const double position = static_cast<double>(beat) + note.position;
         const float index = GetRawNoteIndex(scale, note.index);
-        engine.ScheduleNote(id, position, duration, index, note.intensity);
+        engine.ScheduleNote(id, position, note.duration, index, note.intensity);
       }
     }
   };

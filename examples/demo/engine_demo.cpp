@@ -25,7 +25,6 @@
 namespace {
 
 using ::barelyapi::Engine;
-using ::barelyapi::Id;
 using ::barelyapi::Instrument;
 using ::barelyapi::Note;
 using ::barelyapi::NoteIndex;
@@ -39,6 +38,8 @@ using ::barelyapi::examples::WavFile;
 using ::barelyapi::examples::WinConsoleInput;
 using ::barelyapi::random::Uniform;
 using ::bazel::tools::cpp::runfiles::Runfiles;
+
+using Id = ::barelyapi::Engine::Id;
 
 // Beat composer callback signature.
 using BeatComposerCallback = std::function<void(

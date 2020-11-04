@@ -68,17 +68,20 @@ Engine::Engine()
       id_counter_(0),
       task_runner_(kNumMaxTasks) {}
 
-StatusOr<Id> Engine::Create(std::unique_ptr<Instrument> instrument,
-                            std::vector<ParamData> params) {
-  const Id instrument_id = ++id_counter_;
-  controllers_.emplace(instrument_id, InstrumentController{params});
-  InstrumentProcessor processor{std::move(instrument), params};
-  task_runner_.Add([this, instrument_id,
-                    processor = std::make_shared<InstrumentProcessor>(
-                        std::move(processor))]() {
-    processors_.emplace(instrument_id, std::move(*processor));
-  });
-  return instrument_id;
+StatusOr<Engine::Id> Engine::Create(std::unique_ptr<Instrument> instrument,
+                                    std::vector<ParamData> params) {
+  if (instrument) {
+    const Id instrument_id = ++id_counter_;
+    controllers_.emplace(instrument_id, InstrumentController{params});
+    InstrumentProcessor processor{std::move(instrument), params};
+    task_runner_.Add([this, instrument_id,
+                      processor = std::make_shared<InstrumentProcessor>(
+                          std::move(processor))]() {
+      processors_.emplace(instrument_id, std::move(*processor));
+    });
+    return instrument_id;
+  }
+  return Status::kInvalidArgument;
 }
 
 Status Engine::Destroy(Id instrument_id) {

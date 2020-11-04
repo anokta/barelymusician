@@ -16,6 +16,9 @@ namespace unity {
 
 namespace {
 
+// Invalid id.
+inline constexpr Id kInvalidId = -1;
+
 // Unity plugin.
 struct BarelyMusician {
   BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}

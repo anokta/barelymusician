@@ -18,7 +18,6 @@
 namespace {
 
 using ::barelyapi::Engine;
-using ::barelyapi::Id;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -27,6 +26,8 @@ using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WinConsoleInput;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
+
+using Id = ::barelyapi::Engine::Id;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -104,7 +105,7 @@ int main(int argc, char* argv[]) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << index << ") ";
   });
 
-  std::vector<barelyapi::Id> instrument_ids;
+  std::vector<Id> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     const auto score = BuildScore(midi_file[i], ticks_per_quarter);

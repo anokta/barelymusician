@@ -4,10 +4,10 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/message_data.h"
 #include "examples/instruments/basic_enveloped_voice.h"
 
 namespace barelyapi {

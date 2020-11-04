@@ -11,12 +11,14 @@
 #define BARELY_EXPORT
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
-#include "barelymusician/base/constants.h"
+#include <cstdint>
 
 namespace barelyapi {
 namespace unity {
 
 extern "C" {
+
+using Id = std::int64_t;
 
 // Event callback signatures.
 using BeatCallback = void(double timestamp, int beat);

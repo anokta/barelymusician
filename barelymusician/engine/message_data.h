@@ -1,7 +1,6 @@
-#ifndef BARELYMUSICIAN_BASE_TYPES_H_
-#define BARELYMUSICIAN_BASE_TYPES_H_
+#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
+#define BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
 
-#include <cstdint>
 #include <variant>
 
 namespace barelyapi {
@@ -30,20 +29,9 @@ struct ParamData {
   float value;
 };
 
-// Variant visitor.
-template <class... DataTypes>
-struct Visitor : DataTypes... {
-  using DataTypes::operator()...;
-};
-template <class... DataTypes>
-Visitor(DataTypes...) -> Visitor<DataTypes...>;
-
-// Id type.
-using Id = std::int64_t;
-
 // Message data type.
 using MessageData = std::variant<NoteOnData, NoteOffData, ParamData>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_BASE_TYPES_H_
+#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_

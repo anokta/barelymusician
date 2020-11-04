@@ -22,7 +22,8 @@ cc_library(
     hdrs = ["engine.h"],
     deps = [
         ":instrument",
-        "//barelymusician/base",
+        ":message_data",
+        "//barelymusician/base:constants",
         "//barelymusician/base:status",
         "//barelymusician/util:task_runner",
     ],
@@ -31,6 +32,11 @@ cc_library(
 cc_library(
     name = "instrument",
     hdrs = ["instrument.h"],
+)
+
+cc_library(
+    name = "message_data",
+    hdrs = ["message_data.h"],
 )
 
 cc_library(
@@ -44,7 +50,7 @@ cc_library(
     hdrs = ["note_utils.h"],
     deps = [
         ":note",
-        "//barelymusician/base",
+        "//barelymusician/base:constants",
         "//barelymusician/base:logging",
     ],
 )
@@ -56,7 +62,7 @@ cc_test(
     srcs = ["note_utils_test.cpp"],
     deps = [
         ":note_utils",
-        "//barelymusician/base",
+        "//barelymusician/base:constants",
         "@googletest//:gtest_main",
     ],
 )

@@ -7,7 +7,7 @@ cc_library(
     srcs = ["dsp_utils.cpp"],
     hdrs = ["dsp_utils.h"],
     deps = [
-        "//barelymusician/base",
+        "//barelymusician/base:constants",
         "//barelymusician/base:logging",
     ],
 )
@@ -55,7 +55,7 @@ cc_library(
     hdrs = ["oscillator.h"],
     deps = [
         ":generator",
-        "//barelymusician/base",
+        "//barelymusician/base:constants",
         "//barelymusician/base:logging",
         "//barelymusician/util:random",
     ],
@@ -87,7 +87,7 @@ cc_test(
     srcs = ["dsp_utils_test.cpp"],
     deps = [
         ":dsp_utils",
-        "//barelymusician/base",
+        "//barelymusician/base:constants",
         "@googletest//:gtest_main",
     ],
 )

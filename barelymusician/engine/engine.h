@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <unordered_map>
@@ -10,6 +11,7 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
 #include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/message_data.h"
 #include "barelymusician/util/task_runner.h"
 
 namespace barelyapi {
@@ -17,6 +19,9 @@ namespace barelyapi {
 // Class that manages processing of instruments.
 class Engine {
  public:
+  // Instrument id type.
+  using Id = std::int64_t;
+
   // Beat callback signature.
   using BeatCallback = std::function<void(double timestamp, int beat)>;
 

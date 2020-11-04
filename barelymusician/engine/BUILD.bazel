@@ -23,9 +23,9 @@ cc_library(
     deps = [
         ":instrument",
         ":message_data",
+        ":task_runner",
         "//barelymusician/base:constants",
         "//barelymusician/base:status",
-        "//barelymusician/util:task_runner",
     ],
 )
 
@@ -55,6 +55,13 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "task_runner",
+    srcs = ["task_runner.cpp"],
+    hdrs = ["task_runner.h"],
+    deps = ["//barelymusician/base:logging"],
+)
+
 # TODO(#52): engine_test missing.
 
 cc_test(
@@ -63,6 +70,15 @@ cc_test(
     deps = [
         ":note_utils",
         "//barelymusician/base:constants",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "task_runner_test",
+    srcs = ["task_runner_test.cpp"],
+    deps = [
+        ":task_runner",
         "@googletest//:gtest_main",
     ],
 )

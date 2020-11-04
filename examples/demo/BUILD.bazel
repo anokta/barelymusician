@@ -7,11 +7,11 @@ cc_binary(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
+        "//barelymusician/base:random",
         "//barelymusician/engine",
         "//barelymusician/engine:instrument",
         "//barelymusician/engine:note",
         "//barelymusician/engine:note_utils",
-        "//barelymusician/util:random",
         "//examples/audio_output:pa_audio_output",
         "//examples/input_manager:win_console_input",
         "//examples/instruments:basic_drumkit_instrument",
@@ -27,7 +27,7 @@ cc_binary(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
-        "//barelymusician/util:task_runner",
+        "//barelymusician/engine:task_runner",
         "//examples/audio_output:pa_audio_output",
         "//examples/input_manager:win_console_input",
         "//examples/instruments:basic_synth_instrument",

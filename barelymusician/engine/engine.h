@@ -12,7 +12,7 @@
 #include "barelymusician/base/status.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/message_data.h"
-#include "barelymusician/util/task_runner.h"
+#include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
 

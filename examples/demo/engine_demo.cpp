@@ -10,11 +10,11 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/random.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
 #include "barelymusician/engine/note_utils.h"
-#include "barelymusician/util/random.h"
 #include "examples/audio_output/pa_audio_output.h"
 #include "examples/input_manager/win_console_input.h"
 #include "examples/instruments/basic_drumkit_instrument.h"

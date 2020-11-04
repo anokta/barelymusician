@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,7 +14,22 @@ cc_library(
 )
 
 cc_library(
+    name = "random",
+    srcs = ["random.cpp"],
+    hdrs = ["random.h"],
+)
+
+cc_library(
     name = "status",
     hdrs = ["status.h"],
     deps = [":logging"],
+)
+
+cc_test(
+    name = "random_test",
+    srcs = ["random_test.cpp"],
+    deps = [
+        ":random",
+        "@googletest//:gtest_main",
+    ],
 )

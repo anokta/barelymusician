@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barelymusician/base/logging.h"
-#include "barelymusician/util/random.h"
+#include "barelymusician/base/random.h"
 
 namespace barelyapi {
 

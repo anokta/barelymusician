@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_UTIL_RANDOM_H_
-#define BARELYMUSICIAN_UTIL_RANDOM_H_
+#ifndef BARELYMUSICIAN_BASE_RANDOM_H_
+#define BARELYMUSICIAN_BASE_RANDOM_H_
 
 #include <random>
 
@@ -48,4 +48,4 @@ int Uniform(int min, int max);
 }  // namespace random
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_UTIL_RANDOM_H_
+#endif  // BARELYMUSICIAN_BASE_RANDOM_H_

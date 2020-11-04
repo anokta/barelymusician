@@ -57,7 +57,7 @@ cc_library(
         ":generator",
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
-        "//barelymusician/util:random",
+        "//barelymusician/base:random",
     ],
 )
 

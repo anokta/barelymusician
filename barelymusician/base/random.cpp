@@ -1,4 +1,4 @@
-#include "barelymusician/util/random.h"
+#include "barelymusician/base/random.h"
 
 namespace barelyapi {
 namespace random {

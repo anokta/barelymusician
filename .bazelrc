@@ -6,4 +6,8 @@ build --cxxopt=-std:c++17
 build --cxxopt=-W4
 build --cxxopt=-WX
 
-
+# TODO(#52): temp osx mirror.
+# build --cxxopt=-std=c++17
+# build --cxxopt=-Wall
+# build --cxxopt=-Wno-unused-lambda-capture
+# build --cxxopt=-Werror

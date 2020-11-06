@@ -9,8 +9,8 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/audio_output/pa_audio_output.h"
-#include "examples/input_manager/win_console_input.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "examples/util/input_manager.h"
 
 namespace {
 
@@ -18,8 +18,8 @@ using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
+using ::barelyapi::examples::InputManager;
 using ::barelyapi::examples::PaAudioOutput;
-using ::barelyapi::examples::WinConsoleInput;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -47,7 +47,7 @@ constexpr double kTempoIncrement = 10.0;
 
 int main(int /*argc*/, char* /*argv*/[]) {
   PaAudioOutput audio_output;
-  WinConsoleInput input_manager;
+  InputManager input_manager;
 
   Engine engine;
   engine.SetTempo(kInitialTempo);
@@ -89,7 +89,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&](const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
@@ -132,10 +132,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
-
-  input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-
   engine.Start(timestamp + kLookahead);
 
   while (!quit) {
@@ -146,11 +143,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-
   engine.Stop();
-
   audio_output.Stop();
-  input_manager.Shutdown();
 
   return 0;
 }

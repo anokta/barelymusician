@@ -8,8 +8,8 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/task_runner.h"
 #include "examples/audio_output/pa_audio_output.h"
-#include "examples/input_manager/win_console_input.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "examples/util/input_manager.h"
 
 namespace {
 
@@ -17,8 +17,8 @@ using ::barelyapi::OscillatorType;
 using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
+using ::barelyapi::examples::InputManager;
 using ::barelyapi::examples::PaAudioOutput;
-using ::barelyapi::examples::WinConsoleInput;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -42,7 +42,7 @@ constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
 constexpr float kMaxOffsetOctaves = 3.0f;
 
 // Returns the note index for the given |key| and |offset_octaves|.
-float NoteIndexFromKey(const WinConsoleInput::Key& key, float offset_octaves) {
+float NoteIndexFromKey(const InputManager::Key& key, float offset_octaves) {
   const auto it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
                             std::toupper(key));
   if (it == std::cend(kOctaveKeys)) {
@@ -57,7 +57,7 @@ float NoteIndexFromKey(const WinConsoleInput::Key& key, float offset_octaves) {
 
 int main(int /*argc*/, char* /*argv*/[]) {
   PaAudioOutput audio_output;
-  WinConsoleInput input_manager;
+  InputManager input_manager;
 
   TaskRunner task_runner(kNumMaxTasks);
 
@@ -83,7 +83,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Key down callback.
   bool quit = false;
-  const auto key_down_callback = [&](const WinConsoleInput::Key& key) {
+  const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
       quit = true;
@@ -123,7 +123,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Key up callback.
-  const auto key_up_callback = [&](const WinConsoleInput::Key& key) {
+  const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     const float note_index = NoteIndexFromKey(key, offset_octaves);
     if (note_index < 0.0f) {
@@ -136,8 +136,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
-
-  input_manager.Initialize();
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
   while (!quit) {
@@ -147,9 +145,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-
   audio_output.Stop();
-  input_manager.Shutdown();
 
   return 0;
 }

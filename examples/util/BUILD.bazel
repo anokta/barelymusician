@@ -10,7 +10,6 @@ cc_library(
         "@platforms//os:osx": ["-framework ApplicationServices"],
         "//conditions:default": [],
     }),
-    deps = ["//barelymusician/base:logging"],
 )
 
 cc_library(

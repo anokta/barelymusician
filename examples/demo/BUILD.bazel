@@ -13,9 +13,9 @@ cc_binary(
         "//barelymusician/engine:note",
         "//barelymusician/engine:note_utils",
         "//examples/audio_output:pa_audio_output",
-        "//examples/input_manager:win_console_input",
         "//examples/instruments:basic_drumkit_instrument",
         "//examples/instruments:basic_synth_instrument",
+        "//examples/util:input_manager",
         "//examples/util:wav_file",
         "@bazel_tools//tools/cpp/runfiles",
     ],
@@ -29,8 +29,8 @@ cc_binary(
         "//barelymusician/base:logging",
         "//barelymusician/engine:task_runner",
         "//examples/audio_output:pa_audio_output",
-        "//examples/input_manager:win_console_input",
         "//examples/instruments:basic_synth_instrument",
+        "//examples/util:input_manager",
     ],
 )
 
@@ -42,8 +42,8 @@ cc_binary(
         "//barelymusician/base:logging",
         "//barelymusician/engine",
         "//examples/audio_output:pa_audio_output",
-        "//examples/input_manager:win_console_input",
         "//examples/instruments:basic_synth_instrument",
+        "//examples/util:input_manager",
     ],
 )
 
@@ -56,8 +56,8 @@ cc_binary(
         "//barelymusician/engine",
         "//barelymusician/engine:note",
         "//examples/audio_output:pa_audio_output",
-        "//examples/input_manager:win_console_input",
         "//examples/instruments:basic_synth_instrument",
+        "//examples/util:input_manager",
         "@bazel_tools//tools/cpp/runfiles",
         "@midifile",
     ],

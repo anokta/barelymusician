@@ -71,21 +71,41 @@ cc_library(
         "src/common/*.c",
         "src/common/*.h",
         "include/*.h",
-    ]) +
-    # TODO(#52): Add cross-platform support here.
-    glob([
-        "src/hostapi/wmme/*.c",
-        "src/hostapi/wmme/*.h",
-        "src/os/win/*.c",
-        "src/os/win/*.h",
-    ]),
+    ]) + select({
+        "@platforms//os:osx": glob([
+            "src/hostapi/coreaudio/*.c",
+            "src/hostapi/coreaudio/*.h",
+            "src/os/unix/*.c",
+            "src/os/unix/*.h",
+        ]),
+        "@platforms//os:windows": glob([
+            "src/hostapi/wmme/*.c",
+            "src/hostapi/wmme/*.h",
+            "src/os/win/*.c",
+            "src/os/win/*.h",
+        ]),
+        "//conditions:default": [],
+    }),
     hdrs = ["include/portaudio.h"],
-    defines = ["PA_USE_WMME=1"],
+    defines = select({
+        "@platforms//os:osx": ["PA_USE_COREAUDIO=1"],
+        "@platforms//os:windows": ["PA_USE_WMME=1"],
+        "//conditions:default": [],
+    }),
     includes = [
         "include",
         "src/common",
         "src/os/unix",
     ],
+    linkopts = select({
+        "@platforms//os:osx": [
+            "-framework AudioUnit",
+            "-framework CoreAudio",
+            "-framework AudioToolbox",
+            "-framework Carbon",
+        ],
+        "//conditions:default": [],
+    }),
 )
     """,
     commit = "88c71a6ec478ed693adf86d1ff08134273c1e5e7",

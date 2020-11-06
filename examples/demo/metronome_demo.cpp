@@ -24,7 +24,7 @@ using ::barelyapi::examples::PaAudioOutput;
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
-constexpr int kNumFrames = 2048;
+constexpr int kNumFrames = 1024;
 
 constexpr double kLookahead = 0.05;
 

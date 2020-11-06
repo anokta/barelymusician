@@ -10,8 +10,8 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
-#include "examples/audio_output/pa_audio_output.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
@@ -20,10 +20,10 @@ namespace {
 using ::barelyapi::Engine;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::InputManager;
-using ::barelyapi::examples::PaAudioOutput;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -81,7 +81,7 @@ int main(int /*argc*/, char* argv[]) {
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
   CHECK(runfiles);
 
-  PaAudioOutput audio_output;
+  AudioOutput audio_output;
   InputManager input_manager;
 
   MidiFile midi_file;

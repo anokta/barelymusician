@@ -3,6 +3,16 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "audio_output",
+    srcs = ["audio_output.cpp"],
+    hdrs = ["audio_output.h"],
+    deps = [
+        "//barelymusician/base:logging",
+        "@portaudio",
+    ],
+)
+
+cc_library(
     name = "input_manager",
     srcs = ["input_manager.cpp"],
     hdrs = ["input_manager.h"],

@@ -16,9 +16,9 @@
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
 #include "barelymusician/engine/note_utils.h"
-#include "examples/audio_output/pa_audio_output.h"
 #include "examples/instruments/basic_drumkit_instrument.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 #include "examples/util/wav_file.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -31,11 +31,11 @@ using ::barelyapi::Note;
 using ::barelyapi::NoteIndex;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::QuantizedNoteIndex;
+using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::InputManager;
-using ::barelyapi::examples::PaAudioOutput;
 using ::barelyapi::examples::WavFile;
 using ::barelyapi::random::Uniform;
 using ::bazel::tools::cpp::runfiles::Runfiles;
@@ -186,7 +186,7 @@ int main(int /*argc*/, char* argv[]) {
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
   CHECK(runfiles);
 
-  PaAudioOutput audio_output;
+  AudioOutput audio_output;
   InputManager input_manager;
 
   Engine engine;

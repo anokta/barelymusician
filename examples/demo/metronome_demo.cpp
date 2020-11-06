@@ -8,18 +8,18 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/engine.h"
-#include "examples/audio_output/pa_audio_output.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 
 namespace {
 
 using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::InputManager;
-using ::barelyapi::examples::PaAudioOutput;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -46,7 +46,7 @@ constexpr double kTempoIncrement = 10.0;
 }  // namespace
 
 int main(int /*argc*/, char* /*argv*/[]) {
-  PaAudioOutput audio_output;
+  AudioOutput audio_output;
   InputManager input_manager;
 
   Engine engine;

@@ -7,18 +7,18 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/engine/task_runner.h"
-#include "examples/audio_output/pa_audio_output.h"
 #include "examples/instruments/basic_synth_instrument.h"
+#include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 
 namespace {
 
 using ::barelyapi::OscillatorType;
 using ::barelyapi::TaskRunner;
+using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::InputManager;
-using ::barelyapi::examples::PaAudioOutput;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -56,7 +56,7 @@ float NoteIndexFromKey(const InputManager::Key& key, float offset_octaves) {
 }  // namespace
 
 int main(int /*argc*/, char* /*argv*/[]) {
-  PaAudioOutput audio_output;
+  AudioOutput audio_output;
   InputManager input_manager;
 
   TaskRunner task_runner(kNumMaxTasks);

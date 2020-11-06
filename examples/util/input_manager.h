@@ -24,7 +24,7 @@ class InputManager {
   // Constructs new |InputManager|.
   InputManager();
 
-  // Destroys |InputManager|.
+  // Destructs |InputManager|.
   ~InputManager();
 
   // Sets keyboard key down callback.

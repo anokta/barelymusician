@@ -1,4 +1,5 @@
-#include "examples/audio_output/pa_audio_output.h"
+
+#include "examples/util/audio_output.h"
 
 #include <utility>
 
@@ -7,13 +8,13 @@
 namespace barelyapi {
 namespace examples {
 
-PaAudioOutput::PaAudioOutput() : process_callback_(nullptr), stream_(nullptr) {
+AudioOutput::AudioOutput() : process_callback_(nullptr), stream_(nullptr) {
   Pa_Initialize();
 }
 
-PaAudioOutput::~PaAudioOutput() { Pa_Terminate(); }
+AudioOutput::~AudioOutput() { Pa_Terminate(); }
 
-void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
+void AudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
   DCHECK_GE(sample_rate, 0);
   DCHECK_GE(num_channels, 0);
   DCHECK_GE(num_frames, 0);
@@ -52,7 +53,7 @@ void PaAudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
   Pa_StartStream(stream_);
 }
 
-void PaAudioOutput::Stop() {
+void AudioOutput::Stop() {
   if (stream_) {
     Pa_StopStream(stream_);
     Pa_CloseStream(stream_);
@@ -60,7 +61,7 @@ void PaAudioOutput::Stop() {
   stream_ = nullptr;
 }
 
-void PaAudioOutput::SetProcessCallback(ProcessCallback&& process_callback) {
+void AudioOutput::SetProcessCallback(ProcessCallback&& process_callback) {
   process_callback_ = std::move(process_callback);
 }
 

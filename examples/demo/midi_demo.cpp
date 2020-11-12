@@ -114,22 +114,22 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Create instrument.
-    auto instrument = std::make_unique<BasicSynthInstrument>(kSampleRate);
-    instrument->Control(BasicSynthInstrumentParam::kNumVoices,
-                        static_cast<float>(kNumInstrumentVoices));
-    instrument->Control(BasicSynthInstrumentParam::kOscillatorType,
-                        static_cast<float>(kInstrumentOscillatorType));
-    instrument->Control(BasicSynthInstrumentParam::kEnvelopeAttack,
-                        kInstrumentEnvelopeAttack);
-    instrument->Control(BasicSynthInstrumentParam::kEnvelopeRelease,
-                        kInstrumentEnvelopeRelease);
-    instrument->Control(BasicSynthInstrumentParam::kGain, kInstrumentGain);
-    const auto id = GetValue(engine.Create(std::move(instrument), {}));
+    const auto instrument_id = GetValue(
+        engine.Create(std::make_unique<BasicSynthInstrument>(kSampleRate),
+                      {{BasicSynthInstrumentParam::kNumVoices,
+                        static_cast<float>(kNumInstrumentVoices)},
+                       {BasicSynthInstrumentParam::kOscillatorType,
+                        static_cast<float>(kInstrumentOscillatorType)},
+                       {BasicSynthInstrumentParam::kEnvelopeAttack,
+                        kInstrumentEnvelopeAttack},
+                       {BasicSynthInstrumentParam::kEnvelopeRelease,
+                        kInstrumentEnvelopeRelease},
+                       {BasicSynthInstrumentParam::kGain, kInstrumentGain}}));
     for (const Note& note : score) {
-      engine.ScheduleNote(id, note.position, note.duration,
+      engine.ScheduleNote(instrument_id, note.position, note.duration,
                           std::get<float>(note.index), note.intensity);
     }
-    instrument_ids.push_back(i);
+    instrument_ids.push_back(instrument_id);
   }
   LOG(INFO) << "Number of active MIDI tracks: " << instrument_ids.size();
 

@@ -43,7 +43,7 @@ class Engine {
   // @param params Default instrument params.
   // @return Instrument id.
   StatusOr<Id> Create(std::unique_ptr<Instrument> instrument,
-                      std::vector<ParamData> params);
+                      std::vector<ParamData> params = {});
 
   // Destroys instrument.
   //

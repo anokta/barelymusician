@@ -52,9 +52,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Engine engine;
   engine.SetTempo(kInitialTempo);
 
-  auto metronome = std::make_unique<BasicSynthInstrument>(kSampleRate);
   const auto metronome_id = GetValue(engine.Create(
-      std::move(metronome),
+      std::make_unique<BasicSynthInstrument>(kSampleRate),
       {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
        {static_cast<int>(BasicSynthInstrumentParam::kGain), kGain},

@@ -64,19 +64,16 @@ constexpr int kNumInstrumentVoices = 8;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
-std::unique_ptr<Instrument> BuildSynthInstrument(OscillatorType type,
-                                                 float gain, float attack,
-                                                 float release) {
-  auto synth_instrument = std::make_unique<BasicSynthInstrument>(kSampleRate);
-  synth_instrument->Control(BasicSynthInstrumentParam::kNumVoices,
-                            static_cast<float>(kNumInstrumentVoices));
-  synth_instrument->Control(BasicSynthInstrumentParam::kOscillatorType,
-                            static_cast<float>(type));
-  synth_instrument->Control(BasicSynthInstrumentParam::kGain, gain);
-  synth_instrument->Control(BasicSynthInstrumentParam::kEnvelopeAttack, attack);
-  synth_instrument->Control(BasicSynthInstrumentParam::kEnvelopeRelease,
-                            release);
-  return std::move(synth_instrument);
+Id BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
+                        float attack, float release) {
+  return GetValue(engine->Create(
+      std::make_unique<BasicSynthInstrument>(kSampleRate),
+      {{BasicSynthInstrumentParam::kNumVoices,
+        static_cast<float>(kNumInstrumentVoices)},
+       {BasicSynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
+       {BasicSynthInstrumentParam::kGain, gain},
+       {BasicSynthInstrumentParam::kEnvelopeAttack, attack},
+       {BasicSynthInstrumentParam::kEnvelopeRelease, release}}));
 }
 
 void ComposeChord(float root_note_index, const std::vector<float>& /*scale*/,
@@ -201,12 +198,6 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   std::unordered_map<Id, BeatComposerCallback> performers;
-  const auto create_performer_fn =
-      [&](std::unique_ptr<Instrument> instrument,
-          BeatComposerCallback beat_composer_callback) {
-        const Id id = GetValue(engine.Create(std::move(instrument), {}));
-        performers.emplace(id, std::move(beat_composer_callback));
-      };
 
   // Beat callback.
   int harmonic = 0;
@@ -251,24 +242,22 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetNoteOffCallback(note_off_callback);
 
   // Add synth instruments.
-  auto chords_instrument =
-      BuildSynthInstrument(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
-  auto chords_2_instrument =
-      BuildSynthInstrument(OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
+  auto chords_instrument_id = BuildSynthInstrument(
+      &engine, OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
+  auto chords_2_instrument_id = BuildSynthInstrument(
+      &engine, OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
 
   const auto chords_beat_composer_callback =
       std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
                 std::placeholders::_5);
 
-  create_performer_fn(std::move(chords_instrument),
-                      chords_beat_composer_callback);
-  create_performer_fn(std::move(chords_2_instrument),
-                      chords_beat_composer_callback);
+  performers.emplace(chords_instrument_id, chords_beat_composer_callback);
+  performers.emplace(chords_2_instrument_id, chords_beat_composer_callback);
 
-  auto line_instrument =
-      BuildSynthInstrument(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
-  auto line_2_instrument =
-      BuildSynthInstrument(OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
+  auto line_instrument_id = BuildSynthInstrument(&engine, OscillatorType::kSaw,
+                                                 0.1f, 0.0025f, 0.125f);
+  auto line_2_instrument_id = BuildSynthInstrument(
+      &engine, OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
 
   const auto line_beat_composer_callback = std::bind(
       ComposeLine, kRootNote - barelyapi::kNumSemitones, scale, 1.0f,
@@ -279,9 +268,8 @@ int main(int /*argc*/, char* argv[]) {
                 std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4, std::placeholders::_5);
 
-  create_performer_fn(std::move(line_instrument), line_beat_composer_callback);
-  create_performer_fn(std::move(line_2_instrument),
-                      line_2_beat_composer_callback);
+  performers.emplace(line_instrument_id, line_beat_composer_callback);
+  performers.emplace(line_2_instrument_id, line_2_beat_composer_callback);
 
   // Add drumkit instrument.
   std::unordered_map<float, std::string> drumkit_map;
@@ -299,13 +287,12 @@ int main(int /*argc*/, char* argv[]) {
     CHECK(drumkit_file.Load(path)) << path;
     drumkit_instrument->Add(index, drumkit_file);
   }
-
+  const auto drumkit_instrument_id =
+      GetValue(engine.Create(std::move(drumkit_instrument)));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_5);
-
-  create_performer_fn(std::move(drumkit_instrument),
-                      drumkit_beat_composer_callback);
+  performers.emplace(drumkit_instrument_id, drumkit_beat_composer_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

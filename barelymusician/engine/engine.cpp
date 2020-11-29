@@ -321,18 +321,6 @@ Status Engine::ScheduleNoteOn(Id instrument_id, double position,
   return Status::kNotFound;
 }
 
-Status Engine::ScheduleSetParam(Id instrument_id, double position, int param_id,
-                                float param_value) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (position_ <= position) {
-      controller->messages.emplace(position, ParamData{param_id, param_value});
-      return Status::kOk;
-    }
-    return Status::kInvalidArgument;
-  }
-  return Status::kNotFound;
-}
-
 void Engine::SetBeatCallback(BeatCallback beat_callback) {
   beat_callback_ = std::move(beat_callback);
 }

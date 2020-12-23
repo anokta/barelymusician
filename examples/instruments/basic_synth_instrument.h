@@ -29,10 +29,10 @@ class BasicSynthInstrument : public Instrument {
   explicit BasicSynthInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void Control(int id, float value) override;
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
+  void SetParam(int id, float value) override;
 
   // Returns default parameters.
   static std::vector<ParamData> GetDefaultParams();

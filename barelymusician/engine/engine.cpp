@@ -216,7 +216,7 @@ Status Engine::Process(Id instrument_id, double begin_timestamp,
                                  instrument->NoteOn(data.index, data.intensity);
                                },
                                [instrument](const ParamData& data) {
-                                 instrument->Control(data.id, data.value);
+                                 instrument->SetParam(data.id, data.value);
                                }},
             it->second);
       }
@@ -240,7 +240,7 @@ Status Engine::ResetAllParams(Id instrument_id) {
     task_runner_.Add([this, instrument_id, params = controller->params]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
         for (const auto& [id, param] : params) {
-          processor->instrument->Control(id, param.default_value);
+          processor->instrument->SetParam(id, param.default_value);
         }
       }
     });
@@ -256,7 +256,7 @@ Status Engine::SetParam(Id instrument_id, int param_id, float param_value) {
         param->value = param_value;
         task_runner_.Add([this, instrument_id, param_id, param_value]() {
           if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            processor->instrument->Control(param_id, param_value);
+            processor->instrument->SetParam(param_id, param_value);
           }
         });
         return Status::kOk;
@@ -429,7 +429,7 @@ Engine::InstrumentProcessor::InstrumentProcessor(
     const std::vector<ParamData>& default_params)
     : instrument(std::move(instrument_to_process)) {
   for (const auto& [id, default_value] : default_params) {
-    instrument->Control(id, default_value);
+    instrument->SetParam(id, default_value);
   }
 }
 

@@ -21,7 +21,27 @@ const int kDefaultNumVoices = 8;
 BasicSynthInstrument::BasicSynthInstrument(int sample_rate)
     : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {}
 
-void BasicSynthInstrument::Control(int id, float value) {
+void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
+
+void BasicSynthInstrument::NoteOn(float index, float intensity) {
+  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
+    voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
+    voice->set_gain(intensity);
+  });
+}
+
+void BasicSynthInstrument::Process(float* output, int num_channels,
+                                   int num_frames) {
+  float mono_sample = 0.0f;
+  for (int frame = 0; frame < num_frames; ++frame) {
+    mono_sample = gain_ * voice_.Next(0);
+    for (int channel = 0; channel < num_channels; ++channel) {
+      output[num_channels * frame + channel] = mono_sample;
+    }
+  }
+}
+
+void BasicSynthInstrument::SetParam(int id, float value) {
   switch (static_cast<BasicSynthInstrumentParam>(id)) {
     case BasicSynthInstrumentParam::kGain:
       gain_ = value;
@@ -55,26 +75,6 @@ void BasicSynthInstrument::Control(int id, float value) {
     case BasicSynthInstrumentParam::kNumVoices:
       voice_.Resize(static_cast<int>(value));
       break;
-  }
-}
-
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
-
-void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
-    voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
-    voice->set_gain(intensity);
-  });
-}
-
-void BasicSynthInstrument::Process(float* output, int num_channels,
-                                   int num_frames) {
-  float mono_sample = 0.0f;
-  for (int frame = 0; frame < num_frames; ++frame) {
-    mono_sample = gain_ * voice_.Next(0);
-    for (int channel = 0; channel < num_channels; ++channel) {
-      output[num_channels * frame + channel] = mono_sample;
-    }
   }
 }
 

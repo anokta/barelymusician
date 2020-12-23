@@ -9,12 +9,6 @@ class Instrument {
   // Base destructor to ensure the derived classes get destroyed properly.
   virtual ~Instrument() = default;
 
-  // Sets control |value| with the given |id|.
-  //
-  // @param id Control id.
-  // @param value Control value.
-  virtual void Control(int id, float value) = 0;
-
   // Stops note with the given |index|.
   //
   // @param index Note index.
@@ -32,6 +26,12 @@ class Instrument {
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   virtual void Process(float* output, int num_channels, int num_frames) = 0;
+
+  // Sets param |value| with the given |id|.
+  //
+  // @param id Param id.
+  // @param value Param value.
+  virtual void SetParam(int id, float value) = 0;
 };
 
 }  // namespace barelyapi

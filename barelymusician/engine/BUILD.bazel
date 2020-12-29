@@ -21,6 +21,22 @@ cc_library(
 )
 
 cc_library(
+    name = "instrument_definition",
+    hdrs = ["instrument_definition.h"],
+)
+
+cc_library(
+    name = "instrument_processor",
+    srcs = ["instrument_processor.cpp"],
+    hdrs = ["instrument_processor.h"],
+    deps = [
+        ":instrument_definition",
+        ":message_data",
+        "//barelymusician/dsp:dsp_utils",
+    ],
+)
+
+cc_library(
     name = "message_data",
     hdrs = ["message_data.h"],
 )

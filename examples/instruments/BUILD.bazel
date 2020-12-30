@@ -17,8 +17,8 @@ cc_library(
     hdrs = ["basic_drumkit_instrument.h"],
     deps = [
         ":basic_enveloped_voice",
+        ":instrument",
         "//barelymusician/dsp:sample_player",
-        "//barelymusician/engine:instrument",
         "//examples/util:wav_file",
     ],
 )
@@ -29,11 +29,21 @@ cc_library(
     hdrs = ["basic_synth_instrument.h"],
     deps = [
         ":basic_enveloped_voice",
+        ":instrument",
         "//barelymusician/base:constants",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
-        "//barelymusician/engine:instrument",
-        "//barelymusician/engine:message_data",
+        "//barelymusician/engine:instrument_definition",
+    ],
+)
+
+cc_library(
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
+    deps = [
+        "//barelymusician/base:logging",
+        "//barelymusician/engine:instrument_definition",
     ],
 )

@@ -78,7 +78,12 @@ void BasicSynthInstrument::SetParam(int id, float value) {
   }
 }
 
-std::vector<ParamData> BasicSynthInstrument::GetDefaultParams() {
+std::unique_ptr<Instrument> BasicSynthInstrument::Create(int sample_rate) {
+  return std::make_unique<BasicSynthInstrument>(sample_rate);
+}
+
+std::vector<InstrumentParamDefinition>
+BasicSynthInstrument::GetDefaultParams() {
   return {{static_cast<int>(BasicSynthInstrumentParam::kGain), kDefaultGain},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack),
            kDefaultEnvelopeAttack},

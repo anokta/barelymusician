@@ -4,8 +4,8 @@
 #include <unordered_map>
 
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/engine/instrument.h"
 #include "examples/instruments/basic_enveloped_voice.h"
+#include "examples/instruments/instrument.h"
 #include "examples/util/wav_file.h"
 
 namespace barelyapi {

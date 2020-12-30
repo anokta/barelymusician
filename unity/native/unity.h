@@ -128,23 +128,7 @@ BARELY_EXPORT void ResetAllParams(Id id);
 // @param intensity Note intensity.
 BARELY_EXPORT void ScheduleNote(Id id, double position, double duration,
                                 float index, float intensity);
-
-// Schedules instrument note off.
-//
-// @param id Instrument id.
-// @param position Note position in beats.
-// @param index Note index.
-BARELY_EXPORT void ScheduleNoteOff(Id id, double position, float index);
-
-// Schedules instrument note on.
-//
-// @param id Instrument id.
-// @param position Note position in beats.
-// @param index Note index.
-// @param intensity Note intensity.
-BARELY_EXPORT void ScheduleNoteOn(Id id, double position, float index,
-                                  float intensity);
-
+                                
 // Sets beat callback.
 //
 // @param beat_callback_ptr Pointer to beat callback.

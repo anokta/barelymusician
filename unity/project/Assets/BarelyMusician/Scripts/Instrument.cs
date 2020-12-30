@@ -61,20 +61,6 @@ namespace BarelyApi {
       }
     }
 
-    // Schedules note off.
-    public void ScheduleNoteOff(double position, float index) {
-      if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.ScheduleNoteOff(_id, position, index);
-      }
-    }
-
-    // Schedules note on.
-    public void ScheduleNoteOn(double position, float index, float intensity) {
-      if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.ScheduleNoteOn(_id, position, index, intensity);
-      }
-    }
-
     private void OnAudioFilterRead(float[] data, int channels) {
       if (_id != BarelyMusician.InvalidId) {
         BarelyMusician.Process(_id, data, channels);

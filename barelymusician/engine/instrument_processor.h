@@ -12,7 +12,9 @@ namespace barelyapi {
 class InstrumentProcessor {
  public:
   InstrumentProcessor(int sample_rate, InstrumentDefinition definition);
-  ~InstrumentProcessor();
+
+  void Create();
+  void Destroy();
 
   void Process(double timestamp, float* output, int num_channels,
                int num_frames);

@@ -1,7 +1,13 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_
+#define BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_
+
+#include <any>
+#include <functional>
+
+#include "barelymusician/engine/instrument_definition.h"
 
 namespace barelyapi {
+namespace examples {
 
 // Generic instrument interface.
 class Instrument {
@@ -34,6 +40,10 @@ class Instrument {
   virtual void SetParam(int id, float value) = 0;
 };
 
+using CreateFn = std::function<std::unique_ptr<Instrument>(int sample_rate)>;
+InstrumentDefinition GetInstrumentDefinition(CreateFn create_fn);
+
+}  // namespace examples
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_

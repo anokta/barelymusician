@@ -76,16 +76,6 @@ namespace BarelyApi {
       BarelyMusicianInternal.Instance?.ScheduleNote(id, position, duration, index, intensity);
     }
 
-    // Schedules instrument note off.
-    public static void ScheduleNoteOff(Int64 id, double position, float index) {
-      BarelyMusicianInternal.Instance?.ScheduleNoteOff(id, position, index);
-    }
-
-    // Schedules instrument note on.
-    public static void ScheduleNoteOn(Int64 id, double position, float index, float intensity) {
-      BarelyMusicianInternal.Instance?.ScheduleNoteOn(id, position, index, intensity);
-    }
-
     // Sets instrument param value.
     public static void SetParam(Int64 id, int paramId, float value) {
       BarelyMusicianInternal.Instance?.SetParam(id, paramId, value);
@@ -281,14 +271,6 @@ namespace BarelyApi {
         ScheduleNoteNative(id, position, duration, index, intensity);
       }
 
-      public void ScheduleNoteOff(Int64 id, double position, float index) {
-        ScheduleNoteOffNative(id, position, index);
-      }
-
-      public void ScheduleNoteOn(Int64 id, double position, float index, float intensity) {
-        ScheduleNoteOnNative(id, position, index, intensity);
-      }
-
       public void SetParam(Int64 id, int paramId, float value) {
         SetParamNative(id, paramId, value);
       }
@@ -374,13 +356,6 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "ScheduleNote")]
     private static extern void ScheduleNoteNative(Int64 id, double position, double duration,
                                                   float index, float intensity);
-
-    [DllImport(pluginName, EntryPoint = "ScheduleNoteOff")]
-    private static extern void ScheduleNoteOffNative(Int64 id, double position, float index);
-
-    [DllImport(pluginName, EntryPoint = "ScheduleNoteOn")]
-    private static extern void ScheduleNoteOnNative(Int64 id, double position, float index,
-                                                    float intensity);
 
     [DllImport(pluginName, EntryPoint = "SetBeatCallback")]
     private static extern void SetBeatCallbackNative(IntPtr beatCallbackPtr);

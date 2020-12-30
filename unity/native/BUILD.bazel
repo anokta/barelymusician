@@ -39,25 +39,14 @@ cc_library(
     }),
     visibility = ["//visibility:private"],
     deps = [
-        ":unity_instrument",
         ":unity_log_writer",
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
         "//barelymusician/engine",
+        "//barelymusician/engine:instrument_definition",
         "//examples/instruments:basic_synth_instrument",
     ],
     alwayslink = True,
-)
-
-cc_library(
-    name = "unity_instrument",
-    srcs = ["unity_instrument.cpp"],
-    hdrs = ["unity_instrument.h"],
-    visibility = ["//visibility:private"],
-    deps = [
-        "//barelymusician/base:logging",
-        "//barelymusician/engine:instrument",
-    ],
 )
 
 cc_library(

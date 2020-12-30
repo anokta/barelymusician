@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <variant>
 
+#include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
@@ -12,14 +13,17 @@ InstrumentProcessor::InstrumentProcessor(int sample_rate,
     : sample_rate_(sample_rate),
       definition_(std::move(definition)),
       state_(nullptr) {
+}
+
+void InstrumentProcessor::Create() {
   if (definition_.create_fn) {
-    definition_.create_fn(state_, sample_rate);
+    definition_.create_fn(&state_, sample_rate_);
   }
 }
 
-InstrumentProcessor::~InstrumentProcessor() {
+void InstrumentProcessor::Destroy() {
   if (definition_.destroy_fn) {
-    definition_.destroy_fn(state_);
+    definition_.destroy_fn(&state_);
   }
 }
 
@@ -81,25 +85,25 @@ void InstrumentProcessor::ScheduleParam(double timestamp, int param_id,
 
 void InstrumentProcessor::SetCustomData(void* custom_data) {
   if (definition_.set_custom_data_fn) {
-    definition_.set_custom_data_fn(state_, custom_data);
+    definition_.set_custom_data_fn(&state_, custom_data);
   }
 }
 
 void InstrumentProcessor::SetNoteOff(float note_index) {
   if (definition_.set_note_off_fn) {
-    definition_.set_note_off_fn(state_, note_index);
+    definition_.set_note_off_fn(&state_, note_index);
   }
 }
 
 void InstrumentProcessor::SetNoteOn(float note_index, float note_intensity) {
   if (definition_.set_note_on_fn) {
-    definition_.set_note_on_fn(state_, note_index, note_intensity);
+    definition_.set_note_on_fn(&state_, note_index, note_intensity);
   }
 }
 
 void InstrumentProcessor::SetParam(int param_id, float param_value) {
   if (definition_.set_param_fn) {
-    definition_.set_param_fn(state_, param_id, param_value);
+    definition_.set_param_fn(&state_, param_id, param_value);
   }
 }
 

@@ -1,32 +1,33 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 
+#include <any>
 #include <functional>
 #include <vector>
 
 namespace barelyapi {
 
-using InstrumentState = void*;
+using InstrumentState = std::any;
 
 using CreateInstrumentFn =
-    std::function<void(InstrumentState state, int sample_rate)>;
+    std::function<void(InstrumentState* state, int sample_rate)>;
 
-using DestroyInstrumentFn = std::function<void(InstrumentState state)>;
+using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;
 
 using ProcessInstrumentFn = std::function<void(
-    InstrumentState state, float* output, int num_channels, int num_frames)>;
+    InstrumentState* state, float* output, int num_channels, int num_frames)>;
 
 using SetCustomInstrumentDataFn =
-    std::function<void(InstrumentState state, void* data)>;
+    std::function<void(InstrumentState* state, void* data)>;
 
 using SetInstrumentNoteOffFn =
-    std::function<void(InstrumentState state, float note_index)>;
+    std::function<void(InstrumentState* state, float note_index)>;
 
 using SetInstrumentNoteOnFn = std::function<void(
-    InstrumentState state, float note_index, float note_intensity)>;
+    InstrumentState* state, float note_index, float note_intensity)>;
 
-using SetInstrumentParamFn =
-    std::function<void(InstrumentState state, int param_id, float param_value)>;
+using SetInstrumentParamFn = std::function<void(
+    InstrumentState* state, int param_id, float param_value)>;
 
 struct InstrumentDefinition {
   CreateInstrumentFn create_fn;
@@ -41,8 +42,8 @@ struct InstrumentDefinition {
 struct InstrumentParamDefinition {
   int id;
   float default_value;
-  float max_value;
-  float min_value;
+  //   float max_value;
+  //   float min_value;
 };
 
 }  // namespace barelyapi

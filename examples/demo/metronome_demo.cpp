@@ -49,11 +49,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine;
+  Engine engine(kSampleRate);
   engine.SetTempo(kInitialTempo);
 
   const auto metronome_id = GetValue(engine.Create(
-      std::make_unique<BasicSynthInstrument>(kSampleRate),
+      barelyapi::examples::GetInstrumentDefinition(
+          &BasicSynthInstrument::Create),
       {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
        {static_cast<int>(BasicSynthInstrumentParam::kGain), kGain},
@@ -77,12 +78,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Audio process callback.
   std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
-    const double end_timestamp =
-        timestamp +
-        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
-    engine.Process(metronome_id, timestamp, end_timestamp, output, kNumChannels,
-                   kNumFrames);
-    timestamp = end_timestamp;
+    engine.Process(metronome_id, timestamp, output, kNumChannels, kNumFrames);
+    timestamp = timestamp + static_cast<double>(kNumFrames) /
+                                static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 

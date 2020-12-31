@@ -13,6 +13,32 @@ InstrumentProcessor::InstrumentProcessor(int sample_rate,
     : sample_rate_(sample_rate),
       definition_(std::move(definition)),
       state_(nullptr) {
+  if (definition_.create_fn) {
+    definition_.create_fn(&state_, sample_rate_);
+  }
+}
+
+InstrumentProcessor::~InstrumentProcessor() {
+  if (definition_.destroy_fn) {
+    definition_.destroy_fn(&state_);
+  }
+}
+
+InstrumentProcessor::InstrumentProcessor(InstrumentProcessor&& other) noexcept
+    : sample_rate_(std::move(other.sample_rate_)),
+      definition_(std::exchange(other.definition_, {})),
+      state_(std::exchange(other.state_, nullptr)),
+      messages_(std::move(other.messages_)) {}
+
+InstrumentProcessor& InstrumentProcessor::operator=(
+    InstrumentProcessor&& other) noexcept {
+  if (this != &other) {
+    sample_rate_ = std::move(other.sample_rate_);
+    std::swap(definition_, other.definition_);
+    std::swap(state_, other.state_);
+    messages_ = std::move(other.messages_);
+  }
+  return *this;
 }
 
 void InstrumentProcessor::Create() {

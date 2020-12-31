@@ -33,6 +33,7 @@ class BasicSynthInstrument : public Instrument {
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
+  void SetCustomData(void*) override {}
   void SetParam(int id, float value) override;
 
   // Returns default parameters.

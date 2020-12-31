@@ -44,6 +44,18 @@ void BasicDrumkitInstrument::Process(float* output, int num_channels,
   }
 }
 
+void BasicDrumkitInstrument::SetCustomData(void* data) {
+  auto drumkit_files =
+      *reinterpret_cast<std::unordered_map<float, WavFile>*>(data);
+  for (const auto& [index, file] : drumkit_files) {
+    Add(index, file);
+  }
+}
+
+std::unique_ptr<Instrument> BasicDrumkitInstrument::Create(int sample_rate) {
+  return std::make_unique<BasicDrumkitInstrument>(sample_rate);
+}
+
 void BasicDrumkitInstrument::Add(float note_index, const WavFile& wav_file) {
   BasicDrumkitVoice voice(sample_rate_);
   voice.envelope().SetRelease(kDefaultRelease);

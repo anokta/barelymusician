@@ -12,6 +12,15 @@ namespace barelyapi {
 class InstrumentProcessor {
  public:
   InstrumentProcessor(int sample_rate, InstrumentDefinition definition);
+  ~InstrumentProcessor();
+
+  // Non-copyable.
+  InstrumentProcessor(const InstrumentProcessor& other) = delete;
+  InstrumentProcessor& operator=(const InstrumentProcessor& other) = delete;
+
+  // Movable.
+  InstrumentProcessor(InstrumentProcessor&& other) noexcept;
+  InstrumentProcessor& operator=(InstrumentProcessor&& other) noexcept;
 
   void Create();
   void Destroy();

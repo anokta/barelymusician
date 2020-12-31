@@ -76,7 +76,6 @@ StatusOr<InstrumentId> Engine::Create(
   controllers_.emplace(instrument_id, InstrumentController{params});
   task_runner_.Add([this, instrument_id, instrument, params]() {
     auto processor = InstrumentProcessor(sample_rate_, instrument);
-    processor.Create();
     for (const auto& param : params) {
       // TODO: min/max check (from controller).
       processor.SetParam(param.id, param.default_value);
@@ -89,9 +88,6 @@ StatusOr<InstrumentId> Engine::Create(
 Status Engine::Destroy(InstrumentId instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
     task_runner_.Add([this, instrument_id]() {
-      if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        processor->Destroy();
-      }
       processors_.erase(instrument_id);
     });
     return Status::kOk;

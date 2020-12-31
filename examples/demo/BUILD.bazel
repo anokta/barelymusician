@@ -9,7 +9,6 @@ cc_binary(
         "//barelymusician/base:logging",
         "//barelymusician/base:random",
         "//barelymusician/engine",
-        "//barelymusician/engine:instrument",
         "//barelymusician/engine:note",
         "//barelymusician/engine:note_utils",
         "//examples/instruments:basic_drumkit_instrument",

@@ -1,6 +1,7 @@
 #ifndef EXAMPLES_INSTRUMENTS_BASIC_DRUMKIT_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_BASIC_DRUMKIT_INSTRUMENT_H_
 
+#include <memory>
 #include <unordered_map>
 
 #include "barelymusician/dsp/sample_player.h"
@@ -19,12 +20,15 @@ class BasicDrumkitInstrument : public Instrument {
   void NoteOff(float index) override;
   void NoteOn(float index, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
+  void SetCustomData(void* data) override;
   void SetParam(int, float) override {}
 
-  void Add(float note_index, const WavFile& wav_file);
+  static std::unique_ptr<Instrument> Create(int sample_rate);
 
  private:
   using BasicDrumkitVoice = BasicEnvelopedVoice<SamplePlayer>;
+
+  void Add(float note_index, const WavFile& wav_file);
 
   const int sample_rate_;
 

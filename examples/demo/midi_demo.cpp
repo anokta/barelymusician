@@ -18,16 +18,16 @@
 namespace {
 
 using ::barelyapi::Engine;
+using ::barelyapi::InstrumentId;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
+using ::barelyapi::examples::GetInstrumentDefinition;
 using ::barelyapi::examples::InputManager;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
-
-using Id = ::barelyapi::Engine::Id;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -95,17 +95,18 @@ int main(int /*argc*/, char* argv[]) {
   LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  Engine engine;
+  Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
-  engine.SetNoteOnCallback([](double, Id id, float index, float intensity) {
-    LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << index << ", "
-              << intensity << ")";
-  });
-  engine.SetNoteOffCallback([](double, Id id, float index) {
+  engine.SetNoteOnCallback(
+      [](double, InstrumentId id, float index, float intensity) {
+        LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << index << ", "
+                  << intensity << ")";
+      });
+  engine.SetNoteOffCallback([](double, InstrumentId id, float index) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << index << ") ";
   });
 
-  std::vector<Id> instrument_ids;
+  std::vector<InstrumentId> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     const auto score = BuildScore(midi_file[i], ticks_per_quarter);
@@ -115,7 +116,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Create instrument.
     const auto instrument_id = GetValue(
-        engine.Create(std::make_unique<BasicSynthInstrument>(kSampleRate),
+        engine.Create(GetInstrumentDefinition(&BasicSynthInstrument::Create),
                       {{BasicSynthInstrumentParam::kNumVoices,
                         static_cast<float>(kNumInstrumentVoices)},
                        {BasicSynthInstrumentParam::kOscillatorType,
@@ -137,17 +138,15 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
-    const double end_timestamp =
-        timestamp +
-        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& id : instrument_ids) {
-      engine.Process(id, timestamp, end_timestamp, temp_buffer.data(),
-                     kNumChannels, kNumFrames);
+      engine.Process(id, timestamp, temp_buffer.data(), kNumChannels,
+                     kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp = end_timestamp;
+    timestamp = timestamp + static_cast<double>(kNumFrames) /
+                                static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 

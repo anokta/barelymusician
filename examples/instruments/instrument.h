@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_
 #define BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_
 
-#include <any>
 #include <functional>
 
 #include "barelymusician/engine/instrument_definition.h"
@@ -32,6 +31,8 @@ class Instrument {
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   virtual void Process(float* output, int num_channels, int num_frames) = 0;
+
+  virtual void SetCustomData(void* data) = 0;
 
   // Sets param |value| with the given |id|.
   //

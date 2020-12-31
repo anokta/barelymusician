@@ -13,7 +13,6 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
 #include "barelymusician/engine/note_utils.h"
 #include "examples/instruments/basic_drumkit_instrument.h"
@@ -26,7 +25,7 @@
 namespace {
 
 using ::barelyapi::Engine;
-using ::barelyapi::Instrument;
+using ::barelyapi::InstrumentId;
 using ::barelyapi::Note;
 using ::barelyapi::NoteIndex;
 using ::barelyapi::OscillatorType;
@@ -35,12 +34,11 @@ using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
+using ::barelyapi::examples::GetInstrumentDefinition;
 using ::barelyapi::examples::InputManager;
 using ::barelyapi::examples::WavFile;
 using ::barelyapi::random::Uniform;
 using ::bazel::tools::cpp::runfiles::Runfiles;
-
-using Id = ::barelyapi::Engine::Id;
 
 // Beat composer callback signature.
 using BeatComposerCallback = std::function<void(
@@ -64,10 +62,10 @@ constexpr int kNumInstrumentVoices = 8;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
-Id BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
-                        float attack, float release) {
+InstrumentId BuildSynthInstrument(Engine* engine, OscillatorType type,
+                                  float gain, float attack, float release) {
   return GetValue(engine->Create(
-      std::make_unique<BasicSynthInstrument>(kSampleRate),
+      GetInstrumentDefinition(&BasicSynthInstrument::Create),
       {{BasicSynthInstrumentParam::kNumVoices,
         static_cast<float>(kNumInstrumentVoices)},
        {BasicSynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
@@ -186,7 +184,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine;
+  Engine engine(kSampleRate);
   engine.SetTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
@@ -197,7 +195,7 @@ int main(int /*argc*/, char* argv[]) {
     return progression[bar % progression.size()];
   };
 
-  std::unordered_map<Id, BeatComposerCallback> performers;
+  std::unordered_map<InstrumentId, BeatComposerCallback> performers;
 
   // Beat callback.
   int harmonic = 0;
@@ -228,15 +226,16 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Note on callback.
-  const auto note_on_callback = [](double, Id performer_id, float index,
-                                   float intensity) {
+  const auto note_on_callback = [](double, InstrumentId performer_id,
+                                   float index, float intensity) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << index << ", "
               << intensity << ")";
   };
   engine.SetNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](double, Id performer_id, float index) {
+  const auto note_off_callback = [](double, InstrumentId performer_id,
+                                    float index) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << index << ")";
   };
   engine.SetNoteOffCallback(note_off_callback);
@@ -272,23 +271,21 @@ int main(int /*argc*/, char* argv[]) {
   performers.emplace(line_2_instrument_id, line_2_beat_composer_callback);
 
   // Add drumkit instrument.
-  std::unordered_map<float, std::string> drumkit_map;
-  drumkit_map[barelyapi::kNoteIndexKick] = "basic_kick.wav";
-  drumkit_map[barelyapi::kNoteIndexSnare] = "basic_snare.wav";
-  drumkit_map[barelyapi::kNoteIndexHihatClosed] = "basic_hihat_closed.wav";
-  drumkit_map[barelyapi::kNoteIndexHihatOpen] = "basic_hihat_open.wav";
-  auto drumkit_instrument =
-      std::make_unique<BasicDrumkitInstrument>(kSampleRate);
-  std::vector<WavFile> drumkit_files;
+  const auto drumkit_instrument_id = GetValue(
+      engine.Create(GetInstrumentDefinition(&BasicDrumkitInstrument::Create)));
+  std::unordered_map<float, std::string> drumkit_map = {
+      {barelyapi::kNoteIndexKick, "basic_kick.wav"},
+      {barelyapi::kNoteIndexSnare, "basic_snare.wav"},
+      {barelyapi::kNoteIndexHihatClosed, "basic_hihat_closed.wav"},
+      {barelyapi::kNoteIndexHihatOpen, "basic_hihat_open.wav"}};
+  std::unordered_map<float, WavFile> drumkit_files;
   for (const auto& [index, name] : drumkit_map) {
-    drumkit_files.emplace_back();
-    auto& drumkit_file = drumkit_files.back();
+    auto it = drumkit_files.emplace(index, WavFile{});
     const std::string path = runfiles->Rlocation(kDrumsBaseFilename + name);
-    CHECK(drumkit_file.Load(path)) << path;
-    drumkit_instrument->Add(index, drumkit_file);
+    CHECK(it.first->second.Load(path)) << path;
   }
-  const auto drumkit_instrument_id =
-      GetValue(engine.Create(std::move(drumkit_instrument)));
+  engine.SetCustomData(drumkit_instrument_id,
+                       reinterpret_cast<void*>(&drumkit_files));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_5);
@@ -298,17 +295,15 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
-    const double end_timestamp =
-        timestamp +
-        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& [id, callback] : performers) {
-      engine.Process(id, timestamp, end_timestamp, temp_buffer.data(),
-                     kNumChannels, kNumFrames);
+      engine.Process(id, timestamp, temp_buffer.data(), kNumChannels,
+                     kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp = end_timestamp;
+    timestamp = timestamp + static_cast<double>(kNumFrames) /
+                                static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 

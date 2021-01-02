@@ -24,7 +24,6 @@ using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
-using ::barelyapi::examples::GetInstrumentDefinition;
 using ::barelyapi::examples::InputManager;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
@@ -116,7 +115,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Create instrument.
     const auto instrument_id = GetValue(
-        engine.Create(GetInstrumentDefinition(&BasicSynthInstrument::Create),
+        engine.Create(BasicSynthInstrument::GetDefinition(),
                       {{BasicSynthInstrumentParam::kNumVoices,
                         static_cast<float>(kNumInstrumentVoices)},
                        {BasicSynthInstrumentParam::kOscillatorType,

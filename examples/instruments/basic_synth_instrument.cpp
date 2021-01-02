@@ -78,8 +78,10 @@ void BasicSynthInstrument::SetParam(int id, float value) {
   }
 }
 
-std::unique_ptr<Instrument> BasicSynthInstrument::Create(int sample_rate) {
-  return std::make_unique<BasicSynthInstrument>(sample_rate);
+InstrumentDefinition BasicSynthInstrument::GetDefinition() {
+  return GetInstrumentDefinition([](int sample_rate) {
+    return std::make_unique<BasicSynthInstrument>(sample_rate);
+  });
 }
 
 std::vector<InstrumentParamDefinition>

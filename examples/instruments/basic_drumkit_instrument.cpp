@@ -52,8 +52,10 @@ void BasicDrumkitInstrument::SetCustomData(void* data) {
   }
 }
 
-std::unique_ptr<Instrument> BasicDrumkitInstrument::Create(int sample_rate) {
-  return std::make_unique<BasicDrumkitInstrument>(sample_rate);
+InstrumentDefinition BasicDrumkitInstrument::GetDefinition() {
+  return GetInstrumentDefinition([](int sample_rate) {
+    return std::make_unique<BasicDrumkitInstrument>(sample_rate);
+  });
 }
 
 void BasicDrumkitInstrument::Add(float note_index, const WavFile& wav_file) {

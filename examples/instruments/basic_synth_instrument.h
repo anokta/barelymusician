@@ -36,8 +36,8 @@ class BasicSynthInstrument : public Instrument {
   void SetCustomData(void*) override {}
   void SetParam(int id, float value) override;
 
-  // Returns default parameters.
-  static std::unique_ptr<Instrument> Create(int sample_rate);
+  // Returns instrument definition.
+  static InstrumentDefinition GetDefinition();
   static std::vector<InstrumentParamDefinition> GetDefaultParams();
 
  private:

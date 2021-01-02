@@ -81,8 +81,7 @@ Id CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
 Id CreateBasicSynthInstrument() {
   if (barelymusician) {
     return GetValue(barelymusician->engine.Create(
-        examples::GetInstrumentDefinition(
-            &examples::BasicSynthInstrument::Create),
+        examples::BasicSynthInstrument::GetDefinition(),
         examples::BasicSynthInstrument::GetDefaultParams()));
   }
   return kInvalidId;

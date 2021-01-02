@@ -53,8 +53,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetTempo(kInitialTempo);
 
   const auto metronome_id = GetValue(engine.Create(
-      barelyapi::examples::GetInstrumentDefinition(
-          &BasicSynthInstrument::Create),
+      BasicSynthInstrument::GetDefinition(),
       {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
        {static_cast<int>(BasicSynthInstrumentParam::kGain), kGain},

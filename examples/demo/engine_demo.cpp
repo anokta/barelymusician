@@ -34,7 +34,6 @@ using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
 using ::barelyapi::examples::BasicSynthInstrumentParam;
-using ::barelyapi::examples::GetInstrumentDefinition;
 using ::barelyapi::examples::InputManager;
 using ::barelyapi::examples::WavFile;
 using ::barelyapi::random::Uniform;
@@ -65,7 +64,7 @@ constexpr char kDrumsBaseFilename[] =
 InstrumentId BuildSynthInstrument(Engine* engine, OscillatorType type,
                                   float gain, float attack, float release) {
   return GetValue(engine->Create(
-      GetInstrumentDefinition(&BasicSynthInstrument::Create),
+      BasicSynthInstrument::GetDefinition(),
       {{BasicSynthInstrumentParam::kNumVoices,
         static_cast<float>(kNumInstrumentVoices)},
        {BasicSynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
@@ -271,8 +270,8 @@ int main(int /*argc*/, char* argv[]) {
   performers.emplace(line_2_instrument_id, line_2_beat_composer_callback);
 
   // Add drumkit instrument.
-  const auto drumkit_instrument_id = GetValue(
-      engine.Create(GetInstrumentDefinition(&BasicDrumkitInstrument::Create)));
+  const auto drumkit_instrument_id =
+      GetValue(engine.Create(BasicDrumkitInstrument::GetDefinition()));
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kNoteIndexKick, "basic_kick.wav"},
       {barelyapi::kNoteIndexSnare, "basic_snare.wav"},

@@ -23,7 +23,7 @@ class BasicDrumkitInstrument : public Instrument {
   void SetCustomData(void* data) override;
   void SetParam(int, float) override {}
 
-  static std::unique_ptr<Instrument> Create(int sample_rate);
+  static InstrumentDefinition GetDefinition();
 
  private:
   using BasicDrumkitVoice = BasicEnvelopedVoice<SamplePlayer>;

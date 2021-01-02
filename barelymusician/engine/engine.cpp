@@ -87,9 +87,8 @@ StatusOr<InstrumentId> Engine::Create(
 
 Status Engine::Destroy(InstrumentId instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
-    task_runner_.Add([this, instrument_id]() {
-      processors_.erase(instrument_id);
-    });
+    task_runner_.Add(
+        [this, instrument_id]() { processors_.erase(instrument_id); });
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -334,45 +333,40 @@ void Engine::Update(double timestamp) {
       const double message_timestamp =
           last_timestamp_ + SecondsFromBeats(tempo_, it->first - position_);
       const auto message_data = it->second;
-      std::visit(
-          MessageDataVisitor{
-              [&](const NoteOffData& data) {
-                if (controller.notes.erase(data.index) > 0) {
-                  if (note_off_callback_) {
-                    note_off_callback_(message_timestamp, instrument_id,
-                                       data.index);
-                  }
-                  task_runner_.Add([this, instrument_id, message_timestamp,
-                                    data]() {
-                    if (auto* processor =
-                            FindOrNull(processors_, instrument_id)) {
-                      processor->ScheduleNoteOff(message_timestamp, data.index);
-                    }
-                  });
-                }
-              },
-              [&](const NoteOnData& data) {
-                if (controller.notes.emplace(data.index).second) {
-                  if (note_on_callback_) {
-                    note_on_callback_(message_timestamp, instrument_id,
-                                      data.index, data.intensity);
-                  }
-                  task_runner_.Add(
-                      [this, instrument_id, message_timestamp, data]() {
-                        if (auto* processor =
-                                FindOrNull(processors_, instrument_id)) {
-                          processor->ScheduleNoteOn(message_timestamp,
-                                                    data.index, data.intensity);
-                        }
-                      });
-                }
-              },
-              [&](const ParamData& data) {
-                if (auto* param = FindOrNull(controller.params, data.id)) {
-                  param->value = data.value;
-                }
-              }},
-          message_data);
+      std::visit(MessageDataVisitor{
+                     [&](const NoteOffData& data) {
+                       if (controller.notes.erase(data.index) > 0) {
+                         if (note_off_callback_) {
+                           note_off_callback_(message_timestamp, instrument_id,
+                                              data.index);
+                         }
+                         task_runner_.Add(
+                             [this, instrument_id, message_timestamp, data]() {
+                               if (auto* processor =
+                                       FindOrNull(processors_, instrument_id)) {
+                                 processor->ScheduleNoteOff(message_timestamp,
+                                                            data.index);
+                               }
+                             });
+                       }
+                     },
+                     [&](const NoteOnData& data) {
+                       if (controller.notes.emplace(data.index).second) {
+                         if (note_on_callback_) {
+                           note_on_callback_(message_timestamp, instrument_id,
+                                             data.index, data.intensity);
+                         }
+                         task_runner_.Add([this, instrument_id,
+                                           message_timestamp, data]() {
+                           if (auto* processor =
+                                   FindOrNull(processors_, instrument_id)) {
+                             processor->ScheduleNoteOn(
+                                 message_timestamp, data.index, data.intensity);
+                           }
+                         });
+                       }
+                     }},
+                 message_data);
     }
     controller.messages.erase(cbegin, cend);
   }

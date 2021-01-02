@@ -20,17 +20,8 @@ struct NoteOffData {
   float index;
 };
 
-// Parameter data.
-struct ParamData {
-  // Param id.
-  int id;
-
-  // Param value.
-  float value;
-};
-
 // Message data type.
-using MessageData = std::variant<NoteOnData, NoteOffData, ParamData>;
+using MessageData = std::variant<NoteOnData, NoteOffData>;
 
 // Message data visitor.
 template <class... DataTypes>

@@ -30,7 +30,6 @@ class InstrumentProcessor {
 
   void ScheduleNoteOff(double timestamp, float note_index);
   void ScheduleNoteOn(double timestamp, float note_index, float note_intensity);
-  void ScheduleParam(double timestamp, int param_id, float param_value);
 
   void SetCustomData(void* data);
 

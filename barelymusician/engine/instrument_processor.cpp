@@ -81,9 +81,6 @@ void InstrumentProcessor::Process(double timestamp, float* output,
                                   [this](const NoteOnData& note_on_data) {
                                     SetNoteOn(note_on_data.index,
                                               note_on_data.intensity);
-                                  },
-                                  [this](const ParamData& param_data) {
-                                    SetParam(param_data.id, param_data.value);
                                   }},
                it->second);
   }
@@ -102,11 +99,6 @@ void InstrumentProcessor::ScheduleNoteOff(double timestamp, float note_index) {
 void InstrumentProcessor::ScheduleNoteOn(double timestamp, float note_index,
                                          float note_intensity) {
   messages_.emplace_back(timestamp, NoteOnData{note_index, note_intensity});
-}
-
-void InstrumentProcessor::ScheduleParam(double timestamp, int param_id,
-                                        float param_value) {
-  messages_.emplace_back(timestamp, ParamData{param_id, param_value});
 }
 
 void InstrumentProcessor::SetCustomData(void* custom_data) {

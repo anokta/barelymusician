@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_NOTE_H_
 #define BARELYMUSICIAN_ENGINE_NOTE_H_
 
-#include <variant>
-
 namespace barelyapi {
 
 struct QuantizedNoteIndex {
@@ -13,8 +11,6 @@ struct QuantizedNoteIndex {
   int scale_index;
 };
 
-using NoteIndex = std::variant<float, QuantizedNoteIndex>;
-
 // Abstract musical note.
 struct Note {
   // Note start position in beats.
@@ -24,7 +20,7 @@ struct Note {
   double duration;
 
   // Note index (typically key).
-  NoteIndex index;
+  float index;
 
   // Note intensity (typically loudness).
   float intensity;

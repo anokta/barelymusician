@@ -25,9 +25,9 @@
 namespace {
 
 using ::barelyapi::Engine;
+using ::barelyapi::GetRawNoteIndex;
 using ::barelyapi::InstrumentId;
 using ::barelyapi::Note;
-using ::barelyapi::NoteIndex;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::QuantizedNoteIndex;
 using ::barelyapi::examples::AudioOutput;
@@ -73,12 +73,11 @@ InstrumentId BuildSynthInstrument(Engine* engine, OscillatorType type,
        {BasicSynthInstrumentParam::kEnvelopeRelease, release}}));
 }
 
-void ComposeChord(float root_note_index, const std::vector<float>& /*scale*/,
+void ComposeChord(float root_note_index, const std::vector<float>& scale,
                   float intensity, int harmonic, std::vector<Note>* notes) {
   const auto add_chord_note = [&](int index) {
-    notes->emplace_back(
-        Note{0.0, 1.0, barelyapi::QuantizedNoteIndex{root_note_index, index},
-             intensity});
+    notes->emplace_back(Note{
+        0.0, 1.0, GetRawNoteIndex(scale, {root_note_index, index}), intensity});
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -86,14 +85,14 @@ void ComposeChord(float root_note_index, const std::vector<float>& /*scale*/,
   add_chord_note(harmonic + 7);
 }
 
-void ComposeLine(float root_note_index, const std::vector<float>& /*scale*/,
+void ComposeLine(float root_note_index, const std::vector<float>& scale,
                  float intensity, int bar, int beat, int num_beats,
                  int harmonic, std::vector<Note>* notes) {
   const int note_offset = beat;
   const auto add_note = [&](double position, double duration, int index) {
-    notes->emplace_back(
-        Note{position, duration,
-             barelyapi::QuantizedNoteIndex{root_note_index, index}, intensity});
+    notes->emplace_back(Note{position, duration,
+                             GetRawNoteIndex(scale, {root_note_index, index}),
+                             intensity});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);
@@ -164,15 +163,6 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   }
 }
 
-float GetRawNoteIndex(const std::vector<float>& scale,
-                      const NoteIndex& note_index) {
-  if (std::holds_alternative<QuantizedNoteIndex>(note_index)) {
-    return barelyapi::GetRawNoteIndex(scale,
-                                      std::get<QuantizedNoteIndex>(note_index));
-  }
-  return std::get<float>(note_index);
-}
-
 }  // namespace
 
 int main(int /*argc*/, char* argv[]) {
@@ -217,8 +207,8 @@ int main(int /*argc*/, char* argv[]) {
       }
       for (const Note& note : temp_notes) {
         const double position = static_cast<double>(beat) + note.position;
-        const float index = GetRawNoteIndex(scale, note.index);
-        engine.ScheduleNote(id, position, note.duration, index, note.intensity);
+        engine.ScheduleNote(id, position, note.duration, note.index,
+                            note.intensity);
       }
     }
   };

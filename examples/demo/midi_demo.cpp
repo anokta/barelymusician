@@ -127,7 +127,7 @@ int main(int /*argc*/, char* argv[]) {
                        {BasicSynthInstrumentParam::kGain, kInstrumentGain}}));
     for (const Note& note : score) {
       engine.ScheduleNote(instrument_id, note.position, note.duration,
-                          std::get<float>(note.index), note.intensity);
+                          note.index, note.intensity);
     }
     instrument_ids.push_back(instrument_id);
   }

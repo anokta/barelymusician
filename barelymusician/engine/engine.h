@@ -36,9 +36,7 @@ class Engine {
                          float note_index, float note_intensity)>;
 
   // Constructs new |Engine|.
-  //
-  // @param sample_rate System sampling rate.
-  explicit Engine(int sample_rate);
+  Engine();
 
   // Creates new instrument.
   //
@@ -118,8 +116,9 @@ class Engine {
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   // @return Status.
-  Status Process(InstrumentId instrument_id, double timestamp, float* output,
-                 int num_channels, int num_frames);
+  Status Process(InstrumentId instrument_id, double begin_timestamp,
+                 double end_timestamp, float* output, int num_channels,
+                 int num_frames);
 
   // Resets all parameters.
   //
@@ -224,8 +223,6 @@ class Engine {
   // List of instruments.
   std::unordered_map<InstrumentId, InstrumentController> controllers_;
   std::unordered_map<InstrumentId, InstrumentProcessor> processors_;
-
-  int sample_rate_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;

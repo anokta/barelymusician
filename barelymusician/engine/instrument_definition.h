@@ -9,8 +9,7 @@ namespace barelyapi {
 
 using InstrumentState = void*;
 
-using CreateInstrumentFn =
-    std::function<void(InstrumentState* state, int sample_rate)>;
+using CreateInstrumentFn = std::function<void(InstrumentState* state)>;
 
 using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;
 

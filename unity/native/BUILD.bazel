@@ -42,6 +42,7 @@ cc_library(
         ":unity_log_writer",
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
+        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
         "//barelymusician/engine:instrument_definition",
         "//examples/instruments:basic_synth_instrument",

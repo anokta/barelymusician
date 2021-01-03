@@ -41,7 +41,7 @@ class Instrument {
   virtual void SetParam(int id, float value) = 0;
 };
 
-using CreateFn = std::function<std::unique_ptr<Instrument>(int sample_rate)>;
+using CreateFn = std::function<std::unique_ptr<Instrument>()>;
 InstrumentDefinition GetInstrumentDefinition(CreateFn create_fn);
 
 }  // namespace examples

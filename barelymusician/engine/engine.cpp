@@ -57,9 +57,8 @@ double SecondsFromBeats(double tempo, double beats) {
 
 }  // namespace
 
-Engine::Engine(int sample_rate)
-    : sample_rate_(sample_rate),
-      is_playing_(false),
+Engine::Engine()
+    : is_playing_(false),
       last_timestamp_(0.0),
       position_(0.0),
       tempo_(0.0),
@@ -75,7 +74,7 @@ StatusOr<InstrumentId> Engine::Create(
   const auto instrument_id = ++id_counter_;
   controllers_.emplace(instrument_id, InstrumentController{params});
   task_runner_.Add([this, instrument_id, instrument, params]() {
-    auto processor = InstrumentProcessor(sample_rate_, instrument);
+    auto processor = InstrumentProcessor(instrument);
     for (const auto& param : params) {
       // TODO: min/max check (from controller).
       processor.SetParam(param.id, param.default_value);
@@ -197,11 +196,13 @@ Status Engine::SetCustomData(InstrumentId instrument_id, void* custom_data) {
   return Status::kNotFound;
 }
 
-Status Engine::Process(InstrumentId instrument_id, double timestamp,
-                       float* output, int num_channels, int num_frames) {
+Status Engine::Process(InstrumentId instrument_id, double begin_timestamp,
+                       double end_timestamp, float* output, int num_channels,
+                       int num_frames) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
-    processor->Process(timestamp, output, num_channels, num_frames);
+    processor->Process(begin_timestamp, end_timestamp, output, num_channels,
+                       num_frames);
     return Status::kOk;
   }
   return Status::kNotFound;

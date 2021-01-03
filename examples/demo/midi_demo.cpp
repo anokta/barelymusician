@@ -8,6 +8,7 @@
 
 #include "MidiFile.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
 #include "examples/instruments/basic_synth_instrument.h"
@@ -94,7 +95,7 @@ int main(int /*argc*/, char* argv[]) {
   LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  Engine engine(kSampleRate);
+  Engine engine;
   engine.SetTempo(kTempo);
   engine.SetNoteOnCallback(
       [](double, InstrumentId id, float index, float intensity) {
@@ -115,7 +116,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Create instrument.
     const auto instrument_id = GetValue(
-        engine.Create(BasicSynthInstrument::GetDefinition(),
+        engine.Create(BasicSynthInstrument::GetDefinition(kSampleRate),
                       {{BasicSynthInstrumentParam::kNumVoices,
                         static_cast<float>(kNumInstrumentVoices)},
                        {BasicSynthInstrumentParam::kOscillatorType,
@@ -137,15 +138,16 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
+    const double end_timestamp =
+        timestamp + barelyapi::SecondsFromSamples(kSampleRate, kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& id : instrument_ids) {
-      engine.Process(id, timestamp, temp_buffer.data(), kNumChannels,
-                     kNumFrames);
+      engine.Process(id, timestamp, end_timestamp, temp_buffer.data(),
+                     kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp = timestamp + static_cast<double>(kNumFrames) /
-                                static_cast<double>(kSampleRate);
+    timestamp = end_timestamp;
   };
   audio_output.SetProcessCallback(process_callback);
 

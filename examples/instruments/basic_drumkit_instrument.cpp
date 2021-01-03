@@ -52,8 +52,8 @@ void BasicDrumkitInstrument::SetCustomData(void* data) {
   }
 }
 
-InstrumentDefinition BasicDrumkitInstrument::GetDefinition() {
-  return GetInstrumentDefinition([](int sample_rate) {
+InstrumentDefinition BasicDrumkitInstrument::GetDefinition(int sample_rate) {
+  return GetInstrumentDefinition([sample_rate]() {
     return std::make_unique<BasicDrumkitInstrument>(sample_rate);
   });
 }

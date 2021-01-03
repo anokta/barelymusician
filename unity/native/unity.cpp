@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "examples/instruments/basic_synth_instrument.h"
@@ -21,7 +22,10 @@ inline constexpr Id kInvalidId = -1;
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) : engine(sample_rate) {}
+  BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}
+
+  // Sampling rate.
+  int sample_rate;
 
   // Engine.
   Engine engine;
@@ -81,7 +85,8 @@ Id CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
 Id CreateBasicSynthInstrument() {
   if (barelymusician) {
     return GetValue(barelymusician->engine.Create(
-        examples::BasicSynthInstrument::GetDefinition(),
+        examples::BasicSynthInstrument::GetDefinition(
+            barelymusician->sample_rate),
         examples::BasicSynthInstrument::GetDefaultParams()));
   }
   return kInvalidId;
@@ -156,8 +161,10 @@ void Process(Id id, double timestamp, float* output, int num_channels,
              int num_frames) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician) {
-    barelymusician->engine.Process(id, timestamp, output, num_channels,
-                                   num_frames);
+    const double end_timestamp =
+        timestamp + SecondsFromSamples(barelymusician->sample_rate, num_frames);
+    barelymusician->engine.Process(id, timestamp, end_timestamp, output,
+                                   num_channels, num_frames);
   }
 }
 

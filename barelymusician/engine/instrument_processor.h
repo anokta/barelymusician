@@ -11,7 +11,7 @@ namespace barelyapi {
 
 class InstrumentProcessor {
  public:
-  InstrumentProcessor(int sample_rate, InstrumentDefinition definition);
+  InstrumentProcessor(InstrumentDefinition definition);
   ~InstrumentProcessor();
 
   // Non-copyable.
@@ -22,11 +22,8 @@ class InstrumentProcessor {
   InstrumentProcessor(InstrumentProcessor&& other) noexcept;
   InstrumentProcessor& operator=(InstrumentProcessor&& other) noexcept;
 
-  void Create();
-  void Destroy();
-
-  void Process(double timestamp, float* output, int num_channels,
-               int num_frames);
+  void Process(double begin_timestamp, double end_timestamp, float* output,
+               int num_channels, int num_frames);
 
   void ScheduleNoteOff(double timestamp, float note_index);
   void ScheduleNoteOn(double timestamp, float note_index, float note_intensity);
@@ -38,7 +35,6 @@ class InstrumentProcessor {
   void SetParam(int param_id, float param_value);
 
  private:
-  int sample_rate_;
   InstrumentDefinition definition_;
   InstrumentState state_;
   std::vector<std::pair<double, MessageData>> messages_;

@@ -8,8 +8,8 @@ namespace examples {
 InstrumentDefinition GetInstrumentDefinition(CreateFn create_fn) {
   return InstrumentDefinition{
       .create_fn =
-          [create_fn](InstrumentState* state, int sample_rate) {
-            *state = create_fn(sample_rate).release();
+          [create_fn](InstrumentState* state) {
+            *state = create_fn().release();
           },
       .destroy_fn =
           [](InstrumentState* state) {

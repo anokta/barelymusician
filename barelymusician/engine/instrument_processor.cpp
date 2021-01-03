@@ -8,13 +8,10 @@
 
 namespace barelyapi {
 
-InstrumentProcessor::InstrumentProcessor(int sample_rate,
-                                         InstrumentDefinition definition)
-    : sample_rate_(sample_rate),
-      definition_(std::move(definition)),
-      state_(nullptr) {
+InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition)
+    : definition_(std::move(definition)), state_(nullptr) {
   if (definition_.create_fn) {
-    definition_.create_fn(&state_, sample_rate_);
+    definition_.create_fn(&state_);
   }
 }
 
@@ -25,15 +22,13 @@ InstrumentProcessor::~InstrumentProcessor() {
 }
 
 InstrumentProcessor::InstrumentProcessor(InstrumentProcessor&& other) noexcept
-    : sample_rate_(std::move(other.sample_rate_)),
-      definition_(std::exchange(other.definition_, {})),
+    : definition_(std::exchange(other.definition_, {})),
       state_(std::exchange(other.state_, nullptr)),
       messages_(std::move(other.messages_)) {}
 
 InstrumentProcessor& InstrumentProcessor::operator=(
     InstrumentProcessor&& other) noexcept {
   if (this != &other) {
-    sample_rate_ = std::move(other.sample_rate_);
     std::swap(definition_, other.definition_);
     std::swap(state_, other.state_);
     messages_ = std::move(other.messages_);
@@ -41,50 +36,41 @@ InstrumentProcessor& InstrumentProcessor::operator=(
   return *this;
 }
 
-void InstrumentProcessor::Create() {
-  if (definition_.create_fn) {
-    definition_.create_fn(&state_, sample_rate_);
-  }
-}
-
-void InstrumentProcessor::Destroy() {
-  if (definition_.destroy_fn) {
-    definition_.destroy_fn(&state_);
-  }
-}
-
-void InstrumentProcessor::Process(double timestamp, float* output,
-                                  int num_channels, int num_frames) {
+void InstrumentProcessor::Process(double begin_timestamp, double end_timestamp,
+                                  float* output, int num_channels,
+                                  int num_frames) {
   int frame = 0;
-  // Process *all* messages before |end_timestamp|.
-  const double end_timestamp =
-      timestamp + SecondsFromSamples(sample_rate_, num_frames);
-  const auto begin = messages_.cbegin();
-  const auto end =
-      std::lower_bound(begin, messages_.cend(), end_timestamp,
-                       [](const auto& message, double message_timestamp) {
-                         return message.first < message_timestamp;
-                       });
-  for (auto it = begin; it != end; ++it) {
-    const int message_frame =
-        SamplesFromSeconds(sample_rate_, it->first - timestamp);
-    if (frame < message_frame) {
-      if (definition_.process_fn) {
-        definition_.process_fn(&state_, &output[num_channels * frame],
-                               num_channels, message_frame - frame);
+  if (begin_timestamp < end_timestamp) {
+    // Process *all* messages before |end_timestamp|.
+    const auto begin = messages_.cbegin();
+    const auto end =
+        std::lower_bound(begin, messages_.cend(), end_timestamp,
+                         [](const auto& message, double timestamp) {
+                           return message.first < timestamp;
+                         });
+    const double sample_rate =
+        static_cast<double>(num_frames) / (end_timestamp - begin_timestamp);
+    for (auto it = begin; it != end; ++it) {
+      const int message_frame =
+          SamplesFromSeconds(sample_rate, it->first - begin_timestamp);
+      if (frame < message_frame) {
+        if (definition_.process_fn) {
+          definition_.process_fn(&state_, &output[num_channels * frame],
+                                 num_channels, message_frame - frame);
+        }
+        frame = message_frame;
       }
-      frame = message_frame;
+      std::visit(MessageDataVisitor{[this](const NoteOffData& note_off_data) {
+                                      SetNoteOff(note_off_data.index);
+                                    },
+                                    [this](const NoteOnData& note_on_data) {
+                                      SetNoteOn(note_on_data.index,
+                                                note_on_data.intensity);
+                                    }},
+                 it->second);
     }
-    std::visit(MessageDataVisitor{[this](const NoteOffData& note_off_data) {
-                                    SetNoteOff(note_off_data.index);
-                                  },
-                                  [this](const NoteOnData& note_on_data) {
-                                    SetNoteOn(note_on_data.index,
-                                              note_on_data.intensity);
-                                  }},
-               it->second);
+    messages_.erase(begin, end);
   }
-  messages_.erase(begin, end);
   // Process the rest of the buffer.
   if (frame < num_frames && definition_.process_fn) {
     definition_.process_fn(&state_, &output[num_channels * frame], num_channels,

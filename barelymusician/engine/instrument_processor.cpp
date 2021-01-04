@@ -36,41 +36,35 @@ InstrumentProcessor& InstrumentProcessor::operator=(
   return *this;
 }
 
-void InstrumentProcessor::Process(double begin_timestamp, double end_timestamp,
-                                  float* output, int num_channels,
-                                  int num_frames) {
+void InstrumentProcessor::Process(int64 timestamp, float* output,
+                                  int num_channels, int num_frames) {
   int frame = 0;
-  if (begin_timestamp < end_timestamp) {
-    // Process *all* messages before |end_timestamp|.
-    const auto begin = messages_.cbegin();
-    const auto end =
-        std::lower_bound(begin, messages_.cend(), end_timestamp,
-                         [](const auto& message, double timestamp) {
-                           return message.first < timestamp;
-                         });
-    const double sample_rate =
-        static_cast<double>(num_frames) / (end_timestamp - begin_timestamp);
-    for (auto it = begin; it != end; ++it) {
-      const int message_frame =
-          SamplesFromSeconds(sample_rate, it->first - begin_timestamp);
-      if (frame < message_frame) {
-        if (definition_.process_fn) {
-          definition_.process_fn(&state_, &output[num_channels * frame],
-                                 num_channels, message_frame - frame);
-        }
-        frame = message_frame;
+  // Process *all* messages before |end_timestamp|.
+  const auto begin = messages_.cbegin();
+  const auto end = std::lower_bound(begin, messages_.cend(),
+                                    timestamp + static_cast<int64>(num_frames),
+                                    [](const auto& message, int64 timestamp) {
+                                      return message.first < timestamp;
+                                    });
+  for (auto it = begin; it != end; ++it) {
+    const int message_frame = static_cast<int>(it->first - timestamp);
+    if (frame < message_frame) {
+      if (definition_.process_fn) {
+        definition_.process_fn(&state_, &output[num_channels * frame],
+                               num_channels, message_frame - frame);
       }
-      std::visit(MessageDataVisitor{[this](const NoteOffData& note_off_data) {
-                                      SetNoteOff(note_off_data.index);
-                                    },
-                                    [this](const NoteOnData& note_on_data) {
-                                      SetNoteOn(note_on_data.index,
-                                                note_on_data.intensity);
-                                    }},
-                 it->second);
+      frame = message_frame;
     }
-    messages_.erase(begin, end);
+    std::visit(MessageDataVisitor{[this](const NoteOffData& note_off_data) {
+                                    SetNoteOff(note_off_data.index);
+                                  },
+                                  [this](const NoteOnData& note_on_data) {
+                                    SetNoteOn(note_on_data.index,
+                                              note_on_data.intensity);
+                                  }},
+               it->second);
   }
+  messages_.erase(begin, end);
   // Process the rest of the buffer.
   if (frame < num_frames && definition_.process_fn) {
     definition_.process_fn(&state_, &output[num_channels * frame], num_channels,
@@ -78,11 +72,11 @@ void InstrumentProcessor::Process(double begin_timestamp, double end_timestamp,
   }
 }
 
-void InstrumentProcessor::ScheduleNoteOff(double timestamp, float note_index) {
+void InstrumentProcessor::ScheduleNoteOff(int64 timestamp, float note_index) {
   messages_.emplace_back(timestamp, NoteOffData{note_index});
 }
 
-void InstrumentProcessor::ScheduleNoteOn(double timestamp, float note_index,
+void InstrumentProcessor::ScheduleNoteOn(int64 timestamp, float note_index,
                                          float note_intensity) {
   messages_.emplace_back(timestamp, NoteOnData{note_index, note_intensity});
 }

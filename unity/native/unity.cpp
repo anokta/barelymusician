@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/instrument_definition.h"
@@ -161,10 +162,11 @@ void Process(Id id, double timestamp, float* output, int num_channels,
              int num_frames) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician) {
-    const double end_timestamp =
-        timestamp + SecondsFromSamples(barelymusician->sample_rate, num_frames);
-    barelymusician->engine.Process(id, timestamp, end_timestamp, output,
-                                   num_channels, num_frames);
+    barelymusician->engine.Process(
+        id,
+        static_cast<int64>(static_cast<double>(barelymusician->sample_rate) *
+                           timestamp),
+        output, num_channels, num_frames);
   }
 }
 
@@ -186,8 +188,11 @@ void SetBeatCallback(BeatCallback* beat_callback_ptr) {
   if (barelymusician) {
     if (beat_callback_ptr) {
       barelymusician->engine.SetBeatCallback(
-          [beat_callback_ptr](double timestamp, int beat) {
-            beat_callback_ptr(timestamp, beat);
+          [beat_callback_ptr, sample_rate = barelymusician->sample_rate](
+              int64 timestamp, int beat) {
+            beat_callback_ptr(static_cast<double>(timestamp) /
+                                  static_cast<double>(sample_rate),
+                              beat);
           });
     } else {
       barelymusician->engine.SetBeatCallback(nullptr);
@@ -213,8 +218,11 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
   if (barelymusician) {
     if (note_off_callback_ptr) {
       barelymusician->engine.SetNoteOffCallback(
-          [note_off_callback_ptr](double timestamp, Id id, float index) {
-            note_off_callback_ptr(timestamp, id, index);
+          [note_off_callback_ptr, sample_rate = barelymusician->sample_rate](
+              int64 timestamp, Id id, float index) {
+            note_off_callback_ptr(static_cast<double>(timestamp) /
+                                      static_cast<double>(sample_rate),
+                                  id, index);
           });
     } else {
       barelymusician->engine.SetNoteOffCallback(nullptr);
@@ -226,9 +234,11 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
   if (barelymusician) {
     if (note_on_callback_ptr) {
       barelymusician->engine.SetNoteOnCallback(
-          [note_on_callback_ptr](double timestamp, Id id, float index,
-                                 float intensity) {
-            note_on_callback_ptr(timestamp, id, index, intensity);
+          [note_on_callback_ptr, sample_rate = barelymusician->sample_rate](
+              int64 timestamp, Id id, float index, float intensity) {
+            note_on_callback_ptr(static_cast<double>(timestamp) /
+                                     static_cast<double>(sample_rate),
+                                 id, index, intensity);
           });
     } else {
       barelymusician->engine.SetNoteOnCallback(nullptr);
@@ -256,7 +266,8 @@ void SetTempo(double tempo) {
 
 void Start(double timestamp) {
   if (barelymusician) {
-    barelymusician->engine.Start(timestamp);
+    barelymusician->engine.Start(static_cast<int64>(
+        static_cast<double>(barelymusician->sample_rate) * timestamp));
   }
 }
 
@@ -276,7 +287,10 @@ void Stop() {
 
 void Update(double timestamp) {
   if (barelymusician) {
-    barelymusician->engine.Update(timestamp);
+    barelymusician->engine.Update(
+        barelymusician->sample_rate,
+        static_cast<int64>(static_cast<double>(barelymusician->sample_rate) *
+                           timestamp));
   }
 }
 

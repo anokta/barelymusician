@@ -40,6 +40,7 @@ cc_binary(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
+        "//barelymusician/base:types",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
         "//examples/instruments:basic_synth_instrument",

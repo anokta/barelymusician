@@ -55,11 +55,21 @@ double SecondsFromBeats(double tempo, double beats) {
   return beats * kSecondsFromMinutes / tempo;
 }
 
+double BeatsFromSamples(int sample_rate, double tempo, int64 samples) {
+  return BeatsFromSeconds(
+      tempo, static_cast<double>(samples) / static_cast<double>(sample_rate));
+}
+
+int64 SamplesFromBeats(int sample_rate, double tempo, double beats) {
+  return static_cast<int64>(static_cast<double>(sample_rate) *
+                            SecondsFromBeats(tempo, beats));
+}
+
 }  // namespace
 
 Engine::Engine()
     : is_playing_(false),
-      last_timestamp_(0.0),
+      last_timestamp_(0),
       position_(0.0),
       tempo_(0.0),
       beat_callback_(nullptr),
@@ -196,13 +206,11 @@ Status Engine::SetCustomData(InstrumentId instrument_id, void* custom_data) {
   return Status::kNotFound;
 }
 
-Status Engine::Process(InstrumentId instrument_id, double begin_timestamp,
-                       double end_timestamp, float* output, int num_channels,
-                       int num_frames) {
+Status Engine::Process(InstrumentId instrument_id, int64 time, float* output,
+                       int num_channels, int num_frames) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
-    processor->Process(begin_timestamp, end_timestamp, output, num_channels,
-                       num_frames);
+    processor->Process(time, output, num_channels, num_frames);
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -298,7 +306,7 @@ void Engine::SetPosition(double position) {
 
 void Engine::SetTempo(double tempo) { tempo_ = tempo; }
 
-void Engine::Start(double timestamp) {
+void Engine::Start(int64 timestamp) {
   last_timestamp_ = timestamp;
   is_playing_ = true;
 }
@@ -308,19 +316,21 @@ void Engine::Stop() {
   AllNotesOff();
 }
 
-void Engine::Update(double timestamp) {
+void Engine::Update(int sample_rate, int64 timestamp) {
   if (!is_playing_ || tempo_ <= 0.0 || timestamp <= last_timestamp_) {
     return;
   }
 
   const double end_position =
-      position_ + BeatsFromSeconds(tempo_, timestamp - last_timestamp_);
+      position_ +
+      BeatsFromSamples(sample_rate, tempo_, timestamp - last_timestamp_);
 
   // Trigger beats.
   if (beat_callback_) {
     for (double beat = std::ceil(position_); beat < end_position; ++beat) {
-      const double beat_timestamp =
-          last_timestamp_ + SecondsFromBeats(tempo_, beat - position_);
+      const int64 beat_timestamp =
+          last_timestamp_ +
+          SamplesFromBeats(sample_rate, tempo_, beat - position_);
       beat_callback_(beat_timestamp, static_cast<int>(beat));
     }
   }
@@ -331,8 +341,9 @@ void Engine::Update(double timestamp) {
     const auto cbegin = controller.messages.lower_bound(position_);
     const auto cend = controller.messages.lower_bound(end_position);
     for (auto it = cbegin; it != cend; ++it) {
-      const double message_timestamp =
-          last_timestamp_ + SecondsFromBeats(tempo_, it->first - position_);
+      const int64 message_timestamp =
+          last_timestamp_ +
+          SamplesFromBeats(sample_rate, tempo_, it->first - position_);
       const auto message_data = it->second;
       std::visit(MessageDataVisitor{
                      [&](const NoteOffData& data) {

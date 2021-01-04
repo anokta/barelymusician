@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/base/types.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/message_data.h"
 
@@ -22,11 +23,11 @@ class InstrumentProcessor {
   InstrumentProcessor(InstrumentProcessor&& other) noexcept;
   InstrumentProcessor& operator=(InstrumentProcessor&& other) noexcept;
 
-  void Process(double begin_timestamp, double end_timestamp, float* output,
-               int num_channels, int num_frames);
+  void Process(int64 timestamp, float* output, int num_channels,
+               int num_frames);
 
-  void ScheduleNoteOff(double timestamp, float note_index);
-  void ScheduleNoteOn(double timestamp, float note_index, float note_intensity);
+  void ScheduleNoteOff(int64 timestamp, float note_index);
+  void ScheduleNoteOn(int64 timestamp, float note_index, float note_intensity);
 
   void SetCustomData(void* data);
 
@@ -37,7 +38,7 @@ class InstrumentProcessor {
  private:
   InstrumentDefinition definition_;
   InstrumentState state_;
-  std::vector<std::pair<double, MessageData>> messages_;
+  std::vector<std::pair<int64, MessageData>> messages_;
 };
 
 }  // namespace barelyapi

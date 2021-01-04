@@ -25,6 +25,11 @@ cc_library(
     deps = [":logging"],
 )
 
+cc_library(
+    name = "types",
+    hdrs = ["types.h"],
+)
+
 cc_test(
     name = "random_test",
     srcs = ["random_test.cpp"],

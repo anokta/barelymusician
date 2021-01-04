@@ -13,6 +13,7 @@ cc_library(
         ":task_runner",
         "//barelymusician/base:constants",
         "//barelymusician/base:status",
+        "//barelymusician/base:types",
     ],
 )
 
@@ -29,6 +30,7 @@ cc_library(
         ":instrument_definition",
         ":message_data",
         "//barelymusician/base:logging",
+        "//barelymusician/base:types",
         "//barelymusician/dsp:dsp_utils",
     ],
 )

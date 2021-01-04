@@ -10,6 +10,7 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
+#include "barelymusician/base/types.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/message_data.h"
@@ -24,15 +25,15 @@ using InstrumentId = std::int64_t;
 class Engine {
  public:
   // Beat callback signature.
-  using BeatCallback = std::function<void(double timestamp, int beat)>;
+  using BeatCallback = std::function<void(int64 timestamp, int beat)>;
 
   // Note off callback signature.
   using NoteOffCallback = std::function<void(
-      double timestamp, InstrumentId instrument_id, float note_index)>;
+      int64 timestamp, InstrumentId instrument_id, float note_index)>;
 
   // Note on callback signature.
   using NoteOnCallback =
-      std::function<void(double timestamp, InstrumentId instrument_id,
+      std::function<void(int64 timestamp, InstrumentId instrument_id,
                          float note_index, float note_intensity)>;
 
   // Constructs new |Engine|.
@@ -116,9 +117,8 @@ class Engine {
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   // @return Status.
-  Status Process(InstrumentId instrument_id, double begin_timestamp,
-                 double end_timestamp, float* output, int num_channels,
-                 int num_frames);
+  Status Process(InstrumentId instrument_id, int64 timestamp, float* output,
+                 int num_channels, int num_frames);
 
   // Resets all parameters.
   //
@@ -184,7 +184,7 @@ class Engine {
   // Starts playback.
   //
   // @param timestamp Start timestamp.
-  void Start(double timestamp);
+  void Start(int64 timestamp);
 
   // Stops playback.
   void Stop();
@@ -192,7 +192,7 @@ class Engine {
   // Updates the internal state.
   //
   // @param timestamp Update timestamp.
-  void Update(double timestamp);
+  void Update(int sample_rate, int64 timestamp);
 
  private:
   // Instrument parameter.
@@ -228,7 +228,7 @@ class Engine {
   bool is_playing_;
 
   // Last timestamp.
-  double last_timestamp_;
+  int64 last_timestamp_;
 
   // Playback position.
   double position_;

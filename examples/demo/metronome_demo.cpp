@@ -7,6 +7,7 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/instruments/basic_synth_instrument.h"
@@ -16,6 +17,7 @@
 namespace {
 
 using ::barelyapi::Engine;
+using ::barelyapi::int64;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -27,7 +29,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
-constexpr double kLookahead = 0.05;
+constexpr int64 kLookahead = 2 * kNumFrames;
 
 // Metronome settings.
 constexpr int kNumVoices = 1;
@@ -76,13 +78,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::atomic<double> timestamp = 0.0;
+  std::atomic<int64> timestamp = 0;
   const auto process_callback = [&](float* output) {
-    const double end_timestamp =
-        timestamp + barelyapi::SecondsFromSamples(kSampleRate, kNumFrames);
-    engine.Process(metronome_id, timestamp, end_timestamp, output, kNumChannels,
-                   kNumFrames);
-    timestamp = end_timestamp;
+    engine.Process(metronome_id, timestamp, output, kNumChannels, kNumFrames);
+    timestamp += kNumFrames;
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -136,7 +135,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(timestamp + kLookahead);
+    engine.Update(kSampleRate, timestamp + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

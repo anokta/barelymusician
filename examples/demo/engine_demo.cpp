@@ -12,6 +12,7 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
+#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
@@ -28,6 +29,7 @@ namespace {
 using ::barelyapi::Engine;
 using ::barelyapi::GetRawNoteIndex;
 using ::barelyapi::InstrumentId;
+using ::barelyapi::int64;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::QuantizedNoteIndex;
@@ -49,7 +51,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
-constexpr double kLookahead = 0.05;
+constexpr int64 kLookahead = 2 * kNumFrames;
 
 // Sequencer settings.
 constexpr double kTempo = 124.0;
@@ -283,18 +285,16 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<double> timestamp = 0.0;
+  std::atomic<int64> timestamp = 0;
   const auto process_callback = [&](float* output) {
-    const double end_timestamp =
-        timestamp + barelyapi::SecondsFromSamples(kSampleRate, kNumFrames);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& [id, callback] : performers) {
-      engine.Process(id, timestamp, end_timestamp, temp_buffer.data(),
-                     kNumChannels, kNumFrames);
+      engine.Process(id, timestamp, temp_buffer.data(), kNumChannels,
+                     kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp = end_timestamp;
+    timestamp += kNumFrames;
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -339,7 +339,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(timestamp + kLookahead);
+    engine.Update(kSampleRate, timestamp + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

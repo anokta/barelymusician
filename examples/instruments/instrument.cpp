@@ -25,17 +25,17 @@ InstrumentDefinition GetInstrumentDefinition(
             DCHECK(instrument);
             instrument->Process(output, num_channels, num_frames);
           },
-      .set_note_off_fn =
-          [](InstrumentState* state, float pitch) {
-            Instrument* instrument = reinterpret_cast<Instrument*>(*state);
-            DCHECK(instrument);
-            instrument->NoteOff(pitch);
-          },
       .set_custom_data_fn =
           [](InstrumentState* state, void* data) {
             Instrument* instrument = reinterpret_cast<Instrument*>(*state);
             DCHECK(instrument);
             instrument->SetCustomData(data);
+          },
+      .set_note_off_fn =
+          [](InstrumentState* state, float pitch) {
+            Instrument* instrument = reinterpret_cast<Instrument*>(*state);
+            DCHECK(instrument);
+            instrument->NoteOff(pitch);
           },
       .set_note_on_fn =
           [](InstrumentState* state, float pitch, float intensity) {

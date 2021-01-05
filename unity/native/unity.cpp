@@ -64,17 +64,17 @@ int64 CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
                             ProcessFn* process_fn_ptr) {
   if (barelymusician) {
     InstrumentDefinition definition = {
+        .process_fn =
+            [process_fn_ptr](InstrumentState*, float* output, int num_channels,
+                             int num_frames) {
+              process_fn_ptr(output, num_channels * num_frames, num_channels);
+            },
         .set_note_off_fn = [note_off_fn_ptr](
                                InstrumentState*,
                                float pitch) { note_off_fn_ptr(pitch); },
         .set_note_on_fn =
             [note_on_fn_ptr](InstrumentState*, float pitch, float intensity) {
               note_on_fn_ptr(pitch, intensity);
-            },
-        .process_fn =
-            [process_fn_ptr](InstrumentState*, float* output, int num_channels,
-                             int num_frames) {
-              process_fn_ptr(output, num_channels * num_frames, num_channels);
             }};
     return GetValue(barelymusician->engine.Create(std::move(definition)));
   }

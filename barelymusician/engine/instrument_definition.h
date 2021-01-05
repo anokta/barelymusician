@@ -45,6 +45,8 @@ struct InstrumentParamDefinition {
   //   float min_value;
 };
 
+using InstrumentParamDefinitions = std::vector<InstrumentParamDefinition>;
+
 }  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_

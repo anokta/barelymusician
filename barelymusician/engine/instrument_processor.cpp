@@ -8,6 +8,19 @@
 
 namespace barelyapi {
 
+namespace {
+
+void ScheduleMessage(std::vector<std::pair<int64, MessageData>>* messages,
+                     int64 timestamp, MessageData data) {
+  messages->insert(
+      std::upper_bound(
+          messages->begin(), messages->end(), timestamp,
+          [](int64 lhs, const auto& rhs) { return lhs < rhs.first; }),
+      {timestamp, std::move(data)});
+}
+
+}  // namespace
+
 InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition)
     : definition_(std::move(definition)), state_(nullptr) {
   if (definition_.create_fn) {
@@ -41,11 +54,9 @@ void InstrumentProcessor::Process(int64 timestamp, float* output,
   int frame = 0;
   // Process *all* messages before |end_timestamp|.
   const auto begin = messages_.cbegin();
-  const auto end = std::lower_bound(begin, messages_.cend(),
-                                    timestamp + static_cast<int64>(num_frames),
-                                    [](const auto& message, int64 timestamp) {
-                                      return message.first < timestamp;
-                                    });
+  const auto end = std::lower_bound(
+      begin, messages_.cend(), timestamp + static_cast<int64>(num_frames),
+      [](const auto& lhs, int64 rhs) { return lhs.first < rhs; });
   for (auto it = begin; it != end; ++it) {
     const int message_frame = static_cast<int>(it->first - timestamp);
     if (frame < message_frame) {
@@ -73,12 +84,12 @@ void InstrumentProcessor::Process(int64 timestamp, float* output,
 }
 
 void InstrumentProcessor::ScheduleNoteOff(int64 timestamp, float pitch) {
-  messages_.emplace_back(timestamp, NoteOffData{pitch});
+  ScheduleMessage(&messages_, timestamp, NoteOffData{pitch});
 }
 
 void InstrumentProcessor::ScheduleNoteOn(int64 timestamp, float pitch,
                                          float intensity) {
-  messages_.emplace_back(timestamp, NoteOnData{pitch, intensity});
+  ScheduleMessage(&messages_, timestamp, NoteOnData{pitch, intensity});
 }
 
 void InstrumentProcessor::SetCustomData(void* custom_data) {

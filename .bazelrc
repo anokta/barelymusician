@@ -1,5 +1,5 @@
 # target c++20.
-build --cxxopt=-std:c++20
+build --cxxopt=-std:c++latest
 
 # treat warnings as errors.
 # TODO(#52): MSVC only, needs cross-platform support.

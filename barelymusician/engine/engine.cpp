@@ -201,11 +201,11 @@ Status Engine::SetCustomData(int64 instrument_id, void* custom_data) {
   return Status::kNotFound;
 }
 
-Status Engine::Process(int64 instrument_id, int64 time, float* output,
+Status Engine::Process(int64 instrument_id, int64 timestamp, float* output,
                        int num_channels, int num_frames) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
-    processor->Process(time, output, num_channels, num_frames);
+    processor->Process(timestamp, output, num_channels, num_frames);
     return Status::kOk;
   }
   return Status::kNotFound;

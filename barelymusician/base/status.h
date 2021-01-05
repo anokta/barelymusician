@@ -49,14 +49,14 @@ ValueType&& GetValue(StatusOr<ValueType>&& status_or) {
   return std::move(std::get<ValueType>(status_or));
 }
 
-// Returns whether |status| is ok.
-inline bool IsOk(Status status) { return status == Status::kOk; }
-
 // Returns whether |status_or| is ok.
 template <typename ValueType>
-inline bool IsOk(const StatusOr<ValueType>& status_or) {
+bool IsOk(const StatusOr<ValueType>& status_or) {
   return std::holds_alternative<ValueType>(status_or);
 }
+
+// Returns whether |status| is ok.
+inline bool IsOk(Status status) { return status == Status::kOk; }
 
 }  // namespace barelyapi
 

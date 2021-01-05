@@ -24,6 +24,21 @@ cc_library(
 )
 
 cc_library(
+    name = "instrument_manager",
+    srcs = ["instrument_manager.cpp"],
+    hdrs = ["instrument_manager.h"],
+    deps = [
+        ":instrument_definition",
+        ":instrument_processor",
+        ":task_runner",
+        "//barelymusician/base:constants",
+        "//barelymusician/base:status",
+        "//barelymusician/base:types",
+        "//barelymusician/dsp:dsp_utils",
+    ],
+)
+
+cc_library(
     name = "instrument_processor",
     srcs = ["instrument_processor.cpp"],
     hdrs = ["instrument_processor.h"],

@@ -8,6 +8,7 @@
 
 #include "MidiFile.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
@@ -19,7 +20,6 @@
 namespace {
 
 using ::barelyapi::Engine;
-using ::barelyapi::InstrumentId;
 using ::barelyapi::int64;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
@@ -98,16 +98,15 @@ int main(int /*argc*/, char* argv[]) {
 
   Engine engine;
   engine.SetTempo(kTempo);
-  engine.SetNoteOnCallback(
-      [](double, InstrumentId id, float pitch, float intensity) {
-        LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
-                  << intensity << ")";
-      });
-  engine.SetNoteOffCallback([](double, InstrumentId id, float pitch) {
+  engine.SetNoteOnCallback([](int64, int64 id, float pitch, float intensity) {
+    LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
+              << intensity << ")";
+  });
+  engine.SetNoteOffCallback([](int64, int64 id, float pitch) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
   });
 
-  std::vector<InstrumentId> instrument_ids;
+  std::vector<int64> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     const auto score = BuildScore(midi_file[i], ticks_per_quarter);

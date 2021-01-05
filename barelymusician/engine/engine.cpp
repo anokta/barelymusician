@@ -78,9 +78,8 @@ Engine::Engine()
       id_counter_(0),
       task_runner_(kNumMaxTasks) {}
 
-StatusOr<InstrumentId> Engine::Create(
-    InstrumentDefinition instrument,
-    std::vector<InstrumentParamDefinition> params) {
+StatusOr<int64> Engine::Create(InstrumentDefinition instrument,
+                               std::vector<InstrumentParamDefinition> params) {
   const auto instrument_id = ++id_counter_;
   controllers_.emplace(instrument_id, InstrumentController{params});
   task_runner_.Add([this, instrument_id, instrument, params]() {
@@ -94,7 +93,7 @@ StatusOr<InstrumentId> Engine::Create(
   return instrument_id;
 }
 
-Status Engine::Destroy(InstrumentId instrument_id) {
+Status Engine::Destroy(int64 instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
@@ -103,8 +102,7 @@ Status Engine::Destroy(InstrumentId instrument_id) {
   return Status::kNotFound;
 }
 
-StatusOr<float> Engine::GetParam(InstrumentId instrument_id,
-                                 int param_id) const {
+StatusOr<float> Engine::GetParam(int64 instrument_id, int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (const auto* param = FindOrNull(controller->params, param_id)) {
       return param->value;
@@ -117,7 +115,7 @@ double Engine::GetPosition() const { return position_; }
 
 double Engine::GetTempo() const { return tempo_; }
 
-StatusOr<bool> Engine::IsNoteOn(InstrumentId instrument_id, float pitch) const {
+StatusOr<bool> Engine::IsNoteOn(int64 instrument_id, float pitch) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->notes.find(pitch) != controller->notes.cend();
   }
@@ -132,7 +130,7 @@ void Engine::AllNotesOff() {
   }
 }
 
-Status Engine::AllNotesOff(InstrumentId instrument_id) {
+Status Engine::AllNotesOff(int64 instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     std::vector<float> notes{controller->notes.begin(),
                              controller->notes.end()};
@@ -155,7 +153,7 @@ Status Engine::AllNotesOff(InstrumentId instrument_id) {
   return Status::kNotFound;
 }
 
-Status Engine::NoteOff(InstrumentId instrument_id, float pitch) {
+Status Engine::NoteOff(int64 instrument_id, float pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->notes.erase(pitch) > 0) {
       if (note_off_callback_) {
@@ -173,8 +171,7 @@ Status Engine::NoteOff(InstrumentId instrument_id, float pitch) {
   return Status::kNotFound;
 }
 
-Status Engine::NoteOn(InstrumentId instrument_id, float pitch,
-                      float intensity) {
+Status Engine::NoteOn(int64 instrument_id, float pitch, float intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->notes.emplace(pitch).second) {
       if (note_on_callback_) {
@@ -192,7 +189,7 @@ Status Engine::NoteOn(InstrumentId instrument_id, float pitch,
   return Status::kNotFound;
 }
 
-Status Engine::SetCustomData(InstrumentId instrument_id, void* custom_data) {
+Status Engine::SetCustomData(int64 instrument_id, void* custom_data) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     task_runner_.Add([this, instrument_id, custom_data]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
@@ -204,7 +201,7 @@ Status Engine::SetCustomData(InstrumentId instrument_id, void* custom_data) {
   return Status::kNotFound;
 }
 
-Status Engine::Process(InstrumentId instrument_id, int64 time, float* output,
+Status Engine::Process(int64 instrument_id, int64 time, float* output,
                        int num_channels, int num_frames) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
@@ -214,7 +211,7 @@ Status Engine::Process(InstrumentId instrument_id, int64 time, float* output,
   return Status::kNotFound;
 }
 
-Status Engine::ResetAllParams(InstrumentId instrument_id) {
+Status Engine::ResetAllParams(int64 instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     for (auto& [id, param] : controller->params) {
       param.value = param.default_value;
@@ -231,8 +228,7 @@ Status Engine::ResetAllParams(InstrumentId instrument_id) {
   return Status::kNotFound;
 }
 
-Status Engine::SetParam(InstrumentId instrument_id, int param_id,
-                        float param_value) {
+Status Engine::SetParam(int64 instrument_id, int param_id, float param_value) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (auto* param = FindOrNull(controller->params, param_id)) {
       if (param->value != param_value) {
@@ -256,7 +252,7 @@ void Engine::ClearAllScheduledNotes() {
   }
 }
 
-Status Engine::ClearAllScheduledNotes(InstrumentId instrument_id) {
+Status Engine::ClearAllScheduledNotes(int64 instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     controller->messages.clear();
     return Status::kOk;
@@ -264,7 +260,7 @@ Status Engine::ClearAllScheduledNotes(InstrumentId instrument_id) {
   return Status::kNotFound;
 }
 
-Status Engine::ScheduleNote(InstrumentId instrument_id, double position,
+Status Engine::ScheduleNote(int64 instrument_id, double position,
                             double duration, float pitch, float intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (position_ <= position && duration >= 0.0) {
@@ -331,7 +327,7 @@ void Engine::Update(int sample_rate, int64 timestamp) {
   }
   // Trigger messages.
   for (auto& controller_it : controllers_) {
-    const InstrumentId& instrument_id = controller_it.first;
+    const int64& instrument_id = controller_it.first;
     InstrumentController& controller = controller_it.second;
     const auto cbegin = controller.messages.lower_bound(position_);
     const auto cend = controller.messages.lower_bound(end_position);

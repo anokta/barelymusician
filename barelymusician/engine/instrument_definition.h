@@ -20,10 +20,10 @@ using SetCustomInstrumentDataFn =
     std::function<void(InstrumentState* state, void* data)>;
 
 using SetInstrumentNoteOffFn =
-    std::function<void(InstrumentState* state, float note_index)>;
+    std::function<void(InstrumentState* state, float pitch)>;
 
-using SetInstrumentNoteOnFn = std::function<void(
-    InstrumentState* state, float note_index, float note_intensity)>;
+using SetInstrumentNoteOnFn =
+    std::function<void(InstrumentState* state, float pitch, float intensity)>;
 
 using SetInstrumentParamFn = std::function<void(
     InstrumentState* state, int param_id, float param_value)>;

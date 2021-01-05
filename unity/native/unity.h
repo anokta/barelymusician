@@ -22,13 +22,13 @@ using Id = std::int64_t;
 
 // Event callback signatures.
 using BeatCallback = void(double timestamp, int beat);
-using NoteOffCallback = void(double timestamp, Id id, float index);
-using NoteOnCallback = void(double timestamp, Id id, float index,
+using NoteOffCallback = void(double timestamp, Id id, float pitch);
+using NoteOnCallback = void(double timestamp, Id id, float pitch,
                             float intensity);
 
 // Instrument function signatures.
-using NoteOffFn = void(float index);
-using NoteOnFn = void(float index, float intensity);
+using NoteOffFn = void(float pitch);
+using NoteOnFn = void(float pitch, float intensity);
 using ProcessFn = void(float* output, int size, int num_channels);
 
 // Debug callback signature.
@@ -82,9 +82,9 @@ BARELY_EXPORT double GetTempo();
 // Returns whether the note is active or not.
 //
 // @param id Instrument id.
-// @param index Note index.
+// @param pitch Note pitch.
 // @return True if active.
-BARELY_EXPORT bool IsNoteOn(Id id, float index);
+BARELY_EXPORT bool IsNoteOn(Id id, float pitch);
 
 // Returns playback state.
 //
@@ -97,15 +97,15 @@ BARELY_EXPORT void AllNotesOff(Id id);
 // Stops instrument note.
 //
 // @param id Instrument id.
-// @param index Note index.
-BARELY_EXPORT void NoteOff(Id id, float index);
+// @param pitch Note pitch.
+BARELY_EXPORT void NoteOff(Id id, float pitch);
 
 // Starts instrument note.
 //
 // @param id Instrument id.
-// @param index Note index.
+// @param pitch Note pitch.
 // @param intensity Note intensity.
-BARELY_EXPORT void NoteOn(Id id, float index, float intensity);
+BARELY_EXPORT void NoteOn(Id id, float pitch, float intensity);
 
 // Processes instrument.
 //
@@ -124,11 +124,11 @@ BARELY_EXPORT void ResetAllParams(Id id);
 // @param id Instrument id.
 // @param position Note position in beats.
 // @param duration Note duration in beats.
-// @param index Note index.
+// @param pitch Note pitch.
 // @param intensity Note intensity.
 BARELY_EXPORT void ScheduleNote(Id id, double position, double duration,
-                                float index, float intensity);
-                                
+                                float pitch, float intensity);
+
 // Sets beat callback.
 //
 // @param beat_callback_ptr Pointer to beat callback.

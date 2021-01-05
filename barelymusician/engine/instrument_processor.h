@@ -26,13 +26,13 @@ class InstrumentProcessor {
   void Process(int64 timestamp, float* output, int num_channels,
                int num_frames);
 
-  void ScheduleNoteOff(int64 timestamp, float note_index);
-  void ScheduleNoteOn(int64 timestamp, float note_index, float note_intensity);
+  void ScheduleNoteOff(int64 timestamp, float pitch);
+  void ScheduleNoteOn(int64 timestamp, float pitch, float intensity);
 
   void SetCustomData(void* data);
 
-  void SetNoteOff(float note_index);
-  void SetNoteOn(float note_index, float note_intensity);
+  void SetNoteOff(float pitch);
+  void SetNoteOn(float pitch, float intensity);
   void SetParam(int param_id, float param_value);
 
  private:

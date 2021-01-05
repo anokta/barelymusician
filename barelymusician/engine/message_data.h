@@ -7,8 +7,8 @@ namespace barelyapi {
 
 // Note on data.
 struct NoteOnData {
-  // Note index.
-  float index;
+  // Note pitch.
+  float pitch;
 
   // Note intensity.
   float intensity;
@@ -16,8 +16,8 @@ struct NoteOnData {
 
 // Note off data.
 struct NoteOffData {
-  // Note index.
-  float index;
+  // Note pitch.
+  float pitch;
 };
 
 // Message data type.

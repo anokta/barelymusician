@@ -26,15 +26,15 @@ public class Bouncer : MonoBehaviour {
   }
 
   private void OnCollisionEnter(Collision collision) {
-    float index = rootNote + 12.0f * (lastIndex / MajorScale.Length) + MajorScale[lastIndex++ % MajorScale.Length];
+    float pitch = rootNote + 12.0f * (lastIndex / MajorScale.Length) + MajorScale[lastIndex++ % MajorScale.Length];
     float intensity = Mathf.Min(1.0f, 0.125f * collision.relativeVelocity.sqrMagnitude);
-    StartCoroutine(PlayNote(index, intensity, NoteDuration));
+    StartCoroutine(PlayNote(pitch, intensity, NoteDuration));
   }
 
-  IEnumerator PlayNote(float index, float intensity, float duration) {
-    instrument.NoteOn(index, intensity);
+  IEnumerator PlayNote(float pitch, float intensity, float duration) {
+    instrument.NoteOn(pitch, intensity);
     yield return new WaitForSeconds(duration);
-    instrument.NoteOff(index);
+    instrument.NoteOff(pitch);
   }
 
 }

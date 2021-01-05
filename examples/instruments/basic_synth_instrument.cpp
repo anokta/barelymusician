@@ -21,11 +21,11 @@ const int kDefaultNumVoices = 8;
 BasicSynthInstrument::BasicSynthInstrument(int sample_rate)
     : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {}
 
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
+void BasicSynthInstrument::NoteOff(float pitch) { voice_.Stop(pitch); }
 
-void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
-    voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
+void BasicSynthInstrument::NoteOn(float pitch, float intensity) {
+  voice_.Start(pitch, [pitch, intensity](BasicSynthVoice* voice) {
+    voice->generator().SetFrequency(FrequencyFromPitch(pitch));
     voice->set_gain(intensity);
   });
 }

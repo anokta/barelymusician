@@ -35,14 +35,14 @@ constexpr float kEnvelopeAttack = 0.05f;
 constexpr float kEnvelopeRelease = 0.125f;
 
 // Note settings.
-constexpr float kRootNoteIndex = barelyapi::kNoteIndexC3;
+constexpr float kRootPitch = barelyapi::kPitchC3;
 constexpr float kNoteIntensity = 1.0f;
 constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr float kMaxOffsetOctaves = 3.0f;
 
-// Returns the note index for the given |key| and |offset_octaves|.
-float NoteIndexFromKey(const InputManager::Key& key, float offset_octaves) {
+// Returns the pitch for the given |key| and |offset_octaves|.
+float PitchFromKey(const InputManager::Key& key, float offset_octaves) {
   const auto it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
                             std::toupper(key));
   if (it == std::cend(kOctaveKeys)) {
@@ -50,7 +50,7 @@ float NoteIndexFromKey(const InputManager::Key& key, float offset_octaves) {
   }
   const float distance =
       static_cast<float>(std::distance(std::cbegin(kOctaveKeys), it));
-  return kRootNoteIndex + barelyapi::kNumSemitones * offset_octaves + distance;
+  return kRootPitch + barelyapi::kNumSemitones * offset_octaves + distance;
 }
 
 }  // namespace
@@ -96,7 +96,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       // Stop current notes first.
       task_runner.Add([&, offset_octaves]() {
         for (const char key : kOctaveKeys) {
-          instrument.NoteOff(NoteIndexFromKey(key, offset_octaves));
+          instrument.NoteOff(PitchFromKey(key, offset_octaves));
         }
       });
       // Update offset.
@@ -112,25 +112,24 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
 
     // Play note.
-    const float note_index = NoteIndexFromKey(key, offset_octaves);
-    if (note_index < 0.0f) {
+    const float pitch = PitchFromKey(key, offset_octaves);
+    if (pitch < 0.0f) {
       return;
     }
-    task_runner.Add(
-        [&, note_index]() { instrument.NoteOn(note_index, kNoteIntensity); });
-    LOG(INFO) << "NoteOn(" << note_index << ", " << kNoteIntensity << ")";
+    task_runner.Add([&, pitch]() { instrument.NoteOn(pitch, kNoteIntensity); });
+    LOG(INFO) << "NoteOn(" << pitch << ", " << kNoteIntensity << ")";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Key up callback.
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
-    const float note_index = NoteIndexFromKey(key, offset_octaves);
-    if (note_index < 0.0f) {
+    const float pitch = PitchFromKey(key, offset_octaves);
+    if (pitch < 0.0f) {
       return;
     }
-    task_runner.Add([&, note_index]() { instrument.NoteOff(note_index); });
-    LOG(INFO) << "NoteOff(" << note_index << ")";
+    task_runner.Add([&, pitch]() { instrument.NoteOff(pitch); });
+    LOG(INFO) << "NoteOff(" << pitch << ")";
   };
   input_manager.SetKeyUpCallback(key_up_callback);
 

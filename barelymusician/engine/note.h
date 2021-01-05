@@ -4,7 +4,7 @@
 namespace barelyapi {
 
 struct QuantizedNoteIndex {
-  // Root note index.
+  // Root pitch.
   float root_index;
 
   // Scale index.
@@ -19,10 +19,10 @@ struct Note {
   // Note duration in beats.
   double duration;
 
-  // Note index (typically key).
-  float index;
+  // Note pitch.
+  float pitch;
 
-  // Note intensity (typically loudness).
+  // Note intensity.
   float intensity;
 };
 

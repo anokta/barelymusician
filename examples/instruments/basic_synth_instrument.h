@@ -30,8 +30,8 @@ class BasicSynthInstrument : public Instrument {
   explicit BasicSynthInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void NoteOff(float index) override;
-  void NoteOn(float index, float intensity) override;
+  void NoteOff(float pitch) override;
+  void NoteOn(float pitch, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
   void SetCustomData(void*) override {}
   void SetParam(int id, float value) override;

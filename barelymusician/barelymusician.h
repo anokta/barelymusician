@@ -73,8 +73,8 @@ typedef struct BarelyBuffer {
 
 /// Musical note.
 typedef struct BarelyNote {
-  /// Note index.
-  float index;
+  /// Note pitch.
+  float pitch;
 
   /// Note intensity.
   float intensity;
@@ -91,11 +91,11 @@ typedef void (*BarelyBeatCallback)(int32_t beat);
 
 /// Note on callback signature.
 typedef void (*BarelyNoteOnCallback)(BarelyInstrumentId instrument_id,
-                                     float index, float intensity);
+                                     float pitch, float intensity);
 
 /// Note off callback signature.
 typedef void (*BarelyNoteOffCallback)(BarelyInstrumentId instrument_id,
-                                      float index);
+                                      float pitch);
 
 // TODO(anokta): Callback or Fn or Handler or Func?
 
@@ -113,10 +113,10 @@ typedef void (*BarelyInstrumentControlCallback)(BarelyInstrumentControlId id,
                                                 float value);
 
 /// Instrument note on callback type.
-typedef void (*BarelyInstrumentNoteOnCallback)(float index, float intensity);
+typedef void (*BarelyInstrumentNoteOnCallback)(float pitch, float intensity);
 
 /// Instrument note off callback type.
-typedef void (*BarelyInstrumentNoteOffCallback)(float index);
+typedef void (*BarelyInstrumentNoteOffCallback)(float pitch);
 
 /// Instrument process callback type.
 typedef void (*BarelyInstrumentProcessCallback)(float* output,
@@ -238,11 +238,11 @@ BarelyStatus BarelyGetStress(const BarelyHandle handle, float* stress);
 ///
 /// @param handle System handle.
 /// @param instrument_id Instrument id.
-/// @param note_index Note index.
+/// @param pitch Pitch.
 /// @param is_note_on Denotes whether note is on or not.
 BarelyStatus BarelyIsInstrumentNoteOn(const BarelyHandle handle,
                                       BarelyInstrumentId instrument_id,
-                                      float note_index, bool* is_note_on);
+                                      float pitch, bool* is_note_on);
 
 /// Returns whether playback is active or not.
 ///
@@ -312,20 +312,20 @@ BarelyStatus BarelySetInstrumentControl(BarelyHandle handle,
 ///
 /// @param handle System handle.
 /// @param instrument_id Instrument id.
-/// @param note_index Note index.
-/// @param note_intensity Note intensity.
+/// @param pitch Pitch.
+/// @param intensity Note intensity.
 BarelyStatus BarelySetInstrumentNoteOn(BarelyHandle handle,
                                        BarelyInstrumentId instrument_id,
-                                       float note_index, float note_intensity);
+                                       float pitch, float intensity);
 
 /// Stops playing instrument note.
 ///
 /// @param handle System handle.
 /// @param instrument_id Instrument id.
-/// @param note_index Note index.
+/// @param pitch Pitch.
 BarelyStatus BarelySetInstrumentNoteOff(BarelyHandle handle,
                                         BarelyInstrumentId instrument_id,
-                                        float note_index);
+                                        float pitch);
 
 /// Sets note on callback.
 ///

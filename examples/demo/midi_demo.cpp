@@ -66,7 +66,7 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
       Note note;
       note.position = get_position(midi_event.tick);
       note.duration = get_position(midi_event.getTickDuration());
-      note.index = static_cast<float>(midi_event.getKeyNumber());
+      note.pitch = static_cast<float>(midi_event.getKeyNumber());
       note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       score.push_back(std::move(note));
@@ -99,12 +99,12 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine;
   engine.SetTempo(kTempo);
   engine.SetNoteOnCallback(
-      [](double, InstrumentId id, float index, float intensity) {
-        LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << index << ", "
+      [](double, InstrumentId id, float pitch, float intensity) {
+        LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
                   << intensity << ")";
       });
-  engine.SetNoteOffCallback([](double, InstrumentId id, float index) {
-    LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << index << ") ";
+  engine.SetNoteOffCallback([](double, InstrumentId id, float pitch) {
+    LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
   });
 
   std::vector<InstrumentId> instrument_ids;
@@ -129,7 +129,7 @@ int main(int /*argc*/, char* argv[]) {
                        {BasicSynthInstrumentParam::kGain, kInstrumentGain}}));
     for (const Note& note : score) {
       engine.ScheduleNote(instrument_id, note.position, note.duration,
-                          note.index, note.intensity);
+                          note.pitch, note.intensity);
     }
     instrument_ids.push_back(instrument_id);
   }

@@ -40,11 +40,11 @@ namespace BarelyApi {
     }
     private BarelyMusician.UnityProcessFn _processFn = null;
 
-    // Stops note with the given |index|.
-    public abstract void UnityNoteOff(float index);
+    // Stops note with the given |pitch|.
+    public abstract void UnityNoteOff(float pitch);
 
-    // Starts note with the given |index| and |intensity|.
-    public abstract void UnityNoteOn(float index, float intensity);
+    // Starts note with the given |pitch| and |intensity|.
+    public abstract void UnityNoteOn(float pitch, float intensity);
 
     // Processes the next |output| buffer.
     public abstract void UnityProcess(float[] output, int numChannels);

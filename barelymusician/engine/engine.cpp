@@ -117,10 +117,9 @@ double Engine::GetPosition() const { return position_; }
 
 double Engine::GetTempo() const { return tempo_; }
 
-StatusOr<bool> Engine::IsNoteOn(InstrumentId instrument_id,
-                                float note_index) const {
+StatusOr<bool> Engine::IsNoteOn(InstrumentId instrument_id, float pitch) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return controller->notes.find(note_index) != controller->notes.cend();
+    return controller->notes.find(pitch) != controller->notes.cend();
   }
   return Status::kNotFound;
 }
@@ -156,15 +155,15 @@ Status Engine::AllNotesOff(InstrumentId instrument_id) {
   return Status::kNotFound;
 }
 
-Status Engine::NoteOff(InstrumentId instrument_id, float note_index) {
+Status Engine::NoteOff(InstrumentId instrument_id, float pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->notes.erase(note_index) > 0) {
+    if (controller->notes.erase(pitch) > 0) {
       if (note_off_callback_) {
-        note_off_callback_(last_timestamp_, instrument_id, note_index);
+        note_off_callback_(last_timestamp_, instrument_id, pitch);
       }
-      task_runner_.Add([this, instrument_id, note_index]() {
+      task_runner_.Add([this, instrument_id, pitch]() {
         if (auto* processor = FindOrNull(processors_, instrument_id)) {
-          processor->SetNoteOff(note_index);
+          processor->SetNoteOff(pitch);
         }
       });
       return Status::kOk;
@@ -174,17 +173,16 @@ Status Engine::NoteOff(InstrumentId instrument_id, float note_index) {
   return Status::kNotFound;
 }
 
-Status Engine::NoteOn(InstrumentId instrument_id, float note_index,
-                      float note_intensity) {
+Status Engine::NoteOn(InstrumentId instrument_id, float pitch,
+                      float intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->notes.emplace(note_index).second) {
+    if (controller->notes.emplace(pitch).second) {
       if (note_on_callback_) {
-        note_on_callback_(last_timestamp_, instrument_id, note_index,
-                          note_intensity);
+        note_on_callback_(last_timestamp_, instrument_id, pitch, intensity);
       }
-      task_runner_.Add([this, instrument_id, note_index, note_intensity]() {
+      task_runner_.Add([this, instrument_id, pitch, intensity]() {
         if (auto* processor = FindOrNull(processors_, instrument_id)) {
-          processor->SetNoteOn(note_index, note_intensity);
+          processor->SetNoteOn(pitch, intensity);
         }
       });
       return Status::kOk;
@@ -267,14 +265,11 @@ Status Engine::ClearAllScheduledNotes(InstrumentId instrument_id) {
 }
 
 Status Engine::ScheduleNote(InstrumentId instrument_id, double position,
-                            double duration, float note_index,
-                            float note_intensity) {
+                            double duration, float pitch, float intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (position_ <= position && duration >= 0.0) {
-      controller->messages.emplace(position,
-                                   NoteOnData{note_index, note_intensity});
-      controller->messages.emplace(position + duration,
-                                   NoteOffData{note_index});
+      controller->messages.emplace(position, NoteOnData{pitch, intensity});
+      controller->messages.emplace(position + duration, NoteOffData{pitch});
       return Status::kOk;
     }
     return Status::kInvalidArgument;
@@ -347,33 +342,33 @@ void Engine::Update(int sample_rate, int64 timestamp) {
       const auto message_data = it->second;
       std::visit(MessageDataVisitor{
                      [&](const NoteOffData& data) {
-                       if (controller.notes.erase(data.index) > 0) {
+                       if (controller.notes.erase(data.pitch) > 0) {
                          if (note_off_callback_) {
                            note_off_callback_(message_timestamp, instrument_id,
-                                              data.index);
+                                              data.pitch);
                          }
                          task_runner_.Add(
                              [this, instrument_id, message_timestamp, data]() {
                                if (auto* processor =
                                        FindOrNull(processors_, instrument_id)) {
                                  processor->ScheduleNoteOff(message_timestamp,
-                                                            data.index);
+                                                            data.pitch);
                                }
                              });
                        }
                      },
                      [&](const NoteOnData& data) {
-                       if (controller.notes.emplace(data.index).second) {
+                       if (controller.notes.emplace(data.pitch).second) {
                          if (note_on_callback_) {
                            note_on_callback_(message_timestamp, instrument_id,
-                                             data.index, data.intensity);
+                                             data.pitch, data.intensity);
                          }
                          task_runner_.Add([this, instrument_id,
                                            message_timestamp, data]() {
                            if (auto* processor =
                                    FindOrNull(processors_, instrument_id)) {
                              processor->ScheduleNoteOn(
-                                 message_timestamp, data.index, data.intensity);
+                                 message_timestamp, data.pitch, data.intensity);
                            }
                          });
                        }

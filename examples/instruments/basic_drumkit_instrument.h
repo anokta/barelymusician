@@ -17,8 +17,8 @@ class BasicDrumkitInstrument : public Instrument {
   BasicDrumkitInstrument(int sample_rate);
 
   // Implements |Instrument|.
-  void NoteOff(float index) override;
-  void NoteOn(float index, float intensity) override;
+  void NoteOff(float pitch) override;
+  void NoteOn(float pitch, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
   void SetCustomData(void* data) override;
   void SetParam(int, float) override {}
@@ -28,7 +28,7 @@ class BasicDrumkitInstrument : public Instrument {
  private:
   using BasicDrumkitVoice = BasicEnvelopedVoice<SamplePlayer>;
 
-  void Add(float note_index, const WavFile& wav_file);
+  void Add(float pitch, const WavFile& wav_file);
 
   const int sample_rate_;
 

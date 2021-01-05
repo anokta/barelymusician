@@ -29,12 +29,12 @@ class Engine {
 
   // Note off callback signature.
   using NoteOffCallback = std::function<void(
-      int64 timestamp, InstrumentId instrument_id, float note_index)>;
+      int64 timestamp, InstrumentId instrument_id, float pitch)>;
 
   // Note on callback signature.
   using NoteOnCallback =
       std::function<void(int64 timestamp, InstrumentId instrument_id,
-                         float note_index, float note_intensity)>;
+                         float pitch, float intensity)>;
 
   // Constructs new |Engine|.
   Engine();
@@ -74,9 +74,9 @@ class Engine {
   // Returns whether note is active or not.
   //
   // @param instrument_id Instrument id.
-  // @param index Note index.
+  // @param pitch Pitch.
   // @return True if note is active, if instrument found.
-  StatusOr<bool> IsNoteOn(InstrumentId instrument_id, float note_index) const;
+  StatusOr<bool> IsNoteOn(InstrumentId instrument_id, float pitch) const;
 
   // Returns playback state.
   //
@@ -95,18 +95,17 @@ class Engine {
   // Stops playing note.
   //
   // @param instrument_id Instrument id.
-  // @param note_index Note index.
+  // @param pitch Note pitch.
   // @return True if successful, if instrument found.
-  Status NoteOff(InstrumentId instrument_id, float note_index);
+  Status NoteOff(InstrumentId instrument_id, float pitch);
 
   // Starts playing note.
   //
   // @param instrument_id Instrument id.
-  // @param note_index Note index.
-  // @param note_intensity Note intensity.
+  // @param pitch Note pitch.
+  // @param intensity Note intensity.
   // @return True if successful, if instrument found.
-  Status NoteOn(InstrumentId instrument_id, float note_index,
-                float note_intensity);
+  Status NoteOn(InstrumentId instrument_id, float pitch, float intensity);
 
   // Processes the next output buffer.
   //
@@ -150,11 +149,11 @@ class Engine {
   // @param instrument_id Instrument id.
   // @param position Note position.
   // @param duration Note duration.
-  // @param note_index Note index.
-  // @param note_intensity Note intensity.
+  // @param pitch Note pitch.
+  // @param intensity Note intensity.
   // @return True if successful, if instrument found.
   Status ScheduleNote(InstrumentId instrument_id, double position,
-                      double duration, float note_index, float note_intensity);
+                      double duration, float pitch, float intensity);
 
   // Sets beat callback.
   //

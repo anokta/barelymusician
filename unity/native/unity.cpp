@@ -64,14 +64,12 @@ Id CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
                          ProcessFn* process_fn_ptr) {
   if (barelymusician) {
     InstrumentDefinition definition = {
-        .set_note_off_fn =
-            [note_off_fn_ptr](InstrumentState*, float note_index) {
-              note_off_fn_ptr(note_index);
-            },
+        .set_note_off_fn = [note_off_fn_ptr](
+                               InstrumentState*,
+                               float pitch) { note_off_fn_ptr(pitch); },
         .set_note_on_fn =
-            [note_on_fn_ptr](InstrumentState*, float note_index,
-                             float note_intensity) {
-              note_on_fn_ptr(note_index, note_intensity);
+            [note_on_fn_ptr](InstrumentState*, float pitch, float intensity) {
+              note_on_fn_ptr(pitch, intensity);
             },
         .process_fn =
             [process_fn_ptr](InstrumentState*, float* output, int num_channels,
@@ -123,9 +121,9 @@ double GetTempo() {
   return 0.0f;
 }
 
-bool IsNoteOn(Id id, float index) {
+bool IsNoteOn(Id id, float pitch) {
   if (barelymusician) {
-    const auto is_note_on_or = barelymusician->engine.IsNoteOn(id, index);
+    const auto is_note_on_or = barelymusician->engine.IsNoteOn(id, pitch);
     if (IsOk(is_note_on_or)) {
       return GetValue(is_note_on_or);
     }
@@ -146,15 +144,15 @@ void AllNotesOff(Id id) {
   }
 }
 
-void NoteOff(Id id, float index) {
+void NoteOff(Id id, float pitch) {
   if (barelymusician) {
-    barelymusician->engine.NoteOff(id, index);
+    barelymusician->engine.NoteOff(id, pitch);
   }
 }
 
-void NoteOn(Id id, float index, float intensity) {
+void NoteOn(Id id, float pitch, float intensity) {
   if (barelymusician) {
-    barelymusician->engine.NoteOn(id, index, intensity);
+    barelymusician->engine.NoteOn(id, pitch, intensity);
   }
 }
 
@@ -176,10 +174,10 @@ void ResetAllParams(Id id) {
   }
 }
 
-void ScheduleNote(Id id, double position, double duration, float index,
+void ScheduleNote(Id id, double position, double duration, float pitch,
                   float intensity) {
   if (barelymusician) {
-    barelymusician->engine.ScheduleNote(id, position, duration, index,
+    barelymusician->engine.ScheduleNote(id, position, duration, pitch,
                                         intensity);
   }
 }
@@ -219,10 +217,10 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
     if (note_off_callback_ptr) {
       barelymusician->engine.SetNoteOffCallback(
           [note_off_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int64 timestamp, Id id, float index) {
+              int64 timestamp, Id id, float pitch) {
             note_off_callback_ptr(static_cast<double>(timestamp) /
                                       static_cast<double>(sample_rate),
-                                  id, index);
+                                  id, pitch);
           });
     } else {
       barelymusician->engine.SetNoteOffCallback(nullptr);
@@ -235,10 +233,10 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
     if (note_on_callback_ptr) {
       barelymusician->engine.SetNoteOnCallback(
           [note_on_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int64 timestamp, Id id, float index, float intensity) {
+              int64 timestamp, Id id, float pitch, float intensity) {
             note_on_callback_ptr(static_cast<double>(timestamp) /
                                      static_cast<double>(sample_rate),
-                                 id, index, intensity);
+                                 id, pitch, intensity);
           });
     } else {
       barelymusician->engine.SetNoteOnCallback(nullptr);

@@ -56,10 +56,10 @@ void InstrumentProcessor::Process(int64 timestamp, float* output,
       frame = message_frame;
     }
     std::visit(MessageDataVisitor{[this](const NoteOffData& note_off_data) {
-                                    SetNoteOff(note_off_data.index);
+                                    SetNoteOff(note_off_data.pitch);
                                   },
                                   [this](const NoteOnData& note_on_data) {
-                                    SetNoteOn(note_on_data.index,
+                                    SetNoteOn(note_on_data.pitch,
                                               note_on_data.intensity);
                                   }},
                it->second);
@@ -72,13 +72,13 @@ void InstrumentProcessor::Process(int64 timestamp, float* output,
   }
 }
 
-void InstrumentProcessor::ScheduleNoteOff(int64 timestamp, float note_index) {
-  messages_.emplace_back(timestamp, NoteOffData{note_index});
+void InstrumentProcessor::ScheduleNoteOff(int64 timestamp, float pitch) {
+  messages_.emplace_back(timestamp, NoteOffData{pitch});
 }
 
-void InstrumentProcessor::ScheduleNoteOn(int64 timestamp, float note_index,
-                                         float note_intensity) {
-  messages_.emplace_back(timestamp, NoteOnData{note_index, note_intensity});
+void InstrumentProcessor::ScheduleNoteOn(int64 timestamp, float pitch,
+                                         float intensity) {
+  messages_.emplace_back(timestamp, NoteOnData{pitch, intensity});
 }
 
 void InstrumentProcessor::SetCustomData(void* custom_data) {
@@ -87,15 +87,15 @@ void InstrumentProcessor::SetCustomData(void* custom_data) {
   }
 }
 
-void InstrumentProcessor::SetNoteOff(float note_index) {
+void InstrumentProcessor::SetNoteOff(float pitch) {
   if (definition_.set_note_off_fn) {
-    definition_.set_note_off_fn(&state_, note_index);
+    definition_.set_note_off_fn(&state_, pitch);
   }
 }
 
-void InstrumentProcessor::SetNoteOn(float note_index, float note_intensity) {
+void InstrumentProcessor::SetNoteOn(float pitch, float intensity) {
   if (definition_.set_note_on_fn) {
-    definition_.set_note_on_fn(&state_, note_index, note_intensity);
+    definition_.set_note_on_fn(&state_, pitch, intensity);
   }
 }
 

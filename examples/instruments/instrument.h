@@ -14,16 +14,16 @@ class Instrument {
   // Base destructor to ensure the derived classes get destroyed properly.
   virtual ~Instrument() = default;
 
-  // Stops note with the given |index|.
+  // Stops note with the given |pitch|.
   //
-  // @param index Note index.
-  virtual void NoteOff(float index) = 0;
+  // @param pitch Pitch.
+  virtual void NoteOff(float pitch) = 0;
 
-  // Starts note with the given |index| and |intensity|.
+  // Starts note with the given |pitch| and |intensity|.
   //
-  // @param index Note index.
+  // @param pitch Pitch.
   // @param intensity Note intensity.
-  virtual void NoteOn(float index, float intensity) = 0;
+  virtual void NoteOn(float pitch, float intensity) = 0;
 
   // Processes the next |output| buffer.
   //

@@ -16,14 +16,14 @@ const float kDefaultRelease = 0.1f;
 BasicDrumkitInstrument::BasicDrumkitInstrument(int sample_rate)
     : sample_rate_(sample_rate), gain_(kDefaultGain) {}
 
-void BasicDrumkitInstrument::NoteOff(float index) {
-  if (const auto it = voices_.find(index); it != voices_.cend()) {
+void BasicDrumkitInstrument::NoteOff(float pitch) {
+  if (const auto it = voices_.find(pitch); it != voices_.cend()) {
     it->second.Stop();
   }
 }
 
-void BasicDrumkitInstrument::NoteOn(float index, float intensity) {
-  if (auto it = voices_.find(index); it != voices_.end()) {
+void BasicDrumkitInstrument::NoteOn(float pitch, float intensity) {
+  if (auto it = voices_.find(pitch); it != voices_.end()) {
     it->second.set_gain(intensity);
     it->second.Start();
   }
@@ -58,13 +58,13 @@ InstrumentDefinition BasicDrumkitInstrument::GetDefinition(int sample_rate) {
   });
 }
 
-void BasicDrumkitInstrument::Add(float note_index, const WavFile& wav_file) {
+void BasicDrumkitInstrument::Add(float pitch, const WavFile& wav_file) {
   BasicDrumkitVoice voice(sample_rate_);
   voice.envelope().SetRelease(kDefaultRelease);
   const auto& data = wav_file.GetData();
   const int data_size = static_cast<int>(data.size());
   voice.generator().SetData(data.data(), wav_file.GetSampleRate(), data_size);
-  voices_.insert({note_index, voice});
+  voices_.insert({pitch, voice});
 }
 
 }  // namespace examples

@@ -83,9 +83,9 @@ BarelyStatus BarelyGetStress(const BarelyHandle handle, float* stress) {
 
 BarelyStatus BarelyIsInstrumentNoteOn(const BarelyHandle handle,
                                       BarelyInstrumentId instrument_id,
-                                      float note_index, bool* is_note_on) {
+                                      float pitch, bool* is_note_on) {
   PrintUnimplementedError("BarelyIsInstrumentNoteOn", handle, instrument_id,
-                          note_index, is_note_on);
+                          pitch, is_note_on);
   return kBarelyStatus_Unimplemented;
 }
 
@@ -147,17 +147,17 @@ BarelyStatus BarelySetInstrumentControl(BarelyHandle handle,
 
 BarelyStatus BarelySetInstrumentNoteOn(BarelyHandle handle,
                                        BarelyInstrumentId instrument_id,
-                                       float note_index, float note_intensity) {
+                                       float pitch, float intensity) {
   PrintUnimplementedError("BarelySetInstrumentNoteOn", handle, instrument_id,
-                          note_index, note_intensity);
+                          pitch, intensity);
   return kBarelyStatus_Unimplemented;
 }
 
 BarelyStatus BarelySetInstrumentNoteOff(BarelyHandle handle,
                                         BarelyInstrumentId instrument_id,
-                                        float note_index) {
+                                        float pitch) {
   PrintUnimplementedError("BarelySetInstrumentNoteOn", handle, instrument_id,
-                          note_index);
+                          pitch);
   return kBarelyStatus_Unimplemented;
 }
 

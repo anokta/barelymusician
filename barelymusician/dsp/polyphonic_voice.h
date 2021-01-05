@@ -32,17 +32,17 @@ class PolyphonicVoice {
   // @param num_voices Number of available voices.
   void Resize(int num_voices);
 
-  // Starts new voice for the given |index|.
+  // Starts new voice for the given |pitch|.
   //
-  // @param index Voice (note) index.
+  // @param pitch Voice pitch.
   // @param init_voice Callback to initialize the voice for playback.
-  void Start(float index, const VoiceCallback& init_voice = nullptr);
+  void Start(float pitch, const VoiceCallback& init_voice = nullptr);
 
-  // Stops the voice with the given |index|.
+  // Stops the voice with the given |pitch|.
   //
-  // @param index Voice (note) index.
+  // @param pitch Voice pitch.
   // @param shutdown_voice Callback to shutdown the voice.
-  void Stop(float index, const VoiceCallback& shutdown_voice = nullptr);
+  void Stop(float pitch, const VoiceCallback& shutdown_voice = nullptr);
 
   // Updates all the available voices with the given callback.
   //
@@ -56,7 +56,7 @@ class PolyphonicVoice {
   // List of available voices.
   std::vector<VoiceType> voices_;
 
-  // List of voice states, namely the voice (note) index and its timestamp.
+  // List of voice states, namely the voice pitch and its timestamp.
   // Timestamp is used to determine which voice to *steal* when there is no free
   // voice available.
   // TODO(#12): Consider a more optimized implementation for voice stealing.
@@ -86,7 +86,7 @@ void PolyphonicVoice<VoiceType>::Resize(int num_voices) {
 }
 
 template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Start(float index,
+void PolyphonicVoice<VoiceType>::Start(float pitch,
                                        const VoiceCallback& init_voice) {
   const int num_voices = static_cast<int>(voices_.size());
   if (num_voices == 0) {
@@ -113,7 +113,7 @@ void PolyphonicVoice<VoiceType>::Start(float index,
     }
   }
   VoiceType* voice = &voices_[voice_index];
-  voice_states_[voice_index] = {index, 0};
+  voice_states_[voice_index] = {pitch, 0};
 
   if (init_voice) {
     init_voice(voice);
@@ -122,11 +122,11 @@ void PolyphonicVoice<VoiceType>::Start(float index,
 }
 
 template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Stop(float index,
+void PolyphonicVoice<VoiceType>::Stop(float pitch,
                                       const VoiceCallback& shutdown_voice) {
   const int num_voices = static_cast<int>(voices_.size());
   for (int i = 0; i < num_voices; ++i) {
-    if (voice_states_[i].first == index && voices_[i].IsActive()) {
+    if (voice_states_[i].first == pitch && voices_[i].IsActive()) {
       VoiceType* voice = &voices_[i];
       if (shutdown_voice) {
         shutdown_voice(voice);

@@ -39,8 +39,8 @@ constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.025f;
 
 constexpr double kTickDuration = 0.005f;
-constexpr float kBarNoteIndex = barelyapi::kNoteIndexA4;
-constexpr float kBeatNoteIndex = barelyapi::kNoteIndexA3;
+constexpr float kBarPitch = barelyapi::kPitchA4;
+constexpr float kBeatPitch = barelyapi::kPitchA3;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 120.0;
@@ -72,8 +72,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const int current_beat = beat % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
-    const float index = (current_beat == 0) ? kBarNoteIndex : kBeatNoteIndex;
-    engine.ScheduleNote(metronome_id, position, kTickDuration, index, kGain);
+    const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
+    engine.ScheduleNote(metronome_id, position, kTickDuration, pitch, kGain);
   };
   engine.SetBeatCallback(beat_callback);
 

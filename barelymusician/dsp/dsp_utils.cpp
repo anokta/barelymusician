@@ -24,10 +24,10 @@ float DecibelsFromAmplitude(float amplitude) {
   return kMinDecibels;
 }
 
-float FrequencyFromNoteIndex(float index) {
+float FrequencyFromPitch(float pitch) {
   // Middle A note (A4) is selected as the base note frequency, where:
-  //  f = fA4 * 2 ^ ((i - iA4) / 12).
-  return kFrequencyA4 * std::pow(2.0f, (index - kNoteIndexA4) / kNumSemitones);
+  //  f = fA4 * 2 ^ ((i - pA4) / 12).
+  return kFrequencyA4 * std::pow(2.0f, (pitch - kPitchA4) / kNumSemitones);
 }
 
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) {

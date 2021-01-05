@@ -35,13 +35,13 @@ TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
 }
 
 // Tests that converting arbitrary note indices returns expected frequencies.
-TEST(DspUtilsTest, FrequencyFromNoteIndex) {
+TEST(DspUtilsTest, FrequencyFromPitch) {
   const int kNumIndices = 4;
   const float kIndices[kNumIndices] = {21.0f, 60.0f, 69.0f, 90.5f};
   const float kFrequencies[kNumIndices] = {27.5f, 261.6f, 440.0f, 1523.3f};
 
   for (int i = 0; i < kNumIndices; ++i) {
-    EXPECT_NEAR(FrequencyFromNoteIndex(kIndices[i]), kFrequencies[i], kEpsilon);
+    EXPECT_NEAR(FrequencyFromPitch(kIndices[i]), kFrequencies[i], kEpsilon);
   }
 }
 

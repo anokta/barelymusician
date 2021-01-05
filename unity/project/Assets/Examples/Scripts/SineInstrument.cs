@@ -27,12 +27,12 @@ namespace BarelyApi {
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);
     }
 
-    public override void UnityNoteOff(float index) {
+    public override void UnityNoteOff(float pitch) {
       targetGain = 0.0f;
     }
 
-    public override void UnityNoteOn(float index, float intensity) {
-      frequency = 440.0f * Mathf.Pow(2.0f, (index - 69.0f) / 12.0f);
+    public override void UnityNoteOn(float pitch, float intensity) {
+      frequency = 440.0f * Mathf.Pow(2.0f, (pitch - 69.0f) / 12.0f);
       phase = 0.0f;
       targetGain = intensity;
     }

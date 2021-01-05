@@ -40,7 +40,7 @@ class FakeVoice : public Voice {
 
 // Tests that playing a single voice produces the expected output.
 TEST(PolyphonicVoiceTest, SingleVoice) {
-  const float kNoteIndex = 0.0f;
+  const float kPitch = 0.0f;
 
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
@@ -49,10 +49,10 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
   polyphonic_voice.Resize(kNumVoices);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
-  polyphonic_voice.Start(kNoteIndex);
+  polyphonic_voice.Start(kPitch);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), kOutput);
 
-  polyphonic_voice.Stop(kNoteIndex);
+  polyphonic_voice.Stop(kPitch);
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 }
 
@@ -66,11 +66,11 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
   for (int i = 0; i < kNumVoices; ++i) {
-    const float index = static_cast<float>(i + 1);
+    const float pitch = static_cast<float>(i + 1);
     polyphonic_voice.Start(
-        index, [index](FakeVoice* voice) { voice->SetOutput(index); });
-    EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), index);
-    polyphonic_voice.Stop(index);
+        pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
+    EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), pitch);
+    polyphonic_voice.Stop(pitch);
   }
 }
 
@@ -121,20 +121,20 @@ TEST(PolyphonicVoiceTest, Update) {
   EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), 0.0f);
 
   for (int i = 0; i < kNumVoices; ++i) {
-    const float index = static_cast<float>(i);
-    polyphonic_voice.Start(index);
+    const float pitch = static_cast<float>(i);
+    polyphonic_voice.Start(pitch);
     EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), kOutput);
-    polyphonic_voice.Stop(index);
+    polyphonic_voice.Stop(pitch);
   }
 
   polyphonic_voice.Update(
       [kUpdatedOutput](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
 
   for (int i = 0; i < kNumVoices; ++i) {
-    const float index = static_cast<float>(i);
-    polyphonic_voice.Start(index);
+    const float pitch = static_cast<float>(i);
+    polyphonic_voice.Start(pitch);
     EXPECT_FLOAT_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);
-    polyphonic_voice.Stop(index);
+    polyphonic_voice.Stop(pitch);
   }
 }
 

@@ -25,10 +25,10 @@ InstrumentDefinition GetInstrumentDefinition(CreateFn create_fn) {
             instrument->Process(output, num_channels, num_frames);
           },
       .set_note_off_fn =
-          [](InstrumentState* state, float note_index) {
+          [](InstrumentState* state, float pitch) {
             Instrument* instrument = reinterpret_cast<Instrument*>(*state);
             DCHECK(instrument);
-            instrument->NoteOff(note_index);
+            instrument->NoteOff(pitch);
           },
       .set_custom_data_fn =
           [](InstrumentState* state, void* data) {
@@ -37,10 +37,10 @@ InstrumentDefinition GetInstrumentDefinition(CreateFn create_fn) {
             instrument->SetCustomData(data);
           },
       .set_note_on_fn =
-          [](InstrumentState* state, float note_index, float note_intensity) {
+          [](InstrumentState* state, float pitch, float intensity) {
             Instrument* instrument = reinterpret_cast<Instrument*>(*state);
             DCHECK(instrument);
-            instrument->NoteOn(note_index, note_intensity);
+            instrument->NoteOn(pitch, intensity);
           },
       .set_param_fn =
           [](InstrumentState* state, int param_id, float param_value) {

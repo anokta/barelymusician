@@ -15,11 +15,11 @@ float AmplitudeFromDecibels(float decibels);
 // @return Value in dB.
 float DecibelsFromAmplitude(float amplitude);
 
-// Returns the corresponding frequency for the given note index.
+// Returns the corresponding frequency for the given pitch.
 //
-// @param index Note index.
+// @param pitch Pitch.
 // @return Frequency in Hz.
-float FrequencyFromNoteIndex(float index);
+float FrequencyFromPitch(float pitch);
 
 // Returns one-pole filter coefficient for a given cutoff frequency.
 //

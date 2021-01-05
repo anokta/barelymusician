@@ -22,7 +22,7 @@ class TestInstrument : public Instrument {
   // Implements |Instrument|.
   void Control(int, float) override {}
   void NoteOff(float) override { sample_ = 0.0f; }
-  void NoteOn(float index, float intensity) override {
+  void NoteOn(float pitch, float intensity) override {
     sample_ = index * intensity;
   }
   void Process(float* output, int num_channels, int num_frames) override {
@@ -35,7 +35,7 @@ class TestInstrument : public Instrument {
 
 // Tests that the engine creates and destroy instruments as expected.
 TEST(EngineTest, CreateDestroy) {
-  const float kNoteIndex = 10.0f;
+  const float kPitch = 10.0f;
   const float kNoteIntensity = 0.75f;
 
   Engine engine(kSampleRate);
@@ -52,14 +52,14 @@ TEST(EngineTest, CreateDestroy) {
 
   // Create instrument and start note.
   engine.Create(kInstrumentId, std::make_unique<TestInstrument>());
-  engine.NoteOn(kInstrumentId, kNoteIndex, kNoteIntensity);
+  engine.NoteOn(kInstrumentId, kPitch, kNoteIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   engine.Process(kInstrumentId, buffer.data(), kNumChannels, kSampleRate);
   for (int frame = 0; frame < kSampleRate; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
-                      kNoteIndex * kNoteIntensity);
+                      kPitch * kNoteIntensity);
     }
   }
 
@@ -77,7 +77,7 @@ TEST(EngineTest, CreateDestroy) {
 
 // Tests that playing a single note produces the expected output.
 TEST(EngineTest, ScheduleSingleNote) {
-  const float kNoteIndex = 32.0f;
+  const float kPitch = 32.0f;
   const float kNoteIntensity = 0.5f;
 
   Engine engine(kSampleRate);
@@ -97,7 +97,7 @@ TEST(EngineTest, ScheduleSingleNote) {
   }
 
   // Start note.
-  engine.ScheduleNoteOn(kInstrumentId, 0.0, kNoteIndex, kNoteIntensity);
+  engine.ScheduleNoteOn(kInstrumentId, 0.0, kPitch, kNoteIntensity);
   engine.Update(kSampleRate);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -105,12 +105,12 @@ TEST(EngineTest, ScheduleSingleNote) {
   for (int frame = 0; frame < kSampleRate; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
-                      kNoteIndex * kNoteIntensity);
+                      kPitch * kNoteIntensity);
     }
   }
 
   // Stop note.
-  engine.ScheduleNoteOff(kInstrumentId, 1.0, kNoteIndex);
+  engine.ScheduleNoteOff(kInstrumentId, 1.0, kPitch);
   engine.Update(kSampleRate);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -202,7 +202,7 @@ TEST(EngineTest, SetBeatCallback) {
 
 // Tests that playing notes triggers the corresponding callbacks as expected.
 TEST(EngineTest, SetNoteCallbacks) {
-  const float kNoteIndex = 40.0f;
+  const float kPitch = 40.0f;
   const float kNoteIntensity = 0.75f;
 
   Engine engine(kSampleRate);
@@ -213,33 +213,33 @@ TEST(EngineTest, SetNoteCallbacks) {
   float note_on_index = 0.0f;
   float note_on_intensity = 0.0f;
   engine.SetNoteOnCallback(
-      [&](int instrument_id, float index, float intensity) {
+      [&](int instrument_id, float pitch, float intensity) {
         note_on_instrument_id = instrument_id;
         note_on_index = index;
         note_on_intensity = intensity;
       });
   EXPECT_NE(note_on_instrument_id, kInstrumentId);
-  EXPECT_NE(note_on_index, kNoteIndex);
+  EXPECT_NE(note_on_index, kPitch);
   EXPECT_NE(note_on_intensity, kNoteIntensity);
 
-  engine.NoteOn(kInstrumentId, kNoteIndex, kNoteIntensity);
+  engine.NoteOn(kInstrumentId, kPitch, kNoteIntensity);
   EXPECT_EQ(note_on_instrument_id, kInstrumentId);
-  EXPECT_FLOAT_EQ(note_on_index, kNoteIndex);
+  EXPECT_FLOAT_EQ(note_on_index, kPitch);
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
 
   // Trigger note off.
   int note_off_instrument_id = 0;
   float note_off_index = 0.0f;
-  engine.SetNoteOffCallback([&](int instrument_id, float index) {
+  engine.SetNoteOffCallback([&](int instrument_id, float pitch) {
     note_off_instrument_id = instrument_id;
     note_off_index = index;
   });
   EXPECT_NE(note_off_instrument_id, kInstrumentId);
-  EXPECT_NE(note_off_index, kNoteIndex);
+  EXPECT_NE(note_off_index, kPitch);
 
-  engine.NoteOff(kInstrumentId, kNoteIndex);
+  engine.NoteOff(kInstrumentId, kPitch);
   EXPECT_EQ(note_off_instrument_id, kInstrumentId);
-  EXPECT_FLOAT_EQ(note_off_index, kNoteIndex);
+  EXPECT_FLOAT_EQ(note_off_index, kPitch);
 }
 
 // Tests that the engine starts and stops playback as expected.

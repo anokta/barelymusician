@@ -16,12 +16,12 @@ class Instrument {
 
   // Stops note with the given |pitch|.
   //
-  // @param pitch Pitch.
+  // @param pitch Note pitch.
   virtual void NoteOff(float pitch) = 0;
 
   // Starts note with the given |pitch| and |intensity|.
   //
-  // @param pitch Pitch.
+  // @param pitch Note pitch.
   // @param intensity Note intensity.
   virtual void NoteOn(float pitch, float intensity) = 0;
 
@@ -41,8 +41,9 @@ class Instrument {
   virtual void SetParam(int id, float value) = 0;
 };
 
-using CreateFn = std::function<std::unique_ptr<Instrument>()>;
-InstrumentDefinition GetInstrumentDefinition(CreateFn create_fn);
+// Returns instrument definition for the given create instrument function.
+InstrumentDefinition GetInstrumentDefinition(
+    std::function<std::unique_ptr<Instrument>()> create_instrument_fn);
 
 }  // namespace examples
 }  // namespace barelyapi

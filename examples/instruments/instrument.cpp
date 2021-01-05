@@ -5,11 +5,12 @@
 namespace barelyapi {
 namespace examples {
 
-InstrumentDefinition GetInstrumentDefinition(CreateFn create_fn) {
+InstrumentDefinition GetInstrumentDefinition(
+    std::function<std::unique_ptr<Instrument>()> create_instrument_fn) {
   return InstrumentDefinition{
       .create_fn =
-          [create_fn](InstrumentState* state) {
-            *state = create_fn().release();
+          [create_instrument_fn](InstrumentState* state) {
+            *state = create_instrument_fn().release();
           },
       .destroy_fn =
           [](InstrumentState* state) {

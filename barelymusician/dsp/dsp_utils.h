@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
+#include "barelymusician/base/types.h"
+
 namespace barelyapi {
 
 // Converts a value from dB to linear amplitude.
@@ -33,14 +35,14 @@ float GetFilterCoefficient(int sample_rate, float cuttoff_frequency);
 // @param sample_rate Sampling rate in Hz.
 // @param seconds Number of seconds.
 // @return Number of samples.
-int SamplesFromSeconds(int sample_rate, double seconds);
+int64 SamplesFromSeconds(int sample_rate, double seconds);
 
 // Returns the corresponding number of seconds for the given number of samples.
 //
 // @param sample_rate Sampling rate in Hz.
 // @param samples Number of samples.
 // @return Number of seconds.
-double SecondsFromSamples(int sample_rate, int samples);
+double SecondsFromSamples(int sample_rate, int64 samples);
 
 }  // namespace barelyapi
 

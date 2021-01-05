@@ -30,10 +30,10 @@ inline constexpr float kNaturalMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f,
 inline constexpr float kHarmonicMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f,
                                                 7.0f, 8.0f, 11.0f};
 
-// Middle A note (A4) frequency.
+// Middle A (A4) frequency.
 inline constexpr float kFrequencyA4 = 440.0f;
 
-// Common note indices.
+// Common pitches.
 inline constexpr float kPitchA0 = 21.0f;
 inline constexpr float kPitchAsharp0 = 22.0f;
 inline constexpr float kPitchB0 = 23.0f;

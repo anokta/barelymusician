@@ -41,13 +41,13 @@ float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) {
   return 0.0f;
 }
 
-int SamplesFromSeconds(int sample_rate, double seconds) {
+int64 SamplesFromSeconds(int sample_rate, double seconds) {
   return sample_rate > 0
-             ? static_cast<int>(seconds * static_cast<double>(sample_rate))
+             ? static_cast<int64>(seconds * static_cast<double>(sample_rate))
              : 0;
 }
 
-double SecondsFromSamples(int sample_rate, int samples) {
+double SecondsFromSamples(int sample_rate, int64 samples) {
   return sample_rate > 0
              ? static_cast<double>(samples) / static_cast<double>(sample_rate)
              : 0.0;

@@ -7,7 +7,7 @@
 
 namespace barelyapi {
 
-// Returns the raw pitch for the given scale and quantized note index.
+// Returns pitch for the given scale and quantized note index.
 //
 // @param scale Cumulative scale intervals of an octave in increasing order.
 // @param note_index Quantized note index.

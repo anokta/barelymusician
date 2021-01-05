@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "barelymusician/dsp/dsp_utils.h"
+
 namespace barelyapi {
 
 namespace {
@@ -56,13 +58,11 @@ double SecondsFromBeats(double tempo, double beats) {
 }
 
 double BeatsFromSamples(int sample_rate, double tempo, int64 samples) {
-  return BeatsFromSeconds(
-      tempo, static_cast<double>(samples) / static_cast<double>(sample_rate));
+  return BeatsFromSeconds(tempo, SecondsFromSamples(sample_rate, samples));
 }
 
 int64 SamplesFromBeats(int sample_rate, double tempo, double beats) {
-  return static_cast<int64>(static_cast<double>(sample_rate) *
-                            SecondsFromBeats(tempo, beats));
+  return SamplesFromSeconds(sample_rate, SecondsFromBeats(tempo, beats));
 }
 
 }  // namespace

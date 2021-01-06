@@ -8,19 +8,6 @@
 
 namespace barelyapi {
 
-namespace {
-
-void ScheduleMessage(std::vector<std::pair<int64, MessageData>>* messages,
-                     int64 timestamp, MessageData data) {
-  messages->insert(
-      std::upper_bound(
-          messages->begin(), messages->end(), timestamp,
-          [](int64 lhs, const auto& rhs) { return lhs < rhs.first; }),
-      {timestamp, std::move(data)});
-}
-
-}  // namespace
-
 InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition)
     : definition_(std::move(definition)), state_(nullptr) {
   if (definition_.create_fn) {
@@ -37,14 +24,14 @@ InstrumentProcessor::~InstrumentProcessor() {
 InstrumentProcessor::InstrumentProcessor(InstrumentProcessor&& other) noexcept
     : definition_(std::exchange(other.definition_, {})),
       state_(std::exchange(other.state_, nullptr)),
-      messages_(std::move(other.messages_)) {}
+      data_(std::move(other.data_)) {}
 
 InstrumentProcessor& InstrumentProcessor::operator=(
     InstrumentProcessor&& other) noexcept {
   if (this != &other) {
     std::swap(definition_, other.definition_);
     std::swap(state_, other.state_);
-    messages_ = std::move(other.messages_);
+    data_ = std::move(other.data_);
   }
   return *this;
 }
@@ -52,11 +39,10 @@ InstrumentProcessor& InstrumentProcessor::operator=(
 void InstrumentProcessor::Process(int64 timestamp, float* output,
                                   int num_channels, int num_frames) {
   int frame = 0;
-  // Process *all* messages before |end_timestamp|.
-  const auto begin = messages_.cbegin();
-  const auto end = std::lower_bound(
-      begin, messages_.cend(), timestamp + static_cast<int64>(num_frames),
-      [](const auto& lhs, int64 rhs) { return lhs.first < rhs; });
+  // Process *all* events before |end_timestamp|.
+  const auto begin = data_.cbegin();
+  const auto end =
+      data_.lower_bound(timestamp + static_cast<int64>(num_frames));
   for (auto it = begin; it != end; ++it) {
     const int message_frame = static_cast<int>(it->first - timestamp);
     if (frame < message_frame) {
@@ -66,16 +52,32 @@ void InstrumentProcessor::Process(int64 timestamp, float* output,
       }
       frame = message_frame;
     }
-    std::visit(MessageDataVisitor{[this](const NoteOffData& note_off_data) {
-                                    SetNoteOff(note_off_data.pitch);
-                                  },
-                                  [this](const NoteOnData& note_on_data) {
-                                    SetNoteOn(note_on_data.pitch,
-                                              note_on_data.intensity);
-                                  }},
+    std::visit(InstrumentDataVisitor{
+                   [this](const CustomData& custom_data) {
+                     if (definition_.set_custom_data_fn) {
+                       definition_.set_custom_data_fn(&state_,
+                                                      custom_data.data);
+                     }
+                   },
+                   [this](const NoteOff& note_off) {
+                     if (definition_.set_note_off_fn) {
+                       definition_.set_note_off_fn(&state_, note_off.pitch);
+                     }
+                   },
+                   [this](const NoteOn& note_on) {
+                     if (definition_.set_note_on_fn) {
+                       definition_.set_note_on_fn(&state_, note_on.pitch,
+                                                  note_on.intensity);
+                     }
+                   },
+                   [this](const Param& param) {
+                     if (definition_.set_param_fn) {
+                       definition_.set_param_fn(&state_, param.id, param.value);
+                     }
+                   }},
                it->second);
   }
-  messages_.erase(begin, end);
+  data_.erase(begin, end);
   // Process the rest of the buffer.
   if (frame < num_frames && definition_.process_fn) {
     definition_.process_fn(&state_, &output[num_channels * frame], num_channels,
@@ -83,37 +85,8 @@ void InstrumentProcessor::Process(int64 timestamp, float* output,
   }
 }
 
-void InstrumentProcessor::ScheduleNoteOff(int64 timestamp, float pitch) {
-  ScheduleMessage(&messages_, timestamp, NoteOffData{pitch});
-}
-
-void InstrumentProcessor::ScheduleNoteOn(int64 timestamp, float pitch,
-                                         float intensity) {
-  ScheduleMessage(&messages_, timestamp, NoteOnData{pitch, intensity});
-}
-
-void InstrumentProcessor::SetCustomData(void* custom_data) {
-  if (definition_.set_custom_data_fn) {
-    definition_.set_custom_data_fn(&state_, custom_data);
-  }
-}
-
-void InstrumentProcessor::SetNoteOff(float pitch) {
-  if (definition_.set_note_off_fn) {
-    definition_.set_note_off_fn(&state_, pitch);
-  }
-}
-
-void InstrumentProcessor::SetNoteOn(float pitch, float intensity) {
-  if (definition_.set_note_on_fn) {
-    definition_.set_note_on_fn(&state_, pitch, intensity);
-  }
-}
-
-void InstrumentProcessor::SetParam(int param_id, float param_value) {
-  if (definition_.set_param_fn) {
-    definition_.set_param_fn(&state_, param_id, param_value);
-  }
+void InstrumentProcessor::SetData(int64 timestamp, InstrumentData data) {
+  data_.emplace(timestamp, std::move(data));
 }
 
 }  // namespace barelyapi

@@ -7,15 +7,20 @@ cc_library(
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
     deps = [
+        ":instrument_data",
         ":instrument_definition",
         ":instrument_processor",
-        ":message_data",
         ":task_runner",
         "//barelymusician/base:constants",
         "//barelymusician/base:status",
         "//barelymusician/base:types",
         "//barelymusician/dsp:dsp_utils",
     ],
+)
+
+cc_library(
+    name = "instrument_data",
+    hdrs = ["instrument_data.h"],
 )
 
 cc_library(
@@ -24,36 +29,16 @@ cc_library(
 )
 
 cc_library(
-    name = "instrument_manager",
-    srcs = ["instrument_manager.cpp"],
-    hdrs = ["instrument_manager.h"],
-    deps = [
-        ":instrument_definition",
-        ":instrument_processor",
-        ":task_runner",
-        "//barelymusician/base:constants",
-        "//barelymusician/base:status",
-        "//barelymusician/base:types",
-        "//barelymusician/dsp:dsp_utils",
-    ],
-)
-
-cc_library(
     name = "instrument_processor",
     srcs = ["instrument_processor.cpp"],
     hdrs = ["instrument_processor.h"],
     deps = [
+        ":instrument_data",
         ":instrument_definition",
-        ":message_data",
         "//barelymusician/base:logging",
         "//barelymusician/base:types",
         "//barelymusician/dsp:dsp_utils",
     ],
-)
-
-cc_library(
-    name = "message_data",
-    hdrs = ["message_data.h"],
 )
 
 cc_library(

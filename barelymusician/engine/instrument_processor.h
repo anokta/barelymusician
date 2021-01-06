@@ -1,12 +1,12 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 
+#include <map>
 #include <utility>
-#include <vector>
 
 #include "barelymusician/base/types.h"
+#include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/message_data.h"
 
 namespace barelyapi {
 
@@ -26,19 +26,12 @@ class InstrumentProcessor {
   void Process(int64 timestamp, float* output, int num_channels,
                int num_frames);
 
-  void ScheduleNoteOff(int64 timestamp, float pitch);
-  void ScheduleNoteOn(int64 timestamp, float pitch, float intensity);
-
-  void SetCustomData(void* data);
-
-  void SetNoteOff(float pitch);
-  void SetNoteOn(float pitch, float intensity);
-  void SetParam(int param_id, float param_value);
+  void SetData(int64 timestamp, InstrumentData data);
 
  private:
   InstrumentDefinition definition_;
   InstrumentState state_;
-  std::vector<std::pair<int64, MessageData>> messages_;
+  std::multimap<int64, InstrumentData> data_;
 };
 
 }  // namespace barelyapi

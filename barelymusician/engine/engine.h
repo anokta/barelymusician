@@ -10,9 +10,9 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
 #include "barelymusician/base/types.h"
+#include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_processor.h"
-#include "barelymusician/engine/message_data.h"
 #include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
@@ -86,21 +86,6 @@ class Engine {
   // @return True if instrument found.
   Status AllNotesOff(int64 instrument_id);
 
-  // Stops playing note.
-  //
-  // @param instrument_id Instrument id.
-  // @param pitch Note pitch.
-  // @return True if successful, if instrument found.
-  Status NoteOff(int64 instrument_id, float pitch);
-
-  // Starts playing note.
-  //
-  // @param instrument_id Instrument id.
-  // @param pitch Note pitch.
-  // @param intensity Note intensity.
-  // @return True if successful, if instrument found.
-  Status NoteOn(int64 instrument_id, float pitch, float intensity);
-
   // Processes the next output buffer.
   //
   // @param instrument_id Instrument id.
@@ -119,6 +104,28 @@ class Engine {
   // @return True if instrument found.
   Status ResetAllParams(int64 instrument_id);
 
+  // Sets custom data.
+  //
+  // @param instrument_id Instrument id.
+  // @param custom_data Custom data.
+  // @return True if successful, if instrument found.
+  Status SetCustomData(int64 instrument_id, void* custom_data);
+
+  // Stops playing note.
+  //
+  // @param instrument_id Instrument id.
+  // @param pitch Note pitch.
+  // @return True if successful, if instrument found.
+  Status SetNoteOff(int64 instrument_id, float pitch);
+
+  // Starts playing note.
+  //
+  // @param instrument_id Instrument id.
+  // @param pitch Note pitch.
+  // @param intensity Note intensity.
+  // @return True if successful, if instrument found.
+  Status SetNoteOn(int64 instrument_id, float pitch, float intensity);
+
   // Sets control parameter value.
   //
   // @param instrument_id Instrument id.
@@ -126,8 +133,6 @@ class Engine {
   // @param param_value Parameter value.
   // @return True if successful, if instrument parameter found.
   Status SetParam(int64 instrument_id, int param_id, float param_value);
-
-  Status SetCustomData(int64 instrument_id, void* custom_data);
 
   // Clears all scheduled notes.
   void ClearAllScheduledNotes();
@@ -210,7 +215,7 @@ class Engine {
     std::unordered_set<float> notes;
 
     // Scheduled messages.
-    std::multimap<double, MessageData> messages;
+    std::multimap<double, InstrumentData> messages;
   };
 
   // List of instruments.

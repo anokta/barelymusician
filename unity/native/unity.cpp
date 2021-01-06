@@ -146,13 +146,13 @@ void AllNotesOff(int64 id) {
 
 void NoteOff(int64 id, float pitch) {
   if (barelymusician) {
-    barelymusician->engine.NoteOff(id, pitch);
+    barelymusician->engine.SetNoteOff(id, pitch);
   }
 }
 
 void NoteOn(int64 id, float pitch, float intensity) {
   if (barelymusician) {
-    barelymusician->engine.NoteOn(id, pitch, intensity);
+    barelymusician->engine.SetNoteOn(id, pitch, intensity);
   }
 }
 

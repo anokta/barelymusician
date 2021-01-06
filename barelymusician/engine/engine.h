@@ -4,12 +4,12 @@
 #include <map>
 #include <memory>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
 #include "barelymusician/base/types.h"
+#include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_processor.h"
@@ -193,34 +193,10 @@ class Engine {
   void Update(int sample_rate, int64 timestamp);
 
  private:
-  // Instrument parameter.
-  struct InstrumentParam {
-    // Current parameter value.
-    float value;
-
-    // Default parameter value.
-    float default_value;
-  };
-
-  // Instrument controller (main thread).
-  struct InstrumentController {
-    // Constructs new |InstrumentController| with the given |default_params|.
-    InstrumentController(
-        const std::vector<InstrumentParamDefinition>& default_params);
-
-    // Instrument params.
-    std::unordered_map<int, InstrumentParam> params;
-
-    // Active note indices.
-    std::unordered_set<float> notes;
-
-    // Scheduled messages.
-    std::multimap<double, InstrumentData> messages;
-  };
-
   // List of instruments.
   std::unordered_map<int64, InstrumentController> controllers_;
   std::unordered_map<int64, InstrumentProcessor> processors_;
+  std::unordered_map<int64, std::multimap<double, InstrumentData>> scores_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;

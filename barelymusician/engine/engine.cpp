@@ -81,7 +81,17 @@ Engine::Engine()
 StatusOr<int64> Engine::Create(InstrumentDefinition instrument,
                                std::vector<InstrumentParamDefinition> params) {
   const auto instrument_id = ++id_counter_;
-  controllers_.emplace(instrument_id, InstrumentController{params});
+  auto controller = InstrumentController{params};
+  controller.SetNoteOffCallback(
+      [this, instrument_id](int64 timestamp, float pitch) {
+        note_off_callback_(timestamp, instrument_id, pitch);
+      });
+  controller.SetNoteOnCallback(
+      [this, instrument_id](int64 timestamp, float pitch, float intensity) {
+        note_on_callback_(timestamp, instrument_id, pitch, intensity);
+      });
+  controllers_.emplace(instrument_id, std::move(controller));
+  scores_.emplace(instrument_id, std::multimap<double, InstrumentData>{});
   task_runner_.Add([this, instrument_id, instrument, params]() {
     auto processor = InstrumentProcessor(instrument);
     for (const auto& param : params) {
@@ -95,6 +105,7 @@ StatusOr<int64> Engine::Create(InstrumentDefinition instrument,
 
 Status Engine::Destroy(int64 instrument_id) {
   if (controllers_.erase(instrument_id) > 0) {
+    scores_.erase(instrument_id);
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
     return Status::kOk;
@@ -104,8 +115,8 @@ Status Engine::Destroy(int64 instrument_id) {
 
 StatusOr<float> Engine::GetParam(int64 instrument_id, int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (const auto* param = FindOrNull(controller->params, param_id)) {
-      return param->value;
+    if (const float* value = controller->GetParam(param_id)) {
+      return *value;
     }
   }
   return Status::kNotFound;
@@ -117,7 +128,7 @@ double Engine::GetTempo() const { return tempo_; }
 
 StatusOr<bool> Engine::IsNoteOn(int64 instrument_id, float pitch) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return controller->notes.find(pitch) != controller->notes.cend();
+    return controller->IsNoteOn(pitch);
   }
   return Status::kNotFound;
 }
@@ -132,9 +143,8 @@ void Engine::AllNotesOff() {
 
 Status Engine::AllNotesOff(int64 instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    std::vector<float> notes{controller->notes.begin(),
-                             controller->notes.end()};
-    controller->notes.clear();
+    const auto notes = controller->GetAllActiveNotes();
+    controller->SetAllNotesOff();
     if (note_off_callback_) {
       for (const float note : notes) {
         note_off_callback_(last_timestamp_, instrument_id, note);
@@ -165,16 +175,15 @@ Status Engine::Process(int64 instrument_id, int64 timestamp, float* output,
 
 Status Engine::ResetAllParams(int64 instrument_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    for (auto& [id, param] : controller->params) {
-      param.value = param.default_value;
-    }
-    task_runner_.Add([this, instrument_id, params = controller->params]() {
-      if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        for (const auto& [id, param] : params) {
-          processor->SetData(last_timestamp_, Param{id, param.default_value});
-        }
-      }
-    });
+    controller->ResetAllParams();
+    task_runner_.Add(
+        [this, instrument_id, params = controller->GetAllParams()]() {
+          if (auto* processor = FindOrNull(processors_, instrument_id)) {
+            for (const auto& [id, param] : params) {
+              processor->SetData(last_timestamp_, Param{id, param});
+            }
+          }
+        });
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -194,10 +203,7 @@ Status Engine::SetCustomData(int64 instrument_id, void* custom_data) {
 
 Status Engine::SetNoteOff(int64 instrument_id, float pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->notes.erase(pitch) > 0) {
-      if (note_off_callback_) {
-        note_off_callback_(last_timestamp_, instrument_id, pitch);
-      }
+    if (controller->SetData(last_timestamp_, NoteOff{pitch})) {
       task_runner_.Add([this, instrument_id, pitch]() {
         if (auto* processor = FindOrNull(processors_, instrument_id)) {
           processor->SetData(last_timestamp_, NoteOff{pitch});
@@ -212,10 +218,7 @@ Status Engine::SetNoteOff(int64 instrument_id, float pitch) {
 
 Status Engine::SetNoteOn(int64 instrument_id, float pitch, float intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->notes.emplace(pitch).second) {
-      if (note_on_callback_) {
-        note_on_callback_(last_timestamp_, instrument_id, pitch, intensity);
-      }
+    if (controller->SetData(last_timestamp_, NoteOn{pitch, intensity})) {
       task_runner_.Add([this, instrument_id, pitch, intensity]() {
         if (auto* processor = FindOrNull(processors_, instrument_id)) {
           processor->SetData(last_timestamp_, NoteOn{pitch, intensity});
@@ -230,18 +233,15 @@ Status Engine::SetNoteOn(int64 instrument_id, float pitch, float intensity) {
 
 Status Engine::SetParam(int64 instrument_id, int param_id, float param_value) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (auto* param = FindOrNull(controller->params, param_id)) {
-      if (param->value != param_value) {
-        param->value = param_value;
-        task_runner_.Add([this, instrument_id, param_id, param_value]() {
-          if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            processor->SetData(last_timestamp_, Param{param_id, param_value});
-          }
-        });
-        return Status::kOk;
-      }
-      return Status::kInvalidArgument;
+    if (controller->SetData(last_timestamp_, Param{param_id, param_value})) {
+      task_runner_.Add([this, instrument_id, param_id, param_value]() {
+        if (auto* processor = FindOrNull(processors_, instrument_id)) {
+          processor->SetData(last_timestamp_, Param{param_id, param_value});
+        }
+      });
+      return Status::kOk;
     }
+    return Status::kInvalidArgument;
   }
   return Status::kNotFound;
 }
@@ -253,8 +253,8 @@ void Engine::ClearAllScheduledNotes() {
 }
 
 Status Engine::ClearAllScheduledNotes(int64 instrument_id) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->messages.clear();
+  if (auto* score = FindOrNull(scores_, instrument_id)) {
+    score->clear();
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -262,10 +262,10 @@ Status Engine::ClearAllScheduledNotes(int64 instrument_id) {
 
 Status Engine::ScheduleNote(int64 instrument_id, double position,
                             double duration, float pitch, float intensity) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+  if (auto* score = FindOrNull(scores_, instrument_id)) {
     if (position_ <= position && duration >= 0.0) {
-      controller->messages.emplace(position, NoteOn{pitch, intensity});
-      controller->messages.emplace(position + duration, NoteOff{pitch});
+      score->emplace(position, NoteOn{pitch, intensity});
+      score->emplace(position + duration, NoteOff{pitch});
       return Status::kOk;
     }
     return Status::kInvalidArgument;
@@ -285,15 +285,7 @@ void Engine::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-void Engine::SetPosition(double position) {
-  if (position_ < position) {
-    for (auto& [instrument_id, controller] : controllers_) {
-      controller.messages.erase(controller.messages.cbegin(),
-                                controller.messages.lower_bound(position));
-    }
-  }
-  position_ = position;
-}
+void Engine::SetPosition(double position) { position_ = position; }
 
 void Engine::SetTempo(double tempo) { tempo_ = tempo; }
 
@@ -326,67 +318,28 @@ void Engine::Update(int sample_rate, int64 timestamp) {
     }
   }
   // Trigger messages.
-  for (auto& controller_it : controllers_) {
-    const int64& instrument_id = controller_it.first;
-    InstrumentController& controller = controller_it.second;
-    const auto cbegin = controller.messages.lower_bound(position_);
-    const auto cend = controller.messages.lower_bound(end_position);
+  for (auto& [id, score] : scores_) {
+    auto* controller = FindOrNull(controllers_, id);
+    const auto cbegin = score.lower_bound(position_);
+    const auto cend = score.lower_bound(end_position);
     for (auto it = cbegin; it != cend; ++it) {
       const int64 message_timestamp =
           last_timestamp_ +
           SamplesFromBeats(sample_rate, tempo_, it->first - position_);
       const auto message_data = it->second;
-      std::visit(InstrumentDataVisitor{
-                     [&](const NoteOff& data) {
-                       if (controller.notes.erase(data.pitch) > 0) {
-                         if (note_off_callback_) {
-                           note_off_callback_(message_timestamp, instrument_id,
-                                              data.pitch);
-                         }
-                         task_runner_.Add(
-                             [this, instrument_id, message_timestamp, data]() {
-                               if (auto* processor =
-                                       FindOrNull(processors_, instrument_id)) {
-                                 processor->SetData(message_timestamp,
-                                                    NoteOff{data.pitch});
-                               }
-                             });
-                       }
-                     },
-                     [&](const NoteOn& data) {
-                       if (controller.notes.emplace(data.pitch).second) {
-                         if (note_on_callback_) {
-                           note_on_callback_(message_timestamp, instrument_id,
-                                             data.pitch, data.intensity);
-                         }
-                         task_runner_.Add(
-                             [this, instrument_id, message_timestamp, data]() {
-                               if (auto* processor =
-                                       FindOrNull(processors_, instrument_id)) {
-                                 processor->SetData(
-                                     message_timestamp,
-                                     NoteOn{data.pitch, data.intensity});
-                               }
-                             });
-                       }
-                     },
-                     [](const auto&) {}},
-                 message_data);
+      if (controller->SetData(message_timestamp, message_data)) {
+        task_runner_.Add([this, id = id, message_timestamp, message_data]() {
+          if (auto* processor = FindOrNull(processors_, id)) {
+            processor->SetData(message_timestamp, message_data);
+          }
+        });
+      }
     }
-    controller.messages.erase(cbegin, cend);
+    score.erase(cbegin, cend);
   }
 
   last_timestamp_ = timestamp;
   position_ = end_position;
-}
-
-Engine::InstrumentController::InstrumentController(
-    const std::vector<InstrumentParamDefinition>& default_params) {
-  for (const auto& [id, default_value] : default_params) {
-    // TODO: std::min(std::max(default_value, min_value), max_value)
-    const float value = default_value;
-    params.emplace(id, InstrumentParam{value, value});
-  }
 }
 
 }  // namespace barelyapi

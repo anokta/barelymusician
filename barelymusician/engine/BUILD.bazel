@@ -7,6 +7,7 @@ cc_library(
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
     deps = [
+        ":instrument_controller",
         ":instrument_data",
         ":instrument_definition",
         ":instrument_processor",
@@ -15,6 +16,17 @@ cc_library(
         "//barelymusician/base:status",
         "//barelymusician/base:types",
         "//barelymusician/dsp:dsp_utils",
+    ],
+)
+
+cc_library(
+    name = "instrument_controller",
+    srcs = ["instrument_controller.cpp"],
+    hdrs = ["instrument_controller.h"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
+        "//barelymusician/base:types",
     ],
 )
 

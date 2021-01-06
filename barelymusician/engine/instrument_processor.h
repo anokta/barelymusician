@@ -11,7 +11,7 @@ namespace barelyapi {
 
 class InstrumentProcessor {
  public:
-  InstrumentProcessor(InstrumentDefinition definition);
+  explicit InstrumentProcessor(InstrumentDefinition definition);
   ~InstrumentProcessor();
 
   // Non-copyable.

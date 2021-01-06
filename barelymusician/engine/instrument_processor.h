@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 
 #include <map>
-#include <utility>
 
 #include "barelymusician/base/types.h"
 #include "barelymusician/engine/instrument_data.h"

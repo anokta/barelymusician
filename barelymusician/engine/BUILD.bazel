@@ -35,9 +35,7 @@ cc_library(
     deps = [
         ":instrument_data",
         ":instrument_definition",
-        "//barelymusician/base:logging",
         "//barelymusician/base:types",
-        "//barelymusician/dsp:dsp_utils",
     ],
 )
 

@@ -10,7 +10,6 @@ cc_library(
         ":instrument_data",
         ":instrument_definition",
         ":instrument_utils",
-        "//barelymusician/base:types",
     ],
 )
 
@@ -64,6 +63,7 @@ cc_test(
         ":instrument_data",
         ":instrument_definition",
         ":instrument_processor",
+        "//barelymusician/base:types",
         "@googletest//:gtest_main",
     ],
 )

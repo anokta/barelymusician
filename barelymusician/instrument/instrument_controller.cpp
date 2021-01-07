@@ -10,6 +10,7 @@ namespace barelyapi {
 
 namespace {
 
+// Returns sanitized parameter |value| with respect to the given |definition|.
 float Sanitize(const InstrumentParamDefinition& definition, float value) {
   if (definition.max_value.has_value()) {
     value = std::min(value, *definition.max_value);
@@ -23,19 +24,22 @@ float Sanitize(const InstrumentParamDefinition& definition, float value) {
 }  // namespace
 
 InstrumentController::InstrumentController(
-    const InstrumentParamDefinitions& param_definitions) {
-  for (const auto& definition : param_definitions) {
-    const float value = Sanitize(definition, definition.default_value);
-    params_.emplace(definition.id, std::pair{definition, value});
+    const InstrumentParamDefinitions& definitions) {
+  params_.reserve(definitions.size());
+  for (const auto& definition : definitions) {
+    params_.emplace(
+        definition.id,
+        std::pair{definition, Sanitize(definition, definition.default_value)});
   }
 }
 
 std::vector<float> InstrumentController::GetAllNotes() const {
-  return {notes_.begin(), notes_.end()};
+  return std::vector<float>{notes_.begin(), notes_.end()};
 }
 
 std::vector<Param> InstrumentController::GetAllParams() const {
   std::vector<Param> params;
+  params.reserve(params_.size());
   std::transform(params_.begin(), params_.end(), std::back_inserter(params),
                  [](const auto& param) {
                    return Param{param.first, param.second.second};

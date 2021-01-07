@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "barelymusician/base/types.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"
 #include "gtest/gtest.h"
@@ -40,6 +41,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 
 // Tests that processing a single note produces the expected output.
 TEST(InstrumentProcessorTest, ProcessSingleNote) {
+  const int64 kTimestamp = 20;
   const float kPitch = 32.0f;
   const float kIntensity = 0.5f;
 
@@ -47,7 +49,7 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -55,10 +57,10 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   }
 
   // Start note.
-  processor.SetData(0, NoteOn{kPitch, kIntensity});
+  processor.SetData(kTimestamp, NoteOn{kPitch, kIntensity});
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -67,10 +69,10 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   }
 
   // Stop note.
-  processor.SetData(0, NoteOff{kPitch});
+  processor.SetData(kTimestamp, NoteOff{kPitch});
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

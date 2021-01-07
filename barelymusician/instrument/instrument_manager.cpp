@@ -60,7 +60,7 @@ StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
   return Status::kNotFound;
 }
 
-StatusOr<std::vector<Param>> InstrumentManager::GetAllParams(
+StatusOr<std::vector<std::pair<int, float>>> InstrumentManager::GetAllParams(
     int64 instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllParams();

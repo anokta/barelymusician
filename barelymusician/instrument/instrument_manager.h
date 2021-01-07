@@ -50,7 +50,8 @@ class InstrumentManager {
 
   StatusOr<std::vector<float>> GetAllNotes(int64 instrument_id) const;
 
-  StatusOr<std::vector<Param>> GetAllParams(int64 instrument_id) const;
+  StatusOr<std::vector<std::pair<int, float>>> GetAllParams(
+      int64 instrument_id) const;
 
   // Returns parameter value.
   //

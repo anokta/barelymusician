@@ -26,7 +26,7 @@ class InstrumentController {
   // Returns all parameters.
   //
   // @return List of all instrument parameters.
-  std::vector<Param> GetAllParams() const;
+  std::vector<std::pair<int, float>> GetAllParams() const;
 
   // Returns parameter value.
   //

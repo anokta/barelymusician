@@ -21,15 +21,17 @@ struct NoteOff {
 struct NoteOn {
   // Note pitch.
   float pitch;
+
   // Note intensity.
   float intensity;
 };
 
-// Param data.
+// Parameter data.
 struct Param {
-  // Param id.
+  // Parameter id.
   int id;
-  // Param value.
+
+  // Parameter value.
   float value;
 };
 

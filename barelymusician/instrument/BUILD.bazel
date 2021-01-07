@@ -57,6 +57,17 @@ cc_library(
 )
 
 cc_test(
+    name = "instrument_controller_test",
+    srcs = ["instrument_controller_test.cpp"],
+    deps = [
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "instrument_processor_test",
     srcs = ["instrument_processor_test.cpp"],
     deps = [

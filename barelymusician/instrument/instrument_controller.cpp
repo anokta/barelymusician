@@ -37,12 +37,12 @@ std::vector<float> InstrumentController::GetAllNotes() const {
   return std::vector<float>{notes_.begin(), notes_.end()};
 }
 
-std::vector<Param> InstrumentController::GetAllParams() const {
-  std::vector<Param> params;
+std::vector<std::pair<int, float>> InstrumentController::GetAllParams() const {
+  std::vector<std::pair<int, float>> params;
   params.reserve(params_.size());
   std::transform(params_.begin(), params_.end(), std::back_inserter(params),
                  [](const auto& param) {
-                   return Param{param.first, param.second.second};
+                   return std::pair(param.first, param.second.second);
                  });
   return params;
 }

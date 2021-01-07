@@ -65,14 +65,14 @@ constexpr char kDrumsBaseFilename[] =
 
 int64 BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
                            float attack, float release) {
-  return GetValue(engine->Create(
+  return engine->Create(
       BasicSynthInstrument::GetDefinition(kSampleRate),
       {{BasicSynthInstrumentParam::kNumVoices,
         static_cast<float>(kNumInstrumentVoices)},
        {BasicSynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
        {BasicSynthInstrumentParam::kGain, gain},
        {BasicSynthInstrumentParam::kEnvelopeAttack, attack},
-       {BasicSynthInstrumentParam::kEnvelopeRelease, release}}));
+       {BasicSynthInstrumentParam::kEnvelopeRelease, release}});
 }
 
 void ComposeChord(float root_note_index, const std::vector<float>& scale,
@@ -216,7 +216,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Note on callback.
-  const auto note_on_callback = [](int64, int64 performer_id, float pitch,
+  const auto note_on_callback = [](int64 performer_id, int64, float pitch,
                                    float intensity) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
@@ -224,7 +224,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](int64, int64 performer_id, float pitch) {
+  const auto note_off_callback = [](int64 performer_id, int64, float pitch) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << pitch << ")";
   };
   engine.SetNoteOffCallback(note_off_callback);
@@ -260,8 +260,8 @@ int main(int /*argc*/, char* argv[]) {
   performers.emplace(line_2_instrument_id, line_2_beat_composer_callback);
 
   // Add drumkit instrument.
-  const auto drumkit_instrument_id = GetValue(
-      engine.Create(BasicDrumkitInstrument::GetDefinition(kSampleRate)));
+  const auto drumkit_instrument_id =
+      engine.Create(BasicDrumkitInstrument::GetDefinition(kSampleRate));
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kPitchKick, "basic_kick.wav"},
       {barelyapi::kPitchSnare, "basic_snare.wav"},

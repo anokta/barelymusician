@@ -33,7 +33,6 @@ cc_library(
         ":instrument_definition",
         ":instrument_processor",
         ":instrument_utils",
-        "//barelymusician/base:constants",
         "//barelymusician/base:status",
         "//barelymusician/base:task_runner",
         "//barelymusician/base:types",

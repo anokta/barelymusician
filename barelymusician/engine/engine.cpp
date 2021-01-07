@@ -44,16 +44,12 @@ Engine::Engine()
       tempo_(0.0),
       beat_callback_(nullptr) {}
 
-StatusOr<int64> Engine::Create(InstrumentDefinition definition,
-                               InstrumentParamDefinitions param_definitions) {
-  const auto instrument_id_or =
+int64 Engine::Create(InstrumentDefinition definition,
+                     InstrumentParamDefinitions param_definitions) {
+  const int64 instrument_id =
       manager_.Create(definition, param_definitions, last_timestamp_);
-  if (IsOk(instrument_id_or)) {
-    const int64 instrument_id = GetValue(instrument_id_or);
-    scores_.emplace(instrument_id, std::multimap<double, InstrumentData>{});
-    return instrument_id;
-  }
-  return instrument_id_or;
+  scores_.emplace(instrument_id, std::multimap<double, InstrumentData>{});
+  return instrument_id;
 }
 
 Status Engine::Destroy(int64 instrument_id) {
@@ -151,12 +147,12 @@ void Engine::SetBeatCallback(BeatCallback beat_callback) {
   beat_callback_ = std::move(beat_callback);
 }
 
-void Engine::SetNoteOffCallback(NoteOffCallback note_off_callback) {
-  manager_.SetNoteOffCallback(note_off_callback);
+void Engine::SetNoteOffCallback(InstrumentNoteOffCallback note_off_callback) {
+  manager_.SetNoteOffCallback(std::move(note_off_callback));
 }
 
-void Engine::SetNoteOnCallback(NoteOnCallback note_on_callback) {
-  manager_.SetNoteOnCallback(note_on_callback);
+void Engine::SetNoteOnCallback(InstrumentNoteOnCallback note_on_callback) {
+  manager_.SetNoteOnCallback(std::move(note_on_callback));
 }
 
 void Engine::SetPosition(double position) { position_ = position; }

@@ -21,12 +21,6 @@ class Engine {
   // Beat callback signature.
   using BeatCallback = std::function<void(int64 timestamp, int beat)>;
 
-  // Note off callback signature.
-  using NoteOffCallback = InstrumentManager::NoteOffCallback;
-
-  // Note on callback signature.
-  using NoteOnCallback = InstrumentManager::NoteOnCallback;
-
   // Constructs new |Engine|.
   Engine();
 
@@ -35,8 +29,8 @@ class Engine {
   // @param instrument instrument Instrument to play.
   // @param params Default instrument params.
   // @return Instrument id.
-  StatusOr<int64> Create(InstrumentDefinition definition,
-                         InstrumentParamDefinitions param_definitions = {});
+  int64 Create(InstrumentDefinition definition,
+               InstrumentParamDefinitions param_definitions = {});
 
   // Destroys instrument.
   //
@@ -160,12 +154,12 @@ class Engine {
   // Sets note off callback.
   //
   // @param note_off_callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback);
+  void SetNoteOffCallback(InstrumentNoteOffCallback note_off_callback);
 
   // Sets note on callback.
   //
   // @param note_on_callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback);
+  void SetNoteOnCallback(InstrumentNoteOnCallback note_on_callback);
 
   // Sets playback position.
   //

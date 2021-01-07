@@ -76,17 +76,17 @@ int64 CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
             [note_on_fn_ptr](InstrumentState*, float pitch, float intensity) {
               note_on_fn_ptr(pitch, intensity);
             }};
-    return GetValue(barelymusician->engine.Create(std::move(definition)));
+    return barelymusician->engine.Create(std::move(definition));
   }
   return kInvalidId;
 }
 
 int64 CreateBasicSynthInstrument() {
   if (barelymusician) {
-    return GetValue(barelymusician->engine.Create(
+    return barelymusician->engine.Create(
         examples::BasicSynthInstrument::GetDefinition(
             barelymusician->sample_rate),
-        examples::BasicSynthInstrument::GetDefaultParams()));
+        examples::BasicSynthInstrument::GetDefaultParams());
   }
   return kInvalidId;
 }
@@ -213,7 +213,7 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
     if (note_off_callback_ptr) {
       barelymusician->engine.SetNoteOffCallback(
           [note_off_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int64 timestamp, int64 id, float pitch) {
+              int64 id, int64 timestamp, float pitch) {
             note_off_callback_ptr(SecondsFromSamples(sample_rate, timestamp),
                                   id, pitch);
           });
@@ -228,7 +228,7 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
     if (note_on_callback_ptr) {
       barelymusician->engine.SetNoteOnCallback(
           [note_on_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int64 timestamp, int64 id, float pitch, float intensity) {
+              int64 id, int64 timestamp, float pitch, float intensity) {
             note_on_callback_ptr(SecondsFromSamples(sample_rate, timestamp), id,
                                  pitch, intensity);
           });

@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
 #include "barelymusician/base/task_runner.h"
 #include "barelymusician/base/types.h"
@@ -16,138 +15,145 @@
 
 namespace barelyapi {
 
-// Class that manages processing of instruments.
+// Instrument note off callback signature.
+using InstrumentNoteOffCallback =
+    std::function<void(int64 instrument_id, int64 timestamp, float note_pitch)>;
+
+// Instrument note on callback signature.
+using InstrumentNoteOnCallback =
+    std::function<void(int64 instrument_id, int64 timestamp, float note_pitch,
+                       float note_intensity)>;
+
+// Instrument manager.
 class InstrumentManager {
  public:
-  // Note off callback signature.
-  using NoteOffCallback = std::function<void(
-      int64 timestamp, int64 instrument_id, float note_pitch)>;
-
-  // Note on callback signature.
-  using NoteOnCallback =
-      std::function<void(int64 timestamp, int64 instrument_id, float note_pitch,
-                         float note_intensity)>;
-
   // Constructs new |InstrumentManager|.
   InstrumentManager();
 
-  // Creates new instrument.
+  // Creates new instrument at timestamp.
   //
-  // @param instrument instrument Instrument to play.
-  // @param params Default instrument params.
+  // @param definition Instrument definition.
+  // @param param_definitions Instrument parameter definitions.
   // @param timestamp Timestamp in frames.
   // @return Instrument id.
-  StatusOr<int64> Create(InstrumentDefinition definition,
-                         InstrumentParamDefinitions param_definitions,
-                         int64 timestamp);
+  int64 Create(InstrumentDefinition definition,
+               InstrumentParamDefinitions param_definitions, int64 timestamp);
 
-  // Destroys instrument.
+  // Destroys instrument at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
   // @return Status.
   Status Destroy(int64 instrument_id, int64 timestamp);
 
+  // Returns all active instrument notes.
+  //
+  // @param instrument_id Instrument id.
+  // @return List of active note pitches if successful, error status otherwise.
   StatusOr<std::vector<float>> GetAllNotes(int64 instrument_id) const;
 
+  // Returns all instrument parameters.
+  //
+  // @param instrument_id Instrument id.
+  // @return List of parameters if successful, error status otherwise.
   StatusOr<std::vector<std::pair<int, float>>> GetAllParams(
       int64 instrument_id) const;
 
-  // Returns parameter value.
+  // Returns instrument parameter value.
   //
   // @param instrument_id Instrument id.
   // @param param_id Parameter id.
-  // @return Parameter value, if found.
+  // @return Parameter value if successful, error status otherwise.
   StatusOr<float> GetParam(int64 instrument_id, int param_id) const;
 
-  // Returns whether note is active or not.
+  // Returns whether instrument note is active or not.
   //
   // @param instrument_id Instrument id.
   // @param note_pitch Note pitch.
-  // @return True if note is active, if instrument found.
+  // @return True if note is active, error status otherwise.
   StatusOr<bool> IsNoteOn(int64 instrument_id, float note_pitch) const;
 
-  // Processes the next output buffer.
+  // Processes the next instrument output buffer at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
-  // @param output Pointer to output buffer.
+  // @param output Pointer to the output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   // @return Status.
   Status Process(int64 instrument_id, int64 timestamp, float* output,
                  int num_channels, int num_frames);
 
-  // Resets all parameters to their default values.
+  // Resets all instrument parameters to their default values at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
-  // @return True if successful, if instrument found.
+  // @return Status.
   Status ResetAllParams(int64 instrument_id, int64 timestamp);
 
-  // Resets parameter to its default value.
+  // Resets instrument parameter to its default value at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
   // @param param_id Parameter id.
-  // @return True if successful, if instrument parameter found.
+  // @return Status.
   Status ResetParam(int64 instrument_id, int64 timestamp, int param_id);
 
-  // Stops all playing notes.
+  // Stops all active instrument notes at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
-  // @return True if successful, if instrument found.
+  // @return Status.
   Status SetAllNotesOff(int64 instrument_id, int64 timestamp);
 
-  // Sets custom data.
+  // Sets instrument custom data at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
   // @param custom_data Custom data.
-  // @return True if successful, if instrument found.
+  // @return Status.
   Status SetCustomData(int64 instrument_id, int64 timestamp, void* custom_data);
 
-  // Stops playing note.
+  // Sets instrument note off at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
   // @param note_pitch Note pitch.
-  // @return True if successful, if instrument found.
+  // @return Status.
   Status SetNoteOff(int64 instrument_id, int64 timestamp, float note_pitch);
 
-  // Sets note off callback.
+  // Sets instrument note off callback.
   //
-  // @param note_off_callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback);
+  // @param note_off_callback Instrument note off callback.
+  void SetNoteOffCallback(InstrumentNoteOffCallback note_off_callback);
 
-  // Starts playing note.
+  // Sets instrument note on at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
   // @param note_pitch Note pitch.
   // @param note_intensity Note intensity.
-  // @return True if successful, if instrument found.
+  // @return Status.
   Status SetNoteOn(int64 instrument_id, int64 timestamp, float note_pitch,
                    float note_intensity);
 
-  // Sets note on callback.
+  // Sets instrument note on callback.
   //
-  // @param note_on_callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback);
+  // @param note_on_callback Instrument note on callback.
+  void SetNoteOnCallback(InstrumentNoteOnCallback note_on_callback);
 
-  // Sets parameter value.
+  // Sets instrument parameter value at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.
   // @param param_id Parameter id.
   // @param param_value Parameter value.
-  // @return True if successful, if instrument parameter found.
+  // @return Status.
   Status SetParam(int64 instrument_id, int64 timestamp, int param_id,
                   float param_value);
 
  private:
-  // Sets instrument processor data.
+  // Sets instrument processor |data| at |timestamp|.
   void SetProcessorData(int64 instrument_id, int64 timestamp,
                         InstrumentData data);
 
@@ -155,17 +161,17 @@ class InstrumentManager {
   std::unordered_map<int64, InstrumentController> controllers_;
   std::unordered_map<int64, InstrumentProcessor> processors_;
 
-  // int64 counter.
+  // Instrument note off callback.
+  InstrumentNoteOffCallback note_off_callback_;
+
+  // Instrument note on callback.
+  InstrumentNoteOnCallback note_on_callback_;
+
+  // Instrument id counter.
   int64 id_counter_;
 
-  // Task runner.
+  // Audio thread task runner.
   TaskRunner task_runner_;
-
-  // Note off callback.
-  NoteOffCallback note_off_callback_;
-
-  // Note on callback.
-  NoteOnCallback note_on_callback_;
 };
 
 }  // namespace barelyapi

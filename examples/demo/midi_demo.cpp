@@ -98,11 +98,11 @@ int main(int /*argc*/, char* argv[]) {
 
   Engine engine;
   engine.SetTempo(kTempo);
-  engine.SetNoteOnCallback([](int64, int64 id, float pitch, float intensity) {
+  engine.SetNoteOnCallback([](int64 id, int64, float pitch, float intensity) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
   });
-  engine.SetNoteOffCallback([](int64, int64 id, float pitch) {
+  engine.SetNoteOffCallback([](int64 id, int64, float pitch) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
   });
 
@@ -115,7 +115,7 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Create instrument.
-    const auto instrument_id = GetValue(
+    const auto instrument_id =
         engine.Create(BasicSynthInstrument::GetDefinition(kSampleRate),
                       {{BasicSynthInstrumentParam::kNumVoices,
                         static_cast<float>(kNumInstrumentVoices)},
@@ -125,7 +125,7 @@ int main(int /*argc*/, char* argv[]) {
                         kInstrumentEnvelopeAttack},
                        {BasicSynthInstrumentParam::kEnvelopeRelease,
                         kInstrumentEnvelopeRelease},
-                       {BasicSynthInstrumentParam::kGain, kInstrumentGain}}));
+                       {BasicSynthInstrumentParam::kGain, kInstrumentGain}});
     for (const Note& note : score) {
       engine.ScheduleNote(instrument_id, note.position, note.duration,
                           note.pitch, note.intensity);

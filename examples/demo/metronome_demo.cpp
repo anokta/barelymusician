@@ -55,7 +55,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Engine engine;
   engine.SetTempo(kInitialTempo);
 
-  const auto metronome_id = GetValue(engine.Create(
+  const auto metronome_id = engine.Create(
       BasicSynthInstrument::GetDefinition(kSampleRate),
       {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
@@ -64,7 +64,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         static_cast<float>(kOscillatorType)},
        {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack), kAttack},
        {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeRelease),
-        kRelease}}));
+        kRelease}});
 
   // Beat callback.
   const auto beat_callback = [&](int64, int beat) {

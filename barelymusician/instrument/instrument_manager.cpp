@@ -9,20 +9,20 @@ namespace barelyapi {
 
 namespace {
 
-// Maximum number of tasks to be added per each |Process| call.
+// Maximum number of tasks to be executed per each |Process| call.
 constexpr int kNumMaxTasks = 1000;
 
 }  // namespace
 
 InstrumentManager::InstrumentManager()
-    : id_counter_(0),
-      task_runner_(kNumMaxTasks),
-      note_off_callback_(nullptr),
-      note_on_callback_(nullptr) {}
+    : note_off_callback_(nullptr),
+      note_on_callback_(nullptr),
+      id_counter_(0),
+      task_runner_(kNumMaxTasks) {}
 
-StatusOr<int64> InstrumentManager::Create(
-    InstrumentDefinition definition,
-    InstrumentParamDefinitions param_definitions, int64 timestamp) {
+int64 InstrumentManager::Create(InstrumentDefinition definition,
+                                InstrumentParamDefinitions param_definitions,
+                                int64 timestamp) {
   const int64 instrument_id = ++id_counter_;
   InstrumentController controller(param_definitions);
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
@@ -38,13 +38,14 @@ StatusOr<int64> InstrumentManager::Create(
 }
 
 Status InstrumentManager::Destroy(int64 instrument_id, int64 timestamp) {
-  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
+  if (const auto it = controllers_.find(instrument_id);
+      it != controllers_.end()) {
     if (note_off_callback_) {
-      for (const auto& note : controller->GetAllNotes()) {
-        note_off_callback_(timestamp, instrument_id, note);
+      for (const auto& note_pitch : it->second.GetAllNotes()) {
+        note_off_callback_(instrument_id, timestamp, note_pitch);
       }
     }
-    controllers_.erase(instrument_id);
+    controllers_.erase(it);
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
     return Status::kOk;
@@ -131,15 +132,15 @@ Status InstrumentManager::SetAllNotesOff(int64 instrument_id, int64 timestamp) {
     auto notes = controller->GetAllNotes();
     controller->SetAllNotesOff();
     if (note_off_callback_) {
-      for (const auto& note : notes) {
-        note_off_callback_(timestamp, instrument_id, note);
+      for (const auto& note_pitch : notes) {
+        note_off_callback_(instrument_id, timestamp, note_pitch);
       }
     }
     task_runner_.Add(
         [this, instrument_id, timestamp, notes = std::move(notes)]() {
           if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            for (const auto& note : notes) {
-              processor->SetData(timestamp, NoteOff{note});
+            for (const auto& note_pitch : notes) {
+              processor->SetData(timestamp, NoteOff{note_pitch});
             }
           }
         });
@@ -162,7 +163,7 @@ Status InstrumentManager::SetNoteOff(int64 instrument_id, int64 timestamp,
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOff(note_pitch)) {
       if (note_off_callback_) {
-        note_off_callback_(timestamp, instrument_id, note_pitch);
+        note_off_callback_(instrument_id, timestamp, note_pitch);
       }
       SetProcessorData(instrument_id, timestamp, NoteOff{note_pitch});
       return Status::kOk;
@@ -172,7 +173,8 @@ Status InstrumentManager::SetNoteOff(int64 instrument_id, int64 timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
+void InstrumentManager::SetNoteOffCallback(
+    InstrumentNoteOffCallback note_off_callback) {
   note_off_callback_ = std::move(note_off_callback);
 }
 
@@ -181,7 +183,7 @@ Status InstrumentManager::SetNoteOn(int64 instrument_id, int64 timestamp,
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOn(note_pitch)) {
       if (note_on_callback_) {
-        note_on_callback_(timestamp, instrument_id, note_pitch, note_intensity);
+        note_on_callback_(instrument_id, timestamp, note_pitch, note_intensity);
       }
       SetProcessorData(instrument_id, timestamp,
                        NoteOn{note_pitch, note_intensity});
@@ -192,7 +194,8 @@ Status InstrumentManager::SetNoteOn(int64 instrument_id, int64 timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
+void InstrumentManager::SetNoteOnCallback(
+    InstrumentNoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 

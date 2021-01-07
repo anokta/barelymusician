@@ -77,15 +77,6 @@ class Engine {
   // @return True if playing.
   bool IsPlaying() const;
 
-  // Stops all notes.
-  void AllNotesOff();
-
-  // Stops all notes.
-  //
-  // @param instrument_id Instrument id.
-  // @return True if instrument found.
-  Status AllNotesOff(int64 instrument_id);
-
   // Processes the next output buffer.
   //
   // @param instrument_id Instrument id.
@@ -103,6 +94,17 @@ class Engine {
   // @param instrument_id Instrument id.
   // @return True if instrument found.
   Status ResetAllParams(int64 instrument_id);
+
+  Status ResetParam(int64 instrument_id, int param_id);
+
+  // Stops all notes.
+  void SetAllNotesOff();
+
+  // Stops all notes.
+  //
+  // @param instrument_id Instrument id.
+  // @return True if instrument found.
+  Status SetAllNotesOff(int64 instrument_id);
 
   // Sets custom data.
   //

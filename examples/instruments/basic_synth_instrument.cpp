@@ -86,19 +86,20 @@ InstrumentDefinition BasicSynthInstrument::GetDefinition(int sample_rate) {
 
 std::vector<InstrumentParamDefinition>
 BasicSynthInstrument::GetDefaultParams() {
-  return {{static_cast<int>(BasicSynthInstrumentParam::kGain), kDefaultGain},
+  return {{static_cast<int>(BasicSynthInstrumentParam::kGain), kDefaultGain,
+           0.0f, 1.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack),
-           kDefaultEnvelopeAttack},
+           kDefaultEnvelopeAttack, 0.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeDecay),
-           kDefaultEnvelopeDecay},
+           kDefaultEnvelopeDecay, 0.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeSustain),
-           kDefaultEnvelopeSustain},
+           kDefaultEnvelopeSustain, 0.0f, 1.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeRelease),
-           kDefaultEnvelopeRelease},
+           kDefaultEnvelopeRelease, 0.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kOscillatorType),
            static_cast<float>(kDefaultOscillatorType)},
           {static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
-           static_cast<float>(kDefaultNumVoices)}};
+           static_cast<float>(kDefaultNumVoices), 0.0f}};
 }
 
 }  // namespace examples

@@ -13,38 +13,26 @@ namespace barelyapi {
 
 class InstrumentController {
  public:
-  // Note off callback signature.
-  using NoteOffCallback = std::function<void(int64 timestamp, float pitch)>;
+  explicit InstrumentController(
+      const InstrumentParamDefinitions& param_definitions);
 
-  // Note on callback signature.
-  using NoteOnCallback =
-      std::function<void(int64 timestamp, float pitch, float intensity)>;
-
-  explicit InstrumentController(InstrumentParamDefinitions param_definitions);
-
-  std::vector<float> GetAllActiveNotes() const;
-  std::vector<std::pair<int, float>> GetAllParams() const;
+  std::vector<float> GetAllNotes() const;
+  std::vector<Param> GetAllParams() const;
 
   const float* GetParam(int id) const;
   bool IsNoteOn(float pitch) const;
 
-  void ResetAllParams();
-  void SetAllNotesOff();
-
-  bool SetData(int64 timestamp, InstrumentData data);
-
-  void SetNoteOffCallback(NoteOffCallback note_off_callback);
-  void SetNoteOnCallback(NoteOnCallback note_on_callback);
+  bool ResetParam(int id);
+  bool SetNoteOff(float pitch);
+  bool SetNoteOn(float pitch);
+  bool SetParam(int id, float value);
 
  private:
   // Active note pitches.
-  std::unordered_set<float> active_notes_;
+  std::unordered_set<float> notes_;
 
   // Instrument params.
   std::unordered_map<int, std::pair<InstrumentParamDefinition, float>> params_;
-
-  NoteOffCallback note_off_callback_;
-  NoteOnCallback note_on_callback_;
 };
 
 }  // namespace barelyapi

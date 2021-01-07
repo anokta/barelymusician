@@ -3,6 +3,7 @@
 
 #include <any>
 #include <functional>
+#include <optional>
 #include <vector>
 
 namespace barelyapi {
@@ -41,8 +42,8 @@ struct InstrumentDefinition {
 struct InstrumentParamDefinition {
   int id;
   float default_value;
-  //   float max_value;
-  //   float min_value;
+  std::optional<float> min_value;
+  std::optional<float> max_value;
 };
 
 using InstrumentParamDefinitions = std::vector<InstrumentParamDefinition>;

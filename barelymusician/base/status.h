@@ -19,13 +19,13 @@ enum class Status {
 
 // Value or error status.
 template <typename ValueType>
-using StatusOr = std::variant<ValueType, Status>;
+using StatusOr = std::variant<Status, ValueType>;
 
 // Returns |status_or| status.
 template <typename ValueType>
 Status GetStatus(const StatusOr<ValueType>& status_or) {
   DCHECK(std::holds_alternative<Status>(status_or));
-  return std::get<ValueType>(status_or);
+  return std::get<Status>(status_or);
 }
 
 // Returns |status_or| value.

@@ -140,7 +140,7 @@ bool IsPlaying() {
 
 void AllNotesOff(int64 id) {
   if (barelymusician) {
-    barelymusician->engine.AllNotesOff(id);
+    barelymusician->engine.SetAllNotesOff(id);
   }
 }
 

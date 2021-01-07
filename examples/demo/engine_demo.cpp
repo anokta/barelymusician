@@ -50,7 +50,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
-constexpr int64 kLookahead = 2 * kNumFrames;
+constexpr int64 kLookahead = 4 * kNumFrames;
 
 // Sequencer settings.
 constexpr double kTempo = 124.0;

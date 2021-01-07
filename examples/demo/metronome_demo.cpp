@@ -29,7 +29,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
-constexpr int64 kLookahead = 2 * kNumFrames;
+constexpr int64 kLookahead = 4 * kNumFrames;
 
 // Metronome settings.
 constexpr int kNumVoices = 1;

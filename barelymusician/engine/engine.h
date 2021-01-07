@@ -9,11 +9,9 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
 #include "barelymusician/base/types.h"
-#include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/instrument_processor.h"
-#include "barelymusician/engine/task_runner.h"
+#include "barelymusician/engine/instrument_manager.h"
 
 namespace barelyapi {
 
@@ -39,8 +37,8 @@ class Engine {
   // @param instrument instrument Instrument to play.
   // @param params Default instrument params.
   // @return Instrument id.
-  StatusOr<int64> Create(InstrumentDefinition instrument,
-                         std::vector<InstrumentParamDefinition> params = {});
+  StatusOr<int64> Create(InstrumentDefinition definition,
+                         InstrumentParamDefinitions param_definitions = {});
 
   // Destroys instrument.
   //
@@ -196,8 +194,7 @@ class Engine {
 
  private:
   // List of instruments.
-  std::unordered_map<int64, InstrumentController> controllers_;
-  std::unordered_map<int64, InstrumentProcessor> processors_;
+  InstrumentManager manager_;
   std::unordered_map<int64, std::multimap<double, InstrumentData>> scores_;
 
   // Denotes whether the clock is currently playing.
@@ -220,12 +217,6 @@ class Engine {
 
   // Note on callback.
   NoteOnCallback note_on_callback_;
-
-  // int64 counter.
-  int64 id_counter_;
-
-  // Task runner.
-  TaskRunner task_runner_;
 };
 
 }  // namespace barelyapi

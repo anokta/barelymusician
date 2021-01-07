@@ -22,12 +22,10 @@ class Engine {
   using BeatCallback = std::function<void(int64 timestamp, int beat)>;
 
   // Note off callback signature.
-  using NoteOffCallback =
-      std::function<void(int64 timestamp, int64 instrument_id, float pitch)>;
+  using NoteOffCallback = InstrumentManager::NoteOffCallback;
 
   // Note on callback signature.
-  using NoteOnCallback = std::function<void(
-      int64 timestamp, int64 instrument_id, float pitch, float intensity)>;
+  using NoteOnCallback = InstrumentManager::NoteOnCallback;
 
   // Constructs new |Engine|.
   Engine();
@@ -211,12 +209,6 @@ class Engine {
 
   // Beat callback.
   BeatCallback beat_callback_;
-
-  // Note off callback.
-  NoteOffCallback note_off_callback_;
-
-  // Note on callback.
-  NoteOnCallback note_on_callback_;
 };
 
 }  // namespace barelyapi

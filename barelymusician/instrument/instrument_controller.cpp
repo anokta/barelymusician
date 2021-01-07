@@ -54,6 +54,12 @@ bool InstrumentController::IsNoteOn(float pitch) const {
   return notes_.find(pitch) != notes_.end();
 }
 
+void InstrumentController::ResetAllParams() {
+  for (auto& [id, param] : params_) {
+    param.second = Sanitize(param.first, param.first.default_value);
+  }
+}
+
 bool InstrumentController::ResetParam(int id) {
   if (auto* param = FindOrNull(params_, id)) {
     param->second = Sanitize(param->first, param->first.default_value);
@@ -61,6 +67,8 @@ bool InstrumentController::ResetParam(int id) {
   }
   return false;
 }
+
+void InstrumentController::SetAllNotesOff() { notes_.clear(); }
 
 bool InstrumentController::SetNoteOff(float pitch) {
   return notes_.erase(pitch) > 0;

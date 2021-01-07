@@ -22,7 +22,9 @@ class InstrumentController {
   const float* GetParam(int id) const;
   bool IsNoteOn(float pitch) const;
 
+  void ResetAllParams();
   bool ResetParam(int id);
+  void SetAllNotesOff();
   bool SetNoteOff(float pitch);
   bool SetNoteOn(float pitch);
   bool SetParam(int id, float value);

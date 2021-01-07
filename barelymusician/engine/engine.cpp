@@ -42,13 +42,12 @@ Engine::Engine()
       last_timestamp_(0),
       position_(0.0),
       tempo_(0.0),
-      beat_callback_(nullptr),
-      note_off_callback_(nullptr),
-      note_on_callback_(nullptr) {}
+      beat_callback_(nullptr) {}
 
 StatusOr<int64> Engine::Create(InstrumentDefinition definition,
                                InstrumentParamDefinitions param_definitions) {
-  const auto instrument_id_or = manager_.Create(definition, param_definitions);
+  const auto instrument_id_or =
+      manager_.Create(definition, param_definitions, last_timestamp_);
   if (IsOk(instrument_id_or)) {
     const int64 instrument_id = GetValue(instrument_id_or);
     scores_.emplace(instrument_id, std::multimap<double, InstrumentData>{});
@@ -60,7 +59,7 @@ StatusOr<int64> Engine::Create(InstrumentDefinition definition,
 Status Engine::Destroy(int64 instrument_id) {
   if (scores_.erase(instrument_id) > 0) {
     SetAllNotesOff(instrument_id);
-    manager_.Destroy(instrument_id);
+    manager_.Destroy(instrument_id, last_timestamp_);
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -87,14 +86,7 @@ Status Engine::Process(int64 instrument_id, int64 timestamp, float* output,
 }
 
 Status Engine::ResetAllParams(int64 instrument_id) {
-  const auto params_or = manager_.GetAllParams(instrument_id);
-  if (IsOk(params_or)) {
-    for (const auto& param : GetValue(params_or)) {
-      manager_.ResetParam(instrument_id, last_timestamp_, param.id);
-    }
-    return Status::kOk;
-  }
-  return GetStatus(params_or);
+  return manager_.ResetAllParams(instrument_id, last_timestamp_);
 }
 
 Status Engine::ResetParam(int64 instrument_id, int param_id) {
@@ -108,17 +100,7 @@ void Engine::SetAllNotesOff() {
 }
 
 Status Engine::SetAllNotesOff(int64 instrument_id) {
-  const auto notes_or = manager_.GetAllNotes(instrument_id);
-  if (IsOk(notes_or)) {
-    for (const auto& note : GetValue(notes_or)) {
-      if (note_off_callback_) {
-        note_off_callback_(last_timestamp_, instrument_id, note);
-      }
-      manager_.SetNoteOff(instrument_id, last_timestamp_, note);
-    }
-    return Status::kOk;
-  }
-  return GetStatus(notes_or);
+  return manager_.SetAllNotesOff(instrument_id, last_timestamp_);
 }
 
 Status Engine::SetCustomData(int64 instrument_id, void* custom_data) {
@@ -126,21 +108,11 @@ Status Engine::SetCustomData(int64 instrument_id, void* custom_data) {
 }
 
 Status Engine::SetNoteOff(int64 instrument_id, float pitch) {
-  const auto status =
-      manager_.SetNoteOff(instrument_id, last_timestamp_, pitch);
-  if (IsOk(status) && note_off_callback_) {
-    note_off_callback_(last_timestamp_, instrument_id, pitch);
-  }
-  return status;
+  return manager_.SetNoteOff(instrument_id, last_timestamp_, pitch);
 }
 
 Status Engine::SetNoteOn(int64 instrument_id, float pitch, float intensity) {
-  const auto status =
-      manager_.SetNoteOn(instrument_id, last_timestamp_, pitch, intensity);
-  if (IsOk(status) && note_on_callback_) {
-    note_on_callback_(last_timestamp_, instrument_id, pitch, intensity);
-  }
-  return status;
+  return manager_.SetNoteOn(instrument_id, last_timestamp_, pitch, intensity);
 }
 
 Status Engine::SetParam(int64 instrument_id, int param_id, float param_value) {
@@ -180,11 +152,11 @@ void Engine::SetBeatCallback(BeatCallback beat_callback) {
 }
 
 void Engine::SetNoteOffCallback(NoteOffCallback note_off_callback) {
-  note_off_callback_ = std::move(note_off_callback);
+  manager_.SetNoteOffCallback(note_off_callback);
 }
 
 void Engine::SetNoteOnCallback(NoteOnCallback note_on_callback) {
-  note_on_callback_ = std::move(note_on_callback);
+  manager_.SetNoteOnCallback(note_on_callback);
 }
 
 void Engine::SetPosition(double position) { position_ = position; }
@@ -228,25 +200,17 @@ void Engine::Update(int sample_rate, int64 timestamp) {
           last_timestamp_ +
           SamplesFromBeats(sample_rate, tempo_, it->first - position_);
       const auto message_data = it->second;
-      std::visit(
-          InstrumentDataVisitor{
-              [&, id = id](const NoteOff& note_off) {
-                const auto status =
-                    manager_.SetNoteOff(id, message_timestamp, note_off.pitch);
-                if (IsOk(status) && note_off_callback_) {
-                  note_off_callback_(message_timestamp, id, note_off.pitch);
-                }
-              },
-              [&, id = id](const NoteOn& note_on) {
-                const auto status = manager_.SetNoteOn(
-                    id, message_timestamp, note_on.pitch, note_on.intensity);
-                if (IsOk(status) && note_on_callback_) {
-                  note_on_callback_(message_timestamp, id, note_on.pitch,
-                                    note_on.intensity);
-                }
-              },
-              [](const auto&) {}},
-          message_data);
+      std::visit(InstrumentDataVisitor{
+                     [&, id = id](const NoteOff& note_off) {
+                       manager_.SetNoteOff(id, message_timestamp,
+                                           note_off.pitch);
+                     },
+                     [&, id = id](const NoteOn& note_on) {
+                       manager_.SetNoteOn(id, message_timestamp, note_on.pitch,
+                                          note_on.intensity);
+                     },
+                     [](const auto&) {}},
+                 message_data);
     }
     score.erase(cbegin, cend);
   }

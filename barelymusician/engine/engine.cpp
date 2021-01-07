@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "barelymusician/dsp/dsp_utils.h"
-#include "barelymusician/engine/instrument_utils.h"
+#include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
 

@@ -3,7 +3,7 @@
 
 #include <functional>
 
-#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/instrument/instrument_definition.h"
 
 namespace barelyapi {
 namespace examples {

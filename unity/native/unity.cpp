@@ -8,7 +8,7 @@
 #include "barelymusician/base/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/instrument/instrument_definition.h"
 #include "examples/instruments/basic_synth_instrument.h"
 #include "unity/native/unity_log_writer.h"
 

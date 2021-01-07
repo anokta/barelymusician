@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_TASK_RUNNER_H_
-#define BARELYMUSICIAN_ENGINE_TASK_RUNNER_H_
+#ifndef BARELYMUSICIAN_BASE_TASK_RUNNER_H_
+#define BARELYMUSICIAN_BASE_TASK_RUNNER_H_
 
 #include <atomic>
 #include <functional>
@@ -58,4 +58,4 @@ class TaskRunner {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_TASK_RUNNER_H_
+#endif  // BARELYMUSICIAN_BASE_TASK_RUNNER_H_

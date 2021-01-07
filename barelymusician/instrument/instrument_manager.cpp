@@ -1,9 +1,9 @@
-#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/instrument/instrument_manager.h"
 
 #include <algorithm>
 #include <utility>
 
-#include "barelymusician/engine/instrument_utils.h"
+#include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
 

@@ -1,10 +1,10 @@
-#include "barelymusician/engine/instrument_controller.h"
+#include "barelymusician/instrument/instrument_controller.h"
 
 #include <algorithm>
 #include <iterator>
 #include <variant>
 
-#include "barelymusician/engine/instrument_utils.h"
+#include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
 

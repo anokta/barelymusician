@@ -19,6 +19,7 @@ cc_library(
         ":basic_enveloped_voice",
         ":instrument",
         "//barelymusician/dsp:sample_player",
+        "//barelymusician/instrument:instrument_definition",
         "//examples/util:wav_file",
     ],
 )
@@ -34,7 +35,7 @@ cc_library(
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
-        "//barelymusician/engine:instrument_definition",
+        "//barelymusician/instrument:instrument_definition",
     ],
 )
 
@@ -44,6 +45,6 @@ cc_library(
     hdrs = ["instrument.h"],
     deps = [
         "//barelymusician/base:logging",
-        "//barelymusician/engine:instrument_definition",
+        "//barelymusician/instrument:instrument_definition",
     ],
 )

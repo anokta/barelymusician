@@ -1,13 +1,13 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_CONTROLLER_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_CONTROLLER_H_
+#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_CONTROLLER_H_
+#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_CONTROLLER_H_
 
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
 #include "barelymusician/base/types.h"
-#include "barelymusician/engine/instrument_data.h"
-#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/instrument/instrument_data.h"
+#include "barelymusician/instrument/instrument_definition.h"
 
 namespace barelyapi {
 
@@ -37,4 +37,4 @@ class InstrumentController {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_CONTROLLER_H_
+#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_CONTROLLER_H_

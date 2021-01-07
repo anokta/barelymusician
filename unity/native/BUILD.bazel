@@ -45,7 +45,7 @@ cc_library(
         "//barelymusician/base:types",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
-        "//barelymusician/engine:instrument_definition",
+        "//barelymusician/instrument:instrument_definition",
         "//examples/instruments:basic_synth_instrument",
     ],
     alwayslink = True,

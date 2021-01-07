@@ -9,9 +9,9 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
 #include "barelymusician/base/types.h"
-#include "barelymusician/engine/instrument_data.h"
-#include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/instrument/instrument_data.h"
+#include "barelymusician/instrument/instrument_definition.h"
+#include "barelymusician/instrument/instrument_manager.h"
 
 namespace barelyapi {
 

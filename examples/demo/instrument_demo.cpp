@@ -6,7 +6,7 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/engine/task_runner.h"
+#include "barelymusician/base/task_runner.h"
 #include "examples/instruments/basic_synth_instrument.h"
 #include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"

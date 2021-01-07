@@ -1,17 +1,17 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
+#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_MANAGER_H_
+#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_MANAGER_H_
 
 #include <unordered_map>
 #include <vector>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
+#include "barelymusician/base/task_runner.h"
 #include "barelymusician/base/types.h"
-#include "barelymusician/engine/instrument_controller.h"
-#include "barelymusician/engine/instrument_data.h"
-#include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/instrument_processor.h"
-#include "barelymusician/engine/task_runner.h"
+#include "barelymusician/instrument/instrument_controller.h"
+#include "barelymusician/instrument/instrument_data.h"
+#include "barelymusician/instrument/instrument_definition.h"
+#include "barelymusician/instrument/instrument_processor.h"
 
 namespace barelyapi {
 
@@ -116,4 +116,4 @@ class InstrumentManager {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
+#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_MANAGER_H_

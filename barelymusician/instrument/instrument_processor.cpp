@@ -1,4 +1,4 @@
-#include "barelymusician/engine/instrument_processor.h"
+#include "barelymusician/instrument/instrument_processor.h"
 
 #include <utility>
 #include <variant>

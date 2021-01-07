@@ -27,7 +27,7 @@ cc_binary(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
-        "//barelymusician/engine:task_runner",
+        "//barelymusician/base:task_runner",
         "//examples/instruments:basic_synth_instrument",
         "//examples/util:audio_output",
         "//examples/util:input_manager",

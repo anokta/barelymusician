@@ -12,6 +12,19 @@ namespace barelyapi {
 // @return Const pointer to value if succeeds, nullptr otherwise.
 template <typename KeyType, typename ValueType>
 const ValueType* FindOrNull(const std::unordered_map<KeyType, ValueType>& map,
+                            const KeyType& key);
+
+// Returns a map value by key.
+//
+// @param map Map.
+// @param key Key.
+// @return Pointer to value if succeeds, nullptr otherwise.
+template <typename KeyType, typename ValueType>
+ValueType* FindOrNull(std::unordered_map<KeyType, ValueType>& map,
+                      const KeyType& key);
+
+template <typename KeyType, typename ValueType>
+const ValueType* FindOrNull(const std::unordered_map<KeyType, ValueType>& map,
                             const KeyType& key) {
   if (const auto it = map.find(key); it != map.cend()) {
     return &it->second;
@@ -19,11 +32,6 @@ const ValueType* FindOrNull(const std::unordered_map<KeyType, ValueType>& map,
   return nullptr;
 }
 
-// Returns a map value by key.
-//
-// @param map Map.
-// @param key Key.
-// @return Pointer to value if succeeds, nullptr otherwise.
 template <typename KeyType, typename ValueType>
 ValueType* FindOrNull(std::unordered_map<KeyType, ValueType>& map,
                       const KeyType& key) {

@@ -54,7 +54,6 @@ int64 Engine::Create(InstrumentDefinition definition,
 
 Status Engine::Destroy(int64 instrument_id) {
   if (scores_.erase(instrument_id) > 0) {
-    SetAllNotesOff(instrument_id);
     manager_.Destroy(instrument_id, last_timestamp_);
     return Status::kOk;
   }

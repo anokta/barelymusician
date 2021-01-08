@@ -1,6 +1,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 
 #include "barelymusician/base/constants.h"
+#include "barelymusician/base/types.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -35,13 +36,13 @@ TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
 }
 
 // Tests that converting arbitrary note indices returns expected frequencies.
-TEST(DspUtilsTest, FrequencyFromNoteIndex) {
+TEST(DspUtilsTest, FrequencyFromPitch) {
   const int kNumIndices = 4;
   const float kIndices[kNumIndices] = {21.0f, 60.0f, 69.0f, 90.5f};
   const float kFrequencies[kNumIndices] = {27.5f, 261.6f, 440.0f, 1523.3f};
 
   for (int i = 0; i < kNumIndices; ++i) {
-    EXPECT_NEAR(FrequencyFromNoteIndex(kIndices[i]), kFrequencies[i], kEpsilon);
+    EXPECT_NEAR(FrequencyFromPitch(kIndices[i]), kFrequencies[i], kEpsilon);
   }
 }
 
@@ -58,6 +59,29 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
   for (int i = 0; i < kNumCutoffs; ++i) {
     EXPECT_NEAR(GetFilterCoefficient(kSampleRate, kCutoffs[i]),
                 kExpectedCoefficients[i], kEpsilon);
+  }
+}
+
+// Tests that converting values from/to samples and seconds returns expected
+// results.
+TEST(DspUtilsTest, SamplesSecondsConversion) {
+  const int kSampleRate = 8000;
+  const int kNumValues = 4;
+  const int64 kSamples[kNumValues] = {0, 800, 4000, 32000};
+  const double kSeconds[kNumValues] = {0.0, 0.1, 0.5, 4.0};
+
+  for (int i = 0; i < kNumValues; ++i) {
+    EXPECT_EQ(SamplesFromSeconds(kSampleRate, kSeconds[i]), kSamples[i]);
+    EXPECT_DOUBLE_EQ(SecondsFromSamples(kSampleRate, kSamples[i]), kSeconds[i]);
+
+    // Verify that the back and forth conversion do not mutate the value.
+    EXPECT_EQ(SamplesFromSeconds(kSampleRate,
+                                 SecondsFromSamples(kSampleRate, kSamples[i])),
+              kSamples[i]);
+    EXPECT_DOUBLE_EQ(
+        SecondsFromSamples(kSampleRate,
+                           SamplesFromSeconds(kSampleRate, kSeconds[i])),
+        kSeconds[i]);
   }
 }
 

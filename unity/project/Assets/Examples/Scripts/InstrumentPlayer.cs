@@ -7,7 +7,7 @@ using BarelyApi;
 public class InstrumentPlayer : MonoBehaviour {
   // Note.
   [Range(0.0f, 128.0f)]
-  public float rootIndex = 60.0f;
+  public float rootPitch = 60.0f;
 
   // Instrument to play.
   private Instrument instrument = null;
@@ -15,7 +15,7 @@ public class InstrumentPlayer : MonoBehaviour {
   [System.Serializable]
   public struct Note {
     [Range(-24.0f, 24.0f)]
-    public float index;
+    public float pitch;
     [Range(0.0f, 1.0f)]
     public float intensity;
     [Range(0.0f, 1.0f)]
@@ -50,10 +50,10 @@ public class InstrumentPlayer : MonoBehaviour {
   private void Update() {
     if (!interactive) return;
     if (Input.GetKeyDown(KeyCode.S) && !isPlaying) {
-      instrument.NoteOn(rootIndex, 1.0f);
+      instrument.NoteOn(rootPitch, 1.0f);
       isPlaying = true;
     } else if (Input.GetKeyUp(KeyCode.S) && isPlaying) {
-      instrument.NoteOff(rootIndex);
+      instrument.NoteOff(rootPitch);
       isPlaying = false;
     }
   }
@@ -62,9 +62,9 @@ public class InstrumentPlayer : MonoBehaviour {
     for (int i = 0; i < beatNotes.Length; ++i) {
       var note = beatNotes[i];
       double position = note.position + (double)(beat);
-      float index =
-          rootIndex + note.index + (float)(note.beatMultiplier * ((beat) % note.beatPeriod));
-      instrument.ScheduleNote(position, note.duration, index, note.intensity);
+      float pitch = 
+          rootPitch + note.pitch + (float)(note.beatMultiplier * (beat % note.beatPeriod));
+      instrument.ScheduleNote(position, note.duration, pitch, note.intensity);
     }
   }
 }

@@ -30,12 +30,12 @@ public class Sparkler : MonoBehaviour {
                    32 * Time.deltaTime);
   }
 
-  private void OnNoteOff(double dspTime, Instrument instrument, float index) {
+  private void OnNoteOff(double dspTime, Instrument instrument, float pitch) {
     if (instrument != targetInstrument) return;
     targetColor = noteOffColor;
   }
 
-  private void OnNoteOn(double dspTime, Instrument instrument, float index, float intensity) {
+  private void OnNoteOn(double dspTime, Instrument instrument, float pitch, float intensity) {
     if (instrument != targetInstrument) return;
     targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, intensity, intensity);
   }

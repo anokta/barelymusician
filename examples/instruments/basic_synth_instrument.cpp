@@ -21,11 +21,11 @@ const int kDefaultNumVoices = 8;
 BasicSynthInstrument::BasicSynthInstrument(int sample_rate)
     : gain_(0.0f), voice_(BasicSynthVoice(sample_rate)) {}
 
-void BasicSynthInstrument::NoteOff(float index) { voice_.Stop(index); }
+void BasicSynthInstrument::NoteOff(float pitch) { voice_.Stop(pitch); }
 
-void BasicSynthInstrument::NoteOn(float index, float intensity) {
-  voice_.Start(index, [index, intensity](BasicSynthVoice* voice) {
-    voice->generator().SetFrequency(FrequencyFromNoteIndex(index));
+void BasicSynthInstrument::NoteOn(float pitch, float intensity) {
+  voice_.Start(pitch, [pitch, intensity](BasicSynthVoice* voice) {
+    voice->generator().SetFrequency(FrequencyFromPitch(pitch));
     voice->set_gain(intensity);
   });
 }
@@ -78,20 +78,28 @@ void BasicSynthInstrument::SetParam(int id, float value) {
   }
 }
 
-std::vector<ParamData> BasicSynthInstrument::GetDefaultParams() {
-  return {{static_cast<int>(BasicSynthInstrumentParam::kGain), kDefaultGain},
+InstrumentDefinition BasicSynthInstrument::GetDefinition(int sample_rate) {
+  return GetInstrumentDefinition([sample_rate]() {
+    return std::make_unique<BasicSynthInstrument>(sample_rate);
+  });
+}
+
+std::vector<InstrumentParamDefinition>
+BasicSynthInstrument::GetDefaultParams() {
+  return {{static_cast<int>(BasicSynthInstrumentParam::kGain), kDefaultGain,
+           0.0f, 1.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack),
-           kDefaultEnvelopeAttack},
+           kDefaultEnvelopeAttack, 0.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeDecay),
-           kDefaultEnvelopeDecay},
+           kDefaultEnvelopeDecay, 0.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeSustain),
-           kDefaultEnvelopeSustain},
+           kDefaultEnvelopeSustain, 0.0f, 1.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeRelease),
-           kDefaultEnvelopeRelease},
+           kDefaultEnvelopeRelease, 0.0f},
           {static_cast<int>(BasicSynthInstrumentParam::kOscillatorType),
            static_cast<float>(kDefaultOscillatorType)},
           {static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
-           static_cast<float>(kDefaultNumVoices)}};
+           static_cast<float>(kDefaultNumVoices), 0.0f}};
 }
 
 }  // namespace examples

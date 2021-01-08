@@ -7,7 +7,7 @@ namespace barelyapi {
 namespace {
 
 // Tests that note indices get quantized as expected given an arbitrary scale.
-TEST(NoteUtilsTest, GetRawNoteIndex) {
+TEST(NoteUtilsTest, GetPitch) {
   const int kOctaveRange = 2;
 
   const std::vector<float> kScale(std::cbegin(kMajorScale),
@@ -19,9 +19,8 @@ TEST(NoteUtilsTest, GetRawNoteIndex) {
       const int scale_index = octave * scale_length + i;
       const float expected_note_index =
           static_cast<float>(octave * kNumSemitones) + kScale[i];
-      EXPECT_FLOAT_EQ(
-          GetRawNoteIndex(kScale, QuantizedNoteIndex{0.0f, scale_index}),
-          expected_note_index);
+      EXPECT_FLOAT_EQ(GetPitch(kScale, QuantizedNoteIndex{0.0f, scale_index}),
+                      expected_note_index);
     }
   }
 }

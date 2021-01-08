@@ -39,11 +39,11 @@ public class EventLogger : MonoBehaviour {
     //Debug.Log("Beat: " + beat);
   }
 
-  private void OnNoteOff(double dspTime, Instrument instrument, float index) {
-    Debug.Log(instrument.name + ": NoteOff(" + index + ")");
+  private void OnNoteOff(double dspTime, Instrument instrument, float pitch) {
+    Debug.Log(instrument.name + ": NoteOff(" + pitch + ")");
   }
 
-  private void OnNoteOn(double dspTime, Instrument instrument, float index, float intensity) {
-    Debug.Log(instrument.name + ": NoteOn(" + index + ", " + intensity + ")");
+  private void OnNoteOn(double dspTime, Instrument instrument, float pitch, float intensity) {
+    Debug.Log(instrument.name + ": NoteOn(" + pitch + ", " + intensity + ")");
   }
 }

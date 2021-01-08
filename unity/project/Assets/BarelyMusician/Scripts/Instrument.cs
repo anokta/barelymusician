@@ -40,38 +40,24 @@ namespace BarelyApi {
       BarelyMusician.SetParam(_id, id, value);
     }
 
-    // Stops playing note with the given |index|.
-    public void NoteOff(float index) {
+    // Stops playing note with the given |pitch|.
+    public void NoteOff(float pitch) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.NoteOff(_id, index);
+        BarelyMusician.NoteOff(_id, pitch);
       }
     }
 
-    // Starts playing note with the given |index| and |intensity|.
-    public void NoteOn(float index, float intensity) {
+    // Starts playing note with the given |pitch| and |intensity|.
+    public void NoteOn(float pitch, float intensity) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.NoteOn(_id, index, intensity);
+        BarelyMusician.NoteOn(_id, pitch, intensity);
       }
     }
 
     // Schedules note.
-    public void ScheduleNote(double position, double duration, float index, float intensity) {
+    public void ScheduleNote(double position, double duration, float pitch, float intensity) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.ScheduleNote(_id, position, duration, index, intensity);
-      }
-    }
-
-    // Schedules note off.
-    public void ScheduleNoteOff(double position, float index) {
-      if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.ScheduleNoteOff(_id, position, index);
-      }
-    }
-
-    // Schedules note on.
-    public void ScheduleNoteOn(double position, float index, float intensity) {
-      if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.ScheduleNoteOn(_id, position, index, intensity);
+        BarelyMusician.ScheduleNote(_id, position, duration, pitch, intensity);
       }
     }
 

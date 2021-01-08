@@ -9,6 +9,7 @@ cc_library(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
+        "//barelymusician/base:types",
     ],
 )
 
@@ -81,6 +82,7 @@ cc_test(
     deps = [
         ":dsp_utils",
         "//barelymusician/base:constants",
+        "//barelymusician/base:types",
         "@googletest//:gtest_main",
     ],
 )

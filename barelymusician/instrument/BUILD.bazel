@@ -1,0 +1,99 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "instrument_controller",
+    srcs = ["instrument_controller.cpp"],
+    hdrs = ["instrument_controller.h"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_utils",
+    ],
+)
+
+cc_library(
+    name = "instrument_data",
+    hdrs = ["instrument_data.h"],
+)
+
+cc_library(
+    name = "instrument_definition",
+    hdrs = ["instrument_definition.h"],
+)
+
+cc_library(
+    name = "instrument_manager",
+    srcs = ["instrument_manager.cpp"],
+    hdrs = ["instrument_manager.h"],
+    deps = [
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_processor",
+        ":instrument_utils",
+        "//barelymusician/base:status",
+        "//barelymusician/base:task_runner",
+        "//barelymusician/base:types",
+    ],
+)
+
+cc_library(
+    name = "instrument_processor",
+    srcs = ["instrument_processor.cpp"],
+    hdrs = ["instrument_processor.h"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
+        "//barelymusician/base:types",
+    ],
+)
+
+cc_library(
+    name = "instrument_utils",
+    hdrs = ["instrument_utils.h"],
+)
+
+cc_test(
+    name = "instrument_controller_test",
+    srcs = ["instrument_controller_test.cpp"],
+    deps = [
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_manager_test",
+    srcs = ["instrument_manager_test.cpp"],
+    deps = [
+        ":instrument_manager",
+        "//barelymusician/base:status",
+        "//barelymusician/base:types",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_processor_test",
+    srcs = ["instrument_processor_test.cpp"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_processor",
+        "//barelymusician/base:types",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_utils_test",
+    srcs = ["instrument_utils_test.cpp"],
+    deps = [
+        ":instrument_utils",
+        "@googletest//:gtest_main",
+    ],
+)

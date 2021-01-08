@@ -8,8 +8,8 @@ cc_binary(
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
         "//barelymusician/base:random",
+        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
-        "//barelymusician/engine:instrument",
         "//barelymusician/engine:note",
         "//barelymusician/engine:note_utils",
         "//examples/instruments:basic_drumkit_instrument",
@@ -27,7 +27,7 @@ cc_binary(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
-        "//barelymusician/engine:task_runner",
+        "//barelymusician/base:task_runner",
         "//examples/instruments:basic_synth_instrument",
         "//examples/util:audio_output",
         "//examples/util:input_manager",
@@ -40,6 +40,8 @@ cc_binary(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:logging",
+        "//barelymusician/base:types",
+        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
         "//examples/instruments:basic_synth_instrument",
         "//examples/util:audio_output",
@@ -53,6 +55,7 @@ cc_binary(
     data = ["//examples/data:midi"],
     deps = [
         "//barelymusician/base:logging",
+        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
         "//barelymusician/engine:note",
         "//examples/instruments:basic_synth_instrument",

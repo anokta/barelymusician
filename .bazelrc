@@ -1,5 +1,5 @@
-# target c++17.
-build --cxxopt=-std:c++17
+# target c++20.
+build --cxxopt=-std:c++latest
 
 # treat warnings as errors.
 # TODO(#52): MSVC only, needs cross-platform support.
@@ -7,7 +7,7 @@ build --cxxopt=-W4
 build --cxxopt=-WX
 
 # TODO(#52): temp osx mirror.
-# build --cxxopt=-std=c++17
+# build --cxxopt=-std=c++2a
 # build --cxxopt=-Wall
 # build --cxxopt=-Wno-unused-lambda-capture
 # build --cxxopt=-Werror

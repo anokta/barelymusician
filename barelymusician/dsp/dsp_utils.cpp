@@ -24,10 +24,10 @@ float DecibelsFromAmplitude(float amplitude) {
   return kMinDecibels;
 }
 
-float FrequencyFromNoteIndex(float index) {
+float FrequencyFromPitch(float pitch) {
   // Middle A note (A4) is selected as the base note frequency, where:
-  //  f = fA4 * 2 ^ ((i - iA4) / 12).
-  return kFrequencyA4 * std::pow(2.0f, (index - kNoteIndexA4) / kNumSemitones);
+  //  f = fA4 * 2 ^ ((i - pA4) / 12).
+  return kFrequencyA4 * std::pow(2.0f, (pitch - kPitchA4) / kNumSemitones);
 }
 
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) {
@@ -39,6 +39,18 @@ float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) {
     return std::exp(-kTwoPi * cuttoff_frequency / sample_rate_float);
   }
   return 0.0f;
+}
+
+int64 SamplesFromSeconds(int sample_rate, double seconds) {
+  return sample_rate > 0
+             ? static_cast<int64>(seconds * static_cast<double>(sample_rate))
+             : 0;
+}
+
+double SecondsFromSamples(int sample_rate, int64 samples) {
+  return sample_rate > 0
+             ? static_cast<double>(samples) / static_cast<double>(sample_rate)
+             : 0.0;
 }
 
 }  // namespace barelyapi

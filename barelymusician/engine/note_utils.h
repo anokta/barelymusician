@@ -7,13 +7,13 @@
 
 namespace barelyapi {
 
-// Returns the raw note index for the given scale and quantized note index.
+// Returns pitch for the given scale and quantized note index.
 //
 // @param scale Cumulative scale intervals of an octave in increasing order.
 // @param note_index Quantized note index.
-// @return Raw note index.
-float GetRawNoteIndex(const std::vector<float>& scale,
-                      const QuantizedNoteIndex& note_index);
+// @return Pitch.
+float GetPitch(const std::vector<float>& scale,
+               const QuantizedNoteIndex& note_index);
 
 // Returns quantized position for the given number of beat steps.
 //

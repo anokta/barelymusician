@@ -8,6 +8,8 @@
 
 #include "MidiFile.h"
 #include "barelymusician/base/logging.h"
+#include "barelymusician/base/types.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
 #include "examples/instruments/basic_synth_instrument.h"
@@ -18,6 +20,7 @@
 namespace {
 
 using ::barelyapi::Engine;
+using ::barelyapi::int64;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
@@ -27,14 +30,12 @@ using ::barelyapi::examples::InputManager;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
-using Id = ::barelyapi::Engine::Id;
-
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 512;
 
-constexpr double kLookahead = 0.05;
+constexpr int64 kLookahead = 4 * kNumFrames;
 
 // Sequencer settings.
 constexpr double kTempo = 132.0;
@@ -65,7 +66,7 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
       Note note;
       note.position = get_position(midi_event.tick);
       note.duration = get_position(midi_event.getTickDuration());
-      note.index = static_cast<float>(midi_event.getKeyNumber());
+      note.pitch = static_cast<float>(midi_event.getKeyNumber());
       note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       score.push_back(std::move(note));
@@ -97,15 +98,15 @@ int main(int /*argc*/, char* argv[]) {
 
   Engine engine;
   engine.SetTempo(kTempo);
-  engine.SetNoteOnCallback([](double, Id id, float index, float intensity) {
-    LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << index << ", "
+  engine.SetNoteOnCallback([](int64 id, int64, float pitch, float intensity) {
+    LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
   });
-  engine.SetNoteOffCallback([](double, Id id, float index) {
-    LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << index << ") ";
+  engine.SetNoteOffCallback([](int64 id, int64, float pitch) {
+    LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
   });
 
-  std::vector<Id> instrument_ids;
+  std::vector<int64> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     const auto score = BuildScore(midi_file[i], ticks_per_quarter);
@@ -114,8 +115,8 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Create instrument.
-    const auto instrument_id = GetValue(
-        engine.Create(std::make_unique<BasicSynthInstrument>(kSampleRate),
+    const auto instrument_id =
+        engine.Create(BasicSynthInstrument::GetDefinition(kSampleRate),
                       {{BasicSynthInstrumentParam::kNumVoices,
                         static_cast<float>(kNumInstrumentVoices)},
                        {BasicSynthInstrumentParam::kOscillatorType,
@@ -124,10 +125,10 @@ int main(int /*argc*/, char* argv[]) {
                         kInstrumentEnvelopeAttack},
                        {BasicSynthInstrumentParam::kEnvelopeRelease,
                         kInstrumentEnvelopeRelease},
-                       {BasicSynthInstrumentParam::kGain, kInstrumentGain}}));
+                       {BasicSynthInstrumentParam::kGain, kInstrumentGain}});
     for (const Note& note : score) {
       engine.ScheduleNote(instrument_id, note.position, note.duration,
-                          std::get<float>(note.index), note.intensity);
+                          note.pitch, note.intensity);
     }
     instrument_ids.push_back(instrument_id);
   }
@@ -135,19 +136,16 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<double> timestamp = 0.0;
+  std::atomic<int64> timestamp = 0;
   const auto process_callback = [&](float* output) {
-    const double end_timestamp =
-        timestamp +
-        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& id : instrument_ids) {
-      engine.Process(id, timestamp, end_timestamp, temp_buffer.data(),
-                     kNumChannels, kNumFrames);
+      engine.Process(id, timestamp, temp_buffer.data(), kNumChannels,
+                     kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp = end_timestamp;
+    timestamp += kNumFrames;
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -169,7 +167,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(timestamp + kLookahead);
+    engine.Update(kSampleRate, timestamp + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

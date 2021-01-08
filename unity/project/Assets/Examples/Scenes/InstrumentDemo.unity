@@ -1168,7 +1168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7514fc5c00cdc1247a6c4a66a8bbe8ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootIndex: 60
+  rootPitch: 60
   beatNotes: []
   interactive: 1
 --- !u!1 &1298915918
@@ -1331,15 +1331,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7514fc5c00cdc1247a6c4a66a8bbe8ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootIndex: 48
+  rootPitch: 48
   beatNotes:
-  - index: 0
+  - pitch: 0
     intensity: 1
     position: 0
     duration: 0.5
     beatMultiplier: 6
     beatPeriod: 4
-  - index: 3
+  - pitch: 3
     intensity: 0.5
     position: 0.5
     duration: 0.25
@@ -1483,26 +1483,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 1714525513}
-  rootIndex: 60
+  rootPitch: 60
   start: 0
   length: 4
   loop: 1
   notes:
   - position: 0
     duration: 0.5
-    index: 0
+    pitch: 0
     intensity: 0.75
   - position: 1
     duration: 0.5
-    index: 6
+    pitch: 6
     intensity: 0.75
   - position: 2
     duration: 0.5
-    index: 3
+    pitch: 3
     intensity: 0.75
   - position: 3
     duration: 0.5
-    index: 12
+    pitch: 12
     intensity: 1
 --- !u!114 &1714525513
 MonoBehaviour:

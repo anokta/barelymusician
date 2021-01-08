@@ -13,7 +13,7 @@ public class Sequencer : MonoBehaviour {
     // Duration in beats.
     public double duration;
 
-    public float index;
+    public float pitch;
 
     public float intensity;
   }
@@ -21,7 +21,7 @@ public class Sequencer : MonoBehaviour {
   public Instrument instrument;
 
   [Range(0.0f, 128.0f)]
-  public float rootIndex = 60.0f;
+  public float rootPitch = 60.0f;
 
   public double start = 0.0;
 
@@ -53,8 +53,8 @@ public class Sequencer : MonoBehaviour {
     foreach (var note in notes) {
       if (note.position >= startPosition && note.position < startPosition + 1.0) {
         double position = note.position + noteOffset;
-        float index = note.index + rootIndex;
-        instrument.ScheduleNote(position, note.duration, index, note.intensity);
+        float pitch = note.pitch + rootPitch;
+        instrument.ScheduleNote(position, note.duration, pitch, note.intensity);
       }
     }
   }

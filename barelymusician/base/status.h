@@ -19,13 +19,13 @@ enum class Status {
 
 // Value or error status.
 template <typename ValueType>
-using StatusOr = std::variant<ValueType, Status>;
+using StatusOr = std::variant<Status, ValueType>;
 
 // Returns |status_or| status.
 template <typename ValueType>
 Status GetStatus(const StatusOr<ValueType>& status_or) {
   DCHECK(std::holds_alternative<Status>(status_or));
-  return std::get<ValueType>(status_or);
+  return std::get<Status>(status_or);
 }
 
 // Returns |status_or| value.
@@ -49,14 +49,14 @@ ValueType&& GetValue(StatusOr<ValueType>&& status_or) {
   return std::move(std::get<ValueType>(status_or));
 }
 
-// Returns whether |status| is ok.
-inline bool IsOk(Status status) { return status == Status::kOk; }
-
 // Returns whether |status_or| is ok.
 template <typename ValueType>
-inline bool IsOk(const StatusOr<ValueType>& status_or) {
+bool IsOk(const StatusOr<ValueType>& status_or) {
   return std::holds_alternative<ValueType>(status_or);
 }
+
+// Returns whether |status| is ok.
+inline bool IsOk(Status status) { return status == Status::kOk; }
 
 }  // namespace barelyapi
 

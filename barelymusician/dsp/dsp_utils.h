@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
+#include "barelymusician/base/types.h"
+
 namespace barelyapi {
 
 // Converts a value from dB to linear amplitude.
@@ -15,11 +17,11 @@ float AmplitudeFromDecibels(float decibels);
 // @return Value in dB.
 float DecibelsFromAmplitude(float amplitude);
 
-// Returns the corresponding frequency for the given note index.
+// Returns the corresponding frequency for the given pitch.
 //
-// @param index Note index.
+// @param pitch Pitch.
 // @return Frequency in Hz.
-float FrequencyFromNoteIndex(float index);
+float FrequencyFromPitch(float pitch);
 
 // Returns one-pole filter coefficient for a given cutoff frequency.
 //
@@ -27,6 +29,20 @@ float FrequencyFromNoteIndex(float index);
 // @param cuttoff_frequency Cutoff frequency in Hz.
 // @return Filter coefficient.
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency);
+
+// Returns the corresponding number of samples for the given number of seconds.
+//
+// @param sample_rate Sampling rate in Hz.
+// @param seconds Number of seconds.
+// @return Number of samples.
+int64 SamplesFromSeconds(int sample_rate, double seconds);
+
+// Returns the corresponding number of seconds for the given number of samples.
+//
+// @param sample_rate Sampling rate in Hz.
+// @param samples Number of samples.
+// @return Number of seconds.
+double SecondsFromSamples(int sample_rate, int64 samples);
 
 }  // namespace barelyapi
 

@@ -243,8 +243,8 @@ namespace BarelyApi {
       }
 
       public void Destroy(Int64 id) {
-        _instruments.Remove(id);
         DestroyNative(id);
+        _instruments.Remove(id);
       }
 
       public double GetPosition() { return GetPositionNative(); }

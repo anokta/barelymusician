@@ -34,8 +34,6 @@ cc_library(
     ],
 )
 
-# TODO(#52): engine_test missing.
-
 cc_test(
     name = "note_utils_test",
     srcs = ["note_utils_test.cpp"],

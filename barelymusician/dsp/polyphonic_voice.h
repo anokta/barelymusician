@@ -138,6 +138,7 @@ void PolyphonicVoice<VoiceType>::Stop(float pitch,
 
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Update(const VoiceCallback& update_voice) {
+  update_voice(&base_voice_);
   for (VoiceType& voice : voices_) {
     update_voice(&voice);
   }

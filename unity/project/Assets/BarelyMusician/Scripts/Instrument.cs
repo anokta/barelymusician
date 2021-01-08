@@ -8,7 +8,7 @@ namespace BarelyApi {
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
     // Performer id.
-    private Int64 _id = BarelyMusician.InvalidId;
+    private int _id = BarelyMusician.InvalidId;
 
     // Audio source.
     private AudioSource _source = null;

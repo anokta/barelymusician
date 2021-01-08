@@ -2,9 +2,15 @@
 
 namespace barelyapi {
 
-std::int64_t GetNextId() {
-  static std::int64_t id_counter = 0;
-  return ++id_counter;
-}
+namespace {
+
+// Id counter.
+static int id_counter = 0;
+
+}  // namespace
+
+int GetNextId() { return ++id_counter; }
+
+void ResetIdCount() { id_counter = 0; }
 
 }  // namespace barelyapi

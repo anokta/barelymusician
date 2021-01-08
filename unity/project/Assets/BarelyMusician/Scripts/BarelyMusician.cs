@@ -8,7 +8,7 @@ namespace BarelyApi {
   // Main |BarelyMusician| class that communicates with the native code.
   public static class BarelyMusician {
     // Invalid id.
-    public const Int64 InvalidId = -1;
+    public const int InvalidId = -1;
 
     // Beat event.
     public delegate void BeatEvent(double dspTime, int beat);
@@ -31,12 +31,12 @@ namespace BarelyApi {
       int numChannels);
 
     // Creates new instrument.
-    public static Int64 Create(Instrument instrument) {
+    public static int Create(Instrument instrument) {
       return BarelyMusicianInternal.Instance?.Create(instrument) ?? InvalidId;
     }
 
     // Destroys instrument.
-    public static void Destroy(Int64 id) {
+    public static void Destroy(int id) {
       BarelyMusicianInternal.Instance?.Destroy(id);
     }
 
@@ -56,28 +56,28 @@ namespace BarelyApi {
     }
 
     // Sets instrument note off.
-    public static void NoteOff(Int64 id, float pitch) {
+    public static void NoteOff(int id, float pitch) {
       BarelyMusicianInternal.Instance?.NoteOff(id, pitch);
     }
 
     // Sets instrument note on.
-    public static void NoteOn(Int64 id, float pitch, float intensity) {
+    public static void NoteOn(int id, float pitch, float intensity) {
       BarelyMusicianInternal.Instance?.NoteOn(id, pitch, intensity);
     }
 
     // Processes instrument.
-    public static void Process(Int64 id, float[] output, int numChannels) {
+    public static void Process(int id, float[] output, int numChannels) {
       BarelyMusicianInternal.Instance?.Process(id, output, numChannels);
     }
 
     // Schedules instrument note.
-    public static void ScheduleNote(Int64 id, double position, double duration, float pitch,
+    public static void ScheduleNote(int id, double position, double duration, float pitch,
                                     float intensity) {
       BarelyMusicianInternal.Instance?.ScheduleNote(id, position, duration, pitch, intensity);
     }
 
     // Sets instrument param value.
-    public static void SetParam(Int64 id, int paramId, float value) {
+    public static void SetParam(int id, int paramId, float value) {
       BarelyMusicianInternal.Instance?.SetParam(id, paramId, value);
     }
 
@@ -151,15 +151,15 @@ namespace BarelyApi {
       private DebugCallback _debugCallback = null;
 
       // Note off callback.
-      private delegate void NoteOffCallback(double dspTime, Int64 id, float pitch);
+      private delegate void NoteOffCallback(double dspTime, int id, float pitch);
       private NoteOffCallback _noteOffCallback = null;
 
       // Note on callback.
-      private delegate void NoteOnCallback(double dspTime, Int64 id, float pitch, float intensity);
+      private delegate void NoteOnCallback(double dspTime, int id, float pitch, float intensity);
       private NoteOnCallback _noteOnCallback = null;
 
       // List of instruments.
-      private static Dictionary<Int64, Instrument> _instruments;
+      private static Dictionary<int, Instrument> _instruments;
 
       // Lookahead in seconds.
       private double _lookahead = 0.0;
@@ -189,7 +189,7 @@ namespace BarelyApi {
           }
         };
         SetDebugCallbackNative(Marshal.GetFunctionPointerForDelegate(_debugCallback));
-        _noteOffCallback = delegate (double dspTime, Int64 id, float pitch) {
+        _noteOffCallback = delegate (double dspTime, int id, float pitch) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
             OnNoteOff?.Invoke(dspTime, instrument, pitch);
@@ -198,7 +198,7 @@ namespace BarelyApi {
           }
         };
         SetNoteOffCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOffCallback));
-        _noteOnCallback = delegate (double dspTime, Int64 id, float pitch, float intensity) {
+        _noteOnCallback = delegate (double dspTime, int id, float pitch, float intensity) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
             OnNoteOn?.Invoke(dspTime, instrument, pitch, intensity);
@@ -207,7 +207,7 @@ namespace BarelyApi {
           }
         };
         SetNoteOnCallbackNative(Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
-        _instruments = new Dictionary<Int64, Instrument>();
+        _instruments = new Dictionary<int, Instrument>();
         _lookahead = config.dspBufferSize / config.sampleRate + (double)Time.fixedDeltaTime;
       }
 
@@ -222,8 +222,8 @@ namespace BarelyApi {
         UpdateNative(AudioSettings.dspTime + _lookahead);
       }
 
-      public Int64 Create(Instrument instrument) {
-        Int64 id = InvalidId;
+      public int Create(Instrument instrument) {
+        int id = InvalidId;
         Type instrumentType = instrument.GetType();
         if (instrumentType.IsSubclassOf(typeof(UnityInstrument))) {
           var unityInstrument = instrument as UnityInstrument;
@@ -242,7 +242,7 @@ namespace BarelyApi {
         return id;
       }
 
-      public void Destroy(Int64 id) {
+      public void Destroy(int id) {
         DestroyNative(id);
         _instruments.Remove(id);
       }
@@ -253,25 +253,25 @@ namespace BarelyApi {
 
       public bool IsPlaying() { return IsPlayingNative(); }
 
-      public void NoteOff(Int64 id, float pitch) {
+      public void NoteOff(int id, float pitch) {
         NoteOffNative(id, pitch);
       }
 
-      public void NoteOn(Int64 id, float pitch, float intensity) {
+      public void NoteOn(int id, float pitch, float intensity) {
         NoteOnNative(id, pitch, intensity);
       }
 
-      public void Process(Int64 id, float[] output, int numChannels) {
+      public void Process(int id, float[] output, int numChannels) {
         int numFrames = output.Length / numChannels;
         ProcessNative(id, AudioSettings.dspTime, output, numChannels, numFrames);
       }
 
-      public void ScheduleNote(Int64 id, double position, double duration, float pitch,
+      public void ScheduleNote(int id, double position, double duration, float pitch,
                                float intensity) {
         ScheduleNoteNative(id, position, duration, pitch, intensity);
       }
 
-      public void SetParam(Int64 id, int paramId, float value) {
+      public void SetParam(int id, int paramId, float value) {
         SetParamNative(id, paramId, value);
       }
 
@@ -313,17 +313,17 @@ namespace BarelyApi {
     private static extern void ShutdownNative();
 
     [DllImport(pluginName, EntryPoint = "CreateUnityInstrument")]
-    private static extern Int64 CreateUnityInstrumentNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
-                                                            IntPtr processFnPtr);
+    private static extern int CreateUnityInstrumentNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
+                                                          IntPtr processFnPtr);
 
     [DllImport(pluginName, EntryPoint = "CreateBasicSynthInstrument")]
-    private static extern Int64 CreateBasicSynthInstrumentNative();
+    private static extern int CreateBasicSynthInstrumentNative();
 
     [DllImport(pluginName, EntryPoint = "Destroy")]
-    private static extern void DestroyNative(Int64 id);
+    private static extern void DestroyNative(int id);
 
     [DllImport(pluginName, EntryPoint = "GetParam")]
-    private static extern float GetParamNative(Int64 id, int param_id);
+    private static extern float GetParamNative(int id, int param_id);
 
     [DllImport(pluginName, EntryPoint = "GetPosition")]
     private static extern double GetPositionNative();
@@ -332,29 +332,29 @@ namespace BarelyApi {
     private static extern double GetTempoNative();
 
     [DllImport(pluginName, EntryPoint = "IsNoteOn")]
-    private static extern bool IsNoteOnNative(Int64 id, float pitch);
+    private static extern bool IsNoteOnNative(int id, float pitch);
 
     [DllImport(pluginName, EntryPoint = "IsPlaying")]
     private static extern bool IsPlayingNative();
 
     [DllImport(pluginName, EntryPoint = "Process")]
-    private static extern void ProcessNative(Int64 id, double timestamp, [In, Out] float[] output,
+    private static extern void ProcessNative(int id, double timestamp, [In, Out] float[] output,
                                              int numChannels, int numFrames);
 
     [DllImport(pluginName, EntryPoint = "AllNotesOff")]
-    private static extern void AllNotesOffNative(Int64 id);
+    private static extern void AllNotesOffNative(int id);
 
     [DllImport(pluginName, EntryPoint = "NoteOff")]
-    private static extern void NoteOffNative(Int64 id, float pitch);
+    private static extern void NoteOffNative(int id, float pitch);
 
     [DllImport(pluginName, EntryPoint = "NoteOn")]
-    private static extern void NoteOnNative(Int64 id, float pitch, float intensity);
+    private static extern void NoteOnNative(int id, float pitch, float intensity);
 
     [DllImport(pluginName, EntryPoint = "ResetAllParams")]
-    private static extern void ResetAllParams(Int64 id);
+    private static extern void ResetAllParams(int id);
 
     [DllImport(pluginName, EntryPoint = "ScheduleNote")]
-    private static extern void ScheduleNoteNative(Int64 id, double position, double duration,
+    private static extern void ScheduleNoteNative(int id, double position, double duration,
                                                   float pitch, float intensity);
 
     [DllImport(pluginName, EntryPoint = "SetBeatCallback")]
@@ -370,7 +370,7 @@ namespace BarelyApi {
     private static extern void SetNoteOnCallbackNative(IntPtr noteOnCallbackPtr);
 
     [DllImport(pluginName, EntryPoint = "SetParam")]
-    private static extern void SetParamNative(Int64 id, int param_id, float value);
+    private static extern void SetParamNative(int id, int param_id, float value);
 
     [DllImport(pluginName, EntryPoint = "SetPosition")]
     private static extern void SetPositionNative(double position);

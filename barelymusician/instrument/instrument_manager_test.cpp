@@ -61,7 +61,7 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  const std::int64_t instrument_id = manager.Create(
+  const int instrument_id = manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions(), 0);
 
   EXPECT_TRUE(GetValue(manager.GetAllNotes(instrument_id)).empty());
@@ -117,7 +117,7 @@ TEST(InstrumentManagerTest, SetSingleNote) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  const std::int64_t instrument_id =
+  const int instrument_id =
       manager.Create(GetTestInstrumentDefinition(),
                      GetTestInstrumentParamDefinitions(), kTimestamp);
 
@@ -167,7 +167,7 @@ TEST(InstrumentManagerTest, SetMultipleNotes) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  const std::int64_t instrument_id = manager.Create(
+  const int instrument_id = manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions(), 0);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -218,17 +218,16 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   InstrumentManager manager;
 
   // Create instrument.
-  const std::int64_t instrument_id = manager.Create(
+  const int instrument_id = manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions(), 0);
 
   // Trigger note on callback.
-  std::int64_t note_on_instrument_id = -1;
+  int note_on_instrument_id = -1;
   std::int64_t note_on_timestamp = -1;
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
-  manager.SetNoteOnCallback([&](std::int64_t instrument_id,
-                                std::int64_t timestamp, float note_pitch,
-                                float note_intensity) {
+  manager.SetNoteOnCallback([&](int instrument_id, std::int64_t timestamp,
+                                float note_pitch, float note_intensity) {
     note_on_instrument_id = instrument_id;
     note_on_timestamp = timestamp;
     note_on_pitch = note_pitch;
@@ -257,15 +256,15 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   EXPECT_FLOAT_EQ(note_on_pitch, 2.0f);
 
   // Trigger note off callback.
-  std::int64_t note_off_instrument_id = -1;
+  int note_off_instrument_id = -1;
   std::int64_t note_off_timestamp = -1;
   float note_off_pitch = 0.0f;
-  manager.SetNoteOffCallback([&](std::int64_t instrument_id,
-                                 std::int64_t timestamp, float note_pitch) {
-    note_off_instrument_id = instrument_id;
-    note_off_timestamp = timestamp;
-    note_off_pitch = note_pitch;
-  });
+  manager.SetNoteOffCallback(
+      [&](int instrument_id, std::int64_t timestamp, float note_pitch) {
+        note_off_instrument_id = instrument_id;
+        note_off_timestamp = timestamp;
+        note_off_pitch = note_pitch;
+      });
   EXPECT_NE(note_off_instrument_id, instrument_id);
   EXPECT_NE(note_off_timestamp, kTimestamp);
   EXPECT_NE(note_off_pitch, kNotePitch);
@@ -294,7 +293,7 @@ TEST(InstrumentManagerTest, ResetAllParams) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
-  std::vector<std::int64_t> instrument_ids(kNumInstruments);
+  std::vector<int> instrument_ids(kNumInstruments);
   for (int i = 0; i < kNumInstruments; ++i) {
     instrument_ids[i] =
         manager.Create(GetTestInstrumentDefinition(),
@@ -355,7 +354,7 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
-  std::vector<std::int64_t> instrument_ids(kNumInstruments);
+  std::vector<int> instrument_ids(kNumInstruments);
   for (int i = 0; i < kNumInstruments; ++i) {
     instrument_ids[i] =
         manager.Create(GetTestInstrumentDefinition(),

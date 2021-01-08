@@ -98,15 +98,15 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine;
   engine.SetTempo(kTempo);
   engine.SetNoteOnCallback(
-      [](std::int64_t id, std::int64_t, float pitch, float intensity) {
+      [](int id, std::int64_t, float pitch, float intensity) {
         LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
                   << intensity << ")";
       });
-  engine.SetNoteOffCallback([](std::int64_t id, std::int64_t, float pitch) {
+  engine.SetNoteOffCallback([](int id, std::int64_t, float pitch) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
   });
 
-  std::vector<std::int64_t> instrument_ids;
+  std::vector<int> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     const auto score = BuildScore(midi_file[i], ticks_per_quarter);

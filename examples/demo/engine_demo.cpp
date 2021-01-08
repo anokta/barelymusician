@@ -61,8 +61,8 @@ constexpr int kNumInstrumentVoices = 8;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
-std::int64_t BuildSynthInstrument(Engine* engine, OscillatorType type,
-                                  float gain, float attack, float release) {
+int BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
+                         float attack, float release) {
   return engine->Create(
       BasicSynthInstrument::GetDefinition(kSampleRate),
       {{BasicSynthInstrumentParam::kNumVoices,
@@ -185,7 +185,7 @@ int main(int /*argc*/, char* argv[]) {
     return progression[bar % progression.size()];
   };
 
-  std::unordered_map<std::int64_t, BeatComposerCallback> performers;
+  std::unordered_map<int, BeatComposerCallback> performers;
 
   // Beat callback.
   int harmonic = 0;
@@ -216,15 +216,15 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Note on callback.
-  const auto note_on_callback = [](std::int64_t performer_id, std::int64_t,
-                                   float pitch, float intensity) {
+  const auto note_on_callback = [](int performer_id, std::int64_t, float pitch,
+                                   float intensity) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
   };
   engine.SetNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](std::int64_t performer_id, std::int64_t,
+  const auto note_off_callback = [](int performer_id, std::int64_t,
                                     float pitch) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << pitch << ")";
   };

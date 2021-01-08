@@ -29,21 +29,21 @@ class Engine {
   // @param instrument instrument Instrument to play.
   // @param params Default instrument params.
   // @return Instrument id.
-  std::int64_t Create(InstrumentDefinition definition,
-                      InstrumentParamDefinitions param_definitions = {});
+  int Create(InstrumentDefinition definition,
+             InstrumentParamDefinitions param_definitions = {});
 
   // Destroys instrument.
   //
   // @param instrument_id Instrument id.
   // @return Status.
-  Status Destroy(std::int64_t instrument_id);
+  Status Destroy(int instrument_id);
 
   // Returns parameter value.
   //
   // @param instrument_id Instrument id.
   // @param param_id Parameter id.
   // @return Parameter value, if found.
-  StatusOr<float> GetParam(std::int64_t instrument_id, int param_id) const;
+  StatusOr<float> GetParam(int instrument_id, int param_id) const;
 
   // Returns playback position.
   //
@@ -60,7 +60,7 @@ class Engine {
   // @param instrument_id Instrument id.
   // @param pitch Pitch.
   // @return True if note is active, if instrument found.
-  StatusOr<bool> IsNoteOn(std::int64_t instrument_id, float pitch) const;
+  StatusOr<bool> IsNoteOn(int instrument_id, float pitch) const;
 
   // Returns playback state.
   //
@@ -76,16 +76,16 @@ class Engine {
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   // @return Status.
-  Status Process(std::int64_t instrument_id, std::int64_t timestamp,
-                 float* output, int num_channels, int num_frames);
+  Status Process(int instrument_id, std::int64_t timestamp, float* output,
+                 int num_channels, int num_frames);
 
   // Resets all parameters.
   //
   // @param instrument_id Instrument id.
   // @return True if instrument found.
-  Status ResetAllParams(std::int64_t instrument_id);
+  Status ResetAllParams(int instrument_id);
 
-  Status ResetParam(std::int64_t instrument_id, int param_id);
+  Status ResetParam(int instrument_id, int param_id);
 
   // Stops all notes.
   void SetAllNotesOff();
@@ -94,21 +94,21 @@ class Engine {
   //
   // @param instrument_id Instrument id.
   // @return True if instrument found.
-  Status SetAllNotesOff(std::int64_t instrument_id);
+  Status SetAllNotesOff(int instrument_id);
 
   // Sets custom data.
   //
   // @param instrument_id Instrument id.
   // @param custom_data Custom data.
   // @return True if successful, if instrument found.
-  Status SetCustomData(std::int64_t instrument_id, void* custom_data);
+  Status SetCustomData(int instrument_id, void* custom_data);
 
   // Stops playing note.
   //
   // @param instrument_id Instrument id.
   // @param pitch Note pitch.
   // @return True if successful, if instrument found.
-  Status SetNoteOff(std::int64_t instrument_id, float pitch);
+  Status SetNoteOff(int instrument_id, float pitch);
 
   // Starts playing note.
   //
@@ -116,7 +116,7 @@ class Engine {
   // @param pitch Note pitch.
   // @param intensity Note intensity.
   // @return True if successful, if instrument found.
-  Status SetNoteOn(std::int64_t instrument_id, float pitch, float intensity);
+  Status SetNoteOn(int instrument_id, float pitch, float intensity);
 
   // Sets control parameter value.
   //
@@ -124,7 +124,7 @@ class Engine {
   // @param param_id Parameter id.
   // @param param_value Parameter value.
   // @return True if successful, if instrument parameter found.
-  Status SetParam(std::int64_t instrument_id, int param_id, float param_value);
+  Status SetParam(int instrument_id, int param_id, float param_value);
 
   // Clears all scheduled notes.
   void ClearAllScheduledNotes();
@@ -133,7 +133,7 @@ class Engine {
   //
   // @param instrument_id Instrument id.
   // @return True if instrument found.
-  Status ClearAllScheduledNotes(std::int64_t instrument_id);
+  Status ClearAllScheduledNotes(int instrument_id);
 
   // Schedules note.
   //
@@ -143,8 +143,8 @@ class Engine {
   // @param pitch Note pitch.
   // @param intensity Note intensity.
   // @return True if successful, if instrument found.
-  Status ScheduleNote(std::int64_t instrument_id, double position,
-                      double duration, float pitch, float intensity);
+  Status ScheduleNote(int instrument_id, double position, double duration,
+                      float pitch, float intensity);
 
   // Sets beat callback.
   //
@@ -187,8 +187,7 @@ class Engine {
  private:
   // List of instruments.
   InstrumentManager manager_;
-  std::unordered_map<std::int64_t, std::multimap<double, InstrumentData>>
-      scores_;
+  std::unordered_map<int, std::multimap<double, InstrumentData>> scores_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;

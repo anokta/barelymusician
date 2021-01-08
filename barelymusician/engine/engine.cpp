@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "barelymusician/base/id.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument_utils.h"
 
@@ -42,17 +43,19 @@ Engine::Engine()
       last_timestamp_(0),
       position_(0.0),
       tempo_(0.0),
-      beat_callback_(nullptr) {}
+      beat_callback_(nullptr) {
+  ResetIdCount();
+}
 
-std::int64_t Engine::Create(InstrumentDefinition definition,
-                            InstrumentParamDefinitions param_definitions) {
-  const std::int64_t instrument_id =
+int Engine::Create(InstrumentDefinition definition,
+                   InstrumentParamDefinitions param_definitions) {
+  const int instrument_id =
       manager_.Create(definition, param_definitions, last_timestamp_);
   scores_.emplace(instrument_id, std::multimap<double, InstrumentData>{});
   return instrument_id;
 }
 
-Status Engine::Destroy(std::int64_t instrument_id) {
+Status Engine::Destroy(int instrument_id) {
   if (scores_.erase(instrument_id) > 0) {
     manager_.Destroy(instrument_id, last_timestamp_);
     return Status::kOk;
@@ -60,8 +63,7 @@ Status Engine::Destroy(std::int64_t instrument_id) {
   return Status::kNotFound;
 }
 
-StatusOr<float> Engine::GetParam(std::int64_t instrument_id,
-                                 int param_id) const {
+StatusOr<float> Engine::GetParam(int instrument_id, int param_id) const {
   return manager_.GetParam(instrument_id, param_id);
 }
 
@@ -69,47 +71,45 @@ double Engine::GetPosition() const { return position_; }
 
 double Engine::GetTempo() const { return tempo_; }
 
-StatusOr<bool> Engine::IsNoteOn(std::int64_t instrument_id, float pitch) const {
+StatusOr<bool> Engine::IsNoteOn(int instrument_id, float pitch) const {
   return manager_.IsNoteOn(instrument_id, pitch);
 }
 
 bool Engine::IsPlaying() const { return is_playing_; }
 
-Status Engine::Process(std::int64_t instrument_id, std::int64_t timestamp,
-                       float* output, int num_channels, int num_frames) {
+Status Engine::Process(int instrument_id, std::int64_t timestamp, float* output,
+                       int num_channels, int num_frames) {
   return manager_.Process(instrument_id, timestamp, output, num_channels,
                           num_frames);
 }
 
-Status Engine::ResetAllParams(std::int64_t instrument_id) {
+Status Engine::ResetAllParams(int instrument_id) {
   return manager_.ResetAllParams(instrument_id, last_timestamp_);
 }
 
-Status Engine::ResetParam(std::int64_t instrument_id, int param_id) {
+Status Engine::ResetParam(int instrument_id, int param_id) {
   return manager_.ResetParam(instrument_id, last_timestamp_, param_id);
 }
 
 void Engine::SetAllNotesOff() { manager_.SetAllNotesOff(last_timestamp_); }
 
-Status Engine::SetAllNotesOff(std::int64_t instrument_id) {
+Status Engine::SetAllNotesOff(int instrument_id) {
   return manager_.SetAllNotesOff(instrument_id, last_timestamp_);
 }
 
-Status Engine::SetCustomData(std::int64_t instrument_id, void* custom_data) {
+Status Engine::SetCustomData(int instrument_id, void* custom_data) {
   return manager_.SetCustomData(instrument_id, last_timestamp_, custom_data);
 }
 
-Status Engine::SetNoteOff(std::int64_t instrument_id, float pitch) {
+Status Engine::SetNoteOff(int instrument_id, float pitch) {
   return manager_.SetNoteOff(instrument_id, last_timestamp_, pitch);
 }
 
-Status Engine::SetNoteOn(std::int64_t instrument_id, float pitch,
-                         float intensity) {
+Status Engine::SetNoteOn(int instrument_id, float pitch, float intensity) {
   return manager_.SetNoteOn(instrument_id, last_timestamp_, pitch, intensity);
 }
 
-Status Engine::SetParam(std::int64_t instrument_id, int param_id,
-                        float param_value) {
+Status Engine::SetParam(int instrument_id, int param_id, float param_value) {
   return manager_.SetParam(instrument_id, last_timestamp_, param_id,
                            param_value);
 }
@@ -120,7 +120,7 @@ void Engine::ClearAllScheduledNotes() {
   }
 }
 
-Status Engine::ClearAllScheduledNotes(std::int64_t instrument_id) {
+Status Engine::ClearAllScheduledNotes(int instrument_id) {
   if (auto* score = FindOrNull(scores_, instrument_id)) {
     score->clear();
     return Status::kOk;
@@ -128,8 +128,8 @@ Status Engine::ClearAllScheduledNotes(std::int64_t instrument_id) {
   return Status::kNotFound;
 }
 
-Status Engine::ScheduleNote(std::int64_t instrument_id, double position,
-                            double duration, float pitch, float intensity) {
+Status Engine::ScheduleNote(int instrument_id, double position, double duration,
+                            float pitch, float intensity) {
   if (auto* score = FindOrNull(scores_, instrument_id)) {
     if (position_ <= position && duration >= 0.0) {
       score->emplace(position, NoteOn{pitch, intensity});

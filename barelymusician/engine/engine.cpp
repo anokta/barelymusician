@@ -203,7 +203,6 @@ void Engine::Update(int sample_rate, int64 timestamp) {
                      [](const auto&) {}},
                  message_data);
     }
-    score.erase(cbegin, cend);
   }
 
   last_timestamp_ = timestamp;

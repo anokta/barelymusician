@@ -98,6 +98,20 @@ Status InstrumentManager::Process(int64 instrument_id, int64 timestamp,
   return Status::kNotFound;
 }
 
+void InstrumentManager::ResetAllParams(int64 timestamp) {
+  for (auto& [instrument_id, controller] : controllers_) {
+    controller.ResetAllParams();
+    task_runner_.Add([this, instrument_id = instrument_id, timestamp,
+                      params = controller.GetAllParams()]() {
+      if (auto* processor = FindOrNull(processors_, instrument_id)) {
+        for (const auto& [id, value] : params) {
+          processor->SetData(timestamp, Param{id, value});
+        }
+      }
+    });
+  }
+}
+
 Status InstrumentManager::ResetAllParams(int64 instrument_id, int64 timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     controller->ResetAllParams();
@@ -125,6 +139,26 @@ Status InstrumentManager::ResetParam(int64 instrument_id, int64 timestamp,
     return Status::kInvalidArgument;
   }
   return Status::kNotFound;
+}
+
+void InstrumentManager::SetAllNotesOff(int64 timestamp) {
+  for (auto& [instrument_id, controller] : controllers_) {
+    auto notes = controller.GetAllNotes();
+    controller.SetAllNotesOff();
+    if (note_off_callback_) {
+      for (const auto& note_pitch : notes) {
+        note_off_callback_(instrument_id, timestamp, note_pitch);
+      }
+    }
+    task_runner_.Add([this, instrument_id = instrument_id, timestamp,
+                      notes = std::move(notes)]() {
+      if (auto* processor = FindOrNull(processors_, instrument_id)) {
+        for (const auto& note_pitch : notes) {
+          processor->SetData(timestamp, NoteOff{note_pitch});
+        }
+      }
+    });
+  }
 }
 
 Status InstrumentManager::SetAllNotesOff(int64 instrument_id, int64 timestamp) {

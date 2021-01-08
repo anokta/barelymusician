@@ -5,10 +5,14 @@
 
 #include "barelymusician/base/status.h"
 #include "barelymusician/base/types.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
+
+using ::testing::Pair;
+using ::testing::UnorderedElementsAre;
 
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 12;
@@ -47,22 +51,36 @@ InstrumentParamDefinitions GetTestInstrumentParamDefinitions() {
   return InstrumentParamDefinitions{InstrumentParamDefinition{1, 0.0f}};
 }
 
-// Tests that the manager creates and destroy instruments as expected.
+// Tests that manager creates and destroy instruments as expected.
 TEST(InstrumentManagerTest, CreateDestroy) {
   const int64 kTimestamp = 10;
   const float kNotePitch = 1.25f;
   const float kNoteIntensity = 0.75f;
 
   InstrumentManager manager;
+  std::vector<float> buffer(kNumChannels * kNumFrames);
 
-  // Create instrument and set note on.
-  const int64 instrument_id =
-      manager.Create(GetTestInstrumentDefinition(),
-                     GetTestInstrumentParamDefinitions(), kTimestamp);
+  // Create instrument.
+  const int64 instrument_id = manager.Create(
+      GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions(), 0);
+
+  EXPECT_TRUE(GetValue(manager.GetAllNotes(instrument_id)).empty());
+  EXPECT_THAT(GetValue(manager.GetAllParams(instrument_id)),
+              UnorderedElementsAre(Pair(1, 0.0f)));
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  EXPECT_TRUE(IsOk(manager.Process(instrument_id, kTimestamp, buffer.data(),
+                                   kNumChannels, kNumFrames)));
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+    }
+  }
+
+  // Set note on.
   EXPECT_TRUE(IsOk(manager.SetNoteOn(instrument_id, kTimestamp, kNotePitch,
                                      kNoteIntensity)));
 
-  std::vector<float> buffer(kNumChannels * kNumFrames);
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(IsOk(manager.Process(instrument_id, kTimestamp, buffer.data(),
                                    kNumChannels, kNumFrames)));
@@ -75,6 +93,9 @@ TEST(InstrumentManagerTest, CreateDestroy) {
 
   // Destroy instrument.
   EXPECT_TRUE(IsOk(manager.Destroy(instrument_id, kTimestamp)));
+
+  EXPECT_EQ(GetStatus(manager.GetAllNotes(instrument_id)), Status::kNotFound);
+  EXPECT_EQ(GetStatus(manager.GetAllParams(instrument_id)), Status::kNotFound);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_FALSE(IsOk(manager.Process(instrument_id, kTimestamp + kNumFrames,
@@ -93,13 +114,13 @@ TEST(InstrumentManagerTest, SetSingleNote) {
   const float kNoteIntensity = 0.5f;
 
   InstrumentManager manager;
+  std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
   const int64 instrument_id =
       manager.Create(GetTestInstrumentDefinition(),
                      GetTestInstrumentParamDefinitions(), kTimestamp);
 
-  std::vector<float> buffer(kNumChannels * kNumFrames);
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(IsOk(manager.Process(instrument_id, kTimestamp, buffer.data(),
                                    kNumChannels, kNumFrames)));
@@ -110,7 +131,9 @@ TEST(InstrumentManagerTest, SetSingleNote) {
   }
 
   // Set note on.
-  manager.SetNoteOn(instrument_id, kTimestamp, kNotePitch, kNoteIntensity);
+  EXPECT_TRUE(IsOk(manager.SetNoteOn(instrument_id, kTimestamp, kNotePitch,
+                                     kNoteIntensity)));
+  EXPECT_TRUE(GetValue(manager.IsNoteOn(instrument_id, kNotePitch)));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(IsOk(manager.Process(instrument_id, kTimestamp, buffer.data(),
@@ -124,6 +147,7 @@ TEST(InstrumentManagerTest, SetSingleNote) {
 
   // Set note off.
   manager.SetNoteOff(instrument_id, kTimestamp + kNumFrames, kNotePitch);
+  EXPECT_FALSE(GetValue(manager.IsNoteOn(instrument_id, kNotePitch)));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(IsOk(manager.Process(instrument_id, kTimestamp + kNumFrames,
@@ -140,12 +164,12 @@ TEST(InstrumentManagerTest, SetMultipleNotes) {
   const float kNoteIntensity = 1.0f;
 
   InstrumentManager manager;
+  std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
   const int64 instrument_id = manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions(), 0);
 
-  std::vector<float> buffer(kNumChannels * kNumFrames);
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(IsOk(manager.Process(instrument_id, 0, buffer.data(),
                                    kNumChannels, kNumFrames)));
@@ -159,6 +183,7 @@ TEST(InstrumentManagerTest, SetMultipleNotes) {
   for (int i = 0; i < kNumFrames; ++i) {
     manager.SetNoteOn(instrument_id, i, static_cast<float>(i), kNoteIntensity);
   }
+  EXPECT_EQ(GetValue(manager.GetAllNotes(instrument_id)).size(), kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(IsOk(manager.Process(instrument_id, 0, buffer.data(),
@@ -172,6 +197,7 @@ TEST(InstrumentManagerTest, SetMultipleNotes) {
 
   // Stop all notes.
   manager.SetAllNotesOff(instrument_id, kNumFrames);
+  EXPECT_TRUE(GetValue(manager.GetAllNotes(instrument_id)).empty());
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(IsOk(manager.Process(instrument_id, kNumFrames, buffer.data(),
@@ -256,6 +282,127 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   EXPECT_TRUE(IsOk(manager.Destroy(instrument_id, 2)));
   EXPECT_EQ(note_off_timestamp, 2);
   EXPECT_FLOAT_EQ(note_off_pitch, 2.0f);
+}
+
+// Tests that manager resets all parameters of multiple instruments as expected.
+TEST(InstrumentManagerTest, ResetAllParams) {
+  const int kNumInstruments = 2;
+  const int64 kTimestamp = 400;
+
+  InstrumentManager manager;
+  std::vector<float> buffer(kNumChannels * kNumFrames);
+
+  // Create instruments.
+  std::vector<int64> instrument_ids(kNumInstruments);
+  for (int i = 0; i < kNumInstruments; ++i) {
+    instrument_ids[i] =
+        manager.Create(GetTestInstrumentDefinition(),
+                       GetTestInstrumentParamDefinitions(), kTimestamp);
+  }
+
+  // Set parameter values.
+  for (int i = 0; i < kNumInstruments; ++i) {
+    std::fill(buffer.begin(), buffer.end(), 0.0f);
+    EXPECT_TRUE(IsOk(manager.Process(instrument_ids[i], kTimestamp,
+                                     buffer.data(), kNumChannels, kNumFrames)));
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      for (int channel = 0; channel < kNumChannels; ++channel) {
+        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+      }
+    }
+
+    manager.SetParam(instrument_ids[i], kTimestamp, 1, static_cast<float>(i));
+    EXPECT_THAT(GetValue(manager.GetAllParams(instrument_ids[i])),
+                UnorderedElementsAre(Pair(1, static_cast<float>(i))));
+
+    std::fill(buffer.begin(), buffer.end(), 0.0f);
+    EXPECT_TRUE(IsOk(manager.Process(instrument_ids[i], kTimestamp,
+                                     buffer.data(), kNumChannels, kNumFrames)));
+    const float expected = static_cast<float>(i);
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      for (int channel = 0; channel < kNumChannels; ++channel) {
+        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], expected);
+      }
+    }
+  }
+
+  // Reset all parameters.
+  manager.ResetAllParams(kTimestamp);
+
+  for (int i = 0; i < kNumInstruments; ++i) {
+    EXPECT_THAT(GetValue(manager.GetAllParams(instrument_ids[i])),
+                UnorderedElementsAre(Pair(1, 0.0f)));
+
+    std::fill(buffer.begin(), buffer.end(), 0.0f);
+    EXPECT_TRUE(IsOk(manager.Process(instrument_ids[i], kTimestamp,
+                                     buffer.data(), kNumChannels, kNumFrames)));
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      for (int channel = 0; channel < kNumChannels; ++channel) {
+        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+      }
+    }
+  }
+}
+
+// Tests that manager set all notes of multiple instruments off as expected.
+TEST(InstrumentManagerTest, SetAllNotesOff) {
+  const int kNumInstruments = 3;
+  const int64 kTimestamp = 15;
+  const float kNoteIntensity = 0.1f;
+
+  InstrumentManager manager;
+  std::vector<float> buffer(kNumChannels * kNumFrames);
+
+  // Create instruments.
+  std::vector<int64> instrument_ids(kNumInstruments);
+  for (int i = 0; i < kNumInstruments; ++i) {
+    instrument_ids[i] =
+        manager.Create(GetTestInstrumentDefinition(),
+                       GetTestInstrumentParamDefinitions(), kTimestamp);
+  }
+
+  // Set notes on.
+  for (int i = 0; i < kNumInstruments; ++i) {
+    std::fill(buffer.begin(), buffer.end(), 0.0f);
+    EXPECT_TRUE(IsOk(manager.Process(instrument_ids[i], kTimestamp,
+                                     buffer.data(), kNumChannels, kNumFrames)));
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      for (int channel = 0; channel < kNumChannels; ++channel) {
+        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+      }
+    }
+
+    manager.SetNoteOn(instrument_ids[i], kTimestamp, static_cast<float>(i),
+                      kNoteIntensity);
+    EXPECT_THAT(GetValue(manager.GetAllNotes(instrument_ids[i])),
+                UnorderedElementsAre(static_cast<float>(i)));
+
+    std::fill(buffer.begin(), buffer.end(), 0.0f);
+    const float expected = static_cast<float>(i) * kNoteIntensity;
+    EXPECT_TRUE(IsOk(manager.Process(instrument_ids[i], kTimestamp,
+                                     buffer.data(), kNumChannels, kNumFrames)));
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      for (int channel = 0; channel < kNumChannels; ++channel) {
+        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], expected);
+      }
+    }
+  }
+
+  // Set all notes off.
+  manager.SetAllNotesOff(kTimestamp);
+
+  for (int i = 0; i < kNumInstruments; ++i) {
+    EXPECT_TRUE(GetValue(manager.GetAllNotes(instrument_ids[i])).empty());
+
+    std::fill(buffer.begin(), buffer.end(), 0.0f);
+    EXPECT_TRUE(IsOk(manager.Process(instrument_ids[i], kTimestamp,
+                                     buffer.data(), kNumChannels, kNumFrames)));
+    for (int frame = 0; frame < kNumFrames; ++frame) {
+      for (int channel = 0; channel < kNumChannels; ++channel) {
+        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+      }
+    }
+  }
 }
 
 }  // namespace

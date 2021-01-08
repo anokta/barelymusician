@@ -89,11 +89,7 @@ Status Engine::ResetParam(int64 instrument_id, int param_id) {
   return manager_.ResetParam(instrument_id, last_timestamp_, param_id);
 }
 
-void Engine::SetAllNotesOff() {
-  for (const auto& [instrument_id, score] : scores_) {
-    SetAllNotesOff(instrument_id);
-  }
-}
+void Engine::SetAllNotesOff() { manager_.SetAllNotesOff(last_timestamp_); }
 
 Status Engine::SetAllNotesOff(int64 instrument_id) {
   return manager_.SetAllNotesOff(instrument_id, last_timestamp_);

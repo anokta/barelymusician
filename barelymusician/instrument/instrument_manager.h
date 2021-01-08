@@ -84,6 +84,13 @@ class InstrumentManager {
   Status Process(int64 instrument_id, int64 timestamp, float* output,
                  int num_channels, int num_frames);
 
+  // Resets all parameters of all instruments to their default values at
+  // timestamp.
+  //
+  // @param timestamp Timestamp in frames.
+  // @return Status.
+  void ResetAllParams(int64 timestamp);
+
   // Resets all instrument parameters to their default values at timestamp.
   //
   // @param instrument_id Instrument id.
@@ -99,7 +106,13 @@ class InstrumentManager {
   // @return Status.
   Status ResetParam(int64 instrument_id, int64 timestamp, int param_id);
 
-  // Stops all active instrument notes at timestamp.
+  // Sets all active notes of all instruments off at timestamp.
+  //
+  // @param timestamp Timestamp in frames.
+  // @return Status.
+  void SetAllNotesOff(int64 timestamp);
+
+  // Sets all active instrument notes off at timestamp.
   //
   // @param instrument_id Instrument id.
   // @param timestamp Timestamp in frames.

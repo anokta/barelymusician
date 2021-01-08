@@ -31,7 +31,6 @@ using ::barelyapi::GetPitch;
 using ::barelyapi::int64;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::QuantizedNoteIndex;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::BasicDrumkitInstrument;
 using ::barelyapi::examples::BasicSynthInstrument;
@@ -78,8 +77,9 @@ int64 BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
 void ComposeChord(float root_note_index, const std::vector<float>& scale,
                   float intensity, int harmonic, std::vector<Note>* notes) {
   const auto add_chord_note = [&](int index) {
-    notes->emplace_back(
-        Note{0.0, 1.0, GetPitch(scale, {root_note_index, index}), intensity});
+    notes->push_back(Note{
+        0.0, 1.0, root_note_index + GetPitch(scale, static_cast<float>(index)),
+        intensity});
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -92,9 +92,10 @@ void ComposeLine(float root_note_index, const std::vector<float>& scale,
                  int harmonic, std::vector<Note>* notes) {
   const int note_offset = beat;
   const auto add_note = [&](double position, double duration, int index) {
-    notes->emplace_back(Note{position, duration,
-                             GetPitch(scale, {root_note_index, index}),
-                             intensity});
+    notes->push_back(
+        Note{position, duration,
+             root_note_index + GetPitch(scale, static_cast<float>(index)),
+             intensity});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);

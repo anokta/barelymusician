@@ -3,15 +3,7 @@
 
 namespace barelyapi {
 
-struct QuantizedNoteIndex {
-  // Root pitch.
-  float root_pitch;
-
-  // Scale index.
-  int scale_index;
-};
-
-// Abstract musical note.
+// Musical note.
 struct Note {
   // Note start position in beats.
   double position;

@@ -6,7 +6,7 @@
 namespace barelyapi {
 namespace {
 
-// Tests that note indices get quantized as expected given an arbitrary scale.
+// Tests that expected note pitches are returned given an arbitrary scale.
 TEST(NoteUtilsTest, GetPitch) {
   const int kOctaveRange = 2;
 
@@ -16,19 +16,17 @@ TEST(NoteUtilsTest, GetPitch) {
 
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < scale_length; ++i) {
-      const int scale_index = octave * scale_length + i;
-      const float expected_note_index =
+      const float scale_index = static_cast<float>(octave * scale_length + i);
+      const float expected_pitch =
           static_cast<float>(octave * kNumSemitones) + kScale[i];
-      EXPECT_FLOAT_EQ(GetPitch(kScale, QuantizedNoteIndex{0.0f, scale_index}),
-                      expected_note_index);
+      EXPECT_FLOAT_EQ(GetPitch(kScale, scale_index), expected_pitch);
     }
   }
 }
 
 class PositionTest : public testing::TestWithParam<int> {};
 
-// Tests that the beat gets quantized as expected with respect to the given
-// step.
+// Tests that expected positions are returned with respect to the given steps.
 TEST_P(PositionTest, GetPosition) {
   const int kNumBeats = 4;
   const int num_steps = GetParam();

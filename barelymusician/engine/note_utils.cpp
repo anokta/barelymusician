@@ -13,14 +13,12 @@ double Lerp(double a, double b, double t) { return a + t * (b - a); }
 
 }  // namespace
 
-float GetPitch(const std::vector<float>& scale,
-               const QuantizedNoteIndex& note_index) {
+float GetPitch(const std::vector<float>& scale, float scale_index) {
   DCHECK(!scale.empty());
   const float scale_length = static_cast<float>(scale.size());
-  const float scale_index = static_cast<float>(note_index.scale_index);
   const float octave_offset = std::floor(scale_index / scale_length);
   const float scale_offset = scale_index - octave_offset * scale_length;
-  return note_index.root_pitch + kNumSemitones * octave_offset +
+  return kNumSemitones * octave_offset +
          scale[static_cast<int>(std::floor(scale_offset))];
 }
 

@@ -8,6 +8,12 @@ cc_library(
 )
 
 cc_library(
+    name = "id",
+    srcs = ["id.cpp"],
+    hdrs = ["id.h"],
+)
+
+cc_library(
     name = "logging",
     srcs = ["logging.cpp"],
     hdrs = ["logging.h"],
@@ -32,9 +38,13 @@ cc_library(
     deps = [":logging"],
 )
 
-cc_library(
-    name = "types",
-    hdrs = ["types.h"],
+cc_test(
+    name = "id_test",
+    srcs = ["id_test.cpp"],
+    deps = [
+        ":id",
+        "@googletest//:gtest_main",
+    ],
 )
 
 cc_test(

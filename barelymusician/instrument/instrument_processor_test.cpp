@@ -1,9 +1,9 @@
 #include "barelymusician/instrument/instrument_processor.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <vector>
 
-#include "barelymusician/base/types.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"
 #include "gtest/gtest.h"
@@ -41,7 +41,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 
 // Tests that processing a single note produces the expected output.
 TEST(InstrumentProcessorTest, ProcessSingleNote) {
-  const int64 kTimestamp = 20;
+  const std::int64_t kTimestamp = 20;
   const float kPitch = 32.0f;
   const float kIntensity = 0.5f;
 

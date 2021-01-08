@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -8,7 +9,6 @@
 
 #include "MidiFile.h"
 #include "barelymusician/base/logging.h"
-#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
@@ -20,7 +20,6 @@
 namespace {
 
 using ::barelyapi::Engine;
-using ::barelyapi::int64;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
@@ -35,7 +34,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 512;
 
-constexpr int64 kLookahead = 4 * kNumFrames;
+constexpr std::int64_t kLookahead = 4 * kNumFrames;
 
 // Sequencer settings.
 constexpr double kTempo = 132.0;
@@ -98,15 +97,16 @@ int main(int /*argc*/, char* argv[]) {
 
   Engine engine;
   engine.SetTempo(kTempo);
-  engine.SetNoteOnCallback([](int64 id, int64, float pitch, float intensity) {
-    LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
-              << intensity << ")";
-  });
-  engine.SetNoteOffCallback([](int64 id, int64, float pitch) {
+  engine.SetNoteOnCallback(
+      [](std::int64_t id, std::int64_t, float pitch, float intensity) {
+        LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
+                  << intensity << ")";
+      });
+  engine.SetNoteOffCallback([](std::int64_t id, std::int64_t, float pitch) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
   });
 
-  std::vector<int64> instrument_ids;
+  std::vector<std::int64_t> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     const auto score = BuildScore(midi_file[i], ticks_per_quarter);
@@ -136,7 +136,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<int64> timestamp = 0;
+  std::atomic<std::int64_t> timestamp = 0;
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& id : instrument_ids) {

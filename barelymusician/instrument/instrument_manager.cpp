@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "barelymusician/base/id.h"
 #include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
@@ -17,13 +18,12 @@ constexpr int kNumMaxTasks = 1000;
 InstrumentManager::InstrumentManager()
     : note_off_callback_(nullptr),
       note_on_callback_(nullptr),
-      id_counter_(0),
       task_runner_(kNumMaxTasks) {}
 
-int64 InstrumentManager::Create(InstrumentDefinition definition,
-                                InstrumentParamDefinitions param_definitions,
-                                int64 timestamp) {
-  const int64 instrument_id = ++id_counter_;
+std::int64_t InstrumentManager::Create(
+    InstrumentDefinition definition,
+    InstrumentParamDefinitions param_definitions, std::int64_t timestamp) {
+  const std::int64_t instrument_id = GetNextId();
   InstrumentController controller(param_definitions);
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
                     params = controller.GetAllParams(), timestamp]() {
@@ -37,7 +37,8 @@ int64 InstrumentManager::Create(InstrumentDefinition definition,
   return instrument_id;
 }
 
-Status InstrumentManager::Destroy(int64 instrument_id, int64 timestamp) {
+Status InstrumentManager::Destroy(std::int64_t instrument_id,
+                                  std::int64_t timestamp) {
   if (const auto it = controllers_.find(instrument_id);
       it != controllers_.end()) {
     if (note_off_callback_) {
@@ -54,7 +55,7 @@ Status InstrumentManager::Destroy(int64 instrument_id, int64 timestamp) {
 }
 
 StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
-    int64 instrument_id) const {
+    std::int64_t instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllNotes();
   }
@@ -62,14 +63,14 @@ StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
 }
 
 StatusOr<std::vector<std::pair<int, float>>> InstrumentManager::GetAllParams(
-    int64 instrument_id) const {
+    std::int64_t instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllParams();
   }
   return Status::kNotFound;
 }
 
-StatusOr<float> InstrumentManager::GetParam(int64 instrument_id,
+StatusOr<float> InstrumentManager::GetParam(std::int64_t instrument_id,
                                             int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (const float* value = controller->GetParam(param_id)) {
@@ -79,7 +80,7 @@ StatusOr<float> InstrumentManager::GetParam(int64 instrument_id,
   return Status::kNotFound;
 }
 
-StatusOr<bool> InstrumentManager::IsNoteOn(int64 instrument_id,
+StatusOr<bool> InstrumentManager::IsNoteOn(std::int64_t instrument_id,
                                            float note_pitch) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->IsNoteOn(note_pitch);
@@ -87,9 +88,9 @@ StatusOr<bool> InstrumentManager::IsNoteOn(int64 instrument_id,
   return Status::kNotFound;
 }
 
-Status InstrumentManager::Process(int64 instrument_id, int64 timestamp,
-                                  float* output, int num_channels,
-                                  int num_frames) {
+Status InstrumentManager::Process(std::int64_t instrument_id,
+                                  std::int64_t timestamp, float* output,
+                                  int num_channels, int num_frames) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
     processor->Process(timestamp, output, num_channels, num_frames);
@@ -98,7 +99,7 @@ Status InstrumentManager::Process(int64 instrument_id, int64 timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::ResetAllParams(int64 timestamp) {
+void InstrumentManager::ResetAllParams(std::int64_t timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
     controller.ResetAllParams();
     task_runner_.Add([this, instrument_id = instrument_id, timestamp,
@@ -112,7 +113,8 @@ void InstrumentManager::ResetAllParams(int64 timestamp) {
   }
 }
 
-Status InstrumentManager::ResetAllParams(int64 instrument_id, int64 timestamp) {
+Status InstrumentManager::ResetAllParams(std::int64_t instrument_id,
+                                         std::int64_t timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     controller->ResetAllParams();
     task_runner_.Add([this, instrument_id, timestamp,
@@ -128,8 +130,8 @@ Status InstrumentManager::ResetAllParams(int64 instrument_id, int64 timestamp) {
   return Status::kNotFound;
 }
 
-Status InstrumentManager::ResetParam(int64 instrument_id, int64 timestamp,
-                                     int param_id) {
+Status InstrumentManager::ResetParam(std::int64_t instrument_id,
+                                     std::int64_t timestamp, int param_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->ResetParam(param_id)) {
       SetProcessorData(instrument_id, timestamp,
@@ -141,7 +143,7 @@ Status InstrumentManager::ResetParam(int64 instrument_id, int64 timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetAllNotesOff(int64 timestamp) {
+void InstrumentManager::SetAllNotesOff(std::int64_t timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
     auto notes = controller.GetAllNotes();
     controller.SetAllNotesOff();
@@ -161,7 +163,8 @@ void InstrumentManager::SetAllNotesOff(int64 timestamp) {
   }
 }
 
-Status InstrumentManager::SetAllNotesOff(int64 instrument_id, int64 timestamp) {
+Status InstrumentManager::SetAllNotesOff(std::int64_t instrument_id,
+                                         std::int64_t timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto notes = controller->GetAllNotes();
     controller->SetAllNotesOff();
@@ -183,7 +186,8 @@ Status InstrumentManager::SetAllNotesOff(int64 instrument_id, int64 timestamp) {
   return Status::kNotFound;
 }
 
-Status InstrumentManager::SetCustomData(int64 instrument_id, int64 timestamp,
+Status InstrumentManager::SetCustomData(std::int64_t instrument_id,
+                                        std::int64_t timestamp,
                                         void* custom_data) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     SetProcessorData(instrument_id, timestamp, CustomData{custom_data});
@@ -192,8 +196,8 @@ Status InstrumentManager::SetCustomData(int64 instrument_id, int64 timestamp,
   return Status::kNotFound;
 }
 
-Status InstrumentManager::SetNoteOff(int64 instrument_id, int64 timestamp,
-                                     float note_pitch) {
+Status InstrumentManager::SetNoteOff(std::int64_t instrument_id,
+                                     std::int64_t timestamp, float note_pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOff(note_pitch)) {
       if (note_off_callback_) {
@@ -212,8 +216,9 @@ void InstrumentManager::SetNoteOffCallback(
   note_off_callback_ = std::move(note_off_callback);
 }
 
-Status InstrumentManager::SetNoteOn(int64 instrument_id, int64 timestamp,
-                                    float note_pitch, float note_intensity) {
+Status InstrumentManager::SetNoteOn(std::int64_t instrument_id,
+                                    std::int64_t timestamp, float note_pitch,
+                                    float note_intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOn(note_pitch)) {
       if (note_on_callback_) {
@@ -233,8 +238,9 @@ void InstrumentManager::SetNoteOnCallback(
   note_on_callback_ = std::move(note_on_callback);
 }
 
-Status InstrumentManager::SetParam(int64 instrument_id, int64 timestamp,
-                                   int param_id, float param_value) {
+Status InstrumentManager::SetParam(std::int64_t instrument_id,
+                                   std::int64_t timestamp, int param_id,
+                                   float param_value) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetParam(param_id, param_value)) {
       SetProcessorData(instrument_id, timestamp,
@@ -246,7 +252,8 @@ Status InstrumentManager::SetParam(int64 instrument_id, int64 timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetProcessorData(int64 instrument_id, int64 timestamp,
+void InstrumentManager::SetProcessorData(std::int64_t instrument_id,
+                                         std::int64_t timestamp,
                                          InstrumentData data) {
   task_runner_.Add([this, instrument_id, timestamp, data = std::move(data)]() {
     if (auto* processor = FindOrNull(processors_, instrument_id)) {

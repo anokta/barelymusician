@@ -33,9 +33,9 @@ cc_library(
         ":instrument_definition",
         ":instrument_processor",
         ":instrument_utils",
+        "//barelymusician/base:id",
         "//barelymusician/base:status",
         "//barelymusician/base:task_runner",
-        "//barelymusician/base:types",
     ],
 )
 
@@ -46,7 +46,6 @@ cc_library(
     deps = [
         ":instrument_data",
         ":instrument_definition",
-        "//barelymusician/base:types",
     ],
 )
 
@@ -72,7 +71,6 @@ cc_test(
     deps = [
         ":instrument_manager",
         "//barelymusician/base:status",
-        "//barelymusician/base:types",
         "@googletest//:gtest_main",
     ],
 )
@@ -84,7 +82,6 @@ cc_test(
         ":instrument_data",
         ":instrument_definition",
         ":instrument_processor",
-        "//barelymusician/base:types",
         "@googletest//:gtest_main",
     ],
 )

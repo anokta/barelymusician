@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <unordered_map>
@@ -8,7 +9,6 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
-#include "barelymusician/base/types.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"
 #include "barelymusician/instrument/instrument_manager.h"
@@ -19,7 +19,7 @@ namespace barelyapi {
 class Engine {
  public:
   // Beat callback signature.
-  using BeatCallback = std::function<void(int64 timestamp, int beat)>;
+  using BeatCallback = std::function<void(std::int64_t timestamp, int beat)>;
 
   // Constructs new |Engine|.
   Engine();
@@ -29,21 +29,21 @@ class Engine {
   // @param instrument instrument Instrument to play.
   // @param params Default instrument params.
   // @return Instrument id.
-  int64 Create(InstrumentDefinition definition,
-               InstrumentParamDefinitions param_definitions = {});
+  std::int64_t Create(InstrumentDefinition definition,
+                      InstrumentParamDefinitions param_definitions = {});
 
   // Destroys instrument.
   //
   // @param instrument_id Instrument id.
   // @return Status.
-  Status Destroy(int64 instrument_id);
+  Status Destroy(std::int64_t instrument_id);
 
   // Returns parameter value.
   //
   // @param instrument_id Instrument id.
   // @param param_id Parameter id.
   // @return Parameter value, if found.
-  StatusOr<float> GetParam(int64 instrument_id, int param_id) const;
+  StatusOr<float> GetParam(std::int64_t instrument_id, int param_id) const;
 
   // Returns playback position.
   //
@@ -60,7 +60,7 @@ class Engine {
   // @param instrument_id Instrument id.
   // @param pitch Pitch.
   // @return True if note is active, if instrument found.
-  StatusOr<bool> IsNoteOn(int64 instrument_id, float pitch) const;
+  StatusOr<bool> IsNoteOn(std::int64_t instrument_id, float pitch) const;
 
   // Returns playback state.
   //
@@ -76,16 +76,16 @@ class Engine {
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
   // @return Status.
-  Status Process(int64 instrument_id, int64 timestamp, float* output,
-                 int num_channels, int num_frames);
+  Status Process(std::int64_t instrument_id, std::int64_t timestamp,
+                 float* output, int num_channels, int num_frames);
 
   // Resets all parameters.
   //
   // @param instrument_id Instrument id.
   // @return True if instrument found.
-  Status ResetAllParams(int64 instrument_id);
+  Status ResetAllParams(std::int64_t instrument_id);
 
-  Status ResetParam(int64 instrument_id, int param_id);
+  Status ResetParam(std::int64_t instrument_id, int param_id);
 
   // Stops all notes.
   void SetAllNotesOff();
@@ -94,21 +94,21 @@ class Engine {
   //
   // @param instrument_id Instrument id.
   // @return True if instrument found.
-  Status SetAllNotesOff(int64 instrument_id);
+  Status SetAllNotesOff(std::int64_t instrument_id);
 
   // Sets custom data.
   //
   // @param instrument_id Instrument id.
   // @param custom_data Custom data.
   // @return True if successful, if instrument found.
-  Status SetCustomData(int64 instrument_id, void* custom_data);
+  Status SetCustomData(std::int64_t instrument_id, void* custom_data);
 
   // Stops playing note.
   //
   // @param instrument_id Instrument id.
   // @param pitch Note pitch.
   // @return True if successful, if instrument found.
-  Status SetNoteOff(int64 instrument_id, float pitch);
+  Status SetNoteOff(std::int64_t instrument_id, float pitch);
 
   // Starts playing note.
   //
@@ -116,7 +116,7 @@ class Engine {
   // @param pitch Note pitch.
   // @param intensity Note intensity.
   // @return True if successful, if instrument found.
-  Status SetNoteOn(int64 instrument_id, float pitch, float intensity);
+  Status SetNoteOn(std::int64_t instrument_id, float pitch, float intensity);
 
   // Sets control parameter value.
   //
@@ -124,7 +124,7 @@ class Engine {
   // @param param_id Parameter id.
   // @param param_value Parameter value.
   // @return True if successful, if instrument parameter found.
-  Status SetParam(int64 instrument_id, int param_id, float param_value);
+  Status SetParam(std::int64_t instrument_id, int param_id, float param_value);
 
   // Clears all scheduled notes.
   void ClearAllScheduledNotes();
@@ -133,7 +133,7 @@ class Engine {
   //
   // @param instrument_id Instrument id.
   // @return True if instrument found.
-  Status ClearAllScheduledNotes(int64 instrument_id);
+  Status ClearAllScheduledNotes(std::int64_t instrument_id);
 
   // Schedules note.
   //
@@ -143,8 +143,8 @@ class Engine {
   // @param pitch Note pitch.
   // @param intensity Note intensity.
   // @return True if successful, if instrument found.
-  Status ScheduleNote(int64 instrument_id, double position, double duration,
-                      float pitch, float intensity);
+  Status ScheduleNote(std::int64_t instrument_id, double position,
+                      double duration, float pitch, float intensity);
 
   // Sets beat callback.
   //
@@ -174,7 +174,7 @@ class Engine {
   // Starts playback.
   //
   // @param timestamp Start timestamp.
-  void Start(int64 timestamp);
+  void Start(std::int64_t timestamp);
 
   // Stops playback.
   void Stop();
@@ -182,18 +182,19 @@ class Engine {
   // Updates the internal state.
   //
   // @param timestamp Update timestamp.
-  void Update(int sample_rate, int64 timestamp);
+  void Update(int sample_rate, std::int64_t timestamp);
 
  private:
   // List of instruments.
   InstrumentManager manager_;
-  std::unordered_map<int64, std::multimap<double, InstrumentData>> scores_;
+  std::unordered_map<std::int64_t, std::multimap<double, InstrumentData>>
+      scores_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;
 
   // Last timestamp.
-  int64 last_timestamp_;
+  std::int64_t last_timestamp_;
 
   // Playback position.
   double position_;

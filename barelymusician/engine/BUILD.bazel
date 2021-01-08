@@ -9,7 +9,6 @@ cc_library(
     deps = [
         "//barelymusician/base:constants",
         "//barelymusician/base:status",
-        "//barelymusician/base:types",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/instrument:instrument_data",
         "//barelymusician/instrument:instrument_definition",

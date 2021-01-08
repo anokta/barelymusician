@@ -33,13 +33,13 @@ InstrumentProcessor& InstrumentProcessor::operator=(
   return *this;
 }
 
-void InstrumentProcessor::Process(int64 timestamp, float* output,
+void InstrumentProcessor::Process(std::int64_t timestamp, float* output,
                                   int num_channels, int num_frames) {
   int frame = 0;
   // Process *all* events before |end_timestamp|.
   const auto begin = data_.cbegin();
   const auto end =
-      data_.lower_bound(timestamp + static_cast<int64>(num_frames));
+      data_.lower_bound(timestamp + static_cast<std::int64_t>(num_frames));
   for (auto it = begin; it != end; ++it) {
     const int message_frame = static_cast<int>(it->first - timestamp);
     if (frame < message_frame) {
@@ -82,7 +82,7 @@ void InstrumentProcessor::Process(int64 timestamp, float* output,
   }
 }
 
-void InstrumentProcessor::SetData(int64 timestamp, InstrumentData data) {
+void InstrumentProcessor::SetData(std::int64_t timestamp, InstrumentData data) {
   data_.emplace(timestamp, std::move(data));
 }
 

@@ -1,6 +1,7 @@
 #include "unity/native/unity.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <utility>
@@ -18,7 +19,7 @@ namespace unity {
 namespace {
 
 // Invalid id.
-inline constexpr int64 kInvalidId = -1;
+inline constexpr std::int64_t kInvalidId = -1;
 
 // Unity plugin.
 struct BarelyMusician {
@@ -59,9 +60,9 @@ void Shutdown() {
   barelymusician = nullptr;
 }
 
-int64 CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
-                            NoteOnFn* note_on_fn_ptr,
-                            ProcessFn* process_fn_ptr) {
+std::int64_t CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
+                                   NoteOnFn* note_on_fn_ptr,
+                                   ProcessFn* process_fn_ptr) {
   if (barelymusician) {
     InstrumentDefinition definition = {
         .process_fn =
@@ -81,7 +82,7 @@ int64 CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
   return kInvalidId;
 }
 
-int64 CreateBasicSynthInstrument() {
+std::int64_t CreateBasicSynthInstrument() {
   if (barelymusician) {
     return barelymusician->engine.Create(
         examples::BasicSynthInstrument::GetDefinition(
@@ -91,13 +92,13 @@ int64 CreateBasicSynthInstrument() {
   return kInvalidId;
 }
 
-void Destroy(int64 id) {
+void Destroy(std::int64_t id) {
   if (barelymusician) {
     barelymusician->engine.Destroy(id);
   }
 }
 
-float GetParam(int64 id, int param_id) {
+float GetParam(std::int64_t id, int param_id) {
   if (barelymusician) {
     const auto param_or = barelymusician->engine.GetParam(id, param_id);
     if (IsOk(param_or)) {
@@ -121,7 +122,7 @@ double GetTempo() {
   return 0.0f;
 }
 
-bool IsNoteOn(int64 id, float pitch) {
+bool IsNoteOn(std::int64_t id, float pitch) {
   if (barelymusician) {
     const auto is_note_on_or = barelymusician->engine.IsNoteOn(id, pitch);
     if (IsOk(is_note_on_or)) {
@@ -138,25 +139,25 @@ bool IsPlaying() {
   return false;
 }
 
-void AllNotesOff(int64 id) {
+void AllNotesOff(std::int64_t id) {
   if (barelymusician) {
     barelymusician->engine.SetAllNotesOff(id);
   }
 }
 
-void NoteOff(int64 id, float pitch) {
+void NoteOff(std::int64_t id, float pitch) {
   if (barelymusician) {
     barelymusician->engine.SetNoteOff(id, pitch);
   }
 }
 
-void NoteOn(int64 id, float pitch, float intensity) {
+void NoteOn(std::int64_t id, float pitch, float intensity) {
   if (barelymusician) {
     barelymusician->engine.SetNoteOn(id, pitch, intensity);
   }
 }
 
-void Process(int64 id, double timestamp, float* output, int num_channels,
+void Process(std::int64_t id, double timestamp, float* output, int num_channels,
              int num_frames) {
   std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
   if (barelymusician) {
@@ -166,14 +167,14 @@ void Process(int64 id, double timestamp, float* output, int num_channels,
   }
 }
 
-void ResetAllParams(int64 id) {
+void ResetAllParams(std::int64_t id) {
   if (barelymusician) {
     barelymusician->engine.ResetAllParams(id);
   }
 }
 
-void ScheduleNote(int64 id, double position, double duration, float pitch,
-                  float intensity) {
+void ScheduleNote(std::int64_t id, double position, double duration,
+                  float pitch, float intensity) {
   if (barelymusician) {
     barelymusician->engine.ScheduleNote(id, position, duration, pitch,
                                         intensity);
@@ -185,7 +186,7 @@ void SetBeatCallback(BeatCallback* beat_callback_ptr) {
     if (beat_callback_ptr) {
       barelymusician->engine.SetBeatCallback(
           [beat_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int64 timestamp, int beat) {
+              std::int64_t timestamp, int beat) {
             beat_callback_ptr(SecondsFromSamples(sample_rate, timestamp), beat);
           });
     } else {
@@ -213,7 +214,7 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
     if (note_off_callback_ptr) {
       barelymusician->engine.SetNoteOffCallback(
           [note_off_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int64 id, int64 timestamp, float pitch) {
+              std::int64_t id, std::int64_t timestamp, float pitch) {
             note_off_callback_ptr(SecondsFromSamples(sample_rate, timestamp),
                                   id, pitch);
           });
@@ -228,7 +229,8 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
     if (note_on_callback_ptr) {
       barelymusician->engine.SetNoteOnCallback(
           [note_on_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int64 id, int64 timestamp, float pitch, float intensity) {
+              std::int64_t id, std::int64_t timestamp, float pitch,
+              float intensity) {
             note_on_callback_ptr(SecondsFromSamples(sample_rate, timestamp), id,
                                  pitch, intensity);
           });
@@ -238,7 +240,7 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
   }
 }
 
-void SetParam(int64 id, int param_id, float value) {
+void SetParam(std::int64_t id, int param_id, float value) {
   if (barelymusician) {
     barelymusician->engine.SetParam(id, param_id, value);
   }

@@ -1,9 +1,9 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_
 
+#include <cstdint>
 #include <map>
 
-#include "barelymusician/base/types.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"
 
@@ -34,14 +34,14 @@ class InstrumentProcessor {
   // @param output Pointer to the output buffer.
   // @param num_channels Number of output channels.
   // @param num_frames Number of output frames.
-  void Process(int64 timestamp, float* output, int num_channels,
+  void Process(std::int64_t timestamp, float* output, int num_channels,
                int num_frames);
 
   // Sets instrument data at a given timestamp.
   //
   // @param timestamp Timestamp in frames.
   // @param data Instrument data.
-  void SetData(int64 timestamp, InstrumentData data);
+  void SetData(std::int64_t timestamp, InstrumentData data);
 
  private:
   // Instrument definition.
@@ -51,7 +51,7 @@ class InstrumentProcessor {
   InstrumentState state_;
 
   // List of scheduled instrument data.
-  std::multimap<int64, InstrumentData> data_;
+  std::multimap<std::int64_t, InstrumentData> data_;
 };
 
 }  // namespace barelyapi

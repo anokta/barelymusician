@@ -2,6 +2,7 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <thread>
 #include <unordered_map>
@@ -12,7 +13,6 @@
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
-#include "barelymusician/base/types.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
@@ -28,7 +28,6 @@ namespace {
 
 using ::barelyapi::Engine;
 using ::barelyapi::GetPitch;
-using ::barelyapi::int64;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
@@ -49,7 +48,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
-constexpr int64 kLookahead = 4 * kNumFrames;
+constexpr std::int64_t kLookahead = 4 * kNumFrames;
 
 // Sequencer settings.
 constexpr double kTempo = 124.0;
@@ -62,8 +61,8 @@ constexpr int kNumInstrumentVoices = 8;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
-int64 BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
-                           float attack, float release) {
+std::int64_t BuildSynthInstrument(Engine* engine, OscillatorType type,
+                                  float gain, float attack, float release) {
   return engine->Create(
       BasicSynthInstrument::GetDefinition(kSampleRate),
       {{BasicSynthInstrumentParam::kNumVoices,
@@ -186,12 +185,12 @@ int main(int /*argc*/, char* argv[]) {
     return progression[bar % progression.size()];
   };
 
-  std::unordered_map<int64, BeatComposerCallback> performers;
+  std::unordered_map<std::int64_t, BeatComposerCallback> performers;
 
   // Beat callback.
   int harmonic = 0;
   std::vector<Note> temp_notes;
-  const auto beat_callback = [&](int64, int beat) {
+  const auto beat_callback = [&](std::int64_t, int beat) {
     // Update transport.
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
@@ -217,15 +216,16 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Note on callback.
-  const auto note_on_callback = [](int64 performer_id, int64, float pitch,
-                                   float intensity) {
+  const auto note_on_callback = [](std::int64_t performer_id, std::int64_t,
+                                   float pitch, float intensity) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
   };
   engine.SetNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](int64 performer_id, int64, float pitch) {
+  const auto note_off_callback = [](std::int64_t performer_id, std::int64_t,
+                                    float pitch) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << pitch << ")";
   };
   engine.SetNoteOffCallback(note_off_callback);
@@ -283,7 +283,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<int64> timestamp = 0;
+  std::atomic<std::int64_t> timestamp = 0;
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& [id, callback] : performers) {

@@ -10,18 +10,18 @@ namespace examples {
 template <class GeneratorType>
 class BasicEnvelopedVoice : public Voice {
  public:
-  // Constructs new |BasicEnvelopedVoice| with the given |sample_rate|.
-  //
-  // @param sample_rate Sampling rate in Hz.
+  /// Constructs new |BasicEnvelopedVoice| with the given |sample_rate|.
+  ///
+  /// @param sample_rate Sampling rate in Hz.
   explicit BasicEnvelopedVoice(int sample_rate);
 
-  // Implements |Voice|.
+  /// Implements |Voice|.
   bool IsActive() const override;
   float Next(int channel) override;
   void Start() override;
   void Stop() override;
 
-  // Inline getter/setter functions.
+  /// Inline getter/setter functions.
   const Envelope& envelope() const { return envelope_; }
   Envelope& envelope() { return envelope_; }
 

@@ -5,48 +5,48 @@
 
 namespace barelyapi {
 
-// Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output
-// samples according to its current state.
+/// Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output
+/// samples according to its current state.
 class Envelope : public Generator {
  public:
-  // Constructs new |Envelope|.
-  //
-  // @param sample_rate Sampling rate in Hz.
+  /// Constructs new |Envelope|.
+  ///
+  /// @param sample_rate Sampling rate in Hz.
   explicit Envelope(int sample_rate);
 
-  // Implements |Generator|.
+  /// Implements |Generator|.
   float Next() override;
   void Reset() override;
 
-  // Returns whether the envelope is currently active (i.e., not idle).
-  //
-  // @return True if active.
+  /// Returns whether the envelope is currently active (i.e., not idle).
+  ///
+  /// @return True if active.
   bool IsActive() const;
 
-  // Sets the attack of the envelope in seconds.
-  //
-  // attack Attack in milliseconds.
+  /// Sets the attack of the envelope in seconds.
+  ///
+  /// @param attack Attack in milliseconds.
   void SetAttack(float attack);
 
-  // Sets the decay of the envelope in seconds.
-  //
-  // decay Attack in seconds.
+  /// Sets the decay of the envelope in seconds.
+  ///
+  /// @param  decay Attack in seconds.
   void SetDecay(float decay);
 
-  // Sets the release of the envelope in seconds.
-  //
-  // release Release in seconds.
+  /// Sets the release of the envelope in seconds.
+  ///
+  /// @param  release Release in seconds.
   void SetRelease(float release);
 
-  // Sets the sustain of the envelope in amplitude.
-  //
-  // sustain Sustain in amplitude range [0, 1].
+  /// Sets the sustain of the envelope in amplitude.
+  ///
+  /// @param  sustain Sustain in amplitude range [0, 1].
   void SetSustain(float sustain);
 
-  // Starts the envelope.
+  /// Starts the envelope.
   void Start();
 
-  // Stops the envelope.
+  /// Stops the envelope.
   void Stop();
 
  private:

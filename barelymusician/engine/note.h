@@ -3,18 +3,18 @@
 
 namespace barelyapi {
 
-// Musical note.
+/// Musical note.
 struct Note {
-  // Note start position in beats.
+  /// Note start position in beats.
   double position;
 
-  // Note duration in beats.
+  /// Note duration in beats.
   double duration;
 
-  // Note pitch.
+  /// Note pitch.
   float pitch;
 
-  // Note intensity.
+  /// Note intensity.
   float intensity;
 };
 

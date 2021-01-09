@@ -3,12 +3,12 @@
 
 namespace barelyapi {
 
-// Generates next id.
-//
-// @return Unique id.
+/// Generates next id.
+///
+/// @return Unique id.
 int GetNextId();
 
-// Resets id counter state.
+/// Resets id counter state.
 void ResetIdCount();
 
 }  // namespace barelyapi

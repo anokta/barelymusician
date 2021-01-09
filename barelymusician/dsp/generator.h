@@ -3,18 +3,18 @@
 
 namespace barelyapi {
 
-// Unit generator interface that produces per sample PCM output.
+/// Unit generator interface that produces per sample PCM output.
 class Generator {
  public:
-  // Base destructor to ensure the derived classes get destroyed properly.
+  /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~Generator() = default;
 
-  // Generates the next output sample.
-  //
-  // @return Next output sample.
+  /// Generates the next output sample.
+  ///
+  /// @return Next output sample.
   virtual float Next() = 0;
 
-  // Resets module state.
+  /// Resets module state.
   virtual void Reset() = 0;
 };
 

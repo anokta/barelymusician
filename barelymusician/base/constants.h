@@ -3,26 +3,26 @@
 
 namespace barelyapi {
 
-// Converts minutes to seconds.
+/// Converts minutes to seconds.
 inline constexpr double kSecondsFromMinutes = 60.0;
 
-// PI (radians).
+/// PI (radians).
 inline constexpr float kPi = 3.14159265358979323846f;
 inline constexpr float kTwoPi = 2.0f * kPi;
 
-// Minimum dB threshold.
+/// Minimum dB threshold.
 inline constexpr float kMinDecibels = -80.0f;
 
-// Number of mono channels.
+/// Number of mono channels.
 inline constexpr int kNumMonoChannels = 1;
 
-// Number of stereo channels.
+/// Number of stereo channels.
 inline constexpr int kNumStereoChannels = 2;
 
-// Number of semitones in an octave (twelwe-tone equal temperament).
+/// Number of semitones in an octave (twelwe-tone equal temperament).
 inline constexpr float kNumSemitones = 12.0f;
 
-// Common musical scales.
+/// Common musical scales.
 inline constexpr float kMajorScale[] = {0.0f, 2.0f, 4.0f, 5.0f,
                                         7.0f, 9.0f, 11.0f};
 inline constexpr float kNaturalMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f,
@@ -30,10 +30,10 @@ inline constexpr float kNaturalMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f,
 inline constexpr float kHarmonicMinorScale[] = {0.0f, 2.0f, 3.0f, 5.0f,
                                                 7.0f, 8.0f, 11.0f};
 
-// Middle A (A4) frequency.
+/// Middle A (A4) frequency.
 inline constexpr float kFrequencyA4 = 440.0f;
 
-// Common pitches.
+/// Common pitches.
 inline constexpr float kPitchA0 = 21.0f;
 inline constexpr float kPitchAsharp0 = 22.0f;
 inline constexpr float kPitchB0 = 23.0f;
@@ -135,7 +135,7 @@ inline constexpr float kPitchSnare = kPitchD3;
 inline constexpr float kPitchHihatClosed = kPitchE3;
 inline constexpr float kPitchHihatOpen = kPitchF3;
 
-// Common note values in relation to quarter note beat duration.
+/// Common note values in relation to quarter note beat duration.
 inline constexpr int kNumQuarterNotesPerBeat = 1;
 inline constexpr int kNumEighthNotesPerBeat = 2;
 inline constexpr int kNumEighthTripletNotesPerBeat = 3;

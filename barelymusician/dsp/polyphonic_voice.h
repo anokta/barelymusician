@@ -9,44 +9,44 @@
 
 namespace barelyapi {
 
-// Class template that provides polyphony of a desired voice type.
+/// Class template that provides polyphony of a desired voice type.
 template <class VoiceType>
 class PolyphonicVoice {
  public:
-  // Voice mutator callback signature.
+  /// Voice mutator callback signature.
   using VoiceCallback = std::function<void(VoiceType* voice)>;
 
-  // Constructs new |PolyphonicVoice| with the given |base_voice|.
-  //
-  // @param base_voice Base voice type to be used.
+  /// Constructs new |PolyphonicVoice| with the given |base_voice|.
+  ///
+  /// @param base_voice Base voice type to be used.
   explicit PolyphonicVoice(VoiceType&& base_voice);
 
-  // Returns the next output sample for the given output |channel|.
-  //
-  // @param channel Output channel.
-  // @return Accumulated output sample.
+  /// Returns the next output sample for the given output |channel|.
+  ///
+  /// @param channel Output channel.
+  /// @return Accumulated output sample.
   float Next(int channel);
 
-  // Resizes number of available voices that can be played simultaneously.
-  //
-  // @param num_voices Number of available voices.
+  /// Resizes number of available voices that can be played simultaneously.
+  ///
+  /// @param num_voices Number of available voices.
   void Resize(int num_voices);
 
-  // Starts new voice for the given |pitch|.
-  //
-  // @param pitch Voice pitch.
-  // @param init_voice Callback to initialize the voice for playback.
+  /// Starts new voice for the given |pitch|.
+  ///
+  /// @param pitch Voice pitch.
+  /// @param init_voice Callback to initialize the voice for playback.
   void Start(float pitch, const VoiceCallback& init_voice = nullptr);
 
-  // Stops the voice with the given |pitch|.
-  //
-  // @param pitch Voice pitch.
-  // @param shutdown_voice Callback to shutdown the voice.
+  /// Stops the voice with the given |pitch|.
+  ///
+  /// @param pitch Voice pitch.
+  /// @param shutdown_voice Callback to shutdown the voice.
   void Stop(float pitch, const VoiceCallback& shutdown_voice = nullptr);
 
-  // Updates all the available voices with the given callback.
-  //
-  // @param update_voice Callback to update each voice.
+  /// Updates all the available voices with the given callback.
+  ///
+  /// @param update_voice Callback to update each voice.
   void Update(const VoiceCallback& update_voice);
 
  private:

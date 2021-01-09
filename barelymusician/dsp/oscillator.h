@@ -13,26 +13,26 @@ enum class OscillatorType {
   kNoise,   // White noise.
 };
 
-// Simple oscillator that generates output samples of basic waveforms.
+/// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator : public Generator {
  public:
-  // Constructs new |Oscillator|.
-  //
-  // @param sample_rate Sampling rate in Hz.
+  /// Constructs new |Oscillator|.
+  ///
+  /// @param sample_rate Sampling rate in Hz.
   explicit Oscillator(int sample_rate);
 
-  // Implements |Generator|.
+  /// Implements |Generator|.
   float Next() override;
   void Reset() override;
 
-  // Sets the frequency of the oscillator.
-  //
-  // @param frequency Oscillator frequency in Hz.
+  /// Sets the frequency of the oscillator.
+  ///
+  /// @param frequency Oscillator frequency in Hz.
   void SetFrequency(float frequency);
 
-  // Sets the type of the oscillator.
-  //
-  // @param type Oscillator type.
+  /// Sets the type of the oscillator.
+  ///
+  /// @param type Oscillator type.
   void SetType(OscillatorType type);
 
  private:

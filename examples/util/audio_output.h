@@ -8,31 +8,31 @@
 namespace barelyapi {
 namespace examples {
 
-// Simple portaudio wrapper for handling audio output.
+/// Simple portaudio wrapper for handling audio output.
 class AudioOutput {
  public:
-  // Audio process callback signature.
+  /// Audio process callback signature.
   using ProcessCallback = std::function<void(float* output)>;
 
-  // Constructs new |AudioOutput|.
+  /// Constructs new |AudioOutput|.
   AudioOutput();
 
-  // Destructs |AudioOutput|.
+  /// Destructs |AudioOutput|.
   ~AudioOutput();
 
-  // Starts audio processing routine with the given configuration.
-  //
-  // @param sample_rate Sampling rate in Hz.
-  // @param num_channels Number of output channels.
-  // @param num_frames Number of output frames per buffer.
+  /// Starts audio processing routine with the given configuration.
+  ///
+  /// @param sample_rate Sampling rate in Hz.
+  /// @param num_channels Number of output channels.
+  /// @param num_frames Number of output frames per buffer.
   void Start(int sample_rate, int num_channels, int num_frames);
 
-  // Stops the audio processing routine.
+  /// Stops the audio processing routine.
   void Stop();
 
-  // Sets the audio process callback.
-  //
-  // @param process_callback Audio process callback.
+  /// Sets the audio process callback.
+  ///
+  /// @param process_callback Audio process callback.
   void SetProcessCallback(ProcessCallback&& process_callback);
 
  private:

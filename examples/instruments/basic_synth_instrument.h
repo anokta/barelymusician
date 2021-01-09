@@ -26,17 +26,17 @@ enum BasicSynthInstrumentParam {
 
 class BasicSynthInstrument : public Instrument {
  public:
-  // Constructs new |BasicSynthInstrument|.
+  /// Constructs new |BasicSynthInstrument|.
   explicit BasicSynthInstrument(int sample_rate);
 
-  // Implements |Instrument|.
+  /// Implements |Instrument|.
   void NoteOff(float pitch) override;
   void NoteOn(float pitch, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
   void SetCustomData(void*) override {}
   void SetParam(int id, float value) override;
 
-  // Returns instrument definition.
+  /// Returns instrument definition.
   static InstrumentDefinition GetDefinition(int sample_rate);
   static std::vector<InstrumentParamDefinition> GetDefaultParams();
 

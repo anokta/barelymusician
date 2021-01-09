@@ -13,31 +13,31 @@
 namespace barelyapi {
 namespace examples {
 
-// Input manager for handling keyboard events.
+/// Input manager for handling keyboard events.
 class InputManager {
  public:
-  // Keyboard event callback signatures.
+  /// Keyboard event callback signatures.
   using Key = char;
   using KeyDownCallback = std::function<void(const Key& key)>;
   using KeyUpCallback = std::function<void(const Key& key)>;
 
-  // Constructs new |InputManager|.
+  /// Constructs new |InputManager|.
   InputManager();
 
-  // Destructs |InputManager|.
+  /// Destructs |InputManager|.
   ~InputManager();
 
-  // Sets keyboard key down callback.
-  //
-  // @param key_down_callback Keyboard key down callback.
+  /// Sets keyboard key down callback.
+  ///
+  /// @param key_down_callback Keyboard key down callback.
   void SetKeyDownCallback(KeyDownCallback key_down_callback);
 
-  // Sets keyboard key up callback.
-  //
-  // @param key_up_callback Keyboard key up callback.
+  /// Sets keyboard key up callback.
+  ///
+  /// @param key_up_callback Keyboard key up callback.
   void SetKeyUpCallback(KeyUpCallback key_up_callback);
 
-  // Updates the input manager to handle new input events.
+  /// Updates the input manager to handle new input events.
   void Update();
 
  private:

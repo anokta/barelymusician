@@ -10,30 +10,27 @@
 
 namespace barelyapi {
 
-// Context-free grammar (L-system) template that generates a sequence of
-// |SymbolType| with the given set of substition rules.
+/// Context-free grammar (L-system) template that generates a sequence of
+/// |SymbolType| with the given set of substition rules.
 template <typename SymbolType>
 class ContextFreeGrammar {
  public:
-  // Adds a rule of |substitions| for the given |symbol|.
-  //
-  // @param symbol Input symbol.
-  // @param substitions Output substition list of symbols.
+  /// Adds a rule of |substitions| for the given |symbol|.
+  ///
+  /// @param symbol Input symbol.
+  /// @param substitions Output substition list of symbols.
   void AddRule(const SymbolType& symbol,
                const std::vector<std::vector<SymbolType>>& substitions);
 
-  // Generates a new sequence beginning from the given |start_symbol|.
-  //
-  // @param start_symbol Initial symbol to start the sequence.
-  // @return Generated symbol sequence.
+  /// Generates a new sequence beginning from the given |start_symbol|.
+  ///
+  /// @param start_symbol Initial symbol to start the sequence.
+  /// @return Generated symbol sequence.
   std::vector<SymbolType> GenerateSequence(
       const SymbolType& start_symbol) const;
 
  private:
-  // Returns a new substition for the given |symbol| using its rule.
-  //
-  // @param symbol Input symbol.
-  // @return Output substition list of symbols.
+  // Returns new substition for the given |symbol| using its rule.
   std::vector<SymbolType> GetSubstition(const SymbolType& symbol) const;
 
   // Grammar rules that map symbols to their corresponding substitions.

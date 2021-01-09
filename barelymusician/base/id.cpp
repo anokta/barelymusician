@@ -5,7 +5,7 @@ namespace barelyapi {
 namespace {
 
 // Id counter.
-static int id_counter = 0;
+int id_counter = 0;
 
 }  // namespace
 

@@ -7,23 +7,23 @@
 
 namespace barelyapi {
 
-// Lock-free thread-safe task runner (multiple producers, single consumer).
+/// Lock-free thread-safe task runner (multiple producers, single consumer).
 class TaskRunner {
  public:
-  // Task signature.
+  /// Task signature.
   using Task = std::function<void()>;
 
-  // Constructs new |TaskRunner| with the given |max_size|.
-  //
-  // @param max_size Maximum number of tasks that can be added in each run.
+  /// Constructs new |TaskRunner| with the given |max_size|.
+  ///
+  /// @param max_size Maximum number of tasks that can be added in each run.
   explicit TaskRunner(int max_size);
 
-  // Adds new task.
-  //
-  // @param task Task to run.
+  /// Adds new task.
+  ///
+  /// @param task Task to run.
   void Add(Task&& task);
 
-  // Runs all tasks.
+  /// Runs all tasks.
   void Run();
 
  private:

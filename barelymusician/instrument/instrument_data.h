@@ -5,40 +5,40 @@
 
 namespace barelyapi {
 
-// Custom data.
+/// Custom data.
 struct CustomData {
-  // Custom data.
+  /// Custom data.
   void* data;
 };
 
-// Note off data.
+/// Note off data.
 struct NoteOff {
-  // Note pitch.
+  /// Note pitch.
   float pitch;
 };
 
-// Note on data.
+/// Note on data.
 struct NoteOn {
-  // Note pitch.
+  /// Note pitch.
   float pitch;
 
-  // Note intensity.
+  /// Note intensity.
   float intensity;
 };
 
-// Parameter data.
+/// Parameter data.
 struct Param {
-  // Parameter id.
+  /// Parameter id.
   int id;
 
-  // Parameter value.
+  /// Parameter value.
   float value;
 };
 
-// Instrument data type.
+/// Instrument data type.
 using InstrumentData = std::variant<CustomData, NoteOff, NoteOn, Param>;
 
-// Instrument data visitor.
+/// Instrument data visitor.
 template <class... DataTypes>
 struct InstrumentDataVisitor : DataTypes... {
   using DataTypes::operator()...;

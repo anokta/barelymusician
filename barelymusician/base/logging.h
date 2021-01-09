@@ -4,7 +4,7 @@
 #include <ostream>
 #include <sstream>
 
-// Logging macros.
+/// Logging macros.
 #define LOG(severity) BARELY_LOG(severity)
 #define CHECK(expression) BARELY_CHECK(expression)
 #define CHECK_EQ(lhs, rhs) BARELY_CHECK_OP(==, lhs, rhs)
@@ -25,7 +25,7 @@
 namespace barelyapi {
 namespace logging {
 
-// Log severity.
+/// Log severity.
 enum class LogSeverity {
   INFO = 0,
   WARNING = 1,
@@ -33,25 +33,23 @@ enum class LogSeverity {
   FATAL = 3,
 };
 
-// Logging class that wraps assertion and log stream for debugging.
+/// Logging class that wraps assertion and log stream for debugging.
 class Logger {
  public:
-  // Constructs new |Logger|.
-  //
-  // @param severity Log severity.
-  // @param file File path.
-  // @param line Line number.
+  /// Constructs new |Logger|.
+  ///
+  /// @param severity Log severity.
+  /// @param file File path.
+  /// @param line Line number.
   Logger(LogSeverity severity, const char* file, int line);
 
-  // Destroys |Logger| after writing the log stream.
+  /// Destroys |Logger| after writing the log stream.
   ~Logger();
 
-  // Returns the log stream.
-  //
-  // @return Log stream.
+  /// Returns the log stream.
+  ///
+  /// @return Log stream.
   std::ostream& GetStream();
-
-  // static void SetWriter(LogWriter* writer);
 
  private:
   // Log severity.
@@ -61,36 +59,39 @@ class Logger {
   std::ostringstream stream_;
 };
 
-// Log writer interface.
+/// Log writer interface.
 class LogWriter {
  public:
-  // Base destructor to ensure the derived classes get destroyed properly.
+  /// Base destructor to ensure the derived classes get destroyed properly.
   ~LogWriter() = default;
 
-  // Writes log message.
+  /// Writes log message.
+  ///
+  /// @param severity Log severity.
+  /// @param message Log message.
   virtual void Write(LogSeverity severity, const std::string& message) = 0;
 };
 
-// Log writer that outputs to cerr.
+/// Log writer that outputs to cerr.
 class CerrLogWriter : public LogWriter {
  public:
-  // Implements |LogWriter|.
+  /// Implements |LogWriter|.
   void Write(LogSeverity severity, const std::string& message) override;
 };
 
-// Returns default log writer.
-//
-// @return Default log writer.
+/// Returns default log writer.
+///
+/// @return Default log writer.
 LogWriter& GetDefaultLogWriter();
 
-// Returns null stream.
-//
-// @return Null stream.
+/// Returns null stream.
+///
+/// @return Null stream.
 std::ostream& GetNullStream();
 
-// Sets log writer.
-//
-// @param log_writer Log writer.
+/// Sets log writer.
+///
+/// @param log_writer Log writer.
 void SetLogWriter(LogWriter* log_writer);
 
 }  // namespace logging

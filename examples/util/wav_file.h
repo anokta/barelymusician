@@ -7,28 +7,28 @@
 namespace barelyapi {
 namespace examples {
 
-// RIFF Wave file.
+/// RIFF Wave file.
 class WavFile {
  public:
-  // Returns the audio data.
-  //
-  // @return Audio data.
+  /// Returns the audio data.
+  ///
+  /// @return Audio data.
   const std::vector<float>& GetData() const;
 
-  // Returns the number of audio channels.
-  //
-  // @return Number of audio channels.
+  /// Returns the number of audio channels.
+  ///
+  /// @return Number of audio channels.
   int GetNumChannels() const;
 
-  // Returns the audio sampling rate.
-  //
-  // @return Audio sampling rate.
+  /// Returns the audio sampling rate.
+  ///
+  /// @return Audio sampling rate.
   int GetSampleRate() const;
 
-  // Loads Wave file with the given |file_path|.
-  //
-  // @param file_path Absolute file path.
-  // @return True if successful.
+  /// Loads Wave file with the given |file_path|.
+  ///
+  /// @param file_path Absolute file path.
+  /// @return True if successful.
   bool Load(const std::string& file_path);
 
  private:

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "barelymusician/base/id_generator.h"
 #include "barelymusician/base/status.h"
 #include "barelymusician/base/task_runner.h"
 #include "barelymusician/instrument/instrument_controller.h"
@@ -182,6 +183,9 @@ class InstrumentManager {
 
   // Instrument note on callback.
   InstrumentNoteOnCallback note_on_callback_;
+
+  // Instrument id generator.
+  IdGenerator id_generator_;
 
   // Audio thread task runner.
   TaskRunner task_runner_;

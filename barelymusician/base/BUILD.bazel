@@ -8,9 +8,9 @@ cc_library(
 )
 
 cc_library(
-    name = "id",
-    srcs = ["id.cpp"],
-    hdrs = ["id.h"],
+    name = "id_generator",
+    srcs = ["id_generator.cpp"],
+    hdrs = ["id_generator.h"],
 )
 
 cc_library(
@@ -39,10 +39,10 @@ cc_library(
 )
 
 cc_test(
-    name = "id_test",
-    srcs = ["id_test.cpp"],
+    name = "id_generator_test",
+    srcs = ["id_generator_test.cpp"],
     deps = [
-        ":id",
+        ":id_generator",
         "@googletest//:gtest_main",
     ],
 )

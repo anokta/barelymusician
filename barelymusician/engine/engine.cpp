@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-#include "barelymusician/base/id.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument_utils.h"
 
@@ -44,7 +43,6 @@ Engine::Engine()
       position_(0.0),
       tempo_(0.0),
       beat_callback_(nullptr) {
-  ResetIdCount();
 }
 
 int Engine::Create(InstrumentDefinition definition,

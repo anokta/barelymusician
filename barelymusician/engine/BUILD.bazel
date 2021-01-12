@@ -8,7 +8,6 @@ cc_library(
     hdrs = ["engine.h"],
     deps = [
         "//barelymusician/base:constants",
-        "//barelymusician/base:id",
         "//barelymusician/base:status",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/instrument:instrument_data",

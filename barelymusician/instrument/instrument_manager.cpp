@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <utility>
 
-#include "barelymusician/base/id.h"
 #include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
@@ -23,7 +22,7 @@ InstrumentManager::InstrumentManager()
 int InstrumentManager::Create(InstrumentDefinition definition,
                               InstrumentParamDefinitions param_definitions,
                               std::int64_t timestamp) {
-  const int instrument_id = GetNextId();
+  const int instrument_id = id_generator_.Next();
   InstrumentController controller(param_definitions);
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
                     params = controller.GetAllParams(), timestamp]() {

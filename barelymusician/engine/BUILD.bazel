@@ -33,11 +33,31 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "score",
+    srcs = ["score.cpp"],
+    hdrs = ["score.h"],
+    deps = [
+        "//barelymusician/base:id_generator",
+        "//barelymusician/instrument:instrument_data",
+    ],
+)
+
 cc_test(
     name = "note_utils_test",
     srcs = ["note_utils_test.cpp"],
     deps = [
         ":note_utils",
+        "//barelymusician/base:constants",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "score_test",
+    srcs = ["score_test.cpp"],
+    deps = [
+        ":score",
         "//barelymusician/base:constants",
         "@googletest//:gtest_main",
     ],

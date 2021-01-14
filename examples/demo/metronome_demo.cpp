@@ -54,7 +54,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Engine engine;
   engine.SetTempo(kInitialTempo);
 
-  const auto metronome_id = engine.Create(
+  const auto metronome_id = engine.CreateInstrument(
       BasicSynthInstrument::GetDefinition(kSampleRate),
       {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},

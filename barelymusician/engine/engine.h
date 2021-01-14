@@ -9,6 +9,7 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
+#include "barelymusician/engine/score.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"
 #include "barelymusician/instrument/instrument_manager.h"
@@ -29,14 +30,14 @@ class Engine {
   /// @param instrument instrument Instrument to play.
   /// @param params Default instrument params.
   /// @return Instrument id.
-  int Create(InstrumentDefinition definition,
-             InstrumentParamDefinitions param_definitions = {});
+  int CreateInstrument(InstrumentDefinition definition,
+                       InstrumentParamDefinitions param_definitions = {});
 
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument id.
   /// @return Status.
-  Status Destroy(int instrument_id);
+  Status DestroyInstrument(int instrument_id);
 
   /// Returns parameter value.
   ///
@@ -191,7 +192,7 @@ class Engine {
  private:
   // List of instruments.
   InstrumentManager manager_;
-  std::unordered_map<int, std::multimap<double, InstrumentData>> scores_;
+  std::unordered_map<int, Score> scores_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;

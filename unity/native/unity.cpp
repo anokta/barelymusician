@@ -76,14 +76,14 @@ int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
             [note_on_fn_ptr](InstrumentState*, float pitch, float intensity) {
               note_on_fn_ptr(pitch, intensity);
             }};
-    return barelymusician->engine.Create(std::move(definition));
+    return barelymusician->engine.CreateInstrument(std::move(definition));
   }
   return kInvalidId;
 }
 
 int CreateBasicSynthInstrument() {
   if (barelymusician) {
-    return barelymusician->engine.Create(
+    return barelymusician->engine.CreateInstrument(
         examples::BasicSynthInstrument::GetDefinition(
             barelymusician->sample_rate),
         examples::BasicSynthInstrument::GetDefaultParams());
@@ -93,7 +93,7 @@ int CreateBasicSynthInstrument() {
 
 void Destroy(int id) {
   if (barelymusician) {
-    barelymusician->engine.Destroy(id);
+    barelymusician->engine.DestroyInstrument(id);
   }
 }
 

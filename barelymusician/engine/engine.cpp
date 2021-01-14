@@ -42,18 +42,17 @@ Engine::Engine()
       last_timestamp_(0),
       position_(0.0),
       tempo_(0.0),
-      beat_callback_(nullptr) {
-}
+      beat_callback_(nullptr) {}
 
-int Engine::Create(InstrumentDefinition definition,
-                   InstrumentParamDefinitions param_definitions) {
+int Engine::CreateInstrument(InstrumentDefinition definition,
+                             InstrumentParamDefinitions param_definitions) {
   const int instrument_id =
       manager_.Create(definition, param_definitions, last_timestamp_);
-  scores_.emplace(instrument_id, std::multimap<double, InstrumentData>{});
+  scores_.emplace(instrument_id, Score{});
   return instrument_id;
 }
 
-Status Engine::Destroy(int instrument_id) {
+Status Engine::DestroyInstrument(int instrument_id) {
   if (scores_.erase(instrument_id) > 0) {
     manager_.Destroy(instrument_id, last_timestamp_);
     return Status::kOk;
@@ -120,7 +119,7 @@ void Engine::ClearAllScheduledNotes() {
 
 Status Engine::ClearAllScheduledNotes(int instrument_id) {
   if (auto* score = FindOrNull(scores_, instrument_id)) {
-    score->clear();
+    score->RemoveAllEvents();
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -129,12 +128,8 @@ Status Engine::ClearAllScheduledNotes(int instrument_id) {
 Status Engine::ScheduleNote(int instrument_id, double position, double duration,
                             float pitch, float intensity) {
   if (auto* score = FindOrNull(scores_, instrument_id)) {
-    if (position_ <= position && duration >= 0.0) {
-      score->emplace(position, NoteOn{pitch, intensity});
-      score->emplace(position + duration, NoteOff{pitch});
-      return Status::kOk;
-    }
-    return Status::kInvalidArgument;
+    score->AddNoteEvent(position, duration, pitch, intensity);
+    return Status::kOk;
   }
   return Status::kNotFound;
 }
@@ -185,27 +180,25 @@ void Engine::Update(int sample_rate, std::int64_t timestamp) {
   }
   // Trigger messages.
   for (auto& [id, score] : scores_) {
-    const auto cbegin = score.lower_bound(position_);
-    const auto cend = score.lower_bound(end_position);
-    for (auto it = cbegin; it != cend; ++it) {
-      const std::int64_t message_timestamp =
-          last_timestamp_ +
-          SamplesFromBeats(sample_rate, tempo_, it->first - position_);
-      const auto message_data = it->second;
-      std::visit(InstrumentDataVisitor{
-                     [&, id = id](const NoteOff& note_off) {
-                       manager_.SetNoteOff(id, message_timestamp,
-                                           note_off.pitch);
-                     },
-                     [&, id = id](const NoteOn& note_on) {
-                       manager_.SetNoteOn(id, message_timestamp, note_on.pitch,
-                                          note_on.intensity);
-                     },
-                     [](const auto&) {}},
-                 message_data);
-    }
+    score.ForEachEventInRange(
+        position_, end_position,
+        [&, id = id](double note_position, const InstrumentData& data) {
+          const std::int64_t note_timestamp =
+              last_timestamp_ +
+              SamplesFromBeats(sample_rate, tempo_, note_position - position_);
+          std::visit(InstrumentDataVisitor{
+                         [&](const NoteOff& note_off) {
+                           manager_.SetNoteOff(id, note_timestamp,
+                                               note_off.pitch);
+                         },
+                         [&](const NoteOn& note_on) {
+                           manager_.SetNoteOn(id, note_timestamp, note_on.pitch,
+                                              note_on.intensity);
+                         },
+                         [](const auto&) {}},
+                     data);
+        });
   }
-
   last_timestamp_ = timestamp;
   position_ = end_position;
 }

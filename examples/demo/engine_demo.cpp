@@ -63,7 +63,7 @@ constexpr char kDrumsBaseFilename[] =
 
 int BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
                          float attack, float release) {
-  return engine->Create(
+  return engine->CreateInstrument(
       BasicSynthInstrument::GetDefinition(kSampleRate),
       {{BasicSynthInstrumentParam::kNumVoices,
         static_cast<float>(kNumInstrumentVoices)},
@@ -261,8 +261,8 @@ int main(int /*argc*/, char* argv[]) {
   performers.emplace(line_2_instrument_id, line_2_beat_composer_callback);
 
   // Add drumkit instrument.
-  const auto drumkit_instrument_id =
-      engine.Create(BasicDrumkitInstrument::GetDefinition(kSampleRate));
+  const auto drumkit_instrument_id = engine.CreateInstrument(
+      BasicDrumkitInstrument::GetDefinition(kSampleRate));
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kPitchKick, "basic_kick.wav"},
       {barelyapi::kPitchSnare, "basic_snare.wav"},

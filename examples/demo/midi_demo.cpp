@@ -115,17 +115,17 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Create instrument.
-    const auto instrument_id =
-        engine.Create(BasicSynthInstrument::GetDefinition(kSampleRate),
-                      {{BasicSynthInstrumentParam::kNumVoices,
-                        static_cast<float>(kNumInstrumentVoices)},
-                       {BasicSynthInstrumentParam::kOscillatorType,
-                        static_cast<float>(kInstrumentOscillatorType)},
-                       {BasicSynthInstrumentParam::kEnvelopeAttack,
-                        kInstrumentEnvelopeAttack},
-                       {BasicSynthInstrumentParam::kEnvelopeRelease,
-                        kInstrumentEnvelopeRelease},
-                       {BasicSynthInstrumentParam::kGain, kInstrumentGain}});
+    const auto instrument_id = engine.CreateInstrument(
+        BasicSynthInstrument::GetDefinition(kSampleRate),
+        {{BasicSynthInstrumentParam::kNumVoices,
+          static_cast<float>(kNumInstrumentVoices)},
+         {BasicSynthInstrumentParam::kOscillatorType,
+          static_cast<float>(kInstrumentOscillatorType)},
+         {BasicSynthInstrumentParam::kEnvelopeAttack,
+          kInstrumentEnvelopeAttack},
+         {BasicSynthInstrumentParam::kEnvelopeRelease,
+          kInstrumentEnvelopeRelease},
+         {BasicSynthInstrumentParam::kGain, kInstrumentGain}});
     for (const Note& note : score) {
       engine.ScheduleNote(instrument_id, note.position, note.duration,
                           note.pitch, note.intensity);

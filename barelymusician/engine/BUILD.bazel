@@ -3,10 +3,21 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "clock",
+    srcs = ["clock.cpp"],
+    hdrs = ["clock.h"],
+    deps = [
+        "//barelymusician/base:constants",
+        "//barelymusician/base:logging",
+    ],
+)
+
+cc_library(
     name = "engine",
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
     deps = [
+        ":clock",
         ":score",
         "//barelymusician/base:constants",
         "//barelymusician/base:status",
@@ -40,7 +51,18 @@ cc_library(
     hdrs = ["score.h"],
     deps = [
         "//barelymusician/base:id_generator",
+        "//barelymusician/base:logging",
         "//barelymusician/instrument:instrument_data",
+    ],
+)
+
+cc_test(
+    name = "clock_test",
+    srcs = ["clock_test.cpp"],
+    deps = [
+        ":clock",
+        "//barelymusician/base:constants",
+        "@googletest//:gtest_main",
     ],
 )
 

@@ -1,9 +1,13 @@
 #include "barelymusician/engine/score.h"
 
+#include "barelymusician/base/logging.h"
+
 namespace barelyapi {
 
 int Score::AddNoteEvent(double position, double duration, float pitch,
                         float intensity) {
+  DCHECK_GE(position, 0.0);
+  DCHECK_GE(duration, 0.0);
   const int event_id = id_generator_.Next();
   events_.emplace(event_id, std::vector<double>{position, position + duration});
   data_.emplace(std::pair{position, event_id}, NoteOn{pitch, intensity});
@@ -13,6 +17,8 @@ int Score::AddNoteEvent(double position, double duration, float pitch,
 
 void Score::ForEachEventInRange(double begin_position, double end_position,
                                 const ScoreEventCallback& callback) const {
+  DCHECK_GE(begin_position, 0.0);
+  DCHECK_GE(end_position, 0.0);
   if (begin_position < end_position && callback) {
     const auto begin = data_.lower_bound({begin_position, 0});
     const auto end = data_.lower_bound({end_position, 0});

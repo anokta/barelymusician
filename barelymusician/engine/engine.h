@@ -9,6 +9,7 @@
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/score.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"
@@ -200,11 +201,8 @@ class Engine {
   // Last timestamp.
   std::int64_t last_timestamp_;
 
-  // Playback position.
-  double position_;
-
-  // Playback tempo.
-  double tempo_;
+  // Playback clock.
+  Clock clock_;
 
   // Beat callback.
   BeatCallback beat_callback_;

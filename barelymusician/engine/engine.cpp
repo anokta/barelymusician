@@ -9,15 +9,6 @@ namespace barelyapi {
 
 namespace {
 
-// Returns number of beats for the given number of |seconds| and |tempo|.
-//
-// @param tempo Tempo in BPM.
-// @param seconds Number of seconds.
-// @return Number of beats.
-double BeatsFromSeconds(double tempo, double seconds) {
-  return tempo * seconds / kSecondsFromMinutes;
-}
-
 // Returns number of seconds for the given number of |beats| and |tempo|.
 //
 // @param tempo Tempo in BPM.
@@ -27,10 +18,6 @@ double SecondsFromBeats(double tempo, double beats) {
   return beats * kSecondsFromMinutes / tempo;
 }
 
-double BeatsFromSamples(int sample_rate, double tempo, std::int64_t samples) {
-  return BeatsFromSeconds(tempo, SecondsFromSamples(sample_rate, samples));
-}
-
 std::int64_t SamplesFromBeats(int sample_rate, double tempo, double beats) {
   return SamplesFromSeconds(sample_rate, SecondsFromBeats(tempo, beats));
 }
@@ -38,11 +25,7 @@ std::int64_t SamplesFromBeats(int sample_rate, double tempo, double beats) {
 }  // namespace
 
 Engine::Engine()
-    : is_playing_(false),
-      last_timestamp_(0),
-      position_(0.0),
-      tempo_(0.0),
-      beat_callback_(nullptr) {}
+    : is_playing_(false), last_timestamp_(0), beat_callback_(nullptr) {}
 
 int Engine::CreateInstrument(InstrumentDefinition definition,
                              InstrumentParamDefinitions param_definitions) {
@@ -64,9 +47,9 @@ StatusOr<float> Engine::GetParam(int instrument_id, int param_id) const {
   return manager_.GetParam(instrument_id, param_id);
 }
 
-double Engine::GetPosition() const { return position_; }
+double Engine::GetPosition() const { return clock_.GetPosition(); }
 
-double Engine::GetTempo() const { return tempo_; }
+double Engine::GetTempo() const { return clock_.GetTempo(); }
 
 StatusOr<bool> Engine::IsNoteOn(int instrument_id, float pitch) const {
   return manager_.IsNoteOn(instrument_id, pitch);
@@ -146,9 +129,9 @@ void Engine::SetNoteOnCallback(InstrumentNoteOnCallback note_on_callback) {
   manager_.SetNoteOnCallback(std::move(note_on_callback));
 }
 
-void Engine::SetPosition(double position) { position_ = position; }
+void Engine::SetPosition(double position) { clock_.SetPosition(position); }
 
-void Engine::SetTempo(double tempo) { tempo_ = tempo; }
+void Engine::SetTempo(double tempo) { clock_.SetTempo(tempo); }
 
 void Engine::Start(std::int64_t timestamp) {
   last_timestamp_ = timestamp;
@@ -161,31 +144,34 @@ void Engine::Stop() {
 }
 
 void Engine::Update(int sample_rate, std::int64_t timestamp) {
-  if (!is_playing_ || tempo_ <= 0.0 || timestamp <= last_timestamp_) {
+  const double tempo = clock_.GetTempo();
+  if (!is_playing_ || tempo <= 0.0 || timestamp <= last_timestamp_) {
     return;
   }
 
-  const double end_position =
-      position_ +
-      BeatsFromSamples(sample_rate, tempo_, timestamp - last_timestamp_);
+  const double begin_position = clock_.GetPosition();
+  clock_.UpdatePosition(
+      SecondsFromSamples(sample_rate, timestamp - last_timestamp_));
+  const double end_position = clock_.GetPosition();
 
   // Trigger beats.
   if (beat_callback_) {
-    for (double beat = std::ceil(position_); beat < end_position; ++beat) {
+    for (double beat = std::ceil(begin_position); beat < end_position; ++beat) {
       const std::int64_t beat_timestamp =
           last_timestamp_ +
-          SamplesFromBeats(sample_rate, tempo_, beat - position_);
+          SamplesFromBeats(sample_rate, tempo, beat - end_position);
       beat_callback_(beat_timestamp, static_cast<int>(beat));
     }
   }
   // Trigger messages.
   for (auto& [id, score] : scores_) {
     score.ForEachEventInRange(
-        position_, end_position,
+        begin_position, end_position,
         [&, id = id](double note_position, const InstrumentData& data) {
           const std::int64_t note_timestamp =
               last_timestamp_ +
-              SamplesFromBeats(sample_rate, tempo_, note_position - position_);
+              SamplesFromBeats(sample_rate, tempo,
+                               note_position - begin_position);
           std::visit(InstrumentDataVisitor{
                          [&](const NoteOff& note_off) {
                            manager_.SetNoteOff(id, note_timestamp,
@@ -200,7 +186,6 @@ void Engine::Update(int sample_rate, std::int64_t timestamp) {
         });
   }
   last_timestamp_ = timestamp;
-  position_ = end_position;
 }
 
 }  // namespace barelyapi

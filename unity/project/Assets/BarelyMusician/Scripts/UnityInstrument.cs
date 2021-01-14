@@ -15,7 +15,7 @@ namespace BarelyApi {
       }
     }
     private BarelyMusician.UnityNoteOffFn _noteOffFn = null;
-    
+
     // Note on function.
     public BarelyMusician.UnityNoteOnFn NoteOnFn {
       get {
@@ -26,7 +26,7 @@ namespace BarelyApi {
       }
     }
     private BarelyMusician.UnityNoteOnFn _noteOnFn = null;
-    
+
     // Process function.
     public BarelyMusician.UnityProcessFn ProcessFn {
       get {

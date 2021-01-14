@@ -2,7 +2,7 @@
 bazel-*
 
 # visual studio code.
-.vscode/*
+.vscode*
 
 # osx.
 .DS_Store

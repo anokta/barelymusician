@@ -35,7 +35,7 @@ public class EventLogger : MonoBehaviour {
     }
   }
 
-  private void OnBeat(double dspTime,  int beat) {
+  private void OnBeat(double dspTime, int beat) {
     //Debug.Log("Beat: " + beat);
   }
 

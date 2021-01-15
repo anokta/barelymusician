@@ -40,6 +40,13 @@ namespace BarelyApi {
       BarelyMusician.SetParam(_id, id, value);
     }
 
+    // Stops all notes.
+    public void AllNotesOff() {
+      if (_id != BarelyMusician.InvalidId) {
+        BarelyMusician.AllNotesOff(_id);
+      }
+    }
+
     // Stops playing note with the given |pitch|.
     public void NoteOff(float pitch) {
       if (_id != BarelyMusician.InvalidId) {

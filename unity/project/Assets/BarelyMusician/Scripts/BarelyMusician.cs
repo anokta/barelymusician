@@ -55,6 +55,11 @@ namespace BarelyApi {
       return BarelyMusicianInternal.Instance?.IsPlaying() ?? false;
     }
 
+    // Sets all instrument notes off.
+    public static void AllNotesOff(int id) {
+      BarelyMusicianInternal.Instance?.AllNotesOff(id);
+    }
+
     // Sets instrument note off.
     public static void NoteOff(int id, float pitch) {
       BarelyMusicianInternal.Instance?.NoteOff(id, pitch);
@@ -252,6 +257,8 @@ namespace BarelyApi {
       public double GetTempo() { return GetTempoNative(); }
 
       public bool IsPlaying() { return IsPlayingNative(); }
+
+      public void AllNotesOff(int id) { AllNotesOffNative(id); }
 
       public void NoteOff(int id, float pitch) {
         NoteOffNative(id, pitch);

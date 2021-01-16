@@ -1,6 +1,8 @@
 #include "barelymusician/engine/engine.h"
 
 #include <algorithm>
+#include <utility>
+#include <variant>
 
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/instrument/instrument_utils.h"

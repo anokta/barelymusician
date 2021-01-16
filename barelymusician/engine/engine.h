@@ -2,10 +2,8 @@
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
 #include <cstdint>
-#include <map>
-#include <memory>
+#include <functional>
 #include <unordered_map>
-#include <utility>
 
 #include "barelymusician/base/constants.h"
 #include "barelymusician/base/status.h"

@@ -1,5 +1,7 @@
 #include "barelymusician/engine/score.h"
 
+#include <unordered_set>
+
 #include "barelymusician/base/logging.h"
 
 namespace barelyapi {
@@ -35,8 +37,26 @@ void Score::RemoveAllEvents() {
   events_.clear();
 }
 
+void Score::RemoveAllEventsInRange(double begin_position, double end_position) {
+  DCHECK_GE(begin_position, 0.0);
+  DCHECK_GE(end_position, 0.0);
+  const auto begin = data_.lower_bound({begin_position, 0});
+  const auto end = data_.lower_bound({end_position, 0});
+  std::unordered_set<int> event_ids_to_remove;
+  for (auto it = begin; it != end; ++it) {
+    event_ids_to_remove.insert(it->first.second);
+  }
+  for (const int event_id : event_ids_to_remove) {
+    const auto it = events_.find(event_id);
+    for (const double position : it->second) {
+      data_.erase(std::pair(position, event_id));
+    }
+    events_.erase(it);
+  }
+}
+
 bool Score::RemoveEvent(int event_id) {
-  if (auto it = events_.find(event_id); it != events_.end()) {
+  if (const auto it = events_.find(event_id); it != events_.end()) {
     for (const double position : it->second) {
       data_.erase(std::pair(position, event_id));
     }

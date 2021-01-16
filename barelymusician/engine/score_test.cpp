@@ -91,5 +91,25 @@ TEST(ScoreTest, MultipleNotes) {
   EXPECT_TRUE(score.IsEmpty());
 }
 
+// Tests that removing arbitrary notes in range works as expected.
+TEST(ScoreTest, RemoveAllEventsInRange) {
+  const int kNotePitch = 10.0f;
+  const int kNoteIntensity = 1.0f;
+
+  Score score;
+  EXPECT_TRUE(score.IsEmpty());
+
+  score.AddNoteEvent(2.0, 6.0, kNotePitch, kNoteIntensity);
+  score.AddNoteEvent(4.0, 3.0, kNotePitch, kNoteIntensity);
+  EXPECT_FALSE(score.IsEmpty());
+
+  score.RemoveAllEventsInRange(0.0, 2.0);
+  EXPECT_FALSE(score.IsEmpty());
+  score.RemoveAllEventsInRange(8.0, 20.0);
+  EXPECT_FALSE(score.IsEmpty());
+  score.RemoveAllEventsInRange(3.0, 5.0);
+  EXPECT_TRUE(score.IsEmpty());
+}
+
 }  // namespace
 }  // namespace barelyapi

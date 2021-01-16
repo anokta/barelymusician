@@ -45,6 +45,12 @@ struct Score {
   /// Removes all events.
   void RemoveAllEvents();
 
+  /// Removes all events in given range.
+  ///
+  /// @param begin_position Begin position.
+  /// @param end_position End position.
+  void RemoveAllEventsInRange(double begin_position, double end_position);
+
   /// Removes event.
   ///
   /// @param event_id Event id.

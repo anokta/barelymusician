@@ -4,7 +4,7 @@
 #include <iterator>
 #include <variant>
 
-#include "barelymusician/instrument/instrument_utils.h"
+#include "barelymusician/common/common_utils.h"
 
 namespace barelyapi {
 

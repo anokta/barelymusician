@@ -4,9 +4,9 @@
 #include <utility>
 #include <variant>
 
+#include "barelymusician/common/common_utils.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/note_utils.h"
-#include "barelymusician/instrument/instrument_utils.h"
 
 namespace barelyapi {
 

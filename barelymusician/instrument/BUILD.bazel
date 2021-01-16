@@ -9,7 +9,7 @@ cc_library(
     deps = [
         ":instrument_data",
         ":instrument_definition",
-        ":instrument_utils",
+        "//barelymusician/common:common_utils",
     ],
 )
 
@@ -32,7 +32,7 @@ cc_library(
         ":instrument_data",
         ":instrument_definition",
         ":instrument_processor",
-        ":instrument_utils",
+        "//barelymusician/common:common_utils",
         "//barelymusician/common:id_generator",
         "//barelymusician/common:status",
         "//barelymusician/common:task_runner",
@@ -47,11 +47,6 @@ cc_library(
         ":instrument_data",
         ":instrument_definition",
     ],
-)
-
-cc_library(
-    name = "instrument_utils",
-    hdrs = ["instrument_utils.h"],
 )
 
 cc_test(
@@ -82,15 +77,6 @@ cc_test(
         ":instrument_data",
         ":instrument_definition",
         ":instrument_processor",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "instrument_utils_test",
-    srcs = ["instrument_utils_test.cpp"],
-    deps = [
-        ":instrument_utils",
         "@googletest//:gtest_main",
     ],
 )

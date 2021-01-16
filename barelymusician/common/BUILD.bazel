@@ -3,6 +3,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "common_utils",
+    hdrs = ["common_utils.h"],
+)
+
+cc_library(
     name = "id_generator",
     srcs = ["id_generator.cpp"],
     hdrs = ["id_generator.h"],
@@ -31,6 +36,15 @@ cc_library(
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],
     deps = [":logging"],
+)
+
+cc_test(
+    name = "common_utils_test",
+    srcs = ["common_utils_test.cpp"],
+    deps = [
+        ":common_utils",
+        "@googletest//:gtest_main",
+    ],
 )
 
 cc_test(

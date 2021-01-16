@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_UTILS_H_
-#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_UTILS_H_
+#ifndef BARELYMUSICIAN_COMMON_COMMON_UTILS_H_
+#define BARELYMUSICIAN_COMMON_COMMON_UTILS_H_
 
 #include <unordered_map>
 
@@ -43,4 +43,4 @@ ValueType* FindOrNull(std::unordered_map<KeyType, ValueType>& map,
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_UTILS_H_
+#endif  // BARELYMUSICIAN_COMMON_COMMON_UTILS_H_

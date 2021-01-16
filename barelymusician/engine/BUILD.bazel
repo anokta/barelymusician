@@ -15,13 +15,13 @@ cc_library(
     deps = [
         ":clock",
         ":score",
+        "//barelymusician/common:common_utils",
         "//barelymusician/common:status",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine:note_utils",
         "//barelymusician/instrument:instrument_data",
         "//barelymusician/instrument:instrument_definition",
         "//barelymusician/instrument:instrument_manager",
-        "//barelymusician/instrument:instrument_utils",
     ],
 )
 

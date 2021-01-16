@@ -10,8 +10,8 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/base/logging.h"
-#include "barelymusician/base/random.h"
+#include "barelymusician/common/logging.h"
+#include "barelymusician/common/random.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"

@@ -1,6 +1,6 @@
 #include "examples/util/wav_file.h"
 
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "barelymusician/base/status.h"
+#include "barelymusician/common/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

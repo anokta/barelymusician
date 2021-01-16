@@ -6,8 +6,8 @@ cc_library(
     name = "context_free_grammar",
     hdrs = ["context_free_grammar.h"],
     deps = [
-        "//barelymusician/base:logging",
-        "//barelymusician/base:random",
+        "//barelymusician/common:logging",
+        "//barelymusician/common:random",
     ],
 )
 

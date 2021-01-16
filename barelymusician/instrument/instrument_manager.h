@@ -6,9 +6,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/base/id_generator.h"
-#include "barelymusician/base/status.h"
-#include "barelymusician/base/task_runner.h"
+#include "barelymusician/common/id_generator.h"
+#include "barelymusician/common/status.h"
+#include "barelymusician/common/task_runner.h"
 #include "barelymusician/instrument/instrument_controller.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"

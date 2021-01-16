@@ -1,6 +1,6 @@
 #include "examples/instruments/instrument.h"
 
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 
 namespace barelyapi {
 namespace examples {

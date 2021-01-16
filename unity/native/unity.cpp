@@ -6,7 +6,7 @@
 #include <mutex>
 #include <utility>
 
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/instrument/instrument_definition.h"

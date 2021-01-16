@@ -43,7 +43,7 @@ cc_library(
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],
     deps = [
-        "//barelymusician/base:logging",
+        "//barelymusician/common:logging",
         "//barelymusician/instrument:instrument_definition",
     ],
 )

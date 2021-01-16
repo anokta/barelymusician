@@ -33,9 +33,9 @@ cc_library(
         ":instrument_definition",
         ":instrument_processor",
         ":instrument_utils",
-        "//barelymusician/base:id_generator",
-        "//barelymusician/base:status",
-        "//barelymusician/base:task_runner",
+        "//barelymusician/common:id_generator",
+        "//barelymusician/common:status",
+        "//barelymusician/common:task_runner",
     ],
 )
 
@@ -70,7 +70,7 @@ cc_test(
     srcs = ["instrument_manager_test.cpp"],
     deps = [
         ":instrument_manager",
-        "//barelymusician/base:status",
+        "//barelymusician/common:status",
         "@googletest//:gtest_main",
     ],
 )

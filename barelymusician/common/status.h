@@ -1,9 +1,9 @@
-#ifndef BARELYMUSICIAN_BASE_STATUS_H_
-#define BARELYMUSICIAN_BASE_STATUS_H_
+#ifndef BARELYMUSICIAN_COMMON_STATUS_H_
+#define BARELYMUSICIAN_COMMON_STATUS_H_
 
 #include <variant>
 
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 
 namespace barelyapi {
 
@@ -60,4 +60,4 @@ inline bool IsOk(Status status) { return status == Status::kOk; }
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_BASE_STATUS_H_
+#endif  // BARELYMUSICIAN_COMMON_STATUS_H_

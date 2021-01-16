@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_BASE_LOGGING_H_
-#define BARELYMUSICIAN_BASE_LOGGING_H_
+#ifndef BARELYMUSICIAN_COMMON_LOGGING_H_
+#define BARELYMUSICIAN_COMMON_LOGGING_H_
 
 #include <ostream>
 #include <sstream>
@@ -122,4 +122,4 @@ void SetLogWriter(LogWriter* log_writer);
 #define BARELY_DCHECK_OP(op, lhs, rhs) BARELY_NULL_LOG
 #endif  // !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 
-#endif  // BARELYMUSICIAN_BASE_LOGGING_H_
+#endif  // BARELYMUSICIAN_COMMON_LOGGING_H_

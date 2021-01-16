@@ -1,4 +1,4 @@
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 
 #include <cstdlib>
 #include <iostream>

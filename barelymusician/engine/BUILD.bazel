@@ -15,7 +15,7 @@ cc_library(
     deps = [
         ":clock",
         ":score",
-        "//barelymusician/base:status",
+        "//barelymusician/common:status",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine:note_utils",
         "//barelymusician/instrument:instrument_data",
@@ -36,7 +36,7 @@ cc_library(
     hdrs = ["note_utils.h"],
     deps = [
         ":note",
-        "//barelymusician/base:logging",
+        "//barelymusician/common:logging",
     ],
 )
 
@@ -45,7 +45,7 @@ cc_library(
     srcs = ["score.cpp"],
     hdrs = ["score.h"],
     deps = [
-        "//barelymusician/base:id_generator",
+        "//barelymusician/common:id_generator",
         "//barelymusician/instrument:instrument_data",
     ],
 )

@@ -6,7 +6,7 @@
 #include <memory>
 #include <thread>
 
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note_utils.h"

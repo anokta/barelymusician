@@ -5,7 +5,7 @@
 #include <functional>
 #include <unordered_map>
 
-#include "barelymusician/base/status.h"
+#include "barelymusician/common/status.h"
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/score.h"
 #include "barelymusician/instrument/instrument_data.h"

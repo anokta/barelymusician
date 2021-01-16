@@ -7,7 +7,7 @@ cc_library(
     srcs = ["audio_output.cpp"],
     hdrs = ["audio_output.h"],
     deps = [
-        "//barelymusician/base:logging",
+        "//barelymusician/common:logging",
         "@portaudio",
     ],
 )
@@ -27,7 +27,7 @@ cc_library(
     srcs = ["wav_file.cpp"],
     hdrs = ["wav_file.h"],
     deps = [
-        "//barelymusician/base:logging",
+        "//barelymusician/common:logging",
         "@dr_libs//:dr_wav",
     ],
 )

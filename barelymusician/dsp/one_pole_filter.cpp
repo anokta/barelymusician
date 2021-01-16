@@ -1,6 +1,6 @@
 #include "barelymusician/dsp/one_pole_filter.h"
 
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 
 namespace barelyapi {
 

@@ -1,4 +1,4 @@
-#include "barelymusician/base/id_generator.h"
+#include "barelymusician/common/id_generator.h"
 
 #include <unordered_set>
 

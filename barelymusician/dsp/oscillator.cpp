@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "barelymusician/base/random.h"
+#include "barelymusician/common/random.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {

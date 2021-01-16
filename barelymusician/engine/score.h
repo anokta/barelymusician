@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/base/id_generator.h"
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/instrument/instrument_data.h"
 
 namespace barelyapi {

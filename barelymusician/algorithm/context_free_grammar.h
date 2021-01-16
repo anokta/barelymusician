@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/base/logging.h"
-#include "barelymusician/base/random.h"
+#include "barelymusician/common/logging.h"
+#include "barelymusician/common/random.h"
 
 namespace barelyapi {
 

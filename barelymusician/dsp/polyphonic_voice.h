@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/base/logging.h"
+#include "barelymusician/common/logging.h"
 
 namespace barelyapi {
 

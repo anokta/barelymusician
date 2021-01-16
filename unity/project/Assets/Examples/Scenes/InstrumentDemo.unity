@@ -1685,7 +1685,7 @@ MonoBehaviour:
   decay: 0
   sustain: 1
   release: 0.2
-  oscillatorType: 1
+  oscillatorType: 0
   numVoices: 16
 --- !u!82 &1737834381
 AudioSource:

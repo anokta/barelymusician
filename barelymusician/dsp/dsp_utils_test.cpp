@@ -2,18 +2,16 @@
 
 #include <cstdint>
 
-#include "barelymusician/base/constants.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
 
-// Tolerated error margin.
-constexpr float kEpsilon = 5e-2f;
-
 // Tests that converting values from/to amplitude and decibels returns expected
 // results.
 TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
+  const float kEpsilon = 5e-2f;
+
   const int kNumValues = 5;
   const float kAmplitudes[kNumValues] = {0.0f, 0.1f, 0.25f, 1.0f, 2.0f};
   const float kDecibels[kNumValues] = {-80.0f, -20.0f, -12.0f, 0.0f, 6.0f};
@@ -23,10 +21,11 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
     EXPECT_NEAR(DecibelsFromAmplitude(kAmplitudes[i]), kDecibels[i], kEpsilon);
 
     // Verify that the back and forth conversion do not mutate the value.
-    EXPECT_NEAR(AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])),
-                kAmplitudes[i], kEpsilon);
-    EXPECT_NEAR(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])),
-                kDecibels[i], kEpsilon);
+    EXPECT_FLOAT_EQ(
+        AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])),
+        kAmplitudes[i]);
+    EXPECT_FLOAT_EQ(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])),
+                    kDecibels[i]);
   }
 }
 
@@ -36,20 +35,10 @@ TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_FLOAT_EQ(DecibelsFromAmplitude(0.0f), kMinDecibels);
 }
 
-// Tests that converting arbitrary note indices returns expected frequencies.
-TEST(DspUtilsTest, FrequencyFromPitch) {
-  const int kNumIndices = 4;
-  const float kIndices[kNumIndices] = {21.0f, 60.0f, 69.0f, 90.5f};
-  const float kFrequencies[kNumIndices] = {27.5f, 261.6f, 440.0f, 1523.3f};
-
-  for (int i = 0; i < kNumIndices; ++i) {
-    EXPECT_NEAR(FrequencyFromPitch(kIndices[i]), kFrequencies[i], kEpsilon);
-  }
-}
-
 // Tests that the expected filter coefficients are generated for an arbitrary
 // set of cutoff frequencies.
 TEST(DspUtilsTest, GetFilterCoefficient) {
+  const float kEpsilon = 1e-2f;
   const int kSampleRate = 8000;
 
   const int kNumCutoffs = 5;

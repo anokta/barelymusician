@@ -1,10 +1,6 @@
 #include "barelymusician/dsp/dsp_utils.h"
 
-#include <algorithm>
 #include <cmath>
-
-#include "barelymusician/base/constants.h"
-#include "barelymusician/base/logging.h"
 
 namespace barelyapi {
 
@@ -24,16 +20,9 @@ float DecibelsFromAmplitude(float amplitude) {
   return kMinDecibels;
 }
 
-float FrequencyFromPitch(float pitch) {
-  // Middle A note (A4) is selected as the base note frequency, where:
-  //  f = fA4 * 2 ^ ((i - pA4) / 12).
-  return kFrequencyA4 * std::pow(2.0f, (pitch - kPitchA4) / kNumSemitones);
-}
-
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) {
-  DCHECK_GT(sample_rate, 0);
-  const float sample_rate_float = static_cast<float>(sample_rate);
-  if (cuttoff_frequency < sample_rate_float) {
+  if (const float sample_rate_float = static_cast<float>(sample_rate);
+      sample_rate_float > 0.0f && cuttoff_frequency < sample_rate_float) {
     // c = exp(-2 * pi * fc / fs).
     // TODO(#8): Verify if this *a proper way* to calculate the coefficient?
     return std::exp(-kTwoPi * cuttoff_frequency / sample_rate_float);

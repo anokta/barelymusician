@@ -3,11 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "constants",
-    hdrs = ["constants.h"],
-)
-
-cc_library(
     name = "id_generator",
     srcs = ["id_generator.cpp"],
     hdrs = ["id_generator.h"],

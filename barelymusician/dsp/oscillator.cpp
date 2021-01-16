@@ -2,19 +2,17 @@
 
 #include <cmath>
 
-#include "barelymusician/base/constants.h"
-#include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
+#include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
 
 Oscillator::Oscillator(int sample_rate)
-    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
+    : sample_interval_(sample_rate > 0 ? 1.0f / static_cast<float>(sample_rate)
+                                       : 0.0f),
       type_(OscillatorType::kNoise),
       phase_(0.0f),
-      increment_(0.0f) {
-  DCHECK_GT(sample_rate, 0);
-}
+      increment_(0.0f) {}
 
 float Oscillator::Next() {
   float output = 0.0f;
@@ -45,7 +43,6 @@ float Oscillator::Next() {
 void Oscillator::Reset() { phase_ = 0.0f; }
 
 void Oscillator::SetFrequency(float frequency) {
-  DCHECK_GE(frequency, 0.0f);
   increment_ = frequency * sample_interval_;
 }
 

@@ -1,6 +1,6 @@
 #include "examples/instruments/basic_synth_instrument.h"
 
-#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/engine/note_utils.h"
 
 namespace barelyapi {
 namespace examples {
@@ -25,7 +25,7 @@ void BasicSynthInstrument::NoteOff(float pitch) { voice_.Stop(pitch); }
 
 void BasicSynthInstrument::NoteOn(float pitch, float intensity) {
   voice_.Start(pitch, [pitch, intensity](BasicSynthVoice* voice) {
-    voice->generator().SetFrequency(FrequencyFromPitch(pitch));
+    voice->generator().SetFrequency(GetFrequency(pitch));
     voice->set_gain(intensity);
   });
 }

@@ -3,6 +3,9 @@
 
 namespace barelyapi {
 
+/// Converts minutes to seconds.
+inline constexpr double kSecondsFromMinutes = 60.0;
+
 /// Clock that keeps track of position in beats.
 class Clock {
  public:

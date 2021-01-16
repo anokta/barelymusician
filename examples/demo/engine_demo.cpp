@@ -10,7 +10,6 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/random.h"
 #include "barelymusician/dsp/dsp_utils.h"

@@ -1,10 +1,22 @@
 #include "barelymusician/engine/note_utils.h"
 
-#include "barelymusician/base/constants.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
+
+// Tests that converting arbitrary note indices returns expected frequencies.
+TEST(NoteUtilsTest, GetFrequency) {
+  const float kEpsilon = 1e-2f;
+
+  const int kNumIndices = 4;
+  const float kIndices[kNumIndices] = {21.0f, 60.0f, 69.0f, 90.5f};
+  const float kFrequencies[kNumIndices] = {27.50f, 261.62f, 440.00f, 1523.34f};
+
+  for (int i = 0; i < kNumIndices; ++i) {
+    EXPECT_NEAR(GetFrequency(kIndices[i]), kFrequencies[i], kEpsilon);
+  }
+}
 
 // Tests that expected note pitches are returned given an arbitrary scale.
 TEST(NoteUtilsTest, GetPitch) {

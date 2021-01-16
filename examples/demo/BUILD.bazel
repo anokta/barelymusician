@@ -5,7 +5,6 @@ cc_binary(
     srcs = ["engine_demo.cpp"],
     data = ["//examples/data:audio"],
     deps = [
-        "//barelymusician/base:constants",
         "//barelymusician/base:logging",
         "//barelymusician/base:random",
         "//barelymusician/dsp:dsp_utils",
@@ -25,9 +24,9 @@ cc_binary(
     name = "instrument_demo",
     srcs = ["instrument_demo.cpp"],
     deps = [
-        "//barelymusician/base:constants",
         "//barelymusician/base:logging",
         "//barelymusician/base:task_runner",
+        "//barelymusician/engine:note_utils",
         "//examples/instruments:basic_synth_instrument",
         "//examples/util:audio_output",
         "//examples/util:input_manager",
@@ -38,10 +37,10 @@ cc_binary(
     name = "metronome_demo",
     srcs = ["metronome_demo.cpp"],
     deps = [
-        "//barelymusician/base:constants",
         "//barelymusician/base:logging",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
+        "//barelymusician/engine:note_utils",
         "//examples/instruments:basic_synth_instrument",
         "//examples/util:audio_output",
         "//examples/util:input_manager",

@@ -2,16 +2,25 @@
 
 #include <cmath>
 
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 
 namespace barelyapi {
 
 namespace {
 
+// Middle A (A4) frequency.
+constexpr float kFrequencyA4 = 440.0f;
+
+// Linearly interpolates between given points.
 double Lerp(double a, double b, double t) { return a + t * (b - a); }
 
 }  // namespace
+
+float GetFrequency(float pitch) {
+  // Middle A note (A4) is selected as the base note frequency, where:
+  //  f = fA4 * 2 ^ ((i - pA4) / 12).
+  return kFrequencyA4 * std::pow(2.0f, (pitch - kPitchA4) / kNumSemitones);
+}
 
 float GetPitch(const std::vector<float>& scale, float scale_index) {
   DCHECK(!scale.empty());

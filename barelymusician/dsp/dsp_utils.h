@@ -5,6 +5,13 @@
 
 namespace barelyapi {
 
+/// PI.
+inline constexpr float kPi = 3.14159265358979323846f;
+inline constexpr float kTwoPi = 2.0f * kPi;
+
+/// Minimum dB threshold.
+inline constexpr float kMinDecibels = -80.0f;
+
 /// Converts a value from dB to linear amplitude.
 ///
 /// @param decibels Value in dB.
@@ -16,12 +23,6 @@ float AmplitudeFromDecibels(float decibels);
 /// @param amplitude Value in linear amplitude.
 /// @return Value in dB.
 float DecibelsFromAmplitude(float amplitude);
-
-/// Returns the corresponding frequency for the given pitch.
-///
-/// @param pitch Pitch.
-/// @return Frequency in Hz.
-float FrequencyFromPitch(float pitch);
 
 /// Returns one-pole filter coefficient for a given cutoff frequency.
 ///

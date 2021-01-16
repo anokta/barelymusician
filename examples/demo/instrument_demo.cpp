@@ -4,9 +4,9 @@
 #include <memory>
 #include <thread>
 
-#include "barelymusician/base/constants.h"
 #include "barelymusician/base/logging.h"
 #include "barelymusician/base/task_runner.h"
+#include "barelymusician/engine/note_utils.h"
 #include "examples/instruments/basic_synth_instrument.h"
 #include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"

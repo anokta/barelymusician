@@ -31,10 +31,9 @@ cc_library(
     deps = [
         ":basic_enveloped_voice",
         ":instrument",
-        "//barelymusician/base:constants",
-        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
+        "//barelymusician/engine:note_utils",
         "//barelymusician/instrument:instrument_definition",
     ],
 )

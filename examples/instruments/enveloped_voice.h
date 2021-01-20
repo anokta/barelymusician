@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_INSTRUMENTS_BASIC_ENVEOPED_VOICE_H_
-#define EXAMPLES_INSTRUMENTS_BASIC_ENVEOPED_VOICE_H_
+#ifndef EXAMPLES_INSTRUMENTS_ENVELOPED_VOICE_H_
+#define EXAMPLES_INSTRUMENTS_ENVELOPED_VOICE_H_
 
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/voice.h"
@@ -7,13 +7,14 @@
 namespace barelyapi {
 namespace examples {
 
+/// Simple enveloped voice template.
 template <class GeneratorType>
-class BasicEnvelopedVoice : public Voice {
+class EnvelopedVoice : public Voice {
  public:
-  /// Constructs new |BasicEnvelopedVoice| with the given |sample_rate|.
+  /// Constructs new |EnvelopedVoice| with the given |sample_rate|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit BasicEnvelopedVoice(int sample_rate);
+  explicit EnvelopedVoice(int sample_rate);
 
   /// Implements |Voice|.
   bool IsActive() const override;
@@ -46,14 +47,14 @@ class BasicEnvelopedVoice : public Voice {
 };
 
 template <class GeneratorType>
-BasicEnvelopedVoice<GeneratorType>::BasicEnvelopedVoice(int sample_rate)
+EnvelopedVoice<GeneratorType>::EnvelopedVoice(int sample_rate)
     : envelope_(sample_rate),
       generator_(sample_rate),
       gain_(0.0f),
       output_(0.0f) {}
 
 template <class GeneratorType>
-float BasicEnvelopedVoice<GeneratorType>::Next(int channel) {
+float EnvelopedVoice<GeneratorType>::Next(int channel) {
   if (channel == 0) {
     output_ = gain_ * envelope_.Next() * generator_.Next();
   }
@@ -61,22 +62,22 @@ float BasicEnvelopedVoice<GeneratorType>::Next(int channel) {
 }
 
 template <class GeneratorType>
-bool BasicEnvelopedVoice<GeneratorType>::IsActive() const {
+bool EnvelopedVoice<GeneratorType>::IsActive() const {
   return envelope_.IsActive();
 }
 
 template <class GeneratorType>
-void BasicEnvelopedVoice<GeneratorType>::Start() {
+void EnvelopedVoice<GeneratorType>::Start() {
   generator_.Reset();
   envelope_.Start();
 }
 
 template <class GeneratorType>
-void BasicEnvelopedVoice<GeneratorType>::Stop() {
+void EnvelopedVoice<GeneratorType>::Stop() {
   envelope_.Stop();
 }
 
 }  // namespace examples
 }  // namespace barelyapi
 
-#endif  // EXAMPLES_INSTRUMENTS_BASIC_ENVEOPED_VOICE_H_
+#endif  // EXAMPLES_INSTRUMENTS_ENVELOPED_VOICE_H_

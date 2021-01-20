@@ -16,8 +16,8 @@
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
 #include "barelymusician/engine/note_utils.h"
-#include "examples/instruments/basic_drumkit_instrument.h"
-#include "examples/instruments/basic_synth_instrument.h"
+#include "examples/instruments/drumkit_instrument.h"
+#include "examples/instruments/synth_instrument.h"
 #include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 #include "examples/util/wav_file.h"
@@ -30,10 +30,10 @@ using ::barelyapi::GetPitch;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
-using ::barelyapi::examples::BasicDrumkitInstrument;
-using ::barelyapi::examples::BasicSynthInstrument;
-using ::barelyapi::examples::BasicSynthInstrumentParam;
+using ::barelyapi::examples::DrumkitInstrument;
 using ::barelyapi::examples::InputManager;
+using ::barelyapi::examples::SynthInstrument;
+using ::barelyapi::examples::SynthInstrumentParam;
 using ::barelyapi::examples::WavFile;
 using ::barelyapi::random::Uniform;
 using ::bazel::tools::cpp::runfiles::Runfiles;
@@ -63,13 +63,13 @@ constexpr char kDrumsBaseFilename[] =
 int BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
                          float attack, float release) {
   return engine->CreateInstrument(
-      BasicSynthInstrument::GetDefinition(kSampleRate),
-      {{BasicSynthInstrumentParam::kNumVoices,
+      SynthInstrument::GetDefinition(kSampleRate),
+      {{SynthInstrumentParam::kNumVoices,
         static_cast<float>(kNumInstrumentVoices)},
-       {BasicSynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
-       {BasicSynthInstrumentParam::kGain, gain},
-       {BasicSynthInstrumentParam::kEnvelopeAttack, attack},
-       {BasicSynthInstrumentParam::kEnvelopeRelease, release}});
+       {SynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
+       {SynthInstrumentParam::kGain, gain},
+       {SynthInstrumentParam::kEnvelopeAttack, attack},
+       {SynthInstrumentParam::kEnvelopeRelease, release}});
 }
 
 void ComposeChord(float root_note_index, const std::vector<float>& scale,
@@ -260,8 +260,8 @@ int main(int /*argc*/, char* argv[]) {
   performers.emplace(line_2_instrument_id, line_2_beat_composer_callback);
 
   // Add drumkit instrument.
-  const auto drumkit_instrument_id = engine.CreateInstrument(
-      BasicDrumkitInstrument::GetDefinition(kSampleRate));
+  const auto drumkit_instrument_id =
+      engine.CreateInstrument(DrumkitInstrument::GetDefinition(kSampleRate));
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kPitchKick, "basic_kick.wav"},
       {barelyapi::kPitchSnare, "basic_snare.wav"},

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace BarelyApi {
-  // Basic polyphonic synth instrument.
-  public class BasicSynthInstrument : Instrument {
+  // Simple polyphonic synth instrument.
+  public class SynthInstrument : Instrument {
     public enum OscillatorType {
       Sine,    // Sine wave.
       Saw,     // Sawtooth wave.

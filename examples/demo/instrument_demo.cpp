@@ -7,7 +7,7 @@
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/task_runner.h"
 #include "barelymusician/engine/note_utils.h"
-#include "examples/instruments/basic_synth_instrument.h"
+#include "examples/instruments/synth_instrument.h"
 #include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 
@@ -16,9 +16,9 @@ namespace {
 using ::barelyapi::OscillatorType;
 using ::barelyapi::TaskRunner;
 using ::barelyapi::examples::AudioOutput;
-using ::barelyapi::examples::BasicSynthInstrument;
-using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::InputManager;
+using ::barelyapi::examples::SynthInstrument;
+using ::barelyapi::examples::SynthInstrumentParam;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -61,16 +61,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   TaskRunner task_runner(kNumMaxTasks);
 
-  BasicSynthInstrument instrument(kSampleRate);
-  instrument.SetParam(BasicSynthInstrumentParam::kNumVoices,
+  SynthInstrument instrument(kSampleRate);
+  instrument.SetParam(SynthInstrumentParam::kNumVoices,
                       static_cast<float>(kNumVoices));
-  instrument.SetParam(BasicSynthInstrumentParam::kGain, kGain);
-  instrument.SetParam(BasicSynthInstrumentParam::kOscillatorType,
+  instrument.SetParam(SynthInstrumentParam::kGain, kGain);
+  instrument.SetParam(SynthInstrumentParam::kOscillatorType,
                       static_cast<float>(kOscillatorType));
-  instrument.SetParam(BasicSynthInstrumentParam::kEnvelopeAttack,
-                      kEnvelopeAttack);
-  instrument.SetParam(BasicSynthInstrumentParam::kEnvelopeRelease,
-                      kEnvelopeRelease);
+  instrument.SetParam(SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack);
+  instrument.SetParam(SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease);
 
   float offset_octaves = 0.0f;
 

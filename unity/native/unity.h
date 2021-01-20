@@ -51,7 +51,7 @@ BARELY_EXPORT int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
 /// Creates new synth instrument.
 ///
 /// @return Instrument id.
-BARELY_EXPORT int CreateBasicSynthInstrument();
+BARELY_EXPORT int CreateSynthInstrument();
 
 /// Destroys instrument.
 ///

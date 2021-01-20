@@ -236,8 +236,8 @@ namespace BarelyApi {
               Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOffFn),
               Marshal.GetFunctionPointerForDelegate(unityInstrument.NoteOnFn),
               Marshal.GetFunctionPointerForDelegate(unityInstrument.ProcessFn));
-        } else if (instrumentType == typeof(BasicSynthInstrument)) {
-          id = CreateBasicSynthInstrumentNative();
+        } else if (instrumentType == typeof(SynthInstrument)) {
+          id = CreateSynthInstrumentNative();
         } else {
           Debug.LogError("Unsupported instrument type: " + instrumentType);
         }
@@ -323,8 +323,8 @@ namespace BarelyApi {
     private static extern int CreateUnityInstrumentNative(IntPtr noteOffFnPtr, IntPtr noteOnFnPtr,
                                                           IntPtr processFnPtr);
 
-    [DllImport(pluginName, EntryPoint = "CreateBasicSynthInstrument")]
-    private static extern int CreateBasicSynthInstrumentNative();
+    [DllImport(pluginName, EntryPoint = "CreateSynthInstrument")]
+    private static extern int CreateSynthInstrumentNative();
 
     [DllImport(pluginName, EntryPoint = "Destroy")]
     private static extern void DestroyNative(int id);

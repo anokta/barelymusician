@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
-#define EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
+#ifndef EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
+#define EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
 #include <memory>
 #include <utility>
@@ -8,13 +8,13 @@
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/instrument/instrument_definition.h"
-#include "examples/instruments/basic_enveloped_voice.h"
+#include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/instrument.h"
 
 namespace barelyapi {
 namespace examples {
 
-enum BasicSynthInstrumentParam {
+enum SynthInstrumentParam {
   kGain = 0,
   kEnvelopeAttack = 1,
   kEnvelopeDecay = 2,
@@ -24,10 +24,11 @@ enum BasicSynthInstrumentParam {
   kNumVoices = 6,
 };
 
-class BasicSynthInstrument : public Instrument {
+/// Simple polyphonic synth instrument.
+class SynthInstrument : public Instrument {
  public:
-  /// Constructs new |BasicSynthInstrument|.
-  explicit BasicSynthInstrument(int sample_rate);
+  /// Constructs new |SynthInstrument|.
+  explicit SynthInstrument(int sample_rate);
 
   /// Implements |Instrument|.
   void NoteOff(float pitch) override;
@@ -41,14 +42,14 @@ class BasicSynthInstrument : public Instrument {
   static std::vector<InstrumentParamDefinition> GetDefaultParams();
 
  private:
-  using BasicSynthVoice = BasicEnvelopedVoice<Oscillator>;
+  using SynthVoice = EnvelopedVoice<Oscillator>;
 
   float gain_;
 
-  PolyphonicVoice<BasicSynthVoice> voice_;
+  PolyphonicVoice<SynthVoice> voice_;
 };
 
 }  // namespace examples
 }  // namespace barelyapi
 
-#endif  // EXAMPLES_INSTRUMENTS_BASIC_SYNTH_INSTRUMENT_H_
+#endif  // EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_

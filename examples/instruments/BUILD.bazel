@@ -3,20 +3,11 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "basic_enveloped_voice",
-    hdrs = ["basic_enveloped_voice.h"],
+    name = "drumkit_instrument",
+    srcs = ["drumkit_instrument.cpp"],
+    hdrs = ["drumkit_instrument.h"],
     deps = [
-        "//barelymusician/dsp:envelope",
-        "//barelymusician/dsp:voice",
-    ],
-)
-
-cc_library(
-    name = "basic_drumkit_instrument",
-    srcs = ["basic_drumkit_instrument.cpp"],
-    hdrs = ["basic_drumkit_instrument.h"],
-    deps = [
-        ":basic_enveloped_voice",
+        ":enveloped_voice",
         ":instrument",
         "//barelymusician/dsp:sample_player",
         "//barelymusician/instrument:instrument_definition",
@@ -25,16 +16,11 @@ cc_library(
 )
 
 cc_library(
-    name = "basic_synth_instrument",
-    srcs = ["basic_synth_instrument.cpp"],
-    hdrs = ["basic_synth_instrument.h"],
+    name = "enveloped_voice",
+    hdrs = ["enveloped_voice.h"],
     deps = [
-        ":basic_enveloped_voice",
-        ":instrument",
-        "//barelymusician/dsp:oscillator",
-        "//barelymusician/dsp:polyphonic_voice",
-        "//barelymusician/engine:note_utils",
-        "//barelymusician/instrument:instrument_definition",
+        "//barelymusician/dsp:envelope",
+        "//barelymusician/dsp:voice",
     ],
 )
 
@@ -44,6 +30,20 @@ cc_library(
     hdrs = ["instrument.h"],
     deps = [
         "//barelymusician/common:logging",
+        "//barelymusician/instrument:instrument_definition",
+    ],
+)
+
+cc_library(
+    name = "synth_instrument",
+    srcs = ["synth_instrument.cpp"],
+    hdrs = ["synth_instrument.h"],
+    deps = [
+        ":enveloped_voice",
+        ":instrument",
+        "//barelymusician/dsp:oscillator",
+        "//barelymusician/dsp:polyphonic_voice",
+        "//barelymusician/engine:note_utils",
         "//barelymusician/instrument:instrument_definition",
     ],
 )

@@ -1184,7 +1184,7 @@ GameObject:
   - component: {fileID: 1298915919}
   - component: {fileID: 1298915922}
   m_Layer: 0
-  m_Name: BasicSynthInstrument
+  m_Name: SynthInstrument
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1464,7 +1464,7 @@ GameObject:
   - component: {fileID: 1714525513}
   - component: {fileID: 1714525512}
   m_Layer: 0
-  m_Name: BasicSynthInstrument - Sequencer
+  m_Name: SynthInstrument - Sequencer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1646,7 +1646,7 @@ GameObject:
   - component: {fileID: 1737834380}
   - component: {fileID: 1737834379}
   m_Layer: 0
-  m_Name: BasicSynthInstrument - Controller
+  m_Name: SynthInstrument - Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

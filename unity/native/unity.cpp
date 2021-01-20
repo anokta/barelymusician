@@ -10,7 +10,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/instrument/instrument_definition.h"
-#include "examples/instruments/basic_synth_instrument.h"
+#include "examples/instruments/synth_instrument.h"
 #include "unity/native/unity_log_writer.h"
 
 namespace barelyapi {
@@ -81,12 +81,11 @@ int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
   return kInvalidId;
 }
 
-int CreateBasicSynthInstrument() {
+int CreateSynthInstrument() {
   if (barelymusician) {
     return barelymusician->engine.CreateInstrument(
-        examples::BasicSynthInstrument::GetDefinition(
-            barelymusician->sample_rate),
-        examples::BasicSynthInstrument::GetDefaultParams());
+        examples::SynthInstrument::GetDefinition(barelymusician->sample_rate),
+        examples::SynthInstrument::GetDefaultParams());
   }
   return kInvalidId;
 }

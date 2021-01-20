@@ -12,7 +12,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
-#include "examples/instruments/basic_synth_instrument.h"
+#include "examples/instruments/synth_instrument.h"
 #include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -23,9 +23,9 @@ using ::barelyapi::Engine;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
-using ::barelyapi::examples::BasicSynthInstrument;
-using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::InputManager;
+using ::barelyapi::examples::SynthInstrument;
+using ::barelyapi::examples::SynthInstrumentParam;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -116,16 +116,14 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Create instrument.
     const auto instrument_id = engine.CreateInstrument(
-        BasicSynthInstrument::GetDefinition(kSampleRate),
-        {{BasicSynthInstrumentParam::kNumVoices,
+        SynthInstrument::GetDefinition(kSampleRate),
+        {{SynthInstrumentParam::kNumVoices,
           static_cast<float>(kNumInstrumentVoices)},
-         {BasicSynthInstrumentParam::kOscillatorType,
+         {SynthInstrumentParam::kOscillatorType,
           static_cast<float>(kInstrumentOscillatorType)},
-         {BasicSynthInstrumentParam::kEnvelopeAttack,
-          kInstrumentEnvelopeAttack},
-         {BasicSynthInstrumentParam::kEnvelopeRelease,
-          kInstrumentEnvelopeRelease},
-         {BasicSynthInstrumentParam::kGain, kInstrumentGain}});
+         {SynthInstrumentParam::kEnvelopeAttack, kInstrumentEnvelopeAttack},
+         {SynthInstrumentParam::kEnvelopeRelease, kInstrumentEnvelopeRelease},
+         {SynthInstrumentParam::kGain, kInstrumentGain}});
     for (const Note& note : score) {
       engine.ScheduleNote(instrument_id, note.position, note.duration,
                           note.pitch, note.intensity);

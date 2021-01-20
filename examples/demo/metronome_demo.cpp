@@ -10,7 +10,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note_utils.h"
-#include "examples/instruments/basic_synth_instrument.h"
+#include "examples/instruments/synth_instrument.h"
 #include "examples/util/audio_output.h"
 #include "examples/util/input_manager.h"
 
@@ -19,9 +19,9 @@ namespace {
 using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
-using ::barelyapi::examples::BasicSynthInstrument;
-using ::barelyapi::examples::BasicSynthInstrumentParam;
 using ::barelyapi::examples::InputManager;
+using ::barelyapi::examples::SynthInstrument;
+using ::barelyapi::examples::SynthInstrumentParam;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -55,15 +55,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetTempo(kInitialTempo);
 
   const auto metronome_id = engine.CreateInstrument(
-      BasicSynthInstrument::GetDefinition(kSampleRate),
-      {{static_cast<int>(BasicSynthInstrumentParam::kNumVoices),
+      SynthInstrument::GetDefinition(kSampleRate),
+      {{static_cast<int>(SynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
-       {static_cast<int>(BasicSynthInstrumentParam::kGain), kGain},
-       {static_cast<int>(BasicSynthInstrumentParam::kOscillatorType),
+       {static_cast<int>(SynthInstrumentParam::kGain), kGain},
+       {static_cast<int>(SynthInstrumentParam::kOscillatorType),
         static_cast<float>(kOscillatorType)},
-       {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeAttack), kAttack},
-       {static_cast<int>(BasicSynthInstrumentParam::kEnvelopeRelease),
-        kRelease}});
+       {static_cast<int>(SynthInstrumentParam::kEnvelopeAttack), kAttack},
+       {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), kRelease}});
 
   // Beat callback.
   const auto beat_callback = [&](std::int64_t, int beat) {

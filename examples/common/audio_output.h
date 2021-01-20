@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_UTIL_AUDIO_OUTPUT_H_
-#define EXAMPLES_UTIL_AUDIO_OUTPUT_H_
+#ifndef EXAMPLES_COMMON_AUDIO_OUTPUT_H_
+#define EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
 
@@ -46,4 +46,4 @@ class AudioOutput {
 }  // namespace examples
 }  // namespace barelyapi
 
-#endif  // EXAMPLES_UTIL_AUDIO_OUTPUT_H_
+#endif  // EXAMPLES_COMMON_AUDIO_OUTPUT_H_

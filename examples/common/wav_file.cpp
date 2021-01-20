@@ -1,4 +1,4 @@
-#include "examples/util/wav_file.h"
+#include "examples/common/wav_file.h"
 
 #include "barelymusician/common/logging.h"
 

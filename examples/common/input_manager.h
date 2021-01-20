@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_UTIL_INPUT_MANAGER_H_
-#define EXAMPLES_UTIL_INPUT_MANAGER_H_
+#ifndef EXAMPLES_COMMON_INPUT_MANAGER_H_
+#define EXAMPLES_COMMON_INPUT_MANAGER_H_
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #include <windows.h>
@@ -81,4 +81,4 @@ class InputManager {
 }  // namespace examples
 }  // namespace barelyapi
 
-#endif  // EXAMPLES_UTIL_INPUT_MANAGER_H_
+#endif  // EXAMPLES_COMMON_INPUT_MANAGER_H_

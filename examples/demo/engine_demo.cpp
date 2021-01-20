@@ -16,11 +16,11 @@
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
 #include "barelymusician/engine/note_utils.h"
+#include "examples/common/audio_output.h"
+#include "examples/common/input_manager.h"
+#include "examples/common/wav_file.h"
 #include "examples/instruments/drumkit_instrument.h"
 #include "examples/instruments/synth_instrument.h"
-#include "examples/util/audio_output.h"
-#include "examples/util/input_manager.h"
-#include "examples/util/wav_file.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 namespace {

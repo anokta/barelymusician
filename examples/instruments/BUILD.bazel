@@ -11,7 +11,7 @@ cc_library(
         ":instrument",
         "//barelymusician/dsp:sample_player",
         "//barelymusician/instrument:instrument_definition",
-        "//examples/util:wav_file",
+        "//examples/common:wav_file",
     ],
 )
 

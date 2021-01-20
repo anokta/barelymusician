@@ -12,9 +12,9 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/note.h"
+#include "examples/common/audio_output.h"
+#include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
-#include "examples/util/audio_output.h"
-#include "examples/util/input_manager.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 namespace {

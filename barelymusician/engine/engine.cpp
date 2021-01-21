@@ -34,12 +34,12 @@ int Engine::CreateInstrument(InstrumentDefinition definition,
                              InstrumentParamDefinitions param_definitions) {
   const int instrument_id =
       manager_.Create(definition, param_definitions, last_timestamp_);
-  scores_.emplace(instrument_id, Score{});
+  tracks_.emplace(instrument_id, Track{});
   return instrument_id;
 }
 
 Status Engine::DestroyInstrument(int instrument_id) {
-  if (scores_.erase(instrument_id) > 0) {
+  if (tracks_.erase(instrument_id) > 0) {
     manager_.Destroy(instrument_id, last_timestamp_);
     return Status::kOk;
   }
@@ -98,14 +98,14 @@ Status Engine::SetParam(int instrument_id, int param_id, float param_value) {
 }
 
 void Engine::ClearAllScheduledNotes() {
-  for (const auto& [instrument_id, score] : scores_) {
+  for (const auto& [instrument_id, track] : tracks_) {
     ClearAllScheduledNotes(instrument_id);
   }
 }
 
 Status Engine::ClearAllScheduledNotes(int instrument_id) {
-  if (auto* score = FindOrNull(scores_, instrument_id)) {
-    score->RemoveAllEvents();
+  if (auto* track = FindOrNull(tracks_, instrument_id)) {
+    track->RemoveAllEvents();
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -113,8 +113,8 @@ Status Engine::ClearAllScheduledNotes(int instrument_id) {
 
 Status Engine::ScheduleNote(int instrument_id, double position, double duration,
                             float pitch, float intensity) {
-  if (auto* score = FindOrNull(scores_, instrument_id)) {
-    score->AddNoteEvent(position, duration, pitch, intensity);
+  if (auto* track = FindOrNull(tracks_, instrument_id)) {
+    track->AddNoteEvent(position, duration, pitch, intensity);
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -167,8 +167,8 @@ void Engine::Update(int sample_rate, std::int64_t timestamp) {
     }
   }
   // Trigger messages.
-  for (auto& [id, score] : scores_) {
-    score.ForEachEventInRange(
+  for (auto& [id, track] : tracks_) {
+    track.ForEachEventInRange(
         begin_position, end_position,
         [&, id = id](double note_position, const InstrumentData& data) {
           const std::int64_t note_timestamp =

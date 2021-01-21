@@ -7,7 +7,7 @@
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/engine/clock.h"
-#include "barelymusician/engine/score.h"
+#include "barelymusician/engine/track.h"
 #include "barelymusician/instrument/instrument_data.h"
 #include "barelymusician/instrument/instrument_definition.h"
 #include "barelymusician/instrument/instrument_manager.h"
@@ -190,7 +190,7 @@ class Engine {
  private:
   // List of instruments.
   InstrumentManager manager_;
-  std::unordered_map<int, Score> scores_;
+  std::unordered_map<int, Track> tracks_;
 
   // Denotes whether the clock is currently playing.
   bool is_playing_;

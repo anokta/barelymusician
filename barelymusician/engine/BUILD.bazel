@@ -14,7 +14,7 @@ cc_library(
     hdrs = ["engine.h"],
     deps = [
         ":clock",
-        ":score",
+        ":track",
         "//barelymusician/common:common_utils",
         "//barelymusician/common:status",
         "//barelymusician/dsp:dsp_utils",
@@ -41,9 +41,9 @@ cc_library(
 )
 
 cc_library(
-    name = "score",
-    srcs = ["score.cpp"],
-    hdrs = ["score.h"],
+    name = "track",
+    srcs = ["track.cpp"],
+    hdrs = ["track.h"],
     deps = [
         "//barelymusician/common:id_generator",
         "//barelymusician/instrument:instrument_data",
@@ -69,10 +69,10 @@ cc_test(
 )
 
 cc_test(
-    name = "score_test",
-    srcs = ["score_test.cpp"],
+    name = "track_test",
+    srcs = ["track_test.cpp"],
     deps = [
-        ":score",
+        ":track",
         "@googletest//:gtest_main",
     ],
 )

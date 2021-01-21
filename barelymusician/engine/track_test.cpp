@@ -1,4 +1,4 @@
-#include "barelymusician/engine/score.h"
+#include "barelymusician/engine/track.h"
 
 #include <variant>
 
@@ -7,24 +7,24 @@
 namespace barelyapi {
 namespace {
 
-// Tests that the score stores a single note as expected.
-TEST(ScoreTest, SingleNote) {
+// Tests that the track stores a single note as expected.
+TEST(TrackTest, SingleNote) {
   const double kPosition = 4.0f;
   const double kDuration = 0.5f;
   const float kPitch = 2.5f;
   const float kIntensity = 0.25f;
 
-  Score score;
-  EXPECT_TRUE(score.IsEmpty());
+  Track track;
+  EXPECT_TRUE(track.IsEmpty());
 
   // Add note.
   const int event_id =
-      score.AddNoteEvent(kPosition, kDuration, kPitch, kIntensity);
-  EXPECT_FALSE(score.IsEmpty());
+      track.AddNoteEvent(kPosition, kDuration, kPitch, kIntensity);
+  EXPECT_FALSE(track.IsEmpty());
 
   int num_note_ons = 0;
   int num_note_offs = 0;
-  score.ForEachEventInRange(
+  track.ForEachEventInRange(
       kPosition, kPosition + kDuration + 1.0,
       [&](double position, const InstrumentData& data) {
         if (std::holds_alternative<NoteOn>(data)) {
@@ -44,31 +44,31 @@ TEST(ScoreTest, SingleNote) {
   EXPECT_EQ(num_note_ons, 1);
   EXPECT_EQ(num_note_offs, 1);
 
-  EXPECT_TRUE(score.RemoveEvent(event_id));
-  EXPECT_TRUE(score.IsEmpty());
+  EXPECT_TRUE(track.RemoveEvent(event_id));
+  EXPECT_TRUE(track.IsEmpty());
 
   // Second remove attempt should fail since the note no longer exists.
-  EXPECT_FALSE(score.RemoveEvent(event_id));
+  EXPECT_FALSE(track.RemoveEvent(event_id));
 }
 
-// Tests that the score stores multiple notes as expected.
-TEST(ScoreTest, MultipleNotes) {
+// Tests that the track stores multiple notes as expected.
+TEST(TrackTest, MultipleNotes) {
   const int kNumNotes = 10;
   const float kIntensity = 0.25f;
 
-  Score score;
-  EXPECT_TRUE(score.IsEmpty());
+  Track track;
+  EXPECT_TRUE(track.IsEmpty());
 
   // Add notes.
   for (int i = 0; i < kNumNotes; ++i) {
-    score.AddNoteEvent(static_cast<double>(i), 1.0, static_cast<float>(i),
+    track.AddNoteEvent(static_cast<double>(i), 1.0, static_cast<float>(i),
                        kIntensity);
   }
-  EXPECT_FALSE(score.IsEmpty());
+  EXPECT_FALSE(track.IsEmpty());
 
   int num_note_ons = 0;
   int num_note_offs = 0;
-  score.ForEachEventInRange(
+  track.ForEachEventInRange(
       0.0, static_cast<double>(kNumNotes),
       [&](double position, const InstrumentData& data) {
         if (std::holds_alternative<NoteOn>(data)) {
@@ -87,28 +87,28 @@ TEST(ScoreTest, MultipleNotes) {
   // Last note off should be out of range.
   EXPECT_EQ(num_note_offs, kNumNotes - 1);
 
-  score.RemoveAllEvents();
-  EXPECT_TRUE(score.IsEmpty());
+  track.RemoveAllEvents();
+  EXPECT_TRUE(track.IsEmpty());
 }
 
 // Tests that removing arbitrary notes in range works as expected.
-TEST(ScoreTest, RemoveAllEventsInRange) {
-  const int kNotePitch = 10.0f;
-  const int kNoteIntensity = 1.0f;
+TEST(TrackTest, RemoveAllEventsInRange) {
+  const float kNotePitch = 10.0f;
+  const float kNoteIntensity = 1.0f;
 
-  Score score;
-  EXPECT_TRUE(score.IsEmpty());
+  Track track;
+  EXPECT_TRUE(track.IsEmpty());
 
-  score.AddNoteEvent(2.0, 6.0, kNotePitch, kNoteIntensity);
-  score.AddNoteEvent(4.0, 3.0, kNotePitch, kNoteIntensity);
-  EXPECT_FALSE(score.IsEmpty());
+  track.AddNoteEvent(2.0, 6.0, kNotePitch, kNoteIntensity);
+  track.AddNoteEvent(4.0, 3.0, kNotePitch, kNoteIntensity);
+  EXPECT_FALSE(track.IsEmpty());
 
-  score.RemoveAllEventsInRange(0.0, 2.0);
-  EXPECT_FALSE(score.IsEmpty());
-  score.RemoveAllEventsInRange(8.0, 20.0);
-  EXPECT_FALSE(score.IsEmpty());
-  score.RemoveAllEventsInRange(3.0, 5.0);
-  EXPECT_TRUE(score.IsEmpty());
+  track.RemoveAllEventsInRange(0.0, 2.0);
+  EXPECT_FALSE(track.IsEmpty());
+  track.RemoveAllEventsInRange(8.0, 20.0);
+  EXPECT_FALSE(track.IsEmpty());
+  track.RemoveAllEventsInRange(3.0, 5.0);
+  EXPECT_TRUE(track.IsEmpty());
 }
 
 }  // namespace

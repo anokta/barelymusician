@@ -12,12 +12,12 @@
 
 namespace barelyapi {
 
-// Score event callback signature.
-using ScoreEventCallback =
+// Track event callback signature.
+using TrackEventCallback =
     std::function<void(double position, const InstrumentData& data)>;
 
-// Musical score that stores scheduled instrument events.
-struct Score {
+// Music track that stores scheduled instrument events.
+struct Track {
  public:
   /// Adds note event.
   ///
@@ -35,9 +35,9 @@ struct Score {
   /// @param end_position End position.
   /// @param callback Callback function.
   void ForEachEventInRange(double begin_position, double end_position,
-                           const ScoreEventCallback& callback) const;
+                           const TrackEventCallback& callback) const;
 
-  /// Returns whether the score is empty or not.
+  /// Returns whether the track is empty or not.
   ///
   /// @return True if empty.
   bool IsEmpty() const;

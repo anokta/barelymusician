@@ -1,10 +1,10 @@
-#include "barelymusician/engine/score.h"
+#include "barelymusician/engine/track.h"
 
 #include <unordered_set>
 
 namespace barelyapi {
 
-int Score::AddNoteEvent(double position, double duration, float pitch,
+int Track::AddNoteEvent(double position, double duration, float pitch,
                         float intensity) {
   const int event_id = id_generator_.Next();
   events_.emplace(event_id, std::vector<double>{position, position + duration});
@@ -13,8 +13,8 @@ int Score::AddNoteEvent(double position, double duration, float pitch,
   return event_id;
 }
 
-void Score::ForEachEventInRange(double begin_position, double end_position,
-                                const ScoreEventCallback& callback) const {
+void Track::ForEachEventInRange(double begin_position, double end_position,
+                                const TrackEventCallback& callback) const {
   if (begin_position < end_position && callback) {
     const auto begin = data_.lower_bound({begin_position, 0});
     const auto end = data_.lower_bound({end_position, 0});
@@ -24,14 +24,14 @@ void Score::ForEachEventInRange(double begin_position, double end_position,
   }
 }
 
-bool Score::IsEmpty() const { return events_.empty(); }
+bool Track::IsEmpty() const { return events_.empty(); }
 
-void Score::RemoveAllEvents() {
+void Track::RemoveAllEvents() {
   data_.clear();
   events_.clear();
 }
 
-void Score::RemoveAllEventsInRange(double begin_position, double end_position) {
+void Track::RemoveAllEventsInRange(double begin_position, double end_position) {
   const auto begin = data_.lower_bound({begin_position, 0});
   const auto end = data_.lower_bound({end_position, 0});
   std::unordered_set<int> event_ids_to_remove;
@@ -47,7 +47,7 @@ void Score::RemoveAllEventsInRange(double begin_position, double end_position) {
   }
 }
 
-bool Score::RemoveEvent(int event_id) {
+bool Track::RemoveEvent(int event_id) {
   if (const auto it = events_.find(event_id); it != events_.end()) {
     for (const double position : it->second) {
       data_.erase(std::pair(position, event_id));

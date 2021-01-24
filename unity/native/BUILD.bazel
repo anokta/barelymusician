@@ -6,8 +6,7 @@ package(default_visibility = ["//visibility:public"])
 cc_binary(
     name = "libunity_linux.so",
     linkshared = True,
-    # TODO(#52): Enable this line once bazel supports this attribute (3.7.1?).
-    # target_compatible_with = ["@platforms//os:linux"],
+    target_compatible_with = ["@platforms//os:linux"],
     deps = [":unity"],
 )
 
@@ -15,8 +14,7 @@ cc_binary(
 cc_binary(
     name = "unity_osx.dylib",
     linkshared = True,
-    # TODO(#52): Enable this line once bazel supports this attribute (3.7.1?).
-    # target_compatible_with = ["@platforms//os:osx"],
+    target_compatible_with = ["@platforms//os:osx"],
     deps = [":unity"],
 )
 
@@ -24,8 +22,7 @@ cc_binary(
 cc_binary(
     name = "unity_windows.dll",
     linkshared = True,
-    # TODO(#52): Enable this line once bazel supports this attribute (3.7.1?).
-    # target_compatible_with = ["@platforms//os:windows"],
+    target_compatible_with = ["@platforms//os:windows"],
     deps = [":unity"],
 )
 

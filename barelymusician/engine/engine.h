@@ -77,6 +77,15 @@ class Engine {
   Status Process(int instrument_id, std::int64_t timestamp, float* output,
                  int num_channels, int num_frames);
 
+  /// Removes all scheduled notes.
+  void RemoveAllScheduledNotes();
+
+  /// Removes all scheduled notes.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return True if instrument found.
+  Status RemoveAllScheduledNotes(int instrument_id);
+
   /// Resets all parameters.
   ///
   /// @param instrument_id Instrument id.
@@ -128,15 +137,6 @@ class Engine {
   /// @param param_value Parameter value.
   /// @return True if successful, if instrument parameter found.
   Status SetParam(int instrument_id, int param_id, float param_value);
-
-  /// Clears all scheduled notes.
-  void ClearAllScheduledNotes();
-
-  /// Clears all scheduled notes.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return True if instrument found.
-  Status ClearAllScheduledNotes(int instrument_id);
 
   /// Schedules note.
   ///

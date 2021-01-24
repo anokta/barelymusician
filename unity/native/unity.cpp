@@ -271,7 +271,7 @@ void Pause() {
 void Stop() {
   if (barelymusician) {
     barelymusician->engine.Stop();
-    barelymusician->engine.ClearAllScheduledNotes();
+    barelymusician->engine.RemoveAllScheduledNotes();
     barelymusician->engine.SetPosition(0.0);
   }
 }

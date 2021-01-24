@@ -66,6 +66,20 @@ Status Engine::Process(int instrument_id, std::int64_t timestamp, float* output,
                           num_frames);
 }
 
+void Engine::RemoveAllScheduledNotes() {
+  for (auto& [instrument_id, track] : tracks_) {
+    track.RemoveAllEvents();
+  }
+}
+
+Status Engine::RemoveAllScheduledNotes(int instrument_id) {
+  if (auto* track = FindOrNull(tracks_, instrument_id)) {
+    track->RemoveAllEvents();
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
 Status Engine::ResetAllParams(int instrument_id) {
   return manager_.ResetAllParams(instrument_id, last_timestamp_);
 }
@@ -95,20 +109,6 @@ Status Engine::SetNoteOn(int instrument_id, float pitch, float intensity) {
 Status Engine::SetParam(int instrument_id, int param_id, float param_value) {
   return manager_.SetParam(instrument_id, last_timestamp_, param_id,
                            param_value);
-}
-
-void Engine::ClearAllScheduledNotes() {
-  for (const auto& [instrument_id, track] : tracks_) {
-    ClearAllScheduledNotes(instrument_id);
-  }
-}
-
-Status Engine::ClearAllScheduledNotes(int instrument_id) {
-  if (auto* track = FindOrNull(tracks_, instrument_id)) {
-    track->RemoveAllEvents();
-    return Status::kOk;
-  }
-  return Status::kNotFound;
 }
 
 Status Engine::ScheduleNote(int instrument_id, double position, double duration,

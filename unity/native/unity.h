@@ -23,9 +23,10 @@ using NoteOnCallback = void(double timestamp, int id, float pitch,
                             float intensity);
 
 /// Instrument function signatures.
-using NoteOffFn = void(float pitch);
-using NoteOnFn = void(float pitch, float intensity);
 using ProcessFn = void(float* output, int size, int num_channels);
+using SetNoteOffFn = void(float pitch);
+using SetNoteOnFn = void(float pitch, float intensity);
+using SetParamFn = void(int id, float value);
 
 /// Debug callback signature.
 using DebugCallback = void(int severity, const char* message);
@@ -40,13 +41,15 @@ BARELY_EXPORT void Shutdown();
 
 /// Creates new Unity instrument.
 ///
-/// @param note_off_fn_ptr Note off function.
-/// @param note_on_fn_ptr Note on function.
 /// @param process_fn_ptr Process function.
+/// @param set_note_off_fn_ptr Set note off function.
+/// @param set_note_on_fn_ptr Set note on function.
+/// @param set_param_fn_ptr Set parameter function.
 /// @return Instrument id.
-BARELY_EXPORT int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr,
-                                        NoteOnFn* note_on_fn_ptr,
-                                        ProcessFn* process_fn_ptr);
+BARELY_EXPORT int CreateUnityInstrument(ProcessFn* process_fn_ptr,
+                                        SetNoteOffFn* set_note_off_fn_ptr,
+                                        SetNoteOnFn* set_note_on_fn_ptr,
+                                        SetParamFn* set_param_fn);
 
 /// Creates new synth instrument.
 ///
@@ -86,22 +89,6 @@ BARELY_EXPORT bool IsNoteOn(int id, float pitch);
 ///
 /// @return True if playing.
 BARELY_EXPORT bool IsPlaying();
-
-/// Stops all notes.
-BARELY_EXPORT void AllNotesOff(int id);
-
-/// Stops instrument note.
-///
-/// @param id Instrument id.
-/// @param pitch Note pitch.
-BARELY_EXPORT void NoteOff(int id, float pitch);
-
-/// Starts instrument note.
-///
-/// @param id Instrument id.
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-BARELY_EXPORT void NoteOn(int id, float pitch, float intensity);
 
 /// Processes instrument.
 ///
@@ -144,6 +131,22 @@ BARELY_EXPORT void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr);
 ///
 /// @param note_on_callback_ptr Pointer to note on callback.
 BARELY_EXPORT void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr);
+
+/// Stops all notes.
+BARELY_EXPORT void SetAllNotesOff(int id);
+
+/// Stops instrument note.
+///
+/// @param id Instrument id.
+/// @param pitch Note pitch.
+BARELY_EXPORT void SetNoteOff(int id, float pitch);
+
+/// Starts instrument note.
+///
+/// @param id Instrument id.
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+BARELY_EXPORT void SetNoteOn(int id, float pitch, float intensity);
 
 /// Sets instrument param value.
 ///

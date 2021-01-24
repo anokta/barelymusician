@@ -60,8 +60,10 @@ void Shutdown() {
   barelymusician = nullptr;
 }
 
-int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
-                          ProcessFn* process_fn_ptr) {
+int CreateUnityInstrument(ProcessFn* process_fn_ptr,
+                          SetNoteOffFn* set_note_off_fn_ptr,
+                          SetNoteOnFn* set_note_on_fn_ptr,
+                          SetParamFn* set_param_fn_ptr) {
   if (barelymusician) {
     InstrumentDefinition definition = {
         .process_fn =
@@ -69,13 +71,17 @@ int CreateUnityInstrument(NoteOffFn* note_off_fn_ptr, NoteOnFn* note_on_fn_ptr,
                              int num_frames) {
               process_fn_ptr(output, num_channels * num_frames, num_channels);
             },
-        .set_note_off_fn = [note_off_fn_ptr](
+        .set_note_off_fn = [set_note_off_fn_ptr](
                                InstrumentState*,
-                               float pitch) { note_off_fn_ptr(pitch); },
+                               float pitch) { set_note_off_fn_ptr(pitch); },
         .set_note_on_fn =
-            [note_on_fn_ptr](InstrumentState*, float pitch, float intensity) {
-              note_on_fn_ptr(pitch, intensity);
-            }};
+            [set_note_on_fn_ptr](InstrumentState*, float pitch,
+                                 float intensity) {
+              set_note_on_fn_ptr(pitch, intensity);
+            },
+        .set_param_fn = [set_param_fn_ptr](
+                            InstrumentState*, int id,
+                            float value) { set_param_fn_ptr(id, value); }};
     return barelymusician->engine.CreateInstrument(std::move(definition));
   }
   return kInvalidId;
@@ -135,24 +141,6 @@ bool IsPlaying() {
     return barelymusician->engine.IsPlaying();
   }
   return false;
-}
-
-void AllNotesOff(int id) {
-  if (barelymusician) {
-    barelymusician->engine.SetAllNotesOff(id);
-  }
-}
-
-void NoteOff(int id, float pitch) {
-  if (barelymusician) {
-    barelymusician->engine.SetNoteOff(id, pitch);
-  }
-}
-
-void NoteOn(int id, float pitch, float intensity) {
-  if (barelymusician) {
-    barelymusician->engine.SetNoteOn(id, pitch, intensity);
-  }
 }
 
 void Process(int id, double timestamp, float* output, int num_channels,
@@ -234,6 +222,24 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
     } else {
       barelymusician->engine.SetNoteOnCallback(nullptr);
     }
+  }
+}
+
+void SetAllNotesOff(int id) {
+  if (barelymusician) {
+    barelymusician->engine.SetAllNotesOff(id);
+  }
+}
+
+void SetNoteOff(int id, float pitch) {
+  if (barelymusician) {
+    barelymusician->engine.SetNoteOff(id, pitch);
+  }
+}
+
+void SetNoteOn(int id, float pitch, float intensity) {
+  if (barelymusician) {
+    barelymusician->engine.SetNoteOn(id, pitch, intensity);
   }
 }
 

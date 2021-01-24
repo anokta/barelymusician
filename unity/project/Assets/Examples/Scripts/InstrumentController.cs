@@ -29,10 +29,10 @@ public class InstrumentController : MonoBehaviour {
   void Update() {
     // Shift octaves.
     if (Input.GetKeyDown(KeyCode.Z)) {
-      instrument.AllNotesOff();
+      instrument.SetAllNotesOff();
       octaveOffset = Mathf.Max(octaveOffset - 1, -3);
     } else if (Input.GetKeyDown(KeyCode.X)) {
-      instrument.AllNotesOff();
+      instrument.SetAllNotesOff();
       octaveOffset = Mathf.Min(octaveOffset + 1, 3);
     }
     // Adjust note intensity.
@@ -44,9 +44,9 @@ public class InstrumentController : MonoBehaviour {
     // Play notes.
     for (int i = 0; i < octaveKeys.Length; ++i) {
       if (Input.GetKeyDown(octaveKeys[i])) {
-        instrument.NoteOn(GetPitchFromKeyIndex(i), noteIntensity);
+        instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
       } else if (Input.GetKeyUp(octaveKeys[i])) {
-        instrument.NoteOff(GetPitchFromKeyIndex(i));
+        instrument.SetNoteOff(GetPitchFromKeyIndex(i));
       }
     }
   }

@@ -50,10 +50,10 @@ public class InstrumentPlayer : MonoBehaviour {
   private void Update() {
     if (!interactive) return;
     if (Input.GetKeyDown(KeyCode.Alpha1) && !isPlaying) {
-      instrument.NoteOn(rootPitch, 1.0f);
+      instrument.SetNoteOn(rootPitch, 1.0f);
       isPlaying = true;
     } else if (Input.GetKeyUp(KeyCode.Alpha1) && isPlaying) {
-      instrument.NoteOff(rootPitch);
+      instrument.SetNoteOff(rootPitch);
       isPlaying = false;
     }
   }

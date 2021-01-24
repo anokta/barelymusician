@@ -27,16 +27,6 @@ namespace BarelyApi {
       sampleInterval = 1.0f / (float)(AudioSettings.outputSampleRate);
     }
 
-    public override void UnityNoteOff(float pitch) {
-      targetGain = 0.0f;
-    }
-
-    public override void UnityNoteOn(float pitch, float intensity) {
-      frequency = 440.0f * Mathf.Pow(2.0f, (pitch - 69.0f) / 12.0f);
-      phase = 0.0f;
-      targetGain = intensity;
-    }
-
     public override void UnityProcess(float[] data, int channels) {
       for (int i = 0; i < data.Length; i += channels) {
         gain = Mathf.Lerp(gain, targetGain, 0.01f);
@@ -52,5 +42,17 @@ namespace BarelyApi {
         }
       }
     }
+
+    public override void UnitySetNoteOff(float pitch) {
+      targetGain = 0.0f;
+    }
+
+    public override void UnitySetNoteOn(float pitch, float intensity) {
+      frequency = 440.0f * Mathf.Pow(2.0f, (pitch - 69.0f) / 12.0f);
+      phase = 0.0f;
+      targetGain = intensity;
+    }
+
+    public override void UnitySetParam(int id, float value) {}
   }
 }

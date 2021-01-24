@@ -33,9 +33,9 @@ public class Bouncer : MonoBehaviour {
   }
 
   IEnumerator PlayNote(float pitch, float intensity, float duration) {
-    instrument.NoteOn(pitch, intensity);
+    instrument.SetNoteOn(pitch, intensity);
     yield return new WaitForSeconds(duration);
-    instrument.NoteOff(pitch);
+    instrument.SetNoteOff(pitch);
   }
 
 }

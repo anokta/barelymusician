@@ -36,28 +36,31 @@ namespace BarelyApi {
       _source.Stop();
     }
 
-    protected virtual void SetParam(int id, float value) {
-      BarelyMusician.SetParam(_id, id, value);
-    }
-
     // Stops all notes.
-    public void AllNotesOff() {
+    public void SetAllNotesOff() {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.AllNotesOff(_id);
+        BarelyMusician.SetAllNotesOff(_id);
       }
     }
 
     // Stops playing note with the given |pitch|.
-    public void NoteOff(float pitch) {
+    public void SetNoteOff(float pitch) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.NoteOff(_id, pitch);
+        BarelyMusician.SetNoteOff(_id, pitch);
       }
     }
 
     // Starts playing note with the given |pitch| and |intensity|.
-    public void NoteOn(float pitch, float intensity) {
+    public void SetNoteOn(float pitch, float intensity) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.NoteOn(_id, pitch, intensity);
+        BarelyMusician.SetNoteOn(_id, pitch, intensity);
+      }
+    }
+
+    // Sets parameter with the given |id| and |value|.
+    public void SetParam(int id, float value) {
+      if (_id != BarelyMusician.InvalidId) {
+        BarelyMusician.SetParam(_id, id, value);
       }
     }
 

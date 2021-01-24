@@ -5,28 +5,6 @@ using UnityEngine;
 namespace BarelyApi {
   // Base Unity instrument.
   public abstract class UnityInstrument : Instrument {
-    // Note off function.
-    public BarelyMusician.UnityNoteOffFn NoteOffFn {
-      get {
-        if (_noteOffFn == null) {
-          _noteOffFn = UnityNoteOff;
-        }
-        return _noteOffFn;
-      }
-    }
-    private BarelyMusician.UnityNoteOffFn _noteOffFn = null;
-
-    // Note on function.
-    public BarelyMusician.UnityNoteOnFn NoteOnFn {
-      get {
-        if (_noteOnFn == null) {
-          _noteOnFn = UnityNoteOn;
-        }
-        return _noteOnFn;
-      }
-    }
-    private BarelyMusician.UnityNoteOnFn _noteOnFn = null;
-
     // Process function.
     public BarelyMusician.UnityProcessFn ProcessFn {
       get {
@@ -40,13 +18,49 @@ namespace BarelyApi {
     }
     private BarelyMusician.UnityProcessFn _processFn = null;
 
-    // Stops note with the given |pitch|.
-    public abstract void UnityNoteOff(float pitch);
+    // Note off function.
+    public BarelyMusician.UnitySetNoteOffFn SetNoteOffFn {
+      get {
+        if (_setNoteOffFn == null) {
+          _setNoteOffFn = UnitySetNoteOff;
+        }
+        return _setNoteOffFn;
+      }
+    }
+    private BarelyMusician.UnitySetNoteOffFn _setNoteOffFn = null;
 
-    // Starts note with the given |pitch| and |intensity|.
-    public abstract void UnityNoteOn(float pitch, float intensity);
+    // Note on function.
+    public BarelyMusician.UnitySetNoteOnFn SetNoteOnFn {
+      get {
+        if (_setNoteOnFn == null) {
+          _setNoteOnFn = UnitySetNoteOn;
+        }
+        return _setNoteOnFn;
+      }
+    }
+    private BarelyMusician.UnitySetNoteOnFn _setNoteOnFn = null;
+
+    // Set parameter function.
+    public BarelyMusician.UnitySetParamFn SetParamFn {
+      get {
+        if (_setParamFn == null) {
+          _setParamFn = UnitySetParam;
+        }
+        return _setParamFn;
+      }
+    }
+    private BarelyMusician.UnitySetParamFn _setParamFn = null;
 
     // Processes the next |output| buffer.
     public abstract void UnityProcess(float[] output, int numChannels);
+
+    // Stops note with the given |pitch|.
+    public abstract void UnitySetNoteOff(float pitch);
+
+    // Starts note with the given |pitch| and |intensity|.
+    public abstract void UnitySetNoteOn(float pitch, float intensity);
+
+    // Sets parameter with the given |id| and |value|.
+    public abstract void UnitySetParam(int id, float value);
   }
 }

@@ -5,8 +5,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
-namespace unity {
+namespace barelyapi::unity {
 
 /// Unity log writer.
 class UnityLogWriter : public logging::LogWriter {
@@ -28,7 +27,6 @@ class UnityLogWriter : public logging::LogWriter {
   DebugCallback debug_callback_;
 };
 
-}  // namespace unity
-}  // namespace barelyapi
+}  // namespace barelyapi::unity
 
 #endif  // UNITY_NATIVE_UNITY_LOG_WRITER_H_

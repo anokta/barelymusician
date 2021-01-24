@@ -2,8 +2,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 InstrumentDefinition GetInstrumentDefinition(
     std::function<std::unique_ptr<Instrument>()> create_instrument_fn) {
@@ -51,5 +50,4 @@ InstrumentDefinition GetInstrumentDefinition(
           }};
 }
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples

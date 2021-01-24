@@ -11,8 +11,7 @@
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/instrument.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 enum SynthInstrumentParam {
   kGain = 0,
@@ -49,7 +48,6 @@ class SynthInstrument : public Instrument {
   PolyphonicVoice<SynthVoice> voice_;
 };
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples
 
 #endif  // EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_

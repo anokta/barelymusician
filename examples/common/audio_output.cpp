@@ -5,8 +5,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 AudioOutput::AudioOutput() : process_callback_(nullptr), stream_(nullptr) {
   Pa_Initialize();
@@ -65,5 +64,4 @@ void AudioOutput::SetProcessCallback(ProcessCallback&& process_callback) {
   process_callback_ = std::move(process_callback);
 }
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples

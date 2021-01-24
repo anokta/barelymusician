@@ -1,7 +1,6 @@
 #include "barelymusician/common/random.h"
 
-namespace barelyapi {
-namespace random {
+namespace barelyapi::random {
 
 namespace {
 
@@ -42,5 +41,4 @@ int Uniform(int min, int max) {
   return uniform_int_distribution(generator, param);
 }
 
-}  // namespace random
-}  // namespace barelyapi
+}  // namespace barelyapi::random

@@ -22,8 +22,7 @@
 #define DCHECK_LT(lhs, rhs) BARELY_DCHECK_OP(<, lhs, rhs)
 #define DCHECK_NE(lhs, rhs) BARELY_DCHECK_OP(!=, lhs, rhs)
 
-namespace barelyapi {
-namespace logging {
+namespace barelyapi::logging {
 
 /// Log severity.
 enum class LogSeverity {
@@ -94,8 +93,7 @@ std::ostream& GetNullStream();
 /// @param log_writer Log writer.
 void SetLogWriter(LogWriter* log_writer);
 
-}  // namespace logging
-}  // namespace barelyapi
+}  // namespace barelyapi::logging
 
 // Logging macros (internal).
 #define BARELY_LOG(severity)                                                \

@@ -5,8 +5,7 @@
 
 #include "barelymusician/instrument/instrument_definition.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 /// Generic instrument interface.
 class Instrument {
@@ -48,7 +47,6 @@ class Instrument {
 InstrumentDefinition GetInstrumentDefinition(
     std::function<std::unique_ptr<Instrument>()> create_instrument_fn);
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples
 
 #endif  // BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_

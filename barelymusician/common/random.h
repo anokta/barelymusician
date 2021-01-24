@@ -3,8 +3,7 @@
 
 #include <random>
 
-namespace barelyapi {
-namespace random {
+namespace barelyapi::random {
 
 /// Draws a number with normal distribution.
 ///
@@ -46,7 +45,6 @@ float Uniform(float min, float max);
 /// @return Random integer number.
 int Uniform(int min, int max);
 
-}  // namespace random
-}  // namespace barelyapi
+}  // namespace barelyapi::random
 
 #endif  // BARELYMUSICIAN_COMMON_RANDOM_H_

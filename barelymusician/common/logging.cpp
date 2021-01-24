@@ -4,8 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace barelyapi {
-namespace logging {
+namespace barelyapi::logging {
 
 namespace {
 
@@ -75,5 +74,4 @@ std::ostream& GetNullStream() {
 
 void SetLogWriter(LogWriter* log_writer) { custom_log_writer = log_writer; }
 
-}  // namespace logging
-}  // namespace barelyapi
+}  // namespace barelyapi::logging

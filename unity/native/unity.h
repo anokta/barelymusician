@@ -11,8 +11,7 @@
 #define BARELY_EXPORT
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
-namespace barelyapi {
-namespace unity {
+namespace barelyapi::unity {
 
 extern "C" {
 
@@ -179,7 +178,6 @@ BARELY_EXPORT void Update(double timestamp);
 
 }  // extern "C"
 
-}  // namespace unity
-}  // namespace barelyapi
+}  // namespace barelyapi::unity
 
 #endif  // UNITY_NATIVE_UNITY_H_

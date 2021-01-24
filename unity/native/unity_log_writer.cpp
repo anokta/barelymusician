@@ -1,7 +1,6 @@
 #include "unity/native/unity_log_writer.h"
 
-namespace barelyapi {
-namespace unity {
+namespace barelyapi::unity {
 
 void UnityLogWriter::Write(logging::LogSeverity severity,
                            const std::string& message) {
@@ -14,5 +13,4 @@ void UnityLogWriter::SetDebugCallback(DebugCallback&& debug_callback) {
   debug_callback_ = std::move(debug_callback);
 }
 
-}  // namespace unity
-}  // namespace barelyapi
+}  // namespace barelyapi::unity

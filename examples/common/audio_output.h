@@ -5,8 +5,7 @@
 
 #include "portaudio.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 /// Simple portaudio wrapper for handling audio output.
 class AudioOutput {
@@ -43,7 +42,6 @@ class AudioOutput {
   PaStream* stream_;
 };
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples
 
 #endif  // EXAMPLES_COMMON_AUDIO_OUTPUT_H_

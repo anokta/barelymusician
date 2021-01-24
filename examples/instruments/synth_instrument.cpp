@@ -2,8 +2,7 @@
 
 #include "barelymusician/engine/note_utils.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 SynthInstrument::SynthInstrument(int sample_rate)
     : gain_(0.0f), voice_(SynthVoice(sample_rate)) {}
@@ -79,5 +78,4 @@ std::vector<InstrumentParamDefinition> SynthInstrument::GetDefaultParams() {
       {static_cast<int>(SynthInstrumentParam::kNumVoices), 8.0f, 0.0f}};
 }
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples

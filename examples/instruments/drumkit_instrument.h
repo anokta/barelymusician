@@ -9,8 +9,7 @@
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/instrument.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 /// Simple drumkit instrument.
 class DrumkitInstrument : public Instrument {
@@ -38,7 +37,6 @@ class DrumkitInstrument : public Instrument {
   std::unordered_map<float, DrumkitVoice> voices_;
 };
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples
 
 #endif  // EXAMPLES_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_

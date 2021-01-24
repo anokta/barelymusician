@@ -2,8 +2,7 @@
 
 #include <algorithm>
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 namespace {
 
@@ -67,5 +66,4 @@ void DrumkitInstrument::Add(float pitch, const WavFile& wav_file) {
   voices_.insert({pitch, voice});
 }
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples

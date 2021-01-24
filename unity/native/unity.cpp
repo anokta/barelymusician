@@ -13,8 +13,7 @@
 #include "examples/instruments/synth_instrument.h"
 #include "unity/native/unity_log_writer.h"
 
-namespace barelyapi {
-namespace unity {
+namespace barelyapi::unity {
 
 namespace {
 
@@ -290,5 +289,4 @@ void Update(double timestamp) {
   }
 }
 
-}  // namespace unity
-}  // namespace barelyapi
+}  // namespace barelyapi::unity

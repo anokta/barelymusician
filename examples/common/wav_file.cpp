@@ -5,8 +5,7 @@
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
 
-namespace barelyapi {
-namespace examples {
+namespace barelyapi::examples {
 
 const std::vector<float>& WavFile::GetData() const { return data_; }
 
@@ -39,5 +38,4 @@ bool WavFile::Load(const std::string& file_path) {
   return true;
 }
 
-}  // namespace examples
-}  // namespace barelyapi
+}  // namespace barelyapi::examples

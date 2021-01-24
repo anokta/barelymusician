@@ -4,8 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barelyapi {
-namespace random {
+namespace barelyapi::random {
 namespace {
 
 // Tests that the random number generator generates the same values when it is
@@ -47,5 +46,4 @@ TEST(RandomTest, UniformMinMax) {
 }
 
 }  // namespace
-}  // namespace random
-}  // namespace barelyapi
+}  // namespace barelyapi::random

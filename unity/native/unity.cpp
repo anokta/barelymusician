@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <memory>
-#include <mutex>
 #include <utility>
 
 #include "barelymusician/common/logging.h"
@@ -20,6 +19,8 @@ namespace {
 // Invalid id.
 inline constexpr int kInvalidId = -1;
 
+}  // namespace
+
 // Unity plugin.
 struct BarelyMusician {
   BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}
@@ -34,32 +35,21 @@ struct BarelyMusician {
   UnityLogWriter writer;
 };
 
-// Unity plugin instance.
-BarelyMusician* barelymusician = nullptr;
-
-// Mutex to ensure thread-safe initialization and shutdown.
-std::mutex initialize_shutdown_mutex;
-
-}  // namespace
-
-void Initialize(int sample_rate) {
-  std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
-  if (!barelymusician) {
-    barelymusician = new BarelyMusician(sample_rate);
-    logging::SetLogWriter(&barelymusician->writer);
-  }
+BarelyMusician* Initialize(int sample_rate) {
+  BarelyMusician* barelymusician = new BarelyMusician(sample_rate);
+  logging::SetLogWriter(&barelymusician->writer);
+  return barelymusician;
 }
 
-void Shutdown() {
-  std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
+void Shutdown(BarelyMusician* barelymusician) {
   if (barelymusician) {
     logging::SetLogWriter(nullptr);
     delete barelymusician;
   }
-  barelymusician = nullptr;
 }
 
-int CreateUnityInstrument(ProcessFn* process_fn_ptr,
+int CreateUnityInstrument(BarelyMusician* barelymusician,
+                          ProcessFn* process_fn_ptr,
                           SetNoteOffFn* set_note_off_fn_ptr,
                           SetNoteOnFn* set_note_on_fn_ptr,
                           SetParamFn* set_param_fn_ptr) {
@@ -86,7 +76,7 @@ int CreateUnityInstrument(ProcessFn* process_fn_ptr,
   return kInvalidId;
 }
 
-int CreateSynthInstrument() {
+int CreateSynthInstrument(BarelyMusician* barelymusician) {
   if (barelymusician) {
     return barelymusician->engine.CreateInstrument(
         examples::SynthInstrument::GetDefinition(barelymusician->sample_rate),
@@ -95,13 +85,13 @@ int CreateSynthInstrument() {
   return kInvalidId;
 }
 
-void Destroy(int id) {
+void Destroy(BarelyMusician* barelymusician, int id) {
   if (barelymusician) {
     barelymusician->engine.DestroyInstrument(id);
   }
 }
 
-float GetParam(int id, int param_id) {
+float GetParam(BarelyMusician* barelymusician, int id, int param_id) {
   if (barelymusician) {
     const auto param_or = barelymusician->engine.GetParam(id, param_id);
     if (IsOk(param_or)) {
@@ -111,21 +101,21 @@ float GetParam(int id, int param_id) {
   return 0.0f;
 }
 
-double GetPosition() {
+double GetPosition(BarelyMusician* barelymusician) {
   if (barelymusician) {
     return barelymusician->engine.GetPosition();
   }
   return 0.0f;
 }
 
-double GetTempo() {
+double GetTempo(BarelyMusician* barelymusician) {
   if (barelymusician) {
     return barelymusician->engine.GetTempo();
   }
   return 0.0f;
 }
 
-bool IsNoteOn(int id, float pitch) {
+bool IsNoteOn(BarelyMusician* barelymusician, int id, float pitch) {
   if (barelymusician) {
     const auto is_note_on_or = barelymusician->engine.IsNoteOn(id, pitch);
     if (IsOk(is_note_on_or)) {
@@ -135,16 +125,15 @@ bool IsNoteOn(int id, float pitch) {
   return false;
 }
 
-bool IsPlaying() {
+bool IsPlaying(BarelyMusician* barelymusician) {
   if (barelymusician) {
     return barelymusician->engine.IsPlaying();
   }
   return false;
 }
 
-void Process(int id, double timestamp, float* output, int num_channels,
-             int num_frames) {
-  std::lock_guard<std::mutex> lock(initialize_shutdown_mutex);
+void Process(BarelyMusician* barelymusician, int id, double timestamp,
+             float* output, int num_channels, int num_frames) {
   if (barelymusician) {
     barelymusician->engine.Process(
         id, SamplesFromSeconds(barelymusician->sample_rate, timestamp), output,
@@ -152,21 +141,22 @@ void Process(int id, double timestamp, float* output, int num_channels,
   }
 }
 
-void ResetAllParams(int id) {
+void ResetAllParams(BarelyMusician* barelymusician, int id) {
   if (barelymusician) {
     barelymusician->engine.ResetAllParams(id);
   }
 }
 
-void ScheduleNote(int id, double position, double duration, float pitch,
-                  float intensity) {
+void ScheduleNote(BarelyMusician* barelymusician, int id, double position,
+                  double duration, float pitch, float intensity) {
   if (barelymusician) {
     barelymusician->engine.ScheduleNote(id, position, duration, pitch,
                                         intensity);
   }
 }
 
-void SetBeatCallback(BeatCallback* beat_callback_ptr) {
+void SetBeatCallback(BarelyMusician* barelymusician,
+                     BeatCallback* beat_callback_ptr) {
   if (barelymusician) {
     if (beat_callback_ptr) {
       barelymusician->engine.SetBeatCallback(
@@ -180,7 +170,8 @@ void SetBeatCallback(BeatCallback* beat_callback_ptr) {
   }
 }
 
-void SetDebugCallback(DebugCallback* debug_callback_ptr) {
+void SetDebugCallback(BarelyMusician* barelymusician,
+                      DebugCallback* debug_callback_ptr) {
   if (barelymusician) {
     if (debug_callback_ptr) {
       const auto debug_callback = [debug_callback_ptr](int severity,
@@ -194,7 +185,8 @@ void SetDebugCallback(DebugCallback* debug_callback_ptr) {
   }
 }
 
-void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
+void SetNoteOffCallback(BarelyMusician* barelymusician,
+                        NoteOffCallback* note_off_callback_ptr) {
   if (barelymusician) {
     if (note_off_callback_ptr) {
       barelymusician->engine.SetNoteOffCallback(
@@ -209,7 +201,8 @@ void SetNoteOffCallback(NoteOffCallback* note_off_callback_ptr) {
   }
 }
 
-void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
+void SetNoteOnCallback(BarelyMusician* barelymusician,
+                       NoteOnCallback* note_on_callback_ptr) {
   if (barelymusician) {
     if (note_on_callback_ptr) {
       barelymusician->engine.SetNoteOnCallback(
@@ -224,56 +217,58 @@ void SetNoteOnCallback(NoteOnCallback* note_on_callback_ptr) {
   }
 }
 
-void SetAllNotesOff(int id) {
+void SetAllNotesOff(BarelyMusician* barelymusician, int id) {
   if (barelymusician) {
     barelymusician->engine.SetAllNotesOff(id);
   }
 }
 
-void SetNoteOff(int id, float pitch) {
+void SetNoteOff(BarelyMusician* barelymusician, int id, float pitch) {
   if (barelymusician) {
     barelymusician->engine.SetNoteOff(id, pitch);
   }
 }
 
-void SetNoteOn(int id, float pitch, float intensity) {
+void SetNoteOn(BarelyMusician* barelymusician, int id, float pitch,
+               float intensity) {
   if (barelymusician) {
     barelymusician->engine.SetNoteOn(id, pitch, intensity);
   }
 }
 
-void SetParam(int id, int param_id, float value) {
+void SetParam(BarelyMusician* barelymusician, int id, int param_id,
+              float value) {
   if (barelymusician) {
     barelymusician->engine.SetParam(id, param_id, value);
   }
 }
 
-void SetPosition(double position) {
+void SetPosition(BarelyMusician* barelymusician, double position) {
   if (barelymusician) {
     barelymusician->engine.SetPosition(position);
   }
 }
 
-void SetTempo(double tempo) {
+void SetTempo(BarelyMusician* barelymusician, double tempo) {
   if (barelymusician) {
     barelymusician->engine.SetTempo(tempo);
   }
 }
 
-void Start(double timestamp) {
+void Start(BarelyMusician* barelymusician, double timestamp) {
   if (barelymusician) {
     barelymusician->engine.Start(
         SamplesFromSeconds(barelymusician->sample_rate, timestamp));
   }
 }
 
-void Pause() {
+void Pause(BarelyMusician* barelymusician) {
   if (barelymusician) {
     barelymusician->engine.Stop();
   }
 }
 
-void Stop() {
+void Stop(BarelyMusician* barelymusician) {
   if (barelymusician) {
     barelymusician->engine.Stop();
     barelymusician->engine.RemoveAllScheduledNotes();
@@ -281,7 +276,7 @@ void Stop() {
   }
 }
 
-void Update(double timestamp) {
+void Update(BarelyMusician* barelymusician, double timestamp) {
   if (barelymusician) {
     barelymusician->engine.Update(
         barelymusician->sample_rate,

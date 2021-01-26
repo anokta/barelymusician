@@ -53,6 +53,6 @@ namespace BarelyApi {
       targetGain = intensity;
     }
 
-    public override void UnitySetParam(int id, float value) {}
+    public override void UnitySetParam(int id, float value) { }
   }
 }

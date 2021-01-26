@@ -65,7 +65,7 @@ namespace BarelyApi {
 
     // Returns playback position.
     public static double GetPosition() {
-      if (BarelyMusicianInternal.Initialized) { 
+      if (BarelyMusicianInternal.Initialized) {
         return GetPositionNative();
       }
       return 0.0;
@@ -75,7 +75,7 @@ namespace BarelyApi {
     public static double GetTempo() {
       if (BarelyMusicianInternal.Initialized) {
         return GetTempoNative();
-      } 
+      }
       return 0.0;
     }
 
@@ -83,7 +83,7 @@ namespace BarelyApi {
     public static bool IsPlaying() {
       if (BarelyMusicianInternal.Initialized) {
         return IsPlayingNative();
-      } 
+      }
       return false;
     }
 
@@ -190,7 +190,7 @@ namespace BarelyApi {
           return _instance != null;
         }
       }
-  
+
       // List of instruments.
       public static Dictionary<int, Instrument> Instruments { get; private set; }
 

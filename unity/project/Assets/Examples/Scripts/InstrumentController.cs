@@ -21,9 +21,8 @@ public class InstrumentController : MonoBehaviour {
   public float noteIntensity = 1.0f;
 
   // Ordered keys of one octave.
-  private KeyCode[] octaveKeys = new KeyCode[] { KeyCode.A, KeyCode.W, KeyCode.S, KeyCode.E,
-                                                 KeyCode.D, KeyCode.F, KeyCode.T, KeyCode.G,
-                                                 KeyCode.Y, KeyCode.H, KeyCode.U, KeyCode.J,
+  private KeyCode[] octaveKeys = new KeyCode[] { KeyCode.A, KeyCode.W, KeyCode.S, KeyCode.E, KeyCode.D, KeyCode.F,
+                                                 KeyCode.T, KeyCode.G, KeyCode.Y, KeyCode.H, KeyCode.U, KeyCode.J,
                                                  KeyCode.K };
 
   void Update() {

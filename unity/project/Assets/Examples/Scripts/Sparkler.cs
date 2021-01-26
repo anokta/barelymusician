@@ -26,8 +26,7 @@ public class Sparkler : MonoBehaviour {
 
   private void Update() {
     transform.GetComponent<Renderer>().material.color =
-        Color.Lerp(transform.GetComponent<Renderer>().material.color, targetColor,
-                   32 * Time.deltaTime);
+        Color.Lerp(transform.GetComponent<Renderer>().material.color, targetColor, 32 * Time.deltaTime);
   }
 
   private void OnNoteOff(double dspTime, Instrument instrument, float pitch) {

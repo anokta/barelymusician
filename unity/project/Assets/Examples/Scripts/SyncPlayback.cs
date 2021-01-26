@@ -17,8 +17,7 @@ public class SyncPlayback : MonoBehaviour {
       double dspTime = AudioSettings.dspTime;
       source.PlayScheduled(dspTime);
       BarelyApi.BarelyMusician.PlayScheduled(dspTime);
-    } else if (source.isPlaying && (Input.GetKeyDown(KeyCode.Space) ||
-                                    Input.GetKeyDown(KeyCode.Backspace))) {
+    } else if (source.isPlaying && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Backspace))) {
       source.Stop();
     }
   }

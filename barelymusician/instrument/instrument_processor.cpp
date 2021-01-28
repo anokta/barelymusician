@@ -3,6 +3,8 @@
 #include <utility>
 #include <variant>
 
+#include "barelymusician/dsp/dsp_utils.h"
+
 namespace barelyapi {
 
 InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition)
@@ -33,15 +35,17 @@ InstrumentProcessor& InstrumentProcessor::operator=(
   return *this;
 }
 
-void InstrumentProcessor::Process(std::int64_t timestamp, float* output,
-                                  int num_channels, int num_frames) {
+void InstrumentProcessor::Process(int sample_rate, double timestamp,
+                                  float* output, int num_channels,
+                                  int num_frames) {
   int frame = 0;
   // Process *all* events before |end_timestamp|.
   const auto begin = data_.cbegin();
-  const auto end =
-      data_.lower_bound(timestamp + static_cast<std::int64_t>(num_frames));
+  const auto end = data_.lower_bound(
+      timestamp + SecondsFromSamples(sample_rate, num_frames));
   for (auto it = begin; it != end; ++it) {
-    const int message_frame = static_cast<int>(it->first - timestamp);
+    const int message_frame =
+        SamplesFromSeconds(sample_rate, it->first - timestamp);
     if (frame < message_frame) {
       if (definition_.process_fn) {
         definition_.process_fn(&state_, &output[num_channels * frame],
@@ -82,7 +86,7 @@ void InstrumentProcessor::Process(std::int64_t timestamp, float* output,
   }
 }
 
-void InstrumentProcessor::SetData(std::int64_t timestamp, InstrumentData data) {
+void InstrumentProcessor::SetData(double timestamp, InstrumentData data) {
   data_.emplace(timestamp, std::move(data));
 }
 

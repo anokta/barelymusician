@@ -41,7 +41,8 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 
 // Tests that processing a single note produces the expected output.
 TEST(InstrumentProcessorTest, ProcessSingleNote) {
-  const std::int64_t kTimestamp = 20;
+  const int kSampleRate = 48000;
+  const double kTimestamp = 2.0;
   const float kPitch = 32.0f;
   const float kIntensity = 0.5f;
 
@@ -49,7 +50,8 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(kSampleRate, kTimestamp, buffer.data(), kNumChannels,
+                    kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -60,7 +62,8 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   processor.SetData(kTimestamp, NoteOn{kPitch, kIntensity});
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(kSampleRate, kTimestamp, buffer.data(), kNumChannels,
+                    kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -72,7 +75,8 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   processor.SetData(kTimestamp, NoteOff{kPitch});
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(kSampleRate, kTimestamp, buffer.data(), kNumChannels,
+                    kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -88,7 +92,7 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(1, 0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -97,11 +101,12 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
-    processor.SetData(i, NoteOn{static_cast<float>(i), kIntensity});
+    processor.SetData(static_cast<double>(i),
+                      NoteOn{static_cast<float>(i), kIntensity});
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(1, 0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -111,11 +116,11 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    processor.SetData(0, NoteOff{static_cast<float>(i)});
+    processor.SetData(0.0, NoteOff{static_cast<float>(i)});
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0, buffer.data(), kNumChannels, kNumFrames);
+  processor.Process(1, 0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

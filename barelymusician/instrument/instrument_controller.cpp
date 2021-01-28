@@ -37,14 +37,28 @@ std::vector<float> InstrumentController::GetAllNotes() const {
   return std::vector<float>{notes_.begin(), notes_.end()};
 }
 
-std::vector<std::pair<int, float>> InstrumentController::GetAllParams() const {
-  std::vector<std::pair<int, float>> params;
+std::vector<Param> InstrumentController::GetAllParams() const {
+  std::vector<Param> params;
   params.reserve(params_.size());
   std::transform(params_.begin(), params_.end(), std::back_inserter(params),
                  [](const auto& param) {
-                   return std::pair(param.first, param.second.second);
+                   return Param{param.first, param.second.second};
                  });
   return params;
+}
+
+std::vector<std::pair<double, InstrumentData>>
+InstrumentController::GetAllScheduledData() const {
+  return std::vector<std::pair<double, InstrumentData>>{data_.begin(),
+                                                        data_.end()};
+}
+
+std::vector<std::pair<double, InstrumentData>>
+InstrumentController::GetAllScheduledData(double begin_position,
+                                          double end_position) const {
+  const auto begin = data_.lower_bound(begin_position);
+  const auto end = data_.lower_bound(end_position);
+  return std::vector<std::pair<double, InstrumentData>>{begin, end};
 }
 
 const float* InstrumentController::GetParam(int id) const {
@@ -58,6 +72,8 @@ bool InstrumentController::IsNoteOn(float pitch) const {
   return notes_.find(pitch) != notes_.end();
 }
 
+void InstrumentController::RemoveAllScheduledData() { data_.clear(); }
+
 void InstrumentController::ResetAllParams() {
   for (auto& [id, param] : params_) {
     param.second = Sanitize(param.first, param.first.default_value);
@@ -70,6 +86,12 @@ bool InstrumentController::ResetParam(int id) {
     return true;
   }
   return false;
+}
+
+void InstrumentController::ScheduleNote(double position, double duration,
+                                        float pitch, float intensity) {
+  data_.emplace(position, NoteOn{pitch, intensity});
+  data_.emplace(position + duration, NoteOff{pitch});
 }
 
 void InstrumentController::SetAllNotesOff() { notes_.clear(); }

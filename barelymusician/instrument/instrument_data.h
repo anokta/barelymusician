@@ -9,12 +9,18 @@ namespace barelyapi {
 struct CustomData {
   /// Custom data.
   void* data;
+
+  /// Default comparator.
+  bool operator==(const CustomData&) const = default;
 };
 
 /// Note off data.
 struct NoteOff {
   /// Note pitch.
   float pitch;
+
+  /// Default comparator.
+  bool operator==(const NoteOff&) const = default;
 };
 
 /// Note on data.
@@ -24,6 +30,9 @@ struct NoteOn {
 
   /// Note intensity.
   float intensity;
+
+  /// Default comparator.
+  bool operator==(const NoteOn&) const = default;
 };
 
 /// Parameter data.
@@ -33,6 +42,9 @@ struct Param {
 
   /// Parameter value.
   float value;
+
+  /// Default comparator.
+  bool operator==(const Param&) const = default;
 };
 
 /// Instrument data type.

@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_CONTROLLER_H_
 #define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_CONTROLLER_H_
 
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -26,7 +27,20 @@ class InstrumentController {
   /// Returns all parameters.
   ///
   /// @return List of all instrument parameters.
-  std::vector<std::pair<int, float>> GetAllParams() const;
+  std::vector<Param> GetAllParams() const;
+
+  /// Returns all scheduled data.
+  ///
+  /// @return List of instrument data.
+  std::vector<std::pair<double, InstrumentData>> GetAllScheduledData() const;
+
+  /// Returns all scheduled data in range.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  /// @return List of instrument data.
+  std::vector<std::pair<double, InstrumentData>> GetAllScheduledData(
+      double begin_position, double end_position) const;
 
   /// Returns parameter value.
   ///
@@ -40,6 +54,9 @@ class InstrumentController {
   /// @return True if active, false otherwise.
   bool IsNoteOn(float pitch) const;
 
+  /// Removes all scheduled data.
+  void RemoveAllScheduledData();
+
   /// Resets all parameters.
   void ResetAllParams();
 
@@ -48,6 +65,15 @@ class InstrumentController {
   /// @param id Parameter id.
   /// @return True if successful.
   bool ResetParam(int id);
+
+  /// Schedules note.
+  ///
+  /// @param position Note position.
+  /// @param duration Note duration.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  void ScheduleNote(double position, double duration, float pitch,
+                    float intensity);
 
   /// Sets all active notes off.
   void SetAllNotesOff();
@@ -72,6 +98,9 @@ class InstrumentController {
   bool SetParam(int id, float value);
 
  private:
+  // List of scheduled instrument data.
+  std::multimap<double, InstrumentData> data_;
+
   // List of active note pitches.
   std::unordered_set<float> notes_;
 

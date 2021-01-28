@@ -14,14 +14,13 @@ cc_library(
     hdrs = ["engine.h"],
     deps = [
         ":clock",
-        ":track",
-        "//barelymusician/common:common_utils",
-        "//barelymusician/common:status",
-        "//barelymusician/dsp:dsp_utils",
-        "//barelymusician/engine:note_utils",
+        "//barelymusician/instrument:instrument_controller",
         "//barelymusician/instrument:instrument_data",
         "//barelymusician/instrument:instrument_definition",
-        "//barelymusician/instrument:instrument_manager",
+        "//barelymusician/instrument:instrument_processor",
+        "//barelymusician/common:common_utils",
+        "//barelymusician/common:status",
+        "//barelymusician/common:task_runner",
     ],
 )
 

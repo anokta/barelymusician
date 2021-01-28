@@ -2,7 +2,6 @@
 #include <cctype>
 #include <chrono>
 #include <cmath>
-#include <cstdint>
 #include <memory>
 #include <thread>
 
@@ -28,7 +27,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
-constexpr std::int64_t kLookahead = 4 * kNumFrames;
+constexpr double kLookahead = 0.1;
 
 // Metronome settings.
 constexpr int kNumVoices = 1;
@@ -52,7 +51,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
   Engine engine;
-  engine.SetTempo(kInitialTempo);
+  engine.SetSampleRate(kSampleRate);
+  engine.SetPlaybackTempo(kInitialTempo);
 
   const auto metronome_id = engine.CreateInstrument(
       SynthInstrument::GetDefinition(kSampleRate),
@@ -65,21 +65,24 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), kRelease}});
 
   // Beat callback.
-  const auto beat_callback = [&](std::int64_t, int beat) {
+  const auto beat_callback = [&](double, int beat) {
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    engine.ScheduleNote(metronome_id, position, kTickDuration, pitch, kGain);
+    engine.ScheduleInstrumentNote(metronome_id, position, kTickDuration, pitch,
+                                  kGain);
   };
   engine.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::atomic<std::int64_t> timestamp = 0;
+  std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
-    engine.Process(metronome_id, timestamp, output, kNumChannels, kNumFrames);
-    timestamp += kNumFrames;
+    engine.ProcessInstrument(metronome_id, timestamp, output, kNumChannels,
+                             kNumFrames);
+    timestamp +=
+        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -92,14 +95,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetTempo();
+    double tempo = engine.GetPlaybackTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (engine.IsPlaying()) {
-          engine.Stop();
+          engine.StopPlayback();
           LOG(INFO) << "Stopped playback";
         } else {
-          engine.Start(timestamp + kLookahead);
+          engine.StartPlayback();
           LOG(INFO) << "Started playback";
         }
         return;
@@ -121,7 +124,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    engine.SetTempo(tempo);
+    engine.SetPlaybackTempo(tempo);
     LOG(INFO) << "Tempo set to " << tempo;
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -129,17 +132,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  engine.Start(timestamp + kLookahead);
+  engine.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(kSampleRate, timestamp + kLookahead);
+    engine.Update(timestamp + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  engine.Stop();
+  engine.StopPlayback();
   audio_output.Stop();
 
   return 0;

@@ -50,28 +50,5 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
   }
 }
 
-// Tests that converting values from/to samples and seconds returns expected
-// results.
-TEST(DspUtilsTest, SamplesSecondsConversion) {
-  const int kSampleRate = 8000;
-  const int kNumValues = 4;
-  const int kSamples[kNumValues] = {0, 800, 4000, 32000};
-  const double kSeconds[kNumValues] = {0.0, 0.1, 0.5, 4.0};
-
-  for (int i = 0; i < kNumValues; ++i) {
-    EXPECT_EQ(SamplesFromSeconds(kSampleRate, kSeconds[i]), kSamples[i]);
-    EXPECT_DOUBLE_EQ(SecondsFromSamples(kSampleRate, kSamples[i]), kSeconds[i]);
-
-    // Verify that the back and forth conversion do not mutate the value.
-    EXPECT_EQ(SamplesFromSeconds(kSampleRate,
-                                 SecondsFromSamples(kSampleRate, kSamples[i])),
-              kSamples[i]);
-    EXPECT_DOUBLE_EQ(
-        SecondsFromSamples(kSampleRate,
-                           SamplesFromSeconds(kSampleRate, kSeconds[i])),
-        kSeconds[i]);
-  }
-}
-
 }  // namespace
 }  // namespace barelyapi

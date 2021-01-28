@@ -3,9 +3,23 @@
 #include <utility>
 #include <variant>
 
-#include "barelymusician/dsp/dsp_utils.h"
-
 namespace barelyapi {
+
+namespace {
+
+// Returns number of samples for the given number of |seconds|.
+int SamplesFromSeconds(int sample_rate, double seconds) {
+  return static_cast<int>(seconds * static_cast<double>(sample_rate));
+}
+
+// Returns number of seconds for the given number of |samples|.
+double SecondsFromSamples(int sample_rate, int samples) {
+  return sample_rate > 0
+             ? static_cast<double>(samples) / static_cast<double>(sample_rate)
+             : 0.0;
+}
+
+}  // namespace
 
 InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition)
     : definition_(std::move(definition)), state_(nullptr) {

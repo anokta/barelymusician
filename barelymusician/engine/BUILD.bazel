@@ -40,16 +40,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "track",
-    srcs = ["track.cpp"],
-    hdrs = ["track.h"],
-    deps = [
-        "//barelymusician/common:id_generator",
-        "//barelymusician/instrument:instrument_data",
-    ],
-)
-
 cc_test(
     name = "clock_test",
     srcs = ["clock_test.cpp"],
@@ -64,15 +54,6 @@ cc_test(
     srcs = ["note_utils_test.cpp"],
     deps = [
         ":note_utils",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "track_test",
-    srcs = ["track_test.cpp"],
-    deps = [
-        ":track",
         "@googletest//:gtest_main",
     ],
 )

@@ -212,9 +212,8 @@ class Engine {
   void Update(double timestamp);
 
  private:
-  // Sets instrument processor |data| at |timestamp|.
-  void SetProcessorData(int instrument_id, double timestamp,
-                        InstrumentData data);
+  // Sets instrument processor |data|.
+  void SetProcessorData(int instrument_id, InstrumentData data);
 
   // Sampling rate in Hz.
   int sample_rate_;

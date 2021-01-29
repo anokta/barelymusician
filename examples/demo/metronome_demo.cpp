@@ -132,6 +132,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  engine.Update(timestamp + kLookahead);
   engine.StartPlayback();
 
   while (!quit) {

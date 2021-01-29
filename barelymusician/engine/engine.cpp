@@ -49,7 +49,7 @@ Status Engine::DestroyInstrument(int instrument_id) {
       it != controllers_.end()) {
     if (note_off_callback_) {
       for (const auto& note_pitch : it->second.GetAllNotes()) {
-        note_off_callback_(timestamp_, instrument_id, note_pitch);
+        note_off_callback_(instrument_id, timestamp_, note_pitch);
       }
     }
     controllers_.erase(it);
@@ -110,6 +110,12 @@ Status Engine::ProcessInstrument(int instrument_id, double timestamp,
     return Status::kOk;
   }
   return Status::kNotFound;
+}
+
+void Engine::RemoveAllScheduledInstrumentNotes() {
+  for (auto& [instrument_id, controller] : controllers_) {
+    controller.RemoveAllScheduledData();
+  }
 }
 
 Status Engine::RemoveAllScheduledInstrumentNotes(int instrument_id) {
@@ -180,7 +186,7 @@ void Engine::SetAllInstrumentNotesOff() {
     controller.SetAllNotesOff();
     if (note_off_callback_) {
       for (const auto& note_pitch : notes) {
-        note_off_callback_(timestamp_, instrument_id, note_pitch);
+        note_off_callback_(instrument_id, timestamp_, note_pitch);
       }
     }
     task_runner_.Add([this, instrument_id = instrument_id,
@@ -200,7 +206,7 @@ Status Engine::SetAllInstrumentNotesOff(int instrument_id) {
     controller->SetAllNotesOff();
     if (note_off_callback_) {
       for (const auto& note_pitch : notes) {
-        note_off_callback_(timestamp_, instrument_id, note_pitch);
+        note_off_callback_(instrument_id, timestamp_, note_pitch);
       }
     }
     task_runner_.Add([this, instrument_id, timestamp = timestamp_,
@@ -234,7 +240,7 @@ Status Engine::SetInstrumentNoteOff(int instrument_id, float note_pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOff(note_pitch)) {
       if (note_off_callback_) {
-        note_off_callback_(timestamp_, instrument_id, note_pitch);
+        note_off_callback_(instrument_id, timestamp_, note_pitch);
       }
       SetProcessorData(instrument_id, NoteOff{note_pitch});
       return Status::kOk;
@@ -249,7 +255,7 @@ Status Engine::SetInstrumentNoteOn(int instrument_id, float note_pitch,
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOn(note_pitch)) {
       if (note_on_callback_) {
-        note_on_callback_(timestamp_, instrument_id, note_pitch,
+        note_on_callback_(instrument_id, timestamp_, note_pitch,
                           note_intensity);
       }
       SetProcessorData(instrument_id, NoteOn{note_pitch, note_intensity});
@@ -329,14 +335,14 @@ void Engine::Update(double timestamp) {
                          [&](const NoteOff& note_off) {
                            if (controller.SetNoteOff(note_off.pitch) &&
                                note_off_callback_) {
-                             note_off_callback_(data_it.first, instrument_id,
+                             note_off_callback_(instrument_id, data_it.first,
                                                 note_off.pitch);
                            }
                          },
                          [&](const NoteOn& note_on) {
                            if (controller.SetNoteOn(note_on.pitch) &&
                                note_on_callback_) {
-                             note_on_callback_(data_it.first, instrument_id,
+                             note_on_callback_(instrument_id, data_it.first,
                                                note_on.pitch,
                                                note_on.intensity);
                            }

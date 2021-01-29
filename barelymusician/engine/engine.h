@@ -20,11 +20,11 @@ using BeatCallback = std::function<void(double timestamp, int beat)>;
 
 /// Instrument note off callback signature.
 using NoteOffCallback =
-    std::function<void(double timestamp, int instrument_id, float note_pitch)>;
+    std::function<void(int instrument_id, double timestamp, float note_pitch)>;
 
 /// Instrument note on callback signature.
 using NoteOnCallback =
-    std::function<void(double timestamp, int instrument_id, float note_pitch,
+    std::function<void(int instrument_id, double timestamp, float note_pitch,
                        float note_intensity)>;
 
 /// Instrument playback engine.
@@ -95,6 +95,11 @@ class Engine {
   /// @return Status.
   Status ProcessInstrument(int instrument_id, double timestamp, float* output,
                            int num_channels, int num_frames);
+
+  /// Removes all scheduled notes of all instruments.
+  ///
+  /// @param instrument_id Instrument id.
+  void RemoveAllScheduledInstrumentNotes();
 
   /// Removes all scheduled instrument notes.
   ///

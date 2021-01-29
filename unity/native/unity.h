@@ -180,7 +180,7 @@ BARELY_EXPORT void SetPosition(BarelyMusician* barelymusician, double position);
 BARELY_EXPORT void SetTempo(BarelyMusician* barelymusician, double tempo);
 
 /// Starts playback.
-BARELY_EXPORT void Start(BarelyMusician* barelymusician, double timestamp);
+BARELY_EXPORT void Start(BarelyMusician* barelymusician);
 
 /// Pauses playback.
 BARELY_EXPORT void Pause(BarelyMusician* barelymusician);

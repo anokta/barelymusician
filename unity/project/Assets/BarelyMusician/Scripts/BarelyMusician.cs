@@ -113,12 +113,13 @@ namespace BarelyApi {
 
     // Starts playback.
     public static void Play() {
-      StartNative(InstancePtr, AudioSettings.dspTime + _lookahead);
+      StartNative(InstancePtr);
     }
 
     // Starts playback at scheduled time.
     public static void PlayScheduled(double dspTime) {
-      StartNative(InstancePtr, dspTime);
+      _isStartScheduled = true;
+      _scheduledStartTime = System.Math.Max(AudioSettings.dspTime, dspTime);
     }
 
     // Pauses playback.
@@ -151,11 +152,14 @@ namespace BarelyApi {
     // Denotes whether the system is shutting down to avoid re-initialization.
     private static bool _isShuttingDown = false;
 
+    // Denotes whether the playback is scheduled to start.
+    private static bool _isStartScheduled = false;
+
+    // Scheduled playback start time.
+    private static double _scheduledStartTime = 0.0;
+
     // List of instruments.
     private static Dictionary<int, Instrument> _instruments = new Dictionary<int, Instrument>();
-
-    // Lookahead in seconds.
-    private static double _lookahead = 0.0;
 
     // Internal component to update the native state.
     private class BarelyMusicianInternal : MonoBehaviour {
@@ -226,7 +230,6 @@ namespace BarelyApi {
           }
         };
         SetNoteOnCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
-        _lookahead = config.dspBufferSize / config.sampleRate + (double)Time.fixedDeltaTime;
       }
 
       private void OnApplicationQuit() {
@@ -236,8 +239,15 @@ namespace BarelyApi {
         GameObject.DestroyImmediate(gameObject);
       }
 
-      private void FixedUpdate() {
-        UpdateNative(_instancePtr, AudioSettings.dspTime + _lookahead);
+      private void LateUpdate() {
+        double lookahead = 2.0 * (double)Time.unscaledDeltaTime;
+        double updateTime = AudioSettings.dspTime + lookahead;
+        if (_isStartScheduled && updateTime >= _scheduledStartTime) {
+          _isStartScheduled = false;
+          UpdateNative(_instancePtr, _scheduledStartTime);
+          StartNative(_instancePtr);
+        }
+        UpdateNative(_instancePtr, updateTime);
       }
     }
 
@@ -320,7 +330,7 @@ namespace BarelyApi {
     private static extern void SetTempoNative(IntPtr instancePtr, double tempo);
 
     [DllImport(pluginName, EntryPoint = "Start")]
-    private static extern void StartNative(IntPtr instancePtr, double timestamp);
+    private static extern void StartNative(IntPtr instancePtr);
 
     [DllImport(pluginName, EntryPoint = "Pause")]
     private static extern void PauseNative(IntPtr instancePtr);

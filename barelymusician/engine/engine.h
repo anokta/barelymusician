@@ -44,8 +44,8 @@ class Engine {
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status DestroyInstrument(int instrument_id);
+  /// @return True if successful, false otherwise.
+  bool DestroyInstrument(int instrument_id);
 
   /// Returns all active instrument notes.
   ///
@@ -83,6 +83,9 @@ class Engine {
   /// @return True if note is active, error status otherwise.
   StatusOr<bool> IsInstrumentNoteOn(int instrument_id, float note_pitch) const;
 
+  /// Returns whether the playback is started or not.
+  ///
+  /// @return True if currently playing, false otherwise.
   bool IsPlaying() const;
 
   /// Processes the next instrument output buffer at timestamp.
@@ -92,9 +95,9 @@ class Engine {
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  /// @return Status.
-  Status ProcessInstrument(int instrument_id, double timestamp, float* output,
-                           int num_channels, int num_frames);
+  /// @return True if successful, false otherwise.
+  bool ProcessInstrument(int instrument_id, double timestamp, float* output,
+                         int num_channels, int num_frames);
 
   /// Removes all scheduled notes of all instruments.
   ///
@@ -104,8 +107,8 @@ class Engine {
   /// Removes all scheduled instrument notes.
   ///
   /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status RemoveAllScheduledInstrumentNotes(int instrument_id);
+  /// @return True if successful, false otherwise.
+  bool RemoveAllScheduledInstrumentNotes(int instrument_id);
 
   /// Resets all parameters of all instruments to their default values.
   void ResetAllInstrumentParams();
@@ -113,15 +116,15 @@ class Engine {
   /// Resets all instrument parameters to their default values.
   ///
   /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status ResetAllInstrumentParams(int instrument_id);
+  /// @return True if successful, false otherwise.
+  bool ResetAllInstrumentParams(int instrument_id);
 
   /// Resets instrument parameter to its default value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
-  /// @return Status.
-  Status ResetInstrumentParam(int instrument_id, int param_id);
+  /// @return True if successful, false otherwise.
+  bool ResetInstrumentParam(int instrument_id, int param_id);
 
   /// Schedules instrument note.
   ///
@@ -130,10 +133,10 @@ class Engine {
   /// @param note_duration Note duration in beats.
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
-  /// @return Status.
-  Status ScheduleInstrumentNote(int instrument_id, double note_position,
-                                double note_duration, float note_pitch,
-                                float note_intensity);
+  /// @return True if successful, false otherwise.
+  bool ScheduleInstrumentNote(int instrument_id, double note_position,
+                              double note_duration, float note_pitch,
+                              float note_intensity);
 
   /// Sets all active notes of all instruments off.
   void SetAllInstrumentNotesOff();
@@ -141,8 +144,8 @@ class Engine {
   /// Sets all active instrument notes off.
   ///
   /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status SetAllInstrumentNotesOff(int instrument_id);
+  /// @return True if successful, false otherwise.
+  bool SetAllInstrumentNotesOff(int instrument_id);
 
   /// Sets beat callback.
   ///
@@ -153,32 +156,32 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @param custom_data Custom data.
-  /// @return Status.
-  Status SetCustomInstrumentData(int instrument_id, void* custom_data);
+  /// @return True if successful, false otherwise.
+  bool SetCustomInstrumentData(int instrument_id, void* custom_data);
 
   /// Sets instrument note off.
   ///
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
-  /// @return Status.
-  Status SetInstrumentNoteOff(int instrument_id, float note_pitch);
+  /// @return True if successful, false otherwise.
+  bool SetInstrumentNoteOff(int instrument_id, float note_pitch);
 
   /// Sets instrument note on.
   ///
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
-  /// @return Status.
-  Status SetInstrumentNoteOn(int instrument_id, float note_pitch,
-                             float note_intensity);
+  /// @return True if successful, false otherwise.
+  bool SetInstrumentNoteOn(int instrument_id, float note_pitch,
+                           float note_intensity);
 
   /// Sets instrument parameter value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
   /// @param param_value Parameter value.
-  /// @return Status.
-  Status SetInstrumentParam(int instrument_id, int param_id, float param_value);
+  /// @return True if successful, false otherwise.
+  bool SetInstrumentParam(int instrument_id, int param_id, float param_value);
 
   /// Sets note off callback.
   ///

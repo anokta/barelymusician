@@ -240,7 +240,7 @@ namespace BarelyApi {
       }
 
       private void LateUpdate() {
-        double lookahead = 2.0 * (double)Time.unscaledDeltaTime;
+        double lookahead = 2.0 * (double)Time.smoothDeltaTime;
         double updateTime = AudioSettings.dspTime + lookahead;
         if (_isStartScheduled && updateTime >= _scheduledStartTime) {
           _isStartScheduled = false;

@@ -14,7 +14,8 @@ class InstrumentProcessor {
   /// Constructs new |InstrumentProcessor|.
   ///
   /// @param definition Instrument definition.
-  explicit InstrumentProcessor(InstrumentDefinition definition);
+  /// @param sample_rate Sampling rate in Hz.
+  InstrumentProcessor(InstrumentDefinition definition, int sample_rate);
 
   /// Destroys |InstrumentProcessor|.
   ~InstrumentProcessor();
@@ -29,13 +30,17 @@ class InstrumentProcessor {
 
   /// Processes the next output buffer at a given timestamp.
   ///
-  /// @param sample_rate Sampling rate in Hz.
   /// @param timestamp Timestamp in seconds.
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  void Process(int sample_rate, double timestamp, float* output,
-               int num_channels, int num_frames);
+  void Process(double timestamp, float* output, int num_channels,
+               int num_frames);
+
+  /// Resets instrument.
+  ///
+  /// @param sample_rate System sampling rate in Hz.
+  void Reset(int sample_rate);
 
   /// Sets instrument data at a given timestamp.
   ///
@@ -44,6 +49,9 @@ class InstrumentProcessor {
   void SetData(double timestamp, InstrumentData data);
 
  private:
+  // Sampling rate in Hz.
+  int sample_rate_;
+
   // Instrument definition.
   InstrumentDefinition definition_;
 

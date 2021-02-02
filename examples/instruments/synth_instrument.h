@@ -37,7 +37,7 @@ class SynthInstrument : public Instrument {
   void SetParam(int id, float value) override;
 
   /// Returns instrument definition.
-  static InstrumentDefinition GetDefinition(int sample_rate);
+  static InstrumentDefinition GetDefinition();
   static std::vector<InstrumentParamDefinition> GetDefaultParams();
 
  private:

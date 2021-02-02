@@ -10,7 +10,7 @@ namespace barelyapi {
 namespace {
 
 // Maximum number of tasks to be executed per each |Process| call.
-constexpr int kNumMaxTasks = 5000;
+constexpr int kNumMaxTasks = 8000;
 
 // Returns number of seconds for the given number of |beats| and |tempo|.
 double SecondsFromBeats(double tempo, double beats) {
@@ -20,7 +20,8 @@ double SecondsFromBeats(double tempo, double beats) {
 }  // namespace
 
 Engine::Engine()
-    : is_playing_(false),
+    : sample_rate_(0),
+      is_playing_(false),
       timestamp_(0.0),
       id_counter_(0),
       task_runner_(kNumMaxTasks),
@@ -34,7 +35,7 @@ int Engine::CreateInstrument(InstrumentDefinition definition,
   InstrumentController controller(param_definitions);
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
                     params = controller.GetAllParams()]() {
-    InstrumentProcessor processor(std::move(definition));
+    InstrumentProcessor processor(std::move(definition), sample_rate_);
     for (auto& param : params) {
       processor.SetData(timestamp_, std::move(param));
     }
@@ -99,8 +100,7 @@ bool Engine::ProcessInstrument(int instrument_id, double timestamp,
                                int num_frames) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
-    processor->Process(sample_rate_, timestamp, output, num_channels,
-                       num_frames);
+    processor->Process(timestamp, output, num_channels, num_frames);
     return true;
   }
   return false;
@@ -283,7 +283,12 @@ void Engine::SetPlaybackTempo(double tempo) { clock_.SetTempo(tempo); }
 
 void Engine::SetSampleRate(int sample_rate) {
   SetAllInstrumentNotesOff();
-  task_runner_.Add([this, sample_rate]() { sample_rate_ = sample_rate; });
+  task_runner_.Add([this, sample_rate]() {
+    sample_rate_ = sample_rate;
+    for (auto& [instrument_id, processor] : processors_) {
+      processor.Reset(sample_rate);
+    }
+  });
 }
 
 void Engine::StartPlayback() { is_playing_ = true; }

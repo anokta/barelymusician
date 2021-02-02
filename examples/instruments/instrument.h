@@ -45,7 +45,7 @@ class Instrument {
 
 /// Returns instrument definition for the given create instrument function.
 InstrumentDefinition GetInstrumentDefinition(
-    std::function<std::unique_ptr<Instrument>()> create_instrument_fn);
+    std::function<std::unique_ptr<Instrument>(int)> create_instrument_fn);
 
 }  // namespace barelyapi::examples
 

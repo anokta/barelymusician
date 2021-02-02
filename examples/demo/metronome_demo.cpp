@@ -55,7 +55,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetPlaybackTempo(kInitialTempo);
 
   const auto metronome_id = engine.CreateInstrument(
-      SynthInstrument::GetDefinition(kSampleRate),
+      SynthInstrument::GetDefinition(),
       {{static_cast<int>(SynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
        {static_cast<int>(SynthInstrumentParam::kGain), kGain},

@@ -11,7 +11,8 @@ namespace barelyapi {
 using InstrumentState = void*;
 
 /// Instrument create function signature.
-using CreateInstrumentFn = std::function<void(InstrumentState* state)>;
+using CreateInstrumentFn =
+    std::function<void(InstrumentState* state, int sample_rate)>;
 
 /// Instrument destroy function signature.
 using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;

@@ -59,8 +59,8 @@ void SynthInstrument::SetParam(int id, float value) {
   }
 }
 
-InstrumentDefinition SynthInstrument::GetDefinition(int sample_rate) {
-  return GetInstrumentDefinition([sample_rate]() {
+InstrumentDefinition SynthInstrument::GetDefinition() {
+  return GetInstrumentDefinition([](int sample_rate) {
     return std::make_unique<SynthInstrument>(sample_rate);
   });
 }

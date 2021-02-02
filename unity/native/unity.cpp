@@ -22,12 +22,7 @@ inline constexpr int kInvalidId = -1;
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) : sample_rate(sample_rate) {
-    engine.SetSampleRate(sample_rate);
-  }
-
-  // Sampling rate.
-  int sample_rate;
+  BarelyMusician(int sample_rate) { engine.SetSampleRate(sample_rate); }
 
   // Engine.
   Engine engine;
@@ -80,7 +75,7 @@ int CreateUnityInstrument(BarelyMusician* barelymusician,
 int CreateSynthInstrument(BarelyMusician* barelymusician) {
   if (barelymusician) {
     return barelymusician->engine.CreateInstrument(
-        examples::SynthInstrument::GetDefinition(barelymusician->sample_rate),
+        examples::SynthInstrument::GetDefinition(),
         examples::SynthInstrument::GetDefaultParams());
   }
   return kInvalidId;

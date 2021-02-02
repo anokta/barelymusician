@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <cstdint>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -34,7 +33,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 512;
 
-constexpr std::int64_t kLookahead = 4 * kNumFrames;
+constexpr double kLookahead = 0.1;
 
 // Sequencer settings.
 constexpr double kTempo = 132.0;
@@ -96,13 +95,13 @@ int main(int /*argc*/, char* argv[]) {
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
   Engine engine;
-  engine.SetTempo(kTempo);
-  engine.SetNoteOnCallback(
-      [](int id, std::int64_t, float pitch, float intensity) {
-        LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
-                  << intensity << ")";
-      });
-  engine.SetNoteOffCallback([](int id, std::int64_t, float pitch) {
+  engine.SetSampleRate(kSampleRate);
+  engine.SetPlaybackTempo(kTempo);
+  engine.SetNoteOnCallback([](int id, double, float pitch, float intensity) {
+    LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
+              << intensity << ")";
+  });
+  engine.SetNoteOffCallback([](int id, double, float pitch) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
   });
 
@@ -116,7 +115,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Create instrument.
     const auto instrument_id = engine.CreateInstrument(
-        SynthInstrument::GetDefinition(kSampleRate),
+        SynthInstrument::GetDefinition(),
         {{SynthInstrumentParam::kNumVoices,
           static_cast<float>(kNumInstrumentVoices)},
          {SynthInstrumentParam::kOscillatorType,
@@ -125,8 +124,8 @@ int main(int /*argc*/, char* argv[]) {
          {SynthInstrumentParam::kEnvelopeRelease, kInstrumentEnvelopeRelease},
          {SynthInstrumentParam::kGain, kInstrumentGain}});
     for (const Note& note : score) {
-      engine.ScheduleNote(instrument_id, note.position, note.duration,
-                          note.pitch, note.intensity);
+      engine.ScheduleInstrumentNote(instrument_id, note.position, note.duration,
+                                    note.pitch, note.intensity);
     }
     instrument_ids.push_back(instrument_id);
   }
@@ -134,16 +133,17 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<std::int64_t> timestamp = 0;
+  std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& id : instrument_ids) {
-      engine.Process(id, timestamp, temp_buffer.data(), kNumChannels,
-                     kNumFrames);
+      engine.ProcessInstrument(id, timestamp, temp_buffer.data(), kNumChannels,
+                               kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp += kNumFrames;
+    timestamp +=
+        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -161,17 +161,18 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  engine.Start(timestamp + kLookahead);
+  engine.Update(timestamp + kLookahead);
+  engine.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(kSampleRate, timestamp + kLookahead);
+    engine.Update(timestamp + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  engine.Stop();
+  engine.StopPlayback();
   audio_output.Stop();
 
   return 0;

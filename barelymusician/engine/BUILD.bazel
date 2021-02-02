@@ -19,7 +19,6 @@ cc_library(
         "//barelymusician/instrument:instrument_definition",
         "//barelymusician/instrument:instrument_processor",
         "//barelymusician/common:common_utils",
-        "//barelymusician/common:status",
         "//barelymusician/common:task_runner",
     ],
 )

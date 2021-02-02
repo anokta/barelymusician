@@ -60,42 +60,36 @@ bool Engine::DestroyInstrument(int instrument_id) {
   return false;
 }
 
-StatusOr<std::vector<float>> Engine::GetAllInstrumentNotes(
-    int instrument_id) const {
+std::vector<float> Engine::GetAllInstrumentNotes(int instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllNotes();
   }
-  return Status::kNotFound;
+  return {};
 }
 
-StatusOr<std::vector<Param>> Engine::GetAllInstrumentParams(
-    int instrument_id) const {
+std::vector<Param> Engine::GetAllInstrumentParams(int instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllParams();
   }
-  return Status::kNotFound;
+  return {};
 }
 
-StatusOr<float> Engine::GetInstrumentParam(int instrument_id,
-                                           int param_id) const {
+const float* Engine::GetInstrumentParam(int instrument_id, int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (const float* value = controller->GetParam(param_id)) {
-      return *value;
-    }
+    return controller->GetParam(param_id);
   }
-  return Status::kNotFound;
+  return nullptr;
 }
 
 double Engine::GetPlaybackPosition() const { return clock_.GetPosition(); }
 
 double Engine::GetPlaybackTempo() const { return clock_.GetTempo(); }
 
-StatusOr<bool> Engine::IsInstrumentNoteOn(int instrument_id,
-                                          float note_pitch) const {
+bool Engine::IsInstrumentNoteOn(int instrument_id, float note_pitch) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->IsNoteOn(note_pitch);
   }
-  return Status::kNotFound;
+  return false;
 }
 
 bool Engine::IsPlaying() const { return is_playing_; }

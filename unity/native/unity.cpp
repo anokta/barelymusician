@@ -94,10 +94,9 @@ void Destroy(BarelyMusician* barelymusician, int id) {
 
 float GetParam(BarelyMusician* barelymusician, int id, int param_id) {
   if (barelymusician) {
-    const auto param_or =
-        barelymusician->engine.GetInstrumentParam(id, param_id);
-    if (IsOk(param_or)) {
-      return GetValue(param_or);
+    if (const float* param =
+            barelymusician->engine.GetInstrumentParam(id, param_id)) {
+      return *param;
     }
   }
   return 0.0f;
@@ -119,11 +118,7 @@ double GetTempo(BarelyMusician* barelymusician) {
 
 bool IsNoteOn(BarelyMusician* barelymusician, int id, float pitch) {
   if (barelymusician) {
-    const auto is_note_on_or =
-        barelymusician->engine.IsInstrumentNoteOn(id, pitch);
-    if (IsOk(is_note_on_or)) {
-      return GetValue(is_note_on_or);
-    }
+    return barelymusician->engine.IsInstrumentNoteOn(id, pitch);
   }
   return false;
 }

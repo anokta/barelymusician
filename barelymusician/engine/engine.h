@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/common/status.h"
 #include "barelymusician/common/task_runner.h"
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/instrument/instrument_controller.h"
@@ -50,21 +49,21 @@ class Engine {
   /// Returns all active instrument notes.
   ///
   /// @param instrument_id Instrument id.
-  /// @return List of active note pitches if successful, error status otherwise.
-  StatusOr<std::vector<float>> GetAllInstrumentNotes(int instrument_id) const;
+  /// @return List of active note pitches.
+  std::vector<float> GetAllInstrumentNotes(int instrument_id) const;
 
   /// Returns all instrument parameters.
   ///
   /// @param instrument_id Instrument id.
-  /// @return List of parameters if successful, error status otherwise.
-  StatusOr<std::vector<Param>> GetAllInstrumentParams(int instrument_id) const;
+  /// @return List of parameters.
+  std::vector<Param> GetAllInstrumentParams(int instrument_id) const;
 
   /// Returns instrument parameter value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
-  /// @return Parameter value if successful, error status otherwise.
-  StatusOr<float> GetInstrumentParam(int instrument_id, int param_id) const;
+  /// @return Parameter value if successful, nullptr otherwise.
+  const float* GetInstrumentParam(int instrument_id, int param_id) const;
 
   /// Returns the playback position.
   ///
@@ -80,8 +79,8 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
-  /// @return True if note is active, error status otherwise.
-  StatusOr<bool> IsInstrumentNoteOn(int instrument_id, float note_pitch) const;
+  /// @return True if note is active, false otherwise.
+  bool IsInstrumentNoteOn(int instrument_id, float note_pitch) const;
 
   /// Returns whether the playback is started or not.
   ///

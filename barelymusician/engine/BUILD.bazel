@@ -79,6 +79,16 @@ cc_test(
 )
 
 cc_test(
+    name = "engine_test",
+    srcs = ["engine_test.cpp"],
+    deps = [
+        ":engine",
+        ":instrument_data",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "instrument_controller_test",
     srcs = ["instrument_controller_test.cpp"],
     deps = [

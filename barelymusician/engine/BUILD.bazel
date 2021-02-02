@@ -14,12 +14,43 @@ cc_library(
     hdrs = ["engine.h"],
     deps = [
         ":clock",
-        "//barelymusician/instrument:instrument_controller",
-        "//barelymusician/instrument:instrument_data",
-        "//barelymusician/instrument:instrument_definition",
-        "//barelymusician/instrument:instrument_processor",
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_processor",
         "//barelymusician/common:common_utils",
         "//barelymusician/common:task_runner",
+    ],
+)
+
+cc_library(
+    name = "instrument_controller",
+    srcs = ["instrument_controller.cpp"],
+    hdrs = ["instrument_controller.h"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
+        "//barelymusician/common:common_utils",
+    ],
+)
+
+cc_library(
+    name = "instrument_data",
+    hdrs = ["instrument_data.h"],
+)
+
+cc_library(
+    name = "instrument_definition",
+    hdrs = ["instrument_definition.h"],
+)
+
+cc_library(
+    name = "instrument_processor",
+    srcs = ["instrument_processor.cpp"],
+    hdrs = ["instrument_processor.h"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
     ],
 )
 
@@ -43,6 +74,28 @@ cc_test(
     srcs = ["clock_test.cpp"],
     deps = [
         ":clock",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_controller_test",
+    srcs = ["instrument_controller_test.cpp"],
+    deps = [
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_processor_test",
+    srcs = ["instrument_processor_test.cpp"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_processor",
         "@googletest//:gtest_main",
     ],
 )

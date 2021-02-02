@@ -1,4 +1,4 @@
-#include "barelymusician/instrument/instrument_controller.h"
+#include "barelymusician/engine/instrument_controller.h"
 
 #include <algorithm>
 #include <iterator>

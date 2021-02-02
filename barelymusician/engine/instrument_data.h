@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
-#define BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_
 
 #include <variant>
 
@@ -60,4 +60,4 @@ InstrumentDataVisitor(DataTypes...) -> InstrumentDataVisitor<DataTypes...>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_

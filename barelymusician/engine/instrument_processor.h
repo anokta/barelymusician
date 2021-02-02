@@ -1,10 +1,10 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_
-#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 
 #include <map>
 
-#include "barelymusician/instrument/instrument_data.h"
-#include "barelymusician/instrument/instrument_definition.h"
+#include "barelymusician/engine/instrument_data.h"
+#include "barelymusician/engine/instrument_definition.h"
 
 namespace barelyapi {
 
@@ -64,4 +64,4 @@ class InstrumentProcessor {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_PROCESSOR_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_

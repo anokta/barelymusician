@@ -1,4 +1,4 @@
-#include "barelymusician/instrument/instrument_manager.h"
+#include "barelymusician/engine/engine.h"
 
 #include <algorithm>
 #include <cstdint>

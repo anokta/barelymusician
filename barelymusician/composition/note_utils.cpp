@@ -1,4 +1,4 @@
-#include "barelymusician/engine/note_utils.h"
+#include "barelymusician/composition/note_utils.h"
 
 #include <cmath>
 

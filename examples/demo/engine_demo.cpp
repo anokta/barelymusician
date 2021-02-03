@@ -11,10 +11,10 @@
 
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
+#include "barelymusician/composition/note.h"
+#include "barelymusician/composition/note_utils.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/engine/note.h"
-#include "barelymusician/engine/note_utils.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"

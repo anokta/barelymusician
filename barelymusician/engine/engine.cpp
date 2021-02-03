@@ -19,15 +19,16 @@ double SecondsFromBeats(double tempo, double beats) {
 
 }  // namespace
 
-Engine::Engine()
-    : sample_rate_(0),
-      is_playing_(false),
+Engine::Engine(int sample_rate)
+    : is_playing_(false),
       timestamp_(0.0),
       id_counter_(0),
       task_runner_(kNumMaxTasks),
       beat_callback_(nullptr),
       note_off_callback_(nullptr),
-      note_on_callback_(nullptr) {}
+      note_on_callback_(nullptr) {
+  task_runner_.Add([this, sample_rate]() { sample_rate_ = sample_rate; });
+}
 
 int Engine::CreateInstrument(InstrumentDefinition definition,
                              InstrumentParamDefinitions param_definitions) {

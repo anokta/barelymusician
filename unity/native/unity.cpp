@@ -22,7 +22,7 @@ inline constexpr int kInvalidId = -1;
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) { engine.SetSampleRate(sample_rate); }
+  BarelyMusician(int sample_rate) : engine(sample_rate) {}
 
   // Engine.
   Engine engine;

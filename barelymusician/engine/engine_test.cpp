@@ -56,8 +56,7 @@ TEST(EngineTest, CreateDestroy) {
   const float kNotePitch = 1.25f;
   const float kNoteIntensity = 0.75f;
 
-  Engine engine;
-  engine.SetSampleRate(kSampleRate);
+  Engine engine(kSampleRate);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
@@ -111,11 +110,11 @@ TEST(EngineTest, CreateDestroy) {
 TEST(EngineTest, ScheduleInstrumentNotes) {
   const float kNoteIntensity = 1.0f;
 
-  Engine engine;
-  engine.SetSampleRate(1);
+  Engine engine(1);
+  std::vector<float> buffer(kNumChannels * kNumFrames);
+
   engine.SetPlaybackTempo(60.0);
   engine.StartPlayback();
-  std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
   const int instrument_id = engine.CreateInstrument(
@@ -169,10 +168,10 @@ TEST(EngineTest, SetInstrumentNote) {
   const float kNotePitch = 32.0f;
   const float kNoteIntensity = 0.5f;
 
-  Engine engine;
-  engine.SetSampleRate(kSampleRate);
-  engine.Update(kTimestamp);
+  Engine engine(kSampleRate);
   std::vector<float> buffer(kNumChannels * kNumFrames);
+
+  engine.Update(kTimestamp);
 
   // Create instrument.
   const int instrument_id = engine.CreateInstrument(
@@ -221,8 +220,7 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   const float kNotePitch = 4.0f;
   const float kNoteIntensity = 0.25f;
 
-  Engine engine;
-  engine.SetSampleRate(1);
+  Engine engine(1);
   engine.Update(1.0);
 
   // Create instrument.
@@ -317,8 +315,7 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
 TEST(EngineTest, ResetAllParams) {
   const int kNumInstruments = 2;
 
-  Engine engine;
-  engine.SetSampleRate(kSampleRate);
+  Engine engine(kSampleRate);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
@@ -377,8 +374,7 @@ TEST(EngineTest, SetAllInstrumentNotesOff) {
   const int kNumInstruments = 3;
   const float kNoteIntensity = 0.1f;
 
-  Engine engine;
-  engine.SetSampleRate(kSampleRate);
+  Engine engine(kSampleRate);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.

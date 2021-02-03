@@ -17,11 +17,11 @@ namespace barelyapi {
 /// Beat callback signature.
 using BeatCallback = std::function<void(double timestamp, int beat)>;
 
-/// Instrument note off callback signature.
+/// Note off callback signature.
 using NoteOffCallback =
     std::function<void(int instrument_id, double timestamp, float note_pitch)>;
 
-/// Instrument note on callback signature.
+/// Note on callback signature.
 using NoteOnCallback =
     std::function<void(int instrument_id, double timestamp, float note_pitch,
                        float note_intensity)>;
@@ -30,7 +30,9 @@ using NoteOnCallback =
 class Engine {
  public:
   /// Constructs new |Engine|.
-  Engine();
+  ///
+  /// @param sample_rate Sampling rate in Hz.
+  explicit Engine(int sample_rate);
 
   /// Creates new instrument.
   ///
@@ -62,7 +64,7 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
-  /// @return Parameter value if successful, nullptr otherwise.
+  /// @return Pointer to parameter value if successful, nullptr otherwise.
   const float* GetInstrumentParam(int instrument_id, int param_id) const;
 
   /// Returns the playback position.
@@ -82,9 +84,9 @@ class Engine {
   /// @return True if note is active, false otherwise.
   bool IsInstrumentNoteOn(int instrument_id, float note_pitch) const;
 
-  /// Returns whether the playback is started or not.
+  /// Returns whether the playback is currently active or not.
   ///
-  /// @return True if currently playing, false otherwise.
+  /// @return True if playing, false otherwise.
   bool IsPlaying() const;
 
   /// Processes the next instrument output buffer at timestamp.
@@ -99,8 +101,6 @@ class Engine {
                          int num_channels, int num_frames);
 
   /// Removes all scheduled notes of all instruments.
-  ///
-  /// @param instrument_id Instrument id.
   void RemoveAllScheduledInstrumentNotes();
 
   /// Removes all scheduled instrument notes.
@@ -146,12 +146,12 @@ class Engine {
   /// @return True if successful, false otherwise.
   bool SetAllInstrumentNotesOff(int instrument_id);
 
-  /// Sets beat callback.
+  /// Sets the beat callback.
   ///
-  /// @param beat_callback Beat callback.
+  /// @param beat_callback Playback beat callback.
   void SetBeatCallback(BeatCallback beat_callback);
 
-  /// Sets instrument custom data.
+  /// Sets custom instrument data.
   ///
   /// @param instrument_id Instrument id.
   /// @param custom_data Custom data.
@@ -182,12 +182,12 @@ class Engine {
   /// @return True if successful, false otherwise.
   bool SetInstrumentParam(int instrument_id, int param_id, float param_value);
 
-  /// Sets note off callback.
+  /// Sets the note off callback.
   ///
   /// @param note_off_callback Instrument note off callback.
   void SetNoteOffCallback(NoteOffCallback note_off_callback);
 
-  /// Sets note on callback.
+  /// Sets the note on callback.
   ///
   /// @param note_on_callback Instrument note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback);
@@ -202,7 +202,7 @@ class Engine {
   /// @param tempo Tempo in BPM.
   void SetPlaybackTempo(double tempo);
 
-  /// Sets sampling rate.
+  /// Sets the sampling rate.
   ///
   /// @param sample_rate Sampling rate in Hz.
   void SetSampleRate(int sample_rate);
@@ -213,13 +213,13 @@ class Engine {
   // Stops the playback.
   void StopPlayback();
 
-  /// Updates internal state at timestamp.
+  /// Updates the internal state at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp);
 
  private:
-  // Sets instrument processor |data|.
+  // Sets processor |data| of instrument with the given |instrument_id|.
   void SetProcessorData(int instrument_id, InstrumentData data);
 
   // Sampling rate in Hz.

@@ -50,8 +50,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine;
-  engine.SetSampleRate(kSampleRate);
+  Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kInitialTempo);
 
   const auto metronome_id = engine.CreateInstrument(

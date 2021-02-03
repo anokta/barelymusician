@@ -94,8 +94,7 @@ int main(int /*argc*/, char* argv[]) {
   LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  Engine engine;
-  engine.SetSampleRate(kSampleRate);
+  Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
   engine.SetNoteOnCallback([](int id, double, float pitch, float intensity) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "

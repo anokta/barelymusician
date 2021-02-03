@@ -172,8 +172,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine;
-  engine.SetSampleRate(kSampleRate);
+  Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};

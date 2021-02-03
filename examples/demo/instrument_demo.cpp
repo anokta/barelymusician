@@ -5,8 +5,8 @@
 #include <thread>
 
 #include "barelymusician/common/logging.h"
-#include "barelymusician/common/task_runner.h"
 #include "barelymusician/composition/note_utils.h"
+#include "barelymusician/engine/task_runner.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"

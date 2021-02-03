@@ -5,12 +5,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/common/task_runner.h"
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_processor.h"
+#include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
 

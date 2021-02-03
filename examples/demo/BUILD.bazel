@@ -25,8 +25,8 @@ cc_binary(
     srcs = ["instrument_demo.cpp"],
     deps = [
         "//barelymusician/common:logging",
-        "//barelymusician/common:task_runner",
         "//barelymusician/composition:note_utils",
+        "//barelymusician/engine:task_runner",
         "//examples/common:audio_output",
         "//examples/common:input_manager",
         "//examples/instruments:synth_instrument",

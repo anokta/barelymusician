@@ -8,9 +8,9 @@
 
 #include "MidiFile.h"
 #include "barelymusician/common/logging.h"
+#include "barelymusician/composition/note.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/composition/note.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"

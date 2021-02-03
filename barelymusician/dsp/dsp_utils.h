@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
-#include <cstdint>
-
 namespace barelyapi {
 
 /// PI.
@@ -30,20 +28,6 @@ float DecibelsFromAmplitude(float amplitude);
 /// @param cuttoff_frequency Cutoff frequency in Hz.
 /// @return Filter coefficient.
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency);
-
-/// Returns the corresponding number of samples for the given number of seconds.
-///
-/// @param sample_rate Sampling rate in Hz.
-/// @param seconds Number of seconds.
-/// @return Number of samples.
-std::int64_t SamplesFromSeconds(int sample_rate, double seconds);
-
-/// Returns the corresponding number of seconds for the given number of samples.
-///
-/// @param sample_rate Sampling rate in Hz.
-/// @param samples Number of samples.
-/// @return Number of seconds.
-double SecondsFromSamples(int sample_rate, std::int64_t samples);
 
 }  // namespace barelyapi
 

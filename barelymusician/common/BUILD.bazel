@@ -8,12 +8,6 @@ cc_library(
 )
 
 cc_library(
-    name = "id_generator",
-    srcs = ["id_generator.cpp"],
-    hdrs = ["id_generator.h"],
-)
-
-cc_library(
     name = "logging",
     srcs = ["logging.cpp"],
     hdrs = ["logging.h"],
@@ -31,13 +25,6 @@ cc_library(
     deps = [":logging"],
 )
 
-cc_library(
-    name = "task_runner",
-    srcs = ["task_runner.cpp"],
-    hdrs = ["task_runner.h"],
-    deps = [":logging"],
-)
-
 cc_test(
     name = "common_utils_test",
     srcs = ["common_utils_test.cpp"],
@@ -48,28 +35,10 @@ cc_test(
 )
 
 cc_test(
-    name = "id_generator_test",
-    srcs = ["id_generator_test.cpp"],
-    deps = [
-        ":id_generator",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "random_test",
     srcs = ["random_test.cpp"],
     deps = [
         ":random",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "task_runner_test",
-    srcs = ["task_runner_test.cpp"],
-    deps = [
-        ":task_runner",
         "@googletest//:gtest_main",
     ],
 )

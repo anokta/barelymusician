@@ -2,7 +2,6 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
-#include <cstdint>
 #include <memory>
 #include <thread>
 #include <unordered_map>
@@ -12,10 +11,10 @@
 
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
+#include "barelymusician/composition/note.h"
+#include "barelymusician/composition/note_utils.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/engine/note.h"
-#include "barelymusician/engine/note_utils.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"
@@ -47,7 +46,7 @@ constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
-constexpr std::int64_t kLookahead = 4 * kNumFrames;
+constexpr double kLookahead = 0.1;
 
 // Sequencer settings.
 constexpr double kTempo = 124.0;
@@ -63,7 +62,7 @@ constexpr char kDrumsBaseFilename[] =
 int BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
                          float attack, float release) {
   return engine->CreateInstrument(
-      SynthInstrument::GetDefinition(kSampleRate),
+      SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices,
         static_cast<float>(kNumInstrumentVoices)},
        {SynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
@@ -173,8 +172,8 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine;
-  engine.SetTempo(kTempo);
+  Engine engine(kSampleRate);
+  engine.SetPlaybackTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
   const std::vector<float> scale(std::cbegin(barelyapi::kMajorScale),
@@ -189,7 +188,7 @@ int main(int /*argc*/, char* argv[]) {
   // Beat callback.
   int harmonic = 0;
   std::vector<Note> temp_notes;
-  const auto beat_callback = [&](std::int64_t, int beat) {
+  const auto beat_callback = [&](double, int beat) {
     // Update transport.
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
@@ -207,15 +206,15 @@ int main(int /*argc*/, char* argv[]) {
       }
       for (const Note& note : temp_notes) {
         const double position = static_cast<double>(beat) + note.position;
-        engine.ScheduleNote(id, position, note.duration, note.pitch,
-                            note.intensity);
+        engine.ScheduleInstrumentNote(id, position, note.duration, note.pitch,
+                                      note.intensity);
       }
     }
   };
   engine.SetBeatCallback(beat_callback);
 
   // Note on callback.
-  const auto note_on_callback = [](int performer_id, std::int64_t, float pitch,
+  const auto note_on_callback = [](int performer_id, double, float pitch,
                                    float intensity) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
@@ -223,8 +222,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](int performer_id, std::int64_t,
-                                    float pitch) {
+  const auto note_off_callback = [](int performer_id, double, float pitch) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << pitch << ")";
   };
   engine.SetNoteOffCallback(note_off_callback);
@@ -261,7 +259,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Add drumkit instrument.
   const auto drumkit_instrument_id =
-      engine.CreateInstrument(DrumkitInstrument::GetDefinition(kSampleRate));
+      engine.CreateInstrument(DrumkitInstrument::GetDefinition(), {});
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kPitchKick, "basic_kick.wav"},
       {barelyapi::kPitchSnare, "basic_snare.wav"},
@@ -273,8 +271,8 @@ int main(int /*argc*/, char* argv[]) {
     const std::string path = runfiles->Rlocation(kDrumsBaseFilename + name);
     CHECK(it.first->second.Load(path)) << path;
   }
-  engine.SetCustomData(drumkit_instrument_id,
-                       reinterpret_cast<void*>(&drumkit_files));
+  engine.SetCustomInstrumentData(drumkit_instrument_id,
+                                 reinterpret_cast<void*>(&drumkit_files));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_5);
@@ -282,16 +280,17 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<std::int64_t> timestamp = 0;
+  std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& [id, callback] : performers) {
-      engine.Process(id, timestamp, temp_buffer.data(), kNumChannels,
-                     kNumFrames);
+      engine.ProcessInstrument(id, timestamp, temp_buffer.data(), kNumChannels,
+                               kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp += kNumFrames;
+    timestamp +=
+        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -306,23 +305,23 @@ int main(int /*argc*/, char* argv[]) {
     switch (std::toupper(key)) {
       case ' ':
         if (engine.IsPlaying()) {
-          engine.Stop();
+          engine.StopPlayback();
           LOG(INFO) << "Stopped playback";
         } else {
-          engine.Start(timestamp + kLookahead);
+          engine.StartPlayback();
           LOG(INFO) << "Started playback";
         }
         break;
       case '1':
-        engine.SetTempo(Uniform(0.5, 0.75) * engine.GetTempo());
-        LOG(INFO) << "Tempo changed to " << engine.GetTempo();
+        engine.SetPlaybackTempo(Uniform(0.5, 0.75) * engine.GetPlaybackTempo());
+        LOG(INFO) << "Tempo changed to " << engine.GetPlaybackTempo();
         break;
       case '2':
-        engine.SetTempo(Uniform(1.5, 2.0) * engine.GetTempo());
-        LOG(INFO) << "Tempo changed to " << engine.GetTempo();
+        engine.SetPlaybackTempo(Uniform(1.5, 2.0) * engine.GetPlaybackTempo());
+        LOG(INFO) << "Tempo changed to " << engine.GetPlaybackTempo();
         break;
       case 'R':
-        engine.SetTempo(kTempo);
+        engine.SetPlaybackTempo(kTempo);
         LOG(INFO) << "Tempo reset to " << kTempo;
         break;
     }
@@ -332,17 +331,18 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  engine.Start(timestamp + kLookahead);
+  engine.Update(timestamp + kLookahead);
+  engine.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(kSampleRate, timestamp + kLookahead);
+    engine.Update(timestamp + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  engine.Stop();
+  engine.StopPlayback();
   audio_output.Stop();
 
   return 0;

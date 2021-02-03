@@ -1,9 +1,9 @@
-#ifndef BARELYMUSICIAN_ENGINE_NOTE_UTILS_H_
-#define BARELYMUSICIAN_ENGINE_NOTE_UTILS_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_UTILS_H_
+#define BARELYMUSICIAN_COMPOSITION_NOTE_UTILS_H_
 
 #include <vector>
 
-#include "barelymusician/engine/note.h"
+#include "barelymusician/composition/note.h"
 
 namespace barelyapi {
 
@@ -160,4 +160,4 @@ double QuantizePosition(double position, double resolution,
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_NOTE_UTILS_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_UTILS_H_

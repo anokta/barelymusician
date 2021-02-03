@@ -23,7 +23,7 @@ class DrumkitInstrument : public Instrument {
   void SetCustomData(void* data) override;
   void SetParam(int, float) override {}
 
-  static InstrumentDefinition GetDefinition(int sample_rate);
+  static InstrumentDefinition GetDefinition();
 
  private:
   using DrumkitVoice = EnvelopedVoice<SamplePlayer>;

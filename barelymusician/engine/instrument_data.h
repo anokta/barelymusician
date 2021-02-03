@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
-#define BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_
 
 #include <variant>
 
@@ -9,12 +9,18 @@ namespace barelyapi {
 struct CustomData {
   /// Custom data.
   void* data;
+
+  /// Default comparator.
+  bool operator==(const CustomData&) const = default;
 };
 
 /// Note off data.
 struct NoteOff {
   /// Note pitch.
   float pitch;
+
+  /// Default comparator.
+  bool operator==(const NoteOff&) const = default;
 };
 
 /// Note on data.
@@ -24,6 +30,9 @@ struct NoteOn {
 
   /// Note intensity.
   float intensity;
+
+  /// Default comparator.
+  bool operator==(const NoteOn&) const = default;
 };
 
 /// Parameter data.
@@ -33,6 +42,9 @@ struct Param {
 
   /// Parameter value.
   float value;
+
+  /// Default comparator.
+  bool operator==(const Param&) const = default;
 };
 
 /// Instrument data type.
@@ -48,4 +60,4 @@ InstrumentDataVisitor(DataTypes...) -> InstrumentDataVisitor<DataTypes...>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_DATA_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_

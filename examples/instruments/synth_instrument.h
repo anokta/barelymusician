@@ -7,7 +7,7 @@
 
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
-#include "barelymusician/instrument/instrument_definition.h"
+#include "barelymusician/engine/instrument_definition.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/instrument.h"
 
@@ -37,7 +37,7 @@ class SynthInstrument : public Instrument {
   void SetParam(int id, float value) override;
 
   /// Returns instrument definition.
-  static InstrumentDefinition GetDefinition(int sample_rate);
+  static InstrumentDefinition GetDefinition();
   static std::vector<InstrumentParamDefinition> GetDefaultParams();
 
  private:

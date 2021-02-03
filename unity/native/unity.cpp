@@ -1,14 +1,13 @@
 #include "unity/native/unity.h"
 
 #include <algorithm>
-#include <cstdint>
 #include <memory>
 #include <utility>
 
 #include "barelymusician/common/logging.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/instrument/instrument_definition.h"
+#include "barelymusician/engine/instrument_definition.h"
 #include "examples/instruments/synth_instrument.h"
 #include "unity/native/unity_log_writer.h"
 
@@ -23,10 +22,7 @@ inline constexpr int kInvalidId = -1;
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}
-
-  // Sampling rate.
-  int sample_rate;
+  BarelyMusician(int sample_rate) : engine(sample_rate) {}
 
   // Engine.
   Engine engine;
@@ -71,7 +67,7 @@ int CreateUnityInstrument(BarelyMusician* barelymusician,
         .set_param_fn = [set_param_fn_ptr](
                             InstrumentState*, int id,
                             float value) { set_param_fn_ptr(id, value); }};
-    return barelymusician->engine.CreateInstrument(std::move(definition));
+    return barelymusician->engine.CreateInstrument(std::move(definition), {});
   }
   return kInvalidId;
 }
@@ -79,7 +75,7 @@ int CreateUnityInstrument(BarelyMusician* barelymusician,
 int CreateSynthInstrument(BarelyMusician* barelymusician) {
   if (barelymusician) {
     return barelymusician->engine.CreateInstrument(
-        examples::SynthInstrument::GetDefinition(barelymusician->sample_rate),
+        examples::SynthInstrument::GetDefinition(),
         examples::SynthInstrument::GetDefaultParams());
   }
   return kInvalidId;
@@ -93,9 +89,9 @@ void Destroy(BarelyMusician* barelymusician, int id) {
 
 float GetParam(BarelyMusician* barelymusician, int id, int param_id) {
   if (barelymusician) {
-    const auto param_or = barelymusician->engine.GetParam(id, param_id);
-    if (IsOk(param_or)) {
-      return GetValue(param_or);
+    if (const float* param =
+            barelymusician->engine.GetInstrumentParam(id, param_id)) {
+      return *param;
     }
   }
   return 0.0f;
@@ -103,24 +99,21 @@ float GetParam(BarelyMusician* barelymusician, int id, int param_id) {
 
 double GetPosition(BarelyMusician* barelymusician) {
   if (barelymusician) {
-    return barelymusician->engine.GetPosition();
+    return barelymusician->engine.GetPlaybackPosition();
   }
   return 0.0f;
 }
 
 double GetTempo(BarelyMusician* barelymusician) {
   if (barelymusician) {
-    return barelymusician->engine.GetTempo();
+    return barelymusician->engine.GetPlaybackTempo();
   }
   return 0.0f;
 }
 
 bool IsNoteOn(BarelyMusician* barelymusician, int id, float pitch) {
   if (barelymusician) {
-    const auto is_note_on_or = barelymusician->engine.IsNoteOn(id, pitch);
-    if (IsOk(is_note_on_or)) {
-      return GetValue(is_note_on_or);
-    }
+    return barelymusician->engine.IsInstrumentNoteOn(id, pitch);
   }
   return false;
 }
@@ -135,23 +128,22 @@ bool IsPlaying(BarelyMusician* barelymusician) {
 void Process(BarelyMusician* barelymusician, int id, double timestamp,
              float* output, int num_channels, int num_frames) {
   if (barelymusician) {
-    barelymusician->engine.Process(
-        id, SamplesFromSeconds(barelymusician->sample_rate, timestamp), output,
-        num_channels, num_frames);
+    barelymusician->engine.ProcessInstrument(id, timestamp, output,
+                                             num_channels, num_frames);
   }
 }
 
 void ResetAllParams(BarelyMusician* barelymusician, int id) {
   if (barelymusician) {
-    barelymusician->engine.ResetAllParams(id);
+    barelymusician->engine.ResetAllInstrumentParams(id);
   }
 }
 
 void ScheduleNote(BarelyMusician* barelymusician, int id, double position,
                   double duration, float pitch, float intensity) {
   if (barelymusician) {
-    barelymusician->engine.ScheduleNote(id, position, duration, pitch,
-                                        intensity);
+    barelymusician->engine.ScheduleInstrumentNote(id, position, duration, pitch,
+                                                  intensity);
   }
 }
 
@@ -160,9 +152,8 @@ void SetBeatCallback(BarelyMusician* barelymusician,
   if (barelymusician) {
     if (beat_callback_ptr) {
       barelymusician->engine.SetBeatCallback(
-          [beat_callback_ptr, sample_rate = barelymusician->sample_rate](
-              std::int64_t timestamp, int beat) {
-            beat_callback_ptr(SecondsFromSamples(sample_rate, timestamp), beat);
+          [beat_callback_ptr](double timestamp, int beat) {
+            beat_callback_ptr(timestamp, beat);
           });
     } else {
       barelymusician->engine.SetBeatCallback(nullptr);
@@ -190,10 +181,8 @@ void SetNoteOffCallback(BarelyMusician* barelymusician,
   if (barelymusician) {
     if (note_off_callback_ptr) {
       barelymusician->engine.SetNoteOffCallback(
-          [note_off_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int id, std::int64_t timestamp, float pitch) {
-            note_off_callback_ptr(SecondsFromSamples(sample_rate, timestamp),
-                                  id, pitch);
+          [note_off_callback_ptr](int id, double timestamp, float pitch) {
+            note_off_callback_ptr(timestamp, id, pitch);
           });
     } else {
       barelymusician->engine.SetNoteOffCallback(nullptr);
@@ -206,10 +195,9 @@ void SetNoteOnCallback(BarelyMusician* barelymusician,
   if (barelymusician) {
     if (note_on_callback_ptr) {
       barelymusician->engine.SetNoteOnCallback(
-          [note_on_callback_ptr, sample_rate = barelymusician->sample_rate](
-              int id, std::int64_t timestamp, float pitch, float intensity) {
-            note_on_callback_ptr(SecondsFromSamples(sample_rate, timestamp), id,
-                                 pitch, intensity);
+          [note_on_callback_ptr](int id, double timestamp, float pitch,
+                                 float intensity) {
+            note_on_callback_ptr(timestamp, id, pitch, intensity);
           });
     } else {
       barelymusician->engine.SetNoteOnCallback(nullptr);
@@ -219,68 +207,65 @@ void SetNoteOnCallback(BarelyMusician* barelymusician,
 
 void SetAllNotesOff(BarelyMusician* barelymusician, int id) {
   if (barelymusician) {
-    barelymusician->engine.SetAllNotesOff(id);
+    barelymusician->engine.SetAllInstrumentNotesOff(id);
   }
 }
 
 void SetNoteOff(BarelyMusician* barelymusician, int id, float pitch) {
   if (barelymusician) {
-    barelymusician->engine.SetNoteOff(id, pitch);
+    barelymusician->engine.SetInstrumentNoteOff(id, pitch);
   }
 }
 
 void SetNoteOn(BarelyMusician* barelymusician, int id, float pitch,
                float intensity) {
   if (barelymusician) {
-    barelymusician->engine.SetNoteOn(id, pitch, intensity);
+    barelymusician->engine.SetInstrumentNoteOn(id, pitch, intensity);
   }
 }
 
 void SetParam(BarelyMusician* barelymusician, int id, int param_id,
               float value) {
   if (barelymusician) {
-    barelymusician->engine.SetParam(id, param_id, value);
+    barelymusician->engine.SetInstrumentParam(id, param_id, value);
   }
 }
 
 void SetPosition(BarelyMusician* barelymusician, double position) {
   if (barelymusician) {
-    barelymusician->engine.SetPosition(position);
+    barelymusician->engine.SetPlaybackPosition(position);
   }
 }
 
 void SetTempo(BarelyMusician* barelymusician, double tempo) {
   if (barelymusician) {
-    barelymusician->engine.SetTempo(tempo);
+    barelymusician->engine.SetPlaybackTempo(tempo);
   }
 }
 
-void Start(BarelyMusician* barelymusician, double timestamp) {
+void Start(BarelyMusician* barelymusician) {
   if (barelymusician) {
-    barelymusician->engine.Start(
-        SamplesFromSeconds(barelymusician->sample_rate, timestamp));
+    barelymusician->engine.StartPlayback();
   }
 }
 
 void Pause(BarelyMusician* barelymusician) {
   if (barelymusician) {
-    barelymusician->engine.Stop();
+    barelymusician->engine.StopPlayback();
   }
 }
 
 void Stop(BarelyMusician* barelymusician) {
   if (barelymusician) {
-    barelymusician->engine.Stop();
-    barelymusician->engine.RemoveAllScheduledNotes();
-    barelymusician->engine.SetPosition(0.0);
+    barelymusician->engine.StopPlayback();
+    barelymusician->engine.RemoveAllScheduledInstrumentNotes();
+    barelymusician->engine.SetPlaybackPosition(0.0);
   }
 }
 
 void Update(BarelyMusician* barelymusician, double timestamp) {
   if (barelymusician) {
-    barelymusician->engine.Update(
-        barelymusician->sample_rate,
-        SamplesFromSeconds(barelymusician->sample_rate, timestamp));
+    barelymusician->engine.Update(timestamp);
   }
 }
 

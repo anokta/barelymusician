@@ -14,40 +14,51 @@ cc_library(
     hdrs = ["engine.h"],
     deps = [
         ":clock",
-        ":track",
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_processor",
+        ":task_runner",
         "//barelymusician/common:common_utils",
-        "//barelymusician/common:status",
-        "//barelymusician/dsp:dsp_utils",
-        "//barelymusician/engine:note_utils",
-        "//barelymusician/instrument:instrument_data",
-        "//barelymusician/instrument:instrument_definition",
-        "//barelymusician/instrument:instrument_manager",
     ],
 )
 
 cc_library(
-    name = "note",
-    hdrs = ["note.h"],
-)
-
-cc_library(
-    name = "note_utils",
-    srcs = ["note_utils.cpp"],
-    hdrs = ["note_utils.h"],
+    name = "instrument_controller",
+    srcs = ["instrument_controller.cpp"],
+    hdrs = ["instrument_controller.h"],
     deps = [
-        ":note",
-        "//barelymusician/common:logging",
+        ":instrument_data",
+        ":instrument_definition",
+        "//barelymusician/common:common_utils",
     ],
 )
 
 cc_library(
-    name = "track",
-    srcs = ["track.cpp"],
-    hdrs = ["track.h"],
+    name = "instrument_data",
+    hdrs = ["instrument_data.h"],
+)
+
+cc_library(
+    name = "instrument_definition",
+    hdrs = ["instrument_definition.h"],
+)
+
+cc_library(
+    name = "instrument_processor",
+    srcs = ["instrument_processor.cpp"],
+    hdrs = ["instrument_processor.h"],
     deps = [
-        "//barelymusician/common:id_generator",
-        "//barelymusician/instrument:instrument_data",
+        ":instrument_data",
+        ":instrument_definition",
     ],
+)
+
+cc_library(
+    name = "task_runner",
+    srcs = ["task_runner.cpp"],
+    hdrs = ["task_runner.h"],
+    deps = ["//barelymusician/common:logging"],
 )
 
 cc_test(
@@ -60,19 +71,42 @@ cc_test(
 )
 
 cc_test(
-    name = "note_utils_test",
-    srcs = ["note_utils_test.cpp"],
+    name = "engine_test",
+    srcs = ["engine_test.cpp"],
     deps = [
-        ":note_utils",
+        ":engine",
+        ":instrument_data",
         "@googletest//:gtest_main",
     ],
 )
 
 cc_test(
-    name = "track_test",
-    srcs = ["track_test.cpp"],
+    name = "instrument_controller_test",
+    srcs = ["instrument_controller_test.cpp"],
     deps = [
-        ":track",
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_processor_test",
+    srcs = ["instrument_processor_test.cpp"],
+    deps = [
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_processor",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "task_runner_test",
+    srcs = ["task_runner_test.cpp"],
+    deps = [
+        ":task_runner",
         "@googletest//:gtest_main",
     ],
 )

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_NOTE_H_
-#define BARELYMUSICIAN_ENGINE_NOTE_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_H_
+#define BARELYMUSICIAN_COMPOSITION_NOTE_H_
 
 namespace barelyapi {
 
@@ -20,4 +20,4 @@ struct Note {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_NOTE_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_H_

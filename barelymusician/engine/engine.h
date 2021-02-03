@@ -1,208 +1,257 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
-#include <cstdint>
 #include <functional>
 #include <unordered_map>
+#include <vector>
 
-#include "barelymusician/common/status.h"
 #include "barelymusician/engine/clock.h"
-#include "barelymusician/engine/track.h"
-#include "barelymusician/instrument/instrument_data.h"
-#include "barelymusician/instrument/instrument_definition.h"
-#include "barelymusician/instrument/instrument_manager.h"
+#include "barelymusician/engine/instrument_controller.h"
+#include "barelymusician/engine/instrument_data.h"
+#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_processor.h"
+#include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
 
-/// Class that manages processing of instruments.
+/// Beat callback signature.
+using BeatCallback = std::function<void(double timestamp, int beat)>;
+
+/// Note off callback signature.
+using NoteOffCallback =
+    std::function<void(int instrument_id, double timestamp, float note_pitch)>;
+
+/// Note on callback signature.
+using NoteOnCallback =
+    std::function<void(int instrument_id, double timestamp, float note_pitch,
+                       float note_intensity)>;
+
+/// Instrument playback engine.
 class Engine {
  public:
-  /// Beat callback signature.
-  using BeatCallback = std::function<void(std::int64_t timestamp, int beat)>;
-
   /// Constructs new |Engine|.
-  Engine();
+  ///
+  /// @param sample_rate Sampling rate in Hz.
+  explicit Engine(int sample_rate);
 
   /// Creates new instrument.
   ///
-  /// @param instrument instrument Instrument to play.
-  /// @param params Default instrument params.
+  /// @param definition Instrument definition.
+  /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
   int CreateInstrument(InstrumentDefinition definition,
-                       InstrumentParamDefinitions param_definitions = {});
+                       InstrumentParamDefinitions param_definitions);
 
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status DestroyInstrument(int instrument_id);
+  /// @return True if successful, false otherwise.
+  bool DestroyInstrument(int instrument_id);
 
-  /// Returns parameter value.
+  /// Returns all active instrument notes.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return List of active note pitches.
+  std::vector<float> GetAllInstrumentNotes(int instrument_id) const;
+
+  /// Returns all instrument parameters.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return List of parameters.
+  std::vector<Param> GetAllInstrumentParams(int instrument_id) const;
+
+  /// Returns instrument parameter value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
-  /// @return Parameter value, if found.
-  StatusOr<float> GetParam(int instrument_id, int param_id) const;
+  /// @return Pointer to parameter value if successful, nullptr otherwise.
+  const float* GetInstrumentParam(int instrument_id, int param_id) const;
 
-  /// Returns playback position.
+  /// Returns the playback position.
   ///
   /// @return Position in beats.
-  double GetPosition() const;
+  double GetPlaybackPosition() const;
 
-  /// Returns playback tempo.
+  /// Returns the playback tempo.
   ///
   /// @return Tempo in BPM.
-  double GetTempo() const;
+  double GetPlaybackTempo() const;
 
-  /// Returns whether note is active or not.
+  /// Returns whether instrument note is active or not.
   ///
   /// @param instrument_id Instrument id.
-  /// @param pitch Pitch.
-  /// @return True if note is active, if instrument found.
-  StatusOr<bool> IsNoteOn(int instrument_id, float pitch) const;
+  /// @param note_pitch Note pitch.
+  /// @return True if note is active, false otherwise.
+  bool IsInstrumentNoteOn(int instrument_id, float note_pitch) const;
 
-  /// Returns playback state.
+  /// Returns whether the playback is currently active or not.
   ///
-  /// @return True if playing.
+  /// @return True if playing, false otherwise.
   bool IsPlaying() const;
 
-  /// Processes the next output buffer.
+  /// Processes the next instrument output buffer at timestamp.
   ///
   /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in frames.
-  /// @param output Pointer to output buffer.
+  /// @param timestamp Timestamp in seconds.
+  /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  /// @return Status.
-  Status Process(int instrument_id, std::int64_t timestamp, float* output,
-                 int num_channels, int num_frames);
+  /// @return True if successful, false otherwise.
+  bool ProcessInstrument(int instrument_id, double timestamp, float* output,
+                         int num_channels, int num_frames);
 
-  /// Removes all scheduled notes.
-  void RemoveAllScheduledNotes();
+  /// Removes all scheduled notes of all instruments.
+  void RemoveAllScheduledInstrumentNotes();
 
-  /// Removes all scheduled notes.
+  /// Removes all scheduled instrument notes.
   ///
   /// @param instrument_id Instrument id.
-  /// @return True if instrument found.
-  Status RemoveAllScheduledNotes(int instrument_id);
+  /// @return True if successful, false otherwise.
+  bool RemoveAllScheduledInstrumentNotes(int instrument_id);
 
-  /// Resets all parameters.
+  /// Resets all parameters of all instruments to their default values.
+  void ResetAllInstrumentParams();
+
+  /// Resets all instrument parameters to their default values.
   ///
   /// @param instrument_id Instrument id.
-  /// @return True if instrument found.
-  Status ResetAllParams(int instrument_id);
+  /// @return True if successful, false otherwise.
+  bool ResetAllInstrumentParams(int instrument_id);
 
-  /// Resets parameter.
+  /// Resets instrument parameter to its default value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
-  /// @return True if instrument found.
-  Status ResetParam(int instrument_id, int param_id);
+  /// @return True if successful, false otherwise.
+  bool ResetInstrumentParam(int instrument_id, int param_id);
 
-  /// Stops all notes.
-  void SetAllNotesOff();
-
-  /// Stops all notes.
+  /// Schedules instrument note.
   ///
   /// @param instrument_id Instrument id.
-  /// @return True if instrument found.
-  Status SetAllNotesOff(int instrument_id);
+  /// @param note_position Note position in beats.
+  /// @param note_duration Note duration in beats.
+  /// @param note_pitch Note pitch.
+  /// @param note_intensity Note intensity.
+  /// @return True if successful, false otherwise.
+  bool ScheduleInstrumentNote(int instrument_id, double note_position,
+                              double note_duration, float note_pitch,
+                              float note_intensity);
 
-  /// Sets custom data.
+  /// Sets all active notes of all instruments off.
+  void SetAllInstrumentNotesOff();
+
+  /// Sets all active instrument notes off.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return True if successful, false otherwise.
+  bool SetAllInstrumentNotesOff(int instrument_id);
+
+  /// Sets the beat callback.
+  ///
+  /// @param beat_callback Playback beat callback.
+  void SetBeatCallback(BeatCallback beat_callback);
+
+  /// Sets custom instrument data.
   ///
   /// @param instrument_id Instrument id.
   /// @param custom_data Custom data.
-  /// @return True if successful, if instrument found.
-  Status SetCustomData(int instrument_id, void* custom_data);
+  /// @return True if successful, false otherwise.
+  bool SetCustomInstrumentData(int instrument_id, void* custom_data);
 
-  /// Stops playing note.
+  /// Sets instrument note off.
   ///
   /// @param instrument_id Instrument id.
-  /// @param pitch Note pitch.
-  /// @return True if successful, if instrument found.
-  Status SetNoteOff(int instrument_id, float pitch);
+  /// @param note_pitch Note pitch.
+  /// @return True if successful, false otherwise.
+  bool SetInstrumentNoteOff(int instrument_id, float note_pitch);
 
-  /// Starts playing note.
+  /// Sets instrument note on.
   ///
   /// @param instrument_id Instrument id.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @return True if successful, if instrument found.
-  Status SetNoteOn(int instrument_id, float pitch, float intensity);
+  /// @param note_pitch Note pitch.
+  /// @param note_intensity Note intensity.
+  /// @return True if successful, false otherwise.
+  bool SetInstrumentNoteOn(int instrument_id, float note_pitch,
+                           float note_intensity);
 
-  /// Sets control parameter value.
+  /// Sets instrument parameter value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
   /// @param param_value Parameter value.
-  /// @return True if successful, if instrument parameter found.
-  Status SetParam(int instrument_id, int param_id, float param_value);
+  /// @return True if successful, false otherwise.
+  bool SetInstrumentParam(int instrument_id, int param_id, float param_value);
 
-  /// Schedules note.
+  /// Sets the note off callback.
   ///
-  /// @param instrument_id Instrument id.
-  /// @param position Note position.
-  /// @param duration Note duration.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @return True if successful, if instrument found.
-  Status ScheduleNote(int instrument_id, double position, double duration,
-                      float pitch, float intensity);
+  /// @param note_off_callback Instrument note off callback.
+  void SetNoteOffCallback(NoteOffCallback note_off_callback);
 
-  /// Sets beat callback.
+  /// Sets the note on callback.
   ///
-  /// @param beat_callback Beat callback.
-  void SetBeatCallback(BeatCallback beat_callback);
+  /// @param note_on_callback Instrument note on callback.
+  void SetNoteOnCallback(NoteOnCallback note_on_callback);
 
-  /// Sets note off callback.
-  ///
-  /// @param note_off_callback Note off callback.
-  void SetNoteOffCallback(InstrumentNoteOffCallback note_off_callback);
-
-  /// Sets note on callback.
-  ///
-  /// @param note_on_callback Note on callback.
-  void SetNoteOnCallback(InstrumentNoteOnCallback note_on_callback);
-
-  /// Sets playback position.
+  /// Sets the playback position.
   ///
   /// @param position Position in beats.
-  void SetPosition(double position);
+  void SetPlaybackPosition(double position);
 
-  /// Sets playback tempo.
+  /// Sets the playback tempo.
   ///
   /// @param tempo Tempo in BPM.
-  void SetTempo(double tempo);
+  void SetPlaybackTempo(double tempo);
 
-  /// Starts playback.
+  /// Sets the sampling rate.
   ///
-  /// @param timestamp Start timestamp.
-  void Start(std::int64_t timestamp);
+  /// @param sample_rate Sampling rate in Hz.
+  void SetSampleRate(int sample_rate);
 
-  /// Stops playback.
-  void Stop();
+  /// Starts the playback.
+  void StartPlayback();
 
-  /// Updates the internal state.
+  // Stops the playback.
+  void StopPlayback();
+
+  /// Updates the internal state at timestamp.
   ///
-  /// @param timestamp Update timestamp.
-  void Update(int sample_rate, std::int64_t timestamp);
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp);
 
  private:
-  // List of instruments.
-  InstrumentManager manager_;
-  std::unordered_map<int, Track> tracks_;
+  // Sets processor |data| of instrument with the given |instrument_id|.
+  void SetProcessorData(int instrument_id, InstrumentData data);
 
-  // Denotes whether the clock is currently playing.
-  bool is_playing_;
-
-  // Last timestamp.
-  std::int64_t last_timestamp_;
+  // Sampling rate in Hz.
+  int sample_rate_;
 
   // Playback clock.
   Clock clock_;
 
+  // Denotes whether playback is active or not.
+  bool is_playing_;
+
+  // Last updated timestamp in seconds.
+  double timestamp_;
+
+  // Instrument id counter.
+  int id_counter_;
+
+  // List of instruments.
+  std::unordered_map<int, InstrumentController> controllers_;
+  std::unordered_map<int, InstrumentProcessor> processors_;
+
+  // Audio thread task runner.
+  TaskRunner task_runner_;
+
   // Beat callback.
   BeatCallback beat_callback_;
+
+  // Instrument note off callback.
+  NoteOffCallback note_off_callback_;
+
+  // Instrument note on callback.
+  NoteOnCallback note_on_callback_;
 };
 
 }  // namespace barelyapi

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_DEFINITION_H_
-#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_DEFINITION_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 
 #include <functional>
 #include <optional>
@@ -11,7 +11,8 @@ namespace barelyapi {
 using InstrumentState = void*;
 
 /// Instrument create function signature.
-using CreateInstrumentFn = std::function<void(InstrumentState* state)>;
+using CreateInstrumentFn =
+    std::function<void(InstrumentState* state, int sample_rate)>;
 
 /// Instrument destroy function signature.
 using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;
@@ -80,4 +81,4 @@ using InstrumentParamDefinitions = std::vector<InstrumentParamDefinition>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_DEFINITION_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_

@@ -1,14 +1,33 @@
-#include "barelymusician/instrument/instrument_processor.h"
+#include "barelymusician/engine/instrument_processor.h"
 
 #include <utility>
 #include <variant>
 
 namespace barelyapi {
 
-InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition)
-    : definition_(std::move(definition)), state_(nullptr) {
+namespace {
+
+// Returns number of samples for the given number of |seconds|.
+int SamplesFromSeconds(int sample_rate, double seconds) {
+  return static_cast<int>(seconds * static_cast<double>(sample_rate));
+}
+
+// Returns number of seconds for the given number of |samples|.
+double SecondsFromSamples(int sample_rate, int samples) {
+  return sample_rate > 0
+             ? static_cast<double>(samples) / static_cast<double>(sample_rate)
+             : 0.0;
+}
+
+}  // namespace
+
+InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
+                                         int sample_rate)
+    : sample_rate_(sample_rate),
+      definition_(std::move(definition)),
+      state_(nullptr) {
   if (definition_.create_fn) {
-    definition_.create_fn(&state_);
+    definition_.create_fn(&state_, sample_rate);
   }
 }
 
@@ -19,13 +38,15 @@ InstrumentProcessor::~InstrumentProcessor() {
 }
 
 InstrumentProcessor::InstrumentProcessor(InstrumentProcessor&& other) noexcept
-    : definition_(std::exchange(other.definition_, {})),
+    : sample_rate_(std::exchange(other.sample_rate_, 0)),
+      definition_(std::exchange(other.definition_, {})),
       state_(std::exchange(other.state_, nullptr)),
       data_(std::move(other.data_)) {}
 
 InstrumentProcessor& InstrumentProcessor::operator=(
     InstrumentProcessor&& other) noexcept {
   if (this != &other) {
+    std::swap(sample_rate_, other.sample_rate_);
     std::swap(definition_, other.definition_);
     std::swap(state_, other.state_);
     data_ = std::move(other.data_);
@@ -33,15 +54,16 @@ InstrumentProcessor& InstrumentProcessor::operator=(
   return *this;
 }
 
-void InstrumentProcessor::Process(std::int64_t timestamp, float* output,
+void InstrumentProcessor::Process(double timestamp, float* output,
                                   int num_channels, int num_frames) {
   int frame = 0;
   // Process *all* events before |end_timestamp|.
   const auto begin = data_.cbegin();
-  const auto end =
-      data_.lower_bound(timestamp + static_cast<std::int64_t>(num_frames));
+  const auto end = data_.lower_bound(
+      timestamp + SecondsFromSamples(sample_rate_, num_frames));
   for (auto it = begin; it != end; ++it) {
-    const int message_frame = static_cast<int>(it->first - timestamp);
+    const int message_frame =
+        SamplesFromSeconds(sample_rate_, it->first - timestamp);
     if (frame < message_frame) {
       if (definition_.process_fn) {
         definition_.process_fn(&state_, &output[num_channels * frame],
@@ -82,7 +104,17 @@ void InstrumentProcessor::Process(std::int64_t timestamp, float* output,
   }
 }
 
-void InstrumentProcessor::SetData(std::int64_t timestamp, InstrumentData data) {
+void InstrumentProcessor::Reset(int sample_rate) {
+  sample_rate_ = sample_rate;
+  if (definition_.destroy_fn) {
+    definition_.destroy_fn(&state_);
+  }
+  if (definition_.create_fn) {
+    definition_.create_fn(&state_, sample_rate_);
+  }
+}
+
+void InstrumentProcessor::SetData(double timestamp, InstrumentData data) {
   data_.emplace(timestamp, std::move(data));
 }
 

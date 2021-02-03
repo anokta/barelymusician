@@ -38,7 +38,6 @@ cc_library(
     deps = [
         ":unity_log_writer",
         "//barelymusician/common:logging",
-        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
         "//barelymusician/engine:instrument_definition",
         "//examples/instruments:synth_instrument",

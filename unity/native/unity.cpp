@@ -5,7 +5,6 @@
 #include <utility>
 
 #include "barelymusician/common/logging.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "examples/instruments/synth_instrument.h"

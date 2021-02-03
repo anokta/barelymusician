@@ -6,7 +6,6 @@
 #include <thread>
 
 #include "barelymusician/common/logging.h"
-#include "barelymusician/composition/note_utils.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/common/audio_output.h"
@@ -37,8 +36,8 @@ constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.025f;
 
 constexpr double kTickDuration = 0.005f;
-constexpr float kBarPitch = barelyapi::kPitchA4;
-constexpr float kBeatPitch = barelyapi::kPitchA3;
+constexpr float kBarPitch = 0.0f;
+constexpr float kBeatPitch = -1.0f;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 120.0;

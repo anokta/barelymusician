@@ -9,7 +9,7 @@
 #include "MidiFile.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -64,7 +64,7 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
       Note note;
       note.position = get_position(midi_event.tick);
       note.duration = get_position(midi_event.getTickDuration());
-      note.pitch = static_cast<float>(midi_event.getKeyNumber());
+      note.pitch = barelyapi::GetPitch(midi_event.getKeyNumber());
       note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       score.push_back(std::move(note));

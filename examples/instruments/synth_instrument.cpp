@@ -1,6 +1,6 @@
 #include "examples/instruments/synth_instrument.h"
 
-#include "barelymusician/composition/note_utils.h"
+#include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi::examples {
 

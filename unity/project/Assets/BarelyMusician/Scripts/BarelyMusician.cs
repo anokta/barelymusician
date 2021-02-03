@@ -29,6 +29,14 @@ namespace BarelyApi {
     public delegate void UnitySetNoteOnFn(float pitch, float intensity);
     public delegate void UnitySetParamFn(int id, float value);
 
+    // Temporary helpers to convert between note number (semitones) and pitch.
+    public static float GetNoteNumber(float pitch) {
+      return 12.0f * pitch + 69.0f;
+    }
+    public static float GetPitch(float noteNumber) {
+      return (noteNumber - 69.0f) / 12.0f;
+    }
+
     // Creates new instrument.
     public static int Create(Instrument instrument) {
       int id = InvalidId;
@@ -78,7 +86,7 @@ namespace BarelyApi {
 
     // Schedules instrument note.
     public static void ScheduleNote(int id, double position, double duration, float pitch, float intensity) {
-      ScheduleNoteNative(InstancePtr, id, position, duration, pitch, intensity);
+      ScheduleNoteNative(InstancePtr, id, position, duration, GetPitch(pitch), intensity);
     }
 
     // Sets all instrument notes off.
@@ -88,12 +96,12 @@ namespace BarelyApi {
 
     // Sets instrument note off.
     public static void SetNoteOff(int id, float pitch) {
-      SetNoteOffNative(InstancePtr, id, pitch);
+      SetNoteOffNative(InstancePtr, id, GetPitch(pitch));
     }
 
     // Sets instrument note on.
     public static void SetNoteOn(int id, float pitch, float intensity) {
-      SetNoteOnNative(InstancePtr, id, pitch, intensity);
+      SetNoteOnNative(InstancePtr, id, GetPitch(pitch), intensity);
     }
 
     // Sets instrument param value.
@@ -215,7 +223,7 @@ namespace BarelyApi {
         _noteOffCallback = delegate (double dspTime, int id, float pitch) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
-            OnNoteOff?.Invoke(dspTime, instrument, pitch);
+            OnNoteOff?.Invoke(dspTime, instrument, GetNoteNumber(pitch));
           } else {
             Debug.LogError("Instrument does not exist: " + id);
           }
@@ -224,7 +232,7 @@ namespace BarelyApi {
         _noteOnCallback = delegate (double dspTime, int id, float pitch, float intensity) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
-            OnNoteOn?.Invoke(dspTime, instrument, pitch, intensity);
+            OnNoteOn?.Invoke(dspTime, instrument, GetNoteNumber(pitch), intensity);
           } else {
             Debug.LogError("Instrument does not exist: " + id);
           }

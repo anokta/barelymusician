@@ -5,34 +5,35 @@
 namespace barelyapi {
 namespace {
 
-// Tests that converting arbitrary note indices returns expected frequencies.
-TEST(NoteUtilsTest, GetFrequency) {
-  const float kEpsilon = 1e-2f;
-
-  const int kNumIndices = 4;
-  const float kIndices[kNumIndices] = {21.0f, 60.0f, 69.0f, 90.5f};
-  const float kFrequencies[kNumIndices] = {27.50f, 261.62f, 440.00f, 1523.34f};
-
-  for (int i = 0; i < kNumIndices; ++i) {
-    EXPECT_NEAR(GetFrequency(kIndices[i]), kFrequencies[i], kEpsilon);
-  }
-}
-
-// Tests that expected note pitches are returned given an arbitrary scale.
-TEST(NoteUtilsTest, GetPitch) {
+// Tests that expected note numbers are returned given an arbitrary scale.
+TEST(NoteUtilsTest, GetNoteNumber) {
   const int kOctaveRange = 2;
 
-  const std::vector<float> kScale(std::cbegin(kMajorScale),
-                                  std::cend(kMajorScale));
+  const std::vector<int> kScale(std::cbegin(kMajorScale),
+                                std::cend(kMajorScale));
   const int scale_length = static_cast<int>(kScale.size());
 
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < scale_length; ++i) {
-      const float scale_index = static_cast<float>(octave * scale_length + i);
-      const float expected_pitch =
-          static_cast<float>(octave * kNumSemitones) + kScale[i];
-      EXPECT_FLOAT_EQ(GetPitch(kScale, scale_index), expected_pitch);
+      const int scale_index = octave * scale_length + i;
+      const int expected_note_number = octave * kNumSemitones + kScale[i];
+      EXPECT_EQ(GetNoteNumber(kScale, scale_index), expected_note_number)
+          << scale_index;
     }
+  }
+}
+
+// Tests that expected pitches are returned with respect to the given note
+// numbers.
+TEST(NoteUtilsTest, GetPitch) {
+  const float kEpsilon = 1e-2f;
+
+  const int kNumNoteNumbers = 4;
+  const int kNoteNumbers[kNumNoteNumbers] = {21, 60, 69, 93};
+  const float kPitches[kNumNoteNumbers] = {-4.00f, -0.75f, 0.00f, 2.00f};
+
+  for (int i = 0; i < kNumNoteNumbers; ++i) {
+    EXPECT_NEAR(GetPitch(kNoteNumbers[i]), kPitches[i], kEpsilon);
   }
 }
 

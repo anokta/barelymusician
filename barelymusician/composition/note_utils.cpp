@@ -8,27 +8,23 @@ namespace barelyapi {
 
 namespace {
 
-// Middle A (A4) frequency.
-constexpr float kFrequencyA4 = 440.0f;
-
 // Linearly interpolates between given points.
 double Lerp(double a, double b, double t) { return a + t * (b - a); }
 
 }  // namespace
 
-float GetFrequency(float pitch) {
-  // Middle A note (A4) is selected as the base note frequency, where:
-  //  f = fA4 * 2 ^ ((i - pA4) / 12).
-  return kFrequencyA4 * std::pow(2.0f, (pitch - kPitchA4) / kNumSemitones);
+int GetNoteNumber(const std::vector<int>& scale, int scale_index) {
+  DCHECK(!scale.empty());
+  const int scale_length = static_cast<int>(scale.size());
+  const int octave_offset = static_cast<int>(std::floor(
+      static_cast<float>(scale_index) / static_cast<float>(scale_length)));
+  const int scale_offset = scale_index - octave_offset * scale_length;
+  return kNumSemitones * octave_offset + scale[scale_offset];
 }
 
-float GetPitch(const std::vector<float>& scale, float scale_index) {
-  DCHECK(!scale.empty());
-  const float scale_length = static_cast<float>(scale.size());
-  const float octave_offset = std::floor(scale_index / scale_length);
-  const float scale_offset = scale_index - octave_offset * scale_length;
-  return kNumSemitones * octave_offset +
-         scale[static_cast<int>(std::floor(scale_offset))];
+float GetPitch(int note_number) {
+  return static_cast<float>(note_number - kNoteNumberA4) /
+         static_cast<float>(kNumSemitones);
 }
 
 double GetPosition(int step, int num_steps) {

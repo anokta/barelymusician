@@ -13,18 +13,15 @@ double Lerp(double a, double b, double t) { return a + t * (b - a); }
 
 }  // namespace
 
-int GetNoteNumber(const std::vector<int>& scale, int scale_index) {
+float GetPitch(const std::vector<float>& scale, int scale_index) {
   DCHECK(!scale.empty());
-  const int scale_length = static_cast<int>(scale.size());
-  const int octave_offset = static_cast<int>(std::floor(
-      static_cast<float>(scale_index) / static_cast<float>(scale_length)));
-  const int scale_offset = scale_index - octave_offset * scale_length;
-  return kNumSemitones * octave_offset + scale[scale_offset];
-}
+  const float scale_length = static_cast<float>(scale.size());
+  const float octave_offset =
+      std::floor(static_cast<float>(scale_index) / scale_length);
+  const int scale_offset =
+      scale_index - static_cast<int>(octave_offset * scale_length);
 
-float GetPitch(int note_number) {
-  return static_cast<float>(note_number - kNoteNumberA4) /
-         static_cast<float>(kNumSemitones);
+  return octave_offset + scale[scale_offset];
 }
 
 double GetPosition(int step, int num_steps) {

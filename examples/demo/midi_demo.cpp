@@ -51,6 +51,16 @@ constexpr float kMaxVelocity = 127.0f;
 // Midi file name.
 constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
 
+// Returns the pitch for the given |midi_key_number|.
+float PitchFromMidiKeyNumber(int midi_key_number) {
+  return static_cast<float>(midi_key_number - 69) / barelyapi::kNumSemitones;
+}
+
+// Returns the MIDI key number for the given |pitch|.
+int MidiKeyNumberFromPitch(float pitch) {
+  return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
+}
+
 // Builds the score from the given |midi_events|.
 std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
                              int ticks_per_beat) {
@@ -64,7 +74,7 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
       Note note;
       note.position = get_position(midi_event.tick);
       note.duration = get_position(midi_event.getTickDuration());
-      note.pitch = barelyapi::GetPitch(midi_event.getKeyNumber());
+      note.pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       score.push_back(std::move(note));
@@ -97,11 +107,12 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
   engine.SetNoteOnCallback([](int id, double, float pitch, float intensity) {
-    LOG(INFO) << "MIDI track #" << id << ": NoteOn(" << pitch << ", "
-              << intensity << ")";
+    LOG(INFO) << "MIDI track #" << id << ": NoteOn("
+              << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
   });
   engine.SetNoteOffCallback([](int id, double, float pitch) {
-    LOG(INFO) << "MIDI track #" << id << ": NoteOff(" << pitch << ") ";
+    LOG(INFO) << "MIDI track #" << id << ": NoteOff("
+              << MidiKeyNumberFromPitch(pitch) << ") ";
   });
 
   std::vector<int> instrument_ids;

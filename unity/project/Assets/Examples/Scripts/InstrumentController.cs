@@ -9,8 +9,8 @@ public class InstrumentController : MonoBehaviour {
   public Instrument instrument = null;
 
   // Root note pitch.
-  [Range(0.0f, 128.0f)]
-  public float rootPitch = 60.0f;
+  [Range(0.0f, 1.0f)]
+  public float rootPitch = 0.0f;
 
   // Octave offset.
   [Range(-3, 3)]
@@ -52,6 +52,6 @@ public class InstrumentController : MonoBehaviour {
 
   // Returns the corresponding pitch for the given key.
   private float GetPitchFromKeyIndex(int keyIndex) {
-    return rootPitch + 12.0f * octaveOffset + keyIndex;
+    return rootPitch + octaveOffset + (float)keyIndex / 12.0f;
   }
 }

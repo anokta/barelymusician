@@ -8,114 +8,138 @@
 namespace barelyapi {
 
 /// Number of semitones in an octave (twelwe-tone equal temperament).
-inline constexpr int kNumSemitones = 12;
+inline constexpr float kNumSemitones = 12.0f;
+
+/// Semitone pitch intervals of an octave.
+inline constexpr float kPitchSemitones[static_cast<int>(kNumSemitones)] = {
+    0.0f,
+    1.0f / kNumSemitones,
+    2.0f / kNumSemitones,
+    3.0f / kNumSemitones,
+    4.0f / kNumSemitones,
+    5.0f / kNumSemitones,
+    6.0f / kNumSemitones,
+    7.0f / kNumSemitones,
+    8.0f / kNumSemitones,
+    9.0f / kNumSemitones,
+    10.0f / kNumSemitones,
+    11.0f / kNumSemitones};
 
 /// Common musical scales.
-inline constexpr int kMajorScale[] = {0, 2, 4, 5, 7, 9, 11};
-inline constexpr int kNaturalMinorScale[] = {0, 2, 3, 5, 7, 8, 10};
-inline constexpr int kHarmonicMinorScale[] = {0, 2, 3, 5, 7, 8, 11};
+inline constexpr float kPitchMajorScale[7] = {
+    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[4],
+    kPitchSemitones[5], kPitchSemitones[7], kPitchSemitones[9],
+    kPitchSemitones[11]};
+inline constexpr float kPitchNaturalMinorScale[7] = {
+    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[3],
+    kPitchSemitones[5], kPitchSemitones[7], kPitchSemitones[8],
+    kPitchSemitones[10]};
+inline constexpr float kPitchHarmonicMinorScale[7] = {
+    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[3],
+    kPitchSemitones[5], kPitchSemitones[7], kPitchSemitones[8],
+    kPitchSemitones[11]};
 
-/// Common note numbers.
-inline constexpr int kNoteNumberA0 = 21;
-inline constexpr int kNoteNumberAsharp0 = 22;
-inline constexpr int kNoteNumberB0 = 23;
-inline constexpr int kNoteNumberC0 = 24;
-inline constexpr int kNoteNumberCsharp0 = 25;
-inline constexpr int kNoteNumberD0 = 26;
-inline constexpr int kNoteNumberDsharp0 = 27;
-inline constexpr int kNoteNumberE0 = 28;
-inline constexpr int kNoteNumberF0 = 29;
-inline constexpr int kNoteNumberFsharp0 = 30;
-inline constexpr int kNoteNumberG0 = 31;
-inline constexpr int kNoteNumberGsharp0 = 32;
-inline constexpr int kNoteNumberA1 = 33;
-inline constexpr int kNoteNumberAsharp1 = 34;
-inline constexpr int kNoteNumberB1 = 35;
-inline constexpr int kNoteNumberC1 = 36;
-inline constexpr int kNoteNumberCsharp1 = 37;
-inline constexpr int kNoteNumberD1 = 38;
-inline constexpr int kNoteNumberDsharp1 = 39;
-inline constexpr int kNoteNumberE1 = 40;
-inline constexpr int kNoteNumberF1 = 41;
-inline constexpr int kNoteNumberFsharp1 = 42;
-inline constexpr int kNoteNumberG1 = 43;
-inline constexpr int kNoteNumberGsharp1 = 44;
-inline constexpr int kNoteNumberA2 = 45;
-inline constexpr int kNoteNumberAsharp2 = 46;
-inline constexpr int kNoteNumberB2 = 47;
-inline constexpr int kNoteNumberC2 = 48;
-inline constexpr int kNoteNumberCsharp2 = 49;
-inline constexpr int kNoteNumberD2 = 50;
-inline constexpr int kNoteNumberDsharp2 = 51;
-inline constexpr int kNoteNumberE2 = 52;
-inline constexpr int kNoteNumberF2 = 53;
-inline constexpr int kNoteNumberFsharp2 = 54;
-inline constexpr int kNoteNumberG2 = 55;
-inline constexpr int kNoteNumberGsharp2 = 56;
-inline constexpr int kNoteNumberA3 = 57;
-inline constexpr int kNoteNumberAsharp3 = 58;
-inline constexpr int kNoteNumberB3 = 59;
-inline constexpr int kNoteNumberC3 = 60;
-inline constexpr int kNoteNumberCsharp3 = 61;
-inline constexpr int kNoteNumberD3 = 62;
-inline constexpr int kNoteNumberDsharp3 = 63;
-inline constexpr int kNoteNumberE3 = 64;
-inline constexpr int kNoteNumberF3 = 65;
-inline constexpr int kNoteNumberFsharp3 = 66;
-inline constexpr int kNoteNumberG3 = 67;
-inline constexpr int kNoteNumberGsharp3 = 68;
-inline constexpr int kNoteNumberA4 = 69;
-inline constexpr int kNoteNumberAsharp4 = 70;
-inline constexpr int kNoteNumberB4 = 71;
-inline constexpr int kNoteNumberC4 = 72;
-inline constexpr int kNoteNumberCsharp4 = 73;
-inline constexpr int kNoteNumberD4 = 74;
-inline constexpr int kNoteNumberDsharp4 = 75;
-inline constexpr int kNoteNumberE4 = 76;
-inline constexpr int kNoteNumberF4 = 77;
-inline constexpr int kNoteNumberFsharp4 = 78;
-inline constexpr int kNoteNumberG4 = 79;
-inline constexpr int kNoteNumberGsharp4 = 80;
-inline constexpr int kNoteNumberA5 = 81;
-inline constexpr int kNoteNumberAsharp5 = 82;
-inline constexpr int kNoteNumberB5 = 83;
-inline constexpr int kNoteNumberC5 = 84;
-inline constexpr int kNoteNumberCsharp5 = 85;
-inline constexpr int kNoteNumberD5 = 86;
-inline constexpr int kNoteNumberDsharp5 = 87;
-inline constexpr int kNoteNumberE5 = 88;
-inline constexpr int kNoteNumberF5 = 89;
-inline constexpr int kNoteNumberFsharp5 = 90;
-inline constexpr int kNoteNumberG5 = 91;
-inline constexpr int kNoteNumberGsharp5 = 92;
-inline constexpr int kNoteNumberA6 = 93;
-inline constexpr int kNoteNumberAsharp6 = 94;
-inline constexpr int kNoteNumberB6 = 95;
-inline constexpr int kNoteNumberC6 = 96;
-inline constexpr int kNoteNumberCsharp6 = 97;
-inline constexpr int kNoteNumberD6 = 98;
-inline constexpr int kNoteNumberDsharp6 = 99;
-inline constexpr int kNoteNumberE6 = 100;
-inline constexpr int kNoteNumberF6 = 101;
-inline constexpr int kNoteNumberFsharp6 = 102;
-inline constexpr int kNoteNumberG6 = 103;
-inline constexpr int kNoteNumberGsharp6 = 104;
-inline constexpr int kNoteNumberA7 = 105;
-inline constexpr int kNoteNumberAsharp7 = 106;
-inline constexpr int kNoteNumberB7 = 107;
-inline constexpr int kNoteNumberC7 = 108;
-inline constexpr int kNoteNumberCsharp7 = 109;
-inline constexpr int kNoteNumberD7 = 110;
-inline constexpr int kNoteNumberDsharp7 = 111;
-inline constexpr int kNoteNumberE7 = 112;
-inline constexpr int kNoteNumberF7 = 1113;
-inline constexpr int kNoteNumberFsharp7 = 114;
-inline constexpr int kNoteNumberG7 = 115;
-inline constexpr int kNoteNumberGsharp7 = 116;
-inline constexpr int kNoteNumberKick = kNoteNumberC3;
-inline constexpr int kNoteNumberSnare = kNoteNumberD3;
-inline constexpr int kNoteNumberHihatClosed = kNoteNumberE3;
-inline constexpr int kNoteNumberHihatOpen = kNoteNumberF3;
+/// Common note pitches.
+inline constexpr float kPitchA0 = -4.0f;
+inline constexpr float kPitchAsharp0 = kPitchA0 + kPitchSemitones[1];
+inline constexpr float kPitchB0 = kPitchA0 + kPitchSemitones[2];
+inline constexpr float kPitchC0 = kPitchA0 + kPitchSemitones[3];
+inline constexpr float kPitchCsharp0 = kPitchA0 + kPitchSemitones[4];
+inline constexpr float kPitchD0 = kPitchA0 + kPitchSemitones[5];
+inline constexpr float kPitchDsharp0 = kPitchA0 + kPitchSemitones[6];
+inline constexpr float kPitchE0 = kPitchA0 + kPitchSemitones[7];
+inline constexpr float kPitchF0 = kPitchA0 + kPitchSemitones[8];
+inline constexpr float kPitchFsharp0 = kPitchA0 + kPitchSemitones[9];
+inline constexpr float kPitchG0 = kPitchA0 + kPitchSemitones[10];
+inline constexpr float kPitchGsharp0 = kPitchA0 + kPitchSemitones[11];
+inline constexpr float kPitchA1 = -3.0f;
+inline constexpr float kPitchAsharp1 = kPitchA1 + kPitchSemitones[1];
+inline constexpr float kPitchB1 = kPitchA1 + kPitchSemitones[2];
+inline constexpr float kPitchC1 = kPitchA1 + kPitchSemitones[3];
+inline constexpr float kPitchCsharp1 = kPitchA1 + kPitchSemitones[4];
+inline constexpr float kPitchD1 = kPitchA1 + kPitchSemitones[5];
+inline constexpr float kPitchDsharp1 = kPitchA1 + kPitchSemitones[6];
+inline constexpr float kPitchE1 = kPitchA1 + kPitchSemitones[7];
+inline constexpr float kPitchF1 = kPitchA1 + kPitchSemitones[8];
+inline constexpr float kPitchFsharp1 = kPitchA1 + kPitchSemitones[9];
+inline constexpr float kPitchG1 = kPitchA1 + kPitchSemitones[10];
+inline constexpr float kPitchGsharp1 = kPitchA1 + kPitchSemitones[11];
+inline constexpr float kPitchA2 = -2.0f;
+inline constexpr float kPitchAsharp2 = kPitchA2 + kPitchSemitones[1];
+inline constexpr float kPitchB2 = kPitchA2 + kPitchSemitones[2];
+inline constexpr float kPitchC2 = kPitchA2 + kPitchSemitones[3];
+inline constexpr float kPitchCsharp2 = kPitchA2 + kPitchSemitones[4];
+inline constexpr float kPitchD2 = kPitchA2 + kPitchSemitones[5];
+inline constexpr float kPitchDsharp2 = kPitchA2 + kPitchSemitones[6];
+inline constexpr float kPitchE2 = kPitchA2 + kPitchSemitones[7];
+inline constexpr float kPitchF2 = kPitchA2 + kPitchSemitones[8];
+inline constexpr float kPitchFsharp2 = kPitchA2 + kPitchSemitones[9];
+inline constexpr float kPitchG2 = kPitchA2 + kPitchSemitones[10];
+inline constexpr float kPitchGsharp2 = kPitchA2 + kPitchSemitones[11];
+inline constexpr float kPitchA3 = -1.0f;
+inline constexpr float kPitchAsharp3 = kPitchA3 + kPitchSemitones[1];
+inline constexpr float kPitchB3 = kPitchA3 + kPitchSemitones[2];
+inline constexpr float kPitchC3 = kPitchA3 + kPitchSemitones[3];
+inline constexpr float kPitchCsharp3 = kPitchA3 + kPitchSemitones[4];
+inline constexpr float kPitchD3 = kPitchA3 + kPitchSemitones[5];
+inline constexpr float kPitchDsharp3 = kPitchA3 + kPitchSemitones[6];
+inline constexpr float kPitchE3 = kPitchA3 + kPitchSemitones[7];
+inline constexpr float kPitchF3 = kPitchA3 + kPitchSemitones[8];
+inline constexpr float kPitchFsharp3 = kPitchA3 + kPitchSemitones[9];
+inline constexpr float kPitchG3 = kPitchA3 + kPitchSemitones[10];
+inline constexpr float kPitchGsharp3 = kPitchA3 + kPitchSemitones[11];
+inline constexpr float kPitchA4 = 0.0f;
+inline constexpr float kPitchAsharp4 = kPitchSemitones[1];
+inline constexpr float kPitchB4 = kPitchSemitones[2];
+inline constexpr float kPitchC4 = kPitchSemitones[3];
+inline constexpr float kPitchCsharp4 = kPitchSemitones[4];
+inline constexpr float kPitchD4 = kPitchSemitones[5];
+inline constexpr float kPitchDsharp4 = kPitchSemitones[6];
+inline constexpr float kPitchE4 = kPitchSemitones[7];
+inline constexpr float kPitchF4 = kPitchSemitones[8];
+inline constexpr float kPitchFsharp4 = kPitchSemitones[9];
+inline constexpr float kPitchG4 = kPitchSemitones[10];
+inline constexpr float kPitchGsharp4 = kPitchSemitones[11];
+inline constexpr float kPitchA5 = 1.0f;
+inline constexpr float kPitchAsharp5 = kPitchA5 + kPitchSemitones[1];
+inline constexpr float kPitchB5 = kPitchA5 + kPitchSemitones[2];
+inline constexpr float kPitchC5 = kPitchA5 + kPitchSemitones[3];
+inline constexpr float kPitchCsharp5 = kPitchA5 + kPitchSemitones[4];
+inline constexpr float kPitchD5 = kPitchA5 + kPitchSemitones[5];
+inline constexpr float kPitchDsharp5 = kPitchA5 + kPitchSemitones[6];
+inline constexpr float kPitchE5 = kPitchA5 + kPitchSemitones[7];
+inline constexpr float kPitchF5 = kPitchA5 + kPitchSemitones[8];
+inline constexpr float kPitchFsharp5 = kPitchA5 + kPitchSemitones[9];
+inline constexpr float kPitchG5 = kPitchA5 + kPitchSemitones[10];
+inline constexpr float kPitchGsharp5 = kPitchA5 + kPitchSemitones[11];
+inline constexpr float kPitchA6 = 2.0f;
+inline constexpr float kPitchAsharp6 = kPitchA6 + kPitchSemitones[1];
+inline constexpr float kPitchB6 = kPitchA6 + kPitchSemitones[2];
+inline constexpr float kPitchC6 = kPitchA6 + kPitchSemitones[3];
+inline constexpr float kPitchCsharp6 = kPitchA6 + kPitchSemitones[4];
+inline constexpr float kPitchD6 = kPitchA6 + kPitchSemitones[5];
+inline constexpr float kPitchDsharp6 = kPitchA6 + kPitchSemitones[6];
+inline constexpr float kPitchE6 = kPitchA6 + kPitchSemitones[7];
+inline constexpr float kPitchF6 = kPitchA6 + kPitchSemitones[8];
+inline constexpr float kPitchFsharp6 = kPitchA6 + kPitchSemitones[9];
+inline constexpr float kPitchG6 = kPitchA6 + kPitchSemitones[10];
+inline constexpr float kPitchGsharp6 = kPitchA6 + kPitchSemitones[11];
+inline constexpr float kPitchA7 = 3.0f;
+inline constexpr float kPitchAsharp7 = kPitchA7 + kPitchSemitones[1];
+inline constexpr float kPitchB7 = kPitchA7 + kPitchSemitones[2];
+inline constexpr float kPitchC7 = kPitchA7 + kPitchSemitones[3];
+inline constexpr float kPitchCsharp7 = kPitchA7 + kPitchSemitones[4];
+inline constexpr float kPitchD7 = kPitchA7 + kPitchSemitones[5];
+inline constexpr float kPitchDsharp7 = kPitchA7 + kPitchSemitones[6];
+inline constexpr float kPitchE7 = kPitchA7 + kPitchSemitones[7];
+inline constexpr float kPitchF7 = kPitchA7 + kPitchSemitones[8];
+inline constexpr float kPitchFsharp7 = kPitchA7 + kPitchSemitones[9];
+inline constexpr float kPitchG7 = kPitchA7 + kPitchSemitones[10];
+inline constexpr float kPitchGsharp7 = kPitchA7 + kPitchSemitones[11];
+inline constexpr float kPitchKick = kPitchC3;
+inline constexpr float kPitchSnare = kPitchD3;
+inline constexpr float kPitchHihatClosed = kPitchE3;
+inline constexpr float kPitchHihatOpen = kPitchF3;
 
 /// Common note values in relation to quarter note beat duration.
 inline constexpr int kNumQuarterNotesPerBeat = 1;
@@ -126,18 +150,12 @@ inline constexpr int kNumSixteenthTripletNotesPerBeat = 6;
 inline constexpr int kNumThirtySecondNotesPerBeat = 8;
 inline constexpr int kNumThirtySecondTripletNotesPerBeat = 12;
 
-/// Returns note number for the given scale and scale index.
+/// Returns note pitch for the given scale and scale index.
 ///
 /// @param scale Cumulative scale intervals of an octave in increasing order.
 /// @param scale_index Scale index.
-/// @return Note number in semitones.
-int GetNoteNumber(const std::vector<int>& scale, int scale_index);
-
-/// Returns pitch for the given note number.
-///
-/// @param note_number Note number in semitones.
 /// @return Pitch.
-float GetPitch(int note_number);
+float GetPitch(const std::vector<float>& scale, int scale_index);
 
 /// Returns quantized position for the given number of beat steps.
 ///

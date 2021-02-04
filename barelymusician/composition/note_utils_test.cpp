@@ -5,35 +5,19 @@
 namespace barelyapi {
 namespace {
 
-// Tests that expected note numbers are returned given an arbitrary scale.
-TEST(NoteUtilsTest, GetNoteNumber) {
+// Tests that expected note pitches are returned given an arbitrary scale.
+TEST(NoteUtilsTest, GetPitch) {
   const int kOctaveRange = 2;
+  const std::vector<float> kScale(std::cbegin(kPitchMajorScale),
+                                  std::cend(kPitchMajorScale));
 
-  const std::vector<int> kScale(std::cbegin(kMajorScale),
-                                std::cend(kMajorScale));
   const int scale_length = static_cast<int>(kScale.size());
-
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < scale_length; ++i) {
       const int scale_index = octave * scale_length + i;
-      const int expected_note_number = octave * kNumSemitones + kScale[i];
-      EXPECT_EQ(GetNoteNumber(kScale, scale_index), expected_note_number)
-          << scale_index;
+      const float expected_pitch = static_cast<float>(octave) + kScale[i];
+      EXPECT_FLOAT_EQ(GetPitch(kScale, scale_index), expected_pitch);
     }
-  }
-}
-
-// Tests that expected pitches are returned with respect to the given note
-// numbers.
-TEST(NoteUtilsTest, GetPitch) {
-  const float kEpsilon = 1e-2f;
-
-  const int kNumNoteNumbers = 4;
-  const int kNoteNumbers[kNumNoteNumbers] = {21, 60, 69, 93};
-  const float kPitches[kNumNoteNumbers] = {-4.00f, -0.75f, 0.00f, 2.00f};
-
-  for (int i = 0; i < kNumNoteNumbers; ++i) {
-    EXPECT_NEAR(GetPitch(kNoteNumbers[i]), kPitches[i], kEpsilon);
   }
 }
 

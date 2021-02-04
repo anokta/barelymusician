@@ -24,7 +24,6 @@
 namespace {
 
 using ::barelyapi::Engine;
-using ::barelyapi::GetNoteNumber;
 using ::barelyapi::GetPitch;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
@@ -53,7 +52,7 @@ constexpr double kTempo = 124.0;
 constexpr int kNumBeats = 3;
 
 // Ensemble settings.
-constexpr int kRootNote = barelyapi::kNoteNumberD3;
+constexpr float kRootNote = barelyapi::kPitchD3;
 constexpr int kNumInstrumentVoices = 8;
 
 constexpr char kDrumsBaseFilename[] =
@@ -71,12 +70,11 @@ int BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
        {SynthInstrumentParam::kEnvelopeRelease, release}});
 }
 
-void ComposeChord(int root_note_number, const std::vector<int>& scale,
+void ComposeChord(float root_note, const std::vector<float>& scale,
                   float intensity, int harmonic, std::vector<Note>* notes) {
   const auto add_chord_note = [&](int index) {
     notes->push_back(
-        Note{0.0, 1.0, GetPitch(root_note_number + GetNoteNumber(scale, index)),
-             intensity});
+        Note{0.0, 1.0, root_note + GetPitch(scale, index), intensity});
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -84,14 +82,13 @@ void ComposeChord(int root_note_number, const std::vector<int>& scale,
   add_chord_note(harmonic + 7);
 }
 
-void ComposeLine(int root_note_number, const std::vector<int>& scale,
+void ComposeLine(float root_note, const std::vector<float>& scale,
                  float intensity, int bar, int beat, int num_beats,
                  int harmonic, std::vector<Note>* notes) {
   const int note_offset = beat;
   const auto add_note = [&](double position, double duration, int index) {
-    notes->push_back(Note{
-        position, duration,
-        GetPitch(root_note_number + GetNoteNumber(scale, index)), intensity});
+    notes->push_back(Note{position, duration,
+                          root_note + GetPitch(scale, index), intensity});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);
@@ -117,50 +114,47 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   };
   // Kick.
   if (beat % 2 == 0) {
-    notes->emplace_back(Note{get_beat(0), get_beat(2),
-                             GetPitch(barelyapi::kNoteNumberKick), 1.0f});
+    notes->emplace_back(
+        Note{get_beat(0), get_beat(2), barelyapi::kPitchKick, 1.0f});
     if (bar % 2 == 1 && beat == 0) {
-      notes->emplace_back(Note{get_beat(2), get_beat(2),
-                               GetPitch(barelyapi::kNoteNumberKick), 1.0f});
+      notes->emplace_back(
+          Note{get_beat(2), get_beat(2), barelyapi::kPitchKick, 1.0f});
     }
   }
   // Snare.
   if (beat % 2 == 1) {
-    notes->emplace_back(Note{get_beat(0), get_beat(2),
-                             GetPitch(barelyapi::kNoteNumberSnare), 1.0f});
+    notes->emplace_back(
+        Note{get_beat(0), get_beat(2), barelyapi::kPitchSnare, 1.0f});
   }
   if (beat + 1 == num_beats) {
-    notes->emplace_back(Note{get_beat(2), get_beat(2),
-                             GetPitch(barelyapi::kNoteNumberSnare), 0.75f});
+    notes->emplace_back(
+        Note{get_beat(2), get_beat(2), barelyapi::kPitchSnare, 0.75f});
     if (bar % 4 == 3) {
-      notes->emplace_back(Note{get_beat(1), get_beat(1),
-                               GetPitch(barelyapi::kNoteNumberSnare), 1.0f});
-      notes->emplace_back(Note{get_beat(3), get_beat(1),
-                               GetPitch(barelyapi::kNoteNumberSnare), 0.75f});
+      notes->emplace_back(
+          Note{get_beat(1), get_beat(1), barelyapi::kPitchSnare, 1.0f});
+      notes->emplace_back(
+          Note{get_beat(3), get_beat(1), barelyapi::kPitchSnare, 0.75f});
     }
   }
   // Hihat Closed.
   notes->emplace_back(Note{get_beat(0), get_beat(2),
-                           GetPitch(barelyapi::kNoteNumberHihatClosed),
-                           Uniform(0.5f, 0.75f)});
+                           barelyapi::kPitchHihatClosed, Uniform(0.5f, 0.75f)});
   notes->emplace_back(Note{get_beat(2), get_beat(2),
-                           GetPitch(barelyapi::kNoteNumberHihatClosed),
+                           barelyapi::kPitchHihatClosed,
                            Uniform(0.25f, 0.75f)});
   // Hihat Open.
   if (beat + 1 == num_beats) {
     if (bar % 4 == 3) {
-      notes->emplace_back(Note{get_beat(1), get_beat(1),
-                               GetPitch(barelyapi::kNoteNumberHihatOpen),
-                               0.5f});
+      notes->emplace_back(
+          Note{get_beat(1), get_beat(1), barelyapi::kPitchHihatOpen, 0.5f});
     } else if (bar % 2 == 0) {
-      notes->emplace_back(Note{get_beat(3), get_beat(1),
-                               GetPitch(barelyapi::kNoteNumberHihatOpen),
-                               0.5f});
+      notes->emplace_back(
+          Note{get_beat(3), get_beat(1), barelyapi::kPitchHihatOpen, 0.5f});
     }
   }
   if (beat == 0 && bar % 4 == 0) {
-    notes->emplace_back(Note{get_beat(0), get_beat(2),
-                             GetPitch(barelyapi::kNoteNumberHihatOpen), 0.75f});
+    notes->emplace_back(
+        Note{get_beat(0), get_beat(2), barelyapi::kPitchHihatOpen, 0.75f});
   }
 }
 
@@ -178,8 +172,8 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetPlaybackTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
-  const std::vector<int> scale(std::cbegin(barelyapi::kMajorScale),
-                               std::cend(barelyapi::kMajorScale));
+  const std::vector<float> scale(std::cbegin(barelyapi::kPitchMajorScale),
+                                 std::cend(barelyapi::kPitchMajorScale));
 
   const auto bar_composer_callback = [&progression](int bar) -> int {
     return progression[bar % progression.size()];
@@ -248,9 +242,9 @@ int main(int /*argc*/, char* argv[]) {
       &engine, OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
 
   const auto line_beat_composer_callback = std::bind(
-      ComposeLine, kRootNote - barelyapi::kNumSemitones, scale, 1.0f,
-      std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5);
+      ComposeLine, kRootNote - 1.0f, scale, 1.0f, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+      std::placeholders::_5);
   const auto line_2_beat_composer_callback =
       std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3,
@@ -263,10 +257,10 @@ int main(int /*argc*/, char* argv[]) {
   const auto drumkit_instrument_id =
       engine.CreateInstrument(DrumkitInstrument::GetDefinition(), {});
   std::unordered_map<float, std::string> drumkit_map = {
-      {GetPitch(barelyapi::kNoteNumberKick), "basic_kick.wav"},
-      {GetPitch(barelyapi::kNoteNumberSnare), "basic_snare.wav"},
-      {GetPitch(barelyapi::kNoteNumberHihatClosed), "basic_hihat_closed.wav"},
-      {GetPitch(barelyapi::kNoteNumberHihatOpen), "basic_hihat_open.wav"}};
+      {barelyapi::kPitchKick, "basic_kick.wav"},
+      {barelyapi::kPitchSnare, "basic_snare.wav"},
+      {barelyapi::kPitchHihatClosed, "basic_hihat_closed.wav"},
+      {barelyapi::kPitchHihatOpen, "basic_hihat_open.wav"}};
   std::unordered_map<float, WavFile> drumkit_files;
   for (const auto& [index, name] : drumkit_map) {
     auto it = drumkit_files.emplace(index, WavFile{});

@@ -1,13 +1,11 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
-#include <cmath>
 #include <memory>
 #include <thread>
 
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"

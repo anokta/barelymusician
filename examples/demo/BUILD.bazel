@@ -9,7 +9,6 @@ cc_binary(
         "//barelymusician/common:random",
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_utils",
-        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
         "//examples/common:audio_output",
         "//examples/common:input_manager",
@@ -26,7 +25,7 @@ cc_binary(
     deps = [
         "//barelymusician/common:logging",
         "//barelymusician/composition:note_utils",
-        "//barelymusician/engine:task_runner",
+        "//barelymusician/engine",
         "//examples/common:audio_output",
         "//examples/common:input_manager",
         "//examples/instruments:synth_instrument",
@@ -39,7 +38,6 @@ cc_binary(
     deps = [
         "//barelymusician/common:logging",
         "//barelymusician/composition:note_utils",
-        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/engine",
         "//examples/common:audio_output",
         "//examples/common:input_manager",
@@ -54,7 +52,7 @@ cc_binary(
     deps = [
         "//barelymusician/common:logging",
         "//barelymusician/composition:note",
-        "//barelymusician/dsp:dsp_utils",
+        "//barelymusician/composition:note_utils",
         "//barelymusician/engine",
         "//examples/common:audio_output",
         "//examples/common:input_manager",

@@ -230,6 +230,7 @@ namespace BarelyApi {
           }
         };
         SetNoteOnCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
+        UpdateNative(_instancePtr, AudioSettings.dspTime + 2.0 * (double)Time.smoothDeltaTime);
       }
 
       private void OnApplicationQuit() {

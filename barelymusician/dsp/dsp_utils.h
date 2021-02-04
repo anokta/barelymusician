@@ -29,6 +29,12 @@ float DecibelsFromAmplitude(float amplitude);
 /// @return Filter coefficient.
 float GetFilterCoefficient(int sample_rate, float cuttoff_frequency);
 
+/// Returns frequency for the given pitch.
+///
+/// @param pitch Pitch.
+/// @return Frequency in Hz.
+float GetFrequency(float pitch);
+
 }  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_DSP_DSP_UTILS_H_

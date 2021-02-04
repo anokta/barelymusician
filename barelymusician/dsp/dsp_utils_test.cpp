@@ -41,12 +41,26 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
 
   const int kNumCutoffs = 5;
   const float kCutoffs[kNumCutoffs] = {0.0f, 100.0f, 500.0f, 1000.0f, 8000.0f};
-  const float kExpectedCoefficients[kNumCutoffs] = {1.0f, 0.92f, 0.68f, 0.46f,
-                                                    0.0f};
+  const float kExpectedCoefficients[kNumCutoffs] = {1.00f, 0.92f, 0.68f, 0.46f,
+                                                    0.00f};
 
   for (int i = 0; i < kNumCutoffs; ++i) {
     EXPECT_NEAR(GetFilterCoefficient(kSampleRate, kCutoffs[i]),
                 kExpectedCoefficients[i], kEpsilon);
+  }
+}
+
+// Tests that converting arbitrary pitches returns the expected frequencies.
+TEST(DspUtilsTest, GetFrequency) {
+  const float kEpsilon = 1e-2f;
+
+  const int kNumPitches = 5;
+  const float kPitches[kNumPitches] = {-4.0f, -0.75f, 0.0f, 2.0f, 3.3f};
+  const float kFrequencies[kNumPitches] = {27.50f, 261.62f, 440.00f, 1760.00f,
+                                           4333.63f};
+
+  for (int i = 0; i < kNumPitches; ++i) {
+    EXPECT_NEAR(GetFrequency(kPitches[i]), kFrequencies[i], kEpsilon);
   }
 }
 

@@ -41,7 +41,7 @@ cc_library(
     deps = [
         ":enveloped_voice",
         ":instrument",
-        "//barelymusician/composition:note_utils",
+        "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
         "//barelymusician/engine:instrument_definition",

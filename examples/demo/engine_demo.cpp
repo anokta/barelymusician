@@ -13,7 +13,6 @@
 #include "barelymusician/common/random.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -71,12 +70,11 @@ int BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
        {SynthInstrumentParam::kEnvelopeRelease, release}});
 }
 
-void ComposeChord(float root_note_index, const std::vector<float>& scale,
+void ComposeChord(float root_note, const std::vector<float>& scale,
                   float intensity, int harmonic, std::vector<Note>* notes) {
   const auto add_chord_note = [&](int index) {
-    notes->push_back(Note{
-        0.0, 1.0, root_note_index + GetPitch(scale, static_cast<float>(index)),
-        intensity});
+    notes->push_back(
+        Note{0.0, 1.0, root_note + GetPitch(scale, index), intensity});
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -84,15 +82,13 @@ void ComposeChord(float root_note_index, const std::vector<float>& scale,
   add_chord_note(harmonic + 7);
 }
 
-void ComposeLine(float root_note_index, const std::vector<float>& scale,
+void ComposeLine(float root_note, const std::vector<float>& scale,
                  float intensity, int bar, int beat, int num_beats,
                  int harmonic, std::vector<Note>* notes) {
   const int note_offset = beat;
   const auto add_note = [&](double position, double duration, int index) {
-    notes->push_back(
-        Note{position, duration,
-             root_note_index + GetPitch(scale, static_cast<float>(index)),
-             intensity});
+    notes->push_back(Note{position, duration,
+                          root_note + GetPitch(scale, index), intensity});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);
@@ -176,8 +172,8 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetPlaybackTempo(kTempo);
 
   const std::vector<int> progression = {0, 3, 4, 0};
-  const std::vector<float> scale(std::cbegin(barelyapi::kMajorScale),
-                                 std::cend(barelyapi::kMajorScale));
+  const std::vector<float> scale(std::cbegin(barelyapi::kPitchMajorScale),
+                                 std::cend(barelyapi::kPitchMajorScale));
 
   const auto bar_composer_callback = [&progression](int bar) -> int {
     return progression[bar % progression.size()];
@@ -246,9 +242,9 @@ int main(int /*argc*/, char* argv[]) {
       &engine, OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
 
   const auto line_beat_composer_callback = std::bind(
-      ComposeLine, kRootNote - barelyapi::kNumSemitones, scale, 1.0f,
-      std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
-      std::placeholders::_4, std::placeholders::_5);
+      ComposeLine, kRootNote - 1.0f, scale, 1.0f, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+      std::placeholders::_5);
   const auto line_2_beat_composer_callback =
       std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
                 std::placeholders::_2, std::placeholders::_3,

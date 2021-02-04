@@ -1025,7 +1025,6 @@ GameObject:
   - component: {fileID: 1219313105}
   - component: {fileID: 1219313104}
   - component: {fileID: 1219313103}
-  - component: {fileID: 1219313106}
   m_Layer: 0
   m_Name: SineInstrument
   m_TagString: Untagged
@@ -1156,21 +1155,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1219313106
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1219313102}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7514fc5c00cdc1247a6c4a66a8bbe8ff, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rootPitch: 60
-  beatNotes: []
-  interactive: 1
 --- !u!1 &1298915918
 GameObject:
   m_ObjectHideFlags: 0
@@ -1184,7 +1168,7 @@ GameObject:
   - component: {fileID: 1298915919}
   - component: {fileID: 1298915922}
   m_Layer: 0
-  m_Name: SynthInstrument
+  m_Name: Sequencer 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1317,7 +1301,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1298915922
 MonoBehaviour:
@@ -1328,24 +1312,51 @@ MonoBehaviour:
   m_GameObject: {fileID: 1298915918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7514fc5c00cdc1247a6c4a66a8bbe8ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 997cde229134afd438f66a0c6237c2ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootPitch: 48
-  beatNotes:
-  - pitch: 0
-    intensity: 1
-    position: 0
+  instrument: {fileID: 1298915919}
+  rootNote: 48
+  start: 0
+  length: 4
+  loop: 1
+  notes:
+  - position: 0
     duration: 0.5
-    beatMultiplier: 6
-    beatPeriod: 4
-  - pitch: 3
-    intensity: 0.5
-    position: 0.5
+    note: 0
+    intensity: 0.75
+  - position: 1
+    duration: 0.5
+    note: 6
+    intensity: 1
+  - position: 2
+    duration: 0.5
+    note: 12
+    intensity: 0.75
+  - position: 0.5
     duration: 0.25
-    beatMultiplier: 6
-    beatPeriod: 6
-  interactive: 0
+    note: 3
+    intensity: 0.5
+  - position: 1.5
+    duration: 0.25
+    note: 9
+    intensity: 0.5
+  - position: 2.33
+    duration: 0.33
+    note: 15
+    intensity: 0.5
+  - position: 2.66
+    duration: 0.33
+    note: 21
+    intensity: 0.66
+  - position: 3.5
+    duration: 0.25
+    note: 30
+    intensity: 0.75
+  - position: 3.75
+    duration: 0.25
+    note: 24
+    intensity: 0.5
 --- !u!1 &1554266977
 GameObject:
   m_ObjectHideFlags: 0
@@ -1464,7 +1475,7 @@ GameObject:
   - component: {fileID: 1714525513}
   - component: {fileID: 1714525512}
   m_Layer: 0
-  m_Name: SynthInstrument - Sequencer
+  m_Name: Sequencer 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1483,26 +1494,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 1714525513}
-  rootPitch: 60
+  rootNote: 60
   start: 0
   length: 4
   loop: 1
   notes:
   - position: 0
     duration: 0.5
-    pitch: 0
+    note: 0
     intensity: 0.75
   - position: 1
     duration: 0.5
-    pitch: 6
+    note: 6
     intensity: 0.75
   - position: 2
     duration: 0.5
-    pitch: 3
+    note: 3
     intensity: 0.75
   - position: 3
     duration: 0.5
-    pitch: 12
+    note: 12
     intensity: 1
 --- !u!114 &1714525513
 MonoBehaviour:
@@ -1631,7 +1642,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1737834378
 GameObject:
@@ -1665,7 +1676,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 1737834380}
-  rootPitch: 60
+  rootPitch: 0
   octaveOffset: 0
   noteIntensity: 1
 --- !u!114 &1737834380
@@ -1795,7 +1806,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2019863746
 GameObject:

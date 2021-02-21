@@ -78,8 +78,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto process_callback = [&](float* output) {
     engine.ProcessInstrument(metronome_id, timestamp, output, kNumChannels,
                              kNumFrames);
-    timestamp +=
-        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
+    timestamp = timestamp + static_cast<double>(kNumFrames) /
+                                static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 

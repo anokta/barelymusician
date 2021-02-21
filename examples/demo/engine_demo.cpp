@@ -285,8 +285,8 @@ int main(int /*argc*/, char* argv[]) {
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp +=
-        static_cast<double>(kNumFrames) / static_cast<double>(kSampleRate);
+    timestamp = timestamp + static_cast<double>(kNumFrames) /
+                                static_cast<double>(kSampleRate);
   };
   audio_output.SetProcessCallback(process_callback);
 

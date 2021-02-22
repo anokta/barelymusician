@@ -1,6 +1,7 @@
-barelymusician-sdk
+barelymusician
 ==============
 
-barelymusician native sdk.
+an adaptive music engine for interactive systems.
 
-For more information: http://www.aes.org/e-lib/browse.cfm?elib=17598
+for more information: http://www.aes.org/e-lib/browse.cfm?elib=17598
+legacy: https://github.com/anokta/barelymusician-legacy

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_
-#define BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_GENERIC_INSTRUMENT_H_
+#define BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_GENERIC_INSTRUMENT_H_
 
 #include <functional>
 
@@ -8,10 +8,10 @@
 namespace barelyapi::examples {
 
 /// Generic instrument interface.
-class Instrument {
+class GenericInstrument {
  public:
   /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~Instrument() = default;
+  virtual ~GenericInstrument() = default;
 
   /// Stops note with the given |pitch|.
   ///
@@ -45,8 +45,9 @@ class Instrument {
 
 /// Returns instrument definition for the given create instrument function.
 InstrumentDefinition GetInstrumentDefinition(
-    std::function<std::unique_ptr<Instrument>(int)> create_instrument_fn);
+    std::function<std::unique_ptr<GenericInstrument>(int)>
+        create_instrument_fn);
 
 }  // namespace barelyapi::examples
 
-#endif  // BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_GENERIC_INSTRUMENT_H_

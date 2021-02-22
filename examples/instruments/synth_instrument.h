@@ -9,7 +9,7 @@
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "examples/instruments/enveloped_voice.h"
-#include "examples/instruments/instrument.h"
+#include "examples/instruments/generic_instrument.h"
 
 namespace barelyapi::examples {
 
@@ -24,12 +24,12 @@ enum SynthInstrumentParam {
 };
 
 /// Simple polyphonic synth instrument.
-class SynthInstrument : public Instrument {
+class SynthInstrument : public GenericInstrument {
  public:
   /// Constructs new |SynthInstrument|.
   explicit SynthInstrument(int sample_rate);
 
-  /// Implements |Instrument|.
+  /// Implements |GenericInstrument|.
   void NoteOff(float pitch) override;
   void NoteOn(float pitch, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;

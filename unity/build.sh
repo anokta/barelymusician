@@ -48,6 +48,8 @@ parse_flags() {
 }
 
 main() {
+  set -e
+  
   parse_flags "$@"
 
   echo "Building BarelyMusician Unity plugins..."

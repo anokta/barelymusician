@@ -1,6 +1,7 @@
 #include "barelymusician/engine/engine.h"
 
 #include <algorithm>
+#include <any>
 #include <vector>
 
 #include "barelymusician/engine/instrument_data.h"
@@ -20,29 +21,25 @@ constexpr int kNumFrames = 12;
 InstrumentDefinition GetTestInstrumentDefinition() {
   return InstrumentDefinition{
       .create_fn = [](InstrumentState* state,
-                      int /*sample_rate*/) { *state = new float(0.0f); },
-      .destroy_fn =
-          [](InstrumentState* state) {
-            float* sample = reinterpret_cast<float*>(*state);
-            delete sample;
-          },
+                      int /*sample_rate*/) { state->emplace<float>(0.0f); },
+      .destroy_fn = [](InstrumentState* state) { state->reset(); },
       .process_fn =
           [](InstrumentState* state, float* output, int num_channels,
              int num_frames) {
             std::fill_n(output, num_channels * num_frames,
-                        *reinterpret_cast<float*>(*state));
+                        *std::any_cast<float>(state));
           },
       .set_note_off_fn =
           [](InstrumentState* state, float /*pitch*/) {
-            *reinterpret_cast<float*>(*state) = 0.0f;
+            *std::any_cast<float>(state) = 0.0f;
           },
       .set_note_on_fn =
           [](InstrumentState* state, float pitch, float intensity) {
-            *reinterpret_cast<float*>(*state) = pitch * intensity;
+            *std::any_cast<float>(state) = pitch * intensity;
           },
       .set_param_fn =
           [](InstrumentState* state, int id, float value) {
-            *reinterpret_cast<float*>(*state) = static_cast<float>(id) * value;
+            *std::any_cast<float>(state) = static_cast<float>(id) * value;
           }};
 }
 

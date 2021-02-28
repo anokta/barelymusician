@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 
+#include <any>
 #include <functional>
 #include <optional>
 #include <vector>
@@ -8,7 +9,7 @@
 namespace barelyapi {
 
 /// Instrument state type.
-using InstrumentState = void*;
+using InstrumentState = std::any;
 
 /// Instrument create function signature.
 using CreateInstrumentFn =

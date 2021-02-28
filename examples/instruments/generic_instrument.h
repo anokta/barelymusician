@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_GENERIC_INSTRUMENT_H_
 #define BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_GENERIC_INSTRUMENT_H_
 
+#include <any>
 #include <functional>
 
 #include "barelymusician/engine/instrument_definition.h"
@@ -44,9 +45,42 @@ class GenericInstrument {
 };
 
 /// Returns instrument definition for the given create instrument function.
+template <typename InstrumentType>
 InstrumentDefinition GetInstrumentDefinition(
-    std::function<std::unique_ptr<GenericInstrument>(int)>
-        create_instrument_fn);
+    std::function<InstrumentType(int)> create_instrument_fn) {
+  return InstrumentDefinition{
+      .create_fn =
+          [create_instrument_fn](InstrumentState* state, int sample_rate) {
+            state->emplace<InstrumentType>(create_instrument_fn(sample_rate));
+          },
+      .destroy_fn = [](InstrumentState* state) { state->reset(); },
+      .process_fn =
+          [](InstrumentState* state, float* output, int num_channels,
+             int num_frames) {
+            auto* instrument = std::any_cast<InstrumentType>(state);
+            instrument->Process(output, num_channels, num_frames);
+          },
+      .set_custom_data_fn =
+          [](InstrumentState* state, void* data) {
+            auto* instrument = std::any_cast<InstrumentType>(state);
+            instrument->SetCustomData(data);
+          },
+      .set_note_off_fn =
+          [](InstrumentState* state, float pitch) {
+            auto* instrument = std::any_cast<InstrumentType>(state);
+            instrument->NoteOff(pitch);
+          },
+      .set_note_on_fn =
+          [](InstrumentState* state, float pitch, float intensity) {
+            auto* instrument = std::any_cast<InstrumentType>(state);
+            instrument->NoteOn(pitch, intensity);
+          },
+      .set_param_fn =
+          [](InstrumentState* state, int param_id, float param_value) {
+            auto* instrument = std::any_cast<InstrumentType>(state);
+            instrument->SetParam(param_id, param_value);
+          }};
+}
 
 }  // namespace barelyapi::examples
 

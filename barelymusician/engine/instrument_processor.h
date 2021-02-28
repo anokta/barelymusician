@@ -20,13 +20,11 @@ class InstrumentProcessor {
   /// Destroys |InstrumentProcessor|.
   ~InstrumentProcessor();
 
-  /// Non-copyable.
-  InstrumentProcessor(const InstrumentProcessor& other) = delete;
-  InstrumentProcessor& operator=(const InstrumentProcessor& other) = delete;
-
-  /// Movable.
-  InstrumentProcessor(InstrumentProcessor&& other) noexcept;
-  InstrumentProcessor& operator=(InstrumentProcessor&& other) noexcept;
+  /// Copyable and movable.
+  InstrumentProcessor(const InstrumentProcessor& other) = default;
+  InstrumentProcessor& operator=(const InstrumentProcessor& other) = default;
+  InstrumentProcessor(InstrumentProcessor&& other) = default;
+  InstrumentProcessor& operator=(InstrumentProcessor&& other) = default;
 
   /// Processes the next output buffer at a given timestamp.
   ///

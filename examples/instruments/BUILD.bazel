@@ -26,10 +26,8 @@ cc_library(
 
 cc_library(
     name = "generic_instrument",
-    srcs = ["generic_instrument.cpp"],
     hdrs = ["generic_instrument.h"],
     deps = [
-        "//barelymusician/common:logging",
         "//barelymusician/engine:instrument_definition",
     ],
 )

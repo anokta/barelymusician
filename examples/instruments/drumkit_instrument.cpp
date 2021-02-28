@@ -52,9 +52,8 @@ void DrumkitInstrument::SetCustomData(void* data) {
 }
 
 InstrumentDefinition DrumkitInstrument::GetDefinition() {
-  return GetInstrumentDefinition([](int sample_rate) {
-    return std::make_unique<DrumkitInstrument>(sample_rate);
-  });
+  return GetInstrumentDefinition<DrumkitInstrument>(
+      [](int sample_rate) { return DrumkitInstrument(sample_rate); });
 }
 
 void DrumkitInstrument::Add(float pitch, const WavFile& wav_file) {

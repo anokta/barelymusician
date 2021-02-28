@@ -23,9 +23,7 @@ double SecondsFromSamples(int sample_rate, int samples) {
 
 InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
                                          int sample_rate)
-    : sample_rate_(sample_rate),
-      definition_(std::move(definition)),
-      state_(nullptr) {
+    : sample_rate_(sample_rate), definition_(std::move(definition)) {
   if (definition_.create_fn) {
     definition_.create_fn(&state_, sample_rate);
   }
@@ -35,23 +33,6 @@ InstrumentProcessor::~InstrumentProcessor() {
   if (definition_.destroy_fn) {
     definition_.destroy_fn(&state_);
   }
-}
-
-InstrumentProcessor::InstrumentProcessor(InstrumentProcessor&& other) noexcept
-    : sample_rate_(std::exchange(other.sample_rate_, 0)),
-      definition_(std::exchange(other.definition_, {})),
-      state_(std::exchange(other.state_, nullptr)),
-      data_(std::move(other.data_)) {}
-
-InstrumentProcessor& InstrumentProcessor::operator=(
-    InstrumentProcessor&& other) noexcept {
-  if (this != &other) {
-    std::swap(sample_rate_, other.sample_rate_);
-    std::swap(definition_, other.definition_);
-    std::swap(state_, other.state_);
-    data_ = std::move(other.data_);
-  }
-  return *this;
 }
 
 void InstrumentProcessor::Process(double timestamp, float* output,

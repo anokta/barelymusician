@@ -1,5 +1,6 @@
 #include "barelymusician/engine/spin_mutex.h"
 
+#include <algorithm>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -26,8 +27,7 @@ TEST(SpinMutexTest, SingleThread) {
 
 // Tests that the mutex works as expected when called by multiple threads.
 TEST(SpinMutexTest, MultipleThreads) {
-  const int kNumThreads = 10;
-  const int kThreadDelayMs = 50;
+  const int kNumThreads = 100;
 
   SpinMutex mutex;
 
@@ -35,15 +35,9 @@ TEST(SpinMutexTest, MultipleThreads) {
   std::vector<int> values;
   for (int i = 0; i < kNumThreads; ++i) {
     threads.emplace_back([&, i]() {
-      if (i == 0) {
-        EXPECT_TRUE(mutex.try_lock());
-      } else {
-        ASSERT_FALSE(mutex.try_lock());
-        mutex.lock();
-      }
-      values.push_back(i);
-      std::this_thread::sleep_for(std::chrono::milliseconds(kThreadDelayMs));
-      mutex.unlock();
+      std::lock_guard lock(mutex);
+      EXPECT_FALSE(mutex.try_lock());
+      values.insert(std::lower_bound(values.begin(), values.end(), i), i);
     });
   }
 
@@ -52,8 +46,11 @@ TEST(SpinMutexTest, MultipleThreads) {
       threads[i].join();
     }
   }
+
   EXPECT_EQ(values.size(), kNumThreads);
-  EXPECT_EQ(values.front(), 0);
+  for (int i = 0; i < kNumThreads; ++i) {
+    EXPECT_EQ(values[i], i);
+  }
 
   EXPECT_TRUE(mutex.try_lock());
   EXPECT_FALSE(mutex.try_lock());

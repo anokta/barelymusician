@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <atomic>
 #include <chrono>
 #include <memory>
 #include <thread>
@@ -11,6 +10,7 @@
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/engine.h"
+#include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
@@ -21,6 +21,7 @@ namespace {
 using ::barelyapi::Engine;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
 using ::barelyapi::examples::SynthInstrument;
@@ -104,6 +105,7 @@ int main(int /*argc*/, char* argv[]) {
   LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
             << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
+  AudioClock clock(kSampleRate);
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
   engine.SetNoteOnCallback([](int id, double, float pitch, float intensity) {
@@ -143,17 +145,15 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& id : instrument_ids) {
-      engine.ProcessInstrument(id, timestamp, temp_buffer.data(), kNumChannels,
-                               kNumFrames);
+      engine.ProcessInstrument(id, clock.GetTimestamp(), temp_buffer.data(),
+                               kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp = timestamp + static_cast<double>(kNumFrames) /
-                                static_cast<double>(kSampleRate);
+    clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -171,12 +171,12 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  engine.Update(timestamp + kLookahead);
+  engine.Update(clock.GetTimestamp() + kLookahead);
   engine.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(timestamp + kLookahead);
+    engine.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

@@ -14,6 +14,7 @@
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/engine.h"
+#include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"
@@ -27,6 +28,7 @@ using ::barelyapi::Engine;
 using ::barelyapi::GetPitch;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::DrumkitInstrument;
 using ::barelyapi::examples::InputManager;
@@ -168,6 +170,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
+  AudioClock clock(kSampleRate);
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
 
@@ -276,17 +279,15 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const auto& [id, callback] : performers) {
-      engine.ProcessInstrument(id, timestamp, temp_buffer.data(), kNumChannels,
-                               kNumFrames);
+      engine.ProcessInstrument(id, clock.GetTimestamp(), temp_buffer.data(),
+                               kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
-    timestamp = timestamp + static_cast<double>(kNumFrames) /
-                                static_cast<double>(kSampleRate);
+    clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -327,12 +328,12 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  engine.Update(timestamp + kLookahead);
+  engine.Update(clock.GetTimestamp() + kLookahead);
   engine.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(timestamp + kLookahead);
+    engine.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

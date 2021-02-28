@@ -7,6 +7,7 @@
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/engine.h"
+#include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
@@ -15,6 +16,7 @@ namespace {
 
 using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
 using ::barelyapi::examples::SynthInstrument;
@@ -48,6 +50,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
+  AudioClock clock(kSampleRate);
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kInitialTempo);
 
@@ -74,12 +77,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::atomic<double> timestamp = 0.0;
   const auto process_callback = [&](float* output) {
-    engine.ProcessInstrument(metronome_id, timestamp, output, kNumChannels,
-                             kNumFrames);
-    timestamp = timestamp + static_cast<double>(kNumFrames) /
-                                static_cast<double>(kSampleRate);
+    engine.ProcessInstrument(metronome_id, clock.GetTimestamp(), output,
+                             kNumChannels, kNumFrames);
+    clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -129,12 +130,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  engine.Update(timestamp + kLookahead);
+  engine.Update(clock.GetTimestamp() + kLookahead);
   engine.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(timestamp + kLookahead);
+    engine.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

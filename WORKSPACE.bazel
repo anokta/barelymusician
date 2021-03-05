@@ -4,9 +4,9 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 
 git_repository(
     name = "googletest",
-    commit = "703bd9caab50b139428cea1aaff9974ebee5742e",
+    commit = "e7e591764baba0a0c3c9ad0014430e7a27331d16",
     remote = "https://github.com/google/googletest.git",
-    shallow_since = "1570114335 -0400",
+    shallow_since = "1614877659 -0500",
 )
 
 new_git_repository(

@@ -48,12 +48,6 @@ std::vector<Param> InstrumentController::GetAllParams() const {
 }
 
 std::vector<std::pair<double, InstrumentData>>
-InstrumentController::GetAllScheduledData() const {
-  return std::vector<std::pair<double, InstrumentData>>{data_.begin(),
-                                                        data_.end()};
-}
-
-std::vector<std::pair<double, InstrumentData>>
 InstrumentController::GetAllScheduledData(double begin_position,
                                           double end_position) const {
   const auto begin = data_.lower_bound(begin_position);

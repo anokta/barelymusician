@@ -41,8 +41,8 @@ constexpr float kBarPitch = barelyapi::kPitchA4;
 constexpr float kBeatPitch = barelyapi::kPitchA3;
 
 constexpr int kNumBeats = 4;
-constexpr double kInitialTempo = 120.0;
-constexpr double kTempoIncrement = 10.0;
+constexpr double kInitialTempo = 2.0;
+constexpr double kTempoIncrement = 0.1;
 
 }  // namespace
 
@@ -71,8 +71,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    engine.ScheduleInstrumentNote(metronome_id, position, kTickDuration, pitch,
-                                  kGain);
+    engine.ScheduleInstrumentNote(metronome_id, position,
+                                  position + kTickDuration, pitch, kGain);
   };
   engine.SetBeatCallback(beat_callback);
 
@@ -123,7 +123,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     engine.SetPlaybackTempo(tempo);
-    LOG(INFO) << "Tempo set to " << tempo;
+    LOG(INFO) << "Tempo set to " << (60.0 * tempo) << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

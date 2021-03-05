@@ -222,17 +222,8 @@ class Engine {
   // Sets processor |data| of instrument with the given |instrument_id|.
   void SetProcessorData(int instrument_id, InstrumentData data);
 
-  // Sampling rate in Hz.
-  int sample_rate_;
-
   // Playback clock.
   Clock clock_;
-
-  // Denotes whether playback is active or not.
-  bool is_playing_;
-
-  // Last updated timestamp in seconds.
-  double timestamp_;
 
   // Instrument id counter.
   int id_counter_;
@@ -240,6 +231,9 @@ class Engine {
   // List of instruments.
   std::unordered_map<int, InstrumentController> controllers_;
   std::unordered_map<int, InstrumentProcessor> processors_;
+
+  // Sampling rate in Hz.
+  int sample_rate_;
 
   // Audio thread task runner.
   TaskRunner task_runner_;

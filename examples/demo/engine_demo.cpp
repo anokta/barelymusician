@@ -50,7 +50,7 @@ constexpr int kNumFrames = 1024;
 constexpr double kLookahead = 0.1;
 
 // Sequencer settings.
-constexpr double kTempo = 124.0;
+constexpr double kTempo = 124.0 / 60.0;
 constexpr int kNumBeats = 3;
 
 // Ensemble settings.

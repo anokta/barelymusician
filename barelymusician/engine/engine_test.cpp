@@ -110,7 +110,6 @@ TEST(EngineTest, ScheduleInstrumentNotes) {
   Engine engine(1);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
-  engine.SetPlaybackTempo(60.0);
   engine.StartPlayback();
 
   // Create instrument.
@@ -284,7 +283,6 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   EXPECT_NE(note_off_timestamp, 3.0);
 
   // Trigger both callbacks with a scheduled note.
-  engine.SetPlaybackTempo(60.0);
   engine.StartPlayback();
   engine.ScheduleInstrumentNote(instrument_id, 1.0, 1.5, 10.0f, 1.0f);
 

@@ -29,11 +29,6 @@ class InstrumentController {
   /// @return List of all instrument parameters.
   std::vector<Param> GetAllParams() const;
 
-  /// Returns all scheduled data.
-  ///
-  /// @return List of instrument data.
-  std::vector<std::pair<double, InstrumentData>> GetAllScheduledData() const;
-
   /// Returns all scheduled data in range.
   ///
   /// @param begin_position Begin position in beats.

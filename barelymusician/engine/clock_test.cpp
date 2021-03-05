@@ -5,12 +5,12 @@
 namespace barelyapi {
 namespace {
 
-constexpr double kTempo = 120.0;
+constexpr double kTempo = 1.5;
 
 // Tests that the clock sets its tempo as expected.
 TEST(ClockTest, SetTempo) {
   Clock clock;
-  EXPECT_DOUBLE_EQ(clock.GetTempo(), 0.0);
+  EXPECT_DOUBLE_EQ(clock.GetTempo(), 1.0);
 
   clock.SetTempo(kTempo);
   EXPECT_DOUBLE_EQ(clock.GetTempo(), kTempo);
@@ -27,18 +27,42 @@ TEST(ClockTest, SetPosition) {
   EXPECT_DOUBLE_EQ(clock.GetPosition(), kPosition);
 }
 
-// Tests that the clock updates its position as expected.
-TEST(ClockTest, UpdatePosition) {
+// Tests that the clock updates its state as expected.
+TEST(ClockTest, Update) {
   Clock clock;
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 0.0);
+  EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 0.0);
+  EXPECT_FALSE(clock.IsPlaying());
 
-  clock.UpdatePosition(1.0);
+  clock.Update(1.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 0.0);
+  EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 1.0);
+
+  clock.Start();
+  EXPECT_TRUE(clock.IsPlaying());
+
+  clock.Update(2.0);
+  EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.0);
+  EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 2.0);
+  EXPECT_DOUBLE_EQ(clock.GetTimestampAtPosition(2.0), 3.0);
+
+  clock.Update(2.0);
+  EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.0);
+  EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 2.0);
+  EXPECT_DOUBLE_EQ(clock.GetTimestampAtPosition(1.0), 2.0);
 
   clock.SetTempo(kTempo);
 
-  clock.UpdatePosition(1.0);
-  EXPECT_DOUBLE_EQ(clock.GetPosition(), kTempo / kSecondsFromMinutes);
+  clock.Update(3.0);
+  EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.0 + kTempo);
+  EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 3.0);
+  EXPECT_DOUBLE_EQ(clock.GetTimestampAtPosition(1.0), 2.0);
+
+  clock.Stop();
+
+  clock.Update(4.0);
+  EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.0 + kTempo);
+  EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 4.0);
 }
 
 }  // namespace

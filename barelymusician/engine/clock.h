@@ -3,9 +3,6 @@
 
 namespace barelyapi {
 
-/// Converts minutes to seconds.
-inline constexpr double kSecondsFromMinutes = 60.0;
-
 /// Clock that keeps track of position in beats.
 class Clock {
  public:
@@ -19,8 +16,25 @@ class Clock {
 
   /// Returns the tempo.
   ///
-  /// @return Tempo in BPM.
+  /// @return Tempo in beats per second.
   double GetTempo() const;
+
+  /// Returns the current timestamp.
+  ///
+  /// @return Timestamp in seconds.
+  double GetTimestamp() const;
+
+  /// Returns the timestamp at position.
+  /// @note Assumes the playback is active with a constant valid tempo.
+  ///
+  /// @param position Position in beats.
+  /// @return Timestamp in seconds.
+  double GetTimestampAtPosition(double position) const;
+
+  /// Returns whether the playback is currently active or not.
+  ///
+  /// @return True if playing, false otherwise.
+  bool IsPlaying() const;
 
   /// Sets the current position.
   ///
@@ -29,20 +43,32 @@ class Clock {
 
   /// Sets the tempo.
   ///
-  /// @param tempo Tempo in BPM.
+  /// @param tempo Tempo in beats per second.
   void SetTempo(double tempo);
 
-  /// Updates the current position.
+  /// Starts playback.
+  void Start();
+
+  /// Stops playback.
+  void Stop();
+
+  /// Updates the current state.
   ///
-  /// @param seconds Number of seconds to iterate.
-  void UpdatePosition(double seconds);
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp);
 
  private:
+  // Denotes whether the playback is active or not.
+  double is_playing_;
+
   // Position in beats.
   double position_;
 
-  // Tempo in BPM.
+  // Tempo in beats per second.
   double tempo_;
+
+  // Last updated timestamp in seconds.
+  double timestamp_;
 };
 
 }  // namespace barelyapi

@@ -105,7 +105,7 @@ double GetPosition(BarelyMusician* barelymusician) {
 
 double GetTempo(BarelyMusician* barelymusician) {
   if (barelymusician) {
-    return barelymusician->engine.GetPlaybackTempo();
+    return 60.0 * barelymusician->engine.GetPlaybackTempo();
   }
   return 0.0f;
 }
@@ -141,8 +141,8 @@ void ResetAllParams(BarelyMusician* barelymusician, int id) {
 void ScheduleNote(BarelyMusician* barelymusician, int id, double position,
                   double duration, float pitch, float intensity) {
   if (barelymusician) {
-    barelymusician->engine.ScheduleInstrumentNote(id, position, duration, pitch,
-                                                  intensity);
+    barelymusician->engine.ScheduleInstrumentNote(
+        id, position, position + duration, pitch, intensity);
   }
 }
 
@@ -238,7 +238,7 @@ void SetPosition(BarelyMusician* barelymusician, double position) {
 
 void SetTempo(BarelyMusician* barelymusician, double tempo) {
   if (barelymusician) {
-    barelymusician->engine.SetPlaybackTempo(tempo);
+    barelymusician->engine.SetPlaybackTempo(tempo / 60.0);
   }
 }
 

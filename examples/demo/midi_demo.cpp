@@ -37,7 +37,7 @@ constexpr int kNumFrames = 512;
 constexpr double kLookahead = 0.1;
 
 // Sequencer settings.
-constexpr double kTempo = 132.0;
+constexpr double kTempo = 132.0 / 60.0;
 
 // Performer settings.
 constexpr int kNumInstrumentVoices = 16;

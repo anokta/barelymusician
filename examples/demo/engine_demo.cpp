@@ -88,25 +88,26 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
                  float intensity, int bar, int beat, int num_beats,
                  int harmonic, std::vector<Note>* notes) {
   const int note_offset = beat;
-  const auto add_note = [&](double position, double duration, int index) {
-    notes->push_back(Note{position, duration,
+  const auto add_note = [&](double begin_position, double end_position,
+                            int index) {
+    notes->push_back(Note{begin_position, end_position,
                           root_note + GetPitch(scale, index), intensity});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);
-    add_note(0.33, 0.33, harmonic - note_offset);
-    add_note(0.66, 0.33, harmonic);
+    add_note(0.33, 0.66, harmonic - note_offset);
+    add_note(0.66, 1.0, harmonic);
   } else {
     add_note(0.0, 0.25, harmonic + note_offset);
   }
   if (beat % 2 == 0) {
     add_note(0.0, 0.05, harmonic - note_offset);
-    add_note(0.5, 0.05, harmonic - 2 * note_offset);
+    add_note(0.5, 0.55, harmonic - 2 * note_offset);
   }
   if (beat + 1 == num_beats && bar % 2 == 1) {
-    add_note(0.25, 0.125, harmonic + 2 * note_offset);
-    add_note(0.75, 0.125, harmonic - 2 * note_offset);
-    add_note(0.5, 0.25, harmonic + 2 * note_offset);
+    add_note(0.25, 0.375, harmonic + 2 * note_offset);
+    add_note(0.75, 0.875, harmonic - 2 * note_offset);
+    add_note(0.5, 0.75, harmonic + 2 * note_offset);
   }
 }
 
@@ -120,7 +121,7 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
         Note{get_beat(0), get_beat(2), barelyapi::kPitchKick, 1.0f});
     if (bar % 2 == 1 && beat == 0) {
       notes->emplace_back(
-          Note{get_beat(2), get_beat(2), barelyapi::kPitchKick, 1.0f});
+          Note{get_beat(2), get_beat(4), barelyapi::kPitchKick, 1.0f});
     }
   }
   // Snare.
@@ -130,28 +131,28 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   }
   if (beat + 1 == num_beats) {
     notes->emplace_back(
-        Note{get_beat(2), get_beat(2), barelyapi::kPitchSnare, 0.75f});
+        Note{get_beat(2), get_beat(4), barelyapi::kPitchSnare, 0.75f});
     if (bar % 4 == 3) {
       notes->emplace_back(
-          Note{get_beat(1), get_beat(1), barelyapi::kPitchSnare, 1.0f});
+          Note{get_beat(1), get_beat(2), barelyapi::kPitchSnare, 1.0f});
       notes->emplace_back(
-          Note{get_beat(3), get_beat(1), barelyapi::kPitchSnare, 0.75f});
+          Note{get_beat(3), get_beat(4), barelyapi::kPitchSnare, 0.75f});
     }
   }
   // Hihat Closed.
   notes->emplace_back(Note{get_beat(0), get_beat(2),
                            barelyapi::kPitchHihatClosed, Uniform(0.5f, 0.75f)});
-  notes->emplace_back(Note{get_beat(2), get_beat(2),
+  notes->emplace_back(Note{get_beat(2), get_beat(4),
                            barelyapi::kPitchHihatClosed,
                            Uniform(0.25f, 0.75f)});
   // Hihat Open.
   if (beat + 1 == num_beats) {
     if (bar % 4 == 3) {
       notes->emplace_back(
-          Note{get_beat(1), get_beat(1), barelyapi::kPitchHihatOpen, 0.5f});
+          Note{get_beat(1), get_beat(2), barelyapi::kPitchHihatOpen, 0.5f});
     } else if (bar % 2 == 0) {
       notes->emplace_back(
-          Note{get_beat(3), get_beat(1), barelyapi::kPitchHihatOpen, 0.5f});
+          Note{get_beat(3), get_beat(4), barelyapi::kPitchHihatOpen, 0.5f});
     }
   }
   if (beat == 0 && bar % 4 == 0) {
@@ -204,9 +205,12 @@ int main(int /*argc*/, char* argv[]) {
         callback(current_bar, current_beat, kNumBeats, harmonic, &temp_notes);
       }
       for (const Note& note : temp_notes) {
-        const double position = static_cast<double>(beat) + note.position;
-        engine.ScheduleInstrumentNote(id, position, note.duration, note.pitch,
-                                      note.intensity);
+        const double begin_position =
+            static_cast<double>(beat) + note.begin_position;
+        const double end_position =
+            static_cast<double>(beat) + note.end_position;
+        engine.ScheduleInstrumentNote(id, begin_position, end_position,
+                                      note.pitch, note.intensity);
       }
     }
   };

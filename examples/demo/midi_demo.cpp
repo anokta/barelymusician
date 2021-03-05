@@ -73,8 +73,9 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
       Note note;
-      note.position = get_position(midi_event.tick);
-      note.duration = get_position(midi_event.getTickDuration());
+      note.begin_position = get_position(midi_event.tick);
+      note.end_position =
+          note.begin_position + get_position(midi_event.getTickDuration());
       note.pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
@@ -136,8 +137,9 @@ int main(int /*argc*/, char* argv[]) {
          {SynthInstrumentParam::kEnvelopeRelease, kInstrumentEnvelopeRelease},
          {SynthInstrumentParam::kGain, kInstrumentGain}});
     for (const Note& note : score) {
-      engine.ScheduleInstrumentNote(instrument_id, note.position, note.duration,
-                                    note.pitch, note.intensity);
+      engine.ScheduleInstrumentNote(instrument_id, note.begin_position,
+                                    note.end_position, note.pitch,
+                                    note.intensity);
     }
     instrument_ids.push_back(instrument_id);
   }

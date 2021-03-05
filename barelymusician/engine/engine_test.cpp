@@ -129,7 +129,7 @@ TEST(EngineTest, ScheduleInstrumentNotes) {
   // Schedule new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
     engine.ScheduleInstrumentNote(instrument_id, static_cast<double>(i),
-                                  static_cast<double>(kNumFrames),
+                                  static_cast<double>(i + kNumFrames),
                                   static_cast<float>(i), kNoteIntensity);
   }
   engine.Update(static_cast<double>(kNumFrames));
@@ -286,7 +286,7 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   // Trigger both callbacks with a scheduled note.
   engine.SetPlaybackTempo(60.0);
   engine.StartPlayback();
-  engine.ScheduleInstrumentNote(instrument_id, 1.0, 0.5, 10.0f, 1.0f);
+  engine.ScheduleInstrumentNote(instrument_id, 1.0, 1.5, 10.0f, 1.0f);
 
   engine.Update(4.0);
   EXPECT_NE(note_on_timestamp, 4.0);

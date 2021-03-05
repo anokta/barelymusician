@@ -68,11 +68,11 @@ class InstrumentController {
 
   /// Schedules note.
   ///
-  /// @param position Note position.
-  /// @param duration Note duration.
+  /// @param begin_position Note begin position.
+  /// @param end_position Note end position.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  void ScheduleNote(double position, double duration, float pitch,
+  void ScheduleNote(double begin_position, double end_position, float pitch,
                     float intensity);
 
   /// Sets all active notes off.

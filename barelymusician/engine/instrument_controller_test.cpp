@@ -42,8 +42,8 @@ TEST(InstrumentControllerTest, ResetAllParams) {
 
 // Tests that the controller schedules a single note as expected.
 TEST(InstrumentControllerTest, ScheduleSingleNote) {
-  const double kPosition = 4.0f;
-  const double kDuration = 0.5f;
+  const double kBeginPosition = 4.0f;
+  const double kEndPosition = 4.5f;
   const float kPitch = 2.5f;
   const float kIntensity = 0.25f;
 
@@ -51,16 +51,17 @@ TEST(InstrumentControllerTest, ScheduleSingleNote) {
   EXPECT_TRUE(controller.GetAllScheduledData().empty());
 
   // Add note.
-  controller.ScheduleNote(kPosition, kDuration, kPitch, kIntensity);
+  controller.ScheduleNote(kBeginPosition, kEndPosition, kPitch, kIntensity);
   EXPECT_THAT(
       controller.GetAllScheduledData(),
       UnorderedElementsAre(
-          Pair(kPosition, VariantWith<NoteOn>(NoteOn{kPitch, kIntensity})),
-          Pair(kPosition + kDuration, VariantWith<NoteOff>(NoteOff{kPitch}))));
-  EXPECT_TRUE(controller.GetAllScheduledData(0.0, kPosition).empty());
-  EXPECT_THAT(controller.GetAllScheduledData(kPosition, kPosition + kDuration),
-              UnorderedElementsAre(Pair(
-                  kPosition, VariantWith<NoteOn>(NoteOn{kPitch, kIntensity}))));
+          Pair(kBeginPosition, VariantWith<NoteOn>(NoteOn{kPitch, kIntensity})),
+          Pair(kEndPosition, VariantWith<NoteOff>(NoteOff{kPitch}))));
+  EXPECT_TRUE(controller.GetAllScheduledData(0.0, kBeginPosition).empty());
+  EXPECT_THAT(
+      controller.GetAllScheduledData(kBeginPosition, kEndPosition),
+      UnorderedElementsAre(Pair(
+          kBeginPosition, VariantWith<NoteOn>(NoteOn{kPitch, kIntensity}))));
 
   // Remove note.
   controller.RemoveAllScheduledData();
@@ -68,7 +69,7 @@ TEST(InstrumentControllerTest, ScheduleSingleNote) {
 }
 
 // Tests that the controller schedules multiple notes as expected.
-TEST(TrackTest, MultipleNotes) {
+TEST(InstrumentControllerTest, MultipleNotes) {
   const float kIntensity = 0.25f;
 
   InstrumentController controller(GetTestInstrumentParamDefinitions());
@@ -76,7 +77,8 @@ TEST(TrackTest, MultipleNotes) {
 
   // Add notes.
   for (int i = 0; i < 5; ++i) {
-    controller.ScheduleNote(static_cast<double>(i), 1.0, static_cast<float>(i),
+    controller.ScheduleNote(static_cast<double>(i),
+                            static_cast<double>(i) + 1.0, static_cast<float>(i),
                             kIntensity);
   }
   EXPECT_THAT(controller.GetAllScheduledData(),

@@ -88,10 +88,11 @@ bool InstrumentController::ResetParam(int id) {
   return false;
 }
 
-void InstrumentController::ScheduleNote(double position, double duration,
-                                        float pitch, float intensity) {
-  data_.emplace(position, NoteOn{pitch, intensity});
-  data_.emplace(position + duration, NoteOff{pitch});
+void InstrumentController::ScheduleNote(double begin_position,
+                                        double end_position, float pitch,
+                                        float intensity) {
+  data_.emplace(begin_position, NoteOn{pitch, intensity});
+  data_.emplace(end_position, NoteOff{pitch});
 }
 
 void InstrumentController::SetAllNotesOff() { notes_.clear(); }

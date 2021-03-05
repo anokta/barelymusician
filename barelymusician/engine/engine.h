@@ -128,13 +128,13 @@ class Engine {
   /// Schedules instrument note.
   ///
   /// @param instrument_id Instrument id.
-  /// @param note_position Note position in beats.
-  /// @param note_duration Note duration in beats.
+  /// @param note_begin_position Note begin position in beats.
+  /// @param note_end_position Note end position in beats.
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
   /// @return True if successful, false otherwise.
-  bool ScheduleInstrumentNote(int instrument_id, double note_position,
-                              double note_duration, float note_pitch,
+  bool ScheduleInstrumentNote(int instrument_id, double note_begin_position,
+                              double note_end_position, float note_pitch,
                               float note_intensity);
 
   /// Sets all active notes of all instruments off.

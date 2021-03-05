@@ -163,11 +163,12 @@ bool Engine::ResetInstrumentParam(int instrument_id, int param_id) {
   return false;
 }
 
-bool Engine::ScheduleInstrumentNote(int instrument_id, double note_position,
-                                    double note_duration, float note_pitch,
+bool Engine::ScheduleInstrumentNote(int instrument_id,
+                                    double note_begin_position,
+                                    double note_end_position, float note_pitch,
                                     float note_intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->ScheduleNote(note_position, note_duration, note_pitch,
+    controller->ScheduleNote(note_begin_position, note_end_position, note_pitch,
                              note_intensity);
     return true;
   }

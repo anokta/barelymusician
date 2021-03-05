@@ -13,9 +13,9 @@ class InstrumentProcessor {
  public:
   /// Constructs new |InstrumentProcessor|.
   ///
-  /// @param definition Instrument definition.
   /// @param sample_rate Sampling rate in Hz.
-  InstrumentProcessor(InstrumentDefinition definition, int sample_rate);
+  /// @param definition Instrument definition.
+  InstrumentProcessor(int sample_rate, InstrumentDefinition definition);
 
   /// Destroys |InstrumentProcessor|.
   ~InstrumentProcessor();

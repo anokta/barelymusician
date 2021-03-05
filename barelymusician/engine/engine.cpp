@@ -36,7 +36,7 @@ int Engine::CreateInstrument(InstrumentDefinition definition,
   InstrumentController controller(param_definitions);
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
                     params = controller.GetAllParams()]() {
-    InstrumentProcessor processor(std::move(definition), sample_rate_);
+    InstrumentProcessor processor(sample_rate_, std::move(definition));
     for (auto& param : params) {
       processor.SetData(timestamp_, std::move(param));
     }

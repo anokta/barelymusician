@@ -44,7 +44,7 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   const float kPitch = 32.0f;
   const float kIntensity = 0.5f;
 
-  InstrumentProcessor processor(GetTestInstrumentDefinition(), kSampleRate);
+  InstrumentProcessor processor(kSampleRate, GetTestInstrumentDefinition());
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -83,7 +83,7 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
 TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
   const float kIntensity = 1.0f;
 
-  InstrumentProcessor processor(GetTestInstrumentDefinition(), 1);
+  InstrumentProcessor processor(1, GetTestInstrumentDefinition());
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -129,7 +129,7 @@ TEST(InstrumentProcessorTest, Reset) {
   definition.create_fn = [](InstrumentState* state, int sample_rate) {
     state->emplace<float>(static_cast<float>(sample_rate));
   };
-  InstrumentProcessor processor(std::move(definition), 1000);
+  InstrumentProcessor processor(1000, std::move(definition));
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);

@@ -21,8 +21,8 @@ double SecondsFromSamples(int sample_rate, int samples) {
 
 }  // namespace
 
-InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
-                                         int sample_rate)
+InstrumentProcessor::InstrumentProcessor(int sample_rate,
+                                         InstrumentDefinition definition)
     : sample_rate_(sample_rate), definition_(std::move(definition)) {
   if (definition_.create_fn) {
     definition_.create_fn(&state_, sample_rate);
@@ -38,7 +38,7 @@ InstrumentProcessor::~InstrumentProcessor() {
 void InstrumentProcessor::Process(double timestamp, float* output,
                                   int num_channels, int num_frames) {
   int frame = 0;
-  // Process *all* events before |end_timestamp|.
+  // Process *all* events before the end timestamp.
   const auto begin = data_.cbegin();
   const auto end = data_.lower_bound(
       timestamp + SecondsFromSamples(sample_rate_, num_frames));

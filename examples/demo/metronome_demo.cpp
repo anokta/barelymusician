@@ -65,7 +65,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), kRelease}});
 
   // Beat callback.
-  const auto beat_callback = [&](double, int beat) {
+  const auto beat_callback = [&](int beat) {
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;

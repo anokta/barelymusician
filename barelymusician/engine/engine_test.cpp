@@ -225,25 +225,21 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
 
   // Trigger note on callback.
   int note_on_instrument_id = 0;
-  double note_on_timestamp = 0.0;
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
   engine.SetNoteOnCallback([&](int instrument_id, double timestamp,
                                float note_pitch, float note_intensity) {
     note_on_instrument_id = instrument_id;
-    note_on_timestamp = timestamp;
     note_on_pitch = note_pitch;
     note_on_intensity = note_intensity;
   });
   EXPECT_NE(note_on_instrument_id, instrument_id);
-  EXPECT_NE(note_on_timestamp, 1.0);
   EXPECT_NE(note_on_pitch, kNotePitch);
   EXPECT_NE(note_on_intensity, kNoteIntensity);
 
   EXPECT_TRUE(
       engine.SetInstrumentNoteOn(instrument_id, kNotePitch, kNoteIntensity));
   EXPECT_EQ(note_on_instrument_id, instrument_id);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 1.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
 
@@ -251,11 +247,9 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   engine.Update(2.0);
   EXPECT_FALSE(
       engine.SetInstrumentNoteOn(instrument_id, kNotePitch, kNoteIntensity));
-  EXPECT_NE(note_on_timestamp, 2.0);
 
   // Trigger note on callback again with another note.
   EXPECT_TRUE(engine.SetInstrumentNoteOn(instrument_id, 2.0f, kNoteIntensity));
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 2.0);
   EXPECT_FLOAT_EQ(note_on_pitch, 2.0f);
 
   // Trigger note off callback.
@@ -265,36 +259,30 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   engine.SetNoteOffCallback(
       [&](int instrument_id, double timestamp, float note_pitch) {
         note_off_instrument_id = instrument_id;
-        note_off_timestamp = timestamp;
         note_off_pitch = note_pitch;
       });
   EXPECT_NE(note_off_instrument_id, instrument_id);
-  EXPECT_NE(note_off_timestamp, 2.0);
   EXPECT_NE(note_off_pitch, kNotePitch);
 
   EXPECT_TRUE(engine.SetInstrumentNoteOff(instrument_id, kNotePitch));
   EXPECT_EQ(note_off_instrument_id, instrument_id);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 2.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // This should not trigger the callback since the note is already off.
   engine.Update(3.0);
   EXPECT_FALSE(engine.SetInstrumentNoteOff(instrument_id, kNotePitch));
-  EXPECT_NE(note_off_timestamp, 3.0);
 
   // Trigger both callbacks with a scheduled note.
   engine.StartPlayback();
   engine.ScheduleInstrumentNote(instrument_id, 1.0, 1.5, 10.0f, 1.0f);
 
   engine.Update(4.0);
-  EXPECT_NE(note_on_timestamp, 4.0);
   EXPECT_NE(note_on_pitch, 10.0f);
   EXPECT_NE(note_on_intensity, 1.0f);
   EXPECT_NE(note_off_timestamp, 4.5);
   EXPECT_NE(note_off_pitch, 10.0f);
 
   engine.Update(5.0);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 4.0);
   EXPECT_FLOAT_EQ(note_on_pitch, 10.0f);
   EXPECT_FLOAT_EQ(note_on_intensity, 1.0f);
   EXPECT_DOUBLE_EQ(note_off_timestamp, 4.5);
@@ -302,7 +290,6 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
 
   // Finally, destroy to trigger the note off callback with the remaining note.
   EXPECT_TRUE(engine.DestroyInstrument(instrument_id));
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 5.0);
   EXPECT_FLOAT_EQ(note_off_pitch, 2.0f);
 }
 

@@ -20,7 +20,7 @@ public class Teleporter : MonoBehaviour {
     }
   }
 
-  private void OnBeat(double dspTime, int beat) {
+  private void OnBeat(int beat) {
     transform.localPosition = locations[beat % locations.Length];
     gameObject.SetActive(true);
   }

@@ -15,16 +15,15 @@
 namespace barelyapi {
 
 /// Beat callback signature.
-using BeatCallback = std::function<void(double timestamp, int beat)>;
+using BeatCallback = std::function<void(int beat)>;
 
 /// Note off callback signature.
 using NoteOffCallback =
-    std::function<void(int instrument_id, double timestamp, float note_pitch)>;
+    std::function<void(int instrument_id, float note_pitch)>;
 
 /// Note on callback signature.
-using NoteOnCallback =
-    std::function<void(int instrument_id, double timestamp, float note_pitch,
-                       float note_intensity)>;
+using NoteOnCallback = std::function<void(int instrument_id, float note_pitch,
+                                          float note_intensity)>;
 
 /// Instrument playback engine.
 class Engine {

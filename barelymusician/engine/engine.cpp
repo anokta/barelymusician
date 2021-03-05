@@ -44,7 +44,7 @@ bool Engine::DestroyInstrument(int instrument_id) {
       it != controllers_.end()) {
     if (note_off_callback_) {
       for (const auto& note_pitch : it->second.GetAllNotes()) {
-        note_off_callback_(instrument_id, clock_.GetTimestamp(), note_pitch);
+        note_off_callback_(instrument_id, note_pitch);
       }
     }
     controllers_.erase(it);
@@ -169,16 +169,16 @@ bool Engine::ScheduleInstrumentNote(int instrument_id,
 }
 
 void Engine::SetAllInstrumentNotesOff() {
-  const double timestamp = clock_.GetTimestamp();
   for (auto& [instrument_id, controller] : controllers_) {
     auto notes = controller.GetAllNotes();
     controller.SetAllNotesOff();
     if (note_off_callback_) {
       for (const auto& note_pitch : notes) {
-        note_off_callback_(instrument_id, timestamp, note_pitch);
+        note_off_callback_(instrument_id, note_pitch);
       }
     }
-    task_runner_.Add([this, instrument_id = instrument_id, timestamp,
+    task_runner_.Add([this, instrument_id = instrument_id,
+                      timestamp = clock_.GetTimestamp(),
                       notes = std::move(notes)]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
         for (const auto& note_pitch : notes) {
@@ -190,23 +190,22 @@ void Engine::SetAllInstrumentNotesOff() {
 }
 
 bool Engine::SetAllInstrumentNotesOff(int instrument_id) {
-  const double timestamp = clock_.GetTimestamp();
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto notes = controller->GetAllNotes();
     controller->SetAllNotesOff();
     if (note_off_callback_) {
       for (const auto& note_pitch : notes) {
-        note_off_callback_(instrument_id, timestamp, note_pitch);
+        note_off_callback_(instrument_id, note_pitch);
       }
     }
-    task_runner_.Add(
-        [this, instrument_id, timestamp, notes = std::move(notes)]() {
-          if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            for (const auto& note_pitch : notes) {
-              processor->SetData(timestamp, NoteOff{note_pitch});
-            }
-          }
-        });
+    task_runner_.Add([this, instrument_id, timestamp = clock_.GetTimestamp(),
+                      notes = std::move(notes)]() {
+      if (auto* processor = FindOrNull(processors_, instrument_id)) {
+        for (const auto& note_pitch : notes) {
+          processor->SetData(timestamp, NoteOff{note_pitch});
+        }
+      }
+    });
     return true;
   }
   return false;
@@ -228,7 +227,7 @@ bool Engine::SetInstrumentNoteOff(int instrument_id, float note_pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOff(note_pitch)) {
       if (note_off_callback_) {
-        note_off_callback_(instrument_id, clock_.GetTimestamp(), note_pitch);
+        note_off_callback_(instrument_id, note_pitch);
       }
       SetProcessorData(instrument_id, NoteOff{note_pitch});
       return true;
@@ -242,8 +241,7 @@ bool Engine::SetInstrumentNoteOn(int instrument_id, float note_pitch,
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetNoteOn(note_pitch)) {
       if (note_on_callback_) {
-        note_on_callback_(instrument_id, clock_.GetTimestamp(), note_pitch,
-                          note_intensity);
+        note_on_callback_(instrument_id, note_pitch, note_intensity);
       }
       SetProcessorData(instrument_id, NoteOn{note_pitch, note_intensity});
       return true;
@@ -304,8 +302,7 @@ void Engine::Update(double timestamp) {
     if (beat_callback_) {
       for (double beat = std::ceil(begin_position); beat < end_position;
            ++beat) {
-        beat_callback_(clock_.GetTimestampAtPosition(beat),
-                       static_cast<int>(beat));
+        beat_callback_(static_cast<int>(beat));
       }
     }
     // Trigger messages.
@@ -320,15 +317,14 @@ void Engine::Update(double timestamp) {
                        [&](const NoteOff& note_off) {
                          if (controller.SetNoteOff(note_off.pitch) &&
                              note_off_callback_) {
-                           note_off_callback_(instrument_id, data_it.first,
-                                              note_off.pitch);
+                           note_off_callback_(instrument_id, note_off.pitch);
                          }
                        },
                        [&](const NoteOn& note_on) {
                          if (controller.SetNoteOn(note_on.pitch) &&
                              note_on_callback_) {
-                           note_on_callback_(instrument_id, data_it.first,
-                                             note_on.pitch, note_on.intensity);
+                           note_on_callback_(instrument_id, note_on.pitch,
+                                             note_on.intensity);
                          }
                        },
                        [](const auto&) {}},

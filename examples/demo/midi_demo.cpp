@@ -109,11 +109,11 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock clock(kSampleRate);
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
-  engine.SetNoteOnCallback([](int id, double, float pitch, float intensity) {
+  engine.SetNoteOnCallback([](int id, float pitch, float intensity) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOn("
               << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
   });
-  engine.SetNoteOffCallback([](int id, double, float pitch) {
+  engine.SetNoteOffCallback([](int id, float pitch) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff("
               << MidiKeyNumberFromPitch(pitch) << ") ";
   });

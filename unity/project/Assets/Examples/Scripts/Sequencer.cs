@@ -40,7 +40,7 @@ public class Sequencer : MonoBehaviour {
     BarelyMusician.OnBeat -= OnBeat;
   }
 
-  void OnBeat(double dspTime, int beat) {
+  void OnBeat(int beat) {
     double startPosition = (double)beat;
     if (startPosition < start || (startPosition >= start + (double)length && !loop)) {
       return;

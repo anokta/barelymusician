@@ -188,7 +188,7 @@ int main(int /*argc*/, char* argv[]) {
   // Beat callback.
   int harmonic = 0;
   std::vector<Note> temp_notes;
-  const auto beat_callback = [&](double, int beat) {
+  const auto beat_callback = [&](int beat) {
     // Update transport.
     const int current_bar = beat / kNumBeats;
     const int current_beat = beat % kNumBeats;
@@ -217,7 +217,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Note on callback.
-  const auto note_on_callback = [](int performer_id, double, float pitch,
+  const auto note_on_callback = [](int performer_id, float pitch,
                                    float intensity) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
@@ -225,7 +225,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](int performer_id, double, float pitch) {
+  const auto note_off_callback = [](int performer_id, float pitch) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << pitch << ")";
   };
   engine.SetNoteOffCallback(note_off_callback);

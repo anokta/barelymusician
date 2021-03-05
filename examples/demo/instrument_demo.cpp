@@ -67,12 +67,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
         static_cast<float>(kOscillatorType)},
        {SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack},
        {SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease}});
-  engine.SetNoteOnCallback([](int, double, float pitch, float intensity) {
+  engine.SetNoteOnCallback([](int, float pitch, float intensity) {
     LOG(INFO) << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  engine.SetNoteOffCallback([](int, double, float pitch) {
-    LOG(INFO) << "NoteOff(" << pitch << ") ";
-  });
+  engine.SetNoteOffCallback(
+      [](int, float pitch) { LOG(INFO) << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {

@@ -151,9 +151,7 @@ void SetBeatCallback(BarelyMusician* barelymusician,
   if (barelymusician) {
     if (beat_callback_ptr) {
       barelymusician->engine.SetBeatCallback(
-          [beat_callback_ptr](double timestamp, int beat) {
-            beat_callback_ptr(timestamp, beat);
-          });
+          [beat_callback_ptr](int beat) { beat_callback_ptr(beat); });
     } else {
       barelymusician->engine.SetBeatCallback(nullptr);
     }
@@ -180,8 +178,8 @@ void SetNoteOffCallback(BarelyMusician* barelymusician,
   if (barelymusician) {
     if (note_off_callback_ptr) {
       barelymusician->engine.SetNoteOffCallback(
-          [note_off_callback_ptr](int id, double timestamp, float pitch) {
-            note_off_callback_ptr(timestamp, id, pitch);
+          [note_off_callback_ptr](int id, float pitch) {
+            note_off_callback_ptr(id, pitch);
           });
     } else {
       barelymusician->engine.SetNoteOffCallback(nullptr);
@@ -194,9 +192,8 @@ void SetNoteOnCallback(BarelyMusician* barelymusician,
   if (barelymusician) {
     if (note_on_callback_ptr) {
       barelymusician->engine.SetNoteOnCallback(
-          [note_on_callback_ptr](int id, double timestamp, float pitch,
-                                 float intensity) {
-            note_on_callback_ptr(timestamp, id, pitch, intensity);
+          [note_on_callback_ptr](int id, float pitch, float intensity) {
+            note_on_callback_ptr(id, pitch, intensity);
           });
     } else {
       barelymusician->engine.SetNoteOnCallback(nullptr);

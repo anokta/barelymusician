@@ -11,15 +11,15 @@ namespace BarelyApi {
     public const int InvalidId = -1;
 
     // Beat event.
-    public delegate void BeatEvent(double dspTime, int beat);
+    public delegate void BeatEvent(int beat);
     public static event BeatEvent OnBeat;
 
     // Note off event.
-    public delegate void NoteOffEvent(double dspTime, Instrument instrument, float pitch);
+    public delegate void NoteOffEvent(Instrument instrument, float pitch);
     public static event NoteOffEvent OnNoteOff;
 
     // Note on event.
-    public delegate void NoteOnEvent(double dspTime, Instrument instrument, float pitch, float intensity);
+    public delegate void NoteOnEvent(Instrument instrument, float pitch, float intensity);
     public static event NoteOnEvent OnNoteOn;
 
     // Internal Unity instrument functions.
@@ -172,7 +172,7 @@ namespace BarelyApi {
       }
 
       // Beat callback.
-      private delegate void BeatCallback(double dspTime, int beat);
+      private delegate void BeatCallback(int beat);
       private BeatCallback _beatCallback = null;
 
       // Debug callback.
@@ -180,18 +180,18 @@ namespace BarelyApi {
       private DebugCallback _debugCallback = null;
 
       // Note off callback.
-      private delegate void NoteOffCallback(double dspTime, int id, float pitch);
+      private delegate void NoteOffCallback(int id, float pitch);
       private NoteOffCallback _noteOffCallback = null;
 
       // Note on callback.
-      private delegate void NoteOnCallback(double dspTime, int id, float pitch, float intensity);
+      private delegate void NoteOnCallback(int id, float pitch, float intensity);
       private NoteOnCallback _noteOnCallback = null;
 
       private void Awake() {
         var config = AudioSettings.GetConfiguration();
         _instancePtr = InitializeNative(config.sampleRate);
-        _beatCallback = delegate (double dspTime, int beat) {
-          OnBeat?.Invoke(dspTime, beat);
+        _beatCallback = delegate (int beat) {
+          OnBeat?.Invoke(beat);
         };
         SetBeatCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_beatCallback));
         _debugCallback = delegate (int severity, string message) {
@@ -212,19 +212,19 @@ namespace BarelyApi {
           }
         };
         SetDebugCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_debugCallback));
-        _noteOffCallback = delegate (double dspTime, int id, float pitch) {
+        _noteOffCallback = delegate (int id, float pitch) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
-            OnNoteOff?.Invoke(dspTime, instrument, pitch);
+            OnNoteOff?.Invoke(instrument, pitch);
           } else {
             Debug.LogError("Instrument does not exist: " + id);
           }
         };
         SetNoteOffCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_noteOffCallback));
-        _noteOnCallback = delegate (double dspTime, int id, float pitch, float intensity) {
+        _noteOnCallback = delegate (int id, float pitch, float intensity) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(id, out instrument)) {
-            OnNoteOn?.Invoke(dspTime, instrument, pitch, intensity);
+            OnNoteOn?.Invoke(instrument, pitch, intensity);
           } else {
             Debug.LogError("Instrument does not exist: " + id);
           }

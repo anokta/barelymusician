@@ -16,10 +16,9 @@ namespace barelyapi::unity {
 extern "C" {
 
 /// Event callback signatures.
-using BeatCallback = void(double timestamp, int beat);
-using NoteOffCallback = void(double timestamp, int id, float pitch);
-using NoteOnCallback = void(double timestamp, int id, float pitch,
-                            float intensity);
+using BeatCallback = void(int beat);
+using NoteOffCallback = void(int id, float pitch);
+using NoteOnCallback = void(int id, float pitch, float intensity);
 
 /// Instrument function signatures.
 using ProcessFn = void(float* output, int size, int num_channels);

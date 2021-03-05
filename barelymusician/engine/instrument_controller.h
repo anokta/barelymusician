@@ -102,7 +102,7 @@ class InstrumentController {
   std::multimap<double, InstrumentData> data_;
 
   // List of active note pitches.
-  std::unordered_set<float> notes_;
+  std::unordered_set<float> pitches_;
 
   // List of instrument parameters.
   std::unordered_map<int, std::pair<InstrumentParamDefinition, float>> params_;

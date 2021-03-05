@@ -34,7 +34,7 @@ InstrumentController::InstrumentController(
 }
 
 std::vector<float> InstrumentController::GetAllNotes() const {
-  return std::vector<float>{notes_.begin(), notes_.end()};
+  return std::vector<float>{pitches_.begin(), pitches_.end()};
 }
 
 std::vector<Param> InstrumentController::GetAllParams() const {
@@ -69,7 +69,7 @@ const float* InstrumentController::GetParam(int id) const {
 }
 
 bool InstrumentController::IsNoteOn(float pitch) const {
-  return notes_.find(pitch) != notes_.end();
+  return pitches_.find(pitch) != pitches_.end();
 }
 
 void InstrumentController::RemoveAllScheduledData() { data_.clear(); }
@@ -95,14 +95,14 @@ void InstrumentController::ScheduleNote(double begin_position,
   data_.emplace(end_position, NoteOff{pitch});
 }
 
-void InstrumentController::SetAllNotesOff() { notes_.clear(); }
+void InstrumentController::SetAllNotesOff() { pitches_.clear(); }
 
 bool InstrumentController::SetNoteOff(float pitch) {
-  return notes_.erase(pitch) > 0;
+  return pitches_.erase(pitch) > 0;
 }
 
 bool InstrumentController::SetNoteOn(float pitch) {
-  return notes_.emplace(pitch).second;
+  return pitches_.emplace(pitch).second;
 }
 
 bool InstrumentController::SetParam(int id, float value) {

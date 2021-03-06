@@ -10,7 +10,6 @@ namespace {
 
 using ::testing::Pair;
 using ::testing::UnorderedElementsAre;
-using ::testing::VariantWith;
 
 // Returns test instrument parameter definition.
 InstrumentParamDefinitions GetTestInstrumentParamDefinitions() {
@@ -38,83 +37,6 @@ TEST(InstrumentControllerTest, ResetAllParams) {
   EXPECT_THAT(
       controller.GetAllParams(),
       UnorderedElementsAre(Param{0, 0.0f}, Param{1, 1.0f}, Param{10, 10.0f}));
-}
-
-// Tests that the controller schedules a single note as expected.
-TEST(InstrumentControllerTest, ScheduleSingleNote) {
-  const double kBeginPosition = 4.0f;
-  const double kEndPosition = 4.5f;
-  const float kPitch = 2.5f;
-  const float kIntensity = 0.25f;
-
-  InstrumentController controller(GetTestInstrumentParamDefinitions());
-  EXPECT_TRUE(controller.GetAllScheduledData(0.0, kEndPosition + 1.0).empty());
-
-  // Add note.
-  controller.ScheduleNote(kBeginPosition, kEndPosition, kPitch, kIntensity);
-  EXPECT_TRUE(controller.GetAllScheduledData(0.0, kBeginPosition).empty());
-  EXPECT_THAT(
-      controller.GetAllScheduledData(kBeginPosition, kEndPosition),
-      UnorderedElementsAre(Pair(
-          kBeginPosition, VariantWith<NoteOn>(NoteOn{kPitch, kIntensity}))));
-  EXPECT_THAT(controller.GetAllScheduledData(kEndPosition, kEndPosition + 1.0),
-              UnorderedElementsAre(
-                  Pair(kEndPosition, VariantWith<NoteOff>(NoteOff{kPitch}))));
-  EXPECT_THAT(
-      controller.GetAllScheduledData(0.0, kEndPosition + 1.0),
-      UnorderedElementsAre(
-          Pair(kBeginPosition, VariantWith<NoteOn>(NoteOn{kPitch, kIntensity})),
-          Pair(kEndPosition, VariantWith<NoteOff>(NoteOff{kPitch}))));
-
-  // Remove note.
-  controller.RemoveAllScheduledData();
-  EXPECT_TRUE(controller.GetAllScheduledData(0.0, kEndPosition + 1.0).empty());
-}
-
-// Tests that the controller schedules multiple notes as expected.
-TEST(InstrumentControllerTest, MultipleNotes) {
-  const float kIntensity = 0.25f;
-
-  InstrumentController controller(GetTestInstrumentParamDefinitions());
-  EXPECT_TRUE(controller.GetAllScheduledData(0.0, 6.0).empty());
-
-  // Add notes.
-  for (int i = 0; i < 5; ++i) {
-    controller.ScheduleNote(static_cast<double>(i),
-                            static_cast<double>(i) + 1.0, static_cast<float>(i),
-                            kIntensity);
-  }
-  EXPECT_THAT(controller.GetAllScheduledData(0.0, 5.0),
-              UnorderedElementsAre(
-                  Pair(0.0, VariantWith<NoteOn>(NoteOn{0.0f, kIntensity})),
-                  Pair(1.0, VariantWith<NoteOff>(NoteOff{0.0f})),
-                  Pair(1.0, VariantWith<NoteOn>(NoteOn{1.0f, kIntensity})),
-                  Pair(2.0, VariantWith<NoteOff>(NoteOff{1.0f})),
-                  Pair(2.0, VariantWith<NoteOn>(NoteOn{2.0f, kIntensity})),
-                  Pair(3.0, VariantWith<NoteOff>(NoteOff{2.0f})),
-                  Pair(3.0, VariantWith<NoteOn>(NoteOn{3.0f, kIntensity})),
-                  Pair(4.0, VariantWith<NoteOff>(NoteOff{3.0f})),
-                  Pair(4.0, VariantWith<NoteOn>(NoteOn{4.0f, kIntensity}))));
-  EXPECT_THAT(
-      controller.GetAllScheduledData(5.0, 6.0),
-      UnorderedElementsAre(Pair(5.0, VariantWith<NoteOff>(NoteOff{4.0f}))));
-  EXPECT_TRUE(controller.GetAllScheduledData(6.0, 7.0).empty());
-  EXPECT_THAT(controller.GetAllScheduledData(0.0, 7.0),
-              UnorderedElementsAre(
-                  Pair(0.0, VariantWith<NoteOn>(NoteOn{0.0f, kIntensity})),
-                  Pair(1.0, VariantWith<NoteOff>(NoteOff{0.0f})),
-                  Pair(1.0, VariantWith<NoteOn>(NoteOn{1.0f, kIntensity})),
-                  Pair(2.0, VariantWith<NoteOff>(NoteOff{1.0f})),
-                  Pair(2.0, VariantWith<NoteOn>(NoteOn{2.0f, kIntensity})),
-                  Pair(3.0, VariantWith<NoteOff>(NoteOff{2.0f})),
-                  Pair(3.0, VariantWith<NoteOn>(NoteOn{3.0f, kIntensity})),
-                  Pair(4.0, VariantWith<NoteOff>(NoteOff{3.0f})),
-                  Pair(4.0, VariantWith<NoteOn>(NoteOn{4.0f, kIntensity})),
-                  Pair(5.0, VariantWith<NoteOff>(NoteOff{4.0f}))));
-
-  // Remove notes.
-  controller.RemoveAllScheduledData();
-  EXPECT_TRUE(controller.GetAllScheduledData(0.0, 6.0).empty());
 }
 
 // Tests that controller sets all notes off as expected.

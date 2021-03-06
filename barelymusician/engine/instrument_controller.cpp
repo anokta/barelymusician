@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include <variant>
 
 #include "barelymusician/common/common_utils.h"
 
@@ -47,14 +46,6 @@ std::vector<Param> InstrumentController::GetAllParams() const {
   return params;
 }
 
-std::vector<std::pair<double, InstrumentData>>
-InstrumentController::GetAllScheduledData(double begin_position,
-                                          double end_position) const {
-  const auto begin = data_.lower_bound(begin_position);
-  const auto end = data_.lower_bound(end_position);
-  return std::vector<std::pair<double, InstrumentData>>{begin, end};
-}
-
 const float* InstrumentController::GetParam(int id) const {
   if (const auto* param = FindOrNull(params_, id)) {
     return &param->second;
@@ -65,8 +56,6 @@ const float* InstrumentController::GetParam(int id) const {
 bool InstrumentController::IsNoteOn(float pitch) const {
   return pitches_.find(pitch) != pitches_.end();
 }
-
-void InstrumentController::RemoveAllScheduledData() { data_.clear(); }
 
 void InstrumentController::ResetAllParams() {
   for (auto& [id, param] : params_) {
@@ -80,13 +69,6 @@ bool InstrumentController::ResetParam(int id) {
     return true;
   }
   return false;
-}
-
-void InstrumentController::ScheduleNote(double begin_position,
-                                        double end_position, float pitch,
-                                        float intensity) {
-  data_.emplace(begin_position, NoteOn{pitch, intensity});
-  data_.emplace(end_position, NoteOff{pitch});
 }
 
 void InstrumentController::SetAllNotesOff() { pitches_.clear(); }

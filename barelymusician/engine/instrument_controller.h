@@ -29,14 +29,6 @@ class InstrumentController {
   /// @return List of all instrument parameters.
   std::vector<Param> GetAllParams() const;
 
-  /// Returns all scheduled data in range.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @param end_position End position in beats.
-  /// @return List of instrument data.
-  std::vector<std::pair<double, InstrumentData>> GetAllScheduledData(
-      double begin_position, double end_position) const;
-
   /// Returns parameter value.
   ///
   /// @param id Parameter id.
@@ -49,9 +41,6 @@ class InstrumentController {
   /// @return True if active, false otherwise.
   bool IsNoteOn(float pitch) const;
 
-  /// Removes all scheduled data.
-  void RemoveAllScheduledData();
-
   /// Resets all parameters.
   void ResetAllParams();
 
@@ -60,15 +49,6 @@ class InstrumentController {
   /// @param id Parameter id.
   /// @return True if successful.
   bool ResetParam(int id);
-
-  /// Schedules note.
-  ///
-  /// @param begin_position Note begin position.
-  /// @param end_position Note end position.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  void ScheduleNote(double begin_position, double end_position, float pitch,
-                    float intensity);
 
   /// Sets all active notes off.
   void SetAllNotesOff();
@@ -93,9 +73,6 @@ class InstrumentController {
   bool SetParam(int id, float value);
 
  private:
-  // List of scheduled instrument data.
-  std::multimap<double, InstrumentData> data_;
-
   // List of active note pitches.
   std::unordered_set<float> pitches_;
 

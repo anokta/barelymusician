@@ -8,20 +8,20 @@ cc_library(
     hdrs = ["clock.h"],
 )
 
-cc_library(
-    name = "engine",
-    srcs = ["engine.cpp"],
-    hdrs = ["engine.h"],
-    deps = [
-        ":clock",
-        ":instrument_controller",
-        ":instrument_data",
-        ":instrument_definition",
-        ":instrument_processor",
-        ":task_runner",
-        "//barelymusician/common:common_utils",
-    ],
-)
+# cc_library(
+#     name = "engine",
+#     srcs = ["engine.cpp"],
+#     hdrs = ["engine.h"],
+#     deps = [
+#         ":clock",
+#         ":instrument_controller",
+#         ":instrument_data",
+#         ":instrument_definition",
+#         ":instrument_processor",
+#         ":task_runner",
+#         "//barelymusician/common:common_utils",
+#     ],
+# )
 
 cc_library(
     name = "instrument_controller",
@@ -42,6 +42,20 @@ cc_library(
 cc_library(
     name = "instrument_definition",
     hdrs = ["instrument_definition.h"],
+)
+
+cc_library(
+    name = "instrument_manager",
+    srcs = ["instrument_manager.cpp"],
+    hdrs = ["instrument_manager.h"],
+    deps = [
+        ":instrument_controller",
+        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_processor",
+        ":task_runner",
+        "//barelymusician/common:common_utils",
+    ],
 )
 
 cc_library(
@@ -75,15 +89,15 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "engine_test",
-    srcs = ["engine_test.cpp"],
-    deps = [
-        ":engine",
-        ":instrument_data",
-        "@googletest//:gtest_main",
-    ],
-)
+# cc_test(
+#     name = "engine_test",
+#     srcs = ["engine_test.cpp"],
+#     deps = [
+#         ":engine",
+#         ":instrument_data",
+#         "@googletest//:gtest_main",
+#     ],
+# )
 
 cc_test(
     name = "instrument_controller_test",
@@ -92,6 +106,16 @@ cc_test(
         ":instrument_controller",
         ":instrument_data",
         ":instrument_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_manager_test",
+    srcs = ["instrument_manager_test.cpp"],
+    deps = [
+        ":instrument_data",
+        ":instrument_manager",
         "@googletest//:gtest_main",
     ],
 )

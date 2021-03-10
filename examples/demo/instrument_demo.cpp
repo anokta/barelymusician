@@ -7,14 +7,14 @@
 
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/instrument_manager.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
 
-using ::barelyapi::Engine;
+using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
@@ -58,8 +58,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine(kSampleRate);
-  const int instrument_id = engine.CreateInstrument(
+  InstrumentManager instrument_manager(kSampleRate);
+  const int instrument_id = instrument_manager.Create(
       SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
@@ -67,16 +67,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
         static_cast<float>(kOscillatorType)},
        {SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack},
        {SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease}});
-  engine.SetNoteOnCallback([](int, float pitch, float intensity) {
+  instrument_manager.SetNoteOnCallback([](int, float pitch, float intensity) {
     LOG(INFO) << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  engine.SetNoteOffCallback(
+  instrument_manager.SetNoteOffCallback(
       [](int, float pitch) { LOG(INFO) << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {
-    engine.ProcessInstrument(instrument_id, 0.0, output, kNumChannels,
-                             kNumFrames);
+    instrument_manager.Process(instrument_id, output, kNumChannels, kNumFrames);
   });
 
   // Key down callback.
@@ -92,7 +91,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      engine.SetAllInstrumentNotesOff(instrument_id);
+      instrument_manager.SetAllNotesOff(instrument_id);
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -106,8 +105,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      engine.SetInstrumentNoteOn(instrument_id, offset_octaves + *pitch,
-                                 kNoteIntensity);
+      instrument_manager.SetNoteOn(instrument_id, offset_octaves + *pitch,
+                                   kNoteIntensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -116,7 +115,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      engine.SetInstrumentNoteOff(instrument_id, offset_octaves + *pitch);
+      instrument_manager.SetNoteOff(instrument_id, offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

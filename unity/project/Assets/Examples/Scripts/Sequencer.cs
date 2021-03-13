@@ -33,15 +33,14 @@ public class Sequencer : MonoBehaviour {
 
   public Note[] notes;
 
-  private void OnEnable() {
-    BarelyMusician.OnBeat += OnBeat;
-  }
-  private void OnDisable() {
-    BarelyMusician.OnBeat -= OnBeat;
+  private Clock clock;
+
+  void Start() {
+    clock = GameObject.FindObjectOfType<Clock>();
   }
 
-  void OnBeat(int beat) {
-    double startPosition = (double)beat;
+  public void OnBeat(double beat) {
+    double startPosition = beat;
     if (startPosition < start || (startPosition >= start + (double)length && !loop)) {
       return;
     }
@@ -54,7 +53,8 @@ public class Sequencer : MonoBehaviour {
       if (note.position >= startPosition && note.position < startPosition + 1.0) {
         double position = note.position + noteOffset;
         float pitch = (float)(note.note + rootNote - 69) / 12.0f;
-        instrument.ScheduleNote(position, note.duration, pitch, note.intensity);
+        instrument.ScheduleNoteOn(pitch, note.intensity, clock.GetTimestamp(position));
+        instrument.ScheduleNoteOff(pitch, clock.GetTimestamp(position + note.duration));
       }
     }
   }

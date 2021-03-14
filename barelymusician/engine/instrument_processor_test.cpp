@@ -5,8 +5,8 @@
 #include <cstdint>
 #include <vector>
 
-#include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -56,7 +56,7 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   }
 
   // Start note.
-  processor.SetData(kTimestamp, NoteOn{kPitch, kIntensity});
+  processor.ScheduleEvent(NoteOn{kPitch, kIntensity}, kTimestamp);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
@@ -68,7 +68,7 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   }
 
   // Stop note.
-  processor.SetData(kTimestamp, NoteOff{kPitch});
+  processor.ScheduleEvent(NoteOff{kPitch}, kTimestamp);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
@@ -96,8 +96,8 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
 
   // Start new note per each sample in the buffer.
   for (int i = 0; i < kNumFrames; ++i) {
-    processor.SetData(static_cast<double>(i),
-                      NoteOn{static_cast<float>(i), kIntensity});
+    processor.ScheduleEvent(NoteOn{static_cast<float>(i), kIntensity},
+                            static_cast<double>(i));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -111,7 +111,7 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
 
   // Stop all notes.
   for (int i = 0; i < kNumFrames; ++i) {
-    processor.SetData(0.0, NoteOff{static_cast<float>(i)});
+    processor.ScheduleEvent(NoteOff{static_cast<float>(i)}, 0.0);
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);

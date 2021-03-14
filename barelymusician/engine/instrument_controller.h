@@ -6,8 +6,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
 

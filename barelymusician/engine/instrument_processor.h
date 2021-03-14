@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
 
@@ -40,11 +40,11 @@ class InstrumentProcessor {
   /// @param sample_rate System sampling rate in Hz.
   void Reset(int sample_rate);
 
-  /// Sets instrument data at a given timestamp.
+  /// Schedules instrument event at a given timestamp.
   ///
+  /// @param event Instrument event.
   /// @param timestamp Timestamp in seconds.
-  /// @param data Instrument data.
-  void SetData(double timestamp, InstrumentData data);
+  void ScheduleEvent(InstrumentEvent event, double timestamp);
 
  private:
   // Sampling rate in Hz.
@@ -53,11 +53,11 @@ class InstrumentProcessor {
   // Instrument definition.
   InstrumentDefinition definition_;
 
+  // List of scheduled instrument events.
+  std::multimap<double, InstrumentEvent> events_;
+
   // Instrument state.
   InstrumentState state_;
-
-  // List of scheduled instrument data.
-  std::multimap<double, InstrumentData> data_;
 };
 
 }  // namespace barelyapi

@@ -39,8 +39,8 @@ void InstrumentProcessor::Process(double timestamp, float* output,
                                   int num_channels, int num_frames) {
   int frame = 0;
   // Process *all* events before the end timestamp.
-  const auto begin = data_.cbegin();
-  const auto end = data_.lower_bound(
+  const auto begin = events_.cbegin();
+  const auto end = events_.lower_bound(
       timestamp + SecondsFromSamples(sample_rate_, num_frames));
   for (auto it = begin; it != end; ++it) {
     const int message_frame =
@@ -52,7 +52,7 @@ void InstrumentProcessor::Process(double timestamp, float* output,
       }
       frame = message_frame;
     }
-    std::visit(InstrumentDataVisitor{
+    std::visit(InstrumentEventVisitor{
                    [this](const CustomData& custom_data) {
                      if (definition_.set_custom_data_fn) {
                        definition_.set_custom_data_fn(&state_,
@@ -77,7 +77,7 @@ void InstrumentProcessor::Process(double timestamp, float* output,
                    }},
                it->second);
   }
-  data_.erase(begin, end);
+  events_.erase(begin, end);
   // Process the rest of the buffer.
   if (frame < num_frames && definition_.process_fn) {
     definition_.process_fn(&state_, &output[num_channels * frame], num_channels,
@@ -95,8 +95,9 @@ void InstrumentProcessor::Reset(int sample_rate) {
   }
 }
 
-void InstrumentProcessor::SetData(double timestamp, InstrumentData data) {
-  data_.emplace(timestamp, std::move(data));
+void InstrumentProcessor::ScheduleEvent(InstrumentEvent event,
+                                        double timestamp) {
+  events_.emplace(timestamp, std::move(event));
 }
 
 }  // namespace barelyapi

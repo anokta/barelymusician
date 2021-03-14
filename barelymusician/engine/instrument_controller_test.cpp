@@ -1,7 +1,7 @@
 #include "barelymusician/engine/instrument_controller.h"
 
-#include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

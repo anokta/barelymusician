@@ -342,11 +342,11 @@ void Engine::Update(double timestamp) {
   }
 }
 
-void Engine::SetProcessorData(int instrument_id, InstrumentData data) {
+void Engine::SetProcessorData(int instrument_id, InstrumentEvent event) {
   task_runner_.Add([this, timestamp = clock_.GetTimestamp(), instrument_id,
-                    data = std::move(data)]() {
+                    event = std::move(event)]() {
     if (auto* processor = FindOrNull(processors_, instrument_id)) {
-      processor->SetData(timestamp, std::move(data));
+      processor->ScheduleEvent(std::move(event), timestamp);
     }
   });
 }

@@ -7,8 +7,8 @@
 
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/instrument_controller.h"
-#include "barelymusician/engine/instrument_data.h"
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/task_runner.h"
 
@@ -218,8 +218,8 @@ class Engine {
   void Update(double timestamp);
 
  private:
-  // Sets processor |data| of instrument with the given |instrument_id|.
-  void SetProcessorData(int instrument_id, InstrumentData data);
+  // Sets processor |event| of instrument with the given |instrument_id|.
+  void SetProcessorData(int instrument_id, InstrumentEvent event);
 
   // Playback clock.
   Clock clock_;

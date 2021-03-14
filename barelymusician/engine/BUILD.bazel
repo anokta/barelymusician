@@ -15,7 +15,7 @@ cc_library(
 #     deps = [
 #         ":clock",
 #         ":instrument_controller",
-#         ":instrument_data",
+#         ":instrument_event",
 #         ":instrument_definition",
 #         ":instrument_processor",
 #         ":task_runner",
@@ -28,15 +28,15 @@ cc_library(
     srcs = ["instrument_controller.cpp"],
     hdrs = ["instrument_controller.h"],
     deps = [
-        ":instrument_data",
         ":instrument_definition",
+        ":instrument_event",
         "//barelymusician/common:common_utils",
     ],
 )
 
 cc_library(
-    name = "instrument_data",
-    hdrs = ["instrument_data.h"],
+    name = "instrument_event",
+    hdrs = ["instrument_event.h"],
 )
 
 cc_library(
@@ -50,8 +50,8 @@ cc_library(
     hdrs = ["instrument_manager.h"],
     deps = [
         ":instrument_controller",
-        ":instrument_data",
         ":instrument_definition",
+        ":instrument_event",
         ":instrument_processor",
         ":task_runner",
         "//barelymusician/common:common_utils",
@@ -63,8 +63,8 @@ cc_library(
     srcs = ["instrument_processor.cpp"],
     hdrs = ["instrument_processor.h"],
     deps = [
-        ":instrument_data",
         ":instrument_definition",
+        ":instrument_event",
     ],
 )
 
@@ -94,7 +94,7 @@ cc_test(
 #     srcs = ["engine_test.cpp"],
 #     deps = [
 #         ":engine",
-#         ":instrument_data",
+#         ":instrument_event",
 #         "@googletest//:gtest_main",
 #     ],
 # )
@@ -104,8 +104,8 @@ cc_test(
     srcs = ["instrument_controller_test.cpp"],
     deps = [
         ":instrument_controller",
-        ":instrument_data",
         ":instrument_definition",
+        ":instrument_event",
         "@googletest//:gtest_main",
     ],
 )
@@ -114,7 +114,7 @@ cc_test(
     name = "instrument_manager_test",
     srcs = ["instrument_manager_test.cpp"],
     deps = [
-        ":instrument_data",
+        ":instrument_event",
         ":instrument_manager",
         "@googletest//:gtest_main",
     ],
@@ -124,8 +124,8 @@ cc_test(
     name = "instrument_processor_test",
     srcs = ["instrument_processor_test.cpp"],
     deps = [
-        ":instrument_data",
         ":instrument_definition",
+        ":instrument_event",
         ":instrument_processor",
         "@googletest//:gtest_main",
     ],

@@ -28,7 +28,7 @@ int InstrumentManager::Create(InstrumentDefinition definition,
                     params = controller.GetAllParams()]() {
     InstrumentProcessor processor(sample_rate_, std::move(definition));
     for (auto& param : params) {
-      processor.SetData(0.0, std::move(param));
+      processor.ScheduleEvent(std::move(param), 0.0);
     }
     processors_.emplace(instrument_id, std::move(processor));
   });
@@ -99,7 +99,7 @@ void InstrumentManager::ResetAllParams(double timestamp) {
                       params = controller.GetAllParams()]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
         for (auto& param : params) {
-          processor->SetData(timestamp, std::move(param));
+          processor->ScheduleEvent(std::move(param), timestamp);
         }
       }
     });
@@ -113,7 +113,7 @@ bool InstrumentManager::ResetAllParams(int instrument_id, double timestamp) {
                       params = controller->GetAllParams()]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
         for (auto& param : params) {
-          processor->SetData(timestamp, std::move(param));
+          processor->ScheduleEvent(std::move(param), timestamp);
         }
       }
     });
@@ -126,9 +126,9 @@ bool InstrumentManager::ResetParam(int instrument_id, int param_id,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->ResetParam(param_id)) {
-      SetProcessorData(instrument_id,
-                       Param{param_id, *controller->GetParam(param_id)},
-                       timestamp);
+      ScheduleProcessorEvent(instrument_id,
+                             Param{param_id, *controller->GetParam(param_id)},
+                             timestamp);
       return true;
     }
   }
@@ -148,7 +148,7 @@ void InstrumentManager::SetAllNotesOff(double timestamp) {
                       notes = std::move(notes)]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
         for (const auto& note_pitch : notes) {
-          processor->SetData(timestamp, NoteOff{note_pitch});
+          processor->ScheduleEvent(NoteOff{note_pitch}, timestamp);
         }
       }
     });
@@ -168,7 +168,7 @@ bool InstrumentManager::SetAllNotesOff(int instrument_id, double timestamp) {
         [this, instrument_id, timestamp, notes = std::move(notes)]() {
           if (auto* processor = FindOrNull(processors_, instrument_id)) {
             for (const auto& note_pitch : notes) {
-              processor->SetData(timestamp, NoteOff{note_pitch});
+              processor->ScheduleEvent(NoteOff{note_pitch}, timestamp);
             }
           }
         });
@@ -180,7 +180,7 @@ bool InstrumentManager::SetAllNotesOff(int instrument_id, double timestamp) {
 bool InstrumentManager::SetCustomData(int instrument_id, void* custom_data,
                                       double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    SetProcessorData(instrument_id, CustomData{custom_data}, timestamp);
+    ScheduleProcessorEvent(instrument_id, CustomData{custom_data}, timestamp);
     return true;
   }
   return false;
@@ -193,7 +193,7 @@ bool InstrumentManager::SetNoteOff(int instrument_id, float note_pitch,
       if (note_off_callback_) {
         note_off_callback_(instrument_id, note_pitch);
       }
-      SetProcessorData(instrument_id, NoteOff{note_pitch}, timestamp);
+      ScheduleProcessorEvent(instrument_id, NoteOff{note_pitch}, timestamp);
       return true;
     }
   }
@@ -211,8 +211,8 @@ bool InstrumentManager::SetNoteOn(int instrument_id, float note_pitch,
       if (note_on_callback_) {
         note_on_callback_(instrument_id, note_pitch, note_intensity);
       }
-      SetProcessorData(instrument_id, NoteOn{note_pitch, note_intensity},
-                       timestamp);
+      ScheduleProcessorEvent(instrument_id, NoteOn{note_pitch, note_intensity},
+                             timestamp);
       return true;
     }
   }
@@ -227,9 +227,9 @@ bool InstrumentManager::SetParam(int instrument_id, int param_id,
                                  float param_value, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->SetParam(param_id, param_value)) {
-      SetProcessorData(instrument_id,
-                       Param{param_id, *controller->GetParam(param_id)},
-                       timestamp);
+      ScheduleProcessorEvent(instrument_id,
+                             Param{param_id, *controller->GetParam(param_id)},
+                             timestamp);
       return true;
     }
   }
@@ -246,13 +246,15 @@ void InstrumentManager::SetSampleRate(int sample_rate) {
   });
 }
 
-void InstrumentManager::SetProcessorData(int instrument_id, InstrumentData data,
-                                         double timestamp) {
-  task_runner_.Add([this, instrument_id, data = std::move(data), timestamp]() {
-    if (auto* processor = FindOrNull(processors_, instrument_id)) {
-      processor->SetData(timestamp, std::move(data));
-    }
-  });
+void InstrumentManager::ScheduleProcessorEvent(int instrument_id,
+                                               InstrumentEvent event,
+                                               double timestamp) {
+  task_runner_.Add(
+      [this, instrument_id, event = std::move(event), timestamp]() {
+        if (auto* processor = FindOrNull(processors_, instrument_id)) {
+          processor->ScheduleEvent(std::move(event), timestamp);
+        }
+      });
 }
 
 }  // namespace barelyapi

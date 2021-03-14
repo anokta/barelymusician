@@ -4,7 +4,7 @@
 #include <any>
 #include <vector>
 
-#include "barelymusician/engine/instrument_data.h"
+#include "barelymusician/engine/instrument_event.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

@@ -1,11 +1,11 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 
 #include <variant>
 
 namespace barelyapi {
 
-/// Custom data.
+/// Custom data event.
 struct CustomData {
   /// Custom data.
   void* data;
@@ -14,7 +14,7 @@ struct CustomData {
   bool operator==(const CustomData&) const = default;
 };
 
-/// Note off data.
+/// Note off event.
 struct NoteOff {
   /// Note pitch.
   float pitch;
@@ -23,7 +23,7 @@ struct NoteOff {
   bool operator==(const NoteOff&) const = default;
 };
 
-/// Note on data.
+/// Note on event.
 struct NoteOn {
   /// Note pitch.
   float pitch;
@@ -35,7 +35,7 @@ struct NoteOn {
   bool operator==(const NoteOn&) const = default;
 };
 
-/// Parameter data.
+/// Parameter event.
 struct Param {
   /// Parameter id.
   int id;
@@ -47,17 +47,17 @@ struct Param {
   bool operator==(const Param&) const = default;
 };
 
-/// Instrument data type.
-using InstrumentData = std::variant<CustomData, NoteOff, NoteOn, Param>;
+/// Instrument event type.
+using InstrumentEvent = std::variant<CustomData, NoteOff, NoteOn, Param>;
 
-/// Instrument data visitor.
-template <class... DataTypes>
-struct InstrumentDataVisitor : DataTypes... {
-  using DataTypes::operator()...;
+/// Instrument event visitor.
+template <class... EventTypes>
+struct InstrumentEventVisitor : EventTypes... {
+  using EventTypes::operator()...;
 };
-template <class... DataTypes>
-InstrumentDataVisitor(DataTypes...) -> InstrumentDataVisitor<DataTypes...>;
+template <class... EventTypes>
+InstrumentEventVisitor(EventTypes...) -> InstrumentEventVisitor<EventTypes...>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DATA_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_

@@ -14,9 +14,9 @@ cc_library(
 )
 
 cc_library(
-    name = "random",
-    srcs = ["random.cpp"],
-    hdrs = ["random.h"],
+    name = "random_generator",
+    srcs = ["random_generator.cpp"],
+    hdrs = ["random_generator.h"],
 )
 
 cc_library(
@@ -35,10 +35,10 @@ cc_test(
 )
 
 cc_test(
-    name = "random_test",
-    srcs = ["random_test.cpp"],
+    name = "random_generator_test",
+    srcs = ["random_generator_test.cpp"],
     deps = [
-        ":random",
+        ":random_generator",
         "@googletest//:gtest_main",
     ],
 )

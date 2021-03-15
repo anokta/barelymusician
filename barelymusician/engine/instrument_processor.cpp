@@ -35,8 +35,8 @@ InstrumentProcessor::~InstrumentProcessor() {
   }
 }
 
-void InstrumentProcessor::Process(double timestamp, float* output,
-                                  int num_channels, int num_frames) {
+void InstrumentProcessor::Process(float* output, int num_channels,
+                                  int num_frames, double timestamp) {
   int frame = 0;
   // Process *all* events before the end timestamp.
   const auto begin = events_.cbegin();
@@ -98,6 +98,11 @@ void InstrumentProcessor::Reset(int sample_rate) {
 void InstrumentProcessor::ScheduleEvent(InstrumentEvent event,
                                         double timestamp) {
   events_.emplace(timestamp, std::move(event));
+}
+
+void InstrumentProcessor::ScheduleEvents(
+    std::multimap<double, InstrumentEvent> events) {
+  events_.merge(events);
 }
 
 }  // namespace barelyapi

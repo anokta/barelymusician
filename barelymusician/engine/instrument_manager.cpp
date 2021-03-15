@@ -86,7 +86,7 @@ bool InstrumentManager::Process(int instrument_id, float* output,
                                 double timestamp) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
-    processor->Process(timestamp, output, num_channels, num_frames);
+    processor->Process(output, num_channels, num_frames, timestamp);
     return true;
   }
   return false;

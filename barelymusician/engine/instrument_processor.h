@@ -28,12 +28,12 @@ class InstrumentProcessor {
 
   /// Processes the next output buffer at a given timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  void Process(double timestamp, float* output, int num_channels,
-               int num_frames);
+  /// @param timestamp Timestamp in seconds.
+  void Process(float* output, int num_channels, int num_frames,
+               double timestamp);
 
   /// Resets instrument.
   ///
@@ -45,6 +45,11 @@ class InstrumentProcessor {
   /// @param event Instrument event.
   /// @param timestamp Timestamp in seconds.
   void ScheduleEvent(InstrumentEvent event, double timestamp);
+
+  /// Schedules multiple instrument events at given timestamps.
+  ///
+  /// @param events List of instrument events with their timestamps.
+  void ScheduleEvents(std::multimap<double, InstrumentEvent> events);
 
  private:
   // Sampling rate in Hz.

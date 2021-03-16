@@ -124,12 +124,14 @@ TEST(InstrumentManagerTest, SetNotes) {
   }
 
   // Set new note per each sample in the buffer.
+  std::multimap<double, InstrumentEvent> events;
   for (int i = 0; i < kNumFrames; ++i) {
-    instrument_manager.SetNoteOn(instrument_id, static_cast<float>(i),
-                                 kNoteIntensity, static_cast<double>(i));
-    instrument_manager.SetNoteOff(instrument_id, static_cast<float>(i),
-                                  static_cast<double>(i + kNumFrames));
+    events.emplace(static_cast<double>(i),
+                   NoteOn{static_cast<float>(i), kNoteIntensity});
+    events.emplace(static_cast<double>(i + kNumFrames),
+                   NoteOff{static_cast<float>(i)});
   }
+  instrument_manager.SetEvents(instrument_id, std::move(events));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument_manager.Process(instrument_id, buffer.data(),

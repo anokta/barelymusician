@@ -186,6 +186,50 @@ bool InstrumentManager::SetCustomData(int instrument_id, void* custom_data,
   return false;
 }
 
+bool InstrumentManager::SetEvents(
+    int instrument_id, std::multimap<double, InstrumentEvent> events) {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    for (auto it = events.begin(); it != events.end();) {
+      bool success = false;
+      std::visit(InstrumentEventVisitor{
+                     [&](const CustomData& /*custom_data*/) { success = true; },
+                     [&](const NoteOff& note_off) {
+                       if (controller->SetNoteOff(note_off.pitch)) {
+                         if (note_off_callback_) {
+                           note_off_callback_(instrument_id, note_off.pitch);
+                         }
+                         success = true;
+                       }
+                     },
+                     [&](const NoteOn& note_on) {
+                       if (controller->SetNoteOn(note_on.pitch)) {
+                         if (note_on_callback_) {
+                           note_on_callback_(instrument_id, note_on.pitch,
+                                             note_on.intensity);
+                         }
+                         success = true;
+                       }
+                     },
+                     [&](const Param& param) {
+                       success = controller->SetParam(param.id, param.value);
+                     }},
+                 it->second);
+      if (success) {
+        ++it;
+      } else {
+        it = events.erase(it);
+      }
+    }
+    task_runner_.Add([this, instrument_id, events = std::move(events)]() {
+      if (auto* processor = FindOrNull(processors_, instrument_id)) {
+        processor->ScheduleEvents(events);
+      }
+    });
+    return true;
+  }
+  return false;
+}
+
 bool InstrumentManager::SetNoteOff(int instrument_id, float note_pitch,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {

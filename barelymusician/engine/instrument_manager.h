@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
 #include <functional>
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -121,6 +122,14 @@ class InstrumentManager {
   /// @return True if successful, false otherwise.
   bool SetCustomData(int instrument_id, void* custom_data,
                      double timestamp = 0.0);
+
+  /// Sets instrument events at their timestamps.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param events List of events with their timestamps.
+  /// @return True if successful, false otherwise.
+  bool SetEvents(int instrument_id,
+                 std::multimap<double, InstrumentEvent> events);
 
   /// Sets instrument note off at timestamp.
   ///

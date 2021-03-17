@@ -1,0 +1,106 @@
+#ifndef BARELYMUSICIAN_ENGINE_SEQUENCER_H_
+#define BARELYMUSICIAN_ENGINE_SEQUENCER_H_
+
+#include <functional>
+#include <map>
+#include <unordered_map>
+
+#include "barelymusician/composition/note.h"
+#include "barelymusician/engine/clock.h"
+#include "barelymusician/engine/instrument_manager.h"
+
+namespace barelyapi {
+
+/// Playback sequencer.
+class Sequencer {
+ public:
+  /// Beat callback signature.
+  using BeatCallback = std::function<void(int beat)>;
+
+  explicit Sequencer(InstrumentManager* manager);
+
+  /// Returns the playback position.
+  ///
+  /// @return Position in beats.
+  double GetPlaybackPosition() const;
+
+  /// Returns the playback tempo.
+  ///
+  /// @return Tempo in BPM.
+  double GetPlaybackTempo() const;
+
+  /// Returns whether the playback is currently active or not.
+  ///
+  /// @return True if playing, false otherwise.
+  bool IsPlaying() const;
+
+  /// Removes all scheduled notes of all instruments.
+  void RemoveAllScheduledInstrumentNotes();
+
+  /// Removes all scheduled instrument notes.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return True if successful, false otherwise.
+  void RemoveAllScheduledInstrumentNotes(int instrument_id);
+
+  /// Schedules instrument note.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param note_begin_position Note begin position in beats.
+  /// @param note_end_position Note end position in beats.
+  /// @param note_pitch Note pitch.
+  /// @param note_intensity Note intensity.
+  /// @return True if successful, false otherwise.
+  void ScheduleInstrumentNote(int instrument_id, double note_begin_position,
+                              double note_end_position, float note_pitch,
+                              float note_intensity);
+
+  /// Sets the beat callback.
+  ///
+  /// @param beat_callback Playback beat callback.
+  void SetBeatCallback(BeatCallback beat_callback);
+
+  /// Sets the playback position.
+  ///
+  /// @param position Position in beats.
+  void SetPlaybackPosition(double position);
+
+  /// Sets the playback tempo.
+  ///
+  /// @param tempo Tempo in BPM.
+  void SetPlaybackTempo(double tempo);
+
+  /// Starts the playback.
+  void StartPlayback();
+
+  // Stops the playback.
+  void StopPlayback();
+
+  /// Updates the internal state at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp);
+
+ private:
+  void StopAllNotes();
+
+  struct Track {
+    std::multimap<double, Note> active_notes;
+    std::multimap<double, Note> score;
+  };
+
+  std::unordered_map<int, Track> tracks_;
+
+  // Playback clock.
+  Clock clock_;
+
+  // Instrument manager.
+  InstrumentManager* manager_;  // not owned.
+
+  // Beat callback.
+  BeatCallback beat_callback_;
+};
+
+}  // namespace barelyapi
+
+#endif  // BARELYMUSICIAN_ENGINE_SEQUENCER_H_

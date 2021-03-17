@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "barelymusician/common/logging.h"
-#include "barelymusician/common/random.h"
+#include "barelymusician/common/random_generator.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/engine.h"
@@ -28,6 +28,7 @@ using ::barelyapi::Engine;
 using ::barelyapi::GetPitch;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::RandomGenerator;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::DrumkitInstrument;
@@ -35,7 +36,6 @@ using ::barelyapi::examples::InputManager;
 using ::barelyapi::examples::SynthInstrument;
 using ::barelyapi::examples::SynthInstrumentParam;
 using ::barelyapi::examples::WavFile;
-using ::barelyapi::random::Uniform;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 
 // Beat composer callback signature.
@@ -111,7 +111,8 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
   }
 }
 
-void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
+void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes,
+                  RandomGenerator* random) {
   const auto get_beat = [](int step) {
     return barelyapi::GetPosition(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
@@ -141,10 +142,11 @@ void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes) {
   }
   // Hihat Closed.
   notes->emplace_back(Note{get_beat(0), get_beat(2),
-                           barelyapi::kPitchHihatClosed, Uniform(0.5f, 0.75f)});
+                           barelyapi::kPitchHihatClosed,
+                           random->DrawUniform(0.5f, 0.75f)});
   notes->emplace_back(Note{get_beat(2), get_beat(4),
                            barelyapi::kPitchHihatClosed,
-                           Uniform(0.25f, 0.75f)});
+                           random->DrawUniform(0.25f, 0.75f)});
   // Hihat Open.
   if (beat + 1 == num_beats) {
     if (bar % 4 == 3) {
@@ -170,6 +172,8 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioOutput audio_output;
   InputManager input_manager;
+
+  RandomGenerator random;
 
   AudioClock clock(kSampleRate);
   Engine engine(kSampleRate);
@@ -278,7 +282,7 @@ int main(int /*argc*/, char* argv[]) {
                                  reinterpret_cast<void*>(&drumkit_files));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3, std::placeholders::_5);
+                std::placeholders::_3, std::placeholders::_5, &random);
   performers.emplace(drumkit_instrument_id, drumkit_beat_composer_callback);
 
   // Audio process callback.
@@ -314,11 +318,13 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        engine.SetPlaybackTempo(Uniform(0.5, 0.75) * engine.GetPlaybackTempo());
+        engine.SetPlaybackTempo(random.DrawUniform(0.5, 0.75) *
+                                engine.GetPlaybackTempo());
         LOG(INFO) << "Tempo changed to " << engine.GetPlaybackTempo();
         break;
       case '2':
-        engine.SetPlaybackTempo(Uniform(1.5, 2.0) * engine.GetPlaybackTempo());
+        engine.SetPlaybackTempo(random.DrawUniform(1.5, 2.0) *
+                                engine.GetPlaybackTempo());
         LOG(INFO) << "Tempo changed to " << engine.GetPlaybackTempo();
         break;
       case 'R':

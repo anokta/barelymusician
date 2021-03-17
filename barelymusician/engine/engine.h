@@ -2,15 +2,11 @@
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
 #include <functional>
-#include <unordered_map>
-#include <vector>
 
-#include "barelymusician/engine/clock.h"
-#include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/instrument_processor.h"
-#include "barelymusician/engine/task_runner.h"
+#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/sequencer.h"
 
 namespace barelyapi {
 
@@ -106,7 +102,7 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @return True if successful, false otherwise.
-  bool RemoveAllScheduledInstrumentNotes(int instrument_id);
+  void RemoveAllScheduledInstrumentNotes(int instrument_id);
 
   /// Resets all parameters of all instruments to their default values.
   void ResetAllInstrumentParams();
@@ -218,33 +214,8 @@ class Engine {
   void Update(double timestamp);
 
  private:
-  // Sets processor |event| of instrument with the given |instrument_id|.
-  void SetProcessorData(int instrument_id, InstrumentEvent event);
-
-  // Playback clock.
-  Clock clock_;
-
-  // Instrument id counter.
-  int id_counter_;
-
-  // List of instruments.
-  std::unordered_map<int, InstrumentController> controllers_;
-  std::unordered_map<int, InstrumentProcessor> processors_;
-
-  // Sampling rate in Hz.
-  int sample_rate_;
-
-  // Audio thread task runner.
-  TaskRunner task_runner_;
-
-  // Beat callback.
-  BeatCallback beat_callback_;
-
-  // Instrument note off callback.
-  NoteOffCallback note_off_callback_;
-
-  // Instrument note on callback.
-  NoteOnCallback note_on_callback_;
+  InstrumentManager manager_;
+  Sequencer sequencer_;
 };
 
 }  // namespace barelyapi

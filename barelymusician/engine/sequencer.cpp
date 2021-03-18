@@ -77,6 +77,7 @@ void Sequencer::Update(double timestamp) {
         events.emplace(clock_.GetTimestampAtPosition(it->first),
                        NoteOff{it->second.pitch});
       }
+      track.active_notes.erase(begin, end);
 
       // Handle score.
       begin = track.score.lower_bound(begin_position);

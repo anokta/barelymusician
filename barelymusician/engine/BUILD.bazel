@@ -99,15 +99,15 @@ cc_test(
     ],
 )
 
-# cc_test(
-#     name = "engine_test",
-#     srcs = ["engine_test.cpp"],
-#     deps = [
-#         ":engine",
-#         ":instrument_event",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "engine_test",
+    srcs = ["engine_test.cpp"],
+    deps = [
+        ":engine",
+        ":instrument_event",
+        "@googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "instrument_controller_test",

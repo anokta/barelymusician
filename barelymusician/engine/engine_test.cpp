@@ -227,12 +227,12 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   int note_on_instrument_id = 0;
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
-  engine.SetNoteOnCallback([&](int instrument_id, double timestamp,
-                               float note_pitch, float note_intensity) {
-    note_on_instrument_id = instrument_id;
-    note_on_pitch = note_pitch;
-    note_on_intensity = note_intensity;
-  });
+  engine.SetNoteOnCallback(
+      [&](int instrument_id, float note_pitch, float note_intensity) {
+        note_on_instrument_id = instrument_id;
+        note_on_pitch = note_pitch;
+        note_on_intensity = note_intensity;
+      });
   EXPECT_NE(note_on_instrument_id, instrument_id);
   EXPECT_NE(note_on_pitch, kNotePitch);
   EXPECT_NE(note_on_intensity, kNoteIntensity);
@@ -254,13 +254,11 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
 
   // Trigger note off callback.
   int note_off_instrument_id = 0;
-  double note_off_timestamp = 0.0;
   float note_off_pitch = 0.0f;
-  engine.SetNoteOffCallback(
-      [&](int instrument_id, double timestamp, float note_pitch) {
-        note_off_instrument_id = instrument_id;
-        note_off_pitch = note_pitch;
-      });
+  engine.SetNoteOffCallback([&](int instrument_id, float note_pitch) {
+    note_off_instrument_id = instrument_id;
+    note_off_pitch = note_pitch;
+  });
   EXPECT_NE(note_off_instrument_id, instrument_id);
   EXPECT_NE(note_off_pitch, kNotePitch);
 
@@ -279,13 +277,11 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   engine.Update(4.0);
   EXPECT_NE(note_on_pitch, 10.0f);
   EXPECT_NE(note_on_intensity, 1.0f);
-  EXPECT_NE(note_off_timestamp, 4.5);
   EXPECT_NE(note_off_pitch, 10.0f);
 
   engine.Update(5.0);
   EXPECT_FLOAT_EQ(note_on_pitch, 10.0f);
   EXPECT_FLOAT_EQ(note_on_intensity, 1.0f);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 4.5);
   EXPECT_FLOAT_EQ(note_off_pitch, 10.0f);
 
   // Finally, destroy to trigger the note off callback with the remaining note.

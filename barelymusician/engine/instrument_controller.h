@@ -73,6 +73,8 @@ class InstrumentController {
   bool SetParam(int id, float value);
 
  private:
+  
+
   // List of active note pitches.
   std::unordered_set<float> pitches_;
 

@@ -174,11 +174,13 @@ class InstrumentManager {
   /// @param sample_rate Sampling rate in Hz.
   void SetSampleRate(int sample_rate);
 
+  void Update(double timestamp);
+
  private:
   // Schedules processor |event| of instrument with the given |instrument_id| at
   // |timestamp|.
-  void ScheduleProcessorEvent(int instrument_id, InstrumentEvent event,
-                              double timestamp);
+  // void ScheduleProcessorEvent(int instrument_id, InstrumentEvent event,
+  //                             double timestamp);
 
   // Sampling rate in Hz.
   int sample_rate_;
@@ -188,6 +190,7 @@ class InstrumentManager {
 
   // List of instruments.
   std::unordered_map<int, InstrumentController> controllers_;
+  std::unordered_map<int, std::multimap<double, InstrumentEvent>> events_;
   std::unordered_map<int, InstrumentProcessor> processors_;
 
   // Audio thread task runner.

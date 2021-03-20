@@ -133,6 +133,9 @@ void Engine::StopPlayback() {
   sequencer_.StopPlayback();
 }
 
-void Engine::Update(double timestamp) { sequencer_.Update(timestamp); }
+void Engine::Update(double timestamp) {
+  sequencer_.Update(timestamp);
+  manager_.Update(timestamp);
+}
 
 }  // namespace barelyapi

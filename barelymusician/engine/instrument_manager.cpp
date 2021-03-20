@@ -33,6 +33,7 @@ int InstrumentManager::Create(InstrumentDefinition definition,
     processors_.emplace(instrument_id, std::move(processor));
   });
   controllers_.emplace(instrument_id, std::move(controller));
+  events_.emplace(instrument_id, std::multimap<double, InstrumentEvent>{});
   return instrument_id;
 }
 
@@ -45,6 +46,7 @@ bool InstrumentManager::Destroy(int instrument_id) {
       }
     }
     controllers_.erase(it);
+    events_.erase(instrument_id);
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
     return true;
@@ -94,29 +96,39 @@ bool InstrumentManager::Process(int instrument_id, float* output,
 
 void InstrumentManager::ResetAllParams(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
+    // TODO: Do reset params on Update!
     controller.ResetAllParams();
-    task_runner_.Add([this, instrument_id = instrument_id, timestamp,
-                      params = controller.GetAllParams()]() {
-      if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        for (auto& param : params) {
-          processor->ScheduleEvent(std::move(param), timestamp);
-        }
-      }
-    });
+    auto* events = FindOrNull(events_, instrument_id);
+    for (auto& param : controller.GetAllParams()) {
+      events->emplace(timestamp, std::move(param));
+    }
+    // task_runner_.Add([this, instrument_id = instrument_id, timestamp,
+    //                   params = controller.GetAllParams()]() {
+    //   if (auto* processor = FindOrNull(processors_, instrument_id)) {
+    //     for (auto& param : params) {
+    //       processor->ScheduleEvent(std::move(param), timestamp);
+    //     }
+    //   }
+    // });
   }
 }
 
 bool InstrumentManager::ResetAllParams(int instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    // TODO: Do reset params on Update!
     controller->ResetAllParams();
-    task_runner_.Add([this, instrument_id, timestamp,
-                      params = controller->GetAllParams()]() {
-      if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        for (auto& param : params) {
-          processor->ScheduleEvent(std::move(param), timestamp);
-        }
-      }
-    });
+    auto* events = FindOrNull(events_, instrument_id);
+    for (auto& param : controller->GetAllParams()) {
+      events->emplace(timestamp, std::move(param));
+    }
+    // task_runner_.Add([this, instrument_id, timestamp,
+    //                   params = controller->GetAllParams()]() {
+    //   if (auto* processor = FindOrNull(processors_, instrument_id)) {
+    //     for (auto& param : params) {
+    //       processor->ScheduleEvent(std::move(param), timestamp);
+    //     }
+    //   }
+    // });
     return true;
   }
   return false;
@@ -125,10 +137,14 @@ bool InstrumentManager::ResetAllParams(int instrument_id, double timestamp) {
 bool InstrumentManager::ResetParam(int instrument_id, int param_id,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    // TODO: Do reset param on Update!
     if (controller->ResetParam(param_id)) {
-      ScheduleProcessorEvent(instrument_id,
-                             Param{param_id, *controller->GetParam(param_id)},
-                             timestamp);
+      auto* events = FindOrNull(events_, instrument_id);
+      events->emplace(timestamp,
+                      Param{param_id, *controller->GetParam(param_id)});
+      // ScheduleProcessorEvent(instrument_id,
+      //                        Param{param_id,
+      //                        *controller->GetParam(param_id)}, timestamp);
       return true;
     }
   }
@@ -137,41 +153,51 @@ bool InstrumentManager::ResetParam(int instrument_id, int param_id,
 
 void InstrumentManager::SetAllNotesOff(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    auto notes = controller.GetAllNotes();
-    controller.SetAllNotesOff();
-    if (note_off_callback_) {
-      for (const auto& note_pitch : notes) {
-        note_off_callback_(instrument_id, note_pitch);
-      }
+    auto* events = FindOrNull(events_, instrument_id);
+    for (const auto& note : controller.GetAllNotes()) {
+      events->emplace(timestamp, NoteOff{note});
     }
-    task_runner_.Add([this, instrument_id = instrument_id, timestamp,
-                      notes = std::move(notes)]() {
-      if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        for (const auto& note_pitch : notes) {
-          processor->ScheduleEvent(NoteOff{note_pitch}, timestamp);
-        }
-      }
-    });
+    // auto notes = controller.GetAllNotes();
+    // controller.SetAllNotesOff();
+    // if (note_off_callback_) {
+    //   for (const auto& note_pitch : notes) {
+    //     note_off_callback_(instrument_id, note_pitch);
+    //   }
+    // }
+    // task_runner_.Add([this, instrument_id = instrument_id, timestamp,
+    //                   notes = std::move(notes)]() {
+    //   if (auto* processor = FindOrNull(processors_, instrument_id)) {
+    //     for (const auto& note_pitch : notes) {
+    //       processor->ScheduleEvent(NoteOff{note_pitch}, timestamp);
+    //     }
+    //   }
+    // });
   }
 }
 
 bool InstrumentManager::SetAllNotesOff(int instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto notes = controller->GetAllNotes();
-    controller->SetAllNotesOff();
-    if (note_off_callback_) {
-      for (const auto& note_pitch : notes) {
-        note_off_callback_(instrument_id, note_pitch);
-      }
+    auto* events = FindOrNull(events_, instrument_id);
+    // TODO: should do GetAllNotes at scheduled time as well! Most likely should
+    // have InstrumentEvent vs InstrumentProcessorEvent.
+    for (const auto& note : controller->GetAllNotes()) {
+      events->emplace(timestamp, NoteOff{note});
     }
-    task_runner_.Add(
-        [this, instrument_id, timestamp, notes = std::move(notes)]() {
-          if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            for (const auto& note_pitch : notes) {
-              processor->ScheduleEvent(NoteOff{note_pitch}, timestamp);
-            }
-          }
-        });
+    // auto notes = controller->GetAllNotes();
+    // controller->SetAllNotesOff();
+    // if (note_off_callback_) {
+    //   for (const auto& note_pitch : notes) {
+    //     note_off_callback_(instrument_id, note_pitch);
+    //   }
+    // }
+    // task_runner_.Add(
+    //     [this, instrument_id, timestamp, notes = std::move(notes)]() {
+    //       if (auto* processor = FindOrNull(processors_, instrument_id)) {
+    //         for (const auto& note_pitch : notes) {
+    //           processor->ScheduleEvent(NoteOff{note_pitch}, timestamp);
+    //         }
+    //       }
+    //     });
     return true;
   }
   return false;
@@ -180,51 +206,57 @@ bool InstrumentManager::SetAllNotesOff(int instrument_id, double timestamp) {
 bool InstrumentManager::SetCustomData(int instrument_id, void* custom_data,
                                       double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    ScheduleProcessorEvent(instrument_id, CustomData{custom_data}, timestamp);
+    // ScheduleProcessorEvent(instrument_id, CustomData{custom_data},
+    // timestamp);
+    auto* events = FindOrNull(events_, instrument_id);
+    events->emplace(timestamp, CustomData{custom_data});
     return true;
   }
   return false;
 }
 
 bool InstrumentManager::SetEvents(
-    int instrument_id, std::multimap<double, InstrumentEvent> events) {
+    int instrument_id, std::multimap<double, InstrumentEvent> input_events) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    for (auto it = events.begin(); it != events.end();) {
-      bool success = false;
-      std::visit(InstrumentEventVisitor{
-                     [&](const CustomData& /*custom_data*/) { success = true; },
-                     [&](const NoteOff& note_off) {
-                       if (controller->SetNoteOff(note_off.pitch)) {
-                         if (note_off_callback_) {
-                           note_off_callback_(instrument_id, note_off.pitch);
-                         }
-                         success = true;
-                       }
-                     },
-                     [&](const NoteOn& note_on) {
-                       if (controller->SetNoteOn(note_on.pitch)) {
-                         if (note_on_callback_) {
-                           note_on_callback_(instrument_id, note_on.pitch,
-                                             note_on.intensity);
-                         }
-                         success = true;
-                       }
-                     },
-                     [&](const Param& param) {
-                       success = controller->SetParam(param.id, param.value);
-                     }},
-                 it->second);
-      if (success) {
-        ++it;
-      } else {
-        it = events.erase(it);
-      }
-    }
-    task_runner_.Add([this, instrument_id, events = std::move(events)]() {
-      if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        processor->ScheduleEvents(events);
-      }
-    });
+    auto* events = FindOrNull(events_, instrument_id);
+    events->merge(input_events);
+    // for (auto it = events.begin(); it != events.end();) {
+    //   bool success = false;
+    //   std::visit(InstrumentEventVisitor{
+    //                  [&](const CustomData& /*custom_data*/) { success = true;
+    //                  },
+    //                  [&](const NoteOff& note_off) {
+    //                    if (controller->SetNoteOff(note_off.pitch)) {
+    //                      if (note_off_callback_) {
+    //                        note_off_callback_(instrument_id, note_off.pitch);
+    //                      }
+    //                      success = true;
+    //                    }
+    //                  },
+    //                  [&](const NoteOn& note_on) {
+    //                    if (controller->SetNoteOn(note_on.pitch)) {
+    //                      if (note_on_callback_) {
+    //                        note_on_callback_(instrument_id, note_on.pitch,
+    //                                          note_on.intensity);
+    //                      }
+    //                      success = true;
+    //                    }
+    //                  },
+    //                  [&](const Param& param) {
+    //                    success = controller->SetParam(param.id, param.value);
+    //                  }},
+    //              it->second);
+    //   if (success) {
+    //     ++it;
+    //   } else {
+    //     it = events.erase(it);
+    //   }
+    // }
+    // task_runner_.Add([this, instrument_id, events = std::move(events)]() {
+    //   if (auto* processor = FindOrNull(processors_, instrument_id)) {
+    //     processor->ScheduleEvents(events);
+    //   }
+    // });
     return true;
   }
   return false;
@@ -233,14 +265,16 @@ bool InstrumentManager::SetEvents(
 bool InstrumentManager::SetNoteOff(int instrument_id, float note_pitch,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->SetNoteOff(note_pitch)) {
-      if (note_off_callback_) {
-        note_off_callback_(instrument_id, note_pitch);
-      }
-      ScheduleProcessorEvent(instrument_id, NoteOff{note_pitch}, timestamp);
-      return true;
-    }
+    auto* events = FindOrNull(events_, instrument_id);
+    events->emplace(timestamp, NoteOff{note_pitch});
+    // if (controller->SetNoteOff(note_pitch)) {
+    //   if (note_off_callback_) {
+    //     note_off_callback_(instrument_id, note_pitch);
+    //   }
+    //   ScheduleProcessorEvent(instrument_id, NoteOff{note_pitch}, timestamp);
+    //   return true;
   }
+  // }
   return false;
 }
 
@@ -251,14 +285,17 @@ void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
 bool InstrumentManager::SetNoteOn(int instrument_id, float note_pitch,
                                   float note_intensity, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->SetNoteOn(note_pitch)) {
-      if (note_on_callback_) {
-        note_on_callback_(instrument_id, note_pitch, note_intensity);
-      }
-      ScheduleProcessorEvent(instrument_id, NoteOn{note_pitch, note_intensity},
-                             timestamp);
-      return true;
-    }
+    auto* events = FindOrNull(events_, instrument_id);
+    events->emplace(timestamp, NoteOn{note_pitch, note_intensity});
+    // if (controller->SetNoteOn(note_pitch)) {
+    //   if (note_on_callback_) {
+    //     note_on_callback_(instrument_id, note_pitch, note_intensity);
+    //   }
+    //   ScheduleProcessorEvent(instrument_id, NoteOn{note_pitch,
+    //   note_intensity},
+    //                          timestamp);
+    return true;
+    // }
   }
   return false;
 }
@@ -270,12 +307,15 @@ void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
 bool InstrumentManager::SetParam(int instrument_id, int param_id,
                                  float param_value, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->SetParam(param_id, param_value)) {
-      ScheduleProcessorEvent(instrument_id,
-                             Param{param_id, *controller->GetParam(param_id)},
-                             timestamp);
-      return true;
-    }
+    auto* events = FindOrNull(events_, instrument_id);
+    events->emplace(timestamp,
+                    Param{param_id, *controller->GetParam(param_id)});
+    // if (controller->SetParam(param_id, param_value)) {
+    //   ScheduleProcessorEvent(instrument_id,
+    //                          Param{param_id,
+    //                          *controller->GetParam(param_id)}, timestamp);
+    return true;
+    // }
   }
   return false;
 }
@@ -290,15 +330,63 @@ void InstrumentManager::SetSampleRate(int sample_rate) {
   });
 }
 
-void InstrumentManager::ScheduleProcessorEvent(int instrument_id,
-                                               InstrumentEvent event,
-                                               double timestamp) {
-  task_runner_.Add(
-      [this, instrument_id, event = std::move(event), timestamp]() {
-        if (auto* processor = FindOrNull(processors_, instrument_id)) {
-          processor->ScheduleEvent(std::move(event), timestamp);
-        }
-      });
+// void InstrumentManager::ScheduleProcessorEvent(int instrument_id,
+//                                                InstrumentEvent event,
+//                                                double timestamp) {
+//   task_runner_.Add(
+//       [this, instrument_id, event = std::move(event), timestamp]() {
+//         if (auto* processor = FindOrNull(processors_, instrument_id)) {
+//           processor->ScheduleEvent(std::move(event), timestamp);
+//         }
+//       });
+// }
+
+void InstrumentManager::Update(double timestamp) {
+  for (auto& controller_it : controllers_) {
+    auto& instrument_id = controller_it.first;
+    auto& controller = controller_it.second;
+    auto* events = FindOrNull(events_, instrument_id);
+
+    std::multimap<double, InstrumentEvent> shuttle;
+
+    auto begin = events->begin();
+    auto end = events->upper_bound(timestamp);
+    for (auto it = begin; it != end; ++it) {
+      bool success = false;
+      std::visit(InstrumentEventVisitor{
+                     [&](const CustomData& /*custom_data*/) { success = true; },
+                     [&](const NoteOff& note_off) {
+                       if (controller.SetNoteOff(note_off.pitch)) {
+                         if (note_off_callback_) {
+                           note_off_callback_(instrument_id, note_off.pitch);
+                         }
+                         success = true;
+                       }
+                     },
+                     [&](const NoteOn& note_on) {
+                       if (controller.SetNoteOn(note_on.pitch)) {
+                         if (note_on_callback_) {
+                           note_on_callback_(instrument_id, note_on.pitch,
+                                             note_on.intensity);
+                         }
+                         success = true;
+                       }
+                     },
+                     [&](const Param& param) {
+                       success = controller.SetParam(param.id, param.value);
+                     }},
+                 it->second);
+      if (success) {
+        shuttle.insert(std::move(*it));
+      }
+    }
+    events->erase(begin, end);
+    task_runner_.Add([this, instrument_id, shuttle = std::move(shuttle)]() {
+      if (auto* processor = FindOrNull(processors_, instrument_id)) {
+        processor->ScheduleEvents(shuttle);
+      }
+    });
+  }
 }
 
 }  // namespace barelyapi

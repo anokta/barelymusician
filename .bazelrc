@@ -1,13 +1,12 @@
+common --enable_platform_specific_config
+
 # target c++20.
-build --cxxopt=-std:c++latest
+build:macos --cxxopt=-std=c++2a
+build:windows --cxxopt=-std:c++latest
 
 # treat warnings as errors.
-# TODO(#52): MSVC only, needs cross-platform support.
-build --cxxopt=-W4
-build --cxxopt=-WX
-
-# TODO(#52): temp osx mirror.
-# build --cxxopt=-std=c++2a
-# build --cxxopt=-Wall
-# build --cxxopt=-Wno-unused-lambda-capture
-# build --cxxopt=-Werror
+build:macos --cxxopt=-Wall
+build:macos --cxxopt=-Wno-unused-lambda-capture
+build:macos --cxxopt=-Werror
+build:windows --cxxopt=-W4
+build:windows --cxxopt=-WX

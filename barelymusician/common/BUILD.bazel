@@ -8,6 +8,12 @@ cc_library(
 )
 
 cc_library(
+    name = "id_generator",
+    srcs = ["id_generator.cpp"],
+    hdrs = ["id_generator.h"],
+)
+
+cc_library(
     name = "logging",
     srcs = ["logging.cpp"],
     hdrs = ["logging.h"],
@@ -30,6 +36,15 @@ cc_test(
     srcs = ["common_utils_test.cpp"],
     deps = [
         ":common_utils",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "id_generator_test",
+    srcs = ["id_generator_test.cpp"],
+    deps = [
+        ":id_generator",
         "@googletest//:gtest_main",
     ],
 )

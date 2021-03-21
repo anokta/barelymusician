@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "barelymusician/common/common_utils.h"
+#include "barelymusician/common/logging.h"
 
 namespace barelyapi {
 
@@ -96,11 +97,9 @@ bool InstrumentManager::Process(int instrument_id, float* output,
 
 void InstrumentManager::ResetAllParams(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    // TODO: Do reset params on Update!
-    controller.ResetAllParams();
     auto* events = FindOrNull(events_, instrument_id);
-    for (auto& param : controller.GetAllParams()) {
-      events->emplace(timestamp, std::move(param));
+    for (const auto& [id, value] : controller.GetAllParams()) {
+      events->emplace(timestamp, Param{id, *controller.GetDefaultParam(id)});
     }
     // task_runner_.Add([this, instrument_id = instrument_id, timestamp,
     //                   params = controller.GetAllParams()]() {
@@ -115,11 +114,9 @@ void InstrumentManager::ResetAllParams(double timestamp) {
 
 bool InstrumentManager::ResetAllParams(int instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    // TODO: Do reset params on Update!
-    controller->ResetAllParams();
     auto* events = FindOrNull(events_, instrument_id);
-    for (auto& param : controller->GetAllParams()) {
-      events->emplace(timestamp, std::move(param));
+    for (const auto& [id, value] : controller->GetAllParams()) {
+      events->emplace(timestamp, Param{id, *controller->GetDefaultParam(id)});
     }
     // task_runner_.Add([this, instrument_id, timestamp,
     //                   params = controller->GetAllParams()]() {
@@ -272,7 +269,7 @@ bool InstrumentManager::SetNoteOff(int instrument_id, float note_pitch,
     //     note_off_callback_(instrument_id, note_pitch);
     //   }
     //   ScheduleProcessorEvent(instrument_id, NoteOff{note_pitch}, timestamp);
-    //   return true;
+    return true;
   }
   // }
   return false;
@@ -308,8 +305,7 @@ bool InstrumentManager::SetParam(int instrument_id, int param_id,
                                  float param_value, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp,
-                    Param{param_id, *controller->GetParam(param_id)});
+    events->emplace(timestamp, Param{param_id, param_value});
     // if (controller->SetParam(param_id, param_value)) {
     //   ScheduleProcessorEvent(instrument_id,
     //                          Param{param_id,
@@ -372,8 +368,11 @@ void InstrumentManager::Update(double timestamp) {
                          success = true;
                        }
                      },
-                     [&](const Param& param) {
-                       success = controller.SetParam(param.id, param.value);
+                     [&](Param& param) {
+                       if (controller.SetParam(param.id, param.value)) {
+                         param.value = *controller.GetParam(param.id);
+                         success = true;
+                       }
                      }},
                  it->second);
       if (success) {

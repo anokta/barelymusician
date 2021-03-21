@@ -174,7 +174,7 @@ class InstrumentManager {
   /// @param sample_rate Sampling rate in Hz.
   void SetSampleRate(int sample_rate);
 
-  void Update(double timestamp);
+  void Update(double timestamp = 0.0);
 
  private:
   // Schedules processor |event| of instrument with the given |instrument_id| at

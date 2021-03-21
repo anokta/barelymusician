@@ -46,6 +46,14 @@ std::vector<Param> InstrumentController::GetAllParams() const {
   return params;
 }
 
+// TODO: temp
+const float* InstrumentController::GetDefaultParam(int id) const {
+  if (const auto* param = FindOrNull(params_, id)) {
+    return &param->first.default_value;
+  }
+  return nullptr;
+}
+
 const float* InstrumentController::GetParam(int id) const {
   if (const auto* param = FindOrNull(params_, id)) {
     return &param->second;

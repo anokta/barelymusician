@@ -76,6 +76,7 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   // Set note on.
   EXPECT_TRUE(
       instrument_manager.SetNoteOn(instrument_id, kNotePitch, kNoteIntensity));
+  instrument_manager.Update();
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument_manager.Process(instrument_id, buffer.data(),
@@ -89,6 +90,7 @@ TEST(InstrumentManagerTest, CreateDestroy) {
 
   // Destroy instrument.
   EXPECT_TRUE(instrument_manager.Destroy(instrument_id));
+  instrument_manager.Update();
 
   EXPECT_TRUE(instrument_manager.GetAllNotes(instrument_id).empty());
   EXPECT_TRUE(instrument_manager.GetAllParams(instrument_id).empty());
@@ -132,6 +134,7 @@ TEST(InstrumentManagerTest, SetNotes) {
                    NoteOff{static_cast<float>(i)});
   }
   instrument_manager.SetEvents(instrument_id, std::move(events));
+  instrument_manager.Update(static_cast<double>(kNumFrames));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(instrument_manager.Process(instrument_id, buffer.data(),
@@ -179,6 +182,7 @@ TEST(InstrumentManagerTest, SetNote) {
   // Set note on.
   EXPECT_TRUE(instrument_manager.SetNoteOn(instrument_id, kNotePitch,
                                            kNoteIntensity, kTimestamp));
+  instrument_manager.Update(kTimestamp);
   EXPECT_TRUE(instrument_manager.IsNoteOn(instrument_id, kNotePitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -194,6 +198,7 @@ TEST(InstrumentManagerTest, SetNote) {
   // Set note off.
   EXPECT_TRUE(
       instrument_manager.SetNoteOff(instrument_id, kNotePitch, kTimestamp));
+  instrument_manager.Update(kTimestamp);
   EXPECT_FALSE(instrument_manager.IsNoteOn(instrument_id, kNotePitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -233,18 +238,21 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
 
   EXPECT_TRUE(
       instrument_manager.SetNoteOn(instrument_id, kNotePitch, kNoteIntensity));
+  instrument_manager.Update();
   EXPECT_EQ(note_on_instrument_id, instrument_id);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
 
   // This should not trigger the callback since the note is already on.
-  EXPECT_FALSE(
+  EXPECT_TRUE(
       instrument_manager.SetNoteOn(instrument_id, kNotePitch, kNoteIntensity));
+  instrument_manager.Update();
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
 
   // Trigger note on callback again with another note.
   EXPECT_TRUE(
       instrument_manager.SetNoteOn(instrument_id, 2.0f, kNoteIntensity));
+  instrument_manager.Update();
   EXPECT_FLOAT_EQ(note_on_pitch, 2.0f);
 
   // Trigger note off callback.
@@ -259,11 +267,13 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   EXPECT_NE(note_off_pitch, kNotePitch);
 
   EXPECT_TRUE(instrument_manager.SetNoteOff(instrument_id, kNotePitch));
+  instrument_manager.Update();
   EXPECT_EQ(note_off_instrument_id, instrument_id);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // This should not trigger the callback since the note is already off.
-  EXPECT_FALSE(instrument_manager.SetNoteOff(instrument_id, kNotePitch));
+  EXPECT_TRUE(instrument_manager.SetNoteOff(instrument_id, kNotePitch));
+  instrument_manager.Update();
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // Finally, destroy to trigger the note off callback with the remaining note.
@@ -298,6 +308,7 @@ TEST(InstrumentManagerTest, ResetAllParams) {
     }
 
     instrument_manager.SetParam(instrument_ids[i], 1, static_cast<float>(i));
+    instrument_manager.Update();
     EXPECT_THAT(instrument_manager.GetAllParams(instrument_ids[i]),
                 UnorderedElementsAre(Param{1, static_cast<float>(i)}));
 
@@ -314,6 +325,7 @@ TEST(InstrumentManagerTest, ResetAllParams) {
 
   // Reset all parameters.
   instrument_manager.ResetAllParams();
+  instrument_manager.Update();
 
   for (int i = 0; i < kNumInstruments; ++i) {
     EXPECT_THAT(instrument_manager.GetAllParams(instrument_ids[i]),
@@ -359,6 +371,7 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
     EXPECT_TRUE(instrument_manager.SetNoteOn(
         instrument_ids[i], static_cast<float>(i), kNoteIntensity));
+    instrument_manager.Update();
     EXPECT_THAT(instrument_manager.GetAllNotes(instrument_ids[i]),
                 UnorderedElementsAre(static_cast<float>(i)));
 
@@ -375,6 +388,7 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
   // Set all notes off.
   instrument_manager.SetAllNotesOff();
+  instrument_manager.Update();
 
   for (int i = 0; i < kNumInstruments; ++i) {
     EXPECT_TRUE(instrument_manager.GetAllNotes(instrument_ids[i]).empty());

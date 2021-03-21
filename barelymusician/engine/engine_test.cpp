@@ -76,6 +76,7 @@ TEST(EngineTest, CreateDestroy) {
   // Set note on.
   EXPECT_TRUE(
       engine.SetInstrumentNoteOn(instrument_id, kNotePitch, kNoteIntensity));
+  engine.Update(0.0);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   EXPECT_TRUE(engine.ProcessInstrument(instrument_id, 0.0, buffer.data(),
@@ -185,6 +186,7 @@ TEST(EngineTest, SetInstrumentNote) {
   // Set note on.
   EXPECT_TRUE(
       engine.SetInstrumentNoteOn(instrument_id, kNotePitch, kNoteIntensity));
+  engine.Update(kTimestamp);
   EXPECT_TRUE(engine.IsInstrumentNoteOn(instrument_id, kNotePitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -199,6 +201,7 @@ TEST(EngineTest, SetInstrumentNote) {
 
   // Set note off.
   EXPECT_TRUE(engine.SetInstrumentNoteOff(instrument_id, kNotePitch));
+  engine.Update(kTimestamp);
   EXPECT_FALSE(engine.IsInstrumentNoteOn(instrument_id, kNotePitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -239,17 +242,19 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
 
   EXPECT_TRUE(
       engine.SetInstrumentNoteOn(instrument_id, kNotePitch, kNoteIntensity));
+  engine.Update(1.0);
   EXPECT_EQ(note_on_instrument_id, instrument_id);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
 
   // This should not trigger the callback since the note is already on.
   engine.Update(2.0);
-  EXPECT_FALSE(
+  EXPECT_TRUE(
       engine.SetInstrumentNoteOn(instrument_id, kNotePitch, kNoteIntensity));
 
   // Trigger note on callback again with another note.
   EXPECT_TRUE(engine.SetInstrumentNoteOn(instrument_id, 2.0f, kNoteIntensity));
+  engine.Update(2.0);
   EXPECT_FLOAT_EQ(note_on_pitch, 2.0f);
 
   // Trigger note off callback.
@@ -263,12 +268,14 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   EXPECT_NE(note_off_pitch, kNotePitch);
 
   EXPECT_TRUE(engine.SetInstrumentNoteOff(instrument_id, kNotePitch));
+  engine.Update(2.0);
   EXPECT_EQ(note_off_instrument_id, instrument_id);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // This should not trigger the callback since the note is already off.
   engine.Update(3.0);
-  EXPECT_FALSE(engine.SetInstrumentNoteOff(instrument_id, kNotePitch));
+  EXPECT_TRUE(engine.SetInstrumentNoteOff(instrument_id, kNotePitch));
+  engine.Update(3.0);
 
   // Trigger both callbacks with a scheduled note.
   engine.StartPlayback();
@@ -315,6 +322,7 @@ TEST(EngineTest, ResetAllParams) {
     }
 
     engine.SetInstrumentParam(instrument_ids[i], 1, static_cast<float>(i));
+    engine.Update(0.0);
     EXPECT_THAT(engine.GetAllInstrumentParams(instrument_ids[i]),
                 UnorderedElementsAre(Param{1, static_cast<float>(i)}));
 
@@ -331,6 +339,7 @@ TEST(EngineTest, ResetAllParams) {
 
   // Reset all parameters.
   engine.ResetAllInstrumentParams();
+  engine.Update(0.0);
 
   for (int i = 0; i < kNumInstruments; ++i) {
     EXPECT_THAT(engine.GetAllInstrumentParams(instrument_ids[i]),
@@ -375,6 +384,7 @@ TEST(EngineTest, SetAllInstrumentNotesOff) {
 
     EXPECT_TRUE(engine.SetInstrumentNoteOn(
         instrument_ids[i], static_cast<float>(i), kNoteIntensity));
+    engine.Update(0.0);
     EXPECT_THAT(engine.GetAllInstrumentNotes(instrument_ids[i]),
                 UnorderedElementsAre(static_cast<float>(i)));
 
@@ -391,6 +401,7 @@ TEST(EngineTest, SetAllInstrumentNotesOff) {
 
   // Set all notes off.
   engine.SetAllInstrumentNotesOff();
+  engine.Update(0.0);
 
   for (int i = 0; i < kNumInstruments; ++i) {
     EXPECT_TRUE(engine.GetAllInstrumentNotes(instrument_ids[i]).empty());

@@ -35,6 +35,8 @@ class InstrumentController {
   /// @return Pointer to the parameter value, or nullptr if not found.
   const float* GetParam(int id) const;
 
+  const float* GetDefaultParam(int id) const;
+
   /// Returns whether note is active or not.
   ///
   /// @param pitch Note pitch.
@@ -73,8 +75,6 @@ class InstrumentController {
   bool SetParam(int id, float value);
 
  private:
-  
-
   // List of active note pitches.
   std::unordered_set<float> pitches_;
 

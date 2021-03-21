@@ -5,6 +5,7 @@ cc_binary(
     srcs = ["engine_demo.cpp"],
     data = ["//examples/data:audio"],
     deps = [
+        "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
         "//barelymusician/common:random_generator",
         "//barelymusician/composition:note",
@@ -53,6 +54,7 @@ cc_binary(
     srcs = ["midi_demo.cpp"],
     data = ["//examples/data:midi"],
     deps = [
+        "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_utils",

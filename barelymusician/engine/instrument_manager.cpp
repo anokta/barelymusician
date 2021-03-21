@@ -24,9 +24,9 @@ InstrumentManager::InstrumentManager(int sample_rate, IdGenerator* id_generator)
   DCHECK(id_generator);
 }
 
-int InstrumentManager::Create(InstrumentDefinition definition,
-                              InstrumentParamDefinitions param_definitions) {
-  const int instrument_id = id_generator_->Generate();
+Id InstrumentManager::Create(InstrumentDefinition definition,
+                             InstrumentParamDefinitions param_definitions) {
+  const Id instrument_id = id_generator_->Generate();
   InstrumentController controller(param_definitions);
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
                     params = controller.GetAllParams()]() {
@@ -41,7 +41,7 @@ int InstrumentManager::Create(InstrumentDefinition definition,
   return instrument_id;
 }
 
-bool InstrumentManager::Destroy(int instrument_id) {
+bool InstrumentManager::Destroy(Id instrument_id) {
   if (const auto it = controllers_.find(instrument_id);
       it != controllers_.end()) {
     if (note_off_callback_) {
@@ -58,36 +58,35 @@ bool InstrumentManager::Destroy(int instrument_id) {
   return false;
 }
 
-std::vector<float> InstrumentManager::GetAllNotes(int instrument_id) const {
+std::vector<float> InstrumentManager::GetAllNotes(Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllNotes();
   }
   return {};
 }
 
-std::vector<Param> InstrumentManager::GetAllParams(int instrument_id) const {
+std::vector<Param> InstrumentManager::GetAllParams(Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllParams();
   }
   return {};
 }
 
-const float* InstrumentManager::GetParam(int instrument_id,
-                                         int param_id) const {
+const float* InstrumentManager::GetParam(Id instrument_id, int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetParam(param_id);
   }
   return nullptr;
 }
 
-bool InstrumentManager::IsNoteOn(int instrument_id, float note_pitch) const {
+bool InstrumentManager::IsNoteOn(Id instrument_id, float note_pitch) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->IsNoteOn(note_pitch);
   }
   return false;
 }
 
-bool InstrumentManager::Process(int instrument_id, float* output,
+bool InstrumentManager::Process(Id instrument_id, float* output,
                                 int num_channels, int num_frames,
                                 double timestamp) {
   task_runner_.Run();
@@ -115,7 +114,7 @@ void InstrumentManager::ResetAllParams(double timestamp) {
   }
 }
 
-bool InstrumentManager::ResetAllParams(int instrument_id, double timestamp) {
+bool InstrumentManager::ResetAllParams(Id instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto* events = FindOrNull(events_, instrument_id);
     for (const auto& [id, value] : controller->GetAllParams()) {
@@ -134,7 +133,7 @@ bool InstrumentManager::ResetAllParams(int instrument_id, double timestamp) {
   return false;
 }
 
-bool InstrumentManager::ResetParam(int instrument_id, int param_id,
+bool InstrumentManager::ResetParam(Id instrument_id, int param_id,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     // TODO: Do reset param on Update!
@@ -175,7 +174,7 @@ void InstrumentManager::SetAllNotesOff(double timestamp) {
   }
 }
 
-bool InstrumentManager::SetAllNotesOff(int instrument_id, double timestamp) {
+bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto* events = FindOrNull(events_, instrument_id);
     // TODO: should do GetAllNotes at scheduled time as well! Most likely should
@@ -203,7 +202,7 @@ bool InstrumentManager::SetAllNotesOff(int instrument_id, double timestamp) {
   return false;
 }
 
-bool InstrumentManager::SetCustomData(int instrument_id, void* custom_data,
+bool InstrumentManager::SetCustomData(Id instrument_id, void* custom_data,
                                       double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     // ScheduleProcessorEvent(instrument_id, CustomData{custom_data},
@@ -216,7 +215,7 @@ bool InstrumentManager::SetCustomData(int instrument_id, void* custom_data,
 }
 
 bool InstrumentManager::SetEvents(
-    int instrument_id, std::multimap<double, InstrumentEvent> input_events) {
+    Id instrument_id, std::multimap<double, InstrumentEvent> input_events) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto* events = FindOrNull(events_, instrument_id);
     events->merge(input_events);
@@ -262,7 +261,7 @@ bool InstrumentManager::SetEvents(
   return false;
 }
 
-bool InstrumentManager::SetNoteOff(int instrument_id, float note_pitch,
+bool InstrumentManager::SetNoteOff(Id instrument_id, float note_pitch,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto* events = FindOrNull(events_, instrument_id);
@@ -282,7 +281,7 @@ void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
   note_off_callback_ = std::move(note_off_callback);
 }
 
-bool InstrumentManager::SetNoteOn(int instrument_id, float note_pitch,
+bool InstrumentManager::SetNoteOn(Id instrument_id, float note_pitch,
                                   float note_intensity, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto* events = FindOrNull(events_, instrument_id);
@@ -304,7 +303,7 @@ void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-bool InstrumentManager::SetParam(int instrument_id, int param_id,
+bool InstrumentManager::SetParam(Id instrument_id, int param_id,
                                  float param_value, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     auto* events = FindOrNull(events_, instrument_id);
@@ -329,7 +328,7 @@ void InstrumentManager::SetSampleRate(int sample_rate) {
   });
 }
 
-// void InstrumentManager::ScheduleProcessorEvent(int instrument_id,
+// void InstrumentManager::ScheduleProcessorEvent(Id instrument_id,
 //                                                InstrumentEvent event,
 //                                                double timestamp) {
 //   task_runner_.Add(

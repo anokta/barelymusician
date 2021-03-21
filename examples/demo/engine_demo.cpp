@@ -9,6 +9,7 @@
 #include <variant>
 #include <vector>
 
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/random_generator.h"
 #include "barelymusician/composition/note.h"
@@ -26,6 +27,7 @@ namespace {
 
 using ::barelyapi::Engine;
 using ::barelyapi::GetPitch;
+using ::barelyapi::Id;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::RandomGenerator;
@@ -60,8 +62,8 @@ constexpr int kNumInstrumentVoices = 8;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
-int BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
-                         float attack, float release) {
+Id BuildSynthInstrument(Engine* engine, OscillatorType type, float gain,
+                        float attack, float release) {
   return engine->CreateInstrument(
       SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices,
@@ -187,7 +189,7 @@ int main(int /*argc*/, char* argv[]) {
     return progression[bar % progression.size()];
   };
 
-  std::unordered_map<int, BeatComposerCallback> performers;
+  std::unordered_map<Id, BeatComposerCallback> performers;
 
   // Beat callback.
   int harmonic = 0;
@@ -221,7 +223,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetBeatCallback(beat_callback);
 
   // Note on callback.
-  const auto note_on_callback = [](int performer_id, float pitch,
+  const auto note_on_callback = [](Id performer_id, float pitch,
                                    float intensity) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOn(" << pitch << ", "
               << intensity << ")";
@@ -229,7 +231,7 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](int performer_id, float pitch) {
+  const auto note_off_callback = [](Id performer_id, float pitch) {
     LOG(INFO) << "Performer #" << performer_id << ": NoteOff(" << pitch << ")";
   };
   engine.SetNoteOffCallback(note_off_callback);

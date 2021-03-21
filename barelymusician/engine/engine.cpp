@@ -8,24 +8,24 @@ namespace barelyapi {
 Engine::Engine(int sample_rate)
     : manager_(sample_rate, &id_generator_), sequencer_(&manager_) {}
 
-int Engine::CreateInstrument(InstrumentDefinition definition,
-                             InstrumentParamDefinitions param_definitions) {
+Id Engine::CreateInstrument(InstrumentDefinition definition,
+                            InstrumentParamDefinitions param_definitions) {
   return manager_.Create(std::move(definition), std::move(param_definitions));
 }
 
-bool Engine::DestroyInstrument(int instrument_id) {
+bool Engine::DestroyInstrument(Id instrument_id) {
   return manager_.Destroy(instrument_id);
 }
 
-std::vector<float> Engine::GetAllInstrumentNotes(int instrument_id) const {
+std::vector<float> Engine::GetAllInstrumentNotes(Id instrument_id) const {
   return manager_.GetAllNotes(instrument_id);
 }
 
-std::vector<Param> Engine::GetAllInstrumentParams(int instrument_id) const {
+std::vector<Param> Engine::GetAllInstrumentParams(Id instrument_id) const {
   return manager_.GetAllParams(instrument_id);
 }
 
-const float* Engine::GetInstrumentParam(int instrument_id, int param_id) const {
+const float* Engine::GetInstrumentParam(Id instrument_id, int param_id) const {
   return manager_.GetParam(instrument_id, param_id);
 }
 
@@ -37,13 +37,13 @@ double Engine::GetPlaybackTempo() const {
   return sequencer_.GetPlaybackTempo();
 }
 
-bool Engine::IsInstrumentNoteOn(int instrument_id, float note_pitch) const {
+bool Engine::IsInstrumentNoteOn(Id instrument_id, float note_pitch) const {
   return manager_.IsNoteOn(instrument_id, note_pitch);
 }
 
 bool Engine::IsPlaying() const { return sequencer_.IsPlaying(); }
 
-bool Engine::ProcessInstrument(int instrument_id, double timestamp,
+bool Engine::ProcessInstrument(Id instrument_id, double timestamp,
                                float* output, int num_channels,
                                int num_frames) {
   return manager_.Process(instrument_id, output, num_channels, num_frames,
@@ -54,21 +54,21 @@ void Engine::RemoveAllScheduledInstrumentNotes() {
   sequencer_.RemoveAllScheduledInstrumentNotes();
 }
 
-void Engine::RemoveAllScheduledInstrumentNotes(int instrument_id) {
+void Engine::RemoveAllScheduledInstrumentNotes(Id instrument_id) {
   sequencer_.RemoveAllScheduledInstrumentNotes(instrument_id);
 }
 
 void Engine::ResetAllInstrumentParams() { manager_.ResetAllParams(); }
 
-bool Engine::ResetAllInstrumentParams(int instrument_id) {
+bool Engine::ResetAllInstrumentParams(Id instrument_id) {
   return manager_.ResetAllParams(instrument_id);
 }
 
-bool Engine::ResetInstrumentParam(int instrument_id, int param_id) {
+bool Engine::ResetInstrumentParam(Id instrument_id, int param_id) {
   return manager_.ResetParam(instrument_id, param_id);
 }
 
-bool Engine::ScheduleInstrumentNote(int instrument_id,
+bool Engine::ScheduleInstrumentNote(Id instrument_id,
                                     double note_begin_position,
                                     double note_end_position, float note_pitch,
                                     float note_intensity) {
@@ -80,7 +80,7 @@ bool Engine::ScheduleInstrumentNote(int instrument_id,
 
 void Engine::SetAllInstrumentNotesOff() { manager_.SetAllNotesOff(); }
 
-bool Engine::SetAllInstrumentNotesOff(int instrument_id) {
+bool Engine::SetAllInstrumentNotesOff(Id instrument_id) {
   return manager_.SetAllNotesOff(instrument_id);
 }
 
@@ -88,20 +88,20 @@ void Engine::SetBeatCallback(BeatCallback beat_callback) {
   sequencer_.SetBeatCallback(std::move(beat_callback));
 }
 
-bool Engine::SetCustomInstrumentData(int instrument_id, void* custom_data) {
+bool Engine::SetCustomInstrumentData(Id instrument_id, void* custom_data) {
   return manager_.SetCustomData(instrument_id, custom_data);
 }
 
-bool Engine::SetInstrumentNoteOff(int instrument_id, float note_pitch) {
+bool Engine::SetInstrumentNoteOff(Id instrument_id, float note_pitch) {
   return manager_.SetNoteOff(instrument_id, note_pitch);
 }
 
-bool Engine::SetInstrumentNoteOn(int instrument_id, float note_pitch,
+bool Engine::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
                                  float note_intensity) {
   return manager_.SetNoteOn(instrument_id, note_pitch, note_intensity);
 }
 
-bool Engine::SetInstrumentParam(int instrument_id, int param_id,
+bool Engine::SetInstrumentParam(Id instrument_id, int param_id,
                                 float param_value) {
   return manager_.SetParam(instrument_id, param_id, param_value);
 }

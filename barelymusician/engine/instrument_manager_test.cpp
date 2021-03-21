@@ -59,7 +59,7 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  const int instrument_id = instrument_manager.Create(
+  const Id instrument_id = instrument_manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   EXPECT_TRUE(instrument_manager.GetAllNotes(instrument_id).empty());
@@ -116,7 +116,7 @@ TEST(InstrumentManagerTest, SetNotes) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  const int instrument_id = instrument_manager.Create(
+  const Id instrument_id = instrument_manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -171,7 +171,7 @@ TEST(InstrumentManagerTest, SetNote) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  const int instrument_id = instrument_manager.Create(
+  const Id instrument_id = instrument_manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -224,7 +224,7 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   InstrumentManager instrument_manager(1, &id_generator);
 
   // Create instrument.
-  const int instrument_id = instrument_manager.Create(
+  const Id instrument_id = instrument_manager.Create(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   // Trigger note on callback.
@@ -232,7 +232,7 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
   instrument_manager.SetNoteOnCallback(
-      [&](int instrument_id, float note_pitch, float note_intensity) {
+      [&](Id instrument_id, float note_pitch, float note_intensity) {
         note_on_instrument_id = instrument_id;
         note_on_pitch = note_pitch;
         note_on_intensity = note_intensity;
@@ -264,7 +264,7 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   int note_off_instrument_id = 0;
   float note_off_pitch = 0.0f;
   instrument_manager.SetNoteOffCallback(
-      [&](int instrument_id, float note_pitch) {
+      [&](Id instrument_id, float note_pitch) {
         note_off_instrument_id = instrument_id;
         note_off_pitch = note_pitch;
       });

@@ -57,7 +57,7 @@ TEST(EngineTest, CreateDestroy) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  const int instrument_id = engine.CreateInstrument(
+  const Id instrument_id = engine.CreateInstrument(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   EXPECT_TRUE(engine.GetAllInstrumentNotes(instrument_id).empty());
@@ -114,7 +114,7 @@ TEST(EngineTest, ScheduleInstrumentNotes) {
   engine.StartPlayback();
 
   // Create instrument.
-  const int instrument_id = engine.CreateInstrument(
+  const Id instrument_id = engine.CreateInstrument(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -171,7 +171,7 @@ TEST(EngineTest, SetInstrumentNote) {
   engine.Update(kTimestamp);
 
   // Create instrument.
-  const int instrument_id = engine.CreateInstrument(
+  const Id instrument_id = engine.CreateInstrument(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -223,15 +223,15 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   engine.Update(1.0);
 
   // Create instrument.
-  const int instrument_id = engine.CreateInstrument(
+  const Id instrument_id = engine.CreateInstrument(
       GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
 
   // Trigger note on callback.
-  int note_on_instrument_id = 0;
+  Id note_on_instrument_id = 0;
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
   engine.SetNoteOnCallback(
-      [&](int instrument_id, float note_pitch, float note_intensity) {
+      [&](Id instrument_id, float note_pitch, float note_intensity) {
         note_on_instrument_id = instrument_id;
         note_on_pitch = note_pitch;
         note_on_intensity = note_intensity;
@@ -258,9 +258,9 @@ TEST(EngineTest, SetInstrumentNoteCallbacks) {
   EXPECT_FLOAT_EQ(note_on_pitch, 2.0f);
 
   // Trigger note off callback.
-  int note_off_instrument_id = 0;
+  Id note_off_instrument_id = 0;
   float note_off_pitch = 0.0f;
-  engine.SetNoteOffCallback([&](int instrument_id, float note_pitch) {
+  engine.SetNoteOffCallback([&](Id instrument_id, float note_pitch) {
     note_off_instrument_id = instrument_id;
     note_off_pitch = note_pitch;
   });
@@ -304,7 +304,7 @@ TEST(EngineTest, ResetAllParams) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
-  std::vector<int> instrument_ids(kNumInstruments);
+  std::vector<Id> instrument_ids(kNumInstruments);
   for (int i = 0; i < kNumInstruments; ++i) {
     instrument_ids[i] = engine.CreateInstrument(
         GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());
@@ -365,7 +365,7 @@ TEST(EngineTest, SetAllInstrumentNotesOff) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
-  std::vector<int> instrument_ids(kNumInstruments);
+  std::vector<Id> instrument_ids(kNumInstruments);
   for (int i = 0; i < kNumInstruments; ++i) {
     instrument_ids[i] = engine.CreateInstrument(
         GetTestInstrumentDefinition(), GetTestInstrumentParamDefinitions());

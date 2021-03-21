@@ -15,11 +15,10 @@ namespace barelyapi {
 using BeatCallback = std::function<void(int beat)>;
 
 /// Note off callback signature.
-using NoteOffCallback =
-    std::function<void(int instrument_id, float note_pitch)>;
+using NoteOffCallback = std::function<void(Id instrument_id, float note_pitch)>;
 
 /// Note on callback signature.
-using NoteOnCallback = std::function<void(int instrument_id, float note_pitch,
+using NoteOnCallback = std::function<void(Id instrument_id, float note_pitch,
                                           float note_intensity)>;
 
 /// Instrument playback engine.
@@ -35,33 +34,33 @@ class Engine {
   /// @param definition Instrument definition.
   /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
-  int CreateInstrument(InstrumentDefinition definition,
-                       InstrumentParamDefinitions param_definitions);
+  Id CreateInstrument(InstrumentDefinition definition,
+                      InstrumentParamDefinitions param_definitions);
 
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument id.
   /// @return True if successful, false otherwise.
-  bool DestroyInstrument(int instrument_id);
+  bool DestroyInstrument(Id instrument_id);
 
   /// Returns all active instrument notes.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of active note pitches.
-  std::vector<float> GetAllInstrumentNotes(int instrument_id) const;
+  std::vector<float> GetAllInstrumentNotes(Id instrument_id) const;
 
   /// Returns all instrument parameters.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of parameters.
-  std::vector<Param> GetAllInstrumentParams(int instrument_id) const;
+  std::vector<Param> GetAllInstrumentParams(Id instrument_id) const;
 
   /// Returns instrument parameter value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
   /// @return Pointer to parameter value if successful, nullptr otherwise.
-  const float* GetInstrumentParam(int instrument_id, int param_id) const;
+  const float* GetInstrumentParam(Id instrument_id, int param_id) const;
 
   /// Returns the playback position.
   ///
@@ -78,7 +77,7 @@ class Engine {
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
   /// @return True if note is active, false otherwise.
-  bool IsInstrumentNoteOn(int instrument_id, float note_pitch) const;
+  bool IsInstrumentNoteOn(Id instrument_id, float note_pitch) const;
 
   /// Returns whether the playback is currently active or not.
   ///
@@ -93,7 +92,7 @@ class Engine {
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   /// @return True if successful, false otherwise.
-  bool ProcessInstrument(int instrument_id, double timestamp, float* output,
+  bool ProcessInstrument(Id instrument_id, double timestamp, float* output,
                          int num_channels, int num_frames);
 
   /// Removes all scheduled notes of all instruments.
@@ -103,7 +102,7 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @return True if successful, false otherwise.
-  void RemoveAllScheduledInstrumentNotes(int instrument_id);
+  void RemoveAllScheduledInstrumentNotes(Id instrument_id);
 
   /// Resets all parameters of all instruments to their default values.
   void ResetAllInstrumentParams();
@@ -112,14 +111,14 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @return True if successful, false otherwise.
-  bool ResetAllInstrumentParams(int instrument_id);
+  bool ResetAllInstrumentParams(Id instrument_id);
 
   /// Resets instrument parameter to its default value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
   /// @return True if successful, false otherwise.
-  bool ResetInstrumentParam(int instrument_id, int param_id);
+  bool ResetInstrumentParam(Id instrument_id, int param_id);
 
   /// Schedules instrument note.
   ///
@@ -129,7 +128,7 @@ class Engine {
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
   /// @return True if successful, false otherwise.
-  bool ScheduleInstrumentNote(int instrument_id, double note_begin_position,
+  bool ScheduleInstrumentNote(Id instrument_id, double note_begin_position,
                               double note_end_position, float note_pitch,
                               float note_intensity);
 
@@ -140,7 +139,7 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @return True if successful, false otherwise.
-  bool SetAllInstrumentNotesOff(int instrument_id);
+  bool SetAllInstrumentNotesOff(Id instrument_id);
 
   /// Sets the beat callback.
   ///
@@ -152,14 +151,14 @@ class Engine {
   /// @param instrument_id Instrument id.
   /// @param custom_data Custom data.
   /// @return True if successful, false otherwise.
-  bool SetCustomInstrumentData(int instrument_id, void* custom_data);
+  bool SetCustomInstrumentData(Id instrument_id, void* custom_data);
 
   /// Sets instrument note off.
   ///
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
   /// @return True if successful, false otherwise.
-  bool SetInstrumentNoteOff(int instrument_id, float note_pitch);
+  bool SetInstrumentNoteOff(Id instrument_id, float note_pitch);
 
   /// Sets instrument note on.
   ///
@@ -167,7 +166,7 @@ class Engine {
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
   /// @return True if successful, false otherwise.
-  bool SetInstrumentNoteOn(int instrument_id, float note_pitch,
+  bool SetInstrumentNoteOn(Id instrument_id, float note_pitch,
                            float note_intensity);
 
   /// Sets instrument parameter value.
@@ -176,7 +175,7 @@ class Engine {
   /// @param param_id Parameter id.
   /// @param param_value Parameter value.
   /// @return True if successful, false otherwise.
-  bool SetInstrumentParam(int instrument_id, int param_id, float param_value);
+  bool SetInstrumentParam(Id instrument_id, int param_id, float param_value);
 
   /// Sets the note off callback.
   ///

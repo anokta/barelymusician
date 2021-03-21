@@ -15,6 +15,7 @@
 
 namespace {
 
+using ::barelyapi::Id;
 using ::barelyapi::IdGenerator;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
@@ -62,7 +63,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   IdGenerator id_generator;
   InstrumentManager instrument_manager(kSampleRate, &id_generator);
-  const int instrument_id = instrument_manager.Create(
+  const Id instrument_id = instrument_manager.Create(
       SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
@@ -70,11 +71,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
         static_cast<float>(kOscillatorType)},
        {SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack},
        {SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease}});
-  instrument_manager.SetNoteOnCallback([](int, float pitch, float intensity) {
+  instrument_manager.SetNoteOnCallback([](Id, float pitch, float intensity) {
     LOG(INFO) << "NoteOn(" << pitch << ", " << intensity << ")";
   });
   instrument_manager.SetNoteOffCallback(
-      [](int, float pitch) { LOG(INFO) << "NoteOff(" << pitch << ") "; });
+      [](Id, float pitch) { LOG(INFO) << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {

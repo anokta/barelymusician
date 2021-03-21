@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "MidiFile.h"
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
@@ -19,6 +20,7 @@
 namespace {
 
 using ::barelyapi::Engine;
+using ::barelyapi::Id;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioClock;
@@ -109,16 +111,16 @@ int main(int /*argc*/, char* argv[]) {
   AudioClock clock(kSampleRate);
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
-  engine.SetNoteOnCallback([](int id, float pitch, float intensity) {
+  engine.SetNoteOnCallback([](Id id, float pitch, float intensity) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOn("
               << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
   });
-  engine.SetNoteOffCallback([](int id, float pitch) {
+  engine.SetNoteOffCallback([](Id id, float pitch) {
     LOG(INFO) << "MIDI track #" << id << ": NoteOff("
               << MidiKeyNumberFromPitch(pitch) << ") ";
   });
 
-  std::vector<int> instrument_ids;
+  std::vector<Id> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     const auto score = BuildScore(midi_file[i], ticks_per_quarter);

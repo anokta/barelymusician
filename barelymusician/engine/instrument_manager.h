@@ -20,10 +20,10 @@ class InstrumentManager {
  public:
   /// Note off callback signature.
   using NoteOffCallback =
-      std::function<void(int instrument_id, float note_pitch)>;
+      std::function<void(Id instrument_id, float note_pitch)>;
 
   /// Note on callback signature.
-  using NoteOnCallback = std::function<void(int instrument_id, float note_pitch,
+  using NoteOnCallback = std::function<void(Id instrument_id, float note_pitch,
                                             float note_intensity)>;
 
   /// Constructs new |InstrumentManager|.
@@ -37,40 +37,40 @@ class InstrumentManager {
   /// @param definition Instrument definition.
   /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
-  int Create(InstrumentDefinition definition,
-             InstrumentParamDefinitions param_definitions);
+  Id Create(InstrumentDefinition definition,
+            InstrumentParamDefinitions param_definitions);
 
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument id.
   /// @return True if successful, false otherwise.
-  bool Destroy(int instrument_id);
+  bool Destroy(Id instrument_id);
 
   /// Returns all active instrument notes.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of active note pitches.
-  std::vector<float> GetAllNotes(int instrument_id) const;
+  std::vector<float> GetAllNotes(Id instrument_id) const;
 
   /// Returns all instrument parameters.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of parameters.
-  std::vector<Param> GetAllParams(int instrument_id) const;
+  std::vector<Param> GetAllParams(Id instrument_id) const;
 
   /// Returns instrument parameter value.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
   /// @return Pointer to parameter value if successful, nullptr otherwise.
-  const float* GetParam(int instrument_id, int param_id) const;
+  const float* GetParam(Id instrument_id, int param_id) const;
 
   /// Returns whether instrument note is active or not.
   ///
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
   /// @return True if note is active, false otherwise.
-  bool IsNoteOn(int instrument_id, float note_pitch) const;
+  bool IsNoteOn(Id instrument_id, float note_pitch) const;
 
   /// Processes the next instrument output buffer at timestamp.
   ///
@@ -80,7 +80,7 @@ class InstrumentManager {
   /// @param num_frames Number of output frames.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool Process(int instrument_id, float* output, int num_channels,
+  bool Process(Id instrument_id, float* output, int num_channels,
                int num_frames, double timestamp = 0.0);
 
   /// Resets all parameters of all instruments to their default values at
@@ -94,7 +94,7 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool ResetAllParams(int instrument_id, double timestamp = 0.0);
+  bool ResetAllParams(Id instrument_id, double timestamp = 0.0);
 
   /// Resets instrument parameter to its default value at timestamp.
   ///
@@ -102,7 +102,7 @@ class InstrumentManager {
   /// @param param_id Parameter id.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool ResetParam(int instrument_id, int param_id, double timestamp = 0.0);
+  bool ResetParam(Id instrument_id, int param_id, double timestamp = 0.0);
 
   /// Sets all active notes of all instruments off at timestamp.
   ///
@@ -114,7 +114,7 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetAllNotesOff(int instrument_id, double timestamp = 0.0);
+  bool SetAllNotesOff(Id instrument_id, double timestamp = 0.0);
 
   /// Sets custom instrument data at timestamp.
   ///
@@ -122,7 +122,7 @@ class InstrumentManager {
   /// @param custom_data Custom data.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetCustomData(int instrument_id, void* custom_data,
+  bool SetCustomData(Id instrument_id, void* custom_data,
                      double timestamp = 0.0);
 
   /// Sets instrument events at their timestamps.
@@ -130,7 +130,7 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param events List of events with their timestamps.
   /// @return True if successful, false otherwise.
-  bool SetEvents(int instrument_id,
+  bool SetEvents(Id instrument_id,
                  std::multimap<double, InstrumentEvent> events);
 
   /// Sets instrument note off at timestamp.
@@ -139,7 +139,7 @@ class InstrumentManager {
   /// @param note_pitch Note pitch.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetNoteOff(int instrument_id, float note_pitch, double timestamp = 0.0);
+  bool SetNoteOff(Id instrument_id, float note_pitch, double timestamp = 0.0);
 
   /// Sets the note off callback.
   ///
@@ -153,7 +153,7 @@ class InstrumentManager {
   /// @param note_intensity Note intensity.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetNoteOn(int instrument_id, float note_pitch, float note_intensity,
+  bool SetNoteOn(Id instrument_id, float note_pitch, float note_intensity,
                  double timestamp = 0.0);
 
   /// Sets the note on callback.
@@ -168,7 +168,7 @@ class InstrumentManager {
   /// @param param_value Parameter value.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetParam(int instrument_id, int param_id, float param_value,
+  bool SetParam(Id instrument_id, int param_id, float param_value,
                 double timestamp = 0.0);
 
   /// Sets the sampling rate.
@@ -181,7 +181,7 @@ class InstrumentManager {
  private:
   // Schedules processor |event| of instrument with the given |instrument_id| at
   // |timestamp|.
-  // void ScheduleProcessorEvent(int instrument_id, InstrumentEvent event,
+  // void ScheduleProcessorEvent(Id instrument_id, InstrumentEvent event,
   //                             double timestamp);
 
   // Sampling rate in Hz.
@@ -191,9 +191,9 @@ class InstrumentManager {
   IdGenerator* id_generator_;  // not owned.
 
   // List of instruments.
-  std::unordered_map<int, InstrumentController> controllers_;
-  std::unordered_map<int, std::multimap<double, InstrumentEvent>> events_;
-  std::unordered_map<int, InstrumentProcessor> processors_;
+  std::unordered_map<Id, InstrumentController> controllers_;
+  std::unordered_map<Id, std::multimap<double, InstrumentEvent>> events_;
+  std::unordered_map<Id, InstrumentProcessor> processors_;
 
   // Audio thread task runner.
   TaskRunner task_runner_;

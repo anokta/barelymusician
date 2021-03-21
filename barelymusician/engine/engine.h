@@ -3,6 +3,7 @@
 
 #include <functional>
 
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_manager.h"
@@ -214,6 +215,7 @@ class Engine {
   void Update(double timestamp);
 
  private:
+  IdGenerator id_generator_;
   InstrumentManager manager_;
   Sequencer sequencer_;
 };

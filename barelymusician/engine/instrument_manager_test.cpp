@@ -4,6 +4,7 @@
 #include <any>
 #include <vector>
 
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -53,7 +54,8 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   const float kNotePitch = 1.25f;
   const float kNoteIntensity = 0.75f;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  IdGenerator id_generator;
+  InstrumentManager instrument_manager(kSampleRate, &id_generator);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
@@ -109,7 +111,8 @@ TEST(InstrumentManagerTest, CreateDestroy) {
 TEST(InstrumentManagerTest, SetNotes) {
   const float kNoteIntensity = 1.0f;
 
-  InstrumentManager instrument_manager(1);
+  IdGenerator id_generator;
+  InstrumentManager instrument_manager(1, &id_generator);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
@@ -163,7 +166,8 @@ TEST(InstrumentManagerTest, SetNote) {
   const float kNotePitch = 32.0f;
   const float kNoteIntensity = 0.5f;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  IdGenerator id_generator;
+  InstrumentManager instrument_manager(kSampleRate, &id_generator);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
@@ -216,7 +220,8 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   const float kNotePitch = 4.0f;
   const float kNoteIntensity = 0.25f;
 
-  InstrumentManager instrument_manager(1);
+  IdGenerator id_generator;
+  InstrumentManager instrument_manager(1, &id_generator);
 
   // Create instrument.
   const int instrument_id = instrument_manager.Create(
@@ -286,7 +291,8 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
 TEST(InstrumentManagerTest, ResetAllParams) {
   const int kNumInstruments = 2;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  IdGenerator id_generator;
+  InstrumentManager instrument_manager(kSampleRate, &id_generator);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
@@ -348,7 +354,8 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
   const int kNumInstruments = 3;
   const float kNoteIntensity = 0.1f;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  IdGenerator id_generator;
+  InstrumentManager instrument_manager(kSampleRate, &id_generator);
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.

@@ -4,6 +4,7 @@
 #include <memory>
 #include <utility>
 
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_manager.h"
@@ -23,9 +24,11 @@ inline constexpr int kInvalidId = -1;
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) : instrument_manager(sample_rate) {}
+  BarelyMusician(int sample_rate)
+      : instrument_manager(sample_rate, &id_generator) {}
 
   // Engine.
+  IdGenerator id_generator;
   InstrumentManager instrument_manager;
 
   // Unity log writer.

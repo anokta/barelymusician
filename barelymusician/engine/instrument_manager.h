@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -28,7 +29,8 @@ class InstrumentManager {
   /// Constructs new |InstrumentManager|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit InstrumentManager(int sample_rate);
+  /// @param id_generator Pointer to id generator.
+  InstrumentManager(int sample_rate, IdGenerator* id_generator);
 
   /// Creates new instrument.
   ///
@@ -185,8 +187,8 @@ class InstrumentManager {
   // Sampling rate in Hz.
   int sample_rate_;
 
-  // Instrument id counter.
-  int id_counter_;
+  // Instrument id generator.
+  IdGenerator* id_generator_;  // not owned.
 
   // List of instruments.
   std::unordered_map<int, InstrumentController> controllers_;

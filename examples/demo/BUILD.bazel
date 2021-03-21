@@ -24,6 +24,7 @@ cc_binary(
     name = "instrument_demo",
     srcs = ["instrument_demo.cpp"],
     deps = [
+        "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
         "//barelymusician/composition:note_utils",
         "//barelymusician/engine:instrument_manager",

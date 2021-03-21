@@ -6,7 +6,7 @@
 namespace barelyapi {
 
 Engine::Engine(int sample_rate)
-    : manager_(sample_rate), sequencer_(&manager_) {}
+    : manager_(sample_rate, &id_generator_), sequencer_(&manager_) {}
 
 int Engine::CreateInstrument(InstrumentDefinition definition,
                              InstrumentParamDefinitions param_definitions) {

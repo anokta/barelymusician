@@ -5,6 +5,7 @@
 #include <optional>
 #include <thread>
 
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/instrument_manager.h"
@@ -14,6 +15,7 @@
 
 namespace {
 
+using ::barelyapi::IdGenerator;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
@@ -58,7 +60,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  IdGenerator id_generator;
+  InstrumentManager instrument_manager(kSampleRate, &id_generator);
   const int instrument_id = instrument_manager.Create(
       SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},

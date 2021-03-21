@@ -17,6 +17,7 @@ cc_library(
         ":instrument_event",
         ":sequencer",
         "//barelymusician/common:common_utils",
+        "//barelymusician/common:id_generator",
         "//barelymusician/composition:note",
     ],
 )
@@ -53,6 +54,8 @@ cc_library(
         ":instrument_processor",
         ":task_runner",
         "//barelymusician/common:common_utils",
+        "//barelymusician/common:id_generator",
+        "//barelymusician/common:logging",
     ],
 )
 
@@ -126,6 +129,7 @@ cc_test(
     deps = [
         ":instrument_event",
         ":instrument_manager",
+        "//barelymusician/common:id_generator",
         "@googletest//:gtest_main",
     ],
 )

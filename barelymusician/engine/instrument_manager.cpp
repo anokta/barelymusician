@@ -14,16 +14,19 @@ constexpr int kNumMaxTasks = 8000;
 
 }  // namespace
 
-InstrumentManager::InstrumentManager(int sample_rate)
+InstrumentManager::InstrumentManager(int sample_rate, IdGenerator* id_generator)
     : sample_rate_(sample_rate),
-      id_counter_(0),
+      id_generator_(id_generator),
       task_runner_(kNumMaxTasks),
       note_off_callback_(nullptr),
-      note_on_callback_(nullptr) {}
+      note_on_callback_(nullptr) {
+  DCHECK_GE(sample_rate, 0);
+  DCHECK(id_generator);
+}
 
 int InstrumentManager::Create(InstrumentDefinition definition,
                               InstrumentParamDefinitions param_definitions) {
-  const int instrument_id = ++id_counter_;
+  const int instrument_id = id_generator_->Generate();
   InstrumentController controller(param_definitions);
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
                     params = controller.GetAllParams()]() {

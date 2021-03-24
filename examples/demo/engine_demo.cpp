@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <any>
 #include <atomic>
 #include <cctype>
 #include <chrono>
@@ -281,7 +282,7 @@ int main(int /*argc*/, char* argv[]) {
     CHECK(it.first->second.Load(path)) << path;
   }
   engine.SetCustomInstrumentData(drumkit_instrument_id,
-                                 reinterpret_cast<void*>(&drumkit_files));
+                                 std::any(&drumkit_files));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, std::placeholders::_5, &random);

@@ -88,8 +88,8 @@ void Engine::SetBeatCallback(BeatCallback beat_callback) {
   sequencer_.SetBeatCallback(std::move(beat_callback));
 }
 
-bool Engine::SetCustomInstrumentData(Id instrument_id, void* custom_data) {
-  return manager_.SetCustomData(instrument_id, custom_data);
+bool Engine::SetCustomInstrumentData(Id instrument_id, std::any custom_data) {
+  return manager_.SetCustomData(instrument_id, std::move(custom_data));
 }
 
 bool Engine::SetInstrumentNoteOff(Id instrument_id, float note_pitch) {

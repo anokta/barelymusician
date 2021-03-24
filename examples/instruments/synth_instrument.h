@@ -1,6 +1,7 @@
 #ifndef EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
+#include <any>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -33,7 +34,7 @@ class SynthInstrument : public GenericInstrument {
   void NoteOff(float pitch) override;
   void NoteOn(float pitch, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-  void SetCustomData(void*) override {}
+  void SetCustomData(std::any /*data*/) override {}
   void SetParam(int id, float value) override;
 
   /// Returns instrument definition.

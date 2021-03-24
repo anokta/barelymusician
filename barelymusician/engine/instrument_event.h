@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 
+#include <any>
 #include <variant>
 
 namespace barelyapi {
@@ -8,7 +9,7 @@ namespace barelyapi {
 /// Custom data event.
 struct CustomData {
   /// Custom data.
-  void* data;
+  std::any data;
 
   /// Default comparator.
   bool operator==(const CustomData&) const = default;

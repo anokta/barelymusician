@@ -202,13 +202,13 @@ bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
   return false;
 }
 
-bool InstrumentManager::SetCustomData(Id instrument_id, void* custom_data,
+bool InstrumentManager::SetCustomData(Id instrument_id, std::any custom_data,
                                       double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     // ScheduleProcessorEvent(instrument_id, CustomData{custom_data},
     // timestamp);
     auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, CustomData{custom_data});
+    events->emplace(timestamp, CustomData{std::move(custom_data)});
     return true;
   }
   return false;

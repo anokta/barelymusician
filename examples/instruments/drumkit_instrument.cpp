@@ -43,9 +43,9 @@ void DrumkitInstrument::Process(float* output, int num_channels,
   }
 }
 
-void DrumkitInstrument::SetCustomData(void* data) {
+void DrumkitInstrument::SetCustomData(std::any data) {
   auto* drumkit_files =
-      reinterpret_cast<std::unordered_map<float, WavFile>*>(data);
+      std::any_cast<std::unordered_map<float, WavFile>*>(data);
   for (const auto& [index, file] : *drumkit_files) {
     Add(index, file);
   }

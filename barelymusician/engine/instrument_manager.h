@@ -122,7 +122,7 @@ class InstrumentManager {
   /// @param custom_data Custom data.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetCustomData(Id instrument_id, void* custom_data,
+  bool SetCustomData(Id instrument_id, std::any custom_data,
                      double timestamp = 0.0);
 
   /// Sets instrument events at their timestamps.

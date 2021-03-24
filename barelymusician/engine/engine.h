@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
+#include <any>
 #include <functional>
 
 #include "barelymusician/common/id_generator.h"
@@ -151,7 +152,7 @@ class Engine {
   /// @param instrument_id Instrument id.
   /// @param custom_data Custom data.
   /// @return True if successful, false otherwise.
-  bool SetCustomInstrumentData(Id instrument_id, void* custom_data);
+  bool SetCustomInstrumentData(Id instrument_id, std::any custom_data);
 
   /// Sets instrument note off.
   ///

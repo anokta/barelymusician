@@ -24,7 +24,7 @@ using ProcessInstrumentFn = std::function<void(
 
 /// Instrument set custom data function signature.
 using SetCustomInstrumentDataFn =
-    std::function<void(InstrumentState* state, void* data)>;
+    std::function<void(InstrumentState* state, std::any data)>;
 
 /// Instrument set note off function signature.
 using SetInstrumentNoteOffFn =

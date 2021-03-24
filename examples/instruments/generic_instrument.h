@@ -35,7 +35,7 @@ class GenericInstrument {
   /// Sets custom |data|.
   ///
   /// @param data Custom data.
-  virtual void SetCustomData(void* data) = 0;
+  virtual void SetCustomData(std::any data) = 0;
 
   /// Sets param |value| with the given |id|.
   ///
@@ -61,9 +61,9 @@ InstrumentDefinition GetInstrumentDefinition(
             instrument->Process(output, num_channels, num_frames);
           },
       .set_custom_data_fn =
-          [](InstrumentState* state, void* data) {
+          [](InstrumentState* state, std::any data) {
             auto* instrument = std::any_cast<InstrumentType>(state);
-            instrument->SetCustomData(data);
+            instrument->SetCustomData(std::move(data));
           },
       .set_note_off_fn =
           [](InstrumentState* state, float pitch) {

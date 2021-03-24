@@ -19,11 +19,11 @@ bool Sequencer::IsPlaying() const { return clock_.IsPlaying(); }
 
 void Sequencer::RemoveAllScheduledInstrumentNotes() { tracks_.clear(); }
 
-void Sequencer::RemoveAllScheduledInstrumentNotes(int instrument_id) {
+void Sequencer::RemoveAllScheduledInstrumentNotes(Id instrument_id) {
   tracks_.erase(instrument_id);
 }
 
-void Sequencer::ScheduleInstrumentNote(int instrument_id,
+void Sequencer::ScheduleInstrumentNote(Id instrument_id,
                                        double note_begin_position,
                                        double note_end_position,
                                        float note_pitch, float note_intensity) {

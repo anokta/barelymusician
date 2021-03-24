@@ -77,6 +77,7 @@ cc_library(
         ":clock",
         ":instrument_event",
         ":instrument_manager",
+        "//barelymusician/common:id_generator",
         "//barelymusician/composition:note",
     ],
 )

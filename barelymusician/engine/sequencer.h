@@ -5,6 +5,7 @@
 #include <map>
 #include <unordered_map>
 
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/instrument_manager.h"
@@ -41,7 +42,7 @@ class Sequencer {
   ///
   /// @param instrument_id Instrument id.
   /// @return True if successful, false otherwise.
-  void RemoveAllScheduledInstrumentNotes(int instrument_id);
+  void RemoveAllScheduledInstrumentNotes(Id instrument_id);
 
   /// Schedules instrument note.
   ///
@@ -51,7 +52,7 @@ class Sequencer {
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
   /// @return True if successful, false otherwise.
-  void ScheduleInstrumentNote(int instrument_id, double note_begin_position,
+  void ScheduleInstrumentNote(Id instrument_id, double note_begin_position,
                               double note_end_position, float note_pitch,
                               float note_intensity);
 
@@ -89,7 +90,7 @@ class Sequencer {
     std::multimap<double, Note> score;
   };
 
-  std::unordered_map<int, Track> tracks_;
+  std::unordered_map<Id, Track> tracks_;
 
   // Playback clock.
   Clock clock_;

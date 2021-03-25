@@ -2,30 +2,50 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 
 #include <any>
-#include <variant>
 
 namespace barelyapi {
 
-/// Custom data event.
-struct CustomData {
+/// Reset all parameters event.
+struct ResetAllParams {
+  /// Default comparator.
+  bool operator==(const ResetAllParams&) const = default;
+};
+
+/// Reset parameter event.
+struct ResetParam {
+  /// Parameter id.
+  int id;
+
+  /// Default comparator.
+  bool operator==(const ResetParam&) const = default;
+};
+
+/// Set all notes off event.
+struct SetAllNotesOff {
+  /// Default comparator.
+  bool operator==(const SetAllNotesOff&) const = default;
+};
+
+/// Set custom data event.
+struct SetCustomData {
   /// Custom data.
   std::any data;
 
   /// Default comparator.
-  bool operator==(const CustomData&) const = default;
+  bool operator==(const SetCustomData&) const = default;
 };
 
-/// Note off event.
-struct NoteOff {
+/// Set note off event.
+struct SetNoteOff {
   /// Note pitch.
   float pitch;
 
   /// Default comparator.
-  bool operator==(const NoteOff&) const = default;
+  bool operator==(const SetNoteOff&) const = default;
 };
 
-/// Note on event.
-struct NoteOn {
+/// Set note on event.
+struct SetNoteOn {
   /// Note pitch.
   float pitch;
 
@@ -33,11 +53,11 @@ struct NoteOn {
   float intensity;
 
   /// Default comparator.
-  bool operator==(const NoteOn&) const = default;
+  bool operator==(const SetNoteOn&) const = default;
 };
 
-/// Parameter event.
-struct Param {
+/// Set parameter event.
+struct SetParam {
   /// Parameter id.
   int id;
 
@@ -45,11 +65,8 @@ struct Param {
   float value;
 
   /// Default comparator.
-  bool operator==(const Param&) const = default;
+  bool operator==(const SetParam&) const = default;
 };
-
-/// Instrument event type.
-using InstrumentEvent = std::variant<CustomData, NoteOff, NoteOn, Param>;
 
 /// Instrument event visitor.
 template <class... EventTypes>

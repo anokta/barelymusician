@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 
 #include <map>
+#include <variant>
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -11,6 +12,10 @@ namespace barelyapi {
 /// Instrument processor that wraps the audio thread calls of an instrument.
 class InstrumentProcessor {
  public:
+  // TODO: refactor.
+  /// Instrument processor event type.
+  using Event = std::variant<SetCustomData, SetNoteOff, SetNoteOn, SetParam>;
+
   /// Constructs new |InstrumentProcessor|.
   ///
   /// @param sample_rate Sampling rate in Hz.
@@ -44,12 +49,12 @@ class InstrumentProcessor {
   ///
   /// @param event Instrument event.
   /// @param timestamp Timestamp in seconds.
-  void ScheduleEvent(InstrumentEvent event, double timestamp);
+  void ScheduleEvent(Event event, double timestamp);
 
   /// Schedules multiple instrument events at given timestamps.
   ///
   /// @param events List of instrument events with their timestamps.
-  void ScheduleEvents(std::multimap<double, InstrumentEvent> events);
+  void ScheduleEvents(std::multimap<double, Event> events);
 
  private:
   // Sampling rate in Hz.
@@ -59,7 +64,7 @@ class InstrumentProcessor {
   InstrumentDefinition definition_;
 
   // List of scheduled instrument events.
-  std::multimap<double, InstrumentEvent> events_;
+  std::multimap<double, Event> events_;
 
   // Instrument state.
   InstrumentState state_;

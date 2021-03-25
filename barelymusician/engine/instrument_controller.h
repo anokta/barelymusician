@@ -11,6 +11,19 @@
 
 namespace barelyapi {
 
+// TODO: refactor.
+/// Parameter event.
+struct Param {
+  /// Parameter id.
+  int id;
+
+  /// Parameter value.
+  float value;
+
+  /// Default comparator.
+  bool operator==(const Param&) const = default;
+};
+
 /// Instrument controller that wraps the main thread calls of an instrument.
 class InstrumentController {
  public:

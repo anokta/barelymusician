@@ -53,24 +53,24 @@ void InstrumentProcessor::Process(float* output, int num_channels,
       frame = message_frame;
     }
     std::visit(InstrumentEventVisitor{
-                   [this](const CustomData& custom_data) {
+                   [this](const SetCustomData& custom_data) {
                      if (definition_.set_custom_data_fn) {
                        definition_.set_custom_data_fn(&state_,
                                                       custom_data.data);
                      }
                    },
-                   [this](const NoteOff& note_off) {
+                   [this](const SetNoteOff& note_off) {
                      if (definition_.set_note_off_fn) {
                        definition_.set_note_off_fn(&state_, note_off.pitch);
                      }
                    },
-                   [this](const NoteOn& note_on) {
+                   [this](const SetNoteOn& note_on) {
                      if (definition_.set_note_on_fn) {
                        definition_.set_note_on_fn(&state_, note_on.pitch,
                                                   note_on.intensity);
                      }
                    },
-                   [this](const Param& param) {
+                   [this](const SetParam& param) {
                      if (definition_.set_param_fn) {
                        definition_.set_param_fn(&state_, param.id, param.value);
                      }
@@ -95,13 +95,11 @@ void InstrumentProcessor::Reset(int sample_rate) {
   }
 }
 
-void InstrumentProcessor::ScheduleEvent(InstrumentEvent event,
-                                        double timestamp) {
+void InstrumentProcessor::ScheduleEvent(Event event, double timestamp) {
   events_.emplace(timestamp, std::move(event));
 }
 
-void InstrumentProcessor::ScheduleEvents(
-    std::multimap<double, InstrumentEvent> events) {
+void InstrumentProcessor::ScheduleEvents(std::multimap<double, Event> events) {
   events_.merge(events);
 }
 

@@ -75,7 +75,7 @@ void Sequencer::Update(double timestamp) {
       auto end = track.active_notes.lower_bound(end_position);
       for (auto it = begin; it != end; ++it) {
         events.emplace(clock_.GetTimestampAtPosition(it->first),
-                       NoteOff{it->second.pitch});
+                       SetNoteOff{it->second.pitch});
       }
       track.active_notes.erase(begin, end);
 
@@ -85,11 +85,11 @@ void Sequencer::Update(double timestamp) {
       for (auto it = begin; it != end; ++it) {
         const auto& note = it->second;
         events.emplace(clock_.GetTimestampAtPosition(it->first),
-                       NoteOn{note.pitch, note.intensity});
+                       SetNoteOn{note.pitch, note.intensity});
 
         if (note.end_position < end_position) {
           events.emplace(clock_.GetTimestampAtPosition(note.end_position),
-                         NoteOff{note.pitch});
+                         SetNoteOff{note.pitch});
         } else {
           track.active_notes.emplace(note.end_position, note);
         }
@@ -105,7 +105,7 @@ void Sequencer::StopAllNotes() {
   for (auto& [id, track] : tracks_) {
     std::multimap<double, InstrumentEvent> events;
     for (const auto& [position, note] : track.active_notes) {
-      events.emplace(timestamp, NoteOff{note.pitch});
+      events.emplace(timestamp, SetNoteOff{note.pitch});
     }
     manager_->SetEvents(id, std::move(events));
     track.active_notes.clear();

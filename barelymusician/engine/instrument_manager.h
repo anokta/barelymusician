@@ -4,6 +4,7 @@
 #include <functional>
 #include <map>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 #include "barelymusician/common/id_generator.h"
@@ -14,6 +15,12 @@
 #include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
+
+// TODO: refactor.
+/// Instrument event type.
+using InstrumentEvent =
+    std::variant<ResetAllParams, ResetParam, SetAllNotesOff, SetCustomData,
+                 SetNoteOff, SetNoteOn, SetParam>;
 
 /// Class that manages processing of instruments.
 class InstrumentManager {
@@ -179,11 +186,6 @@ class InstrumentManager {
   void Update(double timestamp = 0.0);
 
  private:
-  // Schedules processor |event| of instrument with the given |instrument_id| at
-  // |timestamp|.
-  // void ScheduleProcessorEvent(Id instrument_id, InstrumentEvent event,
-  //                             double timestamp);
-
   // Sampling rate in Hz.
   int sample_rate_;
 

@@ -63,7 +63,7 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @return List of parameters.
-  std::vector<Param> GetAllParams(Id instrument_id) const;
+  std::vector<InstrumentParam> GetAllParams(Id instrument_id) const;
 
   /// Returns instrument parameter value.
   ///
@@ -194,7 +194,6 @@ class InstrumentManager {
 
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
-  std::unordered_map<Id, std::multimap<double, InstrumentEvent>> events_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
 
   // Audio thread task runner.

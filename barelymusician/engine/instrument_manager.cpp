@@ -27,9 +27,20 @@ InstrumentManager::InstrumentManager(int sample_rate, IdGenerator* id_generator)
 Id InstrumentManager::Create(InstrumentDefinition definition,
                              InstrumentParamDefinitions param_definitions) {
   const Id instrument_id = id_generator_->Generate();
-  InstrumentController controller(param_definitions);
+  InstrumentController controller(
+      param_definitions,
+      [&](float pitch) {
+        if (note_off_callback_) {
+          note_off_callback_(instrument_id, pitch);
+        }
+      },
+      [&](float pitch, float intensity) {
+        if (note_on_callback_) {
+          note_on_callback_(instrument_id, pitch, intensity);
+        }
+      });
 
-  std::multimap<double, InstrumentProcessorEvent> param_events;
+  InstrumentProcessorEvents param_events;
   for (const auto& param : controller.GetAllParams()) {
     param_events.emplace(0.0, barelyapi::SetParam{param.id, param.value});
   }
@@ -40,7 +51,6 @@ Id InstrumentManager::Create(InstrumentDefinition definition,
     processors_.emplace(instrument_id, std::move(processor));
   });
   controllers_.emplace(instrument_id, std::move(controller));
-  events_.emplace(instrument_id, std::multimap<double, InstrumentEvent>{});
   return instrument_id;
 }
 
@@ -53,7 +63,6 @@ bool InstrumentManager::Destroy(Id instrument_id) {
       }
     }
     controllers_.erase(it);
-    events_.erase(instrument_id);
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
     return true;
@@ -68,7 +77,8 @@ std::vector<float> InstrumentManager::GetAllNotes(Id instrument_id) const {
   return {};
 }
 
-std::vector<Param> InstrumentManager::GetAllParams(Id instrument_id) const {
+std::vector<InstrumentParam> InstrumentManager::GetAllParams(
+    Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetAllParams();
   }
@@ -102,15 +112,13 @@ bool InstrumentManager::Process(Id instrument_id, float* output,
 
 void InstrumentManager::ResetAllParams(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, barelyapi::ResetAllParams{});
+    controller.Schedule(timestamp, barelyapi::ResetAllParams{});
   }
 }
 
 bool InstrumentManager::ResetAllParams(Id instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, barelyapi::ResetAllParams{});
+    controller->Schedule(timestamp, barelyapi::ResetAllParams{});
     return true;
   }
   return false;
@@ -119,8 +127,7 @@ bool InstrumentManager::ResetAllParams(Id instrument_id, double timestamp) {
 bool InstrumentManager::ResetParam(Id instrument_id, int param_id,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, barelyapi::ResetParam{param_id});
+    controller->Schedule(timestamp, barelyapi::ResetParam{param_id});
     return true;
   }
   return false;
@@ -128,15 +135,13 @@ bool InstrumentManager::ResetParam(Id instrument_id, int param_id,
 
 void InstrumentManager::SetAllNotesOff(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, barelyapi::SetAllNotesOff{});
+    controller.Schedule(timestamp, barelyapi::SetAllNotesOff{});
   }
 }
 
 bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, barelyapi::SetAllNotesOff{});
+    controller->Schedule(timestamp, barelyapi::SetAllNotesOff{});
     return true;
   }
   return false;
@@ -145,19 +150,17 @@ bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
 bool InstrumentManager::SetCustomData(Id instrument_id, std::any custom_data,
                                       double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp,
-                    barelyapi::SetCustomData{std::move(custom_data)});
+    controller->Schedule(timestamp,
+                         barelyapi::SetCustomData{std::move(custom_data)});
     return true;
   }
   return false;
 }
 
-bool InstrumentManager::SetEvents(
-    Id instrument_id, std::multimap<double, InstrumentEvent> input_events) {
+bool InstrumentManager::SetEvents(Id instrument_id,
+                                  InstrumentControllerEvents events) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->merge(input_events);
+    controller->Schedule(std::move(events));
     return true;
   }
   return false;
@@ -166,8 +169,7 @@ bool InstrumentManager::SetEvents(
 bool InstrumentManager::SetNoteOff(Id instrument_id, float note_pitch,
                                    double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, barelyapi::SetNoteOff{note_pitch});
+    controller->Schedule(timestamp, barelyapi::SetNoteOff{note_pitch});
     return true;
   }
   return false;
@@ -180,9 +182,8 @@ void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
 bool InstrumentManager::SetNoteOn(Id instrument_id, float note_pitch,
                                   float note_intensity, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp,
-                    barelyapi::SetNoteOn{note_pitch, note_intensity});
+    controller->Schedule(timestamp,
+                         barelyapi::SetNoteOn{note_pitch, note_intensity});
     return true;
   }
   return false;
@@ -195,8 +196,7 @@ void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
 bool InstrumentManager::SetParam(Id instrument_id, int param_id,
                                  float param_value, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto* events = FindOrNull(events_, instrument_id);
-    events->emplace(timestamp, barelyapi::SetParam{param_id, param_value});
+    controller->Schedule(timestamp, barelyapi::SetParam{param_id, param_value});
     return true;
   }
   return false;
@@ -213,76 +213,11 @@ void InstrumentManager::SetSampleRate(int sample_rate) {
 }
 
 void InstrumentManager::Update(double timestamp) {
-  for (auto& controller_it : controllers_) {
-    auto& instrument_id = controller_it.first;
-    auto& controller = controller_it.second;
-    auto* events = FindOrNull(events_, instrument_id);
-
-    // TODO: this can be a single pass map (i.e., num_instruments independent).
-    std::multimap<double, InstrumentProcessorEvent> shuttle;
-
-    auto begin = events->begin();
-    auto end = events->upper_bound(timestamp);
-    for (auto it = begin; it != end; ++it) {
-      std::visit(
-          InstrumentEventVisitor{
-              [&](barelyapi::SetCustomData& custom_data) {
-                shuttle.emplace(it->first, std::move(custom_data));
-              },
-              [&](barelyapi::SetNoteOff& note_off) {
-                if (controller.SetNoteOff(note_off.pitch)) {
-                  if (note_off_callback_) {
-                    note_off_callback_(instrument_id, note_off.pitch);
-                  }
-                  shuttle.emplace(it->first, std::move(note_off));
-                }
-              },
-              [&](barelyapi::SetNoteOn& note_on) {
-                if (controller.SetNoteOn(note_on.pitch)) {
-                  if (note_on_callback_) {
-                    note_on_callback_(instrument_id, note_on.pitch,
-                                      note_on.intensity);
-                  }
-                  shuttle.emplace(it->first, std::move(note_on));
-                }
-              },
-              [&](barelyapi::SetParam& param) {
-                if (controller.SetParam(param.id, param.value)) {
-                  param.value = *controller.GetParam(param.id);
-                  shuttle.emplace(it->first, std::move(param));
-                }
-              },
-              [&](barelyapi::ResetAllParams&) {
-                controller.ResetAllParams();
-                for (const auto& param : controller.GetAllParams()) {
-                  shuttle.emplace(it->first,
-                                  barelyapi::SetParam{param.id, param.value});
-                }
-              },
-              [&](barelyapi::ResetParam& reset_param) {
-                if (controller.ResetParam((reset_param.id))) {
-                  shuttle.emplace(it->first,
-                                  barelyapi::SetParam{
-                                      reset_param.id,
-                                      *controller.GetParam(reset_param.id)});
-                }
-              },
-              [&](barelyapi::SetAllNotesOff&) {
-                const auto notes = controller.GetAllNotes();
-                controller.SetAllNotesOff();
-                for (const auto& note_pitch : notes) {
-                  if (note_off_callback_) {
-                    note_off_callback_(instrument_id, note_pitch);
-                  }
-                  shuttle.emplace(it->first, barelyapi::SetNoteOff{note_pitch});
-                }
-              }},
-          it->second);
-    }
-    events->erase(begin, end);
-    task_runner_.Add([this, instrument_id, shuttle = std::move(shuttle)]() {
+  for (auto& [instrument_id, controller] : controllers_) {
+    task_runner_.Add([this, instrument_id = instrument_id,
+                      events = controller.Update(timestamp)]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        processor->Schedule(shuttle);
+        processor->Schedule(std::move(events));
       }
     });
   }

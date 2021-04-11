@@ -3,23 +3,9 @@
 #include <utility>
 #include <variant>
 
+#include "barelymusician/dsp/dsp_utils.h"
+
 namespace barelyapi {
-
-namespace {
-
-// Returns number of samples for the given number of |seconds|.
-int SamplesFromSeconds(int sample_rate, double seconds) {
-  return static_cast<int>(seconds * static_cast<double>(sample_rate));
-}
-
-// Returns number of seconds for the given number of |samples|.
-double SecondsFromSamples(int sample_rate, int samples) {
-  return sample_rate > 0
-             ? static_cast<double>(samples) / static_cast<double>(sample_rate)
-             : 0.0;
-}
-
-}  // namespace
 
 InstrumentProcessor::InstrumentProcessor(int sample_rate,
                                          InstrumentDefinition definition)
@@ -35,8 +21,8 @@ InstrumentProcessor::~InstrumentProcessor() {
   }
 }
 
-void InstrumentProcessor::Process(float* output, int num_channels,
-                                  int num_frames, double timestamp) {
+void InstrumentProcessor::Process(double timestamp, float* output,
+                                  int num_channels, int num_frames) {
   int frame = 0;
   // Process *all* events before the end timestamp.
   const auto begin = events_.cbegin();
@@ -86,21 +72,17 @@ void InstrumentProcessor::Process(float* output, int num_channels,
 }
 
 void InstrumentProcessor::Reset(int sample_rate) {
-  sample_rate_ = sample_rate;
   if (definition_.destroy_fn) {
     definition_.destroy_fn(&state_);
   }
+  sample_rate_ = sample_rate;
   if (definition_.create_fn) {
     definition_.create_fn(&state_, sample_rate_);
   }
 }
 
-void InstrumentProcessor::ScheduleEvent(Event event, double timestamp) {
-  events_.emplace(timestamp, std::move(event));
-}
-
-void InstrumentProcessor::ScheduleEvents(std::multimap<double, Event> events) {
-  events_.merge(events);
+void InstrumentProcessor::Schedule(InstrumentProcessorEvents events) {
+  events_.merge(std::move(events));
 }
 
 }  // namespace barelyapi

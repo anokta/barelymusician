@@ -2,11 +2,10 @@
 
 #include <algorithm>
 #include <any>
-#include <cstdint>
+#include <utility>
 #include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/instrument_event.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -48,7 +47,7 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, kTimestamp);
+  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -56,10 +55,10 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   }
 
   // Start note.
-  processor.ScheduleEvent(NoteOn{kPitch, kIntensity}, kTimestamp);
+  processor.Schedule({{kTimestamp, SetNoteOn{kPitch, kIntensity}}});
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, kTimestamp);
+  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel],
@@ -68,10 +67,10 @@ TEST(InstrumentProcessorTest, ProcessSingleNote) {
   }
 
   // Stop note.
-  processor.ScheduleEvent(NoteOff{kPitch}, kTimestamp);
+  processor.Schedule({{kTimestamp, SetNoteOff{kPitch}}});
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, kTimestamp);
+  processor.Process(kTimestamp, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -87,7 +86,7 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, 0.0);
+  processor.Process(0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -95,13 +94,15 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
   }
 
   // Start new note per each sample in the buffer.
+  InstrumentProcessorEvents note_on_events;
   for (int i = 0; i < kNumFrames; ++i) {
-    processor.ScheduleEvent(NoteOn{static_cast<float>(i), kIntensity},
-                            static_cast<double>(i));
+    note_on_events.emplace(static_cast<double>(i),
+                           SetNoteOn{static_cast<float>(i), kIntensity});
   }
+  processor.Schedule(std::move(note_on_events));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, 0.0);
+  processor.Process(0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     const float expected = static_cast<float>(frame) * kIntensity;
     for (int channel = 0; channel < kNumChannels; ++channel) {
@@ -110,12 +111,14 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
   }
 
   // Stop all notes.
+  InstrumentProcessorEvents note_off_events;
   for (int i = 0; i < kNumFrames; ++i) {
-    processor.ScheduleEvent(NoteOff{static_cast<float>(i)}, 0.0);
+    note_off_events.emplace(0.0, SetNoteOff{static_cast<float>(i)});
   }
+  processor.Schedule(std::move(note_off_events));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, 0.0);
+  processor.Process(0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -133,7 +136,7 @@ TEST(InstrumentProcessorTest, Reset) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, 0.0);
+  processor.Process(0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 1000.0f);
@@ -143,7 +146,7 @@ TEST(InstrumentProcessorTest, Reset) {
   processor.Reset(2000);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(buffer.data(), kNumChannels, kNumFrames, 0.0);
+  processor.Process(0.0, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 2000.0f);
@@ -151,15 +154,15 @@ TEST(InstrumentProcessorTest, Reset) {
   }
 }
 
-// Tests that scheduling multiple events at once gets processed as expected.
-TEST(InstrumentProcessorTest, ScheduleEvents) {
+// Tests that scheduled instrument processor events gets processed as expected.
+TEST(InstrumentProcessorTest, Schedule) {
   const float kNoteOnPitch = 3.0f;
   const float kNoteOffPitch = -2.0f;
   const float kParamValue = 0.5f;
-  const std::multimap<double, InstrumentEvent> kEvents = {
-      {0.0, NoteOn{kNoteOnPitch, 1.0f}},
-      {1.5, NoteOff{kNoteOffPitch}},
-      {2.0, Param{1, kParamValue}}};
+  const InstrumentProcessorEvents kEvents = {
+      {0.0, SetNoteOn{kNoteOnPitch, 1.0f}},
+      {1.5, SetNoteOff{kNoteOffPitch}},
+      {2.0, SetParam{1, kParamValue}}};
 
   float note_on_pitch = 0.0f;
   float note_off_pitch = 0.0f;
@@ -175,22 +178,22 @@ TEST(InstrumentProcessorTest, ScheduleEvents) {
   InstrumentProcessor processor(1, std::move(definition));
   std::vector<float> buffer(1);
 
-  processor.ScheduleEvents(kEvents);
+  processor.Schedule(kEvents);
   EXPECT_NE(note_on_pitch, kNoteOnPitch);
   EXPECT_NE(note_off_pitch, kNoteOffPitch);
   EXPECT_NE(param_value, kParamValue);
 
-  processor.Process(buffer.data(), 1, 1, 0.0);
+  processor.Process(0.0, buffer.data(), 1, 1);
   EXPECT_FLOAT_EQ(note_on_pitch, kNoteOnPitch);
   EXPECT_NE(note_off_pitch, kNoteOffPitch);
   EXPECT_NE(param_value, kParamValue);
 
-  processor.Process(buffer.data(), 1, 1, 1.0);
+  processor.Process(1.0, buffer.data(), 1, 1);
   EXPECT_FLOAT_EQ(note_on_pitch, kNoteOnPitch);
   EXPECT_FLOAT_EQ(note_off_pitch, kNoteOffPitch);
   EXPECT_NE(param_value, kParamValue);
 
-  processor.Process(buffer.data(), 1, 1, 2.0);
+  processor.Process(2.0, buffer.data(), 1, 1);
   EXPECT_FLOAT_EQ(note_on_pitch, kNoteOnPitch);
   EXPECT_FLOAT_EQ(note_off_pitch, kNoteOffPitch);
   EXPECT_FLOAT_EQ(param_value, kParamValue);

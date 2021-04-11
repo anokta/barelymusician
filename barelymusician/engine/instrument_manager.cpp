@@ -29,14 +29,14 @@ Id InstrumentManager::Create(InstrumentDefinition definition,
   const Id instrument_id = id_generator_->Generate();
   InstrumentController controller(param_definitions);
 
-  std::multimap<double, InstrumentProcessor::Event> param_events;
+  std::multimap<double, InstrumentProcessorEvent> param_events;
   for (const auto& param : controller.GetAllParams()) {
     param_events.emplace(0.0, barelyapi::SetParam{param.id, param.value});
   }
   task_runner_.Add([this, instrument_id, definition = std::move(definition),
                     params = std::move(param_events)]() {
     InstrumentProcessor processor(sample_rate_, std::move(definition));
-    processor.ScheduleEvents((std::move(params)));
+    processor.Schedule((std::move(params)));
     processors_.emplace(instrument_id, std::move(processor));
   });
   controllers_.emplace(instrument_id, std::move(controller));
@@ -94,7 +94,7 @@ bool InstrumentManager::Process(Id instrument_id, float* output,
                                 double timestamp) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
-    processor->Process(output, num_channels, num_frames, timestamp);
+    processor->Process(timestamp, output, num_channels, num_frames);
     return true;
   }
   return false;
@@ -219,7 +219,7 @@ void InstrumentManager::Update(double timestamp) {
     auto* events = FindOrNull(events_, instrument_id);
 
     // TODO: this can be a single pass map (i.e., num_instruments independent).
-    std::multimap<double, InstrumentProcessor::Event> shuttle;
+    std::multimap<double, InstrumentProcessorEvent> shuttle;
 
     auto begin = events->begin();
     auto end = events->upper_bound(timestamp);
@@ -282,7 +282,7 @@ void InstrumentManager::Update(double timestamp) {
     events->erase(begin, end);
     task_runner_.Add([this, instrument_id, shuttle = std::move(shuttle)]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        processor->ScheduleEvents(shuttle);
+        processor->Schedule(shuttle);
       }
     });
   }

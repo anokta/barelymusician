@@ -9,20 +9,6 @@ cc_library(
 )
 
 cc_library(
-    name = "engine",
-    srcs = ["engine.cpp"],
-    hdrs = ["engine.h"],
-    deps = [
-        ":instrument_definition",
-        ":instrument_event",
-        ":sequencer",
-        "//barelymusician/common:common_utils",
-        "//barelymusician/common:id_generator",
-        "//barelymusician/composition:note",
-    ],
-)
-
-cc_library(
     name = "instrument_controller",
     srcs = ["instrument_controller.cpp"],
     hdrs = ["instrument_controller.h"],
@@ -66,6 +52,7 @@ cc_library(
     deps = [
         ":instrument_definition",
         ":instrument_event",
+        "//barelymusician/dsp:dsp_utils",
     ],
 )
 
@@ -103,16 +90,6 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "engine_test",
-    srcs = ["engine_test.cpp"],
-    deps = [
-        ":engine",
-        ":instrument_event",
-        "@googletest//:gtest_main",
-    ],
-)
-
 # TODO: enable back tests.
 # cc_test(
 #     name = "instrument_controller_test",
@@ -136,16 +113,16 @@ cc_test(
 #     ],
 # )
 
-# cc_test(
-#     name = "instrument_processor_test",
-#     srcs = ["instrument_processor_test.cpp"],
-#     deps = [
-#         ":instrument_definition",
-#         ":instrument_event",
-#         ":instrument_processor",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "instrument_processor_test",
+    srcs = ["instrument_processor_test.cpp"],
+    deps = [
+        ":instrument_definition",
+        ":instrument_event",
+        ":instrument_processor",
+        "@googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "spin_mutex_test",

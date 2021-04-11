@@ -9,13 +9,17 @@
 
 namespace barelyapi {
 
+/// Instrument processor event type.
+using InstrumentProcessorEvent =
+    std::variant<SetCustomData, SetNoteOff, SetNoteOn, SetParam>;
+
+// Instrument processor event container type.
+using InstrumentProcessorEvents =
+    std::multimap<double, InstrumentProcessorEvent>;
+
 /// Instrument processor that wraps the audio thread calls of an instrument.
 class InstrumentProcessor {
  public:
-  // TODO: refactor.
-  /// Instrument processor event type.
-  using Event = std::variant<SetCustomData, SetNoteOff, SetNoteOn, SetParam>;
-
   /// Constructs new |InstrumentProcessor|.
   ///
   /// @param sample_rate Sampling rate in Hz.
@@ -37,24 +41,18 @@ class InstrumentProcessor {
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(float* output, int num_channels, int num_frames,
-               double timestamp);
+  void Process(double timestamp, float* output, int num_channels,
+               int num_frames);
 
   /// Resets instrument.
   ///
   /// @param sample_rate System sampling rate in Hz.
   void Reset(int sample_rate);
 
-  /// Schedules instrument event at a given timestamp.
+  /// Schedules instrument events.
   ///
-  /// @param event Instrument event.
-  /// @param timestamp Timestamp in seconds.
-  void ScheduleEvent(Event event, double timestamp);
-
-  /// Schedules multiple instrument events at given timestamps.
-  ///
-  /// @param events List of instrument events with their timestamps.
-  void ScheduleEvents(std::multimap<double, Event> events);
+  /// @param events List of timestamped instrument processor events.
+  void Schedule(InstrumentProcessorEvents events);
 
  private:
   // Sampling rate in Hz.
@@ -63,8 +61,8 @@ class InstrumentProcessor {
   // Instrument definition.
   InstrumentDefinition definition_;
 
-  // List of scheduled instrument events.
-  std::multimap<double, Event> events_;
+  // List of scheduled events.
+  InstrumentProcessorEvents events_;
 
   // Instrument state.
   InstrumentState state_;

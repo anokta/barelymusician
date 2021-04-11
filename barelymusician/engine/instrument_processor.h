@@ -13,7 +13,7 @@ namespace barelyapi {
 using InstrumentProcessorEvent =
     std::variant<SetCustomData, SetNoteOff, SetNoteOn, SetParam>;
 
-// Instrument processor event container type.
+// Timestamped instrument processor events container type.
 using InstrumentProcessorEvents =
     std::multimap<double, InstrumentProcessorEvent>;
 
@@ -46,7 +46,7 @@ class InstrumentProcessor {
 
   /// Resets instrument.
   ///
-  /// @param sample_rate System sampling rate in Hz.
+  /// @param sample_rate Sampling rate in Hz.
   void Reset(int sample_rate);
 
   /// Schedules instrument events.

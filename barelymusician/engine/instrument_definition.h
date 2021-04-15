@@ -77,7 +77,7 @@ struct InstrumentParamDefinition {
   std::optional<float> max_value;
 };
 
-/// List of instrument parameter type.
+/// Instrument parameter definitions container type.
 using InstrumentParamDefinitions = std::vector<InstrumentParamDefinition>;
 
 }  // namespace barelyapi

@@ -1,21 +1,10 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 
-#include <map>
-#include <variant>
-
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
-
-/// Instrument processor event type.
-using InstrumentProcessorEvent =
-    std::variant<SetCustomData, SetNoteOff, SetNoteOn, SetParam>;
-
-// Timestamped instrument processor events container type.
-using InstrumentProcessorEvents =
-    std::multimap<double, InstrumentProcessorEvent>;
 
 /// Instrument processor that wraps the audio thread calls of an instrument.
 class InstrumentProcessor {

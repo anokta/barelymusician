@@ -15,7 +15,6 @@ cc_library(
     deps = [
         ":instrument_definition",
         ":instrument_event",
-        ":instrument_processor",
         "//barelymusician/common:common_utils",
     ],
 )

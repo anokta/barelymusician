@@ -2,6 +2,8 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 
 #include <any>
+#include <map>
+#include <variant>
 
 namespace barelyapi {
 
@@ -75,6 +77,23 @@ struct InstrumentEventVisitor : EventTypes... {
 };
 template <class... EventTypes>
 InstrumentEventVisitor(EventTypes...) -> InstrumentEventVisitor<EventTypes...>;
+
+/// Instrument controller event type.
+using InstrumentControllerEvent =
+    std::variant<ResetAllParams, ResetParam, SetAllNotesOff, SetCustomData,
+                 SetNoteOff, SetNoteOn, SetParam>;
+
+// Instrument controller events with their timestamps container type.
+using InstrumentControllerEvents =
+    std::multimap<double, InstrumentControllerEvent>;
+
+/// Instrument processor event type.
+using InstrumentProcessorEvent =
+    std::variant<SetCustomData, SetNoteOff, SetNoteOn, SetParam>;
+
+// Instrument processor events with their timestamps container type.
+using InstrumentProcessorEvents =
+    std::multimap<double, InstrumentProcessorEvent>;
 
 }  // namespace barelyapi
 

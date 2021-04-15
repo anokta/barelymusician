@@ -9,18 +9,8 @@
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/instrument_processor.h"
 
 namespace barelyapi {
-
-/// Instrument controller event type.
-using InstrumentControllerEvent =
-    std::variant<ResetAllParams, ResetParam, SetAllNotesOff, SetCustomData,
-                 SetNoteOff, SetNoteOn, SetParam>;
-
-// Timestamped instrument controller events container type.
-using InstrumentControllerEvents =
-    std::multimap<double, InstrumentControllerEvent>;
 
 // Instrument controller not off callback signature.
 using InstrumentNoteOffCallback = std::function<void(float pitch)>;

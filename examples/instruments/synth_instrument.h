@@ -2,8 +2,6 @@
 #define EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
 #include <any>
-#include <memory>
-#include <utility>
 #include <vector>
 
 #include "barelymusician/dsp/oscillator.h"

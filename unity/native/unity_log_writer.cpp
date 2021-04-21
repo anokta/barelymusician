@@ -1,5 +1,10 @@
 #include "unity/native/unity_log_writer.h"
 
+#include <string>
+#include <utility>
+
+#include "barelymusician/common/logging.h"
+
 namespace barelyapi::unity {
 
 void UnityLogWriter::Write(logging::LogSeverity severity,

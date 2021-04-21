@@ -4,6 +4,8 @@
 #include <variant>
 
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
 

@@ -2,7 +2,6 @@
 #define EXAMPLES_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
 
 #include <any>
-#include <memory>
 #include <unordered_map>
 
 #include "barelymusician/dsp/sample_player.h"

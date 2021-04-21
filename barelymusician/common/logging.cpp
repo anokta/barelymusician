@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <ostream>
 #include <string>
 
 namespace barelyapi::logging {

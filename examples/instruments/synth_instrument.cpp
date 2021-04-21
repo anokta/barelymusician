@@ -1,6 +1,10 @@
 #include "examples/instruments/synth_instrument.h"
 
+#include <vector>
+
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/dsp/oscillator.h"
+#include "examples/instruments/enveloped_voice.h"
 
 namespace barelyapi::examples {
 

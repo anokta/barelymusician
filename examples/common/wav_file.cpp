@@ -1,5 +1,9 @@
 #include "examples/common/wav_file.h"
 
+#include <algorithm>
+#include <string>
+#include <vector>
+
 #include "barelymusician/common/logging.h"
 
 #define DR_WAV_IMPLEMENTATION

@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_COMMON_STATUS_H_
 #define BARELYMUSICIAN_COMMON_STATUS_H_
 
+#include <utility>
 #include <variant>
 
 #include "barelymusician/common/logging.h"

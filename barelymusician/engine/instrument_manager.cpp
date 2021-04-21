@@ -1,9 +1,16 @@
 #include "barelymusician/engine/instrument_manager.h"
 
+#include <any>
 #include <utility>
+#include <vector>
 
 #include "barelymusician/common/common_utils.h"
+#include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
+#include "barelymusician/engine/instrument_controller.h"
+#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_processor.h"
 
 namespace barelyapi {
 

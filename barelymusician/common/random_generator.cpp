@@ -1,5 +1,7 @@
 #include "barelymusician/common/random_generator.h"
 
+#include <random>
+
 namespace barelyapi {
 
 RandomGenerator::RandomGenerator(int seed)

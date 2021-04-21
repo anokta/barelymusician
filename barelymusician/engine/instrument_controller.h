@@ -2,10 +2,10 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_CONTROLLER_H_
 
 #include <functional>
-#include <map>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"

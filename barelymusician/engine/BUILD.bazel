@@ -97,7 +97,6 @@ cc_test(
 #     deps = [
 #         ":instrument_controller",
 #         ":instrument_definition",
-#         ":instrument_event",
 #         "@googletest//:gtest_main",
 #     ],
 # )
@@ -106,6 +105,7 @@ cc_test(
 #     name = "instrument_manager_test",
 #     srcs = ["instrument_manager_test.cpp"],
 #     deps = [
+#         ":instrument_definition",
 #         ":instrument_event",
 #         ":instrument_manager",
 #         "//barelymusician/common:id_generator",

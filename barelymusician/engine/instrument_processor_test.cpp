@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {

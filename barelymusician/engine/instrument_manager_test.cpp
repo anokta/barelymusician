@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "barelymusician/common/id_generator.h"
+#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

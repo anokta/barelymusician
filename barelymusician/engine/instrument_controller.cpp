@@ -3,8 +3,11 @@
 #include <algorithm>
 #include <iterator>
 #include <variant>
+#include <vector>
 
 #include "barelymusician/common/common_utils.h"
+#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
 

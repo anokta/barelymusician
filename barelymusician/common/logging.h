@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <sstream>
+#include <string>
 
 /// Logging macros.
 #define LOG(severity) BARELY_LOG(severity)

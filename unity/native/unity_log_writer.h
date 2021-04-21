@@ -2,6 +2,7 @@
 #define UNITY_NATIVE_UNITY_LOG_WRITER_H_
 
 #include <functional>
+#include <string>
 
 #include "barelymusician/common/logging.h"
 

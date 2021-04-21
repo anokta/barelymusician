@@ -1,6 +1,9 @@
 #include "examples/instruments/drumkit_instrument.h"
 
-#include <algorithm>
+#include <any>
+#include <unordered_map>
+
+#include "examples/common/wav_file.h"
 
 namespace barelyapi::examples {
 

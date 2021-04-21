@@ -1,9 +1,11 @@
 #include "barelymusician/engine/sequencer.h"
 
-#include <algorithm>
+#include <cmath>
 #include <utility>
 
 #include "barelymusician/common/common_utils.h"
+#include "barelymusician/common/id_generator.h"
+#include "barelymusician/composition/note.h"
 #include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {

@@ -11,10 +11,7 @@ cc_library(
     name = "note_utils",
     srcs = ["note_utils.cpp"],
     hdrs = ["note_utils.h"],
-    deps = [
-        ":note",
-        "//barelymusician/common:logging",
-    ],
+    deps = ["//barelymusician/common:logging"],
 )
 
 cc_test(

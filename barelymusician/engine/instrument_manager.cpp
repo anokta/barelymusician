@@ -62,14 +62,7 @@ Id InstrumentManager::Create(InstrumentDefinition definition,
 }
 
 bool InstrumentManager::Destroy(Id instrument_id) {
-  if (const auto it = controllers_.find(instrument_id);
-      it != controllers_.end()) {
-    if (note_off_callback_) {
-      for (const auto& note_pitch : it->second.GetAllNotes()) {
-        note_off_callback_(instrument_id, note_pitch);
-      }
-    }
-    controllers_.erase(it);
+  if (controllers_.erase(instrument_id) > 0) {
     task_runner_.Add(
         [this, instrument_id]() { processors_.erase(instrument_id); });
     return true;

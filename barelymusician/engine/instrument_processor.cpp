@@ -84,7 +84,7 @@ void InstrumentProcessor::Reset(int sample_rate) {
 }
 
 void InstrumentProcessor::Schedule(InstrumentProcessorEvents events) {
-  events_.merge(std::move(events));
+  events_.merge(events);
 }
 
 }  // namespace barelyapi

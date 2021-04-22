@@ -40,6 +40,14 @@ InstrumentController::InstrumentController(
   }
 }
 
+InstrumentController::~InstrumentController() {
+  if (note_off_callback_) {
+    for (const auto& pitch : pitches_) {
+      note_off_callback_(pitch);
+    }
+  }
+}
+
 std::vector<float> InstrumentController::GetAllNotes() const {
   return std::vector<float>{pitches_.begin(), pitches_.end()};
 }
@@ -98,7 +106,9 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
             },
             [&](SetAllNotesOff&) {
               for (const auto& pitch : pitches_) {
-                note_off_callback_(pitch);
+                if (note_off_callback_) {
+                  note_off_callback_(pitch);
+                }
                 events.emplace(it->first, SetNoteOff{pitch});
               }
               pitches_.clear();
@@ -108,13 +118,17 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
             },
             [&](SetNoteOff& set_note_off) {
               if (pitches_.erase(set_note_off.pitch) > 0) {
-                note_off_callback_(set_note_off.pitch);
+                if (note_off_callback_) {
+                  note_off_callback_(set_note_off.pitch);
+                }
                 events.emplace(it->first, std::move(set_note_off));
               }
             },
             [&](SetNoteOn& set_note_on) {
               if (pitches_.emplace(set_note_on.pitch).second) {
-                note_on_callback_(set_note_on.pitch, set_note_on.intensity);
+                if (note_on_callback_) {
+                  note_on_callback_(set_note_on.pitch, set_note_on.intensity);
+                }
                 events.emplace(it->first, std::move(set_note_on));
               }
             },

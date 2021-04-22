@@ -41,6 +41,15 @@ class InstrumentController {
                        InstrumentNoteOffCallback note_off_callback,
                        InstrumentNoteOnCallback note_on_callback);
 
+  /// Destroys |InstrumentController|.
+  ~InstrumentController();
+
+  /// Copyable and movable.
+  InstrumentController(const InstrumentController& other) = default;
+  InstrumentController& operator=(const InstrumentController& other) = default;
+  InstrumentController(InstrumentController&& other) = default;
+  InstrumentController& operator=(InstrumentController&& other) = default;
+
   /// Returns all active notes.
   ///
   /// @return List of active note pitches.

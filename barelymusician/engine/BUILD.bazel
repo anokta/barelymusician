@@ -41,6 +41,7 @@ cc_library(
         ":instrument_processor",
         ":task_runner",
         "//barelymusician/common:common_utils",
+        "//barelymusician/common:id",
         "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
     ],
@@ -71,7 +72,7 @@ cc_library(
         ":clock",
         ":instrument_event",
         ":instrument_manager",
-        "//barelymusician/common:id_generator",
+        "//barelymusician/common:id",
         "//barelymusician/composition:note",
     ],
 )

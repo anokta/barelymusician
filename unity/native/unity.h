@@ -11,7 +11,7 @@
 #define BARELY_EXPORT
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
-#include "barelymusician/common/id_generator.h"
+#include "barelymusician/common/id.h"
 
 namespace barelyapi::unity {
 

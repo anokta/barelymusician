@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 
+#include "barelymusician/common/id.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {

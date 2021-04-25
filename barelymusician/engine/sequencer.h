@@ -5,7 +5,7 @@
 #include <map>
 #include <unordered_map>
 
-#include "barelymusician/common/id_generator.h"
+#include "barelymusician/common/id.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/instrument_manager.h"

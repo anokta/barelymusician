@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "barelymusician/common/common_utils.h"
+#include "barelymusician/common/id.h"
 #include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/engine/instrument_controller.h"

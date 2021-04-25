@@ -5,7 +5,7 @@
 #include <optional>
 #include <thread>
 
-#include "barelymusician/common/id_generator.h"
+#include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/instrument_manager.h"

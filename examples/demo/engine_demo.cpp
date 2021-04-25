@@ -10,7 +10,7 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/common/id_generator.h"
+#include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/random_generator.h"
 #include "barelymusician/composition/note.h"

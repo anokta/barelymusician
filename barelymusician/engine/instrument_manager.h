@@ -8,6 +8,7 @@
 #include <variant>
 #include <vector>
 
+#include "barelymusician/common/id.h"
 #include "barelymusician/common/id_generator.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"

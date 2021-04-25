@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "MidiFile.h"
-#include "barelymusician/common/id_generator.h"
+#include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"

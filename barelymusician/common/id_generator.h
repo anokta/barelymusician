@@ -1,12 +1,9 @@
 #ifndef BARELYMUSICIAN_COMMON_ID_GENERATOR_H_
 #define BARELYMUSICIAN_COMMON_ID_GENERATOR_H_
 
-#include <cstdint>
+#include "barelymusician/common/id.h"
 
 namespace barelyapi {
-
-/// Id type.
-using Id = std::int64_t;
 
 // Unique numerical id generator.
 class IdGenerator {

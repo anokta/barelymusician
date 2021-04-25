@@ -8,9 +8,15 @@ cc_library(
 )
 
 cc_library(
+    name = "id",
+    hdrs = ["id.h"],
+)
+
+cc_library(
     name = "id_generator",
     srcs = ["id_generator.cpp"],
     hdrs = ["id_generator.h"],
+    deps = [":id"],
 )
 
 cc_library(

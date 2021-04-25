@@ -4,7 +4,7 @@
 #include <memory>
 #include <utility>
 
-#include "barelymusician/common/id_generator.h"
+#include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_manager.h"

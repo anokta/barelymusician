@@ -17,12 +17,6 @@
 
 namespace barelyapi {
 
-// TODO: refactor.
-/// Instrument event type.
-using InstrumentEvent =
-    std::variant<ResetAllParams, ResetParam, SetAllNotesOff, SetCustomData,
-                 SetNoteOff, SetNoteOn, SetParam>;
-
 /// Class that manages processing of instruments.
 class InstrumentManager {
  public:
@@ -83,108 +77,40 @@ class InstrumentManager {
   /// Processes the next instrument output buffer at timestamp.
   ///
   /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool Process(Id instrument_id, float* output, int num_channels,
-               int num_frames, double timestamp = 0.0);
+  bool Process(Id instrument_id, double timestamp, float* output,
+               int num_channels, int num_frames);
 
-  /// Resets all parameters of all instruments to their default values at
-  /// timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  void ResetAllParams(double timestamp = 0.0);
-
-  /// Resets all instrument parameters to their default values at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool ResetAllParams(Id instrument_id, double timestamp = 0.0);
-
-  /// Resets instrument parameter to its default value at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param param_id Parameter id.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool ResetParam(Id instrument_id, int param_id, double timestamp = 0.0);
-
-  /// Sets all active notes of all instruments off at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  void SetAllNotesOff(double timestamp = 0.0);
-
-  /// Sets all active instrument notes off at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetAllNotesOff(Id instrument_id, double timestamp = 0.0);
-
-  /// Sets custom instrument data at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param custom_data Custom data.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetCustomData(Id instrument_id, std::any custom_data,
-                     double timestamp = 0.0);
+  bool SetEvent(Id instrument_id, double timestamp,
+                InstrumentControllerEvent event);
 
   /// Sets instrument events at their timestamps.
   ///
   /// @param instrument_id Instrument id.
   /// @param events List of events with their timestamps.
   /// @return True if successful, false otherwise.
-  bool SetEvents(Id instrument_id,
-                 std::multimap<double, InstrumentEvent> events);
-
-  /// Sets instrument note off at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetNoteOff(Id instrument_id, float note_pitch, double timestamp = 0.0);
+  bool SetEvents(Id instrument_id, InstrumentControllerEvents events);
 
   /// Sets the note off callback.
   ///
   /// @param note_off_callback Instrument note off callback.
   void SetNoteOffCallback(NoteOffCallback note_off_callback);
 
-  /// Sets instrument note on at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  /// @param note_intensity Note intensity.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetNoteOn(Id instrument_id, float note_pitch, float note_intensity,
-                 double timestamp = 0.0);
-
   /// Sets the note on callback.
   ///
   /// @param note_on_callback Instrument note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback);
-
-  /// Sets instrument parameter value at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param param_id Parameter id.
-  /// @param param_value Parameter value.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetParam(Id instrument_id, int param_id, float param_value,
-                double timestamp = 0.0);
 
   /// Sets the sampling rate.
   ///
   /// @param sample_rate Sampling rate in Hz.
   void SetSampleRate(int sample_rate);
 
-  void Update(double timestamp = 0.0);
+  void Update(double timestamp);
 
  private:
   // Sampling rate in Hz.

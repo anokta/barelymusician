@@ -35,26 +35,22 @@ Id InstrumentManager::Create(InstrumentDefinition definition,
                              InstrumentParamDefinitions param_definitions) {
   const Id instrument_id = id_generator_->Generate();
   InstrumentController controller(
-      param_definitions,
-      [&](float pitch) {
+      definition, param_definitions,
+      [this, instrument_id](float pitch) {
         if (note_off_callback_) {
           note_off_callback_(instrument_id, pitch);
         }
       },
-      [&](float pitch, float intensity) {
+      [this, instrument_id](float pitch, float intensity) {
         if (note_on_callback_) {
           note_on_callback_(instrument_id, pitch, intensity);
         }
       });
-
-  InstrumentProcessorEvents param_events;
-  for (const auto& param : controller.GetAllParams()) {
-    param_events.emplace(0.0, barelyapi::SetParam{param.id, param.value});
-  }
-  task_runner_.Add([this, instrument_id, definition = std::move(definition),
-                    params = std::move(param_events)]() {
-    InstrumentProcessor processor(sample_rate_, std::move(definition));
-    processor.Schedule((std::move(params)));
+  task_runner_.Add([this, instrument_id, sample_rate = sample_rate_,
+                    definition = std::move(definition),
+                    params = controller.GetAllParams()]() {
+    InstrumentProcessor processor(sample_rate, std::move(definition),
+                                  std::move(params));
     processors_.emplace(instrument_id, std::move(processor));
   });
   controllers_.emplace(instrument_id, std::move(controller));
@@ -99,9 +95,9 @@ bool InstrumentManager::IsNoteOn(Id instrument_id, float note_pitch) const {
   return false;
 }
 
-bool InstrumentManager::Process(Id instrument_id, float* output,
-                                int num_channels, int num_frames,
-                                double timestamp) {
+bool InstrumentManager::Process(Id instrument_id, double timestamp,
+                                float* output, int num_channels,
+                                int num_frames) {
   task_runner_.Run();
   if (auto* processor = FindOrNull(processors_, instrument_id)) {
     processor->Process(timestamp, output, num_channels, num_frames);
@@ -110,48 +106,10 @@ bool InstrumentManager::Process(Id instrument_id, float* output,
   return false;
 }
 
-void InstrumentManager::ResetAllParams(double timestamp) {
-  for (auto& [instrument_id, controller] : controllers_) {
-    controller.Schedule(timestamp, barelyapi::ResetAllParams{});
-  }
-}
-
-bool InstrumentManager::ResetAllParams(Id instrument_id, double timestamp) {
+bool InstrumentManager::SetEvent(Id instrument_id, double timestamp,
+                                 InstrumentControllerEvent event) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->Schedule(timestamp, barelyapi::ResetAllParams{});
-    return true;
-  }
-  return false;
-}
-
-bool InstrumentManager::ResetParam(Id instrument_id, int param_id,
-                                   double timestamp) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->Schedule(timestamp, barelyapi::ResetParam{param_id});
-    return true;
-  }
-  return false;
-}
-
-void InstrumentManager::SetAllNotesOff(double timestamp) {
-  for (auto& [instrument_id, controller] : controllers_) {
-    controller.Schedule(timestamp, barelyapi::SetAllNotesOff{});
-  }
-}
-
-bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->Schedule(timestamp, barelyapi::SetAllNotesOff{});
-    return true;
-  }
-  return false;
-}
-
-bool InstrumentManager::SetCustomData(Id instrument_id, std::any custom_data,
-                                      double timestamp) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->Schedule(timestamp,
-                         barelyapi::SetCustomData{std::move(custom_data)});
+    controller->Schedule(timestamp, std::move(event));
     return true;
   }
   return false;
@@ -166,50 +124,29 @@ bool InstrumentManager::SetEvents(Id instrument_id,
   return false;
 }
 
-bool InstrumentManager::SetNoteOff(Id instrument_id, float note_pitch,
-                                   double timestamp) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->Schedule(timestamp, barelyapi::SetNoteOff{note_pitch});
-    return true;
-  }
-  return false;
-}
-
 void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
   note_off_callback_ = std::move(note_off_callback);
-}
-
-bool InstrumentManager::SetNoteOn(Id instrument_id, float note_pitch,
-                                  float note_intensity, double timestamp) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->Schedule(timestamp,
-                         barelyapi::SetNoteOn{note_pitch, note_intensity});
-    return true;
-  }
-  return false;
 }
 
 void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-bool InstrumentManager::SetParam(Id instrument_id, int param_id,
-                                 float param_value, double timestamp) {
-  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->Schedule(timestamp, barelyapi::SetParam{param_id, param_value});
-    return true;
-  }
-  return false;
-}
-
 void InstrumentManager::SetSampleRate(int sample_rate) {
-  SetAllNotesOff();
-  task_runner_.Add([this, sample_rate]() {
-    sample_rate_ = sample_rate;
-    for (auto& [instrument_id, processor] : processors_) {
-      processor.Reset(sample_rate);
-    }
-  });
+  sample_rate_ = sample_rate;
+  for (auto& [instrument_id, controller] : controllers_) {
+    // TODO: nope - needs to happen before Reset call below.
+    controller.Schedule(0.0, SetAllNotesOff{});
+
+    task_runner_.Add([this, sample_rate, instrument_id = instrument_id,
+                      definition = controller.GetDefinition(),
+                      params = controller.GetAllParams()]() {
+      if (auto* processor = FindOrNull(processors_, instrument_id)) {
+        *processor = InstrumentProcessor(sample_rate, std::move(definition),
+                                         std::move(params));
+      }
+    });
+  }
 }
 
 void InstrumentManager::Update(double timestamp) {

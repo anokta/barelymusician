@@ -37,16 +37,16 @@ namespace BarelyApi {
     }
 
     // Schedules note off.
-    public void ScheduleNoteOff(float pitch, double dspTime) {
+    public void ScheduleNoteOff(double dspTime, float pitch) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.SetNoteOff(_id, pitch, dspTime);
+        BarelyMusician.SetNoteOff(_id, dspTime, pitch);
       }
     }
 
     // Schedules note on.
-    public void ScheduleNoteOn(float pitch, float intensity, double dspTime) {
+    public void ScheduleNoteOn(double dspTime, float pitch, float intensity) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.SetNoteOn(_id, pitch, intensity, dspTime);
+        BarelyMusician.SetNoteOn(_id, dspTime, pitch, intensity);
       }
     }
 
@@ -59,24 +59,24 @@ namespace BarelyApi {
 
     // Stops playing note with the given |pitch|.
     public void SetNoteOff(float pitch) {
-      ScheduleNoteOff(pitch, AudioSettings.dspTime);
+      ScheduleNoteOff(AudioSettings.dspTime, pitch);
     }
 
     // Starts playing note with the given |pitch| and |intensity|.
     public void SetNoteOn(float pitch, float intensity) {
-      ScheduleNoteOn(pitch, intensity, AudioSettings.dspTime);
+      ScheduleNoteOn(AudioSettings.dspTime, pitch, intensity);
     }
 
     // Sets parameter with the given |id| and |value|.
     public void SetParam(int id, float value) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.SetParam(_id, id, value, AudioSettings.dspTime);
+        BarelyMusician.SetParam(_id, AudioSettings.dspTime, id, value);
       }
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.Process(_id, data, channels, AudioSettings.dspTime);
+        BarelyMusician.Process(_id, AudioSettings.dspTime, data, channels);
       }
     }
   }

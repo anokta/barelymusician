@@ -8,18 +8,19 @@
 #include "barelymusician/common/common_utils.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_param.h"
 
 namespace barelyapi {
 
 namespace {
 
-// Returns sanitized parameter |value| with respect to the given |definition|.
-float Sanitize(const InstrumentParamDefinition& definition, float value) {
-  if (definition.max_value.has_value()) {
-    value = std::min(value, *definition.max_value);
+// Returns sanitized |value| with respect to the given |param_definition|.
+float Sanitize(const InstrumentParamDefinition& param_definition, float value) {
+  if (param_definition.max_value.has_value()) {
+    value = std::min(value, *param_definition.max_value);
   }
-  if (definition.min_value.has_value()) {
-    value = std::max(value, *definition.min_value);
+  if (param_definition.min_value.has_value()) {
+    value = std::max(value, *param_definition.min_value);
   }
   return value;
 }
@@ -27,16 +28,19 @@ float Sanitize(const InstrumentParamDefinition& definition, float value) {
 }  // namespace
 
 InstrumentController::InstrumentController(
-    const InstrumentParamDefinitions& definitions,
+    InstrumentDefinition definition,
+    const InstrumentParamDefinitions& param_definitions,
     InstrumentNoteOffCallback note_off_callback,
     InstrumentNoteOnCallback note_on_callback)
-    : note_off_callback_(std::move(note_off_callback)),
+    : definition_(std::move(definition)),
+      note_off_callback_(std::move(note_off_callback)),
       note_on_callback_(std::move(note_on_callback)) {
-  params_.reserve(definitions.size());
-  for (const auto& definition : definitions) {
+  params_.reserve(param_definitions.size());
+  for (const auto& param_definition : param_definitions) {
     params_.emplace(
-        definition.id,
-        std::pair{definition, Sanitize(definition, definition.default_value)});
+        param_definition.id,
+        std::pair{param_definition,
+                  Sanitize(param_definition, param_definition.default_value)});
   }
 }
 
@@ -60,6 +64,10 @@ std::vector<InstrumentParam> InstrumentController::GetAllParams() const {
                    return InstrumentParam{param.first, param.second.second};
                  });
   return params;
+}
+
+InstrumentDefinition InstrumentController::GetDefinition() const {
+  return definition_;
 }
 
 const float* InstrumentController::GetParam(int id) const {
@@ -90,7 +98,7 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
   for (auto it = begin; it != end; ++it) {
     std::visit(
         InstrumentEventVisitor{
-            [&](ResetAllParams&) {
+            [&](ResetAllParams& /*reset_all_params*/) {
               for (auto& [id, param] : params_) {
                 param.second = Sanitize(param.first, param.first.default_value);
                 events.emplace(it->first, SetParam{id, param.second});
@@ -104,7 +112,7 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
                                SetParam{reset_param.id, param->second});
               }
             },
-            [&](SetAllNotesOff&) {
+            [&](SetAllNotesOff& /*all_notes_off*/) {
               for (const auto& pitch : pitches_) {
                 if (note_off_callback_) {
                   note_off_callback_(pitch);

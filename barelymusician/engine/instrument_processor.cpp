@@ -6,14 +6,21 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_param.h"
 
 namespace barelyapi {
 
 InstrumentProcessor::InstrumentProcessor(int sample_rate,
-                                         InstrumentDefinition definition)
+                                         InstrumentDefinition definition,
+                                         std::vector<InstrumentParam> params)
     : sample_rate_(sample_rate), definition_(std::move(definition)) {
   if (definition_.create_fn) {
     definition_.create_fn(&state_, sample_rate);
+  }
+  if (definition_.set_param_fn) {
+    for (const auto& [id, value] : params) {
+      definition_.set_param_fn(&state_, id, value);
+    }
   }
 }
 
@@ -70,16 +77,6 @@ void InstrumentProcessor::Process(double timestamp, float* output,
   if (frame < num_frames && definition_.process_fn) {
     definition_.process_fn(&state_, &output[num_channels * frame], num_channels,
                            num_frames - frame);
-  }
-}
-
-void InstrumentProcessor::Reset(int sample_rate) {
-  if (definition_.destroy_fn) {
-    definition_.destroy_fn(&state_);
-  }
-  sample_rate_ = sample_rate;
-  if (definition_.create_fn) {
-    definition_.create_fn(&state_, sample_rate_);
   }
 }
 

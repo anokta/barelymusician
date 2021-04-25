@@ -74,14 +74,14 @@ BARELY_EXPORT bool BarelyIsInstrumentNoteOn(BarelyMusician* barelymusician,
 ///
 /// @param barelymusician System handle.
 /// @param instrument_id Instrument id.
+/// @param timestamp Timestamp in seconds.
 /// @param output Output buffer.
 /// @param num_channels Number of output channels.
 /// @param num_frames Number of output frames.
-/// @param timestamp Timestamp in seconds.
 BARELY_EXPORT void BarelyProcessInstrument(BarelyMusician* barelymusician,
-                                           Id instrument_id, float* output,
-                                           int num_channels, int num_frames,
-                                           double timestamp);
+                                           Id instrument_id, double timestamp,
+                                           float* output, int num_channels,
+                                           int num_frames);
 
 /// Resets all params.
 ///
@@ -103,12 +103,12 @@ BARELY_EXPORT void BarelySetAllInstrumentNotesOff(
 ///
 /// @param barelymusician System handle.
 /// @param instrument_id Instrument id.
-/// @param note_pitch Note pitch.
 /// @param timestamp Timestamp in seconds.
+/// @param note_pitch Note pitch.
 BARELY_EXPORT void BarelySetInstrumentNoteOff(BarelyMusician* barelymusician,
                                               Id instrument_id,
-                                              float note_pitch,
-                                              double timestamp);
+                                              double timestamp,
+                                              float note_pitch);
 
 /// Sets note off callback.
 ///
@@ -121,13 +121,13 @@ BARELY_EXPORT void BarelySetInstrumentNoteOffCallback(
 ///
 /// @param barelymusician System handle.
 /// @param instrument_id Instrument id.
+/// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
-/// @param timestamp Timestamp in seconds.
 BARELY_EXPORT void BarelySetInstrumentNoteOn(BarelyMusician* barelymusician,
-                                             Id instrument_id, float note_pitch,
-                                             float note_intensity,
-                                             double timestamp);
+                                             Id instrument_id, double timestamp,
+                                             float note_pitch,
+                                             float note_intensity);
 
 /// Sets note on callback.
 ///
@@ -140,13 +140,12 @@ BARELY_EXPORT void BarelySetInstrumentNoteOnCallback(
 ///
 /// @param barelymusician System handle.
 /// @param instrument_id Instrument id.
+/// @param timestamp Timestamp in seconds.
 /// @param param_id Param id.
 /// @param param_value Param param_value.
-/// @param timestamp Timestamp in seconds.
 BARELY_EXPORT void BarelySetInstrumentParam(BarelyMusician* barelymusician,
-                                            Id instrument_id, int param_id,
-                                            float param_value,
-                                            double timestamp);
+                                            Id instrument_id, double timestamp,
+                                            int param_id, float param_value);
 
 /// Updates the internal state.
 ///

@@ -9,6 +9,7 @@
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_param.h"
 
 namespace barelyapi {
 
@@ -19,25 +20,14 @@ using InstrumentNoteOffCallback = std::function<void(float pitch)>;
 using InstrumentNoteOnCallback =
     std::function<void(float pitch, float intensity)>;
 
-/// Instrument parameter.
-struct InstrumentParam {
-  /// Parameter id.
-  int id;
-
-  /// Parameter value.
-  float value;
-
-  /// Default comparator.
-  bool operator==(const InstrumentParam&) const = default;
-};
-
 /// Instrument controller that wraps the main thread calls of an instrument.
 class InstrumentController {
  public:
   /// Constructs new |InstrumentController|.
   ///
   /// @param definitions Instrument parameter definitions.
-  InstrumentController(const InstrumentParamDefinitions& definitions,
+  InstrumentController(InstrumentDefinition definition,
+                       const InstrumentParamDefinitions& param_definitions,
                        InstrumentNoteOffCallback note_off_callback,
                        InstrumentNoteOnCallback note_on_callback);
 
@@ -60,6 +50,8 @@ class InstrumentController {
   /// @return List of all instrument parameters.
   std::vector<InstrumentParam> GetAllParams() const;
 
+  InstrumentDefinition GetDefinition() const;
+
   /// Returns parameter value.
   ///
   /// @param id Parameter id.
@@ -78,6 +70,9 @@ class InstrumentController {
   InstrumentProcessorEvents Update(double timestamp);
 
  private:
+  // Instrument definition.
+  InstrumentDefinition definition_;
+
   // List of scheduled events.
   InstrumentControllerEvents events_;
 

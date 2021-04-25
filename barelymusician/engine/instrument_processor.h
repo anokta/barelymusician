@@ -3,6 +3,7 @@
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_param.h"
 
 namespace barelyapi {
 
@@ -13,7 +14,9 @@ class InstrumentProcessor {
   ///
   /// @param sample_rate Sampling rate in Hz.
   /// @param definition Instrument definition.
-  InstrumentProcessor(int sample_rate, InstrumentDefinition definition);
+  /// @param params Instrument parameters to initialize.
+  InstrumentProcessor(int sample_rate, InstrumentDefinition definition,
+                      std::vector<InstrumentParam> params = {});
 
   /// Destroys |InstrumentProcessor|.
   ~InstrumentProcessor();
@@ -32,11 +35,6 @@ class InstrumentProcessor {
   /// @param timestamp Timestamp in seconds.
   void Process(double timestamp, float* output, int num_channels,
                int num_frames);
-
-  /// Resets instrument.
-  ///
-  /// @param sample_rate Sampling rate in Hz.
-  void Reset(int sample_rate);
 
   /// Schedules instrument events.
   ///

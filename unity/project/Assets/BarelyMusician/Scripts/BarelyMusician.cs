@@ -47,8 +47,8 @@ namespace BarelyApi {
     }
 
     // Processes instrument.
-    public static void Process(Int64 id, float[] output, int numChannels, double dspTime) {
-      ProcessNative(InstancePtr, id, output, numChannels, output.Length / numChannels, dspTime);
+    public static void Process(Int64 id, double dspTime, float[] output, int numChannels) {
+      ProcessNative(InstancePtr, id, dspTime, output, numChannels, output.Length / numChannels);
     }
 
     // Sets all instrument notes off.
@@ -57,18 +57,18 @@ namespace BarelyApi {
     }
 
     // Sets instrument note off.
-    public static void SetNoteOff(Int64 id, float pitch, double dspTime) {
-      SetNoteOffNative(InstancePtr, id, pitch, dspTime);
+    public static void SetNoteOff(Int64 id, double dspTime, float pitch) {
+      SetNoteOffNative(InstancePtr, id, dspTime, pitch);
     }
 
     // Sets instrument note on.
-    public static void SetNoteOn(Int64 id, float pitch, float intensity, double dspTime) {
-      SetNoteOnNative(InstancePtr, id, pitch, intensity, dspTime);
+    public static void SetNoteOn(Int64 id, double dspTime, float pitch, float intensity) {
+      SetNoteOnNative(InstancePtr, id, dspTime, pitch, intensity);
     }
 
     // Sets instrument param value.
-    public static void SetParam(Int64 id, int paramId, float value, double dspTime) {
-      SetParamNative(InstancePtr, id, paramId, value, dspTime);
+    public static void SetParam(Int64 id, double dspTime, int paramId, float value) {
+      SetParamNative(InstancePtr, id, dspTime, paramId, value);
     }
 
     // Singleton instance.
@@ -195,8 +195,8 @@ namespace BarelyApi {
     private static extern bool IsNoteOnNative(IntPtr instancePtr, Int64 instrumentId, float pitch);
 
     [DllImport(pluginName, EntryPoint = "BarelyProcessInstrument")]
-    private static extern void ProcessNative(IntPtr instancePtr, Int64 instrumentId, [In, Out] float[] output,
-                                             int numChannels, int numFrames, double timestamp);
+    private static extern void ProcessNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
+                                             [In, Out] float[] output, int numChannels, int numFrames);
 
     [DllImport(pluginName, EntryPoint = "BarelyResetAllInstrumentParams")]
     private static extern void ResetAllParamsNative(IntPtr instancePtr, Int64 instrumentId, double timestamp);
@@ -211,18 +211,18 @@ namespace BarelyApi {
     private static extern void SetNoteOnCallbackNative(IntPtr instancePtr, IntPtr noteOnCallbackPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOff")]
-    private static extern void SetNoteOffNative(IntPtr instancePtr, Int64 instrumentId, float notePitch,
-                                                double timestamp);
+    private static extern void SetNoteOffNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
+                                                float notePitch);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOn")]
-    private static extern void SetNoteOnNative(IntPtr instancePtr, Int64 instrumentId, float notePitch,
-                                               float noteIntensity, double timestamp);
+    private static extern void SetNoteOnNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
+                                               float notePitch, float noteIntensity);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParam")]
-    private static extern void SetParamNative(IntPtr instancePtr, Int64 instrumentId, int paramId, float paramValue,
-                                              double timestamp);
+    private static extern void SetParamNative(IntPtr instancePtr, Int64 instrumentId, double timestamp, int paramId,
+                                              float paramValue);
 
     [DllImport(pluginName, EntryPoint = "BarelyUpdate")]
-    private static extern void UpdateNative(IntPtr instancePtr, double timestamp);                          
+    private static extern void UpdateNative(IntPtr instancePtr, double timestamp);
   }
 }

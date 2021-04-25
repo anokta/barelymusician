@@ -127,34 +127,6 @@ TEST(InstrumentProcessorTest, ProcessMultipleNotes) {
   }
 }
 
-// Tests that instrument gets reset as expected.
-TEST(InstrumentProcessorTest, Reset) {
-  auto definition = GetTestInstrumentDefinition();
-  definition.create_fn = [](InstrumentState* state, int sample_rate) {
-    state->emplace<float>(static_cast<float>(sample_rate));
-  };
-  InstrumentProcessor processor(1000, std::move(definition));
-  std::vector<float> buffer(kNumChannels * kNumFrames);
-
-  std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0.0, buffer.data(), kNumChannels, kNumFrames);
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 1000.0f);
-    }
-  }
-
-  processor.Reset(2000);
-
-  std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(0.0, buffer.data(), kNumChannels, kNumFrames);
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 2000.0f);
-    }
-  }
-}
-
 // Tests that scheduled instrument processor events gets processed as expected.
 TEST(InstrumentProcessorTest, Schedule) {
   const float kNoteOnPitch = 3.0f;

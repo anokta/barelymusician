@@ -18,7 +18,7 @@ namespace {
 using ::barelyapi::examples::SynthInstrument;
 
 // Invalid instrument_id.
-inline constexpr int kInvalidId = -1;
+inline constexpr Id kInvalidId = -1;
 
 }  // namespace
 
@@ -96,34 +96,36 @@ bool BarelyIsInstrumentNoteOn(BarelyMusician* barelymusician, Id instrument_id,
 }
 
 void BarelyProcessInstrument(BarelyMusician* barelymusician, Id instrument_id,
-                             float* output, int num_channels, int num_frames,
-                             double timestamp) {
+                             double timestamp, float* output, int num_channels,
+                             int num_frames) {
   if (barelymusician) {
-    barelymusician->instrument_manager.Process(
-        instrument_id, output, num_channels, num_frames, timestamp);
+    barelymusician->instrument_manager.Process(instrument_id, timestamp, output,
+                                               num_channels, num_frames);
   }
 }
 
 void BarelyResetAllInstrumentParams(BarelyMusician* barelymusician,
                                     Id instrument_id, double timestamp) {
   if (barelymusician) {
-    barelymusician->instrument_manager.ResetAllParams(instrument_id, timestamp);
+    barelymusician->instrument_manager.SetEvent(instrument_id, timestamp,
+                                                ResetAllParams{});
   }
 }
 
 void BarelySetAllInstrumentNotesOff(BarelyMusician* barelymusician,
                                     Id instrument_id, double timestamp) {
   if (barelymusician) {
-    barelymusician->instrument_manager.SetAllNotesOff(instrument_id, timestamp);
+    barelymusician->instrument_manager.SetEvent(instrument_id, timestamp,
+                                                SetAllNotesOff{});
   }
 }
 
 void BarelySetInstrumentNoteOff(BarelyMusician* barelymusician,
-                                Id instrument_id, float note_pitch,
-                                double timestamp) {
+                                Id instrument_id, double timestamp,
+                                float note_pitch) {
   if (barelymusician) {
-    barelymusician->instrument_manager.SetNoteOff(instrument_id, note_pitch,
-                                                  timestamp);
+    barelymusician->instrument_manager.SetEvent(instrument_id, timestamp,
+                                                SetNoteOff{note_pitch});
   }
 }
 
@@ -142,11 +144,11 @@ void BarelySetInstrumentNoteOffCallback(
 }
 
 void BarelySetInstrumentNoteOn(BarelyMusician* barelymusician, Id instrument_id,
-                               float note_pitch, float note_intensity,
-                               double timestamp) {
+                               double timestamp, float note_pitch,
+                               float note_intensity) {
   if (barelymusician) {
-    barelymusician->instrument_manager.SetNoteOn(instrument_id, note_pitch,
-                                                 note_intensity, timestamp);
+    barelymusician->instrument_manager.SetEvent(
+        instrument_id, timestamp, SetNoteOn{note_pitch, note_intensity});
   }
 }
 
@@ -166,11 +168,11 @@ void BarelySetInstrumentNoteOnCallback(BarelyMusician* barelymusician,
 }
 
 void BarelySetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
-                              int param_id, float param_value,
-                              double timestamp) {
+                              double timestamp, int param_id,
+                              float param_value) {
   if (barelymusician) {
-    barelymusician->instrument_manager.SetParam(instrument_id, param_id,
-                                                param_value, timestamp);
+    barelymusician->instrument_manager.SetEvent(
+        instrument_id, timestamp, SetParam{param_id, param_value});
   }
 }
 

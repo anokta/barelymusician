@@ -79,7 +79,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {
-    instrument_manager.Process(instrument_id, output, kNumChannels, kNumFrames);
+    instrument_manager.Process(instrument_id, 0.0, output, kNumChannels,
+                               kNumFrames);
   });
 
   // Key down callback.
@@ -95,7 +96,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      instrument_manager.SetAllNotesOff(instrument_id);
+      instrument_manager.SetEvent(instrument_id, 0.0,
+                                  barelyapi::SetAllNotesOff{});
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -109,8 +111,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetNoteOn(instrument_id, offset_octaves + *pitch,
-                                   kNoteIntensity);
+      instrument_manager.SetEvent(
+          instrument_id, 0.0,
+          barelyapi::SetNoteOn{offset_octaves + *pitch, kNoteIntensity});
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -119,7 +122,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetNoteOff(instrument_id, offset_octaves + *pitch);
+      instrument_manager.SetEvent(
+          instrument_id, 0.0, barelyapi::SetNoteOff{offset_octaves + *pitch});
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);
@@ -130,7 +134,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    instrument_manager.Update();
+    instrument_manager.Update(0.0);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

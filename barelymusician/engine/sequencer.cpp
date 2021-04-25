@@ -70,7 +70,7 @@ void Sequencer::Update(double timestamp) {
     }
     // Trigger messages.
     for (auto& [id, track] : tracks_) {
-      std::multimap<double, InstrumentEvent> events;
+      InstrumentControllerEvents events;
 
       // Handle note offs.
       auto begin = track.active_notes.lower_bound(begin_position);
@@ -105,7 +105,7 @@ void Sequencer::Update(double timestamp) {
 void Sequencer::StopAllNotes() {
   const double timestamp = clock_.GetTimestamp();
   for (auto& [id, track] : tracks_) {
-    std::multimap<double, InstrumentEvent> events;
+    InstrumentControllerEvents events;
     for (const auto& [position, note] : track.active_notes) {
       events.emplace(timestamp, SetNoteOff{note.pitch});
     }

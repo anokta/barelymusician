@@ -15,6 +15,7 @@ cc_library(
     deps = [
         ":instrument_definition",
         ":instrument_event",
+        ":instrument_param",
         "//barelymusician/common:common_utils",
     ],
 )
@@ -46,12 +47,18 @@ cc_library(
 )
 
 cc_library(
+    name = "instrument_param",
+    hdrs = ["instrument_param.h"],
+)
+
+cc_library(
     name = "instrument_processor",
     srcs = ["instrument_processor.cpp"],
     hdrs = ["instrument_processor.h"],
     deps = [
         ":instrument_definition",
         ":instrument_event",
+        ":instrument_param",
         "//barelymusician/dsp:dsp_utils",
     ],
 )

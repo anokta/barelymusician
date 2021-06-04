@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barelymusician/common/logging.h"
-#include "barelymusician/common/random_generator.h"
+#include "barelymusician/common/random.h"
 
 namespace barelyapi {
 
@@ -17,8 +17,8 @@ class ContextFreeGrammar {
  public:
   /// Constructs new |ContextFreeGrammar|.
   ///
-  /// @param random_generator Pointer to random number generator.
-  explicit ContextFreeGrammar(RandomGenerator* random_generator);
+  /// @param random Pointer to random number generator.
+  explicit ContextFreeGrammar(Random* random);
 
   /// Adds a rule of |substitions| for the given |symbol|.
   ///
@@ -39,17 +39,16 @@ class ContextFreeGrammar {
   std::vector<SymbolType> GetSubstition(const SymbolType& symbol) const;
 
   // Random number generator.
-  RandomGenerator* random_generator_;  // Not owned.
+  Random* random_;  // Not owned.
 
   // Grammar rules that map symbols to their corresponding substitions.
   std::unordered_map<SymbolType, std::vector<std::vector<SymbolType>>> rules_;
 };
 
 template <typename SymbolType>
-ContextFreeGrammar<SymbolType>::ContextFreeGrammar(
-    RandomGenerator* random_generator)
-    : random_generator_(random_generator) {
-  DCHECK(random_generator);
+ContextFreeGrammar<SymbolType>::ContextFreeGrammar(Random* random)
+    : random_(random) {
+  DCHECK(random);
 }
 
 template <typename SymbolType>
@@ -93,8 +92,8 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
 
   // Select a substition randomly with equal probability for each selection.
   const auto& substitions = rules_.at(symbol);
-  const int index = random_generator_->DrawUniform(
-      0, static_cast<int>(substitions.size()) - 1);
+  const int index =
+      random_->DrawUniform(0, static_cast<int>(substitions.size()) - 1);
   return substitions[index];
 }
 

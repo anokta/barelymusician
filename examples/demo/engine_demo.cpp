@@ -12,7 +12,7 @@
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
-#include "barelymusician/common/random_generator.h"
+#include "barelymusician/common/random.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_utils.h"
 #include "barelymusician/engine/engine.h"
@@ -31,7 +31,7 @@ using ::barelyapi::GetPitch;
 using ::barelyapi::Id;
 using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::RandomGenerator;
+using ::barelyapi::Random;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::DrumkitInstrument;
@@ -115,7 +115,7 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
 }
 
 void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes,
-                  RandomGenerator* random) {
+                  Random* random) {
   const auto get_beat = [](int step) {
     return barelyapi::GetPosition(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
@@ -176,7 +176,7 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  RandomGenerator random;
+  Random random;
 
   AudioClock clock(kSampleRate);
   Engine engine(kSampleRate);

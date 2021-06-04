@@ -1,17 +1,17 @@
-#ifndef BARELYMUSICIAN_COMMON_RANDOM_GENERATOR_H_
-#define BARELYMUSICIAN_COMMON_RANDOM_GENERATOR_H_
+#ifndef BARELYMUSICIAN_COMMON_RANDOM_H_
+#define BARELYMUSICIAN_COMMON_RANDOM_H_
 
 #include <random>
 
 namespace barelyapi {
 
 /// Pseudo-random number generator.
-class RandomGenerator {
+class Random {
  public:
-  /// Constructs new |RandomGenerator|.
+  /// Constructs new |Random|.
   ///
   /// @param seed Seed value.
-  explicit RandomGenerator(int seed = 0);
+  explicit Random(int seed = 0);
 
   /// Draws a number with normal distribution.
   ///
@@ -69,4 +69,4 @@ class RandomGenerator {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMMON_RANDOM_GENERATOR_H_
+#endif  // BARELYMUSICIAN_COMMON_RANDOM_H_

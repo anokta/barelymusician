@@ -45,7 +45,7 @@ cc_library(
     deps = [
         ":dsp_utils",
         ":generator",
-        "//barelymusician/common:random_generator",
+        "//barelymusician/common:random",
     ],
 )
 

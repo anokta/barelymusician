@@ -13,23 +13,22 @@
 
 namespace barelyapi {
 
-// Instrument controller not off callback signature.
-using InstrumentNoteOffCallback = std::function<void(float pitch)>;
-
-// Instrument controller not on callback signature.
-using InstrumentNoteOnCallback =
-    std::function<void(float pitch, float intensity)>;
-
 /// Instrument controller that wraps the main thread calls of an instrument.
 class InstrumentController {
  public:
+  // Instrument controller not off callback signature.
+  using NoteOffCallback = std::function<void(float pitch)>;
+
+  // Instrument controller not on callback signature.
+  using NoteOnCallback = std::function<void(float pitch, float intensity)>;
+
   /// Constructs new |InstrumentController|.
   ///
   /// @param definitions Instrument parameter definitions.
   InstrumentController(InstrumentDefinition definition,
                        const InstrumentParamDefinitions& param_definitions,
-                       InstrumentNoteOffCallback note_off_callback,
-                       InstrumentNoteOnCallback note_on_callback);
+                       NoteOffCallback note_off_callback,
+                       NoteOnCallback note_on_callback);
 
   /// Destroys |InstrumentController|.
   ~InstrumentController();
@@ -77,10 +76,10 @@ class InstrumentController {
   InstrumentControllerEvents events_;
 
   // Instrument note off callback.
-  InstrumentNoteOffCallback note_off_callback_;
+  NoteOffCallback note_off_callback_;
 
   // Instrument note on callback.
-  InstrumentNoteOnCallback note_on_callback_;
+  NoteOnCallback note_on_callback_;
 
   // List of instrument parameters.
   std::unordered_map<int, std::pair<InstrumentParamDefinition, float>> params_;

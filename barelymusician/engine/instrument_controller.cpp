@@ -30,8 +30,7 @@ float Sanitize(const InstrumentParamDefinition& param_definition, float value) {
 InstrumentController::InstrumentController(
     InstrumentDefinition definition,
     const InstrumentParamDefinitions& param_definitions,
-    InstrumentNoteOffCallback note_off_callback,
-    InstrumentNoteOnCallback note_on_callback)
+    NoteOffCallback note_off_callback, NoteOnCallback note_on_callback)
     : definition_(std::move(definition)),
       note_off_callback_(std::move(note_off_callback)),
       note_on_callback_(std::move(note_on_callback)) {

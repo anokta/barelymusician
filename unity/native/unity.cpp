@@ -78,9 +78,9 @@ bool BarelyDestroyInstrument(BarelyMusician* barelymusician, Id instrument_id) {
 float BarelyGetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
                                int param_id) {
   if (barelymusician) {
-    if (const float* param = barelymusician->instrument_manager.GetParam(
+    if (const auto* param = barelymusician->instrument_manager.GetParam(
             instrument_id, param_id)) {
-      return *param;
+      return param->value;
     }
   }
   return 0.0f;

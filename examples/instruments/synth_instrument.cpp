@@ -4,6 +4,7 @@
 
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/engine/instrument_param_definition.h"
 #include "examples/instruments/enveloped_voice.h"
 
 namespace barelyapi::examples {

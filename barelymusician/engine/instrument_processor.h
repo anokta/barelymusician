@@ -14,9 +14,7 @@ class InstrumentProcessor {
   ///
   /// @param sample_rate Sampling rate in Hz.
   /// @param definition Instrument definition.
-  /// @param params Instrument parameters to initialize.
-  InstrumentProcessor(int sample_rate, InstrumentDefinition definition,
-                      std::vector<InstrumentParam> params = {});
+  InstrumentProcessor(int sample_rate, InstrumentDefinition definition);
 
   /// Destroys |InstrumentProcessor|.
   ~InstrumentProcessor();
@@ -29,10 +27,10 @@ class InstrumentProcessor {
 
   /// Processes the next output buffer at a given timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  /// @param timestamp Timestamp in seconds.
   void Process(double timestamp, float* output, int num_channels,
                int num_frames);
 

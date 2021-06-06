@@ -1,12 +1,14 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_PARAM_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_PARAM_H_
 
+#include "barelymusician/engine/instrument_param_definition.h"
+
 namespace barelyapi {
 
 /// Instrument parameter.
 struct InstrumentParam {
-  /// Parameter id.
-  int id;
+  /// Parameter definition.
+  InstrumentParamDefinition definition;
 
   /// Parameter value.
   float value;

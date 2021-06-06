@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -14,32 +15,36 @@ namespace barelyapi {
 
 namespace {
 
-// Returns sanitized |value| with respect to the given |param_definition|.
-float Sanitize(const InstrumentParamDefinition& param_definition, float value) {
-  if (param_definition.max_value.has_value()) {
-    value = std::min(value, *param_definition.max_value);
+// TODO: Move to InstrumentParam *class*.
+void SetValue(float value, InstrumentParam* param) {
+  if (param->definition.max_value.has_value()) {
+    value = std::min(value, *param->definition.max_value);
   }
-  if (param_definition.min_value.has_value()) {
-    value = std::max(value, *param_definition.min_value);
+  if (param->definition.min_value.has_value()) {
+    value = std::max(value, *param->definition.min_value);
   }
-  return value;
+  param->value = value;
+}
+
+InstrumentParam BuildParam(InstrumentParamDefinition definition) {
+  InstrumentParam param{std::move(definition)};
+  SetValue(param.definition.default_value, &param);
+  return param;
 }
 
 }  // namespace
 
 InstrumentController::InstrumentController(
     InstrumentDefinition definition,
-    const InstrumentParamDefinitions& param_definitions,
+    InstrumentParamDefinitions param_definitions,
     NoteOffCallback note_off_callback, NoteOnCallback note_on_callback)
     : definition_(std::move(definition)),
       note_off_callback_(std::move(note_off_callback)),
       note_on_callback_(std::move(note_on_callback)) {
   params_.reserve(param_definitions.size());
-  for (const auto& param_definition : param_definitions) {
-    params_.emplace(
-        param_definition.id,
-        std::pair{param_definition,
-                  Sanitize(param_definition, param_definition.default_value)});
+  for (auto& param_definition : param_definitions) {
+    params_.emplace(param_definition.id,
+                    BuildParam(std::move(param_definition)));
   }
 }
 
@@ -51,29 +56,21 @@ InstrumentController::~InstrumentController() {
   }
 }
 
-std::vector<float> InstrumentController::GetAllNotes() const {
-  return std::vector<float>{pitches_.begin(), pitches_.end()};
+const std::unordered_set<float>& InstrumentController::GetAllNotes() const {
+  return pitches_;
 }
 
-std::vector<InstrumentParam> InstrumentController::GetAllParams() const {
-  std::vector<InstrumentParam> params;
-  params.reserve(params_.size());
-  std::transform(params_.begin(), params_.end(), std::back_inserter(params),
-                 [](const auto& param) {
-                   return InstrumentParam{param.first, param.second.second};
-                 });
-  return params;
+const std::unordered_map<int, InstrumentParam>&
+InstrumentController::GetAllParams() const {
+  return params_;
 }
 
 InstrumentDefinition InstrumentController::GetDefinition() const {
   return definition_;
 }
 
-const float* InstrumentController::GetParam(int id) const {
-  if (const auto* param = FindOrNull(params_, id)) {
-    return &param->second;
-  }
-  return nullptr;
+const InstrumentParam* InstrumentController::GetParam(int id) const {
+  return FindOrNull(params_, id);
 }
 
 bool InstrumentController::IsNoteOn(float pitch) const {
@@ -99,16 +96,15 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
         InstrumentEventVisitor{
             [&](ResetAllParams& /*reset_all_params*/) {
               for (auto& [id, param] : params_) {
-                param.second = Sanitize(param.first, param.first.default_value);
-                events.emplace(it->first, SetParam{id, param.second});
+                SetValue(param.definition.default_value, &param);
+                events.emplace(it->first, SetParam{id, param.value});
               }
             },
             [&](ResetParam& reset_param) {
               if (auto* param = FindOrNull(params_, reset_param.id)) {
-                param->second =
-                    Sanitize(param->first, param->first.default_value);
+                SetValue(param->definition.default_value, param);
                 events.emplace(it->first,
-                               SetParam{reset_param.id, param->second});
+                               SetParam{reset_param.id, param->value});
               }
             },
             [&](SetAllNotesOff& /*all_notes_off*/) {
@@ -141,9 +137,8 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
             },
             [&](SetParam& set_param) {
               if (auto* param = FindOrNull(params_, set_param.id)) {
-                param->second = Sanitize(param->first, set_param.value);
-                set_param.value = param->second;
-                events.emplace(it->first, std::move(set_param));
+                SetValue(set_param.value, param);
+                events.emplace(it->first, SetParam{set_param.id, param->value});
               }
             }},
         it->second);

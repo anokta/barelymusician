@@ -16,17 +16,17 @@ namespace barelyapi {
 /// Instrument controller that wraps the main thread calls of an instrument.
 class InstrumentController {
  public:
-  // Instrument controller not off callback signature.
+  // Instrument controller note off callback signature.
   using NoteOffCallback = std::function<void(float pitch)>;
 
-  // Instrument controller not on callback signature.
+  // Instrument controller note on callback signature.
   using NoteOnCallback = std::function<void(float pitch, float intensity)>;
 
   /// Constructs new |InstrumentController|.
   ///
   /// @param definitions Instrument parameter definitions.
   InstrumentController(InstrumentDefinition definition,
-                       const InstrumentParamDefinitions& param_definitions,
+                       InstrumentParamDefinitions param_definitions,
                        NoteOffCallback note_off_callback,
                        NoteOnCallback note_on_callback);
 
@@ -42,20 +42,20 @@ class InstrumentController {
   /// Returns all active notes.
   ///
   /// @return List of active note pitches.
-  std::vector<float> GetAllNotes() const;
+  const std::unordered_set<float>& GetAllNotes() const;
 
   /// Returns all parameters.
   ///
   /// @return List of all instrument parameters.
-  std::vector<InstrumentParam> GetAllParams() const;
+  const std::unordered_map<int, InstrumentParam>& GetAllParams() const;
 
   InstrumentDefinition GetDefinition() const;
 
-  /// Returns parameter value.
+  /// Returns parameter.
   ///
   /// @param id Parameter id.
-  /// @return Pointer to the parameter value, or nullptr if not found.
-  const float* GetParam(int id) const;
+  /// @return Pointer to the parameter, or nullptr if not found.
+  const InstrumentParam* GetParam(int id) const;
 
   /// Returns whether note is active or not.
   ///
@@ -82,7 +82,7 @@ class InstrumentController {
   NoteOnCallback note_on_callback_;
 
   // List of instrument parameters.
-  std::unordered_map<int, std::pair<InstrumentParamDefinition, float>> params_;
+  std::unordered_map<int, InstrumentParam> params_;
 
   // List of active note pitches.
   std::unordered_set<float> pitches_;

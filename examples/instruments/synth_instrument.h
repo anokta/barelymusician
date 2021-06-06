@@ -7,6 +7,7 @@
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_param_definition.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"
 

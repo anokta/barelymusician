@@ -13,6 +13,8 @@
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_param.h"
+#include "barelymusician/engine/instrument_param_definition.h"
 #include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/task_runner.h"
 
@@ -61,12 +63,12 @@ class InstrumentManager {
   /// @return List of parameters.
   std::vector<InstrumentParam> GetAllParams(Id instrument_id) const;
 
-  /// Returns instrument parameter value.
+  /// Returns instrument parameter.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
-  /// @return Pointer to parameter value if successful, nullptr otherwise.
-  const float* GetParam(Id instrument_id, int param_id) const;
+  /// @return Pointer to parameter if successful, nullptr otherwise.
+  const InstrumentParam* GetParam(Id instrument_id, int param_id) const;
 
   /// Returns whether instrument note is active or not.
   ///

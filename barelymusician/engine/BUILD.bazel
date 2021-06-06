@@ -38,6 +38,7 @@ cc_library(
         ":instrument_controller",
         ":instrument_definition",
         ":instrument_event",
+        ":instrument_param_definition",
         ":instrument_processor",
         ":task_runner",
         "//barelymusician/common:common_utils",
@@ -50,6 +51,12 @@ cc_library(
 cc_library(
     name = "instrument_param",
     hdrs = ["instrument_param.h"],
+    deps = ["instrument_param_definition"],
+)
+
+cc_library(
+    name = "instrument_param_definition",
+    hdrs = ["instrument_param_definition.h"],
 )
 
 cc_library(
@@ -121,16 +128,16 @@ cc_test(
 #     ],
 # )
 
-cc_test(
-    name = "instrument_processor_test",
-    srcs = ["instrument_processor_test.cpp"],
-    deps = [
-        ":instrument_definition",
-        ":instrument_event",
-        ":instrument_processor",
-        "@googletest//:gtest_main",
-    ],
-)
+# cc_test(
+#     name = "instrument_processor_test",
+#     srcs = ["instrument_processor_test.cpp"],
+#     deps = [
+#         ":instrument_definition",
+#         ":instrument_event",
+#         ":instrument_processor",
+#         "@googletest//:gtest_main",
+#     ],
+# )
 
 cc_test(
     name = "spin_mutex_test",

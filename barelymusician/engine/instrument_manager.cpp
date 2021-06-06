@@ -1,5 +1,6 @@
 #include "barelymusician/engine/instrument_manager.h"
 
+#include <algorithm>
 #include <any>
 #include <utility>
 #include <vector>
@@ -19,6 +20,25 @@ namespace {
 
 // Maximum number of tasks to be executed per each |Process| call.
 constexpr int kNumMaxTasks = 8000;
+
+// InstrumentProcessorEvents BuildAllNotesOffEvents(double timestamp,
+//                                                  std::vector<float> pitches)
+//                                                  {
+//   InstrumentProcessorEvents events;
+//   for (const auto& pitch : pitches) {
+//     events.emplace(timestamp, SetNoteOff{pitch});
+//   }
+//   return events;
+// }
+
+InstrumentProcessorEvents BuildParamEvents(
+    double timestamp, const std::unordered_map<int, InstrumentParam>& params) {
+  InstrumentProcessorEvents events;
+  for (const auto& [id, param] : params) {
+    events.emplace(timestamp, SetParam{id, param.value});
+  }
+  return events;
+}
 
 }  // namespace
 
@@ -47,13 +67,14 @@ Id InstrumentManager::Create(InstrumentDefinition definition,
           note_on_callback_(instrument_id, pitch, intensity);
         }
       });
-  task_runner_.Add([this, instrument_id, sample_rate = sample_rate_,
-                    definition = std::move(definition),
-                    params = controller.GetAllParams()]() {
-    InstrumentProcessor processor(sample_rate, std::move(definition),
-                                  std::move(params));
-    processors_.emplace(instrument_id, std::move(processor));
-  });
+  task_runner_.Add(
+      [this, instrument_id, sample_rate = sample_rate_,
+       definition = std::move(definition),
+       param_events = BuildParamEvents(0.0, controller.GetAllParams())]() {
+        InstrumentProcessor processor(sample_rate, std::move(definition));
+        processor.Schedule(std::move(param_events));
+        processors_.emplace(instrument_id, std::move(processor));
+      });
   controllers_.emplace(instrument_id, std::move(controller));
   return instrument_id;
 }
@@ -69,7 +90,8 @@ bool InstrumentManager::Destroy(Id instrument_id) {
 
 std::vector<float> InstrumentManager::GetAllNotes(Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return controller->GetAllNotes();
+    const auto& pitches = controller->GetAllNotes();
+    return std::vector<float>{pitches.begin(), pitches.end()};
   }
   return {};
 }
@@ -77,12 +99,18 @@ std::vector<float> InstrumentManager::GetAllNotes(Id instrument_id) const {
 std::vector<InstrumentParam> InstrumentManager::GetAllParams(
     Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return controller->GetAllParams();
+    const auto& params = controller->GetAllParams();
+    std::vector<InstrumentParam> ret;
+    ret.reserve(params.size());
+    std::transform(params.begin(), params.end(), std::back_inserter(ret),
+                   [](const auto& param) { return param.second; });
+    return ret;
   }
   return {};
 }
 
-const float* InstrumentManager::GetParam(Id instrument_id, int param_id) const {
+const InstrumentParam* InstrumentManager::GetParam(Id instrument_id,
+                                                   int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->GetParam(param_id);
   }
@@ -141,10 +169,11 @@ void InstrumentManager::SetSampleRate(int sample_rate) {
 
     task_runner_.Add([this, sample_rate, instrument_id = instrument_id,
                       definition = controller.GetDefinition(),
-                      params = controller.GetAllParams()]() {
+                      param_events =
+                          BuildParamEvents(0.0, controller.GetAllParams())]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        *processor = InstrumentProcessor(sample_rate, std::move(definition),
-                                         std::move(params));
+        *processor = InstrumentProcessor(sample_rate, std::move(definition));
+        processor->Schedule(std::move(param_events));
       }
     });
   }

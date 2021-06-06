@@ -11,16 +11,10 @@
 namespace barelyapi {
 
 InstrumentProcessor::InstrumentProcessor(int sample_rate,
-                                         InstrumentDefinition definition,
-                                         std::vector<InstrumentParam> params)
+                                         InstrumentDefinition definition)
     : sample_rate_(sample_rate), definition_(std::move(definition)) {
   if (definition_.create_fn) {
     definition_.create_fn(&state_, sample_rate);
-  }
-  if (definition_.set_param_fn) {
-    for (const auto& [id, value] : params) {
-      definition_.set_param_fn(&state_, id, value);
-    }
   }
 }
 
@@ -48,26 +42,27 @@ void InstrumentProcessor::Process(double timestamp, float* output,
       frame = message_frame;
     }
     std::visit(InstrumentEventVisitor{
-                   [this](const SetCustomData& custom_data) {
+                   [this](const SetCustomData& set_custom_data) {
                      if (definition_.set_custom_data_fn) {
                        definition_.set_custom_data_fn(&state_,
-                                                      custom_data.data);
+                                                      set_custom_data.data);
                      }
                    },
-                   [this](const SetNoteOff& note_off) {
+                   [this](const SetNoteOff& set_note_off) {
                      if (definition_.set_note_off_fn) {
-                       definition_.set_note_off_fn(&state_, note_off.pitch);
+                       definition_.set_note_off_fn(&state_, set_note_off.pitch);
                      }
                    },
-                   [this](const SetNoteOn& note_on) {
+                   [this](const SetNoteOn& set_note_on) {
                      if (definition_.set_note_on_fn) {
-                       definition_.set_note_on_fn(&state_, note_on.pitch,
-                                                  note_on.intensity);
+                       definition_.set_note_on_fn(&state_, set_note_on.pitch,
+                                                  set_note_on.intensity);
                      }
                    },
-                   [this](const SetParam& param) {
+                   [this](const SetParam& set_param) {
                      if (definition_.set_param_fn) {
-                       definition_.set_param_fn(&state_, param.id, param.value);
+                       definition_.set_param_fn(&state_, set_param.id,
+                                                set_param.value);
                      }
                    }},
                it->second);

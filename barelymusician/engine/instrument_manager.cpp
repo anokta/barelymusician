@@ -35,7 +35,7 @@ InstrumentProcessorEvents BuildParamEvents(
     double timestamp, const std::unordered_map<int, InstrumentParam>& params) {
   InstrumentProcessorEvents events;
   for (const auto& [id, param] : params) {
-    events.emplace(timestamp, SetParam{id, param.value});
+    events.emplace(timestamp, SetParam{id, param.GetValue()});
   }
   return events;
 }

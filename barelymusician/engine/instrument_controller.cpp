@@ -13,27 +13,6 @@
 
 namespace barelyapi {
 
-namespace {
-
-// TODO: Move to InstrumentParam *class*.
-void SetValue(float value, InstrumentParam* param) {
-  if (param->definition.max_value.has_value()) {
-    value = std::min(value, *param->definition.max_value);
-  }
-  if (param->definition.min_value.has_value()) {
-    value = std::max(value, *param->definition.min_value);
-  }
-  param->value = value;
-}
-
-InstrumentParam BuildParam(InstrumentParamDefinition definition) {
-  InstrumentParam param{std::move(definition)};
-  SetValue(param.definition.default_value, &param);
-  return param;
-}
-
-}  // namespace
-
 InstrumentController::InstrumentController(
     InstrumentDefinition definition,
     InstrumentParamDefinitions param_definitions,
@@ -44,7 +23,7 @@ InstrumentController::InstrumentController(
   params_.reserve(param_definitions.size());
   for (auto& param_definition : param_definitions) {
     params_.emplace(param_definition.id,
-                    BuildParam(std::move(param_definition)));
+                    InstrumentParam(std::move(param_definition)));
   }
 }
 
@@ -96,15 +75,15 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
         InstrumentEventVisitor{
             [&](ResetAllParams& /*reset_all_params*/) {
               for (auto& [id, param] : params_) {
-                SetValue(param.definition.default_value, &param);
-                events.emplace(it->first, SetParam{id, param.value});
+                param.ResetValue();
+                events.emplace(it->first, SetParam{id, param.GetValue()});
               }
             },
             [&](ResetParam& reset_param) {
               if (auto* param = FindOrNull(params_, reset_param.id)) {
-                SetValue(param->definition.default_value, param);
+                param->ResetValue();
                 events.emplace(it->first,
-                               SetParam{reset_param.id, param->value});
+                               SetParam{reset_param.id, param->GetValue()});
               }
             },
             [&](SetAllNotesOff& /*all_notes_off*/) {
@@ -137,8 +116,9 @@ InstrumentProcessorEvents InstrumentController::Update(double timestamp) {
             },
             [&](SetParam& set_param) {
               if (auto* param = FindOrNull(params_, set_param.id)) {
-                SetValue(set_param.value, param);
-                events.emplace(it->first, SetParam{set_param.id, param->value});
+                param->SetValue(set_param.value);
+                events.emplace(it->first,
+                               SetParam{set_param.id, param->GetValue()});
               }
             }},
         it->second);

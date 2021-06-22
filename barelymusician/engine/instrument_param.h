@@ -5,16 +5,31 @@
 
 namespace barelyapi {
 
-/// Instrument parameter.
-struct InstrumentParam {
+/// Class that wraps an instrument parameter.
+class InstrumentParam {
+ public:
+  /// Constructs new |InstrumentParam|.
+  explicit InstrumentParam(InstrumentParamDefinition definition);
+
+  /// Returns value.
+  ///
+  /// @return Parameter value.
+  float GetValue() const;
+
+  /// Resets value.
+  void ResetValue();
+
+  /// Sets value.
+  ///
+  /// @param value Parameter value.
+  void SetValue(float value);
+
+ private:
   /// Parameter definition.
-  InstrumentParamDefinition definition;
+  InstrumentParamDefinition definition_;
 
   /// Parameter value.
-  float value;
-
-  /// Default comparator.
-  bool operator==(const InstrumentParam&) const = default;
+  float value_;
 };
 
 }  // namespace barelyapi

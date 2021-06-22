@@ -7,7 +7,7 @@
 
 namespace barelyapi {
 
-/// Class that wraps an instrument instance.
+/// Class that wraps an instrument.
 class Instrument {
  public:
   /// Constructs new |Instrument|.

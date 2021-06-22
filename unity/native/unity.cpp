@@ -80,7 +80,7 @@ float BarelyGetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
   if (barelymusician) {
     if (const auto* param = barelymusician->instrument_manager.GetParam(
             instrument_id, param_id)) {
-      return param->value;
+      return param->GetValue();
     }
   }
   return 0.0f;

@@ -9,6 +9,15 @@ cc_library(
 )
 
 cc_library(
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
+    deps = [
+        ":instrument_definition",
+    ],
+)
+
+cc_library(
     name = "instrument_controller",
     srcs = ["instrument_controller.cpp"],
     hdrs = ["instrument_controller.h"],
@@ -51,7 +60,9 @@ cc_library(
 cc_library(
     name = "instrument_param",
     hdrs = ["instrument_param.h"],
-    deps = ["instrument_param_definition"],
+    deps = [
+        "instrument_param_definition",
+    ],
 )
 
 cc_library(
@@ -93,7 +104,9 @@ cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],
-    deps = ["//barelymusician/common:logging"],
+    deps = [
+        "//barelymusician/common:logging",
+    ],
 )
 
 cc_test(

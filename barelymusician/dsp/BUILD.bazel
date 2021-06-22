@@ -52,7 +52,9 @@ cc_library(
 cc_library(
     name = "polyphonic_voice",
     hdrs = ["polyphonic_voice.h"],
-    deps = ["//barelymusician/common:logging"],
+    deps = [
+        "//barelymusician/common:logging",
+    ],
 )
 
 cc_library(

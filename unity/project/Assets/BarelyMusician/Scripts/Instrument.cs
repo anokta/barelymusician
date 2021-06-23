@@ -16,14 +16,14 @@ namespace BarelyApi {
     protected virtual void Awake() {
       _source = GetComponent<AudioSource>();
       if (_id == BarelyMusician.InvalidId) {
-        _id = BarelyMusician.Create(this);
+        _id = BarelyMusician.Create(this, AudioSettings.dspTime);
       }
     }
 
     protected virtual void OnDestroy() {
       _source = null;
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.Destroy(_id);
+        BarelyMusician.Destroy(_id, AudioSettings.dspTime);
         _id = BarelyMusician.InvalidId;
       }
     }

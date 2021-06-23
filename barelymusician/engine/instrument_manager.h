@@ -4,18 +4,17 @@
 #include <any>
 #include <functional>
 #include <map>
+#include <optional>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
-#include <vector>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/id_generator.h"
-#include "barelymusician/engine/instrument_controller.h"
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_param.h"
 #include "barelymusician/engine/instrument_param_definition.h"
-#include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
@@ -25,43 +24,44 @@ class InstrumentManager {
  public:
   /// Note off callback signature.
   using NoteOffCallback =
-      std::function<void(Id instrument_id, float note_pitch)>;
+      std::function<void(Id instrument_id, double timestamp, float note_pitch)>;
 
   /// Note on callback signature.
-  using NoteOnCallback = std::function<void(Id instrument_id, float note_pitch,
-                                            float note_intensity)>;
+  using NoteOnCallback =
+      std::function<void(Id instrument_id, double timestamp, float note_pitch,
+                         float note_intensity)>;
 
   /// Constructs new |InstrumentManager|.
-  ///
-  /// @param sample_rate Sampling rate in Hz.
-  /// @param id_generator Pointer to id generator.
-  InstrumentManager(int sample_rate, IdGenerator* id_generator);
+  InstrumentManager();
 
-  /// Creates new instrument.
-  ///
-  /// @param definition Instrument definition.
-  /// @param param_definitions Instrument parameter definitions.
-  /// @return Instrument id.
-  Id Create(InstrumentDefinition definition,
-            InstrumentParamDefinitions param_definitions);
-
-  /// Destroys instrument.
+  /// Creates new instrument at timestamp.
   ///
   /// @param instrument_id Instrument id.
-  /// @return True if successful, false otherwise.
-  bool Destroy(Id instrument_id);
+  /// @param timestamp Timestamp in seconds.
+  /// @param definition Instrument definition.
+  /// @param param_definitions Instrument parameter definitions.
+  void Create(Id instrument_id, double timestamp,
+              InstrumentDefinition definition,
+              InstrumentParamDefinitions param_definitions);
+
+  /// Destroys instrument at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  void Destroy(Id instrument_id, double timestamp);
 
   /// Returns all active instrument notes.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of active note pitches.
-  std::vector<float> GetAllNotes(Id instrument_id) const;
+  const std::unordered_set<float>* GetAllNotes(Id instrument_id) const;
 
   /// Returns all instrument parameters.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of parameters.
-  std::vector<InstrumentParam> GetAllParams(Id instrument_id) const;
+  const std::unordered_map<int, InstrumentParam>* GetAllParams(
+      Id instrument_id) const;
 
   /// Returns instrument parameter.
   ///
@@ -81,46 +81,111 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
+  /// @param sample_rate Sampling rate in Hz.
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   /// @return True if successful, false otherwise.
-  bool Process(Id instrument_id, double timestamp, float* output,
-               int num_channels, int num_frames);
+  void Process(Id instrument_id, double timestamp, int sample_rate,
+               float* output, int num_channels, int num_frames);
 
-  bool SetEvent(Id instrument_id, double timestamp,
-                InstrumentControllerEvent event);
+  /// Resets all parameters of all instruments at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void ResetAllParams(double timestamp);
 
-  /// Sets instrument events at their timestamps.
+  /// Resets all instrument parameters at timestamp.
   ///
   /// @param instrument_id Instrument id.
-  /// @param events List of events with their timestamps.
-  /// @return True if successful, false otherwise.
-  bool SetEvents(Id instrument_id, InstrumentControllerEvents events);
+  /// @param timestamp Timestamp in seconds.
+  void ResetAllParams(Id instrument_id, double timestamp);
+
+  /// Resets instrument parameter at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param param_id Parameter id.
+  void ResetParam(Id instrument_id, double timestamp, int param_id);
+
+  /// Sets all notes of all instruments off at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void SetAllNotesOff(double timestamp);
+
+  /// Sets all instrument notes off at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  void SetAllNotesOff(Id instrument_id, double timestamp);
+
+  /// Sets custom instrument data at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param custom_data Custom data.
+  void SetCustomData(Id instrument_id, double timestamp, std::any custom_data);
+
+  /// Sets instrument note off at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param note_pitch Note pitch.
+  void SetNoteOff(Id instrument_id, double timestamp, float note_pitch);
 
   /// Sets the note off callback.
   ///
   /// @param note_off_callback Instrument note off callback.
   void SetNoteOffCallback(NoteOffCallback note_off_callback);
 
+  /// Sets instrument note on at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param note_pitch Note pitch.
+  /// @param note_intensity Note intensity.
+  void SetNoteOn(Id instrument_id, double timestamp, float note_pitch,
+                 float note_intensity);
+
   /// Sets the note on callback.
   ///
   /// @param note_on_callback Instrument note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback);
 
-  /// Sets the sampling rate.
+  /// Sets instrument parameter at timestamp.
   ///
-  /// @param sample_rate Sampling rate in Hz.
-  void SetSampleRate(int sample_rate);
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param param_id Parameter id.
+  /// @param param_value Parameter value.
+  void SetParam(Id instrument_id, double timestamp, int param_id,
+                float param_value);
 
+  /// Updates state at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
   void Update(double timestamp);
 
  private:
-  // Sampling rate in Hz.
-  int sample_rate_;
+  // Instrument controller that wraps the main thread calls of an instrument.
+  struct InstrumentController {
+    // List of instrument parameters.
+    std::unordered_map<int, InstrumentParam> params;
 
-  // Instrument id generator.
-  IdGenerator* id_generator_;  // not owned.
+    // List of active note pitches.
+    std::unordered_set<float> pitches;
+  };
+
+  // Instrument processor that wraps the audio thread calls of an instrument.
+  struct InstrumentProcessor {
+    // List of scheduled instrument events.
+    InstrumentEvents events;
+
+    // Instrument.
+    std::optional<Instrument> instrument;
+  };
+
+  // TODO: this should be done once (instead of called from each scheduler)?
+  void SetProcessorEvents(Id instrument_id, InstrumentEvents events);
 
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
@@ -134,6 +199,13 @@ class InstrumentManager {
 
   // Instrument note on callback.
   NoteOnCallback note_on_callback_;
+
+  // TODO: implement Scheduler<EventType>.
+  using Event = std::function<void()>;
+  using Events = std::multimap<double, Event>;
+
+  Events main_events_;
+  std::vector<Event> audio_events_;
 };
 
 }  // namespace barelyapi

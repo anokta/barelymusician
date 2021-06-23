@@ -5,34 +5,33 @@
 #include <map>
 #include <variant>
 
+#include "barelymusician/engine/instrument_definition.h"
+
 namespace barelyapi {
 
-/// Reset all parameters event.
-struct ResetAllParams {};
-
-/// Reset parameter event.
-struct ResetParam {
-  /// Parameter id.
-  int id;
+/// Create event.
+struct CreateEvent {
+  /// Instrument definition.
+  InstrumentDefinition definition;
 };
 
-/// Set all notes off event.
-struct SetAllNotesOff {};
+/// Destroy event.
+struct DestroyEvent {};
 
 /// Set custom data event.
-struct SetCustomData {
+struct SetCustomDataEvent {
   /// Custom data.
   std::any data;
 };
 
 /// Set note off event.
-struct SetNoteOff {
+struct SetNoteOffEvent {
   /// Note pitch.
   float pitch;
 };
 
 /// Set note on event.
-struct SetNoteOn {
+struct SetNoteOnEvent {
   /// Note pitch.
   float pitch;
 
@@ -41,7 +40,7 @@ struct SetNoteOn {
 };
 
 /// Set parameter event.
-struct SetParam {
+struct SetParamEvent {
   /// Parameter id.
   int id;
 
@@ -57,22 +56,13 @@ struct InstrumentEventVisitor : EventTypes... {
 template <class... EventTypes>
 InstrumentEventVisitor(EventTypes...) -> InstrumentEventVisitor<EventTypes...>;
 
-/// Instrument controller event type.
-using InstrumentControllerEvent =
-    std::variant<ResetAllParams, ResetParam, SetAllNotesOff, SetCustomData,
-                 SetNoteOff, SetNoteOn, SetParam>;
+/// Instrument event type.
+using InstrumentEvent =
+    std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetNoteOffEvent,
+                 SetNoteOnEvent, SetParamEvent>;
 
-// Instrument controller events with their timestamps container type.
-using InstrumentControllerEvents =
-    std::multimap<double, InstrumentControllerEvent>;
-
-/// Instrument processor event type.
-using InstrumentProcessorEvent =
-    std::variant<SetCustomData, SetNoteOff, SetNoteOn, SetParam>;
-
-// Instrument processor events with their timestamps container type.
-using InstrumentProcessorEvents =
-    std::multimap<double, InstrumentProcessorEvent>;
+// Instrument events with their timestamps container type.
+using InstrumentEvents = std::multimap<double, InstrumentEvent>;
 
 }  // namespace barelyapi
 

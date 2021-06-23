@@ -26,11 +26,11 @@ namespace BarelyApi {
     public delegate void UnitySetParamFn(int id, float value);
 
     // Creates new instrument.
-    public static Int64 Create(Instrument instrument) {
+    public static Int64 Create(Instrument instrument, double dspTime) {
       Int64 id = InvalidId;
       Type instrumentType = instrument.GetType();
       if (instrumentType == typeof(SynthInstrument)) {
-        id = CreateSynthInstrumentNative(InstancePtr);
+        id = CreateSynthInstrumentNative(InstancePtr, dspTime);
       } else {
         Debug.LogError("Unsupported instrument type: " + instrumentType);
       }
@@ -41,8 +41,8 @@ namespace BarelyApi {
     }
 
     // Destroys instrument.
-    public static void Destroy(Int64 id) {
-      DestroyNative(InstancePtr, id);
+    public static void Destroy(Int64 id, double dspTime) {
+      DestroyNative(InstancePtr, id, dspTime);
       _instruments.Remove(id);
     }
 
@@ -183,10 +183,10 @@ namespace BarelyApi {
     private static extern void ShutdownNative(IntPtr instancePtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyCreateSynthInstrument")]
-    private static extern Int64 CreateSynthInstrumentNative(IntPtr instancePtr);
+    private static extern Int64 CreateSynthInstrumentNative(IntPtr instancePtr, double timestamp);
 
     [DllImport(pluginName, EntryPoint = "BarelyDestroyInstrument")]
-    private static extern void DestroyNative(IntPtr instancePtr, Int64 instrumentId);
+    private static extern void DestroyNative(IntPtr instancePtr, Int64 instrumentId, double timestamp);
 
     [DllImport(pluginName, EntryPoint = "BarelyGetInstrumentParam")]
     private static extern float GetParamNative(IntPtr instancePtr, Int64 instrumentId, int param_id);

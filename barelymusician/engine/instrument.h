@@ -27,10 +27,12 @@ class Instrument {
 
   /// Processes the next output buffer.
   ///
+  /// @param sample_rate Sampling rate in Hz.
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  void Process(float* output, int num_channels, int num_frames);
+  void Process(int sample_rate, float* output, int num_channels,
+               int num_frames);
 
   /// Sets custom data.
   ///

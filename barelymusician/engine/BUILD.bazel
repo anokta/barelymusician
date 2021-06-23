@@ -18,20 +18,11 @@ cc_library(
 )
 
 cc_library(
-    name = "instrument_controller",
-    srcs = ["instrument_controller.cpp"],
-    hdrs = ["instrument_controller.h"],
-    deps = [
-        ":instrument_definition",
-        ":instrument_event",
-        ":instrument_param",
-        "//barelymusician/common:common_utils",
-    ],
-)
-
-cc_library(
     name = "instrument_event",
     hdrs = ["instrument_event.h"],
+    deps = [
+        ":instrument_definition",
+    ],
 )
 
 cc_library(
@@ -44,16 +35,16 @@ cc_library(
     srcs = ["instrument_manager.cpp"],
     hdrs = ["instrument_manager.h"],
     deps = [
-        ":instrument_controller",
+        ":instrument",
         ":instrument_definition",
         ":instrument_event",
+        ":instrument_param",
         ":instrument_param_definition",
-        ":instrument_processor",
         ":task_runner",
         "//barelymusician/common:common_utils",
         "//barelymusician/common:id",
-        "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
+        "//barelymusician/dsp:dsp_utils",
     ],
 )
 
@@ -69,18 +60,6 @@ cc_library(
 cc_library(
     name = "instrument_param_definition",
     hdrs = ["instrument_param_definition.h"],
-)
-
-cc_library(
-    name = "instrument_processor",
-    srcs = ["instrument_processor.cpp"],
-    hdrs = ["instrument_processor.h"],
-    deps = [
-        ":instrument_definition",
-        ":instrument_event",
-        ":instrument_param",
-        "//barelymusician/dsp:dsp_utils",
-    ],
 )
 
 cc_library(
@@ -119,17 +98,6 @@ cc_test(
     ],
 )
 
-# TODO: enable back tests.
-# cc_test(
-#     name = "instrument_controller_test",
-#     srcs = ["instrument_controller_test.cpp"],
-#     deps = [
-#         ":instrument_controller",
-#         ":instrument_definition",
-#         "@googletest//:gtest_main",
-#     ],
-# )
-
 # cc_test(
 #     name = "instrument_manager_test",
 #     srcs = ["instrument_manager_test.cpp"],
@@ -138,17 +106,6 @@ cc_test(
 #         ":instrument_event",
 #         ":instrument_manager",
 #         "//barelymusician/common:id_generator",
-#         "@googletest//:gtest_main",
-#     ],
-# )
-
-# cc_test(
-#     name = "instrument_processor_test",
-#     srcs = ["instrument_processor_test.cpp"],
-#     deps = [
-#         ":instrument_definition",
-#         ":instrument_event",
-#         ":instrument_processor",
 #         "@googletest//:gtest_main",
 #     ],
 # )

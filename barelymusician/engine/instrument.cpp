@@ -21,9 +21,11 @@ Instrument::~Instrument() {
   }
 }
 
-void Instrument::Process(float* output, int num_channels, int num_frames) {
+void Instrument::Process(int sample_rate, float* output, int num_channels,
+                         int num_frames) {
   if (definition_.process_fn) {
-    definition_.process_fn(&state_, output, num_channels, num_frames);
+    definition_.process_fn(&state_, sample_rate, output, num_channels,
+                           num_frames);
   } else {
     std::fill_n(output, num_channels * num_frames, 0.0f);
   }

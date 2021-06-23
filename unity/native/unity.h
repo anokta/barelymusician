@@ -42,15 +42,18 @@ BARELY_EXPORT void BarelyShutdown(BarelyMusician* barelymusician);
 /// Creates new synth instrument.
 ///
 /// @param barelymusician System handle.
+/// @param timestamp Timestamp in seconds.
 /// @return Instrument id.
-BARELY_EXPORT Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician);
+BARELY_EXPORT Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician,
+                                             double timestamp);
 
 /// Destroys instrument.
 ///
 /// @param barelymusician System handle.
 /// @param instrument_id Instrument id.
+/// @param timestamp Timestamp in seconds.
 BARELY_EXPORT bool BarelyDestroyInstrument(BarelyMusician* barelymusician,
-                                           Id instrument_id);
+                                           Id instrument_id, double timestamp);
 
 /// Returns instrument parameter value.
 ///

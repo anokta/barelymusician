@@ -16,7 +16,6 @@
 namespace {
 
 using ::barelyapi::Id;
-using ::barelyapi::IdGenerator;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
@@ -30,6 +29,7 @@ constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 512;
 
 // Instrument settings.
+constexpr Id kInstrumentId = 1;
 constexpr float kGain = 0.125f;
 constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
@@ -61,26 +61,27 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  IdGenerator id_generator;
-  InstrumentManager instrument_manager(kSampleRate, &id_generator);
-  const Id instrument_id = instrument_manager.Create(
-      SynthInstrument::GetDefinition(),
+  InstrumentManager instrument_manager;
+  instrument_manager.Create(
+      kInstrumentId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
        {SynthInstrumentParam::kOscillatorType,
         static_cast<float>(kOscillatorType)},
        {SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack},
        {SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease}});
-  instrument_manager.SetNoteOnCallback([](Id, float pitch, float intensity) {
-    LOG(INFO) << "NoteOn(" << pitch << ", " << intensity << ")";
+  instrument_manager.SetNoteOnCallback(
+      [](Id, double, float pitch, float intensity) {
+        LOG(INFO) << "NoteOn(" << pitch << ", " << intensity << ")";
+      });
+  instrument_manager.SetNoteOffCallback([](Id, double, float pitch) {
+    LOG(INFO) << "NoteOff(" << pitch << ") ";
   });
-  instrument_manager.SetNoteOffCallback(
-      [](Id, float pitch) { LOG(INFO) << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {
-    instrument_manager.Process(instrument_id, 0.0, output, kNumChannels,
-                               kNumFrames);
+    instrument_manager.Process(kInstrumentId, 0.0, kSampleRate, output,
+                               kNumChannels, kNumFrames);
   });
 
   // Key down callback.
@@ -96,8 +97,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      instrument_manager.SetEvent(instrument_id, 0.0,
-                                  barelyapi::SetAllNotesOff{});
+      instrument_manager.SetAllNotesOff(kInstrumentId, 0.0);
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -111,9 +111,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetEvent(
-          instrument_id, 0.0,
-          barelyapi::SetNoteOn{offset_octaves + *pitch, kNoteIntensity});
+      instrument_manager.SetNoteOn(kInstrumentId, 0.0, offset_octaves + *pitch,
+                                   kNoteIntensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -122,8 +121,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetEvent(
-          instrument_id, 0.0, barelyapi::SetNoteOff{offset_octaves + *pitch});
+      instrument_manager.SetNoteOff(kInstrumentId, 0.0,
+                                    offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

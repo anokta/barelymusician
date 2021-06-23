@@ -56,8 +56,9 @@ InstrumentDefinition GetInstrumentDefinition(
           },
       .destroy_fn = [](InstrumentState* state) { state->reset(); },
       .process_fn =
-          [](InstrumentState* state, float* output, int num_channels,
-             int num_frames) {
+          [](InstrumentState* state, int /*sample_rate*/, float* output,
+             int num_channels, int num_frames) {
+            // TODO: Use sample rate?
             auto* instrument = std::any_cast<InstrumentType>(state);
             instrument->Process(output, num_channels, num_frames);
           },

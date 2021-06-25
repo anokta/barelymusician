@@ -57,7 +57,13 @@ void InstrumentManager::Create(Id instrument_id, double timestamp,
 
 void InstrumentManager::Destroy(Id instrument_id, double timestamp) {
   main_events_.emplace(timestamp, [this, instrument_id, timestamp]() {
-    if (controllers_.erase(instrument_id) > 0) {
+    if (auto it = controllers_.find(instrument_id); it != controllers_.end()) {
+      if (note_off_callback_) {
+        for (const float pitch : it->second.pitches) {
+          note_off_callback_(instrument_id, timestamp, pitch);
+        }
+      }
+      controllers_.erase(it);
       audio_events_.emplace_back([this, instrument_id, timestamp]() {
         if (auto* processor = FindOrNull(processors_, instrument_id)) {
           processor->events.emplace(timestamp, DestroyEvent{});
@@ -123,7 +129,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
         if (instrument) {
           instrument->Process(sample_rate, &output[num_channels * frame],
                               num_channels, message_frame - frame);
-        } 
+        }
         frame = message_frame;
       }
       std::visit(
@@ -134,6 +140,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
                 instrument = &processor->instrument.value();
               },
               [&](DestroyEvent& /*destroy*/) {
+                // TODO: remove processor from the list directly.
                 processor->instrument.reset();
                 instrument = nullptr;
               },

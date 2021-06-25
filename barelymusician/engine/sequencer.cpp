@@ -70,14 +70,12 @@ void Sequencer::Update(double timestamp) {
     }
     // Trigger messages.
     for (auto& [id, track] : tracks_) {
-      InstrumentControllerEvents events;
-
       // Handle note offs.
       auto begin = track.active_notes.lower_bound(begin_position);
       auto end = track.active_notes.lower_bound(end_position);
       for (auto it = begin; it != end; ++it) {
-        events.emplace(clock_.GetTimestampAtPosition(it->first),
-                       SetNoteOff{it->second.pitch});
+        manager_->SetNoteOff(id, clock_.GetTimestampAtPosition(it->first),
+                             it->second.pitch);
       }
       track.active_notes.erase(begin, end);
 
@@ -86,18 +84,16 @@ void Sequencer::Update(double timestamp) {
       end = track.score.lower_bound(end_position);
       for (auto it = begin; it != end; ++it) {
         const auto& note = it->second;
-        events.emplace(clock_.GetTimestampAtPosition(it->first),
-                       SetNoteOn{note.pitch, note.intensity});
+        manager_->SetNoteOn(id, clock_.GetTimestampAtPosition(it->first),
+                            note.pitch, note.intensity);
 
         if (note.end_position < end_position) {
-          events.emplace(clock_.GetTimestampAtPosition(note.end_position),
-                         SetNoteOff{note.pitch});
+          manager_->SetNoteOff(
+              id, clock_.GetTimestampAtPosition(note.end_position), note.pitch);
         } else {
           track.active_notes.emplace(note.end_position, note);
         }
       }
-
-      manager_->SetEvents(id, std::move(events));
     }
   }
 }
@@ -105,11 +101,7 @@ void Sequencer::Update(double timestamp) {
 void Sequencer::StopAllNotes() {
   const double timestamp = clock_.GetTimestamp();
   for (auto& [id, track] : tracks_) {
-    InstrumentControllerEvents events;
-    for (const auto& [position, note] : track.active_notes) {
-      events.emplace(timestamp, SetNoteOff{note.pitch});
-    }
-    manager_->SetEvents(id, std::move(events));
+    manager_->SetAllNotesOff(id, timestamp);
     track.active_notes.clear();
   }
 }

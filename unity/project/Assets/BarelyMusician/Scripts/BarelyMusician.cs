@@ -43,6 +43,7 @@ namespace BarelyApi {
     // Destroys instrument.
     public static void Destroy(Int64 id, double dspTime) {
       DestroyNative(InstancePtr, id, dspTime);
+      // TODO: This causes "instrument does not exist" error on note off callbacks due to retained update.
       _instruments.Remove(id);
     }
 

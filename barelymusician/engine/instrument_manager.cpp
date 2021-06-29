@@ -28,53 +28,6 @@ InstrumentManager::InstrumentManager()
       note_off_callback_(nullptr),
       note_on_callback_(nullptr) {}
 
-void InstrumentManager::Create(Id instrument_id, double timestamp,
-                               InstrumentDefinition definition,
-                               InstrumentParamDefinitions param_definitions) {
-  InstrumentController controller;
-  for (auto& param_definition : param_definitions) {
-    controller.params.emplace(param_definition.id,
-                              InstrumentParam(std::move(param_definition)));
-  }
-  InstrumentProcessor processor;
-  processor.events.emplace(timestamp, CreateEvent{std::move(definition)});
-  for (const auto& [id, param] : controller.params) {
-    processor.events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
-  }
-  main_events_.emplace(
-      timestamp, [this, instrument_id, controller = std::move(controller),
-                  processor = std::move(processor)]() {
-        if (controllers_.emplace(instrument_id, std::move(controller)).second) {
-          audio_events_.emplace_back(
-              [this, instrument_id, processor = std::move(processor)]() {
-                processors_.emplace(instrument_id, std::move(processor));
-              });
-        } else {
-          LOG(ERROR) << "Instrument id already exists: " << instrument_id;
-        }
-      });
-}
-
-void InstrumentManager::Destroy(Id instrument_id, double timestamp) {
-  main_events_.emplace(timestamp, [this, instrument_id, timestamp]() {
-    if (auto it = controllers_.find(instrument_id); it != controllers_.end()) {
-      if (note_off_callback_) {
-        for (const float pitch : it->second.pitches) {
-          note_off_callback_(instrument_id, timestamp, pitch);
-        }
-      }
-      controllers_.erase(it);
-      audio_events_.emplace_back([this, instrument_id, timestamp]() {
-        if (auto* processor = FindOrNull(processors_, instrument_id)) {
-          processor->events.emplace(timestamp, DestroyEvent{});
-        }
-      });
-    } else {
-      LOG(ERROR) << "Instrument id does not exist: " << instrument_id;
-    }
-  });
-}
-
 const std::unordered_set<float>* InstrumentManager::GetAllNotes(
     Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
@@ -179,62 +132,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
   }
 }
 
-void InstrumentManager::ResetAllParams(double timestamp) {
-  main_events_.emplace(timestamp, [this, timestamp]() {
-    std::unordered_map<Id, InstrumentEvents> instrument_events;
-    for (auto& [instrument_id, controller] : controllers_) {
-      auto& events =
-          instrument_events.emplace(instrument_id, InstrumentEvents{})
-              .first->second;
-      for (auto& [id, param] : controller.params) {
-        param.ResetValue();
-        events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
-      }
-    }
-    audio_events_.emplace_back(
-        [this, instrument_events = std::move(instrument_events)]() mutable {
-          for (auto& [instrument_id, events] : instrument_events) {
-            if (auto* processor = FindOrNull(processors_, instrument_id)) {
-              processor->events.merge(std::move(events));
-            }
-          }
-        });
-  });
-}
-
-void InstrumentManager::ResetAllParams(Id instrument_id, double timestamp) {
-  main_events_.emplace(timestamp, [this, instrument_id, timestamp]() {
-    if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-      InstrumentEvents events;
-      for (auto& [id, param] : controller->params) {
-        param.ResetValue();
-        events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
-      }
-      SetProcessorEvents(instrument_id, std::move(events));
-    } else {
-      LOG(ERROR) << "Invalid instrument id: " << instrument_id;
-    }
-  });
-}
-
-void InstrumentManager::ResetParam(Id instrument_id, double timestamp,
-                                   int param_id) {
-  main_events_.emplace(timestamp, [this, instrument_id, timestamp, param_id]() {
-    if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-      if (auto* param = FindOrNull(controller->params, param_id)) {
-        param->ResetValue();
-        SetProcessorEvents(
-            instrument_id,
-            InstrumentEvents{
-                {timestamp, SetParamEvent{param_id, param->GetValue()}}});
-      }
-    } else {
-      LOG(ERROR) << "Invalid instrument id: " << instrument_id;
-    }
-  });
-}
-
-void InstrumentManager::SetAllNotesOff(double timestamp) {
+void InstrumentManager::ScheduleAllNotesOff(double timestamp) {
   main_events_.emplace(timestamp, [this, timestamp]() {
     std::unordered_map<Id, InstrumentEvents> instrument_events;
     for (auto& [instrument_id, controller] : controllers_) {
@@ -260,7 +158,8 @@ void InstrumentManager::SetAllNotesOff(double timestamp) {
   });
 }
 
-void InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
+void InstrumentManager::ScheduleAllNotesOff(Id instrument_id,
+                                            double timestamp) {
   main_events_.emplace(timestamp, [this, instrument_id, timestamp]() {
     if (auto* controller = FindOrNull(controllers_, instrument_id)) {
       InstrumentEvents events;
@@ -271,19 +170,105 @@ void InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
         events.emplace(timestamp, SetNoteOffEvent{pitch});
       }
       controller->pitches.clear();
-      SetProcessorEvents(instrument_id, std::move(events));
+      ScheduleProcessorEvents(instrument_id, std::move(events));
     } else {
       LOG(ERROR) << "Invalid instrument id: " << instrument_id;
     }
   });
 }
 
-void InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
-                                      std::any custom_data) {
+void InstrumentManager::ScheduleAllParamsToDefault(double timestamp) {
+  main_events_.emplace(timestamp, [this, timestamp]() {
+    std::unordered_map<Id, InstrumentEvents> instrument_events;
+    for (auto& [instrument_id, controller] : controllers_) {
+      auto& events =
+          instrument_events.emplace(instrument_id, InstrumentEvents{})
+              .first->second;
+      for (auto& [id, param] : controller.params) {
+        param.ResetValue();
+        events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      }
+    }
+    audio_events_.emplace_back(
+        [this, instrument_events = std::move(instrument_events)]() mutable {
+          for (auto& [instrument_id, events] : instrument_events) {
+            if (auto* processor = FindOrNull(processors_, instrument_id)) {
+              processor->events.merge(std::move(events));
+            }
+          }
+        });
+  });
+}
+
+void InstrumentManager::ScheduleAllParamsToDefault(Id instrument_id,
+                                                   double timestamp) {
+  main_events_.emplace(timestamp, [this, instrument_id, timestamp]() {
+    if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+      InstrumentEvents events;
+      for (auto& [id, param] : controller->params) {
+        param.ResetValue();
+        events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      }
+      ScheduleProcessorEvents(instrument_id, std::move(events));
+    } else {
+      LOG(ERROR) << "Invalid instrument id: " << instrument_id;
+    }
+  });
+}
+
+void InstrumentManager::ScheduleCreate(
+    Id instrument_id, double timestamp, InstrumentDefinition definition,
+    InstrumentParamDefinitions param_definitions) {
+  InstrumentController controller;
+  for (auto& param_definition : param_definitions) {
+    controller.params.emplace(param_definition.id,
+                              InstrumentParam(std::move(param_definition)));
+  }
+  InstrumentProcessor processor;
+  processor.events.emplace(timestamp, CreateEvent{std::move(definition)});
+  for (const auto& [id, param] : controller.params) {
+    processor.events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+  }
+  main_events_.emplace(
+      timestamp, [this, instrument_id, controller = std::move(controller),
+                  processor = std::move(processor)]() {
+        if (controllers_.emplace(instrument_id, std::move(controller)).second) {
+          audio_events_.emplace_back(
+              [this, instrument_id, processor = std::move(processor)]() {
+                processors_.emplace(instrument_id, std::move(processor));
+              });
+        } else {
+          LOG(ERROR) << "Instrument id already exists: " << instrument_id;
+        }
+      });
+}
+
+void InstrumentManager::ScheduleDestroy(Id instrument_id, double timestamp) {
+  main_events_.emplace(timestamp, [this, instrument_id, timestamp]() {
+    if (auto it = controllers_.find(instrument_id); it != controllers_.end()) {
+      if (note_off_callback_) {
+        for (const float pitch : it->second.pitches) {
+          note_off_callback_(instrument_id, timestamp, pitch);
+        }
+      }
+      controllers_.erase(it);
+      audio_events_.emplace_back([this, instrument_id, timestamp]() {
+        if (auto* processor = FindOrNull(processors_, instrument_id)) {
+          processor->events.emplace(timestamp, DestroyEvent{});
+        }
+      });
+    } else {
+      LOG(ERROR) << "Instrument id does not exist: " << instrument_id;
+    }
+  });
+}
+
+void InstrumentManager::ScheduleCustomData(Id instrument_id, double timestamp,
+                                           std::any custom_data) {
   main_events_.emplace(timestamp, [this, instrument_id, timestamp,
                                    custom_data = std::move(custom_data)]() {
     if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-      SetProcessorEvents(
+      ScheduleProcessorEvents(
           instrument_id,
           InstrumentEvents{
               {timestamp, SetCustomDataEvent{std::move(custom_data)}}});
@@ -293,8 +278,8 @@ void InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
   });
 }
 
-void InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
-                                   float note_pitch) {
+void InstrumentManager::ScheduleNoteOff(Id instrument_id, double timestamp,
+                                        float note_pitch) {
   main_events_.emplace(
       timestamp, [this, instrument_id, timestamp, note_pitch]() {
         if (auto* controller = FindOrNull(controllers_, instrument_id)) {
@@ -302,7 +287,7 @@ void InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
             if (note_off_callback_) {
               note_off_callback_(instrument_id, timestamp, note_pitch);
             }
-            SetProcessorEvents(
+            ScheduleProcessorEvents(
                 instrument_id,
                 InstrumentEvents{{timestamp, SetNoteOffEvent{note_pitch}}});
           } else {
@@ -314,12 +299,8 @@ void InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
       });
 }
 
-void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
-  note_off_callback_ = std::move(note_off_callback);
-}
-
-void InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
-                                  float note_pitch, float note_intensity) {
+void InstrumentManager::ScheduleNoteOn(Id instrument_id, double timestamp,
+                                       float note_pitch, float note_intensity) {
   main_events_.emplace(timestamp, [this, instrument_id, timestamp, note_pitch,
                                    note_intensity]() {
     if (auto* controller = FindOrNull(controllers_, instrument_id)) {
@@ -328,7 +309,7 @@ void InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
           note_on_callback_(instrument_id, timestamp, note_pitch,
                             note_intensity);
         }
-        SetProcessorEvents(
+        ScheduleProcessorEvents(
             instrument_id,
             InstrumentEvents{
                 {timestamp, SetNoteOnEvent{note_pitch, note_intensity}}});
@@ -341,18 +322,14 @@ void InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
   });
 }
 
-void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
-  note_on_callback_ = std::move(note_on_callback);
-}
-
-void InstrumentManager::SetParam(Id instrument_id, double timestamp,
-                                 int param_id, float param_value) {
+void InstrumentManager::ScheduleParam(Id instrument_id, double timestamp,
+                                      int param_id, float param_value) {
   main_events_.emplace(
       timestamp, [this, instrument_id, timestamp, param_id, param_value]() {
         if (auto* controller = FindOrNull(controllers_, instrument_id)) {
           if (auto* param = FindOrNull(controller->params, param_id)) {
             param->SetValue(param_value);
-            SetProcessorEvents(
+            ScheduleProcessorEvents(
                 instrument_id,
                 InstrumentEvents{
                     {timestamp, SetParamEvent{param_id, param->GetValue()}}});
@@ -363,6 +340,31 @@ void InstrumentManager::SetParam(Id instrument_id, double timestamp,
           LOG(ERROR) << "Invalid instrument id: " << instrument_id;
         }
       });
+}
+
+void InstrumentManager::ScheduleParamToDefault(Id instrument_id,
+                                               double timestamp, int param_id) {
+  main_events_.emplace(timestamp, [this, instrument_id, timestamp, param_id]() {
+    if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+      if (auto* param = FindOrNull(controller->params, param_id)) {
+        param->ResetValue();
+        ScheduleProcessorEvents(
+            instrument_id,
+            InstrumentEvents{
+                {timestamp, SetParamEvent{param_id, param->GetValue()}}});
+      }
+    } else {
+      LOG(ERROR) << "Invalid instrument id: " << instrument_id;
+    }
+  });
+}
+
+void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
+  note_off_callback_ = std::move(note_off_callback);
+}
+
+void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
+  note_on_callback_ = std::move(note_on_callback);
 }
 
 void InstrumentManager::Update(double timestamp) {
@@ -380,8 +382,8 @@ void InstrumentManager::Update(double timestamp) {
   });
 }
 
-void InstrumentManager::SetProcessorEvents(Id instrument_id,
-                                           InstrumentEvents events) {
+void InstrumentManager::ScheduleProcessorEvents(Id instrument_id,
+                                                InstrumentEvents events) {
   audio_events_.emplace_back(
       [this, instrument_id, events = std::move(events)]() mutable {
         if (auto* processor = FindOrNull(processors_, instrument_id)) {

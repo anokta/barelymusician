@@ -74,8 +74,8 @@ void Sequencer::Update(double timestamp) {
       auto begin = track.active_notes.lower_bound(begin_position);
       auto end = track.active_notes.lower_bound(end_position);
       for (auto it = begin; it != end; ++it) {
-        manager_->SetNoteOff(id, clock_.GetTimestampAtPosition(it->first),
-                             it->second.pitch);
+        manager_->ScheduleNoteOff(id, clock_.GetTimestampAtPosition(it->first),
+                                  it->second.pitch);
       }
       track.active_notes.erase(begin, end);
 
@@ -84,11 +84,11 @@ void Sequencer::Update(double timestamp) {
       end = track.score.lower_bound(end_position);
       for (auto it = begin; it != end; ++it) {
         const auto& note = it->second;
-        manager_->SetNoteOn(id, clock_.GetTimestampAtPosition(it->first),
-                            note.pitch, note.intensity);
+        manager_->ScheduleNoteOn(id, clock_.GetTimestampAtPosition(it->first),
+                                 note.pitch, note.intensity);
 
         if (note.end_position < end_position) {
-          manager_->SetNoteOff(
+          manager_->ScheduleNoteOff(
               id, clock_.GetTimestampAtPosition(note.end_position), note.pitch);
         } else {
           track.active_notes.emplace(note.end_position, note);
@@ -101,7 +101,7 @@ void Sequencer::Update(double timestamp) {
 void Sequencer::StopAllNotes() {
   const double timestamp = clock_.GetTimestamp();
   for (auto& [id, track] : tracks_) {
-    manager_->SetAllNotesOff(id, timestamp);
+    manager_->ScheduleAllNotesOff(id, timestamp);
     track.active_notes.clear();
   }
 }

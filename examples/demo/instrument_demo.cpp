@@ -62,7 +62,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
   InstrumentManager instrument_manager;
-  instrument_manager.Create(
+  instrument_manager.ScheduleCreate(
       kInstrumentId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
@@ -97,7 +97,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      instrument_manager.SetAllNotesOff(kInstrumentId, 0.0);
+      instrument_manager.ScheduleAllNotesOff(kInstrumentId, 0.0);
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -111,8 +111,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetNoteOn(kInstrumentId, 0.0, offset_octaves + *pitch,
-                                   kNoteIntensity);
+      instrument_manager.ScheduleNoteOn(
+          kInstrumentId, 0.0, offset_octaves + *pitch, kNoteIntensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -121,8 +121,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetNoteOff(kInstrumentId, 0.0,
-                                    offset_octaves + *pitch);
+      instrument_manager.ScheduleNoteOff(kInstrumentId, 0.0,
+                                         offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

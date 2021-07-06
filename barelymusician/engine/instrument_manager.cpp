@@ -42,10 +42,9 @@ void InstrumentManager::Create(Id instrument_id, double timestamp,
     processor.events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
   }
   if (controllers_.emplace(instrument_id, std::move(controller)).second) {
-    audio_events_.emplace_back(
-        [this, instrument_id, processor = std::move(processor)]() {
-          processors_.emplace(instrument_id, std::move(processor));
-        });
+    task_runner_.Add([this, instrument_id, processor = std::move(processor)]() {
+      processors_.emplace(instrument_id, std::move(processor));
+    });
   } else {
     LOG(ERROR) << "Instrument id already exists: " << instrument_id;
   }
@@ -59,7 +58,7 @@ void InstrumentManager::Destroy(Id instrument_id, double timestamp) {
       }
     }
     controllers_.erase(it);
-    audio_events_.emplace_back([this, instrument_id, timestamp]() {
+    task_runner_.Add([this, instrument_id, timestamp]() {
       if (auto* processor = FindOrNull(processors_, instrument_id)) {
         processor->events.emplace(timestamp, DestroyEvent{});
       }
@@ -186,7 +185,7 @@ void InstrumentManager::SetAllNotesOff(double timestamp) {
     }
     controller.pitches.clear();
   }
-  audio_events_.emplace_back(
+  task_runner_.Add(
       [this, instrument_events = std::move(instrument_events)]() mutable {
         for (auto& [instrument_id, events] : instrument_events) {
           if (auto* processor = FindOrNull(processors_, instrument_id)) {
@@ -222,7 +221,7 @@ void InstrumentManager::SetAllParamsToDefault(double timestamp) {
       events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
     }
   }
-  audio_events_.emplace_back(
+  task_runner_.Add(
       [this, instrument_events = std::move(instrument_events)]() mutable {
         for (auto& [instrument_id, events] : instrument_events) {
           if (auto* processor = FindOrNull(processors_, instrument_id)) {
@@ -335,23 +334,13 @@ void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-void InstrumentManager::Update(double /*timestamp*/) {
-  // TODO: ugly, cleanup.
-  task_runner_.Add([this, events = std::exchange(audio_events_, {})]() {
-    for (const auto& e : events) {
-      e();
-    }
-  });
-}
-
 void InstrumentManager::SetProcessorEvents(Id instrument_id,
                                            InstrumentEvents events) {
-  audio_events_.emplace_back(
-      [this, instrument_id, events = std::move(events)]() mutable {
-        if (auto* processor = FindOrNull(processors_, instrument_id)) {
-          processor->events.merge(std::move(events));
-        }
-      });
+  task_runner_.Add([this, instrument_id, events = std::move(events)]() mutable {
+    if (auto* processor = FindOrNull(processors_, instrument_id)) {
+      processor->events.merge(std::move(events));
+    }
+  });
 }
 
 }  // namespace barelyapi

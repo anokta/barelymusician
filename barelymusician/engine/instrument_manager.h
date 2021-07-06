@@ -160,11 +160,6 @@ class InstrumentManager {
   /// @param note_on_callback Instrument note on callback.
   void SetNoteOnCallback(NoteOnCallback note_on_callback);
 
-  /// Updates state at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp);
-
  private:
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
@@ -199,11 +194,6 @@ class InstrumentManager {
 
   // Instrument note on callback.
   NoteOnCallback note_on_callback_;
-
-  // TODO: implement Setr<EventType>.
-  using Event = std::function<void()>;
-
-  std::vector<Event> audio_events_;
 };
 
 }  // namespace barelyapi

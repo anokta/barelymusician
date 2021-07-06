@@ -40,7 +40,7 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param definition Instrument definition.
   /// @param param_definitions Instrument parameter definitions.
-  void Create(Id instrument_id, double timestamp,
+  bool Create(Id instrument_id, double timestamp,
               InstrumentDefinition definition,
               InstrumentParamDefinitions param_definitions);
 
@@ -48,7 +48,7 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  void Destroy(Id instrument_id, double timestamp);
+  bool Destroy(Id instrument_id, double timestamp);
 
   /// Returns all active instrument notes.
   ///
@@ -116,14 +116,14 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param custom_data Custom data.
-  void SetCustomData(Id instrument_id, double timestamp, std::any custom_data);
+  bool SetCustomData(Id instrument_id, double timestamp, std::any custom_data);
 
   /// Sets instrument note off at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
-  void SetNoteOff(Id instrument_id, double timestamp, float note_pitch);
+  bool SetNoteOff(Id instrument_id, double timestamp, float note_pitch);
 
   /// Sets instrument note on at timestamp.
   ///
@@ -131,7 +131,7 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
-  void SetNoteOn(Id instrument_id, double timestamp, float note_pitch,
+  bool SetNoteOn(Id instrument_id, double timestamp, float note_pitch,
                  float note_intensity);
 
   /// Sets instrument parameter value at timestamp.
@@ -140,7 +140,7 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param param_id Parameter id.
   /// @param param_value Parameter value.
-  void SetParam(Id instrument_id, double timestamp, int param_id,
+  bool SetParam(Id instrument_id, double timestamp, int param_id,
                 float param_value);
 
   /// Sets instrument parameter to default value at timestamp.
@@ -148,7 +148,7 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param param_id Parameter id.
-  void SetParamToDefault(Id instrument_id, double timestamp, int param_id);
+  bool SetParamToDefault(Id instrument_id, double timestamp, int param_id);
 
   /// Sets the note off callback.
   ///

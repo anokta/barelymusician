@@ -28,7 +28,7 @@ InstrumentManager::InstrumentManager()
       note_off_callback_(nullptr),
       note_on_callback_(nullptr) {}
 
-void InstrumentManager::Create(Id instrument_id, double timestamp,
+bool InstrumentManager::Create(Id instrument_id, double timestamp,
                                InstrumentDefinition definition,
                                InstrumentParamDefinitions param_definitions) {
   InstrumentController controller;
@@ -45,12 +45,12 @@ void InstrumentManager::Create(Id instrument_id, double timestamp,
     task_runner_.Add([this, instrument_id, processor = std::move(processor)]() {
       processors_.emplace(instrument_id, std::move(processor));
     });
-  } else {
-    LOG(ERROR) << "Instrument id already exists: " << instrument_id;
+    return true;
   }
+  return false;
 }
 
-void InstrumentManager::Destroy(Id instrument_id, double timestamp) {
+bool InstrumentManager::Destroy(Id instrument_id, double timestamp) {
   if (auto it = controllers_.find(instrument_id); it != controllers_.end()) {
     if (note_off_callback_) {
       for (const float pitch : it->second.pitches) {
@@ -63,9 +63,9 @@ void InstrumentManager::Destroy(Id instrument_id, double timestamp) {
         processor->events.emplace(timestamp, DestroyEvent{});
       }
     });
-  } else {
-    LOG(ERROR) << "Instrument id does not exist: " << instrument_id;
+    return true;
   }
+  return false;
 }
 
 const std::unordered_set<float>* InstrumentManager::GetAllNotes(
@@ -245,19 +245,19 @@ void InstrumentManager::SetAllParamsToDefault(Id instrument_id,
   }
 }
 
-void InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
+bool InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
                                       std::any custom_data) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     SetProcessorEvents(
         instrument_id,
         InstrumentEvents{
             {timestamp, SetCustomDataEvent{std::move(custom_data)}}});
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
+    return true;
   }
+  return false;
 }
 
-void InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
+bool InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
                                    float note_pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.erase(note_pitch) > 0) {
@@ -267,15 +267,13 @@ void InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
       SetProcessorEvents(
           instrument_id,
           InstrumentEvents{{timestamp, SetNoteOffEvent{note_pitch}}});
-    } else {
-      LOG(WARNING) << "Instrument note already off: " << note_pitch;
+      return true;
     }
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
   }
+  return false;
 }
 
-void InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
+bool InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
                                   float note_pitch, float note_intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.emplace(note_pitch).second) {
@@ -286,15 +284,13 @@ void InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
           instrument_id,
           InstrumentEvents{
               {timestamp, SetNoteOnEvent{note_pitch, note_intensity}}});
-    } else {
-      LOG(WARNING) << "Instrument note already on: " << note_pitch;
+      return true;
     }
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
   }
+  return false;
 }
 
-void InstrumentManager::SetParam(Id instrument_id, double timestamp,
+bool InstrumentManager::SetParam(Id instrument_id, double timestamp,
                                  int param_id, float param_value) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (auto* param = FindOrNull(controller->params, param_id)) {
@@ -303,15 +299,13 @@ void InstrumentManager::SetParam(Id instrument_id, double timestamp,
           instrument_id,
           InstrumentEvents{
               {timestamp, SetParamEvent{param_id, param->GetValue()}}});
-    } else {
-      LOG(WARNING) << "Instrument parameter does not exist: " << param_id;
+      return true;
     }
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
   }
+  return false;
 }
 
-void InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
+bool InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
                                           int param_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (auto* param = FindOrNull(controller->params, param_id)) {
@@ -320,10 +314,10 @@ void InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
           instrument_id,
           InstrumentEvents{
               {timestamp, SetParamEvent{param_id, param->GetValue()}}});
+      return true;
     }
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
   }
+  return false;
 }
 
 void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {

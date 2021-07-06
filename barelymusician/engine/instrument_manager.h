@@ -34,6 +34,22 @@ class InstrumentManager {
   /// Constructs new |InstrumentManager|.
   InstrumentManager();
 
+  /// Creates new instrument at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param definition Instrument definition.
+  /// @param param_definitions Instrument parameter definitions.
+  void Create(Id instrument_id, double timestamp,
+              InstrumentDefinition definition,
+              InstrumentParamDefinitions param_definitions);
+
+  /// Destroys instrument at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  void Destroy(Id instrument_id, double timestamp);
+
   /// Returns all active instrument notes.
   ///
   /// @param instrument_id Instrument id.
@@ -73,83 +89,66 @@ class InstrumentManager {
   void Process(Id instrument_id, double timestamp, int sample_rate,
                float* output, int num_channels, int num_frames);
 
-  /// Schedules all notes of all instruments off at timestamp.
+  /// Sets all notes of all instruments off at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void ScheduleAllNotesOff(double timestamp);
+  void SetAllNotesOff(double timestamp);
 
-  /// Schedules all instrument notes off at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
-  void ScheduleAllNotesOff(Id instrument_id, double timestamp);
-
-  /// Schedules all parameters of all instruments to default value at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  void ScheduleAllParamsToDefault(double timestamp);
-
-  /// Schedules all instrument parameters to default value at timestamp.
+  /// Sets all instrument notes off at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  void ScheduleAllParamsToDefault(Id instrument_id, double timestamp);
+  void SetAllNotesOff(Id instrument_id, double timestamp);
 
-  /// Schedules create new instrument at timestamp.
+  /// Sets all parameters of all instruments to default value at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void SetAllParamsToDefault(double timestamp);
+
+  /// Sets all instrument parameters to default value at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param definition Instrument definition.
-  /// @param param_definitions Instrument parameter definitions.
-  void ScheduleCreate(Id instrument_id, double timestamp,
-                      InstrumentDefinition definition,
-                      InstrumentParamDefinitions param_definitions);
+  void SetAllParamsToDefault(Id instrument_id, double timestamp);
 
-  /// Schedules destroy instrument at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
-  void ScheduleDestroy(Id instrument_id, double timestamp);
-
-  /// Schedules custom instrument data at timestamp.
+  /// Sets custom instrument data at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param custom_data Custom data.
-  void ScheduleCustomData(Id instrument_id, double timestamp,
-                          std::any custom_data);
+  void SetCustomData(Id instrument_id, double timestamp, std::any custom_data);
 
-  /// Schedules instrument note off at timestamp.
+  /// Sets instrument note off at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
-  void ScheduleNoteOff(Id instrument_id, double timestamp, float note_pitch);
+  void SetNoteOff(Id instrument_id, double timestamp, float note_pitch);
 
-  /// Schedules instrument note on at timestamp.
+  /// Sets instrument note on at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
-  void ScheduleNoteOn(Id instrument_id, double timestamp, float note_pitch,
-                      float note_intensity);
+  void SetNoteOn(Id instrument_id, double timestamp, float note_pitch,
+                 float note_intensity);
 
-  /// Schedules instrument parameter value at timestamp.
+  /// Sets instrument parameter value at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param param_id Parameter id.
   /// @param param_value Parameter value.
-  void ScheduleParam(Id instrument_id, double timestamp, int param_id,
-                     float param_value);
+  void SetParam(Id instrument_id, double timestamp, int param_id,
+                float param_value);
 
-  /// Schedules instrument parameter to default value at timestamp.
+  /// Sets instrument parameter to default value at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param param_id Parameter id.
-  void ScheduleParamToDefault(Id instrument_id, double timestamp, int param_id);
+  void SetParamToDefault(Id instrument_id, double timestamp, int param_id);
 
   /// Sets the note off callback.
   ///
@@ -186,7 +185,7 @@ class InstrumentManager {
   };
 
   // TODO: this should be done once (instead of called from each scheduler)?
-  void ScheduleProcessorEvents(Id instrument_id, InstrumentEvents events);
+  void SetProcessorEvents(Id instrument_id, InstrumentEvents events);
 
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
@@ -201,11 +200,9 @@ class InstrumentManager {
   // Instrument note on callback.
   NoteOnCallback note_on_callback_;
 
-  // TODO: implement Scheduler<EventType>.
+  // TODO: implement Setr<EventType>.
   using Event = std::function<void()>;
-  using Events = std::multimap<double, Event>;
 
-  Events main_events_;
   std::vector<Event> audio_events_;
 };
 

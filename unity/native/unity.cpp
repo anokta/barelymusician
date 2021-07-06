@@ -65,7 +65,7 @@ Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician,
                                double timestamp) {
   if (barelymusician) {
     const Id instrument_id = barelymusician->id_generator.Generate();
-    barelymusician->instrument_manager.ScheduleCreate(
+    barelymusician->instrument_manager.Create(
         instrument_id, timestamp, SynthInstrument::GetDefinition(),
         SynthInstrument::GetDefaultParams());
     return instrument_id;
@@ -76,8 +76,7 @@ Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician,
 bool BarelyDestroyInstrument(BarelyMusician* barelymusician, Id instrument_id,
                              double timestamp) {
   if (barelymusician) {
-    barelymusician->instrument_manager.ScheduleDestroy(instrument_id,
-                                                       timestamp);
+    barelymusician->instrument_manager.Destroy(instrument_id, timestamp);
     return true;
   }
   return false;
@@ -116,16 +115,15 @@ void BarelyProcessInstrument(BarelyMusician* barelymusician, Id instrument_id,
 void BarelyResetAllInstrumentParams(BarelyMusician* barelymusician,
                                     Id instrument_id, double timestamp) {
   if (barelymusician) {
-    barelymusician->instrument_manager.ScheduleAllParamsToDefault(instrument_id,
-                                                                  timestamp);
+    barelymusician->instrument_manager.SetAllParamsToDefault(instrument_id,
+                                                             timestamp);
   }
 }
 
 void BarelySetAllInstrumentNotesOff(BarelyMusician* barelymusician,
                                     Id instrument_id, double timestamp) {
   if (barelymusician) {
-    barelymusician->instrument_manager.ScheduleAllNotesOff(instrument_id,
-                                                           timestamp);
+    barelymusician->instrument_manager.SetAllNotesOff(instrument_id, timestamp);
   }
 }
 
@@ -133,8 +131,8 @@ void BarelySetInstrumentNoteOff(BarelyMusician* barelymusician,
                                 Id instrument_id, double timestamp,
                                 float note_pitch) {
   if (barelymusician) {
-    barelymusician->instrument_manager.ScheduleNoteOff(instrument_id, timestamp,
-                                                       note_pitch);
+    barelymusician->instrument_manager.SetNoteOff(instrument_id, timestamp,
+                                                  note_pitch);
   }
 }
 
@@ -157,8 +155,8 @@ void BarelySetInstrumentNoteOn(BarelyMusician* barelymusician, Id instrument_id,
                                double timestamp, float note_pitch,
                                float note_intensity) {
   if (barelymusician) {
-    barelymusician->instrument_manager.ScheduleNoteOn(
-        instrument_id, timestamp, note_pitch, note_intensity);
+    barelymusician->instrument_manager.SetNoteOn(instrument_id, timestamp,
+                                                 note_pitch, note_intensity);
   }
 }
 
@@ -181,8 +179,8 @@ void BarelySetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
                               double timestamp, int param_id,
                               float param_value) {
   if (barelymusician) {
-    barelymusician->instrument_manager.ScheduleParam(instrument_id, timestamp,
-                                                     param_id, param_value);
+    barelymusician->instrument_manager.SetParam(instrument_id, timestamp,
+                                                param_id, param_value);
   }
 }
 

@@ -98,7 +98,7 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  void SetAllNotesOff(Id instrument_id, double timestamp);
+  bool SetAllNotesOff(Id instrument_id, double timestamp);
 
   /// Sets all parameters of all instruments to default value at timestamp.
   ///

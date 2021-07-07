@@ -172,10 +172,8 @@ bool InstrumentManager::Process(Id instrument_id, double timestamp,
 }
 
 void InstrumentManager::SetAllNotesOff(double timestamp) {
-  std::unordered_map<Id, InstrumentEvents> instrument_events;
   for (auto& [instrument_id, controller] : controllers_) {
-    auto& events = instrument_events.emplace(instrument_id, InstrumentEvents{})
-                       .first->second;
+    InstrumentEvents events;
     for (const float pitch : controller.pitches) {
       if (note_off_callback_) {
         note_off_callback_(instrument_id, timestamp, pitch);
@@ -183,18 +181,11 @@ void InstrumentManager::SetAllNotesOff(double timestamp) {
       events.emplace(timestamp, SetNoteOffEvent{pitch});
     }
     controller.pitches.clear();
+    SetProcessorEvents(instrument_id, std::move(events));
   }
-  task_runner_.Add(
-      [this, instrument_events = std::move(instrument_events)]() mutable {
-        for (auto& [instrument_id, events] : instrument_events) {
-          if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            processor->events.merge(std::move(events));
-          }
-        }
-      });
 }
 
-void InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
+bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     InstrumentEvents events;
     for (const float pitch : controller->pitches) {
@@ -205,29 +196,20 @@ void InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
     }
     controller->pitches.clear();
     SetProcessorEvents(instrument_id, std::move(events));
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
+    return true;
   }
+  return false;
 }
 
 void InstrumentManager::SetAllParamsToDefault(double timestamp) {
-  std::unordered_map<Id, InstrumentEvents> instrument_events;
   for (auto& [instrument_id, controller] : controllers_) {
-    auto& events = instrument_events.emplace(instrument_id, InstrumentEvents{})
-                       .first->second;
+    InstrumentEvents events;
     for (auto& [id, param] : controller.params) {
       param.ResetValue();
       events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
     }
+    SetProcessorEvents(instrument_id, std::move(events));
   }
-  task_runner_.Add(
-      [this, instrument_events = std::move(instrument_events)]() mutable {
-        for (auto& [instrument_id, events] : instrument_events) {
-          if (auto* processor = FindOrNull(processors_, instrument_id)) {
-            processor->events.merge(std::move(events));
-          }
-        }
-      });
 }
 
 bool InstrumentManager::SetAllParamsToDefault(Id instrument_id,

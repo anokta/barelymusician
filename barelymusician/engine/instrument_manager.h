@@ -109,7 +109,7 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  void SetAllParamsToDefault(Id instrument_id, double timestamp);
+  bool SetAllParamsToDefault(Id instrument_id, double timestamp);
 
   /// Sets custom instrument data at timestamp.
   ///

@@ -230,7 +230,7 @@ void InstrumentManager::SetAllParamsToDefault(double timestamp) {
       });
 }
 
-void InstrumentManager::SetAllParamsToDefault(Id instrument_id,
+bool InstrumentManager::SetAllParamsToDefault(Id instrument_id,
                                               double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     InstrumentEvents events;
@@ -239,9 +239,9 @@ void InstrumentManager::SetAllParamsToDefault(Id instrument_id,
       events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
     }
     SetProcessorEvents(instrument_id, std::move(events));
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
+    return true;
   }
+  return false;
 }
 
 bool InstrumentManager::SetCustomData(Id instrument_id, double timestamp,

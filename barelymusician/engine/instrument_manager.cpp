@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <any>
+#include <unordered_map>
 #include <utility>
 
 #include "barelymusician/common/common_utils.h"
@@ -31,35 +32,22 @@ InstrumentManager::InstrumentManager()
 bool InstrumentManager::Create(Id instrument_id, double timestamp,
                                InstrumentDefinition definition,
                                InstrumentParamDefinitions param_definitions) {
-  InstrumentController controller;
-  for (auto& param_definition : param_definitions) {
-    controller.params.emplace(param_definition.id,
-                              InstrumentParam(std::move(param_definition)));
-  }
-  InstrumentProcessor processor;
-  processor.events.emplace(timestamp, CreateEvent{std::move(definition)});
-  for (const auto& [id, param] : controller.params) {
-    processor.events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
-  }
-  if (controllers_.emplace(instrument_id, std::move(controller)).second) {
-    task_runner_.Add([this, instrument_id, processor = std::move(processor)]() {
-      processors_.emplace(instrument_id, std::move(processor));
-    });
-    return true;
-  }
-  return false;
+  InstrumentController controller(timestamp, std::move(definition),
+                                  std::move(param_definitions));
+  return controllers_.emplace(instrument_id, std::move(controller)).second;
 }
 
 bool InstrumentManager::Destroy(Id instrument_id, double timestamp) {
-  if (auto it = controllers_.find(instrument_id); it != controllers_.end()) {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (!controller->data.has_value()) {
+      return false;
+    }
     if (note_off_callback_) {
-      for (const float pitch : it->second.pitches) {
+      for (const float pitch : controller->data->pitches) {
         note_off_callback_(instrument_id, timestamp, pitch);
       }
     }
-    controllers_.erase(it);
-    SetProcessorEvents(instrument_id,
-                       InstrumentEvents{{timestamp, DestroyEvent{}}});
+    controller->events.emplace(timestamp, DestroyEvent{});
     return true;
   }
   return false;
@@ -68,7 +56,10 @@ bool InstrumentManager::Destroy(Id instrument_id, double timestamp) {
 const std::unordered_set<float>* InstrumentManager::GetAllNotes(
     Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return &controller->pitches;
+    if (!controller->data.has_value()) {
+      return nullptr;
+    }
+    return &controller->data->pitches;
   }
   return nullptr;
 }
@@ -76,7 +67,10 @@ const std::unordered_set<float>* InstrumentManager::GetAllNotes(
 const std::unordered_map<int, InstrumentParam>* InstrumentManager::GetAllParams(
     Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return &controller->params;
+    if (!controller->data.has_value()) {
+      return nullptr;
+    }
+    return &controller->data->params;
   }
   return nullptr;
 }
@@ -84,14 +78,21 @@ const std::unordered_map<int, InstrumentParam>* InstrumentManager::GetAllParams(
 const InstrumentParam* InstrumentManager::GetParam(Id instrument_id,
                                                    int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return FindOrNull(controller->params, param_id);
+    if (!controller->data.has_value()) {
+      return nullptr;
+    }
+    return FindOrNull(controller->data->params, param_id);
   }
   return nullptr;
 }
 
 bool InstrumentManager::IsNoteOn(Id instrument_id, float note_pitch) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return controller->pitches.find(note_pitch) != controller->pitches.cend();
+    if (!controller->data.has_value()) {
+      return false;
+    }
+    return controller->data->pitches.find(note_pitch) !=
+           controller->data->pitches.cend();
   }
   return false;
 }
@@ -163,6 +164,10 @@ bool InstrumentManager::Process(Id instrument_id, double timestamp,
       instrument->Process(sample_rate, &output[num_channels * frame],
                           num_channels, num_frames - frame);
     }
+    // TODO: erase properly without extra lookup.
+    if (!processor->instrument.has_value()) {
+      processors_.erase(instrument_id);
+    }
     return true;
   }
   return false;
@@ -170,29 +175,31 @@ bool InstrumentManager::Process(Id instrument_id, double timestamp,
 
 void InstrumentManager::SetAllNotesOff(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    InstrumentEvents events;
-    for (const float pitch : controller.pitches) {
+    if (!controller.data.has_value()) {
+      continue;
+    }
+    for (const float pitch : controller.data->pitches) {
       if (note_off_callback_) {
         note_off_callback_(instrument_id, timestamp, pitch);
       }
-      events.emplace(timestamp, SetNoteOffEvent{pitch});
+      controller.events.emplace(timestamp, SetNoteOffEvent{pitch});
     }
-    controller.pitches.clear();
-    SetProcessorEvents(instrument_id, std::move(events));
+    controller.data->pitches.clear();
   }
 }
 
 bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    InstrumentEvents events;
-    for (const float pitch : controller->pitches) {
+    if (!controller->data.has_value()) {
+      return false;
+    }
+    for (const float pitch : controller->data->pitches) {
       if (note_off_callback_) {
         note_off_callback_(instrument_id, timestamp, pitch);
       }
-      events.emplace(timestamp, SetNoteOffEvent{pitch});
+      controller->events.emplace(timestamp, SetNoteOffEvent{pitch});
     }
-    controller->pitches.clear();
-    SetProcessorEvents(instrument_id, std::move(events));
+    controller->data->pitches.clear();
     return true;
   }
   return false;
@@ -200,24 +207,27 @@ bool InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
 
 void InstrumentManager::SetAllParamsToDefault(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    InstrumentEvents events;
-    for (auto& [id, param] : controller.params) {
-      param.ResetValue();
-      events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+    if (!controller.data.has_value()) {
+      continue;
     }
-    SetProcessorEvents(instrument_id, std::move(events));
+    for (auto& [id, param] : controller.data->params) {
+      param.ResetValue();
+      controller.events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+    }
   }
 }
 
 bool InstrumentManager::SetAllParamsToDefault(Id instrument_id,
                                               double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    InstrumentEvents events;
-    for (auto& [id, param] : controller->params) {
-      param.ResetValue();
-      events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+    if (!controller->data.has_value()) {
+      return false;
     }
-    SetProcessorEvents(instrument_id, std::move(events));
+    for (auto& [id, param] : controller->data->params) {
+      param.ResetValue();
+      controller->events.emplace(timestamp,
+                                 SetParamEvent{id, param.GetValue()});
+    }
     return true;
   }
   return false;
@@ -226,10 +236,11 @@ bool InstrumentManager::SetAllParamsToDefault(Id instrument_id,
 bool InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
                                       std::any custom_data) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    SetProcessorEvents(
-        instrument_id,
-        InstrumentEvents{
-            {timestamp, SetCustomDataEvent{std::move(custom_data)}}});
+    if (!controller->data.has_value()) {
+      return false;
+    }
+    controller->events.emplace(timestamp,
+                               SetCustomDataEvent{std::move(custom_data)});
     return true;
   }
   return false;
@@ -238,13 +249,14 @@ bool InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
 bool InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
                                    float note_pitch) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->pitches.erase(note_pitch) > 0) {
+    if (!controller->data.has_value()) {
+      return false;
+    }
+    if (controller->data->pitches.erase(note_pitch) > 0) {
       if (note_off_callback_) {
         note_off_callback_(instrument_id, timestamp, note_pitch);
       }
-      SetProcessorEvents(
-          instrument_id,
-          InstrumentEvents{{timestamp, SetNoteOffEvent{note_pitch}}});
+      controller->events.emplace(timestamp, SetNoteOffEvent{note_pitch});
       return true;
     }
   }
@@ -258,14 +270,15 @@ void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
 bool InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
                                   float note_pitch, float note_intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->pitches.emplace(note_pitch).second) {
+    if (!controller->data.has_value()) {
+      return false;
+    }
+    if (controller->data->pitches.emplace(note_pitch).second) {
       if (note_on_callback_) {
         note_on_callback_(instrument_id, timestamp, note_pitch, note_intensity);
       }
-      SetProcessorEvents(
-          instrument_id,
-          InstrumentEvents{
-              {timestamp, SetNoteOnEvent{note_pitch, note_intensity}}});
+      controller->events.emplace(timestamp,
+                                 SetNoteOnEvent{note_pitch, note_intensity});
       return true;
     }
   }
@@ -279,12 +292,13 @@ void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
 bool InstrumentManager::SetParam(Id instrument_id, double timestamp,
                                  int param_id, float param_value) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (auto* param = FindOrNull(controller->params, param_id)) {
+    if (!controller->data.has_value()) {
+      return false;
+    }
+    if (auto* param = FindOrNull(controller->data->params, param_id)) {
       param->SetValue(param_value);
-      SetProcessorEvents(
-          instrument_id,
-          InstrumentEvents{
-              {timestamp, SetParamEvent{param_id, param->GetValue()}}});
+      controller->events.emplace(timestamp,
+                                 SetParamEvent{param_id, param->GetValue()});
       return true;
     }
   }
@@ -294,24 +308,31 @@ bool InstrumentManager::SetParam(Id instrument_id, double timestamp,
 bool InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
                                           int param_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (auto* param = FindOrNull(controller->params, param_id)) {
+    if (!controller->data.has_value()) {
+      return false;
+    }
+    if (auto* param = FindOrNull(controller->data->params, param_id)) {
       param->ResetValue();
-      SetProcessorEvents(
-          instrument_id,
-          InstrumentEvents{
-              {timestamp, SetParamEvent{param_id, param->GetValue()}}});
+      controller->events.emplace(timestamp,
+                                 SetParamEvent{param_id, param->GetValue()});
       return true;
     }
   }
   return false;
 }
 
-void InstrumentManager::SetProcessorEvents(Id instrument_id,
-                                           InstrumentEvents events) {
-  task_runner_.Add([this, instrument_id, events = std::move(events)]() mutable {
-    if (auto* processor = FindOrNull(processors_, instrument_id)) {
-      processor->events.merge(std::move(events));
+void InstrumentManager::Update() {
+  std::unordered_map<Id, InstrumentEvents> update_events;
+  for (auto& [instrument_id, controller] : controllers_) {
+    std::swap(controller.events, update_events[instrument_id]);
+  }
+  task_runner_.Add([this, update_events = std::move(update_events)]() mutable {
+    for (auto& [instrument_id, events] : update_events) {
+      processors_[instrument_id].events.merge(std::move(events));
     }
+  });
+  std::erase_if(controllers_, [](const auto& controller) {
+    return !controller.second.data.has_value();
   });
 }
 

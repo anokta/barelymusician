@@ -184,10 +184,10 @@ void BarelySetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
   }
 }
 
-void BarelyUpdate(BarelyMusician* /*barelymusician*/, double /*timestamp*/) {
-  // if (barelymusician) {
-  //   barelymusician->instrument_manager.Update(timestamp);
-  // }
+void BarelyUpdate(BarelyMusician* barelymusician, double /*timestamp*/) {
+  if (barelymusician) {
+    barelymusician->instrument_manager.Update();
+  }
 }
 
 }  // namespace barelyapi::unity

@@ -160,14 +160,39 @@ class InstrumentManager {
   /// @param param_id Parameter id.
   bool SetParamToDefault(Id instrument_id, double timestamp, int param_id);
 
+  void Update();
+
  private:
-  // Instrument controller that wraps the main thread calls of an instrument.
-  struct InstrumentController {
+  struct InstrumentData {
+    explicit InstrumentData(InstrumentParamDefinitions param_definitions) {
+      for (auto& param_definition : param_definitions) {
+        params.emplace(param_definition.id,
+                       InstrumentParam(std::move(param_definition)));
+      }
+    }
+
     // List of instrument parameters.
     std::unordered_map<int, InstrumentParam> params;
 
     // List of active note pitches.
     std::unordered_set<float> pitches;
+  };
+
+  // Instrument controller that wraps the main thread calls of an instrument.
+  struct InstrumentController {
+    InstrumentController(double timestamp, InstrumentDefinition definition,
+                         InstrumentParamDefinitions param_definitions)
+        : data(std::move(param_definitions)) {
+      events.emplace(timestamp, CreateEvent{std::move(definition)});
+      for (const auto& [id, param] : data->params) {
+        events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      }
+    }
+
+    std::optional<InstrumentData> data;
+
+    // List of scheduled instrument events.
+    InstrumentEvents events;
   };
 
   // Instrument processor that wraps the audio thread calls of an instrument.
@@ -178,9 +203,6 @@ class InstrumentManager {
     // Instrument.
     std::optional<Instrument> instrument;
   };
-
-  // Sets instrument processor events.
-  void SetProcessorEvents(Id instrument_id, InstrumentEvents events);
 
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;

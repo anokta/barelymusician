@@ -15,25 +15,25 @@ namespace BarelyApi {
 
     protected virtual void Awake() {
       _source = GetComponent<AudioSource>();
-      if (_id == BarelyMusician.InvalidId) {
-        _id = BarelyMusician.Create(this, AudioSettings.dspTime);
-      }
     }
 
     protected virtual void OnDestroy() {
       _source = null;
-      if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.Destroy(_id, AudioSettings.dspTime);
-        _id = BarelyMusician.InvalidId;
-      }
     }
 
     protected virtual void OnEnable() {
+      if (_id == BarelyMusician.InvalidId) {
+        _id = BarelyMusician.Create(this, AudioSettings.dspTime);
+      }
       _source.Play();
     }
 
     protected virtual void OnDisable() {
       _source.Stop();
+      if (_id != BarelyMusician.InvalidId) {
+        BarelyMusician.Destroy(_id, AudioSettings.dspTime);
+        _id = BarelyMusician.InvalidId;
+      }
     }
 
     // Schedules note off.

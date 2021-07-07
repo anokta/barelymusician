@@ -86,7 +86,7 @@ class InstrumentManager {
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   /// @return True if successful, false otherwise.
-  void Process(Id instrument_id, double timestamp, int sample_rate,
+  bool Process(Id instrument_id, double timestamp, int sample_rate,
                float* output, int num_channels, int num_frames);
 
   /// Sets all notes of all instruments off at timestamp.

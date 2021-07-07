@@ -99,7 +99,7 @@ bool InstrumentManager::IsNoteOn(Id instrument_id, float note_pitch) const {
   return false;
 }
 
-void InstrumentManager::Process(Id instrument_id, double timestamp,
+bool InstrumentManager::Process(Id instrument_id, double timestamp,
                                 int sample_rate, float* output,
                                 int num_channels, int num_frames) {
   task_runner_.Run();
@@ -166,10 +166,9 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
       instrument->Process(sample_rate, &output[num_channels * frame],
                           num_channels, num_frames - frame);
     }
-  } else {
-    LOG(ERROR) << "Invalid instrument id: " << instrument_id;
-    std::fill_n(output, num_channels * num_frames, 0.0f);
+    return true;
   }
+  return false;
 }
 
 void InstrumentManager::SetAllNotesOff(double timestamp) {

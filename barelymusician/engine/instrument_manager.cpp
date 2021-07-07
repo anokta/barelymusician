@@ -19,7 +19,7 @@ namespace barelyapi {
 namespace {
 
 // Maximum number of tasks to be executed per each |Process| call.
-constexpr int kNumMaxTasks = 1000;
+constexpr int kNumMaxTasks = 8000;
 
 }  // namespace
 
@@ -58,11 +58,8 @@ bool InstrumentManager::Destroy(Id instrument_id, double timestamp) {
       }
     }
     controllers_.erase(it);
-    task_runner_.Add([this, instrument_id, timestamp]() {
-      if (auto* processor = FindOrNull(processors_, instrument_id)) {
-        processor->events.emplace(timestamp, DestroyEvent{});
-      }
-    });
+    SetProcessorEvents(instrument_id,
+                       InstrumentEvents{{timestamp, DestroyEvent{}}});
     return true;
   }
   return false;
@@ -254,6 +251,10 @@ bool InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
   return false;
 }
 
+void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
+  note_off_callback_ = std::move(note_off_callback);
+}
+
 bool InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
                                   float note_pitch, float note_intensity) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
@@ -269,6 +270,10 @@ bool InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
     }
   }
   return false;
+}
+
+void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
+  note_on_callback_ = std::move(note_on_callback);
 }
 
 bool InstrumentManager::SetParam(Id instrument_id, double timestamp,
@@ -299,14 +304,6 @@ bool InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
     }
   }
   return false;
-}
-
-void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
-  note_off_callback_ = std::move(note_off_callback);
-}
-
-void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
-  note_on_callback_ = std::move(note_on_callback);
 }
 
 void InstrumentManager::SetProcessorEvents(Id instrument_id,

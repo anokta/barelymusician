@@ -125,6 +125,11 @@ class InstrumentManager {
   /// @param note_pitch Note pitch.
   bool SetNoteOff(Id instrument_id, double timestamp, float note_pitch);
 
+  /// Sets the note off callback.
+  ///
+  /// @param note_off_callback Instrument note off callback.
+  void SetNoteOffCallback(NoteOffCallback note_off_callback);
+
   /// Sets instrument note on at timestamp.
   ///
   /// @param instrument_id Instrument id.
@@ -133,6 +138,11 @@ class InstrumentManager {
   /// @param note_intensity Note intensity.
   bool SetNoteOn(Id instrument_id, double timestamp, float note_pitch,
                  float note_intensity);
+
+  /// Sets the note on callback.
+  ///
+  /// @param note_on_callback Instrument note on callback.
+  void SetNoteOnCallback(NoteOnCallback note_on_callback);
 
   /// Sets instrument parameter value at timestamp.
   ///
@@ -149,16 +159,6 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param param_id Parameter id.
   bool SetParamToDefault(Id instrument_id, double timestamp, int param_id);
-
-  /// Sets the note off callback.
-  ///
-  /// @param note_off_callback Instrument note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback);
-
-  /// Sets the note on callback.
-  ///
-  /// @param note_on_callback Instrument note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback);
 
  private:
   // Instrument controller that wraps the main thread calls of an instrument.
@@ -179,7 +179,7 @@ class InstrumentManager {
     std::optional<Instrument> instrument;
   };
 
-  // TODO: this should be done once (instead of called from each scheduler)?
+  // Sets instrument processor events.
   void SetProcessorEvents(Id instrument_id, InstrumentEvents events);
 
   // List of instruments.

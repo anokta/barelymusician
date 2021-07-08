@@ -11,6 +11,11 @@ class InstrumentParam {
   /// Constructs new |InstrumentParam|.
   explicit InstrumentParam(InstrumentParamDefinition definition);
 
+  /// Returns definition.
+  ///
+  /// @return Parameter definition.
+  const InstrumentParamDefinition& GetDefinition() const;
+
   /// Returns value.
   ///
   /// @return Parameter value.

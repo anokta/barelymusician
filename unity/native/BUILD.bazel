@@ -45,6 +45,7 @@ cc_library(
         ":unity_log_writer",
         "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
+        "//barelymusician/common:status",
         "//barelymusician/engine:instrument_definition",
         "//barelymusician/engine:instrument_manager",
         "//examples/instruments:synth_instrument",

@@ -7,6 +7,7 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
+#include "barelymusician/common/status.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "examples/instruments/synth_instrument.h"
@@ -65,10 +66,11 @@ Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician,
                                double timestamp) {
   if (barelymusician) {
     const Id instrument_id = barelymusician->id_generator.Generate();
-    barelymusician->instrument_manager.Create(
-        instrument_id, timestamp, SynthInstrument::GetDefinition(),
-        SynthInstrument::GetDefaultParams());
-    return instrument_id;
+    if (IsOk(barelymusician->instrument_manager.Create(
+            instrument_id, timestamp, SynthInstrument::GetDefinition(),
+            SynthInstrument::GetDefaultParams()))) {
+      return instrument_id;
+    }
   }
   return kInvalidId;
 }
@@ -76,8 +78,8 @@ Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician,
 bool BarelyDestroyInstrument(BarelyMusician* barelymusician, Id instrument_id,
                              double timestamp) {
   if (barelymusician) {
-    barelymusician->instrument_manager.Destroy(instrument_id, timestamp);
-    return true;
+    return IsOk(
+        barelymusician->instrument_manager.Destroy(instrument_id, timestamp));
   }
   return false;
 }
@@ -85,10 +87,9 @@ bool BarelyDestroyInstrument(BarelyMusician* barelymusician, Id instrument_id,
 float BarelyGetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
                                int param_id) {
   if (barelymusician) {
-    if (const auto* param = barelymusician->instrument_manager.GetParam(
-            instrument_id, param_id)) {
-      return param->GetValue();
-    }
+    return GetStatusOrValue(barelymusician->instrument_manager.GetParam(
+                                instrument_id, param_id))
+        .GetValue();
   }
   return 0.0f;
 }
@@ -96,8 +97,8 @@ float BarelyGetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
 bool BarelyIsInstrumentNoteOn(BarelyMusician* barelymusician, Id instrument_id,
                               float note_pitch) {
   if (barelymusician) {
-    return barelymusician->instrument_manager.IsNoteOn(instrument_id,
-                                                       note_pitch);
+    return GetStatusOrValue(
+        barelymusician->instrument_manager.IsNoteOn(instrument_id, note_pitch));
   }
   return false;
 }

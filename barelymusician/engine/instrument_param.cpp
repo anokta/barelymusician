@@ -3,10 +3,16 @@
 #include <algorithm>
 #include <utility>
 
+#include "barelymusician/engine/instrument_param_definition.h"
+
 namespace barelyapi {
 
 InstrumentParam::InstrumentParam(InstrumentParamDefinition definition)
     : definition_(std::move(definition)), value_(definition_.default_value) {}
+
+const InstrumentParamDefinition& InstrumentParam::GetDefinition() const {
+  return definition_;
+}
 
 float InstrumentParam::GetValue() const { return value_; }
 

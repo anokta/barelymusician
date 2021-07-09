@@ -8,11 +8,17 @@
 namespace barelyapi {
 
 InstrumentParam::InstrumentParam(InstrumentParamDefinition definition)
-    : definition_(std::move(definition)), value_(definition_.default_value) {}
+    : definition_(std::move(definition)) {
+  // Make sure that the default value is within the minimum and maximum values.
+  SetValue(definition_.default_value);
+  definition_.default_value = value_;
+}
 
 const InstrumentParamDefinition& InstrumentParam::GetDefinition() const {
   return definition_;
 }
+
+int InstrumentParam::GetId() const { return definition_.id; }
 
 float InstrumentParam::GetValue() const { return value_; }
 

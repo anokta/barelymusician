@@ -16,6 +16,11 @@ class InstrumentParam {
   /// @return Parameter definition.
   const InstrumentParamDefinition& GetDefinition() const;
 
+  /// Returns id.
+  ///
+  /// @return Parameter id.
+  int GetId() const;
+
   /// Returns value.
   ///
   /// @return Parameter value.

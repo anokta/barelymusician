@@ -21,7 +21,7 @@ namespace barelyapi {
 namespace {
 
 // Maximum number of tasks to be executed per each |Process| call.
-constexpr int kNumMaxTasks = 64;
+constexpr int kNumMaxTasks = 100;
 
 // Dummy note off callback that does nothing.
 void NoopNoteOffCallback(Id /*instrument_id*/, double /*timestamp*/,
@@ -152,6 +152,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
               },
               [&](DestroyEvent& /*destroy_event*/) {
                 processors_.erase(processor_it);
+                processor_it = processors_.end();
               },
               [&](SetCustomDataEvent& set_custom_data_event) {
                 if (processor_it != processors_.end()) {
@@ -313,12 +314,14 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
 }
 
 void InstrumentManager::Update() {
-  audio_runner_.Add(
-      [this, update_events = std::exchange(update_events_, {})]() mutable {
-        for (auto& [instrument_id, events] : update_events) {
-          audio_events_[instrument_id].merge(std::move(events));
-        }
-      });
+  if (!update_events_.empty()) {
+    audio_runner_.Add(
+        [this, update_events = std::exchange(update_events_, {})]() mutable {
+          for (auto& [instrument_id, events] : update_events) {
+            audio_events_[instrument_id].merge(std::move(events));
+          }
+        });
+  }
 }
 
 InstrumentManager::InstrumentController::InstrumentController(

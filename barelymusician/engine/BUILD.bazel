@@ -98,17 +98,39 @@ cc_test(
     ],
 )
 
-# cc_test(
-#     name = "instrument_manager_test",
-#     srcs = ["instrument_manager_test.cpp"],
-#     deps = [
-#         ":instrument_definition",
-#         ":instrument_event",
-#         ":instrument_manager",
-#         "//barelymusician/common:id_generator",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "instrument_manager_test",
+    srcs = ["instrument_manager_test.cpp"],
+    deps = [
+        ":instrument_definition",
+        ":instrument_manager",
+        ":instrument_param",
+        ":instrument_param_definition",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_param_test",
+    srcs = ["instrument_param_test.cpp"],
+    deps = [
+        ":instrument_param",
+        ":instrument_param_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_processor_test",
+    srcs = ["instrument_processor_test.cpp"],
+    deps = [
+        ":instrument_definition",
+        ":instrument_processor",
+        "@googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "spin_mutex_test",

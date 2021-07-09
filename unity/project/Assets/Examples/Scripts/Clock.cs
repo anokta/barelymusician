@@ -12,11 +12,11 @@ public class Clock : MonoBehaviour {
   private Sequencer[] sequencers = null;
 
   void Start() {
-    sequencers = GameObject.FindObjectsOfType<Sequencer>();
     dspTime = AudioSettings.dspTime + 1.0;
   }
 
   void Update() {
+    sequencers = GameObject.FindObjectsOfType<Sequencer>();
     double lookahead = 2.0 * (double)Time.smoothDeltaTime;
     double newDspTime = AudioSettings.dspTime + lookahead;
     if (newDspTime <= dspTime) return;

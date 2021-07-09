@@ -26,7 +26,7 @@ using ::barelyapi::examples::SynthInstrumentParam;
 // System audio settings.
 constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
-constexpr int kNumFrames = 512;
+constexpr int kNumFrames = 256;
 
 // Instrument settings.
 constexpr Id kInstrumentId = 1;

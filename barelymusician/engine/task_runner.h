@@ -7,7 +7,7 @@
 
 namespace barelyapi {
 
-/// Lock-free thread-safe task runner (multiple producers, single consumer).
+/// Lock-free thread-safe task runner (single producer, single consumer).
 class TaskRunner {
  public:
   /// Task signature.

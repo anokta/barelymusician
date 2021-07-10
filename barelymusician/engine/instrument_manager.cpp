@@ -284,10 +284,12 @@ Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
                                    int param_id, float param_value) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (auto* param = FindOrNull(controller->params, param_id)) {
-      param->SetValue(param_value);
-      update_events_[instrument_id].emplace(
-          timestamp, SetParamEvent{param_id, param->GetValue()});
-      return Status::kOk;
+      if (param->SetValue(param_value)) {
+        update_events_[instrument_id].emplace(
+            timestamp, SetParamEvent{param_id, param->GetValue()});
+        return Status::kOk;
+      }
+      return Status::kFailedPrecondition;
     }
     return Status::kInvalidArgument;
   }
@@ -298,10 +300,12 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
                                             int param_id) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (auto* param = FindOrNull(controller->params, param_id)) {
-      param->ResetValue();
-      update_events_[instrument_id].emplace(
-          timestamp, SetParamEvent{param_id, param->GetValue()});
-      return Status::kOk;
+      if (param->ResetValue()) {
+        update_events_[instrument_id].emplace(
+            timestamp, SetParamEvent{param_id, param->GetValue()});
+        return Status::kOk;
+      }
+      return Status::kFailedPrecondition;
     }
     return Status::kInvalidArgument;
   }

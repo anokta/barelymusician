@@ -27,12 +27,15 @@ class InstrumentParam {
   float GetValue() const;
 
   /// Resets value.
-  void ResetValue();
+  ///
+  /// @return True if successful, false otherwise.
+  bool ResetValue();
 
   /// Sets value.
   ///
   /// @param value Parameter value.
-  void SetValue(float value);
+  /// @return True if successful, false otherwise.
+  bool SetValue(float value);
 
  private:
   /// Parameter definition.

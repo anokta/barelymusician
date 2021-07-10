@@ -22,16 +22,26 @@ int InstrumentParam::GetId() const { return definition_.id; }
 
 float InstrumentParam::GetValue() const { return value_; }
 
-void InstrumentParam::ResetValue() { value_ = definition_.default_value; }
+bool InstrumentParam::ResetValue() {
+  if (value_ != definition_.default_value) {
+    value_ = definition_.default_value;
+    return true;
+  }
+  return false;
+}
 
-void InstrumentParam::SetValue(float value) {
+bool InstrumentParam::SetValue(float value) {
   if (definition_.max_value.has_value()) {
     value = std::min(value, *definition_.max_value);
   }
   if (definition_.min_value.has_value()) {
     value = std::max(value, *definition_.min_value);
   }
-  value_ = value;
+  if (value_ != value) {
+    value_ = value;
+    return true;
+  }
+  return false;
 }
 
 }  // namespace barelyapi

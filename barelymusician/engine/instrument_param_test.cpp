@@ -11,10 +11,18 @@ TEST(InstrumentParamTest, SetValue) {
   InstrumentParam param(InstrumentParamDefinition{1, -2.0f});
   EXPECT_FLOAT_EQ(param.GetValue(), -2.0f);
 
-  param.SetValue(0.5f);
+  EXPECT_TRUE(param.SetValue(0.5f));
   EXPECT_FLOAT_EQ(param.GetValue(), 0.5f);
 
-  param.ResetValue();
+  // The parameter value is already set to 0.5f.
+  EXPECT_FALSE(param.SetValue(0.5f));
+  EXPECT_FLOAT_EQ(param.GetValue(), 0.5f);
+
+  EXPECT_TRUE(param.ResetValue());
+  EXPECT_FLOAT_EQ(param.GetValue(), -2.0f);
+
+  // The parameter value is already reset.
+  EXPECT_FALSE(param.ResetValue());
   EXPECT_FLOAT_EQ(param.GetValue(), -2.0f);
 }
 
@@ -26,18 +34,36 @@ TEST(InstrumentParamTest, SetValueMinMax) {
   // Verify that the default value is also clamped at the minimum value.
   EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
 
-  param.SetValue(12.0f);
+  EXPECT_TRUE(param.SetValue(12.0f));
+  EXPECT_FLOAT_EQ(param.GetValue(), 12.0f);
+
+  // The parameter value is already set to 12.0f.
+  EXPECT_FALSE(param.SetValue(12.0f));
   EXPECT_FLOAT_EQ(param.GetValue(), 12.0f);
 
   // Verify that the parameter value is clamped at the minimum value.
-  param.SetValue(0.0f);
+  EXPECT_TRUE(param.SetValue(0.0f));
+  EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
+
+  // The parameter value is already set to 0.0f, which is clamped to 10.0f.
+  EXPECT_FALSE(param.SetValue(0.0f));
+  EXPECT_FALSE(param.SetValue(10.0f));
   EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
 
   // Verify that the parameter value is clamped at the maximum value.
-  param.SetValue(50.0f);
+  EXPECT_TRUE(param.SetValue(50.0f));
   EXPECT_FLOAT_EQ(param.GetValue(), 20.0f);
 
-  param.ResetValue();
+  // The parameter value is already set to 50.0f, which is clamped to 20.0f.
+  EXPECT_FALSE(param.SetValue(50.0f));
+  EXPECT_FALSE(param.SetValue(20.0f));
+  EXPECT_FLOAT_EQ(param.GetValue(), 20.0f);
+
+  EXPECT_TRUE(param.ResetValue());
+  EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
+
+  // The parameter value is already reset.
+  EXPECT_FALSE(param.ResetValue());
   EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
 }
 

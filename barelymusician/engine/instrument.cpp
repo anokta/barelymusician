@@ -26,8 +26,7 @@ void NoopSetInstrumentParamFn(InstrumentState* /*state*/, int /*id*/,
                               float /*value*/) {}
 
 // Process instrument function that fills the output buffer with zeros.
-void ZeroFillProcessInstrumentFn(InstrumentState* /*state*/,
-                                 int /*sample_rate*/, float* output,
+void ZeroFillProcessInstrumentFn(InstrumentState* /*state*/, float* output,
                                  int num_channels, int num_frames) {
   std::fill_n(output, num_channels * num_frames, 0.0f);
 }
@@ -61,9 +60,8 @@ Instrument::~Instrument() {
   }
 }
 
-void Instrument::Process(int sample_rate, float* output, int num_channels,
-                         int num_frames) {
-  process_fn_(&state_, sample_rate, output, num_channels, num_frames);
+void Instrument::Process(float* output, int num_channels, int num_frames) {
+  process_fn_(&state_, output, num_channels, num_frames);
 }
 
 void Instrument::SetCustomData(std::any data) {

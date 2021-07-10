@@ -32,7 +32,9 @@ class InstrumentManager {
                          float note_intensity)>;
 
   /// Constructs new |InstrumentManager|.
-  InstrumentManager();
+  ///
+  /// @param sample_rate Sampling rate in Hz.
+  explicit InstrumentManager(int sample_rate);
 
   /// Creates new instrument at timestamp.
   ///
@@ -82,12 +84,11 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param sample_rate Sampling rate in Hz.
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  void Process(Id instrument_id, double timestamp, int sample_rate,
-               float* output, int num_channels, int num_frames);
+  void Process(Id instrument_id, double timestamp, float* output,
+               int num_channels, int num_frames);
 
   /// Sets all notes of all instruments off at timestamp.
   ///
@@ -206,6 +207,9 @@ class InstrumentManager {
 
   // Instrument note on callback.
   NoteOnCallback note_on_callback_;
+
+  // Sampling rate in Hz.
+  int sample_rate_;
 };
 
 }  // namespace barelyapi

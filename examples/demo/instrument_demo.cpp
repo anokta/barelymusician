@@ -61,7 +61,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  InstrumentManager instrument_manager;
+  InstrumentManager instrument_manager(kSampleRate);
   instrument_manager.Create(
       kInstrumentId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
@@ -80,8 +80,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {
-    instrument_manager.Process(kInstrumentId, 0.0, kSampleRate, output,
-                               kNumChannels, kNumFrames);
+    instrument_manager.Process(kInstrumentId, 0.0, output, kNumChannels,
+                               kNumFrames);
   });
 
   // Key down callback.

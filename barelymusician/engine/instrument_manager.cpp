@@ -33,10 +33,11 @@ void NoopNoteOnCallback(Id /*instrument_id*/, double /*timestamp*/,
 
 }  // namespace
 
-InstrumentManager::InstrumentManager()
+InstrumentManager::InstrumentManager(int sample_rate)
     : audio_runner_(kNumMaxTasks),
       note_off_callback_(&NoopNoteOffCallback),
-      note_on_callback_(&NoopNoteOnCallback) {}
+      note_on_callback_(&NoopNoteOnCallback),
+      sample_rate_(sample_rate) {}
 
 Status InstrumentManager::Create(Id instrument_id, double timestamp,
                                  InstrumentDefinition definition,
@@ -111,8 +112,8 @@ StatusOr<bool> InstrumentManager::IsNoteOn(Id instrument_id,
 }
 
 void InstrumentManager::Process(Id instrument_id, double timestamp,
-                                int sample_rate, float* output,
-                                int num_channels, int num_frames) {
+                                float* output, int num_channels,
+                                int num_frames) {
   audio_runner_.Run();
   if (const auto processor_it = processors_.find(instrument_id);
       processor_it != processors_.end()) {
@@ -121,8 +122,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
     auto process_until_fn = [&](int end_frame) {
       auto* process_output = &output[num_channels * frame];
       if (instrument) {
-        instrument->Process(sample_rate, process_output, num_channels,
-                            end_frame - frame);
+        instrument->Process(process_output, num_channels, end_frame - frame);
       } else {
         std::fill_n(process_output, num_channels * (end_frame - frame), 0.0f);
       }
@@ -131,10 +131,10 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
     auto& events = processor_it->second.events;
     auto begin = events.begin();
     auto end = events.lower_bound(timestamp +
-                                  SecondsFromSamples(sample_rate, num_frames));
+                                  SecondsFromSamples(sample_rate_, num_frames));
     for (auto it = begin; it != end; ++it) {
       const int message_frame =
-          SamplesFromSeconds(sample_rate, it->first - timestamp);
+          SamplesFromSeconds(sample_rate_, it->first - timestamp);
       if (frame < message_frame) {
         process_until_fn(message_frame);
         frame = message_frame;
@@ -142,7 +142,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
       std::visit(
           InstrumentEventVisitor{
               [&](CreateEvent& create_event) {
-                instrument.emplace(sample_rate,
+                instrument.emplace(sample_rate_,
                                    std::move(create_event.definition));
               },
               [&](DestroyEvent& /*destroy_event*/) { instrument.reset(); },

@@ -17,9 +17,8 @@ using CreateInstrumentFn =
 using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;
 
 /// Instrument process function signature.
-using ProcessInstrumentFn =
-    std::function<void(InstrumentState* state, int sample_rate, float* output,
-                       int num_channels, int num_frames)>;
+using ProcessInstrumentFn = std::function<void(
+    InstrumentState* state, float* output, int num_channels, int num_frames)>;
 
 /// Instrument set custom data function signature.
 using SetCustomInstrumentDataFn =

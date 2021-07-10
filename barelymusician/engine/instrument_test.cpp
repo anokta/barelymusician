@@ -21,8 +21,8 @@ InstrumentDefinition GetTestInstrumentDefinition() {
                       int /*sample_rate*/) { state->emplace<float>(0.0f); },
       .destroy_fn = [](InstrumentState* state) { state->reset(); },
       .process_fn =
-          [](InstrumentState* state, int /*sample_rate*/, float* output,
-             int num_channels, int num_frames) {
+          [](InstrumentState* state, float* output, int num_channels,
+             int num_frames) {
             std::fill_n(output, num_channels * num_frames,
                         *std::any_cast<float>(state));
           },
@@ -50,7 +50,7 @@ TEST(InstrumentProcessorTest, Process) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -61,7 +61,7 @@ TEST(InstrumentProcessorTest, Process) {
   instrument.SetNoteOn(2.0f, 0.25f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 2.0f * 0.25f);
@@ -72,7 +72,7 @@ TEST(InstrumentProcessorTest, Process) {
   instrument.SetNoteOff(2.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -83,7 +83,7 @@ TEST(InstrumentProcessorTest, Process) {
   instrument.SetParam(1, 0.4f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.4f);
@@ -94,7 +94,7 @@ TEST(InstrumentProcessorTest, Process) {
   instrument.SetCustomData(-5.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], -5.0f);
@@ -109,7 +109,7 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -120,7 +120,7 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   instrument.SetNoteOn(2.0f, 0.25f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -131,7 +131,7 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   instrument.SetNoteOff(2.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -142,7 +142,7 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   instrument.SetParam(1, 0.4f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -153,7 +153,7 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   instrument.SetCustomData(-5.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

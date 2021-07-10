@@ -26,12 +26,11 @@ inline constexpr Id kInvalidId = -1;
 
 // Unity plugin.
 struct BarelyMusician {
-  BarelyMusician(int sample_rate) : sample_rate(sample_rate) {}
+  BarelyMusician(int sample_rate) : instrument_manager(sample_rate) {}
 
   // Engine.
   IdGenerator id_generator;
   InstrumentManager instrument_manager;
-  int sample_rate;
 
   // Unity log writer.
   UnityLogWriter writer;
@@ -107,9 +106,8 @@ void BarelyProcessInstrument(BarelyMusician* barelymusician, Id instrument_id,
                              double timestamp, float* output, int num_channels,
                              int num_frames) {
   if (barelymusician) {
-    barelymusician->instrument_manager.Process(
-        instrument_id, timestamp, barelymusician->sample_rate, output,
-        num_channels, num_frames);
+    barelymusician->instrument_manager.Process(instrument_id, timestamp, output,
+                                               num_channels, num_frames);
   }
 }
 

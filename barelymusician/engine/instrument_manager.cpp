@@ -10,11 +10,11 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_param.h"
 #include "barelymusician/engine/instrument_param_definition.h"
-#include "barelymusician/engine/instrument_processor.h"
 
 namespace barelyapi {
 
@@ -114,24 +114,24 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
                                 int sample_rate, float* output,
                                 int num_channels, int num_frames) {
   audio_runner_.Run();
-  int frame = 0;
-  auto processor_it = processors_.find(instrument_id);
-  auto process_until_fn = [&](int end_frame) {
-    auto* process_output = &output[num_channels * frame];
-    if (processor_it != processors_.end()) {
-      processor_it->second.Process(sample_rate, process_output, num_channels,
-                                   end_frame - frame);
-    } else {
-      std::fill_n(process_output, num_channels * (end_frame - frame), 0.0f);
-    }
-  };
-  // Process *all* events before the end timestamp.
-  if (const auto audio_events_it = audio_events_.find(instrument_id);
-      audio_events_it != audio_events_.end()) {
-    auto& audio_events = audio_events_it->second;
-    auto begin = audio_events.begin();
-    auto end = audio_events.lower_bound(
-        timestamp + SecondsFromSamples(sample_rate, num_frames));
+  if (const auto processor_it = processors_.find(instrument_id);
+      processor_it != processors_.end()) {
+    int frame = 0;
+    auto& instrument = processor_it->second.instrument;
+    auto process_until_fn = [&](int end_frame) {
+      auto* process_output = &output[num_channels * frame];
+      if (instrument) {
+        instrument->Process(sample_rate, process_output, num_channels,
+                            end_frame - frame);
+      } else {
+        std::fill_n(process_output, num_channels * (end_frame - frame), 0.0f);
+      }
+    };
+    // Process *all* events before the end timestamp.
+    auto& events = processor_it->second.events;
+    auto begin = events.begin();
+    auto end = events.lower_bound(timestamp +
+                                  SecondsFromSamples(sample_rate, num_frames));
     for (auto it = begin; it != end; ++it) {
       const int message_frame =
           SamplesFromSeconds(sample_rate, it->first - timestamp);
@@ -142,51 +142,46 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
       std::visit(
           InstrumentEventVisitor{
               [&](CreateEvent& create_event) {
-                processor_it =
-                    processors_
-                        .emplace(instrument_id,
-                                 InstrumentProcessor(
-                                     sample_rate,
-                                     std::move(create_event.definition)))
-                        .first;
+                instrument.emplace(sample_rate,
+                                   std::move(create_event.definition));
               },
-              [&](DestroyEvent& /*destroy_event*/) {
-                processors_.erase(processor_it);
-                processor_it = processors_.end();
-              },
+              [&](DestroyEvent& /*destroy_event*/) { instrument.reset(); },
               [&](SetCustomDataEvent& set_custom_data_event) {
-                if (processor_it != processors_.end()) {
-                  processor_it->second.SetCustomData(
+                if (instrument) {
+                  instrument->SetCustomData(
                       std::move(set_custom_data_event.data));
                 }
               },
               [&](SetNoteOffEvent& set_note_off_event) {
-                if (processor_it != processors_.end()) {
-                  processor_it->second.SetNoteOff(set_note_off_event.pitch);
+                if (instrument) {
+                  instrument->SetNoteOff(set_note_off_event.pitch);
                 }
               },
               [&](SetNoteOnEvent& set_note_on_event) {
-                if (processor_it != processors_.end()) {
-                  processor_it->second.SetNoteOn(set_note_on_event.pitch,
-                                                 set_note_on_event.intensity);
+                if (instrument) {
+                  instrument->SetNoteOn(set_note_on_event.pitch,
+                                        set_note_on_event.intensity);
                 }
               },
               [&](SetParamEvent& set_param_event) {
-                if (processor_it != processors_.end()) {
-                  processor_it->second.SetParam(set_param_event.id,
-                                                set_param_event.value);
+                if (instrument) {
+                  instrument->SetParam(set_param_event.id,
+                                       set_param_event.value);
                 }
               }},
           it->second);
     }
-    audio_events.erase(begin, end);
-    if (processor_it == processors_.end() && audio_events.empty()) {
-      audio_events_.erase(audio_events_it);
+    // Process the rest of the buffer.
+    if (frame < num_frames) {
+      process_until_fn(num_frames);
     }
-  }
-  // Process the rest of the buffer.
-  if (frame < num_frames) {
-    process_until_fn(num_frames);
+    // Clean up the processor.
+    events.erase(begin, end);
+    if (!instrument && events.empty()) {
+      processors_.erase(processor_it);
+    }
+  } else {
+    std::fill_n(output, num_channels * num_frames, 0.0f);
   }
 }
 
@@ -318,7 +313,7 @@ void InstrumentManager::Update() {
     audio_runner_.Add(
         [this, update_events = std::exchange(update_events_, {})]() mutable {
           for (auto& [instrument_id, events] : update_events) {
-            audio_events_[instrument_id].merge(std::move(events));
+            processors_[instrument_id].events.merge(std::move(events));
           }
         });
   }

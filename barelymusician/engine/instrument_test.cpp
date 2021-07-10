@@ -1,4 +1,4 @@
-#include "barelymusician/engine/instrument_processor.h"
+#include "barelymusician/engine/instrument.h"
 
 #include <algorithm>
 #include <any>
@@ -44,13 +44,13 @@ InstrumentDefinition GetTestInstrumentDefinition() {
           }};
 }
 
-// Tests that the instrument processor processes its buffer as expected.
+// Tests that the instrument processes its buffer as expected.
 TEST(InstrumentProcessorTest, Process) {
-  InstrumentProcessor processor(kSampleRate, GetTestInstrumentDefinition());
+  Instrument instrument(kSampleRate, GetTestInstrumentDefinition());
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -58,10 +58,10 @@ TEST(InstrumentProcessorTest, Process) {
   }
 
   // Set note on.
-  processor.SetNoteOn(2.0f, 0.25f);
+  instrument.SetNoteOn(2.0f, 0.25f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 2.0f * 0.25f);
@@ -69,10 +69,10 @@ TEST(InstrumentProcessorTest, Process) {
   }
 
   // Set note off.
-  processor.SetNoteOff(2.0f);
+  instrument.SetNoteOff(2.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -80,10 +80,10 @@ TEST(InstrumentProcessorTest, Process) {
   }
 
   // Set parameter.
-  processor.SetParam(1, 0.4f);
+  instrument.SetParam(1, 0.4f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.4f);
@@ -91,10 +91,10 @@ TEST(InstrumentProcessorTest, Process) {
   }
 
   // Set custom data.
-  processor.SetCustomData(-5.0f);
+  instrument.SetCustomData(-5.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], -5.0f);
@@ -102,14 +102,14 @@ TEST(InstrumentProcessorTest, Process) {
   }
 }
 
-// Tests that the instrument processor processes its buffer as expected when its
+// Tests that the instrument processes its buffer as expected when its
 // definition is empty.
 TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
-  InstrumentProcessor processor(kSampleRate, InstrumentDefinition{});
+  Instrument instrument(kSampleRate, InstrumentDefinition{});
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -117,10 +117,10 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   }
 
   // Set note on.
-  processor.SetNoteOn(2.0f, 0.25f);
+  instrument.SetNoteOn(2.0f, 0.25f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -128,10 +128,10 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   }
 
   // Set note off.
-  processor.SetNoteOff(2.0f);
+  instrument.SetNoteOff(2.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -139,10 +139,10 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   }
 
   // Set parameter.
-  processor.SetParam(1, 0.4f);
+  instrument.SetParam(1, 0.4f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
@@ -150,10 +150,10 @@ TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
   }
 
   // Set custom data.
-  processor.SetCustomData(-5.0f);
+  instrument.SetCustomData(-5.0f);
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
-  processor.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
+  instrument.Process(kSampleRate, buffer.data(), kNumChannels, kNumFrames);
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
       EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);

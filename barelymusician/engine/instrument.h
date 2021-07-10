@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
 #include <any>
 
@@ -7,23 +7,23 @@
 
 namespace barelyapi {
 
-/// Instrument processor that wraps the audio thread calls of an instrument.
-class InstrumentProcessor {
+/// Class that wraps an instrument.
+class Instrument {
  public:
-  /// Constructs new |InstrumentProcessor|.
+  /// Constructs new |Instrument|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  /// @param definition InstrumentProcessor definition.
-  InstrumentProcessor(int sample_rate, InstrumentDefinition definition);
+  /// @param definition Instrument definition.
+  Instrument(int sample_rate, InstrumentDefinition definition);
 
-  /// Destroys |InstrumentProcessor|.
-  ~InstrumentProcessor();
+  /// Destroys |Instrument|.
+  ~Instrument();
 
   /// Copyable and movable.
-  InstrumentProcessor(const InstrumentProcessor& other) = default;
-  InstrumentProcessor& operator=(const InstrumentProcessor& other) = default;
-  InstrumentProcessor(InstrumentProcessor&& other) = default;
-  InstrumentProcessor& operator=(InstrumentProcessor&& other) = default;
+  Instrument(const Instrument& other) = default;
+  Instrument& operator=(const Instrument& other) = default;
+  Instrument(Instrument&& other) = default;
+  Instrument& operator=(Instrument&& other) = default;
 
   /// Processes the next output buffer.
   ///
@@ -81,4 +81,4 @@ class InstrumentProcessor {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

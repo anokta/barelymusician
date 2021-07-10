@@ -1,4 +1,4 @@
-#include "barelymusician/engine/instrument_processor.h"
+#include "barelymusician/engine/instrument.h"
 
 #include <algorithm>
 #include <any>
@@ -34,8 +34,7 @@ void ZeroFillProcessInstrumentFn(InstrumentState* /*state*/,
 
 }  // namespace
 
-InstrumentProcessor::InstrumentProcessor(int sample_rate,
-                                         InstrumentDefinition definition)
+Instrument::Instrument(int sample_rate, InstrumentDefinition definition)
     : destroy_fn_(std::move(definition.destroy_fn)),
       process_fn_(definition.process_fn ? std::move(definition.process_fn)
                                         : &ZeroFillProcessInstrumentFn),
@@ -55,31 +54,29 @@ InstrumentProcessor::InstrumentProcessor(int sample_rate,
   }
 }
 
-InstrumentProcessor::~InstrumentProcessor() {
+Instrument::~Instrument() {
   // Make sure to call |destroy_fn_| only if it's still valid (e.g., not moved).
   if (destroy_fn_) {
     destroy_fn_(&state_);
   }
 }
 
-void InstrumentProcessor::Process(int sample_rate, float* output,
-                                  int num_channels, int num_frames) {
+void Instrument::Process(int sample_rate, float* output, int num_channels,
+                         int num_frames) {
   process_fn_(&state_, sample_rate, output, num_channels, num_frames);
 }
 
-void InstrumentProcessor::SetCustomData(std::any data) {
+void Instrument::SetCustomData(std::any data) {
   set_custom_data_fn_(&state_, std::move(data));
 }
 
-void InstrumentProcessor::SetNoteOff(float pitch) {
-  set_note_off_fn_(&state_, pitch);
-}
+void Instrument::SetNoteOff(float pitch) { set_note_off_fn_(&state_, pitch); }
 
-void InstrumentProcessor::SetNoteOn(float pitch, float intensity) {
+void Instrument::SetNoteOn(float pitch, float intensity) {
   set_note_on_fn_(&state_, pitch, intensity);
 }
 
-void InstrumentProcessor::SetParam(int id, float value) {
+void Instrument::SetParam(int id, float value) {
   set_param_fn_(&state_, id, value);
 }
 

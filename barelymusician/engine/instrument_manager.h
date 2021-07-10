@@ -4,16 +4,17 @@
 #include <any>
 #include <functional>
 #include <map>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_param.h"
 #include "barelymusician/engine/instrument_param_definition.h"
-#include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
@@ -183,12 +184,18 @@ class InstrumentManager {
     std::unordered_set<float> pitches;
   };
 
+  // Instrument processor that wraps the audio thread calls of an instrument.
+  struct InstrumentProcessor {
+    // Instrument.
+    std::optional<Instrument> instrument;
+
+    // List of scheduled instrument events.
+    InstrumentEvents events;
+  };
+
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
-
-  // List of instrument events.
-  std::unordered_map<Id, InstrumentEvents> audio_events_;
   std::unordered_map<Id, InstrumentEvents> update_events_;
 
   // Audio thread task runner.

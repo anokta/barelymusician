@@ -4,9 +4,11 @@
 #include <memory>
 #include <thread>
 
+#include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/sequencer.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -14,8 +16,10 @@
 
 namespace {
 
-using ::barelyapi::Engine;
+using ::barelyapi::Id;
+using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Sequencer;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
@@ -30,6 +34,7 @@ constexpr int kNumFrames = 1024;
 constexpr double kLookahead = 0.1;
 
 // Metronome settings.
+constexpr Id kMetronomeId = 1;
 constexpr int kNumVoices = 1;
 constexpr float kGain = 0.5f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
@@ -51,11 +56,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
   AudioClock clock(kSampleRate);
-  Engine engine(kSampleRate);
-  engine.SetPlaybackTempo(kInitialTempo);
+  InstrumentManager instrument_manager(kSampleRate);
+  Sequencer sequencer(&instrument_manager);
+  sequencer.SetPlaybackTempo(kInitialTempo);
 
-  const auto metronome_id = engine.CreateInstrument(
-      SynthInstrument::GetDefinition(),
+  instrument_manager.Create(
+      kMetronomeId, 0.0, SynthInstrument::GetDefinition(),
       {{static_cast<int>(SynthInstrumentParam::kNumVoices),
         static_cast<float>(kNumVoices)},
        {static_cast<int>(SynthInstrumentParam::kGain), kGain},
@@ -71,15 +77,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    engine.ScheduleInstrumentNote(metronome_id, position,
-                                  position + kTickDuration, pitch, kGain);
+    sequencer.ScheduleInstrumentNote(kMetronomeId, position,
+                                     position + kTickDuration, pitch, kGain);
   };
-  engine.SetBeatCallback(beat_callback);
+  sequencer.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&](float* output) {
-    engine.ProcessInstrument(metronome_id, clock.GetTimestamp(), output,
-                             kNumChannels, kNumFrames);
+    instrument_manager.Process(kMetronomeId, clock.GetTimestamp(), output,
+                               kNumChannels, kNumFrames);
     clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -93,14 +99,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetPlaybackTempo();
+    double tempo = sequencer.GetPlaybackTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (engine.IsPlaying()) {
-          engine.StopPlayback();
+        if (sequencer.IsPlaying()) {
+          sequencer.StopPlayback();
           LOG(INFO) << "Stopped playback";
         } else {
-          engine.StartPlayback();
+          sequencer.StartPlayback();
           LOG(INFO) << "Started playback";
         }
         return;
@@ -122,7 +128,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    engine.SetPlaybackTempo(tempo);
+    sequencer.SetPlaybackTempo(tempo);
     LOG(INFO) << "Tempo set to " << (60.0 * tempo) << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -130,18 +136,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  engine.Update(clock.GetTimestamp() + kLookahead);
-  engine.StartPlayback();
+  sequencer.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(clock.GetTimestamp() + kLookahead);
+    instrument_manager.Update();
+    sequencer.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  engine.StopPlayback();
+  sequencer.StopPlayback();
   audio_output.Stop();
 
   return 0;

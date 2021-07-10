@@ -287,16 +287,6 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
   // Set notes on.
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
-
-    std::fill(buffer.begin(), buffer.end(), 0.0f);
-    instrument_manager.Process(instrument_id, 0.0, buffer.data(), kNumChannels,
-                               kNumFrames);
-    for (int frame = 0; frame < kNumFrames; ++frame) {
-      for (int channel = 0; channel < kNumChannels; ++channel) {
-        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
-      }
-    }
-
     const float note_pitch = static_cast<float>(i);
 
     EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(instrument_id, 0.0,
@@ -376,17 +366,7 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
   // Set parameter values.
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
-
-    std::fill(buffer.begin(), buffer.end(), 0.0f);
-    instrument_manager.Process(instrument_id, 0.0, buffer.data(), kNumChannels,
-                               kNumFrames);
-    for (int frame = 0; frame < kNumFrames; ++frame) {
-      for (int channel = 0; channel < kNumChannels; ++channel) {
-        EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
-      }
-    }
-
-    const float param_value = static_cast<float>(i);
+    const float param_value = static_cast<float>(i + 1);
 
     EXPECT_TRUE(
         IsOk(instrument_manager.SetParam(instrument_id, 0.0, 1, param_value)));
@@ -519,6 +499,87 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
 
   EXPECT_DOUBLE_EQ(note_off_timestamp, 30.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch + 2.0f);
+}
+
+// Tests that the instrument manager updates its sampling rate as expected.
+TEST(InstrumentManagerTest, SetSampleRate) {
+  const float kNotePitch = 3.0f;
+  const float kNoteIntensity = 1.0f;
+  const float kParamValue = -0.25f;
+
+  InstrumentManager instrument_manager(1);
+  std::vector<float> buffer(kNumChannels * kNumFrames);
+
+  // Create instrument.
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, 0.0, GetTestInstrumentDefinition(),
+      GetTestInstrumentParamDefinitions())));
+
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
+              UnorderedElementsAre());
+  EXPECT_THAT(
+      GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
+      UnorderedElementsAre(AllOf(Property(&InstrumentParam::GetId, 1),
+                                 Property(&InstrumentParam::GetValue, 0.0f))));
+
+  instrument_manager.Update();
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
+                             kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
+    }
+  }
+
+  // Set note on.
+  EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 0.0, kNotePitch,
+                                                kNoteIntensity)));
+
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
+              UnorderedElementsAre(kNotePitch));
+
+  // Set parameter.
+  EXPECT_TRUE(
+      IsOk(instrument_manager.SetParam(kInstrumentId, 0.0, 1, kParamValue)));
+
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
+              UnorderedElementsAre(
+                  AllOf(Property(&InstrumentParam::GetId, 1),
+                        Property(&InstrumentParam::GetValue, kParamValue))));
+
+  instrument_manager.Update();
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
+                             kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], kParamValue);
+    }
+  }
+
+  // Update sampling rate.
+  instrument_manager.SetSampleRate(0.0, 2);
+
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
+              UnorderedElementsAre());
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
+              UnorderedElementsAre(
+                  AllOf(Property(&InstrumentParam::GetId, 1),
+                        Property(&InstrumentParam::GetValue, kParamValue))));
+
+  instrument_manager.Update();
+
+  std::fill(buffer.begin(), buffer.end(), 0.0f);
+  instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
+                             kNumFrames);
+  for (int frame = 0; frame < kNumFrames; ++frame) {
+    for (int channel = 0; channel < kNumChannels; ++channel) {
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], kParamValue);
+    }
+  }
 }
 
 }  // namespace

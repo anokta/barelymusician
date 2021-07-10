@@ -154,13 +154,22 @@ namespace BarelyApi {
           }
         };
         SetNoteOnCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
+        AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
       }
 
       private void OnApplicationQuit() {
         _isShuttingDown = true;
+        AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
         ShutdownNative(_instancePtr);
 
         GameObject.DestroyImmediate(gameObject);
+      }
+
+      private void OnAudioConfigurationChanged(bool deviceWasChanged) {
+        SetSampleRateNative(_instancePtr, AudioSettings.dspTime, AudioSettings.outputSampleRate);
+        foreach (var instrument in _instruments.Values) {
+          instrument.GetComponent<AudioSource>()?.Play();
+        }
       }
 
       private void LateUpdate() {
@@ -221,6 +230,9 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParam")]
     private static extern void SetParamNative(IntPtr instancePtr, Int64 instrumentId, double timestamp, int paramId,
                                               float paramValue);
+
+    [DllImport(pluginName, EntryPoint = "BarelySetSampleRate")]
+    private static extern void SetSampleRateNative(IntPtr instancePtr, double timestamp, int sampleRate);
 
     [DllImport(pluginName, EntryPoint = "BarelyUpdate")]
     private static extern void UpdateNative(IntPtr instancePtr, double timestamp);

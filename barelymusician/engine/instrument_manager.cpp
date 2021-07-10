@@ -43,7 +43,8 @@ Status InstrumentManager::Create(Id instrument_id, double timestamp,
                                  InstrumentDefinition definition,
                                  InstrumentParamDefinitions param_definitions) {
   if (const auto [controller_it, success] = controllers_.emplace(
-          instrument_id, InstrumentController(std::move(param_definitions)));
+          instrument_id,
+          InstrumentController(definition, std::move(param_definitions)));
       success) {
     auto& update_events = update_events_[instrument_id];
     update_events.emplace(timestamp, CreateEvent{std::move(definition)});
@@ -128,13 +129,14 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
       }
     };
     // Process *all* events before the end timestamp.
+    const int sample_rate = sample_rate_;
     auto& events = processor_it->second.events;
     auto begin = events.begin();
     auto end = events.lower_bound(timestamp +
-                                  SecondsFromSamples(sample_rate_, num_frames));
+                                  SecondsFromSamples(sample_rate, num_frames));
     for (auto it = begin; it != end; ++it) {
       const int message_frame =
-          SamplesFromSeconds(sample_rate_, it->first - timestamp);
+          SamplesFromSeconds(sample_rate, it->first - timestamp);
       if (frame < message_frame) {
         process_until_fn(message_frame);
         frame = message_frame;
@@ -142,7 +144,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
       std::visit(
           InstrumentEventVisitor{
               [&](CreateEvent& create_event) {
-                instrument.emplace(sample_rate_,
+                instrument.emplace(sample_rate,
                                    std::move(create_event.definition));
               },
               [&](DestroyEvent& /*destroy_event*/) { instrument.reset(); },
@@ -312,6 +314,24 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
   return Status::kNotFound;
 }
 
+void InstrumentManager::SetSampleRate(double timestamp, int sample_rate) {
+  // Note that the sample accurate timing of the existing instrument events
+  // could flactuate during this switch, until the given |timestamp|.
+  sample_rate_ = sample_rate;
+  for (auto& [instrument_id, controller] : controllers_) {
+    auto& update_events = update_events_[instrument_id];
+    for (const float pitch : controller.pitches) {
+      note_off_callback_(instrument_id, timestamp, pitch);
+    }
+    controller.pitches.clear();
+    update_events.emplace(timestamp, DestroyEvent{});
+    update_events.emplace(timestamp, CreateEvent{controller.definition});
+    for (const auto& [id, param] : controller.params) {
+      update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+    }
+  }
+}
+
 void InstrumentManager::Update() {
   if (!update_events_.empty()) {
     audio_runner_.Add(
@@ -324,7 +344,9 @@ void InstrumentManager::Update() {
 }
 
 InstrumentManager::InstrumentController::InstrumentController(
-    InstrumentParamDefinitions param_definitions) {
+    InstrumentDefinition definition,
+    InstrumentParamDefinitions param_definitions)
+    : definition(std::move(definition)) {
   params.reserve(param_definitions.size());
   for (auto& param_definition : param_definitions) {
     params.emplace(param_definition.id,

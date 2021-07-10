@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
 #include <any>
+#include <atomic>
 #include <functional>
 #include <map>
 #include <optional>
@@ -169,6 +170,12 @@ class InstrumentManager {
   /// @return Status.
   Status SetParamToDefault(Id instrument_id, double timestamp, int param_id);
 
+  /// Sets sampling rate at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  /// @param sample_rate Sampling rate in Hz.
+  void SetSampleRate(double timestamp, int sample_rate);
+
   /// Updates the internal state.
   void Update();
 
@@ -176,7 +183,11 @@ class InstrumentManager {
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
     // Constructs new |InstrumentController|.
-    explicit InstrumentController(InstrumentParamDefinitions param_definitions);
+    InstrumentController(InstrumentDefinition definition,
+                         InstrumentParamDefinitions param_definitions);
+
+    // Instrument definition.
+    InstrumentDefinition definition;
 
     // List of instrument parameters.
     std::unordered_map<int, InstrumentParam> params;
@@ -209,7 +220,7 @@ class InstrumentManager {
   NoteOnCallback note_on_callback_;
 
   // Sampling rate in Hz.
-  int sample_rate_;
+  std::atomic<int> sample_rate_;
 };
 
 }  // namespace barelyapi

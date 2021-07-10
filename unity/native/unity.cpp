@@ -183,6 +183,13 @@ void BarelySetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
   }
 }
 
+void BarelySetSampleRate(BarelyMusician* barelymusician, double timestamp,
+                         int sample_rate) {
+  if (barelymusician) {
+    barelymusician->instrument_manager.SetSampleRate(timestamp, sample_rate);
+  }
+}
+
 void BarelyUpdate(BarelyMusician* barelymusician, double /*timestamp*/) {
   if (barelymusician) {
     barelymusician->instrument_manager.Update();

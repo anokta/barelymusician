@@ -150,6 +150,14 @@ BARELY_EXPORT void BarelySetInstrumentParam(BarelyMusician* barelymusician,
                                             Id instrument_id, double timestamp,
                                             int param_id, float param_value);
 
+/// Sets sampling rate.
+///
+/// @param barelymusician System handle.
+/// @param timestamp Timestamp in seconds.
+/// @param sample_rate Sampling rate in Hz.
+BARELY_EXPORT void BarelySetSampleRate(BarelyMusician* barelymusician,
+                                       double timestamp, int sample_rate);
+
 /// Updates the internal state.
 ///
 /// @param barelymusician System handle.

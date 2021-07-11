@@ -189,23 +189,27 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
 
 void InstrumentManager::SetAllNotesOff(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    auto& update_events = update_events_[instrument_id];
-    for (const float pitch : controller.pitches) {
-      note_off_callback_(instrument_id, timestamp, pitch);
-      update_events.emplace(timestamp, SetNoteOffEvent{pitch});
+    if (!controller.pitches.empty()) {
+      auto& update_events = update_events_[instrument_id];
+      for (const float pitch : controller.pitches) {
+        note_off_callback_(instrument_id, timestamp, pitch);
+        update_events.emplace(timestamp, SetNoteOffEvent{pitch});
+      }
+      controller.pitches.clear();
     }
-    controller.pitches.clear();
   }
 }
 
 Status InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto& update_events = update_events_[instrument_id];
-    for (const float pitch : controller->pitches) {
-      note_off_callback_(instrument_id, timestamp, pitch);
-      update_events.emplace(timestamp, SetNoteOffEvent{pitch});
+    if (!controller->pitches.empty()) {
+      auto& update_events = update_events_[instrument_id];
+      for (const float pitch : controller->pitches) {
+        note_off_callback_(instrument_id, timestamp, pitch);
+        update_events.emplace(timestamp, SetNoteOffEvent{pitch});
+      }
+      controller->pitches.clear();
     }
-    controller->pitches.clear();
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -213,10 +217,12 @@ Status InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
 
 void InstrumentManager::SetAllParamsToDefault(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
-    auto& update_events = update_events_[instrument_id];
-    for (auto& [id, param] : controller.params) {
-      param.ResetValue();
-      update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+    if (!controller.params.empty()) {
+      auto& update_events = update_events_[instrument_id];
+      for (auto& [id, param] : controller.params) {
+        param.ResetValue();
+        update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      }
     }
   }
 }
@@ -224,12 +230,14 @@ void InstrumentManager::SetAllParamsToDefault(double timestamp) {
 Status InstrumentManager::SetAllParamsToDefault(Id instrument_id,
                                                 double timestamp) {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    auto& update_events = update_events_[instrument_id];
-    for (auto& [id, param] : controller->params) {
-      param.ResetValue();
-      update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+    if (!controller->params.empty()) {
+      auto& update_events = update_events_[instrument_id];
+      for (auto& [id, param] : controller->params) {
+        param.ResetValue();
+        update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      }
+      return Status::kOk;
     }
-    return Status::kOk;
   }
   return Status::kNotFound;
 }
@@ -289,9 +297,8 @@ Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
       if (param->SetValue(param_value)) {
         update_events_[instrument_id].emplace(
             timestamp, SetParamEvent{param_id, param->GetValue()});
-        return Status::kOk;
       }
-      return Status::kFailedPrecondition;
+      return Status::kOk;
     }
     return Status::kInvalidArgument;
   }
@@ -305,9 +312,8 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
       if (param->ResetValue()) {
         update_events_[instrument_id].emplace(
             timestamp, SetParamEvent{param_id, param->GetValue()});
-        return Status::kOk;
       }
-      return Status::kFailedPrecondition;
+      return Status::kOk;
     }
     return Status::kInvalidArgument;
   }
@@ -315,19 +321,21 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
 }
 
 void InstrumentManager::SetSampleRate(double timestamp, int sample_rate) {
-  // Note that the sample accurate timing of the existing instrument events
-  // could flactuate during this switch, until the given |timestamp|.
-  sample_rate_ = sample_rate;
-  for (auto& [instrument_id, controller] : controllers_) {
-    auto& update_events = update_events_[instrument_id];
-    for (const float pitch : controller.pitches) {
-      note_off_callback_(instrument_id, timestamp, pitch);
-    }
-    controller.pitches.clear();
-    update_events.emplace(timestamp, DestroyEvent{});
-    update_events.emplace(timestamp, CreateEvent{controller.definition});
-    for (const auto& [id, param] : controller.params) {
-      update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+  if (sample_rate_ != sample_rate) {
+    // Note that the sample accurate timing of the existing instrument events
+    // could flactuate during this switch, until the given |timestamp|.
+    sample_rate_ = sample_rate;
+    for (auto& [instrument_id, controller] : controllers_) {
+      auto& update_events = update_events_[instrument_id];
+      for (const float pitch : controller.pitches) {
+        note_off_callback_(instrument_id, timestamp, pitch);
+      }
+      controller.pitches.clear();
+      update_events.emplace(timestamp, DestroyEvent{});
+      update_events.emplace(timestamp, CreateEvent{controller.definition});
+      for (const auto& [id, param] : controller.params) {
+        update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      }
     }
   }
 }

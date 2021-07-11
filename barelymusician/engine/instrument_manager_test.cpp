@@ -107,8 +107,10 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   // Destroy instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Destroy(kInstrumentId, 0.0)));
 
-  EXPECT_FALSE(IsOk(instrument_manager.GetAllNotes(kInstrumentId)));
-  EXPECT_FALSE(IsOk(instrument_manager.GetAllParams(kInstrumentId)));
+  EXPECT_EQ(GetStatusOrStatus(instrument_manager.GetAllNotes(kInstrumentId)),
+            Status::kNotFound);
+  EXPECT_EQ(GetStatusOrStatus(instrument_manager.GetAllParams(kInstrumentId)),
+            Status::kNotFound);
 
   instrument_manager.Update();
 
@@ -453,8 +455,9 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
 
   // This should not trigger the callback since the note is already on.
-  EXPECT_FALSE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 15.0,
-                                                 kNotePitch, kNoteIntensity)));
+  EXPECT_EQ(instrument_manager.SetNoteOn(kInstrumentId, 15.0, kNotePitch,
+                                         kNoteIntensity),
+            Status::kFailedPrecondition);
 
   EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
@@ -488,8 +491,8 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // This should not trigger the callback since the note is already off.
-  EXPECT_FALSE(
-      IsOk(instrument_manager.SetNoteOff(kInstrumentId, 25.0, kNotePitch)));
+  EXPECT_EQ(instrument_manager.SetNoteOff(kInstrumentId, 25.0, kNotePitch),
+            Status::kFailedPrecondition);
 
   EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);

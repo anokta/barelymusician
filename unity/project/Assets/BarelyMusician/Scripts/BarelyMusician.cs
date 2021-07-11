@@ -57,13 +57,13 @@ namespace BarelyApi {
     }
 
     // Sets instrument note off.
-    public static void SetNoteOff(Int64 id, double dspTime, float pitch) {
-      SetNoteOffNative(InstancePtr, id, dspTime, pitch);
+    public static bool SetNoteOff(Int64 id, double dspTime, float pitch) {
+      return SetNoteOffNative(InstancePtr, id, dspTime, pitch);
     }
 
     // Sets instrument note on.
-    public static void SetNoteOn(Int64 id, double dspTime, float pitch, float intensity) {
-      SetNoteOnNative(InstancePtr, id, dspTime, pitch, intensity);
+    public static bool SetNoteOn(Int64 id, double dspTime, float pitch, float intensity) {
+      return SetNoteOnNative(InstancePtr, id, dspTime, pitch, intensity);
     }
 
     // Sets instrument param value.
@@ -97,7 +97,7 @@ namespace BarelyApi {
     // Internal component to update the native state.
     private class BarelyMusicianInternal : MonoBehaviour {
       // Log severity.
-      private enum Severity {
+      private enum LogSeverity {
         Info = 0,
         Warning = 1,
         Error = 2,
@@ -119,17 +119,17 @@ namespace BarelyApi {
       private void Awake() {
         _debugCallback = delegate (int severity, string message) {
           message = "{::" + pluginName + "::}" + message;
-          switch ((Severity)severity) {
-            case Severity.Info:
+          switch ((LogSeverity)severity) {
+            case LogSeverity.Info:
               Debug.Log(message);
               break;
-            case Severity.Warning:
+            case LogSeverity.Warning:
               Debug.LogWarning(message);
               break;
-            case Severity.Error:
+            case LogSeverity.Error:
               Debug.LogError(message);
               break;
-            case Severity.Fatal:
+            case LogSeverity.Fatal:
               Debug.LogAssertion(message);
               break;
           }
@@ -207,29 +207,33 @@ namespace BarelyApi {
     private static extern void ProcessNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
                                              [In, Out] float[] output, int numChannels, int numFrames);
 
-    [DllImport(pluginName, EntryPoint = "BarelyResetAllInstrumentParams")]
-    private static extern void ResetAllParamsNative(IntPtr instancePtr, Int64 instrumentId, double timestamp);
-
     [DllImport(pluginName, EntryPoint = "BarelySetAllInstrumentNotesOff")]
-    private static extern void SetAllNotesOffNative(IntPtr instancePtr, Int64 instrumentId, double timestamp);
+    private static extern bool SetAllNotesOffNative(IntPtr instancePtr, Int64 instrumentId, double timestamp);
+
+    [DllImport(pluginName, EntryPoint = "BarelySetAllInstrumentParamsToDefault")]
+    private static extern bool SetAllParamsToDefaultNative(IntPtr instancePtr, Int64 instrumentId, double timestamp);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOffCallback")]
     private static extern void SetNoteOffCallbackNative(IntPtr instancePtr, IntPtr noteOffCallbackPtr);
 
+    [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOff")]
+    private static extern bool SetNoteOffNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
+                                                float notePitch);
+
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOnCallback")]
     private static extern void SetNoteOnCallbackNative(IntPtr instancePtr, IntPtr noteOnCallbackPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOff")]
-    private static extern void SetNoteOffNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
-                                                float notePitch);
-
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOn")]
-    private static extern void SetNoteOnNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
+    private static extern bool SetNoteOnNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
                                                float notePitch, float noteIntensity);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParam")]
-    private static extern void SetParamNative(IntPtr instancePtr, Int64 instrumentId, double timestamp, int paramId,
+    private static extern bool SetParamNative(IntPtr instancePtr, Int64 instrumentId, double timestamp, int paramId,
                                               float paramValue);
+
+    [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParamToDefault")]
+    private static extern bool SetParamToDefaultNative(IntPtr instancePtr, Int64 instrumentId, double timestamp,
+                                                       int paramId);
 
     [DllImport(pluginName, EntryPoint = "BarelySetSampleRate")]
     private static extern void SetSampleRateNative(IntPtr instancePtr, double timestamp, int sampleRate);

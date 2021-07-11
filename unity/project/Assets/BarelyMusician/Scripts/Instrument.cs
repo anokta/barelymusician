@@ -37,17 +37,19 @@ namespace BarelyApi {
     }
 
     // Schedules note off.
-    public void ScheduleNoteOff(double dspTime, float pitch) {
+    public bool ScheduleNoteOff(double dspTime, float pitch) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.SetNoteOff(_id, dspTime, pitch);
+        return BarelyMusician.SetNoteOff(_id, dspTime, pitch);
       }
+      return false;
     }
 
     // Schedules note on.
-    public void ScheduleNoteOn(double dspTime, float pitch, float intensity) {
+    public bool ScheduleNoteOn(double dspTime, float pitch, float intensity) {
       if (_id != BarelyMusician.InvalidId) {
-        BarelyMusician.SetNoteOn(_id, dspTime, pitch, intensity);
+        return BarelyMusician.SetNoteOn(_id, dspTime, pitch, intensity);
       }
+      return false;
     }
 
     // Stops all notes.
@@ -58,13 +60,13 @@ namespace BarelyApi {
     }
 
     // Stops playing note with the given |pitch|.
-    public void SetNoteOff(float pitch) {
-      ScheduleNoteOff(AudioSettings.dspTime, pitch);
+    public bool SetNoteOff(float pitch) {
+      return ScheduleNoteOff(AudioSettings.dspTime, pitch);
     }
 
     // Starts playing note with the given |pitch| and |intensity|.
-    public void SetNoteOn(float pitch, float intensity) {
-      ScheduleNoteOn(AudioSettings.dspTime, pitch, intensity);
+    public bool SetNoteOn(float pitch, float intensity) {
+      return ScheduleNoteOn(AudioSettings.dspTime, pitch, intensity);
     }
 
     // Sets parameter with the given |id| and |value|.

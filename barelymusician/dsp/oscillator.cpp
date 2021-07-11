@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include "barelymusician/common/random.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
@@ -29,7 +28,7 @@ float Oscillator::Next() {
       break;
     case OscillatorType::kNoise:
     default:
-      output = random::Uniform(-1.0f, 1.0f);
+      output = random_.DrawUniform(-1.0f, 1.0f);
       break;
   }
   // Update the phasor.

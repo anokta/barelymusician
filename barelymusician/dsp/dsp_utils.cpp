@@ -43,4 +43,14 @@ float GetFrequency(float pitch) {
   return kFrequencyA4 * std::pow(2.0f, pitch);
 }
 
+int SamplesFromSeconds(int sample_rate, double seconds) {
+  return static_cast<int>(seconds * static_cast<double>(sample_rate));
+}
+
+double SecondsFromSamples(int sample_rate, int samples) {
+  return sample_rate > 0
+             ? static_cast<double>(samples) / static_cast<double>(sample_rate)
+             : 0.0;
+}
+
 }  // namespace barelyapi

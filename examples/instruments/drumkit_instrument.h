@@ -1,7 +1,7 @@
 #ifndef EXAMPLES_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
 
-#include <memory>
+#include <any>
 #include <unordered_map>
 
 #include "barelymusician/dsp/sample_player.h"
@@ -20,7 +20,7 @@ class DrumkitInstrument : public GenericInstrument {
   void NoteOff(float pitch) override;
   void NoteOn(float pitch, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-  void SetCustomData(void* data) override;
+  void SetCustomData(std::any data) override;
   void SetParam(int, float) override {}
 
   static InstrumentDefinition GetDefinition();

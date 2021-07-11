@@ -9,34 +9,20 @@ cc_library(
 )
 
 cc_library(
-    name = "engine",
-    srcs = ["engine.cpp"],
-    hdrs = ["engine.h"],
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
     deps = [
-        ":clock",
-        ":instrument_controller",
-        ":instrument_data",
         ":instrument_definition",
-        ":instrument_processor",
-        ":task_runner",
-        "//barelymusician/common:common_utils",
     ],
 )
 
 cc_library(
-    name = "instrument_controller",
-    srcs = ["instrument_controller.cpp"],
-    hdrs = ["instrument_controller.h"],
+    name = "instrument_event",
+    hdrs = ["instrument_event.h"],
     deps = [
-        ":instrument_data",
         ":instrument_definition",
-        "//barelymusician/common:common_utils",
     ],
-)
-
-cc_library(
-    name = "instrument_data",
-    hdrs = ["instrument_data.h"],
 )
 
 cc_library(
@@ -45,12 +31,47 @@ cc_library(
 )
 
 cc_library(
-    name = "instrument_processor",
-    srcs = ["instrument_processor.cpp"],
-    hdrs = ["instrument_processor.h"],
+    name = "instrument_manager",
+    srcs = ["instrument_manager.cpp"],
+    hdrs = ["instrument_manager.h"],
     deps = [
-        ":instrument_data",
+        ":instrument",
         ":instrument_definition",
+        ":instrument_event",
+        ":instrument_param",
+        ":instrument_param_definition",
+        ":task_runner",
+        "//barelymusician/common:common_utils",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
+        "//barelymusician/dsp:dsp_utils",
+    ],
+)
+
+cc_library(
+    name = "instrument_param",
+    srcs = ["instrument_param.cpp"],
+    hdrs = ["instrument_param.h"],
+    deps = [
+        "instrument_param_definition",
+    ],
+)
+
+cc_library(
+    name = "instrument_param_definition",
+    hdrs = ["instrument_param_definition.h"],
+)
+
+cc_library(
+    name = "sequencer",
+    srcs = ["sequencer.cpp"],
+    hdrs = ["sequencer.h"],
+    deps = [
+        ":clock",
+        ":instrument_event",
+        ":instrument_manager",
+        "//barelymusician/common:id",
+        "//barelymusician/composition:note",
     ],
 )
 
@@ -63,7 +84,9 @@ cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],
-    deps = ["//barelymusician/common:logging"],
+    deps = [
+        "//barelymusician/common:logging",
+    ],
 )
 
 cc_test(
@@ -76,33 +99,35 @@ cc_test(
 )
 
 cc_test(
-    name = "engine_test",
-    srcs = ["engine_test.cpp"],
+    name = "instrument_manager_test",
+    srcs = ["instrument_manager_test.cpp"],
     deps = [
-        ":engine",
-        ":instrument_data",
+        ":instrument_definition",
+        ":instrument_manager",
+        ":instrument_param",
+        ":instrument_param_definition",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
         "@googletest//:gtest_main",
     ],
 )
 
 cc_test(
-    name = "instrument_controller_test",
-    srcs = ["instrument_controller_test.cpp"],
+    name = "instrument_param_test",
+    srcs = ["instrument_param_test.cpp"],
     deps = [
-        ":instrument_controller",
-        ":instrument_data",
-        ":instrument_definition",
+        ":instrument_param",
+        ":instrument_param_definition",
         "@googletest//:gtest_main",
     ],
 )
 
 cc_test(
-    name = "instrument_processor_test",
-    srcs = ["instrument_processor_test.cpp"],
+    name = "instrument_test",
+    srcs = ["instrument_test.cpp"],
     deps = [
-        ":instrument_data",
+        ":instrument",
         ":instrument_definition",
-        ":instrument_processor",
         "@googletest//:gtest_main",
     ],
 )

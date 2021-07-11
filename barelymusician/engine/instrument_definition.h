@@ -3,8 +3,6 @@
 
 #include <any>
 #include <functional>
-#include <optional>
-#include <vector>
 
 namespace barelyapi {
 
@@ -24,7 +22,7 @@ using ProcessInstrumentFn = std::function<void(
 
 /// Instrument set custom data function signature.
 using SetCustomInstrumentDataFn =
-    std::function<void(InstrumentState* state, void* data)>;
+    std::function<void(InstrumentState* state, std::any data)>;
 
 /// Instrument set note off function signature.
 using SetInstrumentNoteOffFn =
@@ -61,24 +59,6 @@ struct InstrumentDefinition {
   /// Set parameter function.
   SetInstrumentParamFn set_param_fn;
 };
-
-/// Instrument parameter definition.
-struct InstrumentParamDefinition {
-  /// Parameter id.
-  int id;
-
-  /// Parameter default value.
-  float default_value;
-
-  /// Parameter minimum value.
-  std::optional<float> min_value;
-
-  /// Parameter maximum value.
-  std::optional<float> max_value;
-};
-
-/// List of instrument parameter type.
-using InstrumentParamDefinitions = std::vector<InstrumentParamDefinition>;
 
 }  // namespace barelyapi
 

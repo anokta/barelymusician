@@ -43,5 +43,6 @@ cc_library(
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
         "//barelymusician/engine:instrument_definition",
+        "//barelymusician/engine:instrument_param_definition",
     ],
 )

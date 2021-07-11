@@ -16,6 +16,7 @@ cc_test(
     srcs = ["context_free_grammar_test.cpp"],
     deps = [
         ":context_free_grammar",
+        "//barelymusician/common:random",
         "@googletest//:gtest_main",
     ],
 )

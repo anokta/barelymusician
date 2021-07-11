@@ -12,7 +12,6 @@ cc_library(
     srcs = ["note_utils.cpp"],
     hdrs = ["note_utils.h"],
     deps = [
-        ":note",
         "//barelymusician/common:logging",
     ],
 )

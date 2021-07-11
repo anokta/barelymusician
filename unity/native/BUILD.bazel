@@ -7,7 +7,9 @@ cc_binary(
     name = "libunity_linux.so",
     linkshared = True,
     target_compatible_with = ["@platforms//os:linux"],
-    deps = [":unity"],
+    deps = [
+        ":unity",
+    ],
 )
 
 # OSX plugin (rename this to barelymusicianunity.bundle).
@@ -15,7 +17,9 @@ cc_binary(
     name = "unity_osx.dylib",
     linkshared = True,
     target_compatible_with = ["@platforms//os:osx"],
-    deps = [":unity"],
+    deps = [
+        ":unity",
+    ],
 )
 
 # Windows plugin (rename this to barelymusicianunity.dll).
@@ -23,7 +27,9 @@ cc_binary(
     name = "unity_windows.dll",
     linkshared = True,
     target_compatible_with = ["@platforms//os:windows"],
-    deps = [":unity"],
+    deps = [
+        ":unity",
+    ],
 )
 
 cc_library(
@@ -37,9 +43,11 @@ cc_library(
     visibility = ["//visibility:private"],
     deps = [
         ":unity_log_writer",
+        "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
-        "//barelymusician/engine",
+        "//barelymusician/common:status",
         "//barelymusician/engine:instrument_definition",
+        "//barelymusician/engine:instrument_manager",
         "//examples/instruments:synth_instrument",
     ],
     alwayslink = True,
@@ -50,5 +58,7 @@ cc_library(
     srcs = ["unity_log_writer.cpp"],
     hdrs = ["unity_log_writer.h"],
     visibility = ["//visibility:private"],
-    deps = ["//barelymusician/common:logging"],
+    deps = [
+        "//barelymusician/common:logging",
+    ],
 )

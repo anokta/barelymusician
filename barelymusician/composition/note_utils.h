@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include "barelymusician/composition/note.h"
-
 namespace barelyapi {
 
 /// Number of semitones in an octave (twelwe-tone equal temperament).

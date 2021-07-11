@@ -15,6 +15,11 @@ namespace barelyapi {
 template <typename SymbolType>
 class ContextFreeGrammar {
  public:
+  /// Constructs new |ContextFreeGrammar|.
+  ///
+  /// @param random Pointer to random number generator.
+  explicit ContextFreeGrammar(Random* random);
+
   /// Adds a rule of |substitions| for the given |symbol|.
   ///
   /// @param symbol Input symbol.
@@ -33,9 +38,18 @@ class ContextFreeGrammar {
   // Returns new substition for the given |symbol| using its rule.
   std::vector<SymbolType> GetSubstition(const SymbolType& symbol) const;
 
+  // Random number generator.
+  Random* random_;  // Not owned.
+
   // Grammar rules that map symbols to their corresponding substitions.
   std::unordered_map<SymbolType, std::vector<std::vector<SymbolType>>> rules_;
 };
+
+template <typename SymbolType>
+ContextFreeGrammar<SymbolType>::ContextFreeGrammar(Random* random)
+    : random_(random) {
+  DCHECK(random);
+}
 
 template <typename SymbolType>
 void ContextFreeGrammar<SymbolType>::AddRule(
@@ -79,7 +93,7 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
   // Select a substition randomly with equal probability for each selection.
   const auto& substitions = rules_.at(symbol);
   const int index =
-      random::Uniform(0, static_cast<int>(substitions.size()) - 1);
+      random_->DrawUniform(0, static_cast<int>(substitions.size()) - 1);
   return substitions[index];
 }
 

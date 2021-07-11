@@ -1,5 +1,8 @@
 #include "barelymusician/composition/note_utils.h"
 
+#include <iterator>
+#include <vector>
+
 #include "gtest/gtest.h"
 
 namespace barelyapi {

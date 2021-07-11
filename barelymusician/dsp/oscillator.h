@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
 #define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
+#include "barelymusician/common/random.h"
 #include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
@@ -47,6 +48,9 @@ class Oscillator : public Generator {
 
   // Increment per sample.
   float increment_;
+
+  // Random number generator (to generate white noise).
+  Random random_;
 };
 
 }  // namespace barelyapi

@@ -1,5 +1,8 @@
 #include "barelymusician/engine/task_runner.h"
 
+#include <atomic>
+#include <utility>
+
 #include "barelymusician/common/logging.h"
 
 namespace barelyapi {

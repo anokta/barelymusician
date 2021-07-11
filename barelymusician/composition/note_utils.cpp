@@ -1,6 +1,7 @@
 #include "barelymusician/composition/note_utils.h"
 
 #include <cmath>
+#include <vector>
 
 #include "barelymusician/common/logging.h"
 

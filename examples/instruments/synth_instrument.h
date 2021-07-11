@@ -1,13 +1,13 @@
 #ifndef EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
-#include <memory>
-#include <utility>
+#include <any>
 #include <vector>
 
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/instrument_param_definition.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"
 
@@ -33,7 +33,7 @@ class SynthInstrument : public GenericInstrument {
   void NoteOff(float pitch) override;
   void NoteOn(float pitch, float intensity) override;
   void Process(float* output, int num_channels, int num_frames) override;
-  void SetCustomData(void*) override {}
+  void SetCustomData(std::any /*data*/) override {}
   void SetParam(int id, float value) override;
 
   /// Returns instrument definition.

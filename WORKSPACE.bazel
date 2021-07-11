@@ -87,6 +87,10 @@ cc_library(
         "//conditions:default": [],
     }),
     hdrs = ["include/portaudio.h"],
+    copts = select({
+        "@platforms//os:osx": ["-Wno-deprecated-declarations"],
+        "//conditions:default": [],
+    }),
     defines = select({
         "@platforms//os:osx": ["PA_USE_COREAUDIO=1"],
         "@platforms//os:windows": ["PA_USE_WMME=1"],
@@ -108,7 +112,7 @@ cc_library(
     }),
 )
     """,
-    commit = "88c71a6ec478ed693adf86d1ff08134273c1e5e7",
+    commit = "eec7bb739771381ab698a6a611d933bdd72cbd8f",
     remote = "https://github.com/PortAudio/portaudio.git",
-    shallow_since = "1603931550 -0700",
+    shallow_since = "1616176291 -0700",
 )

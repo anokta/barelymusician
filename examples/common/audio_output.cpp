@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "barelymusician/common/logging.h"
+#include "portaudio.h"
 
 namespace barelyapi::examples {
 

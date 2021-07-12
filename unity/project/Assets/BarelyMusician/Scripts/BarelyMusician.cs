@@ -18,13 +18,6 @@ namespace BarelyApi {
     public delegate void NoteOnEvent(Instrument instrument, float pitch, float intensity);
     public static event NoteOnEvent OnNoteOn;
 
-    // Internal Unity instrument functions.
-    public delegate void UnityProcessFn([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)][In, Out] float[] output,
-                                        int size, int numChannels);
-    public delegate void UnitySetNoteOffFn(float pitch);
-    public delegate void UnitySetNoteOnFn(float pitch, float intensity);
-    public delegate void UnitySetParamFn(int id, float value);
-
     // Creates new instrument.
     public static Int64 Create(Instrument instrument) {
       double dspTime = AudioSettings.dspTime;

@@ -6,7 +6,7 @@ using BarelyApi;
 public class Bouncer : MonoBehaviour {
   public Instrument instrument;
 
-  public float rootNote = 64.0f;
+  public float rootPitch = 0.0f;
 
   private readonly float[] MajorScale = new float[] { 0.0f, 2.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f };
 
@@ -26,8 +26,8 @@ public class Bouncer : MonoBehaviour {
   }
 
   private void OnCollisionEnter(Collision collision) {
-    float octaveOffset = 12.0f * (lastIndex / MajorScale.Length);
-    float pitch = rootNote + octaveOffset + MajorScale[lastIndex++ % MajorScale.Length];
+    float octaveOffset = lastIndex / MajorScale.Length;
+    float pitch = rootPitch + octaveOffset + MajorScale[lastIndex++ % MajorScale.Length] / 12.0f;
     float intensity = Mathf.Min(1.0f, 0.125f * collision.relativeVelocity.sqrMagnitude);
     StartCoroutine(PlayNote(pitch, intensity, NoteDuration));
   }
@@ -37,5 +37,4 @@ public class Bouncer : MonoBehaviour {
     yield return new WaitForSeconds(duration);
     instrument.SetNoteOff(pitch);
   }
-
 }

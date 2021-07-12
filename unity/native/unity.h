@@ -17,13 +17,15 @@ namespace barelyapi::unity {
 
 extern "C" {
 
-/// Event callback signatures.
-using NoteOffCallback = void(Id instrument_id, float note_pitch);
-using NoteOnCallback = void(Id instrument_id, float note_pitch,
-                            float note_intensity);
-
 /// Debug callback signature.
 using DebugCallback = void(int severity, const char* message);
+
+/// Note off callback signature.
+using NoteOffCallback = void(Id instrument_id, float note_pitch);
+
+/// Note on callback signature.
+using NoteOnCallback = void(Id instrument_id, float note_pitch,
+                            float note_intensity);
 
 /// System handle.
 struct BarelyMusician;
@@ -37,6 +39,8 @@ BARELY_EXPORT BarelyMusician* BarelyInitialize(
     int sample_rate, DebugCallback* debug_callback_ptr);
 
 /// Shuts down the system.
+///
+/// @param barelymusician System handle.
 BARELY_EXPORT void BarelyShutdown(BarelyMusician* barelymusician);
 
 /// Creates new synth instrument.

@@ -21,7 +21,7 @@ namespace {
 using ::barelyapi::examples::SynthInstrument;
 
 // Invalid instrument_id.
-inline constexpr Id kInvalidId = -1;
+constexpr Id kInvalidId = -1;
 
 }  // namespace
 

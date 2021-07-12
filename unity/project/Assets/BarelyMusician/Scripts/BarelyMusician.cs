@@ -26,7 +26,8 @@ namespace BarelyApi {
     public delegate void UnitySetParamFn(int id, float value);
 
     // Creates new instrument.
-    public static Int64 Create(Instrument instrument, double dspTime) {
+    public static Int64 Create(Instrument instrument) {
+      double dspTime = AudioSettings.dspTime;
       Int64 id = InvalidId;
       Type instrumentType = instrument.GetType();
       if (instrumentType == typeof(SynthInstrument)) {
@@ -41,34 +42,55 @@ namespace BarelyApi {
     }
 
     // Destroys instrument.
-    public static void Destroy(Int64 id, double dspTime) {
-      DestroyNative(InstancePtr, id, dspTime);
-      _instruments.Remove(id);
+    public static void Destroy(Instrument instrument) {
+      DestroyNative(InstancePtr, instrument.Id, AudioSettings.dspTime);
+      _instruments.Remove(instrument.Id);
     }
 
     // Processes instrument.
-    public static void Process(Int64 id, double dspTime, float[] output, int numChannels) {
-      ProcessNative(InstancePtr, id, dspTime, output, numChannels, output.Length / numChannels);
+    public static void Process(Instrument instrument, float[] output, int numChannels) {
+      ProcessNative(InstancePtr, instrument.Id, AudioSettings.dspTime, output, numChannels,
+                    output.Length / numChannels);
+    }
+
+    // Schedules instrument note off.
+    public static bool ScheduleNoteOff(Instrument instrument, double dspTime, float pitch) {
+      return SetNoteOffNative(InstancePtr, instrument.Id, dspTime, pitch);
+    }
+
+    // Schedules instrument note on.
+    public static bool ScheduleNoteOn(Instrument instrument, double dspTime, float pitch, float intensity) {
+      return SetNoteOnNative(InstancePtr, instrument.Id, dspTime, pitch, intensity);
     }
 
     // Sets all instrument notes off.
-    public static void SetAllNotesOff(Int64 id, double dspTime) {
-      SetAllNotesOffNative(InstancePtr, id, dspTime);
+    public static bool SetAllNotesOff(Instrument instrument) {
+      return SetAllNotesOffNative(InstancePtr, instrument.Id, AudioSettings.dspTime);
+    }
+
+    // Sets all instrument parameters to default value.
+    public static bool SetAllParamsToDefault(Instrument instrument) {
+      return SetAllParamsToDefaultNative(InstancePtr, instrument.Id, AudioSettings.dspTime);
     }
 
     // Sets instrument note off.
-    public static bool SetNoteOff(Int64 id, double dspTime, float pitch) {
-      return SetNoteOffNative(InstancePtr, id, dspTime, pitch);
+    public static bool SetNoteOff(Instrument instrument, float pitch) {
+      return SetNoteOffNative(InstancePtr, instrument.Id, AudioSettings.dspTime, pitch);
     }
 
     // Sets instrument note on.
-    public static bool SetNoteOn(Int64 id, double dspTime, float pitch, float intensity) {
-      return SetNoteOnNative(InstancePtr, id, dspTime, pitch, intensity);
+    public static bool SetNoteOn(Instrument instrument, float pitch, float intensity) {
+      return SetNoteOnNative(InstancePtr, instrument.Id, AudioSettings.dspTime, pitch, intensity);
     }
 
-    // Sets instrument param value.
-    public static void SetParam(Int64 id, double dspTime, int paramId, float value) {
-      SetParamNative(InstancePtr, id, dspTime, paramId, value);
+    // Sets instrument parameter value.
+    public static bool SetParam(Instrument instrument, int paramId, float value) {
+      return SetParamNative(InstancePtr, instrument.Id, AudioSettings.dspTime, paramId, value);
+    }
+
+    // Sets instrument parameter value to default.
+    public static bool SetParamToDefault(Instrument instrument, int paramId) {
+      return SetParamToDefaultNative(InstancePtr, instrument.Id, AudioSettings.dspTime, paramId);
     }
 
     // Singleton instance.
@@ -88,11 +110,11 @@ namespace BarelyApi {
     }
     private static IntPtr _instancePtr = IntPtr.Zero;
 
-    // Denotes whether the system is shutting down to avoid re-initialization.
-    private static bool _isShuttingDown = false;
-
     // List of instruments.
     private static Dictionary<Int64, Instrument> _instruments = new Dictionary<Int64, Instrument>();
+
+    // Denotes if the system is shutting down to avoid re-initialization.
+    private static bool _isShuttingDown = false;
 
     // Internal component to update the native state.
     private class BarelyMusicianInternal : MonoBehaviour {
@@ -141,7 +163,7 @@ namespace BarelyApi {
           if (_instruments.TryGetValue(id, out instrument)) {
             OnNoteOff?.Invoke(instrument, pitch);
           } else {
-            Debug.LogError("Instrument does not exist: " + id);
+            Debug.LogWarning("Instrument does not exist: " + id);
           }
         };
         SetNoteOffCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_noteOffCallback));
@@ -150,25 +172,33 @@ namespace BarelyApi {
           if (_instruments.TryGetValue(id, out instrument)) {
             OnNoteOn?.Invoke(instrument, pitch, intensity);
           } else {
-            Debug.LogError("Instrument does not exist: " + id);
+            Debug.LogWarning("Instrument does not exist: " + id);
           }
         };
         SetNoteOnCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
+        if (_instancePtr == IntPtr.Zero) {
+          GameObject.Destroy(gameObject);
+        }
+      }
+
+      private void OnDestroy() {
+        AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
+        ShutdownNative(_instancePtr);
+        _instancePtr = IntPtr.Zero;
       }
 
       private void OnApplicationQuit() {
         _isShuttingDown = true;
-        AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
-        ShutdownNative(_instancePtr);
-
-        GameObject.DestroyImmediate(gameObject);
+        foreach (var instrument in _instruments.Values) {
+          SetAllNotesOffNative(_instancePtr, instrument.Id, AudioSettings.dspTime);
+        }
       }
 
       private void OnAudioConfigurationChanged(bool deviceWasChanged) {
         SetSampleRateNative(_instancePtr, AudioSettings.dspTime, AudioSettings.outputSampleRate);
         foreach (var instrument in _instruments.Values) {
-          instrument.GetComponent<AudioSource>()?.Play();
+          instrument.Source?.Play();
         }
       }
 

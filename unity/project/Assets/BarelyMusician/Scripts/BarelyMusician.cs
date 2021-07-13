@@ -93,10 +93,14 @@ namespace BarelyApi {
           return IntPtr.Zero;
         }
         if (_instancePtr == IntPtr.Zero) {
-          var gameObject = new GameObject() {
+          var instance = new GameObject() {
             hideFlags = HideFlags.HideAndDontSave
           }.AddComponent<BarelyMusicianInternal>();
-          GameObject.DontDestroyOnLoad(gameObject);
+          GameObject.DontDestroyOnLoad(instance.gameObject);
+          if (_instancePtr == IntPtr.Zero) {
+            Debug.LogError("Could not initialize BarelyMusician.");
+            GameObject.DestroyImmediate(instance.gameObject);
+          }
         }
         return _instancePtr;
       }
@@ -132,6 +136,7 @@ namespace BarelyApi {
       private NoteOnCallback _noteOnCallback = null;
 
       private void Awake() {
+        AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
         _debugCallback = delegate (int severity, string message) {
           message = "{::" + pluginName + "::}" + message;
           switch ((LogSeverity)severity) {
@@ -169,10 +174,6 @@ namespace BarelyApi {
           }
         };
         SetNoteOnCallbackNative(_instancePtr, Marshal.GetFunctionPointerForDelegate(_noteOnCallback));
-        AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-        if (_instancePtr == IntPtr.Zero) {
-          GameObject.Destroy(gameObject);
-        }
       }
 
       private void OnDestroy() {
@@ -186,6 +187,7 @@ namespace BarelyApi {
         foreach (var instrument in _instruments.Values) {
           SetAllNotesOffNative(_instancePtr, instrument.Id, AudioSettings.dspTime);
         }
+        GameObject.Destroy(gameObject);
       }
 
       private void OnAudioConfigurationChanged(bool deviceWasChanged) {

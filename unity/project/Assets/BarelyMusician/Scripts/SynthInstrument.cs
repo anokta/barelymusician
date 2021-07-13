@@ -13,6 +13,7 @@ namespace BarelyApi {
     }
 
     // Gain.
+    [Range(0.0f, 1.0f)]
     public float gain = 0.25f;
 
     // Envelope attack.
@@ -22,6 +23,7 @@ namespace BarelyApi {
     public float decay = 0.0f;
 
     // Envelope sustain.
+    [Range(0.0f, 1.0f)]
     public float sustain = 1.0f;
 
     // Envelope release.
@@ -31,6 +33,7 @@ namespace BarelyApi {
     public OscillatorType oscillatorType = OscillatorType.Sine;
 
     // Number of voices.
+    [Range(1, 32)]
     public int numVoices = 8;
 
     private void Update() {

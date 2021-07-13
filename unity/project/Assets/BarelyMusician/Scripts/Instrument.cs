@@ -22,7 +22,9 @@ namespace BarelyApi {
     }
 
     protected virtual void OnEnable() {
-      Id = BarelyMusician.Create(this);
+      if (Id == BarelyMusician.InvalidId) {
+        Id = BarelyMusician.Create(this);
+      }
       Source?.Play();
     }
 

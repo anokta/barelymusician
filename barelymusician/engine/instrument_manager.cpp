@@ -131,9 +131,9 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
     // Process *all* events before the end timestamp.
     const int sample_rate = sample_rate_;
     auto& events = processor_it->second.events;
-    auto begin = events.begin();
-    auto end = events.lower_bound(timestamp +
-                                  SecondsFromSamples(sample_rate, num_frames));
+    const auto begin = events.begin();
+    const auto end = events.lower_bound(
+        timestamp + SecondsFromSamples(sample_rate, num_frames));
     for (auto it = begin; it != end; ++it) {
       const int message_frame =
           SamplesFromSeconds(sample_rate, it->first - timestamp);

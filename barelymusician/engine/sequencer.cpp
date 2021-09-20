@@ -1,7 +1,9 @@
 #include "barelymusician/engine/sequencer.h"
 
 #include <cmath>
+#include <iterator>
 #include <utility>
+#include <variant>
 
 #include "barelymusician/common/common_utils.h"
 #include "barelymusician/common/id.h"
@@ -10,14 +12,66 @@
 
 namespace barelyapi {
 
-Sequencer::Sequencer(InstrumentManager* manager)
-    : manager_(manager), beat_callback_(nullptr) {}
+Sequencer::Sequencer(InstrumentManager* manager) : manager_(manager) {
+  clock_.SetUpdateCallback([&](double begin_position, double end_position) {
+    // Trigger messages.
+    if (begin_position < end_position) {
+      for (auto& [id, track] : tracks_) {
+        auto begin = track.events.lower_bound(begin_position);
+        auto end = track.events.lower_bound(end_position);
+        const auto instrument_id = id;
+        for (auto it = begin; it != end; ++it) {
+          std::visit(
+              InstrumentEventVisitor{
+                  [&](SetNoteOffEvent& set_note_off_event) {
+                    manager_->SetNoteOff(
+                        instrument_id, clock_.GetTimestampAtPosition(it->first),
+                        set_note_off_event.pitch);
+                  },
+                  [&](SetNoteOnEvent& set_note_on_event) {
+                    manager_->SetNoteOn(
+                        instrument_id, clock_.GetTimestampAtPosition(it->first),
+                        set_note_on_event.pitch, set_note_on_event.intensity);
+                  },
+                  [](auto&) {}},
+              it->second);
+        }
+      }
+    } else {
+      // Trigger messages backwards.
+      for (auto& [id, track] : tracks_) {
+        auto begin =
+            std::reverse_iterator(track.events.lower_bound(begin_position));
+        auto end =
+            std::reverse_iterator(track.events.lower_bound(end_position));
+        const auto instrument_id = id;
+        for (auto it = begin; it != end; ++it) {
+          std::visit(
+              InstrumentEventVisitor{
+                  [&](SetNoteOffEvent& set_note_off_event) {
+                    // TODO: intensity missing.
+                    manager_->SetNoteOn(
+                        instrument_id, clock_.GetTimestampAtPosition(it->first),
+                        set_note_off_event.pitch, 0.5);
+                  },
+                  [&](SetNoteOnEvent& set_note_on_event) {
+                    manager_->SetNoteOff(
+                        instrument_id, clock_.GetTimestampAtPosition(it->first),
+                        set_note_on_event.pitch);
+                  },
+                  [](auto&) {}},
+              it->second);
+        }
+      }
+    }
+  });
+}
 
 double Sequencer::GetPlaybackPosition() const { return clock_.GetPosition(); }
 
-double Sequencer::GetPlaybackTempo() const { return clock_.GetTempo(); }
+double Sequencer::GetPlaybackTempo() const { return tempo_; }
 
-bool Sequencer::IsPlaying() const { return clock_.IsPlaying(); }
+bool Sequencer::IsPlaying() const { return is_playing_; }
 
 void Sequencer::RemoveAllScheduledInstrumentNotes() { tracks_.clear(); }
 
@@ -33,13 +87,20 @@ void Sequencer::ScheduleInstrumentNote(Id instrument_id,
   if (track_it == tracks_.end()) {
     track_it = tracks_.emplace(instrument_id, Track{}).first;
   }
-  track_it->second.score.emplace(
-      note_begin_position,
-      Note{note_begin_position, note_end_position, note_pitch, note_intensity});
+  track_it->second.events.emplace(note_begin_position,
+                                  SetNoteOnEvent{note_pitch, note_intensity});
+  track_it->second.events.emplace(note_end_position,
+                                  SetNoteOffEvent{note_pitch});
 }
 
 void Sequencer::SetBeatCallback(BeatCallback beat_callback) {
-  beat_callback_ = std::move(beat_callback);
+  if (beat_callback) {
+    clock_.SetBeatCallback([beat_callback](double beat, double /*timestamp*/) {
+      beat_callback(static_cast<int>(beat));
+    });
+  } else {
+    clock_.SetBeatCallback(nullptr);
+  }
 }
 
 void Sequencer::SetPlaybackPosition(double position) {
@@ -47,62 +108,31 @@ void Sequencer::SetPlaybackPosition(double position) {
   clock_.SetPosition(position);
 }
 
-void Sequencer::SetPlaybackTempo(double tempo) { clock_.SetTempo(tempo); }
+void Sequencer::SetPlaybackTempo(double tempo) {
+  tempo_ = tempo;
+  if (is_playing_) {
+    clock_.SetTempo(tempo_);
+  }
+}
 
-void Sequencer::StartPlayback() { clock_.Start(); }
+void Sequencer::StartPlayback() {
+  clock_.SetTempo(tempo_);
+  is_playing_ = true;
+}
 
 void Sequencer::StopPlayback() {
   StopAllNotes();
-  clock_.Stop();
+  clock_.SetTempo(0.0);
+  is_playing_ = false;
 }
 
-void Sequencer::Update(double timestamp) {
-  const double begin_position = clock_.GetPosition();
-  clock_.Update(timestamp);
-  const double end_position = clock_.GetPosition();
-  if (begin_position < end_position) {
-    // Trigger beats.
-    if (beat_callback_) {
-      for (double beat = std::ceil(begin_position); beat < end_position;
-           ++beat) {
-        beat_callback_(static_cast<int>(beat));
-      }
-    }
-    // Trigger messages.
-    for (auto& [id, track] : tracks_) {
-      // Handle note offs.
-      auto begin = track.active_notes.lower_bound(begin_position);
-      auto end = track.active_notes.lower_bound(end_position);
-      for (auto it = begin; it != end; ++it) {
-        manager_->SetNoteOff(id, clock_.GetTimestampAtPosition(it->first),
-                             it->second.pitch);
-      }
-      track.active_notes.erase(begin, end);
-
-      // Handle score.
-      begin = track.score.lower_bound(begin_position);
-      end = track.score.lower_bound(end_position);
-      for (auto it = begin; it != end; ++it) {
-        const auto& note = it->second;
-        manager_->SetNoteOn(id, clock_.GetTimestampAtPosition(it->first),
-                            note.pitch, note.intensity);
-
-        if (note.end_position < end_position) {
-          manager_->SetNoteOff(
-              id, clock_.GetTimestampAtPosition(note.end_position), note.pitch);
-        } else {
-          track.active_notes.emplace(note.end_position, note);
-        }
-      }
-    }
-  }
-}
+void Sequencer::Update(double timestamp) { clock_.UpdatePosition(timestamp); }
 
 void Sequencer::StopAllNotes() {
   const double timestamp = clock_.GetTimestamp();
   for (auto& [id, track] : tracks_) {
     manager_->SetAllNotesOff(id, timestamp);
-    track.active_notes.clear();
+    track.events.clear();
   }
 }
 

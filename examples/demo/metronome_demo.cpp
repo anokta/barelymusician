@@ -77,8 +77,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const double position = static_cast<double>(beat);
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    sequencer.ScheduleInstrumentNote(kMetronomeId, position,
-                                     position + kTickDuration, pitch, kGain);
+    sequencer.ScheduleInstrumentNote(
+        kMetronomeId,
+        position + (sequencer.GetPlaybackTempo() > 0.0 ? 0.0 : -kTickDuration),
+        position + (sequencer.GetPlaybackTempo() > 0.0 ? kTickDuration : 0.0),
+        pitch, kGain);
   };
   sequencer.SetBeatCallback(beat_callback);
 

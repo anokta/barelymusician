@@ -1,11 +1,20 @@
 #ifndef BARELYMUSICIAN_ENGINE_CLOCK_H_
 #define BARELYMUSICIAN_ENGINE_CLOCK_H_
 
+#include <functional>
+
 namespace barelyapi {
 
 /// Clock that keeps track of position in beats.
 class Clock {
  public:
+  /// Beat callback signature.
+  using BeatCallback = std::function<void(double beat, double timestamp)>;
+
+  /// Update callback signature.
+  using UpdateCallback =
+      std::function<void(double begin_position, double end_position)>;
+
   /// Constructs new |Clock|.
   Clock();
 
@@ -25,16 +34,15 @@ class Clock {
   double GetTimestamp() const;
 
   /// Returns the timestamp at position.
-  /// @note Assumes the playback is active with a constant valid tempo.
   ///
   /// @param position Position in beats.
   /// @return Timestamp in seconds.
   double GetTimestampAtPosition(double position) const;
 
-  /// Returns whether the playback is currently active or not.
+  /// Sets the beat callback.
   ///
-  /// @return True if playing, false otherwise.
-  bool IsPlaying() const;
+  /// @param beat_callback Beat callback.
+  void SetBeatCallback(BeatCallback beat_callback);
 
   /// Sets the current position.
   ///
@@ -46,21 +54,17 @@ class Clock {
   /// @param tempo Tempo in beats per second.
   void SetTempo(double tempo);
 
-  /// Starts playback.
-  void Start();
+  /// Sets the update callback.
+  ///
+  /// @param update_callback Update callback.
+  void SetUpdateCallback(UpdateCallback update_callback);
 
-  /// Stops playback.
-  void Stop();
-
-  /// Updates the current state.
+  /// Updates the current position.
   ///
   /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp);
+  void UpdatePosition(double timestamp);
 
  private:
-  // Denotes whether the playback is active or not.
-  double is_playing_;
-
   // Position in beats.
   double position_;
 
@@ -69,6 +73,12 @@ class Clock {
 
   // Last updated timestamp in seconds.
   double timestamp_;
+
+  // Beat callback.
+  BeatCallback beat_callback_;
+
+  // Update callback.
+  UpdateCallback update_callback_;
 };
 
 }  // namespace barelyapi

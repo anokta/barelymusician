@@ -6,6 +6,9 @@ cc_library(
     name = "clock",
     srcs = ["clock.cpp"],
     hdrs = ["clock.h"],
+    deps = [
+        "//barelymusician/common:logging",
+    ],
 )
 
 cc_library(

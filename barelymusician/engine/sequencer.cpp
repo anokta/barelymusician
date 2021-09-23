@@ -96,7 +96,7 @@ void Sequencer::ScheduleInstrumentNote(Id instrument_id,
 void Sequencer::SetBeatCallback(BeatCallback beat_callback) {
   if (beat_callback) {
     clock_.SetBeatCallback([beat_callback](double beat, double /*timestamp*/) {
-      beat_callback(static_cast<int>(beat));
+      beat_callback(beat);
     });
   } else {
     clock_.SetBeatCallback(nullptr);

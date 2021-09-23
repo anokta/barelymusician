@@ -263,10 +263,10 @@ int main(int /*argc*/, char* argv[]) {
   // Beat callback.
   int harmonic = 0;
   std::vector<Note> temp_notes;
-  const auto beat_callback = [&](int beat) {
+  const auto beat_callback = [&](double beat) {
     // Update transport.
-    const int current_bar = beat / kNumBeats;
-    const int current_beat = beat % kNumBeats;
+    const int current_bar = static_cast<int>(beat) / kNumBeats;
+    const int current_beat = static_cast<int>(beat) % kNumBeats;
 
     if (current_beat == 0) {
       // Compose next bar.
@@ -281,10 +281,8 @@ int main(int /*argc*/, char* argv[]) {
                       &temp_notes);
       }
       for (const Note& note : temp_notes) {
-        const double begin_position =
-            static_cast<double>(beat) + note.begin_position;
-        const double end_position =
-            static_cast<double>(beat) + note.end_position;
+        const double begin_position = beat + note.begin_position;
+        const double end_position = beat + note.end_position;
         sequencer.ScheduleInstrumentNote(static_cast<Id>(i), begin_position,
                                          end_position, note.pitch,
                                          note.intensity);

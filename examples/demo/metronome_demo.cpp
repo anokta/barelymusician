@@ -71,16 +71,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), kRelease}});
 
   // Beat callback.
-  const auto beat_callback = [&](int beat) {
-    const int current_bar = beat / kNumBeats;
-    const int current_beat = beat % kNumBeats;
+  const auto beat_callback = [&](double beat) {
+    const int current_bar = static_cast<int>(beat) / kNumBeats;
+    const int current_beat = static_cast<int>(beat) % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
-    const double position = static_cast<double>(beat);
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
     sequencer.ScheduleInstrumentNote(
         kMetronomeId,
-        position + (sequencer.GetPlaybackTempo() > 0.0 ? 0.0 : -kTickDuration),
-        position + (sequencer.GetPlaybackTempo() > 0.0 ? kTickDuration : 0.0),
+        beat + (sequencer.GetPlaybackTempo() > 0.0 ? 0.0 : -kTickDuration),
+        beat + (sequencer.GetPlaybackTempo() > 0.0 ? kTickDuration : 0.0),
         pitch, kGain);
   };
   sequencer.SetBeatCallback(beat_callback);

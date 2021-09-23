@@ -18,7 +18,7 @@ void NoopUpdateCallback(double /*begin_position*/, double /*end_position*/) {}
 
 Clock::Clock()
     : position_(0.0),
-      tempo_(1.0),
+      tempo_(0.0),
       timestamp_(0.0),
       beat_callback_(&NoopBeatCallback),
       update_callback_(&NoopUpdateCallback) {}
@@ -48,30 +48,33 @@ void Clock::SetUpdateCallback(UpdateCallback update_callback) {
 }
 
 void Clock::UpdatePosition(double timestamp) {
-  double last_timestamp = -1.0;
-  while (timestamp_ < timestamp) {
-    if (tempo_ != 0.0) {
-      const double begin_position = position_;
-      double beat =
-          (tempo_ > 0.0) ? std::ceil(position_) : std::floor(position_);
-      double beat_timestamp = GetTimestampAtPosition(beat);
-      if (beat_timestamp == last_timestamp) {
-        beat = (tempo_ > 0.0) ? beat + 1.0 : beat - 1.0;
-        beat_timestamp = GetTimestampAtPosition(beat);
-      }
-      last_timestamp = beat_timestamp;
-      if (timestamp > beat_timestamp) {
-        position_ = beat;
-        timestamp_ = beat_timestamp;
-        beat_callback_(beat, beat_timestamp);
-      } else {
-        position_ += tempo_ * (timestamp - timestamp_);
-        timestamp_ = timestamp;
-      }
-      update_callback_(begin_position, position_);
+  while (timestamp > timestamp_) {
+    if (tempo_ == 0.0) {
+      timestamp_ = timestamp;
+      return;
+    }
+    double beat = (tempo_ > 0.0) ? std::ceil(position_) : std::floor(position_);
+    if (position_ == beat) {
+      beat_callback_(position_, timestamp_);
+    }
+    if (tempo_ == 0.0) {
+      timestamp_ = timestamp;
+      return;
+    }
+    beat = (tempo_ > 0.0) ? std::ceil(position_) : std::floor(position_);
+    if (position_ == beat) {
+      beat = (tempo_ > 0.0) ? beat + 1.0 : beat - 1.0;
+    }
+    const double begin_position = position_;
+    const double beat_timestamp = GetTimestampAtPosition(beat);
+    if (timestamp > beat_timestamp) {
+      timestamp_ = beat_timestamp;
+      position_ = beat;
     } else {
+      position_ += tempo_ * (timestamp - timestamp_);
       timestamp_ = timestamp;
     }
+    update_callback_(begin_position, position_);
   }
 }
 

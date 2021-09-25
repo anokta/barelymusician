@@ -15,9 +15,9 @@ namespace barelyapi::examples {
 /// Input manager for handling keyboard events.
 class InputManager {
  public:
- // Keyboard key signature.
+  /// Keyboard key signature.
   using Key = char;
-  
+
   /// Keyboard key down callback signature.
   ///
   /// @param key Keyboard key.

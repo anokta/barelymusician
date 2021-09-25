@@ -44,6 +44,12 @@ using ::barelyapi::examples::WavFile;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 
 // Beat composer callback signature.
+//
+// @param bar Current bar.
+// @param beat Current beat.
+// @param num_beats Number of beats in a bar.
+// @param harmonic Harmonic index.
+// @param notes Pointer to mutable notes.
 using BeatComposerCallback = std::function<void(
     int bar, int beat, int num_beats, int harmonic, std::vector<Note>* notes)>;
 

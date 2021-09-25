@@ -9,9 +9,15 @@ namespace barelyapi {
 class Clock {
  public:
   /// Beat callback signature.
-  using BeatCallback = std::function<void(double beat, double timestamp)>;
+  ///
+  /// @param position Beat position in beats.
+  /// @param timestamp Beat timestamp in seconds.
+  using BeatCallback = std::function<void(double position, double timestamp)>;
 
   /// Update callback signature.
+  ///
+  /// @param begin_position Begin position in beats (inclusive).
+  /// @param end_position End position in beats (exclusive).
   using UpdateCallback =
       std::function<void(double begin_position, double end_position)>;
 

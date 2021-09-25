@@ -12,6 +12,9 @@ namespace barelyapi::unity {
 class UnityLogWriter : public logging::LogWriter {
  public:
   /// Debug callback signature.
+  ///
+  /// @param severity Log severity.
+  /// @param message Log message.
   using DebugCallback = std::function<void(int severity, const char* message)>;
 
   /// Implements |LogWriter|.

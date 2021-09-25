@@ -17,6 +17,8 @@ namespace barelyapi {
 class Sequencer {
  public:
   /// Beat callback signature.
+  ///
+  /// @param beat Beat position in beats.
   using BeatCallback = std::function<void(double beat)>;
 
   explicit Sequencer(InstrumentManager* manager);

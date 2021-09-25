@@ -42,12 +42,12 @@ TEST(ClockTest, SetCallbacks) {
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 0.0);
 
   std::vector<std::tuple<std::string, double, double>> callback_values;
-  clock.SetBeatCallback([&](double beat, double timestamp) {
-    callback_values.emplace_back("Beat", beat, timestamp);
-    if (beat == 2.0) {
+  clock.SetBeatCallback([&](double position, double timestamp) {
+    callback_values.emplace_back("Beat", position, timestamp);
+    if (position == 2.0) {
       // Reverse the playback direction.
       clock.SetTempo(-1.0);
-    } else if (beat == -1.0) {
+    } else if (position == -1.0) {
       // Jump to the fifth beat.
       clock.SetPosition(5.0);
     }

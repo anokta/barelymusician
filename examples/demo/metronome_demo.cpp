@@ -75,15 +75,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   clock.SetTempo(tempo);
 
   // Beat callback.
-  const auto beat_callback = [&](double beat, double timestamp) {
-    const int current_bar = std::abs(static_cast<int>(beat)) / kNumBeats;
-    const int current_beat = std::abs(static_cast<int>(beat)) % kNumBeats;
-    LOG(INFO) << "Tick " << ((beat < 0.0) ? "-" : "") << current_bar << "."
+  const auto beat_callback = [&](double position, double timestamp) {
+    const int current_bar = std::abs(static_cast<int>(position)) / kNumBeats;
+    const int current_beat = std::abs(static_cast<int>(position)) % kNumBeats;
+    LOG(INFO) << "Tick " << ((position < 0.0) ? "-" : "") << current_bar << "."
               << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
     instrument_manager.SetNoteOn(kMetronomeId, timestamp, pitch, kGain);
     const double end_timestamp = clock.GetTimestampAtPosition(
-        beat + ((tempo > 0.0) ? kTickDuration : -kTickDuration));
+        position + ((tempo > 0.0) ? kTickDuration : -kTickDuration));
     instrument_manager.SetNoteOff(kMetronomeId, end_timestamp, pitch);
   };
   clock.SetBeatCallback(beat_callback);

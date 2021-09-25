@@ -38,10 +38,10 @@ class InstrumentParam {
   bool SetValue(float value);
 
  private:
-  /// Parameter definition.
+  // Parameter definition.
   InstrumentParamDefinition definition_;
 
-  /// Parameter value.
+  // Parameter value.
   float value_;
 };
 

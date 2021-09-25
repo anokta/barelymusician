@@ -76,11 +76,6 @@ cc_library(
 )
 
 cc_library(
-    name = "spin_mutex",
-    hdrs = ["spin_mutex.h"],
-)
-
-cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],
@@ -128,15 +123,6 @@ cc_test(
     deps = [
         ":instrument",
         ":instrument_definition",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "spin_mutex_test",
-    srcs = ["spin_mutex_test.cpp"],
-    deps = [
-        ":spin_mutex",
         "@googletest//:gtest_main",
     ],
 )

@@ -1,8 +1,7 @@
 #include "barelymusician/engine/clock.h"
 
+#include <cmath>
 #include <utility>
-
-#include "barelymusician/common/logging.h"
 
 namespace barelyapi {
 
@@ -25,12 +24,15 @@ Clock::Clock()
 
 double Clock::GetPosition() const { return position_; }
 
+double Clock::GetPositionAtNextBeat() const {
+  return (tempo_ < 0.0) ? std::floor(position_) : std::ceil(position_);
+}
+
 double Clock::GetTempo() const { return tempo_; }
 
 double Clock::GetTimestamp() const { return timestamp_; }
 
 double Clock::GetTimestampAtPosition(double position) const {
-  DCHECK_NE(tempo_, 0.0);
   return timestamp_ + (position - position_) / tempo_;
 }
 
@@ -48,26 +50,28 @@ void Clock::SetUpdateCallback(UpdateCallback update_callback) {
 }
 
 void Clock::UpdatePosition(double timestamp) {
-  while (timestamp > timestamp_) {
+  while (timestamp_ < timestamp) {
     if (tempo_ == 0.0) {
       timestamp_ = timestamp;
       return;
     }
-    double beat = (tempo_ > 0.0) ? std::ceil(position_) : std::floor(position_);
+    // Compute next beat.
+    double beat = GetPositionAtNextBeat();
     if (position_ == beat) {
       beat_callback_(position_, timestamp_);
+      if (tempo_ == 0.0) {
+        timestamp_ = timestamp;
+        return;
+      }
+      beat = GetPositionAtNextBeat();
+      if (position_ == beat) {
+        beat = (tempo_ < 0.0) ? beat - 1.0 : beat + 1.0;
+      }
     }
-    if (tempo_ == 0.0) {
-      timestamp_ = timestamp;
-      return;
-    }
-    beat = (tempo_ > 0.0) ? std::ceil(position_) : std::floor(position_);
-    if (position_ == beat) {
-      beat = (tempo_ > 0.0) ? beat + 1.0 : beat - 1.0;
-    }
-    const double begin_position = position_;
     const double beat_timestamp = GetTimestampAtPosition(beat);
-    if (timestamp > beat_timestamp) {
+    // Update position.
+    const double begin_position = position_;
+    if (beat_timestamp < timestamp) {
       timestamp_ = beat_timestamp;
       position_ = beat;
     } else {

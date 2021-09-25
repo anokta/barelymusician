@@ -23,6 +23,11 @@ class Clock {
   /// @return Position in beats.
   double GetPosition() const;
 
+  /// Returns the position at next beat.
+  ///
+  /// @return Position in beats.
+  double GetPositionAtNextBeat() const;
+
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per second.

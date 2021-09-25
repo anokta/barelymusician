@@ -41,9 +41,9 @@ Sequencer::Sequencer(InstrumentManager* manager) : manager_(manager) {
       // Trigger messages backwards.
       for (auto& [id, track] : tracks_) {
         auto begin =
-            std::reverse_iterator(track.events.lower_bound(begin_position));
+            std::reverse_iterator(track.events.upper_bound(begin_position));
         auto end =
-            std::reverse_iterator(track.events.lower_bound(end_position));
+            std::reverse_iterator(track.events.upper_bound(end_position));
         const auto instrument_id = id;
         for (auto it = begin; it != end; ++it) {
           std::visit(

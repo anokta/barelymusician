@@ -41,7 +41,7 @@ cc_library(
         ":instrument_param",
         ":instrument_param_definition",
         ":task_runner",
-        "//barelymusician/common:common_utils",
+        "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
         "//barelymusician/dsp:dsp_utils",

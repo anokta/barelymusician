@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
 
@@ -85,16 +86,16 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
 template <typename SymbolType>
 std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
     const SymbolType& symbol) const {
-  if (rules_.find(symbol) == rules_.cend() || rules_.at(symbol).size() == 0) {
+  const auto* substitions = FindOrNull(rules_, symbol);
+  if (!substitions || substitions->empty()) {
     DLOG(INFO) << "Substition rule does not exist for symbol: " << symbol;
     return std::vector<SymbolType>();
   }
 
   // Select a substition randomly with equal probability for each selection.
-  const auto& substitions = rules_.at(symbol);
   const int index =
-      random_->DrawUniform(0, static_cast<int>(substitions.size()) - 1);
-  return substitions[index];
+      random_->DrawUniform(0, static_cast<int>(substitions->size()) - 1);
+  return (*substitions)[index];
 }
 
 }  // namespace barelyapi

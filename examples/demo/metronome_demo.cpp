@@ -1,14 +1,15 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
+#include <cmath>
 #include <memory>
 #include <thread>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/instrument_manager.h"
-#include "barelymusician/engine/sequencer.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -16,10 +17,10 @@
 
 namespace {
 
+using ::barelyapi::Clock;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::Sequencer;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
@@ -55,10 +56,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  AudioClock clock(kSampleRate);
+  AudioClock audio_clock(kSampleRate);
   InstrumentManager instrument_manager(kSampleRate);
-  Sequencer sequencer(&instrument_manager);
-  sequencer.SetPlaybackTempo(kInitialTempo);
 
   instrument_manager.Create(
       kMetronomeId, 0.0, SynthInstrument::GetDefinition(),
@@ -70,23 +69,30 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {static_cast<int>(SynthInstrumentParam::kEnvelopeAttack), kAttack},
        {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), kRelease}});
 
+  double is_playing = true;
+  double tempo = kInitialTempo;
+  Clock clock;
+  clock.SetTempo(tempo);
+
   // Beat callback.
-  const auto beat_callback = [&](int beat) {
-    const int current_bar = beat / kNumBeats;
-    const int current_beat = beat % kNumBeats;
-    LOG(INFO) << "Tick " << current_bar << "." << current_beat;
-    const double position = static_cast<double>(beat);
+  const auto beat_callback = [&](double position, double timestamp) {
+    const int current_bar = std::abs(static_cast<int>(position)) / kNumBeats;
+    const int current_beat = std::abs(static_cast<int>(position)) % kNumBeats;
+    LOG(INFO) << "Tick " << ((position < 0.0) ? "-" : "") << current_bar << "."
+              << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    sequencer.ScheduleInstrumentNote(kMetronomeId, position,
-                                     position + kTickDuration, pitch, kGain);
+    instrument_manager.SetNoteOn(kMetronomeId, timestamp, pitch, kGain);
+    const double end_timestamp = clock.GetTimestampAtPosition(
+        position + ((tempo > 0.0) ? kTickDuration : -kTickDuration));
+    instrument_manager.SetNoteOff(kMetronomeId, end_timestamp, pitch);
   };
-  sequencer.SetBeatCallback(beat_callback);
+  clock.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&](float* output) {
-    instrument_manager.Process(kMetronomeId, clock.GetTimestamp(), output,
+    instrument_manager.Process(kMetronomeId, audio_clock.GetTimestamp(), output,
                                kNumChannels, kNumFrames);
-    clock.Update(kNumFrames);
+    audio_clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -99,14 +105,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = sequencer.GetPlaybackTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (sequencer.IsPlaying()) {
-          sequencer.StopPlayback();
+        if (is_playing) {
+          is_playing = false;
+          clock.SetTempo(0.0);
           LOG(INFO) << "Stopped playback";
         } else {
-          sequencer.StartPlayback();
+          is_playing = true;
+          clock.SetTempo(tempo);
           LOG(INFO) << "Started playback";
         }
         return;
@@ -128,7 +135,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    sequencer.SetPlaybackTempo(tempo);
+    if (is_playing) {
+      clock.SetTempo(tempo);
+    }
     LOG(INFO) << "Tempo set to " << (60.0 * tempo) << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -136,18 +145,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  sequencer.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
     instrument_manager.Update();
-    sequencer.Update(clock.GetTimestamp() + kLookahead);
+    clock.UpdatePosition(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  sequencer.StopPlayback();
   audio_output.Stop();
 
   return 0;

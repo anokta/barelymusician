@@ -8,6 +8,7 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/clock.h"
+#include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_manager.h"
 
 namespace barelyapi {
@@ -16,7 +17,9 @@ namespace barelyapi {
 class Sequencer {
  public:
   /// Beat callback signature.
-  using BeatCallback = std::function<void(int beat)>;
+  ///
+  /// @param beat Beat position in beats.
+  using BeatCallback = std::function<void(double beat)>;
 
   explicit Sequencer(InstrumentManager* manager);
 
@@ -86,8 +89,7 @@ class Sequencer {
   void StopAllNotes();
 
   struct Track {
-    std::multimap<double, Note> active_notes;
-    std::multimap<double, Note> score;
+    std::multimap<double, InstrumentEvent> events;
   };
 
   std::unordered_map<Id, Track> tracks_;
@@ -95,11 +97,14 @@ class Sequencer {
   // Playback clock.
   Clock clock_;
 
+  // Denotes whether the playback is active or not.
+  bool is_playing_;
+
+  // Playback tempo.
+  double tempo_;
+
   // Instrument manager.
   InstrumentManager* manager_;  // not owned.
-
-  // Beat callback.
-  BeatCallback beat_callback_;
 };
 
 }  // namespace barelyapi

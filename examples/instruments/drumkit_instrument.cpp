@@ -3,6 +3,7 @@
 #include <any>
 #include <unordered_map>
 
+#include "barelymusician/common/find_or_null.h"
 #include "examples/common/wav_file.h"
 
 namespace barelyapi::examples {
@@ -19,15 +20,15 @@ DrumkitInstrument::DrumkitInstrument(int sample_rate)
     : sample_rate_(sample_rate), gain_(kDefaultGain) {}
 
 void DrumkitInstrument::NoteOff(float pitch) {
-  if (const auto it = voices_.find(pitch); it != voices_.cend()) {
-    it->second.Stop();
+  if (auto* voice = FindOrNull(voices_, pitch)) {
+    voice->Stop();
   }
 }
 
 void DrumkitInstrument::NoteOn(float pitch, float intensity) {
-  if (auto it = voices_.find(pitch); it != voices_.end()) {
-    it->second.set_gain(intensity);
-    it->second.Start();
+  if (auto* voice = FindOrNull(voices_, pitch)) {
+    voice->set_gain(intensity);
+    voice->Start();
   }
 }
 

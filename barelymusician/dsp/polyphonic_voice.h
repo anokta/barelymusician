@@ -14,6 +14,8 @@ template <class VoiceType>
 class PolyphonicVoice {
  public:
   /// Voice mutator callback signature.
+  ///
+  /// @param voice Pointer to voice.
   using VoiceCallback = std::function<void(VoiceType* voice)>;
 
   /// Constructs new |PolyphonicVoice| with the given |base_voice|.

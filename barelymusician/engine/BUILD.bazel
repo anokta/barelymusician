@@ -41,7 +41,7 @@ cc_library(
         ":instrument_param",
         ":instrument_param_definition",
         ":task_runner",
-        "//barelymusician/common:common_utils",
+        "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
         "//barelymusician/dsp:dsp_utils",
@@ -73,11 +73,6 @@ cc_library(
         "//barelymusician/common:id",
         "//barelymusician/composition:note",
     ],
-)
-
-cc_library(
-    name = "spin_mutex",
-    hdrs = ["spin_mutex.h"],
 )
 
 cc_library(
@@ -128,15 +123,6 @@ cc_test(
     deps = [
         ":instrument",
         ":instrument_definition",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "spin_mutex_test",
-    srcs = ["spin_mutex_test.cpp"],
-    deps = [
-        ":spin_mutex",
         "@googletest//:gtest_main",
     ],
 )

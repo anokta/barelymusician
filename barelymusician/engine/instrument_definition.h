@@ -10,29 +10,53 @@ namespace barelyapi {
 using InstrumentState = std::any;
 
 /// Instrument create function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param sample_rate Sampling rate in Hz.
 using CreateInstrumentFn =
     std::function<void(InstrumentState* state, int sample_rate)>;
 
 /// Instrument destroy function signature.
+///
+/// @param state Pointer to instrument state.
 using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;
 
 /// Instrument process function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param output Pointer to output buffer.
+/// @param num_channels Number of channels.
+/// @param num_frames Number of frames.
 using ProcessInstrumentFn = std::function<void(
     InstrumentState* state, float* output, int num_channels, int num_frames)>;
 
 /// Instrument set custom data function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param data Custom data.
 using SetCustomInstrumentDataFn =
     std::function<void(InstrumentState* state, std::any data)>;
 
 /// Instrument set note off function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param pitch Note pitch.
 using SetInstrumentNoteOffFn =
     std::function<void(InstrumentState* state, float pitch)>;
 
 /// Instrument set note on function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
 using SetInstrumentNoteOnFn =
     std::function<void(InstrumentState* state, float pitch, float intensity)>;
 
 /// Instrument set parameter function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param id Parameter id.
+/// @param value Parameter value.
 using SetInstrumentParamFn =
     std::function<void(InstrumentState* state, int id, float value)>;
 

@@ -1,4 +1,4 @@
-#include "barelymusician/common/common_utils.h"
+#include "barelymusician/common/find_or_null.h"
 
 #include <unordered_map>
 
@@ -8,7 +8,7 @@ namespace barelyapi {
 namespace {
 
 // Tests that querying a value of a const map returns the expected reference.
-TEST(CommonUtilsTest, FindOrNullConstMap) {
+TEST(FindOrNullTest, FindOrNullConstMap) {
   const std::unordered_map<int, float> kConstMap = {{1, 10.0f}, {2, 20.0f}};
 
   EXPECT_EQ(FindOrNull(kConstMap, 0), nullptr);
@@ -19,7 +19,7 @@ TEST(CommonUtilsTest, FindOrNullConstMap) {
 }
 
 // Tests that querying a value of a mutable map returns the expected reference.
-TEST(CommonUtilsTest, FindOrNullMutableMap) {
+TEST(FindOrNullTest, FindOrNullMutableMap) {
   std::unordered_map<int, float> mutable_map;
   mutable_map.emplace(3, 30.0f);
   mutable_map.emplace(5, 50.0f);

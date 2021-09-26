@@ -129,6 +129,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case '2':
         tempo *= 2.0;
         break;
+      case 'X':
+        tempo *= -1.0;
+        break;
       case 'R':
         tempo = kInitialTempo;
         break;

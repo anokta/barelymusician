@@ -97,12 +97,6 @@ class Sequencer {
   // Playback clock.
   Clock clock_;
 
-  // Denotes whether the playback is active or not.
-  bool is_playing_;
-
-  // Playback tempo.
-  double tempo_;
-
   // Instrument manager.
   InstrumentManager* manager_;  // not owned.
 };

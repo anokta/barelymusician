@@ -15,7 +15,7 @@ constexpr double kTempo = 1.5;
 // Tests that the clock sets its tempo as expected.
 TEST(ClockTest, SetTempo) {
   Clock clock;
-  EXPECT_DOUBLE_EQ(clock.GetTempo(), 0.0);
+  EXPECT_DOUBLE_EQ(clock.GetTempo(), 1.0);
 
   clock.SetTempo(kTempo);
   EXPECT_DOUBLE_EQ(clock.GetTempo(), kTempo);
@@ -37,7 +37,8 @@ TEST(ClockTest, SetPosition) {
 TEST(ClockTest, SetCallbacks) {
   Clock clock;
 
-  EXPECT_DOUBLE_EQ(clock.GetTempo(), 0.0);
+  EXPECT_FALSE(clock.IsActive());
+  EXPECT_DOUBLE_EQ(clock.GetTempo(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 0.0);
 
@@ -56,15 +57,16 @@ TEST(ClockTest, SetCallbacks) {
     callback_values.emplace_back("Update", begin_position, end_position);
   });
 
-  clock.UpdatePosition(10.0);
+  clock.Update(10.0);
   EXPECT_TRUE(callback_values.empty());
 
-  EXPECT_DOUBLE_EQ(clock.GetTempo(), 0.0);
+  EXPECT_FALSE(clock.IsActive());
+  EXPECT_DOUBLE_EQ(clock.GetTempo(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 10.0);
 
-  clock.SetTempo(1.0);
-  clock.UpdatePosition(16);
+  clock.Start();
+  clock.Update(16);
   EXPECT_THAT(
       callback_values,
       ElementsAre(
@@ -75,34 +77,36 @@ TEST(ClockTest, SetCallbacks) {
           std::tuple("Beat", 0.0, 14.0), std::tuple("Update", 0.0, -1.0),
           std::tuple("Beat", -1.0, 15.0), std::tuple("Update", 5.0, 4.0)));
 
+  EXPECT_TRUE(clock.IsActive());
   EXPECT_DOUBLE_EQ(clock.GetTempo(), -1.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 4.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 16.0);
 }
 
-// Tests that the clock updates its position as expected.
-TEST(ClockTest, UpdatePosition) {
+// Tests that the clock updates its internal state as expected.
+TEST(ClockTest, Update) {
   Clock clock;
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 0.0);
 
-  clock.UpdatePosition(1.0);
+  clock.Update(1.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 1.0);
 
-  clock.SetTempo(1.0);
+  clock.Start();
+  EXPECT_TRUE(clock.IsActive());
   EXPECT_DOUBLE_EQ(clock.GetTempo(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetPositionAtNextBeat(), 0.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestampAtPosition(0.0), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestampAtPosition(1.0), 2.0);
 
-  clock.UpdatePosition(2.0);
+  clock.Update(2.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetPositionAtNextBeat(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 2.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestampAtPosition(2.0), 3.0);
 
-  clock.UpdatePosition(2.0);
+  clock.Update(2.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetPositionAtNextBeat(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 2.0);
@@ -111,7 +115,7 @@ TEST(ClockTest, UpdatePosition) {
   clock.SetTempo(1.5);
   EXPECT_DOUBLE_EQ(clock.GetTempo(), 1.5);
 
-  clock.UpdatePosition(3.0);
+  clock.Update(3.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 2.5);
   EXPECT_DOUBLE_EQ(clock.GetPositionAtNextBeat(), 3.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 3.0);
@@ -124,17 +128,18 @@ TEST(ClockTest, UpdatePosition) {
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 3.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestampAtPosition(4.0), 1.5);
 
-  clock.UpdatePosition(4.0);
+  clock.Update(4.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(clock.GetPositionAtNextBeat(), 1.0);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 4.0);
 
-  clock.SetTempo(0.0);
-  EXPECT_DOUBLE_EQ(clock.GetTempo(), 0.0);
+  clock.Stop();
+  EXPECT_FALSE(clock.IsActive());
+  EXPECT_DOUBLE_EQ(clock.GetTempo(), -1.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 4.0);
 
-  clock.UpdatePosition(5.0);
+  clock.Update(5.0);
   EXPECT_DOUBLE_EQ(clock.GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(clock.GetTimestamp(), 5.0);
 }

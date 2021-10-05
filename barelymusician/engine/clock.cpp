@@ -16,8 +16,9 @@ void NoopUpdateCallback(double /*begin_position*/, double /*end_position*/) {}
 }  // namespace
 
 Clock::Clock()
-    : position_(0.0),
-      tempo_(0.0),
+    : is_active_(false),
+      position_(0.0),
+      tempo_(1.0),
       timestamp_(0.0),
       beat_callback_(&NoopBeatCallback),
       update_callback_(&NoopUpdateCallback) {}
@@ -36,6 +37,8 @@ double Clock::GetTimestampAtPosition(double position) const {
   return timestamp_ + (position - position_) / tempo_;
 }
 
+bool Clock::IsActive() const { return is_active_; }
+
 void Clock::SetBeatCallback(BeatCallback beat_callback) {
   beat_callback_ = beat_callback ? std::move(beat_callback) : &NoopBeatCallback;
 }
@@ -49,9 +52,13 @@ void Clock::SetUpdateCallback(UpdateCallback update_callback) {
       update_callback ? std::move(update_callback) : &NoopUpdateCallback;
 }
 
-void Clock::UpdatePosition(double timestamp) {
+void Clock::Start() { is_active_ = true; }
+
+void Clock::Stop() { is_active_ = false; }
+
+void Clock::Update(double timestamp) {
   while (timestamp_ < timestamp) {
-    if (tempo_ == 0.0) {
+    if (!is_active_ || tempo_ == 0.0) {
       timestamp_ = timestamp;
       return;
     }
@@ -59,7 +66,7 @@ void Clock::UpdatePosition(double timestamp) {
     double beat = GetPositionAtNextBeat();
     if (position_ == beat) {
       beat_callback_(position_, timestamp_);
-      if (tempo_ == 0.0) {
+      if (!is_active_ || tempo_ == 0.0) {
         timestamp_ = timestamp;
         return;
       }

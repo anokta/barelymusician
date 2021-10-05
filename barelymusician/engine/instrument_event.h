@@ -61,7 +61,7 @@ using InstrumentEvent =
     std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetNoteOffEvent,
                  SetNoteOnEvent, SetParamEvent>;
 
-// Instrument events with their timestamps container type.
+/// Instrument events with their timestamps container type.
 using InstrumentEvents = std::multimap<double, InstrumentEvent>;
 
 }  // namespace barelyapi

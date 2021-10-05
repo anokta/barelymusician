@@ -50,6 +50,11 @@ class Clock {
   /// @return Timestamp in seconds.
   double GetTimestampAtPosition(double position) const;
 
+  /// Returns whether the clock is currently active or not.
+  ///
+  /// @return True if active, false otherwise.
+  bool IsActive() const;
+
   /// Sets the beat callback.
   ///
   /// @param beat_callback Beat callback.
@@ -70,12 +75,21 @@ class Clock {
   /// @param update_callback Update callback.
   void SetUpdateCallback(UpdateCallback update_callback);
 
-  /// Updates the current position.
+  /// Starts the clock.
+  void Start();
+
+  /// Stops the clock.
+  void Stop();
+
+  /// Updates the clock at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void UpdatePosition(double timestamp);
+  void Update(double timestamp);
 
  private:
+  // Denotes whether the clock is active or not.
+  bool is_active_;
+
   // Position in beats.
   double position_;
 

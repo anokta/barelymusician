@@ -69,10 +69,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {static_cast<int>(SynthInstrumentParam::kEnvelopeAttack), kAttack},
        {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), kRelease}});
 
-  double is_playing = true;
-  double tempo = kInitialTempo;
   Clock clock;
-  clock.SetTempo(tempo);
+  clock.SetTempo(kInitialTempo);
 
   // Beat callback.
   const auto beat_callback = [&](double position, double timestamp) {
@@ -83,7 +81,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
     instrument_manager.SetNoteOn(kMetronomeId, timestamp, pitch, kGain);
     const double end_timestamp = clock.GetTimestampAtPosition(
-        position + ((tempo > 0.0) ? kTickDuration : -kTickDuration));
+        position + ((clock.GetTempo() > 0.0) ? kTickDuration : -kTickDuration));
     instrument_manager.SetNoteOff(kMetronomeId, end_timestamp, pitch);
   };
   clock.SetBeatCallback(beat_callback);
@@ -105,15 +103,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
+    double tempo = clock.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (is_playing) {
-          is_playing = false;
-          clock.SetTempo(0.0);
+        if (clock.IsActive()) {
+          clock.Stop();
           LOG(INFO) << "Stopped playback";
         } else {
-          is_playing = true;
-          clock.SetTempo(tempo);
+          clock.Start();
           LOG(INFO) << "Started playback";
         }
         return;
@@ -138,9 +135,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    if (is_playing) {
-      clock.SetTempo(tempo);
-    }
+    clock.SetTempo(tempo);
     LOG(INFO) << "Tempo set to " << (60.0 * tempo) << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -148,11 +143,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  clock.Start();
 
   while (!quit) {
     input_manager.Update();
+    clock.Update(audio_clock.GetTimestamp() + kLookahead);
     instrument_manager.Update();
-    clock.UpdatePosition(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

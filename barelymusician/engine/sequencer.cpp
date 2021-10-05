@@ -69,9 +69,9 @@ Sequencer::Sequencer(InstrumentManager* manager) : manager_(manager) {
 
 double Sequencer::GetPlaybackPosition() const { return clock_.GetPosition(); }
 
-double Sequencer::GetPlaybackTempo() const { return tempo_; }
+double Sequencer::GetPlaybackTempo() const { return clock_.GetTempo(); }
 
-bool Sequencer::IsPlaying() const { return is_playing_; }
+bool Sequencer::IsPlaying() const { return clock_.IsActive(); }
 
 void Sequencer::RemoveAllScheduledInstrumentNotes() { tracks_.clear(); }
 
@@ -108,25 +108,16 @@ void Sequencer::SetPlaybackPosition(double position) {
   clock_.SetPosition(position);
 }
 
-void Sequencer::SetPlaybackTempo(double tempo) {
-  tempo_ = tempo;
-  if (is_playing_) {
-    clock_.SetTempo(tempo_);
-  }
-}
+void Sequencer::SetPlaybackTempo(double tempo) { clock_.SetTempo(tempo); }
 
-void Sequencer::StartPlayback() {
-  clock_.SetTempo(tempo_);
-  is_playing_ = true;
-}
+void Sequencer::StartPlayback() { clock_.Start(); }
 
 void Sequencer::StopPlayback() {
   StopAllNotes();
-  clock_.SetTempo(0.0);
-  is_playing_ = false;
+  clock_.Stop();
 }
 
-void Sequencer::Update(double timestamp) { clock_.UpdatePosition(timestamp); }
+void Sequencer::Update(double timestamp) { clock_.Update(timestamp); }
 
 void Sequencer::StopAllNotes() {
   const double timestamp = clock_.GetTimestamp();

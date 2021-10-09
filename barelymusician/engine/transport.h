@@ -1,18 +1,17 @@
-#ifndef BARELYMUSICIAN_ENGINE_CLOCK_H_
-#define BARELYMUSICIAN_ENGINE_CLOCK_H_
+#ifndef BARELYMUSICIAN_ENGINE_TRANSPORT_H_
+#define BARELYMUSICIAN_ENGINE_TRANSPORT_H_
 
 #include <functional>
 
 namespace barelyapi {
 
-/// Clock that keeps track of position in beats.
-class Clock {
+/// Transport that controls playback.
+class Transport {
  public:
   /// Beat callback signature.
   ///
   /// @param position Beat position in beats.
-  /// @param timestamp Beat timestamp in seconds.
-  using BeatCallback = std::function<void(double position, double timestamp)>;
+  using BeatCallback = std::function<void(double position)>;
 
   /// Update callback signature.
   ///
@@ -21,8 +20,8 @@ class Clock {
   using UpdateCallback =
       std::function<void(double begin_position, double end_position)>;
 
-  /// Constructs new |Clock|.
-  Clock();
+  /// Constructs new |Transport|.
+  Transport();
 
   /// Returns the current position.
   ///
@@ -50,10 +49,10 @@ class Clock {
   /// @return Timestamp in seconds.
   double GetTimestampAtPosition(double position) const;
 
-  /// Returns whether the clock is currently active or not.
+  /// Returns whether the transport is currently playing or not.
   ///
-  /// @return True if active, false otherwise.
-  bool IsActive() const;
+  /// @return True if playing, false otherwise.
+  bool IsPlaying() const;
 
   /// Sets the beat callback.
   ///
@@ -75,20 +74,20 @@ class Clock {
   /// @param update_callback Update callback.
   void SetUpdateCallback(UpdateCallback update_callback);
 
-  /// Starts the clock.
+  /// Starts the playback.
   void Start();
 
-  /// Stops the clock.
+  /// Stops the playback.
   void Stop();
 
-  /// Updates the clock at timestamp.
+  /// Updates the transport at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp);
 
  private:
-  // Denotes whether the clock is active or not.
-  bool is_active_;
+  // Denotes whether the transport is playing or not.
+  bool is_playing_;
 
   // Position in beats.
   double position_;
@@ -108,4 +107,4 @@ class Clock {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_CLOCK_H_
+#endif  // BARELYMUSICIAN_ENGINE_TRANSPORT_H_

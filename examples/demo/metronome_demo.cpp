@@ -8,8 +8,8 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_utils.h"
-#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/transport.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -17,10 +17,10 @@
 
 namespace {
 
-using ::barelyapi::Clock;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Transport;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
@@ -69,22 +69,24 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {static_cast<int>(SynthInstrumentParam::kEnvelopeAttack), kAttack},
        {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), kRelease}});
 
-  Clock clock;
-  clock.SetTempo(kInitialTempo);
+  Transport transport;
+  transport.SetTempo(kInitialTempo);
 
   // Beat callback.
-  const auto beat_callback = [&](double position, double timestamp) {
+  const auto beat_callback = [&](double position) {
     const int current_bar = std::abs(static_cast<int>(position)) / kNumBeats;
     const int current_beat = std::abs(static_cast<int>(position)) % kNumBeats;
     LOG(INFO) << "Tick " << ((position < 0.0) ? "-" : "") << current_bar << "."
               << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    instrument_manager.SetNoteOn(kMetronomeId, timestamp, pitch, kGain);
-    const double end_timestamp = clock.GetTimestampAtPosition(
-        position + ((clock.GetTempo() > 0.0) ? kTickDuration : -kTickDuration));
+    instrument_manager.SetNoteOn(kMetronomeId, transport.GetTimestamp(), pitch,
+                                 kGain);
+    const double end_timestamp = transport.GetTimestampAtPosition(
+        position +
+        ((transport.GetTempo() > 0.0) ? kTickDuration : -kTickDuration));
     instrument_manager.SetNoteOff(kMetronomeId, end_timestamp, pitch);
   };
-  clock.SetBeatCallback(beat_callback);
+  transport.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&](float* output) {
@@ -103,14 +105,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = clock.GetTempo();
+    double tempo = transport.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (clock.IsActive()) {
-          clock.Stop();
+        if (transport.IsPlaying()) {
+          transport.Stop();
           LOG(INFO) << "Stopped playback";
         } else {
-          clock.Start();
+          transport.Start();
           LOG(INFO) << "Started playback";
         }
         return;
@@ -135,7 +137,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    clock.SetTempo(tempo);
+    transport.SetTempo(tempo);
     LOG(INFO) << "Tempo set to " << (60.0 * tempo) << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -143,11 +145,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  clock.Start();
+  transport.Start();
 
   while (!quit) {
     input_manager.Update();
-    clock.Update(audio_clock.GetTimestamp() + kLookahead);
+    transport.Update(audio_clock.GetTimestamp() + kLookahead);
     instrument_manager.Update();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }

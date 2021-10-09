@@ -1,15 +1,14 @@
 #ifndef BARELYMUSICIAN_ENGINE_SEQUENCER_H_
 #define BARELYMUSICIAN_ENGINE_SEQUENCER_H_
 
-#include <functional>
 #include <map>
 #include <unordered_map>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
 
@@ -17,9 +16,7 @@ namespace barelyapi {
 class Sequencer {
  public:
   /// Beat callback signature.
-  ///
-  /// @param beat Beat position in beats.
-  using BeatCallback = std::function<void(double beat)>;
+  using BeatCallback = Transport::BeatCallback;
 
   explicit Sequencer(InstrumentManager* manager);
 
@@ -94,8 +91,8 @@ class Sequencer {
 
   std::unordered_map<Id, Track> tracks_;
 
-  // Playback clock.
-  Clock clock_;
+  // Playback transport.
+  Transport transport_;
 
   // Instrument manager.
   InstrumentManager* manager_;  // not owned.

@@ -1,4 +1,4 @@
-#include "barelymusician/engine/clock.h"
+#include "barelymusician/engine/transport.h"
 
 #include <cmath>
 #include <utility>
@@ -8,65 +8,65 @@ namespace barelyapi {
 namespace {
 
 // Dummy beat callback function that does nothing.
-void NoopBeatCallback(double /*beat*/, double /*timestamp*/) {}
+void NoopBeatCallback(double /*beat*/) {}
 
 // Dummy update callback function that does nothing.
 void NoopUpdateCallback(double /*begin_position*/, double /*end_position*/) {}
 
 }  // namespace
 
-Clock::Clock()
-    : is_active_(false),
+Transport::Transport()
+    : is_playing_(false),
       position_(0.0),
       tempo_(1.0),
       timestamp_(0.0),
       beat_callback_(&NoopBeatCallback),
       update_callback_(&NoopUpdateCallback) {}
 
-double Clock::GetPosition() const { return position_; }
+double Transport::GetPosition() const { return position_; }
 
-double Clock::GetPositionAtNextBeat() const {
+double Transport::GetPositionAtNextBeat() const {
   return (tempo_ < 0.0) ? std::floor(position_) : std::ceil(position_);
 }
 
-double Clock::GetTempo() const { return tempo_; }
+double Transport::GetTempo() const { return tempo_; }
 
-double Clock::GetTimestamp() const { return timestamp_; }
+double Transport::GetTimestamp() const { return timestamp_; }
 
-double Clock::GetTimestampAtPosition(double position) const {
+double Transport::GetTimestampAtPosition(double position) const {
   return timestamp_ + (position - position_) / tempo_;
 }
 
-bool Clock::IsActive() const { return is_active_; }
+bool Transport::IsPlaying() const { return is_playing_; }
 
-void Clock::SetBeatCallback(BeatCallback beat_callback) {
+void Transport::SetBeatCallback(BeatCallback beat_callback) {
   beat_callback_ = beat_callback ? std::move(beat_callback) : &NoopBeatCallback;
 }
 
-void Clock::SetPosition(double position) { position_ = position; }
+void Transport::SetPosition(double position) { position_ = position; }
 
-void Clock::SetTempo(double tempo) { tempo_ = tempo; }
+void Transport::SetTempo(double tempo) { tempo_ = tempo; }
 
-void Clock::SetUpdateCallback(UpdateCallback update_callback) {
+void Transport::SetUpdateCallback(UpdateCallback update_callback) {
   update_callback_ =
       update_callback ? std::move(update_callback) : &NoopUpdateCallback;
 }
 
-void Clock::Start() { is_active_ = true; }
+void Transport::Start() { is_playing_ = true; }
 
-void Clock::Stop() { is_active_ = false; }
+void Transport::Stop() { is_playing_ = false; }
 
-void Clock::Update(double timestamp) {
+void Transport::Update(double timestamp) {
   while (timestamp_ < timestamp) {
-    if (!is_active_ || tempo_ == 0.0) {
+    if (!is_playing_ || tempo_ == 0.0) {
       timestamp_ = timestamp;
       return;
     }
     // Compute next beat.
     double beat = GetPositionAtNextBeat();
     if (position_ == beat) {
-      beat_callback_(position_, timestamp_);
-      if (!is_active_ || tempo_ == 0.0) {
+      beat_callback_(position_);
+      if (!is_playing_ || tempo_ == 0.0) {
         timestamp_ = timestamp;
         return;
       }

@@ -16,14 +16,7 @@
 
 namespace barelyapi::unity {
 
-namespace {
-
 using ::barelyapi::examples::SynthInstrument;
-
-// Invalid instrument_id.
-constexpr Id kInvalidId = -1;
-
-}  // namespace
 
 // Unity plugin.
 struct BarelyMusician {

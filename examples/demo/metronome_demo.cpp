@@ -42,7 +42,6 @@ constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.025f;
 
-constexpr double kTickDuration = 0.005f;
 constexpr float kBarPitch = barelyapi::kPitchA4;
 constexpr float kBeatPitch = barelyapi::kPitchA3;
 
@@ -79,11 +78,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
     LOG(INFO) << "Tick " << ((position < 0.0) ? "-" : "") << current_bar << "."
               << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    instrument_manager.SetNoteOn(kMetronomeId, transport.GetTimestamp(), pitch,
-                                 kGain);
-    const double end_timestamp = transport.GetTimestampAtPosition(
-        position +
-        ((transport.GetTempo() > 0.0) ? kTickDuration : -kTickDuration));
+    const double begin_timestamp = transport.GetTimestamp();
+    instrument_manager.SetNoteOn(kMetronomeId, begin_timestamp, pitch, kGain);
+    const double end_timestamp =
+        begin_timestamp + 1.0 / static_cast<double>(kSampleRate);
     instrument_manager.SetNoteOff(kMetronomeId, end_timestamp, pitch);
   };
   transport.SetBeatCallback(beat_callback);

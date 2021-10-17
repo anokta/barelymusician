@@ -1,5 +1,5 @@
-#ifndef UNITY_NATIVE_UNITY_LOG_WRITER_H_
-#define UNITY_NATIVE_UNITY_LOG_WRITER_H_
+#ifndef PLATFORMS_UNITY_NATIVE_UNITY_LOG_WRITER_H_
+#define PLATFORMS_UNITY_NATIVE_UNITY_LOG_WRITER_H_
 
 #include <functional>
 #include <string>
@@ -33,4 +33,4 @@ class UnityLogWriter : public logging::LogWriter {
 
 }  // namespace barelyapi::unity
 
-#endif  // UNITY_NATIVE_UNITY_LOG_WRITER_H_
+#endif  // PLATFORMS_UNITY_NATIVE_UNITY_LOG_WRITER_H_

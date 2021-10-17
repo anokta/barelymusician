@@ -1,4 +1,4 @@
-#include "unity/native/unity_log_writer.h"
+#include "platforms/unity/native/unity_log_writer.h"
 
 #include <string>
 #include <utility>

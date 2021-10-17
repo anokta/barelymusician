@@ -1,5 +1,5 @@
-#ifndef UNITY_NATIVE_UNITY_H_
-#define UNITY_NATIVE_UNITY_H_
+#ifndef PLATFORMS_UNITY_NATIVE_UNITY_H_
+#define PLATFORMS_UNITY_NATIVE_UNITY_H_
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #ifdef BARELYMUSICIAN_EXPORTS
@@ -189,4 +189,4 @@ BARELY_EXPORT void BarelyUpdate(BarelyMusician* barelymusician,
 
 }  // namespace barelyapi::unity
 
-#endif  // UNITY_NATIVE_UNITY_H_
+#endif  // PLATFORMS_UNITY_NATIVE_UNITY_H_

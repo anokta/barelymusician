@@ -189,6 +189,9 @@ class InstrumentManager {
   void Update();
 
  private:
+  // Instrument events by their timestamps container type.
+  using InstrumentEvents = std::multimap<double, InstrumentEvent>;
+
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
     // Constructs new |InstrumentController|.

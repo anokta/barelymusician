@@ -47,6 +47,11 @@ struct SetParamEvent {
   float value;
 };
 
+/// Instrument event type.
+using InstrumentEvent =
+    std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetNoteOffEvent,
+                 SetNoteOnEvent, SetParamEvent>;
+
 /// Instrument event visitor.
 template <class... EventTypes>
 struct InstrumentEventVisitor : EventTypes... {
@@ -54,11 +59,6 @@ struct InstrumentEventVisitor : EventTypes... {
 };
 template <class... EventTypes>
 InstrumentEventVisitor(EventTypes...) -> InstrumentEventVisitor<EventTypes...>;
-
-/// Instrument event type.
-using InstrumentEvent =
-    std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetNoteOffEvent,
-                 SetNoteOnEvent, SetParamEvent>;
 
 }  // namespace barelyapi
 

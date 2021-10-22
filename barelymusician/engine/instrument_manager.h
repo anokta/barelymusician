@@ -100,6 +100,19 @@ class InstrumentManager {
   void Process(Id instrument_id, double timestamp, float* output,
                int num_channels, int num_frames);
 
+  /// Processes instrument event at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param event Instrument event.
+  void ProcessEvent(Id instrument_id, double timestamp,
+                    InstrumentControllerEvent event);
+
+  /// Processes instrument events.
+  ///
+  /// @param events Instrument events.
+  void ProcessEvents(InstrumentControllerEvents events);
+
   /// Sets all notes of all instruments off at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
@@ -189,9 +202,6 @@ class InstrumentManager {
   void Update();
 
  private:
-  // Instrument events by their timestamps container type.
-  using InstrumentEvents = std::multimap<double, InstrumentEvent>;
-
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
     // Constructs new |InstrumentController|.
@@ -214,13 +224,13 @@ class InstrumentManager {
     std::optional<Instrument> instrument;
 
     // List of scheduled instrument events.
-    InstrumentEvents events;
+    InstrumentProcessorEvents events;
   };
 
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
-  std::unordered_map<Id, InstrumentEvents> update_events_;
+  std::unordered_map<Id, InstrumentProcessorEvents> update_events_;
 
   // Audio thread task runner.
   TaskRunner audio_runner_;

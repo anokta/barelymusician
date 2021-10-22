@@ -86,7 +86,7 @@ class Sequencer {
   void StopAllNotes();
 
   struct Track {
-    std::multimap<double, InstrumentEvent> events;
+    InstrumentProcessorEvents events;
   };
 
   std::unordered_map<Id, Track> tracks_;

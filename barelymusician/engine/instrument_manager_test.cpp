@@ -124,6 +124,59 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   }
 }
 
+// Tests that instrument events are processed as expected.
+TEST(InstrumentManagerTest, ProcessEvents) {
+  const double kTimestamp = 16.0;
+
+  InstrumentManager instrument_manager(kSampleRate);
+
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, kTimestamp, GetTestInstrumentDefinition(),
+      GetTestInstrumentParamDefinitions())));
+
+  // Set note on.
+  instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
+                                  SetNoteOnEvent{-0.5f, 0.25f});
+  EXPECT_TRUE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, -0.5f)));
+
+  // Set note off.
+  instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
+                                  SetNoteOffEvent{-0.5f});
+  EXPECT_FALSE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, -0.5f)));
+
+  // Set multiple notes on at once.
+  instrument_manager.ProcessEvents(InstrumentControllerEvents{
+      {kTimestamp, {kInstrumentId, SetNoteOnEvent{1.0f, 1.0f}}},
+      {kTimestamp, {kInstrumentId, SetNoteOnEvent{2.0f, 1.0f}}},
+      {kTimestamp, {kInstrumentId, SetNoteOnEvent{3.0f, 1.0f}}}});
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
+              UnorderedElementsAre(1.0f, 2.0f, 3.0f));
+
+  // Set all notes off.
+  instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
+                                  SetAllNotesOffEvent{});
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
+              UnorderedElementsAre());
+
+  // Set parameter value.
+  instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
+                                  SetParamEvent{1, 5.0f});
+  EXPECT_FLOAT_EQ(
+      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1))
+          .GetValue(),
+      5.0f);
+
+  // Set all parameters to default value.
+  instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
+                                  SetAllParamsToDefaultEvent{});
+  EXPECT_FLOAT_EQ(
+      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1))
+          .GetValue(),
+      0.0f);
+}
+
 // Tests that setting a single instrument note produces the expected output.
 TEST(InstrumentManagerTest, SetNote) {
   const double kTimestamp = 20.0;

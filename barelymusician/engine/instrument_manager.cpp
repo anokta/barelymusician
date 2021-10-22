@@ -187,6 +187,45 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
   }
 }
 
+void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
+                                     InstrumentControllerEvent event) {
+  std::visit(
+      InstrumentEventVisitor{
+          [&](SetAllNotesOffEvent& /*set_all_notes_off_event*/) {
+            SetAllNotesOff(instrument_id, timestamp);
+          },
+          [&](SetAllParamsToDefaultEvent& /*set_all_params_to_default_event*/) {
+            SetAllParamsToDefault(instrument_id, timestamp);
+          },
+          [&](SetCustomDataEvent& set_custom_data_event) {
+            SetCustomData(instrument_id, timestamp,
+                          std::move(set_custom_data_event.data));
+          },
+          [&](SetNoteOffEvent& set_note_off_event) {
+            SetNoteOff(instrument_id, timestamp, set_note_off_event.pitch);
+          },
+          [&](SetNoteOnEvent& set_note_on_event) {
+            SetNoteOn(instrument_id, timestamp, set_note_on_event.pitch,
+                      set_note_on_event.intensity);
+          },
+          [&](SetParamEvent& set_param_event) {
+            SetParam(instrument_id, timestamp, set_param_event.id,
+                     set_param_event.value);
+          },
+          [&](SetParamToDefaultEvent& set_param_to_default_event) {
+            SetParamToDefault(instrument_id, timestamp,
+                              set_param_to_default_event.id);
+          }},
+      event);
+}
+
+void InstrumentManager::ProcessEvents(InstrumentControllerEvents events) {
+  for (auto& [timestamp, instrument_id_event_pair] : events) {
+    auto& [instrument_id, event] = instrument_id_event_pair;
+    ProcessEvent(instrument_id, timestamp, std::move(event));
+  }
+}
+
 void InstrumentManager::SetAllNotesOff(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
     if (!controller.pitches.empty()) {

@@ -105,10 +105,17 @@ void Envelope::SetSustain(float sustain) {
 }
 
 void Envelope::Start() {
-  output_ = 0.0f;
-  release_output_ = 0.0f;
   phase_ = 0.0f;
-  state_ = State::kAttack;
+  if (attack_increment_ > 0.0) {
+    output_ = 0.0f;
+    state_ = State::kAttack;
+  } else if (decay_increment_ > 0.0) {
+    output_ = 1.0f;
+    state_ = State::kDecay;
+  } else {
+    output_ = sustain_;
+    state_ = State::kSustain;
+  }
 }
 
 void Envelope::Stop() {

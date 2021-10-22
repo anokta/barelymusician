@@ -34,9 +34,8 @@ void DrumkitInstrument::NoteOn(float pitch, float intensity) {
 
 void DrumkitInstrument::Process(float* output, int num_channels,
                                 int num_frames) {
-  float mono_sample = 0.0f;
   for (int frame = 0; frame < num_frames; ++frame) {
-    mono_sample = 0.0f;
+    float mono_sample = 0.0f;
     for (auto& voice : voices_) {
       mono_sample += voice.second.Next(0);
     }

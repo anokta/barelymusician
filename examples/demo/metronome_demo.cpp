@@ -73,16 +73,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Beat callback.
   const auto beat_callback = [&](double position) {
-    const int current_bar = std::abs(static_cast<int>(position)) / kNumBeats;
-    const int current_beat = std::abs(static_cast<int>(position)) % kNumBeats;
+    const int abs_position = std::abs(static_cast<int>(position));
+    const int current_bar = abs_position / kNumBeats;
+    const int current_beat = abs_position % kNumBeats;
     LOG(INFO) << "Tick " << ((position < 0.0) ? "-" : "") << current_bar << "."
               << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    const double begin_timestamp = transport.GetTimestamp();
-    instrument_manager.SetNoteOn(kMetronomeId, begin_timestamp, pitch, kGain);
-    const double end_timestamp =
-        begin_timestamp + 1.0 / static_cast<double>(kSampleRate);
-    instrument_manager.SetNoteOff(kMetronomeId, end_timestamp, pitch);
+    const double timestamp = transport.GetTimestamp();
+    instrument_manager.SetNoteOn(kMetronomeId, timestamp, pitch, kGain);
+    instrument_manager.SetNoteOff(kMetronomeId, timestamp, pitch);
   };
   transport.SetBeatCallback(beat_callback);
 

@@ -22,9 +22,8 @@ void SynthInstrument::NoteOn(float pitch, float intensity) {
 }
 
 void SynthInstrument::Process(float* output, int num_channels, int num_frames) {
-  float mono_sample = 0.0f;
   for (int frame = 0; frame < num_frames; ++frame) {
-    mono_sample = gain_ * voice_.Next(0);
+    const float mono_sample = gain_ * voice_.Next(0);
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }

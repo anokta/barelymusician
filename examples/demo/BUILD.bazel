@@ -40,11 +40,10 @@ cc_binary(
     name = "metronome_demo",
     srcs = ["metronome_demo.cpp"],
     deps = [
+        "//barelymusician",
         "//barelymusician/common:id",
         "//barelymusician/common:logging",
         "//barelymusician/composition:note_utils",
-        "//barelymusician/engine:instrument_manager",
-        "//barelymusician/engine:transport",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:input_manager",

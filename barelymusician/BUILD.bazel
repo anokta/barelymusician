@@ -1,0 +1,17 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "barelymusician",
+    srcs = ["barelymusician.cpp"],
+    hdrs = ["barelymusician.h"],
+    deps = [
+        "//barelymusician/common:id",
+        "//barelymusician/common:id_generator",
+        "//barelymusician/common:logging",
+        "//barelymusician/common:status",
+        "//barelymusician/engine:instrument_manager",
+        "//barelymusician/engine:transport",
+    ],
+)

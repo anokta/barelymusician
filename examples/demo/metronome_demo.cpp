@@ -1,7 +1,5 @@
-#include <atomic>
 #include <cctype>
 #include <chrono>
-#include <cmath>
 #include <memory>
 #include <thread>
 
@@ -73,11 +71,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Beat callback.
   const auto beat_callback = [&](double position) {
-    const int abs_position = std::abs(static_cast<int>(position));
-    const int current_bar = abs_position / kNumBeats;
-    const int current_beat = abs_position % kNumBeats;
-    LOG(INFO) << "Tick " << ((position < 0.0) ? "-" : "") << current_bar << "."
-              << current_beat;
+    const int current_bar = static_cast<int>(position) / kNumBeats;
+    const int current_beat = static_cast<int>(position) % kNumBeats;
+    LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
     const double timestamp = transport.GetTimestamp();
     instrument_manager.SetNoteOn(kMetronomeId, timestamp, pitch, kGain);
@@ -124,9 +120,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
         break;
       case '2':
         tempo *= 2.0;
-        break;
-      case 'X':
-        tempo *= -1.0;
         break;
       case 'R':
         tempo = kInitialTempo;

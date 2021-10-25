@@ -11,7 +11,9 @@ namespace {
 void NoopBeatCallback(double /*beat*/) {}
 
 // Dummy update callback function that does nothing.
-void NoopUpdateCallback(double /*begin_position*/, double /*end_position*/) {}
+void NoopUpdateCallback(double /*begin_position*/, double /*end_position*/,
+                        const Transport::GetTimestampFn& /*get_timestamp_fn*/) {
+}
 
 }  // namespace
 
@@ -21,21 +23,16 @@ Transport::Transport()
       tempo_(1.0),
       timestamp_(0.0),
       beat_callback_(&NoopBeatCallback),
+      get_timestamp_fn_([this](double position) {
+        return timestamp_ + (position - position_) / tempo_;
+      }),
       update_callback_(&NoopUpdateCallback) {}
 
 double Transport::GetPosition() const { return position_; }
 
-double Transport::GetPositionAtNextBeat() const {
-  return (tempo_ < 0.0) ? std::floor(position_) : std::ceil(position_);
-}
-
 double Transport::GetTempo() const { return tempo_; }
 
 double Transport::GetTimestamp() const { return timestamp_; }
-
-double Transport::GetTimestampAtPosition(double position) const {
-  return timestamp_ + (position - position_) / tempo_;
-}
 
 bool Transport::IsPlaying() const { return is_playing_; }
 
@@ -58,24 +55,22 @@ void Transport::Stop() { is_playing_ = false; }
 
 void Transport::Update(double timestamp) {
   while (timestamp_ < timestamp) {
-    if (!is_playing_ || tempo_ == 0.0) {
+    if (!is_playing_ || tempo_ <= 0.0) {
       timestamp_ = timestamp;
       return;
     }
     // Compute next beat.
-    double beat = GetPositionAtNextBeat();
+    double beat = std::ceil(position_);
     if (position_ == beat) {
       beat_callback_(position_);
-      if (!is_playing_ || tempo_ == 0.0) {
+      if (!is_playing_ || tempo_ <= 0.0) {
         timestamp_ = timestamp;
         return;
       }
-      beat = GetPositionAtNextBeat();
-      if (position_ == beat) {
-        beat = (tempo_ < 0.0) ? beat - 1.0 : beat + 1.0;
-      }
+      beat = std::ceil(position_);
+      if (position_ == beat) ++beat;
     }
-    const double beat_timestamp = GetTimestampAtPosition(beat);
+    const double beat_timestamp = get_timestamp_fn_(beat);
     // Update position.
     const double begin_position = position_;
     if (beat_timestamp < timestamp) {
@@ -85,7 +80,7 @@ void Transport::Update(double timestamp) {
       position_ += tempo_ * (timestamp - timestamp_);
       timestamp_ = timestamp;
     }
-    update_callback_(begin_position, position_);
+    update_callback_(begin_position, position_, get_timestamp_fn_);
   }
 }
 

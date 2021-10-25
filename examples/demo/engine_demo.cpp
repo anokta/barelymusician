@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <any>
-#include <atomic>
 #include <cctype>
 #include <chrono>
 #include <memory>

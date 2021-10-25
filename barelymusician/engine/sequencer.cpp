@@ -13,61 +13,32 @@
 namespace barelyapi {
 
 Sequencer::Sequencer(InstrumentManager* manager) : manager_(manager) {
-  transport_.SetUpdateCallback([&](double begin_position, double end_position) {
-    // Trigger messages.
-    if (begin_position < end_position) {
-      for (auto& [id, track] : tracks_) {
-        auto begin = track.events.lower_bound(begin_position);
-        auto end = track.events.lower_bound(end_position);
-        const auto instrument_id = id;
-        for (auto it = begin; it != end; ++it) {
-          std::visit(InstrumentEventVisitor{
-                         [&](SetNoteOffEvent& set_note_off_event) {
-                           manager_->SetNoteOff(
-                               instrument_id,
-                               transport_.GetTimestampAtPosition(it->first),
-                               set_note_off_event.pitch);
-                         },
-                         [&](SetNoteOnEvent& set_note_on_event) {
-                           manager_->SetNoteOn(
-                               instrument_id,
-                               transport_.GetTimestampAtPosition(it->first),
-                               set_note_on_event.pitch,
-                               set_note_on_event.intensity);
-                         },
-                         [](auto&) {}},
-                     it->second);
+  transport_.SetUpdateCallback(
+      [&](double begin_position, double end_position,
+          const Transport::GetTimestampFn get_timestamp_fn) {
+        // Trigger messages.
+        for (auto& [id, track] : tracks_) {
+          const auto begin = track.events.lower_bound(begin_position);
+          const auto end = track.events.lower_bound(end_position);
+          const auto instrument_id = id;
+          for (auto it = begin; it != end; ++it) {
+            std::visit(InstrumentEventVisitor{
+                           [&](SetNoteOffEvent& set_note_off_event) {
+                             manager_->SetNoteOff(instrument_id,
+                                                  get_timestamp_fn(it->first),
+                                                  set_note_off_event.pitch);
+                           },
+                           [&](SetNoteOnEvent& set_note_on_event) {
+                             manager_->SetNoteOn(instrument_id,
+                                                 get_timestamp_fn(it->first),
+                                                 set_note_on_event.pitch,
+                                                 set_note_on_event.intensity);
+                           },
+                           [](auto&) {}},
+                       it->second);
+          }
         }
-      }
-    } else {
-      // Trigger messages backwards.
-      for (auto& [id, track] : tracks_) {
-        auto begin =
-            std::reverse_iterator(track.events.upper_bound(begin_position));
-        auto end =
-            std::reverse_iterator(track.events.upper_bound(end_position));
-        const auto instrument_id = id;
-        for (auto it = begin; it != end; ++it) {
-          std::visit(InstrumentEventVisitor{
-                         [&](SetNoteOffEvent& set_note_off_event) {
-                           // TODO: intensity missing.
-                           manager_->SetNoteOn(
-                               instrument_id,
-                               transport_.GetTimestampAtPosition(it->first),
-                               set_note_off_event.pitch, 0.5);
-                         },
-                         [&](SetNoteOnEvent& set_note_on_event) {
-                           manager_->SetNoteOff(
-                               instrument_id,
-                               transport_.GetTimestampAtPosition(it->first),
-                               set_note_on_event.pitch);
-                         },
-                         [](auto&) {}},
-                     it->second);
-        }
-      }
-    }
-  });
+      });
 }
 
 double Sequencer::GetPlaybackPosition() const {

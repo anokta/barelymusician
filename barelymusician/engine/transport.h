@@ -13,12 +13,20 @@ class Transport {
   /// @param position Beat position in beats.
   using BeatCallback = std::function<void(double position)>;
 
+  /// Get timestamp function signature.
+  ///
+  /// @param position Position in beats.
+  /// @return Timestamp in seconds.
+  using GetTimestampFn = std::function<double(double position)>;
+
   /// Update callback signature.
   ///
   /// @param begin_position Begin position in beats (inclusive).
   /// @param end_position End position in beats (exclusive).
+  /// @param get_timestamp_fn Get timestamp function.
   using UpdateCallback =
-      std::function<void(double begin_position, double end_position)>;
+      std::function<void(double begin_position, double end_position,
+                         const GetTimestampFn& get_timestamp_fn)>;
 
   /// Constructs new |Transport|.
   Transport();
@@ -27,11 +35,6 @@ class Transport {
   ///
   /// @return Position in beats.
   double GetPosition() const;
-
-  /// Returns the position at next beat.
-  ///
-  /// @return Position in beats.
-  double GetPositionAtNextBeat() const;
 
   /// Returns the tempo.
   ///
@@ -42,12 +45,6 @@ class Transport {
   ///
   /// @return Timestamp in seconds.
   double GetTimestamp() const;
-
-  /// Returns the timestamp at position.
-  ///
-  /// @param position Position in beats.
-  /// @return Timestamp in seconds.
-  double GetTimestampAtPosition(double position) const;
 
   /// Returns whether the transport is currently playing or not.
   ///
@@ -100,6 +97,9 @@ class Transport {
 
   // Beat callback.
   BeatCallback beat_callback_;
+
+  // Get timestamp function.
+  GetTimestampFn get_timestamp_fn_;
 
   // Update callback.
   UpdateCallback update_callback_;

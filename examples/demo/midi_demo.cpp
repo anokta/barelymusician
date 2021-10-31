@@ -149,7 +149,6 @@ int main(int /*argc*/, char* argv[]) {
                                        note.end_position, note.pitch,
                                        note.intensity);
     }
-    ++num_instruments;
   }
   LOG(INFO) << "Number of active MIDI tracks: " << num_instruments;
 

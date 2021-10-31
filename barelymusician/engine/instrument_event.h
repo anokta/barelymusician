@@ -62,14 +62,6 @@ struct SetParamToDefaultEvent {
   int id;
 };
 
-/// Instrument event visitor.
-template <class... EventTypes>
-struct InstrumentEventVisitor : EventTypes... {
-  using EventTypes::operator()...;
-};
-template <class... EventTypes>
-InstrumentEventVisitor(EventTypes...) -> InstrumentEventVisitor<EventTypes...>;
-
 /// Instrument controller event type.
 using InstrumentControllerEvent =
     std::variant<SetAllNotesOffEvent, SetAllParamsToDefaultEvent,

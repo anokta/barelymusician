@@ -7,6 +7,7 @@
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
+#include "barelymusician/common/visitor.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/instrument_event.h"
 
@@ -22,19 +23,18 @@ Sequencer::Sequencer(InstrumentManager* manager) : manager_(manager) {
           const auto end = track.events.lower_bound(end_position);
           const auto instrument_id = id;
           for (auto it = begin; it != end; ++it) {
-            std::visit(InstrumentEventVisitor{
-                           [&](SetNoteOffEvent& set_note_off_event) {
-                             manager_->SetNoteOff(instrument_id,
-                                                  get_timestamp_fn(it->first),
-                                                  set_note_off_event.pitch);
-                           },
-                           [&](SetNoteOnEvent& set_note_on_event) {
-                             manager_->SetNoteOn(instrument_id,
-                                                 get_timestamp_fn(it->first),
-                                                 set_note_on_event.pitch,
-                                                 set_note_on_event.intensity);
-                           },
-                           [](auto&) {}},
+            std::visit(Visitor{[&](SetNoteOffEvent& set_note_off_event) {
+                                 manager_->SetNoteOff(
+                                     instrument_id, get_timestamp_fn(it->first),
+                                     set_note_off_event.pitch);
+                               },
+                               [&](SetNoteOnEvent& set_note_on_event) {
+                                 manager_->SetNoteOn(
+                                     instrument_id, get_timestamp_fn(it->first),
+                                     set_note_on_event.pitch,
+                                     set_note_on_event.intensity);
+                               },
+                               [](auto&) {}},
                        it->second);
           }
         }

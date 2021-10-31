@@ -20,8 +20,8 @@ cc_library(
     name = "instrument_event",
     hdrs = ["instrument_event.h"],
     deps = [
-        "//barelymusician/common:id",
         ":instrument_definition",
+        "//barelymusician/common:id",
     ],
 )
 
@@ -39,6 +39,7 @@ cc_library(
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
+        "//barelymusician/common:visitor",
         "//barelymusician/dsp:dsp_utils",
     ],
 )
@@ -66,6 +67,7 @@ cc_library(
         ":instrument_manager",
         ":transport",
         "//barelymusician/common:id",
+        "//barelymusician/common:visitor",
         "//barelymusician/composition:note",
     ],
 )

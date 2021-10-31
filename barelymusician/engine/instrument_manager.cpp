@@ -9,6 +9,7 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
+#include "barelymusician/common/visitor.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
@@ -142,35 +143,34 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
         frame = message_frame;
       }
       std::visit(
-          InstrumentEventVisitor{
-              [&](CreateEvent& create_event) {
-                instrument.emplace(sample_rate,
-                                   std::move(create_event.definition));
-              },
-              [&](DestroyEvent& /*destroy_event*/) { instrument.reset(); },
-              [&](SetCustomDataEvent& set_custom_data_event) {
-                if (instrument) {
-                  instrument->SetCustomData(
-                      std::move(set_custom_data_event.data));
-                }
-              },
-              [&](SetNoteOffEvent& set_note_off_event) {
-                if (instrument) {
-                  instrument->SetNoteOff(set_note_off_event.pitch);
-                }
-              },
-              [&](SetNoteOnEvent& set_note_on_event) {
-                if (instrument) {
-                  instrument->SetNoteOn(set_note_on_event.pitch,
-                                        set_note_on_event.intensity);
-                }
-              },
-              [&](SetParamEvent& set_param_event) {
-                if (instrument) {
-                  instrument->SetParam(set_param_event.id,
-                                       set_param_event.value);
-                }
-              }},
+          Visitor{[&](CreateEvent& create_event) {
+                    instrument.emplace(sample_rate,
+                                       std::move(create_event.definition));
+                  },
+                  [&](DestroyEvent& /*destroy_event*/) { instrument.reset(); },
+                  [&](SetCustomDataEvent& set_custom_data_event) {
+                    if (instrument) {
+                      instrument->SetCustomData(
+                          std::move(set_custom_data_event.data));
+                    }
+                  },
+                  [&](SetNoteOffEvent& set_note_off_event) {
+                    if (instrument) {
+                      instrument->SetNoteOff(set_note_off_event.pitch);
+                    }
+                  },
+                  [&](SetNoteOnEvent& set_note_on_event) {
+                    if (instrument) {
+                      instrument->SetNoteOn(set_note_on_event.pitch,
+                                            set_note_on_event.intensity);
+                    }
+                  },
+                  [&](SetParamEvent& set_param_event) {
+                    if (instrument) {
+                      instrument->SetParam(set_param_event.id,
+                                           set_param_event.value);
+                    }
+                  }},
           it->second);
     }
     // Process the rest of the buffer.
@@ -190,7 +190,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
 void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
                                      InstrumentControllerEvent event) {
   std::visit(
-      InstrumentEventVisitor{
+      Visitor{
           [&](SetAllNotesOffEvent& /*set_all_notes_off_event*/) {
             SetAllNotesOff(instrument_id, timestamp);
           },

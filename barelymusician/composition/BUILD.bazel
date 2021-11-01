@@ -8,6 +8,21 @@ cc_library(
 )
 
 cc_library(
+    name = "note_duration",
+    hdrs = ["note_duration.h"],
+)
+
+cc_library(
+    name = "note_intensity",
+    hdrs = ["note_intensity.h"],
+)
+
+cc_library(
+    name = "note_pitch",
+    hdrs = ["note_pitch.h"],
+)
+
+cc_library(
     name = "note_utils",
     srcs = ["note_utils.cpp"],
     hdrs = ["note_utils.h"],

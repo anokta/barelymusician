@@ -1,7 +1,6 @@
-#include "barelymusician/composition/note_utils.h"
+#include "barelymusician/composition/note_duration.h"
 
 #include <cmath>
-#include <vector>
 
 #include "barelymusician/common/logging.h"
 
@@ -13,17 +12,6 @@ namespace {
 double Lerp(double a, double b, double t) { return a + t * (b - a); }
 
 }  // namespace
-
-float GetPitch(const std::vector<float>& scale, int scale_index) {
-  DCHECK(!scale.empty());
-  const float scale_length = static_cast<float>(scale.size());
-  const float octave_offset =
-      std::floor(static_cast<float>(scale_index) / scale_length);
-  const int scale_offset =
-      scale_index - static_cast<int>(octave_offset * scale_length);
-
-  return octave_offset + scale[scale_offset];
-}
 
 double GetPosition(int step, int num_steps) {
   DCHECK_GE(step, 0);

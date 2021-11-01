@@ -7,7 +7,7 @@
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
-#include "barelymusician/composition/note_utils.h"
+#include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"

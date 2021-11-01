@@ -6,7 +6,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
-#include "barelymusician/composition/note_utils.h"
+#include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/transport.h"
 #include "examples/common/audio_clock.h"

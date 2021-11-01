@@ -5,8 +5,33 @@
 
 namespace barelyapi {
 
+/// Common note values in relation to quarter note beat duration.
+inline constexpr int kNumQuarterNotesPerBeat = 1;
+inline constexpr int kNumEighthNotesPerBeat = 2;
+inline constexpr int kNumEighthTripletNotesPerBeat = 3;
+inline constexpr int kNumSixteenthNotesPerBeat = 4;
+inline constexpr int kNumSixteenthTripletNotesPerBeat = 6;
+inline constexpr int kNumThirtySecondNotesPerBeat = 8;
+inline constexpr int kNumThirtySecondTripletNotesPerBeat = 12;
+
 /// Note duration type.
 using NoteDuration = std::variant<double>;
+
+/// Returns quantized position for the given number of beat steps.
+///
+/// @param step Quantized step.
+/// @param num_steps Number of steps per beat.
+/// @return Raw position.
+double GetPosition(int step, int num_steps);
+
+/// Returns quantized position.
+///
+/// @param position Original position.
+/// @param resolution Quantization resolution.
+/// @param amount Quantization amount.
+/// @return Quantized position.
+double QuantizePosition(double position, double resolution,
+                        double amount = 1.0);
 
 }  // namespace barelyapi
 

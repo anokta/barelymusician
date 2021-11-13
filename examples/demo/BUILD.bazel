@@ -71,3 +71,20 @@ cc_binary(
         "@midifile",
     ],
 )
+
+cc_binary(
+    name = "sequencer_demo",
+    srcs = ["sequencer_demo.cpp"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/common:id",
+        "//barelymusician/common:logging",
+        "//barelymusician/composition:note",
+        "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:note_sequence",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:input_manager",
+        "//examples/instruments:synth_instrument",
+    ],
+)

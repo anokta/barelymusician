@@ -16,6 +16,9 @@ struct Note {
 
   /// Note intensity.
   float intensity;
+
+// TODO: temp to keep changes easy.
+  double duration = 0.0;
 };
 
 }  // namespace barelyapi

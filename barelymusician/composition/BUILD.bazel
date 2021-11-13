@@ -30,6 +30,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "note_sequence",
+    srcs = ["note_sequence.cpp"],
+    hdrs = ["note_sequence.h"],
+    deps = [
+        ":note",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
+    ],
+)
+
 cc_test(
     name = "note_duration_test",
     srcs = ["note_duration_test.cpp"],

@@ -43,6 +43,7 @@ InstrumentManager::InstrumentManager(int sample_rate)
 Status InstrumentManager::Create(Id instrument_id, double timestamp,
                                  InstrumentDefinition definition,
                                  InstrumentParamDefinitions param_definitions) {
+  if (instrument_id == kInvalidId) return Status::kInvalidArgument;
   if (const auto [controller_it, success] = controllers_.emplace(
           instrument_id,
           InstrumentController(definition, std::move(param_definitions)));

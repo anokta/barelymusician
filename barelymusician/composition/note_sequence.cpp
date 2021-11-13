@@ -37,9 +37,7 @@ NoteSequence::NoteSequence()
       note_callback_(&NoopNoteCallback) {}
 
 Status NoteSequence::Add(Id id, double position, Note note) {
-  if (id == kInvalidId) {
-    return Status::kInvalidArgument;
-  }
+  if (id == kInvalidId) return Status::kInvalidArgument;
   if (positions_.emplace(id, position).second) {
     notes_.emplace(std::pair{position, id}, std::move(note));
     return Status::kOk;
@@ -72,8 +70,8 @@ void NoteSequence::Process(double begin_position, double end_position) {
   // if (is_looping_ && loop_length_ > 0.0) {
   //   for (double position = begin_position; position < end_position;
   //        position += loop_length_) {
-  //     const double current = loop_length_ * std::floor(position / loop_length_);
-  //     offset += current;
+  //     const double current = loop_length_ * std::floor(position /
+  //     loop_length_); offset += current;
   //   }
   // }
 
@@ -83,17 +81,14 @@ void NoteSequence::Process(double begin_position, double end_position) {
   //                       note_callback_);
   //   }
   // }
-  // const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalidId});
-  // const auto end = notes_.lower_bound(std::pair{end_position, kInvalidId});
-  // for (auto it = begin; it != end; ++it) {
+  // const auto begin = notes_.lower_bound(std::pair{begin_position,
+  // kInvalidId}); const auto end = notes_.lower_bound(std::pair{end_position,
+  // kInvalidId}); for (auto it = begin; it != end; ++it) {
   //   note_callback_(it->first.first, it->second);
   // }
 }
 
 Status NoteSequence::Remove(Id id) {
-  if (id == kInvalidId) {
-    return Status::kInvalidArgument;
-  }
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     notes_.erase(std::pair{position_it->second, id});

@@ -79,6 +79,7 @@ cc_binary(
         "//barelymusician",
         "//barelymusician/common:id",
         "//barelymusician/common:logging",
+        "//barelymusician/common:status",
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/composition:note_sequence",

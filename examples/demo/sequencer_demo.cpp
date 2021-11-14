@@ -1,11 +1,15 @@
 #include <cctype>
 #include <chrono>
+#include <cmath>
 #include <map>
 #include <memory>
 #include <thread>
+#include <utility>
+#include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
+#include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/composition/note_sequence.h"
 #include "barelymusician/engine/instrument_manager.h"
@@ -19,6 +23,7 @@ namespace {
 
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
+using ::barelyapi::IsOk;
 using ::barelyapi::Note;
 using ::barelyapi::NoteSequence;
 using ::barelyapi::OscillatorType;
@@ -39,10 +44,10 @@ constexpr double kLookahead = 0.1;
 // Instrument settings.
 constexpr Id kInstrumentId = 1;
 constexpr int kNumVoices = 4;
-constexpr float kGain = 0.5f;
+constexpr float kGain = 0.25f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.025f;
+constexpr float kRelease = 0.1f;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 2.0;
@@ -60,25 +65,29 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Transport transport;
   transport.SetTempo(kInitialTempo);
 
-  std::multimap<double, Note> active_notes;
   const auto build_note = [](float pitch, double duration,
-                             float intensity = 0.5f) {
+                             float intensity = 0.25f) {
     return Note{.pitch = pitch, .intensity = intensity, .duration = duration};
   };
   int note_index = 0;
+  std::vector<std::pair<double, Note>> notes;
+  notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));
+  notes.emplace_back(1.0, build_note(barelyapi::kPitchD4, 1.0));
+  notes.emplace_back(2.0, build_note(barelyapi::kPitchE4, 1.0));
+  notes.emplace_back(3.0, build_note(barelyapi::kPitchF4, 1.0));
+  notes.emplace_back(4.0, build_note(barelyapi::kPitchG4, 1.0));
+  notes.emplace_back(5.0, build_note(barelyapi::kPitchG4, 1.0 / 3.0));
+  notes.emplace_back(5.0 + 1.0 / 3.0,
+                     build_note(barelyapi::kPitchA5, 1.0 / 3.0));
+  notes.emplace_back(5.0 + 2.0 / 3.0,
+                     build_note(barelyapi::kPitchB5, 1.0 / 3.0));
+  notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
+
   NoteSequence note_sequence;
-  note_sequence.Add(++note_index, 0.0, build_note(barelyapi::kPitchC4, 1.0));
-  note_sequence.Add(++note_index, 1.0, build_note(barelyapi::kPitchD4, 1.0));
-  note_sequence.Add(++note_index, 2.0, build_note(barelyapi::kPitchE4, 1.0));
-  note_sequence.Add(++note_index, 3.0, build_note(barelyapi::kPitchF4, 1.0));
-  note_sequence.Add(++note_index, 4.0, build_note(barelyapi::kPitchG4, 1.0));
-  note_sequence.Add(++note_index, 5.0,
-                    build_note(barelyapi::kPitchG4, 1.0 / 3.0));
-  note_sequence.Add(++note_index, 5.0 + 1.0 / 3.0,
-                    build_note(barelyapi::kPitchA5, 1.0 / 3.0));
-  note_sequence.Add(++note_index, 5.0 + 2.0 / 3.0,
-                    build_note(barelyapi::kPitchB5, 1.0 / 3.0));
-  note_sequence.Add(++note_index, 6.0, build_note(barelyapi::kPitchC5, 2.0));
+  note_sequence.SetLooping(true);
+  for (const auto& [position, note] : notes) {
+    note_sequence.Add(++note_index, position, note);
+  }
 
   // Create metronome instrument.
   instrument_manager.Create(
@@ -93,13 +102,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument_manager.Create(
       2, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
-       {SynthInstrumentParam::kGain, kGain},
+       {SynthInstrumentParam::kGain, 0.5f * kGain},
        {SynthInstrumentParam::kOscillatorType,
         static_cast<float>(OscillatorType::kSquare)},
        {SynthInstrumentParam::kEnvelopeAttack, kAttack},
-       {SynthInstrumentParam::kEnvelopeRelease, kRelease}});
+       {SynthInstrumentParam::kEnvelopeRelease, 0.025f}});
 
   // Transport update callback.
+  std::multimap<double, Note> active_notes;
   const auto update_callback =
       [&](double begin_position, double end_position,
           const Transport::GetTimestampFn& get_timestamp_fn) {
@@ -144,8 +154,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                  barelyapi::kPitchC3, 1.0);
     instrument_manager.SetNoteOff(2, transport.GetTimestamp(),
                                   barelyapi::kPitchC3);
-    if (position == 8.0) {
-      transport.SetPosition(0.0);
+    if (note_sequence.IsLooping() && position >= 8.0) {
+      transport.SetPosition(std::fmod(position, 8.0));
     }
   });
 
@@ -172,6 +182,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
       quit = true;
       return;
     }
+    if (const Id id = static_cast<int>(key - '0'); id > 0 && id < 10) {
+      // Toggle notes.
+      if (IsOk(note_sequence.Remove(id))) {
+        LOG(INFO) << "Removed note " << id;
+      } else {
+        note_sequence.Add(id, notes[id - 1].first, notes[id - 1].second);
+        LOG(INFO) << "Added note " << id;
+      }
+      return;
+    }
     // Adjust tempo.
     double tempo = transport.GetTempo();
     switch (std::toupper(key)) {
@@ -185,17 +205,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
           LOG(INFO) << "Started playback";
         }
         return;
+      case 'L':
+        if (note_sequence.IsLooping()) {
+          note_sequence.SetLooping(false);
+          LOG(INFO) << "Looping turned off";
+        } else {
+          note_sequence.SetLooping(true);
+          LOG(INFO) << "Looping turned on";
+        }
+        return;
       case '-':
         tempo -= kTempoIncrement;
         break;
       case '+':
         tempo += kTempoIncrement;
-        break;
-      case '1':
-        tempo *= 0.5;
-        break;
-      case '2':
-        tempo *= 2.0;
         break;
       case 'R':
         tempo = kInitialTempo;

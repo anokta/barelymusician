@@ -49,7 +49,7 @@ constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 
-constexpr int kNumBeats = 4;
+constexpr Id kMetronomeId = 2;
 constexpr double kInitialTempo = 2.0;
 constexpr double kTempoIncrement = 10.0;
 
@@ -69,7 +69,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
                              float intensity = 0.25f) {
     return Note{.pitch = pitch, .intensity = intensity, .duration = duration};
   };
-  int note_index = 0;
   std::vector<std::pair<double, Note>> notes;
   notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));
   notes.emplace_back(1.0, build_note(barelyapi::kPitchD4, 1.0));
@@ -85,6 +84,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   NoteSequence note_sequence;
   note_sequence.SetLooping(true);
+  int note_index = 0;
   for (const auto& [position, note] : notes) {
     note_sequence.Add(++note_index, position, note);
   }
@@ -100,7 +100,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {SynthInstrumentParam::kEnvelopeRelease, kRelease}});
 
   instrument_manager.Create(
-      2, 0.0, SynthInstrument::GetDefinition(),
+      kMetronomeId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, 0.5f * kGain},
        {SynthInstrumentParam::kOscillatorType,
@@ -150,9 +150,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   transport.SetUpdateCallback(update_callback);
 
   transport.SetBeatCallback([&](double position) {
-    instrument_manager.SetNoteOn(2, transport.GetTimestamp(),
+    instrument_manager.SetNoteOn(kMetronomeId, transport.GetTimestamp(),
                                  barelyapi::kPitchC3, 1.0);
-    instrument_manager.SetNoteOff(2, transport.GetTimestamp(),
+    instrument_manager.SetNoteOff(kMetronomeId, transport.GetTimestamp(),
                                   barelyapi::kPitchC3);
     if (note_sequence.IsLooping() && position >= 8.0) {
       transport.SetPosition(std::fmod(position, 8.0));
@@ -182,12 +182,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
       quit = true;
       return;
     }
-    if (const Id id = static_cast<int>(key - '0'); id > 0 && id < 10) {
+    if (const int id = static_cast<int>(key - '0'); id > 0 && id < 10) {
       // Toggle notes.
-      if (IsOk(note_sequence.Remove(id))) {
+      if (IsOk(note_sequence.Remove(static_cast<Id>(id)))) {
         LOG(INFO) << "Removed note " << id;
       } else {
-        note_sequence.Add(id, notes[id - 1].first, notes[id - 1].second);
+        note_sequence.Add(static_cast<Id>(id), notes[id - 1].first,
+                          notes[id - 1].second);
         LOG(INFO) << "Added note " << id;
       }
       return;

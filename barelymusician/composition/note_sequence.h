@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <optional>
 #include <unordered_map>
 #include <utility>
 
@@ -42,6 +43,16 @@ class NoteSequence {
   /// @return Start offset in beats.
   double GetStartOffset() const;
 
+  /// Returns the start position.
+  ///
+  /// @return Optional start position.
+  std::optional<double> GetStartPosition() const;
+
+  /// Returns the end position.
+  ///
+  /// @return Optional end position.
+  std::optional<double> GetEndPosition() const;
+
   /// Returns whether the sequence is empty or not.
   ///
   /// @return True if empty.
@@ -56,7 +67,9 @@ class NoteSequence {
   ///
   /// @param begin_position Begin position.
   /// @param end_position End position.
-  void Process(double begin_position, double end_position);
+  /// @param note_callback Note callback.
+  void Process(double begin_position, double end_position,
+               const NoteCallback& note_callback) const;
 
   /// Removes note.
   ///
@@ -74,15 +87,20 @@ class NoteSequence {
   /// @param is_looping True if looping.
   void SetLooping(bool is_looping);
 
-  /// Sets note callback.
-  ///
-  /// @param note_callback Note callback.
-  void SetNoteCallback(NoteCallback note_callback);
-
   /// Sets the start offset.
   ///
   /// @param start_offset Start offset in beats.
   void SetStartOffset(double start_offset);
+
+  /// Sets start position.
+  ///
+  /// @param start_position Optional start position.
+  void SetStartPosition(std::optional<double> start_position);
+
+  /// Sets end position.
+  ///
+  /// @param end_position Optional end position.
+  void SetEndPosition(std::optional<double> end_position);
 
  private:
   // Denotes whether the sequence is looping or not.
@@ -93,6 +111,12 @@ class NoteSequence {
 
   // Start position offset in beats.
   double start_offset_;
+
+  // Optional start position.
+  std::optional<double> start_position_;
+
+  // Optional end position.
+  std::optional<double> end_position_;
 
   // Note callback.
   NoteCallback note_callback_;

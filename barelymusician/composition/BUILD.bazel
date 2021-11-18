@@ -41,6 +41,21 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "sequencer",
+    # srcs = ["sequencer.cpp"],
+    hdrs = ["sequencer.h"],
+    deps = [
+        ":note",
+        ":note_sequence",
+        "//barelymusician/common:find_or_null",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
+        "//barelymusician/engine:instrument_event",
+        "//barelymusician/engine:transport",
+    ],
+)
+
 cc_test(
     name = "note_duration_test",
     srcs = ["note_duration_test.cpp"],

@@ -42,7 +42,7 @@ void Transport::SetBeatCallback(BeatCallback beat_callback) {
 
 void Transport::SetPosition(double position) { position_ = position; }
 
-void Transport::SetTempo(double tempo) { tempo_ = tempo; }
+void Transport::SetTempo(double tempo) { tempo_ = std::max(tempo, 0.0); }
 
 void Transport::SetUpdateCallback(UpdateCallback update_callback) {
   update_callback_ =

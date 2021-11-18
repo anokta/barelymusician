@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <optional>
 #include <utility>
 
 #include "barelymusician/common/id.h"
@@ -12,9 +13,6 @@
 namespace barelyapi {
 
 namespace {
-
-// Dummy note callback that does nothing.
-void NoopNoteCallback(double /*position*/, const Note& /*note*/) {}
 
 // Processes the sequence with an offset.
 void ProcessWithOffset(const std::map<std::pair<double, Id>, Note>& notes,
@@ -34,7 +32,8 @@ NoteSequence::NoteSequence()
     : is_looping_(false),
       loop_length_(1.0),
       start_offset_(0.0),
-      note_callback_(&NoopNoteCallback) {}
+      start_position_(std::nullopt),
+      end_position_(std::nullopt) {}
 
 Status NoteSequence::Add(Id id, double position, Note note) {
   if (id == kInvalidId) return Status::kInvalidArgument;
@@ -49,21 +48,35 @@ double NoteSequence::GetLoopLength() const { return loop_length_; }
 
 double NoteSequence::GetStartOffset() const { return start_offset_; }
 
+std::optional<double> NoteSequence::GetStartPosition() const {
+  return start_position_;
+}
+
+std::optional<double> NoteSequence::GetEndPosition() const {
+  return end_position_;
+}
+
 bool NoteSequence::IsEmpty() const { return notes_.empty(); }
 
 bool NoteSequence::IsLooping() const { return is_looping_; }
 
-void NoteSequence::Process(double begin_position, double end_position) {
+void NoteSequence::Process(double begin_position, double end_position,
+                           const NoteCallback& note_callback) const {
+  if (!note_callback) return;
+
   double offset = start_offset_;
-  if (is_looping_ && loop_length_ > 0.0) {
-  }
+  // if (start_position_) {
+  // }
+
+  // if (is_looping_ && loop_length_ > 0.0) {
+  // }
 
   const auto begin =
       notes_.lower_bound(std::pair{begin_position + offset, kInvalidId});
   const auto end =
       notes_.lower_bound(std::pair{end_position + offset, kInvalidId});
   for (auto it = begin; it != end; ++it) {
-    note_callback_(it->first.first - offset, it->second);
+    note_callback(it->first.first - offset, it->second);
   }
 
   // double offset = 0.0;
@@ -104,12 +117,16 @@ void NoteSequence::SetLoopLength(double loop_length) {
 
 void NoteSequence::SetLooping(bool is_looping) { is_looping_ = is_looping; }
 
-void NoteSequence::SetNoteCallback(NoteCallback note_callback) {
-  note_callback_ = note_callback ? std::move(note_callback) : &NoopNoteCallback;
-}
-
 void NoteSequence::SetStartOffset(double start_offset) {
   start_offset_ = start_offset;
+}
+
+void NoteSequence::SetStartPosition(std::optional<double> start_position) {
+  start_position_ = std::move(start_position);
+}
+
+void NoteSequence::SetEndPosition(std::optional<double> end_position) {
+  end_position_ = std::move(end_position);
 }
 
 }  // namespace barelyapi

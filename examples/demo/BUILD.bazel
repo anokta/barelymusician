@@ -82,7 +82,7 @@ cc_binary(
         "//barelymusician/common:status",
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/composition:note_sequence",
+        "//barelymusician/composition:sequencer",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:input_manager",

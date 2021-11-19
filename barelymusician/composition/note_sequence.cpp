@@ -46,6 +46,10 @@ Status NoteSequence::Add(Id id, double position, Note note) {
 
 double NoteSequence::GetLoopLength() const { return loop_length_; }
 
+double NoteSequence::GetLoopStartPosition() const {
+  return loop_start_position_;
+}
+
 double NoteSequence::GetStartOffset() const { return start_offset_; }
 
 std::optional<double> NoteSequence::GetStartPosition() const {
@@ -131,6 +135,10 @@ Status NoteSequence::Remove(Id id) {
 
 void NoteSequence::SetLoopLength(double loop_length) {
   loop_length_ = std::max(loop_length, 0.0);
+}
+
+void NoteSequence::SetLoopStartPosition(double loop_start_position) {
+  loop_start_position_ = loop_start_position;
 }
 
 void NoteSequence::SetLooping(bool is_looping) { is_looping_ = is_looping; }

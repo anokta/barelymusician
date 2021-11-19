@@ -65,11 +65,29 @@ void NoteSequence::Process(double begin_position, double end_position,
   if (!note_callback) return;
 
   double offset = start_offset_;
-  // if (start_position_) {
-  // }
+
+  if (start_position_) {
+    begin_position = std::max(begin_position, *start_position_);
+    offset -= *start_position_;
+  }
+  if (end_position_) {
+    end_position = std::min(end_position, *end_position_);
+  }
+  if (begin_position >= end_position) return;
 
   // if (is_looping_ && loop_length_ > 0.0) {
   // }
+
+  if (is_looping_) {
+    if (loop_length_ <= 0.0) return;
+
+    // TODO: is this modulus necessary?
+    // double current_offset =
+    //     start_offset_ - std::floor(start_offset_ / loop_length_) *
+    //     loop_length_;
+
+    // for (begin -> end)
+  }
 
   const auto begin =
       notes_.lower_bound(std::pair{begin_position + offset, kInvalidId});

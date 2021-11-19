@@ -46,7 +46,7 @@ constexpr double kLookahead = 0.1;
 // Instrument settings.
 constexpr Id kInstrumentId = 1;
 constexpr int kNumVoices = 4;
-constexpr float kGain = 0.25f;
+constexpr float kGain = 0.1f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
@@ -109,6 +109,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   sequencer.CreateSequence(kSequenceId);
   sequencer.SetInstrument(kSequenceId, kInstrumentId);
   auto* sequence = GetStatusOrValue(sequencer.GetSequence(kSequenceId));
+  sequence->SetStartPosition(2.0);
+  sequence->SetEndPosition(8.0);
   sequence->SetLooping(true);
   int note_index = 0;
   for (const auto& [position, note] : notes) {

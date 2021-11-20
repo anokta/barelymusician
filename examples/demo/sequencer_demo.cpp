@@ -46,7 +46,7 @@ constexpr double kLookahead = 0.1;
 // Instrument settings.
 constexpr Id kInstrumentId = 1;
 constexpr int kNumVoices = 4;
-constexpr float kGain = 0.1f;
+constexpr float kGain = 0.2f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
@@ -88,6 +88,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {SynthInstrumentParam::kEnvelopeAttack, kAttack},
        {SynthInstrumentParam::kEnvelopeRelease, 0.025f}});
 
+  instrument_manager.SetNoteOnCallback(
+      [](Id instrument_id, double timestamp, float note_pitch, float) {
+        if (instrument_id == kInstrumentId) {
+          LOG(INFO) << "NotePitch{"
+                    << ((note_pitch - barelyapi::kPitchC4) *
+                        barelyapi::kNumSemitones)
+                    << "} at: " << timestamp;
+        }
+      });
+
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {
     return Note{.pitch = pitch, .intensity = intensity, .duration = duration};
@@ -110,8 +120,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   sequencer.SetInstrument(kSequenceId, kInstrumentId);
   auto* sequence = GetStatusOrValue(sequencer.GetSequence(kSequenceId));
   sequence->SetStartPosition(2.0);
-  sequence->SetEndPosition(8.0);
+  sequence->SetEndPosition(20.0);
   sequence->SetLooping(true);
+  sequence->SetLoopLength(5.0);
+  sequence->SetLoopStartOffset(3.0);
+  sequence->SetStartOffset(-1.0);
   int note_index = 0;
   for (const auto& [position, note] : notes) {
     sequence->Add(++note_index, position, note);
@@ -131,9 +144,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                  barelyapi::kPitchC3, 1.0);
     instrument_manager.SetNoteOff(kMetronomeId, transport.GetTimestamp(),
                                   barelyapi::kPitchC3);
-    if (sequence->IsLooping() && position >= 8.0) {
-      transport.SetPosition(std::fmod(position, 8.0));
-    }
+    LOG(INFO) << "Beat: " << position;
   });
 
   // Audio process callback.

@@ -38,10 +38,10 @@ class NoteSequence {
   /// @return Loop length in beats.
   double GetLoopLength() const;
   
-  /// Returns the loop start position.
+  /// Returns the loop start offset.
   ///
-  /// @return Loop start position in beats.
-  double GetLoopStartPosition() const;
+  /// @return Loop start offset in beats.
+  double GetLoopStartOffset() const;
 
   /// Returns the start offset.
   ///
@@ -87,10 +87,10 @@ class NoteSequence {
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length);
 
-  /// Sets the loop start position.
+  /// Sets the loop start offset.
   ///
-  /// @param loop_start_position Loop start position in beats.
-  void SetLoopStartPosition(double loop_start_position);
+  /// @param loop_start_offset Loop start offset in beats.
+  void SetLoopStartOffset(double loop_start_position);
 
   /// Sets whether the sequence should be looping or not.
   ///
@@ -119,8 +119,8 @@ class NoteSequence {
   // Loop length in beats.
   double loop_length_;
 
-  // Loop start position in beats.
-  double loop_start_position_;
+  // Loop start offset in beats.
+  double loop_start_offset_;
 
   // Start position offset in beats.
   double start_offset_;

@@ -28,6 +28,13 @@ class Sequencer {
     return Status::kAlreadyExists;
   }
 
+  Status DestroySequence(Id sequence_id) {
+    if (sequences_.erase(sequence_id) > 0) {
+      return Status::kOk;
+    }
+    return Status::kNotFound;
+  }
+
   // TDOO: this should not exist?
   StatusOr<NoteSequence*> GetSequence(Id sequence_id) {
     if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
@@ -75,7 +82,6 @@ class Sequencer {
       if (!sequence_instrument_id_pair.second) continue;
       const auto& sequence = sequence_instrument_id_pair.first;
       const Id instrument_id = *sequence_instrument_id_pair.second;
-      if (!instrument_id) continue;
       sequence.Process(
           begin_position, end_position, [&](double position, const Note& note) {
             // TODO: GetPitch(note.pitch);

@@ -57,6 +57,11 @@ constexpr double kTempoIncrement = 0.1;
 
 constexpr Id kSequenceId = 10;
 
+// Returns the MIDI key number for the given |pitch|.
+int MidiKeyNumberFromPitch(float pitch) {
+  return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
+}
+
 }  // namespace
 
 int main(int /*argc*/, char* /*argv*/[]) {
@@ -91,9 +96,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument_manager.SetNoteOnCallback(
       [](Id instrument_id, double timestamp, float note_pitch, float) {
         if (instrument_id == kInstrumentId) {
-          LOG(INFO) << "NotePitch{"
-                    << ((note_pitch - barelyapi::kPitchC4) *
-                        barelyapi::kNumSemitones)
+          LOG(INFO) << "Note{" << MidiKeyNumberFromPitch(note_pitch)
                     << "} at: " << timestamp;
         }
       });

@@ -59,20 +59,6 @@ cc_library(
 )
 
 cc_library(
-    name = "sequencer",
-    srcs = ["sequencer.cpp"],
-    hdrs = ["sequencer.h"],
-    deps = [
-        ":instrument_event",
-        ":instrument_manager",
-        ":transport",
-        "//barelymusician/common:id",
-        "//barelymusician/common:visitor",
-        "//barelymusician/composition:note",
-    ],
-)
-
-cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],

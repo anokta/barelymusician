@@ -12,11 +12,14 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
+#include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/composition/note_sequence.h"
+#include "barelymusician/composition/sequencer.h"
 #include "barelymusician/engine/instrument_manager.h"
-#include "barelymusician/engine/sequencer.h"
+#include "barelymusician/engine/transport.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -28,12 +31,15 @@
 namespace {
 
 using ::barelyapi::GetPitch;
+using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::Note;
+using ::barelyapi::NoteSequence;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
 using ::barelyapi::Sequencer;
+using ::barelyapi::Transport;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::DrumkitInstrument;
@@ -50,8 +56,9 @@ using ::bazel::tools::cpp::runfiles::Runfiles;
 // @param num_beats Number of beats in a bar.
 // @param harmonic Harmonic index.
 // @param notes Pointer to mutable notes.
-using BeatComposerCallback = std::function<void(
-    int bar, int beat, int num_beats, int harmonic, std::vector<Note>* notes)>;
+using BeatComposerCallback =
+    std::function<void(int bar, int beat, int num_beats, int harmonic,
+                       double offset, NoteSequence* notes)>;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -71,11 +78,14 @@ constexpr int kNumInstrumentVoices = 8;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
+Id note_id_count = 0;
+
 void ComposeChord(float root_note, const std::vector<float>& scale,
-                  float intensity, int harmonic, std::vector<Note>* notes) {
+                  float intensity, int harmonic, double offset,
+                  NoteSequence* sequence) {
   const auto add_chord_note = [&](int index) {
-    notes->push_back(
-        Note{0.0, 1.0, root_note + GetPitch(scale, index), intensity});
+    sequence->Add(++note_id_count, offset,
+                  Note{root_note + GetPitch(scale, index), intensity, 1.0});
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -85,12 +95,13 @@ void ComposeChord(float root_note, const std::vector<float>& scale,
 
 void ComposeLine(float root_note, const std::vector<float>& scale,
                  float intensity, int bar, int beat, int num_beats,
-                 int harmonic, std::vector<Note>* notes) {
+                 int harmonic, double offset, NoteSequence* sequence) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
-    notes->push_back(Note{begin_position, end_position,
-                          root_note + GetPitch(scale, index), intensity});
+    sequence->Add(++note_id_count, begin_position + offset,
+                  Note{root_note + GetPitch(scale, index), intensity,
+                       end_position - begin_position});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);
@@ -110,55 +121,50 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
   }
 }
 
-void ComposeDrums(int bar, int beat, int num_beats, std::vector<Note>* notes,
-                  Random* random) {
+void ComposeDrums(int bar, int beat, int num_beats, Random* random,
+                  double offset, NoteSequence* sequence) {
   const auto get_beat = [](int step) {
     return barelyapi::GetPosition(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
+  const auto add_note = [&](double begin_position, double end_position,
+                            float pitch, float intensity) {
+    sequence->Add(++note_id_count, begin_position + offset,
+                  Note{pitch, intensity, end_position - begin_position});
+  };
+
   // Kick.
   if (beat % 2 == 0) {
-    notes->emplace_back(
-        Note{get_beat(0), get_beat(2), barelyapi::kPitchKick, 1.0f});
+    add_note(get_beat(0), get_beat(2), barelyapi::kPitchKick, 1.0f);
     if (bar % 2 == 1 && beat == 0) {
-      notes->emplace_back(
-          Note{get_beat(2), get_beat(4), barelyapi::kPitchKick, 1.0f});
+      add_note(get_beat(2), get_beat(4), barelyapi::kPitchKick, 1.0f);
     }
   }
   // Snare.
   if (beat % 2 == 1) {
-    notes->emplace_back(
-        Note{get_beat(0), get_beat(2), barelyapi::kPitchSnare, 1.0f});
+    add_note(get_beat(0), get_beat(2), barelyapi::kPitchSnare, 1.0f);
   }
   if (beat + 1 == num_beats) {
-    notes->emplace_back(
-        Note{get_beat(2), get_beat(4), barelyapi::kPitchSnare, 0.75f});
+    add_note(get_beat(2), get_beat(4), barelyapi::kPitchSnare, 0.75f);
     if (bar % 4 == 3) {
-      notes->emplace_back(
-          Note{get_beat(1), get_beat(2), barelyapi::kPitchSnare, 1.0f});
-      notes->emplace_back(
-          Note{get_beat(3), get_beat(4), barelyapi::kPitchSnare, 0.75f});
+      add_note(get_beat(1), get_beat(2), barelyapi::kPitchSnare, 1.0f);
+      add_note(get_beat(3), get_beat(4), barelyapi::kPitchSnare, 0.75f);
     }
   }
   // Hihat Closed.
-  notes->emplace_back(Note{get_beat(0), get_beat(2),
-                           barelyapi::kPitchHihatClosed,
-                           random->DrawUniform(0.5f, 0.75f)});
-  notes->emplace_back(Note{get_beat(2), get_beat(4),
-                           barelyapi::kPitchHihatClosed,
-                           random->DrawUniform(0.25f, 0.75f)});
+  add_note(get_beat(0), get_beat(2), barelyapi::kPitchHihatClosed,
+           random->DrawUniform(0.5f, 0.75f));
+  add_note(get_beat(2), get_beat(4), barelyapi::kPitchHihatClosed,
+           random->DrawUniform(0.25f, 0.75f));
   // Hihat Open.
   if (beat + 1 == num_beats) {
     if (bar % 4 == 3) {
-      notes->emplace_back(
-          Note{get_beat(1), get_beat(2), barelyapi::kPitchHihatOpen, 0.5f});
+      add_note(get_beat(1), get_beat(2), barelyapi::kPitchHihatOpen, 0.5f);
     } else if (bar % 2 == 0) {
-      notes->emplace_back(
-          Note{get_beat(3), get_beat(4), barelyapi::kPitchHihatOpen, 0.5f});
+      add_note(get_beat(3), get_beat(4), barelyapi::kPitchHihatOpen, 0.5f);
     }
   }
   if (beat == 0 && bar % 4 == 0) {
-    notes->emplace_back(
-        Note{get_beat(0), get_beat(2), barelyapi::kPitchHihatOpen, 0.75f});
+    add_note(get_beat(0), get_beat(2), barelyapi::kPitchHihatOpen, 0.75f);
   }
 }
 
@@ -176,8 +182,11 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kSampleRate);
   InstrumentManager instrument_manager(kSampleRate);
-  Sequencer sequencer(&instrument_manager);
-  sequencer.SetPlaybackTempo(kTempo);
+
+  Transport transport;
+  transport.SetTempo(kTempo);
+
+  Sequencer sequencer;
 
   // Note on callback.
   const auto note_on_callback = [](Id performer_id, double /*timestamp*/,
@@ -217,26 +226,38 @@ int main(int /*argc*/, char* argv[]) {
   // Add synth instruments.
   const auto chords_beat_composer_callback =
       std::bind(ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
-                std::placeholders::_5);
+                std::placeholders::_5, std::placeholders::_6);
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
+  sequencer.CreateSequence(static_cast<Id>(performers.size()));
+  sequencer.SetInstrument(static_cast<Id>(performers.size()),
+                          static_cast<Id>(performers.size()));
   performers.push_back(chords_beat_composer_callback);
 
   build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
+  sequencer.CreateSequence(static_cast<Id>(performers.size()));
+  sequencer.SetInstrument(static_cast<Id>(performers.size()),
+                          static_cast<Id>(performers.size()));
   performers.push_back(chords_beat_composer_callback);
 
   const auto line_beat_composer_callback = std::bind(
       ComposeLine, kRootNote - 1.0f, scale, 1.0f, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-      std::placeholders::_5);
+      std::placeholders::_5, std::placeholders::_6);
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
+  sequencer.CreateSequence(static_cast<Id>(performers.size()));
+  sequencer.SetInstrument(static_cast<Id>(performers.size()),
+                          static_cast<Id>(performers.size()));
   performers.push_back(line_beat_composer_callback);
 
-  const auto line_2_beat_composer_callback =
-      std::bind(ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
-                std::placeholders::_2, std::placeholders::_3,
-                std::placeholders::_4, std::placeholders::_5);
+  const auto line_2_beat_composer_callback = std::bind(
+      ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
+      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
+      std::placeholders::_5, std::placeholders::_6);
   build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
+  sequencer.CreateSequence(static_cast<Id>(performers.size()));
+  sequencer.SetInstrument(static_cast<Id>(performers.size()),
+                          static_cast<Id>(performers.size()));
   performers.push_back(line_2_beat_composer_callback);
 
   // Add drumkit instrument.
@@ -258,7 +279,11 @@ int main(int /*argc*/, char* argv[]) {
                                    std::any(&drumkit_files));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3, std::placeholders::_5, &random);
+                std::placeholders::_3, &random, std::placeholders::_5,
+                std::placeholders::_6);
+  sequencer.CreateSequence(static_cast<Id>(performers.size()));
+  sequencer.SetInstrument(static_cast<Id>(performers.size()),
+                          static_cast<Id>(performers.size()));
   performers.push_back(drumkit_beat_composer_callback);
 
   // Bar callback.
@@ -268,7 +293,6 @@ int main(int /*argc*/, char* argv[]) {
 
   // Beat callback.
   int harmonic = 0;
-  std::vector<Note> temp_notes;
   const auto beat_callback = [&](double beat) {
     // Update transport.
     const int current_bar = static_cast<int>(beat) / kNumBeats;
@@ -281,21 +305,23 @@ int main(int /*argc*/, char* argv[]) {
     // Update members.
     for (int i = 0; i < static_cast<int>(performers.size()); ++i) {
       // Compose next beat notes.
-      temp_notes.clear();
       if (performers[i]) {
-        performers[i](current_bar, current_beat, kNumBeats, harmonic,
-                      &temp_notes);
-      }
-      for (const Note& note : temp_notes) {
-        const double begin_position = beat + note.begin_position;
-        const double end_position = beat + note.end_position;
-        sequencer.ScheduleInstrumentNote(static_cast<Id>(i), begin_position,
-                                         end_position, note.pitch,
-                                         note.intensity);
+        performers[i](
+            current_bar, current_beat, kNumBeats, harmonic, beat,
+            GetStatusOrValue(sequencer.GetSequence(static_cast<Id>(i))));
       }
     }
   };
-  sequencer.SetBeatCallback(beat_callback);
+  transport.SetBeatCallback(beat_callback);
+
+  // Transport update callback.
+  const auto update_callback =
+      [&](double begin_position, double end_position,
+          const Transport::GetTimestampFn& get_timestamp_fn) {
+        instrument_manager.ProcessEvents(
+            sequencer.Process(begin_position, end_position, get_timestamp_fn));
+      };
+  transport.SetUpdateCallback(update_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
@@ -321,26 +347,27 @@ int main(int /*argc*/, char* argv[]) {
     }
     switch (std::toupper(key)) {
       case ' ':
-        if (sequencer.IsPlaying()) {
-          sequencer.StopPlayback();
+        if (transport.IsPlaying()) {
+          transport.Stop();
+          sequencer.Stop();
+          instrument_manager.SetAllNotesOff(transport.GetTimestamp());
           LOG(INFO) << "Stopped playback";
         } else {
-          sequencer.StartPlayback();
+          transport.Start();
           LOG(INFO) << "Started playback";
         }
         break;
       case '1':
-        sequencer.SetPlaybackTempo(random.DrawUniform(0.5, 0.75) *
-                                   sequencer.GetPlaybackTempo());
-        LOG(INFO) << "Tempo changed to " << sequencer.GetPlaybackTempo();
+        transport.SetTempo(random.DrawUniform(0.5, 0.75) *
+                           transport.GetTempo());
+        LOG(INFO) << "Tempo changed to " << transport.GetTempo();
         break;
       case '2':
-        sequencer.SetPlaybackTempo(random.DrawUniform(1.5, 2.0) *
-                                   sequencer.GetPlaybackTempo());
-        LOG(INFO) << "Tempo changed to " << sequencer.GetPlaybackTempo();
+        transport.SetTempo(random.DrawUniform(1.5, 2.0) * transport.GetTempo());
+        LOG(INFO) << "Tempo changed to " << transport.GetTempo();
         break;
       case 'R':
-        sequencer.SetPlaybackTempo(kTempo);
+        transport.SetTempo(kTempo);
         LOG(INFO) << "Tempo reset to " << kTempo;
         break;
     }
@@ -350,18 +377,18 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  sequencer.StartPlayback();
+  transport.Start();
 
   while (!quit) {
     input_manager.Update();
+    transport.Update(clock.GetTimestamp() + kLookahead);
     instrument_manager.Update();
-    sequencer.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  sequencer.StopPlayback();
+  transport.Stop();
   audio_output.Stop();
 
   return 0;

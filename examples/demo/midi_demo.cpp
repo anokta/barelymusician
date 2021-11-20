@@ -8,10 +8,13 @@
 #include "MidiFile.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
+#include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/composition/note_sequence.h"
+#include "barelymusician/composition/sequencer.h"
 #include "barelymusician/engine/instrument_manager.h"
-#include "barelymusician/engine/sequencer.h"
+#include "barelymusician/engine/transport.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -20,11 +23,14 @@
 
 namespace {
 
+using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::Note;
+using ::barelyapi::NoteSequence;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Sequencer;
+using ::barelyapi::Transport;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
@@ -67,26 +73,24 @@ int MidiKeyNumberFromPitch(float pitch) {
 }
 
 // Builds the score from the given |midi_events|.
-std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
-                             int ticks_per_beat) {
+bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
+                NoteSequence* sequence) {
   const auto get_position = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
-  std::vector<Note> score;
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
       Note note;
-      note.begin_position = get_position(midi_event.tick);
-      note.end_position =
-          note.begin_position + get_position(midi_event.getTickDuration());
       note.pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
-      score.push_back(std::move(note));
+      note.duration = get_position(midi_event.getTickDuration());
+      sequence->Add(static_cast<Id>(i), get_position(midi_event.tick),
+                    std::move(note));
     }
   }
-  return score;
+  return !sequence->IsEmpty();
 }
 
 }  // namespace
@@ -112,8 +116,6 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kSampleRate);
   InstrumentManager instrument_manager(kSampleRate);
-  Sequencer sequencer(&instrument_manager);
-  sequencer.SetPlaybackTempo(kTempo);
   instrument_manager.SetNoteOnCallback(
       [](Id id, double /*timestamp*/, float pitch, float intensity) {
         LOG(INFO) << "MIDI track #" << id << ": NoteOn("
@@ -125,12 +127,19 @@ int main(int /*argc*/, char* argv[]) {
                   << MidiKeyNumberFromPitch(pitch) << ") ";
       });
 
+  Transport transport;
+  transport.SetTempo(kTempo);
+
+  Sequencer sequencer;
   int num_instruments = 0;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
-    const auto score = BuildScore(midi_file[i], ticks_per_quarter);
-    if (score.empty()) {
+    const Id sequence_id = static_cast<Id>(i);
+    sequencer.CreateSequence(sequence_id);
+    if (!BuildScore(midi_file[i], ticks_per_quarter,
+                    GetStatusOrValue(sequencer.GetSequence(sequence_id)))) {
       LOG(WARNING) << "Empty MIDI track: " << i;
+      sequencer.DestroySequence(sequence_id);
       continue;
     }
     // Create instrument.
@@ -144,13 +153,18 @@ int main(int /*argc*/, char* argv[]) {
          {SynthInstrumentParam::kEnvelopeAttack, kInstrumentEnvelopeAttack},
          {SynthInstrumentParam::kEnvelopeRelease, kInstrumentEnvelopeRelease},
          {SynthInstrumentParam::kGain, kInstrumentGain}});
-    for (const Note& note : score) {
-      sequencer.ScheduleInstrumentNote(instrument_id, note.begin_position,
-                                       note.end_position, note.pitch,
-                                       note.intensity);
-    }
+    sequencer.SetInstrument(sequence_id, instrument_id);
   }
   LOG(INFO) << "Number of active MIDI tracks: " << num_instruments;
+
+  // Transport update callback.
+  const auto update_callback =
+      [&](double begin_position, double end_position,
+          const Transport::GetTimestampFn& get_timestamp_fn) {
+        instrument_manager.ProcessEvents(
+            sequencer.Process(begin_position, end_position, get_timestamp_fn));
+      };
+  transport.SetUpdateCallback(update_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
@@ -180,18 +194,17 @@ int main(int /*argc*/, char* argv[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  sequencer.StartPlayback();
+  transport.Start();
 
   while (!quit) {
     input_manager.Update();
+    transport.Update(clock.GetTimestamp() + kLookahead);
     instrument_manager.Update();
-    sequencer.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  sequencer.StopPlayback();
   audio_output.Stop();
 
   return 0;

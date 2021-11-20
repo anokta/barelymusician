@@ -5,20 +5,17 @@ namespace barelyapi {
 
 /// Musical note.
 struct Note {
-  /// Note begin position in beats.
-  double begin_position;
-
-  /// Note end position in beats.
-  double end_position;
-
   /// Note pitch.
+  // TODO: Use |NotePitch| instead.
   float pitch;
 
   /// Note intensity.
+  // TODO: Use |NoteIntensity| instead.
   float intensity;
 
-// TODO: temp to keep changes easy.
-  double duration = 0.0;
+  /// Note duration.
+  // TODO: Use |NoteDuration| instead.
+  double duration;
 };
 
 }  // namespace barelyapi

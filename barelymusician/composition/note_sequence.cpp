@@ -126,6 +126,20 @@ Status NoteSequence::Remove(Id id) {
   return Status::kNotFound;
 }
 
+void NoteSequence::RemoveAll() {
+  notes_.clear();
+  positions_.clear();
+}
+
+void NoteSequence::RemoveAll(double begin_position, double end_position) {
+  const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalidId});
+  const auto end = notes_.lower_bound(std::pair{end_position, kInvalidId});
+  for (auto it = begin; it != end; ++it) {
+    positions_.erase(it->first.second);
+  }
+  notes_.erase(begin, end);
+}
+
 void NoteSequence::SetLoopLength(double loop_length) {
   loop_length_ = std::max(loop_length, 0.0);
 }

@@ -37,7 +37,7 @@ class NoteSequence {
   ///
   /// @return Loop length in beats.
   double GetLoopLength() const;
-  
+
   /// Returns the loop start offset.
   ///
   /// @return Loop start offset in beats.
@@ -81,6 +81,15 @@ class NoteSequence {
   /// @param id Note id.
   /// @return Status.
   Status Remove(Id id);
+
+  /// Removes all notes.
+  void RemoveAll();
+
+  /// Removes all notes in range.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  void RemoveAll(double begin_position, double end_position);
 
   /// Sets the loop length for when the sequence is looping.
   ///

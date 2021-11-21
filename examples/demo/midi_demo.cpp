@@ -153,7 +153,7 @@ int main(int /*argc*/, char* argv[]) {
          {SynthInstrumentParam::kEnvelopeAttack, kInstrumentEnvelopeAttack},
          {SynthInstrumentParam::kEnvelopeRelease, kInstrumentEnvelopeRelease},
          {SynthInstrumentParam::kGain, kInstrumentGain}});
-    sequencer.SetInstrument(sequence_id, instrument_id);
+    sequencer.AddInstrument(sequence_id, instrument_id);
   }
   LOG(INFO) << "Number of active MIDI tracks: " << num_instruments;
 

@@ -131,9 +131,6 @@ class NoteSequence {
   // Optional end position.
   std::optional<double> end_position_;
 
-  // Note callback.
-  NoteCallback note_callback_;
-
   // Sorted notes by their positions.
   std::map<std::pair<double, Id>, Note> notes_;
 

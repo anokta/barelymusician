@@ -210,11 +210,11 @@ int main(int /*argc*/, char* argv[]) {
   // Initialize performers
   std::vector<BeatComposerCallback> performers;
 
+  Id num_instruments = 0;
   const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
                                              float attack, float release) {
     instrument_manager.Create(
-        static_cast<Id>(performers.size()), 0.0,
-        SynthInstrument::GetDefinition(),
+        ++num_instruments, 0.0, SynthInstrument::GetDefinition(),
         {{SynthInstrumentParam::kNumVoices,
           static_cast<float>(kNumInstrumentVoices)},
          {SynthInstrumentParam::kOscillatorType, static_cast<float>(type)},
@@ -230,14 +230,11 @@ int main(int /*argc*/, char* argv[]) {
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
   sequencer.CreateSequence(static_cast<Id>(performers.size()));
-  sequencer.SetInstrument(static_cast<Id>(performers.size()),
-                          static_cast<Id>(performers.size()));
-  performers.push_back(chords_beat_composer_callback);
+  sequencer.AddInstrument(static_cast<Id>(performers.size()), num_instruments);
 
   build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
-  sequencer.CreateSequence(static_cast<Id>(performers.size()));
-  sequencer.SetInstrument(static_cast<Id>(performers.size()),
-                          static_cast<Id>(performers.size()));
+  sequencer.AddInstrument(static_cast<Id>(performers.size()), num_instruments);
+  
   performers.push_back(chords_beat_composer_callback);
 
   const auto line_beat_composer_callback = std::bind(
@@ -246,8 +243,7 @@ int main(int /*argc*/, char* argv[]) {
       std::placeholders::_5, std::placeholders::_6);
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
   sequencer.CreateSequence(static_cast<Id>(performers.size()));
-  sequencer.SetInstrument(static_cast<Id>(performers.size()),
-                          static_cast<Id>(performers.size()));
+  sequencer.AddInstrument(static_cast<Id>(performers.size()), num_instruments);
   performers.push_back(line_beat_composer_callback);
 
   const auto line_2_beat_composer_callback = std::bind(
@@ -256,13 +252,11 @@ int main(int /*argc*/, char* argv[]) {
       std::placeholders::_5, std::placeholders::_6);
   build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
   sequencer.CreateSequence(static_cast<Id>(performers.size()));
-  sequencer.SetInstrument(static_cast<Id>(performers.size()),
-                          static_cast<Id>(performers.size()));
+  sequencer.AddInstrument(static_cast<Id>(performers.size()), num_instruments);
   performers.push_back(line_2_beat_composer_callback);
 
   // Add drumkit instrument.
-  const Id drumkit_instrument_id = static_cast<Id>(performers.size());
-  instrument_manager.Create(drumkit_instrument_id, 0.0,
+  instrument_manager.Create(++num_instruments, 0.0,
                             DrumkitInstrument::GetDefinition(), {});
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kPitchKick, "basic_kick.wav"},
@@ -275,15 +269,14 @@ int main(int /*argc*/, char* argv[]) {
     const std::string path = runfiles->Rlocation(kDrumsBaseFilename + name);
     CHECK(it.first->second.Load(path)) << path;
   }
-  instrument_manager.SetCustomData(drumkit_instrument_id, 0.0,
+  instrument_manager.SetCustomData(num_instruments, 0.0,
                                    std::any(&drumkit_files));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, &random, std::placeholders::_5,
                 std::placeholders::_6);
   sequencer.CreateSequence(static_cast<Id>(performers.size()));
-  sequencer.SetInstrument(static_cast<Id>(performers.size()),
-                          static_cast<Id>(performers.size()));
+  sequencer.AddInstrument(static_cast<Id>(performers.size()), num_instruments);
   performers.push_back(drumkit_beat_composer_callback);
 
   // Bar callback.
@@ -327,9 +320,9 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (int i = 0; i < static_cast<int>(performers.size()); ++i) {
-      instrument_manager.Process(static_cast<Id>(i), clock.GetTimestamp(),
-                                 temp_buffer.data(), kNumChannels, kNumFrames);
+    for (Id id = 1; id <= num_instruments; ++id) {
+      instrument_manager.Process(id, clock.GetTimestamp(), temp_buffer.data(),
+                                 kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }

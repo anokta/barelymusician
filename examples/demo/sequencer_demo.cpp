@@ -120,7 +120,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Sequencer sequencer;
   sequencer.CreateSequence(kSequenceId);
-  sequencer.SetInstrument(kSequenceId, kInstrumentId);
+  sequencer.AddInstrument(kSequenceId, kInstrumentId);
   auto* sequence = GetStatusOrValue(sequencer.GetSequence(kSequenceId));
   sequence->SetStartPosition(2.0);
   sequence->SetEndPosition(20.0);
@@ -134,6 +134,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Transport update callback.
+  double reset_position = false;
   const auto update_callback =
       [&](double begin_position, double end_position,
           const Transport::GetTimestampFn& get_timestamp_fn) {
@@ -147,6 +148,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                  barelyapi::kPitchC3, 1.0);
     instrument_manager.SetNoteOff(kMetronomeId, transport.GetTimestamp(),
                                   barelyapi::kPitchC3);
+    if (reset_position) {
+      reset_position = false;
+      transport.SetPosition(0.0);
+      position = transport.GetPosition();
+    }
     LOG(INFO) << "Beat: " << position;
   });
 
@@ -206,6 +212,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
           sequence->SetLooping(true);
           LOG(INFO) << "Looping turned on";
         }
+        return;
+      case 'P':
+        reset_position = true;
         return;
       case '-':
         tempo -= kTempoIncrement;

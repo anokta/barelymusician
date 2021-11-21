@@ -2,8 +2,8 @@
 #define BARELYMUSICIAN_COMPOSITION_SEQUENCER_H_
 
 #include <map>
-#include <optional>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -21,7 +21,9 @@ class Sequencer {
  public:
   Status CreateSequence(Id sequence_id) {
     if (sequence_id == kInvalidId) return Status::kInvalidArgument;
-    if (sequences_.emplace(sequence_id, std::pair{NoteSequence{}, std::nullopt})
+    if (sequences_
+            .emplace(sequence_id,
+                     std::pair{NoteSequence{}, std::unordered_set<Id>{}})
             .second) {
       return Status::kOk;
     }
@@ -43,10 +45,12 @@ class Sequencer {
     return Status::kNotFound;
   }
 
-  Status SetInstrument(Id sequence_id, std::optional<Id> instrument_id) {
+  Status AddInstrument(Id sequence_id, Id instrument_id) {
     if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
-      sequence->second = instrument_id;
-      return Status::kOk;
+      if (sequence->second.emplace(instrument_id).second) {
+        return Status::kOk;
+      }
+      return Status::kAlreadyExists;
     }
     return Status::kNotFound;
   }
@@ -79,27 +83,34 @@ class Sequencer {
     }
     // Process sequence events.
     for (const auto& [sequence_id, sequence_instrument_id_pair] : sequences_) {
-      if (!sequence_instrument_id_pair.second) continue;
+      const auto& instrument_ids = sequence_instrument_id_pair.second;
+      if (instrument_ids.empty()) continue;
       const auto& sequence = sequence_instrument_id_pair.first;
-      const Id instrument_id = *sequence_instrument_id_pair.second;
       sequence.Process(
           begin_position, end_position, [&](double position, const Note& note) {
             // TODO: GetPitch(note.pitch);
             const float pitch = note.pitch;
             // TODO: GetIntensity(note.intensity);
             const float intensity = note.intensity;
-            events.emplace(
-                get_timestamp_fn(position),
-                std::pair{instrument_id, SetNoteOnEvent{pitch, intensity}});
+            for (const auto& instrument_id : instrument_ids) {
+              events.emplace(
+                  get_timestamp_fn(position),
+                  std::pair{instrument_id, SetNoteOnEvent{pitch, intensity}});
+            }
             // TODO: GetDuration(note.duration);
             const double duration = note.duration;
             const double off_position = position + duration;
             if (off_position < end_position) {
-              events.emplace(get_timestamp_fn(off_position),
-                             std::pair{instrument_id, SetNoteOffEvent{pitch}});
+              for (const auto& instrument_id : instrument_ids) {
+                events.emplace(
+                    get_timestamp_fn(off_position),
+                    std::pair{instrument_id, SetNoteOffEvent{pitch}});
+              }
             } else {
-              active_notes_.emplace(
-                  position, NoteEvent{instrument_id, off_position, pitch});
+              for (const auto& instrument_id : instrument_ids) {
+                active_notes_.emplace(
+                    position, NoteEvent{instrument_id, off_position, pitch});
+              }
             }
           });
     }
@@ -113,7 +124,8 @@ class Sequencer {
     float pitch;
   };
   std::multimap<double, NoteEvent> active_notes_;
-  std::unordered_map<Id, std::pair<NoteSequence, std::optional<Id>>> sequences_;
+  std::unordered_map<Id, std::pair<NoteSequence, std::unordered_set<Id>>>
+      sequences_;
 };
 
 }  // namespace barelyapi

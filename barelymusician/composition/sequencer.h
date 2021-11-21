@@ -66,20 +66,19 @@ class Sequencer {
     for (auto it = active_notes_.begin(); it != active_notes_.end();) {
       const double note_begin_position = it->first;
       const auto& note_event = it->second;
-      const double note_end_position = note_event.end_position;
-      if (note_end_position < end_position ||
-          begin_position < note_begin_position) {
-        // TODO: Make this check more properly.
-        const double off_position = (note_end_position < end_position)
-                                        ? note_end_position
-                                        : begin_position;
-        events.emplace(get_timestamp_fn(off_position),
-                       std::pair{note_event.instrument_id,
-                                 SetNoteOffEvent{note_event.pitch}});
-        it = active_notes_.erase(it);
+      double note_end_position = note_event.end_position;
+      if (note_end_position < end_position) {
+        note_end_position = std::max(begin_position, note_end_position);
+      } else if (begin_position < note_begin_position) {
+        note_end_position = begin_position;
       } else {
         ++it;
+        continue;
       }
+      events.emplace(get_timestamp_fn(note_end_position),
+                     std::pair{note_event.instrument_id,
+                               SetNoteOffEvent{note_event.pitch}});
+      it = active_notes_.erase(it);
     }
     // Process sequence events.
     for (const auto& [sequence_id, sequence_instrument_id_pair] : sequences_) {

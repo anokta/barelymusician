@@ -9,6 +9,8 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
+#include "barelymusician/composition/conductor.h"
+#include "barelymusician/composition/conductor_definition.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_sequence.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -87,28 +89,38 @@ class Sequencer {
       const auto& sequence = sequence_instrument_id_pair.first;
       sequence.Process(
           begin_position, end_position, [&](double position, const Note& note) {
-            // TODO: GetPitch(note.pitch);
-            const float pitch = note.pitch;
-            // TODO: GetIntensity(note.intensity);
-            const float intensity = note.intensity;
+            const auto pitch_or = conductor_.TransformNotePitch(note.pitch);
+            if (!IsOk(pitch_or)) return;
+            const float pitch = GetStatusOrValue(pitch_or);
+
+            const auto intensity_or =
+                conductor_.TransformNoteIntensity(note.intensity);
+            if (!IsOk(intensity_or)) return;
+            const float intensity = GetStatusOrValue(intensity_or);
+
             for (const auto& instrument_id : instrument_ids) {
               events.emplace(
                   get_timestamp_fn(position),
                   std::pair{instrument_id, SetNoteOnEvent{pitch, intensity}});
             }
-            // TODO: GetDuration(note.duration);
-            const double duration = note.duration;
-            const double off_position = position + duration;
-            if (off_position < end_position) {
+
+            const auto duration_or =
+                conductor_.TransformNoteDuration(note.duration);
+            if (!IsOk(duration_or)) return;
+            const double duration = GetStatusOrValue(duration_or);
+
+            const double note_end_position = position + duration;
+            if (note_end_position < end_position) {
               for (const auto& instrument_id : instrument_ids) {
                 events.emplace(
-                    get_timestamp_fn(off_position),
+                    get_timestamp_fn(note_end_position),
                     std::pair{instrument_id, SetNoteOffEvent{pitch}});
               }
             } else {
               for (const auto& instrument_id : instrument_ids) {
                 active_notes_.emplace(
-                    position, NoteEvent{instrument_id, off_position, pitch});
+                    position,
+                    NoteEvent{instrument_id, note_end_position, pitch});
               }
             }
           });
@@ -125,6 +137,8 @@ class Sequencer {
   std::multimap<double, NoteEvent> active_notes_;
   std::unordered_map<Id, std::pair<NoteSequence, std::unordered_set<Id>>>
       sequences_;
+
+  Conductor conductor_{ConductorDefinition{}};
 };
 
 }  // namespace barelyapi

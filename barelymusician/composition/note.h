@@ -1,21 +1,22 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_NOTE_H_
 #define BARELYMUSICIAN_COMPOSITION_NOTE_H_
 
+#include "barelymusician/composition/note_duration.h"
+#include "barelymusician/composition/note_intensity.h"
+#include "barelymusician/composition/note_pitch.h"
+
 namespace barelyapi {
 
 /// Musical note.
 struct Note {
   /// Note pitch.
-  // TODO: Use |NotePitch| instead.
-  float pitch;
+  NotePitch pitch;
 
   /// Note intensity.
-  // TODO: Use |NoteIntensity| instead.
-  float intensity;
+  NoteIntensity intensity;
 
   /// Note duration.
-  // TODO: Use |NoteDuration| instead.
-  double duration;
+  NoteDuration duration;
 };
 
 }  // namespace barelyapi

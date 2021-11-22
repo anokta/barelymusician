@@ -5,11 +5,14 @@
 #include <memory>
 #include <thread>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
+#include "barelymusician/common/random.h"
 #include "barelymusician/common/status.h"
+#include "barelymusician/composition/conductor_definition.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/composition/sequencer.h"
 #include "barelymusician/engine/instrument_manager.h"
@@ -21,14 +24,21 @@
 
 namespace {
 
+using ::barelyapi::ConductorDefinition;
+using ::barelyapi::ConductorState;
 using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::IsOk;
 using ::barelyapi::Note;
+using ::barelyapi::NoteDuration;
+using ::barelyapi::NoteIntensity;
+using ::barelyapi::NotePitch;
 using ::barelyapi::NoteSequence;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Random;
 using ::barelyapi::Sequencer;
+using ::barelyapi::StatusOr;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
@@ -93,13 +103,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {SynthInstrumentParam::kEnvelopeAttack, kAttack},
        {SynthInstrumentParam::kEnvelopeRelease, 0.025f}});
 
-  instrument_manager.SetNoteOnCallback(
-      [](Id instrument_id, double timestamp, float note_pitch, float) {
-        if (instrument_id == kInstrumentId) {
-          LOG(INFO) << "Note{" << MidiKeyNumberFromPitch(note_pitch)
-                    << "} at: " << timestamp;
-        }
-      });
+  instrument_manager.SetNoteOnCallback([](Id instrument_id, double timestamp,
+                                          float note_pitch,
+                                          float note_intensity) {
+    if (instrument_id == kInstrumentId) {
+      LOG(INFO) << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
+                << note_intensity << "} at: " << timestamp;
+    }
+  });
 
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {
@@ -171,6 +182,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   };
   audio_output.SetProcessCallback(process_callback);
 
+  bool use_conductor = false;
+  Random random;
   // Key down callback.
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -212,6 +225,33 @@ int main(int /*argc*/, char* /*argv*/[]) {
           sequence->SetLooping(true);
           LOG(INFO) << "Looping turned on";
         }
+        return;
+      case 'C':
+        use_conductor = !use_conductor;
+        sequencer.SetConductor(
+            use_conductor
+                ? ConductorDefinition{
+                      .transform_note_duration_fn =
+                          [&](ConductorState*,
+                              const NoteDuration& note_duration) {
+                            return std::get<double>(note_duration) * 0.25 *
+                                   static_cast<double>(
+                                       random.DrawUniform(0, 4));
+                          },
+                      .transform_note_intensity_fn =
+                          [&](ConductorState*,
+                              const NoteIntensity& note_intensity) {
+                            return std::get<float>(note_intensity) * 0.25f *
+                                   static_cast<float>(random.DrawUniform(1, 4));
+                          },
+                      .transform_note_pitch_fn =
+                          [&](ConductorState*, const NotePitch& note_pitch) {
+                            return std::get<float>(note_pitch) +
+                                   static_cast<float>(
+                                       random.DrawUniform(-1, 1));
+                          }}
+                : ConductorDefinition{});
+        LOG(WARNING) << "Conductor is " << (use_conductor ? "on" : "off");
         return;
       case 'P':
         reset_position = true;

@@ -128,6 +128,10 @@ class Sequencer {
     return events;
   }
 
+  void SetConductor(ConductorDefinition definition) {
+    conductor_ = Conductor(std::move(definition));
+  }
+
  private:
   struct NoteEvent {
     Id instrument_id;

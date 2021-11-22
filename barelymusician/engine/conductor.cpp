@@ -1,14 +1,14 @@
-#include "barelymusician/composition/conductor.h"
+#include "barelymusician/engine/conductor.h"
 
 #include <any>
 #include <utility>
 #include <variant>
 
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/conductor_definition.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/engine/conductor_definition.h"
 
 namespace barelyapi {
 

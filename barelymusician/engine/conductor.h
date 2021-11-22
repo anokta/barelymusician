@@ -1,13 +1,13 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_CONDUCTOR_H_
-#define BARELYMUSICIAN_COMPOSITION_CONDUCTOR_H_
+#ifndef BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
+#define BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 
 #include <any>
 
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/conductor_definition.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/engine/conductor_definition.h"
 
 namespace barelyapi {
 
@@ -82,4 +82,4 @@ class Conductor {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_CONDUCTOR_H_
+#endif  // BARELYMUSICIAN_ENGINE_CONDUCTOR_H_

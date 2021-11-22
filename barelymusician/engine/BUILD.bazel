@@ -3,6 +3,30 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "conductor",
+    srcs = ["conductor.cpp"],
+    hdrs = ["conductor.h"],
+    deps = [
+        ":conductor_definition",
+        "//barelymusician/common:status",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_intensity",
+        "//barelymusician/composition:note_pitch",
+    ],
+)
+
+cc_library(
+    name = "conductor_definition",
+    hdrs = ["conductor_definition.h"],
+    deps = [
+        "//barelymusician/common:status",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_intensity",
+        "//barelymusician/composition:note_pitch",
+    ],
+)
+
+cc_library(
     name = "instrument",
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],

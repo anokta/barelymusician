@@ -9,10 +9,10 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/conductor.h"
-#include "barelymusician/composition/conductor_definition.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_sequence.h"
+#include "barelymusician/engine/conductor.h"
+#include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {

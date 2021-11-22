@@ -51,7 +51,6 @@ cc_library(
     # srcs = ["sequencer.cpp"],
     hdrs = ["sequencer.h"],
     deps = [
-        ":note",
         ":note_sequence",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
@@ -59,6 +58,7 @@ cc_library(
         "//barelymusician/engine:conductor",
         "//barelymusician/engine:conductor_definition",
         "//barelymusician/engine:instrument_event",
+        "//barelymusician/engine:performer",
     ],
 )
 

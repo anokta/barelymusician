@@ -83,6 +83,22 @@ cc_library(
 )
 
 cc_library(
+    name = "performer",
+    # srcs = ["performer.cpp"],
+    hdrs = ["performer.h"],
+    deps = [
+        ":conductor",
+        ":instrument_event",
+        "//barelymusician/common:id",
+        "//barelymusician/common:logging",
+        "//barelymusician/common:status",
+        "//barelymusician/composition:note",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_sequence",
+    ],
+)
+
+cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],

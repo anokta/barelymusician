@@ -108,11 +108,6 @@ class InstrumentManager {
   void ProcessEvent(Id instrument_id, double timestamp,
                     InstrumentControllerEvent event);
 
-  /// Processes instrument events.
-  ///
-  /// @param events Instrument events.
-  void ProcessEvents(InstrumentControllerEvents events);
-
   /// Sets all notes of all instruments off at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.

@@ -220,13 +220,6 @@ void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
       event);
 }
 
-void InstrumentManager::ProcessEvents(InstrumentControllerEvents events) {
-  for (auto& [timestamp, instrument_id_event_pair] : events) {
-    auto& [instrument_id, event] = instrument_id_event_pair;
-    ProcessEvent(instrument_id, timestamp, std::move(event));
-  }
-}
-
 void InstrumentManager::SetAllNotesOff(double timestamp) {
   for (auto& [instrument_id, controller] : controllers_) {
     if (!controller.pitches.empty()) {

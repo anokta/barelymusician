@@ -161,8 +161,12 @@ int main(int /*argc*/, char* argv[]) {
   const auto update_callback =
       [&](double begin_position, double end_position,
           const Transport::GetTimestampFn& get_timestamp_fn) {
-        instrument_manager.ProcessEvents(
-            sequencer.Process(begin_position, end_position, get_timestamp_fn));
+        for (auto& [position, instrument_id_event_pair] :
+             sequencer.Process(begin_position, end_position)) {
+          auto& [instrument_id, event] = instrument_id_event_pair;
+          instrument_manager.ProcessEvent(
+              instrument_id, get_timestamp_fn(position), std::move(event));
+        }
       };
   transport.SetUpdateCallback(update_callback);
 

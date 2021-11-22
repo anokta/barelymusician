@@ -83,7 +83,6 @@ cc_library(
         "//barelymusician/common:id",
         "//barelymusician/common:status",
         "//barelymusician/engine:instrument_event",
-        "//barelymusician/engine:transport",
     ],
 )
 

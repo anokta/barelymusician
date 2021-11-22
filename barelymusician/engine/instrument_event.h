@@ -68,7 +68,7 @@ using InstrumentControllerEvent =
                  SetCustomDataEvent, SetNoteOffEvent, SetNoteOnEvent,
                  SetParamEvent, SetParamToDefaultEvent>;
 
-/// Instrument controller id-event pairs by their timestamps container type.
+/// Instrument controller id-event pairs by their positions container type.
 using InstrumentControllerEvents =
     std::multimap<double, std::pair<Id, InstrumentControllerEvent>>;
 

@@ -147,10 +147,10 @@ TEST(InstrumentManagerTest, ProcessEvents) {
       GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, -0.5f)));
 
   // Set multiple notes on at once.
-  instrument_manager.ProcessEvents(InstrumentControllerEvents{
-      {kTimestamp, {kInstrumentId, SetNoteOnEvent{1.0f, 1.0f}}},
-      {kTimestamp, {kInstrumentId, SetNoteOnEvent{2.0f, 1.0f}}},
-      {kTimestamp, {kInstrumentId, SetNoteOnEvent{3.0f, 1.0f}}}});
+  for (const float note_pitch : {1.0f, 2.0f, 3.0f}) {
+    instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
+                                    SetNoteOnEvent{note_pitch, 1.0f});
+  }
   EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
               UnorderedElementsAre(1.0f, 2.0f, 3.0f));
 

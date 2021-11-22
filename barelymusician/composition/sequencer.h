@@ -14,7 +14,6 @@
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_sequence.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
 
@@ -60,9 +59,8 @@ class Sequencer {
   // TODO: this should not exist?
   void Stop() { active_notes_.clear(); }
 
-  InstrumentControllerEvents Process(
-      double begin_position, double end_position,
-      const Transport::GetTimestampFn& get_timestamp_fn) {
+  InstrumentControllerEvents Process(double begin_position,
+                                     double end_position) {
     InstrumentControllerEvents events;
     // Process note off events.
     for (auto it = active_notes_.begin(); it != active_notes_.end();) {
@@ -77,7 +75,7 @@ class Sequencer {
         ++it;
         continue;
       }
-      events.emplace(get_timestamp_fn(note_end_position),
+      events.emplace(note_end_position,
                      std::pair{note_event.instrument_id,
                                SetNoteOffEvent{note_event.pitch}});
       it = active_notes_.erase(it);
@@ -100,7 +98,7 @@ class Sequencer {
 
             for (const auto& instrument_id : instrument_ids) {
               events.emplace(
-                  get_timestamp_fn(position),
+                  position,
                   std::pair{instrument_id, SetNoteOnEvent{pitch, intensity}});
             }
 
@@ -113,7 +111,7 @@ class Sequencer {
             if (note_end_position < end_position) {
               for (const auto& instrument_id : instrument_ids) {
                 events.emplace(
-                    get_timestamp_fn(note_end_position),
+                    note_end_position,
                     std::pair{instrument_id, SetNoteOffEvent{pitch}});
               }
             } else {

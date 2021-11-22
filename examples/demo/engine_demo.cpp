@@ -234,7 +234,7 @@ int main(int /*argc*/, char* argv[]) {
 
   build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
   sequencer.AddInstrument(static_cast<Id>(performers.size()), num_instruments);
-  
+
   performers.push_back(chords_beat_composer_callback);
 
   const auto line_beat_composer_callback = std::bind(

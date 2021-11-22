@@ -17,19 +17,19 @@ inline constexpr int kNumThirtySecondTripletNotesPerBeat = 12;
 /// Note duration type.
 using NoteDuration = std::variant<double>;
 
-/// Returns quantized position for the given number of beat steps.
+/// Returns quantized position for a given number of beat steps.
 ///
 /// @param step Quantized step.
 /// @param num_steps Number of steps per beat.
-/// @return Raw position.
+/// @return Quantized position in beats.
 double GetPosition(int step, int num_steps);
 
 /// Returns quantized position.
 ///
-/// @param position Original position.
+/// @param position Original position in beats.
 /// @param resolution Quantization resolution.
 /// @param amount Quantization amount.
-/// @return Quantized position.
+/// @return Quantized position in beats.
 double QuantizePosition(double position, double resolution,
                         double amount = 1.0);
 

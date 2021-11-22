@@ -57,6 +57,12 @@ class Conductor {
   /// @return Raw note pitch, or error status.
   StatusOr<float> TransformNotePitch(NotePitch note_pitch);
 
+  /// Transforms playback tempo.
+  ///
+  /// @param tempo Original tempo in BPM.
+  /// @return Transformed tempo in BPM.
+  double TransformPlaybackTempo(double tempo);
+
  private:
   // Conductor destroy function.
   DestroyConductorFn destroy_fn_;
@@ -75,6 +81,9 @@ class Conductor {
 
   /// Transform note pitch function.
   TransformNotePitchFn transform_note_pitch_fn_;
+
+  /// Transform playback tempo function.
+  TransformPlaybackTempoFn transform_playback_tempo_fn_;
 
   // Conductor state.
   ConductorState state_;

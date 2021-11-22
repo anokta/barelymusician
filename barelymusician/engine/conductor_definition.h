@@ -63,6 +63,14 @@ using TransformNoteIntensityFn = std::function<StatusOr<float>(
 using TransformNotePitchFn = std::function<StatusOr<float>(
     ConductorState* state, const NotePitch& note_pitch)>;
 
+/// Conductor transform playback tempo function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param tempo Original tempo in BPM.
+/// @return Transformed tempo in BPM.
+using TransformPlaybackTempoFn =
+    std::function<double(ConductorState* state, double tempo)>;
+
 /// Conductor definition.
 struct ConductorDefinition {
   /// Create function.
@@ -85,6 +93,9 @@ struct ConductorDefinition {
 
   /// Transform note pitch function.
   TransformNotePitchFn transform_note_pitch_fn;
+
+  /// Transform playback tempo function.
+  TransformPlaybackTempoFn transform_playback_tempo_fn;
 };
 
 }  // namespace barelyapi

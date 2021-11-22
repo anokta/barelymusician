@@ -126,6 +126,10 @@ class Sequencer {
     return events;
   }
 
+  double GetPlaybackTempo(double tempo) {
+    return conductor_.TransformPlaybackTempo(60.0 * tempo) / 60.0;
+  }
+
   void SetConductor(ConductorDefinition definition) {
     conductor_ = Conductor(std::move(definition));
   }

@@ -81,8 +81,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioClock audio_clock(kSampleRate);
 
   InstrumentManager instrument_manager(kSampleRate);
+
+  double tempo = kInitialTempo;
   Transport transport;
-  transport.SetTempo(kInitialTempo);
+  transport.SetTempo(tempo);
 
   // Create metronome instrument.
   instrument_manager.Create(
@@ -186,10 +188,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   };
   audio_output.SetProcessCallback(process_callback);
 
-  bool use_conductor = false;
-  Random random;
   // Key down callback.
   bool quit = false;
+  bool use_conductor = false;
+  Random random;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
@@ -208,7 +210,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = transport.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (transport.IsPlaying()) {
@@ -253,6 +254,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
                             return std::get<float>(note_pitch) +
                                    static_cast<float>(
                                        random.DrawUniform(-1, 1));
+                          },
+                      .transform_playback_tempo_fn =
+                          [&](ConductorState*, double tempo) {
+                            return 1.25 * tempo;
                           }}
                 : ConductorDefinition{});
         LOG(WARNING) << "Conductor is " << (use_conductor ? "on" : "off");
@@ -272,8 +277,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    transport.SetTempo(tempo);
-    LOG(INFO) << "Tempo set to " << transport.GetTempo() << " BPM";
+    LOG(INFO) << "Tempo set to " << tempo;
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
@@ -284,6 +288,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
+    transport.SetTempo(sequencer.GetPlaybackTempo(tempo));
     transport.Update(audio_clock.GetTimestamp() + kLookahead);
     instrument_manager.Update();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

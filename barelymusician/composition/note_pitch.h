@@ -1,8 +1,8 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 #define BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 
+#include <span>
 #include <variant>
-#include <vector>
 
 namespace barelyapi {
 
@@ -10,19 +10,18 @@ namespace barelyapi {
 inline constexpr float kNumSemitones = 12.0f;
 
 /// Semitone pitch intervals of an octave.
-inline constexpr float kPitchSemitones[static_cast<int>(kNumSemitones)] = {
-    0.0f,
-    1.0f / kNumSemitones,
-    2.0f / kNumSemitones,
-    3.0f / kNumSemitones,
-    4.0f / kNumSemitones,
-    5.0f / kNumSemitones,
-    6.0f / kNumSemitones,
-    7.0f / kNumSemitones,
-    8.0f / kNumSemitones,
-    9.0f / kNumSemitones,
-    10.0f / kNumSemitones,
-    11.0f / kNumSemitones};
+inline constexpr float kPitchSemitones[12] = {0.0f,
+                                              1.0f / kNumSemitones,
+                                              2.0f / kNumSemitones,
+                                              3.0f / kNumSemitones,
+                                              4.0f / kNumSemitones,
+                                              5.0f / kNumSemitones,
+                                              6.0f / kNumSemitones,
+                                              7.0f / kNumSemitones,
+                                              8.0f / kNumSemitones,
+                                              9.0f / kNumSemitones,
+                                              10.0f / kNumSemitones,
+                                              11.0f / kNumSemitones};
 
 /// Common musical scales.
 inline constexpr float kPitchMajorScale[7] = {
@@ -143,12 +142,12 @@ inline constexpr float kPitchHihatOpen = kPitchF3;
 /// Note pitch type.
 using NotePitch = std::variant<float>;
 
-/// Returns note pitch for the given scale and scale index.
+/// Returns note pitch for a given scale and index.
 ///
 /// @param scale Cumulative scale intervals of an octave in increasing order.
-/// @param scale_index Scale index.
-/// @return Pitch.
-float GetPitch(const std::vector<float>& scale, int scale_index);
+/// @param index Scale index.
+/// @return Note pitch.
+float GetPitch(std::span<const float> scale, int index);
 
 }  // namespace barelyapi
 

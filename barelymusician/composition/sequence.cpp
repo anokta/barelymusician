@@ -29,10 +29,10 @@ void ProcessWithOffset(const std::map<std::pair<double, Id>, Note>& notes,
 }  // namespace
 
 Sequence::Sequence()
-    : is_looping_(false),
-      loop_length_(1.0),
+    : begin_offset_(0.0),
+      is_looping_(false),
       loop_begin_offset_(0.0),
-      begin_offset_(0.0) {}
+      loop_length_(1.0) {}
 
 Status Sequence::Add(Id id, double position, Note note) {
   if (id == kInvalidId) return Status::kInvalidArgument;

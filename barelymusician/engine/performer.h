@@ -109,11 +109,14 @@ class Performer {
   // Sequence to perform.
   Sequence sequence_;
 
-  // Optional sequence begin position.
+  // Optional sequence begin position in beats.
   std::optional<double> sequence_begin_position_;
 
-  // Optional sequence end position.
+  // Optional sequence end position in beats.
   std::optional<double> sequence_end_position_;
+
+  // Sequence position offset in beats.
+  double sequence_position_offset_;
 };
 
 }  // namespace barelyapi

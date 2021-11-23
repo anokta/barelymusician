@@ -14,7 +14,8 @@ namespace barelyapi {
 
 Performer::Performer()
     : sequence_begin_position_(std::nullopt),
-      sequence_end_position_(std::nullopt) {}
+      sequence_end_position_(std::nullopt),
+      sequence_position_offset_(0.0) {}
 
 Status Performer::AddInstrument(Id instrument_id) {
   if (instrument_ids_.emplace(instrument_id).second) {
@@ -77,13 +78,11 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
   end_position = GetClampedEndPosition(end_position);
   if (!instrument_ids_.empty() && !sequence_.IsEmpty() &&
       begin_position < end_position) {
-    const double position_offset =
-        sequence_begin_position_ ? *sequence_begin_position_ : 0.0;
-    begin_position -= position_offset;
-    end_position -= position_offset;
+    begin_position -= sequence_position_offset_;
+    end_position -= sequence_position_offset_;
     sequence_.Process(
         begin_position, end_position, [&](double position, const Note& note) {
-          position += position_offset;
+          position += sequence_position_offset_;
 
           // Get pitch.
           const auto pitch_or = conductor.TransformNotePitch(note.pitch);
@@ -167,6 +166,8 @@ StatusOr<std::vector<InstrumentEvent>> Performer::RemoveInstrument(
 void Performer::SetSequenceBeginPosition(
     std::optional<double> sequence_begin_position) {
   sequence_begin_position_ = std::move(sequence_begin_position);
+  sequence_position_offset_ =
+      sequence_begin_position_ ? *sequence_begin_position_ : 0.0;
 }
 
 void Performer::SetSequenceEndPosition(

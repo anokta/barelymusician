@@ -86,6 +86,16 @@ Id BarelyMusician::AddPerformer() {
   return performer_id;
 }
 
+Status BarelyMusician::AddPerformerInstrument(Id performer_id,
+                                              Id instrument_id) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    if (instrument_manager_.IsValid(instrument_id)) {
+      return performer->AddInstrument(instrument_id);
+    }
+  }
+  return Status::kNotFound;
+}
+
 StatusOr<std::optional<double>> BarelyMusician::GetPerformerBeginPosition(
     Id performer_id) const {
   if (const auto* performer = FindOrNull(performers_, performer_id)) {
@@ -117,13 +127,57 @@ void BarelyMusician::ProcessInstrument(Id instrument_id, double timestamp,
                               num_frames);
 }
 
+Status BarelyMusician::RemoveAllPerformerInstruments(Id performer_id) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    const double timestamp = transport_.GetTimestamp();
+    for (auto& [instrument_id, event] : performer->RemoveAllInstruments()) {
+      instrument_manager_.ProcessEvent(instrument_id, timestamp,
+                                       std::move(event));
+    }
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
 Status BarelyMusician::RemoveInstrument(Id instrument_id) {
-  return instrument_manager_.Destroy(instrument_id, transport_.GetTimestamp());
+  const auto status =
+      instrument_manager_.Destroy(instrument_id, transport_.GetTimestamp());
+  if (IsOk(status)) {
+    for (auto& [performer_id, performer] : performers_) {
+      performer.RemoveInstrument(instrument_id);
+    }
+  }
+  return status;
 }
 
 Status BarelyMusician::RemovePerformer(Id performer_id) {
-  if (performers_.erase(performer_id) > 0) {
+  if (const auto performer_it = performers_.find(performer_id);
+      performer_it != performers_.end()) {
+    const double timestamp = transport_.GetTimestamp();
+    for (auto& [instrument_id, event] :
+         performer_it->second.RemoveAllInstruments()) {
+      instrument_manager_.ProcessEvent(instrument_id, timestamp,
+                                       std::move(event));
+    }
+    performers_.erase(performer_it);
     return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status BarelyMusician::RemovePerformerInstrument(Id performer_id,
+                                                 Id instrument_id) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    const auto events_or = performer->RemoveInstrument(instrument_id);
+    if (IsOk(events_or)) {
+      const double timestamp = transport_.GetTimestamp();
+      for (auto& event : GetStatusOrValue(events_or)) {
+        instrument_manager_.ProcessEvent(instrument_id, timestamp,
+                                         std::move(event));
+      }
+      return Status::kOk;
+    }
+    return GetStatusOrStatus(events_or);
   }
   return Status::kNotFound;
 }

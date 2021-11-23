@@ -91,6 +91,12 @@ class InstrumentManager {
   /// @return True if note is active, or false if not, or error status.
   StatusOr<bool> IsNoteOn(Id instrument_id, float note_pitch) const;
 
+  /// Returns whether instrument is valid or not.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return True if instrument is valid (i.e., exists), false otherwise.
+  bool IsValid(Id instrument_id) const;
+
   /// Processes the next instrument output buffer at timestamp.
   ///
   /// @param instrument_id Instrument id.

@@ -64,6 +64,13 @@ class BarelyMusician {
   /// @return Performer id.
   Id AddPerformer();
 
+  /// Adds performer instrument.
+  ///
+  /// @param performer_id Performer id.
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status AddPerformerInstrument(Id performer_id, Id instrument_id);
+
   /// Returns performer begin position.
   ///
   /// @param performer_id Performer id.
@@ -103,6 +110,12 @@ class BarelyMusician {
   void ProcessInstrument(Id instrument_id, double timestamp, float* output,
                          int num_channels, int num_frames);
 
+  /// Removes all performer instruments.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Status.
+  Status RemoveAllPerformerInstruments(Id performer_id);
+
   /// Removes instrument.
   ///
   /// @param instrument_id Instrument id.
@@ -114,6 +127,13 @@ class BarelyMusician {
   /// @param performer_id Performer id.
   /// @return Status.
   Status RemovePerformer(Id performer_id);
+
+  /// Removes performer instrument.
+  ///
+  /// @param performer_id Performer id.
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status RemovePerformerInstrument(Id performer_id, Id instrument_id);
 
   /// Sets conductor.
   ///

@@ -114,6 +114,10 @@ StatusOr<bool> InstrumentManager::IsNoteOn(Id instrument_id,
   return Status::kNotFound;
 }
 
+bool InstrumentManager::IsValid(Id instrument_id) const {
+  return controllers_.contains(instrument_id);
+}
+
 void InstrumentManager::Process(Id instrument_id, double timestamp,
                                 float* output, int num_channels,
                                 int num_frames) {

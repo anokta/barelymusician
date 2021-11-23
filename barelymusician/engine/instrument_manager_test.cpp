@@ -65,9 +65,11 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
+  EXPECT_FALSE(instrument_manager.IsValid(kInstrumentId));
   EXPECT_TRUE(IsOk(instrument_manager.Create(
       kInstrumentId, 0.0, GetTestInstrumentDefinition(),
       GetTestInstrumentParamDefinitions())));
+  EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
 
   EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
               UnorderedElementsAre());
@@ -105,7 +107,9 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   }
 
   // Destroy instrument.
+  EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
   EXPECT_TRUE(IsOk(instrument_manager.Destroy(kInstrumentId, 0.0)));
+  EXPECT_FALSE(instrument_manager.IsValid(kInstrumentId));
 
   EXPECT_EQ(GetStatusOrStatus(instrument_manager.GetAllNotes(kInstrumentId)),
             Status::kNotFound);
@@ -320,9 +324,11 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
 
+    EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
     EXPECT_TRUE(IsOk(instrument_manager.Create(
         instrument_id, 0.0, GetTestInstrumentDefinition(),
         GetTestInstrumentParamDefinitions())));
+    EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
 
     EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(instrument_id)),
                 UnorderedElementsAre());
@@ -396,9 +402,11 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
 
+    EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
     EXPECT_TRUE(IsOk(instrument_manager.Create(
         instrument_id, 0.0, GetTestInstrumentDefinition(),
         GetTestInstrumentParamDefinitions())));
+    EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
 
     EXPECT_THAT(
         GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),

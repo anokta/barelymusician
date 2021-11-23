@@ -51,30 +51,18 @@ class BarelyMusician {
   /// @param sample_rate System sampling rate in Hz.
   explicit BarelyMusician(int sample_rate);
 
-  /// Creates new instrument.
+  /// Adds new instrument.
   ///
   /// @param definition Instrument definition.
   /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
-  Id CreateInstrument(InstrumentDefinition definition,
-                      InstrumentParamDefinitions param_definitions);
+  Id AddInstrument(InstrumentDefinition definition,
+                   InstrumentParamDefinitions param_definitions);
 
-  /// Creates new performer.
+  /// Adds new performer.
   ///
   /// @return Performer id.
-  Id CreatePerformer();
-
-  /// Destroys instrument.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status DestroyInstrument(Id instrument_id);
-
-  /// Destroys performer.
-  ///
-  /// @param performer_id Performer id.
-  /// @return Status.
-  Status DestroyPerformer(Id performer_id);
+  Id AddPerformer();
 
   /// Returns performer begin position.
   ///
@@ -114,6 +102,18 @@ class BarelyMusician {
   /// @param num_frames Number of output frames.
   void ProcessInstrument(Id instrument_id, double timestamp, float* output,
                          int num_channels, int num_frames);
+
+  /// Removes instrument.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status RemoveInstrument(Id instrument_id);
+
+  /// Removes performer.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Status.
+  Status RemovePerformer(Id performer_id);
 
   /// Sets conductor.
   ///

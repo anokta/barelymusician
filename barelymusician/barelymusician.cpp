@@ -71,9 +71,8 @@ BarelyMusician::BarelyMusician(int sample_rate)
       });
 }
 
-Id BarelyMusician::CreateInstrument(
-    InstrumentDefinition definition,
-    InstrumentParamDefinitions param_definitions) {
+Id BarelyMusician::AddInstrument(InstrumentDefinition definition,
+                                 InstrumentParamDefinitions param_definitions) {
   const Id instrument_id = id_generator_.Generate();
   DCHECK(IsOk(instrument_manager_.Create(
       instrument_id, transport_.GetTimestamp(), std::move(definition),
@@ -81,21 +80,10 @@ Id BarelyMusician::CreateInstrument(
   return instrument_id;
 }
 
-Id BarelyMusician::CreatePerformer() {
+Id BarelyMusician::AddPerformer() {
   const Id performer_id = id_generator_.Generate();
   performers_.emplace(performer_id, Performer{});
   return performer_id;
-}
-
-Status BarelyMusician::DestroyInstrument(Id instrument_id) {
-  return instrument_manager_.Destroy(instrument_id, transport_.GetTimestamp());
-}
-
-Status BarelyMusician::DestroyPerformer(Id performer_id) {
-  if (performers_.erase(performer_id) > 0) {
-    return Status::kOk;
-  }
-  return Status::kNotFound;
 }
 
 StatusOr<std::optional<double>> BarelyMusician::GetPerformerBeginPosition(
@@ -127,6 +115,17 @@ void BarelyMusician::ProcessInstrument(Id instrument_id, double timestamp,
                                        int num_frames) {
   instrument_manager_.Process(instrument_id, timestamp, output, num_channels,
                               num_frames);
+}
+
+Status BarelyMusician::RemoveInstrument(Id instrument_id) {
+  return instrument_manager_.Destroy(instrument_id, transport_.GetTimestamp());
+}
+
+Status BarelyMusician::RemovePerformer(Id performer_id) {
+  if (performers_.erase(performer_id) > 0) {
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 void BarelyMusician::SetConductor(ConductorDefinition definition) {

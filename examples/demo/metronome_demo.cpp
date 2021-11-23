@@ -56,7 +56,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   barelymusician.SetPlaybackTempo(kInitialTempo);
 
   // Create metronome instrument.
-  const Id metronome_id = barelymusician.CreateInstrument(
+  const Id metronome_id = barelymusician.AddInstrument(
       SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},

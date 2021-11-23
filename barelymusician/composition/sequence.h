@@ -123,4 +123,4 @@ class Sequence {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_SEQUENCE_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_

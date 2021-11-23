@@ -50,12 +50,11 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
     const auto duration_or =
         conductor.TransformNoteDuration(active_note.duration);
     if (IsOk(duration_or)) {
-      note_end_position = GetClampedEndPosition(note_begin_position +
-                                                GetStatusOrValue(duration_or));
+      note_end_position =
+          ClampEndPosition(note_begin_position + GetStatusOrValue(duration_or));
       if (note_end_position < end_position) {
         note_end_position = std::max(begin_position, note_end_position);
-      } else if (begin_position <
-                 GetClampedBeginPosition(note_begin_position)) {
+      } else if (begin_position < ClampBeginPosition(note_begin_position)) {
         note_end_position = begin_position;
       } else {
         ++it;
@@ -74,8 +73,8 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
   }
 
   // Perform sequence events.
-  begin_position = GetClampedBeginPosition(begin_position);
-  end_position = GetClampedEndPosition(end_position);
+  begin_position = ClampBeginPosition(begin_position);
+  end_position = ClampEndPosition(end_position);
   if (!instrument_ids_.empty() && !sequence_.IsEmpty() &&
       begin_position < end_position) {
     begin_position -= sequence_position_offset_;
@@ -175,13 +174,13 @@ void Performer::SetSequenceEndPosition(
   sequence_end_position_ = std::move(sequence_end_position);
 }
 
-double Performer::GetClampedBeginPosition(double begin_position) {
+double Performer::ClampBeginPosition(double begin_position) {
   return sequence_begin_position_
              ? std::max(begin_position, *sequence_begin_position_)
              : begin_position;
 }
 
-double Performer::GetClampedEndPosition(double end_position) {
+double Performer::ClampEndPosition(double end_position) {
   return sequence_end_position_
              ? std::min(end_position, *sequence_end_position_)
              : end_position;

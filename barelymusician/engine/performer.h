@@ -94,11 +94,11 @@ class Performer {
     float pitch;
   };
 
-  // Returns |begin_position| clamped with |sequence_begin_position_|.
-  double GetClampedBeginPosition(double begin_position);
+  // Clamps |begin_position| with |sequence_begin_position_|.
+  double ClampBeginPosition(double begin_position);
 
-  // Returns |end_position| clamped with |sequence_end_position_|.
-  double GetClampedEndPosition(double end_position);
+  // Clamps |end_position| with |sequence_end_position_|.
+  double ClampEndPosition(double end_position);
 
   // List of active notes.
   std::multimap<double, ActiveNote> active_notes_;

@@ -20,6 +20,8 @@ Status Performer::AddInstrument(Id instrument_id) {
   return Status::kAlreadyExists;
 }
 
+void Performer::ClearAllActiveNotes() { active_notes_.clear(); }
+
 InstrumentIdEventPairs Performer::Perform(double begin_position,
                                           double end_position,
                                           Conductor& conductor) {
@@ -127,5 +129,7 @@ StatusOr<std::vector<InstrumentEvent>> Performer::RemoveInstrument(
   }
   return Status::kNotFound;
 }
+
+void Performer::SetScore(NoteSequence score) { score_ = std::move(score); }
 
 }  // namespace barelyapi

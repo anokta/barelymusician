@@ -27,6 +27,9 @@ class Performer {
   /// @return Status.
   Status AddInstrument(Id instrument_id);
 
+  /// Clears all active notes.
+  void ClearAllActiveNotes();
+
   /// Performs instrument events at given range.
   ///
   /// @param begin_position Begin position in beats.
@@ -38,7 +41,7 @@ class Performer {
 
   /// Removes all instruments.
   ///
-  /// @return Instrument event-id pairs to be processed.
+  /// @return Instrument id-event pairs to be processed.
   std::vector<InstrumentIdEventPair> RemoveAllInstruments();
 
   /// Removes instrument.
@@ -47,11 +50,13 @@ class Performer {
   /// @return Instrument events to be processed, or error status.
   StatusOr<std::vector<InstrumentEvent>> RemoveInstrument(Id instrument_id);
 
-  // TODO: wip
-  NoteSequence& GetScore() { return score_; }
+  /// Sets score.
+  ///
+  /// @param score Score.
+  void SetScore(NoteSequence score);
 
   // TODO: wip
-  void Stop() { active_notes_.clear(); }
+  NoteSequence& GetScore() { return score_; }
 
  private:
   // Active note that is being performed.

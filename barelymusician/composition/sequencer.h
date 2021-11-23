@@ -51,7 +51,7 @@ class Sequencer {
   // TODO: this should not exist?
   void Stop() {
     for (auto& [id, performer] : performers_) {
-      performer.Stop();
+      performer.ClearAllActiveNotes();
     }
   }
 

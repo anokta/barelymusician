@@ -62,25 +62,24 @@ struct SetParamToDefaultEvent {
   int id;
 };
 
-/// Instrument controller event type.
-using InstrumentControllerEvent =
+/// Instrument event type.
+using InstrumentEvent =
     std::variant<SetAllNotesOffEvent, SetAllParamsToDefaultEvent,
                  SetCustomDataEvent, SetNoteOffEvent, SetNoteOnEvent,
                  SetParamEvent, SetParamToDefaultEvent>;
 
-/// Instrument controller id-event pair.
-using InstrumentControllerEventPair = std::pair<Id, InstrumentControllerEvent>;
+/// Instrument id-event pair.
+using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;
 
-/// Instrument controller id-event pairs by their positions container type.
-using InstrumentControllerEventPairs =
-    std::multimap<double, InstrumentControllerEventPair>;
+/// Instrument id-event pairs by their positions container type.
+using InstrumentIdEventPairs = std::multimap<double, InstrumentIdEventPair>;
 
 /// Instrument processor event type.
 using InstrumentProcessorEvent =
     std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetNoteOffEvent,
                  SetNoteOnEvent, SetParamEvent>;
 
-/// Instrument events by their timestamps container type.
+/// Instrument processor events by their timestamps container type.
 using InstrumentProcessorEvents =
     std::multimap<double, InstrumentProcessorEvent>;
 

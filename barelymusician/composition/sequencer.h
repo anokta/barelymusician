@@ -55,13 +55,13 @@ class Sequencer {
     }
   }
 
-  InstrumentControllerEventPairs Process(double begin_position,
-                                         double end_position) {
-    InstrumentControllerEventPairs events;
+  InstrumentIdEventPairs Process(double begin_position, double end_position) {
+    InstrumentIdEventPairs id_event_pairs;
     for (auto& [id, performer] : performers_) {
-      events.merge(performer.Perform(conductor_, begin_position, end_position));
+      id_event_pairs.merge(
+          performer.Perform(begin_position, end_position, conductor_));
     }
-    return events;
+    return id_event_pairs;
   }
 
   double GetPlaybackTempo(double tempo) {

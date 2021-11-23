@@ -105,8 +105,7 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param event Instrument event.
-  void ProcessEvent(Id instrument_id, double timestamp,
-                    InstrumentControllerEvent event);
+  void ProcessEvent(Id instrument_id, double timestamp, InstrumentEvent event);
 
   /// Sets all notes of all instruments off at timestamp.
   ///

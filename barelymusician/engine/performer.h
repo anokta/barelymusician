@@ -3,7 +3,6 @@
 
 #include <map>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 #include "barelymusician/common/id.h"
@@ -28,27 +27,25 @@ class Performer {
   /// @return Status.
   Status AddInstrument(Id instrument_id);
 
-  /// Returns instrument events that are performed at given range.
+  /// Performs instrument events at given range.
   ///
-  /// @param conductor Reference to conductor.
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
-  /// @return Performed instrument event pairs.
-  InstrumentControllerEventPairs Perform(Conductor& conductor,
-                                         double begin_position,
-                                         double end_position);
+  /// @param conductor Conductor.
+  /// @return Instrument id-event pairs to be processed.
+  InstrumentIdEventPairs Perform(double begin_position, double end_position,
+                                 Conductor& conductor);
 
   /// Removes all instruments.
   ///
-  /// @return List of instrument event-id pairs to be processed.
-  std::vector<InstrumentControllerEventPair> RemoveAllInstruments();
+  /// @return Instrument event-id pairs to be processed.
+  std::vector<InstrumentIdEventPair> RemoveAllInstruments();
 
   /// Removes instrument.
   ///
   /// @param instrument_id Instrument id.
-  /// @return List of instrument events to be processed, or error status.
-  StatusOr<std::vector<InstrumentControllerEvent>> RemoveInstrument(
-      Id instrument_id);
+  /// @return Instrument events to be processed, or error status.
+  StatusOr<std::vector<InstrumentEvent>> RemoveInstrument(Id instrument_id);
 
   // TODO: wip
   NoteSequence& GetScore() { return score_; }

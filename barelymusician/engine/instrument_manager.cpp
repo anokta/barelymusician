@@ -189,7 +189,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
 }
 
 void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
-                                     InstrumentControllerEvent event) {
+                                     InstrumentEvent event) {
   std::visit(
       Visitor{
           [&](SetAllNotesOffEvent& /*set_all_notes_off_event*/) {

@@ -64,7 +64,7 @@ class Sequence {
   /// @param end_position End position.
   /// @param process_callback Process callback.
   void Process(double begin_position, double end_position,
-               const ProcessCallback& process_callback) const;
+               ProcessCallback process_callback) const;
 
   /// Removes note.
   ///

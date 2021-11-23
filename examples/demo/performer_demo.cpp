@@ -127,8 +127,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Performer performer;
   performer.AddInstrument(kInstrumentId);
-  performer.SetBeginPosition(2.0);
-  performer.SetEndPosition(20.0);
+  performer.SetSequenceBeginPosition(2.0);
+  performer.SetSequenceEndPosition(19.5);
   auto* sequence = performer.GetMutableSequence();
   sequence->SetLooping(true);
   sequence->SetLoopLength(5.0);
@@ -262,6 +262,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
       case 'P':
         reset_position = true;
+        return;
+      case 'O':
+        transport.SetPosition(0.0);
         return;
       case '-':
         tempo -= kTempoIncrement;

@@ -16,7 +16,7 @@
 
 namespace barelyapi {
 
-/// Class that performs a musical score with a set of instruments.
+/// Class that performs a musical sequence with a set of instruments.
 class Performer {
  public:
   /// Constructs new |Performer|.
@@ -31,16 +31,6 @@ class Performer {
   /// Clears all active notes.
   void ClearAllActiveNotes();
 
-  /// Returns the begin position.
-  ///
-  /// @return Optional begin position.
-  std::optional<double> GetBeginPosition() const;
-
-  /// Returns the end position.
-  ///
-  /// @return Optional end position.
-  std::optional<double> GetEndPosition() const;
-
   /// Returns mutable sequence.
   ///
   /// @return Mutable sequence.
@@ -51,7 +41,17 @@ class Performer {
   /// @return Sequence.
   const Sequence& GetSequence() const;
 
-  /// Performs instrument events at given range.
+  /// Returns sequence begin position.
+  ///
+  /// @return Optional sequence begin position in beats.
+  std::optional<double> GetSequenceBeginPosition() const;
+
+  /// Returns sequence end position.
+  ///
+  /// @return Optional sequence end position in beats.
+  std::optional<double> GetSequenceEndPosition() const;
+
+  /// Performs instruments at given range.
   ///
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
@@ -71,15 +71,15 @@ class Performer {
   /// @return Instrument events to be processed, or error status.
   StatusOr<std::vector<InstrumentEvent>> RemoveInstrument(Id instrument_id);
 
-  /// Sets begin position.
+  /// Sets sequence begin position.
   ///
-  /// @param begin_position Optional begin position.
-  void SetBeginPosition(std::optional<double> begin_position);
+  /// @param sequence_begin_position Optional sequence begin position in beats.
+  void SetSequenceBeginPosition(std::optional<double> sequence_begin_position);
 
-  /// Sets end position.
+  /// Sets sequence end position.
   ///
-  /// @param end_position Optional end position.
-  void SetEndPosition(std::optional<double> end_position);
+  /// @param sequence_end_position Optional sequence end position in beats.
+  void SetSequenceEndPosition(std::optional<double> sequence_end_position);
 
  private:
   // Active note that is being performed.
@@ -94,20 +94,26 @@ class Performer {
     float pitch;
   };
 
+  // Returns |begin_position| clamped with |sequence_begin_position_|.
+  double GetClampedBeginPosition(double begin_position);
+
+  // Returns |end_position| clamped with |sequence_end_position_|.
+  double GetClampedEndPosition(double end_position);
+
   // List of active notes.
   std::multimap<double, ActiveNote> active_notes_;
-
-  // Optional begin position.
-  std::optional<double> begin_position_;
-
-  // Optional end position.
-  std::optional<double> end_position_;
 
   // List of instrument ids to perform.
   std::unordered_set<Id> instrument_ids_;
 
   // Sequence to perform.
   Sequence sequence_;
+
+  // Optional sequence begin position.
+  std::optional<double> sequence_begin_position_;
+
+  // Optional sequence end position.
+  std::optional<double> sequence_end_position_;
 };
 
 }  // namespace barelyapi

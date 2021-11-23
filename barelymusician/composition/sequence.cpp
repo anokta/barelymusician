@@ -54,7 +54,7 @@ bool Sequence::IsEmpty() const { return notes_.empty(); }
 bool Sequence::IsLooping() const { return is_looping_; }
 
 void Sequence::Process(double begin_position, double end_position,
-                       const ProcessCallback& process_callback) const {
+                       ProcessCallback process_callback) const {
   double position_offset = -start_offset_;
   begin_position -= position_offset;
   end_position -= position_offset;

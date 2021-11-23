@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_BARELYMUSICIAN_H_
 
 #include <functional>
+#include <optional>
 #include <unordered_map>
 
 #include "barelymusician/common/id.h"
@@ -75,6 +76,20 @@ class BarelyMusician {
   /// @return Status.
   Status DestroyPerformer(Id performer_id);
 
+  /// Returns performer begin position.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Optional begin position in beats.
+  StatusOr<std::optional<double>> GetPerformerBeginPosition(
+      Id performer_id) const;
+
+  /// Returns performer end position.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Optional end position in beats.
+  StatusOr<std::optional<double>> GetPerformerEndPosition(
+      Id performer_id) const;
+
   /// Returns the playback position.
   ///
   /// @return Position in beats.
@@ -134,6 +149,22 @@ class BarelyMusician {
   /// @param instrument_note_on_callback Instrument note on callback.
   void SetInstrumentNoteOnCallback(
       InstrumentNoteOnCallback instrument_note_on_callback);
+
+  /// Sets performer begin position.
+  ///
+  /// @param performer_id Performer id.
+  /// @param begin_position Optional begin position in beats.
+  /// @return Status.
+  Status SetPerformerBeginPosition(Id performer_id,
+                                   std::optional<double> begin_position);
+
+  /// Sets performer end position.
+  ///
+  /// @param performer_id Performer id.
+  /// @param end_position Optional end position in beats.
+  /// @return Status.
+  Status SetPerformerEndPosition(Id performer_id,
+                                 std::optional<double> end_position);
 
   /// Sets the playback beat callback.
   ///

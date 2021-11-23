@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/status.h"
@@ -97,6 +98,22 @@ Status BarelyMusician::DestroyPerformer(Id performer_id) {
   return Status::kNotFound;
 }
 
+StatusOr<std::optional<double>> BarelyMusician::GetPerformerBeginPosition(
+    Id performer_id) const {
+  if (const auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetSequenceBeginPosition();
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<std::optional<double>> BarelyMusician::GetPerformerEndPosition(
+    Id performer_id) const {
+  if (const auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetSequenceEndPosition();
+  }
+  return Status::kNotFound;
+}
+
 double BarelyMusician::GetPlaybackPosition() const {
   return transport_.GetPosition();
 }
@@ -140,6 +157,24 @@ void BarelyMusician::SetInstrumentNoteOnCallback(
   instrument_note_on_callback_ = instrument_note_on_callback
                                      ? std::move(instrument_note_on_callback)
                                      : &NoopInstrumentNoteOnCallback;
+}
+
+Status BarelyMusician::SetPerformerBeginPosition(
+    Id performer_id, std::optional<double> begin_position) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->SetSequenceBeginPosition(std::move(begin_position));
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status BarelyMusician::SetPerformerEndPosition(
+    Id performer_id, std::optional<double> end_position) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->SetSequenceEndPosition(std::move(end_position));
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 void BarelyMusician::SetPlaybackBeatCallback(

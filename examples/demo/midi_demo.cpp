@@ -11,7 +11,7 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/composition/note_sequence.h"
+#include "barelymusician/composition/sequence.h"
 #include "barelymusician/composition/sequencer.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/transport.h"
@@ -27,8 +27,8 @@ using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::Note;
-using ::barelyapi::NoteSequence;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Sequence;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::AudioClock;
@@ -74,7 +74,7 @@ int MidiKeyNumberFromPitch(float pitch) {
 
 // Builds the score from the given |midi_events|.
 bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
-                NoteSequence* sequence) {
+                Sequence* sequence) {
   const auto get_position = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };

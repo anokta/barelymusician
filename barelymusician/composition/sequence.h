@@ -1,9 +1,8 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_SEQUENCE_H_
-#define BARELYMUSICIAN_COMPOSITION_NOTE_SEQUENCE_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_
+#define BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_
 
 #include <functional>
 #include <map>
-#include <optional>
 #include <unordered_map>
 #include <utility>
 
@@ -13,17 +12,18 @@
 
 namespace barelyapi {
 
-/// Musical note sequence.
-class NoteSequence {
+/// Musical sequence.
+class Sequence {
  public:
-  /// Note callback signature.
+  /// Process callback signature.
   ///
   /// @param position Note position.
   /// @param note Note.
-  using NoteCallback = std::function<void(double position, const Note& note)>;
+  using ProcessCallback =
+      std::function<void(double position, const Note& note)>;
 
-  /// Constructs new |NoteSequence|.
-  NoteSequence();
+  /// Constructs new |Sequence|.
+  Sequence();
 
   /// Adds new note at position.
   ///
@@ -48,16 +48,6 @@ class NoteSequence {
   /// @return Start offset in beats.
   double GetStartOffset() const;
 
-  /// Returns the start position.
-  ///
-  /// @return Optional start position.
-  std::optional<double> GetStartPosition() const;
-
-  /// Returns the end position.
-  ///
-  /// @return Optional end position.
-  std::optional<double> GetEndPosition() const;
-
   /// Returns whether the sequence is empty or not.
   ///
   /// @return True if empty.
@@ -72,9 +62,9 @@ class NoteSequence {
   ///
   /// @param begin_position Begin position.
   /// @param end_position End position.
-  /// @param note_callback Note callback.
+  /// @param process_callback Process callback.
   void Process(double begin_position, double end_position,
-               const NoteCallback& note_callback) const;
+               const ProcessCallback& process_callback) const;
 
   /// Removes note.
   ///
@@ -111,16 +101,6 @@ class NoteSequence {
   /// @param start_offset Start offset in beats.
   void SetStartOffset(double start_offset);
 
-  /// Sets start position.
-  ///
-  /// @param start_position Optional start position.
-  void SetStartPosition(std::optional<double> start_position);
-
-  /// Sets end position.
-  ///
-  /// @param end_position Optional end position.
-  void SetEndPosition(std::optional<double> end_position);
-
  private:
   // Denotes whether the sequence is looping or not.
   bool is_looping_;
@@ -133,12 +113,6 @@ class NoteSequence {
 
   // Start position offset in beats.
   double start_offset_;
-
-  // Optional start position.
-  std::optional<double> start_position_;
-
-  // Optional end position.
-  std::optional<double> end_position_;
 
   // Sorted notes by their positions.
   std::map<std::pair<double, Id>, Note> notes_;

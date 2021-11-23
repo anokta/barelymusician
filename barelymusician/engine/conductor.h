@@ -17,7 +17,7 @@ class Conductor {
   /// Constructs new |Conductor|.
   ///
   /// @param definition Conductor definition.
-  explicit Conductor(ConductorDefinition definition);
+  explicit Conductor(ConductorDefinition definition = {});
 
   /// Destroys |Conductor|.
   ~Conductor();

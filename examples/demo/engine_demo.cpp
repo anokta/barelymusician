@@ -16,7 +16,7 @@
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/composition/note_sequence.h"
+#include "barelymusician/composition/sequence.h"
 #include "barelymusician/composition/sequencer.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/transport.h"
@@ -35,9 +35,9 @@ using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::Note;
-using ::barelyapi::NoteSequence;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
+using ::barelyapi::Sequence;
 using ::barelyapi::Sequencer;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::AudioClock;
@@ -58,7 +58,7 @@ using ::bazel::tools::cpp::runfiles::Runfiles;
 // @param notes Pointer to mutable notes.
 using BeatComposerCallback =
     std::function<void(int bar, int beat, int num_beats, int harmonic,
-                       double offset, NoteSequence* notes)>;
+                       double offset, Sequence* notes)>;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -82,7 +82,7 @@ Id note_id_count = 0;
 
 void ComposeChord(float root_note, const std::vector<float>& scale,
                   float intensity, int harmonic, double offset,
-                  NoteSequence* sequence) {
+                  Sequence* sequence) {
   const auto add_chord_note = [&](int index) {
     sequence->Add(++note_id_count, offset,
                   Note{root_note + GetPitch(scale, index), intensity, 1.0});
@@ -95,7 +95,7 @@ void ComposeChord(float root_note, const std::vector<float>& scale,
 
 void ComposeLine(float root_note, const std::vector<float>& scale,
                  float intensity, int bar, int beat, int num_beats,
-                 int harmonic, double offset, NoteSequence* sequence) {
+                 int harmonic, double offset, Sequence* sequence) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
@@ -122,7 +122,7 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
 }
 
 void ComposeDrums(int bar, int beat, int num_beats, Random* random,
-                  double offset, NoteSequence* sequence) {
+                  double offset, Sequence* sequence) {
   const auto get_beat = [](int step) {
     return barelyapi::GetPosition(step, barelyapi::kNumSixteenthNotesPerBeat);
   };

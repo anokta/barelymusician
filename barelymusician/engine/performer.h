@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_PERFORMER_H_
 
 #include <map>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -9,7 +10,7 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_duration.h"
-#include "barelymusician/composition/note_sequence.h"
+#include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/instrument_event.h"
 
@@ -29,6 +30,26 @@ class Performer {
 
   /// Clears all active notes.
   void ClearAllActiveNotes();
+
+  /// Returns the begin position.
+  ///
+  /// @return Optional begin position.
+  std::optional<double> GetBeginPosition() const;
+
+  /// Returns the end position.
+  ///
+  /// @return Optional end position.
+  std::optional<double> GetEndPosition() const;
+
+  /// Returns mutable sequence.
+  ///
+  /// @return Mutable sequence.
+  Sequence* GetMutableSequence();
+
+  /// Returns sequence.
+  ///
+  /// @return Sequence.
+  const Sequence& GetSequence() const;
 
   /// Performs instrument events at given range.
   ///
@@ -50,13 +71,15 @@ class Performer {
   /// @return Instrument events to be processed, or error status.
   StatusOr<std::vector<InstrumentEvent>> RemoveInstrument(Id instrument_id);
 
-  /// Sets score.
+  /// Sets begin position.
   ///
-  /// @param score Score.
-  void SetScore(NoteSequence score);
+  /// @param begin_position Optional begin position.
+  void SetBeginPosition(std::optional<double> begin_position);
 
-  // TODO: wip
-  NoteSequence& GetScore() { return score_; }
+  /// Sets end position.
+  ///
+  /// @param end_position Optional end position.
+  void SetEndPosition(std::optional<double> end_position);
 
  private:
   // Active note that is being performed.
@@ -74,11 +97,17 @@ class Performer {
   // List of active notes.
   std::multimap<double, ActiveNote> active_notes_;
 
+  // Optional begin position.
+  std::optional<double> begin_position_;
+
+  // Optional end position.
+  std::optional<double> end_position_;
+
   // List of instrument ids to perform.
   std::unordered_set<Id> instrument_ids_;
 
-  // Score to perform.
-  NoteSequence score_;
+  // Sequence to perform.
+  Sequence sequence_;
 };
 
 }  // namespace barelyapi

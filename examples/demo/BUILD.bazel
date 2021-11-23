@@ -12,6 +12,7 @@ cc_binary(
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:sequence",
         "//barelymusician/composition:sequencer",
         "//barelymusician/engine:instrument_manager",
         "//barelymusician/engine:transport",
@@ -64,7 +65,7 @@ cc_binary(
         "//barelymusician/common:status",
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/composition:note_sequence",
+        "//barelymusician/composition:sequence",
         "//barelymusician/composition:sequencer",
         "//barelymusician/engine:instrument_manager",
         "//barelymusician/engine:transport",
@@ -78,8 +79,8 @@ cc_binary(
 )
 
 cc_binary(
-    name = "sequencer_demo",
-    srcs = ["sequencer_demo.cpp"],
+    name = "performer_demo",
+    srcs = ["performer_demo.cpp"],
     deps = [
         "//barelymusician",
         "//barelymusician/common:id",
@@ -88,8 +89,10 @@ cc_binary(
         "//barelymusician/common:status",
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/composition:sequencer",
+        "//barelymusician/composition:sequence",
+        "//barelymusician/engine:conductor",
         "//barelymusician/engine:conductor_definition",
+        "//barelymusician/engine:performer",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:input_manager",

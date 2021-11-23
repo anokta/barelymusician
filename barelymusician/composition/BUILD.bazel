@@ -36,9 +36,9 @@ cc_library(
 )
 
 cc_library(
-    name = "note_sequence",
-    srcs = ["note_sequence.cpp"],
-    hdrs = ["note_sequence.h"],
+    name = "sequence",
+    srcs = ["sequence.cpp"],
+    hdrs = ["sequence.h"],
     deps = [
         ":note",
         "//barelymusician/common:id",
@@ -51,7 +51,7 @@ cc_library(
     # srcs = ["sequencer.cpp"],
     hdrs = ["sequencer.h"],
     deps = [
-        ":note_sequence",
+        ":sequence",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:status",

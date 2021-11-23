@@ -13,9 +13,10 @@
 #include "barelymusician/common/random.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/composition/sequencer.h"
+#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -24,9 +25,9 @@
 
 namespace {
 
+using ::barelyapi::Conductor;
 using ::barelyapi::ConductorDefinition;
 using ::barelyapi::ConductorState;
-using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
 using ::barelyapi::InstrumentManager;
 using ::barelyapi::IsOk;
@@ -34,10 +35,10 @@ using ::barelyapi::Note;
 using ::barelyapi::NoteDuration;
 using ::barelyapi::NoteIntensity;
 using ::barelyapi::NotePitch;
-using ::barelyapi::NoteSequence;
 using ::barelyapi::OscillatorType;
+using ::barelyapi::Performer;
 using ::barelyapi::Random;
-using ::barelyapi::Sequencer;
+using ::barelyapi::Sequence;
 using ::barelyapi::StatusOr;
 using ::barelyapi::Transport;
 using ::barelyapi::examples::AudioClock;
@@ -62,10 +63,8 @@ constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.1f;
 
 constexpr Id kMetronomeId = 2;
-constexpr double kInitialTempo = 2.0;
-constexpr double kTempoIncrement = 0.1;
-
-constexpr Id kSequenceId = 10;
+constexpr double kInitialTempo = 120.0;
+constexpr double kTempoIncrement = 10.0;
 
 // Returns the MIDI key number for the given |pitch|.
 int MidiKeyNumberFromPitch(float pitch) {
@@ -82,11 +81,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   InstrumentManager instrument_manager(kSampleRate);
 
-  double tempo = kInitialTempo;
-  Transport transport;
-  transport.SetTempo(tempo);
-
-  // Create metronome instrument.
   instrument_manager.Create(
       kInstrumentId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
@@ -131,12 +125,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
                      build_note(barelyapi::kPitchB5, 1.0 / 3.0));
   notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
 
-  Sequencer sequencer;
-  sequencer.CreateSequence(kSequenceId);
-  sequencer.AddInstrument(kSequenceId, kInstrumentId);
-  auto* sequence = GetStatusOrValue(sequencer.GetSequence(kSequenceId));
-  sequence->SetStartPosition(2.0);
-  sequence->SetEndPosition(20.0);
+  Performer performer;
+  performer.AddInstrument(kInstrumentId);
+  performer.SetBeginPosition(2.0);
+  performer.SetEndPosition(20.0);
+  auto* sequence = performer.GetMutableSequence();
   sequence->SetLooping(true);
   sequence->SetLoopLength(5.0);
   sequence->SetLoopStartOffset(3.0);
@@ -146,13 +139,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
     sequence->Add(++note_index, position, note);
   }
 
+  Conductor conductor;
+  bool use_conductor = false;
+  Random random;
+
+  double tempo = kInitialTempo;
+  Transport transport;
+
   // Transport update callback.
   double reset_position = false;
   const auto update_callback =
       [&](double begin_position, double end_position,
           const Transport::GetTimestampFn& get_timestamp_fn) {
         for (auto& [position, instrument_id_event_pair] :
-             sequencer.Process(begin_position, end_position)) {
+             performer.Perform(begin_position, end_position, conductor)) {
           auto& [instrument_id, event] = instrument_id_event_pair;
           instrument_manager.ProcessEvent(
               instrument_id, get_timestamp_fn(position), std::move(event));
@@ -190,8 +190,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Key down callback.
   bool quit = false;
-  bool use_conductor = false;
-  Random random;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
       // ESC pressed, quit the app.
@@ -214,7 +212,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (transport.IsPlaying()) {
           transport.Stop();
-          sequencer.Stop();
+          performer.ClearAllActiveNotes();
           instrument_manager.SetAllNotesOff(transport.GetTimestamp());
           LOG(INFO) << "Stopped playback";
         } else {
@@ -233,7 +231,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
       case 'C':
         use_conductor = !use_conductor;
-        sequencer.SetConductor(
+        conductor = Conductor(
             use_conductor
                 ? ConductorDefinition{
                       .transform_note_duration_fn =
@@ -277,7 +275,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    LOG(INFO) << "Tempo set to " << tempo;
+    LOG(INFO) << "Tempo set to " << tempo << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
@@ -288,7 +286,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    transport.SetTempo(sequencer.GetPlaybackTempo(tempo));
+    transport.SetTempo(conductor.TransformPlaybackTempo(tempo) / 60.0);
     transport.Update(audio_clock.GetTimestamp() + kLookahead);
     instrument_manager.Update();
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

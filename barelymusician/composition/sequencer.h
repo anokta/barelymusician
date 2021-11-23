@@ -7,7 +7,7 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/note_sequence.h"
+#include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -34,9 +34,9 @@ class Sequencer {
   }
 
   // TDOO: this should not exist?
-  StatusOr<NoteSequence*> GetSequence(Id sequence_id) {
+  StatusOr<Sequence*> GetSequence(Id sequence_id) {
     if (auto* sequence = FindOrNull(performers_, sequence_id)) {
-      return &sequence->GetScore();
+      return sequence->GetMutableSequence();
     }
     return Status::kNotFound;
   }
@@ -64,10 +64,6 @@ class Sequencer {
     return id_event_pairs;
   }
 
-  double GetPlaybackTempo(double tempo) {
-    return conductor_.TransformPlaybackTempo(60.0 * tempo) / 60.0;
-  }
-
   void SetConductor(ConductorDefinition definition) {
     conductor_ = Conductor(std::move(definition));
   }
@@ -75,7 +71,7 @@ class Sequencer {
  private:
   std::unordered_map<Id, Performer> performers_;
 
-  Conductor conductor_{ConductorDefinition{}};
+  Conductor conductor_;
 };
 
 }  // namespace barelyapi

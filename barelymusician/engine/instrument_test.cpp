@@ -45,7 +45,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 }
 
 // Tests that the instrument processes its buffer as expected.
-TEST(InstrumentProcessorTest, Process) {
+TEST(InstrumentTest, Process) {
   Instrument instrument(kSampleRate, GetTestInstrumentDefinition());
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
@@ -104,7 +104,7 @@ TEST(InstrumentProcessorTest, Process) {
 
 // Tests that the instrument processes its buffer as expected when its
 // definition is empty.
-TEST(InstrumentProcessorTest, ProcessEmptyDefinition) {
+TEST(InstrumentTest, ProcessEmptyDefinition) {
   Instrument instrument(kSampleRate, InstrumentDefinition{});
   std::vector<float> buffer(kNumChannels * kNumFrames);
 

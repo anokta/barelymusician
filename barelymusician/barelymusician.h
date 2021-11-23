@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
 #define BARELYMUSICIAN_BARELYMUSICIAN_H_
 
+#include <functional>
 #include <unordered_map>
 
 #include "barelymusician/common/id.h"
@@ -19,6 +20,21 @@ namespace barelyapi {
 // BarelyMusician C++ API.
 class BarelyMusician {
  public:
+  /// Instrument note off callback signature.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param note_pitch Note pitch.
+  using InstrumentNoteOffCallback =
+      std::function<void(Id instrument_id, float note_pitch)>;
+
+  /// Instrument note on callback signature.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param note_pitch Note pitch.
+  /// @param note_intensity Note intensity.
+  using InstrumentNoteOnCallback = std::function<void(
+      Id instrument_id, float note_pitch, float note_intensity)>;
+
   /// Playback beat callback signature.
   using PlaybackBeatCallback = Transport::BeatCallback;
 
@@ -28,10 +44,6 @@ class BarelyMusician {
   /// @param end_position End position in beats.
   using PlaybackUpdateCallback =
       std::function<void(double begin_position, double end_position)>;
-
-  // TODO(#49): Add |PlaybackUpdateCallback|.
-  // TODO(#49): Add |InstrumentNoteOffCallback|.
-  // TODO(#49): Add |InstrumentNoteOnCallback|.
 
   /// Constructs new |BarelyMusician|.
   ///
@@ -102,6 +114,12 @@ class BarelyMusician {
   /// @return Status.
   Status SetInstrumentNoteOff(Id instrument_id, float note_pitch);
 
+  /// Sets the instrument note off callback.
+  ///
+  /// @param instrument_note_off_callback Instrument note off callback.
+  void SetInstrumentNoteOffCallback(
+      InstrumentNoteOffCallback instrument_note_off_callback);
+
   /// Sets instrument note on.
   ///
   /// @param instrument_id Instrument id.
@@ -110,6 +128,12 @@ class BarelyMusician {
   /// @return Status.
   Status SetInstrumentNoteOn(Id instrument_id, float note_pitch,
                              float note_intensity);
+
+  /// Sets the instrument note on callback.
+  ///
+  /// @param instrument_note_on_callback Instrument note on callback.
+  void SetInstrumentNoteOnCallback(
+      InstrumentNoteOnCallback instrument_note_on_callback);
 
   /// Sets the playback beat callback.
   ///
@@ -152,6 +176,12 @@ class BarelyMusician {
 
   // Instrument manager.
   InstrumentManager instrument_manager_;
+
+  // Instrument note off callback.
+  InstrumentNoteOffCallback instrument_note_off_callback_;
+
+  // Instrument note on callback.
+  InstrumentNoteOnCallback instrument_note_on_callback_;
 
   // List of performers.
   std::unordered_map<Id, Performer> performers_;

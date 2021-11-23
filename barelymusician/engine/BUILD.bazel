@@ -123,6 +123,17 @@ cc_library(
 )
 
 cc_test(
+    name = "conductor_test",
+    srcs = ["conductor_test.cpp"],
+    deps = [
+        ":conductor",
+        ":conductor_definition",
+        "//barelymusician/common:status",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "instrument_manager_test",
     srcs = ["instrument_manager_test.cpp"],
     deps = [

@@ -24,6 +24,14 @@ constexpr double kDefaultPlaybackTempo = 120.0;
 // Converts seconds from minutes.
 constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 
+// Dummy instrument note off callback function that does nothing.
+void NoopInstrumentNoteOffCallback(Id /*instrument_id*/, float /*note_pitch*/) {
+}
+
+// Dummy instrument note on callback function that does nothing.
+void NoopInstrumentNoteOnCallback(Id /*instrument_id*/, float /*note_pitch*/,
+                                  float /*note_intensity*/) {}
+
 // Dummy playback update callback function that does nothing.
 void NoopPlaybackUpdateCallback(double /*begin_position*/,
                                 double /*end_position*/) {}
@@ -32,8 +40,19 @@ void NoopPlaybackUpdateCallback(double /*begin_position*/,
 
 BarelyMusician::BarelyMusician(int sample_rate)
     : instrument_manager_(sample_rate),
+      instrument_note_off_callback_(&NoopInstrumentNoteOffCallback),
+      instrument_note_on_callback_(&NoopInstrumentNoteOnCallback),
       playback_tempo_(kDefaultPlaybackTempo),
       playback_update_callback_(&NoopPlaybackUpdateCallback) {
+  instrument_manager_.SetNoteOffCallback(
+      [&](Id instrument_id, double /*timestamp*/, float note_pitch) {
+        instrument_note_off_callback_(instrument_id, note_pitch);
+      });
+  instrument_manager_.SetNoteOnCallback(
+      [&](Id instrument_id, double /*timestamp*/, float note_pitch,
+          float note_intensity) {
+        instrument_note_on_callback_(instrument_id, note_pitch, note_intensity);
+      });
   transport_.SetUpdateCallback(
       [&](double begin_position, double end_position,
           const Transport::GetTimestampFn& get_timestamp_fn) {
@@ -103,10 +122,24 @@ Status BarelyMusician::SetInstrumentNoteOff(Id instrument_id,
                                         transport_.GetTimestamp(), note_pitch);
 }
 
+void BarelyMusician::SetInstrumentNoteOffCallback(
+    InstrumentNoteOffCallback instrument_note_off_callback) {
+  instrument_note_off_callback_ = instrument_note_off_callback
+                                      ? std::move(instrument_note_off_callback)
+                                      : &NoopInstrumentNoteOffCallback;
+}
+
 Status BarelyMusician::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
                                            float note_intensity) {
   return instrument_manager_.SetNoteOn(instrument_id, transport_.GetTimestamp(),
                                        note_pitch, note_intensity);
+}
+
+void BarelyMusician::SetInstrumentNoteOnCallback(
+    InstrumentNoteOnCallback instrument_note_on_callback) {
+  instrument_note_on_callback_ = instrument_note_on_callback
+                                     ? std::move(instrument_note_on_callback)
+                                     : &NoopInstrumentNoteOnCallback;
 }
 
 void BarelyMusician::SetPlaybackBeatCallback(

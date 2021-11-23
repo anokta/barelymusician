@@ -84,8 +84,8 @@ void ComposeChord(float root_note, const std::vector<float>& scale,
                   float intensity, int harmonic, double offset,
                   Sequence* sequence) {
   const auto add_chord_note = [&](int index) {
-    sequence->Add(++note_id_count, offset,
-                  Note{root_note + GetPitch(scale, index), intensity, 1.0});
+    sequence->AddNote(++note_id_count, offset,
+                      Note{root_note + GetPitch(scale, index), intensity, 1.0});
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -99,9 +99,9 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
-    sequence->Add(++note_id_count, begin_position + offset,
-                  Note{root_note + GetPitch(scale, index), intensity,
-                       end_position - begin_position});
+    sequence->AddNote(++note_id_count, begin_position + offset,
+                      Note{root_note + GetPitch(scale, index), intensity,
+                           end_position - begin_position});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);
@@ -128,8 +128,8 @@ void ComposeDrums(int bar, int beat, int num_beats, Random* random,
   };
   const auto add_note = [&](double begin_position, double end_position,
                             float pitch, float intensity) {
-    sequence->Add(++note_id_count, begin_position + offset,
-                  Note{pitch, intensity, end_position - begin_position});
+    sequence->AddNote(++note_id_count, begin_position + offset,
+                      Note{pitch, intensity, end_position - begin_position});
   };
 
   // Kick.

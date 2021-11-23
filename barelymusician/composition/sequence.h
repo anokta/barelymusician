@@ -5,6 +5,7 @@
 #include <map>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
@@ -12,7 +13,7 @@
 
 namespace barelyapi {
 
-/// Musical sequence.
+/// Musical note sequence.
 class Sequence {
  public:
   /// Process callback signature.
@@ -31,7 +32,12 @@ class Sequence {
   /// @param position Note position.
   /// @param note Note.
   /// @return Status.
-  Status Add(Id id, double position, Note note);
+  Status AddNote(Id id, double position, Note note);
+
+  /// Returns all notes in the sequence.
+  ///
+  /// @return List of notes.
+  std::vector<Note> GetAllNotes() const;
 
   /// Returns the begin offset.
   ///
@@ -48,6 +54,12 @@ class Sequence {
   /// @return Loop length in beats.
   double GetLoopLength() const;
 
+  /// Returns note.
+  ///
+  /// @param id Note id.
+  /// @return Note, or error status.
+  StatusOr<Note> GetNote(Id id) const;
+
   /// Returns whether the sequence is empty or not.
   ///
   /// @return True if empty.
@@ -58,28 +70,30 @@ class Sequence {
   /// @return True if looping.
   bool IsLooping() const;
 
-  /// Processes the sequence at range.
+  /// Processes the sequence at given position range with offset.
   ///
   /// @param begin_position Begin position.
   /// @param end_position End position.
+  /// @param position_offset Position offset in beats.
   /// @param process_callback Process callback.
   void Process(double begin_position, double end_position,
-               ProcessCallback process_callback) const;
-
-  /// Removes note.
-  ///
-  /// @param id Note id.
-  /// @return Status.
-  Status Remove(Id id);
+               double position_offset,
+               const ProcessCallback& process_callback) const;
 
   /// Removes all notes.
-  void RemoveAll();
+  void RemoveAllNotes();
 
   /// Removes all notes in range.
   ///
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
-  void RemoveAll(double begin_position, double end_position);
+  void RemoveAllNotes(double begin_position, double end_position);
+
+  /// Removes note.
+  ///
+  /// @param id Note id.
+  /// @return Status.
+  Status RemoveNote(Id id);
 
   /// Sets the begin offset.
   ///
@@ -102,6 +116,14 @@ class Sequence {
   void SetLooping(bool is_looping);
 
  private:
+  // Note position-id pair type.
+  using NotePositionIdPair = std::pair<double, Id>;
+
+  // Internal process helper function.
+  void ProcessInternal(double begin_position, double end_position,
+                       double position_offset,
+                       const ProcessCallback& process_callback) const;
+
   // Begin offset in beats.
   double begin_offset_;
 
@@ -115,7 +137,7 @@ class Sequence {
   double loop_length_;
 
   // Sorted notes by their positions.
-  std::map<std::pair<double, Id>, Note> notes_;
+  std::map<NotePositionIdPair, Note> notes_;
 
   // Note positions.
   std::unordered_map<Id, double> positions_;

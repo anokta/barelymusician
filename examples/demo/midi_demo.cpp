@@ -86,8 +86,8 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       note.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       note.duration = get_position(midi_event.getTickDuration());
-      sequence->Add(static_cast<Id>(i), get_position(midi_event.tick),
-                    std::move(note));
+      sequence->AddNote(static_cast<Id>(i), get_position(midi_event.tick),
+                        std::move(note));
     }
   }
   return !sequence->IsEmpty();

@@ -77,12 +77,9 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
   end_position = ClampEndPosition(end_position);
   if (!instrument_ids_.empty() && !sequence_.IsEmpty() &&
       begin_position < end_position) {
-    begin_position -= sequence_position_offset_;
-    end_position -= sequence_position_offset_;
     sequence_.Process(
-        begin_position, end_position, [&](double position, const Note& note) {
-          position += sequence_position_offset_;
-
+        begin_position, end_position, sequence_position_offset_,
+        [&](double position, const Note& note) {
           // Get pitch.
           const auto pitch_or = conductor.TransformNotePitch(note.pitch);
           if (!IsOk(pitch_or)) {

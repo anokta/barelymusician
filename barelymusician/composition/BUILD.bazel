@@ -41,6 +41,7 @@ cc_library(
     hdrs = ["sequence.h"],
     deps = [
         ":note",
+        "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
     ],

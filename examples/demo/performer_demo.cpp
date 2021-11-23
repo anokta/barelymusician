@@ -136,7 +136,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   sequence->SetLoopLength(5.0);
   int note_index = 0;
   for (const auto& [position, note] : notes) {
-    sequence->Add(++note_index, position, note);
+    sequence->AddNote(++note_index, position, note);
   }
 
   Conductor conductor;
@@ -198,11 +198,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (const int id = static_cast<int>(key - '0'); id > 0 && id < 10) {
       // Toggle notes.
-      if (IsOk(sequence->Remove(static_cast<Id>(id)))) {
+      if (IsOk(sequence->RemoveNote(static_cast<Id>(id)))) {
         LOG(INFO) << "Removed note " << id;
       } else {
-        sequence->Add(static_cast<Id>(id), notes[id - 1].first,
-                      notes[id - 1].second);
+        sequence->AddNote(static_cast<Id>(id), notes[id - 1].first,
+                          notes[id - 1].second);
         LOG(INFO) << "Added note " << id;
       }
       return;

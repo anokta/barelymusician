@@ -6,27 +6,12 @@
 #include <optional>
 #include <utility>
 
+#include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 
 namespace barelyapi {
-
-namespace {
-
-// Processes the sequence with a position offset.
-void ProcessWithOffset(const std::map<std::pair<double, Id>, Note>& notes,
-                       double begin_position, double end_position,
-                       double position_offset,
-                       const Sequence::ProcessCallback& process_callback) {
-  const auto begin = notes.lower_bound(std::pair{begin_position, kInvalidId});
-  const auto end = notes.lower_bound(std::pair{end_position, kInvalidId});
-  for (auto it = begin; it != end; ++it) {
-    process_callback(it->first.first + position_offset, it->second);
-  }
-}
-
-}  // namespace
 
 Sequence::Sequence()
     : begin_offset_(0.0),
@@ -34,13 +19,24 @@ Sequence::Sequence()
       loop_begin_offset_(0.0),
       loop_length_(1.0) {}
 
-Status Sequence::Add(Id id, double position, Note note) {
+Status Sequence::AddNote(Id id, double position, Note note) {
   if (id == kInvalidId) return Status::kInvalidArgument;
   if (positions_.emplace(id, position).second) {
-    notes_.emplace(std::pair{position, id}, std::move(note));
+    notes_.emplace(NotePositionIdPair{position, id}, std::move(note));
     return Status::kOk;
   }
   return Status::kAlreadyExists;
+}
+
+std::vector<Note> Sequence::GetAllNotes() const {
+  std::vector<Note> notes;
+  if (!notes_.empty()) {
+    notes.reserve(notes_.size());
+    for (const auto& [position_id_pair, note] : notes_) {
+      notes.push_back(note);
+    }
+  }
+  return notes;
 }
 
 double Sequence::GetBeginOffset() const { return begin_offset_; }
@@ -49,76 +45,85 @@ double Sequence::GetLoopBeginOffset() const { return loop_begin_offset_; }
 
 double Sequence::GetLoopLength() const { return loop_length_; }
 
+StatusOr<Note> Sequence::GetNote(Id id) const {
+  if (const auto* position = FindOrNull(positions_, id)) {
+    return notes_.find(NotePositionIdPair{*position, id})->second;
+  }
+  return Status::kNotFound;
+}
+
 bool Sequence::IsEmpty() const { return notes_.empty(); }
 
 bool Sequence::IsLooping() const { return is_looping_; }
 
 void Sequence::Process(double begin_position, double end_position,
-                       ProcessCallback process_callback) const {
-  double position_offset = -begin_offset_;
+                       double position_offset,
+                       const ProcessCallback& process_callback) const {
+  position_offset -= begin_offset_;
   begin_position -= position_offset;
   end_position -= position_offset;
-
   if (is_looping_) {
     if (loop_length_ <= 0.0) {
       return;
     }
-
-    if (begin_position > loop_length_ + loop_begin_offset_) {
+    // Move the process position to the first loop iteration.
+    if (const double loop_begin_position = begin_position - loop_begin_offset_;
+        loop_begin_position > loop_length_) {
       const double loop_offset =
-          loop_length_ *
-          std::floor((begin_position - loop_begin_offset_) / loop_length_);
+          loop_length_ * std::floor(loop_begin_position / loop_length_);
       begin_position -= loop_offset;
       end_position -= loop_offset;
       position_offset += loop_offset;
     }
-
-    if (begin_position < loop_begin_offset_ + loop_length_) {
-      const double loop_end_position =
-          std::min(loop_begin_offset_ + loop_length_, end_position);
-      ProcessWithOffset(notes_, begin_position, loop_end_position,
-                        position_offset, process_callback);
+    // Process the first loop iteration.
+    if (double loop_end_position = loop_begin_offset_ + loop_length_;
+        begin_position < loop_end_position) {
+      loop_end_position = std::min(loop_end_position, end_position);
+      ProcessInternal(begin_position, loop_end_position, position_offset,
+                      process_callback);
       position_offset += loop_end_position - begin_position;
       begin_position = loop_end_position;
     }
-
+    // Process the rest of the loop iterations.
+    position_offset -= loop_begin_offset_;
     while (begin_position < end_position) {
       const double loop_end_position =
           loop_begin_offset_ +
           std::min(loop_length_, end_position - begin_position);
-      ProcessWithOffset(notes_, loop_begin_offset_, loop_end_position,
-                        position_offset + begin_position - loop_begin_offset_,
-                        process_callback);
+      ProcessInternal(loop_begin_offset_, loop_end_position,
+                      position_offset + begin_position, process_callback);
       begin_position += loop_length_;
     }
   } else {
-    ProcessWithOffset(notes_, begin_position, end_position, position_offset,
-                      process_callback);
+    ProcessInternal(begin_position, end_position, position_offset,
+                    process_callback);
   }
 }
 
-Status Sequence::Remove(Id id) {
-  if (const auto position_it = positions_.find(id);
-      position_it != positions_.end()) {
-    notes_.erase(std::pair{position_it->second, id});
-    positions_.erase(position_it);
-    return Status::kOk;
-  }
-  return Status::kNotFound;
-}
-
-void Sequence::RemoveAll() {
+void Sequence::RemoveAllNotes() {
   notes_.clear();
   positions_.clear();
 }
 
-void Sequence::RemoveAll(double begin_position, double end_position) {
-  const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalidId});
-  const auto end = notes_.lower_bound(std::pair{end_position, kInvalidId});
+void Sequence::RemoveAllNotes(double begin_position, double end_position) {
+  const auto begin =
+      notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
+  const auto end =
+      notes_.lower_bound(NotePositionIdPair{end_position, kInvalidId});
   for (auto it = begin; it != end; ++it) {
     positions_.erase(it->first.second);
   }
   notes_.erase(begin, end);
+}
+
+Status Sequence::RemoveNote(Id id) {
+  if (const auto position_it = positions_.find(id);
+      position_it != positions_.end()) {
+    notes_.erase(NotePositionIdPair{position_it->second, id});
+    positions_.erase(position_it);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 void Sequence::SetBeginOffset(double begin_offset) {
@@ -134,5 +139,17 @@ void Sequence::SetLoopLength(double loop_length) {
 }
 
 void Sequence::SetLooping(bool is_looping) { is_looping_ = is_looping; }
+
+void Sequence::ProcessInternal(double begin_position, double end_position,
+                               double position_offset,
+                               const ProcessCallback& process_callback) const {
+  const auto begin =
+      notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
+  const auto end =
+      notes_.lower_bound(NotePositionIdPair{end_position, kInvalidId});
+  for (auto it = begin; it != end; ++it) {
+    process_callback(it->first.first + position_offset, it->second);
+  }
+}
 
 }  // namespace barelyapi

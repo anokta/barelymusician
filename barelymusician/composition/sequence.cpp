@@ -31,8 +31,8 @@ void ProcessWithOffset(const std::map<std::pair<double, Id>, Note>& notes,
 Sequence::Sequence()
     : is_looping_(false),
       loop_length_(1.0),
-      loop_start_offset_(0.0),
-      start_offset_(0.0) {}
+      loop_begin_offset_(0.0),
+      begin_offset_(0.0) {}
 
 Status Sequence::Add(Id id, double position, Note note) {
   if (id == kInvalidId) return Status::kInvalidArgument;
@@ -43,11 +43,11 @@ Status Sequence::Add(Id id, double position, Note note) {
   return Status::kAlreadyExists;
 }
 
+double Sequence::GetBeginOffset() const { return begin_offset_; }
+
+double Sequence::GetLoopBeginOffset() const { return loop_begin_offset_; }
+
 double Sequence::GetLoopLength() const { return loop_length_; }
-
-double Sequence::GetLoopStartOffset() const { return loop_start_offset_; }
-
-double Sequence::GetStartOffset() const { return start_offset_; }
 
 bool Sequence::IsEmpty() const { return notes_.empty(); }
 
@@ -55,7 +55,7 @@ bool Sequence::IsLooping() const { return is_looping_; }
 
 void Sequence::Process(double begin_position, double end_position,
                        ProcessCallback process_callback) const {
-  double position_offset = -start_offset_;
+  double position_offset = -begin_offset_;
   begin_position -= position_offset;
   end_position -= position_offset;
 
@@ -64,18 +64,18 @@ void Sequence::Process(double begin_position, double end_position,
       return;
     }
 
-    if (begin_position > loop_length_ + loop_start_offset_) {
+    if (begin_position > loop_length_ + loop_begin_offset_) {
       const double loop_offset =
           loop_length_ *
-          std::floor((begin_position - loop_start_offset_) / loop_length_);
+          std::floor((begin_position - loop_begin_offset_) / loop_length_);
       begin_position -= loop_offset;
       end_position -= loop_offset;
       position_offset += loop_offset;
     }
 
-    if (begin_position < loop_start_offset_ + loop_length_) {
+    if (begin_position < loop_begin_offset_ + loop_length_) {
       const double loop_end_position =
-          std::min(loop_start_offset_ + loop_length_, end_position);
+          std::min(loop_begin_offset_ + loop_length_, end_position);
       ProcessWithOffset(notes_, begin_position, loop_end_position,
                         position_offset, process_callback);
       position_offset += loop_end_position - begin_position;
@@ -84,10 +84,10 @@ void Sequence::Process(double begin_position, double end_position,
 
     while (begin_position < end_position) {
       const double loop_end_position =
-          loop_start_offset_ +
+          loop_begin_offset_ +
           std::min(loop_length_, end_position - begin_position);
-      ProcessWithOffset(notes_, loop_start_offset_, loop_end_position,
-                        position_offset + begin_position - loop_start_offset_,
+      ProcessWithOffset(notes_, loop_begin_offset_, loop_end_position,
+                        position_offset + begin_position - loop_begin_offset_,
                         process_callback);
       begin_position += loop_length_;
     }
@@ -121,18 +121,18 @@ void Sequence::RemoveAll(double begin_position, double end_position) {
   notes_.erase(begin, end);
 }
 
+void Sequence::SetBeginOffset(double begin_offset) {
+  begin_offset_ = begin_offset;
+}
+
+void Sequence::SetLoopBeginOffset(double loop_begin_offset) {
+  loop_begin_offset_ = loop_begin_offset;
+}
+
 void Sequence::SetLoopLength(double loop_length) {
   loop_length_ = std::max(loop_length, 0.0);
 }
 
-void Sequence::SetLoopStartOffset(double loop_start_offset) {
-  loop_start_offset_ = loop_start_offset;
-}
-
 void Sequence::SetLooping(bool is_looping) { is_looping_ = is_looping; }
-
-void Sequence::SetStartOffset(double start_offset) {
-  start_offset_ = start_offset;
-}
 
 }  // namespace barelyapi

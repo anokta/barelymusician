@@ -33,20 +33,20 @@ class Sequence {
   /// @return Status.
   Status Add(Id id, double position, Note note);
 
+  /// Returns the begin offset.
+  ///
+  /// @return Begin offset in beats.
+  double GetBeginOffset() const;
+
+  /// Returns the loop begin offset.
+  ///
+  /// @return Loop begin offset in beats.
+  double GetLoopBeginOffset() const;
+
   /// Returns the loop length.
   ///
   /// @return Loop length in beats.
   double GetLoopLength() const;
-
-  /// Returns the loop start offset.
-  ///
-  /// @return Loop start offset in beats.
-  double GetLoopStartOffset() const;
-
-  /// Returns the start offset.
-  ///
-  /// @return Start offset in beats.
-  double GetStartOffset() const;
 
   /// Returns whether the sequence is empty or not.
   ///
@@ -81,38 +81,38 @@ class Sequence {
   /// @param end_position End position in beats.
   void RemoveAll(double begin_position, double end_position);
 
+  /// Sets the begin offset.
+  ///
+  /// @param begin_offset Begin offset in beats.
+  void SetBeginOffset(double begin_offset);
+
+  /// Sets the loop begin offset.
+  ///
+  /// @param loop_begin_offset Loop begin offset in beats.
+  void SetLoopBeginOffset(double loop_begin_position);
+
   /// Sets the loop length for when the sequence is looping.
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length);
-
-  /// Sets the loop start offset.
-  ///
-  /// @param loop_start_offset Loop start offset in beats.
-  void SetLoopStartOffset(double loop_start_position);
 
   /// Sets whether the sequence should be looping or not.
   ///
   /// @param is_looping True if looping.
   void SetLooping(bool is_looping);
 
-  /// Sets the start offset.
-  ///
-  /// @param start_offset Start offset in beats.
-  void SetStartOffset(double start_offset);
-
  private:
+  // Begin offset in beats.
+  double begin_offset_;
+
   // Denotes whether the sequence is looping or not.
   bool is_looping_;
 
+  // Loop begin offset in beats.
+  double loop_begin_offset_;
+
   // Loop length in beats.
   double loop_length_;
-
-  // Loop start offset in beats.
-  double loop_start_offset_;
-
-  // Start position offset in beats.
-  double start_offset_;
 
   // Sorted notes by their positions.
   std::map<std::pair<double, Id>, Note> notes_;

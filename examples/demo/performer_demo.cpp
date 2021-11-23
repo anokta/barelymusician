@@ -130,10 +130,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetSequenceBeginPosition(2.0);
   performer.SetSequenceEndPosition(19.5);
   auto* sequence = performer.GetMutableSequence();
+  sequence->SetBeginOffset(-1.0);
   sequence->SetLooping(true);
+  sequence->SetLoopBeginOffset(3.0);
   sequence->SetLoopLength(5.0);
-  sequence->SetLoopStartOffset(3.0);
-  sequence->SetStartOffset(-1.0);
   int note_index = 0;
   for (const auto& [position, note] : notes) {
     sequence->Add(++note_index, position, note);

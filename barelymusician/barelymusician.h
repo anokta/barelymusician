@@ -1,12 +1,17 @@
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
 #define BARELYMUSICIAN_BARELYMUSICIAN_H_
 
+#include <unordered_map>
+
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/status.h"
+#include "barelymusician/engine/conductor.h"
+#include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
@@ -16,6 +21,13 @@ class BarelyMusician {
  public:
   /// Playback beat callback signature.
   using PlaybackBeatCallback = Transport::BeatCallback;
+
+  /// Playback update callback signature.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  using PlaybackUpdateCallback =
+      std::function<void(double begin_position, double end_position)>;
 
   // TODO(#49): Add |PlaybackUpdateCallback|.
   // TODO(#49): Add |InstrumentNoteOffCallback|.
@@ -34,11 +46,22 @@ class BarelyMusician {
   Id CreateInstrument(InstrumentDefinition definition,
                       InstrumentParamDefinitions param_definitions);
 
+  /// Creates new performer.
+  ///
+  /// @return Performer id.
+  Id CreatePerformer();
+
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument id.
   /// @return Status.
   Status DestroyInstrument(Id instrument_id);
+
+  /// Destroys performer.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Status.
+  Status DestroyPerformer(Id performer_id);
 
   /// Returns the playback position.
   ///
@@ -65,6 +88,11 @@ class BarelyMusician {
   void ProcessInstrument(Id instrument_id, double timestamp, float* output,
                          int num_channels, int num_frames);
 
+  /// Sets conductor.
+  ///
+  /// @param definition Conductor definition.
+  void SetConductor(ConductorDefinition definition);
+
   // TODO(#49): Add the rest of the instrument setters.
 
   /// Sets instrument note off.
@@ -72,7 +100,6 @@ class BarelyMusician {
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
   /// @return Status.
-  // TODO(#81): Use |NotePitch| instead of |float|?
   Status SetInstrumentNoteOff(Id instrument_id, float note_pitch);
 
   /// Sets instrument note on.
@@ -81,7 +108,6 @@ class BarelyMusician {
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
   /// @return Status.
-  // TODO(#81): Use |NotePitch| and |NoteIntensity| instead of |float|s?
   Status SetInstrumentNoteOn(Id instrument_id, float note_pitch,
                              float note_intensity);
 
@@ -100,6 +126,12 @@ class BarelyMusician {
   /// @param tempo Tempo in BPM.
   void SetPlaybackTempo(double tempo);
 
+  /// Sets the playback update callback.
+  ///
+  /// @param playback_update_callback Playback update callback.
+  void SetPlaybackUpdateCallback(
+      PlaybackUpdateCallback playback_update_callback);
+
   /// Starts the playback.
   void StartPlayback();
 
@@ -112,11 +144,23 @@ class BarelyMusician {
   void Update(double timestamp);
 
  private:
+  // Conductor.
+  Conductor conductor_;
+
   // Id generator.
   IdGenerator id_generator_;
 
   // Instrument manager.
   InstrumentManager instrument_manager_;
+
+  // List of performers.
+  std::unordered_map<Id, Performer> performers_;
+
+  // Playback tempo in BPM.
+  double playback_tempo_;
+
+  // Playback update callback.
+  PlaybackUpdateCallback playback_update_callback_;
 
   // Playback transport.
   Transport transport_;

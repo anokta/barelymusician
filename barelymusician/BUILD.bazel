@@ -11,7 +11,10 @@ cc_library(
         "//barelymusician/common:id_generator",
         "//barelymusician/common:logging",
         "//barelymusician/common:status",
+        "//barelymusician/engine:conductor",
+        "//barelymusician/engine:conductor_definition",
         "//barelymusician/engine:instrument_manager",
+        "//barelymusician/engine:performer",
         "//barelymusician/engine:transport",
     ],
 )

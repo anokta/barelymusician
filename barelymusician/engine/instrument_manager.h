@@ -16,6 +16,7 @@
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_param.h"
 #include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/instrument_processor_event.h"
 #include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {

@@ -44,7 +44,6 @@ cc_library(
     name = "instrument_event",
     hdrs = ["instrument_event.h"],
     deps = [
-        ":instrument_definition",
         "//barelymusician/common:id",
     ],
 )
@@ -59,6 +58,7 @@ cc_library(
         ":instrument_event",
         ":instrument_param",
         ":instrument_param_definition",
+        ":instrument_processor_event",
         ":task_runner",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
@@ -80,6 +80,15 @@ cc_library(
 cc_library(
     name = "instrument_param_definition",
     hdrs = ["instrument_param_definition.h"],
+)
+
+cc_library(
+    name = "instrument_processor_event",
+    hdrs = ["instrument_processor_event.h"],
+    deps = [
+        ":instrument_definition",
+        ":instrument_event",
+    ],
 )
 
 cc_library(

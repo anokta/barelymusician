@@ -7,18 +7,8 @@
 #include <variant>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/engine/instrument_definition.h"
 
 namespace barelyapi {
-
-/// Create event.
-struct CreateEvent {
-  /// Instrument definition.
-  InstrumentDefinition definition;
-};
-
-/// Destroy event.
-struct DestroyEvent {};
 
 /// Set all notes off event.
 struct SetAllNotesOffEvent {};
@@ -73,15 +63,6 @@ using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;
 
 /// Instrument id-event pairs by their positions container type.
 using InstrumentIdEventPairs = std::multimap<double, InstrumentIdEventPair>;
-
-/// Instrument processor event type.
-using InstrumentProcessorEvent =
-    std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetNoteOffEvent,
-                 SetNoteOnEvent, SetParamEvent>;
-
-/// Instrument processor events by their timestamps container type.
-using InstrumentProcessorEvents =
-    std::multimap<double, InstrumentProcessorEvent>;
 
 }  // namespace barelyapi
 

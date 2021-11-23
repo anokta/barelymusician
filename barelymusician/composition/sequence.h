@@ -16,6 +16,9 @@ namespace barelyapi {
 /// Musical note sequence.
 class Sequence {
  public:
+  /// Note with position type.
+  using NoteWithPosition = std::pair<double, Note>;
+
   /// Process callback signature.
   ///
   /// @param position Note position.
@@ -36,8 +39,8 @@ class Sequence {
 
   /// Returns all notes in the sequence.
   ///
-  /// @return List of notes.
-  std::vector<Note> GetAllNotes() const;
+  /// @return List of notes with their positions.
+  std::vector<NoteWithPosition> GetAllNotes() const;
 
   /// Returns the begin offset.
   ///
@@ -57,8 +60,8 @@ class Sequence {
   /// Returns note.
   ///
   /// @param id Note id.
-  /// @return Note, or error status.
-  StatusOr<Note> GetNote(Id id) const;
+  /// @return Note with position, or error status.
+  StatusOr<NoteWithPosition> GetNote(Id id) const;
 
   /// Returns whether the sequence is empty or not.
   ///

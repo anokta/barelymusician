@@ -28,12 +28,12 @@ Status Sequence::AddNote(Id id, double position, Note note) {
   return Status::kAlreadyExists;
 }
 
-std::vector<Note> Sequence::GetAllNotes() const {
-  std::vector<Note> notes;
+std::vector<Sequence::NoteWithPosition> Sequence::GetAllNotes() const {
+  std::vector<NoteWithPosition> notes;
   if (!notes_.empty()) {
     notes.reserve(notes_.size());
     for (const auto& [position_id_pair, note] : notes_) {
-      notes.push_back(note);
+      notes.emplace_back(position_id_pair.first, note);
     }
   }
   return notes;
@@ -45,9 +45,10 @@ double Sequence::GetLoopBeginOffset() const { return loop_begin_offset_; }
 
 double Sequence::GetLoopLength() const { return loop_length_; }
 
-StatusOr<Note> Sequence::GetNote(Id id) const {
+StatusOr<Sequence::NoteWithPosition> Sequence::GetNote(Id id) const {
   if (const auto* position = FindOrNull(positions_, id)) {
-    return notes_.find(NotePositionIdPair{*position, id})->second;
+    return NoteWithPosition{
+        *position, notes_.find(NotePositionIdPair{*position, id})->second};
   }
   return Status::kNotFound;
 }

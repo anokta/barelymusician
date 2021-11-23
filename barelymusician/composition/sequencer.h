@@ -55,11 +55,11 @@ class Sequencer {
     }
   }
 
-  InstrumentControllerEvents Process(double begin_position,
-                                     double end_position) {
-    InstrumentControllerEvents events;
+  InstrumentControllerEventPairs Process(double begin_position,
+                                         double end_position) {
+    InstrumentControllerEventPairs events;
     for (auto& [id, performer] : performers_) {
-      events.merge(performer.Perform(begin_position, end_position, conductor_));
+      events.merge(performer.Perform(conductor_, begin_position, end_position));
     }
     return events;
   }

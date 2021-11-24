@@ -168,6 +168,20 @@ cc_test(
 )
 
 cc_test(
+    name = "performer_test",
+    srcs = ["performer_test.cpp"],
+    deps = [
+        ":conductor",
+        ":instrument_event",
+        ":performer",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
+        "//barelymusician/composition:note",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "task_runner_test",
     srcs = ["task_runner_test.cpp"],
     deps = [

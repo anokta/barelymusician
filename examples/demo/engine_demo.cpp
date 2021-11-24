@@ -213,7 +213,7 @@ int main(int /*argc*/, char* argv[]) {
   Id num_instruments = 0;
   const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
                                              float attack, float release) {
-    instrument_manager.Create(
+    instrument_manager.Add(
         ++num_instruments, 0.0, SynthInstrument::GetDefinition(),
         {{SynthInstrumentParam::kNumVoices,
           static_cast<float>(kNumInstrumentVoices)},
@@ -256,8 +256,8 @@ int main(int /*argc*/, char* argv[]) {
   performers.push_back(line_2_beat_composer_callback);
 
   // Add drumkit instrument.
-  instrument_manager.Create(++num_instruments, 0.0,
-                            DrumkitInstrument::GetDefinition(), {});
+  instrument_manager.Add(++num_instruments, 0.0,
+                         DrumkitInstrument::GetDefinition(), {});
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kPitchKick, "basic_kick.wav"},
       {barelyapi::kPitchSnare, "basic_snare.wav"},

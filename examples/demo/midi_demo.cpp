@@ -142,9 +142,9 @@ int main(int /*argc*/, char* argv[]) {
       sequencer.DestroySequence(sequence_id);
       continue;
     }
-    // Create instrument.
+    // Add instrument.
     const Id instrument_id = static_cast<Id>(num_instruments++);
-    instrument_manager.Create(
+    instrument_manager.Add(
         instrument_id, 0.0, SynthInstrument::GetDefinition(),
         {{SynthInstrumentParam::kNumVoices,
           static_cast<float>(kNumInstrumentVoices)},

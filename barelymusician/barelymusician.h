@@ -71,6 +71,20 @@ class BarelyMusician {
   /// @return Status.
   Status AddPerformerInstrument(Id performer_id, Id instrument_id);
 
+  /// Adds performer note.
+  ///
+  /// @param performer_id Performer id.
+  /// @param position Note position.
+  /// @param note Note.
+  /// @return Note id.
+  StatusOr<Id> AddPerformerNote(Id performer_id, double position, Note note);
+
+  /// Returns performer begin offset.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Begin offset in beats.
+  StatusOr<double> GetPerformerBeginOffset(Id performer_id) const;
+
   /// Returns performer begin position.
   ///
   /// @param performer_id Performer id.
@@ -85,6 +99,18 @@ class BarelyMusician {
   StatusOr<std::optional<double>> GetPerformerEndPosition(
       Id performer_id) const;
 
+  /// Returns performer loop begin offset.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Loop begin offset in beats.
+  StatusOr<double> GetPerformerLoopBeginOffset(Id performer_id) const;
+
+  /// Returns performer loop length.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Loop length in beats.
+  StatusOr<double> GetPerformerLoopLength(Id performer_id) const;
+
   /// Returns the playback position.
   ///
   /// @return Position in beats.
@@ -94,6 +120,18 @@ class BarelyMusician {
   ///
   /// @return Tempo in BPM.
   double GetPlaybackTempo() const;
+
+  /// Returns whether the performer is empty or not.
+  ///
+  /// @param performer_id Performer id.
+  /// @return True if empty (i.e., has no notes), false if not, or error status.
+  StatusOr<bool> IsPerformerEmpty(Id performer_id) const;
+
+  /// Returns whether the performer is looping or not.
+  ///
+  /// @param performer_id Performer id.
+  /// @return True if looping, false if not, or error status.
+  StatusOr<bool> IsPerformerLooping(Id performer_id) const;
 
   /// Returns whether the playback is currently active or not.
   ///
@@ -116,6 +154,21 @@ class BarelyMusician {
   /// @return Status.
   Status RemoveAllPerformerInstruments(Id performer_id);
 
+  /// Removes all performer notes.
+  ///
+  /// @param performer_id Performer id.
+  /// @return Status.
+  Status RemoveAllPerformerNotes(Id performer_id);
+
+  /// Removes all performer notes at range.
+  ///
+  /// @param performer_id Performer id.
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  /// @return Status.
+  Status RemoveAllPerformerNotes(Id performer_id, double begin_position,
+                                 double end_position);
+
   /// Removes instrument.
   ///
   /// @param instrument_id Instrument id.
@@ -134,6 +187,13 @@ class BarelyMusician {
   /// @param instrument_id Instrument id.
   /// @return Status.
   Status RemovePerformerInstrument(Id performer_id, Id instrument_id);
+
+  /// Removes performer note.
+  ///
+  /// @param performer_id Performer id.
+  /// @param note_id Note id.
+  /// @return Status.
+  Status RemovePerformerNote(Id performer_id, Id note_id);
 
   /// Sets conductor.
   ///
@@ -170,6 +230,28 @@ class BarelyMusician {
   void SetInstrumentNoteOnCallback(
       InstrumentNoteOnCallback instrument_note_on_callback);
 
+  /// Sets instrument parameter.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param param_id Parameter id.
+  /// @param param_value Parameter value.
+  /// @return Status.
+  Status SetInstrumentParam(Id instrument_id, int param_id, float param_value);
+
+  /// Sets instrument parameter to default.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param param_id Parameter id.
+  /// @return Status.
+  Status SetInstrumentParamToDefault(Id instrument_id, int param_id);
+
+  /// Sets performer begin offset.
+  ///
+  /// @param performer_id Performer id.
+  /// @param begin_offset Begin offset in beats.
+  /// @return Status.
+  Status SetPerformerBeginOffset(Id performer_id, double begin_offset);
+
   /// Sets performer begin position.
   ///
   /// @param performer_id Performer id.
@@ -185,6 +267,27 @@ class BarelyMusician {
   /// @return Status.
   Status SetPerformerEndPosition(Id performer_id,
                                  std::optional<double> end_position);
+
+  /// Sets performer loop begin offset.
+  ///
+  /// @param performer_id Performer id.
+  /// @param loop_begin_offset Loop begin offset in beats.
+  /// @return Status.
+  Status SetPerformerLoopBeginOffset(Id performer_id, double loop_begin_offset);
+
+  /// Sets performer loop length.
+  ///
+  /// @param performer_id Performer id.
+  /// @param loop_length Loop length in beats.
+  /// @return Status.
+  Status SetPerformerLoopLength(Id performer_id, double loop_length);
+
+  /// Sets performer looping.
+  ///
+  /// @param performer_id Performer id.
+  /// @param looping True if looping.
+  /// @return Status.
+  Status SetPerformerLooping(Id performer_id, bool looping);
 
   /// Sets the playback beat callback.
   ///

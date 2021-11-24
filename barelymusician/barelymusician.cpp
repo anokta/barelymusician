@@ -5,7 +5,6 @@
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/logging.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
@@ -74,9 +73,8 @@ BarelyMusician::BarelyMusician(int sample_rate)
 Id BarelyMusician::AddInstrument(InstrumentDefinition definition,
                                  InstrumentParamDefinitions param_definitions) {
   const Id instrument_id = id_generator_.Generate();
-  DCHECK(IsOk(instrument_manager_.Create(
-      instrument_id, transport_.GetTimestamp(), std::move(definition),
-      std::move(param_definitions))));
+  instrument_manager_.Add(instrument_id, transport_.GetTimestamp(),
+                          std::move(definition), std::move(param_definitions));
   return instrument_id;
 }
 
@@ -92,6 +90,25 @@ Status BarelyMusician::AddPerformerInstrument(Id performer_id,
     if (instrument_manager_.IsValid(instrument_id)) {
       return performer->AddInstrument(instrument_id);
     }
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<Id> BarelyMusician::AddPerformerNote(Id performer_id, double position,
+                                              Note note) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    const Id note_id = id_generator_.Generate();
+    performer->GetMutableSequence()->AddNote(note_id, position,
+                                             std::move(note));
+    return note_id;
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<double> BarelyMusician::GetPerformerBeginOffset(
+    Id performer_id) const {
+  if (const auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetSequence().GetBeginOffset();
   }
   return Status::kNotFound;
 }
@@ -112,11 +129,40 @@ StatusOr<std::optional<double>> BarelyMusician::GetPerformerEndPosition(
   return Status::kNotFound;
 }
 
+StatusOr<double> BarelyMusician::GetPerformerLoopBeginOffset(
+    Id performer_id) const {
+  if (const auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetSequence().GetLoopBeginOffset();
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<double> BarelyMusician::GetPerformerLoopLength(Id performer_id) const {
+  if (const auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetSequence().GetLoopLength();
+  }
+  return Status::kNotFound;
+}
+
 double BarelyMusician::GetPlaybackPosition() const {
   return transport_.GetPosition();
 }
 
 double BarelyMusician::GetPlaybackTempo() const { return playback_tempo_; }
+
+StatusOr<bool> BarelyMusician::IsPerformerEmpty(Id performer_id) const {
+  if (const auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetSequence().IsEmpty();
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<bool> BarelyMusician::IsPerformerLooping(Id performer_id) const {
+  if (const auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetSequence().IsLooping();
+  }
+  return Status::kNotFound;
+}
 
 bool BarelyMusician::IsPlaying() const { return transport_.IsPlaying(); }
 
@@ -139,9 +185,28 @@ Status BarelyMusician::RemoveAllPerformerInstruments(Id performer_id) {
   return Status::kNotFound;
 }
 
+Status BarelyMusician::RemoveAllPerformerNotes(Id performer_id) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->GetMutableSequence()->RemoveAllNotes();
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status BarelyMusician::RemoveAllPerformerNotes(Id performer_id,
+                                               double begin_position,
+                                               double end_position) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->GetMutableSequence()->RemoveAllNotes(begin_position,
+                                                    end_position);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
 Status BarelyMusician::RemoveInstrument(Id instrument_id) {
   const auto status =
-      instrument_manager_.Destroy(instrument_id, transport_.GetTimestamp());
+      instrument_manager_.Remove(instrument_id, transport_.GetTimestamp());
   if (IsOk(status)) {
     for (auto& [performer_id, performer] : performers_) {
       performer.RemoveInstrument(instrument_id);
@@ -182,6 +247,13 @@ Status BarelyMusician::RemovePerformerInstrument(Id performer_id,
   return Status::kNotFound;
 }
 
+Status BarelyMusician::RemovePerformerNote(Id performer_id, Id note_id) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    return performer->GetMutableSequence()->RemoveNote(note_id);
+  }
+  return Status::kNotFound;
+}
+
 void BarelyMusician::SetConductor(ConductorDefinition definition) {
   conductor_ = Conductor{std::move(definition)};
 }
@@ -205,11 +277,32 @@ Status BarelyMusician::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
                                        note_pitch, note_intensity);
 }
 
+Status BarelyMusician::SetInstrumentParam(Id instrument_id, int param_id,
+                                          float param_value) {
+  return instrument_manager_.SetParam(instrument_id, transport_.GetTimestamp(),
+                                      param_id, param_value);
+}
+
+Status BarelyMusician::SetInstrumentParamToDefault(Id instrument_id,
+                                                   int param_id) {
+  return instrument_manager_.SetParamToDefault(
+      instrument_id, transport_.GetTimestamp(), param_id);
+}
+
 void BarelyMusician::SetInstrumentNoteOnCallback(
     InstrumentNoteOnCallback instrument_note_on_callback) {
   instrument_note_on_callback_ = instrument_note_on_callback
                                      ? std::move(instrument_note_on_callback)
                                      : &NoopInstrumentNoteOnCallback;
+}
+
+Status BarelyMusician::SetPerformerBeginOffset(Id performer_id,
+                                               double begin_offset) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->GetMutableSequence()->SetBeginOffset(begin_offset);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 Status BarelyMusician::SetPerformerBeginPosition(
@@ -225,6 +318,32 @@ Status BarelyMusician::SetPerformerEndPosition(
     Id performer_id, std::optional<double> end_position) {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     performer->SetSequenceEndPosition(std::move(end_position));
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status BarelyMusician::SetPerformerLoopBeginOffset(Id performer_id,
+                                                   double loop_begin_offset) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->GetMutableSequence()->SetLoopBeginOffset(loop_begin_offset);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status BarelyMusician::SetPerformerLoopLength(Id performer_id,
+                                              double loop_length) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->GetMutableSequence()->SetLoopLength(loop_length);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status BarelyMusician::SetPerformerLooping(Id performer_id, bool looping) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->GetMutableSequence()->SetLooping(looping);
     return Status::kOk;
   }
   return Status::kNotFound;

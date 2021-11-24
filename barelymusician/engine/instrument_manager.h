@@ -47,23 +47,16 @@ class InstrumentManager {
   /// @param sample_rate Sampling rate in Hz.
   explicit InstrumentManager(int sample_rate);
 
-  /// Creates new instrument at timestamp.
+  /// Adds new instrument at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param definition Instrument definition.
   /// @param param_definitions Instrument parameter definitions.
   /// @return Status.
-  Status Create(Id instrument_id, double timestamp,
-                InstrumentDefinition definition,
-                InstrumentParamDefinitions param_definitions);
-
-  /// Destroys instrument at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
-  /// @return Status.
-  Status Destroy(Id instrument_id, double timestamp);
+  Status Add(Id instrument_id, double timestamp,
+             InstrumentDefinition definition,
+             InstrumentParamDefinitions param_definitions);
 
   /// Returns all active instrument notes.
   ///
@@ -113,6 +106,13 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param event Instrument event.
   void ProcessEvent(Id instrument_id, double timestamp, InstrumentEvent event);
+
+  /// Removes instrument at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status Remove(Id instrument_id, double timestamp);
 
   /// Sets all notes of all instruments off at timestamp.
   ///

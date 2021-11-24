@@ -40,9 +40,9 @@ InstrumentManager::InstrumentManager(int sample_rate)
       note_on_callback_(&NoopNoteOnCallback),
       sample_rate_(sample_rate) {}
 
-Status InstrumentManager::Create(Id instrument_id, double timestamp,
-                                 InstrumentDefinition definition,
-                                 InstrumentParamDefinitions param_definitions) {
+Status InstrumentManager::Add(Id instrument_id, double timestamp,
+                              InstrumentDefinition definition,
+                              InstrumentParamDefinitions param_definitions) {
   if (instrument_id == kInvalidId) return Status::kInvalidArgument;
   if (const auto [controller_it, success] = controllers_.emplace(
           instrument_id,
@@ -56,21 +56,6 @@ Status InstrumentManager::Create(Id instrument_id, double timestamp,
     return Status::kOk;
   }
   return Status::kAlreadyExists;
-}
-
-Status InstrumentManager::Destroy(Id instrument_id, double timestamp) {
-  if (const auto controller_it = controllers_.find(instrument_id);
-      controller_it != controllers_.end()) {
-    auto& update_events = update_events_[instrument_id];
-    for (const float pitch : controller_it->second.pitches) {
-      note_off_callback_(instrument_id, timestamp, pitch);
-      update_events.emplace(timestamp, SetNoteOffEvent{pitch});
-    }
-    update_events.emplace(timestamp, DestroyEvent{});
-    controllers_.erase(controller_it);
-    return Status::kOk;
-  }
-  return Status::kNotFound;
 }
 
 StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
@@ -222,6 +207,21 @@ void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
                               set_param_to_default_event.id);
           }},
       event);
+}
+
+Status InstrumentManager::Remove(Id instrument_id, double timestamp) {
+  if (const auto controller_it = controllers_.find(instrument_id);
+      controller_it != controllers_.end()) {
+    auto& update_events = update_events_[instrument_id];
+    for (const float pitch : controller_it->second.pitches) {
+      note_off_callback_(instrument_id, timestamp, pitch);
+      update_events.emplace(timestamp, SetNoteOffEvent{pitch});
+    }
+    update_events.emplace(timestamp, DestroyEvent{});
+    controllers_.erase(controller_it);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 void InstrumentManager::SetAllNotesOff(double timestamp) {

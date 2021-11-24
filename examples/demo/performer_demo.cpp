@@ -81,7 +81,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   InstrumentManager instrument_manager(kSampleRate);
 
-  instrument_manager.Create(
+  instrument_manager.Add(
       kInstrumentId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
@@ -90,7 +90,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {SynthInstrumentParam::kEnvelopeAttack, kAttack},
        {SynthInstrumentParam::kEnvelopeRelease, kRelease}});
 
-  instrument_manager.Create(
+  instrument_manager.Add(
       kMetronomeId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, 0.5f * kGain},

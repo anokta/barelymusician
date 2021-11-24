@@ -62,7 +62,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
   InstrumentManager instrument_manager(kSampleRate);
-  instrument_manager.Create(
+  instrument_manager.Add(
       kInstrumentId, 0.0, SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},

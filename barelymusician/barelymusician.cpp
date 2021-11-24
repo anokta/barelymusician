@@ -1,6 +1,7 @@
 #include "barelymusician/barelymusician.h"
 
 #include <algorithm>
+#include <any>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -270,6 +271,12 @@ void BarelyMusician::SetAllInstrumentParamsToDefault() {
 Status BarelyMusician::SetAllInstrumentParamsToDefault(Id instrument_id) {
   return instrument_manager_.SetAllParamsToDefault(instrument_id,
                                                    transport_.GetTimestamp());
+}
+
+Status BarelyMusician::SetCustomInstrumentData(Id instrument_id,
+                                               std::any custom_data) {
+  return instrument_manager_.SetCustomData(
+      instrument_id, transport_.GetTimestamp(), std::move(custom_data));
 }
 
 void BarelyMusician::SetConductor(ConductorDefinition definition) {

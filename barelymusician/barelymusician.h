@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
 #define BARELYMUSICIAN_BARELYMUSICIAN_H_
 
+#include <any>
 #include <functional>
 #include <optional>
 #include <unordered_map>
@@ -217,6 +218,13 @@ class BarelyMusician {
   ///
   /// @param definition Conductor definition.
   void SetConductor(ConductorDefinition definition);
+
+  /// Sets custom instrument data.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param custom_data Custom data.
+  /// @return Status.
+  Status SetCustomInstrumentData(Id instrument_id, std::any custom_data);
 
   /// Sets instrument note off.
   ///

@@ -195,6 +195,24 @@ class BarelyMusician {
   /// @return Status.
   Status RemovePerformerNote(Id performer_id, Id note_id);
 
+  /// Sets all notes of all instruments off.
+  void SetAllInstrumentNotesOff();
+
+  /// Sets all instrument notes off.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status SetAllInstrumentNotesOff(Id instrument_id);
+
+  /// Sets all parameters of all instruments to default.
+  void SetAllInstrumentParamsToDefault();
+
+  /// Sets all instrument parameters to default.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status SetAllInstrumentParamsToDefault(Id instrument_id);
+
   /// Sets conductor.
   ///
   /// @param definition Conductor definition.

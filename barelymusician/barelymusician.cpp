@@ -254,6 +254,24 @@ Status BarelyMusician::RemovePerformerNote(Id performer_id, Id note_id) {
   return Status::kNotFound;
 }
 
+void BarelyMusician::SetAllInstrumentNotesOff() {
+  instrument_manager_.SetAllNotesOff(transport_.GetTimestamp());
+}
+
+Status BarelyMusician::SetAllInstrumentNotesOff(Id instrument_id) {
+  return instrument_manager_.SetAllNotesOff(instrument_id,
+                                            transport_.GetTimestamp());
+}
+
+void BarelyMusician::SetAllInstrumentParamsToDefault() {
+  instrument_manager_.SetAllParamsToDefault(transport_.GetTimestamp());
+}
+
+Status BarelyMusician::SetAllInstrumentParamsToDefault(Id instrument_id) {
+  return instrument_manager_.SetAllParamsToDefault(instrument_id,
+                                                   transport_.GetTimestamp());
+}
+
 void BarelyMusician::SetConductor(ConductorDefinition definition) {
   conductor_ = Conductor{std::move(definition)};
 }

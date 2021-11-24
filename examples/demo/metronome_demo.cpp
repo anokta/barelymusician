@@ -4,7 +4,6 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/id.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "examples/common/audio_clock.h"
@@ -15,7 +14,6 @@
 namespace {
 
 using ::barelyapi::BarelyMusician;
-using ::barelyapi::Id;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioClock;
 using ::barelyapi::examples::AudioOutput;
@@ -56,7 +54,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   barelymusician.SetPlaybackTempo(kInitialTempo);
 
   // Create metronome instrument.
-  const Id metronome_id = barelymusician.AddInstrument(
+  const auto metronome_id = barelymusician.AddInstrument(
       SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
@@ -140,6 +138,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
+  barelymusician.StopPlayback();
   audio_output.Stop();
 
   return 0;

@@ -1,0 +1,17 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "barelymusician",
+    srcs = ["barelymusician.cpp"],
+    hdrs = ["barelymusician.h"],
+    defines = select({
+        "@platforms//os:windows": ["BARELYMUSICIAN_EXPORTS"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//barelymusician",
+        "//platforms/common:visibility",
+    ],
+)

@@ -1,6 +1,5 @@
 #include <cctype>
 #include <chrono>
-#include <memory>
 #include <thread>
 
 #include "barelymusician/barelymusician.h"

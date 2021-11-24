@@ -218,8 +218,6 @@ class BarelyMusician {
   /// @param definition Conductor definition.
   void SetConductor(ConductorDefinition definition);
 
-  // TODO(#49): Add the rest of the instrument setters.
-
   /// Sets instrument note off.
   ///
   /// @param instrument_id Instrument id.

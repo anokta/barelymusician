@@ -28,12 +28,12 @@ Status Sequence::AddNote(Id id, double position, Note note) {
   return Status::kAlreadyExists;
 }
 
-std::vector<Sequence::NoteWithPosition> Sequence::GetAllNotes() const {
-  std::vector<NoteWithPosition> notes;
+std::vector<Sequence::NoteWithPositionIdPair> Sequence::GetAllNotes() const {
+  std::vector<NoteWithPositionIdPair> notes;
   if (!notes_.empty()) {
     notes.reserve(notes_.size());
     for (const auto& [position_id_pair, note] : notes_) {
-      notes.emplace_back(position_id_pair.first, note);
+      notes.emplace_back(position_id_pair, note);
     }
   }
   return notes;

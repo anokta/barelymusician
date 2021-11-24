@@ -16,8 +16,14 @@ namespace barelyapi {
 /// Musical note sequence.
 class Sequence {
  public:
+  /// Note position-id pair type.
+  using NotePositionIdPair = std::pair<double, Id>;
+
   /// Note with position type.
   using NoteWithPosition = std::pair<double, Note>;
+
+  /// Note with position-id pair type.
+  using NoteWithPositionIdPair = std::pair<NotePositionIdPair, Note>;
 
   /// Process callback signature.
   ///
@@ -39,8 +45,8 @@ class Sequence {
 
   /// Returns all notes in the sequence.
   ///
-  /// @return List of notes with their positions.
-  std::vector<NoteWithPosition> GetAllNotes() const;
+  /// @return List of notes with their position-id pairs.
+  std::vector<NoteWithPositionIdPair> GetAllNotes() const;
 
   /// Returns the begin offset.
   ///
@@ -119,9 +125,6 @@ class Sequence {
   void SetLooping(bool is_looping);
 
  private:
-  // Note position-id pair type.
-  using NotePositionIdPair = std::pair<double, Id>;
-
   // Internal process helper function.
   void ProcessInternal(double begin_position, double end_position,
                        double position_offset,

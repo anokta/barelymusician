@@ -17,6 +17,9 @@ struct Note {
 
   /// Note duration.
   NoteDuration duration;
+
+  /// Default comparators.
+  auto operator<=>(const Note& other) const = default;
 };
 
 }  // namespace barelyapi

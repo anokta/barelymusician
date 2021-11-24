@@ -82,7 +82,6 @@ void Sequence::Process(double begin_position, double end_position,
       loop_end_position = std::min(loop_end_position, end_position);
       ProcessInternal(begin_position, loop_end_position, position_offset,
                       process_callback);
-      position_offset += loop_end_position - begin_position;
       begin_position = loop_end_position;
     }
     // Process the rest of the loop iterations.

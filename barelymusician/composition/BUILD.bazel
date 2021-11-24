@@ -64,3 +64,14 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "sequence_test",
+    srcs = ["sequence_test.cpp"],
+    deps = [
+        ":note",
+        ":sequence",
+        "//barelymusician/common:status",
+        "@googletest//:gtest_main",
+    ],
+)

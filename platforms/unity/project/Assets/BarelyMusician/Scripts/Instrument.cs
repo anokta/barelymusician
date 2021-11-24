@@ -13,6 +13,14 @@ namespace BarelyApi {
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
 
+    /// Note off event.
+    public delegate void NoteOffEvent(float pitch);
+    public event NoteOffEvent OnNoteOff;
+
+    /// Note on event.
+    public delegate void NoteOnEvent(float pitch, float intensity);
+    public event NoteOnEvent OnNoteOn;
+
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
     }
@@ -23,6 +31,8 @@ namespace BarelyApi {
 
     protected virtual void OnEnable() {
       if (Id == BarelyMusician.InvalidId) {
+        BarelyMusician.OnInstrumentNoteOff += OnInstrumentNoteOff;
+        BarelyMusician.OnInstrumentNoteOn += OnInstrumentNoteOn;
         Id = BarelyMusician.AddInstrument(this);
       }
       Source?.Play();
@@ -32,6 +42,8 @@ namespace BarelyApi {
       Source?.Stop();
       if (Id != BarelyMusician.InvalidId) {
         BarelyMusician.RemoveInstrument(this);
+        BarelyMusician.OnInstrumentNoteOff -= OnInstrumentNoteOff;
+        BarelyMusician.OnInstrumentNoteOn -= OnInstrumentNoteOn;
         Id = BarelyMusician.InvalidId;
       }
     }
@@ -82,6 +94,18 @@ namespace BarelyApi {
 
     private void OnAudioFilterRead(float[] data, int channels) {
       BarelyMusician.ProcessInstrument(this, data, channels);
+    }
+
+    private void OnInstrumentNoteOff(Instrument instrument, float notePitch) {
+      if (instrument == this) {
+        OnNoteOff?.Invoke(notePitch);
+      }
+    }
+
+    private void OnInstrumentNoteOn(Instrument instrument, float notePitch, float noteIntensity) {
+      if (instrument == this) {
+        OnNoteOn?.Invoke(notePitch, noteIntensity);
+      }
     }
   }
 }

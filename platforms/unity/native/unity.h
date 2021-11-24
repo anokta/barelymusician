@@ -1,17 +1,8 @@
 #ifndef PLATFORMS_UNITY_NATIVE_UNITY_H_
 #define PLATFORMS_UNITY_NATIVE_UNITY_H_
 
-#if defined(_WIN32) || defined(__CYGWIN__)
-#ifdef BARELYMUSICIAN_EXPORTS
-#define BARELY_EXPORT __declspec(dllexport)
-#else  // BARELYMUSICIAN_EXPORTS
-#define BARELY_EXPORT __declspec(dllimport)
-#endif  // BARELYMUSICIAN_EXPORTS
-#else   // defined(_WIN32) || defined(__CYGWIN__)
-#define BARELY_EXPORT
-#endif  // defined(_WIN32) || defined(__CYGWIN__)
-
 #include "barelymusician/common/id.h"
+#include "platforms/common/visibility.h"
 
 namespace barelyapi::unity {
 

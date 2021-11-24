@@ -49,6 +49,7 @@ cc_library(
         "//barelymusician/engine:instrument_definition",
         "//barelymusician/engine:instrument_manager",
         "//examples/instruments:synth_instrument",
+        "//platforms/common:visibility",
     ],
     alwayslink = True,
 )

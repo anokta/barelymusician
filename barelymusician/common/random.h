@@ -11,7 +11,8 @@ class Random {
   /// Constructs new |Random|.
   ///
   /// @param seed Seed value.
-  explicit Random(int seed = 0);
+  explicit Random(
+      int seed = static_cast<int>(std::default_random_engine::default_seed));
 
   /// Draws a number with normal distribution.
   ///

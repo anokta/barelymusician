@@ -1,7 +1,8 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_UTILS_H_
-#define BARELYMUSICIAN_COMPOSITION_NOTE_UTILS_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
+#define BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 
-#include <vector>
+#include <span>
+#include <variant>
 
 namespace barelyapi {
 
@@ -9,19 +10,18 @@ namespace barelyapi {
 inline constexpr float kNumSemitones = 12.0f;
 
 /// Semitone pitch intervals of an octave.
-inline constexpr float kPitchSemitones[static_cast<int>(kNumSemitones)] = {
-    0.0f,
-    1.0f / kNumSemitones,
-    2.0f / kNumSemitones,
-    3.0f / kNumSemitones,
-    4.0f / kNumSemitones,
-    5.0f / kNumSemitones,
-    6.0f / kNumSemitones,
-    7.0f / kNumSemitones,
-    8.0f / kNumSemitones,
-    9.0f / kNumSemitones,
-    10.0f / kNumSemitones,
-    11.0f / kNumSemitones};
+inline constexpr float kPitchSemitones[12] = {0.0f,
+                                              1.0f / kNumSemitones,
+                                              2.0f / kNumSemitones,
+                                              3.0f / kNumSemitones,
+                                              4.0f / kNumSemitones,
+                                              5.0f / kNumSemitones,
+                                              6.0f / kNumSemitones,
+                                              7.0f / kNumSemitones,
+                                              8.0f / kNumSemitones,
+                                              9.0f / kNumSemitones,
+                                              10.0f / kNumSemitones,
+                                              11.0f / kNumSemitones};
 
 /// Common musical scales.
 inline constexpr float kPitchMajorScale[7] = {
@@ -139,38 +139,16 @@ inline constexpr float kPitchSnare = kPitchD3;
 inline constexpr float kPitchHihatClosed = kPitchE3;
 inline constexpr float kPitchHihatOpen = kPitchF3;
 
-/// Common note values in relation to quarter note beat duration.
-inline constexpr int kNumQuarterNotesPerBeat = 1;
-inline constexpr int kNumEighthNotesPerBeat = 2;
-inline constexpr int kNumEighthTripletNotesPerBeat = 3;
-inline constexpr int kNumSixteenthNotesPerBeat = 4;
-inline constexpr int kNumSixteenthTripletNotesPerBeat = 6;
-inline constexpr int kNumThirtySecondNotesPerBeat = 8;
-inline constexpr int kNumThirtySecondTripletNotesPerBeat = 12;
+/// Note pitch type.
+using NotePitch = std::variant<float>;
 
-/// Returns note pitch for the given scale and scale index.
+/// Returns note pitch for a given scale and index.
 ///
 /// @param scale Cumulative scale intervals of an octave in increasing order.
-/// @param scale_index Scale index.
-/// @return Pitch.
-float GetPitch(const std::vector<float>& scale, int scale_index);
-
-/// Returns quantized position for the given number of beat steps.
-///
-/// @param step Quantized step.
-/// @param num_steps Number of steps per beat.
-/// @return Raw position.
-double GetPosition(int step, int num_steps);
-
-/// Returns quantized position.
-///
-/// @param position Original position.
-/// @param resolution Quantization resolution.
-/// @param amount Quantization amount.
-/// @return Quantized position.
-double QuantizePosition(double position, double resolution,
-                        double amount = 1.0);
+/// @param index Scale index.
+/// @return Note pitch.
+float GetPitch(std::span<const float> scale, int index);
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_UTILS_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_

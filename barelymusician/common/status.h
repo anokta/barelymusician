@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_COMMON_STATUS_H_
 #define BARELYMUSICIAN_COMMON_STATUS_H_
 
+#include <string>
 #include <utility>
 #include <variant>
 
@@ -78,6 +79,41 @@ bool IsOk(const StatusOr<ValueType>& status_or) {
 /// @param status Status.
 /// @return True if ok.
 inline bool IsOk(Status status) { return status == Status::kOk; }
+
+/// Returns status string.
+///
+/// @param status_or Value or error status.
+/// @return String.
+template <typename ValueType>
+std::string ToString(const StatusOr<ValueType>& status_or) {
+  return ToString(GetStatusOrStatus(status_or));
+}
+
+/// Returns status string.
+///
+/// @param status Status.
+/// @return String.
+inline std::string ToString(Status status) {
+  switch (status) {
+    case Status::kOk:
+      return "Ok";
+    case Status::kInvalidArgument:
+      return "Invalid argument error";
+    case Status::kNotFound:
+      return "Not found error";
+    case Status::kAlreadyExists:
+      return "Already exists error";
+    case Status::kFailedPrecondition:
+      return "Failed precondition error";
+    case Status::kUnimplemented:
+      return "Unimplemented error";
+    case Status::kInternal:
+      return "Internal error";
+    case Status::kUnknown:
+    default:
+      return "Unknown error";
+  }
+}
 
 }  // namespace barelyapi
 

@@ -1,22 +1,20 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <memory>
+#include <iterator>
 #include <optional>
 #include <thread>
 
-#include "barelymusician/common/id.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/logging.h"
-#include "barelymusician/composition/note_utils.h"
-#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/composition/note_pitch.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
 
-using ::barelyapi::Id;
-using ::barelyapi::InstrumentManager;
+using ::barelyapi::BarelyMusician;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::examples::AudioOutput;
 using ::barelyapi::examples::InputManager;
@@ -29,7 +27,6 @@ constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 256;
 
 // Instrument settings.
-constexpr Id kInstrumentId = 1;
 constexpr float kGain = 0.125f;
 constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
@@ -61,27 +58,28 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  InstrumentManager instrument_manager(kSampleRate);
-  instrument_manager.Create(
-      kInstrumentId, 0.0, SynthInstrument::GetDefinition(),
+  BarelyMusician barelymusician(kSampleRate);
+  const auto instrument_id = barelymusician.AddInstrument(
+      SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
        {SynthInstrumentParam::kOscillatorType,
         static_cast<float>(kOscillatorType)},
        {SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack},
        {SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease}});
-  instrument_manager.SetNoteOnCallback(
-      [](Id, double, float pitch, float intensity) {
+  barelymusician.SetInstrumentNoteOnCallback(
+      [](auto /*instrument_id*/, float pitch, float intensity) {
         LOG(INFO) << "NoteOn(" << pitch << ", " << intensity << ")";
       });
-  instrument_manager.SetNoteOffCallback([](Id, double, float pitch) {
-    LOG(INFO) << "NoteOff(" << pitch << ") ";
-  });
+  barelymusician.SetInstrumentNoteOffCallback(
+      [](auto /*instrument_id*/, float pitch) {
+        LOG(INFO) << "NoteOff(" << pitch << ") ";
+      });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {
-    instrument_manager.Process(kInstrumentId, 0.0, output, kNumChannels,
-                               kNumFrames);
+    barelymusician.ProcessInstrument(instrument_id, 0.0, output, kNumChannels,
+                                     kNumFrames);
   });
 
   // Key down callback.
@@ -97,7 +95,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      instrument_manager.SetAllNotesOff(kInstrumentId, 0.0);
+      barelymusician.SetAllInstrumentNotesOff(instrument_id);
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -111,8 +109,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetNoteOn(kInstrumentId, 0.0, offset_octaves + *pitch,
-                                   kNoteIntensity);
+      barelymusician.SetInstrumentNoteOn(instrument_id, offset_octaves + *pitch,
+                                         kNoteIntensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -121,8 +119,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument_manager.SetNoteOff(kInstrumentId, 0.0,
-                                    offset_octaves + *pitch);
+      barelymusician.SetInstrumentNoteOff(instrument_id,
+                                          offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);
@@ -133,7 +131,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    instrument_manager.Update();
+    barelymusician.Update(0.0);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

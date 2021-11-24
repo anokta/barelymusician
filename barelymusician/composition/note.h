@@ -1,21 +1,25 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_NOTE_H_
 #define BARELYMUSICIAN_COMPOSITION_NOTE_H_
 
+#include "barelymusician/composition/note_duration.h"
+#include "barelymusician/composition/note_intensity.h"
+#include "barelymusician/composition/note_pitch.h"
+
 namespace barelyapi {
 
 /// Musical note.
 struct Note {
-  /// Note begin position in beats.
-  double begin_position;
-
-  /// Note end position in beats.
-  double end_position;
-
   /// Note pitch.
-  float pitch;
+  NotePitch pitch;
 
   /// Note intensity.
-  float intensity;
+  NoteIntensity intensity;
+
+  /// Note duration.
+  NoteDuration duration;
+
+  /// Default comparators.
+  auto operator<=>(const Note& other) const = default;
 };
 
 }  // namespace barelyapi

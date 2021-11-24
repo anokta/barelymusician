@@ -1,28 +1,9 @@
-#include "barelymusician/composition/note_utils.h"
-
-#include <iterator>
-#include <vector>
+#include "barelymusician/composition/note_duration.h"
 
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
-
-// Tests that expected note pitches are returned given an arbitrary scale.
-TEST(NoteUtilsTest, GetPitch) {
-  const int kOctaveRange = 2;
-  const std::vector<float> kScale(std::cbegin(kPitchMajorScale),
-                                  std::cend(kPitchMajorScale));
-
-  const int scale_length = static_cast<int>(kScale.size());
-  for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
-    for (int i = 0; i < scale_length; ++i) {
-      const int scale_index = octave * scale_length + i;
-      const float expected_pitch = static_cast<float>(octave) + kScale[i];
-      EXPECT_FLOAT_EQ(GetPitch(kScale, scale_index), expected_pitch);
-    }
-  }
-}
 
 class PositionTest : public testing::TestWithParam<int> {};
 
@@ -51,7 +32,7 @@ TEST_P(PositionTest, QuantizePosition) {
   EXPECT_DOUBLE_EQ(QuantizePosition(1.0 - kPosition, resolution), 0.0);
 }
 
-INSTANTIATE_TEST_SUITE_P(NoteUtilsTest, PositionTest,
+INSTANTIATE_TEST_SUITE_P(NoteDurationTest, PositionTest,
                          testing::Values(kNumQuarterNotesPerBeat,
                                          kNumEighthNotesPerBeat,
                                          kNumEighthTripletNotesPerBeat,

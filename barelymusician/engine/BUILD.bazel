@@ -3,6 +3,30 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "conductor",
+    srcs = ["conductor.cpp"],
+    hdrs = ["conductor.h"],
+    deps = [
+        ":conductor_definition",
+        "//barelymusician/common:status",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_intensity",
+        "//barelymusician/composition:note_pitch",
+    ],
+)
+
+cc_library(
+    name = "conductor_definition",
+    hdrs = ["conductor_definition.h"],
+    deps = [
+        "//barelymusician/common:status",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_intensity",
+        "//barelymusician/composition:note_pitch",
+    ],
+)
+
+cc_library(
     name = "instrument",
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],
@@ -20,7 +44,6 @@ cc_library(
     name = "instrument_event",
     hdrs = ["instrument_event.h"],
     deps = [
-        ":instrument_definition",
         "//barelymusician/common:id",
     ],
 )
@@ -35,6 +58,7 @@ cc_library(
         ":instrument_event",
         ":instrument_param",
         ":instrument_param_definition",
+        ":instrument_processor_event",
         ":task_runner",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
@@ -59,16 +83,27 @@ cc_library(
 )
 
 cc_library(
-    name = "sequencer",
-    srcs = ["sequencer.cpp"],
-    hdrs = ["sequencer.h"],
+    name = "instrument_processor_event",
+    hdrs = ["instrument_processor_event.h"],
     deps = [
+        ":instrument_definition",
         ":instrument_event",
-        ":instrument_manager",
-        ":transport",
+    ],
+)
+
+cc_library(
+    name = "performer",
+    srcs = ["performer.cpp"],
+    hdrs = ["performer.h"],
+    deps = [
+        ":conductor",
+        ":instrument_event",
         "//barelymusician/common:id",
-        "//barelymusician/common:visitor",
+        "//barelymusician/common:logging",
+        "//barelymusician/common:status",
         "//barelymusician/composition:note",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:sequence",
     ],
 )
 
@@ -85,6 +120,17 @@ cc_library(
     name = "transport",
     srcs = ["transport.cpp"],
     hdrs = ["transport.h"],
+)
+
+cc_test(
+    name = "conductor_test",
+    srcs = ["conductor_test.cpp"],
+    deps = [
+        ":conductor",
+        ":conductor_definition",
+        "//barelymusician/common:status",
+        "@googletest//:gtest_main",
+    ],
 )
 
 cc_test(
@@ -117,6 +163,20 @@ cc_test(
     deps = [
         ":instrument",
         ":instrument_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "performer_test",
+    srcs = ["performer_test.cpp"],
+    deps = [
+        ":conductor",
+        ":instrument_event",
+        ":performer",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
+        "//barelymusician/composition:note",
         "@googletest//:gtest_main",
     ],
 )

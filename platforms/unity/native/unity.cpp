@@ -59,7 +59,7 @@ Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician,
                                double timestamp) {
   if (barelymusician) {
     const Id instrument_id = barelymusician->id_generator.Generate();
-    if (IsOk(barelymusician->instrument_manager.Create(
+    if (IsOk(barelymusician->instrument_manager.Add(
             instrument_id, timestamp, SynthInstrument::GetDefinition(),
             SynthInstrument::GetDefaultParams()))) {
       return instrument_id;
@@ -72,7 +72,7 @@ bool BarelyDestroyInstrument(BarelyMusician* barelymusician, Id instrument_id,
                              double timestamp) {
   if (barelymusician) {
     return IsOk(
-        barelymusician->instrument_manager.Destroy(instrument_id, timestamp));
+        barelymusician->instrument_manager.Remove(instrument_id, timestamp));
   }
   return false;
 }

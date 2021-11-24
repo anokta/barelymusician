@@ -13,14 +13,14 @@ extern "C" {
 typedef struct BarelyMusician* BarelyHandle;
 
 /// Id type.
-typedef uint64_t BarelyId;
+typedef int64_t BarelyId;
 enum BarelyIdConstants {
   /// Invalid id.
   kBarelyInvalidId = -1,
 };
 
 /// Status type.
-typedef uint32_t BarelyStatus;
+typedef int32_t BarelyStatus;
 enum BarelyStatusConstants {
   /// Success.
   kBarelyOk = 0,
@@ -40,17 +40,11 @@ enum BarelyStatusConstants {
   kBarelyUnknown = 7,
 };
 
-/// Playback beat callback signature.
-///
-/// @param position Beat position in beats.
-typedef void (*BarelyPlaybackBeatCallback)(double position);
-
-/// Playback update callback signature.
-///
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
-                                             double end_position);
+// TODO: Temporary shortcut until |InstrumentDefinition| is ported.
+enum BarelyInstrumentTypes {
+  /// Synth instrument.
+  kBarelySynthInstrument = 1,
+};
 
 /// Instrument note off callback signature.
 ///
@@ -68,6 +62,41 @@ typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
                                                float note_pitch,
                                                float note_intensity);
 
+/// Playback beat callback signature.
+///
+/// @param position Beat position in beats.
+typedef void (*BarelyPlaybackBeatCallback)(double position);
+
+/// Playback update callback signature.
+///
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
+                                             double end_position);
+
+/// Adds new instrument.
+///
+/// @param handle BarelyMusician handle.
+/// @return Instrument id.
+BARELY_EXPORT BarelyId BarelyAddInstrument(BarelyHandle handle,
+                                           int32_t instrument_type);
+
+/// Adds new performer.
+///
+/// @param handle BarelyMusician handle.
+/// @return Performer id.
+BARELY_EXPORT BarelyId BarelyAddPerformer(BarelyHandle handle);
+
+/// Adds performer instrument.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param instrument_id Instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyAddPerformerInstrument(BarelyHandle handle,
+                                                        BarelyId performer_id,
+                                                        BarelyId instrument_id);
+
 /// Creates new BarelyMusician.
 ///
 /// @param sample_rate Sampling rate in Hz.
@@ -80,6 +109,83 @@ BARELY_EXPORT BarelyHandle BarelyCreate(int32_t sample_rate);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroy(BarelyHandle handle);
 
+/// Returns whether the playback is currently active or not.
+///
+/// @param handle BarelyMusician handle.
+/// @return True if playing, false otherwise.
+BARELY_EXPORT bool BarelyIsPlaying(BarelyHandle handle);
+
+/// Processes the next instrument output buffer at timestamp.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @param timestamp Timestamp in seconds.
+/// @param output Pointer to the output buffer.
+/// @param num_channels Number of output channels.
+/// @param num_frames Number of output frames.
+BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
+    BarelyHandle handle, BarelyId instrument_id, double timestamp,
+    float* output, int32_t num_channels, int32_t num_frames);
+
+/// Removes all performerinstruments.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyRemoveAllPerformerInstruments(BarelyHandle handle, BarelyId performer_id);
+
+/// Removes instrument.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyRemoveInstrument(BarelyHandle handle,
+                                                  BarelyId instrument_id);
+
+/// Removes performer.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyRemovePerformer(BarelyHandle handle,
+                                                 BarelyId performer_id);
+
+/// Removes performer instrument.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param instrument_id Instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyRemovePerformerInstrument(
+    BarelyHandle handle, BarelyId performer_id, BarelyId instrument_id);
+
+/// Sets all instrument notes off.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySetAllInstrumentNotesOff(BarelyHandle handle, BarelyId instrument_id);
+
+/// Sets all instrument parameters to default.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetAllInstrumentParamsToDefault(
+    BarelyHandle handle, BarelyId instrument_id);
+
+/// Sets instrument note off.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @param note_pitch Note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOff(BarelyHandle handle,
+                                                      BarelyId instrument_id,
+                                                      float note_pitch);
+
 /// Sets the instrument note off callback.
 ///
 /// @param handle BarelyMusician handle.
@@ -89,6 +195,18 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
     BarelyHandle handle,
     BarelyInstrumentNoteOffCallback instrument_note_off_callback);
 
+/// Sets instrument note on.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @param note_pitch Note pitch.
+/// @param note_intensity Note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOn(BarelyHandle handle,
+                                                     BarelyId instrument_id,
+                                                     float note_pitch,
+                                                     float note_intensity);
+
 /// Sets the instrument note on callback.
 ///
 /// @param handle BarelyMusician handle.
@@ -97,6 +215,27 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
 BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
     BarelyHandle handle,
     BarelyInstrumentNoteOnCallback instrument_note_on_callback);
+
+/// Sets instrument parameter.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @param param_id Parameter id.
+/// @param param_value Parameter value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyHandle handle,
+                                                    BarelyId instrument_id,
+                                                    int32_t param_id,
+                                                    float param_value);
+
+/// Sets instrument parameter to default.
+///
+/// @param handle BarelyMusician handle.
+/// @param instrument_id Instrument id.
+/// @param param_id Parameter id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
+    BarelyHandle handle, BarelyId instrument_id, int32_t param_id);
 
 /// Sets the playback beat callback.
 ///
@@ -129,6 +268,14 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackTempo(BarelyHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackUpdateCallback(
     BarelyHandle handle, BarelyPlaybackUpdateCallback playback_update_callback);
+
+/// Sets the sample rate.
+///
+/// @param handle BarelyMusician handle.
+/// @param sample_rate Sampling rate in Hz.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetSampleRate(BarelyHandle handle,
+                                               int32_t sample_rate);
 
 /// Starts the playback.
 ///

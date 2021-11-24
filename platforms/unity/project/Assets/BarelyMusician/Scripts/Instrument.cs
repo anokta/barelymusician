@@ -7,10 +7,10 @@ namespace BarelyApi {
   // Instrument.
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
-    // Instrument id.
+    /// Instrument id.
     public Int64 Id { get; private set; } = BarelyMusician.InvalidId;
 
-    // Audio source.
+    /// Audio source.
     public AudioSource Source { get; private set; } = null;
 
     protected virtual void Awake() {
@@ -23,7 +23,7 @@ namespace BarelyApi {
 
     protected virtual void OnEnable() {
       if (Id == BarelyMusician.InvalidId) {
-        Id = BarelyMusician.Create(this);
+        Id = BarelyMusician.AddInstrument(this);
       }
       Source?.Play();
     }
@@ -31,53 +31,57 @@ namespace BarelyApi {
     protected virtual void OnDisable() {
       Source?.Stop();
       if (Id != BarelyMusician.InvalidId) {
-        BarelyMusician.Destroy(this);
+        BarelyMusician.RemoveInstrument(this);
         Id = BarelyMusician.InvalidId;
       }
     }
 
-    // Schedules note off.
-    public bool ScheduleNoteOff(double dspTime, float pitch) {
-      return BarelyMusician.ScheduleNoteOff(this, dspTime, pitch);
-    }
-
-    // Schedules note on.
-    public bool ScheduleNoteOn(double dspTime, float pitch, float intensity) {
-      return BarelyMusician.ScheduleNoteOn(this, dspTime, pitch, intensity);
-    }
-
-    // Stops all notes.
+    /// Stops all notes.
     public bool SetAllNotesOff() {
-      return BarelyMusician.SetAllNotesOff(this);
+      return BarelyMusician.SetAllInstrumentNotesOff(this);
     }
 
-    // Stops all notes.
+    /// Sets all parameters to default.
     public bool SetAllParamsToDefault() {
-      return BarelyMusician.SetAllParamsToDefault(this);
+      return BarelyMusician.SetAllInstrumentParamsToDefault(this);
     }
 
-    // Stops playing note with the given |pitch|.
+    /// Stops playing note.
+    ///
+    /// @param pitch Note pitch.
+    /// @return True if success, false otherwise.
     public bool SetNoteOff(float pitch) {
-      return BarelyMusician.SetNoteOff(this, pitch);
+      return BarelyMusician.SetInstrumentNoteOff(this, pitch);
     }
 
-    // Starts playing note with the given |pitch| and |intensity|.
+    /// Starts playing note.
+    ///
+    /// @param pitch Note pitch.
+    /// @param intensity Note intensity.
+    /// @return True if success, false otherwise.
     public bool SetNoteOn(float pitch, float intensity) {
-      return BarelyMusician.SetNoteOn(this, pitch, intensity);
+      return BarelyMusician.SetInstrumentNoteOn(this, pitch, intensity);
     }
 
-    // Sets parameter with the given |id| and |value|.
+    /// Sets parameter value.
+    ///
+    /// @param id Parameter id.
+    /// @param value Parameter value.
+    /// @return True if success, false otherwise.
     public bool SetParam(int id, float value) {
-      return BarelyMusician.SetParam(this, id, value);
+      return BarelyMusician.SetInstrumentParam(this, id, value);
     }
 
-    // Sets parameter to default value.
+    /// Sets parameter to default value.
+    ///
+    /// @param id Parameter id.
+    /// @return True if success, false otherwise.
     public bool SetParamToDefault(int id) {
-      return BarelyMusician.SetParamToDefault(this, id);
+      return BarelyMusician.SetInstrumentParamToDefault(this, id);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.Process(this, data, channels);
+      BarelyMusician.ProcessInstrument(this, data, channels);
     }
   }
 }

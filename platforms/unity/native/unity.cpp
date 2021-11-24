@@ -1,209 +1,42 @@
 #include "platforms/unity/native/unity.h"
 
-#include <algorithm>
+#include <cstdint>
 #include <memory>
-#include <mutex>
-#include <utility>
 
-#include "barelymusician/common/id.h"
-#include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/logging.h"
-#include "barelymusician/common/status.h"
-#include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/instrument_manager.h"
-#include "examples/instruments/synth_instrument.h"
+#include "platforms/capi/barelymusician.h"
 #include "platforms/unity/native/unity_log_writer.h"
 
-namespace barelyapi::unity {
+namespace {
 
-using ::barelyapi::examples::SynthInstrument;
+// Unity log writer.
+std::unique_ptr<barelyapi::unity::UnityLogWriter> writer;
 
-// Unity plugin.
-struct BarelyMusician {
-  BarelyMusician(int sample_rate) : instrument_manager(sample_rate) {}
+}  // namespace
 
-  // Engine.
-  IdGenerator id_generator;
-  InstrumentManager instrument_manager;
+BarelyId BarelyAddSynthInstrument(BarelyHandle handle) {
+  return BarelyAddInstrument(handle, kBarelySynthInstrument);
+}
 
-  // Unity log writer.
-  UnityLogWriter writer;
-};
-
-BarelyMusician* BarelyInitialize(int sample_rate,
-                                 DebugCallback* debug_callback_ptr) {
-  BarelyMusician* barelymusician = new BarelyMusician(sample_rate);
-
+BarelyHandle BarelyCreateUnity(std::int32_t sample_rate,
+                               DebugCallback debug_callback_ptr) {
   if (debug_callback_ptr) {
     const auto debug_callback = [debug_callback_ptr](int severity,
                                                      const char* message) {
       debug_callback_ptr(severity, message);
     };
-    barelymusician->writer.SetDebugCallback(debug_callback);
-  } else {
-    barelymusician->writer.SetDebugCallback(nullptr);
+    writer = std::make_unique<barelyapi::unity::UnityLogWriter>();
+    writer->SetDebugCallback(debug_callback);
+    barelyapi::logging::SetLogWriter(writer.get());
   }
-  logging::SetLogWriter(&barelymusician->writer);
-
-  return barelymusician;
+  return BarelyCreate(sample_rate);
 }
 
-void BarelyShutdown(BarelyMusician* barelymusician) {
-  if (barelymusician) {
-    logging::SetLogWriter(nullptr);
-    delete barelymusician;
+BarelyStatus BarelyDestroyUnity(BarelyHandle handle) {
+  const BarelyStatus status = BarelyDestroy(handle);
+  if (status == kBarelyOk) {
+    barelyapi::logging::SetLogWriter(nullptr);
+    writer.reset();
   }
+  return status;
 }
-
-Id BarelyCreateSynthInstrument(BarelyMusician* barelymusician,
-                               double timestamp) {
-  if (barelymusician) {
-    const Id instrument_id = barelymusician->id_generator.Generate();
-    if (IsOk(barelymusician->instrument_manager.Add(
-            instrument_id, timestamp, SynthInstrument::GetDefinition(),
-            SynthInstrument::GetDefaultParams()))) {
-      return instrument_id;
-    }
-  }
-  return kInvalidId;
-}
-
-bool BarelyDestroyInstrument(BarelyMusician* barelymusician, Id instrument_id,
-                             double timestamp) {
-  if (barelymusician) {
-    return IsOk(
-        barelymusician->instrument_manager.Remove(instrument_id, timestamp));
-  }
-  return false;
-}
-
-float BarelyGetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
-                               int param_id) {
-  if (barelymusician) {
-    return GetStatusOrValue(barelymusician->instrument_manager.GetParam(
-                                instrument_id, param_id))
-        .GetValue();
-  }
-  return 0.0f;
-}
-
-bool BarelyIsInstrumentNoteOn(BarelyMusician* barelymusician, Id instrument_id,
-                              float note_pitch) {
-  if (barelymusician) {
-    return GetStatusOrValue(
-        barelymusician->instrument_manager.IsNoteOn(instrument_id, note_pitch));
-  }
-  return false;
-}
-
-void BarelyProcessInstrument(BarelyMusician* barelymusician, Id instrument_id,
-                             double timestamp, float* output, int num_channels,
-                             int num_frames) {
-  if (barelymusician) {
-    barelymusician->instrument_manager.Process(instrument_id, timestamp, output,
-                                               num_channels, num_frames);
-  }
-}
-
-bool BarelySetAllInstrumentNotesOff(BarelyMusician* barelymusician,
-                                    Id instrument_id, double timestamp) {
-  if (barelymusician) {
-    return IsOk(barelymusician->instrument_manager.SetAllNotesOff(instrument_id,
-                                                                  timestamp));
-  }
-  return false;
-}
-
-bool BarelySetAllInstrumentParamsToDefault(BarelyMusician* barelymusician,
-                                           Id instrument_id, double timestamp) {
-  if (barelymusician) {
-    return IsOk(barelymusician->instrument_manager.SetAllParamsToDefault(
-        instrument_id, timestamp));
-  }
-  return false;
-}
-
-bool BarelySetInstrumentNoteOff(BarelyMusician* barelymusician,
-                                Id instrument_id, double timestamp,
-                                float note_pitch) {
-  if (barelymusician) {
-    return IsOk(barelymusician->instrument_manager.SetNoteOff(
-        instrument_id, timestamp, note_pitch));
-  }
-  return false;
-}
-
-void BarelySetInstrumentNoteOffCallback(
-    BarelyMusician* barelymusician, NoteOffCallback* note_off_callback_ptr) {
-  if (barelymusician) {
-    if (note_off_callback_ptr) {
-      barelymusician->instrument_manager.SetNoteOffCallback(
-          [note_off_callback_ptr](Id instrument_id, double /*timestamp*/,
-                                  float note_pitch) {
-            note_off_callback_ptr(instrument_id, note_pitch);
-          });
-    } else {
-      barelymusician->instrument_manager.SetNoteOffCallback(nullptr);
-    }
-  }
-}
-
-bool BarelySetInstrumentNoteOn(BarelyMusician* barelymusician, Id instrument_id,
-                               double timestamp, float note_pitch,
-                               float note_intensity) {
-  if (barelymusician) {
-    return IsOk(barelymusician->instrument_manager.SetNoteOn(
-        instrument_id, timestamp, note_pitch, note_intensity));
-  }
-  return false;
-}
-
-void BarelySetInstrumentNoteOnCallback(BarelyMusician* barelymusician,
-                                       NoteOnCallback* note_on_callback_ptr) {
-  if (barelymusician) {
-    if (note_on_callback_ptr) {
-      barelymusician->instrument_manager.SetNoteOnCallback(
-          [note_on_callback_ptr](Id instrument_id, double /*timestamp*/,
-                                 float note_pitch, float note_intensity) {
-            note_on_callback_ptr(instrument_id, note_pitch, note_intensity);
-          });
-    } else {
-      barelymusician->instrument_manager.SetNoteOnCallback(nullptr);
-    }
-  }
-}
-
-bool BarelySetInstrumentParam(BarelyMusician* barelymusician, Id instrument_id,
-                              double timestamp, int param_id,
-                              float param_value) {
-  if (barelymusician) {
-    return IsOk(barelymusician->instrument_manager.SetParam(
-        instrument_id, timestamp, param_id, param_value));
-  }
-  return false;
-}
-
-bool BarelySetInstrumentParamToDefault(BarelyMusician* barelymusician,
-                                       Id instrument_id, double timestamp,
-                                       int param_id) {
-  if (barelymusician) {
-    return IsOk(barelymusician->instrument_manager.SetParamToDefault(
-        instrument_id, timestamp, param_id));
-  }
-  return false;
-}
-
-void BarelySetSampleRate(BarelyMusician* barelymusician, double timestamp,
-                         int sample_rate) {
-  if (barelymusician) {
-    barelymusician->instrument_manager.SetSampleRate(timestamp, sample_rate);
-  }
-}
-
-void BarelyUpdate(BarelyMusician* barelymusician, double /*timestamp*/) {
-  if (barelymusician) {
-    barelymusician->instrument_manager.Update();
-  }
-}
-
-}  // namespace barelyapi::unity

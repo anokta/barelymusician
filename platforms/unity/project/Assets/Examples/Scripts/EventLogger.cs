@@ -5,20 +5,20 @@ using BarelyApi;
 
 public class EventLogger : MonoBehaviour {
   private void OnEnable() {
-    BarelyMusician.OnNoteOff += OnNoteOff;
-    BarelyMusician.OnNoteOn += OnNoteOn;
+    BarelyMusician.OnInstrumentNoteOff += OnNoteOff;
+    BarelyMusician.OnInstrumentNoteOn += OnNoteOn;
   }
 
   private void OnDisable() {
-    BarelyMusician.OnNoteOff -= OnNoteOff;
-    BarelyMusician.OnNoteOn -= OnNoteOn;
+    BarelyMusician.OnInstrumentNoteOff -= OnNoteOff;
+    BarelyMusician.OnInstrumentNoteOn -= OnNoteOn;
   }
 
-  private void OnNoteOff(Instrument instrument, float pitch) {
-    Debug.Log(instrument.name + ": NoteOff(" + pitch + ")");
+  private void OnNoteOff(Instrument instrument, float note_pitch) {
+    Debug.Log(instrument.name + ": NoteOff(" + note_pitch + ")");
   }
 
-  private void OnNoteOn(Instrument instrument, float pitch, float intensity) {
-    Debug.Log(instrument.name + ": NoteOn(" + pitch + ", " + intensity + ")");
+  private void OnNoteOn(Instrument instrument, float note_pitch, float note_intensity) {
+    Debug.Log(instrument.name + ": NoteOn(" + note_pitch + ", " + note_intensity + ")");
   }
 }

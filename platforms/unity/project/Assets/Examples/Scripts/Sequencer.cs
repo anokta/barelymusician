@@ -53,8 +53,8 @@ public class Sequencer : MonoBehaviour {
       if (note.position >= startPosition && note.position < startPosition + 1.0) {
         double position = note.position + noteOffset;
         float pitch = (float)(note.note + rootNote - 69) / 12.0f;
-        instrument.ScheduleNoteOn(clock.GetTimestamp(position), pitch, note.intensity);
-        instrument.ScheduleNoteOff(clock.GetTimestamp(position + note.duration), pitch);
+        // instrument.ScheduleNoteOn(clock.GetTimestamp(position), pitch, note.intensity);
+        // instrument.ScheduleNoteOff(clock.GetTimestamp(position + note.duration), pitch);
       }
     }
   }

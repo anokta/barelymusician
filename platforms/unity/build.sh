@@ -9,7 +9,7 @@
 readonly WORKSPACE="$(bazel info workspace)"
 readonly BAZEL_BIN="${WORKSPACE}/bazel-bin"
 
-readonly NATIVE_BIN_DIR="${BAZEL_BIN}/unity/native"
+readonly NATIVE_BIN_DIR="${BAZEL_BIN}/platforms/unity/native"
 
 readonly PLUGINS_DIR="${WORKSPACE}/platforms/unity/project/Assets/BarelyMusician/Plugins"
 readonly PLUGINS_X64_DIR="${PLUGINS_DIR}/x86_64"

@@ -11,13 +11,13 @@ public class Sparkler : MonoBehaviour {
   private Color targetColor = Color.white;
 
   private void OnEnable() {
-    BarelyMusician.OnNoteOff += OnNoteOff;
-    BarelyMusician.OnNoteOn += OnNoteOn;
+    BarelyMusician.OnInstrumentNoteOff += OnNoteOff;
+    BarelyMusician.OnInstrumentNoteOn += OnNoteOn;
   }
 
   private void OnDisable() {
-    BarelyMusician.OnNoteOff -= OnNoteOff;
-    BarelyMusician.OnNoteOn -= OnNoteOn;
+    BarelyMusician.OnInstrumentNoteOff -= OnNoteOff;
+    BarelyMusician.OnInstrumentNoteOn -= OnNoteOn;
   }
 
   private void Start() {
@@ -29,13 +29,13 @@ public class Sparkler : MonoBehaviour {
         Color.Lerp(transform.GetComponent<Renderer>().material.color, targetColor, 32 * Time.deltaTime);
   }
 
-  private void OnNoteOff(Instrument instrument, float pitch) {
+  private void OnNoteOff(Instrument instrument, float note_pitch) {
     if (instrument != targetInstrument) return;
     targetColor = noteOffColor;
   }
 
-  private void OnNoteOn(Instrument instrument, float pitch, float intensity) {
+  private void OnNoteOn(Instrument instrument, float note_pitch, float note_intensity) {
     if (instrument != targetInstrument) return;
-    targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, intensity, intensity);
+    targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, note_intensity, note_intensity);
   }
 }

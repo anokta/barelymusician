@@ -394,6 +394,13 @@ void BarelyMusician::SetPlaybackUpdateCallback(
                                   : &NoopPlaybackUpdateCallback;
 }
 
+void BarelyMusician::SetSampleRate(int sample_rate) {
+  for (auto& [performer_id, performer] : performers_) {
+    performer.ClearAllActiveNotes();
+  }
+  instrument_manager_.SetSampleRate(transport_.GetTimestamp(), sample_rate);
+}
+
 void BarelyMusician::StartPlayback() { transport_.Start(); }
 
 void BarelyMusician::StopPlayback() {

@@ -334,6 +334,11 @@ class BarelyMusician {
   void SetPlaybackUpdateCallback(
       PlaybackUpdateCallback playback_update_callback);
 
+  /// Sets the sample rate.
+  ///
+  /// @param sample_rate Sampling rate in Hz.
+  void SetSampleRate(int sample_rate);
+
   /// Starts the playback.
   void StartPlayback();
 

@@ -1,8 +1,9 @@
 # bazel build artifacts.
 bazel-*
 
-# visual studio code.
-.vscode*
-
 # osx.
 .DS_Store
+
+# visual studio code.
+.vscode/*
+!.vscode/settings.json

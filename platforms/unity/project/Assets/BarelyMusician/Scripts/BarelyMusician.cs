@@ -43,6 +43,20 @@ namespace BarelyApi {
       return id;
     }
 
+    /// Returns the playback position.
+    ///
+    /// @return Playback position in beats.
+    public static double GetPlaybackPosition() {
+      return GetPlaybackPositionNative(Handle);
+    }
+
+    /// Returns the playback tempo.
+    ///
+    /// @return Playback tempo.
+    public static double GetPlaybackTempo() {
+      return GetPlaybackTempoNative(Handle);
+    }
+
     /// Returns whether the playback is currently active or not.
     ///
     /// @return True if playing, false otherwise.
@@ -286,6 +300,12 @@ namespace BarelyApi {
 
     [DllImport(pluginName, EntryPoint = "BarelyAddSynthInstrument")]
     private static extern Int64 AddSynthInstrumentNative(IntPtr handle);
+
+    [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackPosition")]
+    private static extern double GetPlaybackPositionNative(IntPtr handle);
+
+    [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackTempo")]
+    private static extern double GetPlaybackTempoNative(IntPtr handle);
 
     [DllImport(pluginName, EntryPoint = "BarelyIsPlaying")]
     private static extern bool IsPlayingNative(IntPtr handle);

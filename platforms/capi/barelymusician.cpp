@@ -85,6 +85,20 @@ BarelyStatus BarelyDestroy(BarelyHandle handle) {
   return kBarelyNotFound;
 }
 
+double BarelyGetPlaybackPosition(BarelyHandle handle) {
+  if (handle) {
+    return handle->instance.GetPlaybackPosition();
+  }
+  return 0.0;
+}
+
+double BarelyGetPlaybackTempo(BarelyHandle handle) {
+  if (handle) {
+    return handle->instance.GetPlaybackTempo();
+  }
+  return 0.0;
+}
+
 bool BarelyIsPlaying(BarelyHandle handle) {
   if (handle) {
     return handle->instance.IsPlaying();

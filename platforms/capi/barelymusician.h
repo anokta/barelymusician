@@ -109,6 +109,16 @@ BARELY_EXPORT BarelyHandle BarelyCreate(int32_t sample_rate);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroy(BarelyHandle handle);
 
+/// Returns the playback position.
+///
+/// @return Position in beats.
+BARELY_EXPORT double BarelyGetPlaybackPosition(BarelyHandle handle);
+
+/// Returns the playback tempo.
+///
+/// @return Tempo in BPM.
+BARELY_EXPORT double BarelyGetPlaybackTempo(BarelyHandle handle);
+
 /// Returns whether the playback is currently active or not.
 ///
 /// @param handle BarelyMusician handle.

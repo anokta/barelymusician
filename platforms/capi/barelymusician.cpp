@@ -52,7 +52,7 @@ BarelyId BarelyAddInstrument(BarelyHandle handle,
     if (instrument_type == kBarelySynthInstrument) {
       return handle->instance.AddInstrument(
           barelyapi::examples::SynthInstrument::GetDefinition(),
-          barelyapi::examples::SynthInstrument::GetDefaultParams());
+          barelyapi::examples::SynthInstrument::GetParamDefinitions());
     }
   }
   return kBarelyInvalidId;

@@ -43,7 +43,7 @@ enum BarelyStatusConstants {
 // TODO(#85): Add |BarelyConductorDefinition|.
 
 // TODO(#85): Add |BarelyInstrumentDefinition|.
-// TODO(#85): Add |BarelyInstrumentParamDefinitions|.
+// TODO(#85): Add |BarelyParamDefinitions|.
 // TODO(#85): Temporary shortcut until |InstrumentDefinition| is ported.
 enum BarelyInstrumentTypes {
   /// Synth instrument.

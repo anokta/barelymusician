@@ -11,7 +11,7 @@
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/param_definition.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
@@ -72,7 +72,7 @@ BarelyMusician::BarelyMusician(int sample_rate)
 }
 
 Id BarelyMusician::AddInstrument(InstrumentDefinition definition,
-                                 InstrumentParamDefinitions param_definitions) {
+                                 ParamDefinitions param_definitions) {
   const Id instrument_id = id_generator_.Generate();
   instrument_manager_.Add(instrument_id, transport_.GetTimestamp(),
                           std::move(definition), std::move(param_definitions));

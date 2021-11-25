@@ -14,8 +14,8 @@
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/instrument_param.h"
-#include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/param.h"
+#include "barelymusician/engine/param_definition.h"
 
 namespace barelyapi {
 
@@ -42,7 +42,7 @@ InstrumentManager::InstrumentManager(int sample_rate)
 
 Status InstrumentManager::Add(Id instrument_id, double timestamp,
                               InstrumentDefinition definition,
-                              InstrumentParamDefinitions param_definitions) {
+                              ParamDefinitions param_definitions) {
   if (instrument_id == kInvalidId) return Status::kInvalidArgument;
   if (const auto [controller_it, success] = controllers_.emplace(
           instrument_id,
@@ -67,10 +67,10 @@ StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
   return Status::kNotFound;
 }
 
-StatusOr<std::vector<InstrumentParam>> InstrumentManager::GetAllParams(
+StatusOr<std::vector<Param>> InstrumentManager::GetAllParams(
     Id instrument_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    std::vector<InstrumentParam> params;
+    std::vector<Param> params;
     params.reserve(controller->params.size());
     for (const auto& [id, param] : controller->params) {
       params.push_back(param);
@@ -80,8 +80,8 @@ StatusOr<std::vector<InstrumentParam>> InstrumentManager::GetAllParams(
   return Status::kNotFound;
 }
 
-StatusOr<InstrumentParam> InstrumentManager::GetParam(Id instrument_id,
-                                                      int param_id) const {
+StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
+                                            int param_id) const {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (const auto* param = FindOrNull(controller->params, param_id)) {
       return *param;
@@ -389,13 +389,11 @@ void InstrumentManager::Update() {
 }
 
 InstrumentManager::InstrumentController::InstrumentController(
-    InstrumentDefinition definition,
-    InstrumentParamDefinitions param_definitions)
+    InstrumentDefinition definition, ParamDefinitions param_definitions)
     : definition(std::move(definition)) {
   params.reserve(param_definitions.size());
   for (auto& param_definition : param_definitions) {
-    params.emplace(param_definition.id,
-                   InstrumentParam(std::move(param_definition)));
+    params.emplace(param_definition.id, Param(std::move(param_definition)));
   }
 }
 

@@ -56,9 +56,9 @@ cc_library(
         ":instrument",
         ":instrument_definition",
         ":instrument_event",
-        ":instrument_param",
-        ":instrument_param_definition",
         ":instrument_processor_event",
+        ":param",
+        ":param_definition",
         ":task_runner",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
@@ -69,26 +69,26 @@ cc_library(
 )
 
 cc_library(
-    name = "instrument_param",
-    srcs = ["instrument_param.cpp"],
-    hdrs = ["instrument_param.h"],
-    deps = [
-        "instrument_param_definition",
-    ],
-)
-
-cc_library(
-    name = "instrument_param_definition",
-    hdrs = ["instrument_param_definition.h"],
-)
-
-cc_library(
     name = "instrument_processor_event",
     hdrs = ["instrument_processor_event.h"],
     deps = [
         ":instrument_definition",
         ":instrument_event",
     ],
+)
+
+cc_library(
+    name = "param",
+    srcs = ["param.cpp"],
+    hdrs = ["param.h"],
+    deps = [
+        "param_definition",
+    ],
+)
+
+cc_library(
+    name = "param_definition",
+    hdrs = ["param_definition.h"],
 )
 
 cc_library(
@@ -139,20 +139,10 @@ cc_test(
     deps = [
         ":instrument_definition",
         ":instrument_manager",
-        ":instrument_param",
-        ":instrument_param_definition",
+        ":param",
+        ":param_definition",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "instrument_param_test",
-    srcs = ["instrument_param_test.cpp"],
-    deps = [
-        ":instrument_param",
-        ":instrument_param_definition",
         "@googletest//:gtest_main",
     ],
 )
@@ -163,6 +153,16 @@ cc_test(
     deps = [
         ":instrument",
         ":instrument_definition",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "param_test",
+    srcs = ["param_test.cpp"],
+    deps = [
+        ":param",
+        ":param_definition",
         "@googletest//:gtest_main",
     ],
 )

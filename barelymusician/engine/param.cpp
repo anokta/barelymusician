@@ -1,28 +1,25 @@
-#include "barelymusician/engine/instrument_param.h"
+#include "barelymusician/engine/param.h"
 
 #include <algorithm>
 #include <utility>
 
-#include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/param_definition.h"
 
 namespace barelyapi {
 
-InstrumentParam::InstrumentParam(InstrumentParamDefinition definition)
-    : definition_(std::move(definition)) {
+Param::Param(ParamDefinition definition) : definition_(std::move(definition)) {
   // Make sure that the default value is within the minimum and maximum values.
   SetValue(definition_.default_value);
   definition_.default_value = value_;
 }
 
-const InstrumentParamDefinition& InstrumentParam::GetDefinition() const {
-  return definition_;
-}
+const ParamDefinition& Param::GetDefinition() const { return definition_; }
 
-int InstrumentParam::GetId() const { return definition_.id; }
+int Param::GetId() const { return definition_.id; }
 
-float InstrumentParam::GetValue() const { return value_; }
+float Param::GetValue() const { return value_; }
 
-bool InstrumentParam::ResetValue() {
+bool Param::ResetValue() {
   if (value_ != definition_.default_value) {
     value_ = definition_.default_value;
     return true;
@@ -30,7 +27,7 @@ bool InstrumentParam::ResetValue() {
   return false;
 }
 
-bool InstrumentParam::SetValue(float value) {
+bool Param::SetValue(float value) {
   if (definition_.max_value.has_value()) {
     value = std::min(value, *definition_.max_value);
   }

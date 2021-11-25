@@ -4,7 +4,7 @@
 
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/param_definition.h"
 #include "examples/instruments/enveloped_voice.h"
 
 namespace barelyapi::examples {
@@ -68,7 +68,7 @@ InstrumentDefinition SynthInstrument::GetDefinition() {
       [](int sample_rate) { return SynthInstrument(sample_rate); });
 }
 
-std::vector<InstrumentParamDefinition> SynthInstrument::GetDefaultParams() {
+ParamDefinitions SynthInstrument::GetParamDefinitions() {
   return {
       {static_cast<int>(SynthInstrumentParam::kGain), 0.25f, 0.0f, 1.0f},
       {static_cast<int>(SynthInstrumentParam::kEnvelopeAttack), 0.05f, 0.0f},

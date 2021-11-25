@@ -1,20 +1,22 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_PARAM_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_PARAM_H_
+#ifndef BARELYMUSICIAN_ENGINE_PARAM_H_
+#define BARELYMUSICIAN_ENGINE_PARAM_H_
 
-#include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/param_definition.h"
 
 namespace barelyapi {
 
-/// Class that wraps an instrument parameter.
-class InstrumentParam {
+/// Class that wraps a parameter.
+class Param {
  public:
-  /// Constructs new |InstrumentParam|.
-  explicit InstrumentParam(InstrumentParamDefinition definition);
+  /// Constructs new |Param|.
+  ///
+  /// @param definition Parameter definition.
+  explicit Param(ParamDefinition definition);
 
   /// Returns definition.
   ///
   /// @return Parameter definition.
-  const InstrumentParamDefinition& GetDefinition() const;
+  const ParamDefinition& GetDefinition() const;
 
   /// Returns id.
   ///
@@ -39,7 +41,7 @@ class InstrumentParam {
 
  private:
   // Parameter definition.
-  InstrumentParamDefinition definition_;
+  ParamDefinition definition_;
 
   // Parameter value.
   float value_;
@@ -47,4 +49,4 @@ class InstrumentParam {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_PARAM_H_
+#endif  // BARELYMUSICIAN_ENGINE_PARAM_H_

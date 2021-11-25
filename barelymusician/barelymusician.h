@@ -13,7 +13,7 @@
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_manager.h"
-#include "barelymusician/engine/instrument_param_definition.h"
+#include "barelymusician/engine/param_definition.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
@@ -58,7 +58,7 @@ class BarelyMusician {
   /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
   Id AddInstrument(InstrumentDefinition definition,
-                   InstrumentParamDefinitions param_definitions);
+                   ParamDefinitions param_definitions);
 
   /// Adds new performer.
   ///

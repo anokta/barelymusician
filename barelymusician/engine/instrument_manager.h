@@ -14,9 +14,9 @@
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/instrument_param.h"
-#include "barelymusician/engine/instrument_param_definition.h"
 #include "barelymusician/engine/instrument_processor_event.h"
+#include "barelymusician/engine/param.h"
+#include "barelymusician/engine/param_definition.h"
 #include "barelymusician/engine/task_runner.h"
 
 namespace barelyapi {
@@ -56,7 +56,7 @@ class InstrumentManager {
   /// @return Status.
   Status Add(Id instrument_id, double timestamp,
              InstrumentDefinition definition,
-             InstrumentParamDefinitions param_definitions);
+             ParamDefinitions param_definitions);
 
   /// Returns all active instrument notes.
   ///
@@ -68,14 +68,14 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @return List of parameters or error status.
-  StatusOr<std::vector<InstrumentParam>> GetAllParams(Id instrument_id) const;
+  StatusOr<std::vector<Param>> GetAllParams(Id instrument_id) const;
 
   /// Returns instrument parameter.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
   /// @return Instrument parameter or error status.
-  StatusOr<InstrumentParam> GetParam(Id instrument_id, int param_id) const;
+  StatusOr<Param> GetParam(Id instrument_id, int param_id) const;
 
   /// Returns whether instrument note is active or not.
   ///
@@ -207,13 +207,13 @@ class InstrumentManager {
   struct InstrumentController {
     // Constructs new |InstrumentController|.
     InstrumentController(InstrumentDefinition definition,
-                         InstrumentParamDefinitions param_definitions);
+                         ParamDefinitions param_definitions);
 
     // Instrument definition.
     InstrumentDefinition definition;
 
     // List of instrument parameters.
-    std::unordered_map<int, InstrumentParam> params;
+    std::unordered_map<int, Param> params;
 
     // List of active note pitches.
     std::unordered_set<float> pitches;

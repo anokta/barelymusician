@@ -359,50 +359,6 @@ LightingSettings:
   m_PVRFilteringAtrousPositionSigmaDirect: 0.5
   m_PVRFilteringAtrousPositionSigmaIndirect: 2
   m_PVRFilteringAtrousPositionSigmaAO: 1
---- !u!1 &1188861874
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1188861876}
-  - component: {fileID: 1188861875}
-  m_Layer: 0
-  m_Name: Clock
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1188861875
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1188861874}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e52e9f83f11de7643aeec317ef74d3b7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tempo: 120
---- !u!4 &1188861876
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1188861874}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1298915918
 GameObject:
   m_ObjectHideFlags: 0
@@ -416,7 +372,7 @@ GameObject:
   - component: {fileID: 1298915919}
   - component: {fileID: 1298915922}
   m_Layer: 0
-  m_Name: Sequencer 1
+  m_Name: Performer 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -549,7 +505,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1298915922
 MonoBehaviour:
@@ -560,51 +516,62 @@ MonoBehaviour:
   m_GameObject: {fileID: 1298915918}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 997cde229134afd438f66a0c6237c2ce, type: 3}
+  m_Script: {fileID: 11500000, guid: b8478c34e94f0ff449fc5bff3c8e1fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  instrument: {fileID: 1298915919}
-  rootNote: 48
-  start: 0
-  length: 4
-  loop: 1
-  notes:
+  BeginOffset: 0
+  IsLooping: 1
+  LoopBeginOffset: 0
+  LoopLength: 4
+  Instruments:
+  - {fileID: 1298915919}
+  RootNote: 48
+  Notes:
   - position: 0
-    duration: 0.5
-    note: 0
-    intensity: 0.75
+    note:
+      Pitch: 0
+      Intensity: 0.75
+      Duration: 0.5
   - position: 1
-    duration: 0.5
-    note: 6
-    intensity: 1
+    note:
+      Pitch: 6
+      Intensity: 1
+      Duration: 0.5
   - position: 2
-    duration: 0.5
-    note: 12
-    intensity: 0.75
+    note:
+      Pitch: 12
+      Intensity: 0.75
+      Duration: 0.5
   - position: 0.5
-    duration: 0.25
-    note: 3
-    intensity: 0.5
+    note:
+      Pitch: 3
+      Intensity: 0.5
+      Duration: 0.25
   - position: 1.5
-    duration: 0.25
-    note: 9
-    intensity: 0.5
+    note:
+      Pitch: 9
+      Intensity: 0.5
+      Duration: 0.25
   - position: 2.33
-    duration: 0.33
-    note: 15
-    intensity: 0.5
+    note:
+      Pitch: 15
+      Intensity: 0.5
+      Duration: 0.33
   - position: 2.66
-    duration: 0.33
-    note: 21
-    intensity: 0.66
+    note:
+      Pitch: 21
+      Intensity: 0.66
+      Duration: 0.33
   - position: 3.5
-    duration: 0.25
-    note: 30
-    intensity: 0.75
+    note:
+      Pitch: 30
+      Intensity: 0.75
+      Duration: 0.25
   - position: 3.75
-    duration: 0.25
-    note: 24
-    intensity: 0.5
+    note:
+      Pitch: 24
+      Intensity: 0.5
+      Duration: 0.25
 --- !u!1 &1714525511
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,48 +583,14 @@ GameObject:
   - component: {fileID: 1714525515}
   - component: {fileID: 1714525514}
   - component: {fileID: 1714525513}
-  - component: {fileID: 1714525512}
+  - component: {fileID: 1714525516}
   m_Layer: 0
-  m_Name: Sequencer 2
+  m_Name: Performer 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1714525512
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1714525511}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 997cde229134afd438f66a0c6237c2ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  instrument: {fileID: 1714525513}
-  rootNote: 60
-  start: 0
-  length: 4
-  loop: 1
-  notes:
-  - position: 0
-    duration: 0.5
-    note: 0
-    intensity: 0.75
-  - position: 1
-    duration: 0.5
-    note: 6
-    intensity: 0.75
-  - position: 2
-    duration: 0.5
-    note: 3
-    intensity: 0.75
-  - position: 3
-    duration: 0.5
-    note: 12
-    intensity: 1
 --- !u!114 &1714525513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -785,8 +718,48 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1714525516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1714525511}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8478c34e94f0ff449fc5bff3c8e1fe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BeginOffset: 0
+  IsLooping: 1
+  LoopBeginOffset: 0
+  LoopLength: 4
+  Instruments:
+  - {fileID: 1714525513}
+  RootNote: 60
+  Notes:
+  - position: 0
+    note:
+      Pitch: 0
+      Intensity: 0.75
+      Duration: 0.5
+  - position: 1
+    note:
+      Pitch: 6
+      Intensity: 0.75
+      Duration: 0.5
+  - position: 2
+    note:
+      Pitch: 3
+      Intensity: 0.75
+      Duration: 0.5
+  - position: 3
+    note:
+      Pitch: 12
+      Intensity: 1
+      Duration: 0.5
 --- !u!1 &1737834378
 GameObject:
   m_ObjectHideFlags: 0
@@ -800,7 +773,7 @@ GameObject:
   - component: {fileID: 1737834380}
   - component: {fileID: 1737834379}
   m_Layer: 0
-  m_Name: SynthInstrument - Controller
+  m_Name: InstrumentController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1030,8 +1003,9 @@ MonoBehaviour:
   numBeats: 4
   barPitch: 1
   beatPitch: 0
-  intensity: 1
+  intensity: 0.25
   logToConsole: 1
+  tick: 1
 --- !u!4 &2098958021
 Transform:
   m_ObjectHideFlags: 0
@@ -1044,7 +1018,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2098958022
 MonoBehaviour:
@@ -1058,13 +1032,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gain: 0.25
+  gain: 0.2
   attack: 0
   decay: 0
   sustain: 1
   release: 0.05
   oscillatorType: 2
-  numVoices: 4
+  numVoices: 1
 --- !u!82 &2098958023
 AudioSource:
   m_ObjectHideFlags: 0

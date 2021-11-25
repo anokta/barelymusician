@@ -24,6 +24,8 @@ public class Metronome : MonoBehaviour {
 
   public bool logToConsole = true;
 
+  public bool tick = true;
+
   void OnEnable() {
     BarelyMusician.OnPlaybackBeat += OnPlaybackBeat;
   }
@@ -56,7 +58,7 @@ public class Metronome : MonoBehaviour {
     int bar = (int)(position) / numBeats;
     int beat = (int)(position) % numBeats;
     float pitch = (beat == 0.0) ? barPitch : beatPitch;
-    if (instrument) {
+    if (tick && instrument) {
       instrument.SetNoteOn(pitch, intensity);
       instrument.SetNoteOff(pitch);
     }

@@ -5,11 +5,11 @@
   "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp.default.includePath": [
     ".",
-    "bazel-barelymusician-sdk/external/dr_libs",
-    "bazel-barelymusician-sdk/external/googletest/googlemock/include",
-    "bazel-barelymusician-sdk/external/googletest/googletest/include",
-    "bazel-barelymusician-sdk/external/portaudio/include",
-    "bazel-barelymusician-sdk/external/bazel_tools"
+    "bazel-barelymusician/external/dr_libs",
+    "bazel-barelymusician/external/googletest/googlemock/include",
+    "bazel-barelymusician/external/googletest/googletest/include",
+    "bazel-barelymusician/external/portaudio/include",
+    "bazel-barelymusician/external/bazel_tools"
   ],
   "editor.insertSpaces": true,
   "editor.tabSize": 2,

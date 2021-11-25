@@ -1,11 +1,10 @@
 #ifndef BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
 #define BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_
 
+#include <cassert>
 #include <functional>
 #include <utility>
 #include <vector>
-
-#include "barelymusician/common/logging.h"
 
 namespace barely {
 
@@ -82,7 +81,7 @@ float PolyphonicVoice<VoiceType>::Next(int channel) {
 
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Resize(int num_voices) {
-  DCHECK_GE(num_voices, 0);
+  assert(num_voices >= 0);
   voices_.resize(num_voices, base_voice_);
   voice_states_.resize(num_voices, {0.0f, 0});
 }

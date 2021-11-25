@@ -231,7 +231,6 @@ namespace BarelyApi {
         Info = 0,
         Warning = 1,
         Error = 2,
-        Fatal = 3,
       }
 
       // Debug callback.
@@ -263,9 +262,6 @@ namespace BarelyApi {
               break;
             case LogSeverity.Error:
               Debug.LogError(message);
-              break;
-            case LogSeverity.Fatal:
-              Debug.LogAssertion(message);
               break;
           }
         };

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <any>
+#include <cassert>
 #include <cctype>
 #include <chrono>
 #include <memory>
@@ -170,7 +171,7 @@ void ComposeDrums(int bar, int beat, int num_beats, Random* random,
 int main(int /*argc*/, char* argv[]) {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
-  CHECK(runfiles);
+  assert(runfiles);
 
   AudioOutput audio_output;
   InputManager input_manager;
@@ -264,7 +265,7 @@ int main(int /*argc*/, char* argv[]) {
   for (const auto& [index, name] : drumkit_map) {
     auto it = drumkit_files.emplace(index, WavFile{});
     const std::string path = runfiles->Rlocation(kDrumsBaseFilename + name);
-    CHECK(it.first->second.Load(path)) << path;
+    assert(it.first->second.Load(path));
   }
   musician.SetCustomInstrumentData(instrument_ids.back(),
                                    std::any(&drumkit_files));

@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
 #define BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
 
+#include <cassert>
 #include <iterator>
 #include <unordered_map>
 #include <vector>
@@ -49,7 +50,7 @@ class ContextFreeGrammar {
 template <typename SymbolType>
 ContextFreeGrammar<SymbolType>::ContextFreeGrammar(Random* random)
     : random_(random) {
-  DCHECK(random);
+  assert(random);
 }
 
 template <typename SymbolType>

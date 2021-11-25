@@ -1,9 +1,9 @@
 
 #include "examples/common/audio_output.h"
 
+#include <cassert>
 #include <utility>
 
-#include "barelymusician/common/logging.h"
 #include "portaudio.h"
 
 namespace barely::examples {
@@ -15,9 +15,9 @@ AudioOutput::AudioOutput() : process_callback_(nullptr), stream_(nullptr) {
 AudioOutput::~AudioOutput() { Pa_Terminate(); }
 
 void AudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
-  DCHECK_GE(sample_rate, 0);
-  DCHECK_GE(num_channels, 0);
-  DCHECK_GE(num_frames, 0);
+  assert(sample_rate >= 0);
+  assert(num_channels >= 0);
+  assert(num_frames >= 0);
 
   if (stream_) {
     // Stop the existing |stream_| first.
@@ -26,7 +26,7 @@ void AudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
 
   PaStreamParameters output_parameters;
   output_parameters.device = Pa_GetDefaultOutputDevice();
-  DCHECK_NE(output_parameters.device, paNoDevice);
+  assert(output_parameters.device != paNoDevice);
   output_parameters.channelCount = num_channels;
   output_parameters.sampleFormat = paFloat32;
   output_parameters.suggestedLatency =

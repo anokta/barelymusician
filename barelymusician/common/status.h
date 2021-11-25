@@ -1,11 +1,10 @@
 #ifndef BARELYMUSICIAN_COMMON_STATUS_H_
 #define BARELYMUSICIAN_COMMON_STATUS_H_
 
+#include <cassert>
 #include <string>
 #include <utility>
 #include <variant>
-
-#include "barelymusician/common/logging.h"
 
 namespace barely {
 
@@ -31,7 +30,7 @@ using StatusOr = std::variant<Status, ValueType>;
 /// @return Error status.
 template <typename ValueType>
 Status GetStatusOrStatus(const StatusOr<ValueType>& status_or) {
-  DCHECK(std::holds_alternative<Status>(status_or));
+  assert(std::holds_alternative<Status>(status_or));
   return std::get<Status>(status_or);
 }
 
@@ -41,7 +40,7 @@ Status GetStatusOrStatus(const StatusOr<ValueType>& status_or) {
 /// @return Value.
 template <typename ValueType>
 ValueType& GetStatusOrValue(StatusOr<ValueType>& status_or) {
-  DCHECK(std::holds_alternative<ValueType>(status_or));
+  assert(std::holds_alternative<ValueType>(status_or));
   return std::get<ValueType>(status_or);
 }
 
@@ -51,7 +50,7 @@ ValueType& GetStatusOrValue(StatusOr<ValueType>& status_or) {
 /// @return Value.
 template <typename ValueType>
 const ValueType& GetStatusOrValue(const StatusOr<ValueType>& status_or) {
-  DCHECK(std::holds_alternative<ValueType>(status_or));
+  assert(std::holds_alternative<ValueType>(status_or));
   return std::get<ValueType>(status_or);
 }
 
@@ -61,7 +60,7 @@ const ValueType& GetStatusOrValue(const StatusOr<ValueType>& status_or) {
 /// @return Value.
 template <typename ValueType>
 ValueType&& GetStatusOrValue(StatusOr<ValueType>&& status_or) {
-  DCHECK(std::holds_alternative<ValueType>(status_or));
+  assert(std::holds_alternative<ValueType>(status_or));
   return std::move(std::get<ValueType>(status_or));
 }
 

@@ -1,6 +1,6 @@
 #include "barelymusician/dsp/envelope.h"
 
-#include "barelymusician/common/logging.h"
+#include <cassert>
 
 namespace barely {
 
@@ -14,7 +14,7 @@ Envelope::Envelope(int sample_rate)
       output_(0.0f),
       release_output_(0.0f),
       phase_(0.0f) {
-  DCHECK_GT(sample_rate, 0);
+  assert(sample_rate > 0);
 }
 
 float Envelope::Next() {
@@ -75,7 +75,7 @@ void Envelope::Reset() { state_ = State::kIdle; }
 bool Envelope::IsActive() const { return state_ != State::kIdle; }
 
 void Envelope::SetAttack(float attack) {
-  DCHECK_GE(attack, 0.0f);
+  assert(attack >= 0.0f);
   attack_increment_ = (attack > 0.0f) ? sample_interval_ / attack : 0.0f;
   if (attack_increment_ > 1.0f) {
     attack_increment_ = 0.0f;
@@ -83,7 +83,7 @@ void Envelope::SetAttack(float attack) {
 }
 
 void Envelope::SetDecay(float decay) {
-  DCHECK_GE(decay, 0.0f);
+  assert(decay >= 0.0f);
   decay_increment_ = (decay > 0.0f) ? sample_interval_ / decay : 0.0f;
   if (decay_increment_ > 1.0f) {
     decay_increment_ = 0.0f;
@@ -91,7 +91,7 @@ void Envelope::SetDecay(float decay) {
 }
 
 void Envelope::SetRelease(float release) {
-  DCHECK_GE(release, 0.0f);
+  assert(release >= 0.0f);
   release_increment_ = (release > 0.0f) ? sample_interval_ / release : 0.0f;
   if (release_increment_ > 1.0f) {
     release_increment_ = 0.0f;
@@ -99,8 +99,7 @@ void Envelope::SetRelease(float release) {
 }
 
 void Envelope::SetSustain(float sustain) {
-  DCHECK_GE(sustain, 0.0f);
-  DCHECK_LE(sustain, 1.0f);
+  assert(sustain >= 0.0f && sustain <= 1.0f);
   sustain_ = sustain;
 }
 

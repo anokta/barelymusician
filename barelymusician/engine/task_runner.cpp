@@ -1,6 +1,7 @@
 #include "barelymusician/engine/task_runner.h"
 
 #include <atomic>
+#include <cassert>
 #include <utility>
 
 #include "barelymusician/common/logging.h"
@@ -8,7 +9,7 @@
 namespace barely {
 
 TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
-  DCHECK_GT(max_size, 0);
+  assert(max_size > 0);
   for (int i = 0; i < max_size - 1; ++i) {
     nodes_[i].next = &nodes_[i + 1];
   }

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <memory>
 #include <thread>
@@ -89,15 +90,15 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
 int main(int /*argc*/, char* argv[]) {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
-  CHECK(runfiles);
+  assert(runfiles);
 
   AudioOutput audio_output;
   InputManager input_manager;
 
   MidiFile midi_file;
   const std::string midi_file_path = runfiles->Rlocation(kMidiFileName);
-  CHECK(midi_file.read(midi_file_path)) << "Failed to read " << kMidiFileName;
-  CHECK(midi_file.isAbsoluteTicks()) << "Events should be in absolute ticks";
+  assert(midi_file.read(midi_file_path));
+  assert(midi_file.isAbsoluteTicks());
   midi_file.linkNotePairs();
 
   const int num_tracks = midi_file.getTrackCount();

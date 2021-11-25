@@ -7,21 +7,7 @@
 
 /// Logging macros.
 #define LOG(severity) BARELY_LOG(severity)
-#define CHECK(expression) BARELY_CHECK(expression)
-#define CHECK_EQ(lhs, rhs) BARELY_CHECK_OP(==, lhs, rhs)
-#define CHECK_GE(lhs, rhs) BARELY_CHECK_OP(>=, lhs, rhs)
-#define CHECK_GT(lhs, rhs) BARELY_CHECK_OP(>, lhs, rhs)
-#define CHECK_LE(lhs, rhs) BARELY_CHECK_OP(<=, lhs, rhs)
-#define CHECK_LT(lhs, rhs) BARELY_CHECK_OP(<, lhs, rhs)
-#define CHECK_NE(lhs, rhs) BARELY_CHECK_OP(!=, lhs, rhs)
 #define DLOG(severity) BARELY_DLOG(severity)
-#define DCHECK(expression) BARELY_DCHECK(expression)
-#define DCHECK_EQ(lhs, rhs) BARELY_DCHECK_OP(==, lhs, rhs)
-#define DCHECK_GE(lhs, rhs) BARELY_DCHECK_OP(>=, lhs, rhs)
-#define DCHECK_GT(lhs, rhs) BARELY_DCHECK_OP(>, lhs, rhs)
-#define DCHECK_LE(lhs, rhs) BARELY_DCHECK_OP(<=, lhs, rhs)
-#define DCHECK_LT(lhs, rhs) BARELY_DCHECK_OP(<, lhs, rhs)
-#define DCHECK_NE(lhs, rhs) BARELY_DCHECK_OP(!=, lhs, rhs)
 
 namespace barely::logging {
 
@@ -30,7 +16,6 @@ enum class LogSeverity {
   INFO = 0,
   WARNING = 1,
   ERROR = 2,
-  FATAL = 3,
 };
 
 /// Logging class that wraps assertion and log stream for debugging.
@@ -103,22 +88,10 @@ void SetLogWriter(LogWriter* log_writer);
       .GetStream()
 #define BARELY_NULL_LOG ::barely::logging::GetNullStream()
 
-#define BARELY_CHECK(expression)                                       \
-  (!(expression)                                                       \
-       ? BARELY_LOG(FATAL) << "Check failed: '" << #expression << "' " \
-       : BARELY_NULL_LOG)
-
-#define BARELY_CHECK_OP(op, lhs, rhs) \
-  BARELY_CHECK(lhs op rhs) << "(" << lhs << " " << #op << " " << rhs << ") "
-
 #if !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 #define BARELY_DLOG(severity) BARELY_LOG(severity)
-#define BARELY_DCHECK(expression) BARELY_CHECK(expression)
-#define BARELY_DCHECK_OP(op, lhs, rhs) BARELY_CHECK_OP(op, lhs, rhs)
 #else  // !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 #define BARELY_DLOG(severity) BARELY_NULL_LOG
-#define BARELY_DCHECK(expression) BARELY_NULL_LOG
-#define BARELY_DCHECK_OP(op, lhs, rhs) BARELY_NULL_LOG
 #endif  // !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 
 #endif  // BARELYMUSICIAN_COMMON_LOGGING_H_

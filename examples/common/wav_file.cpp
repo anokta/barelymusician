@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "barelymusician/common/logging.h"
-
 #define DR_WAV_IMPLEMENTATION
 #include "dr_wav.h"
 
@@ -26,7 +24,6 @@ bool WavFile::Load(const std::string& file_path) {
       file_path.c_str(), &wav_num_channels, &wav_sample_rate, &wav_num_frames,
       nullptr);
   if (!wav_data) {
-    LOG(ERROR) << "Failed to read WAV file: " << file_path;
     return false;
   }
 

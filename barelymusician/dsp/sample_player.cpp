@@ -1,8 +1,7 @@
 #include "barelymusician/dsp/sample_player.h"
 
+#include <cassert>
 #include <cmath>
-
-#include "barelymusician/common/logging.h"
 
 namespace barely {
 
@@ -15,7 +14,7 @@ SamplePlayer::SamplePlayer(int sample_rate)
       speed_(1.0f),
       cursor_(0.0f),
       increment_(0.0f) {
-  DCHECK_GT(sample_rate, 0);
+  assert(sample_rate > 0);
 }
 
 float SamplePlayer::Next() {
@@ -37,8 +36,8 @@ float SamplePlayer::Next() {
 void SamplePlayer::Reset() { cursor_ = 0.0f; }
 
 void SamplePlayer::SetData(const float* data, int frequency, int length) {
-  DCHECK_GE(frequency, 0.0f);
-  DCHECK_GE(length, 0);
+  assert(frequency >= 0);
+  assert(length >= 0);
   data_ = data;
   frequency_ = static_cast<float>(frequency);
   length_ = static_cast<float>(length);
@@ -48,7 +47,7 @@ void SamplePlayer::SetData(const float* data, int frequency, int length) {
 void SamplePlayer::SetLoop(bool loop) { loop_ = loop; }
 
 void SamplePlayer::SetSpeed(float speed) {
-  DCHECK_GE(speed, 0.0f);
+  assert(speed >= 0.0f);
   speed_ = speed;
   CalculateIncrementPerSample();
 }

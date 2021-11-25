@@ -1,6 +1,5 @@
 #include "barelymusician/common/logging.h"
 
-#include <cstdlib>
 #include <iostream>
 #include <ostream>
 #include <string>
@@ -29,8 +28,6 @@ std::string GetStringFromSeverity(LogSeverity severity) {
       return "WARNING";
     case LogSeverity::ERROR:
       return "ERROR";
-    case LogSeverity::FATAL:
-      return "FATAL";
     default:
       break;
   }
@@ -51,10 +48,6 @@ Logger::~Logger() {
   LogWriter& writer =
       custom_log_writer ? *custom_log_writer : GetDefaultLogWriter();
   writer.Write(severity_, stream_.str());
-  if (severity_ == LogSeverity::FATAL) {
-    // Fatal error received, abort the program.
-    std::abort();
-  }
 }
 
 std::ostream& Logger::GetStream() { return stream_; }

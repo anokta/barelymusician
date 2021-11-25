@@ -40,7 +40,11 @@ enum BarelyStatusConstants {
   kBarelyUnknown = 7,
 };
 
-// TODO: Temporary shortcut until |InstrumentDefinition| is ported.
+// TODO(#85): Add |BarelyConductorDefinition|.
+
+// TODO(#85): Add |BarelyInstrumentDefinition|.
+// TODO(#85): Add |BarelyInstrumentParamDefinitions|.
+// TODO(#85): Temporary shortcut until |InstrumentDefinition| is ported.
 enum BarelyInstrumentTypes {
   /// Synth instrument.
   kBarelySynthInstrument = 1,
@@ -81,6 +85,8 @@ typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
 BARELY_EXPORT BarelyId BarelyAddInstrument(BarelyHandle handle,
                                            int32_t instrument_type);
 
+// TODO(#85): Add |BarelyAddInstrument| with |BarelyInstrumentDefinition|.
+
 /// Adds new performer.
 ///
 /// @param handle BarelyMusician handle.
@@ -97,6 +103,19 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformerInstrument(BarelyHandle handle,
                                                         BarelyId performer_id,
                                                         BarelyId instrument_id);
 
+/// Adds performer note.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param note_position Note position.
+/// @param note_duration Note duration.
+/// @param note_pitch Note pitch.
+/// @param note_intensity Note intensity.
+/// @return Note id.
+BARELY_EXPORT BarelyId BarelyAddPerformerNote(
+    BarelyHandle handle, BarelyId performer_id, double note_position,
+    double note_duration, float note_pitch, float note_intensity);
+
 /// Creates new BarelyMusician.
 ///
 /// @param sample_rate Sampling rate in Hz.
@@ -109,15 +128,60 @@ BARELY_EXPORT BarelyHandle BarelyCreate(int32_t sample_rate);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroy(BarelyHandle handle);
 
+/// Returns performer begin offset.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return Begin offset in beats.
+BARELY_EXPORT double BarelyGetPerformerBeginOffset(BarelyHandle handle,
+                                                   BarelyId performer_id);
+
+// TODO(#85): Add |BarelyGetPerformerBeginPosition|.
+// TODO(#85): Add |BarelyGetPerformerEndPosition|.
+
+/// Returns performer loop begin offset.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return Loop begin offset in beats.
+BARELY_EXPORT double BarelyGetPerformerLoopBeginOffset(BarelyHandle handle,
+                                                       BarelyId performer_id);
+
+/// Returns performer loop length.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return Loop length in beats.
+BARELY_EXPORT double BarelyGetPerformerLoopLength(BarelyHandle handle,
+                                                  BarelyId performer_id);
+
 /// Returns the playback position.
 ///
+/// @param handle BarelyMusician handle.
 /// @return Position in beats.
 BARELY_EXPORT double BarelyGetPlaybackPosition(BarelyHandle handle);
 
 /// Returns the playback tempo.
 ///
+/// @param handle BarelyMusician handle.
 /// @return Tempo in BPM.
 BARELY_EXPORT double BarelyGetPlaybackTempo(BarelyHandle handle);
+
+/// Returns whether the performer is empty or not.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return True if empty (i.e., has no notes), false otherwise.
+BARELY_EXPORT bool BarelyIsPerformerEmpty(BarelyHandle handle,
+                                          BarelyId performer_id);
+
+/// Returns whether the performer is looping or not.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return True if looping, false otherwise.
+BARELY_EXPORT bool BarelyIsPerformerLooping(BarelyHandle handle,
+                                            BarelyId performer_id);
 
 /// Returns whether the playback is currently active or not.
 ///
@@ -133,6 +197,7 @@ BARELY_EXPORT bool BarelyIsPlaying(BarelyHandle handle);
 /// @param output Pointer to the output buffer.
 /// @param num_channels Number of output channels.
 /// @param num_frames Number of output frames.
+/// @return Status.
 BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
     BarelyHandle handle, BarelyId instrument_id, double timestamp,
     float* output, int32_t num_channels, int32_t num_frames);
@@ -144,6 +209,25 @@ BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyRemoveAllPerformerInstruments(BarelyHandle handle, BarelyId performer_id);
+
+/// Removes all performer notes.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyRemoveAllPerformerNotes(BarelyHandle handle,
+                                                         BarelyId performer_id);
+
+/// Removes all performer notes at given range.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyRemoveAllPerformerNotesAt(BarelyHandle handle, BarelyId performer_id,
+                                double begin_position, double end_position);
 
 /// Removes instrument.
 ///
@@ -170,6 +254,18 @@ BARELY_EXPORT BarelyStatus BarelyRemovePerformer(BarelyHandle handle,
 BARELY_EXPORT BarelyStatus BarelyRemovePerformerInstrument(
     BarelyHandle handle, BarelyId performer_id, BarelyId instrument_id);
 
+/// Removes performer note.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param note_id Note id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyRemovePerformerNote(BarelyHandle handle,
+                                                     BarelyId performer_id,
+                                                     BarelyId note_id);
+
+// TODO(#85): Add |BarelySetAllInstrumentNotesOff| for all.
+
 /// Sets all instrument notes off.
 ///
 /// @param handle BarelyMusician handle.
@@ -178,6 +274,8 @@ BARELY_EXPORT BarelyStatus BarelyRemovePerformerInstrument(
 BARELY_EXPORT BarelyStatus
 BarelySetAllInstrumentNotesOff(BarelyHandle handle, BarelyId instrument_id);
 
+// TODO(#85): Add |BarelySetAllInstrumentParamsToDefault| for all.
+
 /// Sets all instrument parameters to default.
 ///
 /// @param handle BarelyMusician handle.
@@ -185,6 +283,10 @@ BarelySetAllInstrumentNotesOff(BarelyHandle handle, BarelyId instrument_id);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetAllInstrumentParamsToDefault(
     BarelyHandle handle, BarelyId instrument_id);
+
+// TODO(#85): Add |SetConductor|.
+
+// TODO(#85): Add |SetCustomInstrumentData|.
 
 /// Sets instrument note off.
 ///
@@ -246,6 +348,64 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
     BarelyHandle handle, BarelyId instrument_id, int32_t param_id);
+
+/// Sets performer begin offset.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param begin_offset Begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerBeginOffset(BarelyHandle handle,
+                                                         BarelyId performer_id,
+                                                         double begin_offset);
+
+/// Sets performer begin position.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param begin_position Optional begin position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerBeginPosition(
+    BarelyHandle handle, BarelyId performer_id, double* begin_position);
+
+/// Sets performer end position.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param end_position Optional end position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerEndPosition(BarelyHandle handle,
+                                                         BarelyId performer_id,
+                                                         double* end_position);
+
+/// Sets performer loop begin offset.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param loop_begin_offset Loop begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerLoopBeginOffset(
+    BarelyHandle handle, BarelyId performer_id, double loop_begin_offset);
+
+/// Sets performer loop length.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param loop_length Loop length in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerLoopLength(BarelyHandle handle,
+                                                        BarelyId performer_id,
+                                                        double loop_length);
+
+/// Sets performer looping.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param looping True if looping.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerLooping(BarelyHandle handle,
+                                                     BarelyId performer_id,
+                                                     bool looping);
 
 /// Sets the playback beat callback.
 ///

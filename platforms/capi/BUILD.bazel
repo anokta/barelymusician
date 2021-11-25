@@ -13,6 +13,7 @@ cc_library(
     deps = [
         "//barelymusician",
         "//barelymusician/common:status",
+        "//barelymusician/composition:note",
         "//examples/instruments:synth_instrument",
         "//platforms/common:visibility",
     ],

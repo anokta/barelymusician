@@ -1,9 +1,11 @@
 #include "platforms/capi/barelymusician.h"
 
 #include <cstdint>
+#include <optional>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/status.h"
+#include "barelymusician/composition/note.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
@@ -73,6 +75,22 @@ BarelyStatus BarelyAddPerformerInstrument(BarelyHandle handle,
   return kBarelyNotFound;
 }
 
+BarelyId BarelyAddPerformerNote(BarelyHandle handle, BarelyId performer_id,
+                                double note_position, double note_duration,
+                                float note_pitch, float note_intensity) {
+  if (handle) {
+    if (const auto note_id_or = handle->instance.AddPerformerNote(
+            performer_id, note_position,
+            barelyapi::Note{.pitch = note_pitch,
+                            .intensity = note_intensity,
+                            .duration = note_duration});
+        barelyapi::IsOk(note_id_or)) {
+      return barelyapi::GetStatusOrValue(note_id_or);
+    }
+  }
+  return kBarelyInvalidId;
+}
+
 BarelyHandle BarelyCreate(std::int32_t sample_rate) {
   return new BarelyMusician(sample_rate);
 }
@@ -97,6 +115,28 @@ double BarelyGetPlaybackTempo(BarelyHandle handle) {
     return handle->instance.GetPlaybackTempo();
   }
   return 0.0;
+}
+
+bool BarelyIsPerformerEmpty(BarelyHandle handle, BarelyId performer_id) {
+  if (handle) {
+    const auto is_performer_empty_or =
+        handle->instance.IsPerformerEmpty(performer_id);
+    if (barelyapi::IsOk(is_performer_empty_or)) {
+      return barelyapi::GetStatusOrValue(is_performer_empty_or);
+    }
+  }
+  return false;
+}
+
+bool BarelyIsPerformerLooping(BarelyHandle handle, BarelyId performer_id) {
+  if (handle) {
+    const auto is_performer_looping_or =
+        handle->instance.IsPerformerLooping(performer_id);
+    if (barelyapi::IsOk(is_performer_looping_or)) {
+      return barelyapi::GetStatusOrValue(is_performer_looping_or);
+    }
+  }
+  return false;
 }
 
 bool BarelyIsPlaying(BarelyHandle handle) {
@@ -127,6 +167,25 @@ BarelyStatus BarelyRemoveAllPerformerInstruments(BarelyHandle handle,
   return kBarelyNotFound;
 }
 
+BarelyStatus BarelyRemoveAllPerformerNotes(BarelyHandle handle,
+                                           BarelyId performer_id) {
+  if (handle) {
+    return GetStatus(handle->instance.RemoveAllPerformerNotes(performer_id));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelyRemoveAllPerformerNotesAt(BarelyHandle handle,
+                                             BarelyId performer_id,
+                                             double begin_position,
+                                             double end_position) {
+  if (handle) {
+    return GetStatus(handle->instance.RemoveAllPerformerNotes(
+        performer_id, begin_position, end_position));
+  }
+  return kBarelyNotFound;
+}
+
 BarelyStatus BarelyRemoveInstrument(BarelyHandle handle,
                                     BarelyId instrument_id) {
   if (handle) {
@@ -148,6 +207,16 @@ BarelyStatus BarelyRemovePerformerInstrument(BarelyHandle handle,
   if (handle) {
     return GetStatus(handle->instance.RemovePerformerInstrument(performer_id,
                                                                 instrument_id));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelyRemovePerformerNote(BarelyHandle handle,
+                                       BarelyId performer_id,
+                                       BarelyId note_id) {
+  if (handle) {
+    return GetStatus(
+        handle->instance.RemovePerformerNote(performer_id, note_id));
   }
   return kBarelyNotFound;
 }
@@ -242,6 +311,67 @@ BarelyStatus BarelySetInstrumentParamToDefault(BarelyHandle handle,
   if (handle) {
     return GetStatus(
         handle->instance.SetInstrumentParamToDefault(instrument_id, param_id));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelySetPerformerBeginOffset(BarelyHandle handle,
+                                           BarelyId performer_id,
+                                           double begin_offset) {
+  if (handle) {
+    return GetStatus(
+        handle->instance.SetPerformerBeginOffset(performer_id, begin_offset));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelySetPerformerBeginPosition(BarelyHandle handle,
+                                             BarelyId performer_id,
+                                             double* begin_position) {
+  if (handle) {
+    return GetStatus(handle->instance.SetPerformerBeginPosition(
+        performer_id, begin_position ? std::optional<double>{*begin_position}
+                                     : std::nullopt));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelySetPerformerEndPosition(BarelyHandle handle,
+                                           BarelyId performer_id,
+                                           double* end_position) {
+  if (handle) {
+    return GetStatus(handle->instance.SetPerformerEndPosition(
+        performer_id,
+        end_position ? std::optional<double>{*end_position} : std::nullopt));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelySetPerformerLoopBeginOffset(BarelyHandle handle,
+                                               BarelyId performer_id,
+                                               double loop_begin_offset) {
+  if (handle) {
+    return GetStatus(handle->instance.SetPerformerLoopBeginOffset(
+        performer_id, loop_begin_offset));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelySetPerformerLoopLength(BarelyHandle handle,
+                                          BarelyId performer_id,
+                                          double loop_length) {
+  if (handle) {
+    return GetStatus(
+        handle->instance.SetPerformerLoopLength(performer_id, loop_length));
+  }
+  return kBarelyNotFound;
+}
+
+BarelyStatus BarelySetPerformerLooping(BarelyHandle handle,
+                                       BarelyId performer_id, bool looping) {
+  if (handle) {
+    return GetStatus(
+        handle->instance.SetPerformerLooping(performer_id, looping));
   }
   return kBarelyNotFound;
 }

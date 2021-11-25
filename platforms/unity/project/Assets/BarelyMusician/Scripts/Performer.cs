@@ -18,8 +18,8 @@ namespace BarelyApi {
     /// Optional end position.
     public double? EndPosition = null;
 
-    /// Denotes whether looping or not.
-    public bool IsLooping = false;
+    /// Denotes whether the performer is looping or not.
+    public bool Loop = false;
 
     /// Loop begin offset.
     public double LoopBeginOffset = 0.0;

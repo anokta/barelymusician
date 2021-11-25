@@ -378,6 +378,16 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerEndPosition(BarelyHandle handle,
                                                          BarelyId performer_id,
                                                          double* end_position);
 
+/// Sets whether performer should be looping or not.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param loop True if looping.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerLoop(BarelyHandle handle,
+                                                  BarelyId performer_id,
+                                                  bool loop);
+
 /// Sets performer loop begin offset.
 ///
 /// @param handle BarelyMusician handle.
@@ -396,16 +406,6 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerLoopBeginOffset(
 BARELY_EXPORT BarelyStatus BarelySetPerformerLoopLength(BarelyHandle handle,
                                                         BarelyId performer_id,
                                                         double loop_length);
-
-/// Sets performer looping.
-///
-/// @param handle BarelyMusician handle.
-/// @param performer_id Performer id.
-/// @param looping True if looping.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerLooping(BarelyHandle handle,
-                                                     BarelyId performer_id,
-                                                     bool looping);
 
 /// Sets the playback beat callback.
 ///

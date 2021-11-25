@@ -294,6 +294,13 @@ class Musician {
   Status SetPerformerEndPosition(Id performer_id,
                                  std::optional<double> end_position);
 
+  /// Sets whether performer should be looping or not.
+  ///
+  /// @param performer_id Performer id.
+  /// @param loop True if looping.
+  /// @return Status.
+  Status SetPerformerLoop(Id performer_id, bool loop);
+
   /// Sets performer loop begin offset.
   ///
   /// @param performer_id Performer id.
@@ -307,13 +314,6 @@ class Musician {
   /// @param loop_length Loop length in beats.
   /// @return Status.
   Status SetPerformerLoopLength(Id performer_id, double loop_length);
-
-  /// Sets performer looping.
-  ///
-  /// @param performer_id Performer id.
-  /// @param looping True if looping.
-  /// @return Status.
-  Status SetPerformerLooping(Id performer_id, bool looping);
 
   /// Sets the playback beat callback.
   ///

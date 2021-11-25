@@ -181,9 +181,9 @@ namespace BarelyApi {
     public static void UpdatePerformer(Performer performer) {
       /// TODO(#85): This is a POC implementation only, also missing begin/end position setters.
       SetPerformerBeginOffsetNative(Handle, performer.Id, performer.BeginOffset);
+      SetPerformerLoopNative(Handle, performer.Id, performer.Loop);
       SetPerformerLoopBeginOffsetNative(Handle, performer.Id, performer.LoopBeginOffset);
       SetPerformerLoopLengthNative(Handle, performer.Id, performer.LoopLength);
-      SetPerformerLooping(Handle, performer.Id, performer.IsLooping);
       RemoveAllPerformerNotesNative(Handle, performer.Id);
       foreach (var performerNote in performer.Notes) {
         float pitch = (float)(performer.RootNote + performerNote.note.Pitch - 69) / 12.0f;
@@ -408,15 +408,15 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerEndPosition")]
     private static extern Int32 SetPerformerEndPositionNative(IntPtr handle, Int64 performerId, IntPtr endPosition);
 
+    [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoop")]
+    private static extern Int32 SetPerformerLoopNative(IntPtr handle, Int64 performerId, bool loop);
+
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoopBeginOffset")]
     private static extern Int32 SetPerformerLoopBeginOffsetNative(IntPtr handle, Int64 performerId,
                                                                   double loopBeginOffset);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoopLength")]
     private static extern Int32 SetPerformerLoopLengthNative(IntPtr handle, Int64 performerId, double loopLength);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerLooping")]
-    private static extern Int32 SetPerformerLooping(IntPtr handle, Int64 performerId, bool looping);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPlaybackBeatCallback")]
     private static extern Int32 SetPlaybackBeatCallbackNative(IntPtr handle, IntPtr playbackBeatCallbackPtr);

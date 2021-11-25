@@ -74,8 +74,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_THAT(notes, ElementsAre(Pair(1.0, kNote)));
   notes.clear();
 
-  // Set looping.
-  sequence.SetLooping(true);
+  // Set loop.
+  sequence.SetLoop(true);
   EXPECT_TRUE(sequence.IsLooping());
 
   sequence.Process(1.0, 11.0, 1.0, process_callback);
@@ -134,9 +134,9 @@ TEST(SequenceTest, ProcessMultipleNotes) {
                                  Pair(3.0, Note{.pitch = 4.0f})));
   notes.clear();
 
-  // Set looping with offset.
+  // Set loop with offset.
   sequence.SetBeginOffset(1.0);
-  sequence.SetLooping(true);
+  sequence.SetLoop(true);
   sequence.SetLoopBeginOffset(2.0);
   sequence.SetLoopLength(2.0);
 

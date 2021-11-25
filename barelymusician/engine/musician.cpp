@@ -341,6 +341,14 @@ Status Musician::SetPerformerEndPosition(Id performer_id,
   return Status::kNotFound;
 }
 
+Status Musician::SetPerformerLoop(Id performer_id, bool loop) {
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    performer->GetMutableSequence()->SetLoop(loop);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
 Status Musician::SetPerformerLoopBeginOffset(Id performer_id,
                                              double loop_begin_offset) {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
@@ -353,14 +361,6 @@ Status Musician::SetPerformerLoopBeginOffset(Id performer_id,
 Status Musician::SetPerformerLoopLength(Id performer_id, double loop_length) {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     performer->GetMutableSequence()->SetLoopLength(loop_length);
-    return Status::kOk;
-  }
-  return Status::kNotFound;
-}
-
-Status Musician::SetPerformerLooping(Id performer_id, bool looping) {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->GetMutableSequence()->SetLooping(looping);
     return Status::kOk;
   }
   return Status::kNotFound;

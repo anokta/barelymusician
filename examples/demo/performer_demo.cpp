@@ -121,7 +121,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetPerformerBeginPosition(performer_id, 2.0);
   musician.SetPerformerEndPosition(performer_id, 19.5);
   musician.SetPerformerBeginOffset(performer_id, -1.0);
-  musician.SetPerformerLooping(performer_id, true);
+  musician.SetPerformerLoop(performer_id, true);
   musician.SetPerformerLoopBeginOffset(performer_id, 3.0);
   musician.SetPerformerLoopLength(performer_id, 5.0);
   std::vector<Id> note_ids;
@@ -193,11 +193,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
       case 'L':
         if (GetStatusOrValue(musician.IsPerformerLooping(performer_id))) {
-          musician.SetPerformerLooping(performer_id, false);
-          LOG(INFO) << "Looping turned off";
+          musician.SetPerformerLoop(performer_id, false);
+          LOG(INFO) << "Loop turned off";
         } else {
-          musician.SetPerformerLooping(performer_id, true);
-          LOG(INFO) << "Looping turned on";
+          musician.SetPerformerLoop(performer_id, true);
+          LOG(INFO) << "Loop turned on";
         }
         return;
       case 'C':

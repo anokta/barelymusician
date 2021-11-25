@@ -354,6 +354,14 @@ BarelyStatus BarelySetPerformerEndPosition(BarelyHandle handle,
   return kBarelyNotFound;
 }
 
+BarelyStatus BarelySetPerformerLoop(BarelyHandle handle, BarelyId performer_id,
+                                    bool loop) {
+  if (handle) {
+    return GetStatus(handle->instance.SetPerformerLoop(performer_id, loop));
+  }
+  return kBarelyNotFound;
+}
+
 BarelyStatus BarelySetPerformerLoopBeginOffset(BarelyHandle handle,
                                                BarelyId performer_id,
                                                double loop_begin_offset) {
@@ -370,15 +378,6 @@ BarelyStatus BarelySetPerformerLoopLength(BarelyHandle handle,
   if (handle) {
     return GetStatus(
         handle->instance.SetPerformerLoopLength(performer_id, loop_length));
-  }
-  return kBarelyNotFound;
-}
-
-BarelyStatus BarelySetPerformerLooping(BarelyHandle handle,
-                                       BarelyId performer_id, bool looping) {
-  if (handle) {
-    return GetStatus(
-        handle->instance.SetPerformerLooping(performer_id, looping));
   }
   return kBarelyNotFound;
 }

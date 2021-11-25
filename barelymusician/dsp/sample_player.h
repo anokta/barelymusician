@@ -50,7 +50,7 @@ class SamplePlayer : public Generator {
   // Sample data length in samples.
   float length_;
 
-  // Denotes whether the playback is looping.
+  // Denotes whether the playback is looping or not.
   bool loop_;
 
   // Playback speed.

@@ -109,20 +109,20 @@ class Sequence {
   /// @param begin_offset Begin offset in beats.
   void SetBeginOffset(double begin_offset);
 
+  /// Sets whether the sequence should be looping or not.
+  ///
+  /// @param loop True if looping.
+  void SetLoop(bool loop);
+
   /// Sets the loop begin offset.
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
   void SetLoopBeginOffset(double loop_begin_position);
 
-  /// Sets the loop length for when the sequence is looping.
+  /// Sets the loop length.
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length);
-
-  /// Sets whether the sequence should be looping or not.
-  ///
-  /// @param is_looping True if looping.
-  void SetLooping(bool is_looping);
 
  private:
   // Internal process helper function.
@@ -134,7 +134,7 @@ class Sequence {
   double begin_offset_;
 
   // Denotes whether the sequence is looping or not.
-  bool is_looping_;
+  bool loop_;
 
   // Loop begin offset in beats.
   double loop_begin_offset_;

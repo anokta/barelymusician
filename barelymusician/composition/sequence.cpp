@@ -15,7 +15,7 @@ namespace barely {
 
 Sequence::Sequence()
     : begin_offset_(0.0),
-      is_looping_(false),
+      loop_(false),
       loop_begin_offset_(0.0),
       loop_length_(1.0) {}
 
@@ -55,7 +55,7 @@ StatusOr<Sequence::NoteWithPosition> Sequence::GetNote(Id id) const {
 
 bool Sequence::IsEmpty() const { return notes_.empty(); }
 
-bool Sequence::IsLooping() const { return is_looping_; }
+bool Sequence::IsLooping() const { return loop_; }
 
 void Sequence::Process(double begin_position, double end_position,
                        double position_offset,
@@ -63,7 +63,7 @@ void Sequence::Process(double begin_position, double end_position,
   position_offset -= begin_offset_;
   begin_position -= position_offset;
   end_position -= position_offset;
-  if (is_looping_) {
+  if (loop_) {
     if (loop_length_ <= 0.0) {
       return;
     }
@@ -130,6 +130,8 @@ void Sequence::SetBeginOffset(double begin_offset) {
   begin_offset_ = begin_offset;
 }
 
+void Sequence::SetLoop(bool loop) { loop_ = loop; }
+
 void Sequence::SetLoopBeginOffset(double loop_begin_offset) {
   loop_begin_offset_ = loop_begin_offset;
 }
@@ -137,8 +139,6 @@ void Sequence::SetLoopBeginOffset(double loop_begin_offset) {
 void Sequence::SetLoopLength(double loop_length) {
   loop_length_ = std::max(loop_length, 0.0);
 }
-
-void Sequence::SetLooping(bool is_looping) { is_looping_ = is_looping; }
 
 void Sequence::ProcessInternal(double begin_position, double end_position,
                                double position_offset,

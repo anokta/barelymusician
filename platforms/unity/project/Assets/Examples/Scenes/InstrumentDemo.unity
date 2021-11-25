@@ -520,7 +520,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BeginOffset: 0
-  IsLooping: 1
+  Loop: 1
   LoopBeginOffset: 0
   LoopLength: 4
   Instruments:
@@ -733,7 +733,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BeginOffset: 0
-  IsLooping: 1
+  Loop: 1
   LoopBeginOffset: 0
   LoopLength: 4
   Instruments:

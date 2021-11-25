@@ -8,6 +8,7 @@
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
+#include "barelymusician/engine/param_definition.h"
 #include "gtest/gtest.h"
 
 namespace barely {
@@ -42,6 +43,11 @@ ConductorDefinition GetTestConductorDefinition() {
           }};
 }
 
+// Returns test conductor parameter definition.
+ParamDefinitions GetTestParamDefinitions() {
+  return ParamDefinitions{ParamDefinition{1, 0.0f}};
+}
+
 // Tests that the conductor behaves as expected with an empty definition.
 TEST(ConductorTest, EmptyDefinition) {
   Conductor conductor;
@@ -58,7 +64,7 @@ TEST(ConductorTest, EmptyDefinition) {
 
 // Tests that the conductor behaves as expected with a test definition.
 TEST(ConductorTest, TestDefinition) {
-  Conductor conductor(GetTestConductorDefinition());
+  Conductor conductor(GetTestConductorDefinition(), GetTestParamDefinitions());
   EXPECT_DOUBLE_EQ(
       GetStatusOrValue(conductor.TransformNoteDuration(NoteDuration{5.0})),
       0.0);

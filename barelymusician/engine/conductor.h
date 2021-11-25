@@ -2,12 +2,15 @@
 #define BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 
 #include <any>
+#include <unordered_map>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
+#include "barelymusician/engine/param.h"
+#include "barelymusician/engine/param_definition.h"
 
 namespace barely {
 
@@ -17,7 +20,9 @@ class Conductor {
   /// Constructs new |Conductor|.
   ///
   /// @param definition Conductor definition.
-  explicit Conductor(ConductorDefinition definition = {});
+  /// @param param_definitions Conductor parameter definitions.
+  explicit Conductor(ConductorDefinition definition = {},
+                     ParamDefinitions param_definitions = {});
 
   /// Destroys |Conductor|.
   ~Conductor();
@@ -28,6 +33,12 @@ class Conductor {
   Conductor(Conductor&& other) = default;
   Conductor& operator=(Conductor&& other) = default;
 
+  /// Returns parameter.
+  ///
+  /// @param id Parameter id.
+  /// @return Parameter or error status.
+  StatusOr<Param> GetParam(int id) const;
+
   /// Sets custom data.
   ///
   /// @param data Custom data.
@@ -37,7 +48,14 @@ class Conductor {
   ///
   /// @param id Parameter id.
   /// @param value Parameter value.
-  void SetParam(int id, float value);
+  /// @return Status.
+  Status SetParam(int id, float value);
+
+  /// Sets parameter to default.
+  ///
+  /// @param id Parameter id.
+  /// @return Status.
+  Status SetParamToDefault(int id);
 
   /// Transforms note duration.
   ///
@@ -87,6 +105,9 @@ class Conductor {
 
   // Conductor state.
   ConductorState state_;
+
+  // List of performer parameters.
+  std::unordered_map<int, Param> params_;
 };
 
 }  // namespace barely

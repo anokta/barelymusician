@@ -274,8 +274,9 @@ Status Musician::SetCustomInstrumentData(Id instrument_id,
       instrument_id, transport_.GetTimestamp(), std::move(custom_data));
 }
 
-void Musician::SetConductor(ConductorDefinition definition) {
-  conductor_ = Conductor{std::move(definition)};
+void Musician::SetConductor(ConductorDefinition definition,
+                            ParamDefinitions param_definitions) {
+  conductor_ = Conductor{std::move(definition), std::move(param_definitions)};
 }
 
 Status Musician::SetInstrumentNoteOff(Id instrument_id, float note_pitch) {

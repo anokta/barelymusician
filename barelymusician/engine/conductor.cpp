@@ -4,11 +4,13 @@
 #include <utility>
 #include <variant>
 
+#include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
+#include "barelymusician/engine/param.h"
 
 namespace barely {
 
@@ -56,7 +58,8 @@ double NoopTransformPlaybackTempoFn(ConductorState* /*state*/, double tempo) {
 
 }  // namespace
 
-Conductor::Conductor(ConductorDefinition definition)
+Conductor::Conductor(ConductorDefinition definition,
+                     ParamDefinitions param_definitions)
     : destroy_fn_(std::move(definition.destroy_fn)),
       set_custom_data_fn_(definition.set_custom_data_fn
                               ? std::move(definition.set_custom_data_fn)
@@ -82,6 +85,10 @@ Conductor::Conductor(ConductorDefinition definition)
   if (definition.create_fn) {
     definition.create_fn(&state_);
   }
+  params_.reserve(param_definitions.size());
+  for (auto& param_definition : param_definitions) {
+    params_.emplace(param_definition.id, Param(std::move(param_definition)));
+  }
 }
 
 Conductor::~Conductor() {
@@ -91,12 +98,35 @@ Conductor::~Conductor() {
   }
 }
 
+StatusOr<Param> Conductor::GetParam(int id) const {
+  if (const auto* param = FindOrNull(params_, id)) {
+    return *param;
+  }
+  return Status::kInvalidArgument;
+}
+
 void Conductor::SetCustomData(std::any data) {
   set_custom_data_fn_(&state_, std::move(data));
 }
 
-void Conductor::SetParam(int id, float value) {
-  set_param_fn_(&state_, id, value);
+Status Conductor::SetParam(int id, float value) {
+  if (auto* param = FindOrNull(params_, id)) {
+    if (param->SetValue(value)) {
+      set_param_fn_(&state_, id, param->GetValue());
+    }
+    return Status::kOk;
+  }
+  return Status::kInvalidArgument;
+}
+
+Status Conductor::SetParamToDefault(int id) {
+  if (auto* param = FindOrNull(params_, id)) {
+    if (param->ResetValue()) {
+      set_param_fn_(&state_, id, param->GetValue());
+    }
+    return Status::kOk;
+  }
+  return Status::kInvalidArgument;
 }
 
 StatusOr<double> Conductor::TransformNoteDuration(NoteDuration note_duration) {

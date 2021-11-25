@@ -84,6 +84,7 @@ cc_binary(
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine:conductor_definition",
         "//barelymusician/engine:musician",
+        "//barelymusician/engine:param_definition",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:input_manager",

@@ -17,6 +17,7 @@
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/musician.h"
+#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -34,6 +35,7 @@ using ::barely::NoteDuration;
 using ::barely::NoteIntensity;
 using ::barely::NotePitch;
 using ::barely::OscillatorType;
+using ::barely::ParamDefinitions;
 using ::barely::Random;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -226,7 +228,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
                           [&](ConductorState*, double playback_tempo) {
                             return 1.25 * playback_tempo;
                           }}
-                : ConductorDefinition{});
+                : ConductorDefinition{},
+            ParamDefinitions{});
         LOG(INFO) << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':

@@ -217,7 +217,9 @@ class Musician {
   /// Sets conductor.
   ///
   /// @param definition Conductor definition.
-  void SetConductor(ConductorDefinition definition);
+  /// @param definition Conductor parameter definitions.
+  void SetConductor(ConductorDefinition definition,
+                    ParamDefinitions param_definitions);
 
   /// Sets custom instrument data.
   ///

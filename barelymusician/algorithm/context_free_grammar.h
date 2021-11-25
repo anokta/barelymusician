@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
 
 namespace barely {
@@ -37,11 +36,11 @@ class ContextFreeGrammar {
       const SymbolType& start_symbol) const;
 
  private:
-  // Returns new substition for the given |symbol| using its rule.
-  std::vector<SymbolType> GetSubstition(const SymbolType& symbol) const;
+  // Returns substition for a given |symbol| using its rule.
+  const std::vector<SymbolType>* GetSubstition(const SymbolType& symbol) const;
 
   // Random number generator.
-  Random* random_;  // Not owned.
+  Random& random_;
 
   // Grammar rules that map symbols to their corresponding substitions.
   std::unordered_map<SymbolType, std::vector<std::vector<SymbolType>>> rules_;
@@ -49,7 +48,7 @@ class ContextFreeGrammar {
 
 template <typename SymbolType>
 ContextFreeGrammar<SymbolType>::ContextFreeGrammar(Random* random)
-    : random_(random) {
+    : random_(*random) {
   assert(random);
 }
 
@@ -64,39 +63,37 @@ template <typename SymbolType>
 std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
     const SymbolType& start_symbol) const {
   std::vector<SymbolType> sequence;
-
   // Add |start_symbol| to the beginning of the sequence.
   sequence.push_back(start_symbol);
   // Iterate through all the symbols, and substitute them according to their
   // corresponding rules until reaching to the end.
   int i = 0;
   while (i < static_cast<int>(sequence.size())) {
-    if (rules_.find(sequence[i]) == rules_.cend()) {
+    if (rules_.find(sequence[i]) != rules_.cend()) {
+      const auto* substition = GetSubstition(sequence[i]);
+      sequence.erase(std::next(sequence.cbegin(), i));
+      if (substition) {
+        sequence.insert(std::next(sequence.cbegin(), i), substition->cbegin(),
+                        substition->cend());
+      }
+    } else {
       ++i;
-      continue;
     }
-    const auto& substition = GetSubstition(sequence[i]);
-    sequence.erase(std::next(sequence.cbegin(), i));
-    sequence.insert(std::next(sequence.cbegin(), i), substition.cbegin(),
-                    substition.cend());
   }
-
   return sequence;
 }
 
 template <typename SymbolType>
-std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
+const std::vector<SymbolType>* ContextFreeGrammar<SymbolType>::GetSubstition(
     const SymbolType& symbol) const {
   const auto* substitions = FindOrNull(rules_, symbol);
   if (!substitions || substitions->empty()) {
-    DLOG(INFO) << "Substition rule does not exist for symbol: " << symbol;
-    return std::vector<SymbolType>();
+    return nullptr;
   }
-
   // Select a substition randomly with equal probability for each selection.
   const int index =
-      random_->DrawUniform(0, static_cast<int>(substitions->size()) - 1);
-  return (*substitions)[index];
+      random_.DrawUniform(0, static_cast<int>(substitions->size()) - 1);
+  return &(*substitions)[index];
 }
 
 }  // namespace barely

@@ -131,9 +131,6 @@ cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],
-    deps = [
-        "//barelymusician/common:logging",
-    ],
 )
 
 cc_library(

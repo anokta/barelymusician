@@ -3,31 +3,38 @@
 #include <cstdint>
 #include <optional>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
+#include "barelymusician/engine/musician.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
 
+using ::barely::GetStatusOrValue;
+using ::barely::IsOk;
+using ::barely::Musician;
+using ::barely::Note;
+using ::barely::Status;
+using ::barely::examples::SynthInstrument;
+
 // Returns the corresponding |BarelyStatus| value for a given |status|.
-BarelyStatus GetStatus(barelyapi::Status status) {
+BarelyStatus GetStatus(Status status) {
   switch (status) {
-    case barelyapi::Status::kOk:
+    case Status::kOk:
       return kBarelyOk;
-    case barelyapi::Status::kInvalidArgument:
+    case Status::kInvalidArgument:
       return kBarelyInvalidArgument;
-    case barelyapi::Status::kNotFound:
+    case Status::kNotFound:
       return kBarelyNotFound;
-    case barelyapi::Status::kAlreadyExists:
+    case Status::kAlreadyExists:
       return kBarelyAlreadyExists;
-    case barelyapi::Status::kFailedPrecondition:
+    case Status::kFailedPrecondition:
       return kBarelyFailedPrecondition;
-    case barelyapi::Status::kUnimplemented:
+    case Status::kUnimplemented:
       return kBarelyUnimplemented;
-    case barelyapi::Status::kInternal:
+    case Status::kInternal:
       return kBarelyInternal;
-    case barelyapi::Status::kUnknown:
+    case Status::kUnknown:
     default:
       return kBarelyUnknown;
   }
@@ -43,7 +50,7 @@ struct BarelyMusician {
   explicit BarelyMusician(std::int32_t sample_rate) : instance(sample_rate) {}
 
   /// BarelyMusician instance.
-  barelyapi::BarelyMusician instance;
+  Musician instance;
 };
 
 BarelyId BarelyAddInstrument(BarelyHandle handle,
@@ -51,8 +58,8 @@ BarelyId BarelyAddInstrument(BarelyHandle handle,
   if (handle) {
     if (instrument_type == kBarelySynthInstrument) {
       return handle->instance.AddInstrument(
-          barelyapi::examples::SynthInstrument::GetDefinition(),
-          barelyapi::examples::SynthInstrument::GetParamDefinitions());
+          SynthInstrument::GetDefinition(),
+          SynthInstrument::GetParamDefinitions());
     }
   }
   return kBarelyInvalidId;
@@ -79,13 +86,13 @@ BarelyId BarelyAddPerformerNote(BarelyHandle handle, BarelyId performer_id,
                                 double note_position, double note_duration,
                                 float note_pitch, float note_intensity) {
   if (handle) {
-    if (const auto note_id_or = handle->instance.AddPerformerNote(
-            performer_id, note_position,
-            barelyapi::Note{.pitch = note_pitch,
-                            .intensity = note_intensity,
-                            .duration = note_duration});
-        barelyapi::IsOk(note_id_or)) {
-      return barelyapi::GetStatusOrValue(note_id_or);
+    if (const auto note_id_or =
+            handle->instance.AddPerformerNote(performer_id, note_position,
+                                              Note{.pitch = note_pitch,
+                                                   .intensity = note_intensity,
+                                                   .duration = note_duration});
+        IsOk(note_id_or)) {
+      return GetStatusOrValue(note_id_or);
     }
   }
   return kBarelyInvalidId;
@@ -121,8 +128,8 @@ bool BarelyIsPerformerEmpty(BarelyHandle handle, BarelyId performer_id) {
   if (handle) {
     const auto is_performer_empty_or =
         handle->instance.IsPerformerEmpty(performer_id);
-    if (barelyapi::IsOk(is_performer_empty_or)) {
-      return barelyapi::GetStatusOrValue(is_performer_empty_or);
+    if (IsOk(is_performer_empty_or)) {
+      return GetStatusOrValue(is_performer_empty_or);
     }
   }
   return false;
@@ -132,8 +139,8 @@ bool BarelyIsPerformerLooping(BarelyHandle handle, BarelyId performer_id) {
   if (handle) {
     const auto is_performer_looping_or =
         handle->instance.IsPerformerLooping(performer_id);
-    if (barelyapi::IsOk(is_performer_looping_or)) {
-      return barelyapi::GetStatusOrValue(is_performer_looping_or);
+    if (IsOk(is_performer_looping_or)) {
+      return GetStatusOrValue(is_performer_looping_or);
     }
   }
   return false;

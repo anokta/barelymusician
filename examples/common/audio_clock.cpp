@@ -1,7 +1,7 @@
 
 #include "examples/common/audio_clock.h"
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 AudioClock::AudioClock(int sample_rate)
     : sample_rate_(sample_rate), timestamp_(0.0) {}
@@ -15,4 +15,4 @@ void AudioClock::Update(int num_frames) {
   }
 }
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples

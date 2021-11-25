@@ -4,7 +4,7 @@
 #include <any>
 #include <functional>
 
-namespace barelyapi {
+namespace barely {
 
 /// Instrument state type.
 using InstrumentState = std::any;
@@ -84,6 +84,6 @@ struct InstrumentDefinition {
   SetInstrumentParamFn set_param_fn;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_

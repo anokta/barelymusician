@@ -5,7 +5,7 @@
 #include "barelymusician/common/id.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Tests that all generated ids are unique for an arbitrary number of calls.
@@ -18,4 +18,4 @@ TEST(IdGeneratorTest, Generate) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

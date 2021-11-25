@@ -2,7 +2,7 @@
 
 #include <random>
 
-namespace barelyapi {
+namespace barely {
 
 Random::Random(int seed) : engine_(static_cast<unsigned int>(seed)) {}
 
@@ -33,4 +33,4 @@ int Random::DrawUniform(int min, int max) {
 
 void Random::Reset(int seed) { engine_.seed(static_cast<unsigned int>(seed)); }
 
-}  // namespace barelyapi
+}  // namespace barely

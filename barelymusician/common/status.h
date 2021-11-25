@@ -7,7 +7,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Status codes.
 enum class Status {
@@ -115,6 +115,6 @@ inline std::string ToString(Status status) {
   }
 }
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMMON_STATUS_H_

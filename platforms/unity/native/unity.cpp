@@ -9,8 +9,11 @@
 
 namespace {
 
+using ::barely::logging::SetLogWriter;
+using ::barely::unity::UnityLogWriter;
+
 // Unity log writer.
-std::unique_ptr<barelyapi::unity::UnityLogWriter> writer;
+std::unique_ptr<UnityLogWriter> writer;
 
 }  // namespace
 
@@ -25,9 +28,9 @@ BarelyHandle BarelyCreateUnity(std::int32_t sample_rate,
                                                      const char* message) {
       debug_callback_ptr(severity, message);
     };
-    writer = std::make_unique<barelyapi::unity::UnityLogWriter>();
+    writer = std::make_unique<UnityLogWriter>();
     writer->SetDebugCallback(debug_callback);
-    barelyapi::logging::SetLogWriter(writer.get());
+    SetLogWriter(writer.get());
   }
   return BarelyCreate(sample_rate);
 }
@@ -35,7 +38,7 @@ BarelyHandle BarelyCreateUnity(std::int32_t sample_rate,
 BarelyStatus BarelyDestroyUnity(BarelyHandle handle) {
   const BarelyStatus status = BarelyDestroy(handle);
   if (status == kBarelyOk) {
-    barelyapi::logging::SetLogWriter(nullptr);
+    SetLogWriter(nullptr);
     writer.reset();
   }
   return status;

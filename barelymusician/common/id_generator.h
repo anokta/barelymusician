@@ -3,7 +3,7 @@
 
 #include "barelymusician/common/id.h"
 
-namespace barelyapi {
+namespace barely {
 
 // Unique numerical id generator.
 class IdGenerator {
@@ -21,6 +21,6 @@ class IdGenerator {
   Id counter_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMMON_ID_GENERATOR_H_

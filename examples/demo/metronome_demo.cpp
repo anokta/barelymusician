@@ -2,9 +2,9 @@
 #include <chrono>
 #include <thread>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/engine/musician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/input_manager.h"
@@ -12,13 +12,13 @@
 
 namespace {
 
-using ::barelyapi::BarelyMusician;
-using ::barelyapi::OscillatorType;
-using ::barelyapi::examples::AudioClock;
-using ::barelyapi::examples::AudioOutput;
-using ::barelyapi::examples::InputManager;
-using ::barelyapi::examples::SynthInstrument;
-using ::barelyapi::examples::SynthInstrumentParam;
+using ::barely::Musician;
+using ::barely::OscillatorType;
+using ::barely::examples::AudioClock;
+using ::barely::examples::AudioOutput;
+using ::barely::examples::InputManager;
+using ::barely::examples::SynthInstrument;
+using ::barely::examples::SynthInstrumentParam;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -34,8 +34,8 @@ constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.025f;
 
-constexpr float kBarPitch = barelyapi::kPitchA4;
-constexpr float kBeatPitch = barelyapi::kPitchA3;
+constexpr float kBarPitch = barely::kPitchA4;
+constexpr float kBeatPitch = barely::kPitchA3;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 120.0;
@@ -49,11 +49,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kSampleRate);
 
-  BarelyMusician barelymusician(kSampleRate);
-  barelymusician.SetPlaybackTempo(kInitialTempo);
+  Musician musician(kSampleRate);
+  musician.SetPlaybackTempo(kInitialTempo);
 
   // Create metronome instrument.
-  const auto metronome_id = barelymusician.AddInstrument(
+  const auto metronome_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
       {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
        {SynthInstrumentParam::kGain, kGain},
@@ -68,15 +68,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const int current_beat = static_cast<int>(position) % kNumBeats;
     LOG(INFO) << "Tick " << current_bar << "." << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    barelymusician.SetInstrumentNoteOn(metronome_id, pitch, kGain);
-    barelymusician.SetInstrumentNoteOff(metronome_id, pitch);
+    musician.SetInstrumentNoteOn(metronome_id, pitch, kGain);
+    musician.SetInstrumentNoteOff(metronome_id, pitch);
   };
-  barelymusician.SetPlaybackBeatCallback(beat_callback);
+  musician.SetPlaybackBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&](float* output) {
-    barelymusician.ProcessInstrument(metronome_id, audio_clock.GetTimestamp(),
-                                     output, kNumChannels, kNumFrames);
+    musician.ProcessInstrument(metronome_id, audio_clock.GetTimestamp(), output,
+                               kNumChannels, kNumFrames);
     audio_clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -90,14 +90,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = barelymusician.GetPlaybackTempo();
+    double tempo = musician.GetPlaybackTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (barelymusician.IsPlaying()) {
-          barelymusician.StopPlayback();
+        if (musician.IsPlaying()) {
+          musician.StopPlayback();
           LOG(INFO) << "Stopped playback";
         } else {
-          barelymusician.StartPlayback();
+          musician.StartPlayback();
           LOG(INFO) << "Started playback";
         }
         return;
@@ -119,7 +119,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    barelymusician.SetPlaybackTempo(tempo);
+    musician.SetPlaybackTempo(tempo);
     LOG(INFO) << "Tempo set to " << tempo << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -127,17 +127,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   LOG(INFO) << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  barelymusician.StartPlayback();
+  musician.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    barelymusician.Update(audio_clock.GetTimestamp() + kLookahead);
+    musician.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   LOG(INFO) << "Stopping audio stream";
-  barelymusician.StopPlayback();
+  musician.StopPlayback();
   audio_output.Stop();
 
   return 0;

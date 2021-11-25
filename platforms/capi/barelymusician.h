@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "platforms/common/visibility.h"
+#include "platforms/capi/visibility.h"
 
 #ifdef __cplusplus
 extern "C" {

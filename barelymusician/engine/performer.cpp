@@ -10,7 +10,7 @@
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/instrument_event.h"
 
-namespace barelyapi {
+namespace barely {
 
 Performer::Performer()
     : sequence_begin_position_(std::nullopt),
@@ -183,4 +183,4 @@ double Performer::ClampEndPosition(double end_position) {
              : end_position;
 }
 
-}  // namespace barelyapi
+}  // namespace barely

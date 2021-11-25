@@ -3,7 +3,7 @@
 
 #include "barelymusician/dsp/generator.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output
 /// samples according to its current state.
@@ -75,6 +75,6 @@ class Envelope : public Generator {
   float phase_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_ENVELOPE_H_

@@ -3,7 +3,7 @@
 
 #include <atomic>
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 /// Thread-safe audio dsp clock.
 class AudioClock {
@@ -29,6 +29,6 @@ class AudioClock {
   std::atomic<double> timestamp_;
 };
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples
 
 #endif  // EXAMPLES_COMMON_AUDIO_CLOCK_H_

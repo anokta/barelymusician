@@ -5,7 +5,7 @@
 #include "barelymusician/dsp/voice.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Number of voices for the polyphonic instrument.
@@ -139,4 +139,4 @@ TEST(PolyphonicVoiceTest, Update) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

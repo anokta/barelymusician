@@ -2,7 +2,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 OnePoleFilter::OnePoleFilter()
     : coefficient_(1.0f), type_(FilterType::kLowPass), output_(0.0f) {}
@@ -25,4 +25,4 @@ void OnePoleFilter::SetCoefficient(float coefficient) {
 
 void OnePoleFilter::SetType(FilterType type) { type_ = type; }
 
-}  // namespace barelyapi
+}  // namespace barely

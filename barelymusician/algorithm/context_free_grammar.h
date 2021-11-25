@@ -9,7 +9,7 @@
 #include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Context-free grammar (L-system) template that generates a sequence of
 /// |SymbolType| with the given set of substition rules.
@@ -98,6 +98,6 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GetSubstition(
   return (*substitions)[index];
 }
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_

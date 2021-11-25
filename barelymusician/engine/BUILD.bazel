@@ -78,6 +78,23 @@ cc_library(
 )
 
 cc_library(
+    name = "musician",
+    srcs = ["musician.cpp"],
+    hdrs = ["musician.h"],
+    deps = [
+        ":conductor",
+        ":conductor_definition",
+        ":instrument_manager",
+        ":performer",
+        ":transport",
+        "//barelymusician/common:find_or_null",
+        "//barelymusician/common:id",
+        "//barelymusician/common:id_generator",
+        "//barelymusician/common:status",
+    ],
+)
+
+cc_library(
     name = "param",
     srcs = ["param.cpp"],
     hdrs = ["param.h"],

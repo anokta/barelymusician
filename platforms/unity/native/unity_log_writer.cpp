@@ -5,7 +5,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi::unity {
+namespace barely::unity {
 
 void UnityLogWriter::Write(logging::LogSeverity severity,
                            const std::string& message) {
@@ -18,4 +18,4 @@ void UnityLogWriter::SetDebugCallback(DebugCallback&& debug_callback) {
   debug_callback_ = std::move(debug_callback);
 }
 
-}  // namespace barelyapi::unity
+}  // namespace barely::unity

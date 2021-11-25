@@ -4,7 +4,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 namespace {
 
@@ -28,4 +28,4 @@ double QuantizePosition(double position, double resolution, double amount) {
   return Lerp(position, resolution * std::round(position / resolution), amount);
 }
 
-}  // namespace barelyapi
+}  // namespace barely

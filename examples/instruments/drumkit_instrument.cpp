@@ -6,7 +6,7 @@
 #include "barelymusician/common/find_or_null.h"
 #include "examples/common/wav_file.h"
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 namespace {
 
@@ -68,4 +68,4 @@ void DrumkitInstrument::Add(float pitch, const WavFile& wav_file) {
   voices_.insert({pitch, voice});
 }
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples

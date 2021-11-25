@@ -7,7 +7,7 @@
 
 #include "barelymusician/engine/instrument_definition.h"
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 /// Generic instrument interface.
 class GenericInstrument {
@@ -83,6 +83,6 @@ InstrumentDefinition GetInstrumentDefinition(
           }};
 }
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples
 
 #endif  // BARELYMUSICIAN_EXAMPLES_INSTRUMENTS_GENERIC_INSTRUMENT_H_

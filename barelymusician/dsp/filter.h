@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_PROCESSOR_H_
 #define BARELYMUSICIAN_DSP_PROCESSOR_H_
 
-namespace barelyapi {
+namespace barely {
 
 /// Unit filter interface that processes per sample PCM input.
 class Filter {
@@ -19,6 +19,6 @@ class Filter {
   virtual void Reset() = 0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_PROCESSOR_H_

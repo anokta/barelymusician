@@ -4,7 +4,7 @@
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/voice.h"
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 /// Simple enveloped voice template.
 template <class GeneratorType>
@@ -76,6 +76,6 @@ void EnvelopedVoice<GeneratorType>::Stop() {
   envelope_.Stop();
 }
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples
 
 #endif  // EXAMPLES_INSTRUMENTS_ENVELOPED_VOICE_H_

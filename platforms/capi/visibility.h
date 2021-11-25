@@ -1,5 +1,5 @@
-#ifndef PLATFORMS_COMMON_VISIBILITY_H_
-#define PLATFORMS_COMMON_VISIBILITY_H_
+#ifndef PLATFORMS_CAPI_VISIBILITY_H_
+#define PLATFORMS_CAPI_VISIBILITY_H_
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 #ifdef BARELYMUSICIAN_EXPORTS
@@ -23,4 +23,4 @@
 #endif  // __GNUC__ >= 4
 #endif  // defined(_WIN32) || defined(__CYGWIN__)
 
-#endif  // PLATFORMS_COMMON_VISIBILITY_H_
+#endif  // PLATFORMS_CAPI_VISIBILITY_H_

@@ -7,7 +7,7 @@
 #include "barelymusician/engine/param_definition.h"
 #include "examples/instruments/enveloped_voice.h"
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 SynthInstrument::SynthInstrument(int sample_rate)
     : gain_(0.0f), voice_(SynthVoice(sample_rate)) {}
@@ -81,4 +81,4 @@ ParamDefinitions SynthInstrument::GetParamDefinitions() {
       {static_cast<int>(SynthInstrumentParam::kNumVoices), 8.0f, 0.0f}};
 }
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples

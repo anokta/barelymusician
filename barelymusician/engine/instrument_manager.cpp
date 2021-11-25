@@ -17,7 +17,7 @@
 #include "barelymusician/engine/param.h"
 #include "barelymusician/engine/param_definition.h"
 
-namespace barelyapi {
+namespace barely {
 
 namespace {
 
@@ -397,4 +397,4 @@ InstrumentManager::InstrumentController::InstrumentController(
   }
 }
 
-}  // namespace barelyapi
+}  // namespace barely

@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace barelyapi {
+namespace barely {
 
 /// Id type.
 using Id = std::int64_t;
@@ -11,6 +11,6 @@ using Id = std::int64_t;
 /// Invalid id.
 inline constexpr Id kInvalidId = -1;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMMON_ID_H_

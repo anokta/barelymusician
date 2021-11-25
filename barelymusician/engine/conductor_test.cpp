@@ -10,7 +10,7 @@
 #include "barelymusician/engine/conductor_definition.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Returns test conductor definition.
@@ -82,4 +82,4 @@ TEST(ConductorTest, TestDefinition) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

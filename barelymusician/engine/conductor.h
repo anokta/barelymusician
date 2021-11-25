@@ -9,7 +9,7 @@
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Class that wraps a conductor.
 class Conductor {
@@ -89,6 +89,6 @@ class Conductor {
   ConductorState state_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_CONDUCTOR_H_

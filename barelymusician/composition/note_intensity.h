@@ -3,11 +3,11 @@
 
 #include <variant>
 
-namespace barelyapi {
+namespace barely {
 
 /// Note intensity type.
 using NoteIntensity = std::variant<float>;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMPOSITION_NOTE_INTENSITY_H_

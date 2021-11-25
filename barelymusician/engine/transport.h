@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace barelyapi {
+namespace barely {
 
 /// Transport that controls playback.
 class Transport {
@@ -105,6 +105,6 @@ class Transport {
   UpdateCallback update_callback_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_TRANSPORT_H_

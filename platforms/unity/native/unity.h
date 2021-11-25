@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include "platforms/capi/barelymusician.h"
-#include "platforms/common/visibility.h"
+#include "platforms/capi/visibility.h"
 
 extern "C" {
 

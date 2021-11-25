@@ -8,7 +8,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Tests that adding a single synchronous task gets run as expected.
@@ -109,4 +109,4 @@ TEST(TaskRunnerTest, RunTasksExeedingMaxSize) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

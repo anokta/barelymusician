@@ -10,7 +10,7 @@
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
 
-namespace barelyapi {
+namespace barely {
 
 namespace {
 
@@ -116,4 +116,4 @@ double Conductor::TransformPlaybackTempo(double tempo) {
   return transform_playback_tempo_fn_(&state_, tempo);
 }
 
-}  // namespace barelyapi
+}  // namespace barely

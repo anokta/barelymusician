@@ -4,7 +4,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 SamplePlayer::SamplePlayer(int sample_rate)
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
@@ -57,4 +57,4 @@ void SamplePlayer::CalculateIncrementPerSample() {
   increment_ = speed_ * frequency_ * sample_interval_;
 }
 
-}  // namespace barelyapi
+}  // namespace barely

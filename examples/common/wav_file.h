@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 /// RIFF Wave file.
 class WavFile {
@@ -41,6 +41,6 @@ class WavFile {
   std::vector<float> data_;
 };
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples
 
 #endif  // EXAMPLES_COMMON_WAV_FILE_H_

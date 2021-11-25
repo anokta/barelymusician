@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 InputManager::InputManager()
     : key_down_callback_(nullptr), key_up_callback_(nullptr) {
@@ -112,4 +112,4 @@ void InputManager::HandleKeyUp(const Key& key) {
   }
 }
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples

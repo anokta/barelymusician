@@ -11,7 +11,7 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 
-namespace barelyapi {
+namespace barely {
 
 Sequence::Sequence()
     : begin_offset_(0.0),
@@ -152,4 +152,4 @@ void Sequence::ProcessInternal(double begin_position, double end_position,
   }
 }
 
-}  // namespace barelyapi
+}  // namespace barely

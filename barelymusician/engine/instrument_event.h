@@ -8,7 +8,7 @@
 
 #include "barelymusician/common/id.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Set all notes off event.
 struct SetAllNotesOffEvent {};
@@ -64,6 +64,6 @@ using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;
 /// Instrument id-event pairs by their positions container type.
 using InstrumentIdEventPairs = std::multimap<double, InstrumentIdEventPair>;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_

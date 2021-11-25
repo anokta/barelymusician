@@ -7,7 +7,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Class template that provides polyphony of a desired voice type.
 template <class VoiceType>
@@ -146,6 +146,6 @@ void PolyphonicVoice<VoiceType>::Update(const VoiceCallback& update_voice) {
   }
 }
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_

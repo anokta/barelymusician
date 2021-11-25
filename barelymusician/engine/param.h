@@ -3,7 +3,7 @@
 
 #include "barelymusician/engine/param_definition.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Class that wraps a parameter.
 class Param {
@@ -47,6 +47,6 @@ class Param {
   float value_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_PARAM_H_

@@ -5,7 +5,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
   DCHECK_GT(max_size, 0);
@@ -72,4 +72,4 @@ void TaskRunner::PushNode(std::atomic<Node*>* head, Node* node) {
       old_head, node, std::memory_order_release, std::memory_order_relaxed));
 }
 
-}  // namespace barelyapi
+}  // namespace barely

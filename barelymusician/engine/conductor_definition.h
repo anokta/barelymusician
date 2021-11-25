@@ -9,7 +9,7 @@
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Conductor state type.
 using ConductorState = std::any;
@@ -98,6 +98,6 @@ struct ConductorDefinition {
   TransformPlaybackTempoFn transform_playback_tempo_fn;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMPOSITION_CONDUCTOR_DEFINITION_H_

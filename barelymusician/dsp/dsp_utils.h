@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
-namespace barelyapi {
+namespace barely {
 
 /// PI.
 inline constexpr float kPi = 3.14159265358979323846f;
@@ -49,6 +49,6 @@ int SamplesFromSeconds(int sample_rate, double seconds);
 /// @return Number of seconds.
 double SecondsFromSamples(int sample_rate, int samples);
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_DSP_UTILS_H_

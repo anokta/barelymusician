@@ -2,7 +2,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 Envelope::Envelope(int sample_rate)
     : sample_interval_(1.0f / static_cast<float>(sample_rate)),
@@ -126,4 +126,4 @@ void Envelope::Stop() {
   }
 }
 
-}  // namespace barelyapi
+}  // namespace barely

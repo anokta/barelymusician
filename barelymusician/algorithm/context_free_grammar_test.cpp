@@ -6,7 +6,7 @@
 #include "barelymusician/common/random.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Tests that the expected sequence is generated with a given substition rule.
@@ -93,4 +93,4 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

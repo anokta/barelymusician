@@ -11,10 +11,15 @@ cc_library(
         "//conditions:default": [],
     }),
     deps = [
-        "//barelymusician",
+        ":visibility",
         "//barelymusician/common:status",
         "//barelymusician/composition:note",
+        "//barelymusician/engine:musician",
         "//examples/instruments:synth_instrument",
-        "//platforms/common:visibility",
     ],
+)
+
+cc_library(
+    name = "visibility",
+    hdrs = ["visibility.h"],
 )

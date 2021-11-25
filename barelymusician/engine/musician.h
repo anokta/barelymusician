@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
-#define BARELYMUSICIAN_BARELYMUSICIAN_H_
+#ifndef BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#define BARELYMUSICIAN_ENGINE_MUSICIAN_H_
 
 #include <any>
 #include <functional>
@@ -17,10 +17,10 @@
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
-namespace barelyapi {
+namespace barely {
 
-// BarelyMusician C++ API.
-class BarelyMusician {
+// barely::Musician C++ API.
+class Musician {
  public:
   /// Instrument note off callback signature.
   ///
@@ -47,10 +47,10 @@ class BarelyMusician {
   using PlaybackUpdateCallback =
       std::function<void(double begin_position, double end_position)>;
 
-  /// Constructs new |BarelyMusician|.
+  /// Constructs new |Musician|.
   ///
   /// @param sample_rate System sampling rate in Hz.
-  explicit BarelyMusician(int sample_rate);
+  explicit Musician(int sample_rate);
 
   /// Adds new instrument.
   ///
@@ -379,6 +379,6 @@ class BarelyMusician {
   Transport transport_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
-#endif  // BARELYMUSICIAN_BARELYMUSICIAN_H_
+#endif  // BARELYMUSICIAN_ENGINE_MUSICIAN_H_

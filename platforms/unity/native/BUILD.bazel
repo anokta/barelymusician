@@ -45,7 +45,7 @@ cc_library(
         ":unity_log_writer",
         "//barelymusician/common:logging",
         "//platforms/capi:barelymusician",
-        "//platforms/common:visibility",
+        "//platforms/capi:visibility",
     ],
     alwayslink = True,
 )

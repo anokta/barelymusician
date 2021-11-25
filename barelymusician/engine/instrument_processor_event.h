@@ -7,7 +7,7 @@
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Create event.
 struct CreateEvent {
@@ -27,6 +27,6 @@ using InstrumentProcessorEvent =
 using InstrumentProcessorEvents =
     std::multimap<double, InstrumentProcessorEvent>;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_EVENT_H_

@@ -4,7 +4,7 @@
 #include <optional>
 #include <vector>
 
-namespace barelyapi {
+namespace barely {
 
 /// Parameter definition.
 struct ParamDefinition {
@@ -24,6 +24,6 @@ struct ParamDefinition {
 /// Parameter definitions container type.
 using ParamDefinitions = std::vector<ParamDefinition>;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_PARAM_DEFINITION_H_

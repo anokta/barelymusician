@@ -10,7 +10,7 @@
 #include <functional>
 #include <unordered_set>
 
-namespace barelyapi::examples {
+namespace barely::examples {
 
 /// Input manager for handling keyboard events.
 class InputManager {
@@ -85,6 +85,6 @@ class InputManager {
 #endif  // defined(__APPLE__)
 };
 
-}  // namespace barelyapi::examples
+}  // namespace barely::examples
 
 #endif  // EXAMPLES_COMMON_INPUT_MANAGER_H_

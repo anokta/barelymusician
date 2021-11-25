@@ -5,7 +5,7 @@
 
 #include "barelymusician/engine/param_definition.h"
 
-namespace barelyapi {
+namespace barely {
 
 Param::Param(ParamDefinition definition) : definition_(std::move(definition)) {
   // Make sure that the default value is within the minimum and maximum values.
@@ -41,4 +41,4 @@ bool Param::SetValue(float value) {
   return false;
 }
 
-}  // namespace barelyapi
+}  // namespace barely

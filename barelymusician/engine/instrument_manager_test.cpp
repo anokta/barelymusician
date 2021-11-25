@@ -12,7 +12,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 using ::testing::AllOf;
@@ -642,4 +642,4 @@ TEST(InstrumentManagerTest, SetSampleRate) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

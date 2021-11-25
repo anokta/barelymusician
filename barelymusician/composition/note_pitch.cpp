@@ -5,7 +5,7 @@
 
 #include "barelymusician/common/logging.h"
 
-namespace barelyapi {
+namespace barely {
 
 float GetPitch(std::span<const float> scale, int index) {
   DCHECK(!scale.empty());
@@ -18,4 +18,4 @@ float GetPitch(std::span<const float> scale, int index) {
   return octave_offset + scale[scale_offset];
 }
 
-}  // namespace barelyapi
+}  // namespace barely

@@ -2,10 +2,10 @@
 
 #include "barelymusician/common/id.h"
 
-namespace barelyapi {
+namespace barely {
 
 IdGenerator::IdGenerator() : counter_(0) {}
 
 Id IdGenerator::Generate() { return ++counter_; }
 
-}  // namespace barelyapi
+}  // namespace barely

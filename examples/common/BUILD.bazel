@@ -18,6 +18,11 @@ cc_library(
 )
 
 cc_library(
+    name = "console_log",
+    hdrs = ["console_log.h"],
+)
+
+cc_library(
     name = "input_manager",
     srcs = ["input_manager.cpp"],
     hdrs = ["input_manager.h"],

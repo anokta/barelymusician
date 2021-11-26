@@ -22,12 +22,6 @@ cc_library(
 )
 
 cc_library(
-    name = "logging",
-    srcs = ["logging.cpp"],
-    hdrs = ["logging.h"],
-)
-
-cc_library(
     name = "random",
     srcs = ["random.cpp"],
     hdrs = ["random.h"],

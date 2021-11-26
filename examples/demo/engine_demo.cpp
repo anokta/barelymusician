@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
@@ -20,6 +19,7 @@
 #include "barelymusician/engine/musician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
+#include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"
 #include "examples/instruments/drumkit_instrument.h"
@@ -37,6 +37,7 @@ using ::barely::OscillatorType;
 using ::barely::Random;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
+using ::barely::examples::ConsoleLog;
 using ::barely::examples::DrumkitInstrument;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
@@ -186,14 +187,15 @@ int main(int /*argc*/, char* argv[]) {
   // Note on callback.
   const auto note_on_callback = [](Id instrument_id, float pitch,
                                    float intensity) {
-    LOG(INFO) << "Instrument #" << instrument_id << ": NoteOn(" << pitch << ", "
-              << intensity << ")";
+    ConsoleLog() << "Instrument #" << instrument_id << ": NoteOn(" << pitch
+                 << ", " << intensity << ")";
   };
   musician.SetInstrumentNoteOnCallback(note_on_callback);
 
   // Note off callback.
   const auto note_off_callback = [](Id performer_id, float pitch) {
-    LOG(INFO) << "Instrument #" << performer_id << ": NoteOff(" << pitch << ")";
+    ConsoleLog() << "Instrument #" << performer_id << ": NoteOff(" << pitch
+                 << ")";
   };
   musician.SetInstrumentNoteOffCallback(note_off_callback);
 
@@ -331,32 +333,32 @@ int main(int /*argc*/, char* argv[]) {
       case ' ':
         if (musician.IsPlaying()) {
           musician.StopPlayback();
-          LOG(INFO) << "Stopped playback";
+          ConsoleLog() << "Stopped playback";
         } else {
           musician.StartPlayback();
-          LOG(INFO) << "Started playback";
+          ConsoleLog() << "Started playback";
         }
         break;
       case '1':
         musician.SetPlaybackTempo(random.DrawUniform(0.5, 0.75) *
                                   musician.GetPlaybackTempo());
-        LOG(INFO) << "Tempo changed to " << musician.GetPlaybackTempo();
+        ConsoleLog() << "Tempo changed to " << musician.GetPlaybackTempo();
         break;
       case '2':
         musician.SetPlaybackTempo(random.DrawUniform(1.5, 2.0) *
                                   musician.GetPlaybackTempo());
-        LOG(INFO) << "Tempo changed to " << musician.GetPlaybackTempo();
+        ConsoleLog() << "Tempo changed to " << musician.GetPlaybackTempo();
         break;
       case 'R':
         musician.SetPlaybackTempo(kTempo);
-        LOG(INFO) << "Tempo reset to " << kTempo;
+        ConsoleLog() << "Tempo reset to " << kTempo;
         break;
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
-  LOG(INFO) << "Starting audio stream";
+  ConsoleLog() << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
   musician.StartPlayback();
 
@@ -367,7 +369,7 @@ int main(int /*argc*/, char* argv[]) {
   }
 
   // Stop the demo.
-  LOG(INFO) << "Stopping audio stream";
+  ConsoleLog() << "Stopping audio stream";
   musician.StopPlayback();
   audio_output.Stop();
 

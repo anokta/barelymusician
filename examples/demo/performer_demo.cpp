@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/logging.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
@@ -20,6 +19,7 @@
 #include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
+#include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
 
@@ -39,6 +39,7 @@ using ::barely::ParamDefinitions;
 using ::barely::Random;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
+using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
@@ -96,8 +97,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetInstrumentNoteOnCallback(
       [&](Id instrument_id, float note_pitch, float note_intensity) {
         if (instrument_id == performer_instrument_id) {
-          LOG(INFO) << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
-                    << note_intensity << "}";
+          ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
+                       << note_intensity << "}";
         }
       });
 
@@ -141,7 +142,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       reset_position = false;
       musician.SetPlaybackPosition(0.0);
     }
-    LOG(INFO) << "Beat: " << musician.GetPlaybackPosition();
+    ConsoleLog() << "Beat: " << musician.GetPlaybackPosition();
   });
 
   // Audio process callback.
@@ -170,12 +171,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
         index > 0 && index < 10) {
       // Toggle notes.
       if (IsOk(musician.RemovePerformerNote(performer_id, note_ids[index]))) {
-        LOG(INFO) << "Removed note " << index;
+        ConsoleLog() << "Removed note " << index;
         note_ids[index] = barely::kInvalidId;
       } else {
         note_ids[index] = GetStatusOrValue(musician.AddPerformerNote(
             performer_id, notes[index].first, notes[index].second));
-        LOG(INFO) << "Added note " << index;
+        ConsoleLog() << "Added note " << index;
       }
       return;
     }
@@ -185,19 +186,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (musician.IsPlaying()) {
           musician.StopPlayback();
-          LOG(INFO) << "Stopped playback";
+          ConsoleLog() << "Stopped playback";
         } else {
           musician.StartPlayback();
-          LOG(INFO) << "Started playback";
+          ConsoleLog() << "Started playback";
         }
         return;
       case 'L':
         if (GetStatusOrValue(musician.IsPerformerLooping(performer_id))) {
           musician.SetPerformerLoop(performer_id, false);
-          LOG(INFO) << "Loop turned off";
+          ConsoleLog() << "Loop turned off";
         } else {
           musician.SetPerformerLoop(performer_id, true);
-          LOG(INFO) << "Loop turned on";
+          ConsoleLog() << "Loop turned on";
         }
         return;
       case 'C':
@@ -230,7 +231,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                           }}
                 : ConductorDefinition{},
             ParamDefinitions{});
-        LOG(INFO) << "Conductor turned " << (use_conductor ? "on" : "off");
+        ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':
         reset_position = true;
@@ -251,12 +252,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     musician.SetPlaybackTempo(tempo);
-    LOG(INFO) << "Tempo set to " << tempo << " BPM";
+    ConsoleLog() << "Tempo set to " << tempo << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
-  LOG(INFO) << "Starting audio stream";
+  ConsoleLog() << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
   musician.StartPlayback();
 
@@ -267,7 +268,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Stop the demo.
-  LOG(INFO) << "Stopping audio stream";
+  ConsoleLog() << "Stopping audio stream";
   musician.StopPlayback();
   audio_output.Stop();
 

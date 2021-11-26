@@ -8,12 +8,12 @@
 
 #include "MidiFile.h"
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/logging.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/musician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
+#include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -27,6 +27,7 @@ using ::barely::Note;
 using ::barely::OscillatorType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
+using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
@@ -103,22 +104,22 @@ int main(int /*argc*/, char* argv[]) {
 
   const int num_tracks = midi_file.getTrackCount();
   const int ticks_per_quarter = midi_file.getTPQ();
-  LOG(INFO) << "Initializing " << kMidiFileName << " for MIDI playback ("
-            << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
+  ConsoleLog() << "Initializing " << kMidiFileName << " for MIDI playback ("
+               << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
 
   AudioClock clock(kSampleRate);
 
   Musician musician(kSampleRate);
   musician.SetPlaybackTempo(kTempo);
 
-  musician.SetInstrumentNoteOnCallback(
-      [](Id instrument_id, float pitch, float intensity) {
-        LOG(INFO) << "MIDI track #" << instrument_id << ": NoteOn("
-                  << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
-      });
+  musician.SetInstrumentNoteOnCallback([](Id instrument_id, float pitch,
+                                          float intensity) {
+    ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOn("
+                 << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
+  });
   musician.SetInstrumentNoteOffCallback([](Id instrument_id, float pitch) {
-    LOG(INFO) << "MIDI track #" << instrument_id << ": NoteOff("
-              << MidiKeyNumberFromPitch(pitch) << ") ";
+    ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOff("
+                 << MidiKeyNumberFromPitch(pitch) << ") ";
   });
 
   std::vector<Id> instrument_ids;
@@ -127,7 +128,7 @@ int main(int /*argc*/, char* argv[]) {
     const Id performer_id = musician.AddPerformer();
     AddScore(midi_file[i], ticks_per_quarter, &musician, performer_id);
     if (GetStatusOrValue(musician.IsPerformerEmpty(performer_id))) {
-      LOG(WARNING) << "Empty MIDI track: " << i;
+      ConsoleLog() << "Empty MIDI track: " << i;
       musician.RemovePerformer(performer_id);
       continue;
     }
@@ -144,7 +145,7 @@ int main(int /*argc*/, char* argv[]) {
     musician.AddPerformerInstrument(performer_id, instrument_id);
     instrument_ids.push_back(instrument_id);
   }
-  LOG(INFO) << "Number of active MIDI tracks: " << instrument_ids.size();
+  ConsoleLog() << "Number of active MIDI tracks: " << instrument_ids.size();
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
@@ -172,7 +173,7 @@ int main(int /*argc*/, char* argv[]) {
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
-  LOG(INFO) << "Starting audio stream";
+  ConsoleLog() << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
   musician.StartPlayback();
 
@@ -183,7 +184,7 @@ int main(int /*argc*/, char* argv[]) {
   }
 
   // Stop the demo.
-  LOG(INFO) << "Stopping audio stream";
+  ConsoleLog() << "Stopping audio stream";
   musician.StopPlayback();
   audio_output.Stop();
 

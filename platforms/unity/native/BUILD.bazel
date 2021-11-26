@@ -42,20 +42,8 @@ cc_library(
     }),
     visibility = ["//visibility:private"],
     deps = [
-        ":unity_log_writer",
-        "//barelymusician/common:logging",
         "//platforms/capi:barelymusician",
         "//platforms/capi:visibility",
     ],
     alwayslink = True,
-)
-
-cc_library(
-    name = "unity_log_writer",
-    srcs = ["unity_log_writer.cpp"],
-    hdrs = ["unity_log_writer.h"],
-    visibility = ["//visibility:private"],
-    deps = [
-        "//barelymusician/common:logging",
-    ],
 )

@@ -226,17 +226,6 @@ namespace BarelyApi {
 
     // Internal component to update the native state.
     private class BarelyMusicianInternal : MonoBehaviour {
-      // Log severity.
-      private enum LogSeverity {
-        Info = 0,
-        Warning = 1,
-        Error = 2,
-      }
-
-      // Debug callback.
-      private delegate void DebugCallback(int severity, string message);
-      private DebugCallback _debugCallback = null;
-
       // Instrument note off callback.
       private delegate void InstrumentNoteOffCallback(Int64 instrumentId, float notePitch);
       private InstrumentNoteOffCallback _instrumentNoteOffCallback = null;
@@ -251,22 +240,7 @@ namespace BarelyApi {
 
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-        _debugCallback = delegate (int severity, string message) {
-          message = "{::" + pluginName + "::}" + message;
-          switch ((LogSeverity)severity) {
-            case LogSeverity.Info:
-              Debug.Log(message);
-              break;
-            case LogSeverity.Warning:
-              Debug.LogWarning(message);
-              break;
-            case LogSeverity.Error:
-              Debug.LogError(message);
-              break;
-          }
-        };
-        _handle =
-            CreateNative(AudioSettings.outputSampleRate, Marshal.GetFunctionPointerForDelegate(_debugCallback));
+        _handle = CreateNative(AudioSettings.outputSampleRate);
         _instrumentNoteOffCallback = delegate (Int64 instrumentId, float notePitch) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(instrumentId, out instrument)) {
@@ -338,10 +312,10 @@ namespace BarelyApi {
     [DllImport(pluginName, EntryPoint = "BarelyAddSynthInstrument")]
     private static extern Int64 AddSynthInstrumentNative(IntPtr handle);
 
-    [DllImport(pluginName, EntryPoint = "BarelyCreateUnity")]
-    private static extern IntPtr CreateNative(Int32 sampleRate, IntPtr debugCallbackPtr);
+    [DllImport(pluginName, EntryPoint = "BarelyCreate")]
+    private static extern IntPtr CreateNative(Int32 sampleRate);
 
-    [DllImport(pluginName, EntryPoint = "BarelyDestroyUnity")]
+    [DllImport(pluginName, EntryPoint = "BarelyDestroy")]
     private static extern Int32 DestroyNative(IntPtr handle);
 
     [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackPosition")]

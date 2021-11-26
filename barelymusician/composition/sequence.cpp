@@ -13,13 +13,13 @@
 
 namespace barely {
 
-Sequence::Sequence()
+Sequence::Sequence() noexcept
     : begin_offset_(0.0),
       loop_(false),
       loop_begin_offset_(0.0),
       loop_length_(1.0) {}
 
-Status Sequence::AddNote(Id id, double position, Note note) {
+Status Sequence::AddNote(Id id, double position, Note note) noexcept {
   if (id == kInvalidId) return Status::kInvalidArgument;
   if (positions_.emplace(id, position).second) {
     notes_.emplace(NotePositionIdPair{position, id}, std::move(note));
@@ -28,7 +28,8 @@ Status Sequence::AddNote(Id id, double position, Note note) {
   return Status::kAlreadyExists;
 }
 
-std::vector<Sequence::NoteWithPositionIdPair> Sequence::GetAllNotes() const {
+std::vector<Sequence::NoteWithPositionIdPair> Sequence::GetAllNotes()
+    const noexcept {
   std::vector<NoteWithPositionIdPair> notes;
   if (!notes_.empty()) {
     notes.reserve(notes_.size());
@@ -39,13 +40,15 @@ std::vector<Sequence::NoteWithPositionIdPair> Sequence::GetAllNotes() const {
   return notes;
 }
 
-double Sequence::GetBeginOffset() const { return begin_offset_; }
+double Sequence::GetBeginOffset() const noexcept { return begin_offset_; }
 
-double Sequence::GetLoopBeginOffset() const { return loop_begin_offset_; }
+double Sequence::GetLoopBeginOffset() const noexcept {
+  return loop_begin_offset_;
+}
 
-double Sequence::GetLoopLength() const { return loop_length_; }
+double Sequence::GetLoopLength() const noexcept { return loop_length_; }
 
-StatusOr<Sequence::NoteWithPosition> Sequence::GetNote(Id id) const {
+StatusOr<Sequence::NoteWithPosition> Sequence::GetNote(Id id) const noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     return NoteWithPosition{
         *position, notes_.find(NotePositionIdPair{*position, id})->second};
@@ -53,13 +56,16 @@ StatusOr<Sequence::NoteWithPosition> Sequence::GetNote(Id id) const {
   return Status::kNotFound;
 }
 
-bool Sequence::IsEmpty() const { return notes_.empty(); }
+bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 
-bool Sequence::IsLooping() const { return loop_; }
+bool Sequence::IsLooping() const noexcept { return loop_; }
 
 void Sequence::Process(double begin_position, double end_position,
                        double position_offset,
-                       const ProcessCallback& process_callback) const {
+                       const ProcessCallback& process_callback) const noexcept {
+  if (begin_position >= end_position) {
+    return;
+  }
   position_offset -= begin_offset_;
   begin_position -= position_offset;
   end_position -= position_offset;
@@ -100,23 +106,26 @@ void Sequence::Process(double begin_position, double end_position,
   }
 }
 
-void Sequence::RemoveAllNotes() {
+void Sequence::RemoveAllNotes() noexcept {
   notes_.clear();
   positions_.clear();
 }
 
-void Sequence::RemoveAllNotes(double begin_position, double end_position) {
-  const auto begin =
-      notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
-  const auto end =
-      notes_.lower_bound(NotePositionIdPair{end_position, kInvalidId});
-  for (auto it = begin; it != end; ++it) {
-    positions_.erase(it->first.second);
+void Sequence::RemoveAllNotes(double begin_position,
+                              double end_position) noexcept {
+  if (begin_position < end_position) {
+    const auto begin =
+        notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
+    const auto end =
+        notes_.lower_bound(NotePositionIdPair{end_position, kInvalidId});
+    for (auto it = begin; it != end; ++it) {
+      positions_.erase(it->first.second);
+    }
+    notes_.erase(begin, end);
   }
-  notes_.erase(begin, end);
 }
 
-Status Sequence::RemoveNote(Id id) {
+Status Sequence::RemoveNote(Id id) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     notes_.erase(NotePositionIdPair{position_it->second, id});
@@ -126,23 +135,23 @@ Status Sequence::RemoveNote(Id id) {
   return Status::kNotFound;
 }
 
-void Sequence::SetBeginOffset(double begin_offset) {
+void Sequence::SetBeginOffset(double begin_offset) noexcept {
   begin_offset_ = begin_offset;
 }
 
-void Sequence::SetLoop(bool loop) { loop_ = loop; }
+void Sequence::SetLoop(bool loop) noexcept { loop_ = loop; }
 
-void Sequence::SetLoopBeginOffset(double loop_begin_offset) {
+void Sequence::SetLoopBeginOffset(double loop_begin_offset) noexcept {
   loop_begin_offset_ = loop_begin_offset;
 }
 
-void Sequence::SetLoopLength(double loop_length) {
+void Sequence::SetLoopLength(double loop_length) noexcept {
   loop_length_ = std::max(loop_length, 0.0);
 }
 
-void Sequence::ProcessInternal(double begin_position, double end_position,
-                               double position_offset,
-                               const ProcessCallback& process_callback) const {
+void Sequence::ProcessInternal(
+    double begin_position, double end_position, double position_offset,
+    const ProcessCallback& process_callback) const noexcept {
   const auto begin =
       notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
   const auto end =

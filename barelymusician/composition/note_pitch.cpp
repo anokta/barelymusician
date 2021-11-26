@@ -6,7 +6,7 @@
 
 namespace barely {
 
-float GetPitch(std::span<const float> scale, int index) {
+float GetPitch(std::span<const float> scale, int index) noexcept {
   assert(!scale.empty());
   const float scale_length = static_cast<float>(scale.size());
   const float octave_offset =

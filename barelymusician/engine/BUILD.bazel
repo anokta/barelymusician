@@ -119,7 +119,6 @@ cc_library(
         ":conductor",
         ":instrument_event",
         "//barelymusician/common:id",
-        "//barelymusician/common:logging",
         "//barelymusician/common:status",
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_duration",

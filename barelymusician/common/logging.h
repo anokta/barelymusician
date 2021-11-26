@@ -7,7 +7,6 @@
 
 /// Logging macros.
 #define LOG(severity) BARELY_LOG(severity)
-#define DLOG(severity) BARELY_DLOG(severity)
 
 namespace barely::logging {
 
@@ -87,11 +86,5 @@ void SetLogWriter(LogWriter* log_writer);
                             __FILE__, __LINE__)                       \
       .GetStream()
 #define BARELY_NULL_LOG ::barely::logging::GetNullStream()
-
-#if !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
-#define BARELY_DLOG(severity) BARELY_LOG(severity)
-#else  // !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
-#define BARELY_DLOG(severity) BARELY_NULL_LOG
-#endif  // !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
 
 #endif  // BARELYMUSICIAN_COMMON_LOGGING_H_

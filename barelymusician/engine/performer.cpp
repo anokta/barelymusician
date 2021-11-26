@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/logging.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -60,9 +59,6 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
         ++it;
         continue;
       }
-    } else {
-      DLOG(ERROR) << "Conductor failed to transform note duration: "
-                  << ToString(duration_or);
     }
     // Perform note off event.
     id_event_pairs.emplace(
@@ -83,8 +79,6 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
           // Get pitch.
           const auto pitch_or = conductor.TransformNotePitch(note.pitch);
           if (!IsOk(pitch_or)) {
-            DLOG(ERROR) << "Conductor failed to transform note pitch: "
-                        << ToString(pitch_or);
             return;
           }
           const float pitch = GetStatusOrValue(pitch_or);
@@ -92,8 +86,6 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
           const auto intensity_or =
               conductor.TransformNoteIntensity(note.intensity);
           if (!IsOk(intensity_or)) {
-            DLOG(ERROR) << "Conductor failed to transform note intensity: "
-                        << ToString(intensity_or);
             return;
           }
           const float intensity = GetStatusOrValue(intensity_or);
@@ -101,8 +93,6 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
           const auto duration_or =
               conductor.TransformNoteDuration(note.duration);
           if (!IsOk(duration_or)) {
-            DLOG(ERROR) << "Conductor failed to transform note duration: "
-                        << ToString(duration_or);
             return;
           }
           const double note_end_position =

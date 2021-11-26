@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_COMMON_STATUS_H_
 
 #include <cassert>
-#include <string>
 #include <utility>
 #include <variant>
 
@@ -29,7 +28,7 @@ using StatusOr = std::variant<Status, ValueType>;
 /// @param status_or Value or error status.
 /// @return Error status.
 template <typename ValueType>
-Status GetStatusOrStatus(const StatusOr<ValueType>& status_or) {
+Status GetStatusOrStatus(const StatusOr<ValueType>& status_or) noexcept {
   assert(std::holds_alternative<Status>(status_or));
   return std::get<Status>(status_or);
 }
@@ -39,7 +38,7 @@ Status GetStatusOrStatus(const StatusOr<ValueType>& status_or) {
 /// @param status_or Value or error status.
 /// @return Value.
 template <typename ValueType>
-ValueType& GetStatusOrValue(StatusOr<ValueType>& status_or) {
+ValueType& GetStatusOrValue(StatusOr<ValueType>& status_or) noexcept {
   assert(std::holds_alternative<ValueType>(status_or));
   return std::get<ValueType>(status_or);
 }
@@ -49,7 +48,8 @@ ValueType& GetStatusOrValue(StatusOr<ValueType>& status_or) {
 /// @param status_or Value or error status.
 /// @return Value.
 template <typename ValueType>
-const ValueType& GetStatusOrValue(const StatusOr<ValueType>& status_or) {
+const ValueType& GetStatusOrValue(
+    const StatusOr<ValueType>& status_or) noexcept {
   assert(std::holds_alternative<ValueType>(status_or));
   return std::get<ValueType>(status_or);
 }
@@ -59,7 +59,7 @@ const ValueType& GetStatusOrValue(const StatusOr<ValueType>& status_or) {
 /// @param status_or Value or error status.
 /// @return Value.
 template <typename ValueType>
-ValueType&& GetStatusOrValue(StatusOr<ValueType>&& status_or) {
+ValueType&& GetStatusOrValue(StatusOr<ValueType>&& status_or) noexcept {
   assert(std::holds_alternative<ValueType>(status_or));
   return std::move(std::get<ValueType>(status_or));
 }
@@ -69,7 +69,7 @@ ValueType&& GetStatusOrValue(StatusOr<ValueType>&& status_or) {
 /// @param status_or Value or error status.
 /// @return True if ok.
 template <typename ValueType>
-bool IsOk(const StatusOr<ValueType>& status_or) {
+bool IsOk(const StatusOr<ValueType>& status_or) noexcept {
   return std::holds_alternative<ValueType>(status_or);
 }
 
@@ -77,42 +77,7 @@ bool IsOk(const StatusOr<ValueType>& status_or) {
 ///
 /// @param status Status.
 /// @return True if ok.
-inline bool IsOk(Status status) { return status == Status::kOk; }
-
-/// Returns status string.
-///
-/// @param status_or Value or error status.
-/// @return String.
-template <typename ValueType>
-std::string ToString(const StatusOr<ValueType>& status_or) {
-  return ToString(GetStatusOrStatus(status_or));
-}
-
-/// Returns status string.
-///
-/// @param status Status.
-/// @return String.
-inline std::string ToString(Status status) {
-  switch (status) {
-    case Status::kOk:
-      return "Ok";
-    case Status::kInvalidArgument:
-      return "Invalid argument error";
-    case Status::kNotFound:
-      return "Not found error";
-    case Status::kAlreadyExists:
-      return "Already exists error";
-    case Status::kFailedPrecondition:
-      return "Failed precondition error";
-    case Status::kUnimplemented:
-      return "Unimplemented error";
-    case Status::kInternal:
-      return "Internal error";
-    case Status::kUnknown:
-    default:
-      return "Unknown error";
-  }
-}
+inline bool IsOk(Status status) noexcept { return status == Status::kOk; }
 
 }  // namespace barely
 

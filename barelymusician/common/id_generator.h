@@ -9,12 +9,12 @@ namespace barely {
 class IdGenerator {
  public:
   /// Constructs new |IdGenerator|.
-  IdGenerator();
+  IdGenerator() noexcept;
 
   /// Generates next id.
   ///
   /// @return Unique id.
-  Id Generate();
+  Id Next() noexcept;
 
  private:
   // Id counter.

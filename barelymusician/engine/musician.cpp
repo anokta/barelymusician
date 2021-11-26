@@ -73,14 +73,14 @@ Musician::Musician(int sample_rate)
 
 Id Musician::AddInstrument(InstrumentDefinition definition,
                            ParamDefinitions param_definitions) {
-  const Id instrument_id = id_generator_.Generate();
+  const Id instrument_id = id_generator_.Next();
   instrument_manager_.Add(instrument_id, transport_.GetTimestamp(),
                           std::move(definition), std::move(param_definitions));
   return instrument_id;
 }
 
 Id Musician::AddPerformer() {
-  const Id performer_id = id_generator_.Generate();
+  const Id performer_id = id_generator_.Next();
   performers_.emplace(performer_id, Performer{});
   return performer_id;
 }
@@ -97,7 +97,7 @@ Status Musician::AddPerformerInstrument(Id performer_id, Id instrument_id) {
 StatusOr<Id> Musician::AddPerformerNote(Id performer_id, double position,
                                         Note note) {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
-    const Id note_id = id_generator_.Generate();
+    const Id note_id = id_generator_.Next();
     performer->GetMutableSequence()->AddNote(note_id, position,
                                              std::move(note));
     return note_id;

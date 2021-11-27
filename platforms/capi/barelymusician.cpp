@@ -18,7 +18,7 @@ using ::barely::Status;
 using ::barely::examples::SynthInstrument;
 
 // Returns the corresponding |BarelyStatus| value for a given |status|.
-BarelyStatus GetStatus(Status status) {
+BarelyStatus GetStatus(Status status) noexcept {
   switch (status) {
     case Status::kOk:
       return kBarelyOk;
@@ -47,7 +47,8 @@ struct BarelyMusician {
   /// Constructs new |BarelyMusician|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit BarelyMusician(std::int32_t sample_rate) : instance(sample_rate) {}
+  explicit BarelyMusician(std::int32_t sample_rate) noexcept
+      : instance(sample_rate) {}
 
   /// BarelyMusician instance.
   Musician instance;

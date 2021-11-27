@@ -16,9 +16,6 @@ cc_library(
     name = "note_duration",
     srcs = ["note_duration.cpp"],
     hdrs = ["note_duration.h"],
-    deps = [
-        "//barelymusician/common:logging",
-    ],
 )
 
 cc_library(
@@ -30,9 +27,6 @@ cc_library(
     name = "note_pitch",
     srcs = ["note_pitch.cpp"],
     hdrs = ["note_pitch.h"],
-    deps = [
-        "//barelymusician/common:logging",
-    ],
 )
 
 cc_library(

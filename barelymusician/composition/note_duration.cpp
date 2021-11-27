@@ -1,8 +1,7 @@
 #include "barelymusician/composition/note_duration.h"
 
+#include <cassert>
 #include <cmath>
-
-#include "barelymusician/common/logging.h"
 
 namespace barely {
 
@@ -13,18 +12,18 @@ double Lerp(double a, double b, double t) { return a + t * (b - a); }
 
 }  // namespace
 
-double GetPosition(int step, int num_steps) {
-  DCHECK_GE(step, 0);
-  DCHECK_GT(num_steps, 0);
+double GetPosition(int step, int num_steps) noexcept {
+  assert(step >= 0);
+  assert(num_steps > 0);
   const double num_beats = static_cast<double>(step / num_steps);
   return num_beats +
          static_cast<double>(step % num_steps) / static_cast<double>(num_steps);
 }
 
-double QuantizePosition(double position, double resolution, double amount) {
-  DCHECK_GT(resolution, 0.0);
-  DCHECK_GE(amount, 0.0);
-  DCHECK_LE(amount, 1.0);
+double QuantizePosition(double position, double resolution,
+                        double amount) noexcept {
+  assert(resolution > 0.0);
+  assert(amount >= 0.0 && amount <= 1.0);
   return Lerp(position, resolution * std::round(position / resolution), amount);
 }
 

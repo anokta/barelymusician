@@ -11,33 +11,33 @@ class Param {
   /// Constructs new |Param|.
   ///
   /// @param definition Parameter definition.
-  explicit Param(ParamDefinition definition);
+  explicit Param(ParamDefinition definition) noexcept;
 
   /// Returns definition.
   ///
   /// @return Parameter definition.
-  const ParamDefinition& GetDefinition() const;
+  const ParamDefinition& GetDefinition() const noexcept;
 
   /// Returns id.
   ///
   /// @return Parameter id.
-  int GetId() const;
+  int GetId() const noexcept;
 
   /// Returns value.
   ///
   /// @return Parameter value.
-  float GetValue() const;
+  float GetValue() const noexcept;
 
   /// Resets value.
   ///
   /// @return True if successful, false otherwise.
-  bool ResetValue();
+  bool ResetValue() noexcept;
 
   /// Sets value.
   ///
   /// @param value Parameter value.
   /// @return True if successful, false otherwise.
-  bool SetValue(float value);
+  bool SetValue(float value) noexcept;
 
  private:
   // Parameter definition.

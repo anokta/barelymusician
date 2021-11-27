@@ -15,21 +15,21 @@ enum class FilterType {
 class OnePoleFilter : public Filter {
  public:
   /// Constructs new |OnePoleFilter|.
-  OnePoleFilter();
+  OnePoleFilter() noexcept;
 
   /// Implements |Processor|.
-  float Next(float input) override;
-  void Reset() override;
+  float Next(float input) noexcept override;
+  void Reset() noexcept override;
 
   /// Sets the coefficent of the filter.
   ///
   /// @param coefficient Filter coefficient.
-  void SetCoefficient(float coefficient);
+  void SetCoefficient(float coefficient) noexcept;
 
   /// Sets the type of the filter.
   ///
   /// @param type Filter type.
-  void SetType(FilterType type);
+  void SetType(FilterType type) noexcept;
 
  private:
   // Transfer function coefficient of the filter.

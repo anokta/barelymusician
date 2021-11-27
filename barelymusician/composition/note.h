@@ -19,7 +19,7 @@ struct Note {
   NoteDuration duration;
 
   /// Default comparators.
-  auto operator<=>(const Note& other) const = default;
+  auto operator<=>(const Note& other) const noexcept = default;
 };
 
 }  // namespace barely

@@ -16,15 +16,15 @@ class TaskRunner {
   /// Constructs new |TaskRunner| with the given |max_size|.
   ///
   /// @param max_size Maximum number of tasks that can be added in each run.
-  explicit TaskRunner(int max_size);
+  explicit TaskRunner(int max_size) noexcept;
 
   /// Adds new task.
   ///
   /// @param task Task to run.
-  void Add(Task&& task);
+  void Add(Task&& task) noexcept;
 
   /// Runs all tasks.
-  void Run();
+  void Run() noexcept;
 
  private:
   // Single-linked list node.
@@ -37,10 +37,10 @@ class TaskRunner {
   };
 
   // Pops and returns node from the given |head|.
-  Node* PopNode(std::atomic<Node*>* head);
+  Node* PopNode(std::atomic<Node*>* head) noexcept;
 
   // Pushes the given |node| to the given |head|.
-  void PushNode(std::atomic<Node*>* head, Node* node);
+  void PushNode(std::atomic<Node*>* head, Node* node) noexcept;
 
   // Active list head node.
   std::atomic<Node*> active_head_;

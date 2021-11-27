@@ -12,28 +12,30 @@ namespace {
 
 // Dummy set custom instrument data function that does nothing.
 void NoopSetCustomInstrumentDataFn(InstrumentState* /*state*/,
-                                   std::any /*data*/) {}
+                                   std::any /*data*/) noexcept {}
 
 // Dummy set instrument note off function that does nothing.
-void NoopSetInstrumentNoteOffFn(InstrumentState* /*state*/, float /*pitch*/) {}
+void NoopSetInstrumentNoteOffFn(InstrumentState* /*state*/,
+                                float /*pitch*/) noexcept {}
 
 // Dummy set instrument note on function that does nothing.
 void NoopSetInstrumentNoteOnFn(InstrumentState* /*state*/, float /*pitch*/,
-                               float /*intensity*/) {}
+                               float /*intensity*/) noexcept {}
 
 // Dummy set instrument parameter function that does nothing.
 void NoopSetInstrumentParamFn(InstrumentState* /*state*/, int /*id*/,
-                              float /*value*/) {}
+                              float /*value*/) noexcept {}
 
 // Process instrument function that fills the output buffer with zeros.
 void ZeroFillProcessInstrumentFn(InstrumentState* /*state*/, float* output,
-                                 int num_channels, int num_frames) {
+                                 int num_channels, int num_frames) noexcept {
   std::fill_n(output, num_channels * num_frames, 0.0f);
 }
 
 }  // namespace
 
-Instrument::Instrument(int sample_rate, InstrumentDefinition definition)
+Instrument::Instrument(int sample_rate,
+                       InstrumentDefinition definition) noexcept
     : destroy_fn_(std::move(definition.destroy_fn)),
       process_fn_(definition.process_fn ? std::move(definition.process_fn)
                                         : &ZeroFillProcessInstrumentFn),
@@ -53,28 +55,31 @@ Instrument::Instrument(int sample_rate, InstrumentDefinition definition)
   }
 }
 
-Instrument::~Instrument() {
+Instrument::~Instrument() noexcept {
   // Make sure to call |destroy_fn_| only if it's still valid (e.g., not moved).
   if (destroy_fn_) {
     destroy_fn_(&state_);
   }
 }
 
-void Instrument::Process(float* output, int num_channels, int num_frames) {
+void Instrument::Process(float* output, int num_channels,
+                         int num_frames) noexcept {
   process_fn_(&state_, output, num_channels, num_frames);
 }
 
-void Instrument::SetCustomData(std::any data) {
+void Instrument::SetCustomData(std::any data) noexcept {
   set_custom_data_fn_(&state_, std::move(data));
 }
 
-void Instrument::SetNoteOff(float pitch) { set_note_off_fn_(&state_, pitch); }
+void Instrument::SetNoteOff(float pitch) noexcept {
+  set_note_off_fn_(&state_, pitch);
+}
 
-void Instrument::SetNoteOn(float pitch, float intensity) {
+void Instrument::SetNoteOn(float pitch, float intensity) noexcept {
   set_note_on_fn_(&state_, pitch, intensity);
 }
 
-void Instrument::SetParam(int id, float value) {
+void Instrument::SetParam(int id, float value) noexcept {
   set_param_fn_(&state_, id, value);
 }
 

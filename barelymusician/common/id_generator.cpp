@@ -4,8 +4,8 @@
 
 namespace barely {
 
-IdGenerator::IdGenerator() : counter_(0) {}
+IdGenerator::IdGenerator() noexcept : counter_(0) {}
 
-Id IdGenerator::Generate() { return ++counter_; }
+Id IdGenerator::Next() noexcept { return ++counter_; }
 
 }  // namespace barely

@@ -12,49 +12,49 @@ class Envelope : public Generator {
   /// Constructs new |Envelope|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit Envelope(int sample_rate);
+  explicit Envelope(int sample_rate) noexcept;
 
   /// Implements |Generator|.
-  float Next() override;
-  void Reset() override;
+  float Next() noexcept override;
+  void Reset() noexcept override;
 
   /// Returns whether the envelope is currently active (i.e., not idle).
   ///
   /// @return True if active.
-  bool IsActive() const;
+  bool IsActive() const noexcept;
 
   /// Sets the attack of the envelope in seconds.
   ///
   /// @param attack Attack in milliseconds.
-  void SetAttack(float attack);
+  void SetAttack(float attack) noexcept;
 
   /// Sets the decay of the envelope in seconds.
   ///
   /// @param  decay Attack in seconds.
-  void SetDecay(float decay);
+  void SetDecay(float decay) noexcept;
 
   /// Sets the release of the envelope in seconds.
   ///
   /// @param  release Release in seconds.
-  void SetRelease(float release);
+  void SetRelease(float release) noexcept;
 
   /// Sets the sustain of the envelope in amplitude.
   ///
   /// @param  sustain Sustain in amplitude range [0, 1].
-  void SetSustain(float sustain);
+  void SetSustain(float sustain) noexcept;
 
   /// Starts the envelope.
-  void Start();
+  void Start() noexcept;
 
   /// Stops the envelope.
-  void Stop();
+  void Stop() noexcept;
 
  private:
   // Envelope state.
   enum class State { kAttack, kDecay, kSustain, kRelease, kIdle };
 
   // Inverse sampling rate in seconds.
-  const float sample_interval_;
+  float sample_interval_;
 
   // Current ADSR values.
   float attack_increment_;

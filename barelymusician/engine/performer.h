@@ -20,36 +20,36 @@ namespace barely {
 class Performer {
  public:
   /// Constructs new |Performer|.
-  Performer();
+  Performer() noexcept;
 
   /// Adds instrument.
   ///
   /// @param instrument_id Instrument id.
   /// @return Status.
-  Status AddInstrument(Id instrument_id);
+  Status AddInstrument(Id instrument_id) noexcept;
 
   /// Clears all active notes.
-  void ClearAllActiveNotes();
+  void ClearAllActiveNotes() noexcept;
 
   /// Returns mutable sequence.
   ///
   /// @return Mutable sequence.
-  Sequence* GetMutableSequence();
+  Sequence* GetMutableSequence() noexcept;
 
   /// Returns sequence.
   ///
   /// @return Sequence.
-  const Sequence& GetSequence() const;
+  const Sequence& GetSequence() const noexcept;
 
   /// Returns sequence begin position.
   ///
   /// @return Optional sequence begin position in beats.
-  std::optional<double> GetSequenceBeginPosition() const;
+  std::optional<double> GetSequenceBeginPosition() const noexcept;
 
   /// Returns sequence end position.
   ///
   /// @return Optional sequence end position in beats.
-  std::optional<double> GetSequenceEndPosition() const;
+  std::optional<double> GetSequenceEndPosition() const noexcept;
 
   /// Performs instruments at given range.
   ///
@@ -58,28 +58,31 @@ class Performer {
   /// @param conductor Conductor.
   /// @return Instrument id-event pairs to be processed.
   InstrumentIdEventPairs Perform(double begin_position, double end_position,
-                                 Conductor& conductor);
+                                 Conductor& conductor) noexcept;
 
   /// Removes all instruments.
   ///
   /// @return Instrument id-event pairs to be processed.
-  std::vector<InstrumentIdEventPair> RemoveAllInstruments();
+  std::vector<InstrumentIdEventPair> RemoveAllInstruments() noexcept;
 
   /// Removes instrument.
   ///
   /// @param instrument_id Instrument id.
   /// @return Instrument events to be processed, or error status.
-  StatusOr<std::vector<InstrumentEvent>> RemoveInstrument(Id instrument_id);
+  StatusOr<std::vector<InstrumentEvent>> RemoveInstrument(
+      Id instrument_id) noexcept;
 
   /// Sets sequence begin position.
   ///
   /// @param sequence_begin_position Optional sequence begin position in beats.
-  void SetSequenceBeginPosition(std::optional<double> sequence_begin_position);
+  void SetSequenceBeginPosition(
+      std::optional<double> sequence_begin_position) noexcept;
 
   /// Sets sequence end position.
   ///
   /// @param sequence_end_position Optional sequence end position in beats.
-  void SetSequenceEndPosition(std::optional<double> sequence_end_position);
+  void SetSequenceEndPosition(
+      std::optional<double> sequence_end_position) noexcept;
 
  private:
   // Active note that is being performed.
@@ -95,10 +98,10 @@ class Performer {
   };
 
   // Clamps |begin_position| with |sequence_begin_position_|.
-  double ClampBeginPosition(double begin_position);
+  double ClampBeginPosition(double begin_position) noexcept;
 
   // Clamps |end_position| with |sequence_end_position_|.
-  double ClampEndPosition(double end_position);
+  double ClampEndPosition(double end_position) noexcept;
 
   // List of active notes.
   std::multimap<double, ActiveNote> active_notes_;

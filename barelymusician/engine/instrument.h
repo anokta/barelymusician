@@ -14,45 +14,45 @@ class Instrument {
   ///
   /// @param sample_rate Sampling rate in Hz.
   /// @param definition Instrument definition.
-  Instrument(int sample_rate, InstrumentDefinition definition);
+  Instrument(int sample_rate, InstrumentDefinition definition) noexcept;
 
   /// Destroys |Instrument|.
-  ~Instrument();
+  ~Instrument() noexcept;
 
   /// Copyable and movable.
   Instrument(const Instrument& other) = default;
-  Instrument& operator=(const Instrument& other) = default;
+  Instrument& operator=(const Instrument& other) noexcept = default;
   Instrument(Instrument&& other) = default;
-  Instrument& operator=(Instrument&& other) = default;
+  Instrument& operator=(Instrument&& other) noexcept = default;
 
   /// Processes the next output buffer.
   ///
   /// @param output Pointer to the output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  void Process(float* output, int num_channels, int num_frames);
+  void Process(float* output, int num_channels, int num_frames) noexcept;
 
   /// Sets custom data.
   ///
   /// @param data Custom data.
-  void SetCustomData(std::any data);
+  void SetCustomData(std::any data) noexcept;
 
   /// Sets note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(float pitch);
+  void SetNoteOff(float pitch) noexcept;
 
   /// Sets note on.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  void SetNoteOn(float pitch, float intensity);
+  void SetNoteOn(float pitch, float intensity) noexcept;
 
   /// Sets parameter.
   ///
   /// @param id Parameter id.
   /// @param value Parameter value.
-  void SetParam(int id, float value);
+  void SetParam(int id, float value) noexcept;
 
  private:
   // Instrument destroy function.

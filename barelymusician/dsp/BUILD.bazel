@@ -14,7 +14,6 @@ cc_library(
     hdrs = ["envelope.h"],
     deps = [
         ":generator",
-        "//barelymusician/common:logging",
     ],
 )
 
@@ -34,7 +33,6 @@ cc_library(
     hdrs = ["one_pole_filter.h"],
     deps = [
         ":filter",
-        "//barelymusician/common:logging",
     ],
 )
 
@@ -52,9 +50,6 @@ cc_library(
 cc_library(
     name = "polyphonic_voice",
     hdrs = ["polyphonic_voice.h"],
-    deps = [
-        "//barelymusician/common:logging",
-    ],
 )
 
 cc_library(
@@ -63,7 +58,6 @@ cc_library(
     hdrs = ["sample_player.h"],
     deps = [
         ":generator",
-        "//barelymusician/common:logging",
     ],
 )
 

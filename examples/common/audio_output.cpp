@@ -1,24 +1,25 @@
 
 #include "examples/common/audio_output.h"
 
+#include <cassert>
 #include <utility>
 
-#include "barelymusician/common/logging.h"
 #include "portaudio.h"
 
 namespace barely::examples {
 
-AudioOutput::AudioOutput() : process_callback_(nullptr), stream_(nullptr) {
+AudioOutput::AudioOutput() noexcept
+    : process_callback_(nullptr), stream_(nullptr) {
   Pa_Initialize();
 }
 
-AudioOutput::~AudioOutput() { Pa_Terminate(); }
+AudioOutput::~AudioOutput() noexcept { Pa_Terminate(); }
 
-void AudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
-  DCHECK_GE(sample_rate, 0);
-  DCHECK_GE(num_channels, 0);
-  DCHECK_GE(num_frames, 0);
-
+void AudioOutput::Start(int sample_rate, int num_channels,
+                        int num_frames) noexcept {
+  assert(sample_rate >= 0);
+  assert(num_channels >= 0);
+  assert(num_frames >= 0);
   if (stream_) {
     // Stop the existing |stream_| first.
     Stop();
@@ -26,7 +27,7 @@ void AudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
 
   PaStreamParameters output_parameters;
   output_parameters.device = Pa_GetDefaultOutputDevice();
-  DCHECK_NE(output_parameters.device, paNoDevice);
+  assert(output_parameters.device != paNoDevice);
   output_parameters.channelCount = num_channels;
   output_parameters.sampleFormat = paFloat32;
   output_parameters.suggestedLatency =
@@ -37,7 +38,7 @@ void AudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
                            unsigned long /*frames_per_buffer*/,
                            const PaStreamCallbackTimeInfo* /*time_info*/,
                            PaStreamCallbackFlags /*status_flags*/,
-                           void* user_data) {
+                           void* user_data) noexcept {
     if (user_data) {
       // Access the audio process callback via |user_data| (to avoid capturing
       // |process_callback_|).
@@ -53,7 +54,7 @@ void AudioOutput::Start(int sample_rate, int num_channels, int num_frames) {
   Pa_StartStream(stream_);
 }
 
-void AudioOutput::Stop() {
+void AudioOutput::Stop() noexcept {
   if (stream_) {
     Pa_StopStream(stream_);
     Pa_CloseStream(stream_);
@@ -61,7 +62,8 @@ void AudioOutput::Stop() {
   stream_ = nullptr;
 }
 
-void AudioOutput::SetProcessCallback(ProcessCallback&& process_callback) {
+void AudioOutput::SetProcessCallback(
+    ProcessCallback process_callback) noexcept {
   process_callback_ = std::move(process_callback);
 }
 

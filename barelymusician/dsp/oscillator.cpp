@@ -6,14 +6,14 @@
 
 namespace barely {
 
-Oscillator::Oscillator(int sample_rate)
+Oscillator::Oscillator(int sample_rate) noexcept
     : sample_interval_(sample_rate > 0 ? 1.0f / static_cast<float>(sample_rate)
                                        : 0.0f),
       type_(OscillatorType::kNoise),
       phase_(0.0f),
       increment_(0.0f) {}
 
-float Oscillator::Next() {
+float Oscillator::Next() noexcept {
   float output = 0.0f;
   // Generate the next sample.
   switch (type_) {
@@ -39,12 +39,12 @@ float Oscillator::Next() {
   return output;
 }
 
-void Oscillator::Reset() { phase_ = 0.0f; }
+void Oscillator::Reset() noexcept { phase_ = 0.0f; }
 
-void Oscillator::SetFrequency(float frequency) {
+void Oscillator::SetFrequency(float frequency) noexcept {
   increment_ = frequency * sample_interval_;
 }
 
-void Oscillator::SetType(OscillatorType type) { type_ = type; }
+void Oscillator::SetType(OscillatorType type) noexcept { type_ = type; }
 
 }  // namespace barely

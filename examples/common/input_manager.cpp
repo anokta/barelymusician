@@ -4,7 +4,7 @@
 
 namespace barely::examples {
 
-InputManager::InputManager()
+InputManager::InputManager() noexcept
     : key_down_callback_(nullptr), key_up_callback_(nullptr) {
 #if defined(_WIN32) || defined(__CYGWIN__)
   std_input_handle_ = GetStdHandle(STD_INPUT_HANDLE);
@@ -17,7 +17,7 @@ InputManager::InputManager()
   const DWORD console_mode = ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT;
   SetConsoleMode(std_input_handle_, console_mode);
 #elif defined(__APPLE__)
-  event_callback_ = [this](CGEventType type, CGEventRef event) {
+  event_callback_ = [this](CGEventType type, CGEventRef event) noexcept {
     UniCharCount length = 0;
     UniChar str[1];
     CGEventKeyboardGetUnicodeString(event, 1, &length, str);
@@ -32,7 +32,8 @@ InputManager::InputManager()
     }
   };
   const auto callback = [](CGEventTapProxy proxy, CGEventType type,
-                           CGEventRef event, void* refcon) -> CGEventRef {
+                           CGEventRef event,
+                           void* refcon) noexcept -> CGEventRef {
     if (refcon) {
       // Access the event callback via |refcon| (to avoid capturing
       // |event_callback_|).
@@ -56,7 +57,7 @@ InputManager::InputManager()
 #endif  // defined(__APPLE__)
 }
 
-InputManager::~InputManager() {
+InputManager::~InputManager() noexcept {
 #if defined(_WIN32) || defined(__CYGWIN__)
   SetConsoleMode(std_input_handle_, previous_console_mode_);
 #elif defined(__APPLE__)
@@ -66,15 +67,16 @@ InputManager::~InputManager() {
 #endif  // defined(__APPLE__)
 }
 
-void InputManager::SetKeyDownCallback(KeyDownCallback key_down_callback) {
+void InputManager::SetKeyDownCallback(
+    KeyDownCallback key_down_callback) noexcept {
   key_down_callback_ = std::move(key_down_callback);
 }
 
-void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) {
+void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
   key_up_callback_ = std::move(key_up_callback);
 }
 
-void InputManager::Update() {
+void InputManager::Update() noexcept {
 #if defined(_WIN32) || defined(__CYGWIN__)
   DWORD num_events = 0;
   if (!GetNumberOfConsoleInputEvents(std_input_handle_, &num_events) ||
@@ -100,13 +102,13 @@ void InputManager::Update() {
 #endif  // defined(__APPLE__)
 }
 
-void InputManager::HandleKeyDown(const Key& key) {
+void InputManager::HandleKeyDown(const Key& key) noexcept {
   if (pressed_keys_.insert(key).second && key_down_callback_) {
     key_down_callback_(key);
   }
 }
 
-void InputManager::HandleKeyUp(const Key& key) {
+void InputManager::HandleKeyUp(const Key& key) noexcept {
   if (pressed_keys_.erase(key) > 0 && key_up_callback_) {
     key_up_callback_(key);
   }

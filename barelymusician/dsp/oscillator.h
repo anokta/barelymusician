@@ -20,21 +20,21 @@ class Oscillator : public Generator {
   /// Constructs new |Oscillator|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit Oscillator(int sample_rate);
+  explicit Oscillator(int sample_rate) noexcept;
 
   /// Implements |Generator|.
-  float Next() override;
-  void Reset() override;
+  float Next() noexcept override;
+  void Reset() noexcept override;
 
   /// Sets the frequency of the oscillator.
   ///
   /// @param frequency Oscillator frequency in Hz.
-  void SetFrequency(float frequency);
+  void SetFrequency(float frequency) noexcept;
 
   /// Sets the type of the oscillator.
   ///
   /// @param type Oscillator type.
-  void SetType(OscillatorType type);
+  void SetType(OscillatorType type) noexcept;
 
  private:
   // Inverse sampling rate in seconds.

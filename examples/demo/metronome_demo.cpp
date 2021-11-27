@@ -2,11 +2,11 @@
 #include <chrono>
 #include <thread>
 
-#include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/musician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
+#include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
 
@@ -16,6 +16,7 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
+using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
@@ -66,7 +67,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto beat_callback = [&](double position) {
     const int current_bar = static_cast<int>(position) / kNumBeats;
     const int current_beat = static_cast<int>(position) % kNumBeats;
-    LOG(INFO) << "Tick " << current_bar << "." << current_beat;
+    ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
     musician.SetInstrumentNoteOn(metronome_id, pitch, kGain);
     musician.SetInstrumentNoteOff(metronome_id, pitch);
@@ -95,10 +96,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (musician.IsPlaying()) {
           musician.StopPlayback();
-          LOG(INFO) << "Stopped playback";
+          ConsoleLog() << "Stopped playback";
         } else {
           musician.StartPlayback();
-          LOG(INFO) << "Started playback";
+          ConsoleLog() << "Started playback";
         }
         return;
       case '-':
@@ -120,12 +121,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     musician.SetPlaybackTempo(tempo);
-    LOG(INFO) << "Tempo set to " << tempo << " BPM";
+    ConsoleLog() << "Tempo set to " << tempo << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
-  LOG(INFO) << "Starting audio stream";
+  ConsoleLog() << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
   musician.StartPlayback();
 
@@ -136,7 +137,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Stop the demo.
-  LOG(INFO) << "Stopping audio stream";
+  ConsoleLog() << "Stopping audio stream";
   musician.StopPlayback();
   audio_output.Stop();
 

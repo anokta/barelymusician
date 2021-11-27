@@ -22,7 +22,7 @@ using NoteDuration = std::variant<double>;
 /// @param step Quantized step.
 /// @param num_steps Number of steps per beat.
 /// @return Quantized position in beats.
-double GetPosition(int step, int num_steps);
+double GetPosition(int step, int num_steps) noexcept;
 
 /// Returns quantized position.
 ///
@@ -31,7 +31,7 @@ double GetPosition(int step, int num_steps);
 /// @param amount Quantization amount.
 /// @return Quantized position in beats.
 double QuantizePosition(double position, double resolution,
-                        double amount = 1.0);
+                        double amount = 1.0) noexcept;
 
 }  // namespace barely
 

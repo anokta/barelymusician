@@ -33,7 +33,7 @@ class Sequence {
       std::function<void(double position, const Note& note)>;
 
   /// Constructs new |Sequence|.
-  Sequence();
+  Sequence() noexcept;
 
   /// Adds new note at position.
   ///
@@ -41,43 +41,43 @@ class Sequence {
   /// @param position Note position.
   /// @param note Note.
   /// @return Status.
-  Status AddNote(Id id, double position, Note note);
+  Status AddNote(Id id, double position, Note note) noexcept;
 
   /// Returns all notes in the sequence.
   ///
   /// @return List of notes with their position-id pairs.
-  std::vector<NoteWithPositionIdPair> GetAllNotes() const;
+  std::vector<NoteWithPositionIdPair> GetAllNotes() const noexcept;
 
   /// Returns the begin offset.
   ///
   /// @return Begin offset in beats.
-  double GetBeginOffset() const;
+  double GetBeginOffset() const noexcept;
 
   /// Returns the loop begin offset.
   ///
   /// @return Loop begin offset in beats.
-  double GetLoopBeginOffset() const;
+  double GetLoopBeginOffset() const noexcept;
 
   /// Returns the loop length.
   ///
   /// @return Loop length in beats.
-  double GetLoopLength() const;
+  double GetLoopLength() const noexcept;
 
   /// Returns note.
   ///
   /// @param id Note id.
   /// @return Note with position, or error status.
-  StatusOr<NoteWithPosition> GetNote(Id id) const;
+  StatusOr<NoteWithPosition> GetNote(Id id) const noexcept;
 
   /// Returns whether the sequence is empty or not.
   ///
   /// @return True if empty.
-  bool IsEmpty() const;
+  bool IsEmpty() const noexcept;
 
   /// Returns whether the sequence is looping or not.
   ///
   /// @return True if looping.
-  bool IsLooping() const;
+  bool IsLooping() const noexcept;
 
   /// Processes the sequence at given position range with offset.
   ///
@@ -87,48 +87,66 @@ class Sequence {
   /// @param process_callback Process callback.
   void Process(double begin_position, double end_position,
                double position_offset,
-               const ProcessCallback& process_callback) const;
+               const ProcessCallback& process_callback) const noexcept;
 
   /// Removes all notes.
-  void RemoveAllNotes();
+  void RemoveAllNotes() noexcept;
 
   /// Removes all notes in range.
   ///
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
-  void RemoveAllNotes(double begin_position, double end_position);
+  void RemoveAllNotes(double begin_position, double end_position) noexcept;
 
   /// Removes note.
   ///
   /// @param id Note id.
   /// @return Status.
-  Status RemoveNote(Id id);
+  Status RemoveNote(Id id) noexcept;
 
   /// Sets the begin offset.
   ///
   /// @param begin_offset Begin offset in beats.
-  void SetBeginOffset(double begin_offset);
+  void SetBeginOffset(double begin_offset) noexcept;
 
   /// Sets whether the sequence should be looping or not.
   ///
   /// @param loop True if looping.
-  void SetLoop(bool loop);
+  void SetLoop(bool loop) noexcept;
 
   /// Sets the loop begin offset.
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
-  void SetLoopBeginOffset(double loop_begin_position);
+  void SetLoopBeginOffset(double loop_begin_position) noexcept;
 
   /// Sets the loop length.
   ///
   /// @param loop_length Loop length in beats.
-  void SetLoopLength(double loop_length);
+  void SetLoopLength(double loop_length) noexcept;
+
+  /// Sets note duration.
+  ///
+  /// @param id Note id.
+  /// @return Status.
+  Status SetNoteDuration(Id id, NoteDuration note_duration) noexcept;
+
+  /// Sets note intensity.
+  ///
+  /// @param id Note id.
+  /// @return Status.
+  Status SetNoteIntensity(Id id, NoteIntensity note_intensity) noexcept;
+
+  /// Sets note pitch.
+  ///
+  /// @param id Note id.
+  /// @return Status.
+  Status SetNotePitch(Id id, NotePitch note_pitch) noexcept;
 
  private:
   // Internal process helper function.
   void ProcessInternal(double begin_position, double end_position,
                        double position_offset,
-                       const ProcessCallback& process_callback) const;
+                       const ProcessCallback& process_callback) const noexcept;
 
   // Begin offset in beats.
   double begin_offset_;

@@ -1,11 +1,12 @@
 #include "barelymusician/dsp/envelope.h"
 
-#include "barelymusician/common/logging.h"
+#include <algorithm>
 
 namespace barely {
 
-Envelope::Envelope(int sample_rate)
-    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
+Envelope::Envelope(int sample_rate) noexcept
+    : sample_interval_(
+          (sample_rate > 0) ? 1.0f / static_cast<float>(sample_rate) : 0.0f),
       attack_increment_(0.0f),
       decay_increment_(0.0f),
       sustain_(1.0f),
@@ -13,11 +14,9 @@ Envelope::Envelope(int sample_rate)
       state_(State::kIdle),
       output_(0.0f),
       release_output_(0.0f),
-      phase_(0.0f) {
-  DCHECK_GT(sample_rate, 0);
-}
+      phase_(0.0f) {}
 
-float Envelope::Next() {
+float Envelope::Next() noexcept {
   if (state_ == State::kIdle) {
     return 0.0f;
   }
@@ -70,41 +69,36 @@ float Envelope::Next() {
   return 0.0f;
 }
 
-void Envelope::Reset() { state_ = State::kIdle; }
+void Envelope::Reset() noexcept { state_ = State::kIdle; }
 
-bool Envelope::IsActive() const { return state_ != State::kIdle; }
+bool Envelope::IsActive() const noexcept { return state_ != State::kIdle; }
 
-void Envelope::SetAttack(float attack) {
-  DCHECK_GE(attack, 0.0f);
+void Envelope::SetAttack(float attack) noexcept {
   attack_increment_ = (attack > 0.0f) ? sample_interval_ / attack : 0.0f;
   if (attack_increment_ > 1.0f) {
     attack_increment_ = 0.0f;
   }
 }
 
-void Envelope::SetDecay(float decay) {
-  DCHECK_GE(decay, 0.0f);
+void Envelope::SetDecay(float decay) noexcept {
   decay_increment_ = (decay > 0.0f) ? sample_interval_ / decay : 0.0f;
   if (decay_increment_ > 1.0f) {
     decay_increment_ = 0.0f;
   }
 }
 
-void Envelope::SetRelease(float release) {
-  DCHECK_GE(release, 0.0f);
+void Envelope::SetRelease(float release) noexcept {
   release_increment_ = (release > 0.0f) ? sample_interval_ / release : 0.0f;
   if (release_increment_ > 1.0f) {
     release_increment_ = 0.0f;
   }
 }
 
-void Envelope::SetSustain(float sustain) {
-  DCHECK_GE(sustain, 0.0f);
-  DCHECK_LE(sustain, 1.0f);
-  sustain_ = sustain;
+void Envelope::SetSustain(float sustain) noexcept {
+  sustain_ = std::min(std::max(sustain, 0.0f), 1.0f);
 }
 
-void Envelope::Start() {
+void Envelope::Start() noexcept {
   phase_ = 0.0f;
   if (attack_increment_ > 0.0) {
     output_ = 0.0f;
@@ -118,7 +112,7 @@ void Envelope::Start() {
   }
 }
 
-void Envelope::Stop() {
+void Envelope::Stop() noexcept {
   if (state_ != State::kIdle) {
     phase_ = 0.0f;
     release_output_ = output_;

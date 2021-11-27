@@ -5,10 +5,10 @@
 #include <optional>
 #include <thread>
 
-#include "barelymusician/common/logging.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/musician.h"
 #include "examples/common/audio_output.h"
+#include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
 
@@ -17,6 +17,7 @@ namespace {
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::examples::AudioOutput;
+using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
@@ -69,11 +70,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease}});
   musician.SetInstrumentNoteOnCallback(
       [](auto /*instrument_id*/, float pitch, float intensity) {
-        LOG(INFO) << "NoteOn(" << pitch << ", " << intensity << ")";
+        ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
       });
   musician.SetInstrumentNoteOffCallback(
       [](auto /*instrument_id*/, float pitch) {
-        LOG(INFO) << "NoteOff(" << pitch << ") ";
+        ConsoleLog() << "NoteOff(" << pitch << ") ";
       });
 
   // Audio process callback.
@@ -103,7 +104,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       }
       offset_octaves =
           std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
-      LOG(INFO) << "Octave offset set to " << offset_octaves;
+      ConsoleLog() << "Octave offset set to " << offset_octaves;
       return;
     }
 
@@ -125,7 +126,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   input_manager.SetKeyUpCallback(key_up_callback);
 
   // Start the demo.
-  LOG(INFO) << "Starting audio stream";
+  ConsoleLog() << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
 
   while (!quit) {
@@ -135,7 +136,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   // Stop the demo.
-  LOG(INFO) << "Stopping audio stream";
+  ConsoleLog() << "Stopping audio stream";
   audio_output.Stop();
 
   return 0;

@@ -1,14 +1,13 @@
 #include "barelymusician/engine/task_runner.h"
 
 #include <atomic>
+#include <cassert>
 #include <utility>
-
-#include "barelymusician/common/logging.h"
 
 namespace barely {
 
-TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
-  DCHECK_GT(max_size, 0);
+TaskRunner::TaskRunner(int max_size) noexcept : nodes_(max_size) {
+  assert(max_size > 0);
   for (int i = 0; i < max_size - 1; ++i) {
     nodes_[i].next = &nodes_[i + 1];
   }
@@ -19,17 +18,14 @@ TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
   temp_tasks_.reserve(max_size);
 }
 
-void TaskRunner::Add(Task&& task) {
-  Node* const node = PopNode(&free_head_);
-  if (!node) {
-    DLOG(WARNING) << "Failed to add task, max_size exceeded: " << nodes_.size();
-    return;
+void TaskRunner::Add(Task&& task) noexcept {
+  if (Node* node = PopNode(&free_head_)) {
+    node->task = std::move(task);
+    PushNode(&active_head_, node);
   }
-  node->task = std::move(task);
-  PushNode(&active_head_, node);
 }
 
-void TaskRunner::Run() {
+void TaskRunner::Run() noexcept {
   // Iterate through the stacked tasks.
   Node* it = active_head_.exchange(nullptr);
   while (it) {
@@ -48,7 +44,7 @@ void TaskRunner::Run() {
   temp_tasks_.clear();
 }
 
-TaskRunner::Node* TaskRunner::PopNode(std::atomic<Node*>* head) {
+TaskRunner::Node* TaskRunner::PopNode(std::atomic<Node*>* head) noexcept {
   Node* old_head = nullptr;
   Node* old_head_next = nullptr;
   do {
@@ -63,7 +59,7 @@ TaskRunner::Node* TaskRunner::PopNode(std::atomic<Node*>* head) {
   return old_head;
 }
 
-void TaskRunner::PushNode(std::atomic<Node*>* head, Node* node) {
+void TaskRunner::PushNode(std::atomic<Node*>* head, Node* node) noexcept {
   Node* old_head = nullptr;
   do {
     old_head = head->load();

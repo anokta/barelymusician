@@ -11,32 +11,32 @@ class SamplePlayer : public Generator {
   /// Construct new |SamplePlayer| with the given sample data.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit SamplePlayer(int sample_rate);
+  explicit SamplePlayer(int sample_rate) noexcept;
 
   /// Implements |Generator|.
-  float Next() override;
-  void Reset() override;
+  float Next() noexcept override;
+  void Reset() noexcept override;
 
   /// Sets the sample data.
   ///
   /// @param data Sample data.
   /// @param frequency Data sampling frequency in Hz.
   /// @param length Data length in samples.
-  void SetData(const float* data, int frequency, int length);
+  void SetData(const float* data, int frequency, int length) noexcept;
 
   /// Sets whether the playback should be looping.
   ///
   /// @param loop True if looping.
-  void SetLoop(bool loop);
+  void SetLoop(bool loop) noexcept;
 
   /// Sets the playback speed.
   ///
   /// @param speed Playback speed.
-  void SetSpeed(float speed);
+  void SetSpeed(float speed) noexcept;
 
  private:
   // Calculates per sample increment amount with the current properties.
-  void CalculateIncrementPerSample();
+  void CalculateIncrementPerSample() noexcept;
 
   // Inverse sampling rate in seconds.
   const float sample_interval_;

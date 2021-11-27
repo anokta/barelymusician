@@ -1,23 +1,22 @@
 #include "barelymusician/dsp/sample_player.h"
 
-#include <cassert>
+#include <algorithm>
 #include <cmath>
 
 namespace barely {
 
-SamplePlayer::SamplePlayer(int sample_rate)
-    : sample_interval_(1.0f / static_cast<float>(sample_rate)),
+SamplePlayer::SamplePlayer(int sample_rate) noexcept
+    : sample_interval_(
+          (sample_rate > 0) ? 1.0f / static_cast<float>(sample_rate) : 0.0f),
       data_(nullptr),
       frequency_(0.0f),
       length_(0.0f),
       loop_(false),
       speed_(1.0f),
       cursor_(0.0f),
-      increment_(0.0f) {
-  assert(sample_rate > 0);
-}
+      increment_(0.0f) {}
 
-float SamplePlayer::Next() {
+float SamplePlayer::Next() noexcept {
   if (!data_ || cursor_ >= length_) {
     // Nothing to play, skip processing.
     return 0.0f;
@@ -33,26 +32,24 @@ float SamplePlayer::Next() {
   return output;
 }
 
-void SamplePlayer::Reset() { cursor_ = 0.0f; }
+void SamplePlayer::Reset() noexcept { cursor_ = 0.0f; }
 
-void SamplePlayer::SetData(const float* data, int frequency, int length) {
-  assert(frequency >= 0);
-  assert(length >= 0);
+void SamplePlayer::SetData(const float* data, int frequency,
+                           int length) noexcept {
   data_ = data;
-  frequency_ = static_cast<float>(frequency);
-  length_ = static_cast<float>(length);
+  frequency_ = static_cast<float>(std::max(frequency, 0));
+  length_ = static_cast<float>(std::max(length, 0));
   CalculateIncrementPerSample();
 }
 
-void SamplePlayer::SetLoop(bool loop) { loop_ = loop; }
+void SamplePlayer::SetLoop(bool loop) noexcept { loop_ = loop; }
 
-void SamplePlayer::SetSpeed(float speed) {
-  assert(speed >= 0.0f);
-  speed_ = speed;
+void SamplePlayer::SetSpeed(float speed) noexcept {
+  speed_ = std::max(speed, 0.0f);
   CalculateIncrementPerSample();
 }
 
-void SamplePlayer::CalculateIncrementPerSample() {
+void SamplePlayer::CalculateIncrementPerSample() noexcept {
   increment_ = speed_ * frequency_ * sample_interval_;
 }
 

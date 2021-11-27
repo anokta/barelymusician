@@ -13,10 +13,10 @@ class Filter {
   ///
   /// @param input Input sample.
   /// @return Filtered output sample.
-  virtual float Next(float input) = 0;
+  virtual float Next(float input) noexcept = 0;
 
   /// Resets module state.
-  virtual void Reset() = 0;
+  virtual void Reset() noexcept = 0;
 };
 
 }  // namespace barely

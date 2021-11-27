@@ -20,7 +20,9 @@ Sequence::Sequence() noexcept
       loop_length_(1.0) {}
 
 Status Sequence::AddNote(Id id, double position, Note note) noexcept {
-  if (id == kInvalidId) return Status::kInvalidArgument;
+  if (id == kInvalidId) {
+    return Status::kInvalidArgument;
+  }
   if (positions_.emplace(id, position).second) {
     notes_.emplace(NotePositionIdPair{position, id}, std::move(note));
     return Status::kOk;

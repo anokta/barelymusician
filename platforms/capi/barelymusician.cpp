@@ -10,6 +10,7 @@
 
 namespace {
 
+using ::barely::GetStatusOrStatus;
 using ::barely::GetStatusOrValue;
 using ::barely::IsOk;
 using ::barely::Musician;
@@ -54,49 +55,47 @@ struct BarelyMusician {
   Musician instance;
 };
 
-BarelyId BarelyAddInstrument(BarelyHandle handle,
-                             std::int32_t instrument_type) {
-  if (handle) {
-    if (instrument_type == kBarelySynthInstrument) {
-      return handle->instance.AddInstrument(
-          SynthInstrument::GetDefinition(),
-          SynthInstrument::GetParamDefinitions());
-    }
-  }
-  return kBarelyInvalidId;
+BarelyStatus BarelyAddInstrument(BarelyHandle handle,
+                                 BarelyId* instrument_id_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!instrument_id_ptr) return kBarelyInvalidArgument;
+  *instrument_id_ptr = handle->instance.AddInstrument(
+      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  return kBarelyOk;
 }
 
-BarelyId BarelyAddPerformer(BarelyHandle handle) {
-  if (handle) {
-    return handle->instance.AddPerformer();
-  }
-  return kBarelyInvalidId;
+BarelyStatus BarelyAddPerformer(BarelyHandle handle,
+                                BarelyId* performer_id_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!performer_id_ptr) return kBarelyInvalidArgument;
+  *performer_id_ptr = handle->instance.AddPerformer();
+  return kBarelyOk;
 }
 
 BarelyStatus BarelyAddPerformerInstrument(BarelyHandle handle,
                                           BarelyId performer_id,
                                           BarelyId instrument_id) {
-  if (handle) {
-    return GetStatus(
-        handle->instance.AddPerformerInstrument(performer_id, instrument_id));
-  }
-  return kBarelyNotFound;
+  if (!handle) return kBarelyNotFound;
+  return GetStatus(
+      handle->instance.AddPerformerInstrument(performer_id, instrument_id));
 }
 
-BarelyId BarelyAddPerformerNote(BarelyHandle handle, BarelyId performer_id,
-                                double note_position, double note_duration,
-                                float note_pitch, float note_intensity) {
-  if (handle) {
-    if (const auto note_id_or =
-            handle->instance.AddPerformerNote(performer_id, note_position,
-                                              Note{.pitch = note_pitch,
-                                                   .intensity = note_intensity,
-                                                   .duration = note_duration});
-        IsOk(note_id_or)) {
-      return GetStatusOrValue(note_id_or);
-    }
+BarelyStatus BarelyAddPerformerNote(BarelyHandle handle, BarelyId performer_id,
+                                    double note_position, double note_duration,
+                                    float note_pitch, float note_intensity,
+                                    BarelyId* note_id_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!note_id_ptr) return kBarelyInvalidArgument;
+  const auto note_id_or =
+      handle->instance.AddPerformerNote(performer_id, note_position,
+                                        Note{.pitch = note_pitch,
+                                             .intensity = note_intensity,
+                                             .duration = note_duration});
+  if (IsOk(note_id_or)) {
+    *note_id_ptr = GetStatusOrValue(note_id_or);
+    return kBarelyOk;
   }
-  return kBarelyInvalidId;
+  return GetStatus(GetStatusOrStatus(note_id_or));
 }
 
 BarelyHandle BarelyCreate(std::int32_t sample_rate) {
@@ -111,47 +110,121 @@ BarelyStatus BarelyDestroy(BarelyHandle handle) {
   return kBarelyNotFound;
 }
 
-double BarelyGetPlaybackPosition(BarelyHandle handle) {
-  if (handle) {
-    return handle->instance.GetPlaybackPosition();
+BarelyStatus BarelyGetPerformerBeginOffset(BarelyHandle handle,
+                                           BarelyId performer_id,
+                                           double* begin_offset_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!begin_offset_ptr) return kBarelyInvalidArgument;
+  const auto begin_offset_or =
+      handle->instance.GetPerformerBeginOffset(performer_id);
+  if (IsOk(begin_offset_or)) {
+    *begin_offset_ptr = GetStatusOrValue(begin_offset_or);
+    return kBarelyOk;
   }
-  return 0.0;
+  return GetStatus(GetStatusOrStatus(begin_offset_or));
 }
 
-double BarelyGetPlaybackTempo(BarelyHandle handle) {
-  if (handle) {
-    return handle->instance.GetPlaybackTempo();
+BarelyStatus BarelyGetPerformerBeginPosition(BarelyHandle handle,
+                                             BarelyId performer_id,
+                                             double* begin_position_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!begin_position_ptr) return kBarelyInvalidArgument;
+  const auto begin_position_or =
+      handle->instance.GetPerformerBeginPosition(performer_id);
+  if (IsOk(begin_position_or)) {
+    *begin_position_ptr = GetStatusOrValue(begin_position_or);
+    return kBarelyOk;
   }
-  return 0.0;
+  return GetStatus(GetStatusOrStatus(begin_position_or));
 }
 
-bool BarelyIsPerformerEmpty(BarelyHandle handle, BarelyId performer_id) {
-  if (handle) {
-    const auto is_performer_empty_or =
-        handle->instance.IsPerformerEmpty(performer_id);
-    if (IsOk(is_performer_empty_or)) {
-      return GetStatusOrValue(is_performer_empty_or);
-    }
+BarelyStatus BarelyGetPerformerEndPosition(BarelyHandle handle,
+                                           BarelyId performer_id,
+                                           double* end_position_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!end_position_ptr) return kBarelyInvalidArgument;
+  const auto end_position_or =
+      handle->instance.GetPerformerEndPosition(performer_id);
+  if (IsOk(end_position_or)) {
+    *end_position_ptr = GetStatusOrValue(end_position_or);
+    return kBarelyOk;
   }
-  return false;
+  return GetStatus(GetStatusOrStatus(end_position_or));
 }
 
-bool BarelyIsPerformerLooping(BarelyHandle handle, BarelyId performer_id) {
-  if (handle) {
-    const auto is_performer_looping_or =
-        handle->instance.IsPerformerLooping(performer_id);
-    if (IsOk(is_performer_looping_or)) {
-      return GetStatusOrValue(is_performer_looping_or);
-    }
+BarelyStatus BarelyGetPerformerLoopBeginOffset(BarelyHandle handle,
+                                               BarelyId performer_id,
+                                               double* loop_begin_offset_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!loop_begin_offset_ptr) return kBarelyInvalidArgument;
+  const auto loop_begin_offset_or =
+      handle->instance.GetPerformerLoopBeginOffset(performer_id);
+  if (IsOk(loop_begin_offset_or)) {
+    *loop_begin_offset_ptr = GetStatusOrValue(loop_begin_offset_or);
+    return kBarelyOk;
   }
-  return false;
+  return GetStatus(GetStatusOrStatus(loop_begin_offset_or));
 }
 
-bool BarelyIsPlaying(BarelyHandle handle) {
-  if (handle) {
-    return handle->instance.IsPlaying();
+BarelyStatus BarelyGetPerformerLoopLength(BarelyHandle handle,
+                                          BarelyId performer_id,
+                                          double* loop_length_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!loop_length_ptr) return kBarelyInvalidArgument;
+  const auto loop_length_or =
+      handle->instance.GetPerformerLoopLength(performer_id);
+  if (IsOk(loop_length_or)) {
+    *loop_length_ptr = GetStatusOrValue(loop_length_or);
+    return kBarelyOk;
   }
-  return false;
+  return GetStatus(GetStatusOrStatus(loop_length_or));
+}
+
+BarelyStatus BarelyGetPlaybackPosition(BarelyHandle handle,
+                                       double* position_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!position_ptr) return kBarelyInvalidArgument;
+  *position_ptr = handle->instance.GetPlaybackPosition();
+  return kBarelyOk;
+}
+
+BarelyStatus BarelyGetPlaybackTempo(BarelyHandle handle, double* tempo_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!tempo_ptr) return kBarelyInvalidArgument;
+  *tempo_ptr = handle->instance.GetPlaybackTempo();
+  return kBarelyOk;
+}
+
+BarelyStatus BarelyIsPerformerEmpty(BarelyHandle handle, BarelyId performer_id,
+                                    bool* is_empty_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!is_empty_ptr) return kBarelyInvalidArgument;
+  const auto is_empty_or = handle->instance.IsPerformerEmpty(performer_id);
+  if (IsOk(is_empty_or)) {
+    *is_empty_ptr = GetStatusOrValue(is_empty_or);
+    return kBarelyOk;
+  }
+  return GetStatus(GetStatusOrStatus(is_empty_or));
+}
+
+BarelyStatus BarelyIsPerformerLooping(BarelyHandle handle,
+                                      BarelyId performer_id,
+                                      bool* is_looping_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!is_looping_ptr) return kBarelyInvalidArgument;
+  const auto is_looping_or = handle->instance.IsPerformerLooping(performer_id);
+  if (IsOk(is_looping_or)) {
+    *is_looping_ptr = GetStatusOrValue(is_looping_or);
+    return kBarelyOk;
+  }
+  return GetStatus(GetStatusOrStatus(is_looping_or));
+}
+
+BarelyStatus BarelyIsPlaying(BarelyHandle handle, bool* is_playing_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!is_playing_ptr) return kBarelyInvalidArgument;
+  *is_playing_ptr = handle->instance.IsPlaying();
+  return kBarelyOk;
 }
 
 BarelyStatus BarelyProcessInstrument(BarelyHandle handle,

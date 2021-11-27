@@ -81,17 +81,19 @@ typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
 /// Adds new instrument.
 ///
 /// @param handle BarelyMusician handle.
-/// @return Instrument id.
-BARELY_EXPORT BarelyId BarelyAddInstrument(BarelyHandle handle,
-                                           int32_t instrument_type);
-
-// TODO(#85): Add |BarelyAddInstrument| with |BarelyInstrumentDefinition|.
+/// @param instrument_id_ptr Pointer to instrument id.
+/// @return Status.
+// TODO(#85): Refactor to use |BarelyInstrumentDefinition|.
+BARELY_EXPORT BarelyStatus BarelyAddInstrument(BarelyHandle handle,
+                                               BarelyId* instrument_id_ptr);
 
 /// Adds new performer.
 ///
 /// @param handle BarelyMusician handle.
-/// @return Performer id.
-BARELY_EXPORT BarelyId BarelyAddPerformer(BarelyHandle handle);
+/// @param performer_id_ptr Pointer to performer id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyAddPerformer(BarelyHandle handle,
+                                              BarelyId* performer_id_ptr);
 
 /// Adds performer instrument.
 ///
@@ -111,10 +113,12 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformerInstrument(BarelyHandle handle,
 /// @param note_duration Note duration.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
-/// @return Note id.
-BARELY_EXPORT BarelyId BarelyAddPerformerNote(
+/// @param note_id_ptr Pointer to note id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyAddPerformerNote(
     BarelyHandle handle, BarelyId performer_id, double note_position,
-    double note_duration, float note_pitch, float note_intensity);
+    double note_duration, float note_pitch, float note_intensity,
+    BarelyId* note_id_ptr);
 
 /// Creates new BarelyMusician.
 ///
@@ -128,66 +132,94 @@ BARELY_EXPORT BarelyHandle BarelyCreate(int32_t sample_rate);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroy(BarelyHandle handle);
 
-/// Returns performer begin offset.
+/// Gets performer begin offset.
 ///
 /// @param handle BarelyMusician handle.
 /// @param performer_id Performer id.
-/// @return Begin offset in beats.
-BARELY_EXPORT double BarelyGetPerformerBeginOffset(BarelyHandle handle,
-                                                   BarelyId performer_id);
+/// @param begin_offset_ptr Pointer to begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginOffset(
+    BarelyHandle handle, BarelyId performer_id, double* begin_offset_ptr);
 
-// TODO(#85): Add |BarelyGetPerformerBeginPosition|.
-// TODO(#85): Add |BarelyGetPerformerEndPosition|.
-
-/// Returns performer loop begin offset.
+/// Gets performer begin position.
 ///
 /// @param handle BarelyMusician handle.
 /// @param performer_id Performer id.
-/// @return Loop begin offset in beats.
-BARELY_EXPORT double BarelyGetPerformerLoopBeginOffset(BarelyHandle handle,
-                                                       BarelyId performer_id);
+/// @param begin_position_ptr Pointer to begin position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginPosition(
+    BarelyHandle handle, BarelyId performer_id, double* begin_position_ptr);
 
-/// Returns performer loop length.
+/// Gets performer end position.
 ///
 /// @param handle BarelyMusician handle.
 /// @param performer_id Performer id.
-/// @return Loop length in beats.
-BARELY_EXPORT double BarelyGetPerformerLoopLength(BarelyHandle handle,
-                                                  BarelyId performer_id);
+/// @param end_position_ptr Pointer to end position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPerformerEndPosition(
+    BarelyHandle handle, BarelyId performer_id, double* end_position_ptr);
 
-/// Returns the playback position.
-///
-/// @param handle BarelyMusician handle.
-/// @return Position in beats.
-BARELY_EXPORT double BarelyGetPlaybackPosition(BarelyHandle handle);
-
-/// Returns the playback tempo.
-///
-/// @param handle BarelyMusician handle.
-/// @return Tempo in BPM.
-BARELY_EXPORT double BarelyGetPlaybackTempo(BarelyHandle handle);
-
-/// Returns whether the performer is empty or not.
+/// Gets performer loop begin offset.
 ///
 /// @param handle BarelyMusician handle.
 /// @param performer_id Performer id.
-/// @return True if empty (i.e., has no notes), false otherwise.
-BARELY_EXPORT bool BarelyIsPerformerEmpty(BarelyHandle handle,
-                                          BarelyId performer_id);
+/// @param loop_begin_offset_ptr Pointer to loop begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopBeginOffset(
+    BarelyHandle handle, BarelyId performer_id, double* begin_offset_ptr);
 
-/// Returns whether the performer is looping or not.
+/// Gets performer loop length.
 ///
 /// @param handle BarelyMusician handle.
 /// @param performer_id Performer id.
-/// @return True if looping, false otherwise.
-BARELY_EXPORT bool BarelyIsPerformerLooping(BarelyHandle handle,
-                                            BarelyId performer_id);
+/// @param loop_length_ptr Pointer to loop length in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopLength(
+    BarelyHandle handle, BarelyId performer_id, double* loop_length_ptr);
 
-/// Returns whether the playback is currently active or not.
+/// Gets the playback position.
 ///
 /// @param handle BarelyMusician handle.
-/// @return True if playing, false otherwise.
-BARELY_EXPORT bool BarelyIsPlaying(BarelyHandle handle);
+/// @param position_ptr Pointer to position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPlaybackPosition(BarelyHandle handle,
+                                                     double* position_ptr);
+
+/// Gets the playback tempo.
+///
+/// @param handle BarelyMusician handle.
+/// @param tempo_ptr Pointer to tempo in BPM.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyHandle handle,
+                                                  double* tempo_ptr);
+
+/// Gets whether the performer is empty or not.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param is_empty_ptr Pointer to true if empty, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyIsPerformerEmpty(BarelyHandle handle,
+                                                  BarelyId performer_id,
+                                                  bool is_empty_ptr);
+
+/// Gets whether the performer is looping or not.
+///
+/// @param handle BarelyMusician handle.
+/// @param performer_id Performer id.
+/// @param is_looping_ptr Ponter to true if looping, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyIsPerformerLooping(BarelyHandle handle,
+                                                    BarelyId performer_id,
+                                                    bool* is_looping_ptr);
+
+/// Gets whether the playback is currently active or not.
+///
+/// @param handle BarelyMusician handle.
+/// @param is_playing_ptr Pointer to true if playing, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyHandle handle,
+                                           bool* is_playing_ptr);
 
 /// Processes the next instrument output buffer at timestamp.
 ///

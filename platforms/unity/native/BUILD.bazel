@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -8,7 +8,7 @@ cc_binary(
     linkshared = True,
     target_compatible_with = ["@platforms//os:linux"],
     deps = [
-        ":unity",
+        "//platforms/capi:barelymusician",
     ],
 )
 
@@ -18,7 +18,7 @@ cc_binary(
     linkshared = True,
     target_compatible_with = ["@platforms//os:osx"],
     deps = [
-        ":unity",
+        "//platforms/capi:barelymusician",
     ],
 )
 
@@ -28,22 +28,6 @@ cc_binary(
     linkshared = True,
     target_compatible_with = ["@platforms//os:windows"],
     deps = [
-        ":unity",
-    ],
-)
-
-cc_library(
-    name = "unity",
-    srcs = ["unity.cpp"],
-    hdrs = ["unity.h"],
-    defines = select({
-        "@platforms//os:windows": ["BARELYMUSICIAN_EXPORTS"],
-        "//conditions:default": [],
-    }),
-    visibility = ["//visibility:private"],
-    deps = [
         "//platforms/capi:barelymusician",
-        "//platforms/capi:visibility",
     ],
-    alwayslink = True,
 )

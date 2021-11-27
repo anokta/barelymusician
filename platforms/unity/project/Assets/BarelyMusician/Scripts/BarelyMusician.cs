@@ -30,17 +30,19 @@ namespace BarelyApi {
     /// @param instrument Instrument to add.
     /// @return Instrument id.
     public static Int64 AddInstrument(Instrument instrument) {
-      Int64 id = InvalidId;
+      Int64 instrumentId = InvalidId;
       Type instrumentType = instrument.GetType();
       if (instrumentType == typeof(SynthInstrument)) {
-        id = AddSynthInstrumentNative(Handle);
+        if (AddSynthInstrumentNative(Handle, _int64Ptr) == OkStatus) {
+          instrumentId = Marshal.ReadInt64(_int64Ptr);
+        }
       } else {
         Debug.LogError("Unsupported instrument type: " + instrumentType);
       }
-      if (id != InvalidId) {
-        _instruments.Add(id, instrument);
+      if (instrumentId != InvalidId) {
+        _instruments.Add(instrumentId, instrument);
       }
-      return id;
+      return instrumentId;
     }
 
     /// Adds new performer.
@@ -48,28 +50,41 @@ namespace BarelyApi {
     /// @param performer Performer to add.
     /// @return Performer id.
     public static Int64 AddPerformer(Performer performer) {
-      return AddPerformerNative(Handle);
+      Int64 performerId = InvalidId;
+      if (AddPerformerNative(Handle, _int64Ptr) == OkStatus) {
+        performerId = Marshal.ReadInt64(_int64Ptr);
+      }
+      return performerId;
     }
 
     /// Returns the playback position.
     ///
     /// @return Playback position in beats.
     public static double GetPlaybackPosition() {
-      return GetPlaybackPositionNative(Handle);
+      if (GetPlaybackPositionNative(Handle, _doublePtr) == OkStatus) {
+        return Marshal.PtrToStructure<Double>(_doublePtr);
+      }
+      return 0.0;
     }
 
     /// Returns the playback tempo.
     ///
     /// @return Playback tempo.
     public static double GetPlaybackTempo() {
-      return GetPlaybackTempoNative(Handle);
+      if (GetPlaybackTempoNative(Handle, _doublePtr) == OkStatus) {
+        return Marshal.PtrToStructure<Double>(_doublePtr);
+      }
+      return 0.0;
     }
 
     /// Returns whether the playback is currently active or not.
     ///
     /// @return True if playing, false otherwise.
     public static bool IsPlaying() {
-      return IsPlayingNative(Handle);
+      if (IsPlayingNative(Handle, _booleanPtr) == OkStatus) {
+        return Marshal.PtrToStructure<Boolean>(_booleanPtr);
+      }
+      return false;
     }
 
     /// Removes instrument.
@@ -188,7 +203,7 @@ namespace BarelyApi {
       foreach (var performerNote in performer.Notes) {
         float pitch = (float)(performer.RootNote + performerNote.note.Pitch - 69) / 12.0f;
         AddPerformerNoteNative(Handle, performer.Id, performerNote.position, performerNote.note.Duration, pitch,
-                               performerNote.note.Intensity);
+                               performerNote.note.Intensity, _int64Ptr);
       }
       foreach (var instrument in performer.Instruments) {
         if (instrument != null) {
@@ -208,7 +223,11 @@ namespace BarelyApi {
             hideFlags = HideFlags.HideAndDontSave
           }.AddComponent<BarelyMusicianInternal>();
           GameObject.DontDestroyOnLoad(instance.gameObject);
-          if (_handle == IntPtr.Zero) {
+          if (_handle != IntPtr.Zero) {
+            _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
+            _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
+            _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
+          } else {
             Debug.LogError("Could not initialize BarelyMusician.");
             GameObject.DestroyImmediate(instance.gameObject);
           }
@@ -217,6 +236,15 @@ namespace BarelyApi {
       }
     }
     private static IntPtr _handle = IntPtr.Zero;
+
+    // Boolean type pointer.
+    private static IntPtr _booleanPtr = IntPtr.Zero;
+
+    // Double type pointer.
+    private static IntPtr _doublePtr = IntPtr.Zero;
+
+    // Int64 type pointer.
+    private static IntPtr _int64Ptr = IntPtr.Zero;
 
     // List of instruments.
     private static Dictionary<Int64, Instrument> _instruments = new Dictionary<Int64, Instrument>();
@@ -269,6 +297,9 @@ namespace BarelyApi {
         AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
         DestroyNative(_handle);
         _handle = IntPtr.Zero;
+        Marshal.FreeHGlobal(_booleanPtr);
+        Marshal.FreeHGlobal(_doublePtr);
+        Marshal.FreeHGlobal(_int64Ptr);
       }
 
       private void OnApplicationQuit() {
@@ -300,17 +331,18 @@ namespace BarelyApi {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
     [DllImport(pluginName, EntryPoint = "BarelyAddPerformer")]
-    private static extern Int64 AddPerformerNative(IntPtr handle);
+    private static extern Int32 AddPerformerNative(IntPtr handle, IntPtr performerIdPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyAddPerformerInstrument")]
-    private static extern Int64 AddPerformerInstrumentNative(IntPtr handle, Int64 performerId, Int64 instrumentId);
+    private static extern Int32 AddPerformerInstrumentNative(IntPtr handle, Int64 performerId, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelyAddPerformerNote")]
-    private static extern Int64 AddPerformerNoteNative(IntPtr handle, Int64 performerId, double notePosition,
-                                                       double noteDuration, float notePitch, float noteIntensity);
+    private static extern Int32 AddPerformerNoteNative(IntPtr handle, Int64 performerId, double notePosition,
+                                                       double noteDuration, float notePitch, float noteIntensity,
+                                                       IntPtr noteIdPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelyAddSynthInstrument")]
-    private static extern Int64 AddSynthInstrumentNative(IntPtr handle);
+    [DllImport(pluginName, EntryPoint = "BarelyAddInstrument")]
+    private static extern Int64 AddSynthInstrumentNative(IntPtr handle, IntPtr instrumentIdPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyCreate")]
     private static extern IntPtr CreateNative(Int32 sampleRate);
@@ -319,13 +351,13 @@ namespace BarelyApi {
     private static extern Int32 DestroyNative(IntPtr handle);
 
     [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackPosition")]
-    private static extern double GetPlaybackPositionNative(IntPtr handle);
+    private static extern Int32 GetPlaybackPositionNative(IntPtr handle, IntPtr positionPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackTempo")]
-    private static extern double GetPlaybackTempoNative(IntPtr handle);
+    private static extern Int32 GetPlaybackTempoNative(IntPtr handle, IntPtr tempoPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyIsPlaying")]
-    private static extern bool IsPlayingNative(IntPtr handle);
+    private static extern Int32 IsPlayingNative(IntPtr handle, IntPtr isPlayingPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyProcessInstrument")]
     private static extern Int32 ProcessInstrumentNative(IntPtr handle, Int64 instrumentId, double timestamp,

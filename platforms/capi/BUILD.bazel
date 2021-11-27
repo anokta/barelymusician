@@ -17,6 +17,7 @@ cc_library(
         "//barelymusician/engine:musician",
         "//examples/instruments:synth_instrument",
     ],
+    alwayslink = True,
 )
 
 cc_library(

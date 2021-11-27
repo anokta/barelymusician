@@ -91,15 +91,13 @@ class Musician {
   ///
   /// @param performer_id Performer id.
   /// @return Optional begin position in beats.
-  StatusOr<std::optional<double>> GetPerformerBeginPosition(
-      Id performer_id) const noexcept;
+  StatusOr<double> GetPerformerBeginPosition(Id performer_id) const noexcept;
 
   /// Returns performer end position.
   ///
   /// @param performer_id Performer id.
   /// @return Optional end position in beats.
-  StatusOr<std::optional<double>> GetPerformerEndPosition(
-      Id performer_id) const noexcept;
+  StatusOr<double> GetPerformerEndPosition(Id performer_id) const noexcept;
 
   /// Returns performer loop begin offset.
   ///

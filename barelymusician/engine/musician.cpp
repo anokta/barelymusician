@@ -114,18 +114,22 @@ StatusOr<double> Musician::GetPerformerBeginOffset(
   return Status::kNotFound;
 }
 
-StatusOr<std::optional<double>> Musician::GetPerformerBeginPosition(
+StatusOr<double> Musician::GetPerformerBeginPosition(
     Id performer_id) const noexcept {
   if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->GetSequenceBeginPosition();
+    if (const auto begin_position = performer->GetSequenceBeginPosition()) {
+      return *begin_position;
+    }
   }
   return Status::kNotFound;
 }
 
-StatusOr<std::optional<double>> Musician::GetPerformerEndPosition(
+StatusOr<double> Musician::GetPerformerEndPosition(
     Id performer_id) const noexcept {
   if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->GetSequenceEndPosition();
+    if (const auto end_position = performer->GetSequenceEndPosition()) {
+      return *end_position;
+    }
   }
   return Status::kNotFound;
 }

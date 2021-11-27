@@ -6,7 +6,7 @@
 
 namespace barely {
 
-TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
+TaskRunner::TaskRunner(int max_size) noexcept : nodes_(max_size) {
   assert(max_size > 0);
   for (int i = 0; i < max_size - 1; ++i) {
     nodes_[i].next = &nodes_[i + 1];
@@ -18,14 +18,14 @@ TaskRunner::TaskRunner(int max_size) : nodes_(max_size) {
   temp_tasks_.reserve(max_size);
 }
 
-void TaskRunner::Add(Task&& task) {
+void TaskRunner::Add(Task&& task) noexcept {
   if (Node* node = PopNode(&free_head_)) {
     node->task = std::move(task);
     PushNode(&active_head_, node);
   }
 }
 
-void TaskRunner::Run() {
+void TaskRunner::Run() noexcept {
   // Iterate through the stacked tasks.
   Node* it = active_head_.exchange(nullptr);
   while (it) {
@@ -44,7 +44,7 @@ void TaskRunner::Run() {
   temp_tasks_.clear();
 }
 
-TaskRunner::Node* TaskRunner::PopNode(std::atomic<Node*>* head) {
+TaskRunner::Node* TaskRunner::PopNode(std::atomic<Node*>* head) noexcept {
   Node* old_head = nullptr;
   Node* old_head_next = nullptr;
   do {
@@ -59,7 +59,7 @@ TaskRunner::Node* TaskRunner::PopNode(std::atomic<Node*>* head) {
   return old_head;
 }
 
-void TaskRunner::PushNode(std::atomic<Node*>* head, Node* node) {
+void TaskRunner::PushNode(std::atomic<Node*>* head, Node* node) noexcept {
   Node* old_head = nullptr;
   do {
     old_head = head->load();

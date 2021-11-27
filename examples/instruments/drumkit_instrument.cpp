@@ -16,16 +16,16 @@ const float kDefaultRelease = 0.1f;
 
 }  // namespace
 
-DrumkitInstrument::DrumkitInstrument(int sample_rate)
+DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
     : sample_rate_(sample_rate), gain_(kDefaultGain) {}
 
-void DrumkitInstrument::NoteOff(float pitch) {
+void DrumkitInstrument::NoteOff(float pitch) noexcept {
   if (auto* voice = FindOrNull(voices_, pitch)) {
     voice->Stop();
   }
 }
 
-void DrumkitInstrument::NoteOn(float pitch, float intensity) {
+void DrumkitInstrument::NoteOn(float pitch, float intensity) noexcept {
   if (auto* voice = FindOrNull(voices_, pitch)) {
     voice->set_gain(intensity);
     voice->Start();
@@ -33,7 +33,7 @@ void DrumkitInstrument::NoteOn(float pitch, float intensity) {
 }
 
 void DrumkitInstrument::Process(float* output, int num_channels,
-                                int num_frames) {
+                                int num_frames) noexcept {
   for (int frame = 0; frame < num_frames; ++frame) {
     float mono_sample = 0.0f;
     for (auto& voice : voices_) {
@@ -46,7 +46,7 @@ void DrumkitInstrument::Process(float* output, int num_channels,
   }
 }
 
-void DrumkitInstrument::SetCustomData(std::any data) {
+void DrumkitInstrument::SetCustomData(std::any data) noexcept {
   auto* drumkit_files =
       std::any_cast<std::unordered_map<float, WavFile>*>(data);
   for (const auto& [index, file] : *drumkit_files) {
@@ -54,12 +54,12 @@ void DrumkitInstrument::SetCustomData(std::any data) {
   }
 }
 
-InstrumentDefinition DrumkitInstrument::GetDefinition() {
+InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<DrumkitInstrument>(
       [](int sample_rate) { return DrumkitInstrument(sample_rate); });
 }
 
-void DrumkitInstrument::Add(float pitch, const WavFile& wav_file) {
+void DrumkitInstrument::Add(float pitch, const WavFile& wav_file) noexcept {
   DrumkitVoice voice(sample_rate_);
   voice.envelope().SetRelease(kDefaultRelease);
   const auto& data = wav_file.GetData();

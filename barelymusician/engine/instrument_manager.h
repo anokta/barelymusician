@@ -45,7 +45,7 @@ class InstrumentManager {
   /// Constructs new |InstrumentManager|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit InstrumentManager(int sample_rate);
+  explicit InstrumentManager(int sample_rate) noexcept;
 
   /// Adds new instrument at timestamp.
   ///
@@ -56,39 +56,39 @@ class InstrumentManager {
   /// @return Status.
   Status Add(Id instrument_id, double timestamp,
              InstrumentDefinition definition,
-             ParamDefinitions param_definitions);
+             ParamDefinitions param_definitions) noexcept;
 
   /// Returns all active instrument notes.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of active note pitches or error status.
-  StatusOr<std::vector<float>> GetAllNotes(Id instrument_id) const;
+  StatusOr<std::vector<float>> GetAllNotes(Id instrument_id) const noexcept;
 
   /// Returns all instrument parameters.
   ///
   /// @param instrument_id Instrument id.
   /// @return List of parameters or error status.
-  StatusOr<std::vector<Param>> GetAllParams(Id instrument_id) const;
+  StatusOr<std::vector<Param>> GetAllParams(Id instrument_id) const noexcept;
 
   /// Returns instrument parameter.
   ///
   /// @param instrument_id Instrument id.
   /// @param param_id Parameter id.
   /// @return Instrument parameter or error status.
-  StatusOr<Param> GetParam(Id instrument_id, int param_id) const;
+  StatusOr<Param> GetParam(Id instrument_id, int param_id) const noexcept;
 
   /// Returns whether instrument note is active or not.
   ///
   /// @param instrument_id Instrument id.
   /// @param note_pitch Note pitch.
   /// @return True if note is active, or false if not, or error status.
-  StatusOr<bool> IsNoteOn(Id instrument_id, float note_pitch) const;
+  StatusOr<bool> IsNoteOn(Id instrument_id, float note_pitch) const noexcept;
 
   /// Returns whether instrument is valid or not.
   ///
   /// @param instrument_id Instrument id.
   /// @return True if instrument is valid (i.e., exists), false otherwise.
-  bool IsValid(Id instrument_id) const;
+  bool IsValid(Id instrument_id) const noexcept;
 
   /// Processes the next instrument output buffer at timestamp.
   ///
@@ -98,45 +98,46 @@ class InstrumentManager {
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   void Process(Id instrument_id, double timestamp, float* output,
-               int num_channels, int num_frames);
+               int num_channels, int num_frames) noexcept;
 
   /// Processes instrument event at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param event Instrument event.
-  void ProcessEvent(Id instrument_id, double timestamp, InstrumentEvent event);
+  void ProcessEvent(Id instrument_id, double timestamp,
+                    InstrumentEvent event) noexcept;
 
   /// Removes instrument at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status Remove(Id instrument_id, double timestamp);
+  Status Remove(Id instrument_id, double timestamp) noexcept;
 
   /// Sets all notes of all instruments off at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void SetAllNotesOff(double timestamp);
+  void SetAllNotesOff(double timestamp) noexcept;
 
   /// Sets all instrument notes off at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status SetAllNotesOff(Id instrument_id, double timestamp);
+  Status SetAllNotesOff(Id instrument_id, double timestamp) noexcept;
 
   /// Sets all parameters of all instruments to default value at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void SetAllParamsToDefault(double timestamp);
+  void SetAllParamsToDefault(double timestamp) noexcept;
 
   /// Sets all instrument parameters to default value at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status SetAllParamsToDefault(Id instrument_id, double timestamp);
+  Status SetAllParamsToDefault(Id instrument_id, double timestamp) noexcept;
 
   /// Sets custom instrument data at timestamp.
   ///
@@ -145,7 +146,7 @@ class InstrumentManager {
   /// @param custom_data Custom data.
   /// @return Status.
   Status SetCustomData(Id instrument_id, double timestamp,
-                       std::any custom_data);
+                       std::any custom_data) noexcept;
 
   /// Sets instrument note off at timestamp.
   ///
@@ -153,12 +154,13 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
   /// @return Status.
-  Status SetNoteOff(Id instrument_id, double timestamp, float note_pitch);
+  Status SetNoteOff(Id instrument_id, double timestamp,
+                    float note_pitch) noexcept;
 
   /// Sets the note off callback.
   ///
   /// @param note_off_callback Instrument note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback);
+  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept;
 
   /// Sets instrument note on at timestamp.
   ///
@@ -168,12 +170,12 @@ class InstrumentManager {
   /// @param note_intensity Note intensity.
   /// @return Status.
   Status SetNoteOn(Id instrument_id, double timestamp, float note_pitch,
-                   float note_intensity);
+                   float note_intensity) noexcept;
 
   /// Sets the note on callback.
   ///
   /// @param note_on_callback Instrument note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback);
+  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept;
 
   /// Sets instrument parameter value at timestamp.
   ///
@@ -183,7 +185,7 @@ class InstrumentManager {
   /// @param param_value Parameter value.
   /// @return Status.
   Status SetParam(Id instrument_id, double timestamp, int param_id,
-                  float param_value);
+                  float param_value) noexcept;
 
   /// Sets instrument parameter to default value at timestamp.
   ///
@@ -191,23 +193,24 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param param_id Parameter id.
   /// @return Status.
-  Status SetParamToDefault(Id instrument_id, double timestamp, int param_id);
+  Status SetParamToDefault(Id instrument_id, double timestamp,
+                           int param_id) noexcept;
 
   /// Sets sampling rate at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @param sample_rate Sampling rate in Hz.
-  void SetSampleRate(double timestamp, int sample_rate);
+  void SetSampleRate(double timestamp, int sample_rate) noexcept;
 
   /// Updates the internal state.
-  void Update();
+  void Update() noexcept;
 
  private:
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
     // Constructs new |InstrumentController|.
     InstrumentController(InstrumentDefinition definition,
-                         ParamDefinitions param_definitions);
+                         ParamDefinitions param_definitions) noexcept;
 
     // Instrument definition.
     InstrumentDefinition definition;

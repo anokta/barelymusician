@@ -11,35 +11,35 @@
 
 namespace barely {
 
-Performer::Performer()
+Performer::Performer() noexcept
     : sequence_begin_position_(std::nullopt),
       sequence_end_position_(std::nullopt),
       sequence_position_offset_(0.0) {}
 
-Status Performer::AddInstrument(Id instrument_id) {
+Status Performer::AddInstrument(Id instrument_id) noexcept {
   if (instrument_ids_.emplace(instrument_id).second) {
     return Status::kOk;
   }
   return Status::kAlreadyExists;
 }
 
-void Performer::ClearAllActiveNotes() { active_notes_.clear(); }
+void Performer::ClearAllActiveNotes() noexcept { active_notes_.clear(); }
 
-std::optional<double> Performer::GetSequenceBeginPosition() const {
+std::optional<double> Performer::GetSequenceBeginPosition() const noexcept {
   return sequence_begin_position_;
 }
 
-std::optional<double> Performer::GetSequenceEndPosition() const {
+std::optional<double> Performer::GetSequenceEndPosition() const noexcept {
   return sequence_end_position_;
 }
 
-Sequence* Performer::GetMutableSequence() { return &sequence_; }
+Sequence* Performer::GetMutableSequence() noexcept { return &sequence_; }
 
-const Sequence& Performer::GetSequence() const { return sequence_; }
+const Sequence& Performer::GetSequence() const noexcept { return sequence_; }
 
 InstrumentIdEventPairs Performer::Perform(double begin_position,
                                           double end_position,
-                                          Conductor& conductor) {
+                                          Conductor& conductor) noexcept {
   InstrumentIdEventPairs id_event_pairs;
 
   // Perform active note events.
@@ -75,7 +75,7 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
       begin_position < end_position) {
     sequence_.Process(
         begin_position, end_position, sequence_position_offset_,
-        [&](double position, const Note& note) {
+        [&](double position, const Note& note) noexcept {
           // Get pitch.
           const auto pitch_or = conductor.TransformNotePitch(note.pitch);
           if (!IsOk(pitch_or)) {
@@ -96,7 +96,7 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
             return;
           }
           const double note_end_position =
-              position + GetStatusOrValue(duration_or);
+              position + std::max(GetStatusOrValue(duration_or), 0.0);
 
           for (const auto& instrument_id : instrument_ids_) {
             // Perform note on event.
@@ -119,7 +119,7 @@ InstrumentIdEventPairs Performer::Perform(double begin_position,
   return id_event_pairs;
 }
 
-std::vector<InstrumentIdEventPair> Performer::RemoveAllInstruments() {
+std::vector<InstrumentIdEventPair> Performer::RemoveAllInstruments() noexcept {
   instrument_ids_.clear();
   std::vector<InstrumentIdEventPair> id_event_pairs;
   if (!active_notes_.empty()) {
@@ -133,7 +133,7 @@ std::vector<InstrumentIdEventPair> Performer::RemoveAllInstruments() {
 }
 
 StatusOr<std::vector<InstrumentEvent>> Performer::RemoveInstrument(
-    Id instrument_id) {
+    Id instrument_id) noexcept {
   if (instrument_ids_.erase(instrument_id) > 0) {
     std::vector<InstrumentEvent> events;
     for (auto it = active_notes_.begin(); it != active_notes_.end();) {
@@ -150,24 +150,24 @@ StatusOr<std::vector<InstrumentEvent>> Performer::RemoveInstrument(
 }
 
 void Performer::SetSequenceBeginPosition(
-    std::optional<double> sequence_begin_position) {
+    std::optional<double> sequence_begin_position) noexcept {
   sequence_begin_position_ = std::move(sequence_begin_position);
   sequence_position_offset_ =
       sequence_begin_position_ ? *sequence_begin_position_ : 0.0;
 }
 
 void Performer::SetSequenceEndPosition(
-    std::optional<double> sequence_end_position) {
+    std::optional<double> sequence_end_position) noexcept {
   sequence_end_position_ = std::move(sequence_end_position);
 }
 
-double Performer::ClampBeginPosition(double begin_position) {
+double Performer::ClampBeginPosition(double begin_position) noexcept {
   return sequence_begin_position_
              ? std::max(begin_position, *sequence_begin_position_)
              : begin_position;
 }
 
-double Performer::ClampEndPosition(double end_position) {
+double Performer::ClampEndPosition(double end_position) noexcept {
   return sequence_end_position_
              ? std::min(end_position, *sequence_end_position_)
              : end_position;

@@ -29,30 +29,30 @@ class InputManager {
   using KeyUpCallback = std::function<void(const Key& key)>;
 
   /// Constructs new |InputManager|.
-  InputManager();
+  InputManager() noexcept;
 
   /// Destructs |InputManager|.
-  ~InputManager();
+  ~InputManager() noexcept;
 
   /// Sets keyboard key down callback.
   ///
   /// @param key_down_callback Keyboard key down callback.
-  void SetKeyDownCallback(KeyDownCallback key_down_callback);
+  void SetKeyDownCallback(KeyDownCallback key_down_callback) noexcept;
 
   /// Sets keyboard key up callback.
   ///
   /// @param key_up_callback Keyboard key up callback.
-  void SetKeyUpCallback(KeyUpCallback key_up_callback);
+  void SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept;
 
   /// Updates the input manager to handle new input events.
-  void Update();
+  void Update() noexcept;
 
  private:
   // Handles keyboard key down event.
-  void HandleKeyDown(const Key& key);
+  void HandleKeyDown(const Key& key) noexcept;
 
   // Handles keyboard key up event.
-  void HandleKeyUp(const Key& key);
+  void HandleKeyUp(const Key& key) noexcept;
 
   // Keyboard events.
   KeyDownCallback key_down_callback_;

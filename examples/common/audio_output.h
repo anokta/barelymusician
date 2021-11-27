@@ -16,25 +16,25 @@ class AudioOutput {
   using ProcessCallback = std::function<void(float* output)>;
 
   /// Constructs new |AudioOutput|.
-  AudioOutput();
+  AudioOutput() noexcept;
 
   /// Destructs |AudioOutput|.
-  ~AudioOutput();
+  ~AudioOutput() noexcept;
 
   /// Starts audio processing routine with the given configuration.
   ///
   /// @param sample_rate Sampling rate in Hz.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames per buffer.
-  void Start(int sample_rate, int num_channels, int num_frames);
+  void Start(int sample_rate, int num_channels, int num_frames) noexcept;
 
   /// Stops the audio processing routine.
-  void Stop();
+  void Stop() noexcept;
 
   /// Sets the audio process callback.
   ///
   /// @param process_callback Audio process callback.
-  void SetProcessCallback(ProcessCallback&& process_callback);
+  void SetProcessCallback(ProcessCallback process_callback) noexcept;
 
  private:
   // Process callback.

@@ -27,18 +27,19 @@ enum SynthInstrumentParam {
 class SynthInstrument : public GenericInstrument {
  public:
   /// Constructs new |SynthInstrument|.
-  explicit SynthInstrument(int sample_rate);
+  explicit SynthInstrument(int sample_rate) noexcept;
 
   /// Implements |GenericInstrument|.
-  void NoteOff(float pitch) override;
-  void NoteOn(float pitch, float intensity) override;
-  void Process(float* output, int num_channels, int num_frames) override;
-  void SetCustomData(std::any /*data*/) override {}
-  void SetParam(int id, float value) override;
+  void NoteOff(float pitch) noexcept override;
+  void NoteOn(float pitch, float intensity) noexcept override;
+  void Process(float* output, int num_channels,
+               int num_frames) noexcept override;
+  void SetCustomData(std::any /*data*/) noexcept override {}
+  void SetParam(int id, float value) noexcept override;
 
   /// Returns instrument definition.
-  static InstrumentDefinition GetDefinition();
-  static ParamDefinitions GetParamDefinitions();
+  static InstrumentDefinition GetDefinition() noexcept;
+  static ParamDefinitions GetParamDefinitions() noexcept;
 
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;

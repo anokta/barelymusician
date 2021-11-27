@@ -9,13 +9,13 @@
 
 namespace barely::examples {
 
-const std::vector<float>& WavFile::GetData() const { return data_; }
+const std::vector<float>& WavFile::GetData() const noexcept { return data_; }
 
-int WavFile::GetNumChannels() const { return num_channels_; }
+int WavFile::GetNumChannels() const noexcept { return num_channels_; }
 
-int WavFile::GetSampleRate() const { return sample_rate_; }
+int WavFile::GetSampleRate() const noexcept { return sample_rate_; }
 
-bool WavFile::Load(const std::string& file_path) {
+bool WavFile::Load(const std::string& file_path) noexcept {
   // Read the file.
   unsigned int wav_num_channels;
   unsigned int wav_sample_rate;

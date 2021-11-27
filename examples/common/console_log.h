@@ -14,20 +14,20 @@ class ConsoleLog {
   ConsoleLog() = default;
 
   /// Destroys |ConsoleLog|.
-  ~ConsoleLog() { std::cout << stream_.str() << std::endl; }
+  ~ConsoleLog() noexcept { std::cout << stream_.str() << std::endl; }
 
   /// Non-copyable and non-movable.
   ConsoleLog(const ConsoleLog& other) = delete;
-  ConsoleLog& operator=(const ConsoleLog& other) = delete;
+  ConsoleLog& operator=(const ConsoleLog& other) noexcept = delete;
   ConsoleLog(ConsoleLog&& other) = delete;
-  ConsoleLog& operator=(ConsoleLog&& other) = delete;
+  ConsoleLog& operator=(ConsoleLog&& other) noexcept = delete;
 
   /// Overloads output stream operator.
   ///
   /// @param value Value to output.
   /// @return Output stream.
   template <typename Type>
-  std::ostream& operator<<(const Type& value) {
+  std::ostream& operator<<(const Type& value) noexcept {
     stream_ << value;
     return stream_;
   }

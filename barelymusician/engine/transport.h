@@ -29,58 +29,58 @@ class Transport {
                          const GetTimestampFn& get_timestamp_fn)>;
 
   /// Constructs new |Transport|.
-  Transport();
+  Transport() noexcept;
 
   /// Returns the current position.
   ///
   /// @return Position in beats.
-  double GetPosition() const;
+  double GetPosition() const noexcept;
 
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per second.
-  double GetTempo() const;
+  double GetTempo() const noexcept;
 
   /// Returns the current timestamp.
   ///
   /// @return Timestamp in seconds.
-  double GetTimestamp() const;
+  double GetTimestamp() const noexcept;
 
   /// Returns whether the transport is currently playing or not.
   ///
   /// @return True if playing, false otherwise.
-  bool IsPlaying() const;
+  bool IsPlaying() const noexcept;
 
   /// Sets the beat callback.
   ///
   /// @param beat_callback Beat callback.
-  void SetBeatCallback(BeatCallback beat_callback);
+  void SetBeatCallback(BeatCallback beat_callback) noexcept;
 
   /// Sets the current position.
   ///
   /// @param position Position in beats.
-  void SetPosition(double position);
+  void SetPosition(double position) noexcept;
 
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per second.
-  void SetTempo(double tempo);
+  void SetTempo(double tempo) noexcept;
 
   /// Sets the update callback.
   ///
   /// @param update_callback Update callback.
-  void SetUpdateCallback(UpdateCallback update_callback);
+  void SetUpdateCallback(UpdateCallback update_callback) noexcept;
 
   /// Starts the playback.
-  void Start();
+  void Start() noexcept;
 
   /// Stops the playback.
-  void Stop();
+  void Stop() noexcept;
 
   /// Updates the transport at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp);
+  void Update(double timestamp) noexcept;
 
  private:
   // Denotes whether the transport is playing or not.

@@ -26,15 +26,16 @@ constexpr int kNumMaxTasks = 100;
 
 // Dummy note off callback that does nothing.
 void NoopNoteOffCallback(Id /*instrument_id*/, double /*timestamp*/,
-                         float /*note_pitch*/) {}
+                         float /*note_pitch*/) noexcept {}
 
 // Dummy note on callback that does nothing.
 void NoopNoteOnCallback(Id /*instrument_id*/, double /*timestamp*/,
-                        float /*note_pitch*/, float /*note_intensity*/) {}
+                        float /*note_pitch*/,
+                        float /*note_intensity*/) noexcept {}
 
 }  // namespace
 
-InstrumentManager::InstrumentManager(int sample_rate)
+InstrumentManager::InstrumentManager(int sample_rate) noexcept
     : audio_runner_(kNumMaxTasks),
       note_off_callback_(&NoopNoteOffCallback),
       note_on_callback_(&NoopNoteOnCallback),
@@ -42,8 +43,10 @@ InstrumentManager::InstrumentManager(int sample_rate)
 
 Status InstrumentManager::Add(Id instrument_id, double timestamp,
                               InstrumentDefinition definition,
-                              ParamDefinitions param_definitions) {
-  if (instrument_id == kInvalidId) return Status::kInvalidArgument;
+                              ParamDefinitions param_definitions) noexcept {
+  if (instrument_id == kInvalidId) {
+    return Status::kInvalidArgument;
+  }
   if (const auto [controller_it, success] = controllers_.emplace(
           instrument_id,
           InstrumentController(definition, std::move(param_definitions)));
@@ -59,7 +62,7 @@ Status InstrumentManager::Add(Id instrument_id, double timestamp,
 }
 
 StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
-    Id instrument_id) const {
+    Id instrument_id) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return std::vector<float>(controller->pitches.cbegin(),
                               controller->pitches.cend());
@@ -68,7 +71,7 @@ StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
 }
 
 StatusOr<std::vector<Param>> InstrumentManager::GetAllParams(
-    Id instrument_id) const {
+    Id instrument_id) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     std::vector<Param> params;
     params.reserve(controller->params.size());
@@ -81,7 +84,7 @@ StatusOr<std::vector<Param>> InstrumentManager::GetAllParams(
 }
 
 StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
-                                            int param_id) const {
+                                            int param_id) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (const auto* param = FindOrNull(controller->params, param_id)) {
       return *param;
@@ -92,20 +95,20 @@ StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
 }
 
 StatusOr<bool> InstrumentManager::IsNoteOn(Id instrument_id,
-                                           float note_pitch) const {
+                                           float note_pitch) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->pitches.find(note_pitch) != controller->pitches.cend();
   }
   return Status::kNotFound;
 }
 
-bool InstrumentManager::IsValid(Id instrument_id) const {
+bool InstrumentManager::IsValid(Id instrument_id) const noexcept {
   return controllers_.contains(instrument_id);
 }
 
 void InstrumentManager::Process(Id instrument_id, double timestamp,
                                 float* output, int num_channels,
-                                int num_frames) {
+                                int num_frames) noexcept {
   audio_runner_.Run();
   if (const auto processor_it = processors_.find(instrument_id);
       processor_it != processors_.end()) {
@@ -133,29 +136,31 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
         frame = message_frame;
       }
       std::visit(
-          Visitor{[&](CreateEvent& create_event) {
+          Visitor{[&](CreateEvent& create_event) noexcept {
                     instrument.emplace(sample_rate,
                                        std::move(create_event.definition));
                   },
-                  [&](DestroyEvent& /*destroy_event*/) { instrument.reset(); },
-                  [&](SetCustomDataEvent& set_custom_data_event) {
+                  [&](DestroyEvent& /*destroy_event*/) noexcept {
+                    instrument.reset();
+                  },
+                  [&](SetCustomDataEvent& set_custom_data_event) noexcept {
                     if (instrument) {
                       instrument->SetCustomData(
                           std::move(set_custom_data_event.data));
                     }
                   },
-                  [&](SetNoteOffEvent& set_note_off_event) {
+                  [&](SetNoteOffEvent& set_note_off_event) noexcept {
                     if (instrument) {
                       instrument->SetNoteOff(set_note_off_event.pitch);
                     }
                   },
-                  [&](SetNoteOnEvent& set_note_on_event) {
+                  [&](SetNoteOnEvent& set_note_on_event) noexcept {
                     if (instrument) {
                       instrument->SetNoteOn(set_note_on_event.pitch,
                                             set_note_on_event.intensity);
                     }
                   },
-                  [&](SetParamEvent& set_param_event) {
+                  [&](SetParamEvent& set_param_event) noexcept {
                     if (instrument) {
                       instrument->SetParam(set_param_event.id,
                                            set_param_event.value);
@@ -178,38 +183,38 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
 }
 
 void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
-                                     InstrumentEvent event) {
+                                     InstrumentEvent event) noexcept {
   std::visit(
-      Visitor{
-          [&](SetAllNotesOffEvent& /*set_all_notes_off_event*/) {
-            SetAllNotesOff(instrument_id, timestamp);
-          },
-          [&](SetAllParamsToDefaultEvent& /*set_all_params_to_default_event*/) {
-            SetAllParamsToDefault(instrument_id, timestamp);
-          },
-          [&](SetCustomDataEvent& set_custom_data_event) {
-            SetCustomData(instrument_id, timestamp,
-                          std::move(set_custom_data_event.data));
-          },
-          [&](SetNoteOffEvent& set_note_off_event) {
-            SetNoteOff(instrument_id, timestamp, set_note_off_event.pitch);
-          },
-          [&](SetNoteOnEvent& set_note_on_event) {
-            SetNoteOn(instrument_id, timestamp, set_note_on_event.pitch,
-                      set_note_on_event.intensity);
-          },
-          [&](SetParamEvent& set_param_event) {
-            SetParam(instrument_id, timestamp, set_param_event.id,
-                     set_param_event.value);
-          },
-          [&](SetParamToDefaultEvent& set_param_to_default_event) {
-            SetParamToDefault(instrument_id, timestamp,
-                              set_param_to_default_event.id);
-          }},
+      Visitor{[&](SetAllNotesOffEvent& /*set_all_notes_off_event*/) noexcept {
+                SetAllNotesOff(instrument_id, timestamp);
+              },
+              [&](SetAllParamsToDefaultEvent&
+                  /*set_all_params_to_default_event*/) noexcept {
+                SetAllParamsToDefault(instrument_id, timestamp);
+              },
+              [&](SetCustomDataEvent& set_custom_data_event) noexcept {
+                SetCustomData(instrument_id, timestamp,
+                              std::move(set_custom_data_event.data));
+              },
+              [&](SetNoteOffEvent& set_note_off_event) noexcept {
+                SetNoteOff(instrument_id, timestamp, set_note_off_event.pitch);
+              },
+              [&](SetNoteOnEvent& set_note_on_event) noexcept {
+                SetNoteOn(instrument_id, timestamp, set_note_on_event.pitch,
+                          set_note_on_event.intensity);
+              },
+              [&](SetParamEvent& set_param_event) noexcept {
+                SetParam(instrument_id, timestamp, set_param_event.id,
+                         set_param_event.value);
+              },
+              [&](SetParamToDefaultEvent& set_param_to_default_event) noexcept {
+                SetParamToDefault(instrument_id, timestamp,
+                                  set_param_to_default_event.id);
+              }},
       event);
 }
 
-Status InstrumentManager::Remove(Id instrument_id, double timestamp) {
+Status InstrumentManager::Remove(Id instrument_id, double timestamp) noexcept {
   if (const auto controller_it = controllers_.find(instrument_id);
       controller_it != controllers_.end()) {
     auto& update_events = update_events_[instrument_id];
@@ -224,7 +229,7 @@ Status InstrumentManager::Remove(Id instrument_id, double timestamp) {
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetAllNotesOff(double timestamp) {
+void InstrumentManager::SetAllNotesOff(double timestamp) noexcept {
   for (auto& [instrument_id, controller] : controllers_) {
     if (!controller.pitches.empty()) {
       auto& update_events = update_events_[instrument_id];
@@ -237,7 +242,8 @@ void InstrumentManager::SetAllNotesOff(double timestamp) {
   }
 }
 
-Status InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
+Status InstrumentManager::SetAllNotesOff(Id instrument_id,
+                                         double timestamp) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (!controller->pitches.empty()) {
       auto& update_events = update_events_[instrument_id];
@@ -252,7 +258,7 @@ Status InstrumentManager::SetAllNotesOff(Id instrument_id, double timestamp) {
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetAllParamsToDefault(double timestamp) {
+void InstrumentManager::SetAllParamsToDefault(double timestamp) noexcept {
   for (auto& [instrument_id, controller] : controllers_) {
     if (!controller.params.empty()) {
       auto& update_events = update_events_[instrument_id];
@@ -265,7 +271,7 @@ void InstrumentManager::SetAllParamsToDefault(double timestamp) {
 }
 
 Status InstrumentManager::SetAllParamsToDefault(Id instrument_id,
-                                                double timestamp) {
+                                                double timestamp) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (!controller->params.empty()) {
       auto& update_events = update_events_[instrument_id];
@@ -280,7 +286,7 @@ Status InstrumentManager::SetAllParamsToDefault(Id instrument_id,
 }
 
 Status InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
-                                        std::any custom_data) {
+                                        std::any custom_data) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     update_events_[instrument_id].emplace(
         timestamp, SetCustomDataEvent{std::move(custom_data)});
@@ -290,7 +296,7 @@ Status InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
 }
 
 Status InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
-                                     float note_pitch) {
+                                     float note_pitch) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.erase(note_pitch) > 0) {
       note_off_callback_(instrument_id, timestamp, note_pitch);
@@ -303,13 +309,15 @@ Status InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetNoteOffCallback(NoteOffCallback note_off_callback) {
+void InstrumentManager::SetNoteOffCallback(
+    NoteOffCallback note_off_callback) noexcept {
   note_off_callback_ =
       note_off_callback ? std::move(note_off_callback) : &NoopNoteOffCallback;
 }
 
 Status InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
-                                    float note_pitch, float note_intensity) {
+                                    float note_pitch,
+                                    float note_intensity) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.emplace(note_pitch).second) {
       note_on_callback_(instrument_id, timestamp, note_pitch, note_intensity);
@@ -322,13 +330,14 @@ Status InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetNoteOnCallback(NoteOnCallback note_on_callback) {
+void InstrumentManager::SetNoteOnCallback(
+    NoteOnCallback note_on_callback) noexcept {
   note_on_callback_ =
       note_on_callback ? std::move(note_on_callback) : &NoopNoteOnCallback;
 }
 
 Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
-                                   int param_id, float param_value) {
+                                   int param_id, float param_value) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (auto* param = FindOrNull(controller->params, param_id)) {
       if (param->SetValue(param_value)) {
@@ -343,7 +352,7 @@ Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
 }
 
 Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
-                                            int param_id) {
+                                            int param_id) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (auto* param = FindOrNull(controller->params, param_id)) {
       if (param->ResetValue()) {
@@ -357,7 +366,8 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetSampleRate(double timestamp, int sample_rate) {
+void InstrumentManager::SetSampleRate(double timestamp,
+                                      int sample_rate) noexcept {
   if (sample_rate_ != sample_rate) {
     // Note that the sample accurate timing of the existing instrument events
     // could flactuate during this switch, until the given |timestamp|.
@@ -377,7 +387,7 @@ void InstrumentManager::SetSampleRate(double timestamp, int sample_rate) {
   }
 }
 
-void InstrumentManager::Update() {
+void InstrumentManager::Update() noexcept {
   if (!update_events_.empty()) {
     audio_runner_.Add(
         [this, update_events = std::exchange(update_events_, {})]() mutable {
@@ -389,7 +399,8 @@ void InstrumentManager::Update() {
 }
 
 InstrumentManager::InstrumentController::InstrumentController(
-    InstrumentDefinition definition, ParamDefinitions param_definitions)
+    InstrumentDefinition definition,
+    ParamDefinitions param_definitions) noexcept
     : definition(std::move(definition)) {
   params.reserve(param_definitions.size());
   for (auto& param_definition : param_definitions) {

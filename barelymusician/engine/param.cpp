@@ -7,19 +7,22 @@
 
 namespace barely {
 
-Param::Param(ParamDefinition definition) : definition_(std::move(definition)) {
+Param::Param(ParamDefinition definition) noexcept
+    : definition_(std::move(definition)) {
   // Make sure that the default value is within the minimum and maximum values.
   SetValue(definition_.default_value);
   definition_.default_value = value_;
 }
 
-const ParamDefinition& Param::GetDefinition() const { return definition_; }
+const ParamDefinition& Param::GetDefinition() const noexcept {
+  return definition_;
+}
 
-int Param::GetId() const { return definition_.id; }
+int Param::GetId() const noexcept { return definition_.id; }
 
-float Param::GetValue() const { return value_; }
+float Param::GetValue() const noexcept { return value_; }
 
-bool Param::ResetValue() {
+bool Param::ResetValue() noexcept {
   if (value_ != definition_.default_value) {
     value_ = definition_.default_value;
     return true;
@@ -27,7 +30,7 @@ bool Param::ResetValue() {
   return false;
 }
 
-bool Param::SetValue(float value) {
+bool Param::SetValue(float value) noexcept {
   if (definition_.max_value.has_value()) {
     value = std::min(value, *definition_.max_value);
   }

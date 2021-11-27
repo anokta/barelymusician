@@ -9,17 +9,17 @@ namespace barely::examples {
 class AudioClock {
  public:
   /// Constructs new |AudioClock|.
-  explicit AudioClock(int sample_rate);
+  explicit AudioClock(int sample_rate) noexcept;
 
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
-  double GetTimestamp() const;
+  double GetTimestamp() const noexcept;
 
   /// Updates the clock.
   ///
   /// @param num_frames Number of frames to iterate.
-  void Update(int num_frames);
+  void Update(int num_frames) noexcept;
 
  private:
   // Sampling rate in Hz.

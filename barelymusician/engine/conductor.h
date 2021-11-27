@@ -22,64 +22,64 @@ class Conductor {
   /// @param definition Conductor definition.
   /// @param param_definitions Conductor parameter definitions.
   explicit Conductor(ConductorDefinition definition = {},
-                     ParamDefinitions param_definitions = {});
+                     ParamDefinitions param_definitions = {}) noexcept;
 
   /// Destroys |Conductor|.
-  ~Conductor();
+  ~Conductor() noexcept;
 
   /// Copyable and movable.
   Conductor(const Conductor& other) = default;
-  Conductor& operator=(const Conductor& other) = default;
+  Conductor& operator=(const Conductor& other) noexcept = default;
   Conductor(Conductor&& other) = default;
-  Conductor& operator=(Conductor&& other) = default;
+  Conductor& operator=(Conductor&& other) noexcept = default;
 
   /// Returns parameter.
   ///
   /// @param id Parameter id.
   /// @return Parameter or error status.
-  StatusOr<Param> GetParam(int id) const;
+  StatusOr<Param> GetParam(int id) const noexcept;
 
   /// Sets custom data.
   ///
   /// @param data Custom data.
-  void SetCustomData(std::any data);
+  void SetCustomData(std::any data) noexcept;
 
   /// Sets parameter.
   ///
   /// @param id Parameter id.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParam(int id, float value);
+  Status SetParam(int id, float value) noexcept;
 
   /// Sets parameter to default.
   ///
   /// @param id Parameter id.
   /// @return Status.
-  Status SetParamToDefault(int id);
+  Status SetParamToDefault(int id) noexcept;
 
   /// Transforms note duration.
   ///
   /// @param note_duration Note duration.
   /// @return Raw note duration, or error status.
-  StatusOr<double> TransformNoteDuration(NoteDuration note_duration);
+  StatusOr<double> TransformNoteDuration(NoteDuration note_duration) noexcept;
 
   /// Transforms note intensity.
   ///
   /// @param note_intensity Note intensity.
   /// @return Raw note intensity, or error status.
-  StatusOr<float> TransformNoteIntensity(NoteIntensity note_intensity);
+  StatusOr<float> TransformNoteIntensity(NoteIntensity note_intensity) noexcept;
 
   /// Transforms note pitch.
   ///
   /// @param note_pitch Note pitch.
   /// @return Raw note pitch, or error status.
-  StatusOr<float> TransformNotePitch(NotePitch note_pitch);
+  StatusOr<float> TransformNotePitch(NotePitch note_pitch) noexcept;
 
   /// Transforms playback tempo.
   ///
   /// @param tempo Original tempo in BPM.
   /// @return Transformed tempo in BPM.
-  double TransformPlaybackTempo(double tempo);
+  double TransformPlaybackTempo(double tempo) noexcept;
 
  private:
   // Conductor destroy function.

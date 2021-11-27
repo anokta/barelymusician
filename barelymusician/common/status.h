@@ -9,21 +9,21 @@ namespace barely {
 
 /// Status codes.
 enum class Status {
-  // Success.
+  /// Success.
   kOk = 0,
-  // Invalid argument error.
+  /// Invalid argument error.
   kInvalidArgument = 1,
-  // Not found error.
+  /// Not found error.
   kNotFound = 2,
-  // Already exists error.
+  /// Already exists error.
   kAlreadyExists = 3,
-  // Failed precondition error.
+  /// Failed precondition error.
   kFailedPrecondition = 4,
-  // Unimplemented error.
+  /// Unimplemented error.
   kUnimplemented = 5,
-  // Internal error.
+  /// Internal error.
   kInternal = 6,
-  // Unknown error.
+  /// Unknown error.
   kUnknown = 7,
 };
 

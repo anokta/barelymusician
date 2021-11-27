@@ -151,6 +151,37 @@ void Sequence::SetLoopLength(double loop_length) noexcept {
   loop_length_ = std::max(loop_length, 0.0);
 }
 
+Status Sequence::SetNoteDuration(Id id, NoteDuration note_duration) noexcept {
+  if (const auto* position = FindOrNull(positions_, id)) {
+    if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
+      note->duration = std::move(note_duration);
+      return Status::kOk;
+    }
+  }
+  return Status::kNotFound;
+}
+
+Status Sequence::SetNoteIntensity(Id id,
+                                  NoteIntensity note_intensity) noexcept {
+  if (const auto* position = FindOrNull(positions_, id)) {
+    if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
+      note->intensity = std::move(note_intensity);
+      return Status::kOk;
+    }
+  }
+  return Status::kNotFound;
+}
+
+Status Sequence::SetNotePitch(Id id, NotePitch note_pitch) noexcept {
+  if (const auto* position = FindOrNull(positions_, id)) {
+    if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
+      note->pitch = std::move(note_pitch);
+      return Status::kOk;
+    }
+  }
+  return Status::kNotFound;
+}
+
 void Sequence::ProcessInternal(
     double begin_position, double end_position, double position_offset,
     const ProcessCallback& process_callback) const noexcept {

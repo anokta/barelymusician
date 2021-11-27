@@ -124,6 +124,14 @@ class Sequence {
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept;
 
+  /// Sets note.
+  ///
+  /// @param id Note id.
+  /// @param position Note position.
+  /// @param note Note.
+  /// @return Status.
+  Status SetNote(Id id, double position, Note note) noexcept;
+
   /// Sets note duration.
   ///
   /// @param id Note id.
@@ -141,6 +149,12 @@ class Sequence {
   /// @param id Note id.
   /// @return Status.
   Status SetNotePitch(Id id, NotePitch note_pitch) noexcept;
+
+  /// Sets note position.
+  ///
+  /// @param id Note id.
+  /// @return Status.
+  Status SetNotePosition(Id id, double position) noexcept;
 
  private:
   // Internal process helper function.

@@ -151,6 +151,23 @@ void Sequence::SetLoopLength(double loop_length) noexcept {
   loop_length_ = std::max(loop_length, 0.0);
 }
 
+Status Sequence::SetNote(Id id, double position, Note note) noexcept {
+  if (const auto position_it = positions_.find(id);
+      position_it != positions_.end()) {
+    const auto note_it =
+        notes_.find(NotePositionIdPair{position_it->second, id});
+    note_it->second = std::move(note);
+    if (position_it->second != position) {
+      auto note_node = notes_.extract(note_it);
+      note_node.key().first = position;
+      notes_.insert(std::move(note_node));
+      position_it->second = position;
+    }
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
 Status Sequence::SetNoteDuration(Id id, NoteDuration note_duration) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
@@ -178,6 +195,22 @@ Status Sequence::SetNotePitch(Id id, NotePitch note_pitch) noexcept {
       note->pitch = std::move(note_pitch);
       return Status::kOk;
     }
+  }
+  return Status::kNotFound;
+}
+
+Status Sequence::SetNotePosition(Id id, double position) noexcept {
+  if (const auto position_it = positions_.find(id);
+      position_it != positions_.end()) {
+    if (position_it->second != position) {
+      const auto note_it =
+          notes_.find(NotePositionIdPair{position_it->second, id});
+      auto note_node = notes_.extract(note_it);
+      note_node.key().first = position;
+      notes_.insert(std::move(note_node));
+      position_it->second = position;
+    }
+    return Status::kOk;
   }
   return Status::kNotFound;
 }

@@ -10,9 +10,6 @@ namespace Barely {
     /// Invalid id.
     public const Int64 InvalidId = -1;
 
-    /// Okay status code.
-    public const Int32 OkStatus = 0;
-
     /// Instrument note off event.
     public delegate void InstrumentNoteOffEvent(Instrument instrument, float notePitch);
     public static event InstrumentNoteOffEvent OnInstrumentNoteOff;
@@ -33,8 +30,11 @@ namespace Barely {
       Int64 instrumentId = InvalidId;
       Type instrumentType = instrument.GetType();
       if (instrumentType == typeof(SynthInstrument)) {
-        if (AddSynthInstrumentNative(Handle, _int64Ptr) == OkStatus) {
+        Status status = AddSynthInstrumentNative(Handle, _int64Ptr);
+        if (IsOk(status)) {
           instrumentId = Marshal.ReadInt64(_int64Ptr);
+        } else {
+          Debug.LogError("Failed to add instrument (" + instrument.name + "): " + status);
         }
       } else {
         Debug.LogError("Unsupported instrument type: " + instrumentType);
@@ -51,8 +51,11 @@ namespace Barely {
     /// @return Performer id.
     public static Int64 AddPerformer(Performer performer) {
       Int64 performerId = InvalidId;
-      if (AddPerformerNative(Handle, _int64Ptr) == OkStatus) {
+      Status status = AddPerformerNative(Handle, _int64Ptr);
+      if (IsOk(status)) {
         performerId = Marshal.ReadInt64(_int64Ptr);
+      } else {
+        Debug.LogError("Failed to add performer (" + performer.name + "): " + status);
       }
       return performerId;
     }
@@ -61,8 +64,11 @@ namespace Barely {
     ///
     /// @return Playback position in beats.
     public static double GetPlaybackPosition() {
-      if (GetPlaybackPositionNative(Handle, _doublePtr) == OkStatus) {
+      Status status = GetPlaybackPositionNative(Handle, _doublePtr);
+      if (IsOk(status)) {
         return Marshal.PtrToStructure<Double>(_doublePtr);
+      } else {
+        Debug.LogError("Failed to get playback position: " + status);
       }
       return 0.0;
     }
@@ -71,8 +77,11 @@ namespace Barely {
     ///
     /// @return Playback tempo.
     public static double GetPlaybackTempo() {
-      if (GetPlaybackTempoNative(Handle, _doublePtr) == OkStatus) {
+      Status status = GetPlaybackTempoNative(Handle, _doublePtr);
+      if (IsOk(status)) {
         return Marshal.PtrToStructure<Double>(_doublePtr);
+      } else {
+        Debug.LogError("Failed to get playback tempo: " + status);
       }
       return 0.0;
     }
@@ -81,10 +90,23 @@ namespace Barely {
     ///
     /// @return True if playing, false otherwise.
     public static bool IsPlaying() {
-      if (IsPlayingNative(Handle, _booleanPtr) == OkStatus) {
+      Status status = IsPlayingNative(Handle, _booleanPtr);
+      if (IsOk(status)) {
         return Marshal.PtrToStructure<Boolean>(_booleanPtr);
+      } else {
+        Debug.LogError("Failed to get playback state: " + status);
       }
       return false;
+    }
+
+    /// Processes the next instrument buffer.
+    ///
+    /// @param instrument Instrument to process.
+    /// @param output Output buffer.
+    /// @param numChannels Number of channels.
+    public static void ProcessInstrument(Instrument instrument, float[] output, int numChannels) {
+      ProcessInstrumentNative(Handle, instrument.Id, AudioSettings.dspTime, output, numChannels,
+                              output.Length / numChannels);
     }
 
     /// Removes instrument.
@@ -102,22 +124,12 @@ namespace Barely {
       RemovePerformerNative(Handle, performer.Id);
     }
 
-    /// Processes the next instrument buffer.
-    ///
-    /// @param instrument Instrument to process.
-    /// @param output Output buffer.
-    /// @param numChannels Number of channels.
-    public static void ProcessInstrument(Instrument instrument, float[] output, int numChannels) {
-      ProcessInstrumentNative(Handle, instrument.Id, AudioSettings.dspTime, output, numChannels,
-                              output.Length / numChannels);
-    }
-
     /// Sets all instrument notes off.
     ///
     /// @param instrument Instrument to set.
     /// @return True if success, false otherwise.
     public static bool SetAllInstrumentNotesOff(Instrument instrument) {
-      return SetAllInstrumentNotesOffNative(Handle, instrument.Id) == OkStatus;
+      return IsOk(SetAllInstrumentNotesOffNative(Handle, instrument.Id));
     }
 
     /// Sets all instrument parameters to default value.
@@ -125,7 +137,7 @@ namespace Barely {
     /// @param instrument Instrument to set.
     /// @return True if success, false otherwise.
     public static bool SetAllInstrumentParamsToDefault(Instrument instrument) {
-      return SetAllInstrumentParamsToDefaultNative(Handle, instrument.Id) == OkStatus;
+      return IsOk(SetAllInstrumentParamsToDefaultNative(Handle, instrument.Id));
     }
 
     /// Sets instrument note off.
@@ -134,7 +146,7 @@ namespace Barely {
     /// @param notePitch Note pitch.
     /// @return True if success, false otherwise.
     public static bool SetInstrumentNoteOff(Instrument instrument, float notePitch) {
-      return SetInstrumentNoteOffNative(Handle, instrument.Id, notePitch) == OkStatus;
+      return IsOk(SetInstrumentNoteOffNative(Handle, instrument.Id, notePitch));
     }
 
     /// Sets instrument note on.
@@ -144,7 +156,7 @@ namespace Barely {
     /// @param noteIntensity Note intensity.
     /// @return True if success, false otherwise.
     public static bool SetInstrumentNoteOn(Instrument instrument, float notePitch, float noteIntensity) {
-      return SetInstrumentNoteOnNative(Handle, instrument.Id, notePitch, noteIntensity) == OkStatus;
+      return IsOk(SetInstrumentNoteOnNative(Handle, instrument.Id, notePitch, noteIntensity));
     }
 
     /// Sets instrument parameter value.
@@ -154,7 +166,7 @@ namespace Barely {
     /// @param paramValue Parameter value.
     /// @return True if success, false otherwise.
     public static bool SetInstrumentParam(Instrument instrument, int paramId, float paramValue) {
-      return SetInstrumentParamNative(Handle, instrument.Id, paramId, paramValue) == OkStatus;
+      return IsOk(SetInstrumentParamNative(Handle, instrument.Id, paramId, paramValue));
     }
 
     /// Sets instrument parameter value to default.
@@ -163,38 +175,44 @@ namespace Barely {
     /// @param paramId Parameter id.
     /// @return True if success, false otherwise.
     public static bool SetInstrumentParamToDefault(Instrument instrument, int paramId) {
-      return SetInstrumentParamToDefaultNative(Handle, instrument.Id, paramId) == OkStatus;
+      return IsOk(SetInstrumentParamToDefaultNative(Handle, instrument.Id, paramId));
     }
 
     /// Sets playback position.
     ///
     /// @param position Playback position in beats.
-    public static void SetPlaybackPosition(double position) {
-      SetPlaybackPositionNative(Handle, position);
+    /// @return True if success, false otherwise.
+    public static bool SetPlaybackPosition(double position) {
+      return IsOk(SetPlaybackPositionNative(Handle, position));
     }
 
     /// Sets playback tempo.
     ///
     /// @param tempo Playback tempo in BPM.
-    public static void SetPlaybackTempo(double tempo) {
-      SetPlaybackTempoNative(Handle, tempo);
+    /// @return True if success, false otherwise.
+    public static bool SetPlaybackTempo(double tempo) {
+      return IsOk(SetPlaybackTempoNative(Handle, tempo));
     }
 
     /// Starts the playback.
-    public static void StartPlayback() {
-      StartPlaybackNative(Handle);
+    ///
+    /// @return True if success, false otherwise.
+    public static bool StartPlayback() {
+      return IsOk(StartPlaybackNative(Handle));
     }
 
     /// Stops the playback.
-    public static void StopPlayback() {
-      StopPlaybackNative(Handle);
+    ///
+    /// @return True if success, false otherwise.
+    public static bool StopPlayback() {
+      return IsOk(StopPlaybackNative(Handle));
     }
 
     /// Updates performer.
     ///
     /// @param performer Performer to update.
+    /// TODO(#85): This is a POC implementation only, also missing begin/end position setters.
     public static void UpdatePerformer(Performer performer) {
-      /// TODO(#85): This is a POC implementation only, also missing begin/end position setters.
       SetPerformerBeginOffsetNative(Handle, performer.Id, performer.BeginOffset);
       SetPerformerLoopNative(Handle, performer.Id, performer.Loop);
       SetPerformerLoopBeginOffsetNative(Handle, performer.Id, performer.LoopBeginOffset);
@@ -324,6 +342,31 @@ namespace Barely {
       }
     }
 
+    // Status codes.
+    private enum Status {
+      // Success.
+      Ok = 0,
+      // Invalid argument error.
+      InvalidArgument = 1,
+      // Not found error.
+      NotFound = 2,
+      // Already exists error.
+      AlreadyExists = 3,
+      // Failed precondition error.
+      FailedPrecondition = 4,
+      // Unimplemented error.
+      Unimplemented = 5,
+      // Internal error.
+      Internal = 6,
+      // Unknown error.
+      Unknown = 7,
+    }
+
+    // Returns whether given |status| is ok.
+    private static bool IsOk(Status status) {
+      return (status == Status.Ok);
+    }
+
 #if !UNITY_EDITOR && UNITY_IOS
     private const string pluginName = "__Internal";
 #else
@@ -331,114 +374,114 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
     [DllImport(pluginName, EntryPoint = "BarelyAddPerformer")]
-    private static extern Int32 AddPerformerNative(IntPtr handle, IntPtr performerIdPtr);
+    private static extern Status AddPerformerNative(IntPtr handle, IntPtr performerIdPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyAddPerformerInstrument")]
-    private static extern Int32 AddPerformerInstrumentNative(IntPtr handle, Int64 performerId, Int64 instrumentId);
+    private static extern Status AddPerformerInstrumentNative(IntPtr handle, Int64 performerId, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelyAddPerformerNote")]
-    private static extern Int32 AddPerformerNoteNative(IntPtr handle, Int64 performerId, double notePosition,
+    private static extern Status AddPerformerNoteNative(IntPtr handle, Int64 performerId, double notePosition,
                                                        double noteDuration, float notePitch, float noteIntensity,
                                                        IntPtr noteIdPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyAddInstrument")]
-    private static extern Int64 AddSynthInstrumentNative(IntPtr handle, IntPtr instrumentIdPtr);
+    private static extern Status AddSynthInstrumentNative(IntPtr handle, IntPtr instrumentIdPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyCreate")]
     private static extern IntPtr CreateNative(Int32 sampleRate);
 
     [DllImport(pluginName, EntryPoint = "BarelyDestroy")]
-    private static extern Int32 DestroyNative(IntPtr handle);
+    private static extern Status DestroyNative(IntPtr handle);
 
     [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackPosition")]
-    private static extern Int32 GetPlaybackPositionNative(IntPtr handle, IntPtr positionPtr);
+    private static extern Status GetPlaybackPositionNative(IntPtr handle, IntPtr positionPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackTempo")]
-    private static extern Int32 GetPlaybackTempoNative(IntPtr handle, IntPtr tempoPtr);
+    private static extern Status GetPlaybackTempoNative(IntPtr handle, IntPtr tempoPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyIsPlaying")]
-    private static extern Int32 IsPlayingNative(IntPtr handle, IntPtr isPlayingPtr);
+    private static extern Status IsPlayingNative(IntPtr handle, IntPtr isPlayingPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyProcessInstrument")]
-    private static extern Int32 ProcessInstrumentNative(IntPtr handle, Int64 instrumentId, double timestamp,
+    private static extern Status ProcessInstrumentNative(IntPtr handle, Int64 instrumentId, double timestamp,
                                                         [In, Out] float[] output, Int32 numChannels, Int32 numFrames);
 
     [DllImport(pluginName, EntryPoint = "BarelyRemoveAllPerformerNotes")]
-    private static extern Int32 RemoveAllPerformerNotesNative(IntPtr handle, Int64 performerId);
+    private static extern Status RemoveAllPerformerNotesNative(IntPtr handle, Int64 performerId);
 
     [DllImport(pluginName, EntryPoint = "BarelyRemoveInstrument")]
-    private static extern Int32 RemoveInstrumentNative(IntPtr handle, Int64 instrumentId);
+    private static extern Status RemoveInstrumentNative(IntPtr handle, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelyRemovePerformer")]
-    private static extern Int32 RemovePerformerNative(IntPtr handle, Int64 performerId);
+    private static extern Status RemovePerformerNative(IntPtr handle, Int64 performerId);
 
     [DllImport(pluginName, EntryPoint = "BarelyRemovePerformerNote")]
-    private static extern Int32 RemovePerformerNoteNative(IntPtr handle, Int64 performerId, Int64 noteId);
+    private static extern Status RemovePerformerNoteNative(IntPtr handle, Int64 performerId, Int64 noteId);
 
     [DllImport(pluginName, EntryPoint = "BarelySetAllInstrumentNotesOff")]
-    private static extern Int32 SetAllInstrumentNotesOffNative(IntPtr handle, Int64 instrumentId);
+    private static extern Status SetAllInstrumentNotesOffNative(IntPtr handle, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelySetAllInstrumentParamsToDefault")]
-    private static extern Int32 SetAllInstrumentParamsToDefaultNative(IntPtr handle, Int64 instrumentId);
+    private static extern Status SetAllInstrumentParamsToDefaultNative(IntPtr handle, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOffCallback")]
-    private static extern Int32 SetInstrumentNoteOffCallbackNative(IntPtr handle, IntPtr noteOffCallbackPtr);
+    private static extern Status SetInstrumentNoteOffCallbackNative(IntPtr handle, IntPtr noteOffCallbackPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOff")]
-    private static extern Int32 SetInstrumentNoteOffNative(IntPtr handle, Int64 instrumentId, float notePitch);
+    private static extern Status SetInstrumentNoteOffNative(IntPtr handle, Int64 instrumentId, float notePitch);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOnCallback")]
-    private static extern Int32 SetInstrumentNoteOnCallbackNative(IntPtr handle, IntPtr noteOnCallbackPtr);
+    private static extern Status SetInstrumentNoteOnCallbackNative(IntPtr handle, IntPtr noteOnCallbackPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOn")]
-    private static extern Int32 SetInstrumentNoteOnNative(IntPtr handle, Int64 instrumentId, float notePitch,
+    private static extern Status SetInstrumentNoteOnNative(IntPtr handle, Int64 instrumentId, float notePitch,
                                                           float noteIntensity);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParam")]
-    private static extern Int32 SetInstrumentParamNative(IntPtr handle, Int64 instrumentId, Int32 paramId,
+    private static extern Status SetInstrumentParamNative(IntPtr handle, Int64 instrumentId, Int32 paramId,
                                                          float paramValue);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParamToDefault")]
-    private static extern Int32 SetInstrumentParamToDefaultNative(IntPtr handle, Int64 instrumentId, Int32 paramId);
+    private static extern Status SetInstrumentParamToDefaultNative(IntPtr handle, Int64 instrumentId, Int32 paramId);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerBeginOffset")]
-    private static extern Int32 SetPerformerBeginOffsetNative(IntPtr handle, Int64 performerId, double beginOffset);
+    private static extern Status SetPerformerBeginOffsetNative(IntPtr handle, Int64 performerId, double beginOffset);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerBeginPosition")]
-    private static extern Int32 SetPerformerBeginPositionNative(IntPtr handle, Int64 performerId, IntPtr beginPosition);
+    private static extern Status SetPerformerBeginPositionNative(IntPtr handle, Int64 performerId, IntPtr beginPosition);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerEndPosition")]
-    private static extern Int32 SetPerformerEndPositionNative(IntPtr handle, Int64 performerId, IntPtr endPosition);
+    private static extern Status SetPerformerEndPositionNative(IntPtr handle, Int64 performerId, IntPtr endPosition);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoop")]
-    private static extern Int32 SetPerformerLoopNative(IntPtr handle, Int64 performerId, bool loop);
+    private static extern Status SetPerformerLoopNative(IntPtr handle, Int64 performerId, bool loop);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoopBeginOffset")]
-    private static extern Int32 SetPerformerLoopBeginOffsetNative(IntPtr handle, Int64 performerId,
+    private static extern Status SetPerformerLoopBeginOffsetNative(IntPtr handle, Int64 performerId,
                                                                   double loopBeginOffset);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoopLength")]
-    private static extern Int32 SetPerformerLoopLengthNative(IntPtr handle, Int64 performerId, double loopLength);
+    private static extern Status SetPerformerLoopLengthNative(IntPtr handle, Int64 performerId, double loopLength);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPlaybackBeatCallback")]
-    private static extern Int32 SetPlaybackBeatCallbackNative(IntPtr handle, IntPtr playbackBeatCallbackPtr);
+    private static extern Status SetPlaybackBeatCallbackNative(IntPtr handle, IntPtr playbackBeatCallbackPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPlaybackPosition")]
-    private static extern Int32 SetPlaybackPositionNative(IntPtr handle, double position);
+    private static extern Status SetPlaybackPositionNative(IntPtr handle, double position);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPlaybackTempo")]
-    private static extern Int32 SetPlaybackTempoNative(IntPtr handle, double tempo);
+    private static extern Status SetPlaybackTempoNative(IntPtr handle, double tempo);
 
     [DllImport(pluginName, EntryPoint = "BarelySetSampleRate")]
-    private static extern Int32 SetSampleRateNative(IntPtr handle, Int32 sampleRate);
+    private static extern Status SetSampleRateNative(IntPtr handle, Int32 sampleRate);
 
     [DllImport(pluginName, EntryPoint = "BarelyStartPlayback")]
-    private static extern Int32 StartPlaybackNative(IntPtr handle);
+    private static extern Status StartPlaybackNative(IntPtr handle);
 
     [DllImport(pluginName, EntryPoint = "BarelyStopPlayback")]
-    private static extern Int32 StopPlaybackNative(IntPtr handle);
+    private static extern Status StopPlaybackNative(IntPtr handle);
 
     [DllImport(pluginName, EntryPoint = "BarelyUpdate")]
-    private static extern Int32 UpdateNative(IntPtr handle, double timestamp);
+    private static extern Status UpdateNative(IntPtr handle, double timestamp);
   }
 }

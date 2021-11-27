@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BarelyApi {
+namespace Barely {
   /// Performer.
   public class Performer : MonoBehaviour {
     /// Performer id.
-    public Int64 Id { get; private set; } = BarelyMusician.InvalidId;
+    public Int64 Id { get; private set; } = Musician.InvalidId;
 
     /// Begin offset.
     public double BeginOffset = 0.0;
@@ -44,15 +44,15 @@ namespace BarelyApi {
     private bool _changed = false;
 
     void OnEnable() {
-      if (Id == BarelyMusician.InvalidId) {
-        Id = BarelyMusician.AddPerformer(this);
+      if (Id == Musician.InvalidId) {
+        Id = Musician.AddPerformer(this);
       }
     }
 
     void OnDisable() {
-      if (Id != BarelyMusician.InvalidId) {
-        BarelyMusician.RemovePerformer(this);
-        Id = BarelyMusician.InvalidId;
+      if (Id != Musician.InvalidId) {
+        Musician.RemovePerformer(this);
+        Id = Musician.InvalidId;
       }
     }
 
@@ -63,7 +63,7 @@ namespace BarelyApi {
     void Update() {
       if (_changed) {
         _changed = false;
-        BarelyMusician.UpdatePerformer(this);
+        Musician.UpdatePerformer(this);
       }
     }
   }

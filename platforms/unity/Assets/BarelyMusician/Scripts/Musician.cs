@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace BarelyApi {
-  /// Class that communicates with the native BarelyMusician API.
-  public static class BarelyMusician {
+namespace Barely {
+  /// Class that communicates with the native API.
+  public static class Musician {
     /// Invalid id.
     public const Int64 InvalidId = -1;
 
@@ -221,7 +221,7 @@ namespace BarelyApi {
         if (_handle == IntPtr.Zero) {
           var instance = new GameObject() {
             hideFlags = HideFlags.HideAndDontSave
-          }.AddComponent<BarelyMusicianInternal>();
+          }.AddComponent<MusicianInternal>();
           GameObject.DontDestroyOnLoad(instance.gameObject);
           if (_handle != IntPtr.Zero) {
             _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
@@ -253,7 +253,7 @@ namespace BarelyApi {
     private static bool _isShuttingDown = false;
 
     // Internal component to update the native state.
-    private class BarelyMusicianInternal : MonoBehaviour {
+    private class MusicianInternal : MonoBehaviour {
       // Instrument note off callback.
       private delegate void InstrumentNoteOffCallback(Int64 instrumentId, float notePitch);
       private InstrumentNoteOffCallback _instrumentNoteOffCallback = null;

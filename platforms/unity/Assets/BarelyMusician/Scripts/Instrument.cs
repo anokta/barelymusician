@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BarelyApi {
+namespace Barely {
   // Instrument.
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
     /// Instrument id.
-    public Int64 Id { get; private set; } = BarelyMusician.InvalidId;
+    public Int64 Id { get; private set; } = Musician.InvalidId;
 
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
@@ -30,32 +30,32 @@ namespace BarelyApi {
     }
 
     protected virtual void OnEnable() {
-      if (Id == BarelyMusician.InvalidId) {
-        BarelyMusician.OnInstrumentNoteOff += OnInstrumentNoteOff;
-        BarelyMusician.OnInstrumentNoteOn += OnInstrumentNoteOn;
-        Id = BarelyMusician.AddInstrument(this);
+      if (Id == Musician.InvalidId) {
+        Musician.OnInstrumentNoteOff += OnInstrumentNoteOff;
+        Musician.OnInstrumentNoteOn += OnInstrumentNoteOn;
+        Id = Musician.AddInstrument(this);
       }
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      if (Id != BarelyMusician.InvalidId) {
-        BarelyMusician.RemoveInstrument(this);
-        BarelyMusician.OnInstrumentNoteOff -= OnInstrumentNoteOff;
-        BarelyMusician.OnInstrumentNoteOn -= OnInstrumentNoteOn;
-        Id = BarelyMusician.InvalidId;
+      if (Id != Musician.InvalidId) {
+        Musician.RemoveInstrument(this);
+        Musician.OnInstrumentNoteOff -= OnInstrumentNoteOff;
+        Musician.OnInstrumentNoteOn -= OnInstrumentNoteOn;
+        Id = Musician.InvalidId;
       }
     }
 
     /// Stops all notes.
     public bool SetAllNotesOff() {
-      return BarelyMusician.SetAllInstrumentNotesOff(this);
+      return Musician.SetAllInstrumentNotesOff(this);
     }
 
     /// Sets all parameters to default.
     public bool SetAllParamsToDefault() {
-      return BarelyMusician.SetAllInstrumentParamsToDefault(this);
+      return Musician.SetAllInstrumentParamsToDefault(this);
     }
 
     /// Stops playing note.
@@ -63,7 +63,7 @@ namespace BarelyApi {
     /// @param pitch Note pitch.
     /// @return True if success, false otherwise.
     public bool SetNoteOff(float pitch) {
-      return BarelyMusician.SetInstrumentNoteOff(this, pitch);
+      return Musician.SetInstrumentNoteOff(this, pitch);
     }
 
     /// Starts playing note.
@@ -72,7 +72,7 @@ namespace BarelyApi {
     /// @param intensity Note intensity.
     /// @return True if success, false otherwise.
     public bool SetNoteOn(float pitch, float intensity) {
-      return BarelyMusician.SetInstrumentNoteOn(this, pitch, intensity);
+      return Musician.SetInstrumentNoteOn(this, pitch, intensity);
     }
 
     /// Sets parameter value.
@@ -81,7 +81,7 @@ namespace BarelyApi {
     /// @param value Parameter value.
     /// @return True if success, false otherwise.
     public bool SetParam(int id, float value) {
-      return BarelyMusician.SetInstrumentParam(this, id, value);
+      return Musician.SetInstrumentParam(this, id, value);
     }
 
     /// Sets parameter to default value.
@@ -89,11 +89,11 @@ namespace BarelyApi {
     /// @param id Parameter id.
     /// @return True if success, false otherwise.
     public bool SetParamToDefault(int id) {
-      return BarelyMusician.SetInstrumentParamToDefault(this, id);
+      return Musician.SetInstrumentParamToDefault(this, id);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      BarelyMusician.ProcessInstrument(this, data, channels);
+      Musician.ProcessInstrument(this, data, channels);
     }
 
     private void OnInstrumentNoteOff(Instrument instrument, float notePitch) {

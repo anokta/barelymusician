@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using BarelyApi;
+using Barely;
 
 /// Simple metronome that controls the playback.
 public class Metronome : MonoBehaviour {
@@ -27,30 +27,30 @@ public class Metronome : MonoBehaviour {
   public bool tick = true;
 
   void OnEnable() {
-    BarelyMusician.OnPlaybackBeat += OnPlaybackBeat;
+    Musician.OnPlaybackBeat += OnPlaybackBeat;
   }
 
   void OnDisable() {
-    BarelyMusician.OnPlaybackBeat -= OnPlaybackBeat;
+    Musician.OnPlaybackBeat -= OnPlaybackBeat;
   }
 
   void Update() {
-    BarelyMusician.SetPlaybackTempo(tempo);
+    Musician.SetPlaybackTempo(tempo);
     if (Input.GetKeyDown(KeyCode.Space)) {
-      if (BarelyMusician.IsPlaying()) {
-        BarelyMusician.StopPlayback();
+      if (Musician.IsPlaying()) {
+        Musician.StopPlayback();
         if (logToConsole) {
           Debug.Log("Playback stopped");
         }
       } else {
-        BarelyMusician.StartPlayback();
+        Musician.StartPlayback();
         if (logToConsole) {
           Debug.Log("Playback started");
         }
       }
     } else if (Input.GetKeyDown(KeyCode.Backspace)) {
-      BarelyMusician.StopPlayback();
-      BarelyMusician.SetPlaybackPosition(0.0);
+      Musician.StopPlayback();
+      Musician.SetPlaybackPosition(0.0);
     }
   }
 

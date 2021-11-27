@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace BarelyApi {
+namespace Barely {
   /// Musical note.
   [System.Serializable]
   public class Note {

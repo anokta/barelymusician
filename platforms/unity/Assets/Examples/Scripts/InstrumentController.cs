@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using BarelyApi;
+using Barely;
 
 // Instrument keyboard controller.
 public class InstrumentController : MonoBehaviour {

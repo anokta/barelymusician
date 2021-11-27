@@ -1,17 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using BarelyApi;
+using Barely;
 
 public class EventLogger : MonoBehaviour {
   private void OnEnable() {
-    BarelyMusician.OnInstrumentNoteOff += OnNoteOff;
-    BarelyMusician.OnInstrumentNoteOn += OnNoteOn;
+    Musician.OnInstrumentNoteOff += OnNoteOff;
+    Musician.OnInstrumentNoteOn += OnNoteOn;
   }
 
   private void OnDisable() {
-    BarelyMusician.OnInstrumentNoteOff -= OnNoteOff;
-    BarelyMusician.OnInstrumentNoteOn -= OnNoteOn;
+    Musician.OnInstrumentNoteOff -= OnNoteOff;
+    Musician.OnInstrumentNoteOn -= OnNoteOn;
   }
 
   private void OnNoteOff(Instrument instrument, float note_pitch) {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace BarelyApi {
+namespace Barely {
   // Simple polyphonic synth instrument.
   public class SynthInstrument : Instrument {
     public enum OscillatorType {

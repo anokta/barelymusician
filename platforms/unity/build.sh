@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-# Builds BarelyMusician Unity plugins and copies them to the project plugins
-# folder.
+# Builds BarelyMusician Unity plugins and copies them to the plugins folder.
 #
 # Options:
 #   -c=|--compilation_mode=[dbg|opt], default: opt
@@ -9,9 +8,9 @@
 readonly WORKSPACE="$(bazel info workspace)"
 readonly BAZEL_BIN="${WORKSPACE}/bazel-bin"
 
-readonly NATIVE_BIN_DIR="${BAZEL_BIN}/platforms/unity/native"
+readonly NATIVE_BIN_DIR="${BAZEL_BIN}/platforms/unity"
 
-readonly PLUGINS_DIR="${WORKSPACE}/platforms/unity/project/Assets/BarelyMusician/Plugins"
+readonly PLUGINS_DIR="${WORKSPACE}/platforms/unity/Assets/BarelyMusician/Plugins"
 readonly PLUGINS_X64_DIR="${PLUGINS_DIR}/x86_64"
 
 readonly PLUGIN_NAME="barelymusicianunity"
@@ -53,7 +52,7 @@ main() {
   parse_flags "$@"
 
   echo "Building BarelyMusician Unity plugins..."
-  bazel build -c "${COMPILATION_MODE}" "//platforms/unity/native:all"
+  bazel build -c "${COMPILATION_MODE}" "//platforms/unity:all"
 
   if [[ -f "${LINUX_BIN_SRC_PATH}" ]]; then
     echo "Copying native Linux plugin into Unity project..."

@@ -384,7 +384,7 @@ namespace Barely {
                                                        double noteDuration, float notePitch, float noteIntensity,
                                                        IntPtr noteIdPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelyAddInstrument")]
+    [DllImport(pluginName, EntryPoint = "BarelyAddSynthInstrument")]
     private static extern Status AddSynthInstrumentNative(IntPtr handle, IntPtr instrumentIdPtr);
 
     [DllImport(pluginName, EntryPoint = "BarelyCreate")]

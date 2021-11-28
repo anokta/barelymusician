@@ -1,10 +1,12 @@
 #include "platforms/capi/barelymusician.h"
 
+#include <any>
 #include <cstdint>
 #include <optional>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
+#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/musician.h"
 #include "examples/instruments/synth_instrument.h"
 
@@ -12,11 +14,63 @@ namespace {
 
 using ::barely::GetStatusOrStatus;
 using ::barely::GetStatusOrValue;
+using ::barely::InstrumentDefinition;
+using ::barely::InstrumentState;
 using ::barely::IsOk;
 using ::barely::Musician;
 using ::barely::Note;
 using ::barely::Status;
 using ::barely::examples::SynthInstrument;
+
+// Returns the corresponding |InstrumentDefinition| for a given |definition|.
+InstrumentDefinition GetInstrumentDefinition(
+    BarelyInstrumentDefinition definition) {
+  InstrumentDefinition result;
+  if (definition.create_fn) {
+    result.create_fn = [create_fn = std::move(definition.create_fn)](
+                           InstrumentState* state, int sample_rate) noexcept {
+      create_fn(&state->emplace<BarelyInstrumentState>(), sample_rate);
+    };
+  }
+  if (definition.destroy_fn) {
+    result.destroy_fn = [destroy_fn = std::move(definition.destroy_fn)](
+                            InstrumentState* state) noexcept {
+      destroy_fn(std::any_cast<BarelyInstrumentState*>(&state));
+      state->reset();
+    };
+  }
+  if (definition.process_fn) {
+    result.process_fn = [process_fn = std::move(definition.process_fn)](
+                            InstrumentState* state, float* output,
+                            int num_channels, int num_frames) noexcept {
+      process_fn(std::any_cast<BarelyInstrumentState*>(&state), output,
+                 num_channels, num_frames);
+    };
+  }
+  if (definition.set_note_off_fn) {
+    result.set_note_off_fn = [set_note_off_fn =
+                                  std::move(definition.set_note_off_fn)](
+                                 InstrumentState* state, float pitch) noexcept {
+      set_note_off_fn(std::any_cast<BarelyInstrumentState*>(&state), pitch);
+    };
+  }
+  if (definition.set_note_on_fn) {
+    result.set_note_on_fn =
+        [set_note_on_fn = std::move(definition.set_note_on_fn)](
+            InstrumentState* state, float pitch, float intensity) noexcept {
+          set_note_on_fn(std::any_cast<BarelyInstrumentState*>(&state), pitch,
+                         intensity);
+        };
+  }
+  if (definition.set_param_fn) {
+    result.set_param_fn = [set_param_fn = std::move(definition.set_param_fn)](
+                              InstrumentState* state, int id,
+                              float value) noexcept {
+      set_param_fn(std::any_cast<BarelyInstrumentState*>(&state), id, value);
+    };
+  }
+  return result;
+}
 
 // Returns the corresponding |BarelyStatus| value for a given |status|.
 BarelyStatus GetStatus(Status status) noexcept {
@@ -56,7 +110,18 @@ struct BarelyMusician {
 };
 
 BarelyStatus BarelyAddInstrument(BarelyHandle handle,
+                                 BarelyInstrumentDefinition definition,
                                  BarelyId* instrument_id_ptr) {
+  if (!handle) return kBarelyNotFound;
+  if (!instrument_id_ptr) return kBarelyInvalidArgument;
+  *instrument_id_ptr = handle->instance.AddInstrument(
+      GetInstrumentDefinition(std::move(definition)),
+      SynthInstrument::GetParamDefinitions());
+  return kBarelyOk;
+}
+
+BarelyStatus BarelyAddSynthInstrument(BarelyHandle handle,
+                                      BarelyId* instrument_id_ptr) {
   if (!handle) return kBarelyNotFound;
   if (!instrument_id_ptr) return kBarelyInvalidArgument;
   *instrument_id_ptr = handle->instance.AddInstrument(

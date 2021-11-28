@@ -40,15 +40,80 @@ enum BarelyStatusConstants {
   kBarelyUnknown = 7,
 };
 
+// TODO(#85): Add |BarelyParamDefinitions|.
+
 // TODO(#85): Add |BarelyConductorDefinition|.
 
-// TODO(#85): Add |BarelyInstrumentDefinition|.
-// TODO(#85): Add |BarelyParamDefinitions|.
-// TODO(#85): Temporary shortcut until |InstrumentDefinition| is ported.
-enum BarelyInstrumentTypes {
-  /// Synth instrument.
-  kBarelySynthInstrument = 1,
-};
+/// Instrument state type.
+typedef void* BarelyInstrumentState;
+
+/// Instrument create function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param sample_rate Sampling rate in Hz.
+typedef void (*BarelyInstrumentCreateFn)(BarelyInstrumentState* state,
+                                         int32_t sample_rate);
+
+/// Instrument destroy function signature.
+///
+/// @param state Pointer to instrument state.
+typedef void (*BarelyInstrumentDestroyFn)(BarelyInstrumentState* state);
+
+/// Instrument process function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param output Pointer to output buffer.
+/// @param num_channels Number of channels.
+/// @param num_frames Number of frames.
+typedef void (*BarelyInstrumentProcessFn)(BarelyInstrumentState* state,
+                                          float* output, int32_t num_channels,
+                                          int32_t num_frames);
+
+// TODO(#85): Add |BarelyInstrumentSetCustomDataFn|.
+
+/// Instrument set note off function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param pitch Note pitch.
+typedef void (*BarelyInstrumentSetNoteOffFn)(BarelyInstrumentState* state,
+                                             float pitch);
+
+/// Instrument set note on function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+typedef void (*BarelyInstrumentSetNoteOnFn)(BarelyInstrumentState* state,
+                                            float pitch, float intensity);
+
+/// Instrument set parameter function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param id Parameter id.
+/// @param value Parameter value.
+typedef void (*BarelyInstrumentSetParamFn)(BarelyInstrumentState* state, int id,
+                                           float value);
+
+/// Instrument definition.
+typedef struct BarelyInstrumentDefinition {
+  /// Create function.
+  BarelyInstrumentCreateFn create_fn;
+
+  /// Destroy function.
+  BarelyInstrumentDestroyFn destroy_fn;
+
+  /// Process function.
+  BarelyInstrumentProcessFn process_fn;
+
+  /// Set note off function.
+  BarelyInstrumentSetNoteOffFn set_note_off_fn;
+
+  /// Set note on function.
+  BarelyInstrumentSetNoteOnFn set_note_on_fn;
+
+  /// Set parameter function.
+  BarelyInstrumentSetParamFn set_param_fn;
+} BarelyInstrumentDefinition;
 
 /// Instrument note off callback signature.
 ///
@@ -81,11 +146,16 @@ typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
 /// Adds new instrument.
 ///
 /// @param handle BarelyMusician handle.
+/// @param definition Instrument definition.
 /// @param instrument_id_ptr Pointer to instrument id.
 /// @return Status.
-// TODO(#85): Refactor to use |BarelyInstrumentDefinition|.
-BARELY_EXPORT BarelyStatus BarelyAddInstrument(BarelyHandle handle,
-                                               BarelyId* instrument_id_ptr);
+BARELY_EXPORT BarelyStatus
+BarelyAddInstrument(BarelyHandle handle, BarelyInstrumentDefinition definition,
+                    BarelyId* instrument_id_ptr);
+
+// TODO(#85): Temporary shortcut to test instruments.
+BARELY_EXPORT BarelyStatus
+BarelyAddSynthInstrument(BarelyHandle handle, BarelyId* instrument_id_ptr);
 
 /// Adds new performer.
 ///

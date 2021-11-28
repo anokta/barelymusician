@@ -11,6 +11,7 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/musician.h"
+#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -25,6 +26,7 @@ using ::barely::Id;
 using ::barely::Musician;
 using ::barely::Note;
 using ::barely::OscillatorType;
+using ::barely::ParamDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -136,12 +138,14 @@ int main(int /*argc*/, char* argv[]) {
     const Id instrument_id = musician.AddInstrument(
         SynthInstrument::GetDefinition(),
         {{SynthInstrumentParam::kNumVoices,
-          static_cast<float>(kNumInstrumentVoices)},
+          ParamDefinition{static_cast<float>(kNumInstrumentVoices)}},
          {SynthInstrumentParam::kOscillatorType,
-          static_cast<float>(kInstrumentOscillatorType)},
-         {SynthInstrumentParam::kEnvelopeAttack, kInstrumentEnvelopeAttack},
-         {SynthInstrumentParam::kEnvelopeRelease, kInstrumentEnvelopeRelease},
-         {SynthInstrumentParam::kGain, kInstrumentGain}});
+          ParamDefinition{static_cast<float>(kInstrumentOscillatorType)}},
+         {SynthInstrumentParam::kEnvelopeAttack,
+          ParamDefinition{kInstrumentEnvelopeAttack}},
+         {SynthInstrumentParam::kEnvelopeRelease,
+          ParamDefinition{kInstrumentEnvelopeRelease}},
+         {SynthInstrumentParam::kGain, ParamDefinition{kInstrumentGain}}});
     musician.AddPerformerInstrument(performer_id, instrument_id);
     instrument_ids.push_back(instrument_id);
   }

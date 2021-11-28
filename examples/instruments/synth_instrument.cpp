@@ -70,16 +70,20 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
 }
 
 ParamDefinitions SynthInstrument::GetParamDefinitions() noexcept {
-  return {
-      {static_cast<int>(SynthInstrumentParam::kGain), 0.25f, 0.0f, 1.0f},
-      {static_cast<int>(SynthInstrumentParam::kEnvelopeAttack), 0.05f, 0.0f},
-      {static_cast<int>(SynthInstrumentParam::kEnvelopeDecay), 0.0f, 0.0f},
-      {static_cast<int>(SynthInstrumentParam::kEnvelopeSustain), 1.0f, 0.0f,
-       1.0f},
-      {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease), 0.25f, 0.0f},
-      {static_cast<int>(SynthInstrumentParam::kOscillatorType),
-       static_cast<float>(OscillatorType::kSine)},
-      {static_cast<int>(SynthInstrumentParam::kNumVoices), 8.0f, 0.0f}};
+  return {{static_cast<int>(SynthInstrumentParam::kGain),
+           ParamDefinition{0.25f, 0.0f, 1.0f}},
+          {static_cast<int>(SynthInstrumentParam::kEnvelopeAttack),
+           ParamDefinition{0.05f, 0.0f}},
+          {static_cast<int>(SynthInstrumentParam::kEnvelopeDecay),
+           ParamDefinition{0.0f, 0.0f}},
+          {static_cast<int>(SynthInstrumentParam::kEnvelopeSustain),
+           ParamDefinition{1.0f, 0.0f, 1.0f}},
+          {static_cast<int>(SynthInstrumentParam::kEnvelopeRelease),
+           ParamDefinition{0.25f, 0.0f}},
+          {static_cast<int>(SynthInstrumentParam::kOscillatorType),
+           ParamDefinition{static_cast<float>(OscillatorType::kSine)}},
+          {static_cast<int>(SynthInstrumentParam::kNumVoices),
+           ParamDefinition{8.0f, 0.0f}}};
 }
 
 }  // namespace barely::examples

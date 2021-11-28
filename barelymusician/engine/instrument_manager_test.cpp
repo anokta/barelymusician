@@ -15,7 +15,7 @@
 namespace barely {
 namespace {
 
-using ::testing::AllOf;
+using ::testing::Pair;
 using ::testing::Property;
 using ::testing::UnorderedElementsAre;
 
@@ -53,7 +53,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 
 // Returns test instrument parameter definition.
 ParamDefinitions GetTestParamDefinitions() {
-  return ParamDefinitions{ParamDefinition{1, 0.0f}};
+  return ParamDefinitions{{1, ParamDefinition{0.0f}}};
 }
 
 // Tests that instruments are added and removed as expected.
@@ -74,8 +74,7 @@ TEST(InstrumentManagerTest, AddRemove) {
   EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
               UnorderedElementsAre());
   EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-              UnorderedElementsAre(AllOf(Property(&Param::GetId, 1),
-                                         Property(&Param::GetValue, 0.0f))));
+              UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
@@ -409,8 +408,7 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
 
     EXPECT_THAT(
         GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(AllOf(Property(&Param::GetId, 1),
-                                   Property(&Param::GetValue, 0.0f))));
+        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
 
     instrument_manager.Update();
 
@@ -434,8 +432,7 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
 
     EXPECT_THAT(
         GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(AllOf(Property(&Param::GetId, 1),
-                                   Property(&Param::GetValue, param_value))));
+        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, param_value))));
 
     instrument_manager.Update();
 
@@ -459,8 +456,7 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
 
     EXPECT_THAT(
         GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(AllOf(Property(&Param::GetId, 1),
-                                   Property(&Param::GetValue, 0.0f))));
+        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
     instrument_manager.Process(instrument_id, 0.0, buffer.data(), kNumChannels,
@@ -578,8 +574,7 @@ TEST(InstrumentManagerTest, SetSampleRate) {
   EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
               UnorderedElementsAre());
   EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-              UnorderedElementsAre(AllOf(Property(&Param::GetId, 1),
-                                         Property(&Param::GetValue, 0.0f))));
+              UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
 
   instrument_manager.Update();
 
@@ -605,8 +600,7 @@ TEST(InstrumentManagerTest, SetSampleRate) {
 
   EXPECT_THAT(
       GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-      UnorderedElementsAre(AllOf(Property(&Param::GetId, 1),
-                                 Property(&Param::GetValue, kParamValue))));
+      UnorderedElementsAre(Pair(1, Property(&Param::GetValue, kParamValue))));
 
   instrument_manager.Update();
 
@@ -626,8 +620,7 @@ TEST(InstrumentManagerTest, SetSampleRate) {
               UnorderedElementsAre());
   EXPECT_THAT(
       GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-      UnorderedElementsAre(AllOf(Property(&Param::GetId, 1),
-                                 Property(&Param::GetValue, kParamValue))));
+      UnorderedElementsAre(Pair(1, Property(&Param::GetValue, kParamValue))));
 
   instrument_manager.Update();
 

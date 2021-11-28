@@ -87,8 +87,8 @@ Conductor::Conductor(ConductorDefinition definition,
     definition.create_fn(&state_);
   }
   params_.reserve(param_definitions.size());
-  for (auto& param_definition : param_definitions) {
-    params_.emplace(param_definition.id, Param(std::move(param_definition)));
+  for (auto& [id, param_definition] : param_definitions) {
+    params_.emplace(id, Param{std::move(param_definition)});
   }
 }
 

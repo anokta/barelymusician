@@ -18,8 +18,6 @@ const ParamDefinition& Param::GetDefinition() const noexcept {
   return definition_;
 }
 
-int Param::GetId() const noexcept { return definition_.id; }
-
 float Param::GetValue() const noexcept { return value_; }
 
 bool Param::ResetValue() noexcept {

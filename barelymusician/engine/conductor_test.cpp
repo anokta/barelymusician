@@ -45,7 +45,7 @@ ConductorDefinition GetTestConductorDefinition() {
 
 // Returns test conductor parameter definition.
 ParamDefinitions GetTestParamDefinitions() {
-  return ParamDefinitions{ParamDefinition{1, 0.0f}};
+  return ParamDefinitions{{1, ParamDefinition{0.0f}}};
 }
 
 // Tests that the conductor behaves as expected with an empty definition.

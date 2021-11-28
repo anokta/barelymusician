@@ -8,7 +8,7 @@ namespace {
 
 // Tests that the parameter sets its value as expected.
 TEST(ParamTest, SetValue) {
-  Param param(ParamDefinition{1, -2.0f});
+  Param param(ParamDefinition{-2.0f});
   EXPECT_FLOAT_EQ(param.GetValue(), -2.0f);
 
   EXPECT_TRUE(param.SetValue(0.5f));
@@ -29,7 +29,7 @@ TEST(ParamTest, SetValue) {
 // Tests that the parameter sets its value with respect to its minimum and
 // maximum boundaries as expected.
 TEST(ParamTest, SetValueMinMax) {
-  Param param(ParamDefinition{2, 5.0f, 10.0f, 20.0f});
+  Param param(ParamDefinition{5.0f, 10.0f, 20.0f});
 
   // Verify that the default value is also clamped at the minimum value.
   EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);

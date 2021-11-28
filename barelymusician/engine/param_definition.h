@@ -2,15 +2,12 @@
 #define BARELYMUSICIAN_ENGINE_PARAM_DEFINITION_H_
 
 #include <optional>
-#include <vector>
+#include <unordered_map>
 
 namespace barely {
 
 /// Parameter definition.
 struct ParamDefinition {
-  /// Parameter id.
-  int id;
-
   /// Parameter default value.
   float default_value;
 
@@ -22,7 +19,7 @@ struct ParamDefinition {
 };
 
 /// Parameter definitions container type.
-using ParamDefinitions = std::vector<ParamDefinition>;
+using ParamDefinitions = std::unordered_map<int, ParamDefinition>;
 
 }  // namespace barely
 

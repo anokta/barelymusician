@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <any>
-#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -70,15 +69,10 @@ StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
   return Status::kNotFound;
 }
 
-StatusOr<std::vector<Param>> InstrumentManager::GetAllParams(
+StatusOr<Params> InstrumentManager::GetAllParams(
     Id instrument_id) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    std::vector<Param> params;
-    params.reserve(controller->params.size());
-    for (const auto& [id, param] : controller->params) {
-      params.push_back(param);
-    }
-    return params;
+    return controller->params;
   }
   return Status::kNotFound;
 }
@@ -403,8 +397,8 @@ InstrumentManager::InstrumentController::InstrumentController(
     ParamDefinitions param_definitions) noexcept
     : definition(std::move(definition)) {
   params.reserve(param_definitions.size());
-  for (auto& param_definition : param_definitions) {
-    params.emplace(param_definition.id, Param(std::move(param_definition)));
+  for (auto& [id, param_definition] : param_definitions) {
+    params.emplace(id, Param{std::move(param_definition)});
   }
 }
 

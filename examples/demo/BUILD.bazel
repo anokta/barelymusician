@@ -12,6 +12,7 @@ cc_binary(
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine:musician",
+        "//barelymusician/engine:param_definition",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:console_log",
@@ -29,6 +30,7 @@ cc_binary(
     deps = [
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine:musician",
+        "//barelymusician/engine:param_definition",
         "//examples/common:audio_output",
         "//examples/common:console_log",
         "//examples/common:input_manager",
@@ -42,6 +44,7 @@ cc_binary(
     deps = [
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine:musician",
+        "//barelymusician/engine:param_definition",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:console_log",
@@ -60,6 +63,7 @@ cc_binary(
         "//barelymusician/composition:note",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine:musician",
+        "//barelymusician/engine:param_definition",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:console_log",

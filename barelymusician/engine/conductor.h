@@ -107,7 +107,7 @@ class Conductor {
   ConductorState state_;
 
   // List of performer parameters.
-  std::unordered_map<int, Param> params_;
+  Params params_;
 };
 
 }  // namespace barely

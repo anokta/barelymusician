@@ -35,6 +35,7 @@ using ::barely::NoteDuration;
 using ::barely::NoteIntensity;
 using ::barely::NotePitch;
 using ::barely::OscillatorType;
+using ::barely::ParamDefinition;
 using ::barely::ParamDefinitions;
 using ::barely::Random;
 using ::barely::examples::AudioClock;
@@ -79,20 +80,22 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const Id performer_instrument_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
-       {SynthInstrumentParam::kGain, kGain},
+      {{SynthInstrumentParam::kNumVoices,
+        ParamDefinition{static_cast<float>(kNumVoices)}},
+       {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
        {SynthInstrumentParam::kOscillatorType,
-        static_cast<float>(kOscillatorType)},
-       {SynthInstrumentParam::kEnvelopeAttack, kAttack},
-       {SynthInstrumentParam::kEnvelopeRelease, kRelease}});
+        ParamDefinition{static_cast<float>(kOscillatorType)}},
+       {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
+       {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{kRelease}}});
   const Id metronome_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
-       {SynthInstrumentParam::kGain, 0.5f * kGain},
+      {{SynthInstrumentParam::kNumVoices,
+        ParamDefinition{static_cast<float>(kNumVoices)}},
+       {SynthInstrumentParam::kGain, ParamDefinition{0.5f * kGain}},
        {SynthInstrumentParam::kOscillatorType,
-        static_cast<float>(OscillatorType::kSquare)},
-       {SynthInstrumentParam::kEnvelopeAttack, kAttack},
-       {SynthInstrumentParam::kEnvelopeRelease, 0.025f}});
+        ParamDefinition{static_cast<float>(OscillatorType::kSquare)}},
+       {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
+       {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{0.025f}}});
 
   musician.SetInstrumentNoteOnCallback(
       [&](Id instrument_id, float note_pitch, float note_intensity) {

@@ -4,6 +4,7 @@
 
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/musician.h"
+#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -14,6 +15,7 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::ParamDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -56,12 +58,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Create metronome instrument.
   const auto metronome_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
-       {SynthInstrumentParam::kGain, kGain},
+      {{SynthInstrumentParam::kNumVoices,
+        ParamDefinition{static_cast<float>(kNumVoices)}},
+       {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
        {SynthInstrumentParam::kOscillatorType,
-        static_cast<float>(kOscillatorType)},
-       {SynthInstrumentParam::kEnvelopeAttack, kAttack},
-       {SynthInstrumentParam::kEnvelopeRelease, kRelease}});
+        ParamDefinition{static_cast<float>(kOscillatorType)}},
+       {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
+       {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{kRelease}}});
 
   // Beat callback.
   const auto beat_callback = [&](double position) {

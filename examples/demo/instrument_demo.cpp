@@ -7,6 +7,7 @@
 
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/musician.h"
+#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -16,6 +17,7 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::ParamDefinition;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -62,12 +64,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kSampleRate);
   const auto instrument_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, static_cast<float>(kNumVoices)},
-       {SynthInstrumentParam::kGain, kGain},
+      {{SynthInstrumentParam::kNumVoices,
+        ParamDefinition{static_cast<float>(kNumVoices)}},
+       {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
        {SynthInstrumentParam::kOscillatorType,
-        static_cast<float>(kOscillatorType)},
-       {SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack},
-       {SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease}});
+        ParamDefinition{static_cast<float>(kOscillatorType)}},
+       {SynthInstrumentParam::kEnvelopeAttack,
+        ParamDefinition{kEnvelopeAttack}},
+       {SynthInstrumentParam::kEnvelopeRelease,
+        ParamDefinition{kEnvelopeRelease}}});
   musician.SetInstrumentNoteOnCallback(
       [](auto /*instrument_id*/, float pitch, float intensity) {
         ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";

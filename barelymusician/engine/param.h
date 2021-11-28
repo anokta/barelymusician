@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_ENGINE_PARAM_H_
 #define BARELYMUSICIAN_ENGINE_PARAM_H_
 
+#include <unordered_map>
+
 #include "barelymusician/engine/param_definition.h"
 
 namespace barely {
@@ -17,11 +19,6 @@ class Param {
   ///
   /// @return Parameter definition.
   const ParamDefinition& GetDefinition() const noexcept;
-
-  /// Returns id.
-  ///
-  /// @return Parameter id.
-  int GetId() const noexcept;
 
   /// Returns value.
   ///
@@ -46,6 +43,9 @@ class Param {
   // Parameter value.
   float value_;
 };
+
+/// Parameter container type.
+using Params = std::unordered_map<int, Param>;
 
 }  // namespace barely
 

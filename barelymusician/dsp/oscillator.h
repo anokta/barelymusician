@@ -6,12 +6,16 @@
 
 namespace barely {
 
-// Oscillator type.
+/// Oscillator type.
 enum class OscillatorType {
-  kSine,    // Sine wave.
-  kSaw,     // Sawtooth wave.
-  kSquare,  // Square wave.
-  kNoise,   // White noise.
+  /// Sine wave.
+  kSine = 0,
+  /// Sawtooth wave.
+  kSaw = 1,
+  /// Square wave.
+  kSquare = 2,
+  /// White noise.
+  kNoise = 3,
 };
 
 /// Simple oscillator that generates output samples of basic waveforms.

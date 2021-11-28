@@ -37,23 +37,27 @@ void SynthInstrument::SetParam(int id, float value) noexcept {
       gain_ = value;
       break;
     case SynthInstrumentParam::kEnvelopeAttack:
-      voice_.Update(
-          [value](SynthVoice* voice) { voice->envelope().SetAttack(value); });
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetAttack(value);
+      });
       break;
     case SynthInstrumentParam::kEnvelopeDecay:
-      voice_.Update(
-          [value](SynthVoice* voice) { voice->envelope().SetRelease(value); });
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetRelease(value);
+      });
       break;
     case SynthInstrumentParam::kEnvelopeSustain:
-      voice_.Update(
-          [value](SynthVoice* voice) { voice->envelope().SetSustain(value); });
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetSustain(value);
+      });
       break;
     case SynthInstrumentParam::kEnvelopeRelease:
-      voice_.Update(
-          [value](SynthVoice* voice) { voice->envelope().SetRelease(value); });
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetRelease(value);
+      });
       break;
     case SynthInstrumentParam::kOscillatorType:
-      voice_.Update([value](SynthVoice* voice) {
+      voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));
       });

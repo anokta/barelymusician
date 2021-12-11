@@ -260,7 +260,8 @@ int main(int /*argc*/, char* argv[]) {
 
   // Add drumkit instrument.
   instrument_ids.push_back(
-      musician.AddInstrument(DrumkitInstrument::GetDefinition(), {}));
+      musician.AddInstrument(DrumkitInstrument::GetDefinition(),
+                             DrumkitInstrument::GetParamDefinitions()));
   std::unordered_map<float, std::string> drumkit_map = {
       {barely::kPitchKick, "basic_kick.wav"},
       {barely::kPitchSnare, "basic_snare.wav"},
@@ -273,7 +274,7 @@ int main(int /*argc*/, char* argv[]) {
     assert(it.first->second.Load(path));
   }
   musician.SetCustomInstrumentData(instrument_ids.back(),
-                                   std::any(&drumkit_files));
+                                   std::any{std::move(drumkit_files)});
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, &random, std::placeholders::_5,

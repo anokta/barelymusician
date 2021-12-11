@@ -5,30 +5,23 @@
 
 #include "barelymusician/common/find_or_null.h"
 #include "examples/common/wav_file.h"
+#include "examples/instruments/generic_instrument.h"
 
 namespace barely::examples {
 
-namespace {
-
-// Default values.
-const float kDefaultGain = 0.5f;
-const float kDefaultRelease = 0.1f;
-
-}  // namespace
-
 DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
-    : sample_rate_(sample_rate), gain_(kDefaultGain) {}
+    : sample_rate_(sample_rate), gain_(0.0f) {}
 
 void DrumkitInstrument::NoteOff(float pitch) noexcept {
-  if (auto* voice = FindOrNull(voices_, pitch)) {
-    voice->Stop();
+  if (auto* pad = FindOrNull(pads_, pitch)) {
+    pad->voice.Stop();
   }
 }
 
 void DrumkitInstrument::NoteOn(float pitch, float intensity) noexcept {
-  if (auto* voice = FindOrNull(voices_, pitch)) {
-    voice->set_gain(intensity);
-    voice->Start();
+  if (auto* pad = FindOrNull(pads_, pitch)) {
+    pad->voice.set_gain(intensity);
+    pad->voice.Start();
   }
 }
 
@@ -36,8 +29,8 @@ void DrumkitInstrument::Process(float* output, int num_channels,
                                 int num_frames) noexcept {
   for (int frame = 0; frame < num_frames; ++frame) {
     float mono_sample = 0.0f;
-    for (auto& voice : voices_) {
-      mono_sample += voice.second.Next(0);
+    for (auto& [pitch, pad] : pads_) {
+      mono_sample += pad.voice.Next(0);
     }
     mono_sample *= gain_;
     for (int channel = 0; channel < num_channels; ++channel) {
@@ -47,10 +40,22 @@ void DrumkitInstrument::Process(float* output, int num_channels,
 }
 
 void DrumkitInstrument::SetCustomData(std::any data) noexcept {
-  auto* drumkit_files =
-      std::any_cast<std::unordered_map<float, WavFile>*>(data);
-  for (const auto& [index, file] : *drumkit_files) {
-    Add(index, file);
+  for (const auto& [pitch, file] :
+       std::any_cast<std::unordered_map<float, WavFile>&>(data)) {
+    pads_.insert({pitch, DrumkitPad{file, sample_rate_}});
+  }
+}
+
+void DrumkitInstrument::SetParam(int id, float value) noexcept {
+  switch (static_cast<DrumkitInstrumentParam>(id)) {
+    case DrumkitInstrumentParam::kPadGain:
+      gain_ = value;
+      break;
+    case DrumkitInstrumentParam::kPadRelease:
+      for (auto& [pitch, pad] : pads_) {
+        pad.voice.envelope().SetRelease(value);
+      }
+      break;
   }
 }
 
@@ -59,13 +64,11 @@ InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
       [](int sample_rate) { return DrumkitInstrument(sample_rate); });
 }
 
-void DrumkitInstrument::Add(float pitch, const WavFile& wav_file) noexcept {
-  DrumkitVoice voice(sample_rate_);
-  voice.envelope().SetRelease(kDefaultRelease);
-  const auto& data = wav_file.GetData();
-  const int data_size = static_cast<int>(data.size());
-  voice.generator().SetData(data.data(), wav_file.GetSampleRate(), data_size);
-  voices_.insert({pitch, voice});
+ParamDefinitions DrumkitInstrument::GetParamDefinitions() noexcept {
+  return {
+      {DrumkitInstrumentParam::kPadGain, ParamDefinition{0.5f, 0.0f, 1.0f}},
+      {DrumkitInstrumentParam::kPadRelease, ParamDefinition{0.1f, 0.0f}},
+  };
 }
 
 }  // namespace barely::examples

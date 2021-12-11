@@ -12,6 +12,7 @@ cc_library(
         "//barelymusician/common:find_or_null",
         "//barelymusician/dsp:sample_player",
         "//barelymusician/engine:instrument_definition",
+        "//barelymusician/engine:param_definition",
         "//examples/common:wav_file",
     ],
 )

@@ -5,11 +5,17 @@
 #include <unordered_map>
 
 #include "barelymusician/dsp/sample_player.h"
+#include "barelymusician/engine/param_definition.h"
 #include "examples/common/wav_file.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"
 
 namespace barely::examples {
+
+enum DrumkitInstrumentParam {
+  kPadGain = 0,
+  kPadRelease = 1,
+};
 
 /// Simple drumkit instrument.
 class DrumkitInstrument : public GenericInstrument {
@@ -22,20 +28,28 @@ class DrumkitInstrument : public GenericInstrument {
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
   void SetCustomData(std::any data) noexcept override;
-  void SetParam(int, float) noexcept override {}
+  void SetParam(int, float) noexcept override;
 
+  /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
+  static ParamDefinitions GetParamDefinitions() noexcept;
 
  private:
-  using DrumkitVoice = EnvelopedVoice<SamplePlayer>;
+  struct DrumkitPad {
+    explicit DrumkitPad(const WavFile& wav_file, int sample_rate)
+        : data(wav_file.GetData()), voice(sample_rate) {
+      voice.generator().SetData(data.data(), wav_file.GetSampleRate(),
+                                static_cast<int>(data.size()));
+    }
+    std::vector<float> data;
+    EnvelopedVoice<SamplePlayer> voice;
+  };
 
-  void Add(float pitch, const WavFile& wav_file) noexcept;
-
-  const int sample_rate_;
+  int sample_rate_;
 
   float gain_;
 
-  std::unordered_map<float, DrumkitVoice> voices_;
+  std::unordered_map<float, DrumkitPad> pads_;
 };
 
 }  // namespace barely::examples

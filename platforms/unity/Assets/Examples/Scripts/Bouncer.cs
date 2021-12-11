@@ -16,7 +16,7 @@ public class Bouncer : MonoBehaviour {
 
   private void Start() {
     Vector3 force = new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(0.0f, 2.0f), 0.0f);
-    //transform.GetComponent<Rigidbody>().AddForce(force, ForceMode.Impulse);
+    // transform.GetComponent<Rigidbody>().AddForce(force, ForceMode.Impulse);
   }
 
   private void Update() {

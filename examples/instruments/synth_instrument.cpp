@@ -82,8 +82,8 @@ ParamDefinitions SynthInstrument::GetParamDefinitions() noexcept {
        ParamDefinition{1.0f, 0.0f, 1.0f}},
       {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{0.25f, 0.0f}},
       {SynthInstrumentParam::kOscillatorType,
-       ParamDefinition{static_cast<float>(OscillatorType::kSine)}},
-      {SynthInstrumentParam::kNumVoices, ParamDefinition{8.0f, 0.0f}}};
+       ParamDefinition{static_cast<int>(OscillatorType::kSine)}},
+      {SynthInstrumentParam::kNumVoices, ParamDefinition{8, 0}}};
 }
 
 }  // namespace barely::examples

@@ -80,20 +80,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const Id performer_instrument_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices,
-        ParamDefinition{static_cast<float>(kNumVoices)}},
+      {{SynthInstrumentParam::kNumVoices, ParamDefinition{kNumVoices}},
        {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
        {SynthInstrumentParam::kOscillatorType,
-        ParamDefinition{static_cast<float>(kOscillatorType)}},
+        ParamDefinition{static_cast<int>(kOscillatorType)}},
        {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
        {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{kRelease}}});
   const Id metronome_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices,
-        ParamDefinition{static_cast<float>(kNumVoices)}},
+      {{SynthInstrumentParam::kNumVoices, ParamDefinition{kNumVoices}},
        {SynthInstrumentParam::kGain, ParamDefinition{0.5f * kGain}},
        {SynthInstrumentParam::kOscillatorType,
-        ParamDefinition{static_cast<float>(OscillatorType::kSquare)}},
+        ParamDefinition{static_cast<int>(OscillatorType::kSquare)}},
        {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
        {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{0.025f}}});
 

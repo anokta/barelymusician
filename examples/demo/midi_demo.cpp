@@ -91,8 +91,7 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
 }  // namespace
 
 int main(int /*argc*/, char* argv[]) {
-  std::string error;
-  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
+  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
   assert(runfiles);
 
   AudioOutput audio_output;
@@ -138,9 +137,9 @@ int main(int /*argc*/, char* argv[]) {
     const Id instrument_id = musician.AddInstrument(
         SynthInstrument::GetDefinition(),
         {{SynthInstrumentParam::kNumVoices,
-          ParamDefinition{static_cast<float>(kNumInstrumentVoices)}},
+          ParamDefinition{kNumInstrumentVoices}},
          {SynthInstrumentParam::kOscillatorType,
-          ParamDefinition{static_cast<float>(kInstrumentOscillatorType)}},
+          ParamDefinition{static_cast<int>(kInstrumentOscillatorType)}},
          {SynthInstrumentParam::kEnvelopeAttack,
           ParamDefinition{kInstrumentEnvelopeAttack}},
          {SynthInstrumentParam::kEnvelopeRelease,

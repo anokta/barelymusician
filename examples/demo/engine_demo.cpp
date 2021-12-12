@@ -172,8 +172,7 @@ void ComposeDrums(int bar, int beat, int num_beats, Random* random,
 }  // namespace
 
 int main(int /*argc*/, char* argv[]) {
-  std::string error;
-  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
+  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
   assert(runfiles);
 
   AudioOutput audio_output;
@@ -214,9 +213,9 @@ int main(int /*argc*/, char* argv[]) {
     instrument_ids.push_back(musician.AddInstrument(
         SynthInstrument::GetDefinition(),
         {{SynthInstrumentParam::kNumVoices,
-          ParamDefinition{static_cast<float>(kNumInstrumentVoices)}},
+          ParamDefinition{kNumInstrumentVoices}},
          {SynthInstrumentParam::kOscillatorType,
-          ParamDefinition{static_cast<float>(type)}},
+          ParamDefinition{static_cast<int>(type)}},
          {SynthInstrumentParam::kGain, ParamDefinition{gain}},
          {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{attack}},
          {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{release}}}));

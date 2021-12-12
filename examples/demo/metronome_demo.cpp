@@ -58,11 +58,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Create metronome instrument.
   const auto metronome_id = musician.AddInstrument(
       SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices,
-        ParamDefinition{static_cast<float>(kNumVoices)}},
+      {{SynthInstrumentParam::kNumVoices, ParamDefinition{kNumVoices}},
        {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
        {SynthInstrumentParam::kOscillatorType,
-        ParamDefinition{static_cast<float>(kOscillatorType)}},
+        ParamDefinition{static_cast<int>(kOscillatorType)}},
        {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
        {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{kRelease}}});
 

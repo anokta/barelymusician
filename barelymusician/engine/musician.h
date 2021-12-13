@@ -58,7 +58,7 @@ class Musician {
   /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
   Id AddInstrument(InstrumentDefinition definition,
-                   ParamDefinitions param_definitions) noexcept;
+                   ParamDefinitionMap param_definitions) noexcept;
 
   /// Adds new performer.
   ///
@@ -218,7 +218,7 @@ class Musician {
   /// @param definition Conductor definition.
   /// @param definition Conductor parameter definitions.
   void SetConductor(ConductorDefinition definition,
-                    ParamDefinitions param_definitions) noexcept;
+                    ParamDefinitionMap param_definitions) noexcept;
 
   /// Sets custom instrument data.
   ///

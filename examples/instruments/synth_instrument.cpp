@@ -73,7 +73,7 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
       [](int sample_rate) { return SynthInstrument(sample_rate); });
 }
 
-ParamDefinitions SynthInstrument::GetParamDefinitions() noexcept {
+ParamDefinitionMap SynthInstrument::GetParamDefinitions() noexcept {
   return {
       {SynthInstrumentParam::kGain, ParamDefinition{0.25f, 0.0f, 1.0f}},
       {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{0.05f, 0.0f}},

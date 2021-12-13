@@ -37,10 +37,10 @@ Sequence* Performer::GetMutableSequence() noexcept { return &sequence_; }
 
 const Sequence& Performer::GetSequence() const noexcept { return sequence_; }
 
-InstrumentIdEventPairs Performer::Perform(double begin_position,
-                                          double end_position,
-                                          Conductor& conductor) noexcept {
-  InstrumentIdEventPairs id_event_pairs;
+InstrumentIdEventPairMap Performer::Perform(double begin_position,
+                                            double end_position,
+                                            Conductor& conductor) noexcept {
+  InstrumentIdEventPairMap id_event_pairs;
 
   // Perform active note events.
   for (auto it = active_notes_.begin(); it != active_notes_.end();) {

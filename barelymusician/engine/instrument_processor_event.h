@@ -23,8 +23,8 @@ using InstrumentProcessorEvent =
     std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetNoteOffEvent,
                  SetNoteOnEvent, SetParamEvent>;
 
-/// Instrument processor events by their timestamps container type.
-using InstrumentProcessorEvents =
+/// Instrument processor event by timestamp map type.
+using InstrumentProcessorEventMap =
     std::multimap<double, InstrumentProcessorEvent>;
 
 }  // namespace barely

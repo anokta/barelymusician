@@ -44,8 +44,8 @@ class Param {
   float value_;
 };
 
-/// Parameter container type.
-using Params = std::unordered_map<int, Param>;
+/// Parameter by id map type.
+using ParamMap = std::unordered_map<int, Param>;
 
 }  // namespace barely
 

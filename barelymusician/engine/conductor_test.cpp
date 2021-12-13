@@ -43,9 +43,9 @@ ConductorDefinition GetTestConductorDefinition() {
           }};
 }
 
-// Returns test conductor parameter definition.
-ParamDefinitions GetTestParamDefinitions() {
-  return ParamDefinitions{{1, ParamDefinition{0.0f}}};
+// Returns test conductor parameter definitions.
+ParamDefinitionMap GetTestParamDefinitions() {
+  return ParamDefinitionMap{{1, ParamDefinition{0.0f}}};
 }
 
 // Tests that the conductor behaves as expected with an empty definition.

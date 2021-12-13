@@ -36,7 +36,7 @@ using ::barely::NoteIntensity;
 using ::barely::NotePitch;
 using ::barely::OscillatorType;
 using ::barely::ParamDefinition;
-using ::barely::ParamDefinitions;
+using ::barely::ParamDefinitionMap;
 using ::barely::Random;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -231,7 +231,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                             return 1.25 * playback_tempo;
                           }}
                 : ConductorDefinition{},
-            ParamDefinitions{});
+            ParamDefinitionMap{});
         ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':

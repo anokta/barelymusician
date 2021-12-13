@@ -60,7 +60,7 @@ double NoopTransformPlaybackTempoFn(ConductorState* /*state*/,
 }  // namespace
 
 Conductor::Conductor(ConductorDefinition definition,
-                     ParamDefinitions param_definitions) noexcept
+                     ParamDefinitionMap param_definitions) noexcept
     : destroy_fn_(std::move(definition.destroy_fn)),
       set_custom_data_fn_(definition.set_custom_data_fn
                               ? std::move(definition.set_custom_data_fn)

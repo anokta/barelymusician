@@ -57,8 +57,8 @@ class Performer {
   /// @param end_position End position in beats.
   /// @param conductor Conductor.
   /// @return Instrument id-event pairs to be processed.
-  InstrumentIdEventPairs Perform(double begin_position, double end_position,
-                                 Conductor& conductor) noexcept;
+  InstrumentIdEventPairMap Perform(double begin_position, double end_position,
+                                   Conductor& conductor) noexcept;
 
   /// Removes all instruments.
   ///

@@ -58,7 +58,7 @@ Musician::Musician(int sample_rate) noexcept
       [&](double begin_position, double end_position,
           const Transport::GetTimestampFn& get_timestamp_fn) noexcept {
         playback_update_callback_(begin_position, end_position);
-        InstrumentIdEventPairs id_event_pairs;
+        InstrumentIdEventPairMap id_event_pairs;
         for (auto& [performer_id, performer] : performers_) {
           id_event_pairs.merge(
               performer.Perform(begin_position, end_position, conductor_));
@@ -72,7 +72,7 @@ Musician::Musician(int sample_rate) noexcept
 }
 
 Id Musician::AddInstrument(InstrumentDefinition definition,
-                           ParamDefinitions param_definitions) noexcept {
+                           ParamDefinitionMap param_definitions) noexcept {
   const Id instrument_id = id_generator_.Next();
   instrument_manager_.Add(instrument_id, transport_.GetTimestamp(),
                           std::move(definition), std::move(param_definitions));
@@ -284,7 +284,7 @@ Status Musician::SetCustomInstrumentData(Id instrument_id,
 }
 
 void Musician::SetConductor(ConductorDefinition definition,
-                            ParamDefinitions param_definitions) noexcept {
+                            ParamDefinitionMap param_definitions) noexcept {
   conductor_ = Conductor{std::move(definition), std::move(param_definitions)};
 }
 

@@ -22,7 +22,7 @@ class Conductor {
   /// @param definition Conductor definition.
   /// @param param_definitions Conductor parameter definitions.
   explicit Conductor(ConductorDefinition definition = {},
-                     ParamDefinitions param_definitions = {}) noexcept;
+                     ParamDefinitionMap param_definitions = {}) noexcept;
 
   /// Destroys |Conductor|.
   ~Conductor() noexcept;
@@ -91,23 +91,23 @@ class Conductor {
   // Conductor set parameter function.
   SetConductorParamFn set_param_fn_;
 
-  /// Transform note duration function.
+  // Transform note duration function.
   TransformNoteDurationFn transform_note_duration_fn_;
 
-  /// Transform note intensity function.
+  // Transform note intensity function.
   TransformNoteIntensityFn transform_note_intensity_fn_;
 
-  /// Transform note pitch function.
+  // Transform note pitch function.
   TransformNotePitchFn transform_note_pitch_fn_;
 
-  /// Transform playback tempo function.
+  // Transform playback tempo function.
   TransformPlaybackTempoFn transform_playback_tempo_fn_;
 
   // Conductor state.
   ConductorState state_;
 
-  // List of performer parameters.
-  Params params_;
+  // Conductor parameters.
+  ParamMap params_;
 };
 
 }  // namespace barely

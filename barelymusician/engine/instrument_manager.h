@@ -56,7 +56,7 @@ class InstrumentManager {
   /// @return Status.
   Status Add(Id instrument_id, double timestamp,
              InstrumentDefinition definition,
-             ParamDefinitions param_definitions) noexcept;
+             ParamDefinitionMap param_definitions) noexcept;
 
   /// Returns all active instrument notes.
   ///
@@ -67,8 +67,8 @@ class InstrumentManager {
   /// Returns all instrument parameters.
   ///
   /// @param instrument_id Instrument id.
-  /// @return List of parameters or error status.
-  StatusOr<Params> GetAllParams(Id instrument_id) const noexcept;
+  /// @return Parameters or error status.
+  StatusOr<ParamMap> GetAllParams(Id instrument_id) const noexcept;
 
   /// Returns instrument parameter.
   ///
@@ -210,13 +210,13 @@ class InstrumentManager {
   struct InstrumentController {
     // Constructs new |InstrumentController|.
     InstrumentController(InstrumentDefinition definition,
-                         ParamDefinitions param_definitions) noexcept;
+                         ParamDefinitionMap param_definitions) noexcept;
 
     // Instrument definition.
     InstrumentDefinition definition;
 
-    // List of instrument parameters.
-    Params params;
+    // Instrument parameters.
+    ParamMap params;
 
     // List of active note pitches.
     std::unordered_set<float> pitches;
@@ -228,13 +228,13 @@ class InstrumentManager {
     std::optional<Instrument> instrument;
 
     // List of scheduled instrument events.
-    InstrumentProcessorEvents events;
+    InstrumentProcessorEventMap events;
   };
 
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
-  std::unordered_map<Id, InstrumentProcessorEvents> update_events_;
+  std::unordered_map<Id, InstrumentProcessorEventMap> update_events_;
 
   // Audio thread task runner.
   TaskRunner audio_runner_;

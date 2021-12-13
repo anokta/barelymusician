@@ -55,8 +55,8 @@ struct ParamDefinition {
   std::optional<float> min_value;
 };
 
-/// Parameter definitions container type.
-using ParamDefinitions = std::unordered_map<int, ParamDefinition>;
+/// Parameter definition by id map type.
+using ParamDefinitionMap = std::unordered_map<int, ParamDefinition>;
 
 }  // namespace barely
 

@@ -61,8 +61,8 @@ using InstrumentEvent =
 /// Instrument id-event pair.
 using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;
 
-/// Instrument id-event pairs by their positions container type.
-using InstrumentIdEventPairs = std::multimap<double, InstrumentIdEventPair>;
+/// Instrument id-event pair by position map type.
+using InstrumentIdEventPairMap = std::multimap<double, InstrumentIdEventPair>;
 
 }  // namespace barely
 

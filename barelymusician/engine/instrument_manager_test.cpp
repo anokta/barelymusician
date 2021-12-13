@@ -52,8 +52,8 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 }
 
 // Returns test instrument parameter definition.
-ParamDefinitions GetTestParamDefinitions() {
-  return ParamDefinitions{{1, ParamDefinition{0.0f}}};
+ParamDefinitionMap GetTestParamDefinitions() {
+  return ParamDefinitionMap{{1, ParamDefinition{0.0f}}};
 }
 
 // Tests that instruments are added and removed as expected.

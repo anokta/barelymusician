@@ -42,7 +42,7 @@ InstrumentManager::InstrumentManager(int sample_rate) noexcept
 
 Status InstrumentManager::Add(Id instrument_id, double timestamp,
                               InstrumentDefinition definition,
-                              ParamDefinitions param_definitions) noexcept {
+                              ParamDefinitionMap param_definitions) noexcept {
   if (instrument_id == kInvalidId) {
     return Status::kInvalidArgument;
   }
@@ -69,7 +69,7 @@ StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
   return Status::kNotFound;
 }
 
-StatusOr<Params> InstrumentManager::GetAllParams(
+StatusOr<ParamMap> InstrumentManager::GetAllParams(
     Id instrument_id) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
     return controller->params;
@@ -394,7 +394,7 @@ void InstrumentManager::Update() noexcept {
 
 InstrumentManager::InstrumentController::InstrumentController(
     InstrumentDefinition definition,
-    ParamDefinitions param_definitions) noexcept
+    ParamDefinitionMap param_definitions) noexcept
     : definition(std::move(definition)) {
   params.reserve(param_definitions.size());
   for (auto& [id, param_definition] : param_definitions) {

@@ -12,37 +12,86 @@ extern "C" {
 /// Handle type.
 typedef struct BarelyMusician* BarelyHandle;
 
-/// Id type.
-typedef int64_t BarelyId;
-enum BarelyIdConstants {
-  /// Invalid id.
-  kBarelyInvalidId = -1,
-};
+/// Optional double value type.
+typedef struct BarelyOptionalDouble {
+  /// Denotes whether the value should be used or not.
+  bool has_value;
+
+  /// Optional value.
+  double value;
+} BarelyOptionalDouble;
+
+/// Optional float value type.
+typedef struct BarelyOptionalFloat {
+  /// Denotes whether the value should be used or not.
+  bool has_value;
+
+  /// Optional value.
+  float value;
+} BarelyOptionalFloat;
 
 /// Status type.
 typedef int32_t BarelyStatus;
-enum BarelyStatusConstants {
+enum BarelyStatusValues {
   /// Success.
-  kBarelyOk = 0,
+  kBarelyStatus_Ok = 0,
   /// Invalid argument error.
-  kBarelyInvalidArgument = 1,
+  kBarelyStatus_InvalidArgument = 1,
   /// Not found error.
-  kBarelyNotFound = 2,
+  kBarelyStatus_NotFound = 2,
   /// Already exists error.
-  kBarelyAlreadyExists = 3,
+  kBarelyStatus_AlreadyExists = 3,
   /// Failed precondition error.
-  kBarelyFailedPrecondition = 4,
+  kBarelyStatus_FailedPrecondition = 4,
   /// Unimplemented error.
-  kBarelyUnimplemented = 5,
+  kBarelyStatus_Unimplemented = 5,
   /// Internal error.
-  kBarelyInternal = 6,
+  kBarelyStatus_Internal = 6,
   /// Unknown error.
-  kBarelyUnknown = 7,
+  kBarelyStatus_Unknown = 7,
 };
 
-// TODO(#85): Add |BarelyParamDefinitions|.
+// TODO(#85): Remove this in favor of context specific id types.
+/// Id type.
+typedef int64_t BarelyId;
+
+/// Parameter id type.
+typedef int32_t BarelyParamId;
+
+// TODO(#85): Should these structs be further refactored?
+/// Parameter definition.
+typedef struct BarelyParamDefinition {
+  /// Default value.
+  float default_value;
+
+  /// Optional maximum value.
+  BarelyOptionalFloat max_value;
+
+  /// Optional minimum value.
+  BarelyOptionalFloat min_value;
+} BarelyParamDefinition;
+
+typedef struct BarelyParamIdDefinitionPair {
+  /// Id.
+  BarelyId id;
+
+  /// Definition.
+  BarelyParamDefinition definition;
+} BarelyParamIdDefinitionPair;
+
+typedef struct BarelyParamDefinitionMap {
+  /// Definition pairs.
+  BarelyParamIdDefinitionPair* definitions;
+
+  /// Number of definition pairs.
+  int32_t num_definitions;
+} BarelyParamDefinitionMap;
 
 // TODO(#85): Add |BarelyConductorDefinition|.
+
+/// Instrument id type.
+// TODO(#85): Use this instead of |BarelyId|.
+// typedef int64_t BarelyInstrumentId;
 
 /// Instrument state type.
 typedef void* BarelyInstrumentState;
@@ -69,7 +118,12 @@ typedef void (*BarelyInstrumentProcessFn)(BarelyInstrumentState* state,
                                           float* output, int32_t num_channels,
                                           int32_t num_frames);
 
-// TODO(#85): Add |BarelyInstrumentSetCustomDataFn|.
+/// Instrument set custom data function signature.
+///
+/// @param state Pointer to instrument state.
+/// @param custom_data Custom data.
+typedef void (*BarelyInstrumentSetCustomDataFn)(BarelyInstrumentState* state,
+                                                void* custom_data);
 
 /// Instrument set note off function signature.
 ///
@@ -91,8 +145,8 @@ typedef void (*BarelyInstrumentSetNoteOnFn)(BarelyInstrumentState* state,
 /// @param state Pointer to instrument state.
 /// @param id Parameter id.
 /// @param value Parameter value.
-typedef void (*BarelyInstrumentSetParamFn)(BarelyInstrumentState* state, int id,
-                                           float value);
+typedef void (*BarelyInstrumentSetParamFn)(BarelyInstrumentState* state,
+                                           BarelyParamId id, float value);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -104,6 +158,9 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Process function.
   BarelyInstrumentProcessFn process_fn;
+
+  /// Set custom_data function.
+  BarelyInstrumentSetCustomDataFn set_custom_data_fn;
 
   /// Set note off function.
   BarelyInstrumentSetNoteOffFn set_note_off_fn;
@@ -118,19 +175,24 @@ typedef struct BarelyInstrumentDefinition {
 /// Instrument note off callback signature.
 ///
 /// @param instrument_id Instrument id.
+/// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
 typedef void (*BarelyInstrumentNoteOffCallback)(BarelyId instrument_id,
+                                                double timestamp,
                                                 float note_pitch);
 
 /// Instrument note on callback signature.
 ///
 /// @param instrument_id Instrument id.
+/// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
 typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
+                                               double timestamp,
                                                float note_pitch,
                                                float note_intensity);
 
+// TODO(#85): Should this be more generic (beyond the beat granularity)?
 /// Playback beat callback signature.
 ///
 /// @param position Beat position in beats.
@@ -147,11 +209,12 @@ typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
 ///
 /// @param handle BarelyMusician handle.
 /// @param definition Instrument definition.
+/// @param param_definitions Instrument parameter definitions.
 /// @param instrument_id_ptr Pointer to instrument id.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyAddInstrument(BarelyHandle handle, BarelyInstrumentDefinition definition,
-                    BarelyId* instrument_id_ptr);
+BARELY_EXPORT BarelyStatus BarelyAddInstrument(
+    BarelyHandle handle, BarelyInstrumentDefinition definition,
+    BarelyParamDefinitionMap param_definitions, BarelyId* instrument_id_ptr);
 
 // TODO(#85): Temporary shortcut to test instruments.
 BARELY_EXPORT BarelyStatus
@@ -439,7 +502,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyHandle handle,
                                                     BarelyId instrument_id,
-                                                    int32_t param_id,
+                                                    BarelyParamId param_id,
                                                     float param_value);
 
 /// Sets instrument parameter to default.
@@ -449,7 +512,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyHandle handle,
 /// @param param_id Parameter id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
-    BarelyHandle handle, BarelyId instrument_id, int32_t param_id);
+    BarelyHandle handle, BarelyId instrument_id, BarelyParamId param_id);
 
 /// Sets performer begin offset.
 ///

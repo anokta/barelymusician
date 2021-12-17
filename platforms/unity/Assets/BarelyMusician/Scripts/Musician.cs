@@ -275,12 +275,13 @@ namespace Barely {
     // Internal component to update the native state.
     private class MusicianInternal : MonoBehaviour {
       // Instrument note off callback.
-      private delegate void InstrumentNoteOffCallback(Int64 instrumentId, float notePitch);
+      private delegate void InstrumentNoteOffCallback(Int64 instrumentId, double timestamp,
+                                                      float notePitch);
       private InstrumentNoteOffCallback _instrumentNoteOffCallback = null;
 
       // Instrument note on callback.
-      private delegate void InstrumentNoteOnCallback(Int64 instrument_id, float notePitch,
-                                                     float noteIntensity);
+      private delegate void InstrumentNoteOnCallback(Int64 instrument_id, double timestamp,
+                                                     float notePitch, float noteIntensity);
       private InstrumentNoteOnCallback _instrumentNoteOnCallback = null;
 
       // Playback beat callback.
@@ -290,7 +291,8 @@ namespace Barely {
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
         _handle = CreateNative(AudioSettings.outputSampleRate);
-        _instrumentNoteOffCallback = delegate(Int64 instrumentId, float notePitch) {
+        _instrumentNoteOffCallback =
+            delegate(Int64 instrumentId, double timestamp, float notePitch) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(instrumentId, out instrument)) {
             OnInstrumentNoteOff?.Invoke(instrument, notePitch);
@@ -301,7 +303,7 @@ namespace Barely {
         SetInstrumentNoteOffCallbackNative(
             _handle, Marshal.GetFunctionPointerForDelegate(_instrumentNoteOffCallback));
         _instrumentNoteOnCallback =
-            delegate(Int64 instrumentId, float notePitch, float noteIntensity) {
+            delegate(Int64 instrumentId, double timestamp, float notePitch, float noteIntensity) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(instrumentId, out instrument)) {
             OnInstrumentNoteOn?.Invoke(instrument, notePitch, noteIntensity);

@@ -271,7 +271,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyIsPerformerEmpty(BarelyHandle handle,
                                                   BarelyId performer_id,
-                                                  bool is_empty_ptr);
+                                                  bool* is_empty_ptr);
 
 /// Gets whether the performer is looping or not.
 ///

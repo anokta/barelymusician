@@ -1,7 +1,8 @@
 #include "platforms/capi/barelymusician.h"
 
+#include <stdint.h>
+
 #include <any>
-#include <cstdint>
 #include <optional>
 
 #include "barelymusician/common/status.h"
@@ -24,7 +25,7 @@ using ::barely::examples::SynthInstrument;
 
 // Returns the corresponding |InstrumentDefinition| for a given |definition|.
 InstrumentDefinition GetInstrumentDefinition(
-    BarelyInstrumentDefinition definition) {
+    BarelyInstrumentDefinition definition) noexcept {
   InstrumentDefinition result;
   if (definition.create_fn) {
     result.create_fn = [create_fn = std::move(definition.create_fn)](
@@ -97,12 +98,14 @@ BarelyStatus GetStatus(Status status) noexcept {
 
 }  // namespace
 
+extern "C" {
+
 /// BarelyMusician C API.
 struct BarelyMusician {
   /// Constructs new |BarelyMusician|.
   ///
   /// @param sample_rate Sampling rate in Hz.
-  explicit BarelyMusician(std::int32_t sample_rate) noexcept
+  explicit BarelyMusician(int32_t sample_rate) noexcept
       : instance(sample_rate) {}
 
   /// BarelyMusician instance.
@@ -163,7 +166,7 @@ BarelyStatus BarelyAddPerformerNote(BarelyHandle handle, BarelyId performer_id,
   return GetStatus(GetStatusOrStatus(note_id_or));
 }
 
-BarelyHandle BarelyCreate(std::int32_t sample_rate) {
+BarelyHandle BarelyCreate(int32_t sample_rate) {
   return new BarelyMusician(sample_rate);
 }
 
@@ -441,8 +444,7 @@ BarelyStatus BarelySetInstrumentNoteOnCallback(
 }
 
 BarelyStatus BarelySetInstrumentParam(BarelyHandle handle,
-                                      BarelyId instrument_id,
-                                      std::int32_t param_id,
+                                      BarelyId instrument_id, int32_t param_id,
                                       float param_value) {
   if (handle) {
     return GetStatus(handle->instance.SetInstrumentParam(
@@ -453,7 +455,7 @@ BarelyStatus BarelySetInstrumentParam(BarelyHandle handle,
 
 BarelyStatus BarelySetInstrumentParamToDefault(BarelyHandle handle,
                                                BarelyId instrument_id,
-                                               std::int32_t param_id) {
+                                               int32_t param_id) {
   if (handle) {
     return GetStatus(
         handle->instance.SetInstrumentParamToDefault(instrument_id, param_id));
@@ -587,8 +589,7 @@ BarelyStatus BarelyStopPlayback(BarelyHandle handle) {
   return kBarelyNotFound;
 }
 
-BarelyStatus BarelySetSampleRate(BarelyHandle handle,
-                                 std::int32_t sample_rate) {
+BarelyStatus BarelySetSampleRate(BarelyHandle handle, int32_t sample_rate) {
   if (handle) {
     handle->instance.SetSampleRate(sample_rate);
     return kBarelyOk;
@@ -603,3 +604,5 @@ BarelyStatus BarelyUpdate(BarelyHandle handle, double timestamp) {
   }
   return kBarelyNotFound;
 }
+
+}  // extern "C"

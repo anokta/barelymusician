@@ -25,14 +25,6 @@ constexpr double kDefaultPlaybackTempo = 120.0;
 // Converts seconds from minutes.
 constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 
-// Dummy instrument note off callback function that does nothing.
-void NoopInstrumentNoteOffCallback(Id /*instrument_id*/,
-                                   float /*note_pitch*/) noexcept {}
-
-// Dummy instrument note on callback function that does nothing.
-void NoopInstrumentNoteOnCallback(Id /*instrument_id*/, float /*note_pitch*/,
-                                  float /*note_intensity*/) noexcept {}
-
 // Dummy playback update callback function that does nothing.
 void NoopPlaybackUpdateCallback(double /*begin_position*/,
                                 double /*end_position*/) noexcept {}
@@ -41,19 +33,8 @@ void NoopPlaybackUpdateCallback(double /*begin_position*/,
 
 Musician::Musician(int sample_rate) noexcept
     : instrument_manager_(sample_rate),
-      instrument_note_off_callback_(&NoopInstrumentNoteOffCallback),
-      instrument_note_on_callback_(&NoopInstrumentNoteOnCallback),
       playback_tempo_(kDefaultPlaybackTempo),
       playback_update_callback_(&NoopPlaybackUpdateCallback) {
-  instrument_manager_.SetNoteOffCallback(
-      [&](Id instrument_id, double /*timestamp*/, float note_pitch) noexcept {
-        instrument_note_off_callback_(instrument_id, note_pitch);
-      });
-  instrument_manager_.SetNoteOnCallback(
-      [&](Id instrument_id, double /*timestamp*/, float note_pitch,
-          float note_intensity) noexcept {
-        instrument_note_on_callback_(instrument_id, note_pitch, note_intensity);
-      });
   transport_.SetUpdateCallback(
       [&](double begin_position, double end_position,
           const Transport::GetTimestampFn& get_timestamp_fn) noexcept {
@@ -296,9 +277,8 @@ Status Musician::SetInstrumentNoteOff(Id instrument_id,
 
 void Musician::SetInstrumentNoteOffCallback(
     InstrumentNoteOffCallback instrument_note_off_callback) noexcept {
-  instrument_note_off_callback_ = instrument_note_off_callback
-                                      ? std::move(instrument_note_off_callback)
-                                      : &NoopInstrumentNoteOffCallback;
+  instrument_manager_.SetNoteOffCallback(
+      std::move(instrument_note_off_callback));
 }
 
 Status Musician::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
@@ -321,9 +301,7 @@ Status Musician::SetInstrumentParamToDefault(Id instrument_id,
 
 void Musician::SetInstrumentNoteOnCallback(
     InstrumentNoteOnCallback instrument_note_on_callback) noexcept {
-  instrument_note_on_callback_ = instrument_note_on_callback
-                                     ? std::move(instrument_note_on_callback)
-                                     : &NoopInstrumentNoteOnCallback;
+  instrument_manager_.SetNoteOnCallback(std::move(instrument_note_on_callback));
 }
 
 Status Musician::SetPerformerBeginOffset(Id performer_id,

@@ -448,10 +448,9 @@ BarelyStatus BarelySetInstrumentNoteOffCallback(
   if (handle) {
     if (instrument_note_off_callback) {
       handle->instance.SetInstrumentNoteOffCallback(
-          [instrument_note_off_callback](auto instrument_id, float note_pitch) {
-            // TODO(#85): Include timestamp.
-            instrument_note_off_callback(instrument_id, /*timestamp=*/0.0,
-                                         note_pitch);
+          [instrument_note_off_callback](auto instrument_id, double timestamp,
+                                         float note_pitch) {
+            instrument_note_off_callback(instrument_id, timestamp, note_pitch);
           });
     } else {
       handle->instance.SetInstrumentNoteOffCallback(nullptr);
@@ -477,11 +476,11 @@ BarelyStatus BarelySetInstrumentNoteOnCallback(
   if (handle) {
     if (instrument_note_on_callback) {
       handle->instance.SetInstrumentNoteOnCallback(
-          [instrument_note_on_callback](auto instrument_id, float note_pitch,
+          [instrument_note_on_callback](auto instrument_id, double timestamp,
+                                        float note_pitch,
                                         float note_intensity) {
-            // TODO(#85): Include timestamp.
-            instrument_note_on_callback(instrument_id, /*timestamp=*/0.0,
-                                        note_pitch, note_intensity);
+            instrument_note_on_callback(instrument_id, timestamp, note_pitch,
+                                        note_intensity);
           });
     } else {
       handle->instance.SetInstrumentNoteOffCallback(nullptr);

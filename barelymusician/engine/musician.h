@@ -23,19 +23,10 @@ namespace barely {
 class Musician {
  public:
   /// Instrument note off callback signature.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  using InstrumentNoteOffCallback =
-      std::function<void(Id instrument_id, float note_pitch)>;
+  using InstrumentNoteOffCallback = InstrumentManager::NoteOffCallback;
 
   /// Instrument note on callback signature.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  /// @param note_intensity Note intensity.
-  using InstrumentNoteOnCallback = std::function<void(
-      Id instrument_id, float note_pitch, float note_intensity)>;
+  using InstrumentNoteOnCallback = InstrumentManager::NoteOnCallback;
 
   /// Playback beat callback signature.
   using PlaybackBeatCallback = Transport::BeatCallback;
@@ -364,12 +355,6 @@ class Musician {
 
   // Instrument manager.
   InstrumentManager instrument_manager_;
-
-  // Instrument note off callback.
-  InstrumentNoteOffCallback instrument_note_off_callback_;
-
-  // Instrument note on callback.
-  InstrumentNoteOnCallback instrument_note_on_callback_;
 
   // List of performers.
   std::unordered_map<Id, Performer> performers_;

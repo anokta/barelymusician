@@ -72,12 +72,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
         ParamDefinition{kEnvelopeAttack}},
        {SynthInstrumentParam::kEnvelopeRelease,
         ParamDefinition{kEnvelopeRelease}}});
-  musician.SetInstrumentNoteOnCallback(
-      [](auto /*instrument_id*/, float pitch, float intensity) {
-        ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-      });
+  musician.SetInstrumentNoteOnCallback([](auto /*instrument_id*/,
+                                          double /*timestamp*/, float pitch,
+                                          float intensity) {
+    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
+  });
   musician.SetInstrumentNoteOffCallback(
-      [](auto /*instrument_id*/, float pitch) {
+      [](auto /*instrument_id*/, double /*timestamp*/, float pitch) {
         ConsoleLog() << "NoteOff(" << pitch << ") ";
       });
 

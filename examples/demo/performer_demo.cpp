@@ -96,7 +96,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
        {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{0.025f}}});
 
   musician.SetInstrumentNoteOnCallback(
-      [&](Id instrument_id, float note_pitch, float note_intensity) {
+      [&](Id instrument_id, double /*timestamp*/, float note_pitch,
+          float note_intensity) {
         if (instrument_id == performer_instrument_id) {
           ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
                        << note_intensity << "}";

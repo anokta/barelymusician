@@ -85,18 +85,12 @@ InstrumentDefinition GetInstrumentDefinition(
   return result;
 }
 
-// Returns the corresponding |std::optional<float>| for a given |value_or|.
-std::optional<float> GetOptionalFloat(const BarelyOptionalFloat& value_or) {
-  return value_or.has_value ? std::optional<float>(value_or.value)
-                            : std::nullopt;
-}
-
 // Returns the corresponding |ParamDefinition| for a given |param_definition|.
 ParamDefinition GetParamDefinition(
     const BarelyParamDefinition& param_definition) noexcept {
   return ParamDefinition(param_definition.default_value,
-                         GetOptionalFloat(param_definition.min_value),
-                         GetOptionalFloat(param_definition.max_value));
+                         param_definition.min_value,
+                         param_definition.max_value);
 }
 
 // Returns the corresponding |ParamDefinitionMap| for a given

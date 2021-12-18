@@ -12,26 +12,10 @@ extern "C" {
 /// BarelyMusician C API type.
 typedef struct BarelyMusician* BarelyApi;
 
-/// Optional double value type.
-typedef struct BarelyOptionalDouble {
-  /// Denotes whether the value should be used or not.
-  bool has_value;
-
-  /// Optional value.
-  double value;
-} BarelyOptionalDouble;
-
-/// Optional float value type.
-typedef struct BarelyOptionalFloat {
-  /// Denotes whether the value should be used or not.
-  bool has_value;
-
-  /// Optional value.
-  float value;
-} BarelyOptionalFloat;
-
 /// Status type.
 typedef int32_t BarelyStatus;
+
+/// Status values.
 enum BarelyStatusValues {
   /// Success.
   kBarelyStatus_Ok = 0,
@@ -51,14 +35,9 @@ enum BarelyStatusValues {
   kBarelyStatus_Unknown = 7,
 };
 
-// TODO(#85): Remove this in favor of context specific id types.
-/// Id type.
-typedef int64_t BarelyId;
-
 /// Parameter id type.
 typedef int32_t BarelyParamId;
 
-// TODO(#85): Should these structs be further refactored?
 /// Parameter definition.
 typedef struct BarelyParamDefinition {
   /// Id.
@@ -67,14 +46,18 @@ typedef struct BarelyParamDefinition {
   /// Default value.
   float default_value;
 
-  /// Optional maximum value.
-  BarelyOptionalFloat max_value;
+  /// Minimum value.
+  float min_value;
 
-  /// Optional minimum value.
-  BarelyOptionalFloat min_value;
+  /// Maximum value.
+  float max_value;
 } BarelyParamDefinition;
 
 // TODO(#85): Add |BarelyConductorDefinition|.
+
+// TODO(#85): Remove this in favor of context specific id types?
+/// Id type.
+typedef int64_t BarelyId;
 
 /// Instrument id type.
 typedef int64_t BarelyInstrumentId;
@@ -264,7 +247,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginOffset(
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param begin_position_ptr Pointer to begin position in beats.
+/// @param begin_position_ptr Pointer to optional begin position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginPosition(
     BarelyApi api, BarelyId performer_id, double* begin_position_ptr);
@@ -273,7 +256,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginPosition(
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param end_position_ptr Pointer to end position in beats.
+/// @param end_position_ptr Pointer to optional end position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPerformerEndPosition(
     BarelyApi api, BarelyId performer_id, double* end_position_ptr);

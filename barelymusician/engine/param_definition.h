@@ -14,8 +14,8 @@ struct ParamDefinition {
   /// @param default_value Default boolean value.
   explicit ParamDefinition(bool default_value)
       : default_value(static_cast<float>(default_value)),
-        max_value(std::nullopt),
-        min_value(std::nullopt) {}
+        min_value(std::nullopt),
+        max_value(std::nullopt) {}
 
   /// Constructs new |ParamDefinition|.
   ///
@@ -26,8 +26,8 @@ struct ParamDefinition {
                            std::optional<float> min_value = std::nullopt,
                            std::optional<float> max_value = std::nullopt)
       : default_value(default_value),
-        max_value(std::move(max_value)),
-        min_value(std::move(min_value)) {}
+        min_value(std::move(min_value)),
+        max_value(std::move(max_value)) {}
 
   /// Constructs new |ParamDefinition|.
   ///
@@ -38,21 +38,21 @@ struct ParamDefinition {
                            std::optional<int> min_value = std::nullopt,
                            std::optional<int> max_value = std::nullopt)
       : default_value(static_cast<float>(default_value)),
-        max_value(max_value
-                      ? std::optional<float>{static_cast<float>(*max_value)}
-                      : std::nullopt),
         min_value(min_value
                       ? std::optional<float>{static_cast<float>(*min_value)}
+                      : std::nullopt),
+        max_value(max_value
+                      ? std::optional<float>{static_cast<float>(*max_value)}
                       : std::nullopt) {}
 
   /// Parameter default value.
   float default_value;
 
-  /// Parameter maximum value.
-  std::optional<float> max_value;
-
   /// Parameter minimum value.
   std::optional<float> min_value;
+
+  /// Parameter maximum value.
+  std::optional<float> max_value;
 };
 
 /// Parameter definition by id map type.

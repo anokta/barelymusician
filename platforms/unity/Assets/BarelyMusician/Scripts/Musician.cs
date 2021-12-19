@@ -31,7 +31,7 @@ namespace Barely {
       Int64 instrumentId = InvalidId;
       Type instrumentType = instrument.GetType();
       if (instrumentType == typeof(SynthInstrument)) {
-        Status status = AddSynthInstrumentNative(Api, _int64Ptr);
+        Status status = CreateSynthInstrumentNative(Api, _int64Ptr);
         if (IsOk(status)) {
           instrumentId = Marshal.ReadInt64(_int64Ptr);
         } else {
@@ -114,7 +114,7 @@ namespace Barely {
     ///
     /// @param instrument Instrument to remove.
     public static void RemoveInstrument(Instrument instrument) {
-      RemoveInstrumentNative(Api, instrument.Id);
+      DestroyInstrumentNative(Api, instrument.Id);
       _instruments.Remove(instrument.Id);
     }
 
@@ -395,14 +395,17 @@ namespace Barely {
                                                         float notePitch, float noteIntensity,
                                                         IntPtr noteIdPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelyAddSynthInstrument")]
-    private static extern Status AddSynthInstrumentNative(IntPtr api, IntPtr instrumentIdPtr);
-
     [DllImport(pluginName, EntryPoint = "BarelyCreateApi")]
     private static extern IntPtr CreateApiNative(Int32 sampleRate);
 
+    [DllImport(pluginName, EntryPoint = "BarelyCreateSynthInstrument")]
+    private static extern Status CreateSynthInstrumentNative(IntPtr api, IntPtr instrumentIdPtr);
+
     [DllImport(pluginName, EntryPoint = "BarelyDestroyApi")]
     private static extern Status DestroyApiNative(IntPtr api);
+
+    [DllImport(pluginName, EntryPoint = "BarelyDestroyInstrument")]
+    private static extern Status DestroyInstrumentNative(IntPtr api, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelyGetPlaybackPosition")]
     private static extern Status GetPlaybackPositionNative(IntPtr api, IntPtr positionPtr);
@@ -420,9 +423,6 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyRemoveAllPerformerNotes")]
     private static extern Status RemoveAllPerformerNotesNative(IntPtr api, Int64 performerId);
-
-    [DllImport(pluginName, EntryPoint = "BarelyRemoveInstrument")]
-    private static extern Status RemoveInstrumentNative(IntPtr api, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelyRemovePerformer")]
     private static extern Status RemovePerformerNative(IntPtr api, Int64 performerId);

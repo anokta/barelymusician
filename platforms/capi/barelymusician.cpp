@@ -150,28 +150,6 @@ struct BarelyMusician {
   Musician instance;
 };
 
-BarelyStatus BarelyAddInstrument(BarelyApi api,
-                                 BarelyInstrumentDefinition definition,
-                                 BarelyParamDefinition* param_definitions,
-                                 int32_t num_param_definitions,
-                                 BarelyInstrumentId* instrument_id_ptr) {
-  if (!api) return kBarelyStatus_NotFound;
-  if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
-  *instrument_id_ptr = api->instance.AddInstrument(
-      GetInstrumentDefinition(std::move(definition)),
-      GetParamDefinitions(param_definitions, num_param_definitions));
-  return kBarelyStatus_Ok;
-}
-
-BarelyStatus BarelyAddSynthInstrument(BarelyApi api,
-                                      BarelyInstrumentId* instrument_id_ptr) {
-  if (!api) return kBarelyStatus_NotFound;
-  if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
-  *instrument_id_ptr = api->instance.AddInstrument(
-      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
-  return kBarelyStatus_Ok;
-}
-
 BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* performer_id_ptr) {
   if (!api) return kBarelyStatus_NotFound;
   if (!performer_id_ptr) return kBarelyStatus_InvalidArgument;
@@ -180,7 +158,7 @@ BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* performer_id_ptr) {
 }
 
 BarelyStatus BarelyAddPerformerInstrument(BarelyApi api, BarelyId performer_id,
-                                          BarelyInstrumentId instrument_id) {
+                                          BarelyId instrument_id) {
   if (!api) return kBarelyStatus_NotFound;
   return GetStatus(
       api->instance.AddPerformerInstrument(performer_id, instrument_id));
@@ -208,10 +186,39 @@ BarelyApi BarelyCreateApi(int32_t sample_rate) {
   return new BarelyMusician(sample_rate);
 }
 
+BarelyStatus BarelyCreateInstrument(BarelyApi api,
+                                    BarelyInstrumentDefinition definition,
+                                    BarelyParamDefinition* param_definitions,
+                                    int32_t num_param_definitions,
+                                    BarelyId* instrument_id_ptr) {
+  if (!api) return kBarelyStatus_NotFound;
+  if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
+  *instrument_id_ptr = api->instance.AddInstrument(
+      GetInstrumentDefinition(std::move(definition)),
+      GetParamDefinitions(param_definitions, num_param_definitions));
+  return kBarelyStatus_Ok;
+}
+
+BarelyStatus BarelyCreateSynthInstrument(BarelyApi api,
+                                         BarelyId* instrument_id_ptr) {
+  if (!api) return kBarelyStatus_NotFound;
+  if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
+  *instrument_id_ptr = api->instance.AddInstrument(
+      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  return kBarelyStatus_Ok;
+}
+
 BarelyStatus BarelyDestroyApi(BarelyApi api) {
   if (api) {
     delete api;
     return kBarelyStatus_Ok;
+  }
+  return kBarelyStatus_NotFound;
+}
+
+BarelyStatus BarelyDestroyInstrument(BarelyApi api, BarelyId instrument_id) {
+  if (api) {
+    return GetStatus(api->instance.RemoveInstrument(instrument_id));
   }
   return kBarelyStatus_NotFound;
 }
@@ -328,8 +335,7 @@ BarelyStatus BarelyIsPlaying(BarelyApi api, bool* is_playing_ptr) {
   return kBarelyStatus_Ok;
 }
 
-BarelyStatus BarelyProcessInstrument(BarelyApi api,
-                                     BarelyInstrumentId instrument_id,
+BarelyStatus BarelyProcessInstrument(BarelyApi api, BarelyId instrument_id,
                                      double timestamp, float* output,
                                      int32_t num_channels, int32_t num_frames) {
   if (api) {
@@ -367,14 +373,6 @@ BarelyStatus BarelyRemoveAllPerformerNotesAt(BarelyApi api,
   return kBarelyStatus_NotFound;
 }
 
-BarelyStatus BarelyRemoveInstrument(BarelyApi api,
-                                    BarelyInstrumentId instrument_id) {
-  if (api) {
-    return GetStatus(api->instance.RemoveInstrument(instrument_id));
-  }
-  return kBarelyStatus_NotFound;
-}
-
 BarelyStatus BarelyRemovePerformer(BarelyApi api, BarelyId performer_id) {
   if (api) {
     return GetStatus(api->instance.RemovePerformer(performer_id));
@@ -384,7 +382,7 @@ BarelyStatus BarelyRemovePerformer(BarelyApi api, BarelyId performer_id) {
 
 BarelyStatus BarelyRemovePerformerInstrument(BarelyApi api,
                                              BarelyId performer_id,
-                                             BarelyInstrumentId instrument_id) {
+                                             BarelyId instrument_id) {
   if (api) {
     return GetStatus(
         api->instance.RemovePerformerInstrument(performer_id, instrument_id));
@@ -401,15 +399,15 @@ BarelyStatus BarelyRemovePerformerNote(BarelyApi api, BarelyId performer_id,
 }
 
 BarelyStatus BarelySetAllInstrumentNotesOff(BarelyApi api,
-                                            BarelyInstrumentId instrument_id) {
+                                            BarelyId instrument_id) {
   if (api) {
     return GetStatus(api->instance.SetAllInstrumentNotesOff(instrument_id));
   }
   return kBarelyStatus_NotFound;
 }
 
-BarelyStatus BarelySetAllInstrumentParamsToDefault(
-    BarelyApi api, BarelyInstrumentId instrument_id) {
+BarelyStatus BarelySetAllInstrumentParamsToDefault(BarelyApi api,
+                                                   BarelyId instrument_id) {
   if (api) {
     return GetStatus(
         api->instance.SetAllInstrumentParamsToDefault(instrument_id));
@@ -417,8 +415,7 @@ BarelyStatus BarelySetAllInstrumentParamsToDefault(
   return kBarelyStatus_NotFound;
 }
 
-BarelyStatus BarelySetInstrumentNoteOff(BarelyApi api,
-                                        BarelyInstrumentId instrument_id,
+BarelyStatus BarelySetInstrumentNoteOff(BarelyApi api, BarelyId instrument_id,
                                         float note_pitch) {
   if (api) {
     return GetStatus(
@@ -445,8 +442,7 @@ BarelyStatus BarelySetInstrumentNoteOffCallback(
   return kBarelyStatus_NotFound;
 }
 
-BarelyStatus BarelySetInstrumentNoteOn(BarelyApi api,
-                                       BarelyInstrumentId instrument_id,
+BarelyStatus BarelySetInstrumentNoteOn(BarelyApi api, BarelyId instrument_id,
                                        float note_pitch, float note_intensity) {
   if (api) {
     return GetStatus(api->instance.SetInstrumentNoteOn(
@@ -474,8 +470,7 @@ BarelyStatus BarelySetInstrumentNoteOnCallback(
   return kBarelyStatus_NotFound;
 }
 
-BarelyStatus BarelySetInstrumentParam(BarelyApi api,
-                                      BarelyInstrumentId instrument_id,
+BarelyStatus BarelySetInstrumentParam(BarelyApi api, BarelyId instrument_id,
                                       BarelyParamId param_id,
                                       float param_value) {
   if (api) {
@@ -486,7 +481,7 @@ BarelyStatus BarelySetInstrumentParam(BarelyApi api,
 }
 
 BarelyStatus BarelySetInstrumentParamToDefault(BarelyApi api,
-                                               BarelyInstrumentId instrument_id,
+                                               BarelyId instrument_id,
                                                BarelyParamId param_id) {
   if (api) {
     return GetStatus(

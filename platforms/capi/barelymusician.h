@@ -35,6 +35,9 @@ enum BarelyStatusValues {
   kBarelyStatus_Unknown = 7,
 };
 
+/// Id type.
+typedef int64_t BarelyId;
+
 /// Parameter id type.
 typedef int32_t BarelyParamId;
 
@@ -54,13 +57,6 @@ typedef struct BarelyParamDefinition {
 } BarelyParamDefinition;
 
 // TODO(#85): Add |BarelyConductorDefinition|.
-
-// TODO(#85): Remove this in favor of context specific id types?
-/// Id type.
-typedef int64_t BarelyId;
-
-/// Instrument id type.
-typedef int64_t BarelyInstrumentId;
 
 /// Instrument state type.
 typedef void* BarelyInstrumentState;
@@ -146,8 +142,9 @@ typedef struct BarelyInstrumentDefinition {
 /// @param instrument_id Instrument id.
 /// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
-typedef void (*BarelyInstrumentNoteOffCallback)(
-    BarelyInstrumentId instrument_id, double timestamp, float note_pitch);
+typedef void (*BarelyInstrumentNoteOffCallback)(BarelyId instrument_id,
+                                                double timestamp,
+                                                float note_pitch);
 
 /// Instrument note on callback signature.
 ///
@@ -155,7 +152,7 @@ typedef void (*BarelyInstrumentNoteOffCallback)(
 /// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
-typedef void (*BarelyInstrumentNoteOnCallback)(BarelyInstrumentId instrument_id,
+typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
                                                double timestamp,
                                                float note_pitch,
                                                float note_intensity);
@@ -173,23 +170,6 @@ typedef void (*BarelyPlaybackBeatCallback)(double position);
 typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
                                              double end_position);
 
-/// Adds new instrument.
-///
-/// @param api BarelyMusician API.
-/// @param definition Instrument definition.
-/// @param param_definitions List of instrument parameter definitions.
-/// @param num_param_definitions Number of instrument parameter definitions.
-/// @param instrument_id_ptr Pointer to instrument id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyAddInstrument(
-    BarelyApi api, BarelyInstrumentDefinition definition,
-    BarelyParamDefinition* param_definitions, int32_t num_param_definitions,
-    BarelyInstrumentId* instrument_id_ptr);
-
-// TODO(#85): Temporary shortcut to test instruments.
-BARELY_EXPORT BarelyStatus
-BarelyAddSynthInstrument(BarelyApi api, BarelyInstrumentId* instrument_id_ptr);
-
 /// Adds new performer.
 ///
 /// @param api BarelyMusician API.
@@ -204,8 +184,9 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformer(BarelyApi api,
 /// @param performer_id Performer id.
 /// @param instrument_id Instrument id.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyAddPerformerInstrument(
-    BarelyApi api, BarelyId performer_id, BarelyInstrumentId instrument_id);
+BARELY_EXPORT BarelyStatus BarelyAddPerformerInstrument(BarelyApi api,
+                                                        BarelyId performer_id,
+                                                        BarelyId instrument_id);
 
 /// Adds performer note.
 ///
@@ -228,11 +209,36 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformerNote(
 /// @return BarelyMusician API.
 BARELY_EXPORT BarelyApi BarelyCreateApi(int32_t sample_rate);
 
+/// Create new instrument.
+///
+/// @param api BarelyMusician API.
+/// @param definition Instrument definition.
+/// @param param_definitions List of instrument parameter definitions.
+/// @param num_param_definitions Number of instrument parameter definitions.
+/// @param instrument_id_ptr Pointer to instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyCreateInstrument(
+    BarelyApi api, BarelyInstrumentDefinition definition,
+    BarelyParamDefinition* param_definitions, int32_t num_param_definitions,
+    BarelyId* instrument_id_ptr);
+
+// TODO(#85): Temporary shortcut to test instruments.
+BARELY_EXPORT BarelyStatus
+BarelyCreateSynthInstrument(BarelyApi api, BarelyId* instrument_id_ptr);
+
 /// Destroys BarelyMusician API.
 ///
 /// @param api BarelyMusician API.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi api);
+
+/// Destroys instrument.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
+                                                   BarelyId instrument_id);
 
 /// Gets performer begin offset.
 ///
@@ -332,8 +338,8 @@ BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* is_playing_ptr);
 /// @param num_frames Number of output frames.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
-    BarelyApi api, BarelyInstrumentId instrument_id, double timestamp,
-    float* output, int32_t num_channels, int32_t num_frames);
+    BarelyApi api, BarelyId instrument_id, double timestamp, float* output,
+    int32_t num_channels, int32_t num_frames);
 
 /// Removes all performerinstruments.
 ///
@@ -362,14 +368,6 @@ BARELY_EXPORT BarelyStatus
 BarelyRemoveAllPerformerNotesAt(BarelyApi api, BarelyId performer_id,
                                 double begin_position, double end_position);
 
-/// Removes instrument.
-///
-/// @param api BarelyMusician API.
-/// @param instrument_id Instrument id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyRemoveInstrument(BarelyApi api, BarelyInstrumentId instrument_id);
-
 /// Removes performer.
 ///
 /// @param api BarelyMusician API.
@@ -385,7 +383,7 @@ BARELY_EXPORT BarelyStatus BarelyRemovePerformer(BarelyApi api,
 /// @param instrument_id Instrument id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyRemovePerformerInstrument(
-    BarelyApi api, BarelyId performer_id, BarelyInstrumentId instrument_id);
+    BarelyApi api, BarelyId performer_id, BarelyId instrument_id);
 
 /// Removes performer note.
 ///
@@ -405,7 +403,7 @@ BARELY_EXPORT BarelyStatus BarelyRemovePerformerNote(BarelyApi api,
 /// @param instrument_id Instrument id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelySetAllInstrumentNotesOff(BarelyApi api, BarelyInstrumentId instrument_id);
+BarelySetAllInstrumentNotesOff(BarelyApi api, BarelyId instrument_id);
 
 // TODO(#85): Add |BarelySetAllInstrumentParamsToDefault| for all.
 
@@ -414,8 +412,8 @@ BarelySetAllInstrumentNotesOff(BarelyApi api, BarelyInstrumentId instrument_id);
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument id.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetAllInstrumentParamsToDefault(
-    BarelyApi api, BarelyInstrumentId instrument_id);
+BARELY_EXPORT BarelyStatus
+BarelySetAllInstrumentParamsToDefault(BarelyApi api, BarelyId instrument_id);
 
 // TODO(#85): Add |SetConductor|.
 
@@ -427,8 +425,9 @@ BARELY_EXPORT BarelyStatus BarelySetAllInstrumentParamsToDefault(
 /// @param instrument_id Instrument id.
 /// @param note_pitch Note pitch.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOff(
-    BarelyApi api, BarelyInstrumentId instrument_id, float note_pitch);
+BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOff(BarelyApi api,
+                                                      BarelyId instrument_id,
+                                                      float note_pitch);
 
 /// Sets the instrument note off callback.
 ///
@@ -446,9 +445,10 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySetInstrumentNoteOn(BarelyApi api, BarelyInstrumentId instrument_id,
-                          float note_pitch, float note_intensity);
+BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOn(BarelyApi api,
+                                                     BarelyId instrument_id,
+                                                     float note_pitch,
+                                                     float note_intensity);
 
 /// Sets the instrument note on callback.
 ///
@@ -465,9 +465,10 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
 /// @param param_id Parameter id.
 /// @param param_value Parameter value.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySetInstrumentParam(BarelyApi api, BarelyInstrumentId instrument_id,
-                         BarelyParamId param_id, float param_value);
+BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyApi api,
+                                                    BarelyId instrument_id,
+                                                    BarelyParamId param_id,
+                                                    float param_value);
 
 /// Sets instrument parameter to default.
 ///
@@ -476,7 +477,7 @@ BarelySetInstrumentParam(BarelyApi api, BarelyInstrumentId instrument_id,
 /// @param param_id Parameter id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
-    BarelyApi api, BarelyInstrumentId instrument_id, BarelyParamId param_id);
+    BarelyApi api, BarelyId instrument_id, BarelyParamId param_id);
 
 /// Sets performer begin offset.
 ///

@@ -224,7 +224,49 @@ BARELY_EXPORT BarelyStatus BarelyIsInstrumentNoteOn(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* is_playing_ptr);
 
-/// Sets instrument custom data.
+/// Processes instrument at timestamp.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param timestamp Timestamp in seconds.
+/// @param output Pointer to output buffer.
+/// @param num_output_channels Number of output channels.
+/// @param num_output_frames Number of output frames.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
+    BarelyApi api, BarelyId instrument_id, double timestamp, float* output,
+    int32_t num_output_channels, int32_t num_output_frames);
+
+/// Sets all notes of all instruments off.
+///
+/// @param api BarelyMusician API.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetAllInstrumentsAllNotesOff(BarelyApi api);
+
+/// Sets all parameters of all instruments to default value.
+///
+/// @param api BarelyMusician API.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySetAllInstrumentsAllParamsToDefault(BarelyApi api);
+
+/// Sets all instrument notes off.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySetInstrumentAllNotesOff(BarelyApi api, BarelyId instrument_id);
+
+/// Sets all instrument parameters to default value.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySetInstrumentAllParamsToDefault(BarelyApi api, BarelyId instrument_id);
+
+/// Sets custom instrument data.
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument identifier.
@@ -268,7 +310,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyApi api,
                                                     BarelyParamId param_id,
                                                     float param_value);
 
-/// Sets instrument parameter value to default.
+/// Sets instrument parameter to default value.
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument identifier.

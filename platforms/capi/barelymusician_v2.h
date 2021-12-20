@@ -169,6 +169,18 @@ BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi api);
 BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
                                                    BarelyId instrument_id);
 
+/// Gets instrument parameter value.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param param_id Parameter identifier.
+/// @param param_value_ptr Output parameter value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetInstrumentParam(BarelyApi api,
+                                                    BarelyId instrument_id,
+                                                    BarelyParamId param_id,
+                                                    float* param_value_ptr);
+
 /// Gets the playback position.
 ///
 /// @param api BarelyMusician API.
@@ -193,12 +205,77 @@ BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyGetSampleRate(BarelyApi api,
                                                int32_t* sample_rate_ptr);
 
+/// Gets whether instrument note is on or not.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param note_pitch Note pitch.
+/// @param is_note_on_ptr Output true if on, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyIsInstrumentNoteOn(BarelyApi api,
+                                                    BarelyId instrument_id,
+                                                    float note_pitch,
+                                                    bool* is_note_on_ptr);
+
 /// Gets whether the playback is active or not.
 ///
 /// @param api BarelyMusician API.
-/// @param is_playing_ptr Output true if playing, false otherwise.
+/// @param is_playing_ptr Output true if active, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* is_playing_ptr);
+
+/// Sets instrument custom data.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param custom_data Custom data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentCustomData(BarelyApi api,
+                                                         BarelyId instrument_id,
+                                                         void* custom_data);
+
+/// Sets instrument note off.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param note_pitch Note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOff(BarelyApi api,
+                                                      BarelyId instrument_id,
+                                                      float note_pitch);
+
+/// Sets instrument note on.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param note_pitch Note pitch.
+/// @param note_intensity Note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOn(BarelyApi api,
+                                                     BarelyId instrument_id,
+                                                     float note_pitch,
+                                                     float note_intensity);
+
+/// Sets instrument parameter value.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param param_id Parameter identifier.
+/// @param param_value Parameter value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyApi api,
+                                                    BarelyId instrument_id,
+                                                    BarelyParamId param_id,
+                                                    float param_value);
+
+/// Sets instrument parameter value to default.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param param_id Parameter identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
+    BarelyApi api, BarelyId instrument_id, BarelyParamId param_id);
 
 /// Sets the playback position.
 ///

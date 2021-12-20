@@ -169,6 +169,52 @@ BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi api);
 BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
                                                    BarelyId instrument_id);
 
+/// Gets the playback position.
+///
+/// @param api BarelyMusician API.
+/// @param position_ptr Output playback position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPlaybackPosition(BarelyApi api,
+                                                     double* position_ptr);
+
+/// Gets the playback tempo.
+///
+/// @param api BarelyMusician API.
+/// @param tempo_ptr Output playback tempo in BPM.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyApi api,
+                                                  double* tempo_ptr);
+
+/// Gets the sampling rate.
+///
+/// @param api BarelyMusician API.
+/// @param sample_rate_ptr Output sampling rate in Hz.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetSampleRate(BarelyApi api,
+                                               int32_t* sample_rate_ptr);
+
+/// Gets whether the playback is active or not.
+///
+/// @param api BarelyMusician API.
+/// @param is_playing_ptr Output true if playing, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* is_playing_ptr);
+
+/// Sets the playback position.
+///
+/// @param api BarelyMusician API.
+/// @param position Playback position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPlaybackPosition(BarelyApi api,
+                                                     double position);
+
+/// Sets the playback tempo.
+///
+/// @param api BarelyMusician API.
+/// @param tempo Playback tempo in BPM.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPlaybackTempo(BarelyApi api, double tempo);
+
 /// Sets the sampling rate.
 ///
 /// @param api BarelyMusician API.

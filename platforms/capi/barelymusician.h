@@ -548,7 +548,7 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackBeatCallback(
 /// Sets the playback position.
 ///
 /// @param api BarelyMusician API.
-/// @param tempo Playback position in beats.
+/// @param position Playback position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackPosition(BarelyApi api,
                                                      double position);

@@ -453,7 +453,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOn(BarelyApi api,
 /// Sets the instrument note on callback.
 ///
 /// @param api BarelyMusician API.
-/// @param instrument_note_off_callback Instrument note on callback.
+/// @param instrument_note_on_callback Instrument note on callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
     BarelyApi api, BarelyInstrumentNoteOnCallback instrument_note_on_callback);

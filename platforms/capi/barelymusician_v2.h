@@ -81,6 +81,57 @@ typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
                                                float note_pitch,
                                                float note_intensity);
 
+/// Conductor state type.
+typedef void* BarelyConductorState;
+
+/// Conductor create function signature.
+///
+/// @param state Pointer to conductor state.
+typedef void (*BarelyConductorCreateFn)(BarelyConductorState* state);
+
+/// Conductor destroy function signature.
+///
+/// @param state Pointer to conductor state.
+typedef void (*BarelyConductorDestroyFn)(BarelyConductorState* state);
+
+/// Conductor set custom data function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param custom_data Custom data.
+typedef void (*BarelyConductorSetCustomDataFn)(BarelyConductorState* state,
+                                               void* custom_data);
+
+/// Conductor set parameter function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param id Parameter identifier.
+/// @param value Parameter value.
+typedef void (*BarelyConductorSetParamFn)(BarelyConductorState* state,
+                                          BarelyParamId id, float value);
+
+// TODO(#85): Add BarelyTransformNoteDurationFn.
+// TODO(#85): Add BarelyTransformNoteIntensityFn.
+// TODO(#85): Add BarelyTransformNotePitchFn.
+
+/// Conductor definition.
+typedef struct BarelyConductorDefinition {
+  /// Create function.
+  BarelyConductorCreateFn create_fn;
+
+  /// Destroy function.
+  BarelyConductorDestroyFn destroy_fn;
+
+  /// Set custom data function.
+  BarelyConductorSetCustomDataFn set_custom_data_fn;
+
+  /// Set parameter function.
+  BarelyConductorSetParamFn set_param_fn;
+
+  // TODO(#85): Add BarelyTransformNoteDurationFn.
+  // TODO(#85): Add BarelyTransformNoteIntensityFn.
+  // TODO(#85): Add BarelyTransformNotePitchFn.
+} BarelyConductorDefinition;
+
 /// Instrument state type.
 typedef void* BarelyInstrumentState;
 
@@ -186,10 +237,9 @@ typedef struct BarelyParamDefinition {
 
 /// Creates new BarelyMusician API.
 ///
-/// @param sample_rate Sampling rate in Hz.
 /// @param api Output BarelyMusician API.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyCreateApi(int32_t sample_rate, BarelyApi* api);
+BARELY_EXPORT BarelyStatus BarelyCreateApi(BarelyApi* api);
 
 /// Creates new instrument.
 ///
@@ -217,6 +267,34 @@ BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi api);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
                                                    BarelyId instrument_id);
+
+/// Gets all conductor parameters.
+///
+/// @param api BarelyMusician API.
+/// @param params_ptr Output list of parameters.
+/// @param num_params_ptr Output number of parameters.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetConductorAllParams(BarelyApi api,
+                                                       BarelyParam** params_ptr,
+                                                       int32_t* num_params_ptr);
+
+/// Gets conductor parameter value.
+///
+/// @param api BarelyMusician API.
+/// @param param_id Parameter identifier.
+/// @param param_value_ptr Output parameter value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyGetConductorParam(BarelyApi api,
+                                                   BarelyParamId param_id,
+                                                   float* param_value_ptr);
+
+/// Gets conductor root note.
+///
+/// @param api BarelyMusician API.
+/// @param root_note_pitch_ptr Output root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyGetConductorRootNote(BarelyApi api, float* root_note_pitch_ptr);
 
 /// Gets all active instrument notes.
 ///
@@ -334,6 +412,58 @@ BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelySetAllInstrumentsAllParamsToDefault(BarelyApi api);
+
+// TODO(#85): Verify the function signature to set the conductor properties.
+/// Sets conductor.
+///
+/// @param api BarelyMusician API.
+/// @param definition Conductor definition.
+/// @param param_definitions List of conductor parameter definitions.
+/// @param num_param_definitions Number of conductor parameter definitions.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetConductor(
+    BarelyApi api, BarelyConductorDefinition definition,
+    BarelyParamDefinition* param_definitions, int32_t num_param_definitions);
+
+/// Sets all conductor parameters to default value.
+///
+/// @param api BarelyMusician API.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetConductorAllParamsToDefault(BarelyApi api);
+
+/// Sets custom conductor data.
+///
+/// @param api BarelyMusician API.
+/// @param custom_data Custom data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetConductorCustomData(BarelyApi api,
+                                                        void* custom_data);
+
+/// Sets conductor parameter value.
+///
+/// @param api BarelyMusician API.
+/// @param param_id Parameter identifier.
+/// @param param_value Parameter value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetConductorParam(BarelyApi api,
+                                                   BarelyParamId param_id,
+                                                   float param_value);
+
+/// Sets conductor parameter to default value.
+///
+/// @param api BarelyMusician API.
+/// @param param_id Parameter identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySetConductorParamToDefault(BarelyApi api, BarelyParamId param_id);
+
+/// Sets conductor root note.
+///
+/// @param api BarelyMusician API.
+/// @param root_note_pitch Root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetConductorRootNote(BarelyApi api,
+                                                      float root_note_pitch);
 
 /// Sets all instrument parameters to default value.
 ///

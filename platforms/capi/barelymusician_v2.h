@@ -406,12 +406,43 @@ BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
     BarelyApi api, BarelyId instrument_id, double timestamp, float* output,
     int32_t num_output_channels, int32_t num_output_frames);
 
-/// Sets all parameters of all instruments to default value.
+/// Resets all parameters of all instruments to default value.
 ///
 /// @param api BarelyMusician API.
 /// @return Status.
+BARELY_EXPORT BarelyStatus BarelyResetAllInstrumentsAllParams(BarelyApi api);
+
+/// Resets all conductor parameters to default value.
+///
+/// @param api BarelyMusician API.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyResetConductorAllParams(BarelyApi api);
+
+/// Resets conductor parameter to default value.
+///
+/// @param api BarelyMusician API.
+/// @param param_id Parameter identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyResetConductorParam(BarelyApi api,
+                                                     BarelyParamId param_id);
+
+/// Resets all instrument parameters to default value.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelySetAllInstrumentsAllParamsToDefault(BarelyApi api);
+BarelyResetInstrumentAllParams(BarelyApi api, BarelyId instrument_id);
+
+/// Resets instrument parameter to default value.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param param_id Parameter identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyResetInstrumentParam(BarelyApi api,
+                                                      BarelyId instrument_id,
+                                                      BarelyParamId param_id);
 
 // TODO(#85): Verify the function signature to set the conductor properties.
 /// Sets conductor.
@@ -424,12 +455,6 @@ BarelySetAllInstrumentsAllParamsToDefault(BarelyApi api);
 BARELY_EXPORT BarelyStatus BarelySetConductor(
     BarelyApi api, BarelyConductorDefinition definition,
     BarelyParamDefinition* param_definitions, int32_t num_param_definitions);
-
-/// Sets all conductor parameters to default value.
-///
-/// @param api BarelyMusician API.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetConductorAllParamsToDefault(BarelyApi api);
 
 /// Sets custom conductor data.
 ///
@@ -449,14 +474,6 @@ BARELY_EXPORT BarelyStatus BarelySetConductorParam(BarelyApi api,
                                                    BarelyParamId param_id,
                                                    float param_value);
 
-/// Sets conductor parameter to default value.
-///
-/// @param api BarelyMusician API.
-/// @param param_id Parameter identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySetConductorParamToDefault(BarelyApi api, BarelyParamId param_id);
-
 /// Sets conductor root note.
 ///
 /// @param api BarelyMusician API.
@@ -464,14 +481,6 @@ BarelySetConductorParamToDefault(BarelyApi api, BarelyParamId param_id);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetConductorRootNote(BarelyApi api,
                                                       float root_note_pitch);
-
-/// Sets all instrument parameters to default value.
-///
-/// @param api BarelyMusician API.
-/// @param instrument_id Instrument identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySetInstrumentAllParamsToDefault(BarelyApi api, BarelyId instrument_id);
 
 /// Sets custom instrument data.
 ///
@@ -521,15 +530,6 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyApi api,
                                                     BarelyId instrument_id,
                                                     BarelyParamId param_id,
                                                     float param_value);
-
-/// Sets instrument parameter to default value.
-///
-/// @param api BarelyMusician API.
-/// @param instrument_id Instrument identifier.
-/// @param param_id Parameter identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
-    BarelyApi api, BarelyId instrument_id, BarelyParamId param_id);
 
 /// Sets the playback position.
 ///

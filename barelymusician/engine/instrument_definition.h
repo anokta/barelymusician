@@ -24,7 +24,7 @@ using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;
 /// Instrument process function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param output Pointer to output buffer.
+/// @param output Output buffer.
 /// @param num_channels Number of channels.
 /// @param num_frames Number of frames.
 using ProcessInstrumentFn = std::function<void(

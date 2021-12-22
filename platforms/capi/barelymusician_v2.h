@@ -150,7 +150,7 @@ typedef void (*BarelyInstrumentDestroyFn)(BarelyInstrumentState* state);
 /// Instrument process function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param output Pointer to output buffer.
+/// @param output Output buffer.
 /// @param num_channels Number of channels.
 /// @param num_frames Number of frames.
 typedef void (*BarelyInstrumentProcessFn)(BarelyInstrumentState* state,
@@ -398,7 +398,7 @@ BARELY_EXPORT BarelyStatus BarelyIsPlaybackActive(BarelyApi api,
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument identifier.
 /// @param timestamp Timestamp in seconds.
-/// @param output Pointer to output buffer.
+/// @param output Output buffer.
 /// @param num_output_channels Number of output channels.
 /// @param num_output_frames Number of output frames.
 /// @return Status.

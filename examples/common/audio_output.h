@@ -12,7 +12,7 @@ class AudioOutput {
  public:
   /// Audio process callback signature.
   ///
-  /// @param output Pointer to output buffer.
+  /// @param output Output buffer.
   using ProcessCallback = std::function<void(float* output)>;
 
   /// Constructs new |AudioOutput|.

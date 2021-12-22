@@ -28,7 +28,7 @@ class GenericInstrument {
 
   /// Processes the next |output| buffer.
   ///
-  /// @param output Pointer to the output buffer.
+  /// @param output Output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   virtual void Process(float* output, int num_channels,

@@ -133,7 +133,7 @@ class Musician {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param output Pointer to the output buffer.
+  /// @param output Output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   void ProcessInstrument(Id instrument_id, double timestamp, float* output,

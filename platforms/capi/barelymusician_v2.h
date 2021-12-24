@@ -32,6 +32,36 @@ extern "C" {
 /// BarelyMusician API type.
 typedef struct BarelyMusician* BarelyApi;
 
+/// Identifier type.
+typedef int64_t BarelyId;
+
+/// Parameter identifier type.
+typedef int32_t BarelyParamId;
+
+/// Parameter.
+typedef struct BarelyParam {
+  /// Identifier.
+  BarelyParamId id;
+
+  /// Value.
+  float value;
+} BarelyParam;
+
+/// Parameter definition.
+typedef struct BarelyParamDefinition {
+  /// Identifier.
+  BarelyParamId id;
+
+  /// Default value.
+  float default_value;
+
+  /// Minimum value.
+  float min_value;
+
+  /// Maximum value.
+  float max_value;
+} BarelyParamDefinition;
+
 /// Status type.
 typedef int32_t BarelyStatus;
 
@@ -54,12 +84,6 @@ enum BarelyStatusValues {
   /// Unknown error.
   kBarelyStatus_Unknown = 7,
 };
-
-/// Identifier type.
-typedef int64_t BarelyId;
-
-/// Parameter identifier type.
-typedef int32_t BarelyParamId;
 
 /// Instrument note off callback signature.
 ///
@@ -211,30 +235,6 @@ typedef struct BarelyInstrumentDefinition {
   BarelyInstrumentSetParamFn set_param_fn;
 } BarelyInstrumentDefinition;
 
-/// Parameter.
-typedef struct BarelyParam {
-  /// Identifier.
-  BarelyParamId id;
-
-  /// Value.
-  float value;
-} BarelyParam;
-
-/// Parameter definition.
-typedef struct BarelyParamDefinition {
-  /// Identifier.
-  BarelyParamId id;
-
-  /// Default value.
-  float default_value;
-
-  /// Minimum value.
-  float min_value;
-
-  /// Maximum value.
-  float max_value;
-} BarelyParamDefinition;
-
 /// Creates new BarelyMusician API.
 ///
 /// @param api Output BarelyMusician API.
@@ -254,6 +254,14 @@ BARELY_EXPORT BarelyStatus BarelyCreateInstrument(
     BarelyParamDefinition* param_definitions, int32_t num_param_definitions,
     BarelyId* instrument_id_ptr);
 
+/// Creates new sequence.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id_ptr Output sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyCreateSequence(BarelyApi api,
+                                                BarelyId* sequence_id_ptr);
+
 /// Destroys BarelyMusician API.
 ///
 /// @param api BarelyMusician API.
@@ -267,6 +275,14 @@ BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi api);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
                                                    BarelyId instrument_id);
+
+/// Destroys sequence.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyDestroySequence(BarelyApi api,
+                                                 BarelyId sequence_id);
 
 /// Gets all conductor parameters.
 ///
@@ -572,13 +588,13 @@ BARELY_EXPORT BarelyStatus BarelyStartInstrumentNote(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyStartPlayback(BarelyApi api);
 
-/// Stops all notes of all instruments.
+/// Stops all active notes of all instruments.
 ///
 /// @param api BarelyMusician API.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyStopAllInstrumentsAllNotes(BarelyApi api);
 
-/// Stops all instrument notes.
+/// Stops all active instrument notes.
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument identifier.

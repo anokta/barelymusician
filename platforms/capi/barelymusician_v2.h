@@ -35,6 +35,30 @@ typedef struct BarelyMusician* BarelyApi;
 /// Identifier type.
 typedef int64_t BarelyId;
 
+// TODO(#85): Make this a variant type.
+/// Note duration type.
+typedef double BarelyNoteDuration;
+
+// TODO(#85): Make this a variant type.
+/// Note intensity type.
+typedef float BarelyNoteIntensity;
+
+// TODO(#85): Make this a variant type.
+/// Note pitch type.
+typedef float BarelyNotePitch;
+
+/// Note type.
+typedef struct BarelyNote {
+  /// Pitch.
+  BarelyNotePitch pitch;
+
+  /// Intensity.
+  BarelyNoteIntensity intensity;
+
+  /// Duration.
+  BarelyNoteDuration duration;
+} BarelyNote;
+
 /// Parameter identifier type.
 typedef int32_t BarelyParamId;
 
@@ -134,14 +158,41 @@ typedef void (*BarelyConductorSetCustomDataFn)(BarelyConductorState* state,
 /// Conductor set parameter function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param id Parameter identifier.
-/// @param value Parameter value.
+/// @param param_id Parameter identifier.
+/// @param param_value Parameter value.
 typedef void (*BarelyConductorSetParamFn)(BarelyConductorState* state,
-                                          BarelyParamId id, float value);
+                                          BarelyParamId param_id,
+                                          float param_value);
 
-// TODO(#85): Add BarelyTransformNoteDurationFn.
-// TODO(#85): Add BarelyTransformNoteIntensityFn.
-// TODO(#85): Add BarelyTransformNotePitchFn.
+/// Conductor transform note duration function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param note_duration Note duration.
+/// @param out_raw_note_duration Output raw note duration.
+/// @return Status.
+typedef BarelyStatus (*BarelyConductorTransformNoteDurationFn)(
+    BarelyConductorState* state, BarelyNoteDuration note_duration,
+    double* out_raw_note_duration);
+
+/// Conductor transform note intensity function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param note_intensity Note intensity.
+/// @param out_raw_note_intensity Output raw note intensity.
+/// @return Status.
+typedef BarelyStatus (*BarelyConductorTransformNoteIntensityFn)(
+    BarelyConductorState* state, BarelyNoteIntensity note_intensity,
+    float* out_raw_note_intensity);
+
+/// Conductor transform note pitch function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param note_pitch Note pitch.
+/// @param out_raw_note_pitch Output raw note pitch.
+/// @return Status.
+typedef BarelyStatus (*BarelyConductorTransformNotePitchFn)(
+    BarelyConductorState* state, BarelyNotePitch note_pitch,
+    float* out_raw_note_pitch);
 
 /// Conductor definition.
 typedef struct BarelyConductorDefinition {
@@ -157,9 +208,14 @@ typedef struct BarelyConductorDefinition {
   /// Set parameter function.
   BarelyConductorSetParamFn set_param_fn;
 
-  // TODO(#85): Add BarelyTransformNoteDurationFn.
-  // TODO(#85): Add BarelyTransformNoteIntensityFn.
-  // TODO(#85): Add BarelyTransformNotePitchFn.
+  /// Transform note duration function.
+  BarelyConductorTransformNoteDurationFn transform_note_duration_fn;
+
+  /// Transform note intensity function.
+  BarelyConductorTransformNoteIntensityFn transform_note_intensity_fn;
+
+  /// Transform note pitch function.
+  BarelyConductorTransformNotePitchFn transform_note_pitch_fn;
 } BarelyConductorDefinition;
 
 /// Instrument state type.
@@ -181,11 +237,12 @@ typedef void (*BarelyInstrumentDestroyFn)(BarelyInstrumentState* state);
 ///
 /// @param state Pointer to instrument state.
 /// @param output Output buffer.
-/// @param num_channels Number of channels.
-/// @param num_frames Number of frames.
+/// @param num_output_channels Number of channels.
+/// @param num_output_frames Number of frames.
 typedef void (*BarelyInstrumentProcessFn)(BarelyInstrumentState* state,
-                                          float* output, int32_t num_channels,
-                                          int32_t num_frames);
+                                          float* output,
+                                          int32_t num_output_channels,
+                                          int32_t num_output_frames);
 
 /// Instrument set custom data function signature.
 ///
@@ -197,25 +254,27 @@ typedef void (*BarelyInstrumentSetCustomDataFn)(BarelyInstrumentState* state,
 /// Instrument set note off function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param pitch Note pitch.
+/// @param note_pitch Note pitch.
 typedef void (*BarelyInstrumentSetNoteOffFn)(BarelyInstrumentState* state,
-                                             float pitch);
+                                             float note_pitch);
 
 /// Instrument set note on function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
+/// @param note_pitch Note pitch.
+/// @param note_intensity Note intensity.
 typedef void (*BarelyInstrumentSetNoteOnFn)(BarelyInstrumentState* state,
-                                            float pitch, float intensity);
+                                            float note_pitch,
+                                            float note_intensity);
 
 /// Instrument set parameter function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param id Parameter identifier.
-/// @param value Parameter value.
+/// @param param_id Parameter identifier.
+/// @param param_value Parameter value.
 typedef void (*BarelyInstrumentSetParamFn)(BarelyInstrumentState* state,
-                                           BarelyParamId id, float value);
+                                           BarelyParamId param_id,
+                                           float param_value);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -510,6 +569,16 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentGetParam(BarelyApi api,
                                                     BarelyParamId param_id,
                                                     float* out_param_value);
 
+/// Gets whether instrument is muted or not.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param out_is_muted Output true if muted, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrumentIsMuted(BarelyApi api,
+                                                   BarelyId instrument_id,
+                                                   float* out_is_muted);
+
 /// Gets whether instrument note is active or not.
 ///
 /// @param api BarelyMusician API.
@@ -570,6 +639,16 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentSetCustomData(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyInstrumentSetGain(BarelyApi api,
                                                    BarelyId instrument_id,
                                                    float gain);
+
+/// Sets whether instrument should be muted or not.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param is_muted True if muted, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrumentSetMuted(BarelyApi api,
+                                                    BarelyId instrument_id,
+                                                    bool is_muted);
 
 /// Stops instrument note.
 ///

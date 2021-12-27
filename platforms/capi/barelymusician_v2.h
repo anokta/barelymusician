@@ -47,7 +47,7 @@ typedef float BarelyNoteIntensity;
 /// Note pitch type.
 typedef float BarelyNotePitch;
 
-/// Note type.
+/// Note.
 typedef struct BarelyNote {
   /// Pitch.
   BarelyNotePitch pitch;
@@ -59,14 +59,8 @@ typedef struct BarelyNote {
   BarelyNoteDuration duration;
 } BarelyNote;
 
-/// Parameter identifier type.
-typedef int32_t BarelyParamId;
-
 /// Parameter definition.
 typedef struct BarelyParamDefinition {
-  /// Identifier.
-  BarelyParamId id;
-
   /// Default value.
   float default_value;
 
@@ -149,10 +143,10 @@ typedef void (*BarelyConductorSetCustomDataFn)(BarelyConductorState* state,
 /// Conductor set parameter function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @param param_value Parameter value.
 typedef void (*BarelyConductorSetParamFn)(BarelyConductorState* state,
-                                          BarelyParamId param_id,
+                                          int32_t param_index,
                                           float param_value);
 
 /// Conductor transform note duration function signature.
@@ -267,10 +261,10 @@ typedef void (*BarelyInstrumentSetNoteOnFn)(BarelyInstrumentState* state,
 /// Instrument set parameter function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @param param_value Parameter value.
 typedef void (*BarelyInstrumentSetParamFn)(BarelyInstrumentState* state,
-                                           BarelyParamId param_id,
+                                           int32_t param_index,
                                            float param_value);
 
 /// Instrument definition.
@@ -426,11 +420,11 @@ BARELY_EXPORT BarelyStatus BarelyConductorGetEnergy(BarelyApi api,
 /// Gets conductor parameter value.
 ///
 /// @param api BarelyMusician API.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @param out_param_value Output parameter value.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyConductorGetParam(BarelyApi api,
-                                                   BarelyParamId param_id,
+                                                   int32_t param_index,
                                                    float* out_param_value);
 
 /// Gets conductor root note.
@@ -482,20 +476,20 @@ BARELY_EXPORT BarelyStatus BarelyConductorSetEnergy(BarelyApi api,
 /// Sets conductor parameter value.
 ///
 /// @param api BarelyMusician API.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @param param_value Parameter value.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyConductorSetParam(BarelyApi api,
-                                                   BarelyParamId param_id,
+                                                   int32_t param_index,
                                                    float param_value);
 
 /// Resets conductor parameter to default value.
 ///
 /// @param api BarelyMusician API.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelyConductorSetParamToDefault(BarelyApi api, BarelyParamId param_id);
+BarelyConductorSetParamToDefault(BarelyApi api, int32_t param_index);
 
 /// Sets conductor root note.
 ///
@@ -544,12 +538,12 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentGetGain(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument identifier.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @param out_param_value Output parameter value.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrumentGetParam(BarelyApi api,
                                                     BarelyId instrument_id,
-                                                    BarelyParamId param_id,
+                                                    int32_t param_index,
                                                     float* out_param_value);
 
 /// Gets whether instrument is muted or not.
@@ -659,22 +653,22 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentSetNoteOn(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument identifier.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @param param_value Parameter value.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrumentSetParam(BarelyApi api,
                                                     BarelyId instrument_id,
-                                                    BarelyParamId param_id,
+                                                    int32_t param_index,
                                                     float param_value);
 
 /// Resets instrument parameter to default value.
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument identifier.
-/// @param param_id Parameter identifier.
+/// @param param_index Parameter index.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrumentSetParamToDefault(
-    BarelyApi api, BarelyId instrument_id, BarelyParamId param_id);
+    BarelyApi api, BarelyId instrument_id, int32_t param_index);
 
 /// Creates new sequence.
 ///

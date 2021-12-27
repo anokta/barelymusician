@@ -44,9 +44,6 @@ class Param {
   float value_;
 };
 
-/// Parameter by id map type.
-using ParamMap = std::unordered_map<int, Param>;
-
 }  // namespace barely
 
 #endif  // BARELYMUSICIAN_ENGINE_PARAM_H_

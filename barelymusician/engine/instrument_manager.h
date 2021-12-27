@@ -58,18 +58,6 @@ class InstrumentManager {
              InstrumentDefinition definition,
              ParamDefinitionMap param_definitions) noexcept;
 
-  /// Returns all active instrument notes.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return List of active note pitches or error status.
-  StatusOr<std::vector<float>> GetAllNotes(Id instrument_id) const noexcept;
-
-  /// Returns all instrument parameters.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return Parameters or error status.
-  StatusOr<ParamMap> GetAllParams(Id instrument_id) const noexcept;
-
   /// Returns instrument parameter.
   ///
   /// @param instrument_id Instrument id.
@@ -216,7 +204,7 @@ class InstrumentManager {
     InstrumentDefinition definition;
 
     // Instrument parameters.
-    ParamMap params;
+    std::unordered_map<int, Param> params;
 
     // List of active note pitches.
     std::unordered_set<float> pitches;

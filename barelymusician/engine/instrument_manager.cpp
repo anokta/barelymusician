@@ -60,23 +60,6 @@ Status InstrumentManager::Add(Id instrument_id, double timestamp,
   return Status::kAlreadyExists;
 }
 
-StatusOr<std::vector<float>> InstrumentManager::GetAllNotes(
-    Id instrument_id) const noexcept {
-  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return std::vector<float>(controller->pitches.cbegin(),
-                              controller->pitches.cend());
-  }
-  return Status::kNotFound;
-}
-
-StatusOr<ParamMap> InstrumentManager::GetAllParams(
-    Id instrument_id) const noexcept {
-  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    return controller->params;
-  }
-  return Status::kNotFound;
-}
-
 StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
                                             int param_id) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {

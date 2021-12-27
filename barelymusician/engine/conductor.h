@@ -107,7 +107,7 @@ class Conductor {
   ConductorState state_;
 
   // Conductor parameters.
-  ParamMap params_;
+  std::unordered_map<int, Param> params_;
 };
 
 }  // namespace barely

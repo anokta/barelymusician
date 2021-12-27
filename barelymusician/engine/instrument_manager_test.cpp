@@ -15,9 +15,7 @@
 namespace barely {
 namespace {
 
-using ::testing::Pair;
 using ::testing::Property;
-using ::testing::UnorderedElementsAre;
 
 constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
@@ -71,11 +69,6 @@ TEST(InstrumentManagerTest, AddRemove) {
                                           GetTestParamDefinitions())));
   EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
 
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-              UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
-
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
                              kNumFrames);
@@ -88,9 +81,8 @@ TEST(InstrumentManagerTest, AddRemove) {
   // Set note on.
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 0.0, kNotePitch,
                                                 kNoteIntensity)));
-
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre(kNotePitch));
+  EXPECT_TRUE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
 
   instrument_manager.Update();
 
@@ -108,11 +100,6 @@ TEST(InstrumentManagerTest, AddRemove) {
   EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
   EXPECT_TRUE(IsOk(instrument_manager.Remove(kInstrumentId, 0.0)));
   EXPECT_FALSE(instrument_manager.IsValid(kInstrumentId));
-
-  EXPECT_EQ(GetStatusOrStatus(instrument_manager.GetAllNotes(kInstrumentId)),
-            Status::kNotFound);
-  EXPECT_EQ(GetStatusOrStatus(instrument_manager.GetAllParams(kInstrumentId)),
-            Status::kNotFound);
 
   instrument_manager.Update();
 
@@ -152,15 +139,17 @@ TEST(InstrumentManagerTest, ProcessEvents) {
   for (const float note_pitch : {1.0f, 2.0f, 3.0f}) {
     instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
                                     SetNoteOnEvent{note_pitch, 1.0f});
+    EXPECT_TRUE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(kInstrumentId, note_pitch)));
   }
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre(1.0f, 2.0f, 3.0f));
 
   // Set all notes off.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
                                   SetAllNotesOffEvent{});
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
+  for (const float note_pitch : {1.0f, 2.0f, 3.0f}) {
+    EXPECT_FALSE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(kInstrumentId, note_pitch)));
+  }
 
   // Set parameter value.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
@@ -328,9 +317,6 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
                                             GetTestParamDefinitions())));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
 
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(instrument_id)),
-                UnorderedElementsAre());
-
     instrument_manager.Update();
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -350,9 +336,8 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
     EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(instrument_id, 0.0,
                                                   note_pitch, kNoteIntensity)));
-
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(instrument_id)),
-                UnorderedElementsAre(note_pitch));
+    EXPECT_TRUE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(instrument_id, note_pitch)));
 
     instrument_manager.Update();
 
@@ -374,9 +359,10 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
+    const float note_pitch = static_cast<float>(i);
 
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(instrument_id)),
-                UnorderedElementsAre());
+    EXPECT_FALSE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(instrument_id, note_pitch)));
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
     instrument_manager.Process(instrument_id, 0.0, buffer.data(), kNumChannels,
@@ -405,10 +391,8 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
                                             GetTestInstrumentDefinition(),
                                             GetTestParamDefinitions())));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
-
-    EXPECT_THAT(
-        GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 1)),
+                Property(&Param::GetValue, 0.0f));
 
     instrument_manager.Update();
 
@@ -429,10 +413,8 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
 
     EXPECT_TRUE(
         IsOk(instrument_manager.SetParam(instrument_id, 0.0, 1, param_value)));
-
-    EXPECT_THAT(
-        GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, param_value))));
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 1)),
+                Property(&Param::GetValue, param_value));
 
     instrument_manager.Update();
 
@@ -454,9 +436,8 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
 
-    EXPECT_THAT(
-        GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 1)),
+                Property(&Param::GetValue, 0.0f));
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
     instrument_manager.Process(instrument_id, 0.0, buffer.data(), kNumChannels,
@@ -571,11 +552,6 @@ TEST(InstrumentManagerTest, SetSampleRate) {
                                           GetTestInstrumentDefinition(),
                                           GetTestParamDefinitions())));
 
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-              UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
-
   instrument_manager.Update();
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -590,17 +566,15 @@ TEST(InstrumentManagerTest, SetSampleRate) {
   // Set note on.
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 0.0, kNotePitch,
                                                 kNoteIntensity)));
-
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre(kNotePitch));
+  EXPECT_TRUE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
 
   // Set parameter.
   EXPECT_TRUE(
       IsOk(instrument_manager.SetParam(kInstrumentId, 0.0, 1, kParamValue)));
 
-  EXPECT_THAT(
-      GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-      UnorderedElementsAre(Pair(1, Property(&Param::GetValue, kParamValue))));
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1)),
+              Property(&Param::GetValue, kParamValue));
 
   instrument_manager.Update();
 
@@ -616,11 +590,10 @@ TEST(InstrumentManagerTest, SetSampleRate) {
   // Update sampling rate.
   instrument_manager.SetSampleRate(0.0, 2);
 
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
-  EXPECT_THAT(
-      GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-      UnorderedElementsAre(Pair(1, Property(&Param::GetValue, kParamValue))));
+  EXPECT_FALSE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1)),
+              Property(&Param::GetValue, kParamValue));
 
   instrument_manager.Update();
 

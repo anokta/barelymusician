@@ -62,15 +62,6 @@ typedef struct BarelyNote {
 /// Parameter identifier type.
 typedef int32_t BarelyParamId;
 
-/// Parameter.
-typedef struct BarelyParam {
-  /// Identifier.
-  BarelyParamId id;
-
-  /// Value.
-  float value;
-} BarelyParam;
-
 /// Parameter definition.
 typedef struct BarelyParamDefinition {
   /// Identifier.
@@ -216,6 +207,12 @@ typedef struct BarelyConductorDefinition {
 
   /// Transform note pitch function.
   BarelyConductorTransformNotePitchFn transform_note_pitch_fn;
+
+  /// Number of parameter definitions.
+  int32_t num_param_definitions;
+
+  /// List of parameter definitions.
+  BarelyParamDefinition* param_definitions;
 } BarelyConductorDefinition;
 
 /// Instrument state type.
@@ -298,6 +295,12 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Set parameter function.
   BarelyInstrumentSetParamFn set_param_fn;
+
+  /// Number of parameter definitions.
+  int32_t num_param_definitions;
+
+  /// List of parameter definitions.
+  BarelyParamDefinition* param_definitions;
 } BarelyInstrumentDefinition;
 
 /// Creates new BarelyMusician API.
@@ -425,16 +428,6 @@ BARELY_EXPORT BarelyStatus BarelyApiStopPlayback(BarelyApi api);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApiUpdate(BarelyApi api, double timestamp);
 
-/// Gets all conductor parameters.
-///
-/// @param api BarelyMusician API.
-/// @param out_params Output list of parameters.
-/// @param out_num_params Output number of parameters.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductorGetAllParams(BarelyApi api,
-                                                       BarelyParam** out_params,
-                                                       int32_t* out_num_params);
-
 /// Gets conductor parameter value.
 ///
 /// @param api BarelyMusician API.
@@ -471,12 +464,9 @@ BARELY_EXPORT BarelyStatus BarelyConductorSetCustomData(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param definition Conductor definition.
-/// @param param_definitions List of conductor parameter definitions.
-/// @param num_param_definitions Number of conductor parameter definitions.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyConductorSetDefinition(
-    BarelyApi api, BarelyConductorDefinition definition,
-    BarelyParamDefinition* param_definitions, int32_t num_param_definitions);
+    BarelyApi api, BarelyConductorDefinition definition);
 
 /// Sets conductor parameter value.
 ///
@@ -508,14 +498,11 @@ BARELY_EXPORT BarelyStatus BarelyConductorSetRootNote(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param definition Instrument definition.
-/// @param param_definitions List of instrument parameter definitions.
-/// @param num_param_definitions Number of instrument parameter definitions.
 /// @param out_instrument_id Output instrument identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrumentCreate(
-    BarelyApi api, BarelyInstrumentDefinition definition,
-    BarelyParamDefinition* param_definitions, int32_t num_param_definitions,
-    BarelyId* out_instrument_id);
+BARELY_EXPORT BarelyStatus
+BarelyInstrumentCreate(BarelyApi api, BarelyInstrumentDefinition definition,
+                       BarelyId* out_instrument_id);
 
 /// Destroys instrument.
 ///
@@ -524,29 +511,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentCreate(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrumentDestroy(BarelyApi api,
                                                    BarelyId instrument_id);
-
-/// Gets all active instrument notes.
-///
-/// @param api BarelyMusician API.
-/// @param instrument_id Instrument identifier.
-/// @param out_note_pitches Output list of note pitches.
-/// @param out_num_note_pitches Output number of note pitches.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrumentGetAllNotes(
-    BarelyApi api, BarelyId instrument_id, float** out_note_pitches,
-    int32_t* out_num_note_pitches);
-
-/// Gets all instrument parameters.
-///
-/// @param api BarelyMusician API.
-/// @param instrument_id Instrument identifier.
-/// @param out_params Output list of parameters.
-/// @param out_num_params Output number of parameters.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrumentGetAllParams(BarelyApi api, BarelyId instrument_id,
-                             BarelyParam** out_params, int32_t* out_num_params);
-
 /// Gets instrument gain.
 ///
 /// @param api BarelyMusician API.

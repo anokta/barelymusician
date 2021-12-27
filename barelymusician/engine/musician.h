@@ -185,18 +185,12 @@ class Musician {
   /// @param note_id Note id.
   /// @return Status.
   Status RemovePerformerNote(Id performer_id, Id note_id) noexcept;
-
-  /// Sets all notes of all instruments off.
-  void SetAllInstrumentNotesOff() noexcept;
-
+  
   /// Sets all instrument notes off.
   ///
   /// @param instrument_id Instrument id.
   /// @return Status.
   Status SetAllInstrumentNotesOff(Id instrument_id) noexcept;
-
-  /// Sets all parameters of all instruments to default.
-  void SetAllInstrumentParamsToDefault() noexcept;
 
   /// Sets all instrument parameters to default.
   ///

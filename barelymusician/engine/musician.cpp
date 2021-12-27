@@ -240,17 +240,9 @@ Status Musician::RemovePerformerNote(Id performer_id, Id note_id) noexcept {
   return Status::kNotFound;
 }
 
-void Musician::SetAllInstrumentNotesOff() noexcept {
-  instrument_manager_.SetAllNotesOff(transport_.GetTimestamp());
-}
-
 Status Musician::SetAllInstrumentNotesOff(Id instrument_id) noexcept {
   return instrument_manager_.SetAllNotesOff(instrument_id,
                                             transport_.GetTimestamp());
-}
-
-void Musician::SetAllInstrumentParamsToDefault() noexcept {
-  instrument_manager_.SetAllParamsToDefault(transport_.GetTimestamp());
 }
 
 Status Musician::SetAllInstrumentParamsToDefault(Id instrument_id) noexcept {

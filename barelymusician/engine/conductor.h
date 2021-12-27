@@ -2,7 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 
 #include <any>
-#include <unordered_map>
+#include <vector>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
@@ -21,8 +21,9 @@ class Conductor {
   ///
   /// @param definition Conductor definition.
   /// @param param_definitions Conductor parameter definitions.
-  explicit Conductor(ConductorDefinition definition = {},
-                     ParamDefinitionMap param_definitions = {}) noexcept;
+  explicit Conductor(
+      ConductorDefinition definition = {},
+      std::vector<ParamDefinition> param_definitions = {}) noexcept;
 
   /// Destroys |Conductor|.
   ~Conductor() noexcept;
@@ -107,7 +108,7 @@ class Conductor {
   ConductorState state_;
 
   // Conductor parameters.
-  std::unordered_map<int, Param> params_;
+  std::vector<Param> params_;
 };
 
 }  // namespace barely

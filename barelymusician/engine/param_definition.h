@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_ENGINE_PARAM_DEFINITION_H_
 
 #include <optional>
-#include <unordered_map>
 #include <utility>
 
 namespace barely {
@@ -54,9 +53,6 @@ struct ParamDefinition {
   /// Parameter maximum value.
   std::optional<float> max_value;
 };
-
-/// Parameter definition by id map type.
-using ParamDefinitionMap = std::unordered_map<int, ParamDefinition>;
 
 }  // namespace barely
 

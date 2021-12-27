@@ -32,7 +32,7 @@ class DrumkitInstrument : public GenericInstrument {
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
-  static ParamDefinitionMap GetParamDefinitions() noexcept;
+  static std::vector<ParamDefinition> GetParamDefinitions() noexcept;
 
  private:
   struct DrumkitPad {

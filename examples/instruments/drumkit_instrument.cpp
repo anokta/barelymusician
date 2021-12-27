@@ -64,11 +64,11 @@ InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
       [](int sample_rate) { return DrumkitInstrument(sample_rate); });
 }
 
-ParamDefinitionMap DrumkitInstrument::GetParamDefinitions() noexcept {
-  return {
-      {DrumkitInstrumentParam::kPadGain, ParamDefinition{0.5f, 0.0f, 1.0f}},
-      {DrumkitInstrumentParam::kPadRelease, ParamDefinition{0.1f, 0.0f}},
-  };
+std::vector<ParamDefinition> DrumkitInstrument::GetParamDefinitions() noexcept {
+  return {// Pad gain.
+          ParamDefinition{0.5f, 0.0f, 1.0f},
+          // Pad release.
+          ParamDefinition{0.1f, 0.0f}};
 }
 
 }  // namespace barely::examples

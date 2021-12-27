@@ -4,6 +4,7 @@
 
 #include <any>
 #include <optional>
+#include <vector>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
@@ -22,7 +23,6 @@ using ::barely::IsOk;
 using ::barely::Musician;
 using ::barely::Note;
 using ::barely::ParamDefinition;
-using ::barely::ParamDefinitionMap;
 using ::barely::Status;
 using ::barely::StatusOr;
 using ::barely::examples::SynthInstrument;
@@ -77,9 +77,9 @@ InstrumentDefinition GetInstrumentDefinition(
   }
   if (definition.set_param_fn) {
     result.set_param_fn = [set_param_fn = std::move(definition.set_param_fn)](
-                              InstrumentState* state, BarelyParamId id,
+                              InstrumentState* state, int32_t index,
                               float value) noexcept {
-      set_param_fn(std::any_cast<BarelyInstrumentState*>(&state), id, value);
+      set_param_fn(std::any_cast<BarelyInstrumentState*>(&state), index, value);
     };
   }
   return result;
@@ -95,12 +95,12 @@ ParamDefinition GetParamDefinition(
 
 // Returns the corresponding |ParamDefinitionMap| for a given
 // |param_definitions| of |num_param_definitions|.
-ParamDefinitionMap GetParamDefinitions(BarelyParamDefinition* param_definitions,
-                                       int32_t num_param_definitions) noexcept {
-  ParamDefinitionMap result;
+std::vector<ParamDefinition> GetParamDefinitions(
+    BarelyParamDefinition* param_definitions,
+    int32_t num_param_definitions) noexcept {
+  std::vector<ParamDefinition> result;
   for (int32_t i = 0; i < num_param_definitions; ++i) {
-    result.emplace(param_definitions[i].id,
-                   GetParamDefinition(param_definitions[i]));
+    result.emplace_back(GetParamDefinition(param_definitions[i]));
   }
   return result;
 }
@@ -471,21 +471,20 @@ BarelyStatus BarelySetInstrumentNoteOnCallback(
 }
 
 BarelyStatus BarelySetInstrumentParam(BarelyApi api, BarelyId instrument_id,
-                                      BarelyParamId param_id,
-                                      float param_value) {
+                                      int32_t param_index, float param_value) {
   if (api) {
-    return GetStatus(
-        api->instance.SetInstrumentParam(instrument_id, param_id, param_value));
+    return GetStatus(api->instance.SetInstrumentParam(
+        instrument_id, param_index, param_value));
   }
   return kBarelyStatus_NotFound;
 }
 
 BarelyStatus BarelySetInstrumentParamToDefault(BarelyApi api,
                                                BarelyId instrument_id,
-                                               BarelyParamId param_id) {
+                                               int32_t param_index) {
   if (api) {
     return GetStatus(
-        api->instance.SetInstrumentParamToDefault(instrument_id, param_id));
+        api->instance.SetInstrumentParamToDefault(instrument_id, param_index));
   }
   return kBarelyStatus_NotFound;
 }

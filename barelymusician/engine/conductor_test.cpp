@@ -2,6 +2,7 @@
 
 #include <any>
 #include <variant>
+#include <vector>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
@@ -20,8 +21,9 @@ ConductorDefinition GetTestConductorDefinition() {
       .create_fn = [](ConductorState* state) { state->emplace<float>(0.0f); },
       .destroy_fn = [](ConductorState* state) { state->reset(); },
       .set_param_fn =
-          [](ConductorState* state, int id, float value) {
-            *std::any_cast<float>(state) = static_cast<float>(id) * value;
+          [](ConductorState* state, int index, float value) {
+            *std::any_cast<float>(state) =
+                static_cast<float>(index + 1) * value;
           },
       .transform_note_duration_fn =
           [](ConductorState* state, const NoteDuration& note_duration) {
@@ -44,8 +46,8 @@ ConductorDefinition GetTestConductorDefinition() {
 }
 
 // Returns test conductor parameter definitions.
-ParamDefinitionMap GetTestParamDefinitions() {
-  return ParamDefinitionMap{{1, ParamDefinition{0.0f}}};
+std::vector<ParamDefinition> GetTestParamDefinitions() {
+  return {ParamDefinition{0.0f}};
 }
 
 // Tests that the conductor behaves as expected with an empty definition.
@@ -75,7 +77,7 @@ TEST(ConductorTest, TestDefinition) {
       GetStatusOrValue(conductor.TransformNotePitch(NotePitch{-0.4f})), -0.4f);
   EXPECT_DOUBLE_EQ(conductor.TransformPlaybackTempo(100.0), 100.0);
 
-  conductor.SetParam(1, 10.0f);
+  conductor.SetParam(0, 10.0f);
   EXPECT_DOUBLE_EQ(
       GetStatusOrValue(conductor.TransformNoteDuration(NoteDuration{5.0})),
       50.0);

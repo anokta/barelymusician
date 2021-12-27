@@ -136,17 +136,22 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Add instrument.
-    const Id instrument_id = musician.AddInstrument(
-        SynthInstrument::GetDefinition(),
-        {{SynthInstrumentParam::kNumVoices,
-          ParamDefinition{kNumInstrumentVoices}},
-         {SynthInstrumentParam::kOscillatorType,
-          ParamDefinition{static_cast<int>(kInstrumentOscillatorType)}},
-         {SynthInstrumentParam::kEnvelopeAttack,
-          ParamDefinition{kInstrumentEnvelopeAttack}},
-         {SynthInstrumentParam::kEnvelopeRelease,
-          ParamDefinition{kInstrumentEnvelopeRelease}},
-         {SynthInstrumentParam::kGain, ParamDefinition{kInstrumentGain}}});
+    const Id instrument_id =
+        musician.AddInstrument(SynthInstrument::GetDefinition(),
+                               SynthInstrument::GetParamDefinitions());
+    musician.SetInstrumentParam(instrument_id, SynthInstrumentParam::kGain,
+                                kInstrumentGain);
+    musician.SetInstrumentParam(instrument_id,
+                                SynthInstrumentParam::kEnvelopeAttack,
+                                kInstrumentEnvelopeAttack);
+    musician.SetInstrumentParam(instrument_id,
+                                SynthInstrumentParam::kEnvelopeRelease,
+                                kInstrumentEnvelopeRelease);
+    musician.SetInstrumentParam(instrument_id,
+                                SynthInstrumentParam::kOscillatorType,
+                                static_cast<float>(kInstrumentOscillatorType));
+    musician.SetInstrumentParam(instrument_id, SynthInstrumentParam::kNumVoices,
+                                static_cast<float>(kNumInstrumentVoices));
     musician.AddPerformerInstrument(performer_id, instrument_id);
     instrument_ids.push_back(instrument_id);
   }

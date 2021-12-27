@@ -57,13 +57,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Create metronome instrument.
   const auto metronome_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, ParamDefinition{kNumVoices}},
-       {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
-       {SynthInstrumentParam::kOscillatorType,
-        ParamDefinition{static_cast<int>(kOscillatorType)}},
-       {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
-       {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{kRelease}}});
+      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  musician.SetInstrumentParam(metronome_id,
+                              SynthInstrumentParam::kEnvelopeAttack, kAttack);
+  musician.SetInstrumentParam(metronome_id,
+                              SynthInstrumentParam::kEnvelopeRelease, kRelease);
+  musician.SetInstrumentParam(metronome_id,
+                              SynthInstrumentParam::kOscillatorType,
+                              static_cast<float>(kOscillatorType));
+  musician.SetInstrumentParam(metronome_id, SynthInstrumentParam::kNumVoices,
+                              static_cast<float>(kNumVoices));
 
   // Beat callback.
   const auto beat_callback = [&](double position) {

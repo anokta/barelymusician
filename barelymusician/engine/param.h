@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_PARAM_H_
 #define BARELYMUSICIAN_ENGINE_PARAM_H_
 
-#include <unordered_map>
-
 #include "barelymusician/engine/param_definition.h"
 
 namespace barely {

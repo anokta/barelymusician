@@ -23,7 +23,7 @@ void NoopSetInstrumentNoteOnFn(InstrumentState* /*state*/, float /*pitch*/,
                                float /*intensity*/) noexcept {}
 
 // Dummy set instrument parameter function that does nothing.
-void NoopSetInstrumentParamFn(InstrumentState* /*state*/, int /*id*/,
+void NoopSetInstrumentParamFn(InstrumentState* /*state*/, int /*index*/,
                               float /*value*/) noexcept {}
 
 // Process instrument function that fills the output buffer with zeros.
@@ -79,8 +79,8 @@ void Instrument::SetNoteOn(float pitch, float intensity) noexcept {
   set_note_on_fn_(&state_, pitch, intensity);
 }
 
-void Instrument::SetParam(int id, float value) noexcept {
-  set_param_fn_(&state_, id, value);
+void Instrument::SetParam(int index, float value) noexcept {
+  set_param_fn_(&state_, index, value);
 }
 
 }  // namespace barely

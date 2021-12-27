@@ -35,11 +35,11 @@ class SynthInstrument : public GenericInstrument {
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
   void SetCustomData(std::any /*data*/) noexcept override {}
-  void SetParam(int id, float value) noexcept override;
+  void SetParam(int index, float value) noexcept override;
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
-  static ParamDefinitionMap GetParamDefinitions() noexcept;
+  static std::vector<ParamDefinition> GetParamDefinitions() noexcept;
 
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;

@@ -39,8 +39,8 @@ InstrumentDefinition GetTestInstrumentDefinition() {
             *std::any_cast<float>(state) = pitch * intensity;
           },
       .set_param_fn =
-          [](InstrumentState* state, int id, float value) {
-            *std::any_cast<float>(state) = static_cast<float>(id) * value;
+          [](InstrumentState* state, int index, float value) {
+            *std::any_cast<float>(state) = static_cast<float>(index) * value;
           }};
 }
 

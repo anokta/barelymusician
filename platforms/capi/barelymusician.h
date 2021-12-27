@@ -38,14 +38,8 @@ enum BarelyStatusValues {
 /// Id type.
 typedef int64_t BarelyId;
 
-/// Parameter id type.
-typedef int32_t BarelyParamId;
-
 /// Parameter definition.
 typedef struct BarelyParamDefinition {
-  /// Id.
-  BarelyParamId id;
-
   /// Default value.
   float default_value;
 
@@ -108,10 +102,10 @@ typedef void (*BarelyInstrumentSetNoteOnFn)(BarelyInstrumentState* state,
 /// Instrument set parameter function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param id Parameter id.
+/// @param index Parameter index.
 /// @param value Parameter value.
 typedef void (*BarelyInstrumentSetParamFn)(BarelyInstrumentState* state,
-                                           BarelyParamId id, float value);
+                                           int32_t index, float value);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -462,22 +456,22 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument id.
-/// @param param_id Parameter id.
+/// @param param_index Parameter index.
 /// @param param_value Parameter value.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyApi api,
                                                     BarelyId instrument_id,
-                                                    BarelyParamId param_id,
+                                                    int32_t param_index,
                                                     float param_value);
 
 /// Sets instrument parameter to default.
 ///
 /// @param api BarelyMusician API.
 /// @param instrument_id Instrument id.
-/// @param param_id Parameter id.
+/// @param param_index Parameter index.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
-    BarelyApi api, BarelyId instrument_id, BarelyParamId param_id);
+    BarelyApi api, BarelyId instrument_id, int32_t param_index);
 
 /// Sets performer begin offset.
 ///

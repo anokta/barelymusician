@@ -40,9 +40,9 @@ InstrumentManager::InstrumentManager(int sample_rate) noexcept
       note_on_callback_(&NoopNoteOnCallback),
       sample_rate_(sample_rate) {}
 
-Status InstrumentManager::Add(Id instrument_id, double timestamp,
-                              InstrumentDefinition definition,
-                              ParamDefinitionMap param_definitions) noexcept {
+Status InstrumentManager::Add(
+    Id instrument_id, double timestamp, InstrumentDefinition definition,
+    std::vector<ParamDefinition> param_definitions) noexcept {
   if (instrument_id == kInvalidId) {
     return Status::kInvalidArgument;
   }
@@ -52,8 +52,9 @@ Status InstrumentManager::Add(Id instrument_id, double timestamp,
       success) {
     auto& update_events = update_events_[instrument_id];
     update_events.emplace(timestamp, CreateEvent{std::move(definition)});
-    for (const auto& [id, param] : controller_it->second.params) {
-      update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+    const auto& params = controller_it->second.params;
+    for (int i = 0; i < static_cast<int>(params.size()); ++i) {
+      update_events.emplace(timestamp, SetParamEvent{i, params[i].GetValue()});
     }
     return Status::kOk;
   }
@@ -61,10 +62,11 @@ Status InstrumentManager::Add(Id instrument_id, double timestamp,
 }
 
 StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
-                                            int param_id) const noexcept {
+                                            int param_index) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (const auto* param = FindOrNull(controller->params, param_id)) {
-      return *param;
+    if (param_index >= 0 &&
+        param_index < static_cast<int>(controller->params.size())) {
+      return controller->params[param_index];
     }
     return Status::kInvalidArgument;
   }
@@ -239,9 +241,10 @@ void InstrumentManager::SetAllParamsToDefault(double timestamp) noexcept {
   for (auto& [instrument_id, controller] : controllers_) {
     if (!controller.params.empty()) {
       auto& update_events = update_events_[instrument_id];
-      for (auto& [id, param] : controller.params) {
-        param.ResetValue();
-        update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      for (int i = 0; i < static_cast<int>(controller.params.size()); ++i) {
+        controller.params[i].ResetValue();
+        update_events.emplace(
+            timestamp, SetParamEvent{i, controller.params[i].GetValue()});
       }
     }
   }
@@ -252,9 +255,10 @@ Status InstrumentManager::SetAllParamsToDefault(Id instrument_id,
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (!controller->params.empty()) {
       auto& update_events = update_events_[instrument_id];
-      for (auto& [id, param] : controller->params) {
-        param.ResetValue();
-        update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      for (int i = 0; i < static_cast<int>(controller->params.size()); ++i) {
+        controller->params[i].ResetValue();
+        update_events.emplace(
+            timestamp, SetParamEvent{i, controller->params[i].GetValue()});
       }
       return Status::kOk;
     }
@@ -314,12 +318,15 @@ void InstrumentManager::SetNoteOnCallback(
 }
 
 Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
-                                   int param_id, float param_value) noexcept {
+                                   int param_index,
+                                   float param_value) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (auto* param = FindOrNull(controller->params, param_id)) {
-      if (param->SetValue(param_value)) {
+    if (param_index >= 0 &&
+        param_index < static_cast<int>(controller->params.size())) {
+      auto& param = controller->params[param_index];
+      if (param.SetValue(param_value)) {
         update_events_[instrument_id].emplace(
-            timestamp, SetParamEvent{param_id, param->GetValue()});
+            timestamp, SetParamEvent{param_index, param.GetValue()});
       }
       return Status::kOk;
     }
@@ -329,12 +336,14 @@ Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
 }
 
 Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
-                                            int param_id) noexcept {
+                                            int param_index) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (auto* param = FindOrNull(controller->params, param_id)) {
-      if (param->ResetValue()) {
+    if (param_index >= 0 &&
+        param_index < static_cast<int>(controller->params.size())) {
+      auto& param = controller->params[param_index];
+      if (param.ResetValue()) {
         update_events_[instrument_id].emplace(
-            timestamp, SetParamEvent{param_id, param->GetValue()});
+            timestamp, SetParamEvent{param_index, param.GetValue()});
       }
       return Status::kOk;
     }
@@ -357,8 +366,9 @@ void InstrumentManager::SetSampleRate(double timestamp,
       controller.pitches.clear();
       update_events.emplace(timestamp, DestroyEvent{});
       update_events.emplace(timestamp, CreateEvent{controller.definition});
-      for (const auto& [id, param] : controller.params) {
-        update_events.emplace(timestamp, SetParamEvent{id, param.GetValue()});
+      for (int i = 0; i < static_cast<int>(controller.params.size()); ++i) {
+        update_events.emplace(
+            timestamp, SetParamEvent{i, controller.params[i].GetValue()});
       }
     }
   }
@@ -377,11 +387,11 @@ void InstrumentManager::Update() noexcept {
 
 InstrumentManager::InstrumentController::InstrumentController(
     InstrumentDefinition definition,
-    ParamDefinitionMap param_definitions) noexcept
+    std::vector<ParamDefinition> param_definitions) noexcept
     : definition(std::move(definition)) {
   params.reserve(param_definitions.size());
-  for (auto& [id, param_definition] : param_definitions) {
-    params.emplace(id, Param{std::move(param_definition)});
+  for (auto& param_definition : param_definitions) {
+    params.emplace_back(std::move(param_definition));
   }
 }
 

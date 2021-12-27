@@ -36,7 +36,6 @@ using ::barely::NoteIntensity;
 using ::barely::NotePitch;
 using ::barely::OscillatorType;
 using ::barely::ParamDefinition;
-using ::barely::ParamDefinitionMap;
 using ::barely::Random;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -53,7 +52,6 @@ constexpr int kNumFrames = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr int kNumVoices = 4;
 constexpr float kGain = 0.2f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr float kAttack = 0.0f;
@@ -79,21 +77,28 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetPlaybackTempo(kInitialTempo);
 
   const Id performer_instrument_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, ParamDefinition{kNumVoices}},
-       {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
-       {SynthInstrumentParam::kOscillatorType,
-        ParamDefinition{static_cast<int>(kOscillatorType)}},
-       {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
-       {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{kRelease}}});
+      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  musician.SetInstrumentParam(performer_instrument_id,
+                              SynthInstrumentParam::kGain, kGain);
+  musician.SetInstrumentParam(performer_instrument_id,
+                              SynthInstrumentParam::kEnvelopeAttack, kAttack);
+  musician.SetInstrumentParam(performer_instrument_id,
+                              SynthInstrumentParam::kEnvelopeRelease, kRelease);
+  musician.SetInstrumentParam(performer_instrument_id,
+                              SynthInstrumentParam::kOscillatorType,
+                              static_cast<float>(kOscillatorType));
+
   const Id metronome_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, ParamDefinition{kNumVoices}},
-       {SynthInstrumentParam::kGain, ParamDefinition{0.5f * kGain}},
-       {SynthInstrumentParam::kOscillatorType,
-        ParamDefinition{static_cast<int>(OscillatorType::kSquare)}},
-       {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{kAttack}},
-       {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{0.025f}}});
+      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  musician.SetInstrumentParam(metronome_id, SynthInstrumentParam::kGain,
+                              0.5f * kGain);
+  musician.SetInstrumentParam(metronome_id,
+                              SynthInstrumentParam::kEnvelopeAttack, kAttack);
+  musician.SetInstrumentParam(metronome_id,
+                              SynthInstrumentParam::kEnvelopeRelease, 0.025f);
+  musician.SetInstrumentParam(metronome_id,
+                              SynthInstrumentParam::kOscillatorType,
+                              static_cast<float>(OscillatorType::kSquare));
 
   musician.SetInstrumentNoteOnCallback(
       [&](Id instrument_id, double /*timestamp*/, float note_pitch,
@@ -232,7 +237,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                             return 1.25 * playback_tempo;
                           }}
                 : ConductorDefinition{},
-            ParamDefinitionMap{});
+            {});
         ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':

@@ -62,16 +62,21 @@ int main(int /*argc*/, char* /*argv*/[]) {
   InputManager input_manager;
 
   Musician musician(kSampleRate);
+
   const auto instrument_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(),
-      {{SynthInstrumentParam::kNumVoices, ParamDefinition{kNumVoices}},
-       {SynthInstrumentParam::kGain, ParamDefinition{kGain}},
-       {SynthInstrumentParam::kOscillatorType,
-        ParamDefinition{static_cast<int>(kOscillatorType)}},
-       {SynthInstrumentParam::kEnvelopeAttack,
-        ParamDefinition{kEnvelopeAttack}},
-       {SynthInstrumentParam::kEnvelopeRelease,
-        ParamDefinition{kEnvelopeRelease}}});
+      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  musician.SetInstrumentParam(instrument_id, SynthInstrumentParam::kGain,
+                              kGain);
+  musician.SetInstrumentParam(
+      instrument_id, SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack);
+  musician.SetInstrumentParam(
+      instrument_id, SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease);
+  musician.SetInstrumentParam(instrument_id,
+                              SynthInstrumentParam::kOscillatorType,
+                              static_cast<float>(kOscillatorType));
+  musician.SetInstrumentParam(instrument_id, SynthInstrumentParam::kNumVoices,
+                              static_cast<float>(kNumVoices));
+
   musician.SetInstrumentNoteOnCallback([](auto /*instrument_id*/,
                                           double /*timestamp*/, float pitch,
                                           float intensity) {

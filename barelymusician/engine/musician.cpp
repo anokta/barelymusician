@@ -52,8 +52,9 @@ Musician::Musician(int sample_rate) noexcept
       });
 }
 
-Id Musician::AddInstrument(InstrumentDefinition definition,
-                           ParamDefinitionMap param_definitions) noexcept {
+Id Musician::AddInstrument(
+    InstrumentDefinition definition,
+    std::vector<ParamDefinition> param_definitions) noexcept {
   const Id instrument_id = id_generator_.Next();
   instrument_manager_.Add(instrument_id, transport_.GetTimestamp(),
                           std::move(definition), std::move(param_definitions));
@@ -256,8 +257,9 @@ Status Musician::SetCustomInstrumentData(Id instrument_id,
       instrument_id, transport_.GetTimestamp(), std::move(custom_data));
 }
 
-void Musician::SetConductor(ConductorDefinition definition,
-                            ParamDefinitionMap param_definitions) noexcept {
+void Musician::SetConductor(
+    ConductorDefinition definition,
+    std::vector<ParamDefinition> param_definitions) noexcept {
   conductor_ = Conductor{std::move(definition), std::move(param_definitions)};
 }
 

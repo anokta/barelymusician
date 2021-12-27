@@ -73,7 +73,6 @@ constexpr int kNumBeats = 3;
 
 // Ensemble settings.
 constexpr float kRootNote = barely::kPitchD3;
-constexpr int kNumInstrumentVoices = 8;
 
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
@@ -211,15 +210,18 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
                                              float attack, float release) {
-    instrument_ids.push_back(musician.AddInstrument(
-        SynthInstrument::GetDefinition(),
-        {{SynthInstrumentParam::kNumVoices,
-          ParamDefinition{kNumInstrumentVoices}},
-         {SynthInstrumentParam::kOscillatorType,
-          ParamDefinition{static_cast<int>(type)}},
-         {SynthInstrumentParam::kGain, ParamDefinition{gain}},
-         {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{attack}},
-         {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{release}}}));
+    instrument_ids.push_back(
+        musician.AddInstrument(SynthInstrument::GetDefinition(),
+                               SynthInstrument::GetParamDefinitions()));
+    musician.SetInstrumentParam(instrument_ids.back(),
+                                SynthInstrumentParam::kGain, gain);
+    musician.SetInstrumentParam(instrument_ids.back(),
+                                SynthInstrumentParam::kEnvelopeAttack, attack);
+    musician.SetInstrumentParam(
+        instrument_ids.back(), SynthInstrumentParam::kEnvelopeRelease, release);
+    musician.SetInstrumentParam(instrument_ids.back(),
+                                SynthInstrumentParam::kOscillatorType,
+                                static_cast<float>(type));
   };
 
   // Add synth instruments.

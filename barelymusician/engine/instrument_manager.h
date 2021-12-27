@@ -4,10 +4,10 @@
 #include <any>
 #include <atomic>
 #include <functional>
-#include <map>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
@@ -56,14 +56,14 @@ class InstrumentManager {
   /// @return Status.
   Status Add(Id instrument_id, double timestamp,
              InstrumentDefinition definition,
-             ParamDefinitionMap param_definitions) noexcept;
+             std::vector<ParamDefinition> param_definitions) noexcept;
 
   /// Returns instrument parameter.
   ///
   /// @param instrument_id Instrument id.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @return Instrument parameter or error status.
-  StatusOr<Param> GetParam(Id instrument_id, int param_id) const noexcept;
+  StatusOr<Param> GetParam(Id instrument_id, int param_index) const noexcept;
 
   /// Returns whether instrument note is active or not.
   ///
@@ -169,20 +169,20 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @param param_value Parameter value.
   /// @return Status.
-  Status SetParam(Id instrument_id, double timestamp, int param_id,
+  Status SetParam(Id instrument_id, double timestamp, int param_index,
                   float param_value) noexcept;
 
   /// Sets instrument parameter to default value at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @return Status.
   Status SetParamToDefault(Id instrument_id, double timestamp,
-                           int param_id) noexcept;
+                           int param_index) noexcept;
 
   /// Sets sampling rate at timestamp.
   ///
@@ -197,14 +197,15 @@ class InstrumentManager {
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
     // Constructs new |InstrumentController|.
-    InstrumentController(InstrumentDefinition definition,
-                         ParamDefinitionMap param_definitions) noexcept;
+    InstrumentController(
+        InstrumentDefinition definition,
+        std::vector<ParamDefinition> param_definitions) noexcept;
 
     // Instrument definition.
     InstrumentDefinition definition;
 
     // Instrument parameters.
-    std::unordered_map<int, Param> params;
+    std::vector<Param> params;
 
     // List of active note pitches.
     std::unordered_set<float> pitches;

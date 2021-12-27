@@ -31,8 +31,8 @@ void SynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-void SynthInstrument::SetParam(int id, float value) noexcept {
-  switch (static_cast<SynthInstrumentParam>(id)) {
+void SynthInstrument::SetParam(int index, float value) noexcept {
+  switch (static_cast<SynthInstrumentParam>(index)) {
     case SynthInstrumentParam::kGain:
       gain_ = value;
       break;
@@ -73,17 +73,21 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
       [](int sample_rate) { return SynthInstrument(sample_rate); });
 }
 
-ParamDefinitionMap SynthInstrument::GetParamDefinitions() noexcept {
-  return {
-      {SynthInstrumentParam::kGain, ParamDefinition{0.25f, 0.0f, 1.0f}},
-      {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{0.05f, 0.0f}},
-      {SynthInstrumentParam::kEnvelopeDecay, ParamDefinition{0.0f, 0.0f}},
-      {SynthInstrumentParam::kEnvelopeSustain,
-       ParamDefinition{1.0f, 0.0f, 1.0f}},
-      {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{0.25f, 0.0f}},
-      {SynthInstrumentParam::kOscillatorType,
-       ParamDefinition{static_cast<int>(OscillatorType::kSine)}},
-      {SynthInstrumentParam::kNumVoices, ParamDefinition{8, 0}}};
+std::vector<ParamDefinition> SynthInstrument::GetParamDefinitions() noexcept {
+  return {// Gain.
+          ParamDefinition{0.25f, 0.0f, 1.0f},
+          // Attack.
+          ParamDefinition{0.05f, 0.0f},
+          // Decay.
+          ParamDefinition{0.0f, 0.0f},
+          // Sustain.
+          ParamDefinition{1.0f, 0.0f, 1.0f},
+          // Release.
+          ParamDefinition{0.25f, 0.0f},
+          // Oscillator type.
+          ParamDefinition{static_cast<int>(OscillatorType::kSine)},
+          // Number of voices.
+          ParamDefinition{8, 0}};
 }
 
 }  // namespace barely::examples

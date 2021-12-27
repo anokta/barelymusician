@@ -164,20 +164,20 @@ namespace Barely {
     /// Sets instrument parameter value.
     ///
     /// @param instrument Instrument to set.
-    /// @param paramId Parameter id.
+    /// @param paramIndex Parameter index.
     /// @param paramValue Parameter value.
     /// @return True if success, false otherwise.
-    public static bool SetInstrumentParam(Instrument instrument, int paramId, float paramValue) {
-      return IsOk(SetInstrumentParamNative(Api, instrument.Id, paramId, paramValue));
+    public static bool SetInstrumentParam(Instrument instrument, int paramIndex, float paramValue) {
+      return IsOk(SetInstrumentParamNative(Api, instrument.Id, paramIndex, paramValue));
     }
 
     /// Sets instrument parameter value to default.
     ///
     /// @param instrument Instrument to set.
-    /// @param paramId Parameter id.
+    /// @param paramIndex Parameter index.
     /// @return True if success, false otherwise.
-    public static bool SetInstrumentParamToDefault(Instrument instrument, int paramId) {
-      return IsOk(SetInstrumentParamToDefaultNative(Api, instrument.Id, paramId));
+    public static bool SetInstrumentParamToDefault(Instrument instrument, int paramIndex) {
+      return IsOk(SetInstrumentParamToDefaultNative(Api, instrument.Id, paramIndex));
     }
 
     /// Sets playback position.
@@ -456,11 +456,11 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParam")]
     private static extern Status SetInstrumentParamNative(IntPtr api, Int64 instrumentId,
-                                                          Int32 paramId, float paramValue);
+                                                          Int32 paramIndex, float paramValue);
 
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentParamToDefault")]
     private static extern Status SetInstrumentParamToDefaultNative(IntPtr api, Int64 instrumentId,
-                                                                   Int32 paramId);
+                                                                   Int32 paramIndex);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPerformerBeginOffset")]
     private static extern Status SetPerformerBeginOffsetNative(IntPtr api, Int64 performerId,

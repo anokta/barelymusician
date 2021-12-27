@@ -44,14 +44,15 @@ InstrumentDefinition GetTestInstrumentDefinition() {
             *std::any_cast<float>(state) = pitch * intensity;
           },
       .set_param_fn =
-          [](InstrumentState* state, int id, float value) {
-            *std::any_cast<float>(state) = static_cast<float>(id) * value;
+          [](InstrumentState* state, int index, float value) {
+            *std::any_cast<float>(state) =
+                static_cast<float>(index + 1) * value;
           }};
 }
 
 // Returns test instrument parameter definition.
-ParamDefinitionMap GetTestParamDefinitions() {
-  return ParamDefinitionMap{{1, ParamDefinition{0.0f}}};
+std::vector<ParamDefinition> GetTestParamDefinitions() {
+  return {ParamDefinition{0.0f}};
 }
 
 // Tests that instruments are added and removed as expected.
@@ -153,9 +154,9 @@ TEST(InstrumentManagerTest, ProcessEvents) {
 
   // Set parameter value.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
-                                  SetParamEvent{1, 5.0f});
+                                  SetParamEvent{0, 5.0f});
   EXPECT_FLOAT_EQ(
-      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1))
+      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0))
           .GetValue(),
       5.0f);
 
@@ -163,7 +164,7 @@ TEST(InstrumentManagerTest, ProcessEvents) {
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
                                   SetAllParamsToDefaultEvent{});
   EXPECT_FLOAT_EQ(
-      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1))
+      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0))
           .GetValue(),
       0.0f);
 }
@@ -391,7 +392,7 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
                                             GetTestInstrumentDefinition(),
                                             GetTestParamDefinitions())));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 1)),
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
                 Property(&Param::GetValue, 0.0f));
 
     instrument_manager.Update();
@@ -412,8 +413,8 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
     const float param_value = static_cast<float>(i + 1);
 
     EXPECT_TRUE(
-        IsOk(instrument_manager.SetParam(instrument_id, 0.0, 1, param_value)));
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 1)),
+        IsOk(instrument_manager.SetParam(instrument_id, 0.0, 0, param_value)));
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
                 Property(&Param::GetValue, param_value));
 
     instrument_manager.Update();
@@ -436,7 +437,7 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
 
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 1)),
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
                 Property(&Param::GetValue, 0.0f));
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -571,9 +572,9 @@ TEST(InstrumentManagerTest, SetSampleRate) {
 
   // Set parameter.
   EXPECT_TRUE(
-      IsOk(instrument_manager.SetParam(kInstrumentId, 0.0, 1, kParamValue)));
+      IsOk(instrument_manager.SetParam(kInstrumentId, 0.0, 0, kParamValue)));
 
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1)),
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0)),
               Property(&Param::GetValue, kParamValue));
 
   instrument_manager.Update();
@@ -592,7 +593,7 @@ TEST(InstrumentManagerTest, SetSampleRate) {
 
   EXPECT_FALSE(
       GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1)),
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0)),
               Property(&Param::GetValue, kParamValue));
 
   instrument_manager.Update();

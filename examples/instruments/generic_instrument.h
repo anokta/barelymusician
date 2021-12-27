@@ -15,18 +15,18 @@ class GenericInstrument {
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~GenericInstrument() = default;
 
-  /// Stops note with the given |pitch|.
+  /// Stops note.
   ///
   /// @param pitch Note pitch.
   virtual void NoteOff(float pitch) noexcept = 0;
 
-  /// Starts note with the given |pitch| and |intensity|.
+  /// Starts note.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   virtual void NoteOn(float pitch, float intensity) noexcept = 0;
 
-  /// Processes the next |output| buffer.
+  /// Processes the next output buffer.
   ///
   /// @param output Output buffer.
   /// @param num_channels Number of output channels.
@@ -34,16 +34,16 @@ class GenericInstrument {
   virtual void Process(float* output, int num_channels,
                        int num_frames) noexcept = 0;
 
-  /// Sets custom |data|.
+  /// Sets custom data.
   ///
   /// @param data Custom data.
   virtual void SetCustomData(std::any data) noexcept = 0;
 
-  /// Sets param |value| with the given |id|.
+  /// Sets parameter value.
   ///
-  /// @param id Param id.
-  /// @param value Param value.
-  virtual void SetParam(int id, float value) noexcept = 0;
+  /// @param id Parameter index.
+  /// @param value Parameter value.
+  virtual void SetParam(int index, float value) noexcept = 0;
 };
 
 /// Returns instrument definition for the given create instrument function.
@@ -79,9 +79,10 @@ InstrumentDefinition GetInstrumentDefinition(
             instrument->NoteOn(pitch, intensity);
           },
       .set_param_fn =
-          [](InstrumentState* state, int param_id, float param_value) noexcept {
+          [](InstrumentState* state, int param_index,
+             float param_value) noexcept {
             auto* instrument = std::any_cast<InstrumentType>(state);
-            instrument->SetParam(param_id, param_value);
+            instrument->SetParam(param_index, param_value);
           }};
 }
 

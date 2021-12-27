@@ -5,6 +5,7 @@
 #include <functional>
 #include <optional>
 #include <unordered_map>
+#include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/id_generator.h"
@@ -49,7 +50,7 @@ class Musician {
   /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
   Id AddInstrument(InstrumentDefinition definition,
-                   ParamDefinitionMap param_definitions) noexcept;
+                   std::vector<ParamDefinition> param_definitions) noexcept;
 
   /// Adds new performer.
   ///
@@ -185,7 +186,7 @@ class Musician {
   /// @param note_id Note id.
   /// @return Status.
   Status RemovePerformerNote(Id performer_id, Id note_id) noexcept;
-  
+
   /// Sets all instrument notes off.
   ///
   /// @param instrument_id Instrument id.
@@ -203,7 +204,7 @@ class Musician {
   /// @param definition Conductor definition.
   /// @param definition Conductor parameter definitions.
   void SetConductor(ConductorDefinition definition,
-                    ParamDefinitionMap param_definitions) noexcept;
+                    std::vector<ParamDefinition> param_definitions) noexcept;
 
   /// Sets custom instrument data.
   ///

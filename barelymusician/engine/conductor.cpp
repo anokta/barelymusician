@@ -3,6 +3,7 @@
 #include <any>
 #include <utility>
 #include <variant>
+#include <vector>
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/status.h"
@@ -21,7 +22,7 @@ void NoopSetCustomConductorDataFn(ConductorState* /*state*/,
                                   std::any /*data*/) noexcept {}
 
 // Dummy set conductor parameter function that does nothing.
-void NoopSetConductorParamFn(ConductorState* /*state*/, int /*id*/,
+void NoopSetConductorParamFn(ConductorState* /*state*/, int /*index*/,
                              float /*value*/) noexcept {}
 
 // Dummy transform note duration function that returns raw note duration.
@@ -60,7 +61,7 @@ double NoopTransformPlaybackTempoFn(ConductorState* /*state*/,
 }  // namespace
 
 Conductor::Conductor(ConductorDefinition definition,
-                     ParamDefinitionMap param_definitions) noexcept
+                     std::vector<ParamDefinition> param_definitions) noexcept
     : destroy_fn_(std::move(definition.destroy_fn)),
       set_custom_data_fn_(definition.set_custom_data_fn
                               ? std::move(definition.set_custom_data_fn)
@@ -87,8 +88,8 @@ Conductor::Conductor(ConductorDefinition definition,
     definition.create_fn(&state_);
   }
   params_.reserve(param_definitions.size());
-  for (auto& [id, param_definition] : param_definitions) {
-    params_.emplace(id, Param{std::move(param_definition)});
+  for (auto& param_definition : param_definitions) {
+    params_.emplace_back(std::move(param_definition));
   }
 }
 
@@ -99,9 +100,9 @@ Conductor::~Conductor() noexcept {
   }
 }
 
-StatusOr<Param> Conductor::GetParam(int id) const noexcept {
-  if (const auto* param = FindOrNull(params_, id)) {
-    return *param;
+StatusOr<Param> Conductor::GetParam(int index) const noexcept {
+  if (index >= 0 && index < static_cast<int>(params_.size())) {
+    return params_[index];
   }
   return Status::kInvalidArgument;
 }
@@ -110,20 +111,20 @@ void Conductor::SetCustomData(std::any data) noexcept {
   set_custom_data_fn_(&state_, std::move(data));
 }
 
-Status Conductor::SetParam(int id, float value) noexcept {
-  if (auto* param = FindOrNull(params_, id)) {
-    if (param->SetValue(value)) {
-      set_param_fn_(&state_, id, param->GetValue());
+Status Conductor::SetParam(int index, float value) noexcept {
+  if (index >= 0 && index < static_cast<int>(params_.size())) {
+    if (params_[index].SetValue(value)) {
+      set_param_fn_(&state_, index, params_[index].GetValue());
     }
     return Status::kOk;
   }
   return Status::kInvalidArgument;
 }
 
-Status Conductor::SetParamToDefault(int id) noexcept {
-  if (auto* param = FindOrNull(params_, id)) {
-    if (param->ResetValue()) {
-      set_param_fn_(&state_, id, param->GetValue());
+Status Conductor::SetParamToDefault(int index) noexcept {
+  if (index >= 0 && index < static_cast<int>(params_.size())) {
+    if (params_[index].ResetValue()) {
+      set_param_fn_(&state_, index, params_[index].GetValue());
     }
     return Status::kOk;
   }

@@ -347,19 +347,6 @@ BARELY_EXPORT BarelyStatus BarelyApiGetSampleRate(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyApiIsPlaying(BarelyApi api,
                                               bool* out_is_playing);
 
-/// Stops all active notes of all instruments.
-///
-/// @param api BarelyMusician API.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApiSetAllInstrumentNotesOff(BarelyApi api);
-
-/// Resets all parameters of all instruments to default value.
-///
-/// @param api BarelyMusician API.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyApiSetAllInstrumentParamsToDefault(BarelyApi api);
-
 /// Sets the instrument note off callback.
 ///
 /// @param api BarelyMusician API.
@@ -428,6 +415,14 @@ BARELY_EXPORT BarelyStatus BarelyApiStopPlayback(BarelyApi api);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApiUpdate(BarelyApi api, double timestamp);
 
+/// Gets conductor energy (i.e., arousal).
+///
+/// @param api BarelyMusician API.
+/// @param out_energy Output energy in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductorGetEnergy(BarelyApi api,
+                                                    float* out_energy);
+
 /// Gets conductor parameter value.
 ///
 /// @param api BarelyMusician API.
@@ -445,6 +440,14 @@ BARELY_EXPORT BarelyStatus BarelyConductorGetParam(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyConductorGetRootNote(BarelyApi api, float* out_root_note_pitch);
+
+/// Gets conductor stress (i.e., valence).
+///
+/// @param api BarelyMusician API.
+/// @param out_stress Stress in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductorGetStress(BarelyApi api,
+                                                    float* out_stress);
 
 /// Resets all conductor parameters to default value.
 ///
@@ -467,6 +470,14 @@ BARELY_EXPORT BarelyStatus BarelyConductorSetCustomData(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyConductorSetDefinition(
     BarelyApi api, BarelyConductorDefinition definition);
+
+/// Sets conductor energy (i.e., arousal).
+///
+/// @param api BarelyMusician API.
+/// @param energy Energy in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductorSetEnergy(BarelyApi api,
+                                                    float energy);
 
 /// Sets conductor parameter value.
 ///
@@ -493,6 +504,14 @@ BarelyConductorSetParamToDefault(BarelyApi api, BarelyParamId param_id);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyConductorSetRootNote(BarelyApi api,
                                                       float root_note_pitch);
+
+/// Sets conductor stress (i.e., valence).
+///
+/// @param api BarelyMusician API.
+/// @param stress Stress in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductorSetStress(BarelyApi api,
+                                                    float stress);
 
 /// Creates new instrument.
 ///

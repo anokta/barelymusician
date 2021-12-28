@@ -193,10 +193,10 @@ typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
 /// Adds new performer.
 ///
 /// @param api BarelyMusician API.
-/// @param performer_id_ptr Pointer to performer id.
+/// @param out_performer_id Output performer id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyAddPerformer(BarelyApi api,
-                                              BarelyId* performer_id_ptr);
+                                              BarelyId* out_performer_id);
 
 /// Adds performer instrument.
 ///
@@ -216,12 +216,12 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformerInstrument(BarelyApi api,
 /// @param note_duration Note duration.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
-/// @param note_id_ptr Pointer to note id.
+/// @param out_note_id Output note id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyAddPerformerNote(
     BarelyApi api, BarelyId performer_id, double note_position,
     double note_duration, float note_pitch, float note_intensity,
-    BarelyId* note_id_ptr);
+    BarelyId* out_note_id);
 
 /// Creates new BarelyMusician API.
 ///
@@ -233,15 +233,15 @@ BARELY_EXPORT BarelyApi BarelyCreateApi(int32_t sample_rate);
 ///
 /// @param api BarelyMusician API.
 /// @param definition Instrument definition.
-/// @param instrument_id_ptr Pointer to instrument id.
+/// @param out_instrument_id Output instrument id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyCreateInstrument(BarelyApi api, BarelyInstrumentDefinition definition,
-                       BarelyId* instrument_id_ptr);
+                       BarelyId* out_instrument_id);
 
 // TODO(#85): Temporary shortcut to test instruments.
 BARELY_EXPORT BarelyStatus
-BarelyCreateSynthInstrument(BarelyApi api, BarelyId* instrument_id_ptr);
+BarelyCreateSynthInstrument(BarelyApi api, BarelyId* out_instrument_id);
 
 /// Destroys BarelyMusician API.
 ///
@@ -261,89 +261,89 @@ BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param begin_offset_ptr Pointer to begin offset in beats.
+/// @param out_begin_offset Output begin offset in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginOffset(
-    BarelyApi api, BarelyId performer_id, double* begin_offset_ptr);
+    BarelyApi api, BarelyId performer_id, double* out_begin_offset);
 
 /// Gets performer begin position.
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param begin_position_ptr Pointer to optional begin position in beats.
+/// @param out_begin_position Output optional begin position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginPosition(
-    BarelyApi api, BarelyId performer_id, double* begin_position_ptr);
+    BarelyApi api, BarelyId performer_id, double* out_begin_position);
 
 /// Gets performer end position.
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param end_position_ptr Pointer to optional end position in beats.
+/// @param out_end_position Output optional end position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPerformerEndPosition(
-    BarelyApi api, BarelyId performer_id, double* end_position_ptr);
+    BarelyApi api, BarelyId performer_id, double* out_end_position);
 
 /// Gets performer loop begin offset.
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param loop_begin_offset_ptr Pointer to loop begin offset in beats.
+/// @param out_loop_begin_offset Output loop begin offset in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopBeginOffset(
-    BarelyApi api, BarelyId performer_id, double* begin_offset_ptr);
+    BarelyApi api, BarelyId performer_id, double* out_begin_offset);
 
 /// Gets performer loop length.
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param loop_length_ptr Pointer to loop length in beats.
+/// @param out_loop_length Output loop length in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopLength(
-    BarelyApi api, BarelyId performer_id, double* loop_length_ptr);
+    BarelyApi api, BarelyId performer_id, double* out_loop_length);
 
 /// Gets the playback position.
 ///
 /// @param api BarelyMusician API.
-/// @param position_ptr Pointer to position in beats.
+/// @param out_position Output position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPlaybackPosition(BarelyApi api,
-                                                     double* position_ptr);
+                                                     double* out_position);
 
 /// Gets the playback tempo.
 ///
 /// @param api BarelyMusician API.
-/// @param tempo_ptr Pointer to tempo in BPM.
+/// @param out_tempo Output tempo in BPM.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyApi api,
-                                                  double* tempo_ptr);
+                                                  double* out_tempo);
 
 /// Gets whether the performer is empty or not.
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param is_empty_ptr Pointer to true if empty, false otherwise.
+/// @param out_is_empty Output true if empty, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyIsPerformerEmpty(BarelyApi api,
                                                   BarelyId performer_id,
-                                                  bool* is_empty_ptr);
+                                                  bool* out_is_empty);
 
 /// Gets whether the performer is looping or not.
 ///
 /// @param api BarelyMusician API.
 /// @param performer_id Performer id.
-/// @param is_looping_ptr Ponter to true if looping, false otherwise.
+/// @param out_is_looping Ponter to true if looping, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyIsPerformerLooping(BarelyApi api,
                                                     BarelyId performer_id,
-                                                    bool* is_looping_ptr);
+                                                    bool* out_is_looping);
 
 /// Gets whether the playback is currently active or not.
 ///
 /// @param api BarelyMusician API.
-/// @param is_playing_ptr Pointer to true if playing, false otherwise.
+/// @param out_is_playing Output true if playing, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* is_playing_ptr);
+BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* out_is_playing);
 
 /// Processes the next instrument output buffer at timestamp.
 ///

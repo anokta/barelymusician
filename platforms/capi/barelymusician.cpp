@@ -145,10 +145,10 @@ struct BarelyMusician {
   Musician instance;
 };
 
-BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* performer_id_ptr) {
+BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* out_performer_id) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!performer_id_ptr) return kBarelyStatus_InvalidArgument;
-  *performer_id_ptr = api->instance.AddPerformer();
+  if (!out_performer_id) return kBarelyStatus_InvalidArgument;
+  *out_performer_id = api->instance.AddPerformer();
   return kBarelyStatus_Ok;
 }
 
@@ -162,16 +162,16 @@ BarelyStatus BarelyAddPerformerInstrument(BarelyApi api, BarelyId performer_id,
 BarelyStatus BarelyAddPerformerNote(BarelyApi api, BarelyId performer_id,
                                     double note_position, double note_duration,
                                     float note_pitch, float note_intensity,
-                                    BarelyId* note_id_ptr) {
+                                    BarelyId* out_note_id) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!note_id_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_note_id) return kBarelyStatus_InvalidArgument;
   const auto note_id_or =
       api->instance.AddPerformerNote(performer_id, note_position,
                                      Note{.pitch = note_pitch,
                                           .intensity = note_intensity,
                                           .duration = note_duration});
   if (IsOk(note_id_or)) {
-    *note_id_ptr = GetStatusOrValue(note_id_or);
+    *out_note_id = GetStatusOrValue(note_id_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(note_id_or);
@@ -183,19 +183,19 @@ BarelyApi BarelyCreateApi(int32_t sample_rate) {
 
 BarelyStatus BarelyCreateInstrument(BarelyApi api,
                                     BarelyInstrumentDefinition definition,
-                                    BarelyId* instrument_id_ptr) {
+                                    BarelyId* out_instrument_id) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
-  *instrument_id_ptr = api->instance.AddInstrument(
+  if (!out_instrument_id) return kBarelyStatus_InvalidArgument;
+  *out_instrument_id = api->instance.AddInstrument(
       GetInstrumentDefinition(std::move(definition)));
   return kBarelyStatus_Ok;
 }
 
 BarelyStatus BarelyCreateSynthInstrument(BarelyApi api,
-                                         BarelyId* instrument_id_ptr) {
+                                         BarelyId* out_instrument_id) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
-  *instrument_id_ptr =
+  if (!out_instrument_id) return kBarelyStatus_InvalidArgument;
+  *out_instrument_id =
       api->instance.AddInstrument(SynthInstrument::GetDefinition());
   return kBarelyStatus_Ok;
 }
@@ -216,13 +216,13 @@ BarelyStatus BarelyDestroyInstrument(BarelyApi api, BarelyId instrument_id) {
 }
 
 BarelyStatus BarelyGetPerformerBeginOffset(BarelyApi api, BarelyId performer_id,
-                                           double* begin_offset_ptr) {
+                                           double* out_begin_offset) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!begin_offset_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_begin_offset) return kBarelyStatus_InvalidArgument;
   const auto begin_offset_or =
       api->instance.GetPerformerBeginOffset(performer_id);
   if (IsOk(begin_offset_or)) {
-    *begin_offset_ptr = GetStatusOrValue(begin_offset_or);
+    *out_begin_offset = GetStatusOrValue(begin_offset_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(begin_offset_or);
@@ -230,26 +230,26 @@ BarelyStatus BarelyGetPerformerBeginOffset(BarelyApi api, BarelyId performer_id,
 
 BarelyStatus BarelyGetPerformerBeginPosition(BarelyApi api,
                                              BarelyId performer_id,
-                                             double* begin_position_ptr) {
+                                             double* out_begin_position) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!begin_position_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_begin_position) return kBarelyStatus_InvalidArgument;
   const auto begin_position_or =
       api->instance.GetPerformerBeginPosition(performer_id);
   if (IsOk(begin_position_or)) {
-    *begin_position_ptr = GetStatusOrValue(begin_position_or);
+    *out_begin_position = GetStatusOrValue(begin_position_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(begin_position_or);
 }
 
 BarelyStatus BarelyGetPerformerEndPosition(BarelyApi api, BarelyId performer_id,
-                                           double* end_position_ptr) {
+                                           double* out_end_position) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!end_position_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_end_position) return kBarelyStatus_InvalidArgument;
   const auto end_position_or =
       api->instance.GetPerformerEndPosition(performer_id);
   if (IsOk(end_position_or)) {
-    *end_position_ptr = GetStatusOrValue(end_position_or);
+    *out_end_position = GetStatusOrValue(end_position_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(end_position_or);
@@ -257,73 +257,73 @@ BarelyStatus BarelyGetPerformerEndPosition(BarelyApi api, BarelyId performer_id,
 
 BarelyStatus BarelyGetPerformerLoopBeginOffset(BarelyApi api,
                                                BarelyId performer_id,
-                                               double* loop_begin_offset_ptr) {
+                                               double* out_loop_begin_offset) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!loop_begin_offset_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_loop_begin_offset) return kBarelyStatus_InvalidArgument;
   const auto loop_begin_offset_or =
       api->instance.GetPerformerLoopBeginOffset(performer_id);
   if (IsOk(loop_begin_offset_or)) {
-    *loop_begin_offset_ptr = GetStatusOrValue(loop_begin_offset_or);
+    *out_loop_begin_offset = GetStatusOrValue(loop_begin_offset_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(loop_begin_offset_or);
 }
 
 BarelyStatus BarelyGetPerformerLoopLength(BarelyApi api, BarelyId performer_id,
-                                          double* loop_length_ptr) {
+                                          double* out_loop_length) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!loop_length_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_loop_length) return kBarelyStatus_InvalidArgument;
   const auto loop_length_or =
       api->instance.GetPerformerLoopLength(performer_id);
   if (IsOk(loop_length_or)) {
-    *loop_length_ptr = GetStatusOrValue(loop_length_or);
+    *out_loop_length = GetStatusOrValue(loop_length_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(loop_length_or);
 }
 
-BarelyStatus BarelyGetPlaybackPosition(BarelyApi api, double* position_ptr) {
+BarelyStatus BarelyGetPlaybackPosition(BarelyApi api, double* out_position) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!position_ptr) return kBarelyStatus_InvalidArgument;
-  *position_ptr = api->instance.GetPlaybackPosition();
+  if (!out_position) return kBarelyStatus_InvalidArgument;
+  *out_position = api->instance.GetPlaybackPosition();
   return kBarelyStatus_Ok;
 }
 
-BarelyStatus BarelyGetPlaybackTempo(BarelyApi api, double* tempo_ptr) {
+BarelyStatus BarelyGetPlaybackTempo(BarelyApi api, double* out_tempo) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!tempo_ptr) return kBarelyStatus_InvalidArgument;
-  *tempo_ptr = api->instance.GetPlaybackTempo();
+  if (!out_tempo) return kBarelyStatus_InvalidArgument;
+  *out_tempo = api->instance.GetPlaybackTempo();
   return kBarelyStatus_Ok;
 }
 
 BarelyStatus BarelyIsPerformerEmpty(BarelyApi api, BarelyId performer_id,
-                                    bool* is_empty_ptr) {
+                                    bool* out_is_empty) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!is_empty_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_is_empty) return kBarelyStatus_InvalidArgument;
   const auto is_empty_or = api->instance.IsPerformerEmpty(performer_id);
   if (IsOk(is_empty_or)) {
-    *is_empty_ptr = GetStatusOrValue(is_empty_or);
+    *out_is_empty = GetStatusOrValue(is_empty_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(is_empty_or);
 }
 
 BarelyStatus BarelyIsPerformerLooping(BarelyApi api, BarelyId performer_id,
-                                      bool* is_looping_ptr) {
+                                      bool* out_is_looping) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!is_looping_ptr) return kBarelyStatus_InvalidArgument;
+  if (!out_is_looping) return kBarelyStatus_InvalidArgument;
   const auto is_looping_or = api->instance.IsPerformerLooping(performer_id);
   if (IsOk(is_looping_or)) {
-    *is_looping_ptr = GetStatusOrValue(is_looping_or);
+    *out_is_looping = GetStatusOrValue(is_looping_or);
     return kBarelyStatus_Ok;
   }
   return GetStatus(is_looping_or);
 }
 
-BarelyStatus BarelyIsPlaying(BarelyApi api, bool* is_playing_ptr) {
+BarelyStatus BarelyIsPlaying(BarelyApi api, bool* out_is_playing) {
   if (!api) return kBarelyStatus_NotFound;
-  if (!is_playing_ptr) return kBarelyStatus_InvalidArgument;
-  *is_playing_ptr = api->instance.IsPlaying();
+  if (!out_is_playing) return kBarelyStatus_InvalidArgument;
+  *out_is_playing = api->instance.IsPlaying();
   return kBarelyStatus_Ok;
 }
 

@@ -63,6 +63,18 @@ class InstrumentManager {
   /// @return Instrument parameter or error status.
   StatusOr<Param> GetParam(Id instrument_id, int param_index) const noexcept;
 
+  /// Returns instrument gain.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Instrument gain or error status.
+  StatusOr<float> GetGain(Id instrument_id) const noexcept;
+
+  /// Returns whether instrument is muted or not.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return True if muted, or false if not, or error status.
+  StatusOr<bool> IsMuted(Id instrument_id) const noexcept;
+
   /// Returns whether instrument note is active or not.
   ///
   /// @param instrument_id Instrument id.
@@ -134,6 +146,22 @@ class InstrumentManager {
   Status SetCustomData(Id instrument_id, double timestamp,
                        std::any custom_data) noexcept;
 
+  /// Sets instrument gain at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param gain Gain in amplitude.
+  /// @return Status.
+  Status SetGain(Id instrument_id, double timestamp, float gain) noexcept;
+
+  /// Sets whether instrument should be muted or not at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param is_muted True if muted, false otherwise.
+  /// @return Status.
+  Status SetMuted(Id instrument_id, double timestamp, bool is_muted) noexcept;
+
   /// Sets instrument note off at timestamp.
   ///
   /// @param instrument_id Instrument id.
@@ -199,6 +227,12 @@ class InstrumentManager {
 
     // Instrument definition.
     InstrumentDefinition definition;
+
+    // Instrument gain.
+    float gain;
+
+    // Denotes whether instrument is muted or not.
+    bool is_muted;
 
     // Instrument parameters.
     std::vector<Param> params;

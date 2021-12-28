@@ -37,6 +37,11 @@ class Instrument {
   /// @param data Custom data.
   void SetCustomData(std::any data) noexcept;
 
+  /// Sets gain.
+  ///
+  /// @param gain Gain in amplitude.
+  void SetGain(float gain) noexcept;
+
   /// Sets note off.
   ///
   /// @param pitch Note pitch.
@@ -75,6 +80,9 @@ class Instrument {
 
   // Instrument state.
   InstrumentState state_;
+
+  // Instrument gain.
+  float gain_;
 };
 
 }  // namespace barely

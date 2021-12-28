@@ -299,9 +299,9 @@ typedef struct BarelyInstrumentDefinition {
 
 /// Creates new BarelyMusician API.
 ///
-/// @param api Output BarelyMusician API.
+/// @param out_api Output BarelyMusician API.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApiCreate(BarelyApi* api);
+BARELY_EXPORT BarelyStatus BarelyApiCreate(BarelyApi* out_api);
 
 /// Destroys BarelyMusician API.
 ///

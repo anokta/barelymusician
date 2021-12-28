@@ -65,8 +65,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const auto instrument_id =
       musician.AddInstrument(SynthInstrument::GetDefinition());
-  musician.SetInstrumentParam(instrument_id, SynthInstrumentParam::kGain,
-                              kGain);
+  musician.SetInstrumentGain(instrument_id, kGain);
   musician.SetInstrumentParam(
       instrument_id, SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack);
   musician.SetInstrumentParam(

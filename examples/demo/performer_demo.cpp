@@ -78,8 +78,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const Id performer_instrument_id =
       musician.AddInstrument(SynthInstrument::GetDefinition());
-  musician.SetInstrumentParam(performer_instrument_id,
-                              SynthInstrumentParam::kGain, kGain);
+  musician.SetInstrumentGain(performer_instrument_id, kGain);
   musician.SetInstrumentParam(performer_instrument_id,
                               SynthInstrumentParam::kEnvelopeAttack, kAttack);
   musician.SetInstrumentParam(performer_instrument_id,
@@ -90,8 +89,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const Id metronome_id =
       musician.AddInstrument(SynthInstrument::GetDefinition());
-  musician.SetInstrumentParam(metronome_id, SynthInstrumentParam::kGain,
-                              0.5f * kGain);
+  musician.SetInstrumentGain(metronome_id, 0.5f * kGain);
   musician.SetInstrumentParam(metronome_id,
                               SynthInstrumentParam::kEnvelopeAttack, kAttack);
   musician.SetInstrumentParam(metronome_id,

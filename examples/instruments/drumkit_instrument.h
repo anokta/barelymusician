@@ -14,8 +14,7 @@
 namespace barely::examples {
 
 enum DrumkitInstrumentParam {
-  kPadGain = 0,
-  kPadRelease = 1,
+  kPadRelease = 0,
 };
 
 /// Simple drumkit instrument.
@@ -46,8 +45,6 @@ class DrumkitInstrument : public GenericInstrument {
   };
 
   int sample_rate_;
-
-  float gain_;
 
   std::unordered_map<float, DrumkitPad> pads_;
 };

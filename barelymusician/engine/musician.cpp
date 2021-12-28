@@ -259,6 +259,16 @@ void Musician::SetConductor(ConductorDefinition definition) noexcept {
   conductor_ = Conductor{std::move(definition)};
 }
 
+Status Musician::SetInstrumentGain(Id instrument_id, float gain) noexcept {
+  return instrument_manager_.SetGain(instrument_id, transport_.GetTimestamp(),
+                                     gain);
+}
+
+Status Musician::SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept {
+  return instrument_manager_.SetMuted(instrument_id, transport_.GetTimestamp(),
+                                      is_muted);
+}
+
 Status Musician::SetInstrumentNoteOff(Id instrument_id,
                                       float note_pitch) noexcept {
   return instrument_manager_.SetNoteOff(instrument_id,

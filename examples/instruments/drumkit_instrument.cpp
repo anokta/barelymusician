@@ -10,7 +10,7 @@
 namespace barely::examples {
 
 DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
-    : sample_rate_(sample_rate), gain_(0.0f) {}
+    : sample_rate_(sample_rate) {}
 
 void DrumkitInstrument::NoteOff(float pitch) noexcept {
   if (auto* pad = FindOrNull(pads_, pitch)) {
@@ -32,7 +32,6 @@ void DrumkitInstrument::Process(float* output, int num_channels,
     for (auto& [pitch, pad] : pads_) {
       mono_sample += pad.voice.Next(0);
     }
-    mono_sample *= gain_;
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }
@@ -48,9 +47,6 @@ void DrumkitInstrument::SetCustomData(std::any data) noexcept {
 
 void DrumkitInstrument::SetParam(int id, float value) noexcept {
   switch (static_cast<DrumkitInstrumentParam>(id)) {
-    case DrumkitInstrumentParam::kPadGain:
-      gain_ = value;
-      break;
     case DrumkitInstrumentParam::kPadRelease:
       for (auto& [pitch, pad] : pads_) {
         pad.voice.envelope().SetRelease(value);
@@ -62,9 +58,7 @@ void DrumkitInstrument::SetParam(int id, float value) noexcept {
 InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<DrumkitInstrument>(
       [](int sample_rate) { return DrumkitInstrument(sample_rate); },
-      {// Pad gain.
-       ParamDefinition{0.5f, 0.0f, 1.0f},
-       // Pad release.
+      {// Pad release.
        ParamDefinition{0.1f, 0.0f}});
 }
 

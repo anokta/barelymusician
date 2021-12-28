@@ -22,6 +22,12 @@ struct SetCustomDataEvent {
   std::any data;
 };
 
+/// Set gain event.
+struct SetGainEvent {
+  /// Gain.
+  float gain;
+};
+
 /// Set note off event.
 struct SetNoteOffEvent {
   /// Note pitch.
@@ -55,8 +61,8 @@ struct SetParamToDefaultEvent {
 /// Instrument event type.
 using InstrumentEvent =
     std::variant<SetAllNotesOffEvent, SetAllParamsToDefaultEvent,
-                 SetCustomDataEvent, SetNoteOffEvent, SetNoteOnEvent,
-                 SetParamEvent, SetParamToDefaultEvent>;
+                 SetCustomDataEvent, SetGainEvent, SetNoteOffEvent,
+                 SetNoteOnEvent, SetParamEvent, SetParamToDefaultEvent>;
 
 /// Instrument id-event pair.
 using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;

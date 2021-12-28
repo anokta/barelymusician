@@ -13,13 +13,12 @@
 namespace barely::examples {
 
 enum SynthInstrumentParam {
-  kGain = 0,
-  kEnvelopeAttack = 1,
-  kEnvelopeDecay = 2,
-  kEnvelopeSustain = 3,
-  kEnvelopeRelease = 4,
-  kOscillatorType = 5,
-  kNumVoices = 6,
+  kEnvelopeAttack = 0,
+  kEnvelopeDecay = 1,
+  kEnvelopeSustain = 2,
+  kEnvelopeRelease = 3,
+  kOscillatorType = 4,
+  kNumVoices = 5,
 };
 
 /// Simple polyphonic synth instrument.
@@ -41,8 +40,6 @@ class SynthInstrument : public GenericInstrument {
 
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;
-
-  float gain_;
 
   PolyphonicVoice<SynthVoice> voice_;
 };

@@ -138,8 +138,7 @@ int main(int /*argc*/, char* argv[]) {
     // Add instrument.
     const Id instrument_id =
         musician.AddInstrument(SynthInstrument::GetDefinition());
-    musician.SetInstrumentParam(instrument_id, SynthInstrumentParam::kGain,
-                                kInstrumentGain);
+    musician.SetInstrumentGain(instrument_id, kInstrumentGain);
     musician.SetInstrumentParam(instrument_id,
                                 SynthInstrumentParam::kEnvelopeAttack,
                                 kInstrumentEnvelopeAttack);

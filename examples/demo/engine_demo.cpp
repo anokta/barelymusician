@@ -212,8 +212,7 @@ int main(int /*argc*/, char* argv[]) {
                                              float attack, float release) {
     instrument_ids.push_back(
         musician.AddInstrument(SynthInstrument::GetDefinition()));
-    musician.SetInstrumentParam(instrument_ids.back(),
-                                SynthInstrumentParam::kGain, gain);
+    musician.SetInstrumentGain(instrument_ids.back(), gain);
     musician.SetInstrumentParam(instrument_ids.back(),
                                 SynthInstrumentParam::kEnvelopeAttack, attack);
     musician.SetInstrumentParam(
@@ -262,6 +261,7 @@ int main(int /*argc*/, char* argv[]) {
   // Add drumkit instrument.
   instrument_ids.push_back(
       musician.AddInstrument(DrumkitInstrument::GetDefinition()));
+  musician.SetInstrumentGain(instrument_ids.back(), 0.5f);
   std::unordered_map<float, std::string> drumkit_map = {
       {barely::kPitchKick, "basic_kick.wav"},
       {barely::kPitchSnare, "basic_snare.wav"},

@@ -390,7 +390,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gain: 0.25
   attack: 0
   decay: 0
   sustain: 1
@@ -603,7 +602,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gain: 0.2
   attack: 0
   decay: 0
   sustain: 1
@@ -807,7 +805,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gain: 0.25
   attack: 0
   decay: 0
   sustain: 1
@@ -826,7 +823,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.2
+  m_Volume: 0.25
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -1003,7 +1000,7 @@ MonoBehaviour:
   numBeats: 4
   barPitch: 1
   beatPitch: 0
-  intensity: 0.25
+  intensity: 0.5
   logToConsole: 1
   tick: 1
 --- !u!4 &2098958021
@@ -1032,7 +1029,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gain: 0.2
   attack: 0
   decay: 0
   sustain: 1
@@ -1051,7 +1047,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0

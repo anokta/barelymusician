@@ -59,6 +59,13 @@ Status InstrumentManager::Add(Id instrument_id, double timestamp,
   return Status::kAlreadyExists;
 }
 
+StatusOr<float> InstrumentManager::GetGain(Id instrument_id) const noexcept {
+  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
+    return controller->gain;
+  }
+  return Status::kNotFound;
+}
+
 StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
                                             int param_index) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
@@ -67,6 +74,13 @@ StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
       return controller->params[param_index];
     }
     return Status::kInvalidArgument;
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<bool> InstrumentManager::IsMuted(Id instrument_id) const noexcept {
+  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
+    return controller->is_muted;
   }
   return Status::kNotFound;
 }
@@ -126,6 +140,11 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
                           std::move(set_custom_data_event.data));
                     }
                   },
+                  [&](SetGainEvent& set_gain_event) noexcept {
+                    if (instrument) {
+                      instrument->SetGain(set_gain_event.gain);
+                    }
+                  },
                   [&](SetNoteOffEvent& set_note_off_event) noexcept {
                     if (instrument) {
                       instrument->SetNoteOff(set_note_off_event.pitch);
@@ -172,6 +191,9 @@ void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
               [&](SetCustomDataEvent& set_custom_data_event) noexcept {
                 SetCustomData(instrument_id, timestamp,
                               std::move(set_custom_data_event.data));
+              },
+              [&](SetGainEvent& set_gain_event) noexcept {
+                SetGain(instrument_id, timestamp, set_gain_event.gain);
               },
               [&](SetNoteOffEvent& set_note_off_event) noexcept {
                 SetNoteOff(instrument_id, timestamp, set_note_off_event.pitch);
@@ -269,6 +291,32 @@ Status InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     update_events_[instrument_id].emplace(
         timestamp, SetCustomDataEvent{std::move(custom_data)});
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status InstrumentManager::SetGain(Id instrument_id, double timestamp,
+                                  float gain) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->gain = std::min(std::max(gain, 0.0f), 1.0f);
+    if (!controller->is_muted) {
+      update_events_[instrument_id].emplace(timestamp,
+                                            SetGainEvent{controller->gain});
+    }
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status InstrumentManager::SetMuted(Id instrument_id, double timestamp,
+                                   bool is_muted) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (controller->is_muted != is_muted) {
+      controller->is_muted = is_muted;
+      update_events_[instrument_id].emplace(
+          timestamp, SetGainEvent{is_muted ? 0.0f : controller->gain});
+    }
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -385,7 +433,7 @@ void InstrumentManager::Update() noexcept {
 
 InstrumentManager::InstrumentController::InstrumentController(
     InstrumentDefinition definition) noexcept
-    : definition(std::move(definition)) {
+    : definition(std::move(definition)), gain(1.0f), is_muted(false) {
   params.reserve(this->definition.param_definitions.size());
   for (const auto& param_definition : this->definition.param_definitions) {
     params.emplace_back(param_definition);

@@ -210,6 +210,20 @@ class Musician {
   Status SetCustomInstrumentData(Id instrument_id,
                                  std::any custom_data) noexcept;
 
+  /// Sets instrument gain.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param gain Gain in amplitude.
+  /// @return Status.
+  Status SetInstrumentGain(Id instrument_id, float gain) noexcept;
+
+  /// Sets whether instrument should be muted or not.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param is_muted True if muted, false otherwise.
+  /// @return Status.
+  Status SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept;
+
   /// Sets instrument note off.
   ///
   /// @param instrument_id Instrument id.

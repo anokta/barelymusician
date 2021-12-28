@@ -8,7 +8,7 @@
 namespace barely::examples {
 
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
-    : gain_(0.0f), voice_(SynthVoice(sample_rate)) {}
+    : voice_(SynthVoice(sample_rate)) {}
 
 void SynthInstrument::NoteOff(float pitch) noexcept { voice_.Stop(pitch); }
 
@@ -22,7 +22,7 @@ void SynthInstrument::NoteOn(float pitch, float intensity) noexcept {
 void SynthInstrument::Process(float* output, int num_channels,
                               int num_frames) noexcept {
   for (int frame = 0; frame < num_frames; ++frame) {
-    const float mono_sample = gain_ * voice_.Next(0);
+    const float mono_sample = voice_.Next(0);
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }
@@ -31,9 +31,6 @@ void SynthInstrument::Process(float* output, int num_channels,
 
 void SynthInstrument::SetParam(int index, float value) noexcept {
   switch (static_cast<SynthInstrumentParam>(index)) {
-    case SynthInstrumentParam::kGain:
-      gain_ = value;
-      break;
     case SynthInstrumentParam::kEnvelopeAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetAttack(value);
@@ -69,9 +66,7 @@ void SynthInstrument::SetParam(int index, float value) noexcept {
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<SynthInstrument>(
       [](int sample_rate) { return SynthInstrument(sample_rate); },
-      {// Gain.
-       ParamDefinition{0.25f, 0.0f, 1.0f},
-       // Attack.
+      {// Attack.
        ParamDefinition{0.05f, 0.0f},
        // Decay.
        ParamDefinition{0.0f, 0.0f},

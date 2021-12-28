@@ -32,7 +32,7 @@ constexpr double kLookahead = 0.1;
 
 // Metronome settings.
 constexpr int kNumVoices = 1;
-constexpr float kGain = 0.5f;
+constexpr float kGain = 0.25f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.025f;

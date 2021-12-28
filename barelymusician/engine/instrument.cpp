@@ -49,7 +49,8 @@ Instrument::Instrument(int sample_rate,
                           ? std::move(definition.set_note_on_fn)
                           : &NoopSetInstrumentNoteOnFn),
       set_param_fn_(definition.set_param_fn ? std::move(definition.set_param_fn)
-                                            : &NoopSetInstrumentParamFn) {
+                                            : &NoopSetInstrumentParamFn),
+      gain_(1.0f) {
   if (definition.create_fn) {
     definition.create_fn(&state_, sample_rate);
   }
@@ -65,11 +66,17 @@ Instrument::~Instrument() noexcept {
 void Instrument::Process(float* output, int num_channels,
                          int num_frames) noexcept {
   process_fn_(&state_, output, num_channels, num_frames);
+  // TODO(#88): Revisit gain processing.
+  for (int i = 0; i < num_channels * num_frames; ++i) {
+    output[i] *= gain_;
+  }
 }
 
 void Instrument::SetCustomData(std::any data) noexcept {
   set_custom_data_fn_(&state_, std::move(data));
 }
+
+void Instrument::SetGain(float gain) noexcept { gain_ = gain; }
 
 void Instrument::SetNoteOff(float pitch) noexcept {
   set_note_off_fn_(&state_, pitch);

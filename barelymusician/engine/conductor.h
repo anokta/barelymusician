@@ -20,10 +20,7 @@ class Conductor {
   /// Constructs new |Conductor|.
   ///
   /// @param definition Conductor definition.
-  /// @param param_definitions Conductor parameter definitions.
-  explicit Conductor(
-      ConductorDefinition definition = {},
-      std::vector<ParamDefinition> param_definitions = {}) noexcept;
+  explicit Conductor(ConductorDefinition definition = {}) noexcept;
 
   /// Destroys |Conductor|.
   ~Conductor() noexcept;

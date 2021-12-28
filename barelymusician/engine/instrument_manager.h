@@ -52,11 +52,9 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param definition Instrument definition.
-  /// @param param_definitions Instrument parameter definitions.
   /// @return Status.
   Status Add(Id instrument_id, double timestamp,
-             InstrumentDefinition definition,
-             std::vector<ParamDefinition> param_definitions) noexcept;
+             InstrumentDefinition definition) noexcept;
 
   /// Returns instrument parameter.
   ///
@@ -197,9 +195,7 @@ class InstrumentManager {
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
     // Constructs new |InstrumentController|.
-    InstrumentController(
-        InstrumentDefinition definition,
-        std::vector<ParamDefinition> param_definitions) noexcept;
+    explicit InstrumentController(InstrumentDefinition definition) noexcept;
 
     // Instrument definition.
     InstrumentDefinition definition;

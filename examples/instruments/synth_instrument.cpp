@@ -1,7 +1,5 @@
 #include "examples/instruments/synth_instrument.h"
 
-#include <vector>
-
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/engine/param_definition.h"
@@ -70,24 +68,21 @@ void SynthInstrument::SetParam(int index, float value) noexcept {
 
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<SynthInstrument>(
-      [](int sample_rate) { return SynthInstrument(sample_rate); });
-}
-
-std::vector<ParamDefinition> SynthInstrument::GetParamDefinitions() noexcept {
-  return {// Gain.
-          ParamDefinition{0.25f, 0.0f, 1.0f},
-          // Attack.
-          ParamDefinition{0.05f, 0.0f},
-          // Decay.
-          ParamDefinition{0.0f, 0.0f},
-          // Sustain.
-          ParamDefinition{1.0f, 0.0f, 1.0f},
-          // Release.
-          ParamDefinition{0.25f, 0.0f},
-          // Oscillator type.
-          ParamDefinition{static_cast<int>(OscillatorType::kSine)},
-          // Number of voices.
-          ParamDefinition{8, 0}};
+      [](int sample_rate) { return SynthInstrument(sample_rate); },
+      {// Gain.
+       ParamDefinition{0.25f, 0.0f, 1.0f},
+       // Attack.
+       ParamDefinition{0.05f, 0.0f},
+       // Decay.
+       ParamDefinition{0.0f, 0.0f},
+       // Sustain.
+       ParamDefinition{1.0f, 0.0f, 1.0f},
+       // Release.
+       ParamDefinition{0.25f, 0.0f},
+       // Oscillator type.
+       ParamDefinition{static_cast<int>(OscillatorType::kSine)},
+       // Number of voices.
+       ParamDefinition{8, 0}});
 }
 
 }  // namespace barely::examples

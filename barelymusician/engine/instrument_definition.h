@@ -3,6 +3,9 @@
 
 #include <any>
 #include <functional>
+#include <vector>
+
+#include "barelymusician/engine/param_definition.h"
 
 namespace barely {
 
@@ -82,6 +85,9 @@ struct InstrumentDefinition {
 
   /// Set parameter function.
   SetInstrumentParamFn set_param_fn;
+
+  /// Parameter definitions.
+  std::vector<ParamDefinition> param_definitions;
 };
 
 }  // namespace barely

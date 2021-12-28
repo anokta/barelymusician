@@ -2,7 +2,6 @@
 #define EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
 #include <any>
-#include <vector>
 
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
@@ -39,7 +38,6 @@ class SynthInstrument : public GenericInstrument {
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
-  static std::vector<ParamDefinition> GetParamDefinitions() noexcept;
 
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;

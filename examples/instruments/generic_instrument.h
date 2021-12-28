@@ -4,8 +4,10 @@
 #include <any>
 #include <functional>
 #include <utility>
+#include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/engine/param_definition.h"
 
 namespace barely::examples {
 
@@ -49,7 +51,8 @@ class GenericInstrument {
 /// Returns instrument definition for the given create instrument function.
 template <typename InstrumentType>
 InstrumentDefinition GetInstrumentDefinition(
-    std::function<InstrumentType(int)> create_instrument_fn) noexcept {
+    std::function<InstrumentType(int)> create_instrument_fn,
+    std::vector<ParamDefinition> param_definitions) noexcept {
   return InstrumentDefinition{
       .create_fn =
           [create_instrument_fn](InstrumentState* state,
@@ -83,7 +86,8 @@ InstrumentDefinition GetInstrumentDefinition(
              float param_value) noexcept {
             auto* instrument = std::any_cast<InstrumentType>(state);
             instrument->SetParam(param_index, param_value);
-          }};
+          },
+      .param_definitions = std::move(param_definitions)};
 }
 
 }  // namespace barely::examples

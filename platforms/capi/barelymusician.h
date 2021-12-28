@@ -129,6 +129,12 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Set parameter function.
   BarelyInstrumentSetParamFn set_param_fn;
+
+  /// Number of parameter definitions.
+  int32_t num_param_definitions;
+
+  /// List of parameter definitions.
+  BarelyParamDefinition* param_definitions;
 } BarelyInstrumentDefinition;
 
 /// Instrument note off callback signature.
@@ -207,14 +213,11 @@ BARELY_EXPORT BarelyApi BarelyCreateApi(int32_t sample_rate);
 ///
 /// @param api BarelyMusician API.
 /// @param definition Instrument definition.
-/// @param param_definitions List of instrument parameter definitions.
-/// @param num_param_definitions Number of instrument parameter definitions.
 /// @param instrument_id_ptr Pointer to instrument id.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyCreateInstrument(
-    BarelyApi api, BarelyInstrumentDefinition definition,
-    BarelyParamDefinition* param_definitions, int32_t num_param_definitions,
-    BarelyId* instrument_id_ptr);
+BARELY_EXPORT BarelyStatus
+BarelyCreateInstrument(BarelyApi api, BarelyInstrumentDefinition definition,
+                       BarelyId* instrument_id_ptr);
 
 // TODO(#85): Temporary shortcut to test instruments.
 BARELY_EXPORT BarelyStatus

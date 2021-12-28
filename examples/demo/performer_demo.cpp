@@ -76,8 +76,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician(kSampleRate);
   musician.SetPlaybackTempo(kInitialTempo);
 
-  const Id performer_instrument_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  const Id performer_instrument_id =
+      musician.AddInstrument(SynthInstrument::GetDefinition());
   musician.SetInstrumentParam(performer_instrument_id,
                               SynthInstrumentParam::kGain, kGain);
   musician.SetInstrumentParam(performer_instrument_id,
@@ -88,8 +88,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
                               SynthInstrumentParam::kOscillatorType,
                               static_cast<float>(kOscillatorType));
 
-  const Id metronome_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  const Id metronome_id =
+      musician.AddInstrument(SynthInstrument::GetDefinition());
   musician.SetInstrumentParam(metronome_id, SynthInstrumentParam::kGain,
                               0.5f * kGain);
   musician.SetInstrumentParam(metronome_id,
@@ -236,8 +236,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                           [&](ConductorState*, double playback_tempo) {
                             return 1.25 * playback_tempo;
                           }}
-                : ConductorDefinition{},
-            {});
+                : ConductorDefinition{});
         ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':

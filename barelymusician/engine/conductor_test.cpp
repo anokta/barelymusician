@@ -2,7 +2,6 @@
 
 #include <any>
 #include <variant>
-#include <vector>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
@@ -42,12 +41,8 @@ ConductorDefinition GetTestConductorDefinition() {
       .transform_playback_tempo_fn =
           [](ConductorState* state, double tempo) {
             return tempo + static_cast<double>(*std::any_cast<float>(state));
-          }};
-}
-
-// Returns test conductor parameter definitions.
-std::vector<ParamDefinition> GetTestParamDefinitions() {
-  return {ParamDefinition{0.0f}};
+          },
+      .param_definitions = {ParamDefinition{0.0f}}};
 }
 
 // Tests that the conductor behaves as expected with an empty definition.
@@ -66,7 +61,7 @@ TEST(ConductorTest, EmptyDefinition) {
 
 // Tests that the conductor behaves as expected with a test definition.
 TEST(ConductorTest, TestDefinition) {
-  Conductor conductor(GetTestConductorDefinition(), GetTestParamDefinitions());
+  Conductor conductor(GetTestConductorDefinition());
   EXPECT_DOUBLE_EQ(
       GetStatusOrValue(conductor.TransformNoteDuration(NoteDuration{5.0})),
       0.0);

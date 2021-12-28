@@ -27,6 +27,14 @@ using ::barely::Status;
 using ::barely::StatusOr;
 using ::barely::examples::SynthInstrument;
 
+// Returns the corresponding |ParamDefinition| for a given |param_definition|.
+ParamDefinition GetParamDefinition(
+    const BarelyParamDefinition& param_definition) noexcept {
+  return ParamDefinition(param_definition.default_value,
+                         param_definition.min_value,
+                         param_definition.max_value);
+}
+
 // Returns the corresponding |InstrumentDefinition| for a given |definition|.
 InstrumentDefinition GetInstrumentDefinition(
     BarelyInstrumentDefinition definition) noexcept {
@@ -82,25 +90,12 @@ InstrumentDefinition GetInstrumentDefinition(
       set_param_fn(std::any_cast<BarelyInstrumentState*>(&state), index, value);
     };
   }
-  return result;
-}
-
-// Returns the corresponding |ParamDefinition| for a given |param_definition|.
-ParamDefinition GetParamDefinition(
-    const BarelyParamDefinition& param_definition) noexcept {
-  return ParamDefinition(param_definition.default_value,
-                         param_definition.min_value,
-                         param_definition.max_value);
-}
-
-// Returns the corresponding |ParamDefinitionMap| for a given
-// |param_definitions| of |num_param_definitions|.
-std::vector<ParamDefinition> GetParamDefinitions(
-    BarelyParamDefinition* param_definitions,
-    int32_t num_param_definitions) noexcept {
-  std::vector<ParamDefinition> result;
-  for (int32_t i = 0; i < num_param_definitions; ++i) {
-    result.emplace_back(GetParamDefinition(param_definitions[i]));
+  if (definition.num_param_definitions > 0) {
+    result.param_definitions.reserve(definition.num_param_definitions);
+    for (int32_t i = 0; i < definition.num_param_definitions; ++i) {
+      result.param_definitions.emplace_back(
+          GetParamDefinition(definition.param_definitions[i]));
+    }
   }
   return result;
 }
@@ -188,14 +183,11 @@ BarelyApi BarelyCreateApi(int32_t sample_rate) {
 
 BarelyStatus BarelyCreateInstrument(BarelyApi api,
                                     BarelyInstrumentDefinition definition,
-                                    BarelyParamDefinition* param_definitions,
-                                    int32_t num_param_definitions,
                                     BarelyId* instrument_id_ptr) {
   if (!api) return kBarelyStatus_NotFound;
   if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
   *instrument_id_ptr = api->instance.AddInstrument(
-      GetInstrumentDefinition(std::move(definition)),
-      GetParamDefinitions(param_definitions, num_param_definitions));
+      GetInstrumentDefinition(std::move(definition)));
   return kBarelyStatus_Ok;
 }
 
@@ -203,8 +195,8 @@ BarelyStatus BarelyCreateSynthInstrument(BarelyApi api,
                                          BarelyId* instrument_id_ptr) {
   if (!api) return kBarelyStatus_NotFound;
   if (!instrument_id_ptr) return kBarelyStatus_InvalidArgument;
-  *instrument_id_ptr = api->instance.AddInstrument(
-      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  *instrument_id_ptr =
+      api->instance.AddInstrument(SynthInstrument::GetDefinition());
   return kBarelyStatus_Ok;
 }
 

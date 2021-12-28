@@ -211,8 +211,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
                                              float attack, float release) {
     instrument_ids.push_back(
-        musician.AddInstrument(SynthInstrument::GetDefinition(),
-                               SynthInstrument::GetParamDefinitions()));
+        musician.AddInstrument(SynthInstrument::GetDefinition()));
     musician.SetInstrumentParam(instrument_ids.back(),
                                 SynthInstrumentParam::kGain, gain);
     musician.SetInstrumentParam(instrument_ids.back(),
@@ -262,8 +261,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Add drumkit instrument.
   instrument_ids.push_back(
-      musician.AddInstrument(DrumkitInstrument::GetDefinition(),
-                             DrumkitInstrument::GetParamDefinitions()));
+      musician.AddInstrument(DrumkitInstrument::GetDefinition()));
   std::unordered_map<float, std::string> drumkit_map = {
       {barely::kPitchKick, "basic_kick.wav"},
       {barely::kPitchSnare, "basic_snare.wav"},

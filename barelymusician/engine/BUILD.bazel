@@ -22,6 +22,7 @@ cc_library(
     name = "conductor_definition",
     hdrs = ["conductor_definition.h"],
     deps = [
+        ":param_definition",
         "//barelymusician/common:status",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_intensity",
@@ -41,6 +42,9 @@ cc_library(
 cc_library(
     name = "instrument_definition",
     hdrs = ["instrument_definition.h"],
+    deps = [
+        ":param_definition",
+    ],
 )
 
 cc_library(

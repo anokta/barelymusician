@@ -3,11 +3,13 @@
 
 #include <any>
 #include <functional>
+#include <vector>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/engine/param_definition.h"
 
 namespace barely {
 
@@ -96,6 +98,9 @@ struct ConductorDefinition {
 
   /// Transform playback tempo function.
   TransformPlaybackTempoFn transform_playback_tempo_fn;
+
+  /// Parameter definitions.
+  std::vector<ParamDefinition> param_definitions;
 };
 
 }  // namespace barely

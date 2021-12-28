@@ -47,10 +47,8 @@ class Musician {
   /// Adds new instrument.
   ///
   /// @param definition Instrument definition.
-  /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
-  Id AddInstrument(InstrumentDefinition definition,
-                   std::vector<ParamDefinition> param_definitions) noexcept;
+  Id AddInstrument(InstrumentDefinition definition) noexcept;
 
   /// Adds new performer.
   ///
@@ -202,9 +200,7 @@ class Musician {
   /// Sets conductor.
   ///
   /// @param definition Conductor definition.
-  /// @param definition Conductor parameter definitions.
-  void SetConductor(ConductorDefinition definition,
-                    std::vector<ParamDefinition> param_definitions) noexcept;
+  void SetConductor(ConductorDefinition definition) noexcept;
 
   /// Sets custom instrument data.
   ///

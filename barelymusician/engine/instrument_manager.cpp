@@ -40,15 +40,13 @@ InstrumentManager::InstrumentManager(int sample_rate) noexcept
       note_on_callback_(&NoopNoteOnCallback),
       sample_rate_(sample_rate) {}
 
-Status InstrumentManager::Add(
-    Id instrument_id, double timestamp, InstrumentDefinition definition,
-    std::vector<ParamDefinition> param_definitions) noexcept {
+Status InstrumentManager::Add(Id instrument_id, double timestamp,
+                              InstrumentDefinition definition) noexcept {
   if (instrument_id == kInvalidId) {
     return Status::kInvalidArgument;
   }
-  if (const auto [controller_it, success] = controllers_.emplace(
-          instrument_id,
-          InstrumentController(definition, std::move(param_definitions)));
+  if (const auto [controller_it, success] =
+          controllers_.emplace(instrument_id, InstrumentController(definition));
       success) {
     auto& update_events = update_events_[instrument_id];
     update_events.emplace(timestamp, CreateEvent{std::move(definition)});
@@ -386,12 +384,11 @@ void InstrumentManager::Update() noexcept {
 }
 
 InstrumentManager::InstrumentController::InstrumentController(
-    InstrumentDefinition definition,
-    std::vector<ParamDefinition> param_definitions) noexcept
+    InstrumentDefinition definition) noexcept
     : definition(std::move(definition)) {
-  params.reserve(param_definitions.size());
-  for (auto& param_definition : param_definitions) {
-    params.emplace_back(std::move(param_definition));
+  params.reserve(this->definition.param_definitions.size());
+  for (const auto& param_definition : this->definition.param_definitions) {
+    params.emplace_back(param_definition);
   }
 }
 

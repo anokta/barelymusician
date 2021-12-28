@@ -47,12 +47,15 @@ InstrumentDefinition GetTestInstrumentDefinition() {
           [](InstrumentState* state, int index, float value) {
             *std::any_cast<float>(state) =
                 static_cast<float>(index + 1) * value;
-          }};
+          },
+      .param_definitions = {ParamDefinition{0.0f}}};
 }
 
-// Returns test instrument parameter definition.
-std::vector<ParamDefinition> GetTestParamDefinitions() {
-  return {ParamDefinition{0.0f}};
+TEST(InstrumentManagerTest, GetParam) {
+  InstrumentManager instrument_manager(kSampleRate);
+  EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
+                                          GetTestInstrumentDefinition())));
+  EXPECT_TRUE(IsOk(instrument_manager.GetParam(kInstrumentId, 0)));
 }
 
 // Tests that instruments are added and removed as expected.
@@ -66,8 +69,7 @@ TEST(InstrumentManagerTest, AddRemove) {
   // Add instrument.
   EXPECT_FALSE(instrument_manager.IsValid(kInstrumentId));
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
   EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -121,8 +123,7 @@ TEST(InstrumentManagerTest, ProcessEvents) {
   InstrumentManager instrument_manager(kSampleRate);
 
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, kTimestamp,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   // Set note on.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
@@ -180,8 +181,7 @@ TEST(InstrumentManagerTest, SetNote) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, kTimestamp,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   instrument_manager.Update();
 
@@ -243,8 +243,7 @@ TEST(InstrumentManagerTest, SetNotes) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   instrument_manager.Update();
 
@@ -314,8 +313,7 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
     EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
     EXPECT_TRUE(IsOk(instrument_manager.Add(instrument_id, 0.0,
-                                            GetTestInstrumentDefinition(),
-                                            GetTestParamDefinitions())));
+                                            GetTestInstrumentDefinition())));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
 
     instrument_manager.Update();
@@ -389,8 +387,7 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
 
     EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
     EXPECT_TRUE(IsOk(instrument_manager.Add(instrument_id, 0.0,
-                                            GetTestInstrumentDefinition(),
-                                            GetTestParamDefinitions())));
+                                            GetTestInstrumentDefinition())));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
     EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
                 Property(&Param::GetValue, 0.0f));
@@ -460,8 +457,7 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   // Trigger note on callback.
   Id note_on_instrument_id = 0;
@@ -550,8 +546,7 @@ TEST(InstrumentManagerTest, SetSampleRate) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   instrument_manager.Update();
 

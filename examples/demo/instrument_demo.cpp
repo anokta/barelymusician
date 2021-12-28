@@ -63,8 +63,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Musician musician(kSampleRate);
 
-  const auto instrument_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  const auto instrument_id =
+      musician.AddInstrument(SynthInstrument::GetDefinition());
   musician.SetInstrumentParam(instrument_id, SynthInstrumentParam::kGain,
                               kGain);
   musician.SetInstrumentParam(

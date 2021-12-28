@@ -56,8 +56,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetPlaybackTempo(kInitialTempo);
 
   // Create metronome instrument.
-  const auto metronome_id = musician.AddInstrument(
-      SynthInstrument::GetDefinition(), SynthInstrument::GetParamDefinitions());
+  const auto metronome_id =
+      musician.AddInstrument(SynthInstrument::GetDefinition());
   musician.SetInstrumentParam(metronome_id,
                               SynthInstrumentParam::kEnvelopeAttack, kAttack);
   musician.SetInstrumentParam(metronome_id,

@@ -3,6 +3,7 @@
 
 #include <any>
 #include <unordered_map>
+#include <vector>
 
 #include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/engine/param_definition.h"
@@ -32,7 +33,6 @@ class DrumkitInstrument : public GenericInstrument {
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
-  static std::vector<ParamDefinition> GetParamDefinitions() noexcept;
 
  private:
   struct DrumkitPad {

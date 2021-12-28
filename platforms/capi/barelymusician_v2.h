@@ -47,18 +47,6 @@ typedef float BarelyNoteIntensity;
 /// Note pitch type.
 typedef float BarelyNotePitch;
 
-/// Note.
-typedef struct BarelyNote {
-  /// Pitch.
-  BarelyNotePitch pitch;
-
-  /// Intensity.
-  BarelyNoteIntensity intensity;
-
-  /// Duration.
-  BarelyNoteDuration duration;
-} BarelyNote;
-
 /// Parameter definition.
 typedef struct BarelyParamDefinition {
   /// Default value.
@@ -507,6 +495,23 @@ BARELY_EXPORT BarelyStatus BarelyConductorSetRootNote(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyConductorSetStress(BarelyApi api,
                                                     float stress);
 
+/// Cancels all scheduled instrument note events.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrumentCancelAllScheduledNoteEvents(
+    BarelyApi api, BarelyId instrument_id);
+
+/// Cancels scheduled instrument note event.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param note_event_id Note event identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrumentCancelScheduledNoteEvent(
+    BarelyApi api, BarelyId instrument_id, BarelyId note_event_id);
+
 /// Creates new instrument.
 ///
 /// @param api BarelyMusician API.
@@ -580,6 +585,21 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentIsNoteOn(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyInstrumentProcess(
     BarelyApi api, BarelyId instrument_id, double timestamp, float* output,
     int32_t num_output_channels, int32_t num_output_frames);
+
+/// Schedules instrument note event at position.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param note_position Note position in beats.
+/// @param note_duration Note duration.
+/// @param note_pitch Note pitch.
+/// @param note_intensity Note intensity.
+/// @param out_note_event_id Output note event identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrumentScheduleNoteEvent(
+    BarelyApi api, BarelyId instrument_id, double note_position,
+    BarelyNoteDuration note_duration, BarelyNotePitch note_pitch,
+    BarelyNoteIntensity note_intensity, BarelyId* out_note_event_id);
 
 /// Stops all active instrument notes.
 ///
@@ -670,6 +690,30 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentSetParam(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyInstrumentSetParamToDefault(
     BarelyApi api, BarelyId instrument_id, int32_t param_index);
 
+/// Adds instrument to sequence.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @param instrument_id Instrument identifier.
+BARELY_EXPORT BarelyStatus BarelySequenceAddInstrument(BarelyApi api,
+                                                       BarelyId sequence_id,
+                                                       BarelyId instrument_id);
+
+/// Adds sequence note event at position.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @param note_position Note position in beats.
+/// @param note_duration Note duration.
+/// @param note_pitch Note pitch.
+/// @param note_intensity Note intensity.
+/// @param out_note_event_id Output note event identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceAddNoteEvent(
+    BarelyApi api, BarelyId sequence_id, double note_position,
+    BarelyNoteDuration note_duration, BarelyNotePitch note_pitch,
+    BarelyNoteIntensity note_intensity, BarelyId* out_note_event_id);
+
 /// Creates new sequence.
 ///
 /// @param api BarelyMusician API.
@@ -732,6 +776,49 @@ BARELY_EXPORT BarelyStatus BarelySequenceGetLoopLength(BarelyApi api,
                                                        BarelyId sequence_id,
                                                        double* out_loop_length);
 
+/// Gets sequence note event duration.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @param note_event_id Note event identifier.
+/// @param out_note_duration Output note duration.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceGetNoteEventDuration(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id,
+    BarelyNoteDuration* out_note_duration);
+
+/// Gets sequence note event intensity.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @param note_event_id Note event identifier.
+/// @param out_note_intensity Output note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceGetNoteEventIntensity(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id,
+    BarelyNoteIntensity* out_note_intensity);
+
+/// Gets sequence note event pitch.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @param note_event_id Note event identifier.
+/// @param out_note_pitch Output note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceGetNoteEventPitch(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id,
+    BarelyNotePitch* out_note_pitch);
+
+/// Gets whether sequence has instrument or not.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @param instrument_id Instrument identifier.
+/// @param out_has_instrument Output true if instrument is had, false otherwise.
+BARELY_EXPORT BarelyStatus
+BarelySequenceHasInstrument(BarelyApi api, BarelyId sequence_id,
+                            BarelyId instrument_id, bool* out_has_instrument);
+
 /// Gets whether sequence is empty or not.
 ///
 /// @param api BarelyMusician API.
@@ -751,6 +838,38 @@ BARELY_EXPORT BarelyStatus BarelySequenceIsEmpty(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelySequenceIsLooping(BarelyApi api,
                                                    BarelyId sequence_id,
                                                    bool* out_is_looping);
+
+/// Removes all instruments from sequence.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+BARELY_EXPORT BarelyStatus
+BarelySequenceRemoveAllInstruments(BarelyApi api, BarelyId sequence_id);
+
+/// Removes all sequence note events.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySequenceRemoveAllNoteEvents(BarelyApi api, BarelyId instrument_id);
+
+/// Removes instrument from sequence.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @param instrument_id Instrument identifier.
+BARELY_EXPORT BarelyStatus BarelySequenceRemoveInstrument(
+    BarelyApi api, BarelyId sequence_id, BarelyId instrument_id);
+
+/// Removes sequence note event.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @param note_event_id Note event identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceRemoveNoteEvent(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id);
 
 /// Sets sequence begin offset.
 ///
@@ -809,6 +928,39 @@ BARELY_EXPORT BarelyStatus BarelySequenceSetLoopLength(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelySequenceSetLooping(BarelyApi api,
                                                     BarelyId sequence_id,
                                                     bool is_looping);
+
+/// Sets sequence note event duration.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @param note_event_id Note event identifier.
+/// @param note_duration Note duration.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceSetNoteEventDuration(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id,
+    BarelyNoteDuration note_duration);
+
+/// Sets sequence note event intensity.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @param note_event_id Note event identifier.
+/// @param note_intensity Note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceSetNoteEventIntensity(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id,
+    BarelyNoteIntensity note_intensity);
+
+/// Sets sequence note event pitch.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Sequence identifier.
+/// @param note_event_id Note event identifier.
+/// @param note_pitch Note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequenceSetNoteEventPitch(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id,
+    BarelyNotePitch note_pitch);
 
 #ifdef __cplusplus
 }  // extern "C"

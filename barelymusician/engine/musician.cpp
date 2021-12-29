@@ -35,26 +35,26 @@ Musician::Musician(int sample_rate) noexcept
     : instrument_manager_(sample_rate),
       playback_tempo_(kDefaultPlaybackTempo),
       playback_update_callback_(&NoopPlaybackUpdateCallback) {
-  transport_.SetUpdateCallback(
-      [&](double begin_position, double end_position,
-          const Transport::GetTimestampFn& get_timestamp_fn) noexcept {
-        playback_update_callback_(begin_position, end_position);
-        InstrumentIdEventPairMap id_event_pairs;
-        for (auto& [performer_id, performer] : performers_) {
-          id_event_pairs.merge(
-              performer.Perform(begin_position, end_position, conductor_));
-        }
-        for (auto& [position, id_event_pair] : id_event_pairs) {
-          auto& [instrument_id, event] = id_event_pair;
-          instrument_manager_.ProcessEvent(
-              instrument_id, get_timestamp_fn(position), std::move(event));
-        }
-      });
+  transport_.SetUpdateCallback([&](double begin_position,
+                                   double end_position) noexcept {
+    playback_update_callback_(begin_position, end_position);
+    InstrumentIdEventPairMap id_event_pairs;
+    for (auto& [performer_id, performer] : performers_) {
+      id_event_pairs.merge(
+          performer.Perform(begin_position, end_position, conductor_));
+    }
+    for (auto& [position, id_event_pair] : id_event_pairs) {
+      auto& [instrument_id, event] = id_event_pair;
+      instrument_manager_.ProcessEvent(instrument_id,
+                                       transport_.GetLastTimestamp(position),
+                                       std::move(event));
+    }
+  });
 }
 
 Id Musician::AddInstrument(InstrumentDefinition definition) noexcept {
   const Id instrument_id = id_generator_.Next();
-  instrument_manager_.Add(instrument_id, transport_.GetTimestamp(),
+  instrument_manager_.Add(instrument_id, transport_.GetLastTimestamp(),
                           std::move(definition));
   return instrument_id;
 }
@@ -161,7 +161,7 @@ void Musician::ProcessInstrument(Id instrument_id, double timestamp,
 
 Status Musician::RemoveAllPerformerInstruments(Id performer_id) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
-    const double timestamp = transport_.GetTimestamp();
+    const double timestamp = transport_.GetLastTimestamp();
     for (auto& [instrument_id, event] : performer->RemoveAllInstruments()) {
       instrument_manager_.ProcessEvent(instrument_id, timestamp,
                                        std::move(event));
@@ -191,7 +191,7 @@ Status Musician::RemoveAllPerformerNotes(Id performer_id, double begin_position,
 
 Status Musician::RemoveInstrument(Id instrument_id) noexcept {
   const auto status =
-      instrument_manager_.Remove(instrument_id, transport_.GetTimestamp());
+      instrument_manager_.Remove(instrument_id, transport_.GetLastTimestamp());
   if (IsOk(status)) {
     for (auto& [performer_id, performer] : performers_) {
       performer.RemoveInstrument(instrument_id);
@@ -203,7 +203,7 @@ Status Musician::RemoveInstrument(Id instrument_id) noexcept {
 Status Musician::RemovePerformer(Id performer_id) noexcept {
   if (const auto performer_it = performers_.find(performer_id);
       performer_it != performers_.end()) {
-    const double timestamp = transport_.GetTimestamp();
+    const double timestamp = transport_.GetLastTimestamp();
     for (auto& [instrument_id, event] :
          performer_it->second.RemoveAllInstruments()) {
       instrument_manager_.ProcessEvent(instrument_id, timestamp,
@@ -220,7 +220,7 @@ Status Musician::RemovePerformerInstrument(Id performer_id,
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     const auto events_or = performer->RemoveInstrument(instrument_id);
     if (IsOk(events_or)) {
-      const double timestamp = transport_.GetTimestamp();
+      const double timestamp = transport_.GetLastTimestamp();
       for (auto& event : GetStatusOrValue(events_or)) {
         instrument_manager_.ProcessEvent(instrument_id, timestamp,
                                          std::move(event));
@@ -241,18 +241,18 @@ Status Musician::RemovePerformerNote(Id performer_id, Id note_id) noexcept {
 
 Status Musician::SetAllInstrumentNotesOff(Id instrument_id) noexcept {
   return instrument_manager_.SetAllNotesOff(instrument_id,
-                                            transport_.GetTimestamp());
+                                            transport_.GetLastTimestamp());
 }
 
 Status Musician::SetAllInstrumentParamsToDefault(Id instrument_id) noexcept {
-  return instrument_manager_.SetAllParamsToDefault(instrument_id,
-                                                   transport_.GetTimestamp());
+  return instrument_manager_.SetAllParamsToDefault(
+      instrument_id, transport_.GetLastTimestamp());
 }
 
 Status Musician::SetCustomInstrumentData(Id instrument_id,
                                          std::any custom_data) noexcept {
   return instrument_manager_.SetCustomData(
-      instrument_id, transport_.GetTimestamp(), std::move(custom_data));
+      instrument_id, transport_.GetLastTimestamp(), std::move(custom_data));
 }
 
 void Musician::SetConductor(ConductorDefinition definition) noexcept {
@@ -260,19 +260,19 @@ void Musician::SetConductor(ConductorDefinition definition) noexcept {
 }
 
 Status Musician::SetInstrumentGain(Id instrument_id, float gain) noexcept {
-  return instrument_manager_.SetGain(instrument_id, transport_.GetTimestamp(),
-                                     gain);
+  return instrument_manager_.SetGain(instrument_id,
+                                     transport_.GetLastTimestamp(), gain);
 }
 
 Status Musician::SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept {
-  return instrument_manager_.SetMuted(instrument_id, transport_.GetTimestamp(),
-                                      is_muted);
+  return instrument_manager_.SetMuted(instrument_id,
+                                      transport_.GetLastTimestamp(), is_muted);
 }
 
 Status Musician::SetInstrumentNoteOff(Id instrument_id,
                                       float note_pitch) noexcept {
-  return instrument_manager_.SetNoteOff(instrument_id,
-                                        transport_.GetTimestamp(), note_pitch);
+  return instrument_manager_.SetNoteOff(
+      instrument_id, transport_.GetLastTimestamp(), note_pitch);
 }
 
 void Musician::SetInstrumentNoteOffCallback(
@@ -283,20 +283,20 @@ void Musician::SetInstrumentNoteOffCallback(
 
 Status Musician::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
                                      float note_intensity) noexcept {
-  return instrument_manager_.SetNoteOn(instrument_id, transport_.GetTimestamp(),
-                                       note_pitch, note_intensity);
+  return instrument_manager_.SetNoteOn(
+      instrument_id, transport_.GetLastTimestamp(), note_pitch, note_intensity);
 }
 
 Status Musician::SetInstrumentParam(Id instrument_id, int param_id,
                                     float param_value) noexcept {
-  return instrument_manager_.SetParam(instrument_id, transport_.GetTimestamp(),
-                                      param_id, param_value);
+  return instrument_manager_.SetParam(
+      instrument_id, transport_.GetLastTimestamp(), param_id, param_value);
 }
 
 Status Musician::SetInstrumentParamToDefault(Id instrument_id,
                                              int param_id) noexcept {
   return instrument_manager_.SetParamToDefault(
-      instrument_id, transport_.GetTimestamp(), param_id);
+      instrument_id, transport_.GetLastTimestamp(), param_id);
 }
 
 void Musician::SetInstrumentNoteOnCallback(
@@ -381,7 +381,7 @@ void Musician::SetSampleRate(int sample_rate) noexcept {
   for (auto& [performer_id, performer] : performers_) {
     performer.ClearAllActiveNotes();
   }
-  instrument_manager_.SetSampleRate(transport_.GetTimestamp(),
+  instrument_manager_.SetSampleRate(transport_.GetLastTimestamp(),
                                     std::max(sample_rate, 0));
 }
 
@@ -392,7 +392,7 @@ void Musician::StopPlayback() noexcept {
     performer.ClearAllActiveNotes();
   }
   transport_.Stop();
-  instrument_manager_.SetAllNotesOff(transport_.GetTimestamp());
+  instrument_manager_.SetAllNotesOff(transport_.GetLastTimestamp());
 }
 
 void Musician::Update(double timestamp) noexcept {

@@ -54,14 +54,12 @@ TEST(TransportTest, SetCallbacks) {
       transport.SetPosition(5.0);
     }
   });
-  transport.SetUpdateCallback(
-      [&](double begin_position, double end_position,
-          const Transport::GetTimestampFn& get_timestamp_fn) {
-        callback_values.emplace_back(
-            "Update", std::vector<double>{
-                          begin_position, get_timestamp_fn(begin_position),
-                          end_position, get_timestamp_fn(end_position)});
-      });
+  transport.SetUpdateCallback([&](double begin_position, double end_position) {
+    callback_values.emplace_back(
+        "Update", std::vector<double>{
+                      begin_position, transport.GetTimestamp(begin_position),
+                      end_position, transport.GetTimestamp(end_position)});
+  });
 
   transport.Update(10.0);
   EXPECT_TRUE(callback_values.empty());

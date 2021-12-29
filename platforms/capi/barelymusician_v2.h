@@ -105,8 +105,19 @@ typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
 /// Playback beat callback signature.
 ///
 /// @param position Beat position in beats.
-/// @param timestamp Timestamp in seconds.
+/// @param timestamp Beat timestamp in seconds.
 typedef void (*BarelyPlaybackBeatCallback)(double position, double timestamp);
+
+/// Playback update callback signature.
+///
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @param begin_timestamp Begin timestamp in seconds.
+/// @param end_timestamp End timestamp in seconds.
+typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
+                                             double end_position,
+                                             double begin_timestamp,
+                                             double end_timestamp);
 
 /// Conductor state type.
 typedef void* BarelyConductorState;
@@ -369,6 +380,14 @@ BARELY_EXPORT BarelyStatus BarelyApiSetPlaybackPosition(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApiSetPlaybackTempo(BarelyApi api,
                                                      double tempo);
+
+/// Sets the playback update callback.
+///
+/// @param api BarelyMusician API.
+/// @param playback_update_callback Playback update callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApiSetPlaybackUpdateCallback(
+    BarelyApi api, BarelyPlaybackUpdateCallback playback_update_callback);
 
 /// Sets the sampling rate.
 ///

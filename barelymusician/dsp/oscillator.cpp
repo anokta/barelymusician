@@ -10,8 +10,9 @@ Oscillator::Oscillator(int sample_rate) noexcept
     : sample_interval_(sample_rate > 0 ? 1.0f / static_cast<float>(sample_rate)
                                        : 0.0f),
       type_(OscillatorType::kNoise),
+      increment_(0.0f),
       phase_(0.0f),
-      increment_(0.0f) {}
+      white_noise_distribution_(-1.0f, 1.0f) {}
 
 float Oscillator::Next() noexcept {
   float output = 0.0f;
@@ -28,7 +29,7 @@ float Oscillator::Next() noexcept {
       break;
     case OscillatorType::kNoise:
     default:
-      output = random_.DrawUniform(-1.0f, 1.0f);
+      output = white_noise_distribution_(white_noise_engine_);
       break;
   }
   // Update the phasor.

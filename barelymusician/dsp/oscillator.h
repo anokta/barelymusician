@@ -1,7 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
 #define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
-#include "barelymusician/common/random.h"
+#include <random>
+
 #include "barelymusician/dsp/generator.h"
 
 namespace barely {
@@ -47,14 +48,15 @@ class Oscillator : public Generator {
   // Oscillator type.
   OscillatorType type_;
 
-  // Internal clock.
-  float phase_;
-
   // Increment per sample.
   float increment_;
 
-  // Random number generator (to generate white noise).
-  Random random_;
+  // Internal clock.
+  float phase_;
+
+  // White noise random number generator.
+  std::uniform_real_distribution<float> white_noise_distribution_;
+  std::default_random_engine white_noise_engine_;
 };
 
 }  // namespace barely

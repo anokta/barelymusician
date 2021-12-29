@@ -86,6 +86,12 @@ class Transport {
   // Denotes whether the transport is playing or not.
   bool is_playing_;
 
+  // Next beat position in beats.
+  double next_beat_position_;
+
+  // Next beat timestamp in seconds.
+  double next_beat_timestamp_;
+
   // Position in beats.
   double position_;
 

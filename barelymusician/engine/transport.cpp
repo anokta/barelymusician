@@ -19,6 +19,7 @@ void NoopUpdateCallback(
 
 Transport::Transport() noexcept
     : is_playing_(false),
+      next_beat_position_(0.0),
       position_(0.0),
       tempo_(1.0),
       timestamp_(0.0),
@@ -40,10 +41,19 @@ void Transport::SetBeatCallback(BeatCallback beat_callback) noexcept {
   beat_callback_ = beat_callback ? std::move(beat_callback) : &NoopBeatCallback;
 }
 
-void Transport::SetPosition(double position) noexcept { position_ = position; }
+void Transport::SetPosition(double position) noexcept {
+  if (position != position_) {
+    position_ = std::max(position, 0.0);
+    next_beat_position_ = std::ceil(position_);
+    next_beat_timestamp_ = get_timestamp_fn_(next_beat_position_);
+  }
+}
 
 void Transport::SetTempo(double tempo) noexcept {
-  tempo_ = std::max(tempo, 0.0);
+  if (tempo != tempo_) {
+    tempo_ = std::max(tempo, 0.0);
+    next_beat_timestamp_ = get_timestamp_fn_(next_beat_position_);
+  }
 }
 
 void Transport::SetUpdateCallback(UpdateCallback update_callback) noexcept {
@@ -62,22 +72,21 @@ void Transport::Update(double timestamp) noexcept {
       return;
     }
     // Compute next beat.
-    double beat = std::ceil(position_);
-    if (position_ == beat) {
+    if (position_ == next_beat_position_) {
       beat_callback_(position_);
       if (!is_playing_ || tempo_ <= 0.0) {
         timestamp_ = timestamp;
         return;
       }
-      beat = std::ceil(position_);
-      if (position_ == beat) ++beat;
+      if (position_ == next_beat_position_) {
+        next_beat_timestamp_ = get_timestamp_fn_(++next_beat_position_);
+      }
     }
-    const double beat_timestamp = get_timestamp_fn_(beat);
     // Update position.
     const double begin_position = position_;
-    if (beat_timestamp < timestamp) {
-      timestamp_ = beat_timestamp;
-      position_ = beat;
+    if (next_beat_timestamp_ < timestamp) {
+      position_ = next_beat_position_;
+      timestamp_ = next_beat_timestamp_;
     } else {
       position_ += tempo_ * (timestamp - timestamp_);
       timestamp_ = timestamp;

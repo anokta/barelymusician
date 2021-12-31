@@ -63,21 +63,21 @@ typedef int32_t BarelyStatus;
 /// Status enum values.
 enum BarelyStatus_Values {
   /// Success.
-  kBarelyStatus_Ok = 0,
+  BarelyStatus_kOk = 0,
   /// Invalid argument error.
-  kBarelyStatus_InvalidArgument = 1,
+  BarelyStatus_kInvalidArgument = 1,
   /// Not found error.
-  kBarelyStatus_NotFound = 2,
+  BarelyStatus_kNotFound = 2,
   /// Already exists error.
-  kBarelyStatus_AlreadyExists = 3,
+  BarelyStatus_kAlreadyExists = 3,
   /// Failed precondition error.
-  kBarelyStatus_FailedPrecondition = 4,
+  BarelyStatus_kFailedPrecondition = 4,
   /// Unimplemented error.
-  kBarelyStatus_Unimplemented = 5,
+  BarelyStatus_kUnimplemented = 5,
   /// Internal error.
-  kBarelyStatus_Internal = 6,
+  BarelyStatus_kInternal = 6,
   /// Unknown error.
-  kBarelyStatus_Unknown = 7,
+  BarelyStatus_kUnknown = 7,
 };
 
 /// Beat callback signature.
@@ -129,6 +129,12 @@ typedef void (*BarelyConductorDestroyFn)(void** state);
 /// @param data Data.
 typedef void (*BarelyConductorSetDataFn)(void** state, void* data);
 
+/// Conductor set energy function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param energy Energy.
+typedef void (*BarelyConductorSetEnergyFn)(void** state, float energy);
+
 /// Conductor set parameter function signature.
 ///
 /// @param state Pointer to conductor state.
@@ -136,6 +142,12 @@ typedef void (*BarelyConductorSetDataFn)(void** state, void* data);
 /// @param param_value Parameter value.
 typedef void (*BarelyConductorSetParamFn)(void** state, int32_t param_id,
                                           float param_value);
+
+/// Conductor set stress function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param stress Stress.
+typedef void (*BarelyConductorSetStressFn)(void** state, float stress);
 
 /// Conductor transform note duration function signature.
 ///
@@ -184,8 +196,14 @@ typedef struct BarelyConductorDefinition {
   /// Set data function.
   BarelyConductorSetDataFn set_data_fn;
 
+  /// Set energy function.
+  BarelyConductorSetEnergyFn set_energy_fn;
+
   /// Set parameter function.
   BarelyConductorSetParamFn set_param_fn;
+
+  /// Set stress function.
+  BarelyConductorSetStressFn set_stress_fn;
 
   /// Transform note duration function.
   BarelyConductorTransformNoteDurationFn transform_note_duration_fn;
@@ -545,6 +563,16 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_CancelAllScheduledNoteEvents(
 BARELY_EXPORT BarelyStatus BarelyInstrument_CancelScheduledNoteEvent(
     BarelyApi api, BarelyId instrument_id, BarelyId note_event_id);
 
+/// Clones instrument.
+///
+/// @param api BarelyMusician API.
+/// @param instrument_id Instrument identifier.
+/// @param out_instrument_id Output instrument identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_Clone(BarelyApi api,
+                                                  BarelyId instrument_id,
+                                                  BarelyId* out_instrument_id);
+
 /// Creates new instrument.
 ///
 /// @param api BarelyMusician API.
@@ -748,6 +776,16 @@ BARELY_EXPORT BarelyStatus BarelySequence_AddNoteEvent(
     BarelyApi api, BarelyId sequence_id, double note_position,
     double note_duration, BarelyNotePitch note_pitch, float note_intensity,
     BarelyId* out_note_event_id);
+
+/// Clones sequence.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @param out_sequence_id Output sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_Clone(BarelyApi api,
+                                                BarelyId sequence_id,
+                                                BarelyId* out_sequence_id);
 
 /// Creates new sequence.
 ///

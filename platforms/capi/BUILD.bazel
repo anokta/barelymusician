@@ -19,3 +19,16 @@ cc_library(
     ],
     alwayslink = True,
 )
+
+# TODO(#85): Replace |:barelymusician| with this target.
+cc_library(
+    name = "barelymusician_v2",
+    # srcs = ["barelymusician.cpp"],
+    hdrs = ["barelymusician_v2.h"],
+    defines = select({
+        "@platforms//os:windows": ["BARELYMUSICIAN_EXPORTS"],
+        "//conditions:default": [],
+    }),
+    # deps = [],
+    alwayslink = True,
+)

@@ -709,15 +709,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrumentSetParam(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyInstrumentSetParamToDefault(
     BarelyApi api, BarelyId instrument_id, int32_t param_index);
 
-/// Adds instrument to sequence.
-///
-/// @param api BarelyMusician API.
-/// @param sequence_id Sequence identifier.
-/// @param instrument_id Instrument identifier.
-BARELY_EXPORT BarelyStatus BarelySequenceAddInstrument(BarelyApi api,
-                                                       BarelyId sequence_id,
-                                                       BarelyId instrument_id);
-
 /// Adds sequence note event at position.
 ///
 /// @param api BarelyMusician API.
@@ -776,6 +767,14 @@ BARELY_EXPORT BarelyStatus BarelySequenceGetBeginPosition(
 BARELY_EXPORT BarelyStatus BarelySequenceGetEndPosition(
     BarelyApi api, BarelyId sequence_id, double* out_end_position);
 
+/// Gets sequence instrument.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @param out_instrument_id Instrument identifier.
+BARELY_EXPORT BarelyStatus BarelySequenceGetInstrument(
+    BarelyApi api, BarelyId sequence_id, BarelyId* out_instrument_id);
+
 /// Gets sequence loop begin offset.
 ///
 /// @param api BarelyMusician API.
@@ -828,16 +827,6 @@ BARELY_EXPORT BarelyStatus BarelySequenceGetNoteEventPitch(
     BarelyApi api, BarelyId sequence_id, BarelyId note_event_id,
     BarelyNotePitch* out_note_pitch);
 
-/// Gets whether sequence has instrument or not.
-///
-/// @param api BarelyMusician API.
-/// @param sequence_id Sequence identifier.
-/// @param instrument_id Instrument identifier.
-/// @param out_has_instrument Output true if instrument is had, false otherwise.
-BARELY_EXPORT BarelyStatus
-BarelySequenceHasInstrument(BarelyApi api, BarelyId sequence_id,
-                            BarelyId instrument_id, bool* out_has_instrument);
-
 /// Gets whether sequence is empty or not.
 ///
 /// @param api BarelyMusician API.
@@ -858,13 +847,6 @@ BARELY_EXPORT BarelyStatus BarelySequenceIsLooping(BarelyApi api,
                                                    BarelyId sequence_id,
                                                    bool* out_is_looping);
 
-/// Removes all instruments from sequence.
-///
-/// @param api BarelyMusician API.
-/// @param sequence_id Sequence identifier.
-BARELY_EXPORT BarelyStatus
-BarelySequenceRemoveAllInstruments(BarelyApi api, BarelyId sequence_id);
-
 /// Removes all sequence note events.
 ///
 /// @param api BarelyMusician API.
@@ -872,14 +854,6 @@ BarelySequenceRemoveAllInstruments(BarelyApi api, BarelyId sequence_id);
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelySequenceRemoveAllNoteEvents(BarelyApi api, BarelyId instrument_id);
-
-/// Removes instrument from sequence.
-///
-/// @param api BarelyMusician API.
-/// @param sequence_id Sequence identifier.
-/// @param instrument_id Instrument identifier.
-BARELY_EXPORT BarelyStatus BarelySequenceRemoveInstrument(
-    BarelyApi api, BarelyId sequence_id, BarelyId instrument_id);
 
 /// Removes sequence note event.
 ///
@@ -918,6 +892,15 @@ BARELY_EXPORT BarelyStatus BarelySequenceSetBeginPosition(
 BARELY_EXPORT BarelyStatus BarelySequenceSetEndPosition(BarelyApi api,
                                                         BarelyId sequence_id,
                                                         double end_position);
+
+/// Sets sequence instrument.
+///
+/// @param api BarelyMusician API.
+/// @param sequence_id Sequence identifier.
+/// @param instrument_id Instrument identifier.
+BARELY_EXPORT BarelyStatus BarelySequenceSetInstrument(BarelyApi api,
+                                                       BarelyId sequence_id,
+                                                       BarelyId instrument_id);
 
 /// Sets sequence loop begin offset.
 ///

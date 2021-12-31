@@ -152,31 +152,41 @@ typedef void (*BarelyConductorSetParamFn)(BarelyConductorState* state,
 ///
 /// @param state Pointer to conductor state.
 /// @param note_duration Note duration.
-/// @param out_raw_note_duration Output raw note duration.
+/// @param out_note_duration Output note duration.
 /// @return Status.
 typedef BarelyStatus (*BarelyConductorTransformNoteDurationFn)(
     BarelyConductorState* state, BarelyNoteDuration note_duration,
-    double* out_raw_note_duration);
+    double* out_note_duration);
 
 /// Conductor transform note intensity function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param note_intensity Note intensity.
-/// @param out_raw_note_intensity Output raw note intensity.
+/// @param out_note_intensity Output note intensity.
 /// @return Status.
 typedef BarelyStatus (*BarelyConductorTransformNoteIntensityFn)(
     BarelyConductorState* state, BarelyNoteIntensity note_intensity,
-    float* out_raw_note_intensity);
+    float* out_note_intensity);
 
 /// Conductor transform note pitch function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param note_pitch Note pitch.
-/// @param out_raw_note_pitch Output raw note pitch.
+/// @param out_note_pitch Output note pitch.
 /// @return Status.
 typedef BarelyStatus (*BarelyConductorTransformNotePitchFn)(
     BarelyConductorState* state, BarelyNotePitch note_pitch,
-    float* out_raw_note_pitch);
+    float* out_note_pitch);
+
+/// Conductor transform playback tempo function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param playback_tempo Playback tempo in BPM.
+/// @param out_playback_tempo Output playback tempo in BPM.
+/// @return Status.
+typedef BarelyStatus (*BarelyConductorTransformPlaybackTempoFn)(
+    BarelyConductorState* state, double playback_tempo,
+    double* out_playback_tempo);
 
 /// Conductor definition.
 typedef struct BarelyConductorDefinition {
@@ -200,6 +210,9 @@ typedef struct BarelyConductorDefinition {
 
   /// Transform note pitch function.
   BarelyConductorTransformNotePitchFn transform_note_pitch_fn;
+
+  /// Transform playback tempo function.
+  BarelyConductorTransformPlaybackTempoFn transform_playback_tempo_fn;
 
   /// Number of parameter definitions.
   int32_t num_param_definitions;
@@ -324,6 +337,14 @@ BARELY_EXPORT BarelyStatus BarelyApiGetPlaybackPosition(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyApiGetPlaybackTempo(BarelyApi api,
                                                      double* out_tempo);
 
+/// Gets root note.
+///
+/// @param api BarelyMusician API.
+/// @param out_root_note_pitch Output root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApiGetRootNote(BarelyApi api,
+                                                float* out_root_note_pitch);
+
 /// Gets the sampling rate.
 ///
 /// @param api BarelyMusician API.
@@ -331,6 +352,15 @@ BARELY_EXPORT BarelyStatus BarelyApiGetPlaybackTempo(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApiGetSampleRate(BarelyApi api,
                                                   int32_t* out_sample_rate);
+
+/// Gets scale.
+///
+/// @param api BarelyMusician API.
+/// @param out_scale Output scale.
+/// @param out_scale_length Output scale length.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApiGetScale(BarelyApi api, float** out_scale,
+                                             int32_t* out_scale_length);
 
 /// Gets whether the playback is active or not.
 ///
@@ -389,6 +419,14 @@ BARELY_EXPORT BarelyStatus BarelyApiSetPlaybackTempo(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyApiSetPlaybackUpdateCallback(
     BarelyApi api, BarelyPlaybackUpdateCallback playback_update_callback);
 
+/// Sets root note.
+///
+/// @param api BarelyMusician API.
+/// @param root_note_pitch Root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApiSetRootNote(BarelyApi api,
+                                                float root_note_pitch);
+
 /// Sets the sampling rate.
 ///
 /// @param api BarelyMusician API.
@@ -396,6 +434,15 @@ BARELY_EXPORT BarelyStatus BarelyApiSetPlaybackUpdateCallback(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApiSetSampleRate(BarelyApi api,
                                                   int32_t sample_rate);
+
+/// Sets scale.
+///
+/// @param api BarelyMusician API.
+/// @param scale Scale.
+/// @param scale_length Scale length.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApiSetScale(BarelyApi api, float* scale,
+                                             int32_t scale_length);
 
 /// Starts the playback.
 ///
@@ -433,14 +480,6 @@ BARELY_EXPORT BarelyStatus BarelyConductorGetEnergy(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyConductorGetParam(BarelyApi api,
                                                    int32_t param_index,
                                                    float* out_param_value);
-
-/// Gets conductor root note.
-///
-/// @param api BarelyMusician API.
-/// @param out_root_note_pitch Output root note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyConductorGetRootNote(BarelyApi api, float* out_root_note_pitch);
 
 /// Gets conductor stress (i.e., valence).
 ///
@@ -497,14 +536,6 @@ BARELY_EXPORT BarelyStatus BarelyConductorSetParam(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyConductorSetParamToDefault(BarelyApi api, int32_t param_index);
-
-/// Sets conductor root note.
-///
-/// @param api BarelyMusician API.
-/// @param root_note_pitch Root note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductorSetRootNote(BarelyApi api,
-                                                      float root_note_pitch);
 
 /// Sets conductor stress (i.e., valence).
 ///

@@ -22,6 +22,24 @@ BarelyStatus BarelyApi_Destroy(BarelyApi api) {
   return BarelyStatus_kOk;
 }
 
+BarelyStatus BarelyApi_SetBeatCallback(BarelyApi api,
+                                       BarelyApi_BeatCallback beat_callback) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  beat_callback;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyApi_SetPositionCallback(
+    BarelyApi api, BarelyApi_PositionCallback position_callback) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  position_callback;
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyApi_GetSampleRate(BarelyApi api, int32_t* out_sample_rate) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_sample_rate) return BarelyStatus_kInvalidArgument;
@@ -33,14 +51,16 @@ BarelyStatus BarelyApi_GetSampleRate(BarelyApi api, int32_t* out_sample_rate) {
 BarelyStatus BarelyApi_SetSampleRate(BarelyApi api, int32_t sample_rate) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Temp POC for testing.
+  // TODO(#85): Implement - this is a temp POC for testing.
   api->sample_rate = sample_rate;
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyApi_Update(BarelyApi api, double /*timestamp*/) {
+BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp) {
   if (!api) return BarelyStatus_kNotFound;
 
+  // TODO(#85): Implement.
+  timestamp;
   return BarelyStatus_kUnimplemented;
 }
 

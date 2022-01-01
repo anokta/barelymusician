@@ -80,40 +80,31 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 7,
 };
 
-/// Beat callback signature.
+/// BarelyMusician API beat callback signature.
 ///
 /// @param position Beat position in beats.
-/// @param timestamp Beat timestamp in seconds.
-typedef void (*BarelyApi_BeatCallback)(double position, double timestamp);
+typedef void (*BarelyApi_BeatCallback)(double position);
 
-/// Note off callback signature.
+/// BarelyMusician API note off callback signature.
 ///
 /// @param instrument_id Instrument identifier.
-/// @param timestamp Timestamp in seconds.
-/// @param note_pitch Note pitch.
-typedef void (*BarelyApi_NoteOffCallback)(BarelyId instrument_id,
-                                          double timestamp, float note_pitch);
+/// @param pitch Note pitch.
+typedef void (*BarelyApi_NoteOffCallback)(BarelyId instrument_id, float pitch);
 
-/// Note on callback signature.
+/// BarelyMusician API note on callback signature.
 ///
 /// @param instrument_id Instrument identifier.
-/// @param timestamp Timestamp in seconds.
-/// @param note_pitch Note pitch.
-/// @param note_intensity Note intensity.
-typedef void (*BarelyApi_NoteOnCallback)(BarelyId instrument_id,
-                                         double timestamp, float note_pitch,
-                                         float note_intensity);
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+typedef void (*BarelyApi_NoteOnCallback)(BarelyId instrument_id, float pitch,
+                                         float intensity);
 
-/// Position callback signature.
+/// BarelyMusician API position callback signature.
 ///
 /// @param begin_position Begin position in beats.
 /// @param end_position End position in beats.
-/// @param begin_timestamp Begin timestamp in seconds.
-/// @param end_timestamp End timestamp in seconds.
 typedef void (*BarelyApi_PositionCallback)(double begin_position,
-                                           double end_position,
-                                           double begin_timestamp,
-                                           double end_timestamp);
+                                           double end_position);
 
 /// Conductor create function signature.
 ///

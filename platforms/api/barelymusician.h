@@ -114,6 +114,17 @@ class StatusOr {
 /// BarelyMusician C++ API.
 class Api {
  public:
+  /// Beat callback signature.
+  ///
+  /// @param position Beat position.
+  using BeatCallback = void (*)(double position);
+
+  /// Position callback signature.
+  ///
+  /// @param begin_position Begin position.
+  /// @param end_position End position.
+  using PositionCallback = void (*)(double begin_position, double end_position);
+
   /// Constructs new |Api|.
   Api();
 
@@ -135,6 +146,16 @@ class Api {
   ///
   /// @return Sampling rate in Hz, or error status.
   StatusOr<int> GetSampleRate() const;
+
+  /// Sets beat callback.
+  ///
+  /// @param beat_callback Beat callback.
+  Status SetBeatCallback(BeatCallback beat_callback);
+
+  /// Sets position callback.
+  ///
+  /// @param position_callback Position callback.
+  Status SetPositionCallback(PositionCallback position_callback);
 
   /// Sets the sampling rate.
   ///
@@ -220,6 +241,17 @@ StatusOr<int> Api::GetSampleRate() const {
     return static_cast<Status>(status);
   }
   return sample_rate;
+}
+
+Status Api::SetBeatCallback(BeatCallback beat_callback) {
+  return static_cast<Status>(BarelyApi_SetBeatCallback(
+      api_, static_cast<BarelyApi_BeatCallback>(std::move(beat_callback))));
+}
+
+Status Api::SetPositionCallback(PositionCallback position_callback) {
+  return static_cast<Status>(BarelyApi_SetPositionCallback(
+      api_,
+      static_cast<BarelyApi_PositionCallback>(std::move(position_callback))));
 }
 
 Status Api::SetSampleRate(int sample_rate) {

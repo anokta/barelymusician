@@ -109,38 +109,38 @@ typedef void (*BarelyApi_PositionCallback)(double begin_position,
 /// Conductor create function signature.
 ///
 /// @param state Pointer to conductor state.
-typedef void (*BarelyConductorCreateFn)(void** state);
+typedef void (*BarelyConductor_CreateFn)(void** state);
 
 /// Conductor destroy function signature.
 ///
 /// @param state Pointer to conductor state.
-typedef void (*BarelyConductorDestroyFn)(void** state);
+typedef void (*BarelyConductor_DestroyFn)(void** state);
 
 /// Conductor set data function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param data Data.
-typedef void (*BarelyConductorSetDataFn)(void** state, void* data);
+typedef void (*BarelyConductor_SetDataFn)(void** state, void* data);
 
 /// Conductor set energy function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param energy Energy.
-typedef void (*BarelyConductorSetEnergyFn)(void** state, float energy);
+typedef void (*BarelyConductor_SetEnergyFn)(void** state, float energy);
 
 /// Conductor set parameter function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param param_id Parameter identifier.
 /// @param param_value Parameter value.
-typedef void (*BarelyConductorSetParamFn)(void** state, int32_t param_id,
-                                          float param_value);
+typedef void (*BarelyConductor_SetParamFn)(void** state, int32_t param_id,
+                                           float param_value);
 
 /// Conductor set stress function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param stress Stress.
-typedef void (*BarelyConductorSetStressFn)(void** state, float stress);
+typedef void (*BarelyConductor_SetStressFn)(void** state, float stress);
 
 /// Conductor transform note duration function signature.
 ///
@@ -148,7 +148,7 @@ typedef void (*BarelyConductorSetStressFn)(void** state, float stress);
 /// @param note_duration Note duration.
 /// @param out_note_duration Output note duration.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductorTransformNoteDurationFn)(
+typedef BarelyStatus (*BarelyConductor_TransformNoteDurationFn)(
     void** state, double note_duration, double* out_note_duration);
 
 /// Conductor transform note intensity function signature.
@@ -157,7 +157,7 @@ typedef BarelyStatus (*BarelyConductorTransformNoteDurationFn)(
 /// @param note_intensity Note intensity.
 /// @param out_note_intensity Output note intensity.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductorTransformNoteIntensityFn)(
+typedef BarelyStatus (*BarelyConductor_TransformNoteIntensityFn)(
     void** state, float note_intensity, float* out_note_intensity);
 
 /// Conductor transform note pitch function signature.
@@ -166,7 +166,7 @@ typedef BarelyStatus (*BarelyConductorTransformNoteIntensityFn)(
 /// @param note_pitch Note pitch.
 /// @param out_note_pitch Output note pitch.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductorTransformNotePitchFn)(
+typedef BarelyStatus (*BarelyConductor_TransformNotePitchFn)(
     void** state, BarelyNotePitch note_pitch, float* out_note_pitch);
 
 /// Conductor transform playback tempo function signature.
@@ -175,40 +175,40 @@ typedef BarelyStatus (*BarelyConductorTransformNotePitchFn)(
 /// @param playback_tempo Playback tempo in BPM.
 /// @param out_playback_tempo Output playback tempo in BPM.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductorTransformPlaybackTempoFn)(
+typedef BarelyStatus (*BarelyConductor_TransformPlaybackTempoFn)(
     void** state, double playback_tempo, double* out_playback_tempo);
 
 /// Conductor definition.
 typedef struct BarelyConductorDefinition {
   /// Create function.
-  BarelyConductorCreateFn create_fn;
+  BarelyConductor_CreateFn create_fn;
 
   /// Destroy function.
-  BarelyConductorDestroyFn destroy_fn;
+  BarelyConductor_DestroyFn destroy_fn;
 
   /// Set data function.
-  BarelyConductorSetDataFn set_data_fn;
+  BarelyConductor_SetDataFn set_data_fn;
 
   /// Set energy function.
-  BarelyConductorSetEnergyFn set_energy_fn;
+  BarelyConductor_SetEnergyFn set_energy_fn;
 
   /// Set parameter function.
-  BarelyConductorSetParamFn set_param_fn;
+  BarelyConductor_SetParamFn set_param_fn;
 
   /// Set stress function.
-  BarelyConductorSetStressFn set_stress_fn;
+  BarelyConductor_SetStressFn set_stress_fn;
 
   /// Transform note duration function.
-  BarelyConductorTransformNoteDurationFn transform_note_duration_fn;
+  BarelyConductor_TransformNoteDurationFn transform_note_duration_fn;
 
   /// Transform note intensity function.
-  BarelyConductorTransformNoteIntensityFn transform_note_intensity_fn;
+  BarelyConductor_TransformNoteIntensityFn transform_note_intensity_fn;
 
   /// Transform note pitch function.
-  BarelyConductorTransformNotePitchFn transform_note_pitch_fn;
+  BarelyConductor_TransformNotePitchFn transform_note_pitch_fn;
 
   /// Transform playback tempo function.
-  BarelyConductorTransformPlaybackTempoFn transform_playback_tempo_fn;
+  BarelyConductor_TransformPlaybackTempoFn transform_playback_tempo_fn;
 
   /// Number of parameter definitions.
   int32_t num_param_definitions;
@@ -221,12 +221,12 @@ typedef struct BarelyConductorDefinition {
 ///
 /// @param state Pointer to instrument state.
 /// @param sample_rate Sampling rate in Hz.
-typedef void (*BarelyInstrumentCreateFn)(void** state, int32_t sample_rate);
+typedef void (*BarelyInstrument_CreateFn)(void** state, int32_t sample_rate);
 
 /// Instrument destroy function signature.
 ///
 /// @param state Pointer to instrument state.
-typedef void (*BarelyInstrumentDestroyFn)(void** state);
+typedef void (*BarelyInstrument_DestroyFn)(void** state);
 
 /// Instrument process function signature.
 ///
@@ -234,60 +234,60 @@ typedef void (*BarelyInstrumentDestroyFn)(void** state);
 /// @param output Output buffer.
 /// @param num_output_channels Number of channels.
 /// @param num_output_frames Number of frames.
-typedef void (*BarelyInstrumentProcessFn)(void** state, float* output,
-                                          int32_t num_output_channels,
-                                          int32_t num_output_frames);
+typedef void (*BarelyInstrument_ProcessFn)(void** state, float* output,
+                                           int32_t num_output_channels,
+                                           int32_t num_output_frames);
 
 /// Instrument set data function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param data Data.
-typedef void (*BarelyInstrumentSetDataFn)(void** state, void* data);
+typedef void (*BarelyInstrument_SetDataFn)(void** state, void* data);
 
 /// Instrument set note off function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param note_pitch Note pitch.
-typedef void (*BarelyInstrumentSetNoteOffFn)(void** state, float note_pitch);
+typedef void (*BarelyInstrument_SetNoteOffFn)(void** state, float note_pitch);
 
 /// Instrument set note on function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
-typedef void (*BarelyInstrumentSetNoteOnFn)(void** state, float note_pitch,
-                                            float note_intensity);
+typedef void (*BarelyInstrument_SetNoteOnFn)(void** state, float note_pitch,
+                                             float note_intensity);
 
 /// Instrument set parameter function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param param_id Parameter identifier.
 /// @param param_value Parameter value.
-typedef void (*BarelyInstrumentSetParamFn)(void** state, int32_t param_id,
-                                           float param_value);
+typedef void (*BarelyInstrument_SetParamFn)(void** state, int32_t param_id,
+                                            float param_value);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create function.
-  BarelyInstrumentCreateFn create_fn;
+  BarelyInstrument_CreateFn create_fn;
 
   /// Destroy function.
-  BarelyInstrumentDestroyFn destroy_fn;
+  BarelyInstrument_DestroyFn destroy_fn;
 
   /// Process function.
-  BarelyInstrumentProcessFn process_fn;
+  BarelyInstrument_ProcessFn process_fn;
 
   /// Set data function.
-  BarelyInstrumentSetDataFn set_data_fn;
+  BarelyInstrument_SetDataFn set_data_fn;
 
   /// Set note off function.
-  BarelyInstrumentSetNoteOffFn set_note_off_fn;
+  BarelyInstrument_SetNoteOffFn set_note_off_fn;
 
   /// Set note on function.
-  BarelyInstrumentSetNoteOnFn set_note_on_fn;
+  BarelyInstrument_SetNoteOnFn set_note_on_fn;
 
   /// Set parameter function.
-  BarelyInstrumentSetParamFn set_param_fn;
+  BarelyInstrument_SetParamFn set_param_fn;
 
   /// Number of parameter definitions.
   int32_t num_param_definitions;

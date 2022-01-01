@@ -9,7 +9,7 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/musician.h"
+#include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/param_definition.h"
 #include "examples/instruments/synth_instrument.h"
 
@@ -21,7 +21,7 @@ using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::InstrumentDefinition;
 using ::barelyapi::InstrumentState;
 using ::barelyapi::IsOk;
-using ::barelyapi::Musician;
+using ::barelyapi::Engine;
 using ::barelyapi::Note;
 using ::barelyapi::ParamDefinition;
 using ::barelyapi::Status;
@@ -141,8 +141,8 @@ struct BarelyMusician {
   explicit BarelyMusician(int32_t sample_rate) noexcept
       : instance(sample_rate) {}
 
-  /// Musician instance.
-  Musician instance;
+  /// Engine instance.
+  Engine instance;
 };
 
 BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* out_performer_id) {

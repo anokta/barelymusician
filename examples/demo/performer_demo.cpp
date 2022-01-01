@@ -15,7 +15,7 @@
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
-#include "barelymusician/engine/musician.h"
+#include "barelymusician/engine/engine.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -32,9 +32,9 @@ using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
 using ::barelyapi::ConductorDefinition;
 using ::barelyapi::ConductorState;
+using ::barelyapi::Engine;
 using ::barelyapi::Id;
 using ::barelyapi::IsOk;
-using ::barelyapi::Musician;
 using ::barelyapi::Note;
 using ::barelyapi::NoteDuration;
 using ::barelyapi::NoteIntensity;
@@ -71,39 +71,38 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kSampleRate);
 
-  Musician musician(kSampleRate);
-  musician.SetPlaybackTempo(kInitialTempo);
+  Engine engine(kSampleRate);
+  engine.SetPlaybackTempo(kInitialTempo);
 
   const Id performer_instrument_id =
-      musician.AddInstrument(SynthInstrument::GetDefinition());
-  musician.SetInstrumentGain(performer_instrument_id, kGain);
-  musician.SetInstrumentParam(performer_instrument_id,
-                              SynthInstrumentParam::kEnvelopeAttack, kAttack);
-  musician.SetInstrumentParam(performer_instrument_id,
-                              SynthInstrumentParam::kEnvelopeRelease, kRelease);
-  musician.SetInstrumentParam(performer_instrument_id,
-                              SynthInstrumentParam::kOscillatorType,
-                              static_cast<float>(kOscillatorType));
+      engine.AddInstrument(SynthInstrument::GetDefinition());
+  engine.SetInstrumentGain(performer_instrument_id, kGain);
+  engine.SetInstrumentParam(performer_instrument_id,
+                            SynthInstrumentParam::kEnvelopeAttack, kAttack);
+  engine.SetInstrumentParam(performer_instrument_id,
+                            SynthInstrumentParam::kEnvelopeRelease, kRelease);
+  engine.SetInstrumentParam(performer_instrument_id,
+                            SynthInstrumentParam::kOscillatorType,
+                            static_cast<float>(kOscillatorType));
 
   const Id metronome_id =
-      musician.AddInstrument(SynthInstrument::GetDefinition());
-  musician.SetInstrumentGain(metronome_id, 0.5f * kGain);
-  musician.SetInstrumentParam(metronome_id,
-                              SynthInstrumentParam::kEnvelopeAttack, kAttack);
-  musician.SetInstrumentParam(metronome_id,
-                              SynthInstrumentParam::kEnvelopeRelease, 0.025f);
-  musician.SetInstrumentParam(metronome_id,
-                              SynthInstrumentParam::kOscillatorType,
-                              static_cast<float>(OscillatorType::kSquare));
+      engine.AddInstrument(SynthInstrument::GetDefinition());
+  engine.SetInstrumentGain(metronome_id, 0.5f * kGain);
+  engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kEnvelopeAttack,
+                            kAttack);
+  engine.SetInstrumentParam(metronome_id,
+                            SynthInstrumentParam::kEnvelopeRelease, 0.025f);
+  engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kOscillatorType,
+                            static_cast<float>(OscillatorType::kSquare));
 
-  musician.SetInstrumentNoteOnCallback(
-      [&](Id instrument_id, double /*timestamp*/, float note_pitch,
-          float note_intensity) {
-        if (instrument_id == performer_instrument_id) {
-          ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
-                       << note_intensity << "}";
-        }
-      });
+  engine.SetInstrumentNoteOnCallback([&](Id instrument_id, double /*timestamp*/,
+                                         float note_pitch,
+                                         float note_intensity) {
+    if (instrument_id == performer_instrument_id) {
+      ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
+                   << note_intensity << "}";
+    }
+  });
 
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {
@@ -122,32 +121,32 @@ int main(int /*argc*/, char* /*argv*/[]) {
                      build_note(barelyapi::kPitchB5, 1.0 / 3.0));
   notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
 
-  const Id performer_id = musician.AddPerformer();
-  musician.AddPerformerInstrument(performer_id, performer_instrument_id);
-  musician.SetPerformerBeginPosition(performer_id, 2.0);
-  musician.SetPerformerEndPosition(performer_id, 19.5);
-  musician.SetPerformerBeginOffset(performer_id, -1.0);
-  musician.SetPerformerLoop(performer_id, true);
-  musician.SetPerformerLoopBeginOffset(performer_id, 3.0);
-  musician.SetPerformerLoopLength(performer_id, 5.0);
+  const Id performer_id = engine.AddPerformer();
+  engine.AddPerformerInstrument(performer_id, performer_instrument_id);
+  engine.SetPerformerBeginPosition(performer_id, 2.0);
+  engine.SetPerformerEndPosition(performer_id, 19.5);
+  engine.SetPerformerBeginOffset(performer_id, -1.0);
+  engine.SetPerformerLoop(performer_id, true);
+  engine.SetPerformerLoopBeginOffset(performer_id, 3.0);
+  engine.SetPerformerLoopLength(performer_id, 5.0);
   std::vector<Id> note_ids;
   for (const auto& [position, note] : notes) {
     note_ids.push_back(GetStatusOrValue(
-        musician.AddPerformerNote(performer_id, position, note)));
+        engine.AddPerformerNote(performer_id, position, note)));
   }
 
   bool use_conductor = false;
   Random random;
 
   double reset_position = false;
-  musician.SetPlaybackBeatCallback([&](double /*position*/) {
-    musician.SetInstrumentNoteOn(metronome_id, barelyapi::kPitchC3, 1.0);
-    musician.SetInstrumentNoteOff(metronome_id, barelyapi::kPitchC3);
+  engine.SetPlaybackBeatCallback([&](double /*position*/) {
+    engine.SetInstrumentNoteOn(metronome_id, barelyapi::kPitchC3, 1.0);
+    engine.SetInstrumentNoteOff(metronome_id, barelyapi::kPitchC3);
     if (reset_position) {
       reset_position = false;
-      musician.SetPlaybackPosition(0.0);
+      engine.SetPlaybackPosition(0.0);
     }
-    ConsoleLog() << "Beat: " << musician.GetPlaybackPosition();
+    ConsoleLog() << "Beat: " << engine.GetPlaybackPosition();
   });
 
   // Audio process callback.
@@ -155,8 +154,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
     for (const Id instrument_id : {performer_instrument_id, metronome_id}) {
-      musician.ProcessInstrument(instrument_id, audio_clock.GetTimestamp(),
-                                 temp_buffer.data(), kNumChannels, kNumFrames);
+      engine.ProcessInstrument(instrument_id, audio_clock.GetTimestamp(),
+                               temp_buffer.data(), kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      std::plus<float>());
     }
@@ -175,40 +174,40 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
       // Toggle notes.
-      if (IsOk(musician.RemovePerformerNote(performer_id, note_ids[index]))) {
+      if (IsOk(engine.RemovePerformerNote(performer_id, note_ids[index]))) {
         ConsoleLog() << "Removed note " << index;
         note_ids[index] = barelyapi::kInvalidId;
       } else {
-        note_ids[index] = GetStatusOrValue(musician.AddPerformerNote(
+        note_ids[index] = GetStatusOrValue(engine.AddPerformerNote(
             performer_id, notes[index].first, notes[index].second));
         ConsoleLog() << "Added note " << index;
       }
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetPlaybackTempo();
+    double tempo = engine.GetPlaybackTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (musician.IsPlaying()) {
-          musician.StopPlayback();
+        if (engine.IsPlaying()) {
+          engine.StopPlayback();
           ConsoleLog() << "Stopped playback";
         } else {
-          musician.StartPlayback();
+          engine.StartPlayback();
           ConsoleLog() << "Started playback";
         }
         return;
       case 'L':
-        if (GetStatusOrValue(musician.IsPerformerLooping(performer_id))) {
-          musician.SetPerformerLoop(performer_id, false);
+        if (GetStatusOrValue(engine.IsPerformerLooping(performer_id))) {
+          engine.SetPerformerLoop(performer_id, false);
           ConsoleLog() << "Loop turned off";
         } else {
-          musician.SetPerformerLoop(performer_id, true);
+          engine.SetPerformerLoop(performer_id, true);
           ConsoleLog() << "Loop turned on";
         }
         return;
       case 'C':
         use_conductor = !use_conductor;
-        musician.SetConductor(
+        engine.SetConductor(
             use_conductor
                 ? ConductorDefinition{
                       .transform_note_duration_fn =
@@ -241,7 +240,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         reset_position = true;
         return;
       case 'O':
-        musician.SetPlaybackPosition(0.0);
+        engine.SetPlaybackPosition(0.0);
         return;
       case '-':
         tempo -= kTempoIncrement;
@@ -255,7 +254,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    musician.SetPlaybackTempo(tempo);
+    engine.SetPlaybackTempo(tempo);
     ConsoleLog() << "Tempo set to " << tempo << " BPM";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -263,17 +262,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  musician.StartPlayback();
+  engine.StartPlayback();
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  musician.StopPlayback();
+  engine.StopPlayback();
   audio_output.Stop();
 
   return 0;

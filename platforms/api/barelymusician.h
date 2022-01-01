@@ -2,12 +2,54 @@
 #define PLATFORMS_API_BARELYMUSICIAN_H_
 
 #include <cassert>
+#include <limits>
 #include <utility>
 #include <variant>
 
 #include "platforms/capi/barelymusician_v2.h"
 
 namespace barely {
+
+/// Identifier type.
+using Id = BarelyId;
+
+/// Parameter identifier type.
+using ParamId = BarelyParamId;
+
+/// Parameter definition.
+struct ParamDefinition {
+  /// Constructs new |ParamDefinition|.
+  ///
+  /// @param default_value Default value.
+  /// @param min_value Minimum value.
+  /// @param max_value Maximum value.
+  ParamDefinition(float default_value = 0.0f,
+                  float min_value = std::numeric_limits<float>::lowest(),
+                  float max_value = std::numeric_limits<float>::max());
+
+  /// Constructs new |ParamDefinition| for a boolean value.
+  ///
+  /// @param default_value Default boolean value.
+  ParamDefinition(bool default_value);
+
+  /// Constructs new |ParamDefinition| for an integer value.
+  ///
+  /// @param default_value Default integer value.
+  /// @param min_value Minimum integer value.
+  /// @param max_value Maximum integer value.
+  ParamDefinition(int default_value,
+                  int min_value = std::numeric_limits<int>::lowest(),
+                  int max_value = std::numeric_limits<int>::max());
+
+  /// Default value.
+  float default_value;
+
+  /// Minimum value.
+  float min_value;
+
+  /// Maximum value.
+  float max_value;
+};
 
 /// Status.
 enum class Status : BarelyStatus {
@@ -109,6 +151,21 @@ class Api {
   BarelyApi api_;
 };
 
+ParamDefinition::ParamDefinition(float default_value, float min_value,
+                                 float max_value)
+    : default_value(default_value),
+      min_value(min_value),
+      max_value(max_value) {}
+
+ParamDefinition::ParamDefinition(bool default_value)
+    : ParamDefinition(static_cast<float>(default_value)) {}
+
+ParamDefinition::ParamDefinition(int default_value, int min_value,
+                                 int max_value)
+    : ParamDefinition(static_cast<float>(default_value),
+                      static_cast<float>(min_value),
+                      static_cast<float>(max_value)) {}
+
 template <typename ValueType>
 StatusOr<ValueType>::StatusOr(Status error_status) : value_or_(error_status) {
   assert(error_status != Status::kOk);
@@ -133,6 +190,11 @@ template <typename ValueType>
 const ValueType& StatusOr<ValueType>::GetValue() const {
   assert(std::holds_alternative<ValueType>(value_or_));
   return std::get<ValueType>(value_or_);
+}
+
+template <typename ValueType>
+bool StatusOr<ValueType>::IsOk() const {
+  return std::holds_alternative<ValueType>(value_or_);
 }
 
 Api::Api() {

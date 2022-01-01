@@ -1,6 +1,15 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
+    name = "api_demo",
+    srcs = ["api_demo.cpp"],
+    deps = [
+        "//examples/common:console_log",
+        "//platforms/api:barelymusician",
+    ],
+)
+
+cc_binary(
     name = "engine_demo",
     srcs = ["engine_demo.cpp"],
     data = ["//examples/data:audio"],

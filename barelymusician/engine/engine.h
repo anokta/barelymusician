@@ -20,7 +20,7 @@
 
 namespace barelyapi {
 
-// barelyapi::Engine C++ API.
+// Class that wraps the internal BarelyMusician engine.
 class Engine {
  public:
   /// Instrument note off callback signature.

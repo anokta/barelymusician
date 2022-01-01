@@ -6,6 +6,7 @@
 #include <limits>
 #include <utility>
 #include <variant>
+#include <vector>
 
 #include "platforms/capi/barelymusician_v2.h"
 
@@ -119,6 +120,9 @@ class Api {
   /// @param position Beat position.
   using BeatCallback = void (*)(double position);
 
+  // TODO(#85): Add |NoteOffCallback|.
+  // TODO(#85): Add |NoteOnCallback|.
+
   /// Position callback signature.
   ///
   /// @param begin_position Begin position.
@@ -152,6 +156,9 @@ class Api {
   /// @param beat_callback Beat callback.
   Status SetBeatCallback(BeatCallback beat_callback);
 
+  // TODO(#85): Add |SetNoteOffCallback|.
+  // TODO(#85): Add |SetNoteOnCallback|.
+
   /// Sets position callback.
   ///
   /// @param position_callback Position callback.
@@ -169,8 +176,99 @@ class Api {
   Status Update(double timestamp);
 
  private:
-  // API handle.
+  // Internal API handle.
   BarelyApi api_;
+};
+
+/// Instrument.
+class Instrument {
+ public:
+  /// Create function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param sample_rate Sampling rate in Hz.
+  using CreateFn = void (*)(void** state, int sample_rate);
+
+  /// Destroy function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  using DestroyFn = void (*)(void** state);
+
+  /// Process function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param output Output buffer.
+  /// @param num_output_channels Number of channels.
+  /// @param num_output_frames Number of frames.
+  using ProcessFn = void (*)(void** state, float* output,
+                             int num_output_channels, int num_output_frames);
+
+  /// Set data function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param data Data.
+  using SetDataFn = void (*)(void** state, void* data);
+
+  /// Set note off function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param pitch Note pitch.
+  using SetNoteOffFn = void (*)(void** state, float pitch);
+
+  /// Set note on function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  using SetNoteOnFn = void (*)(void** state, float pitch, float intensity);
+
+  /// Set parameter function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param id Parameter identifier.
+  /// @param value Parameter value.
+  using SetParamFn = void (*)(void** state, ParamId id, float value);
+
+  ///
+  Instrument(BarelyApi api, BarelyId instrument_id_);
+
+  ~Instrument();
+
+  StatusOr<bool> IsNoteOn(float pitch) const;
+
+  Status SetNoteOff(float pitch);
+  Status SetNoteOn(float pitch, float intensity);
+
+ private:
+  // Internal API handle.
+  BarelyApi api_;
+
+  // Instrument identifier.
+  BarelyId id_;
+};
+
+/// Instrument definition.
+struct InstrumentDefinition {
+  /// Create function.
+  Instrument::CreateFn create_fn;
+
+  /// Destroy function.
+  Instrument::DestroyFn destroy_fn;
+
+  /// Process function.
+  Instrument::ProcessFn process_fn;
+
+  /// Set data function.
+  Instrument::SetDataFn set_data_fn;
+
+  /// Set note off function.
+  Instrument::SetNoteOffFn set_note_off_fn;
+
+  /// Set note on function.
+  Instrument::SetNoteOnFn set_note_on_fn;
+
+  /// Set parameter function.
+  Instrument::SetParamFn set_param_fn;
 };
 
 ParamDefinition::ParamDefinition(float default_value, float min_value,
@@ -260,6 +358,30 @@ Status Api::SetSampleRate(int sample_rate) {
 
 Status Api::Update(double timestamp) {
   return static_cast<Status>(BarelyApi_Update(api_, timestamp));
+}
+
+Instrument::Instrument(BarelyApi api, BarelyId instrument_id)
+    : api_(std::move(api)), id_(std::move(instrument_id)) {}
+
+Instrument::~Instrument() { BarelyInstrument_Destroy(api_, id_); }
+
+StatusOr<bool> Instrument::IsNoteOn(float pitch) const {
+  bool is_note_on = false;
+  if (const auto status =
+          BarelyInstrument_IsNoteOn(api_, id_, pitch, &is_note_on);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return is_note_on;
+}
+
+Status Instrument::SetNoteOff(float pitch) {
+  return static_cast<Status>(BarelyInstrument_SetNoteOff(api_, id_, pitch));
+}
+
+Status Instrument::SetNoteOn(float pitch, float intensity) {
+  return static_cast<Status>(
+      BarelyInstrument_SetNoteOn(api_, id_, pitch, intensity));
 }
 
 }  // namespace barely

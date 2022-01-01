@@ -2,6 +2,7 @@
 #define PLATFORMS_API_BARELYMUSICIAN_H_
 
 #include <cassert>
+#include <cstdint>
 #include <limits>
 #include <utility>
 #include <variant>
@@ -11,10 +12,10 @@
 namespace barely {
 
 /// Identifier type.
-using Id = BarelyId;
+using Id = std::int64_t;
 
 /// Parameter identifier type.
-using ParamId = BarelyParamId;
+using ParamId = std::int32_t;
 
 /// Parameter definition.
 struct ParamDefinition {
@@ -130,12 +131,12 @@ class Api {
   Api(Api&& other) = delete;
   Api& operator=(Api&& other) noexcept = delete;
 
-  /// Gets sampling rate.
+  /// Gets the sampling rate.
   ///
   /// @return Sampling rate in Hz, or error status.
   StatusOr<int> GetSampleRate() const;
 
-  /// Sets sampling rate.
+  /// Sets the sampling rate.
   ///
   /// @param sample_rate Sampling rate in Hz.
   Status SetSampleRate(int sample_rate);

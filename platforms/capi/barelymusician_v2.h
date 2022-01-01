@@ -84,15 +84,15 @@ enum BarelyStatus_Values {
 ///
 /// @param position Beat position in beats.
 /// @param timestamp Beat timestamp in seconds.
-typedef void (*BarelyBeatCallback)(double position, double timestamp);
+typedef void (*BarelyApi_BeatCallback)(double position, double timestamp);
 
 /// Note off callback signature.
 ///
 /// @param instrument_id Instrument identifier.
 /// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
-typedef void (*BarelyNoteOffCallback)(BarelyId instrument_id, double timestamp,
-                                      float note_pitch);
+typedef void (*BarelyApi_NoteOffCallback)(BarelyId instrument_id,
+                                          double timestamp, float note_pitch);
 
 /// Note on callback signature.
 ///
@@ -100,18 +100,20 @@ typedef void (*BarelyNoteOffCallback)(BarelyId instrument_id, double timestamp,
 /// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
-typedef void (*BarelyNoteOnCallback)(BarelyId instrument_id, double timestamp,
-                                     float note_pitch, float note_intensity);
+typedef void (*BarelyApi_NoteOnCallback)(BarelyId instrument_id,
+                                         double timestamp, float note_pitch,
+                                         float note_intensity);
 
-/// Update callback signature.
+/// Position callback signature.
 ///
 /// @param begin_position Begin position in beats.
 /// @param end_position End position in beats.
 /// @param begin_timestamp Begin timestamp in seconds.
 /// @param end_timestamp End timestamp in seconds.
-typedef void (*BarelyUpdateCallback)(double begin_position, double end_position,
-                                     double begin_timestamp,
-                                     double end_timestamp);
+typedef void (*BarelyApi_PositionCallback)(double begin_position,
+                                           double end_position,
+                                           double begin_timestamp,
+                                           double end_timestamp);
 
 /// Conductor create function signature.
 ///
@@ -370,7 +372,7 @@ BARELY_EXPORT BarelyStatus BarelyApi_IsPlaying(BarelyApi api,
 /// @param beat_callback Beat callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelyApi_SetBeatCallback(BarelyApi api, BarelyBeatCallback beat_callback);
+BarelyApi_SetBeatCallback(BarelyApi api, BarelyApi_BeatCallback beat_callback);
 
 /// Sets the note off callback.
 ///
@@ -378,7 +380,7 @@ BarelyApi_SetBeatCallback(BarelyApi api, BarelyBeatCallback beat_callback);
 /// @param note_off_callback Note off callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_SetNoteOffCallback(
-    BarelyApi api, BarelyNoteOffCallback note_off_callback);
+    BarelyApi api, BarelyApi_NoteOffCallback note_off_callback);
 
 /// Sets the note on callback.
 ///
@@ -386,7 +388,7 @@ BARELY_EXPORT BarelyStatus BarelyApi_SetNoteOffCallback(
 /// @param note_on_callback Note on callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_SetNoteOnCallback(
-    BarelyApi api, BarelyNoteOnCallback note_on_callback);
+    BarelyApi api, BarelyApi_NoteOnCallback note_on_callback);
 
 /// Sets the playback position.
 ///
@@ -403,6 +405,15 @@ BARELY_EXPORT BarelyStatus BarelyApi_SetPlaybackPosition(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_SetPlaybackTempo(BarelyApi api,
                                                       double tempo);
+
+/// Sets the position callback.
+///
+/// @param api BarelyMusician API.
+/// @param position_callback Position callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApi_SetPositionCallback(
+    BarelyApi api, BarelyApi_PositionCallback position_callback);
+
 /// Sets root note.
 ///
 /// @param api BarelyMusician API.
@@ -427,14 +438,6 @@ BARELY_EXPORT BarelyStatus BarelyApi_SetSampleRate(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_SetScale(BarelyApi api, float* scale,
                                               int32_t scale_length);
-
-/// Sets the update callback.
-///
-/// @param api BarelyMusician API.
-/// @param update_callback Update callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetUpdateCallback(
-    BarelyApi api, BarelyUpdateCallback update_callback);
 
 /// Starts the playback.
 ///

@@ -18,9 +18,9 @@
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
-namespace barely {
+namespace barelyapi {
 
-// barely::Musician C++ API.
+// barelyapi::Musician C++ API.
 class Musician {
  public:
   /// Instrument note off callback signature.
@@ -374,6 +374,6 @@ class Musician {
   Transport transport_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_MUSICIAN_H_

@@ -7,7 +7,7 @@
 #include "barelymusician/engine/instrument_definition.h"
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 constexpr int kSampleRate = 8000;
@@ -162,4 +162,4 @@ TEST(InstrumentTest, ProcessEmptyDefinition) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

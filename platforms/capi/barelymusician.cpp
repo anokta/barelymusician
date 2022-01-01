@@ -15,17 +15,17 @@
 
 namespace {
 
-using ::barely::GetStatusOrStatus;
-using ::barely::GetStatusOrValue;
-using ::barely::InstrumentDefinition;
-using ::barely::InstrumentState;
-using ::barely::IsOk;
-using ::barely::Musician;
-using ::barely::Note;
-using ::barely::ParamDefinition;
-using ::barely::Status;
-using ::barely::StatusOr;
 using ::barely::examples::SynthInstrument;
+using ::barelyapi::GetStatusOrStatus;
+using ::barelyapi::GetStatusOrValue;
+using ::barelyapi::InstrumentDefinition;
+using ::barelyapi::InstrumentState;
+using ::barelyapi::IsOk;
+using ::barelyapi::Musician;
+using ::barelyapi::Note;
+using ::barelyapi::ParamDefinition;
+using ::barelyapi::Status;
+using ::barelyapi::StatusOr;
 
 // Returns the corresponding |ParamDefinition| for a given |param_definition|.
 ParamDefinition GetParamDefinition(

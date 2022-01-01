@@ -5,7 +5,7 @@
 
 #include "barelymusician/dsp/generator.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Oscillator type.
 enum class OscillatorType {
@@ -59,6 +59,6 @@ class Oscillator : public Generator {
   std::default_random_engine white_noise_engine_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_DSP_OSCILLATOR_H_

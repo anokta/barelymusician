@@ -12,7 +12,7 @@
 #include "barelymusician/engine/param.h"
 #include "barelymusician/engine/param_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that wraps a conductor.
 class Conductor {
@@ -108,6 +108,6 @@ class Conductor {
   std::vector<Param> params_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_CONDUCTOR_H_

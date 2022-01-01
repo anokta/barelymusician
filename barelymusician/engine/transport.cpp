@@ -3,7 +3,7 @@
 #include <cmath>
 #include <utility>
 
-namespace barely {
+namespace barelyapi {
 
 namespace {
 
@@ -113,4 +113,4 @@ void Transport::Update(double timestamp) noexcept {
   }
 }
 
-}  // namespace barely
+}  // namespace barelyapi

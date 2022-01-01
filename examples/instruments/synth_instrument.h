@@ -36,12 +36,12 @@ class SynthInstrument : public GenericInstrument {
   void SetParam(int index, float value) noexcept override;
 
   /// Returns instrument definition.
-  static InstrumentDefinition GetDefinition() noexcept;
+  static barelyapi::InstrumentDefinition GetDefinition() noexcept;
 
  private:
-  using SynthVoice = EnvelopedVoice<Oscillator>;
+  using SynthVoice = EnvelopedVoice<barelyapi::Oscillator>;
 
-  PolyphonicVoice<SynthVoice> voice_;
+  barelyapi::PolyphonicVoice<SynthVoice> voice_;
 };
 
 }  // namespace barely::examples

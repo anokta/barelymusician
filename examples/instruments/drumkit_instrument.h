@@ -31,7 +31,7 @@ class DrumkitInstrument : public GenericInstrument {
   void SetParam(int, float) noexcept override;
 
   /// Returns instrument definition.
-  static InstrumentDefinition GetDefinition() noexcept;
+  static barelyapi::InstrumentDefinition GetDefinition() noexcept;
 
  private:
   struct DrumkitPad {
@@ -41,7 +41,7 @@ class DrumkitInstrument : public GenericInstrument {
                                 static_cast<int>(data.size()));
     }
     std::vector<float> data;
-    EnvelopedVoice<SamplePlayer> voice;
+    EnvelopedVoice<barelyapi::SamplePlayer> voice;
   };
 
   int sample_rate_;

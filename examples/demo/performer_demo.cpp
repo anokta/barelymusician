@@ -16,7 +16,6 @@
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/musician.h"
-#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -25,24 +24,23 @@
 
 namespace {
 
-using ::barely::ConductorDefinition;
-using ::barely::ConductorState;
-using ::barely::Id;
-using ::barely::IsOk;
-using ::barely::Musician;
-using ::barely::Note;
-using ::barely::NoteDuration;
-using ::barely::NoteIntensity;
-using ::barely::NotePitch;
-using ::barely::OscillatorType;
-using ::barely::ParamDefinition;
-using ::barely::Random;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
+using ::barelyapi::ConductorDefinition;
+using ::barelyapi::ConductorState;
+using ::barelyapi::Id;
+using ::barelyapi::IsOk;
+using ::barelyapi::Musician;
+using ::barelyapi::Note;
+using ::barelyapi::NoteDuration;
+using ::barelyapi::NoteIntensity;
+using ::barelyapi::NotePitch;
+using ::barelyapi::OscillatorType;
+using ::barelyapi::Random;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -62,7 +60,7 @@ constexpr double kTempoIncrement = 10.0;
 
 // Returns the MIDI key number for the given |pitch|.
 int MidiKeyNumberFromPitch(float pitch) {
-  return static_cast<int>(barely::kNumSemitones * pitch) + 69;
+  return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
 }  // namespace
@@ -112,15 +110,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
     return Note{.pitch = pitch, .intensity = intensity, .duration = duration};
   };
   std::vector<std::pair<double, Note>> notes;
-  notes.emplace_back(0.0, build_note(barely::kPitchC4, 1.0));
-  notes.emplace_back(1.0, build_note(barely::kPitchD4, 1.0));
-  notes.emplace_back(2.0, build_note(barely::kPitchE4, 1.0));
-  notes.emplace_back(3.0, build_note(barely::kPitchF4, 1.0));
-  notes.emplace_back(4.0, build_note(barely::kPitchG4, 1.0));
-  notes.emplace_back(5.0, build_note(barely::kPitchG4, 1.0 / 3.0));
-  notes.emplace_back(5.0 + 1.0 / 3.0, build_note(barely::kPitchA5, 1.0 / 3.0));
-  notes.emplace_back(5.0 + 2.0 / 3.0, build_note(barely::kPitchB5, 1.0 / 3.0));
-  notes.emplace_back(6.0, build_note(barely::kPitchC5, 2.0));
+  notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));
+  notes.emplace_back(1.0, build_note(barelyapi::kPitchD4, 1.0));
+  notes.emplace_back(2.0, build_note(barelyapi::kPitchE4, 1.0));
+  notes.emplace_back(3.0, build_note(barelyapi::kPitchF4, 1.0));
+  notes.emplace_back(4.0, build_note(barelyapi::kPitchG4, 1.0));
+  notes.emplace_back(5.0, build_note(barelyapi::kPitchG4, 1.0 / 3.0));
+  notes.emplace_back(5.0 + 1.0 / 3.0,
+                     build_note(barelyapi::kPitchA5, 1.0 / 3.0));
+  notes.emplace_back(5.0 + 2.0 / 3.0,
+                     build_note(barelyapi::kPitchB5, 1.0 / 3.0));
+  notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
 
   const Id performer_id = musician.AddPerformer();
   musician.AddPerformerInstrument(performer_id, performer_instrument_id);
@@ -141,8 +141,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   double reset_position = false;
   musician.SetPlaybackBeatCallback([&](double /*position*/) {
-    musician.SetInstrumentNoteOn(metronome_id, barely::kPitchC3, 1.0);
-    musician.SetInstrumentNoteOff(metronome_id, barely::kPitchC3);
+    musician.SetInstrumentNoteOn(metronome_id, barelyapi::kPitchC3, 1.0);
+    musician.SetInstrumentNoteOff(metronome_id, barelyapi::kPitchC3);
     if (reset_position) {
       reset_position = false;
       musician.SetPlaybackPosition(0.0);
@@ -177,7 +177,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       // Toggle notes.
       if (IsOk(musician.RemovePerformerNote(performer_id, note_ids[index]))) {
         ConsoleLog() << "Removed note " << index;
-        note_ids[index] = barely::kInvalidId;
+        note_ids[index] = barelyapi::kInvalidId;
       } else {
         note_ids[index] = GetStatusOrValue(musician.AddPerformerNote(
             performer_id, notes[index].first, notes[index].second));

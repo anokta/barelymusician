@@ -3,7 +3,7 @@
 
 #include <random>
 
-namespace barely {
+namespace barelyapi {
 
 /// Pseudo-random number generator.
 class Random {
@@ -68,6 +68,6 @@ class Random {
   std::uniform_int_distribution<int> uniform_int_distribution_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_COMMON_RANDOM_H_

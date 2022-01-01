@@ -5,7 +5,7 @@
 
 #include "barelymusician/engine/param_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 Param::Param(ParamDefinition definition) noexcept
     : definition_(std::move(definition)) {
@@ -42,4 +42,4 @@ bool Param::SetValue(float value) noexcept {
   return false;
 }
 
-}  // namespace barely
+}  // namespace barelyapi

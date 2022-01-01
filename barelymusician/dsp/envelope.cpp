@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace barely {
+namespace barelyapi {
 
 Envelope::Envelope(int sample_rate) noexcept
     : sample_interval_(
@@ -120,4 +120,4 @@ void Envelope::Stop() noexcept {
   }
 }
 
-}  // namespace barely
+}  // namespace barelyapi

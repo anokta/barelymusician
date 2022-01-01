@@ -15,7 +15,7 @@
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
-namespace barely {
+namespace barelyapi {
 
 namespace {
 
@@ -402,4 +402,4 @@ void Musician::Update(double timestamp) noexcept {
   instrument_manager_.Update();
 }
 
-}  // namespace barely
+}  // namespace barelyapi

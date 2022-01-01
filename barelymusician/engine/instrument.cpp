@@ -6,7 +6,7 @@
 
 #include "barelymusician/engine/instrument_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 namespace {
 
@@ -90,4 +90,4 @@ void Instrument::SetParam(int index, float value) noexcept {
   set_param_fn_(&state_, index, value);
 }
 
-}  // namespace barely
+}  // namespace barelyapi

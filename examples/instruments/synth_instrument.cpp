@@ -7,6 +7,11 @@
 
 namespace barely::examples {
 
+using ::barelyapi::GetFrequency;
+using ::barelyapi::InstrumentDefinition;
+using ::barelyapi::OscillatorType;
+using ::barelyapi::ParamDefinition;
+
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
     : voice_(SynthVoice(sample_rate)) {}
 

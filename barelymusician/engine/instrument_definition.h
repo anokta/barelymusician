@@ -7,7 +7,7 @@
 
 #include "barelymusician/engine/param_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Instrument state type.
 using InstrumentState = std::any;
@@ -90,6 +90,6 @@ struct InstrumentDefinition {
   std::vector<ParamDefinition> param_definitions;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_

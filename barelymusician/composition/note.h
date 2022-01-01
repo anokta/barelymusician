@@ -5,7 +5,7 @@
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Musical note.
 struct Note {
@@ -22,6 +22,6 @@ struct Note {
   auto operator<=>(const Note& other) const noexcept = default;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_COMPOSITION_NOTE_H_

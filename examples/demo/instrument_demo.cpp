@@ -7,7 +7,6 @@
 
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/musician.h"
-#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -15,14 +14,13 @@
 
 namespace {
 
-using ::barely::Musician;
-using ::barely::OscillatorType;
-using ::barely::ParamDefinition;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
+using ::barelyapi::Musician;
+using ::barelyapi::OscillatorType;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -37,7 +35,7 @@ constexpr float kEnvelopeAttack = 0.05f;
 constexpr float kEnvelopeRelease = 0.125f;
 
 // Note settings.
-constexpr float kRootPitch = barely::kPitchC3;
+constexpr float kRootPitch = barelyapi::kPitchC3;
 constexpr float kNoteIntensity = 1.0f;
 constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
@@ -52,7 +50,7 @@ std::optional<float> PitchFromKey(const InputManager::Key& key) {
   }
   const float distance =
       static_cast<float>(std::distance(std::cbegin(kOctaveKeys), it));
-  return kRootPitch + distance / barely::kNumSemitones;
+  return kRootPitch + distance / barelyapi::kNumSemitones;
 }
 
 }  // namespace

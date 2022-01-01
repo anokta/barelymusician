@@ -9,6 +9,10 @@
 
 namespace barely::examples {
 
+using ::barelyapi::FindOrNull;
+using ::barelyapi::InstrumentDefinition;
+using ::barelyapi::ParamDefinition;
+
 DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
     : sample_rate_(sample_rate) {}
 

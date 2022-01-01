@@ -4,7 +4,6 @@
 
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/musician.h"
-#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -13,15 +12,14 @@
 
 namespace {
 
-using ::barely::Musician;
-using ::barely::OscillatorType;
-using ::barely::ParamDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
+using ::barelyapi::Musician;
+using ::barelyapi::OscillatorType;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -37,8 +35,8 @@ constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr float kAttack = 0.0f;
 constexpr float kRelease = 0.025f;
 
-constexpr float kBarPitch = barely::kPitchA4;
-constexpr float kBeatPitch = barely::kPitchA3;
+constexpr float kBarPitch = barelyapi::kPitchA4;
+constexpr float kBeatPitch = barelyapi::kPitchA3;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 120.0;

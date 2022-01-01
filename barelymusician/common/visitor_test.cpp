@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 // Tests that all variants are visited when set with an auto definition.
@@ -40,4 +40,4 @@ TEST(VisitorTest, ExplicitVisit) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

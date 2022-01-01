@@ -4,7 +4,7 @@
 #include <optional>
 #include <utility>
 
-namespace barely {
+namespace barelyapi {
 
 /// Parameter definition.
 struct ParamDefinition {
@@ -54,6 +54,6 @@ struct ParamDefinition {
   std::optional<float> max_value;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_PARAM_DEFINITION_H_

@@ -19,7 +19,7 @@
 #include "barelymusician/engine/param_definition.h"
 #include "barelymusician/engine/task_runner.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that manages processing of instruments.
 class InstrumentManager {
@@ -268,6 +268,6 @@ class InstrumentManager {
   std::atomic<int> sample_rate_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_

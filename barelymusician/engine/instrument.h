@@ -5,7 +5,7 @@
 
 #include "barelymusician/engine/instrument_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that wraps an instrument.
 class Instrument {
@@ -85,6 +85,6 @@ class Instrument {
   float gain_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

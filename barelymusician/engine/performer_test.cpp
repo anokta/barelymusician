@@ -8,7 +8,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 using ::testing::ElementsAre;
@@ -53,4 +53,4 @@ TEST(PerformerTest, Perform) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

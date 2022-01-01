@@ -11,7 +11,7 @@
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/param_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Conductor state type.
 using ConductorState = std::any;
@@ -103,6 +103,6 @@ struct ConductorDefinition {
   std::vector<ParamDefinition> param_definitions;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_CONDUCTOR_DEFINITION_H_

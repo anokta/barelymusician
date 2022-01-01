@@ -3,7 +3,7 @@
 
 #include <variant>
 
-namespace barely {
+namespace barelyapi {
 
 /// Common note values in relation to quarter note beat duration.
 inline constexpr int kNumQuarterNotesPerBeat = 1;
@@ -33,6 +33,6 @@ double GetPosition(int step, int num_steps) noexcept;
 double QuantizePosition(double position, double resolution,
                         double amount = 1.0) noexcept;
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_COMPOSITION_NOTE_DURATION_H_

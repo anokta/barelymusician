@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-namespace barely {
+namespace barelyapi {
 
 /// Class template that provides polyphony of a desired voice type.
 template <class VoiceType>
@@ -147,6 +147,6 @@ void PolyphonicVoice<VoiceType>::Update(
   }
 }
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_DSP_POLYPHONIC_VOICE_H_

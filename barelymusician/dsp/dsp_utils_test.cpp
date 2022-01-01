@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 // Tests that converting values from/to amplitude and decibels returns expected
@@ -88,4 +88,4 @@ TEST(DspUtilsTest, SamplesSecondsConversion) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

@@ -3,7 +3,7 @@
 
 #include "barelymusician/dsp/generator.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Sample player that generates output samples from the provided mono data.
 class SamplePlayer : public Generator {
@@ -63,6 +63,6 @@ class SamplePlayer : public Generator {
   float increment_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_

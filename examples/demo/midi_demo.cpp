@@ -11,7 +11,6 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/musician.h"
-#include "barelymusician/engine/param_definition.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -21,18 +20,17 @@
 
 namespace {
 
-using ::barely::GetStatusOrValue;
-using ::barely::Id;
-using ::barely::Musician;
-using ::barely::Note;
-using ::barely::OscillatorType;
-using ::barely::ParamDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
+using ::barelyapi::GetStatusOrValue;
+using ::barelyapi::Id;
+using ::barelyapi::Musician;
+using ::barelyapi::Note;
+using ::barelyapi::OscillatorType;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -60,12 +58,12 @@ constexpr double kTempo = 132.0;
 
 // Returns the pitch for the given |midi_key_number|.
 float PitchFromMidiKeyNumber(int midi_key_number) {
-  return static_cast<float>(midi_key_number - 69) / barely::kNumSemitones;
+  return static_cast<float>(midi_key_number - 69) / barelyapi::kNumSemitones;
 }
 
 // Returns the MIDI key number for the given |pitch|.
 int MidiKeyNumberFromPitch(float pitch) {
-  return static_cast<int>(barely::kNumSemitones * pitch) + 69;
+  return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
 // Adds the score to |performer_id| from the given |midi_events|.

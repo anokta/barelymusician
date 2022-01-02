@@ -118,20 +118,6 @@ class StatusOr {
 /// BarelyMusician C++ API.
 class Api {
  public:
-  /// Beat callback signature.
-  ///
-  /// @param position Beat position.
-  using BeatCallback = void (*)(double position);
-
-  // TODO(#85): Add |NoteOffCallback|.
-  // TODO(#85): Add |NoteOnCallback|.
-
-  /// Position callback signature.
-  ///
-  /// @param begin_position Begin position.
-  /// @param end_position End position.
-  using PositionCallback = void (*)(double begin_position, double end_position);
-
   /// Constructs new |Api|.
   Api();
 
@@ -154,19 +140,6 @@ class Api {
   /// @return Sampling rate in Hz, or error status.
   StatusOr<int> GetSampleRate() const;
 
-  /// Sets beat callback.
-  ///
-  /// @param beat_callback Beat callback.
-  Status SetBeatCallback(BeatCallback beat_callback);
-
-  // TODO(#85): Add |SetNoteOffCallback|.
-  // TODO(#85): Add |SetNoteOnCallback|.
-
-  /// Sets position callback.
-  ///
-  /// @param position_callback Position callback.
-  Status SetPositionCallback(PositionCallback position_callback);
-
   /// Sets the sampling rate.
   ///
   /// @param sample_rate Sampling rate in Hz.
@@ -186,6 +159,27 @@ class Api {
 /// Instrument.
 class Instrument {
  public:
+  /// Creates new |Instrument|.
+  Instrument(BarelyApi api, BarelyId id);
+
+  /// Destroys |Instrument|.
+  ~Instrument();
+
+  StatusOr<bool> IsNoteOn(float pitch) const;
+
+  Status SetNoteOff(float pitch);
+  Status SetNoteOn(float pitch, float intensity);
+
+ private:
+  // Internal API handle.
+  BarelyApi api_;
+
+  // Instrument identifier.
+  BarelyId id_;
+};
+
+/// Instrument definition.
+struct InstrumentDefinition {
   /// Create function signature.
   ///
   /// @param state Pointer to instrument state.
@@ -232,47 +226,26 @@ class Instrument {
   /// @param value Parameter value.
   using SetParamFn = void (*)(void** state, ParamId id, float value);
 
-  /// Creates new |Instrument|.
-  Instrument(BarelyApi api, BarelyId id);
-
-  /// Destroys |Instrument|.
-  ~Instrument();
-
-  StatusOr<bool> IsNoteOn(float pitch) const;
-
-  Status SetNoteOff(float pitch);
-  Status SetNoteOn(float pitch, float intensity);
-
- private:
-  // Internal API handle.
-  BarelyApi api_;
-
-  // Instrument identifier.
-  BarelyId id_;
-};
-
-/// Instrument definition.
-struct InstrumentDefinition {
   /// Create function.
-  Instrument::CreateFn create_fn;
+  CreateFn create_fn;
 
   /// Destroy function.
-  Instrument::DestroyFn destroy_fn;
+  DestroyFn destroy_fn;
 
   /// Process function.
-  Instrument::ProcessFn process_fn;
+  ProcessFn process_fn;
 
   /// Set data function.
-  Instrument::SetDataFn set_data_fn;
+  SetDataFn set_data_fn;
 
   /// Set note off function.
-  Instrument::SetNoteOffFn set_note_off_fn;
+  SetNoteOffFn set_note_off_fn;
 
   /// Set note on function.
-  Instrument::SetNoteOnFn set_note_on_fn;
+  SetNoteOnFn set_note_on_fn;
 
   /// Set parameter function.
-  Instrument::SetParamFn set_param_fn;
+  SetParamFn set_param_fn;
 
   /// List of parameter definitions.
   std::vector<ParamDefinition> param_definitions;
@@ -347,17 +320,6 @@ StatusOr<int> Api::GetSampleRate() const {
     return static_cast<Status>(status);
   }
   return sample_rate;
-}
-
-Status Api::SetBeatCallback(BeatCallback beat_callback) {
-  return static_cast<Status>(BarelyApi_SetBeatCallback(
-      api_, static_cast<BarelyApi_BeatCallback>(std::move(beat_callback))));
-}
-
-Status Api::SetPositionCallback(PositionCallback position_callback) {
-  return static_cast<Status>(BarelyApi_SetPositionCallback(
-      api_,
-      static_cast<BarelyApi_PositionCallback>(std::move(position_callback))));
 }
 
 Status Api::SetSampleRate(int sample_rate) {

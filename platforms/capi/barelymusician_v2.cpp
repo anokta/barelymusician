@@ -24,24 +24,6 @@ BarelyStatus BarelyApi_Destroy(BarelyApi api) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyApi_SetBeatCallback(BarelyApi api,
-                                       BarelyApi_BeatCallback beat_callback) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  beat_callback;
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyApi_SetPositionCallback(
-    BarelyApi api, BarelyApi_PositionCallback position_callback) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  position_callback;
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelyApi_GetSampleRate(BarelyApi api, int32_t* out_sample_rate) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_sample_rate) return BarelyStatus_kInvalidArgument;
@@ -115,6 +97,24 @@ BarelyStatus BarelyInstrument_SetNoteOn(BarelyApi api, BarelyId instrument_id,
   instrument_id;
   pitch;
   intensity;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyTransport_SetBeatCallback(
+    BarelyApi api, BarelyTransport_BeatCallback beat_callback) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  beat_callback;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyTransport_SetUpdateCallback(
+    BarelyApi api, BarelyTransport_UpdateCallback update_callback) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  update_callback;
   return BarelyStatus_kUnimplemented;
 }
 

@@ -80,67 +80,44 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 7,
 };
 
-/// BarelyMusician API beat callback signature.
-///
-/// @param position Beat position in beats.
-typedef void (*BarelyApi_BeatCallback)(double position);
-
-/// BarelyMusician API note off callback signature.
-///
-/// @param instrument_id Instrument identifier.
-/// @param pitch Note pitch.
-typedef void (*BarelyApi_NoteOffCallback)(BarelyId instrument_id, float pitch);
-
-/// BarelyMusician API note on callback signature.
-///
-/// @param instrument_id Instrument identifier.
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-typedef void (*BarelyApi_NoteOnCallback)(BarelyId instrument_id, float pitch,
-                                         float intensity);
-
-/// BarelyMusician API position callback signature.
-///
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-typedef void (*BarelyApi_PositionCallback)(double begin_position,
-                                           double end_position);
-
 /// Conductor create function signature.
 ///
 /// @param state Pointer to conductor state.
-typedef void (*BarelyConductor_CreateFn)(void** state);
+typedef void (*BarelyConductorDefinition_CreateFn)(void** state);
 
 /// Conductor destroy function signature.
 ///
 /// @param state Pointer to conductor state.
-typedef void (*BarelyConductor_DestroyFn)(void** state);
+typedef void (*BarelyConductorDefinition_DestroyFn)(void** state);
 
 /// Conductor set data function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param data Data.
-typedef void (*BarelyConductor_SetDataFn)(void** state, void* data);
+typedef void (*BarelyConductorDefinition_SetDataFn)(void** state, void* data);
 
 /// Conductor set energy function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param energy Energy.
-typedef void (*BarelyConductor_SetEnergyFn)(void** state, float energy);
+typedef void (*BarelyConductorDefinition_SetEnergyFn)(void** state,
+                                                      float energy);
 
 /// Conductor set parameter function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param id Parameter identifier.
 /// @param value Parameter value.
-typedef void (*BarelyConductor_SetParamFn)(void** state, BarelyParamId id,
-                                           float value);
+typedef void (*BarelyConductorDefinition_SetParamFn)(void** state,
+                                                     BarelyParamId id,
+                                                     float value);
 
 /// Conductor set stress function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param stress Stress.
-typedef void (*BarelyConductor_SetStressFn)(void** state, float stress);
+typedef void (*BarelyConductorDefinition_SetStressFn)(void** state,
+                                                      float stress);
 
 /// Conductor transform note duration function signature.
 ///
@@ -148,7 +125,7 @@ typedef void (*BarelyConductor_SetStressFn)(void** state, float stress);
 /// @param duration Note duration.
 /// @param out_duration Output note duration.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductor_TransformNoteDurationFn)(
+typedef BarelyStatus (*BarelyConductorDefinition_TransformNoteDurationFn)(
     void** state, double duration, double* out_duration);
 
 /// Conductor transform note intensity function signature.
@@ -157,7 +134,7 @@ typedef BarelyStatus (*BarelyConductor_TransformNoteDurationFn)(
 /// @param intensity Note intensity.
 /// @param out_intensity Output note intensity.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductor_TransformNoteIntensityFn)(
+typedef BarelyStatus (*BarelyConductorDefinition_TransformNoteIntensityFn)(
     void** state, float intensity, float* out_intensity);
 
 /// Conductor transform note pitch function signature.
@@ -166,49 +143,49 @@ typedef BarelyStatus (*BarelyConductor_TransformNoteIntensityFn)(
 /// @param pitch Note pitch.
 /// @param out_pitch Output note pitch.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductor_TransformNotePitchFn)(
+typedef BarelyStatus (*BarelyConductorDefinition_TransformNotePitchFn)(
     void** state, BarelyNotePitch pitch, float* out_pitch);
 
-/// Conductor transform playback tempo function signature.
+/// Conductor transform tempo function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param playback_tempo Playback tempo in BPM.
-/// @param out_playback_tempo Output playback tempo in BPM.
+/// @param tempo Tempo in BPM.
+/// @param out_tempo Output tempo in BPM.
 /// @return Status.
-typedef BarelyStatus (*BarelyConductor_TransformPlaybackTempoFn)(
-    void** state, double playback_tempo, double* out_playback_tempo);
+typedef BarelyStatus (*BarelyConductorDefinition_TransformTempoFn)(
+    void** state, double tempo, double* out_tempo);
 
 /// Conductor definition.
 typedef struct BarelyConductorDefinition {
   /// Create function.
-  BarelyConductor_CreateFn create_fn;
+  BarelyConductorDefinition_CreateFn create_fn;
 
   /// Destroy function.
-  BarelyConductor_DestroyFn destroy_fn;
+  BarelyConductorDefinition_DestroyFn destroy_fn;
 
   /// Set data function.
-  BarelyConductor_SetDataFn set_data_fn;
+  BarelyConductorDefinition_SetDataFn set_data_fn;
 
   /// Set energy function.
-  BarelyConductor_SetEnergyFn set_energy_fn;
+  BarelyConductorDefinition_SetEnergyFn set_energy_fn;
 
   /// Set parameter function.
-  BarelyConductor_SetParamFn set_param_fn;
+  BarelyConductorDefinition_SetParamFn set_param_fn;
 
   /// Set stress function.
-  BarelyConductor_SetStressFn set_stress_fn;
+  BarelyConductorDefinition_SetStressFn set_stress_fn;
 
   /// Transform note duration function.
-  BarelyConductor_TransformNoteDurationFn transform_duration_fn;
+  BarelyConductorDefinition_TransformNoteDurationFn transform_duration_fn;
 
   /// Transform note intensity function.
-  BarelyConductor_TransformNoteIntensityFn transform_intensity_fn;
+  BarelyConductorDefinition_TransformNoteIntensityFn transform_intensity_fn;
 
   /// Transform note pitch function.
-  BarelyConductor_TransformNotePitchFn transform_pitch_fn;
+  BarelyConductorDefinition_TransformNotePitchFn transform_pitch_fn;
 
-  /// Transform playback tempo function.
-  BarelyConductor_TransformPlaybackTempoFn transform_playback_tempo_fn;
+  /// Transform tempo function.
+  BarelyConductorDefinition_TransformTempoFn transform_tempo_fn;
 
   /// Number of parameter definitions.
   int32_t num_param_definitions;
@@ -217,16 +194,31 @@ typedef struct BarelyConductorDefinition {
   BarelyParamDefinition* param_definitions;
 } BarelyConductorDefinition;
 
+/// Instrument note off callback signature.
+///
+/// @param pitch Note pitch.
+/// @param user_data User data.
+typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, void* user_data);
+
+/// Instrument note on callback signature.
+///
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+/// @param user_data User data.
+typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity,
+                                                void* user_data);
+
 /// Instrument create function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param sample_rate Sampling rate in Hz.
-typedef void (*BarelyInstrument_CreateFn)(void** state, int32_t sample_rate);
+typedef void (*BarelyInstrumentDefinition_CreateFn)(void** state,
+                                                    int32_t sample_rate);
 
 /// Instrument destroy function signature.
 ///
 /// @param state Pointer to instrument state.
-typedef void (*BarelyInstrument_DestroyFn)(void** state);
+typedef void (*BarelyInstrumentDefinition_DestroyFn)(void** state);
 
 /// Instrument process function signature.
 ///
@@ -234,60 +226,63 @@ typedef void (*BarelyInstrument_DestroyFn)(void** state);
 /// @param output Output buffer.
 /// @param num_output_channels Number of channels.
 /// @param num_output_frames Number of frames.
-typedef void (*BarelyInstrument_ProcessFn)(void** state, float* output,
-                                           int32_t num_output_channels,
-                                           int32_t num_output_frames);
+typedef void (*BarelyInstrumentDefinition_ProcessFn)(
+    void** state, float* output, int32_t num_output_channels,
+    int32_t num_output_frames);
 
 /// Instrument set data function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param data Data.
-typedef void (*BarelyInstrument_SetDataFn)(void** state, void* data);
+typedef void (*BarelyInstrumentDefinition_SetDataFn)(void** state, void* data);
 
 /// Instrument set note off function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrument_SetNoteOffFn)(void** state, float pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOffFn)(void** state,
+                                                        float pitch);
 
 /// Instrument set note on function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyInstrument_SetNoteOnFn)(void** state, float pitch,
-                                             float intensity);
+typedef void (*BarelyInstrumentDefinition_SetNoteOnFn)(void** state,
+                                                       float pitch,
+                                                       float intensity);
 
 /// Instrument set parameter function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param id Parameter identifier.
 /// @param value Parameter value.
-typedef void (*BarelyInstrument_SetParamFn)(void** state, BarelyParamId id,
-                                            float value);
+typedef void (*BarelyInstrumentDefinition_SetParamFn)(void** state,
+                                                      BarelyParamId id,
+                                                      float value);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create function.
-  BarelyInstrument_CreateFn create_fn;
+  BarelyInstrumentDefinition_CreateFn create_fn;
 
   /// Destroy function.
-  BarelyInstrument_DestroyFn destroy_fn;
+  BarelyInstrumentDefinition_DestroyFn destroy_fn;
 
   /// Process function.
-  BarelyInstrument_ProcessFn process_fn;
+  BarelyInstrumentDefinition_ProcessFn process_fn;
 
   /// Set data function.
-  BarelyInstrument_SetDataFn set_data_fn;
+  BarelyInstrumentDefinition_SetDataFn set_data_fn;
 
   /// Set note off function.
-  BarelyInstrument_SetNoteOffFn set_note_off_fn;
+  BarelyInstrumentDefinition_SetNoteOffFn set_note_off_fn;
 
   /// Set note on function.
-  BarelyInstrument_SetNoteOnFn set_note_on_fn;
+  BarelyInstrumentDefinition_SetNoteOnFn set_note_on_fn;
 
   /// Set parameter function.
-  BarelyInstrument_SetParamFn set_param_fn;
+  BarelyInstrumentDefinition_SetParamFn set_param_fn;
 
   /// Number of parameter definitions.
   int32_t num_param_definitions;
@@ -295,6 +290,21 @@ typedef struct BarelyInstrumentDefinition {
   /// List of parameter definitions.
   BarelyParamDefinition* param_definitions;
 } BarelyInstrumentDefinition;
+
+/// Transport beat callback signature.
+///
+/// @param position Beat position in beats.
+/// @param user_data User data.
+typedef void (*BarelyTransport_BeatCallback)(double position, void* user_data);
+
+/// Transport update callback signature.
+///
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @param user_data User data.
+typedef void (*BarelyTransport_UpdateCallback)(double begin_position,
+                                               double end_position,
+                                               void* user_data);
 
 /// Creates new BarelyMusician API.
 ///
@@ -307,22 +317,6 @@ BARELY_EXPORT BarelyStatus BarelyApi_Create(BarelyApi* out_api);
 /// @param api BarelyMusician API.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi api);
-
-/// Gets the playback position.
-///
-/// @param api BarelyMusician API.
-/// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_GetTransportPosition(BarelyApi api,
-                                                          double* out_position);
-
-/// Gets the playback tempo.
-///
-/// @param api BarelyMusician API.
-/// @param out_tempo Output playback tempo in BPM.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_GetPlaybackTempo(BarelyApi api,
-                                                      double* out_tempo);
 
 /// Gets root note.
 ///
@@ -349,62 +343,6 @@ BARELY_EXPORT BarelyStatus BarelyApi_GetSampleRate(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyApi_GetScale(BarelyApi api, float** out_scale,
                                               int32_t* out_scale_length);
 
-/// Gets whether the playback is active or not.
-///
-/// @param api BarelyMusician API.
-/// @param out_is_playing Output true if active, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_IsPlaying(BarelyApi api,
-                                               bool* out_is_playing);
-
-/// Sets the beat callback.
-///
-/// @param api BarelyMusician API.
-/// @param beat_callback Beat callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyApi_SetBeatCallback(BarelyApi api, BarelyApi_BeatCallback beat_callback);
-
-/// Sets the note off callback.
-///
-/// @param api BarelyMusician API.
-/// @param note_off_callback Note off callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetNoteOffCallback(
-    BarelyApi api, BarelyApi_NoteOffCallback note_off_callback);
-
-/// Sets the note on callback.
-///
-/// @param api BarelyMusician API.
-/// @param note_on_callback Note on callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetNoteOnCallback(
-    BarelyApi api, BarelyApi_NoteOnCallback note_on_callback);
-
-/// Sets the playback position.
-///
-/// @param api BarelyMusician API.
-/// @param position Playback position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetPlaybackPosition(BarelyApi api,
-                                                         double position);
-
-/// Sets the playback tempo.
-///
-/// @param api BarelyMusician API.
-/// @param tempo Playback tempo in BPM.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetPlaybackTempo(BarelyApi api,
-                                                      double tempo);
-
-/// Sets the position callback.
-///
-/// @param api BarelyMusician API.
-/// @param position_callback Position callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetPositionCallback(
-    BarelyApi api, BarelyApi_PositionCallback position_callback);
-
 /// Sets root note.
 ///
 /// @param api BarelyMusician API.
@@ -429,18 +367,6 @@ BARELY_EXPORT BarelyStatus BarelyApi_SetSampleRate(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_SetScale(BarelyApi api, float* scale,
                                               int32_t scale_length);
-
-/// Starts the playback.
-///
-/// @param api BarelyMusician API.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_StartPlayback(BarelyApi api);
-
-/// Stops the playback.
-///
-/// @param api BarelyMusician API.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_StopPlayback(BarelyApi api);
 
 /// Updates the internal state at timestamp.
 ///
@@ -723,6 +649,14 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOff(BarelyApi api,
                                                        BarelyId instrument_id,
                                                        float pitch);
 
+/// Sets instrument note off callback.
+///
+/// @param api BarelyMusician API.
+/// @param note_off_callback Note off callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
+    BarelyApi api, BarelyInstrument_NoteOffCallback note_off_callback);
+
 /// Starts instrument note.
 ///
 /// @param api BarelyMusician API.
@@ -734,6 +668,14 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOn(BarelyApi api,
                                                       BarelyId instrument_id,
                                                       float pitch,
                                                       float intensity);
+
+/// Sets instrument note on callback.
+///
+/// @param api BarelyMusician API.
+/// @param note_on_callback Note on callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApi_SetNoteOnCallback(
+    BarelyApi api, BarelyInstrument_NoteOnCallback note_on_callback);
 
 /// Sets instrument parameter value.
 ///
@@ -1018,6 +960,74 @@ BarelySequence_SetNoteEventIntensity(BarelyApi api, BarelyId sequence_id,
 BARELY_EXPORT BarelyStatus
 BarelySequence_SetNoteEventPitch(BarelyApi api, BarelyId sequence_id,
                                  BarelyId note_event_id, BarelyNotePitch pitch);
+
+/// Gets the transport position.
+///
+/// @param api BarelyMusician API.
+/// @param out_position Output position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_GetPosition(BarelyApi api,
+                                                       double* out_position);
+
+/// Gets the transport tempo.
+///
+/// @param api BarelyMusician API.
+/// @param out_tempo Output tempo in BPM.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_GetTempo(BarelyApi api,
+                                                    double* out_tempo);
+
+/// Gets whether the transport is playing or not.
+///
+/// @param api BarelyMusician API.
+/// @param out_is_playing Output true if playing, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_IsPlaying(BarelyApi api,
+                                                     bool* out_is_playing);
+
+/// Sets the transport beat callback.
+///
+/// @param api BarelyMusician API.
+/// @param beat_callback Beat callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetBeatCallback(
+    BarelyApi api, BarelyTransport_BeatCallback beat_callback);
+
+/// Sets the transport position.
+///
+/// @param api BarelyMusician API.
+/// @param position Transport position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetPosition(BarelyApi api,
+                                                       double position);
+
+/// Sets the transport tempo.
+///
+/// @param api BarelyMusician API.
+/// @param tempo Tempo in BPM.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetTempo(BarelyApi api,
+                                                    double tempo);
+
+/// Sets the transport update callback.
+///
+/// @param api BarelyMusician API.
+/// @param update_callback Update callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetUpdateCallback(
+    BarelyApi api, BarelyTransport_UpdateCallback update_callback);
+
+/// Starts the transport playback.
+///
+/// @param api BarelyMusician API.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_Start(BarelyApi api);
+
+/// Stops the transport playback.
+///
+/// @param api BarelyMusician API.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_Stop(BarelyApi api);
 
 #ifdef __cplusplus
 }  // extern "C"

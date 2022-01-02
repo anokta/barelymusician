@@ -8,20 +8,20 @@
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/param_definition.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
 
 using ::barely::examples::SynthInstrument;
+using ::barelyapi::Engine;
 using ::barelyapi::GetStatusOrStatus;
 using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::InstrumentDefinition;
 using ::barelyapi::InstrumentState;
 using ::barelyapi::IsOk;
-using ::barelyapi::Engine;
 using ::barelyapi::Note;
 using ::barelyapi::ParamDefinition;
 using ::barelyapi::Status;
@@ -143,6 +143,11 @@ struct BarelyMusician {
 
   /// Engine instance.
   Engine instance;
+
+ private:
+  // Ensure that the instance can only be destroyed via the API call.
+  friend BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi);
+  ~BarelyMusician() = default;
 };
 
 BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* out_performer_id) {

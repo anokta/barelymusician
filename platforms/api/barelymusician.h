@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <utility>
 #include <variant>
@@ -135,7 +136,7 @@ class Api {
   Api(Api&& other) = delete;
   Api& operator=(Api&& other) noexcept = delete;
 
-  /// Gets the sampling rate.
+  /// Returns the sampling rate.
   ///
   /// @return Sampling rate in Hz, or error status.
   StatusOr<int> GetSampleRate() const;
@@ -143,6 +144,7 @@ class Api {
   /// Sets the sampling rate.
   ///
   /// @param sample_rate Sampling rate in Hz.
+  /// @return Status.
   Status SetSampleRate(int sample_rate);
 
   /// Updates the internal state at timestamp.
@@ -152,6 +154,8 @@ class Api {
   Status Update(double timestamp);
 
  private:
+  friend class Transport;
+
   // Internal API handle.
   BarelyApi api_;
 };
@@ -159,7 +163,7 @@ class Api {
 /// Instrument.
 class Instrument {
  public:
-  /// Creates new |Instrument|.
+  /// Constructs new |Instrument|.
   Instrument(BarelyApi api, BarelyId id);
 
   /// Destroys |Instrument|.
@@ -251,6 +255,82 @@ struct InstrumentDefinition {
   std::vector<ParamDefinition> param_definitions;
 };
 
+/// Playback transport.
+class Transport {
+ public:
+  /// Beat callback signature.
+  ///
+  /// @param position Beat position in beats.
+  using BeatCallback = std::function<void(double position)>;
+
+  /// Update callback signature.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  using UpdateCallback =
+      std::function<void(double begin_position, double end_position)>;
+
+  /// Constructs new |Transport|.
+  ///
+  /// @param api BarelyMusician C++ API.
+  explicit Transport(const Api& api);
+
+  /// Returns the position.
+  ///
+  /// @return Position in beats, or error status.
+  StatusOr<double> GetPosition() const;
+
+  /// Returns the tempo.
+  ///
+  /// @return Tempo in BPM, or error status.
+  StatusOr<double> GetTempo() const;
+
+  /// Returns whether the playback is active or not.
+  ///
+  /// @return True if playing, false otherwise, or error status.
+  StatusOr<bool> IsPlaying() const;
+
+  /// Sets the beat callback.
+  ///
+  /// @param beat_callback Beat callback.
+  /// @return Status.
+  Status SetBeatCallback(BeatCallback beat_callback);
+
+  /// Sets the position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status SetPosition(double position);
+
+  /// Sets the tempo.
+  ///
+  /// @param tempo Tempo in BPM.
+  /// @return Status.
+  Status SetTempo(double tempo);
+
+  /// Sets the update callback.
+  ///
+  /// @param update_callback Update callback.
+  /// @return Status.
+  Status SetUpdateCallback(UpdateCallback update_callback);
+
+  /// Starts the playback.
+  Status Start();
+
+  /// Stops the playback.
+  Status Stop();
+
+ private:
+  // Internal API handle.
+  const BarelyApi& api_;
+
+  // Beat callback.
+  BeatCallback beat_callback_;
+
+  // Update callback.
+  UpdateCallback update_callback_;
+};
+
 ParamDefinition::ParamDefinition(ParamId id, float default_value,
                                  float min_value, float max_value)
     : id(id),
@@ -331,7 +411,7 @@ Status Api::Update(double timestamp) {
 }
 
 Instrument::Instrument(BarelyApi api, BarelyId instrument_id)
-    : api_(std::move(api)), id_(std::move(instrument_id)) {}
+    : api_(api), id_(std::move(instrument_id)) {}
 
 Instrument::~Instrument() { BarelyInstrument_Destroy(api_, id_); }
 
@@ -352,6 +432,91 @@ Status Instrument::SetNoteOff(float pitch) {
 Status Instrument::SetNoteOn(float pitch, float intensity) {
   return static_cast<Status>(
       BarelyInstrument_SetNoteOn(api_, id_, pitch, intensity));
+}
+
+Transport::Transport(const Api& api)
+    : api_(api.api_), beat_callback_(nullptr), update_callback_(nullptr) {}
+
+StatusOr<double> Transport::GetPosition() const {
+  double position = 0.0;
+  if (const auto status = BarelyTransport_GetPosition(api_, &position);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return position;
+}
+
+StatusOr<double> Transport::GetTempo() const {
+  double tempo = 0.0;
+  if (const auto status = BarelyTransport_GetTempo(api_, &tempo);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return tempo;
+}
+
+StatusOr<bool> Transport::IsPlaying() const {
+  bool is_playing = false;
+  if (const auto status = BarelyTransport_IsPlaying(api_, &is_playing);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return is_playing;
+}
+
+// TODO(#85): Ensure that the beat callback is updated accordingly for when
+//    transport is copied/moved/destroyed.
+Status Transport::SetBeatCallback(BeatCallback beat_callback) {
+  beat_callback_ = std::move(beat_callback);
+  if (beat_callback_) {
+    return static_cast<Status>(BarelyTransport_SetBeatCallback(
+        api_,
+        [](double position, void* user_data) {
+          if (user_data) {
+            (*static_cast<BeatCallback*>(user_data))(position);
+          }
+        },
+        static_cast<void*>(&beat_callback_)));
+  } else {
+    return static_cast<Status>(
+        BarelyTransport_SetBeatCallback(api_, nullptr, nullptr));
+  }
+}
+
+Status Transport::SetPosition(double position) {
+  return static_cast<Status>(BarelyTransport_SetPosition(api_, position));
+}
+
+Status Transport::SetTempo(double tempo) {
+  return static_cast<Status>(BarelyTransport_SetTempo(api_, tempo));
+}
+
+// TODO(#85): Ensure that the update callback is updated accordingly for when
+//    transport is copied/moved/destroyed.
+Status Transport::SetUpdateCallback(UpdateCallback update_callback) {
+  update_callback_ = std::move(update_callback);
+  if (update_callback_) {
+    return static_cast<Status>(BarelyTransport_SetUpdateCallback(
+        api_,
+        [](double begin_position, double end_position, void* user_data) {
+          if (user_data) {
+            (*static_cast<UpdateCallback*>(user_data))(begin_position,
+                                                       end_position);
+          }
+        },
+        static_cast<void*>(&beat_callback_)));
+  } else {
+    return static_cast<Status>(
+        BarelyTransport_SetUpdateCallback(api_, nullptr, nullptr));
+  }
+}
+
+Status Transport::Start() {
+  return static_cast<Status>(BarelyTransport_Start(api_));
+}
+
+Status Transport::Stop() {
+  return static_cast<Status>(BarelyTransport_Stop(api_));
 }
 
 }  // namespace barely

@@ -978,7 +978,7 @@ BARELY_EXPORT BarelyStatus BarelyTransport_GetPosition(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyTransport_GetTempo(BarelyApi api,
                                                     double* out_tempo);
 
-/// Gets whether the transport is playing or not.
+/// Gets whether the transport playback is active or not.
 ///
 /// @param api BarelyMusician API.
 /// @param out_is_playing Output true if playing, false otherwise.
@@ -990,9 +990,10 @@ BARELY_EXPORT BarelyStatus BarelyTransport_IsPlaying(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param beat_callback Beat callback.
+/// @param user_data User data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyTransport_SetBeatCallback(
-    BarelyApi api, BarelyTransport_BeatCallback beat_callback);
+    BarelyApi api, BarelyTransport_BeatCallback beat_callback, void* user_data);
 
 /// Sets the transport position.
 ///
@@ -1014,9 +1015,11 @@ BARELY_EXPORT BarelyStatus BarelyTransport_SetTempo(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param update_callback Update callback.
+/// @param user_data User data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyTransport_SetUpdateCallback(
-    BarelyApi api, BarelyTransport_UpdateCallback update_callback);
+    BarelyApi api, BarelyTransport_UpdateCallback update_callback,
+    void* user_data);
 
 /// Starts the transport playback.
 ///

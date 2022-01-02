@@ -12,9 +12,6 @@
 
 namespace barely {
 
-/// Identifier type.
-using Id = std::int64_t;
-
 /// Parameter identifier type.
 using ParamId = std::int32_t;
 
@@ -22,26 +19,32 @@ using ParamId = std::int32_t;
 struct ParamDefinition {
   /// Constructs new |ParamDefinition|.
   ///
+  /// @param id Identifier.
   /// @param default_value Default value.
   /// @param min_value Minimum value.
   /// @param max_value Maximum value.
-  ParamDefinition(float default_value = 0.0f,
+  ParamDefinition(ParamId id, float default_value = 0.0f,
                   float min_value = std::numeric_limits<float>::lowest(),
                   float max_value = std::numeric_limits<float>::max());
 
   /// Constructs new |ParamDefinition| for a boolean value.
   ///
+  /// @param id Identifier.
   /// @param default_value Default boolean value.
-  ParamDefinition(bool default_value);
+  ParamDefinition(ParamId id, bool default_value);
 
   /// Constructs new |ParamDefinition| for an integer value.
   ///
+  /// @param id Identifier.
   /// @param default_value Default integer value.
   /// @param min_value Minimum integer value.
   /// @param max_value Maximum integer value.
-  ParamDefinition(int default_value,
+  ParamDefinition(ParamId id, int default_value,
                   int min_value = std::numeric_limits<int>::lowest(),
                   int max_value = std::numeric_limits<int>::max());
+
+  /// Identifier.
+  ParamId id;
 
   /// Default value.
   float default_value;
@@ -229,9 +232,10 @@ class Instrument {
   /// @param value Parameter value.
   using SetParamFn = void (*)(void** state, ParamId id, float value);
 
-  ///
-  Instrument(BarelyApi api, BarelyId instrument_id_);
+  /// Creates new |Instrument|.
+  Instrument(BarelyApi api, BarelyId id);
 
+  /// Destroys |Instrument|.
   ~Instrument();
 
   StatusOr<bool> IsNoteOn(float pitch) const;
@@ -269,20 +273,24 @@ struct InstrumentDefinition {
 
   /// Set parameter function.
   Instrument::SetParamFn set_param_fn;
+
+  /// List of parameter definitions.
+  std::vector<ParamDefinition> param_definitions;
 };
 
-ParamDefinition::ParamDefinition(float default_value, float min_value,
-                                 float max_value)
-    : default_value(default_value),
+ParamDefinition::ParamDefinition(ParamId id, float default_value,
+                                 float min_value, float max_value)
+    : id(id),
+      default_value(default_value),
       min_value(min_value),
       max_value(max_value) {}
 
-ParamDefinition::ParamDefinition(bool default_value)
-    : ParamDefinition(static_cast<float>(default_value)) {}
+ParamDefinition::ParamDefinition(ParamId id, bool default_value)
+    : ParamDefinition(id, static_cast<float>(default_value)) {}
 
-ParamDefinition::ParamDefinition(int default_value, int min_value,
+ParamDefinition::ParamDefinition(ParamId id, int default_value, int min_value,
                                  int max_value)
-    : ParamDefinition(static_cast<float>(default_value),
+    : ParamDefinition(id, static_cast<float>(default_value),
                       static_cast<float>(min_value),
                       static_cast<float>(max_value)) {}
 

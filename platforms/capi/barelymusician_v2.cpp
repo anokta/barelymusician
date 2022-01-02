@@ -8,7 +8,6 @@ extern "C" {
 struct BarelyMusician {
   // TODO(#85): This is a temp POC for testing.
   int sample_rate;
-  BarelyId id_count;
   double tempo;
 
  private:
@@ -62,13 +61,35 @@ BarelyStatus BarelyInstrument_Create(BarelyApi api,
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement - this is a temp POC for testing.
-  definition;
-  *out_instrument_id = ++api->id_count;
+  *out_instrument_id =
+      definition.num_param_definitions > 0
+          ? static_cast<BarelyId>(definition.param_definitions[0].default_value)
+          : 0;
   return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyInstrument_Destroy(BarelyApi api, BarelyId instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
+                                      float* out_gain) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_gain) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement - this is a temp POC for testing.
+  *out_gain = static_cast<float>(instrument_id);
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId instrument_id,
+                                      bool* out_is_muted) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_is_muted) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
   instrument_id;
@@ -86,6 +107,50 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api, BarelyId instrument_id,
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
+                                      double timestamp, float* output,
+                                      int32_t num_output_channels,
+                                      int32_t num_output_frames) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  timestamp;
+  output;
+  num_output_channels;
+  num_output_frames;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_SetAllNotesOff(BarelyApi api,
+                                             BarelyId instrument_id) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId instrument_id,
+                                      float gain) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  gain;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_SetMuted(BarelyApi api, BarelyId instrument_id,
+                                       bool is_muted) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  is_muted;
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyInstrument_SetNoteOff(BarelyApi api, BarelyId instrument_id,
                                          float pitch) {
   if (!api) return BarelyStatus_kNotFound;
@@ -93,6 +158,18 @@ BarelyStatus BarelyInstrument_SetNoteOff(BarelyApi api, BarelyId instrument_id,
   // TODO(#85): Implement.
   instrument_id;
   pitch;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_SetNoteOffCallback(
+    BarelyApi api, BarelyId instrument_id,
+    BarelyInstrument_NoteOffCallback note_off_callback, void* user_data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  note_off_callback;
+  user_data;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -104,6 +181,18 @@ BarelyStatus BarelyInstrument_SetNoteOn(BarelyApi api, BarelyId instrument_id,
   instrument_id;
   pitch;
   intensity;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_SetNoteOnCallback(
+    BarelyApi api, BarelyId instrument_id,
+    BarelyInstrument_NoteOnCallback note_on_callback, void* user_data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  note_on_callback;
+  user_data;
   return BarelyStatus_kUnimplemented;
 }
 

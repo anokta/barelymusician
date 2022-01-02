@@ -21,10 +21,15 @@ struct ParamDefinition {
   /// Constructs new |ParamDefinition|.
   ///
   /// @param id Identifier.
-  /// @param default_value Default value.
-  /// @param min_value Minimum value.
-  /// @param max_value Maximum value.
-  ParamDefinition(ParamId id, float default_value = 0.0f,
+  explicit ParamDefinition(ParamId id);
+
+  /// Constructs new |ParamDefinition| for a float value.
+  ///
+  /// @param id Identifier.
+  /// @param default_value Default float value.
+  /// @param min_value Minimum float value.
+  /// @param max_value Maximum float value.
+  ParamDefinition(ParamId id, float default_value,
                   float min_value = std::numeric_limits<float>::lowest(),
                   float max_value = std::numeric_limits<float>::max());
 
@@ -55,6 +60,12 @@ struct ParamDefinition {
 
   /// Maximum value.
   float max_value;
+
+ private:
+  friend struct InstrumentDefinition;
+
+  // Returns the corresponding C API type for internal use.
+  BarelyParamDefinition GetBarelyParamDefinition() const;
 };
 
 /// Status.
@@ -154,32 +165,11 @@ class Api {
   Status Update(double timestamp);
 
  private:
+  friend class Instrument;
   friend class Transport;
 
   // Internal API handle.
   BarelyApi api_;
-};
-
-/// Instrument.
-class Instrument {
- public:
-  /// Constructs new |Instrument|.
-  Instrument(BarelyApi api, BarelyId id);
-
-  /// Destroys |Instrument|.
-  ~Instrument();
-
-  StatusOr<bool> IsNoteOn(float pitch) const;
-
-  Status SetNoteOff(float pitch);
-  Status SetNoteOn(float pitch, float intensity);
-
- private:
-  // Internal API handle.
-  BarelyApi api_;
-
-  // Instrument identifier.
-  BarelyId id_;
 };
 
 /// Instrument definition.
@@ -253,6 +243,132 @@ struct InstrumentDefinition {
 
   /// List of parameter definitions.
   std::vector<ParamDefinition> param_definitions;
+
+ private:
+  friend class Instrument;
+
+  // Returns the corresponding C type for internal use.
+  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const;
+};
+
+/// Instrument.
+class Instrument {
+ public:
+  /// Note off callback signature.
+  ///
+  /// @param pitch Note pitch.
+  using NoteOffCallback = std::function<void(float pitch)>;
+
+  /// Note on callback signature.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  using NoteOnCallback = std::function<void(float pitch, float intensity)>;
+
+  /// Constructs new |Instrument|.
+  ///
+  /// @param api BarelyMusician C++ API.
+  /// @param definition Definition.
+  Instrument(const Api& api, InstrumentDefinition definition);
+
+  /// Destroys |Instrument|.
+  ~Instrument();
+
+  // TODO(#85): Should |Instrument| be non-movable and non-copyable?
+
+  // TODO(#85): Implement |BarelyInstrument_Clone| (via copy?).
+
+  // TODO(#85): Implement |BarelyInstrument_CancelAllScheduledNoteEvents|.
+  // TODO(#85): Implement |BarelyInstrument_CancelScheduledNoteEvent|.
+
+  /// Returns the gain.
+  ///
+  /// @return Gain in amplitude.
+  StatusOr<float> GetGain() const;
+
+  // TODO(#85): Implement |BarelyInstrument_GetParam|.
+  // TODO(#85): Implement |BarelyInstrument_GetParamDefinition|.
+
+  /// Returns whether the volume is muted or not.
+  ///
+  /// @return True if muted, false otherwise, or error status.
+  StatusOr<bool> IsMuted() const;
+
+  /// Returns whether note is active or not.
+  ///
+  /// @param pitch Note pitch.
+  /// @return True if active, false otherwise, or error status.
+  StatusOr<bool> IsNoteOn(float pitch) const;
+
+  /// Processes the next output buffer at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  /// @param output Output buffer.
+  /// @param num_output_channels Number of output channels.
+  /// @param num_output_frames Number of output frames.
+  /// @return Status.
+  Status Process(double timestamp, float* output, int num_output_channels,
+                 int num_output_frames);
+
+  // TODO(#85): Implement |BarelyInstrument_ScheduleNoteEvent|.
+
+  /// Sets all notes off.
+  ///
+  /// @return Status.
+  Status SetAllNotesOff();
+
+  /// Sets the gain.
+  ///
+  /// @param gain Gain in amplitude.
+  /// @return Status.
+  Status SetGain(float gain);
+
+  /// Sets whether the volume should be muted or not.
+  ///
+  /// @param is_muted True if muted, false otherwise.
+  /// @return Status.
+  Status SetMuted(bool is_muted);
+
+  /// Sets note off.
+  ///
+  /// @param pitch Note pitch.
+  /// @return Status.
+  Status SetNoteOff(float pitch);
+
+  /// Sets note off callback.
+  ///
+  /// @param note_off_callback Note off callback.
+  /// @return Status.
+  Status SetNoteOffCallback(NoteOffCallback note_off_callback);
+
+  /// Sets note on.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @return Status.
+  Status SetNoteOn(float pitch, float intensity);
+
+  /// Sets note on callback.
+  ///
+  /// @param note_on_callback Note on callback.
+  /// @return Status.
+  Status SetNoteOnCallback(NoteOnCallback note_on_callback);
+
+  // TODO(#85): Implement |BarelyInstrument_SetParam|.
+  // TODO(#85): Implement |BarelyInstrument_SetParamToDefault|.
+
+ private:
+  // Internal API handle.
+  const BarelyApi& api_;
+
+  // Identifier.
+  BarelyId id_;
+
+  // Note off callback.
+  NoteOffCallback note_off_callback_;
+
+  // Note on callback.
+  NoteOnCallback note_on_callback_;
 };
 
 /// Playback transport.
@@ -274,6 +390,8 @@ class Transport {
   ///
   /// @param api BarelyMusician C++ API.
   explicit Transport(const Api& api);
+
+  // TODO(#85): Should |Transport| be non-movable and non-copyable?
 
   /// Returns the position.
   ///
@@ -331,6 +449,8 @@ class Transport {
   UpdateCallback update_callback_;
 };
 
+ParamDefinition::ParamDefinition(ParamId id) : ParamDefinition(id, 0.0f) {}
+
 ParamDefinition::ParamDefinition(ParamId id, float default_value,
                                  float min_value, float max_value)
     : id(id),
@@ -346,6 +466,10 @@ ParamDefinition::ParamDefinition(ParamId id, int default_value, int min_value,
     : ParamDefinition(id, static_cast<float>(default_value),
                       static_cast<float>(min_value),
                       static_cast<float>(max_value)) {}
+
+BarelyParamDefinition ParamDefinition::GetBarelyParamDefinition() const {
+  return BarelyParamDefinition{id, default_value, min_value, max_value};
+}
 
 template <typename ValueType>
 StatusOr<ValueType>::StatusOr(Status error_status) : value_or_(error_status) {
@@ -410,10 +534,53 @@ Status Api::Update(double timestamp) {
   return static_cast<Status>(BarelyApi_Update(api_, timestamp));
 }
 
-Instrument::Instrument(BarelyApi api, BarelyId instrument_id)
-    : api_(api), id_(std::move(instrument_id)) {}
+std::vector<BarelyParamDefinition>
+InstrumentDefinition::GetBarelyParamDefinitions() const {
+  std::vector<BarelyParamDefinition> c_param_definitions;
+  c_param_definitions.reserve(param_definitions.size());
+  for (const auto& param_definition : param_definitions) {
+    c_param_definitions.push_back(param_definition.GetBarelyParamDefinition());
+  }
+  return c_param_definitions;
+}
+
+Instrument::Instrument(const Api& api, InstrumentDefinition definition)
+    : api_(api.api_) {
+  auto c_param_definitions = definition.GetBarelyParamDefinitions();
+  auto c_definition =
+      BarelyInstrumentDefinition{std::move(definition.create_fn),
+                                 std::move(definition.destroy_fn),
+                                 std::move(definition.process_fn),
+                                 std::move(definition.set_data_fn),
+                                 std::move(definition.set_note_off_fn),
+                                 std::move(definition.set_note_on_fn),
+                                 std::move(definition.set_param_fn),
+                                 c_param_definitions.data(),
+                                 static_cast<int>(c_param_definitions.size())};
+  const auto status =
+      BarelyInstrument_Create(api_, std::move(c_definition), &id_);
+  assert(status == BarelyStatus_kOk);
+}
 
 Instrument::~Instrument() { BarelyInstrument_Destroy(api_, id_); }
+
+StatusOr<float> Instrument::GetGain() const {
+  float gain = 0.0f;
+  if (const auto status = BarelyInstrument_GetGain(api_, id_, &gain);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return gain;
+}
+
+StatusOr<bool> Instrument::IsMuted() const {
+  bool is_muted = false;
+  if (const auto status = BarelyInstrument_IsMuted(api_, id_, &is_muted);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return is_muted;
+}
 
 StatusOr<bool> Instrument::IsNoteOn(float pitch) const {
   bool is_note_on = false;
@@ -425,13 +592,61 @@ StatusOr<bool> Instrument::IsNoteOn(float pitch) const {
   return is_note_on;
 }
 
+Status Instrument::Process(double timestamp, float* output,
+                           int num_output_channels, int num_output_frames) {
+  return static_cast<Status>(BarelyInstrument_Process(
+      api_, id_, timestamp, output, num_output_channels, num_output_frames));
+}
+
+Status Instrument::SetAllNotesOff() {
+  return static_cast<Status>(BarelyInstrument_SetAllNotesOff(api_, id_));
+}
+
+Status Instrument::SetGain(float gain) {
+  return static_cast<Status>(BarelyInstrument_SetGain(api_, id_, gain));
+}
+
+Status Instrument::SetMuted(bool is_muted) {
+  return static_cast<Status>(BarelyInstrument_SetMuted(api_, id_, is_muted));
+}
+
 Status Instrument::SetNoteOff(float pitch) {
   return static_cast<Status>(BarelyInstrument_SetNoteOff(api_, id_, pitch));
+}
+
+Status Instrument::SetNoteOffCallback(NoteOffCallback note_off_callback) {
+  if (note_off_callback) {
+    note_off_callback_ = std::move(note_off_callback);
+    return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
+        api_, id_,
+        [](float pitch, void* user_data) {
+          (*static_cast<NoteOffCallback*>(user_data))(pitch);
+        },
+        static_cast<void*>(&note_off_callback_)));
+  } else {
+    return static_cast<Status>(
+        BarelyInstrument_SetNoteOffCallback(api_, id_, nullptr, nullptr));
+  }
 }
 
 Status Instrument::SetNoteOn(float pitch, float intensity) {
   return static_cast<Status>(
       BarelyInstrument_SetNoteOn(api_, id_, pitch, intensity));
+}
+
+Status Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) {
+  if (note_on_callback) {
+    note_on_callback_ = std::move(note_on_callback);
+    return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
+        api_, id_,
+        [](float pitch, float intensity, void* user_data) {
+          (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity);
+        },
+        static_cast<void*>(&note_on_callback_)));
+  } else {
+    return static_cast<Status>(
+        BarelyInstrument_SetNoteOnCallback(api_, id_, nullptr, nullptr));
+  }
 }
 
 Transport::Transport(const Api& api)
@@ -467,8 +682,8 @@ StatusOr<bool> Transport::IsPlaying() const {
 // TODO(#85): Ensure that the beat callback is updated accordingly for when
 //    transport is copied/moved/destroyed.
 Status Transport::SetBeatCallback(BeatCallback beat_callback) {
-  beat_callback_ = std::move(beat_callback);
-  if (beat_callback_) {
+  if (beat_callback) {
+    beat_callback_ = std::move(beat_callback);
     return static_cast<Status>(BarelyTransport_SetBeatCallback(
         api_,
         [](double position, void* user_data) {
@@ -494,8 +709,8 @@ Status Transport::SetTempo(double tempo) {
 // TODO(#85): Ensure that the update callback is updated accordingly for when
 //    transport is copied/moved/destroyed.
 Status Transport::SetUpdateCallback(UpdateCallback update_callback) {
-  update_callback_ = std::move(update_callback);
-  if (update_callback_) {
+  if (update_callback) {
+    update_callback_ = std::move(update_callback);
     return static_cast<Status>(BarelyTransport_SetUpdateCallback(
         api_,
         [](double begin_position, double end_position, void* user_data) {

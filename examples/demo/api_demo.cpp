@@ -5,6 +5,10 @@
 namespace {
 
 using ::barely::Api;
+using ::barely::Instrument;
+using ::barely::InstrumentDefinition;
+using ::barely::ParamDefinition;
+using ::barely::ParamId;
 using ::barely::Status;
 using ::barely::Transport;
 using ::barely::examples::ConsoleLog;
@@ -27,6 +31,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto tempo_or = transport.GetTempo();
   assert(tempo_or.IsOk());
   ConsoleLog() << "Tempo: " << tempo_or.GetValue();
+
+  Instrument instrument(
+      api, InstrumentDefinition{
+               .param_definitions = {ParamDefinition(ParamId{1}, 5)}});
+
+  const auto gain_or = instrument.GetGain();
+  assert(gain_or.IsOk());
+  ConsoleLog() << "Instrument Gain: " << gain_or.GetValue();
 
   return 0;
 }

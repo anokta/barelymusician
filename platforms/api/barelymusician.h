@@ -166,10 +166,11 @@ class Api {
 
  private:
   friend class Instrument;
+  friend class Sequence;
   friend class Transport;
 
-  // Internal API handle.
-  BarelyApi api_;
+  // Internal C API handle.
+  BarelyApi capi_;
 };
 
 /// Instrument definition.
@@ -283,7 +284,7 @@ class Instrument {
 
   /// Returns the gain.
   ///
-  /// @return Gain in amplitude.
+  /// @return Gain in amplitude, or error status.
   StatusOr<float> GetGain() const;
 
   // TODO(#85): Implement |BarelyInstrument_GetParam|.
@@ -358,8 +359,8 @@ class Instrument {
   // TODO(#85): Implement |BarelyInstrument_SetParamToDefault|.
 
  private:
-  // Internal API handle.
-  const BarelyApi& api_;
+  // Internal C API handle.
+  const BarelyApi& capi_;
 
   // Identifier.
   BarelyId id_;
@@ -369,6 +370,117 @@ class Instrument {
 
   // Note on callback.
   NoteOnCallback note_on_callback_;
+};
+
+/// Note sequence.
+class Sequence {
+ public:
+  /// Constructs new |Sequence|.
+  ///
+  /// @param api BarelyMusician C++ API.
+  explicit Sequence(const Api& api);
+
+  /// Destroys |Sequence|.
+  ~Sequence();
+
+  // TODO(#85): Should |Sequence| be non-movable and non-copyable?
+
+  // TODO(#85): Implement |BarelySequence_Clone| (via copy?).
+
+  // TODO(#85): Implement |BarelySequence_AddNoteEvent|.
+
+  /// Returns the begin offset.
+  ///
+  /// @return Begin offset in beats, or error status.
+  StatusOr<double> GetBeginOffset() const;
+
+  /// Returns the begin position.
+  ///
+  /// @return Begin position in beats, or error status.
+  StatusOr<double> GetBeginPosition() const;
+
+  /// Returns the end position.
+  ///
+  /// @return End position in beats, or error status.
+  StatusOr<double> GetEndPosition() const;
+
+  // TODO(#85): Implement |BarelySequence_GetInstrument|.
+
+  /// Returns the loop begin offset.
+  ///
+  /// @return Loop begin offset in beats, or error status.
+  StatusOr<double> GetLoopBeginOffset() const;
+
+  /// Returns the loop length.
+  ///
+  /// @return Loop length in beats, or error status.
+  StatusOr<double> GetLoopLength() const;
+
+  // TODO(#85): Implement |BarelySequence_GetNoteEventDuration|.
+  // TODO(#85): Implement |BarelySequence_GetNoteEventIntensity|.
+  // TODO(#85): Implement |BarelySequence_GetNoteEventPitch|.
+
+  /// Returns whether the sequence is empty or not.
+  ///
+  /// @return True if empty, false otherwise, or error status.
+  StatusOr<bool> IsEmpty() const;
+
+  /// Returns whether the sequence should be looping or not.
+  ///
+  /// @return True if looping, false otherwise, or error status.
+  StatusOr<bool> IsLooping() const;
+
+  // TODO(#85): Implement |BarelySequence_RemoveAllNoteEvents|.
+  // TODO(#85): Implement |BarelySequence_RemoveNoteEvent|.
+
+  /// Sets the begin offset.
+  ///
+  /// @param begin_offset Begin offset in beats.
+  /// @return Status.
+  Status SetBeginOffset(double begin_offset);
+
+  /// Sets the begin position.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @return Status.
+  Status SetBeginPosition(double begin_position);
+
+  /// Sets the end position.
+  ///
+  /// @param end_position End position in beats.
+  /// @return Status.
+  Status SetEndPosition(double end_position);
+
+  // TODO(#85): Implement |BarelySequence_SetInstrument|.
+
+  /// Sets the loop begin offset.
+  ///
+  /// @param loop_begin_offset Loop begin offset in beats.
+  /// @return Status.
+  Status SetLoopBeginOffset(double loop_begin_offset);
+
+  /// Sets the loop length.
+  ///
+  /// @param loop_length Loop length in beats.
+  /// @return Status.
+  Status SetLoopLength(double loop_length);
+
+  /// Sets whether the sequence should be looping or not.
+  ///
+  /// @param is_looping True if looping, false otherwise.
+  /// @return Status.
+  Status SetLooping(bool is_looping);
+
+  // TODO(#85): Implement |BarelySequence_SetNoteEventDuration|.
+  // TODO(#85): Implement |BarelySequence_SetNoteEventIntensity|.
+  // TODO(#85): Implement |BarelySequence_SetNoteEventPitch|.
+
+ private:
+  // Internal API handle.
+  const BarelyApi& capi_;
+
+  // Identifier.
+  BarelyId id_;
 };
 
 /// Playback transport.
@@ -403,7 +515,7 @@ class Transport {
   /// @return Tempo in BPM, or error status.
   StatusOr<double> GetTempo() const;
 
-  /// Returns whether the playback is active or not.
+  /// Returns whether the transport is playing or not.
   ///
   /// @return True if playing, false otherwise, or error status.
   StatusOr<bool> IsPlaying() const;
@@ -440,7 +552,7 @@ class Transport {
 
  private:
   // Internal API handle.
-  const BarelyApi& api_;
+  const BarelyApi& capi_;
 
   // Beat callback.
   BeatCallback beat_callback_;
@@ -503,23 +615,23 @@ bool StatusOr<ValueType>::IsOk() const {
 }
 
 Api::Api() {
-  const auto status = BarelyApi_Create(&api_);
+  const auto status = BarelyApi_Create(&capi_);
   assert(status == BarelyStatus_kOk);
 }
 
 Api::Api(int sample_rate) : Api() {
-  const auto status = BarelyApi_SetSampleRate(api_, sample_rate);
+  const auto status = BarelyApi_SetSampleRate(capi_, sample_rate);
   assert(status == BarelyStatus_kOk);
 }
 
 Api::~Api() {
-  const auto status = BarelyApi_Destroy(api_);
+  const auto status = BarelyApi_Destroy(capi_);
   assert(status == BarelyStatus_kOk);
 }
 
 StatusOr<int> Api::GetSampleRate() const {
   int sample_rate = 0;
-  if (const auto status = BarelyApi_GetSampleRate(api_, &sample_rate);
+  if (const auto status = BarelyApi_GetSampleRate(capi_, &sample_rate);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -527,27 +639,27 @@ StatusOr<int> Api::GetSampleRate() const {
 }
 
 Status Api::SetSampleRate(int sample_rate) {
-  return static_cast<Status>(BarelyApi_SetSampleRate(api_, sample_rate));
+  return static_cast<Status>(BarelyApi_SetSampleRate(capi_, sample_rate));
 }
 
 Status Api::Update(double timestamp) {
-  return static_cast<Status>(BarelyApi_Update(api_, timestamp));
+  return static_cast<Status>(BarelyApi_Update(capi_, timestamp));
 }
 
 std::vector<BarelyParamDefinition>
 InstrumentDefinition::GetBarelyParamDefinitions() const {
-  std::vector<BarelyParamDefinition> c_param_definitions;
-  c_param_definitions.reserve(param_definitions.size());
+  std::vector<BarelyParamDefinition> cparam_definitions;
+  cparam_definitions.reserve(param_definitions.size());
   for (const auto& param_definition : param_definitions) {
-    c_param_definitions.push_back(param_definition.GetBarelyParamDefinition());
+    cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
   }
-  return c_param_definitions;
+  return cparam_definitions;
 }
 
 Instrument::Instrument(const Api& api, InstrumentDefinition definition)
-    : api_(api.api_) {
-  auto c_param_definitions = definition.GetBarelyParamDefinitions();
-  auto c_definition =
+    : capi_(api.capi_) {
+  auto cparam_definitions = definition.GetBarelyParamDefinitions();
+  auto cdefinition =
       BarelyInstrumentDefinition{std::move(definition.create_fn),
                                  std::move(definition.destroy_fn),
                                  std::move(definition.process_fn),
@@ -555,18 +667,18 @@ Instrument::Instrument(const Api& api, InstrumentDefinition definition)
                                  std::move(definition.set_note_off_fn),
                                  std::move(definition.set_note_on_fn),
                                  std::move(definition.set_param_fn),
-                                 c_param_definitions.data(),
-                                 static_cast<int>(c_param_definitions.size())};
+                                 cparam_definitions.data(),
+                                 static_cast<int>(cparam_definitions.size())};
   const auto status =
-      BarelyInstrument_Create(api_, std::move(c_definition), &id_);
+      BarelyInstrument_Create(capi_, std::move(cdefinition), &id_);
   assert(status == BarelyStatus_kOk);
 }
 
-Instrument::~Instrument() { BarelyInstrument_Destroy(api_, id_); }
+Instrument::~Instrument() { BarelyInstrument_Destroy(capi_, id_); }
 
 StatusOr<float> Instrument::GetGain() const {
   float gain = 0.0f;
-  if (const auto status = BarelyInstrument_GetGain(api_, id_, &gain);
+  if (const auto status = BarelyInstrument_GetGain(capi_, id_, &gain);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -575,7 +687,7 @@ StatusOr<float> Instrument::GetGain() const {
 
 StatusOr<bool> Instrument::IsMuted() const {
   bool is_muted = false;
-  if (const auto status = BarelyInstrument_IsMuted(api_, id_, &is_muted);
+  if (const auto status = BarelyInstrument_IsMuted(capi_, id_, &is_muted);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -585,7 +697,7 @@ StatusOr<bool> Instrument::IsMuted() const {
 StatusOr<bool> Instrument::IsNoteOn(float pitch) const {
   bool is_note_on = false;
   if (const auto status =
-          BarelyInstrument_IsNoteOn(api_, id_, pitch, &is_note_on);
+          BarelyInstrument_IsNoteOn(capi_, id_, pitch, &is_note_on);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -595,66 +707,170 @@ StatusOr<bool> Instrument::IsNoteOn(float pitch) const {
 Status Instrument::Process(double timestamp, float* output,
                            int num_output_channels, int num_output_frames) {
   return static_cast<Status>(BarelyInstrument_Process(
-      api_, id_, timestamp, output, num_output_channels, num_output_frames));
+      capi_, id_, timestamp, output, num_output_channels, num_output_frames));
 }
 
 Status Instrument::SetAllNotesOff() {
-  return static_cast<Status>(BarelyInstrument_SetAllNotesOff(api_, id_));
+  return static_cast<Status>(BarelyInstrument_SetAllNotesOff(capi_, id_));
 }
 
 Status Instrument::SetGain(float gain) {
-  return static_cast<Status>(BarelyInstrument_SetGain(api_, id_, gain));
+  return static_cast<Status>(BarelyInstrument_SetGain(capi_, id_, gain));
 }
 
 Status Instrument::SetMuted(bool is_muted) {
-  return static_cast<Status>(BarelyInstrument_SetMuted(api_, id_, is_muted));
+  return static_cast<Status>(BarelyInstrument_SetMuted(capi_, id_, is_muted));
 }
 
 Status Instrument::SetNoteOff(float pitch) {
-  return static_cast<Status>(BarelyInstrument_SetNoteOff(api_, id_, pitch));
+  return static_cast<Status>(BarelyInstrument_SetNoteOff(capi_, id_, pitch));
 }
 
 Status Instrument::SetNoteOffCallback(NoteOffCallback note_off_callback) {
   if (note_off_callback) {
     note_off_callback_ = std::move(note_off_callback);
     return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
-        api_, id_,
+        capi_, id_,
         [](float pitch, void* user_data) {
           (*static_cast<NoteOffCallback*>(user_data))(pitch);
         },
         static_cast<void*>(&note_off_callback_)));
   } else {
     return static_cast<Status>(
-        BarelyInstrument_SetNoteOffCallback(api_, id_, nullptr, nullptr));
+        BarelyInstrument_SetNoteOffCallback(capi_, id_, nullptr, nullptr));
   }
 }
 
 Status Instrument::SetNoteOn(float pitch, float intensity) {
   return static_cast<Status>(
-      BarelyInstrument_SetNoteOn(api_, id_, pitch, intensity));
+      BarelyInstrument_SetNoteOn(capi_, id_, pitch, intensity));
 }
 
 Status Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   if (note_on_callback) {
     note_on_callback_ = std::move(note_on_callback);
     return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
-        api_, id_,
+        capi_, id_,
         [](float pitch, float intensity, void* user_data) {
           (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity);
         },
         static_cast<void*>(&note_on_callback_)));
   } else {
     return static_cast<Status>(
-        BarelyInstrument_SetNoteOnCallback(api_, id_, nullptr, nullptr));
+        BarelyInstrument_SetNoteOnCallback(capi_, id_, nullptr, nullptr));
   }
 }
 
+Sequence::Sequence(const Api& api) : capi_(api.capi_) {
+  const auto status = BarelySequence_Create(capi_, &id_);
+  assert(status == BarelyStatus_kOk);
+}
+
+Sequence::~Sequence() { BarelySequence_Destroy(capi_, id_); }
+
+StatusOr<double> Sequence::GetBeginOffset() const {
+  double begin_offset = 0.0;
+  if (const auto status =
+          BarelySequence_GetBeginOffset(capi_, id_, &begin_offset);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return begin_offset;
+}
+
+StatusOr<double> Sequence::GetBeginPosition() const {
+  double begin_position = 0.0;
+  if (const auto status =
+          BarelySequence_GetBeginPosition(capi_, id_, &begin_position);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return begin_position;
+}
+
+StatusOr<double> Sequence::GetEndPosition() const {
+  double end_position = 0.0;
+  if (const auto status =
+          BarelySequence_GetEndPosition(capi_, id_, &end_position);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return end_position;
+}
+
+StatusOr<double> Sequence::GetLoopBeginOffset() const {
+  double loop_begin_offset = 0.0;
+  if (const auto status =
+          BarelySequence_GetLoopBeginOffset(capi_, id_, &loop_begin_offset);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return loop_begin_offset;
+}
+
+StatusOr<double> Sequence::GetLoopLength() const {
+  double loop_length = 0.0;
+  if (const auto status =
+          BarelySequence_GetLoopLength(capi_, id_, &loop_length);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return loop_length;
+}
+
+StatusOr<bool> Sequence::IsEmpty() const {
+  bool is_empty = false;
+  if (const auto status = BarelySequence_IsEmpty(capi_, id_, &is_empty);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return is_empty;
+}
+
+StatusOr<bool> Sequence::IsLooping() const {
+  bool is_looping = false;
+  if (const auto status = BarelySequence_IsLooping(capi_, id_, &is_looping);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return is_looping;
+}
+
+Status Sequence::SetBeginOffset(double begin_offset) {
+  return static_cast<Status>(
+      BarelySequence_SetBeginOffset(capi_, id_, begin_offset));
+}
+
+Status Sequence::SetBeginPosition(double begin_position) {
+  return static_cast<Status>(
+      BarelySequence_SetBeginPosition(capi_, id_, begin_position));
+}
+
+Status Sequence::SetEndPosition(double end_position) {
+  return static_cast<Status>(
+      BarelySequence_SetEndPosition(capi_, id_, end_position));
+}
+
+Status Sequence::SetLoopBeginOffset(double loop_begin_offset) {
+  return static_cast<Status>(
+      BarelySequence_SetLoopBeginOffset(capi_, id_, loop_begin_offset));
+}
+
+Status Sequence::SetLoopLength(double loop_length) {
+  return static_cast<Status>(
+      BarelySequence_SetLoopLength(capi_, id_, loop_length));
+}
+
+Status Sequence::SetLooping(bool is_looping) {
+  return static_cast<Status>(BarelySequence_SetLooping(capi_, id_, is_looping));
+}
+
 Transport::Transport(const Api& api)
-    : api_(api.api_), beat_callback_(nullptr), update_callback_(nullptr) {}
+    : capi_(api.capi_), beat_callback_(nullptr), update_callback_(nullptr) {}
 
 StatusOr<double> Transport::GetPosition() const {
   double position = 0.0;
-  if (const auto status = BarelyTransport_GetPosition(api_, &position);
+  if (const auto status = BarelyTransport_GetPosition(capi_, &position);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -663,7 +879,7 @@ StatusOr<double> Transport::GetPosition() const {
 
 StatusOr<double> Transport::GetTempo() const {
   double tempo = 0.0;
-  if (const auto status = BarelyTransport_GetTempo(api_, &tempo);
+  if (const auto status = BarelyTransport_GetTempo(capi_, &tempo);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -672,7 +888,7 @@ StatusOr<double> Transport::GetTempo() const {
 
 StatusOr<bool> Transport::IsPlaying() const {
   bool is_playing = false;
-  if (const auto status = BarelyTransport_IsPlaying(api_, &is_playing);
+  if (const auto status = BarelyTransport_IsPlaying(capi_, &is_playing);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -685,7 +901,7 @@ Status Transport::SetBeatCallback(BeatCallback beat_callback) {
   if (beat_callback) {
     beat_callback_ = std::move(beat_callback);
     return static_cast<Status>(BarelyTransport_SetBeatCallback(
-        api_,
+        capi_,
         [](double position, void* user_data) {
           if (user_data) {
             (*static_cast<BeatCallback*>(user_data))(position);
@@ -694,16 +910,16 @@ Status Transport::SetBeatCallback(BeatCallback beat_callback) {
         static_cast<void*>(&beat_callback_)));
   } else {
     return static_cast<Status>(
-        BarelyTransport_SetBeatCallback(api_, nullptr, nullptr));
+        BarelyTransport_SetBeatCallback(capi_, nullptr, nullptr));
   }
 }
 
 Status Transport::SetPosition(double position) {
-  return static_cast<Status>(BarelyTransport_SetPosition(api_, position));
+  return static_cast<Status>(BarelyTransport_SetPosition(capi_, position));
 }
 
 Status Transport::SetTempo(double tempo) {
-  return static_cast<Status>(BarelyTransport_SetTempo(api_, tempo));
+  return static_cast<Status>(BarelyTransport_SetTempo(capi_, tempo));
 }
 
 // TODO(#85): Ensure that the update callback is updated accordingly for when
@@ -712,7 +928,7 @@ Status Transport::SetUpdateCallback(UpdateCallback update_callback) {
   if (update_callback) {
     update_callback_ = std::move(update_callback);
     return static_cast<Status>(BarelyTransport_SetUpdateCallback(
-        api_,
+        capi_,
         [](double begin_position, double end_position, void* user_data) {
           if (user_data) {
             (*static_cast<UpdateCallback*>(user_data))(begin_position,
@@ -722,16 +938,16 @@ Status Transport::SetUpdateCallback(UpdateCallback update_callback) {
         static_cast<void*>(&beat_callback_)));
   } else {
     return static_cast<Status>(
-        BarelyTransport_SetUpdateCallback(api_, nullptr, nullptr));
+        BarelyTransport_SetUpdateCallback(capi_, nullptr, nullptr));
   }
 }
 
 Status Transport::Start() {
-  return static_cast<Status>(BarelyTransport_Start(api_));
+  return static_cast<Status>(BarelyTransport_Start(capi_));
 }
 
 Status Transport::Stop() {
-  return static_cast<Status>(BarelyTransport_Stop(api_));
+  return static_cast<Status>(BarelyTransport_Stop(capi_));
 }
 
 }  // namespace barely

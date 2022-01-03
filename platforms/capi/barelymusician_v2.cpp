@@ -9,6 +9,7 @@ struct BarelyMusician {
   // TODO(#85): This is a temp POC for testing.
   int sample_rate;
   double tempo;
+  double begin_offset;
 
  private:
   // Ensure that the instance can only be destroyed via the API call.
@@ -193,6 +194,157 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
   instrument_id;
   note_on_callback;
   user_data;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_Create(BarelyApi api, BarelyId* out_sequence_id) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement - this is a temp POC for testing.
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelySequence_Destroy(BarelyApi api, BarelyId sequence_id) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_GetBeginOffset(BarelyApi api, BarelyId sequence_id,
+                                           double* out_begin_offset) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_begin_offset) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement - this is a temp POC for testing.
+  sequence_id;
+  *out_begin_offset = api->begin_offset;
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelySequence_GetBeginPosition(BarelyApi api,
+                                             BarelyId sequence_id,
+                                             double* out_begin_position) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_begin_position) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_GetEndPosition(BarelyApi api, BarelyId sequence_id,
+                                           double* out_end_position) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_end_position) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_GetLoopBeginOffset(BarelyApi api,
+                                               BarelyId sequence_id,
+                                               double* out_loop_begin_offset) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_loop_begin_offset) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_GetLoopLength(BarelyApi api, BarelyId sequence_id,
+                                          double* out_loop_length) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_loop_length) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_IsEmpty(BarelyApi api, BarelyId sequence_id,
+                                    bool* out_is_empty) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_is_empty) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_IsLooping(BarelyApi api, BarelyId sequence_id,
+                                      bool* out_is_looping) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_is_looping) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_SetBeginOffset(BarelyApi api, BarelyId sequence_id,
+                                           double begin_offset) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement - this is a temp POC for testing.
+  sequence_id;
+  api->begin_offset = begin_offset;
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelySequence_SetBeginPosition(BarelyApi api,
+                                             BarelyId sequence_id,
+                                             double begin_position) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  begin_position;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_SetEndPosition(BarelyApi api, BarelyId sequence_id,
+                                           double end_position) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  end_position;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_SetLoopBeginOffset(BarelyApi api,
+                                               BarelyId sequence_id,
+                                               double loop_begin_offset) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  loop_begin_offset;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_SetLoopLength(BarelyApi api, BarelyId sequence_id,
+                                          double loop_length) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  loop_length;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_SetLooping(BarelyApi api, BarelyId sequence_id,
+                                       bool is_looping) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  is_looping;
   return BarelyStatus_kUnimplemented;
 }
 

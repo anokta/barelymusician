@@ -9,6 +9,7 @@ using ::barely::Instrument;
 using ::barely::InstrumentDefinition;
 using ::barely::ParamDefinition;
 using ::barely::ParamId;
+using ::barely::Sequence;
 using ::barely::Status;
 using ::barely::Transport;
 using ::barely::examples::ConsoleLog;
@@ -39,6 +40,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto gain_or = instrument.GetGain();
   assert(gain_or.IsOk());
   ConsoleLog() << "Instrument Gain: " << gain_or.GetValue();
+
+  Sequence sequence(api);
+  assert(sequence.SetBeginOffset(3.25) == Status::kOk);
+
+  const auto begin_offset_or = sequence.GetBeginOffset();
+  assert(begin_offset_or.IsOk());
+  ConsoleLog() << "Sequence Begin Offset: " << begin_offset_or.GetValue();
 
   return 0;
 }

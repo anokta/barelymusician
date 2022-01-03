@@ -929,7 +929,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetLoopLength(BarelyApi api,
 ///
 /// @param api BarelyMusician API.
 /// @param sequence_id Sequence identifier.
-/// @param is_looping True if looping.
+/// @param is_looping True if looping, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(BarelyApi api,
                                                      BarelyId sequence_id,
@@ -984,7 +984,7 @@ BARELY_EXPORT BarelyStatus BarelyTransport_GetPosition(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyTransport_GetTempo(BarelyApi api,
                                                     double* out_tempo);
 
-/// Gets whether the transport playback is active or not.
+/// Gets whether the transport is playing or not.
 ///
 /// @param api BarelyMusician API.
 /// @param out_is_playing Output true if playing, false otherwise.

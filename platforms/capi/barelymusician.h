@@ -194,16 +194,6 @@ typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
 BARELY_EXPORT BarelyStatus BarelyAddPerformer(BarelyApi api,
                                               BarelyId* out_performer_id);
 
-/// Adds performer instrument.
-///
-/// @param api BarelyMusician API.
-/// @param performer_id Performer id.
-/// @param instrument_id Instrument id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyAddPerformerInstrument(BarelyApi api,
-                                                        BarelyId performer_id,
-                                                        BarelyId instrument_id);
-
 /// Adds performer note.
 ///
 /// @param api BarelyMusician API.
@@ -354,14 +344,6 @@ BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
     BarelyApi api, BarelyId instrument_id, double timestamp, float* output,
     int32_t num_channels, int32_t num_frames);
 
-/// Removes all performerinstruments.
-///
-/// @param api BarelyMusician API.
-/// @param performer_id Performer id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyRemoveAllPerformerInstruments(BarelyApi api, BarelyId performer_id);
-
 /// Removes all performer notes.
 ///
 /// @param api BarelyMusician API.
@@ -388,15 +370,6 @@ BarelyRemoveAllPerformerNotesAt(BarelyApi api, BarelyId performer_id,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyRemovePerformer(BarelyApi api,
                                                  BarelyId performer_id);
-
-/// Removes performer instrument.
-///
-/// @param api BarelyMusician API.
-/// @param performer_id Performer id.
-/// @param instrument_id Instrument id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyRemovePerformerInstrument(
-    BarelyApi api, BarelyId performer_id, BarelyId instrument_id);
 
 /// Removes performer note.
 ///
@@ -520,6 +493,16 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerBeginPosition(
 BARELY_EXPORT BarelyStatus BarelySetPerformerEndPosition(BarelyApi api,
                                                          BarelyId performer_id,
                                                          double* end_position);
+
+/// Sets performer instrument.
+///
+/// @param api BarelyMusician API.
+/// @param performer_id Performer id.
+/// @param instrument_id Instrument id.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySetPerformerInstrument(BarelyApi api,
+                                                        BarelyId performer_id,
+                                                        BarelyId instrument_id);
 
 /// Sets whether performer should be looping or not.
 ///

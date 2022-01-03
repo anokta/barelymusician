@@ -157,13 +157,6 @@ BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* out_performer_id) {
   return kBarelyStatus_Ok;
 }
 
-BarelyStatus BarelyAddPerformerInstrument(BarelyApi api, BarelyId performer_id,
-                                          BarelyId instrument_id) {
-  if (!api) return kBarelyStatus_NotFound;
-  return GetStatus(
-      api->instance.AddPerformerInstrument(performer_id, instrument_id));
-}
-
 BarelyStatus BarelyAddPerformerNote(BarelyApi api, BarelyId performer_id,
                                     double note_position, double note_duration,
                                     float note_pitch, float note_intensity,
@@ -343,14 +336,6 @@ BarelyStatus BarelyProcessInstrument(BarelyApi api, BarelyId instrument_id,
   return kBarelyStatus_NotFound;
 }
 
-BarelyStatus BarelyRemoveAllPerformerInstruments(BarelyApi api,
-                                                 BarelyId performer_id) {
-  if (api) {
-    return GetStatus(api->instance.RemoveAllPerformerInstruments(performer_id));
-  }
-  return kBarelyStatus_NotFound;
-}
-
 BarelyStatus BarelyRemoveAllPerformerNotes(BarelyApi api,
                                            BarelyId performer_id) {
   if (api) {
@@ -373,16 +358,6 @@ BarelyStatus BarelyRemoveAllPerformerNotesAt(BarelyApi api,
 BarelyStatus BarelyRemovePerformer(BarelyApi api, BarelyId performer_id) {
   if (api) {
     return GetStatus(api->instance.RemovePerformer(performer_id));
-  }
-  return kBarelyStatus_NotFound;
-}
-
-BarelyStatus BarelyRemovePerformerInstrument(BarelyApi api,
-                                             BarelyId performer_id,
-                                             BarelyId instrument_id) {
-  if (api) {
-    return GetStatus(
-        api->instance.RemovePerformerInstrument(performer_id, instrument_id));
   }
   return kBarelyStatus_NotFound;
 }
@@ -512,6 +487,14 @@ BarelyStatus BarelySetPerformerEndPosition(BarelyApi api, BarelyId performer_id,
         end_position ? std::optional<double>{*end_position} : std::nullopt));
   }
   return kBarelyStatus_NotFound;
+}
+
+BarelyStatus BarelySetPerformerInstrument(BarelyApi api, BarelyId performer_id,
+                                          BarelyId instrument_id) {
+  if (!api) return kBarelyStatus_NotFound;
+  api->instance.RemoveAllPerformerInstruments(performer_id);
+  return GetStatus(
+      api->instance.AddPerformerInstrument(performer_id, instrument_id));
 }
 
 BarelyStatus BarelySetPerformerLoop(BarelyApi api, BarelyId performer_id,

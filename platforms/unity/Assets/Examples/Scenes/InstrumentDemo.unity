@@ -522,8 +522,7 @@ MonoBehaviour:
   Loop: 1
   LoopBeginOffset: 0
   LoopLength: 4
-  Instruments:
-  - {fileID: 1298915919}
+  Instrument: {fileID: 1298915919}
   RootNote: 48
   Notes:
   - position: 0
@@ -734,8 +733,7 @@ MonoBehaviour:
   Loop: 1
   LoopBeginOffset: 0
   LoopLength: 4
-  Instruments:
-  - {fileID: 1714525513}
+  Instrument: {fileID: 1714525513}
   RootNote: 60
   Notes:
   - position: 0

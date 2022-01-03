@@ -27,8 +27,8 @@ namespace Barely {
     /// Loop length.
     public double LoopLength = 1.0;
 
-    /// Instruments to perform.
-    public Instrument[] Instruments = null;
+    /// Instrument to perform.
+    public Instrument Instrument = null;
 
     [Range(0, 128)]
     public int RootNote = 60;

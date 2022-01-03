@@ -111,16 +111,15 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
 
-  engine.SetInstrumentNoteOnCallback([](Id instrument_id, double /*timestamp*/,
-                                        float pitch, float intensity) {
+  engine.SetInstrumentNoteOnCallback([](Id instrument_id, float pitch,
+                                        float intensity) {
     ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOn("
                  << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
   });
-  engine.SetInstrumentNoteOffCallback(
-      [](Id instrument_id, double /*timestamp*/, float pitch) {
-        ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOff("
-                     << MidiKeyNumberFromPitch(pitch) << ") ";
-      });
+  engine.SetInstrumentNoteOffCallback([](Id instrument_id, float pitch) {
+    ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOff("
+                 << MidiKeyNumberFromPitch(pitch) << ") ";
+  });
 
   std::vector<Id> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {

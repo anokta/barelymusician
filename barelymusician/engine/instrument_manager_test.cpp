@@ -461,19 +461,15 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
 
   // Trigger note on callback.
   Id note_on_instrument_id = 0;
-  double note_on_timestamp = 0.0;
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
-  instrument_manager.SetNoteOnCallback([&](Id instrument_id, double timestamp,
-                                           float note_pitch,
-                                           float note_intensity) {
-    note_on_instrument_id = instrument_id;
-    note_on_timestamp = timestamp;
-    note_on_pitch = note_pitch;
-    note_on_intensity = note_intensity;
-  });
+  instrument_manager.SetNoteOnCallback(
+      [&](Id instrument_id, float note_pitch, float note_intensity) {
+        note_on_instrument_id = instrument_id;
+        note_on_pitch = note_pitch;
+        note_on_intensity = note_intensity;
+      });
   EXPECT_NE(note_on_instrument_id, kInstrumentId);
-  EXPECT_NE(note_on_timestamp, 1.0);
   EXPECT_NE(note_on_pitch, kNotePitch);
   EXPECT_NE(note_on_intensity, kNoteIntensity);
 
@@ -481,7 +477,6 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
                                                 kNoteIntensity)));
 
   EXPECT_EQ(note_on_instrument_id, kInstrumentId);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
 
@@ -490,48 +485,40 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
                                          kNoteIntensity),
             Status::kFailedPrecondition);
 
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
 
   // Trigger note on callback again with another note.
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(
       kInstrumentId, 15.0, kNotePitch + 2.0f, kNoteIntensity)));
 
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 15.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch + 2.0f);
 
   // Trigger note off callback.
   Id note_off_instrument_id = 0;
-  double note_off_timestamp = 0.0;
   float note_off_pitch = 0.0f;
   instrument_manager.SetNoteOffCallback(
-      [&](Id instrument_id, double timestamp, float note_pitch) {
+      [&](Id instrument_id, float note_pitch) {
         note_off_instrument_id = instrument_id;
-        note_off_timestamp = timestamp;
         note_off_pitch = note_pitch;
       });
   EXPECT_NE(note_off_instrument_id, kInstrumentId);
-  EXPECT_NE(note_off_timestamp, 20.0);
   EXPECT_NE(note_off_pitch, kNotePitch);
 
   EXPECT_TRUE(
       IsOk(instrument_manager.SetNoteOff(kInstrumentId, 20.0, kNotePitch)));
 
   EXPECT_EQ(note_off_instrument_id, kInstrumentId);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // This should not trigger the callback since the note is already off.
   EXPECT_EQ(instrument_manager.SetNoteOff(kInstrumentId, 25.0, kNotePitch),
             Status::kFailedPrecondition);
 
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // Finally, remove to trigger the note off callback with the remaining note.
   EXPECT_TRUE(IsOk(instrument_manager.Remove(kInstrumentId, 30.0)));
 
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 30.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch + 2.0f);
 }
 

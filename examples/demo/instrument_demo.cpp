@@ -74,15 +74,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetInstrumentParam(instrument_id, SynthInstrumentParam::kNumVoices,
                             static_cast<float>(kNumVoices));
 
-  engine.SetInstrumentNoteOnCallback([](auto /*instrument_id*/,
-                                        double /*timestamp*/, float pitch,
-                                        float intensity) {
-    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-  });
-  engine.SetInstrumentNoteOffCallback(
-      [](auto /*instrument_id*/, double /*timestamp*/, float pitch) {
-        ConsoleLog() << "NoteOff(" << pitch << ") ";
+  engine.SetInstrumentNoteOnCallback(
+      [](auto /*instrument_id*/, float pitch, float intensity) {
+        ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
       });
+  engine.SetInstrumentNoteOffCallback([](auto /*instrument_id*/, float pitch) {
+    ConsoleLog() << "NoteOff(" << pitch << ") ";
+  });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {

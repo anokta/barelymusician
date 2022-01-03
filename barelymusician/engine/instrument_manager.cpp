@@ -24,12 +24,10 @@ namespace {
 constexpr int kNumMaxTasks = 100;
 
 // Dummy note off callback that does nothing.
-void NoopNoteOffCallback(Id /*instrument_id*/, double /*timestamp*/,
-                         float /*note_pitch*/) noexcept {}
+void NoopNoteOffCallback(Id /*instrument_id*/, float /*note_pitch*/) noexcept {}
 
 // Dummy note on callback that does nothing.
-void NoopNoteOnCallback(Id /*instrument_id*/, double /*timestamp*/,
-                        float /*note_pitch*/,
+void NoopNoteOnCallback(Id /*instrument_id*/, float /*note_pitch*/,
                         float /*note_intensity*/) noexcept {}
 
 }  // namespace
@@ -218,7 +216,7 @@ Status InstrumentManager::Remove(Id instrument_id, double timestamp) noexcept {
       controller_it != controllers_.end()) {
     auto& update_events = update_events_[instrument_id];
     for (const float pitch : controller_it->second.pitches) {
-      note_off_callback_(instrument_id, timestamp, pitch);
+      note_off_callback_(instrument_id, pitch);
       update_events.emplace(timestamp, SetNoteOffEvent{pitch});
     }
     update_events.emplace(timestamp, DestroyEvent{});
@@ -233,7 +231,7 @@ void InstrumentManager::SetAllNotesOff(double timestamp) noexcept {
     if (!controller.pitches.empty()) {
       auto& update_events = update_events_[instrument_id];
       for (const float pitch : controller.pitches) {
-        note_off_callback_(instrument_id, timestamp, pitch);
+        note_off_callback_(instrument_id, pitch);
         update_events.emplace(timestamp, SetNoteOffEvent{pitch});
       }
       controller.pitches.clear();
@@ -247,7 +245,7 @@ Status InstrumentManager::SetAllNotesOff(Id instrument_id,
     if (!controller->pitches.empty()) {
       auto& update_events = update_events_[instrument_id];
       for (const float pitch : controller->pitches) {
-        note_off_callback_(instrument_id, timestamp, pitch);
+        note_off_callback_(instrument_id, pitch);
         update_events.emplace(timestamp, SetNoteOffEvent{pitch});
       }
       controller->pitches.clear();
@@ -326,7 +324,7 @@ Status InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
                                      float note_pitch) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.erase(note_pitch) > 0) {
-      note_off_callback_(instrument_id, timestamp, note_pitch);
+      note_off_callback_(instrument_id, note_pitch);
       update_events_[instrument_id].emplace(timestamp,
                                             SetNoteOffEvent{note_pitch});
       return Status::kOk;
@@ -347,7 +345,7 @@ Status InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
                                     float note_intensity) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.emplace(note_pitch).second) {
-      note_on_callback_(instrument_id, timestamp, note_pitch, note_intensity);
+      note_on_callback_(instrument_id, note_pitch, note_intensity);
       update_events_[instrument_id].emplace(
           timestamp, SetNoteOnEvent{note_pitch, note_intensity});
       return Status::kOk;
@@ -407,7 +405,7 @@ void InstrumentManager::SetSampleRate(double timestamp,
     for (auto& [instrument_id, controller] : controllers_) {
       auto& update_events = update_events_[instrument_id];
       for (const float pitch : controller.pitches) {
-        note_off_callback_(instrument_id, timestamp, pitch);
+        note_off_callback_(instrument_id, pitch);
       }
       controller.pitches.clear();
       update_events.emplace(timestamp, DestroyEvent{});

@@ -160,20 +160,16 @@ typedef struct BarelyInstrumentDefinition {
 /// Instrument note off callback signature.
 ///
 /// @param instrument_id Instrument id.
-/// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
 typedef void (*BarelyInstrumentNoteOffCallback)(BarelyId instrument_id,
-                                                double timestamp,
                                                 float note_pitch);
 
 /// Instrument note on callback signature.
 ///
 /// @param instrument_id Instrument id.
-/// @param timestamp Timestamp in seconds.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
 typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
-                                               double timestamp,
                                                float note_pitch,
                                                float note_intensity);
 

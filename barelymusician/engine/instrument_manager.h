@@ -27,20 +27,17 @@ class InstrumentManager {
   /// Note off callback signature.
   ///
   /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
   using NoteOffCallback =
-      std::function<void(Id instrument_id, double timestamp, float note_pitch)>;
+      std::function<void(Id instrument_id, float note_pitch)>;
 
   /// Note on callback signature.
   ///
   /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
-  using NoteOnCallback =
-      std::function<void(Id instrument_id, double timestamp, float note_pitch,
-                         float note_intensity)>;
+  using NoteOnCallback = std::function<void(Id instrument_id, float note_pitch,
+                                            float note_intensity)>;
 
   /// Constructs new |InstrumentManager|.
   ///

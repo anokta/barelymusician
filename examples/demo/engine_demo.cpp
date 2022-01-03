@@ -182,16 +182,15 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetPlaybackTempo(kTempo);
 
   // Note on callback.
-  const auto note_on_callback = [](Id instrument_id, double /*timestamp*/,
-                                   float pitch, float intensity) {
+  const auto note_on_callback = [](Id instrument_id, float pitch,
+                                   float intensity) {
     ConsoleLog() << "Instrument #" << instrument_id << ": NoteOn(" << pitch
                  << ", " << intensity << ")";
   };
   engine.SetInstrumentNoteOnCallback(note_on_callback);
 
   // Note off callback.
-  const auto note_off_callback = [](Id performer_id, double /*timestamp*/,
-                                    float pitch) {
+  const auto note_off_callback = [](Id performer_id, float pitch) {
     ConsoleLog() << "Instrument #" << performer_id << ": NoteOff(" << pitch
                  << ")";
   };

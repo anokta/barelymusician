@@ -95,14 +95,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kOscillatorType,
                             static_cast<float>(OscillatorType::kSquare));
 
-  engine.SetInstrumentNoteOnCallback([&](Id instrument_id, double /*timestamp*/,
-                                         float note_pitch,
-                                         float note_intensity) {
-    if (instrument_id == performer_instrument_id) {
-      ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
-                   << note_intensity << "}";
-    }
-  });
+  engine.SetInstrumentNoteOnCallback(
+      [&](Id instrument_id, float note_pitch, float note_intensity) {
+        if (instrument_id == performer_instrument_id) {
+          ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
+                       << note_intensity << "}";
+        }
+      });
 
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {

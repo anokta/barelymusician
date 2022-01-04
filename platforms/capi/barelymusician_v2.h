@@ -1002,9 +1002,8 @@ BarelySequence_SetNoteEventIntensity(BarelyApi api, BarelyId sequence_id,
 /// @param note_event_id Note event identifier.
 /// @param pitch Note event pitch.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_SetNoteEventPitch(BarelyApi api, BarelyId sequence_id,
-                                 BarelyId note_event_id, BarelyNotePitch pitch);
+BARELY_EXPORT BarelyStatus BarelySequence_SetNoteEventPitch(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_event_id, float pitch);
 
 /// Sets sequence note event position.
 ///

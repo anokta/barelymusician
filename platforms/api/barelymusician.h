@@ -62,6 +62,7 @@ struct ParamDefinition {
   float max_value;
 
  private:
+  friend struct ConductorDefinition;
   friend struct InstrumentDefinition;
 
   // Returns the corresponding C api type for internal use.
@@ -165,12 +166,152 @@ class Api {
   Status Update(double timestamp);
 
  private:
+  friend class Conductor;
   friend class Instrument;
   friend class Sequence;
   friend class Transport;
 
   // Internal C api handle.
   BarelyApi capi_;
+};
+
+/// Conductor definition.
+struct ConductorDefinition {
+  /// Create function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  using CreateFn = void (*)(void** state);
+
+  /// Destroy function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  using DestroyFn = void (*)(void** state);
+
+  /// Set data function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param data Data.
+  using SetDataFn = void (*)(void** state, void* data);
+
+  /// Set energy function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param energy Energy.
+  using SetEnergyFn = void (*)(void** state, float energy);
+
+  /// Set parameter function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param id Parameter identifier.
+  /// @param value Parameter value.
+  using SetParamFn = void (*)(void** state, ParamId id, float value);
+
+  /// Set stress function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param stress Stress.
+  using SetStressFn = void (*)(void** state, float stress);
+
+  // TODO(#85): Implement |BarelyConductorDefinition_TransformNoteDurationFn|.
+  // TODO(#85): Implement |BarelyConductorDefinition_TransformNoteIntensityFn|.
+  // TODO(#85): Implement |BarelyConductorDefinition_TransformNotePitchFn|.
+  // TODO(#85): Implement |BarelyConductorDefinition_TransformTempoFn|.
+
+  /// Create function.
+  CreateFn create_fn;
+
+  /// Destroy function.
+  DestroyFn destroy_fn;
+
+  /// Set data function.
+  SetDataFn set_data_fn;
+
+  /// Set energy function.
+  SetEnergyFn set_energy_fn;
+
+  /// Set parameter function.
+  SetParamFn set_param_fn;
+
+  /// Set stress function.
+  SetStressFn set_stress_fn;
+
+  // TODO(#85): Add |transform_duration_fn|.
+  // TODO(#85): Add |transform_intensity_fn|.
+  // TODO(#85): Add |transform_pitch_fn|.
+  // TODO(#85): Add |transform_tempo_fn|.
+
+  /// List of parameter definitions.
+  std::vector<ParamDefinition> param_definitions;
+
+ private:
+  friend class Conductor;
+
+  // Returns the corresponding C type for internal use.
+  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const;
+};
+
+/// Conductor.
+class Conductor {
+ public:
+  /// Constructs new |Conductor|.
+  ///
+  /// @param api BarelyMusician C++ api.
+  explicit Conductor(const Api& api);
+
+  // TODO(#85): Should |Conductor| be non-movable and non-copyable?
+
+  /// Returns energy.
+  ///
+  /// @return Energy, or error status.
+  StatusOr<float> GetEnergy() const;
+
+  // TODO(#85): Implement |BarelyConductor_GetParam|.
+  // TODO(#85): Implement |BarelyConductor_GetParamDefinition|.
+
+  /// Returns root note.
+  ///
+  /// @return Root note pitch, or error status.
+  StatusOr<float> GetRootNote() const;
+
+  // TODO(#85): Implement |BarelyConductor_GetScale|.
+
+  /// Returns stress.
+  ///
+  /// @return Stress, or error status.
+  StatusOr<float> GetStress() const;
+
+  // TODO(#85): Implement |BarelyConductor_SetAllParamsToDefault|.
+  // TODO(#85): Implement |BarelyConductor_SetData|.
+
+  /// Sets definition.
+  ///
+  /// @param definition Conductor definition.
+  /// @return Status.
+  Status SetDefinition(ConductorDefinition definition);
+
+  /// Sets energy.
+  ///
+  /// @param energy Energy.
+  Status SetEnergy(float energy);
+
+  // TODO(#85): Implement |BarelyConductor_SetParam|.
+  // TODO(#85): Implement |BarelyConductor_SetParamToDefault|.
+
+  /// Sets root note.
+  ///
+  /// @param root_pitch Root note pitch.
+  Status SetRootNote(float root_pitch);
+
+  // TODO(#85): Implement |BarelyConductor_SetScale|.
+
+  /// Sets stress.
+  ///
+  /// @param stress Stress.
+  Status SetStress(float stress);
+
+ private:
+  // Internal api handle.
+  const BarelyApi& capi_;
 };
 
 /// Instrument definition.
@@ -320,6 +461,9 @@ class Instrument {
   ///
   /// @return Status.
   Status SetAllNotesOff();
+
+  // TODO(#85): Implement |BarelyInstrument_SetAllParamsToDefault|.
+  // TODO(#85): Implement |BarelyInstrument_SetData|.
 
   /// Sets gain.
   ///
@@ -653,6 +797,77 @@ Status Api::SetSampleRate(int sample_rate) {
 
 Status Api::Update(double timestamp) {
   return static_cast<Status>(BarelyApi_Update(capi_, timestamp));
+}
+
+std::vector<BarelyParamDefinition>
+ConductorDefinition::GetBarelyParamDefinitions() const {
+  std::vector<BarelyParamDefinition> cparam_definitions;
+  cparam_definitions.reserve(param_definitions.size());
+  for (const auto& param_definition : param_definitions) {
+    cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
+  }
+  return cparam_definitions;
+}
+
+Conductor::Conductor(const Api& api) : capi_(api.capi_) {}
+
+StatusOr<float> Conductor::GetEnergy() const {
+  float energy = 0.0f;
+  if (const auto status = BarelyConductor_GetEnergy(capi_, &energy);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return energy;
+}
+
+StatusOr<float> Conductor::GetRootNote() const {
+  float root_pitch = 0.0f;
+  if (const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return root_pitch;
+}
+
+StatusOr<float> Conductor::GetStress() const {
+  float stress = 0.0f;
+  if (const auto status = BarelyConductor_GetStress(capi_, &stress);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return stress;
+}
+
+Status Conductor::SetDefinition(ConductorDefinition definition) {
+  auto cparam_definitions = definition.GetBarelyParamDefinitions();
+  // TODO(#85): Define and include the transform functions.
+  auto cdefinition =
+      BarelyConductorDefinition{std::move(definition.create_fn),
+                                std::move(definition.destroy_fn),
+                                std::move(definition.set_data_fn),
+                                std::move(definition.set_energy_fn),
+                                std::move(definition.set_param_fn),
+                                std::move(definition.set_stress_fn),
+                                /*transform_duration_fn=*/nullptr,
+                                /*transform_intensity_fn=*/nullptr,
+                                /*transform_pitch_fn=*/nullptr,
+                                /*transform_tempo_fn=*/nullptr,
+                                cparam_definitions.data(),
+                                static_cast<int>(cparam_definitions.size())};
+  return static_cast<Status>(
+      BarelyConductor_SetDefinition(capi_, std::move(cdefinition)));
+}
+
+Status Conductor::SetEnergy(float energy) {
+  return static_cast<Status>(BarelyConductor_SetEnergy(capi_, energy));
+}
+
+Status Conductor::SetRootNote(float root_pitch) {
+  return static_cast<Status>(BarelyConductor_SetRootNote(capi_, root_pitch));
+}
+
+Status Conductor::SetStress(float stress) {
+  return static_cast<Status>(BarelyConductor_SetStress(capi_, stress));
 }
 
 std::vector<BarelyParamDefinition>

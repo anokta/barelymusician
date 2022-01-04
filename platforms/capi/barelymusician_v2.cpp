@@ -55,6 +55,63 @@ BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp) {
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelyConductor_GetEnergy(BarelyApi api, float* out_energy) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_energy) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetRootNote(BarelyApi api, float* out_root_pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_root_pitch) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetStress(BarelyApi api, float* out_stress) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_stress) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetDefinition(
+    BarelyApi api, BarelyConductorDefinition definition) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  definition;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float energy) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  energy;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetRootNote(BarelyApi api, float root_pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  root_pitch;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetStress(BarelyApi api, float stress) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  stress;
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyInstrument_Create(BarelyApi api,
                                      BarelyInstrumentDefinition definition,
                                      BarelyId* out_instrument_id) {

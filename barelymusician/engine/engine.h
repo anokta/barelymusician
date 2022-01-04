@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
 #include <any>
-#include <functional>
 #include <optional>
 #include <unordered_map>
 #include <vector>
@@ -33,11 +32,7 @@ class Engine {
   using PlaybackBeatCallback = Transport::BeatCallback;
 
   /// Playback update callback signature.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @param end_position End position in beats.
-  using PlaybackUpdateCallback =
-      std::function<void(double begin_position, double end_position)>;
+  using PlaybackUpdateCallback = Transport::UpdateCallback;
 
   /// Constructs new |Engine|.
   ///

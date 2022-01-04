@@ -197,15 +197,19 @@ typedef struct BarelyConductorDefinition {
 /// Instrument note off callback signature.
 ///
 /// @param pitch Note pitch.
+/// @param timestamp Note timestamp in seconds.
 /// @param user_data User data.
-typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, void* user_data);
+typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, double timestamp,
+                                                 void* user_data);
 
 /// Instrument note on callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
+/// @param timestamp Note timestamp in seconds.
 /// @param user_data User data.
 typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity,
+                                                double timestamp,
                                                 void* user_data);
 
 /// Instrument create function signature.
@@ -294,16 +298,22 @@ typedef struct BarelyInstrumentDefinition {
 /// Transport beat callback signature.
 ///
 /// @param position Beat position in beats.
+/// @param timestamp Beat timestamp in seconds.
 /// @param user_data User data.
-typedef void (*BarelyTransport_BeatCallback)(double position, void* user_data);
+typedef void (*BarelyTransport_BeatCallback)(double position, double timestamp,
+                                             void* user_data);
 
 /// Transport update callback signature.
 ///
 /// @param begin_position Begin position in beats.
 /// @param end_position End position in beats.
+/// @param begin_timestamp Begin timestamp in seconds.
+/// @param end_timestamp End timestamp in seconds.
 /// @param user_data User data.
 typedef void (*BarelyTransport_UpdateCallback)(double begin_position,
                                                double end_position,
+                                               double begin_timestamp,
+                                               double end_timestamp,
                                                void* user_data);
 
 /// Creates new BarelyMusician API.

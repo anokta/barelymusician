@@ -258,13 +258,16 @@ class Instrument {
   /// Note off callback signature.
   ///
   /// @param pitch Note pitch.
-  using NoteOffCallback = std::function<void(float pitch)>;
+  /// @param timestamp Note timestamp in seconds.
+  using NoteOffCallback = std::function<void(float pitch, double timestamp)>;
 
   /// Note on callback signature.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  using NoteOnCallback = std::function<void(float pitch, float intensity)>;
+  /// @param timestamp Note timestamp in seconds.
+  using NoteOnCallback =
+      std::function<void(float pitch, float intensity, double timestamp)>;
 
   /// Constructs new |Instrument|.
   ///
@@ -489,14 +492,18 @@ class Transport {
   /// Beat callback signature.
   ///
   /// @param position Beat position in beats.
-  using BeatCallback = std::function<void(double position)>;
+  /// @param timestamp Beat timestamp in seconds.
+  using BeatCallback = std::function<void(double position, double timestamp)>;
 
   /// Update callback signature.
   ///
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
+  /// @param begin_timestamp Begin timestamp in seconds.
+  /// @param end_timestamp End timestamp in seconds.
   using UpdateCallback =
-      std::function<void(double begin_position, double end_position)>;
+      std::function<void(double begin_position, double end_position,
+                         double begin_timestamp, double end_timestamp)>;
 
   /// Constructs new |Transport|.
   ///
@@ -731,8 +738,8 @@ Status Instrument::SetNoteOffCallback(NoteOffCallback note_off_callback) {
     note_off_callback_ = std::move(note_off_callback);
     return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
         capi_, id_,
-        [](float pitch, void* user_data) {
-          (*static_cast<NoteOffCallback*>(user_data))(pitch);
+        [](float pitch, double timestamp, void* user_data) {
+          (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
         },
         static_cast<void*>(&note_off_callback_)));
   } else {
@@ -751,8 +758,9 @@ Status Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) {
     note_on_callback_ = std::move(note_on_callback);
     return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
         capi_, id_,
-        [](float pitch, float intensity, void* user_data) {
-          (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity);
+        [](float pitch, float intensity, double timestamp, void* user_data) {
+          (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity,
+                                                     timestamp);
         },
         static_cast<void*>(&note_on_callback_)));
   } else {
@@ -902,9 +910,9 @@ Status Transport::SetBeatCallback(BeatCallback beat_callback) {
     beat_callback_ = std::move(beat_callback);
     return static_cast<Status>(BarelyTransport_SetBeatCallback(
         capi_,
-        [](double position, void* user_data) {
+        [](double position, double timestamp, void* user_data) {
           if (user_data) {
-            (*static_cast<BeatCallback*>(user_data))(position);
+            (*static_cast<BeatCallback*>(user_data))(position, timestamp);
           }
         },
         static_cast<void*>(&beat_callback_)));
@@ -929,10 +937,11 @@ Status Transport::SetUpdateCallback(UpdateCallback update_callback) {
     update_callback_ = std::move(update_callback);
     return static_cast<Status>(BarelyTransport_SetUpdateCallback(
         capi_,
-        [](double begin_position, double end_position, void* user_data) {
+        [](double begin_position, double end_position, double begin_timestamp,
+           double end_timestamp, void* user_data) {
           if (user_data) {
-            (*static_cast<UpdateCallback*>(user_data))(begin_position,
-                                                       end_position);
+            (*static_cast<UpdateCallback*>(user_data))(
+                begin_position, end_position, begin_timestamp, end_timestamp);
           }
         },
         static_cast<void*>(&beat_callback_)));

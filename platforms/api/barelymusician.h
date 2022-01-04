@@ -422,6 +422,7 @@ class Sequence {
   // TODO(#85): Implement |BarelySequence_GetNoteEventDuration|.
   // TODO(#85): Implement |BarelySequence_GetNoteEventIntensity|.
   // TODO(#85): Implement |BarelySequence_GetNoteEventPitch|.
+  // TODO(#85): Implement |BarelySequence_GetNoteEventPosition|.
 
   /// Returns whether sequence is empty or not.
   ///
@@ -477,6 +478,7 @@ class Sequence {
   // TODO(#85): Implement |BarelySequence_SetNoteEventDuration|.
   // TODO(#85): Implement |BarelySequence_SetNoteEventIntensity|.
   // TODO(#85): Implement |BarelySequence_SetNoteEventPitch|.
+  // TODO(#85): Implement |BarelySequence_SetNoteEventPosition|.
 
  private:
   // Internal api handle.

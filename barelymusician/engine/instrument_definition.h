@@ -15,7 +15,7 @@ using InstrumentState = std::any;
 /// Instrument create function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param sample_rate Sampling rate in Hz.
+/// @param sample_rate Sampling rate in hz.
 using CreateInstrumentFn =
     std::function<void(InstrumentState* state, int sample_rate)>;
 

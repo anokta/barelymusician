@@ -41,7 +41,7 @@ class InstrumentManager {
 
   /// Constructs new |InstrumentManager|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit InstrumentManager(int sample_rate) noexcept;
 
   /// Adds new instrument at timestamp.
@@ -210,7 +210,7 @@ class InstrumentManager {
   /// Sets sampling rate at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   void SetSampleRate(double timestamp, int sample_rate) noexcept;
 
   /// Updates the internal state.
@@ -261,7 +261,7 @@ class InstrumentManager {
   // Instrument note on callback.
   NoteOnCallback note_on_callback_;
 
-  // Sampling rate in Hz.
+  // Sampling rate in hz.
   std::atomic<int> sample_rate_;
 };
 

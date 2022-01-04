@@ -64,7 +64,7 @@ struct ParamDefinition {
  private:
   friend struct InstrumentDefinition;
 
-  // Returns the corresponding C API type for internal use.
+  // Returns the corresponding C api type for internal use.
   BarelyParamDefinition GetBarelyParamDefinition() const;
 };
 
@@ -102,24 +102,24 @@ class StatusOr {
   /// @param value Value.
   StatusOr(ValueType value);
 
-  /// Returns the error status.
+  /// Returns contained error status.
   ///
   /// @return Error status.
   Status GetErrorStatus() const;
 
-  /// Returns the value.
-  ///
-  /// @return Mutable value.
-  ValueType& GetValue();
-
-  /// Returns the value.
+  /// Returns contained value.
   ///
   /// @return Value.
   const ValueType& GetValue() const;
 
-  /// Returns whether a value is present or not.
+  /// Returns contained value.
   ///
-  /// @return True if a value is present, false otherwise.
+  /// @return Mutable value.
+  ValueType& GetValue();
+
+  /// Returns whether a value is contained or not.
+  ///
+  /// @return True if contained, false otherwise.
   bool IsOk() const;
 
  private:
@@ -127,7 +127,7 @@ class StatusOr {
   std::variant<Status, ValueType> value_or_;
 };
 
-/// BarelyMusician C++ API.
+/// BarelyMusician C++ api.
 class Api {
  public:
   /// Constructs new |Api|.
@@ -135,7 +135,7 @@ class Api {
 
   /// Constructs new |Api| with an initial sampling rate.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit Api(int sample_rate);
 
   /// Destroys |Api|.
@@ -147,18 +147,18 @@ class Api {
   Api(Api&& other) = delete;
   Api& operator=(Api&& other) noexcept = delete;
 
-  /// Returns the sampling rate.
+  /// Returns sampling rate.
   ///
-  /// @return Sampling rate in Hz, or error status.
+  /// @return Sampling rate in hz, or error status.
   StatusOr<int> GetSampleRate() const;
 
-  /// Sets the sampling rate.
+  /// Sets sampling rate.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   /// @return Status.
   Status SetSampleRate(int sample_rate);
 
-  /// Updates the internal state at timestamp.
+  /// Updates internal state at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
@@ -169,7 +169,7 @@ class Api {
   friend class Sequence;
   friend class Transport;
 
-  // Internal C API handle.
+  // Internal C api handle.
   BarelyApi capi_;
 };
 
@@ -178,7 +178,7 @@ struct InstrumentDefinition {
   /// Create function signature.
   ///
   /// @param state Pointer to instrument state.
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   using CreateFn = void (*)(void** state, int sample_rate);
 
   /// Destroy function signature.
@@ -271,7 +271,7 @@ class Instrument {
 
   /// Constructs new |Instrument|.
   ///
-  /// @param api BarelyMusician C++ API.
+  /// @param api BarelyMusician C++ api.
   /// @param definition Definition.
   Instrument(const Api& api, InstrumentDefinition definition);
 
@@ -285,7 +285,7 @@ class Instrument {
   // TODO(#85): Implement |BarelyInstrument_CancelAllScheduledNoteEvents|.
   // TODO(#85): Implement |BarelyInstrument_CancelScheduledNoteEvent|.
 
-  /// Returns the gain.
+  /// Returns gain.
   ///
   /// @return Gain in amplitude, or error status.
   StatusOr<float> GetGain() const;
@@ -293,7 +293,7 @@ class Instrument {
   // TODO(#85): Implement |BarelyInstrument_GetParam|.
   // TODO(#85): Implement |BarelyInstrument_GetParamDefinition|.
 
-  /// Returns whether the volume is muted or not.
+  /// Returns whether instrument is muted or not.
   ///
   /// @return True if muted, false otherwise, or error status.
   StatusOr<bool> IsMuted() const;
@@ -304,7 +304,7 @@ class Instrument {
   /// @return True if active, false otherwise, or error status.
   StatusOr<bool> IsNoteOn(float pitch) const;
 
-  /// Processes the next output buffer at timestamp.
+  /// Processes output buffer at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @param output Output buffer.
@@ -321,13 +321,13 @@ class Instrument {
   /// @return Status.
   Status SetAllNotesOff();
 
-  /// Sets the gain.
+  /// Sets gain.
   ///
   /// @param gain Gain in amplitude.
   /// @return Status.
   Status SetGain(float gain);
 
-  /// Sets whether the volume should be muted or not.
+  /// Sets whether instrument should be muted or not.
   ///
   /// @param is_muted True if muted, false otherwise.
   /// @return Status.
@@ -362,7 +362,7 @@ class Instrument {
   // TODO(#85): Implement |BarelyInstrument_SetParamToDefault|.
 
  private:
-  // Internal C API handle.
+  // Internal C api handle.
   const BarelyApi& capi_;
 
   // Identifier.
@@ -380,7 +380,7 @@ class Sequence {
  public:
   /// Constructs new |Sequence|.
   ///
-  /// @param api BarelyMusician C++ API.
+  /// @param api BarelyMusician C++ api.
   explicit Sequence(const Api& api);
 
   /// Destroys |Sequence|.
@@ -392,29 +392,29 @@ class Sequence {
 
   // TODO(#85): Implement |BarelySequence_AddNoteEvent|.
 
-  /// Returns the begin offset.
+  /// Returns begin offset.
   ///
   /// @return Begin offset in beats, or error status.
   StatusOr<double> GetBeginOffset() const;
 
-  /// Returns the begin position.
+  /// Returns begin position.
   ///
   /// @return Begin position in beats, or error status.
   StatusOr<double> GetBeginPosition() const;
 
-  /// Returns the end position.
+  /// Returns end position.
   ///
   /// @return End position in beats, or error status.
   StatusOr<double> GetEndPosition() const;
 
   // TODO(#85): Implement |BarelySequence_GetInstrument|.
 
-  /// Returns the loop begin offset.
+  /// Returns loop begin offset.
   ///
   /// @return Loop begin offset in beats, or error status.
   StatusOr<double> GetLoopBeginOffset() const;
 
-  /// Returns the loop length.
+  /// Returns loop length.
   ///
   /// @return Loop length in beats, or error status.
   StatusOr<double> GetLoopLength() const;
@@ -423,12 +423,12 @@ class Sequence {
   // TODO(#85): Implement |BarelySequence_GetNoteEventIntensity|.
   // TODO(#85): Implement |BarelySequence_GetNoteEventPitch|.
 
-  /// Returns whether the sequence is empty or not.
+  /// Returns whether sequence is empty or not.
   ///
   /// @return True if empty, false otherwise, or error status.
   StatusOr<bool> IsEmpty() const;
 
-  /// Returns whether the sequence should be looping or not.
+  /// Returns whether sequence should be looping or not.
   ///
   /// @return True if looping, false otherwise, or error status.
   StatusOr<bool> IsLooping() const;
@@ -436,19 +436,19 @@ class Sequence {
   // TODO(#85): Implement |BarelySequence_RemoveAllNoteEvents|.
   // TODO(#85): Implement |BarelySequence_RemoveNoteEvent|.
 
-  /// Sets the begin offset.
+  /// Sets begin offset.
   ///
   /// @param begin_offset Begin offset in beats.
   /// @return Status.
   Status SetBeginOffset(double begin_offset);
 
-  /// Sets the begin position.
+  /// Sets begin position.
   ///
   /// @param begin_position Begin position in beats.
   /// @return Status.
   Status SetBeginPosition(double begin_position);
 
-  /// Sets the end position.
+  /// Sets end position.
   ///
   /// @param end_position End position in beats.
   /// @return Status.
@@ -456,19 +456,19 @@ class Sequence {
 
   // TODO(#85): Implement |BarelySequence_SetInstrument|.
 
-  /// Sets the loop begin offset.
+  /// Sets loop begin offset.
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
   /// @return Status.
   Status SetLoopBeginOffset(double loop_begin_offset);
 
-  /// Sets the loop length.
+  /// Sets loop length.
   ///
   /// @param loop_length Loop length in beats.
   /// @return Status.
   Status SetLoopLength(double loop_length);
 
-  /// Sets whether the sequence should be looping or not.
+  /// Sets whether sequence should be looping or not.
   ///
   /// @param is_looping True if looping, false otherwise.
   /// @return Status.
@@ -479,7 +479,7 @@ class Sequence {
   // TODO(#85): Implement |BarelySequence_SetNoteEventPitch|.
 
  private:
-  // Internal API handle.
+  // Internal api handle.
   const BarelyApi& capi_;
 
   // Identifier.
@@ -507,58 +507,58 @@ class Transport {
 
   /// Constructs new |Transport|.
   ///
-  /// @param api BarelyMusician C++ API.
+  /// @param api BarelyMusician C++ api.
   explicit Transport(const Api& api);
 
   // TODO(#85): Should |Transport| be non-movable and non-copyable?
 
-  /// Returns the position.
+  /// Returns position.
   ///
   /// @return Position in beats, or error status.
   StatusOr<double> GetPosition() const;
 
-  /// Returns the tempo.
+  /// Returns tempo.
   ///
   /// @return Tempo in BPM, or error status.
   StatusOr<double> GetTempo() const;
 
-  /// Returns whether the transport is playing or not.
+  /// Returns whether transport is playing or not.
   ///
   /// @return True if playing, false otherwise, or error status.
   StatusOr<bool> IsPlaying() const;
 
-  /// Sets the beat callback.
+  /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
   /// @return Status.
   Status SetBeatCallback(BeatCallback beat_callback);
 
-  /// Sets the position.
+  /// Sets position.
   ///
   /// @param position Position in beats.
   /// @return Status.
   Status SetPosition(double position);
 
-  /// Sets the tempo.
+  /// Sets tempo.
   ///
   /// @param tempo Tempo in BPM.
   /// @return Status.
   Status SetTempo(double tempo);
 
-  /// Sets the update callback.
+  /// Sets update callback.
   ///
   /// @param update_callback Update callback.
   /// @return Status.
   Status SetUpdateCallback(UpdateCallback update_callback);
 
-  /// Starts the playback.
+  /// Starts playback.
   Status Start();
 
-  /// Stops the playback.
+  /// Stops playback.
   Status Stop();
 
  private:
-  // Internal API handle.
+  // Internal api handle.
   const BarelyApi& capi_;
 
   // Beat callback.

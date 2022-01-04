@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// Class that communicates with the native API.
+  /// Class that communicates with the native api.
   public static class Musician {
     /// Invalid id.
     public const Int64 InvalidId = -1;
@@ -231,7 +231,7 @@ namespace Barely {
                                    performer.Instrument ? performer.Instrument.Id : InvalidId);
     }
 
-    // Singleton API.
+    // Singleton api.
     private static IntPtr Api {
       get {
         if (_isShuttingDown) {

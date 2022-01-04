@@ -12,7 +12,7 @@ class EnvelopedVoice : public barelyapi::Voice {
  public:
   /// Constructs new |EnvelopedVoice| with the given |sample_rate|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit EnvelopedVoice(int sample_rate) noexcept;
 
   /// Implements |Voice|.

@@ -29,7 +29,7 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// BarelyMusician C API type.
+/// BarelyMusician C api type.
 typedef struct BarelyMusician* BarelyApi;
 
 /// Status type.
@@ -78,7 +78,7 @@ typedef void* BarelyInstrumentState;
 /// Instrument create function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param sample_rate Sampling rate in Hz.
+/// @param sample_rate Sampling rate in hz.
 typedef void (*BarelyInstrumentCreateFn)(BarelyInstrumentState* state,
                                          int32_t sample_rate);
 
@@ -188,7 +188,7 @@ typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
 
 /// Adds new performer.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param out_performer_id Output performer id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyAddPerformer(BarelyApi api,
@@ -196,7 +196,7 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformer(BarelyApi api,
 
 /// Adds performer note.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param note_position Note position.
 /// @param note_duration Note duration.
@@ -209,15 +209,15 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformerNote(
     double note_duration, float note_pitch, float note_intensity,
     BarelyId* out_note_id);
 
-/// Creates new BarelyMusician API.
+/// Creates new BarelyMusician api.
 ///
-/// @param sample_rate Sampling rate in Hz.
-/// @return BarelyMusician API.
+/// @param sample_rate Sampling rate in hz.
+/// @return BarelyMusician api.
 BARELY_EXPORT BarelyApi BarelyCreateApi(int32_t sample_rate);
 
 /// Create new instrument.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param definition Instrument definition.
 /// @param out_instrument_id Output instrument id.
 /// @return Status.
@@ -229,15 +229,15 @@ BarelyCreateInstrument(BarelyApi api, BarelyInstrumentDefinition definition,
 BARELY_EXPORT BarelyStatus
 BarelyCreateSynthInstrument(BarelyApi api, BarelyId* out_instrument_id);
 
-/// Destroys BarelyMusician API.
+/// Destroys BarelyMusician api.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi api);
 
 /// Destroys instrument.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
@@ -245,7 +245,7 @@ BARELY_EXPORT BarelyStatus BarelyDestroyInstrument(BarelyApi api,
 
 /// Gets performer begin offset.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param out_begin_offset Output begin offset in beats.
 /// @return Status.
@@ -254,7 +254,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginOffset(
 
 /// Gets performer begin position.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param out_begin_position Output optional begin position in beats.
 /// @return Status.
@@ -263,7 +263,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginPosition(
 
 /// Gets performer end position.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param out_end_position Output optional end position in beats.
 /// @return Status.
@@ -272,7 +272,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerEndPosition(
 
 /// Gets performer loop begin offset.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param out_loop_begin_offset Output loop begin offset in beats.
 /// @return Status.
@@ -281,7 +281,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopBeginOffset(
 
 /// Gets performer loop length.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param out_loop_length Output loop length in beats.
 /// @return Status.
@@ -290,7 +290,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopLength(
 
 /// Gets the playback position.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param out_position Output position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPlaybackPosition(BarelyApi api,
@@ -298,7 +298,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPlaybackPosition(BarelyApi api,
 
 /// Gets the playback tempo.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param out_tempo Output tempo in BPM.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyApi api,
@@ -306,7 +306,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyApi api,
 
 /// Gets whether the performer is empty or not.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param out_is_empty Output true if empty, false otherwise.
 /// @return Status.
@@ -316,7 +316,7 @@ BARELY_EXPORT BarelyStatus BarelyIsPerformerEmpty(BarelyApi api,
 
 /// Gets whether the performer is looping or not.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param out_is_looping Ponter to true if looping, false otherwise.
 /// @return Status.
@@ -326,14 +326,14 @@ BARELY_EXPORT BarelyStatus BarelyIsPerformerLooping(BarelyApi api,
 
 /// Gets whether the playback is currently active or not.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* out_is_playing);
 
 /// Processes the next instrument output buffer at timestamp.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @param timestamp Timestamp in seconds.
 /// @param output Output buffer.
@@ -346,7 +346,7 @@ BARELY_EXPORT BarelyStatus BarelyProcessInstrument(
 
 /// Removes all performer notes.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyRemoveAllPerformerNotes(BarelyApi api,
@@ -354,7 +354,7 @@ BARELY_EXPORT BarelyStatus BarelyRemoveAllPerformerNotes(BarelyApi api,
 
 /// Removes all performer notes at given range.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param begin_position Begin position in beats.
 /// @param end_position End position in beats.
@@ -365,7 +365,7 @@ BarelyRemoveAllPerformerNotesAt(BarelyApi api, BarelyId performer_id,
 
 /// Removes performer.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyRemovePerformer(BarelyApi api,
@@ -373,7 +373,7 @@ BARELY_EXPORT BarelyStatus BarelyRemovePerformer(BarelyApi api,
 
 /// Removes performer note.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param note_id Note id.
 /// @return Status.
@@ -385,7 +385,7 @@ BARELY_EXPORT BarelyStatus BarelyRemovePerformerNote(BarelyApi api,
 
 /// Sets all instrument notes off.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
@@ -395,7 +395,7 @@ BarelySetAllInstrumentNotesOff(BarelyApi api, BarelyId instrument_id);
 
 /// Sets all instrument parameters to default.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
@@ -407,7 +407,7 @@ BarelySetAllInstrumentParamsToDefault(BarelyApi api, BarelyId instrument_id);
 
 /// Sets instrument note off.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @param note_pitch Note pitch.
 /// @return Status.
@@ -417,7 +417,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOff(BarelyApi api,
 
 /// Sets the instrument note off callback.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_note_off_callback Instrument note off callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
@@ -426,7 +426,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
 
 /// Sets instrument note on.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @param note_pitch Note pitch.
 /// @param note_intensity Note intensity.
@@ -438,7 +438,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOn(BarelyApi api,
 
 /// Sets the instrument note on callback.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_note_on_callback Instrument note on callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
@@ -446,7 +446,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
 
 /// Sets instrument parameter.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @param param_index Parameter index.
 /// @param param_value Parameter value.
@@ -458,7 +458,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentParam(BarelyApi api,
 
 /// Sets instrument parameter to default.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param instrument_id Instrument id.
 /// @param param_index Parameter index.
 /// @return Status.
@@ -467,7 +467,7 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentParamToDefault(
 
 /// Sets performer begin offset.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param begin_offset Begin offset in beats.
 /// @return Status.
@@ -477,7 +477,7 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerBeginOffset(BarelyApi api,
 
 /// Sets performer begin position.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param begin_position Optional begin position in beats.
 /// @return Status.
@@ -486,7 +486,7 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerBeginPosition(
 
 /// Sets performer end position.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param end_position Optional end position in beats.
 /// @return Status.
@@ -496,7 +496,7 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerEndPosition(BarelyApi api,
 
 /// Sets performer instrument.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param instrument_id Instrument id.
 /// @return Status.
@@ -506,7 +506,7 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerInstrument(BarelyApi api,
 
 /// Sets whether performer should be looping or not.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param loop True if looping.
 /// @return Status.
@@ -516,7 +516,7 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerLoop(BarelyApi api,
 
 /// Sets performer loop begin offset.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param loop_begin_offset Loop begin offset in beats.
 /// @return Status.
@@ -525,7 +525,7 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerLoopBeginOffset(
 
 /// Sets performer loop length.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param performer_id Performer id.
 /// @param loop_length Loop length in beats.
 /// @return Status.
@@ -535,7 +535,7 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerLoopLength(BarelyApi api,
 
 /// Sets the playback beat callback.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param playback_beat_callback Playback beat callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackBeatCallback(
@@ -543,7 +543,7 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackBeatCallback(
 
 /// Sets the playback position.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param position Playback position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackPosition(BarelyApi api,
@@ -551,14 +551,14 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackPosition(BarelyApi api,
 
 /// Sets the playback tempo.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param tempo Playback tempo in BPM.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackTempo(BarelyApi api, double tempo);
 
 /// Sets the playback update callback.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param playback_update_callback Playback update callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackUpdateCallback(
@@ -566,27 +566,27 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackUpdateCallback(
 
 /// Sets the sample rate.
 ///
-/// @param api BarelyMusician API.
-/// @param sample_rate Sampling rate in Hz.
+/// @param api BarelyMusician api.
+/// @param sample_rate Sampling rate in hz.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetSampleRate(BarelyApi api,
                                                int32_t sample_rate);
 
 /// Starts the playback.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyStartPlayback(BarelyApi api);
 
 /// Stops the playback.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyStopPlayback(BarelyApi api);
 
 /// Updates the internal state at timestamp.
 ///
-/// @param api BarelyMusician API.
+/// @param api BarelyMusician api.
 /// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyUpdate(BarelyApi api, double timestamp);

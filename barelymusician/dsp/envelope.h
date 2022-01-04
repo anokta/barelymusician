@@ -11,7 +11,7 @@ class Envelope : public Generator {
  public:
   /// Constructs new |Envelope|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit Envelope(int sample_rate) noexcept;
 
   /// Implements |Generator|.

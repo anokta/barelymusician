@@ -66,7 +66,7 @@ Id Engine::AddPerformer() noexcept {
 }
 
 Status Engine::AddPerformerInstrument(Id performer_id,
-                                        Id instrument_id) noexcept {
+                                      Id instrument_id) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     if (instrument_manager_.IsValid(instrument_id)) {
       return performer->AddInstrument(instrument_id);
@@ -76,7 +76,7 @@ Status Engine::AddPerformerInstrument(Id performer_id,
 }
 
 StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
-                                        Note note) noexcept {
+                                      Note note) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     const Id note_id = id_generator_.Next();
     performer->GetMutableSequence()->AddNote(note_id, position,
@@ -153,8 +153,8 @@ StatusOr<bool> Engine::IsPerformerLooping(Id performer_id) const noexcept {
 bool Engine::IsPlaying() const noexcept { return transport_.IsPlaying(); }
 
 void Engine::ProcessInstrument(Id instrument_id, double timestamp,
-                                 float* output, int num_channels,
-                                 int num_frames) noexcept {
+                               float* output, int num_channels,
+                               int num_frames) noexcept {
   instrument_manager_.Process(instrument_id, timestamp, output, num_channels,
                               num_frames);
 }
@@ -180,7 +180,7 @@ Status Engine::RemoveAllPerformerNotes(Id performer_id) noexcept {
 }
 
 Status Engine::RemoveAllPerformerNotes(Id performer_id, double begin_position,
-                                         double end_position) noexcept {
+                                       double end_position) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     performer->GetMutableSequence()->RemoveAllNotes(begin_position,
                                                     end_position);
@@ -216,7 +216,7 @@ Status Engine::RemovePerformer(Id performer_id) noexcept {
 }
 
 Status Engine::RemovePerformerInstrument(Id performer_id,
-                                           Id instrument_id) noexcept {
+                                         Id instrument_id) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     const auto events_or = performer->RemoveInstrument(instrument_id);
     if (IsOk(events_or)) {
@@ -250,7 +250,7 @@ Status Engine::SetAllInstrumentParamsToDefault(Id instrument_id) noexcept {
 }
 
 Status Engine::SetCustomInstrumentData(Id instrument_id,
-                                         std::any custom_data) noexcept {
+                                       std::any custom_data) noexcept {
   return instrument_manager_.SetCustomData(
       instrument_id, transport_.GetLastTimestamp(), std::move(custom_data));
 }
@@ -270,7 +270,7 @@ Status Engine::SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept {
 }
 
 Status Engine::SetInstrumentNoteOff(Id instrument_id,
-                                      float note_pitch) noexcept {
+                                    float note_pitch) noexcept {
   return instrument_manager_.SetNoteOff(
       instrument_id, transport_.GetLastTimestamp(), note_pitch);
 }
@@ -282,19 +282,19 @@ void Engine::SetInstrumentNoteOffCallback(
 }
 
 Status Engine::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
-                                     float note_intensity) noexcept {
+                                   float note_intensity) noexcept {
   return instrument_manager_.SetNoteOn(
       instrument_id, transport_.GetLastTimestamp(), note_pitch, note_intensity);
 }
 
 Status Engine::SetInstrumentParam(Id instrument_id, int param_id,
-                                    float param_value) noexcept {
+                                  float param_value) noexcept {
   return instrument_manager_.SetParam(
       instrument_id, transport_.GetLastTimestamp(), param_id, param_value);
 }
 
 Status Engine::SetInstrumentParamToDefault(Id instrument_id,
-                                             int param_id) noexcept {
+                                           int param_id) noexcept {
   return instrument_manager_.SetParamToDefault(
       instrument_id, transport_.GetLastTimestamp(), param_id);
 }
@@ -305,7 +305,7 @@ void Engine::SetInstrumentNoteOnCallback(
 }
 
 Status Engine::SetPerformerBeginOffset(Id performer_id,
-                                         double begin_offset) noexcept {
+                                       double begin_offset) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     performer->GetMutableSequence()->SetBeginOffset(begin_offset);
     return Status::kOk;
@@ -339,8 +339,8 @@ Status Engine::SetPerformerLoop(Id performer_id, bool loop) noexcept {
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerLoopBeginOffset(
-    Id performer_id, double loop_begin_offset) noexcept {
+Status Engine::SetPerformerLoopBeginOffset(Id performer_id,
+                                           double loop_begin_offset) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     performer->GetMutableSequence()->SetLoopBeginOffset(loop_begin_offset);
     return Status::kOk;
@@ -349,7 +349,7 @@ Status Engine::SetPerformerLoopBeginOffset(
 }
 
 Status Engine::SetPerformerLoopLength(Id performer_id,
-                                        double loop_length) noexcept {
+                                      double loop_length) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     performer->GetMutableSequence()->SetLoopLength(loop_length);
     return Status::kOk;

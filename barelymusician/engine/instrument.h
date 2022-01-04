@@ -12,7 +12,7 @@ class Instrument {
  public:
   /// Constructs new |Instrument|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   /// @param definition Instrument definition.
   Instrument(int sample_rate, InstrumentDefinition definition) noexcept;
 

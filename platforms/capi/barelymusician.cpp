@@ -133,11 +133,11 @@ BarelyStatus GetStatus(const StatusOr<ValueType>& status_or) noexcept {
 
 extern "C" {
 
-/// BarelyMusician C API.
+/// BarelyMusician C api.
 struct BarelyMusician {
   /// Constructs new |BarelyMusician|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit BarelyMusician(int32_t sample_rate) noexcept
       : instance(sample_rate) {}
 
@@ -145,7 +145,7 @@ struct BarelyMusician {
   Engine instance;
 
  private:
-  // Ensure that the instance can only be destroyed via the API call.
+  // Ensure that the instance can only be destroyed via the api call.
   friend BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi);
   ~BarelyMusician() = default;
 };

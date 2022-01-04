@@ -4,7 +4,7 @@
 
 extern "C" {
 
-/// BarelyMusician C API.
+/// BarelyMusician C api.
 struct BarelyMusician {
   // TODO(#85): This is a temp POC for testing.
   int sample_rate;
@@ -12,7 +12,7 @@ struct BarelyMusician {
   double begin_offset;
 
  private:
-  // Ensure that the instance can only be destroyed via the API call.
+  // Ensure that the instance can only be destroyed via the api call.
   friend BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi);
   ~BarelyMusician() = default;
 };

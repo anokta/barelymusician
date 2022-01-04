@@ -36,7 +36,7 @@ class Engine {
 
   /// Constructs new |Engine|.
   ///
-  /// @param sample_rate System sampling rate in Hz.
+  /// @param sample_rate System sampling rate in hz.
   explicit Engine(int sample_rate) noexcept;
 
   /// Adds new instrument.
@@ -332,7 +332,7 @@ class Engine {
 
   /// Sets the sample rate.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   void SetSampleRate(int sample_rate) noexcept;
 
   /// Starts the playback.

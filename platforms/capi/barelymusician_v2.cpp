@@ -4,6 +4,16 @@
 
 extern "C" {
 
+BarelyStatus BarelyConductor_GetParam(BarelyApi api, BarelyParamId id,
+                                      float* out_value) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_value) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  id;
+  return BarelyStatus_kUnimplemented;
+}
+
 /// BarelyMusician C api.
 struct BarelyMusician {
   // TODO(#85): This is a temp POC for testing.
@@ -63,6 +73,17 @@ BarelyStatus BarelyConductor_GetEnergy(BarelyApi api, float* out_energy) {
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelyConductor_GetParamDefinition(
+    BarelyApi api, BarelyParamId id,
+    BarelyParamDefinition* out_param_definition) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_param_definition) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  id;
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyConductor_GetRootNote(BarelyApi api, float* out_root_pitch) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_root_pitch) return BarelyStatus_kInvalidArgument;
@@ -76,6 +97,29 @@ BarelyStatus BarelyConductor_GetStress(BarelyApi api, float* out_stress) {
   if (!out_stress) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_ResetAllParams(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_ResetParam(BarelyApi api, BarelyParamId id) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetData(BarelyApi api, void* data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  data;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -93,6 +137,16 @@ BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float energy) {
 
   // TODO(#85): Implement.
   energy;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetParam(BarelyApi api, BarelyParamId id,
+                                      float value) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  id;
+  value;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -144,6 +198,29 @@ BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
   return BarelyStatus_kOk;
 }
 
+BarelyStatus BarelyInstrument_GetParam(BarelyApi api, BarelyId instrument_id,
+                                       BarelyParamId id, float* out_value) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_value) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_GetParamDefinition(
+    BarelyApi api, BarelyId instrument_id, BarelyParamId id,
+    BarelyParamDefinition* out_param_definition) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_param_definition) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  id;
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId instrument_id,
                                       bool* out_is_muted) {
   if (!api) return BarelyStatus_kNotFound;
@@ -177,6 +254,35 @@ BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
   output;
   num_output_channels;
   num_output_frames;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_ResetAllParams(BarelyApi api,
+                                             BarelyId instrument_id) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_ResetParam(BarelyApi api, BarelyId instrument_id,
+                                         BarelyParamId id) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId instrument_id,
+                                      void* data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  data;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -221,6 +327,17 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
   instrument_id;
   note_on_callback;
   user_data;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_SetParam(BarelyApi api, BarelyId instrument_id,
+                                       BarelyParamId id, float value) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  id;
+  value;
   return BarelyStatus_kUnimplemented;
 }
 

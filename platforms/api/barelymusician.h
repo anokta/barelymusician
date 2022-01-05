@@ -18,12 +18,12 @@ using ParamId = std::int32_t;
 
 /// Parameter definition.
 struct ParamDefinition {
-  /// Constructs new |ParamDefinition|.
+  /// Constructs new `ParamDefinition`.
   ///
   /// @param id Identifier.
   explicit ParamDefinition(ParamId id);
 
-  /// Constructs new |ParamDefinition| for a float value.
+  /// Constructs new `ParamDefinition` for a float value.
   ///
   /// @param id Identifier.
   /// @param default_value Default float value.
@@ -33,13 +33,13 @@ struct ParamDefinition {
                   float min_value = std::numeric_limits<float>::lowest(),
                   float max_value = std::numeric_limits<float>::max());
 
-  /// Constructs new |ParamDefinition| for a boolean value.
+  /// Constructs new `ParamDefinition` for a boolean value.
   ///
   /// @param id Identifier.
   /// @param default_value Default boolean value.
   ParamDefinition(ParamId id, bool default_value);
 
-  /// Constructs new |ParamDefinition| for an integer value.
+  /// Constructs new `ParamDefinition` for an integer value.
   ///
   /// @param id Identifier.
   /// @param default_value Default integer value.
@@ -62,10 +62,16 @@ struct ParamDefinition {
   float max_value;
 
  private:
+  friend class Conductor;
   friend struct ConductorDefinition;
+  friend class Instrument;
   friend struct InstrumentDefinition;
 
-  // Returns the corresponding C api type for internal use.
+  /// Returns corresponding `ParamDefinition` for C type for internal use.
+  static ParamDefinition FromBarelyParamDefinition(
+      BarelyParamDefinition definition);
+
+  // Returns corresponding C type for internal use.
   BarelyParamDefinition GetBarelyParamDefinition() const;
 };
 
@@ -93,12 +99,12 @@ enum class Status : BarelyStatus {
 template <typename ValueType>
 class StatusOr {
  public:
-  /// Constructs new |StatusOr| with an error status.
+  /// Constructs new `StatusOr` with an error status.
   ///
   /// @param error_status Error status.
   StatusOr(Status error_status);
 
-  /// Constructs new |StatusOr| with a value.
+  /// Constructs new `StatusOr` with a value.
   ///
   /// @param value Value.
   StatusOr(ValueType value);
@@ -131,15 +137,15 @@ class StatusOr {
 /// BarelyMusician C++ api.
 class Api {
  public:
-  /// Constructs new |Api|.
+  /// Constructs new `Api`.
   Api();
 
-  /// Constructs new |Api| with an initial sampling rate.
+  /// Constructs new `Api` with an initial sampling rate.
   ///
   /// @param sample_rate Sampling rate in hz.
   explicit Api(int sample_rate);
 
-  /// Destroys |Api|.
+  /// Destroys `Api`.
   ~Api();
 
   /// Non-copyable and non-movable.
@@ -212,10 +218,10 @@ struct ConductorDefinition {
   /// @param stress Stress.
   using SetStressFn = void (*)(void** state, float stress);
 
-  // TODO(#85): Implement |BarelyConductorDefinition_TransformNoteDurationFn|.
-  // TODO(#85): Implement |BarelyConductorDefinition_TransformNoteIntensityFn|.
-  // TODO(#85): Implement |BarelyConductorDefinition_TransformNotePitchFn|.
-  // TODO(#85): Implement |BarelyConductorDefinition_TransformTempoFn|.
+  // TODO(#85): Implement `BarelyConductorDefinition_TransformNoteDurationFn`.
+  // TODO(#85): Implement `BarelyConductorDefinition_TransformNoteIntensityFn`.
+  // TODO(#85): Implement `BarelyConductorDefinition_TransformNotePitchFn`.
+  // TODO(#85): Implement `BarelyConductorDefinition_TransformTempoFn`.
 
   /// Create function.
   CreateFn create_fn;
@@ -235,10 +241,10 @@ struct ConductorDefinition {
   /// Set stress function.
   SetStressFn set_stress_fn;
 
-  // TODO(#85): Add |transform_duration_fn|.
-  // TODO(#85): Add |transform_intensity_fn|.
-  // TODO(#85): Add |transform_pitch_fn|.
-  // TODO(#85): Add |transform_tempo_fn|.
+  // TODO(#85): Add `transform_duration_fn`.
+  // TODO(#85): Add `transform_intensity_fn`.
+  // TODO(#85): Add `transform_pitch_fn`.
+  // TODO(#85): Add `transform_tempo_fn`.
 
   /// List of parameter definitions.
   std::vector<ParamDefinition> param_definitions;
@@ -246,44 +252,67 @@ struct ConductorDefinition {
  private:
   friend class Conductor;
 
-  // Returns the corresponding C type for internal use.
+  // Returns corresponding C type for internal use.
   std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const;
 };
 
 /// Conductor.
 class Conductor {
  public:
-  /// Constructs new |Conductor|.
+  /// Constructs new `Conductor`.
   ///
   /// @param api BarelyMusician C++ api.
   explicit Conductor(const Api& api);
 
-  // TODO(#85): Should |Conductor| be non-movable and non-copyable?
+  // TODO(#85): Should `Conductor` be non-movable and non-copyable?
 
   /// Returns energy.
   ///
   /// @return Energy, or error status.
   StatusOr<float> GetEnergy() const;
 
-  // TODO(#85): Implement |BarelyConductor_GetParam|.
-  // TODO(#85): Implement |BarelyConductor_GetParamDefinition|.
+  /// Returns parameter value.
+  ///
+  /// @param id Parameter identifier.
+  /// @return Parameter value, or error status.
+  StatusOr<float> GetParam(ParamId id) const;
+
+  /// Returns parameter definition.
+  ///
+  /// @param id Parameter identifier.
+  /// @return Parameter definition, or error status.
+  StatusOr<ParamDefinition> GetParamDefinition(ParamId id) const;
 
   /// Returns root note.
   ///
   /// @return Root note pitch, or error status.
   StatusOr<float> GetRootNote() const;
 
-  // TODO(#85): Implement |BarelyConductor_GetScale|.
+  // TODO(#85): Implement `BarelyConductor_GetScale`.
 
   /// Returns stress.
   ///
   /// @return Stress, or error status.
   StatusOr<float> GetStress() const;
 
-  // TODO(#85): Implement |BarelyConductor_ResetAllParams|.
-  // TODO(#85): Implement |BarelyConductor_ResetParam|.
+  /// Resets all parameters.
+  ///
+  /// @return Status.
+  Status ResetAllParams();
 
-  // TODO(#85): Implement |BarelyConductor_SetData|.
+  /// Resets parameter value.
+  ///
+  /// @param id Parameter identifier.
+  /// @return Status.
+  Status ResetParam(ParamId id);
+
+  // TODO(#85): Implement `BarelyInstrument_ScheduleNoteEvent`.
+
+  /// Sets data.
+  ///
+  /// @param data Data.
+  /// @return Status.
+  Status SetData(void* data);
 
   /// Sets definition.
   ///
@@ -296,14 +325,19 @@ class Conductor {
   /// @param energy Energy.
   Status SetEnergy(float energy);
 
-  // TODO(#85): Implement |BarelyConductor_SetParam|.
+  /// Sets parameter value.
+  ///
+  /// @param id Parameter identifier.
+  /// @param value Parameter value.
+  /// @return Status.
+  Status SetParam(ParamId id, float value);
 
   /// Sets root note.
   ///
   /// @param root_pitch Root note pitch.
   Status SetRootNote(float root_pitch);
 
-  // TODO(#85): Implement |BarelyConductor_SetScale|.
+  // TODO(#85): Implement `BarelyConductor_SetScale`.
 
   /// Sets stress.
   ///
@@ -390,7 +424,7 @@ struct InstrumentDefinition {
  private:
   friend class Instrument;
 
-  // Returns the corresponding C type for internal use.
+  // Returns corresponding C type for internal use.
   std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const;
 };
 
@@ -411,29 +445,38 @@ class Instrument {
   using NoteOnCallback =
       std::function<void(float pitch, float intensity, double timestamp)>;
 
-  /// Constructs new |Instrument|.
+  /// Constructs new `Instrument`.
   ///
   /// @param api BarelyMusician C++ api.
   /// @param definition Definition.
   Instrument(const Api& api, InstrumentDefinition definition);
 
-  /// Destroys |Instrument|.
+  /// Destroys `Instrument`.
   ~Instrument();
 
-  // TODO(#85): Should |Instrument| be non-movable and non-copyable?
+  // TODO(#85): Should `Instrument` be non-movable and non-copyable?
 
-  // TODO(#85): Implement |BarelyInstrument_Clone| (via copy?).
+  // TODO(#85): Implement `BarelyInstrument_Clone` (via copy?).
 
-  // TODO(#85): Implement |BarelyInstrument_CancelAllScheduledNoteEvents|.
-  // TODO(#85): Implement |BarelyInstrument_CancelScheduledNoteEvent|.
+  // TODO(#85): Implement `BarelyInstrument_CancelAllScheduledNoteEvents`.
+  // TODO(#85): Implement `BarelyInstrument_CancelScheduledNoteEvent`.
 
   /// Returns gain.
   ///
   /// @return Gain in amplitude, or error status.
   StatusOr<float> GetGain() const;
 
-  // TODO(#85): Implement |BarelyInstrument_GetParam|.
-  // TODO(#85): Implement |BarelyInstrument_GetParamDefinition|.
+  /// Returns parameter value.
+  ///
+  /// @param id Parameter identifier.
+  /// @return Parameter value, or error status.
+  StatusOr<float> GetParam(ParamId id) const;
+
+  /// Returns parameter definition.
+  ///
+  /// @param id Parameter identifier.
+  /// @return Parameter definition, or error status.
+  StatusOr<ParamDefinition> GetParamDefinition(ParamId id) const;
 
   /// Returns whether instrument is muted or not.
   ///
@@ -456,12 +499,24 @@ class Instrument {
   Status Process(double timestamp, float* output, int num_output_channels,
                  int num_output_frames);
 
-  // TODO(#85): Implement |BarelyInstrument_ResetAllParams|.
-  // TODO(#85): Implement |BarelyInstrument_ResetParam|.
+  /// Resets all parameters.
+  ///
+  /// @return Status.
+  Status ResetAllParams();
 
-  // TODO(#85): Implement |BarelyInstrument_ScheduleNoteEvent|.
+  /// Resets parameter value.
+  ///
+  /// @param id Parameter identifier.
+  /// @return Status.
+  Status ResetParam(ParamId id);
 
-  // TODO(#85): Implement |BarelyInstrument_SetData|.
+  // TODO(#85): Implement `BarelyInstrument_ScheduleNoteEvent`.
+
+  /// Sets data.
+  ///
+  /// @param data Data.
+  /// @return Status.
+  Status SetData(void* data);
 
   /// Sets gain.
   ///
@@ -487,7 +542,12 @@ class Instrument {
   /// @return Status.
   Status SetNoteOnCallback(NoteOnCallback note_on_callback);
 
-  // TODO(#85): Implement |BarelyInstrument_SetParam|.
+  /// Sets parameter value.
+  ///
+  /// @param id Parameter identifier.
+  /// @param value Parameter value.
+  /// @return Status.
+  Status SetParam(ParamId id, float value);
 
   /// Starts note.
   ///
@@ -524,19 +584,19 @@ class Instrument {
 /// Note sequence.
 class Sequence {
  public:
-  /// Constructs new |Sequence|.
+  /// Constructs new `Sequence`.
   ///
   /// @param api BarelyMusician C++ api.
   explicit Sequence(const Api& api);
 
-  /// Destroys |Sequence|.
+  /// Destroys `Sequence`.
   ~Sequence();
 
-  // TODO(#85): Should |Sequence| be non-movable and non-copyable?
+  // TODO(#85): Should `Sequence` be non-movable and non-copyable?
 
-  // TODO(#85): Implement |BarelySequence_Clone| (via copy?).
+  // TODO(#85): Implement `BarelySequence_Clone` (via copy?).
 
-  // TODO(#85): Implement |BarelySequence_AddNoteEvent|.
+  // TODO(#85): Implement `BarelySequence_AddNoteEvent`.
 
   /// Returns begin offset.
   ///
@@ -553,7 +613,7 @@ class Sequence {
   /// @return End position in beats, or error status.
   StatusOr<double> GetEndPosition() const;
 
-  // TODO(#85): Implement |BarelySequence_GetInstrument|.
+  // TODO(#85): Implement `BarelySequence_GetInstrument`.
 
   /// Returns loop begin offset.
   ///
@@ -565,10 +625,10 @@ class Sequence {
   /// @return Loop length in beats, or error status.
   StatusOr<double> GetLoopLength() const;
 
-  // TODO(#85): Implement |BarelySequence_GetNoteEventDuration|.
-  // TODO(#85): Implement |BarelySequence_GetNoteEventIntensity|.
-  // TODO(#85): Implement |BarelySequence_GetNoteEventPitch|.
-  // TODO(#85): Implement |BarelySequence_GetNoteEventPosition|.
+  // TODO(#85): Implement `BarelySequence_GetNoteEventDuration`.
+  // TODO(#85): Implement `BarelySequence_GetNoteEventIntensity`.
+  // TODO(#85): Implement `BarelySequence_GetNoteEventPitch`.
+  // TODO(#85): Implement `BarelySequence_GetNoteEventPosition`.
 
   /// Returns whether sequence is empty or not.
   ///
@@ -580,8 +640,8 @@ class Sequence {
   /// @return True if looping, false otherwise, or error status.
   StatusOr<bool> IsLooping() const;
 
-  // TODO(#85): Implement |BarelySequence_RemoveAllNoteEvents|.
-  // TODO(#85): Implement |BarelySequence_RemoveNoteEvent|.
+  // TODO(#85): Implement `BarelySequence_RemoveAllNoteEvents`.
+  // TODO(#85): Implement `BarelySequence_RemoveNoteEvent`.
 
   /// Sets begin offset.
   ///
@@ -601,7 +661,7 @@ class Sequence {
   /// @return Status.
   Status SetEndPosition(double end_position);
 
-  // TODO(#85): Implement |BarelySequence_SetInstrument|.
+  // TODO(#85): Implement `BarelySequence_SetInstrument`.
 
   /// Sets loop begin offset.
   ///
@@ -621,10 +681,10 @@ class Sequence {
   /// @return Status.
   Status SetLooping(bool is_looping);
 
-  // TODO(#85): Implement |BarelySequence_SetNoteEventDuration|.
-  // TODO(#85): Implement |BarelySequence_SetNoteEventIntensity|.
-  // TODO(#85): Implement |BarelySequence_SetNoteEventPitch|.
-  // TODO(#85): Implement |BarelySequence_SetNoteEventPosition|.
+  // TODO(#85): Implement `BarelySequence_SetNoteEventDuration`.
+  // TODO(#85): Implement `BarelySequence_SetNoteEventIntensity`.
+  // TODO(#85): Implement `BarelySequence_SetNoteEventPitch`.
+  // TODO(#85): Implement `BarelySequence_SetNoteEventPosition`.
 
  private:
   // Internal api handle.
@@ -653,12 +713,12 @@ class Transport {
       std::function<void(double begin_position, double end_position,
                          double begin_timestamp, double end_timestamp)>;
 
-  /// Constructs new |Transport|.
+  /// Constructs new `Transport`.
   ///
   /// @param api BarelyMusician C++ api.
   explicit Transport(const Api& api);
 
-  // TODO(#85): Should |Transport| be non-movable and non-copyable?
+  // TODO(#85): Should `Transport` be non-movable and non-copyable?
 
   /// Returns position.
   ///
@@ -733,6 +793,12 @@ ParamDefinition::ParamDefinition(ParamId id, int default_value, int min_value,
     : ParamDefinition(id, static_cast<float>(default_value),
                       static_cast<float>(min_value),
                       static_cast<float>(max_value)) {}
+
+ParamDefinition ParamDefinition::FromBarelyParamDefinition(
+    BarelyParamDefinition definition) {
+  return ParamDefinition(definition.id, definition.default_value,
+                         definition.min_value, definition.max_value);
+}
 
 BarelyParamDefinition ParamDefinition::GetBarelyParamDefinition() const {
   return BarelyParamDefinition{id, default_value, min_value, max_value};
@@ -822,6 +888,25 @@ StatusOr<float> Conductor::GetEnergy() const {
   return energy;
 }
 
+StatusOr<float> Conductor::GetParam(ParamId id) const {
+  float value = 0.0f;
+  if (const auto status = BarelyConductor_GetParam(capi_, id, &value);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return value;
+}
+
+StatusOr<ParamDefinition> Conductor::GetParamDefinition(ParamId id) const {
+  BarelyParamDefinition definition;
+  if (const auto status =
+          BarelyConductor_GetParamDefinition(capi_, id, &definition);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
+}
+
 StatusOr<float> Conductor::GetRootNote() const {
   float root_pitch = 0.0f;
   if (const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
@@ -838,6 +923,18 @@ StatusOr<float> Conductor::GetStress() const {
     return static_cast<Status>(status);
   }
   return stress;
+}
+
+Status Conductor::ResetAllParams() {
+  return static_cast<Status>(BarelyConductor_ResetAllParams(capi_));
+}
+
+Status Conductor::ResetParam(ParamId id) {
+  return static_cast<Status>(BarelyConductor_ResetParam(capi_, id));
+}
+
+Status Conductor::SetData(void* data) {
+  return static_cast<Status>(BarelyConductor_SetData(capi_, data));
 }
 
 Status Conductor::SetDefinition(ConductorDefinition definition) {
@@ -862,6 +959,10 @@ Status Conductor::SetDefinition(ConductorDefinition definition) {
 
 Status Conductor::SetEnergy(float energy) {
   return static_cast<Status>(BarelyConductor_SetEnergy(capi_, energy));
+}
+
+Status Conductor::SetParam(ParamId id, float value) {
+  return static_cast<Status>(BarelyConductor_SetParam(capi_, id, value));
 }
 
 Status Conductor::SetRootNote(float root_pitch) {
@@ -911,6 +1012,25 @@ StatusOr<float> Instrument::GetGain() const {
   return gain;
 }
 
+StatusOr<float> Instrument::GetParam(ParamId id) const {
+  float value = 0.0f;
+  if (const auto status = BarelyInstrument_GetParam(capi_, id_, id, &value);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return value;
+}
+
+StatusOr<ParamDefinition> Instrument::GetParamDefinition(ParamId id) const {
+  BarelyParamDefinition definition;
+  if (const auto status =
+          BarelyInstrument_GetParamDefinition(capi_, id_, id, &definition);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
+}
+
 StatusOr<bool> Instrument::IsMuted() const {
   bool is_muted = false;
   if (const auto status = BarelyInstrument_IsMuted(capi_, id_, &is_muted);
@@ -934,6 +1054,18 @@ Status Instrument::Process(double timestamp, float* output,
                            int num_output_channels, int num_output_frames) {
   return static_cast<Status>(BarelyInstrument_Process(
       capi_, id_, timestamp, output, num_output_channels, num_output_frames));
+}
+
+Status Instrument::ResetAllParams() {
+  return static_cast<Status>(BarelyInstrument_ResetAllParams(capi_, id_));
+}
+
+Status Instrument::ResetParam(ParamId id) {
+  return static_cast<Status>(BarelyInstrument_ResetParam(capi_, id_, id));
+}
+
+Status Instrument::SetData(void* data) {
+  return static_cast<Status>(BarelyInstrument_SetData(capi_, id_, data));
 }
 
 Status Instrument::SetGain(float gain) {
@@ -973,6 +1105,10 @@ Status Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) {
     return static_cast<Status>(
         BarelyInstrument_SetNoteOnCallback(capi_, id_, nullptr, nullptr));
   }
+}
+
+Status Instrument::SetParam(ParamId id, float value) {
+  return static_cast<Status>(BarelyInstrument_SetParam(capi_, id_, id, value));
 }
 
 Status Instrument::StartNote(float pitch, float intensity) {

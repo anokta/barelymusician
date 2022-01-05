@@ -29,10 +29,7 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// BarelyMusician api type.
-typedef struct BarelyMusician* BarelyApi;
-
-/// Identifier type.
+/// Identifier alias.
 typedef int64_t BarelyId;
 
 /// Identifier values.
@@ -41,7 +38,7 @@ enum BarelyId_Values {
   BarelyId_kInvalid = -1,
 };
 
-/// Note pitch type enum type.
+/// Note pitch type enum alias.
 typedef int32_t BarelyNotePitchType;
 
 /// Note pitch type enum values.
@@ -54,25 +51,10 @@ enum BarelyNotePitchType_Values {
   BarelyNotePitchType_ScaleIndex = 2,
 };
 
-/// Parameter identifier type.
+/// Parameter identifier alias.
 typedef int32_t BarelyParamId;
 
-/// Parameter definition.
-typedef struct BarelyParamDefinition {
-  /// Identifier.
-  BarelyParamId id;
-
-  /// Default value.
-  float default_value;
-
-  /// Minimum value.
-  float min_value;
-
-  /// Maximum value.
-  float max_value;
-} BarelyParamDefinition;
-
-/// Status enum type.
+/// Status enum alias.
 typedef int32_t BarelyStatus;
 
 /// Status enum values.
@@ -172,46 +154,6 @@ typedef BarelyStatus (*BarelyConductorDefinition_TransformNotePitchFn)(
 typedef BarelyStatus (*BarelyConductorDefinition_TransformTempoFn)(
     void** state, double tempo, double* out_tempo);
 
-/// Conductor definition.
-typedef struct BarelyConductorDefinition {
-  /// Create function.
-  BarelyConductorDefinition_CreateFn create_fn;
-
-  /// Destroy function.
-  BarelyConductorDefinition_DestroyFn destroy_fn;
-
-  /// Set data function.
-  BarelyConductorDefinition_SetDataFn set_data_fn;
-
-  /// Set energy function.
-  BarelyConductorDefinition_SetEnergyFn set_energy_fn;
-
-  /// Set parameter function.
-  BarelyConductorDefinition_SetParamFn set_param_fn;
-
-  /// Set stress function.
-  BarelyConductorDefinition_SetStressFn set_stress_fn;
-
-  /// Transform note duration function.
-  BarelyConductorDefinition_TransformNoteDurationFn transform_note_duration_fn;
-
-  /// Transform note intensity function.
-  BarelyConductorDefinition_TransformNoteIntensityFn
-      transform_note_intensity_fn;
-
-  /// Transform note pitch function.
-  BarelyConductorDefinition_TransformNotePitchFn transform_note_pitch_fn;
-
-  /// Transform tempo function.
-  BarelyConductorDefinition_TransformTempoFn transform_tempo_fn;
-
-  /// List of parameter definitions.
-  BarelyParamDefinition* param_definitions;
-
-  /// Number of parameter definitions.
-  int32_t num_param_definitions;
-} BarelyConductorDefinition;
-
 /// Instrument note off callback signature.
 ///
 /// @param pitch Note pitch.
@@ -283,6 +225,85 @@ typedef void (*BarelyInstrumentDefinition_SetParamFn)(void** state,
                                                       BarelyParamId id,
                                                       float value);
 
+/// Transport beat callback signature.
+///
+/// @param position Beat position in beats.
+/// @param timestamp Beat timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyTransport_BeatCallback)(double position, double timestamp,
+                                             void* user_data);
+
+/// Transport update callback signature.
+///
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @param begin_timestamp Begin timestamp in seconds.
+/// @param end_timestamp End timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyTransport_UpdateCallback)(double begin_position,
+                                               double end_position,
+                                               double begin_timestamp,
+                                               double end_timestamp,
+                                               void* user_data);
+
+/// BarelyMusician api.
+typedef struct BarelyMusician* BarelyApi;
+
+/// Parameter definition.
+typedef struct BarelyParamDefinition {
+  /// Identifier.
+  BarelyParamId id;
+
+  /// Default value.
+  float default_value;
+
+  /// Minimum value.
+  float min_value;
+
+  /// Maximum value.
+  float max_value;
+} BarelyParamDefinition;
+
+/// Conductor definition.
+typedef struct BarelyConductorDefinition {
+  /// Create function.
+  BarelyConductorDefinition_CreateFn create_fn;
+
+  /// Destroy function.
+  BarelyConductorDefinition_DestroyFn destroy_fn;
+
+  /// Set data function.
+  BarelyConductorDefinition_SetDataFn set_data_fn;
+
+  /// Set energy function.
+  BarelyConductorDefinition_SetEnergyFn set_energy_fn;
+
+  /// Set parameter function.
+  BarelyConductorDefinition_SetParamFn set_param_fn;
+
+  /// Set stress function.
+  BarelyConductorDefinition_SetStressFn set_stress_fn;
+
+  /// Transform note duration function.
+  BarelyConductorDefinition_TransformNoteDurationFn transform_note_duration_fn;
+
+  /// Transform note intensity function.
+  BarelyConductorDefinition_TransformNoteIntensityFn
+      transform_note_intensity_fn;
+
+  /// Transform note pitch function.
+  BarelyConductorDefinition_TransformNotePitchFn transform_note_pitch_fn;
+
+  /// Transform tempo function.
+  BarelyConductorDefinition_TransformTempoFn transform_tempo_fn;
+
+  /// List of parameter definitions.
+  BarelyParamDefinition* param_definitions;
+
+  /// Number of parameter definitions.
+  int32_t num_param_definitions;
+} BarelyConductorDefinition;
+
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create function.
@@ -312,27 +333,6 @@ typedef struct BarelyInstrumentDefinition {
   /// Number of parameter definitions.
   int32_t num_param_definitions;
 } BarelyInstrumentDefinition;
-
-/// Transport beat callback signature.
-///
-/// @param position Beat position in beats.
-/// @param timestamp Beat timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyTransport_BeatCallback)(double position, double timestamp,
-                                             void* user_data);
-
-/// Transport update callback signature.
-///
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-/// @param begin_timestamp Begin timestamp in seconds.
-/// @param end_timestamp End timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyTransport_UpdateCallback)(double begin_position,
-                                               double end_position,
-                                               double begin_timestamp,
-                                               double end_timestamp,
-                                               void* user_data);
 
 /// Creates new BarelyMusician api.
 ///

@@ -16,65 +16,6 @@ namespace barely {
 /// Parameter identifier type.
 using ParamId = std::int32_t;
 
-/// Parameter definition.
-struct ParamDefinition {
-  /// Constructs new `ParamDefinition`.
-  ///
-  /// @param id Identifier.
-  explicit ParamDefinition(ParamId id);
-
-  /// Constructs new `ParamDefinition` for a float value.
-  ///
-  /// @param id Identifier.
-  /// @param default_value Default float value.
-  /// @param min_value Minimum float value.
-  /// @param max_value Maximum float value.
-  ParamDefinition(ParamId id, float default_value,
-                  float min_value = std::numeric_limits<float>::lowest(),
-                  float max_value = std::numeric_limits<float>::max());
-
-  /// Constructs new `ParamDefinition` for a boolean value.
-  ///
-  /// @param id Identifier.
-  /// @param default_value Default boolean value.
-  ParamDefinition(ParamId id, bool default_value);
-
-  /// Constructs new `ParamDefinition` for an integer value.
-  ///
-  /// @param id Identifier.
-  /// @param default_value Default integer value.
-  /// @param min_value Minimum integer value.
-  /// @param max_value Maximum integer value.
-  ParamDefinition(ParamId id, int default_value,
-                  int min_value = std::numeric_limits<int>::lowest(),
-                  int max_value = std::numeric_limits<int>::max());
-
-  /// Identifier.
-  ParamId id;
-
-  /// Default value.
-  float default_value;
-
-  /// Minimum value.
-  float min_value;
-
-  /// Maximum value.
-  float max_value;
-
- private:
-  friend class Conductor;
-  friend struct ConductorDefinition;
-  friend class Instrument;
-  friend struct InstrumentDefinition;
-
-  /// Returns corresponding `ParamDefinition` for C type for internal use.
-  static ParamDefinition FromBarelyParamDefinition(
-      BarelyParamDefinition definition);
-
-  // Returns corresponding C type for internal use.
-  BarelyParamDefinition GetBarelyParamDefinition() const;
-};
-
 /// Status.
 enum class Status : BarelyStatus {
   /// Success.
@@ -179,6 +120,65 @@ class Api {
 
   // Internal C api handle.
   BarelyApi capi_;
+};
+
+/// Parameter definition.
+struct ParamDefinition {
+  /// Constructs new `ParamDefinition`.
+  ///
+  /// @param id Identifier.
+  explicit ParamDefinition(ParamId id);
+
+  /// Constructs new `ParamDefinition` for a float value.
+  ///
+  /// @param id Identifier.
+  /// @param default_value Default float value.
+  /// @param min_value Minimum float value.
+  /// @param max_value Maximum float value.
+  ParamDefinition(ParamId id, float default_value,
+                  float min_value = std::numeric_limits<float>::lowest(),
+                  float max_value = std::numeric_limits<float>::max());
+
+  /// Constructs new `ParamDefinition` for a boolean value.
+  ///
+  /// @param id Identifier.
+  /// @param default_value Default boolean value.
+  ParamDefinition(ParamId id, bool default_value);
+
+  /// Constructs new `ParamDefinition` for an integer value.
+  ///
+  /// @param id Identifier.
+  /// @param default_value Default integer value.
+  /// @param min_value Minimum integer value.
+  /// @param max_value Maximum integer value.
+  ParamDefinition(ParamId id, int default_value,
+                  int min_value = std::numeric_limits<int>::lowest(),
+                  int max_value = std::numeric_limits<int>::max());
+
+  /// Identifier.
+  ParamId id;
+
+  /// Default value.
+  float default_value;
+
+  /// Minimum value.
+  float min_value;
+
+  /// Maximum value.
+  float max_value;
+
+ private:
+  friend class Conductor;
+  friend struct ConductorDefinition;
+  friend class Instrument;
+  friend struct InstrumentDefinition;
+
+  /// Returns corresponding `ParamDefinition` for C type for internal use.
+  static ParamDefinition FromBarelyParamDefinition(
+      BarelyParamDefinition definition);
+
+  // Returns corresponding C type for internal use.
+  BarelyParamDefinition GetBarelyParamDefinition() const;
 };
 
 /// Conductor definition.
@@ -784,34 +784,6 @@ class Transport {
   UpdateCallback update_callback_;
 };
 
-ParamDefinition::ParamDefinition(ParamId id) : ParamDefinition(id, 0.0f) {}
-
-ParamDefinition::ParamDefinition(ParamId id, float default_value,
-                                 float min_value, float max_value)
-    : id(id),
-      default_value(default_value),
-      min_value(min_value),
-      max_value(max_value) {}
-
-ParamDefinition::ParamDefinition(ParamId id, bool default_value)
-    : ParamDefinition(id, static_cast<float>(default_value)) {}
-
-ParamDefinition::ParamDefinition(ParamId id, int default_value, int min_value,
-                                 int max_value)
-    : ParamDefinition(id, static_cast<float>(default_value),
-                      static_cast<float>(min_value),
-                      static_cast<float>(max_value)) {}
-
-ParamDefinition ParamDefinition::FromBarelyParamDefinition(
-    BarelyParamDefinition definition) {
-  return ParamDefinition(definition.id, definition.default_value,
-                         definition.min_value, definition.max_value);
-}
-
-BarelyParamDefinition ParamDefinition::GetBarelyParamDefinition() const {
-  return BarelyParamDefinition{id, default_value, min_value, max_value};
-}
-
 template <typename ValueType>
 StatusOr<ValueType>::StatusOr(Status error_status) : value_or_(error_status) {
   assert(error_status != Status::kOk);
@@ -873,6 +845,34 @@ Status Api::SetSampleRate(int sample_rate) {
 
 Status Api::Update(double timestamp) {
   return static_cast<Status>(BarelyApi_Update(capi_, timestamp));
+}
+
+ParamDefinition::ParamDefinition(ParamId id) : ParamDefinition(id, 0.0f) {}
+
+ParamDefinition::ParamDefinition(ParamId id, float default_value,
+                                 float min_value, float max_value)
+    : id(id),
+      default_value(default_value),
+      min_value(min_value),
+      max_value(max_value) {}
+
+ParamDefinition::ParamDefinition(ParamId id, bool default_value)
+    : ParamDefinition(id, static_cast<float>(default_value)) {}
+
+ParamDefinition::ParamDefinition(ParamId id, int default_value, int min_value,
+                                 int max_value)
+    : ParamDefinition(id, static_cast<float>(default_value),
+                      static_cast<float>(min_value),
+                      static_cast<float>(max_value)) {}
+
+ParamDefinition ParamDefinition::FromBarelyParamDefinition(
+    BarelyParamDefinition definition) {
+  return ParamDefinition(definition.id, definition.default_value,
+                         definition.min_value, definition.max_value);
+}
+
+BarelyParamDefinition ParamDefinition::GetBarelyParamDefinition() const {
+  return BarelyParamDefinition{id, default_value, min_value, max_value};
 }
 
 std::vector<BarelyParamDefinition>

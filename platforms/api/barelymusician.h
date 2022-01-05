@@ -1061,8 +1061,9 @@ StatusOr<bool> Instrument::IsMuted() const {
 
 StatusOr<bool> Instrument::IsNoteOn(float pitch) const {
   bool is_note_on = false;
-  if (const auto status =
-          BarelyInstrument_IsNoteOn(capi_, id_, pitch, &is_note_on);
+  // TODO(#85): Support other `NotePitchType`s.
+  if (const auto status = BarelyInstrument_IsNoteOn(
+          capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, &is_note_on);
       status != BarelyStatus_kOk) {
     return static_cast<Status>(status);
   }
@@ -1131,8 +1132,9 @@ Status Instrument::SetParam(ParamId id, float value) {
 }
 
 Status Instrument::StartNote(float pitch, float intensity) {
-  return static_cast<Status>(
-      BarelyInstrument_StartNote(capi_, id_, pitch, intensity));
+  // TODO(#85): Support other `NotePitchType`s.
+  return static_cast<Status>(BarelyInstrument_StartNote(
+      capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, intensity));
 }
 
 Status Instrument::StopAllNotes() {
@@ -1140,7 +1142,9 @@ Status Instrument::StopAllNotes() {
 }
 
 Status Instrument::StopNote(float pitch) {
-  return static_cast<Status>(BarelyInstrument_StopNote(capi_, id_, pitch));
+  // TODO(#85): Support other `NotePitchType`s.
+  return static_cast<Status>(BarelyInstrument_StopNote(
+      capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch));
 }
 
 Sequence::Sequence(const Api& api) : capi_(api.capi_) {

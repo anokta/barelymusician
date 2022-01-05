@@ -280,7 +280,9 @@ class Conductor {
   /// @return Stress, or error status.
   StatusOr<float> GetStress() const;
 
-  // TODO(#85): Implement |BarelyConductor_SetAllParamsToDefault|.
+  // TODO(#85): Implement |BarelyConductor_ResetAllParams|.
+  // TODO(#85): Implement |BarelyConductor_ResetParam|.
+
   // TODO(#85): Implement |BarelyConductor_SetData|.
 
   /// Sets definition.
@@ -295,7 +297,6 @@ class Conductor {
   Status SetEnergy(float energy);
 
   // TODO(#85): Implement |BarelyConductor_SetParam|.
-  // TODO(#85): Implement |BarelyConductor_SetParamToDefault|.
 
   /// Sets root note.
   ///
@@ -455,14 +456,11 @@ class Instrument {
   Status Process(double timestamp, float* output, int num_output_channels,
                  int num_output_frames);
 
+  // TODO(#85): Implement |BarelyInstrument_ResetAllParams|.
+  // TODO(#85): Implement |BarelyInstrument_ResetParam|.
+
   // TODO(#85): Implement |BarelyInstrument_ScheduleNoteEvent|.
 
-  /// Sets all notes off.
-  ///
-  /// @return Status.
-  Status SetAllNotesOff();
-
-  // TODO(#85): Implement |BarelyInstrument_SetAllParamsToDefault|.
   // TODO(#85): Implement |BarelyInstrument_SetData|.
 
   /// Sets gain.
@@ -477,24 +475,11 @@ class Instrument {
   /// @return Status.
   Status SetMuted(bool is_muted);
 
-  /// Sets note off.
-  ///
-  /// @param pitch Note pitch.
-  /// @return Status.
-  Status SetNoteOff(float pitch);
-
   /// Sets note off callback.
   ///
   /// @param note_off_callback Note off callback.
   /// @return Status.
   Status SetNoteOffCallback(NoteOffCallback note_off_callback);
-
-  /// Sets note on.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @return Status.
-  Status SetNoteOn(float pitch, float intensity);
 
   /// Sets note on callback.
   ///
@@ -503,7 +488,24 @@ class Instrument {
   Status SetNoteOnCallback(NoteOnCallback note_on_callback);
 
   // TODO(#85): Implement |BarelyInstrument_SetParam|.
-  // TODO(#85): Implement |BarelyInstrument_SetParamToDefault|.
+
+  /// Starts note.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @return Status.
+  Status StartNote(float pitch, float intensity = 1.0f);
+
+  /// Stops all notes.
+  ///
+  /// @return Status.
+  Status StopAllNotes();
+
+  /// Stops note.
+  ///
+  /// @param pitch Note pitch.
+  /// @return Status.
+  Status StopNote(float pitch);
 
  private:
   // Internal C api handle.
@@ -751,13 +753,13 @@ Status StatusOr<ValueType>::GetErrorStatus() const {
 }
 
 template <typename ValueType>
-ValueType& StatusOr<ValueType>::GetValue() {
+const ValueType& StatusOr<ValueType>::GetValue() const {
   assert(std::holds_alternative<ValueType>(value_or_));
   return std::get<ValueType>(value_or_);
 }
 
 template <typename ValueType>
-const ValueType& StatusOr<ValueType>::GetValue() const {
+ValueType& StatusOr<ValueType>::GetValue() {
   assert(std::holds_alternative<ValueType>(value_or_));
   return std::get<ValueType>(value_or_);
 }
@@ -934,20 +936,12 @@ Status Instrument::Process(double timestamp, float* output,
       capi_, id_, timestamp, output, num_output_channels, num_output_frames));
 }
 
-Status Instrument::SetAllNotesOff() {
-  return static_cast<Status>(BarelyInstrument_SetAllNotesOff(capi_, id_));
-}
-
 Status Instrument::SetGain(float gain) {
   return static_cast<Status>(BarelyInstrument_SetGain(capi_, id_, gain));
 }
 
 Status Instrument::SetMuted(bool is_muted) {
   return static_cast<Status>(BarelyInstrument_SetMuted(capi_, id_, is_muted));
-}
-
-Status Instrument::SetNoteOff(float pitch) {
-  return static_cast<Status>(BarelyInstrument_SetNoteOff(capi_, id_, pitch));
 }
 
 Status Instrument::SetNoteOffCallback(NoteOffCallback note_off_callback) {
@@ -965,11 +959,6 @@ Status Instrument::SetNoteOffCallback(NoteOffCallback note_off_callback) {
   }
 }
 
-Status Instrument::SetNoteOn(float pitch, float intensity) {
-  return static_cast<Status>(
-      BarelyInstrument_SetNoteOn(capi_, id_, pitch, intensity));
-}
-
 Status Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   if (note_on_callback) {
     note_on_callback_ = std::move(note_on_callback);
@@ -984,6 +973,19 @@ Status Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) {
     return static_cast<Status>(
         BarelyInstrument_SetNoteOnCallback(capi_, id_, nullptr, nullptr));
   }
+}
+
+Status Instrument::StartNote(float pitch, float intensity) {
+  return static_cast<Status>(
+      BarelyInstrument_StartNote(capi_, id_, pitch, intensity));
+}
+
+Status Instrument::StopAllNotes() {
+  return static_cast<Status>(BarelyInstrument_StopAllNotes(capi_, id_));
+}
+
+Status Instrument::StopNote(float pitch) {
+  return static_cast<Status>(BarelyInstrument_StopNote(capi_, id_, pitch));
 }
 
 Sequence::Sequence(const Api& api) : capi_(api.capi_) {

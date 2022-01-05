@@ -180,15 +180,6 @@ BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_SetAllNotesOff(BarelyApi api,
-                                             BarelyId instrument_id) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  instrument_id;
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId instrument_id,
                                       float gain) {
   if (!api) return BarelyStatus_kNotFound;
@@ -209,16 +200,6 @@ BarelyStatus BarelyInstrument_SetMuted(BarelyApi api, BarelyId instrument_id,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_SetNoteOff(BarelyApi api, BarelyId instrument_id,
-                                         float pitch) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  instrument_id;
-  pitch;
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelyInstrument_SetNoteOffCallback(
     BarelyApi api, BarelyId instrument_id,
     BarelyInstrument_NoteOffCallback note_off_callback, void* user_data) {
@@ -231,7 +212,19 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_SetNoteOn(BarelyApi api, BarelyId instrument_id,
+BarelyStatus BarelyInstrument_SetNoteOnCallback(
+    BarelyApi api, BarelyId instrument_id,
+    BarelyInstrument_NoteOnCallback note_on_callback, void* user_data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  note_on_callback;
+  user_data;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_StartNote(BarelyApi api, BarelyId instrument_id,
                                         float pitch, float intensity) {
   if (!api) return BarelyStatus_kNotFound;
 
@@ -242,15 +235,22 @@ BarelyStatus BarelyInstrument_SetNoteOn(BarelyApi api, BarelyId instrument_id,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_SetNoteOnCallback(
-    BarelyApi api, BarelyId instrument_id,
-    BarelyInstrument_NoteOnCallback note_on_callback, void* user_data) {
+BarelyStatus BarelyInstrument_StopAllNotes(BarelyApi api,
+                                           BarelyId instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
   instrument_id;
-  note_on_callback;
-  user_data;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyInstrument_StopNote(BarelyApi api, BarelyId instrument_id,
+                                       float pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  instrument_id;
+  pitch;
   return BarelyStatus_kUnimplemented;
 }
 

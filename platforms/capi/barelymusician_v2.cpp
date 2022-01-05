@@ -92,6 +92,16 @@ BarelyStatus BarelyConductor_GetRootNote(BarelyApi api, float* out_root_pitch) {
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelyConductor_GetScale(BarelyApi api, float** out_scale_pitches,
+                                      int32_t* out_num_scale_pitches) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_scale_pitches) return BarelyStatus_kInvalidArgument;
+  if (!out_num_scale_pitches) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyConductor_GetStress(BarelyApi api, float* out_stress) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_stress) return BarelyStatus_kInvalidArgument;
@@ -155,6 +165,16 @@ BarelyStatus BarelyConductor_SetRootNote(BarelyApi api, float root_pitch) {
 
   // TODO(#85): Implement.
   root_pitch;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetScale(BarelyApi api, float* scale_pitches,
+                                      int32_t num_scale_pitches) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  scale_pitches;
+  num_scale_pitches;
   return BarelyStatus_kUnimplemented;
 }
 

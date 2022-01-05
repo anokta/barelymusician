@@ -288,7 +288,10 @@ class Conductor {
   /// @return Root note pitch, or error status.
   StatusOr<float> GetRootNote() const;
 
-  // TODO(#85): Implement `BarelyConductor_GetScale`.
+  /// Returns scale.
+  ///
+  /// @return List of scale note pitches, or error status.
+  StatusOr<std::vector<float>> GetScale() const;
 
   /// Returns stress.
   ///
@@ -306,8 +309,6 @@ class Conductor {
   /// @return Status.
   Status ResetParam(ParamId id);
 
-  // TODO(#85): Implement `BarelyInstrument_ScheduleNoteEvent`.
-
   /// Sets data.
   ///
   /// @param data Data.
@@ -323,6 +324,7 @@ class Conductor {
   /// Sets energy.
   ///
   /// @param energy Energy.
+  /// @return Status.
   Status SetEnergy(float energy);
 
   /// Sets parameter value.
@@ -335,13 +337,19 @@ class Conductor {
   /// Sets root note.
   ///
   /// @param root_pitch Root note pitch.
+  /// @return Status.
   Status SetRootNote(float root_pitch);
 
-  // TODO(#85): Implement `BarelyConductor_SetScale`.
+  /// Sets scale.
+  ///
+  /// @param scale_pitches List of scale note pitches.
+  /// @return Status.
+  Status SetScale(std::vector<float> scale_pitches);
 
   /// Sets stress.
   ///
   /// @param stress Stress.
+  /// @return Status.
   Status SetStress(float stress);
 
  private:
@@ -458,8 +466,8 @@ class Instrument {
 
   // TODO(#85): Implement `BarelyInstrument_Clone` (via copy?).
 
-  // TODO(#85): Implement `BarelyInstrument_CancelAllScheduledNoteEvents`.
-  // TODO(#85): Implement `BarelyInstrument_CancelScheduledNoteEvent`.
+  // TODO(#85): Implement `BarelyInstrument_CancelAllScheduledNotes`.
+  // TODO(#85): Implement `BarelyInstrument_CancelScheduledNote`.
 
   /// Returns gain.
   ///
@@ -510,7 +518,7 @@ class Instrument {
   /// @return Status.
   Status ResetParam(ParamId id);
 
-  // TODO(#85): Implement `BarelyInstrument_ScheduleNoteEvent`.
+  // TODO(#85): Implement `BarelyInstrument_ScheduleNote`.
 
   /// Sets data.
   ///
@@ -596,7 +604,7 @@ class Sequence {
 
   // TODO(#85): Implement `BarelySequence_Clone` (via copy?).
 
-  // TODO(#85): Implement `BarelySequence_AddNoteEvent`.
+  // TODO(#85): Implement `BarelySequence_AddNote`.
 
   /// Returns begin offset.
   ///
@@ -625,10 +633,10 @@ class Sequence {
   /// @return Loop length in beats, or error status.
   StatusOr<double> GetLoopLength() const;
 
-  // TODO(#85): Implement `BarelySequence_GetNoteEventDuration`.
-  // TODO(#85): Implement `BarelySequence_GetNoteEventIntensity`.
-  // TODO(#85): Implement `BarelySequence_GetNoteEventPitch`.
-  // TODO(#85): Implement `BarelySequence_GetNoteEventPosition`.
+  // TODO(#85): Implement `BarelySequence_GetNoteDuration`.
+  // TODO(#85): Implement `BarelySequence_GetNoteIntensity`.
+  // TODO(#85): Implement `BarelySequence_GetNotePitch`.
+  // TODO(#85): Implement `BarelySequence_GetNotePosition`.
 
   /// Returns whether sequence is empty or not.
   ///
@@ -640,8 +648,8 @@ class Sequence {
   /// @return True if looping, false otherwise, or error status.
   StatusOr<bool> IsLooping() const;
 
-  // TODO(#85): Implement `BarelySequence_RemoveAllNoteEvents`.
-  // TODO(#85): Implement `BarelySequence_RemoveNoteEvent`.
+  // TODO(#85): Implement `BarelySequence_RemoveAllNotes`.
+  // TODO(#85): Implement `BarelySequence_RemoveNote`.
 
   /// Sets begin offset.
   ///
@@ -681,10 +689,10 @@ class Sequence {
   /// @return Status.
   Status SetLooping(bool is_looping);
 
-  // TODO(#85): Implement `BarelySequence_SetNoteEventDuration`.
-  // TODO(#85): Implement `BarelySequence_SetNoteEventIntensity`.
-  // TODO(#85): Implement `BarelySequence_SetNoteEventPitch`.
-  // TODO(#85): Implement `BarelySequence_SetNoteEventPosition`.
+  // TODO(#85): Implement `BarelySequence_SetNoteDuration`.
+  // TODO(#85): Implement `BarelySequence_SetNoteIntensity`.
+  // TODO(#85): Implement `BarelySequence_SetNotePitch`.
+  // TODO(#85): Implement `BarelySequence_SetNotePosition`.
 
  private:
   // Internal api handle.
@@ -914,6 +922,17 @@ StatusOr<float> Conductor::GetRootNote() const {
     return static_cast<Status>(status);
   }
   return root_pitch;
+}
+
+StatusOr<std::vector<float>> Conductor::GetScale() const {
+  float* scale_pitches;
+  int num_scale_pitches;
+  if (const auto status =
+          BarelyConductor_GetScale(capi_, &scale_pitches, &num_scale_pitches);
+      status != BarelyStatus_kOk) {
+    return static_cast<Status>(status);
+  }
+  return std::vector<float>(scale_pitches, scale_pitches + num_scale_pitches);
 }
 
 StatusOr<float> Conductor::GetStress() const {

@@ -35,6 +35,12 @@ typedef struct BarelyMusician* BarelyApi;
 /// Identifier type.
 typedef int64_t BarelyId;
 
+/// Identifier values.
+enum BarelyId_Values {
+  /// Invalid identifier.
+  BarelyId_kInvalid = -1,
+};
+
 /// Parameter identifier type.
 typedef int32_t BarelyParamId;
 

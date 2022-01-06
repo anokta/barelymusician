@@ -43,32 +43,43 @@ class StatusOr {
   /// Constructs new `StatusOr` with an error status.
   ///
   /// @param error_status Error status.
-  StatusOr(Status error_status);
+  StatusOr(Status error_status) : value_or_(error_status) {
+    assert(error_status != Status::kOk);
+  }
 
   /// Constructs new `StatusOr` with a value.
   ///
   /// @param value Value.
-  StatusOr(ValueType value);
+  StatusOr(ValueType value) : value_or_(std::move(value)) {}
 
   /// Returns contained error status.
   ///
   /// @return Error status.
-  Status GetErrorStatus() const;
+  Status GetErrorStatus() const {
+    assert(std::holds_alternative<Status>(value_or_));
+    return std::get<Status>(value_or_);
+  }
 
   /// Returns contained value.
   ///
   /// @return Value.
-  const ValueType& GetValue() const;
+  const ValueType& GetValue() const {
+    assert(std::holds_alternative<ValueType>(value_or_));
+    return std::get<ValueType>(value_or_);
+  }
 
   /// Returns contained value.
   ///
   /// @return Mutable value.
-  ValueType& GetValue();
+  ValueType& GetValue() {
+    assert(std::holds_alternative<ValueType>(value_or_));
+    return std::get<ValueType>(value_or_);
+  }
 
   /// Returns whether a value is contained or not.
   ///
   /// @return True if contained, false otherwise.
-  bool IsOk() const;
+  bool IsOk() const { return std::holds_alternative<ValueType>(value_or_); }
 
  private:
   // Value or error status.
@@ -79,15 +90,24 @@ class StatusOr {
 class Api {
  public:
   /// Constructs new `Api`.
-  Api();
+  Api() {
+    const auto status = BarelyApi_Create(&capi_);
+    assert(status == BarelyStatus_kOk);
+  }
 
   /// Constructs new `Api` with an initial sampling rate.
   ///
   /// @param sample_rate Sampling rate in hz.
-  explicit Api(int sample_rate);
+  explicit Api(int sample_rate) : Api() {
+    const auto status = BarelyApi_SetSampleRate(capi_, sample_rate);
+    assert(status == BarelyStatus_kOk);
+  }
 
   /// Destroys `Api`.
-  ~Api();
+  ~Api() {
+    const auto status = BarelyApi_Destroy(capi_);
+    assert(status == BarelyStatus_kOk);
+  }
 
   /// Non-copyable and non-movable.
   Api(const Api& other) = delete;
@@ -98,19 +118,30 @@ class Api {
   /// Returns sampling rate.
   ///
   /// @return Sampling rate in hz, or error status.
-  StatusOr<int> GetSampleRate() const;
+  StatusOr<int> GetSampleRate() const {
+    int sample_rate = 0;
+    if (const auto status = BarelyApi_GetSampleRate(capi_, &sample_rate);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return sample_rate;
+  }
 
   /// Sets sampling rate.
   ///
   /// @param sample_rate Sampling rate in hz.
   /// @return Status.
-  Status SetSampleRate(int sample_rate);
+  Status SetSampleRate(int sample_rate) {
+    return static_cast<Status>(BarelyApi_SetSampleRate(capi_, sample_rate));
+  }
 
   /// Updates internal state at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status Update(double timestamp);
+  Status Update(double timestamp) {
+    return static_cast<Status>(BarelyApi_Update(capi_, timestamp));
+  }
 
  private:
   friend class Conductor;
@@ -127,7 +158,7 @@ struct ParamDefinition {
   /// Constructs new `ParamDefinition`.
   ///
   /// @param id Identifier.
-  explicit ParamDefinition(ParamId id);
+  explicit ParamDefinition(ParamId id) : ParamDefinition(id, 0.0f) {}
 
   /// Constructs new `ParamDefinition` for a float value.
   ///
@@ -137,13 +168,18 @@ struct ParamDefinition {
   /// @param max_value Maximum float value.
   ParamDefinition(ParamId id, float default_value,
                   float min_value = std::numeric_limits<float>::lowest(),
-                  float max_value = std::numeric_limits<float>::max());
+                  float max_value = std::numeric_limits<float>::max())
+      : id(id),
+        default_value(default_value),
+        min_value(min_value),
+        max_value(max_value) {}
 
   /// Constructs new `ParamDefinition` for a boolean value.
   ///
   /// @param id Identifier.
   /// @param default_value Default boolean value.
-  ParamDefinition(ParamId id, bool default_value);
+  ParamDefinition(ParamId id, bool default_value)
+      : ParamDefinition(id, static_cast<float>(default_value)) {}
 
   /// Constructs new `ParamDefinition` for an integer value.
   ///
@@ -153,7 +189,10 @@ struct ParamDefinition {
   /// @param max_value Maximum integer value.
   ParamDefinition(ParamId id, int default_value,
                   int min_value = std::numeric_limits<int>::lowest(),
-                  int max_value = std::numeric_limits<int>::max());
+                  int max_value = std::numeric_limits<int>::max())
+      : ParamDefinition(id, static_cast<float>(default_value),
+                        static_cast<float>(min_value),
+                        static_cast<float>(max_value)) {}
 
   /// Identifier.
   ParamId id;
@@ -175,10 +214,15 @@ struct ParamDefinition {
 
   /// Returns corresponding `ParamDefinition` for C type for internal use.
   static ParamDefinition FromBarelyParamDefinition(
-      BarelyParamDefinition definition);
+      BarelyParamDefinition definition) {
+    return ParamDefinition(definition.id, definition.default_value,
+                           definition.min_value, definition.max_value);
+  }
 
   // Returns corresponding C type for internal use.
-  BarelyParamDefinition GetBarelyParamDefinition() const;
+  BarelyParamDefinition GetBarelyParamDefinition() const {
+    return BarelyParamDefinition{id, default_value, min_value, max_value};
+  }
 };
 
 /// Conductor definition.
@@ -253,7 +297,14 @@ struct ConductorDefinition {
   friend class Conductor;
 
   // Returns corresponding C type for internal use.
-  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const;
+  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const {
+    std::vector<BarelyParamDefinition> cparam_definitions;
+    cparam_definitions.reserve(param_definitions.size());
+    for (const auto& param_definition : param_definitions) {
+      cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
+    }
+    return cparam_definitions;
+  }
 };
 
 /// Conductor.
@@ -262,95 +313,175 @@ class Conductor {
   /// Constructs new `Conductor`.
   ///
   /// @param api BarelyMusician C++ api.
-  explicit Conductor(const Api& api);
+  explicit Conductor(const Api& api) : capi_(api.capi_) {}
 
   // TODO(#85): Should `Conductor` be non-movable and non-copyable?
 
   /// Returns energy.
   ///
   /// @return Energy, or error status.
-  StatusOr<float> GetEnergy() const;
+  StatusOr<float> GetEnergy() const {
+    float energy = 0.0f;
+    if (const auto status = BarelyConductor_GetEnergy(capi_, &energy);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return energy;
+  }
 
   /// Returns parameter value.
   ///
   /// @param id Parameter identifier.
   /// @return Parameter value, or error status.
-  StatusOr<float> GetParam(ParamId id) const;
+  StatusOr<float> GetParam(ParamId id) const {
+    float value = 0.0f;
+    if (const auto status = BarelyConductor_GetParam(capi_, id, &value);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return value;
+  }
 
   /// Returns parameter definition.
   ///
   /// @param id Parameter identifier.
   /// @return Parameter definition, or error status.
-  StatusOr<ParamDefinition> GetParamDefinition(ParamId id) const;
+  StatusOr<ParamDefinition> GetParamDefinition(ParamId id) const {
+    BarelyParamDefinition definition;
+    if (const auto status =
+            BarelyConductor_GetParamDefinition(capi_, id, &definition);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
+  }
 
   /// Returns root note.
   ///
   /// @return Root note pitch, or error status.
-  StatusOr<float> GetRootNote() const;
+  StatusOr<float> GetRootNote() const {
+    float root_pitch = 0.0f;
+    if (const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return root_pitch;
+  }
 
   /// Returns scale.
   ///
   /// @return List of scale note pitches, or error status.
-  StatusOr<std::vector<float>> GetScale() const;
+  StatusOr<std::vector<float>> GetScale() const {
+    float* scale_pitches;
+    int num_scale_pitches;
+    if (const auto status =
+            BarelyConductor_GetScale(capi_, &scale_pitches, &num_scale_pitches);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return std::vector<float>(scale_pitches, scale_pitches + num_scale_pitches);
+  }
 
   /// Returns stress.
   ///
   /// @return Stress, or error status.
-  StatusOr<float> GetStress() const;
+  StatusOr<float> GetStress() const {
+    float stress = 0.0f;
+    if (const auto status = BarelyConductor_GetStress(capi_, &stress);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return stress;
+  }
 
   /// Resets all parameters.
   ///
   /// @return Status.
-  Status ResetAllParams();
+  Status ResetAllParams() {
+    return static_cast<Status>(BarelyConductor_ResetAllParams(capi_));
+  }
 
   /// Resets parameter value.
   ///
   /// @param id Parameter identifier.
   /// @return Status.
-  Status ResetParam(ParamId id);
+  Status ResetParam(ParamId id) {
+    return static_cast<Status>(BarelyConductor_ResetParam(capi_, id));
+  }
 
   /// Sets data.
   ///
   /// @param data Data.
   /// @return Status.
-  Status SetData(void* data);
+  Status SetData(void* data) {
+    return static_cast<Status>(BarelyConductor_SetData(capi_, data));
+  }
 
   /// Sets definition.
   ///
   /// @param definition Conductor definition.
   /// @return Status.
-  Status SetDefinition(ConductorDefinition definition);
+  Status SetDefinition(ConductorDefinition definition) {
+    auto cparam_definitions = definition.GetBarelyParamDefinitions();
+    // TODO(#85): Define and include the transform functions.
+    auto cdefinition =
+        BarelyConductorDefinition{std::move(definition.create_fn),
+                                  std::move(definition.destroy_fn),
+                                  std::move(definition.set_data_fn),
+                                  std::move(definition.set_energy_fn),
+                                  std::move(definition.set_param_fn),
+                                  std::move(definition.set_stress_fn),
+                                  /*transform_duration_fn=*/nullptr,
+                                  /*transform_intensity_fn=*/nullptr,
+                                  /*transform_pitch_fn=*/nullptr,
+                                  /*transform_tempo_fn=*/nullptr,
+                                  cparam_definitions.data(),
+                                  static_cast<int>(cparam_definitions.size())};
+    return static_cast<Status>(
+        BarelyConductor_SetDefinition(capi_, std::move(cdefinition)));
+  }
 
   /// Sets energy.
   ///
   /// @param energy Energy.
   /// @return Status.
-  Status SetEnergy(float energy);
+  Status SetEnergy(float energy) {
+    return static_cast<Status>(BarelyConductor_SetEnergy(capi_, energy));
+  }
 
   /// Sets parameter value.
   ///
   /// @param id Parameter identifier.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParam(ParamId id, float value);
+  Status SetParam(ParamId id, float value) {
+    return static_cast<Status>(BarelyConductor_SetParam(capi_, id, value));
+  }
 
   /// Sets root note.
   ///
   /// @param root_pitch Root note pitch.
   /// @return Status.
-  Status SetRootNote(float root_pitch);
+  Status SetRootNote(float root_pitch) {
+    return static_cast<Status>(BarelyConductor_SetRootNote(capi_, root_pitch));
+  }
 
   /// Sets scale.
   ///
   /// @param scale_pitches List of scale note pitches.
   /// @return Status.
-  Status SetScale(std::vector<float> scale_pitches);
+  Status SetScale(std::vector<float> scale_pitches) {
+    return static_cast<Status>(BarelyConductor_SetScale(
+        capi_, scale_pitches.data(), static_cast<int>(scale_pitches.size())));
+  }
 
   /// Sets stress.
   ///
   /// @param stress Stress.
   /// @return Status.
-  Status SetStress(float stress);
+  Status SetStress(float stress) {
+    return static_cast<Status>(BarelyConductor_SetStress(capi_, stress));
+  }
 
  private:
   // Internal api handle.
@@ -433,7 +564,14 @@ struct InstrumentDefinition {
   friend class Instrument;
 
   // Returns corresponding C type for internal use.
-  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const;
+  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const {
+    std::vector<BarelyParamDefinition> cparam_definitions;
+    cparam_definitions.reserve(param_definitions.size());
+    for (const auto& param_definition : param_definitions) {
+      cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
+    }
+    return cparam_definitions;
+  }
 };
 
 /// Instrument.
@@ -457,10 +595,26 @@ class Instrument {
   ///
   /// @param api BarelyMusician C++ api.
   /// @param definition Definition.
-  Instrument(const Api& api, InstrumentDefinition definition);
+  Instrument(const Api& api, InstrumentDefinition definition)
+      : capi_(api.capi_) {
+    auto cparam_definitions = definition.GetBarelyParamDefinitions();
+    auto cdefinition =
+        BarelyInstrumentDefinition{std::move(definition.create_fn),
+                                   std::move(definition.destroy_fn),
+                                   std::move(definition.process_fn),
+                                   std::move(definition.set_data_fn),
+                                   std::move(definition.set_note_off_fn),
+                                   std::move(definition.set_note_on_fn),
+                                   std::move(definition.set_param_fn),
+                                   cparam_definitions.data(),
+                                   static_cast<int>(cparam_definitions.size())};
+    const auto status =
+        BarelyInstrument_Create(capi_, std::move(cdefinition), &id_);
+    assert(status == BarelyStatus_kOk);
+  }
 
   /// Destroys `Instrument`.
-  ~Instrument();
+  ~Instrument() { BarelyInstrument_Destroy(capi_, id_); }
 
   // TODO(#85): Should `Instrument` be non-movable and non-copyable?
 
@@ -472,30 +626,68 @@ class Instrument {
   /// Returns gain.
   ///
   /// @return Gain in amplitude, or error status.
-  StatusOr<float> GetGain() const;
+  StatusOr<float> GetGain() const {
+    float gain = 0.0f;
+    if (const auto status = BarelyInstrument_GetGain(capi_, id_, &gain);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return gain;
+  }
 
   /// Returns parameter value.
   ///
   /// @param id Parameter identifier.
   /// @return Parameter value, or error status.
-  StatusOr<float> GetParam(ParamId id) const;
+  StatusOr<float> GetParam(ParamId id) const {
+    float value = 0.0f;
+    if (const auto status = BarelyInstrument_GetParam(capi_, id_, id, &value);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return value;
+  }
 
   /// Returns parameter definition.
   ///
   /// @param id Parameter identifier.
   /// @return Parameter definition, or error status.
-  StatusOr<ParamDefinition> GetParamDefinition(ParamId id) const;
+  StatusOr<ParamDefinition> GetParamDefinition(ParamId id) const {
+    BarelyParamDefinition definition;
+    if (const auto status =
+            BarelyInstrument_GetParamDefinition(capi_, id_, id, &definition);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
+  }
 
   /// Returns whether instrument is muted or not.
   ///
   /// @return True if muted, false otherwise, or error status.
-  StatusOr<bool> IsMuted() const;
+  StatusOr<bool> IsMuted() const {
+    bool is_muted = false;
+    if (const auto status = BarelyInstrument_IsMuted(capi_, id_, &is_muted);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return is_muted;
+  }
 
   /// Returns whether note is active or not.
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise, or error status.
-  StatusOr<bool> IsNoteOn(float pitch) const;
+  StatusOr<bool> IsNoteOn(float pitch) const {
+    bool is_note_on = false;
+    // TODO(#85): Support other `NotePitchType`s.
+    if (const auto status = BarelyInstrument_IsNoteOn(
+            capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, &is_note_on);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return is_note_on;
+  }
 
   /// Processes output buffer at timestamp.
   ///
@@ -505,18 +697,25 @@ class Instrument {
   /// @param num_output_frames Number of output frames.
   /// @return Status.
   Status Process(double timestamp, float* output, int num_output_channels,
-                 int num_output_frames);
+                 int num_output_frames) {
+    return static_cast<Status>(BarelyInstrument_Process(
+        capi_, id_, timestamp, output, num_output_channels, num_output_frames));
+  }
 
   /// Resets all parameters.
   ///
   /// @return Status.
-  Status ResetAllParams();
+  Status ResetAllParams() {
+    return static_cast<Status>(BarelyInstrument_ResetAllParams(capi_, id_));
+  }
 
   /// Resets parameter value.
   ///
   /// @param id Parameter identifier.
   /// @return Status.
-  Status ResetParam(ParamId id);
+  Status ResetParam(ParamId id) {
+    return static_cast<Status>(BarelyInstrument_ResetParam(capi_, id_, id));
+  }
 
   // TODO(#85): Implement `BarelyInstrument_ScheduleNote`.
 
@@ -524,56 +723,102 @@ class Instrument {
   ///
   /// @param data Data.
   /// @return Status.
-  Status SetData(void* data);
+  Status SetData(void* data) {
+    return static_cast<Status>(BarelyInstrument_SetData(capi_, id_, data));
+  }
 
   /// Sets gain.
   ///
   /// @param gain Gain in amplitude.
   /// @return Status.
-  Status SetGain(float gain);
+  Status SetGain(float gain) {
+    return static_cast<Status>(BarelyInstrument_SetGain(capi_, id_, gain));
+  }
 
   /// Sets whether instrument should be muted or not.
   ///
   /// @param is_muted True if muted, false otherwise.
   /// @return Status.
-  Status SetMuted(bool is_muted);
+  Status SetMuted(bool is_muted) {
+    return static_cast<Status>(BarelyInstrument_SetMuted(capi_, id_, is_muted));
+  }
 
   /// Sets note off callback.
   ///
   /// @param note_off_callback Note off callback.
   /// @return Status.
-  Status SetNoteOffCallback(NoteOffCallback note_off_callback);
+  Status SetNoteOffCallback(NoteOffCallback note_off_callback) {
+    if (note_off_callback) {
+      note_off_callback_ = std::move(note_off_callback);
+      return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
+          capi_, id_,
+          [](float pitch, double timestamp, void* user_data) {
+            (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
+          },
+          static_cast<void*>(&note_off_callback_)));
+    } else {
+      return static_cast<Status>(
+          BarelyInstrument_SetNoteOffCallback(capi_, id_, nullptr, nullptr));
+    }
+  }
 
   /// Sets note on callback.
   ///
   /// @param note_on_callback Note on callback.
   /// @return Status.
-  Status SetNoteOnCallback(NoteOnCallback note_on_callback);
+  Status SetNoteOnCallback(NoteOnCallback note_on_callback) {
+    if (note_on_callback) {
+      note_on_callback_ = std::move(note_on_callback);
+      return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
+          capi_, id_,
+          [](float pitch, float intensity, double timestamp, void* user_data) {
+            (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity,
+                                                       timestamp);
+          },
+          static_cast<void*>(&note_on_callback_)));
+    } else {
+      return static_cast<Status>(
+          BarelyInstrument_SetNoteOnCallback(capi_, id_, nullptr, nullptr));
+    }
+  }
 
   /// Sets parameter value.
   ///
   /// @param id Parameter identifier.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParam(ParamId id, float value);
+  Status SetParam(ParamId id, float value) {
+    return static_cast<Status>(
+        BarelyInstrument_SetParam(capi_, id_, id, value));
+  }
 
   /// Starts note.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   /// @return Status.
-  Status StartNote(float pitch, float intensity = 1.0f);
+  Status StartNote(float pitch, float intensity = 1.0f) {
+    // TODO(#85): Support other `NotePitchType`s.
+    return static_cast<Status>(BarelyInstrument_StartNote(
+        capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, intensity));
+  }
 
   /// Stops all notes.
   ///
   /// @return Status.
-  Status StopAllNotes();
+  Status StopAllNotes() {
+    return static_cast<Status>(BarelyInstrument_StopAllNotes(capi_, id_));
+  }
 
   /// Stops note.
   ///
   /// @param pitch Note pitch.
   /// @return Status.
-  Status StopNote(float pitch);
+  Status StopNote(float pitch) {
+    // TODO(#85): Support other `NotePitchType`s.
+    return static_cast<Status>(BarelyInstrument_StopNote(
+        capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch));
+  }
 
  private:
   // Internal C api handle.
@@ -595,10 +840,13 @@ class Sequence {
   /// Constructs new `Sequence`.
   ///
   /// @param api BarelyMusician C++ api.
-  explicit Sequence(const Api& api);
+  explicit Sequence(const Api& api) : capi_(api.capi_) {
+    const auto status = BarelySequence_Create(capi_, &id_);
+    assert(status == BarelyStatus_kOk);
+  }
 
   /// Destroys `Sequence`.
-  ~Sequence();
+  ~Sequence() { BarelySequence_Destroy(capi_, id_); }
 
   // TODO(#85): Should `Sequence` be non-movable and non-copyable?
 
@@ -609,29 +857,69 @@ class Sequence {
   /// Returns begin offset.
   ///
   /// @return Begin offset in beats, or error status.
-  StatusOr<double> GetBeginOffset() const;
+  StatusOr<double> GetBeginOffset() const {
+    double begin_offset = 0.0;
+    if (const auto status =
+            BarelySequence_GetBeginOffset(capi_, id_, &begin_offset);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return begin_offset;
+  }
 
   /// Returns begin position.
   ///
   /// @return Begin position in beats, or error status.
-  StatusOr<double> GetBeginPosition() const;
+  StatusOr<double> GetBeginPosition() const {
+    double begin_position = 0.0;
+    if (const auto status =
+            BarelySequence_GetBeginPosition(capi_, id_, &begin_position);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return begin_position;
+  }
 
   /// Returns end position.
   ///
   /// @return End position in beats, or error status.
-  StatusOr<double> GetEndPosition() const;
+  StatusOr<double> GetEndPosition() const {
+    double end_position = 0.0;
+    if (const auto status =
+            BarelySequence_GetEndPosition(capi_, id_, &end_position);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return end_position;
+  }
 
   // TODO(#85): Implement `BarelySequence_GetInstrument`.
 
   /// Returns loop begin offset.
   ///
   /// @return Loop begin offset in beats, or error status.
-  StatusOr<double> GetLoopBeginOffset() const;
+  StatusOr<double> GetLoopBeginOffset() const {
+    double loop_begin_offset = 0.0;
+    if (const auto status =
+            BarelySequence_GetLoopBeginOffset(capi_, id_, &loop_begin_offset);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return loop_begin_offset;
+  }
 
   /// Returns loop length.
   ///
   /// @return Loop length in beats, or error status.
-  StatusOr<double> GetLoopLength() const;
+  StatusOr<double> GetLoopLength() const {
+    double loop_length = 0.0;
+    if (const auto status =
+            BarelySequence_GetLoopLength(capi_, id_, &loop_length);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return loop_length;
+  }
 
   // TODO(#85): Implement `BarelySequence_GetNoteDuration`.
   // TODO(#85): Implement `BarelySequence_GetNoteIntensity`.
@@ -641,12 +929,26 @@ class Sequence {
   /// Returns whether sequence is empty or not.
   ///
   /// @return True if empty, false otherwise, or error status.
-  StatusOr<bool> IsEmpty() const;
+  StatusOr<bool> IsEmpty() const {
+    bool is_empty = false;
+    if (const auto status = BarelySequence_IsEmpty(capi_, id_, &is_empty);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return is_empty;
+  }
 
   /// Returns whether sequence should be looping or not.
   ///
   /// @return True if looping, false otherwise, or error status.
-  StatusOr<bool> IsLooping() const;
+  StatusOr<bool> IsLooping() const {
+    bool is_looping = false;
+    if (const auto status = BarelySequence_IsLooping(capi_, id_, &is_looping);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return is_looping;
+  }
 
   // TODO(#85): Implement `BarelySequence_RemoveAllNotes`.
   // TODO(#85): Implement `BarelySequence_RemoveNote`.
@@ -655,19 +957,28 @@ class Sequence {
   ///
   /// @param begin_offset Begin offset in beats.
   /// @return Status.
-  Status SetBeginOffset(double begin_offset);
+  Status SetBeginOffset(double begin_offset) {
+    return static_cast<Status>(
+        BarelySequence_SetBeginOffset(capi_, id_, begin_offset));
+  }
 
   /// Sets begin position.
   ///
   /// @param begin_position Begin position in beats.
   /// @return Status.
-  Status SetBeginPosition(double begin_position);
+  Status SetBeginPosition(double begin_position) {
+    return static_cast<Status>(
+        BarelySequence_SetBeginPosition(capi_, id_, begin_position));
+  }
 
   /// Sets end position.
   ///
   /// @param end_position End position in beats.
   /// @return Status.
-  Status SetEndPosition(double end_position);
+  Status SetEndPosition(double end_position) {
+    return static_cast<Status>(
+        BarelySequence_SetEndPosition(capi_, id_, end_position));
+  }
 
   // TODO(#85): Implement `BarelySequence_SetInstrument`.
 
@@ -675,19 +986,28 @@ class Sequence {
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
   /// @return Status.
-  Status SetLoopBeginOffset(double loop_begin_offset);
+  Status SetLoopBeginOffset(double loop_begin_offset) {
+    return static_cast<Status>(
+        BarelySequence_SetLoopBeginOffset(capi_, id_, loop_begin_offset));
+  }
 
   /// Sets loop length.
   ///
   /// @param loop_length Loop length in beats.
   /// @return Status.
-  Status SetLoopLength(double loop_length);
+  Status SetLoopLength(double loop_length) {
+    return static_cast<Status>(
+        BarelySequence_SetLoopLength(capi_, id_, loop_length));
+  }
 
   /// Sets whether sequence should be looping or not.
   ///
   /// @param is_looping True if looping, false otherwise.
   /// @return Status.
-  Status SetLooping(bool is_looping);
+  Status SetLooping(bool is_looping) {
+    return static_cast<Status>(
+        BarelySequence_SetLooping(capi_, id_, is_looping));
+  }
 
   // TODO(#85): Implement `BarelySequence_SetNoteDuration`.
   // TODO(#85): Implement `BarelySequence_SetNoteIntensity`.
@@ -724,54 +1044,116 @@ class Transport {
   /// Constructs new `Transport`.
   ///
   /// @param api BarelyMusician C++ api.
-  explicit Transport(const Api& api);
+  explicit Transport(const Api& api)
+      : capi_(api.capi_), beat_callback_(nullptr), update_callback_(nullptr) {}
 
   // TODO(#85): Should `Transport` be non-movable and non-copyable?
 
   /// Returns position.
   ///
   /// @return Position in beats, or error status.
-  StatusOr<double> GetPosition() const;
+  StatusOr<double> GetPosition() const {
+    double position = 0.0;
+    if (const auto status = BarelyTransport_GetPosition(capi_, &position);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return position;
+  }
 
   /// Returns tempo.
   ///
   /// @return Tempo in BPM, or error status.
-  StatusOr<double> GetTempo() const;
+  StatusOr<double> GetTempo() const {
+    double tempo = 0.0;
+    if (const auto status = BarelyTransport_GetTempo(capi_, &tempo);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return tempo;
+  }
 
   /// Returns whether transport is playing or not.
   ///
   /// @return True if playing, false otherwise, or error status.
-  StatusOr<bool> IsPlaying() const;
+  StatusOr<bool> IsPlaying() const {
+    bool is_playing = false;
+    if (const auto status = BarelyTransport_IsPlaying(capi_, &is_playing);
+        status != BarelyStatus_kOk) {
+      return static_cast<Status>(status);
+    }
+    return is_playing;
+  }
 
   /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
   /// @return Status.
-  Status SetBeatCallback(BeatCallback beat_callback);
+  Status SetBeatCallback(BeatCallback beat_callback) {
+    // TODO(#85): Ensure that the beat callback is updated accordingly for when
+    //    transport is copied/moved/destroyed.
+    if (beat_callback) {
+      beat_callback_ = std::move(beat_callback);
+      return static_cast<Status>(BarelyTransport_SetBeatCallback(
+          capi_,
+          [](double position, double timestamp, void* user_data) {
+            if (user_data) {
+              (*static_cast<BeatCallback*>(user_data))(position, timestamp);
+            }
+          },
+          static_cast<void*>(&beat_callback_)));
+    } else {
+      return static_cast<Status>(
+          BarelyTransport_SetBeatCallback(capi_, nullptr, nullptr));
+    }
+  }
 
   /// Sets position.
   ///
   /// @param position Position in beats.
   /// @return Status.
-  Status SetPosition(double position);
+  Status SetPosition(double position) {
+    return static_cast<Status>(BarelyTransport_SetPosition(capi_, position));
+  }
 
   /// Sets tempo.
   ///
   /// @param tempo Tempo in BPM.
   /// @return Status.
-  Status SetTempo(double tempo);
+  Status SetTempo(double tempo) {
+    return static_cast<Status>(BarelyTransport_SetTempo(capi_, tempo));
+  }
 
   /// Sets update callback.
   ///
   /// @param update_callback Update callback.
   /// @return Status.
-  Status SetUpdateCallback(UpdateCallback update_callback);
+  Status SetUpdateCallback(UpdateCallback update_callback) {
+    // TODO(#85): Ensure that the update callback is updated accordingly for
+    //    when transport is copied/moved/destroyed.
+    if (update_callback) {
+      update_callback_ = std::move(update_callback);
+      return static_cast<Status>(BarelyTransport_SetUpdateCallback(
+          capi_,
+          [](double begin_position, double end_position, double begin_timestamp,
+             double end_timestamp, void* user_data) {
+            if (user_data) {
+              (*static_cast<UpdateCallback*>(user_data))(
+                  begin_position, end_position, begin_timestamp, end_timestamp);
+            }
+          },
+          static_cast<void*>(&beat_callback_)));
+    } else {
+      return static_cast<Status>(
+          BarelyTransport_SetUpdateCallback(capi_, nullptr, nullptr));
+    }
+  }
 
   /// Starts playback.
-  Status Start();
+  Status Start() { return static_cast<Status>(BarelyTransport_Start(capi_)); }
 
   /// Stops playback.
-  Status Stop();
+  Status Stop() { return static_cast<Status>(BarelyTransport_Stop(capi_)); }
 
  private:
   // Internal api handle.
@@ -783,559 +1165,6 @@ class Transport {
   // Update callback.
   UpdateCallback update_callback_;
 };
-
-template <typename ValueType>
-StatusOr<ValueType>::StatusOr(Status error_status) : value_or_(error_status) {
-  assert(error_status != Status::kOk);
-}
-
-template <typename ValueType>
-StatusOr<ValueType>::StatusOr(ValueType value) : value_or_(std::move(value)) {}
-
-template <typename ValueType>
-Status StatusOr<ValueType>::GetErrorStatus() const {
-  assert(std::holds_alternative<Status>(value_or_));
-  return std::get<Status>(value_or_);
-}
-
-template <typename ValueType>
-const ValueType& StatusOr<ValueType>::GetValue() const {
-  assert(std::holds_alternative<ValueType>(value_or_));
-  return std::get<ValueType>(value_or_);
-}
-
-template <typename ValueType>
-ValueType& StatusOr<ValueType>::GetValue() {
-  assert(std::holds_alternative<ValueType>(value_or_));
-  return std::get<ValueType>(value_or_);
-}
-
-template <typename ValueType>
-bool StatusOr<ValueType>::IsOk() const {
-  return std::holds_alternative<ValueType>(value_or_);
-}
-
-Api::Api() {
-  const auto status = BarelyApi_Create(&capi_);
-  assert(status == BarelyStatus_kOk);
-}
-
-Api::Api(int sample_rate) : Api() {
-  const auto status = BarelyApi_SetSampleRate(capi_, sample_rate);
-  assert(status == BarelyStatus_kOk);
-}
-
-Api::~Api() {
-  const auto status = BarelyApi_Destroy(capi_);
-  assert(status == BarelyStatus_kOk);
-}
-
-StatusOr<int> Api::GetSampleRate() const {
-  int sample_rate = 0;
-  if (const auto status = BarelyApi_GetSampleRate(capi_, &sample_rate);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return sample_rate;
-}
-
-Status Api::SetSampleRate(int sample_rate) {
-  return static_cast<Status>(BarelyApi_SetSampleRate(capi_, sample_rate));
-}
-
-Status Api::Update(double timestamp) {
-  return static_cast<Status>(BarelyApi_Update(capi_, timestamp));
-}
-
-ParamDefinition::ParamDefinition(ParamId id) : ParamDefinition(id, 0.0f) {}
-
-ParamDefinition::ParamDefinition(ParamId id, float default_value,
-                                 float min_value, float max_value)
-    : id(id),
-      default_value(default_value),
-      min_value(min_value),
-      max_value(max_value) {}
-
-ParamDefinition::ParamDefinition(ParamId id, bool default_value)
-    : ParamDefinition(id, static_cast<float>(default_value)) {}
-
-ParamDefinition::ParamDefinition(ParamId id, int default_value, int min_value,
-                                 int max_value)
-    : ParamDefinition(id, static_cast<float>(default_value),
-                      static_cast<float>(min_value),
-                      static_cast<float>(max_value)) {}
-
-ParamDefinition ParamDefinition::FromBarelyParamDefinition(
-    BarelyParamDefinition definition) {
-  return ParamDefinition(definition.id, definition.default_value,
-                         definition.min_value, definition.max_value);
-}
-
-BarelyParamDefinition ParamDefinition::GetBarelyParamDefinition() const {
-  return BarelyParamDefinition{id, default_value, min_value, max_value};
-}
-
-std::vector<BarelyParamDefinition>
-ConductorDefinition::GetBarelyParamDefinitions() const {
-  std::vector<BarelyParamDefinition> cparam_definitions;
-  cparam_definitions.reserve(param_definitions.size());
-  for (const auto& param_definition : param_definitions) {
-    cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
-  }
-  return cparam_definitions;
-}
-
-Conductor::Conductor(const Api& api) : capi_(api.capi_) {}
-
-StatusOr<float> Conductor::GetEnergy() const {
-  float energy = 0.0f;
-  if (const auto status = BarelyConductor_GetEnergy(capi_, &energy);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return energy;
-}
-
-StatusOr<float> Conductor::GetParam(ParamId id) const {
-  float value = 0.0f;
-  if (const auto status = BarelyConductor_GetParam(capi_, id, &value);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return value;
-}
-
-StatusOr<ParamDefinition> Conductor::GetParamDefinition(ParamId id) const {
-  BarelyParamDefinition definition;
-  if (const auto status =
-          BarelyConductor_GetParamDefinition(capi_, id, &definition);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
-}
-
-StatusOr<float> Conductor::GetRootNote() const {
-  float root_pitch = 0.0f;
-  if (const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return root_pitch;
-}
-
-StatusOr<std::vector<float>> Conductor::GetScale() const {
-  float* scale_pitches;
-  int num_scale_pitches;
-  if (const auto status =
-          BarelyConductor_GetScale(capi_, &scale_pitches, &num_scale_pitches);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return std::vector<float>(scale_pitches, scale_pitches + num_scale_pitches);
-}
-
-StatusOr<float> Conductor::GetStress() const {
-  float stress = 0.0f;
-  if (const auto status = BarelyConductor_GetStress(capi_, &stress);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return stress;
-}
-
-Status Conductor::ResetAllParams() {
-  return static_cast<Status>(BarelyConductor_ResetAllParams(capi_));
-}
-
-Status Conductor::ResetParam(ParamId id) {
-  return static_cast<Status>(BarelyConductor_ResetParam(capi_, id));
-}
-
-Status Conductor::SetData(void* data) {
-  return static_cast<Status>(BarelyConductor_SetData(capi_, data));
-}
-
-Status Conductor::SetDefinition(ConductorDefinition definition) {
-  auto cparam_definitions = definition.GetBarelyParamDefinitions();
-  // TODO(#85): Define and include the transform functions.
-  auto cdefinition =
-      BarelyConductorDefinition{std::move(definition.create_fn),
-                                std::move(definition.destroy_fn),
-                                std::move(definition.set_data_fn),
-                                std::move(definition.set_energy_fn),
-                                std::move(definition.set_param_fn),
-                                std::move(definition.set_stress_fn),
-                                /*transform_duration_fn=*/nullptr,
-                                /*transform_intensity_fn=*/nullptr,
-                                /*transform_pitch_fn=*/nullptr,
-                                /*transform_tempo_fn=*/nullptr,
-                                cparam_definitions.data(),
-                                static_cast<int>(cparam_definitions.size())};
-  return static_cast<Status>(
-      BarelyConductor_SetDefinition(capi_, std::move(cdefinition)));
-}
-
-Status Conductor::SetEnergy(float energy) {
-  return static_cast<Status>(BarelyConductor_SetEnergy(capi_, energy));
-}
-
-Status Conductor::SetParam(ParamId id, float value) {
-  return static_cast<Status>(BarelyConductor_SetParam(capi_, id, value));
-}
-
-Status Conductor::SetRootNote(float root_pitch) {
-  return static_cast<Status>(BarelyConductor_SetRootNote(capi_, root_pitch));
-}
-
-Status Conductor::SetStress(float stress) {
-  return static_cast<Status>(BarelyConductor_SetStress(capi_, stress));
-}
-
-std::vector<BarelyParamDefinition>
-InstrumentDefinition::GetBarelyParamDefinitions() const {
-  std::vector<BarelyParamDefinition> cparam_definitions;
-  cparam_definitions.reserve(param_definitions.size());
-  for (const auto& param_definition : param_definitions) {
-    cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
-  }
-  return cparam_definitions;
-}
-
-Instrument::Instrument(const Api& api, InstrumentDefinition definition)
-    : capi_(api.capi_) {
-  auto cparam_definitions = definition.GetBarelyParamDefinitions();
-  auto cdefinition =
-      BarelyInstrumentDefinition{std::move(definition.create_fn),
-                                 std::move(definition.destroy_fn),
-                                 std::move(definition.process_fn),
-                                 std::move(definition.set_data_fn),
-                                 std::move(definition.set_note_off_fn),
-                                 std::move(definition.set_note_on_fn),
-                                 std::move(definition.set_param_fn),
-                                 cparam_definitions.data(),
-                                 static_cast<int>(cparam_definitions.size())};
-  const auto status =
-      BarelyInstrument_Create(capi_, std::move(cdefinition), &id_);
-  assert(status == BarelyStatus_kOk);
-}
-
-Instrument::~Instrument() { BarelyInstrument_Destroy(capi_, id_); }
-
-StatusOr<float> Instrument::GetGain() const {
-  float gain = 0.0f;
-  if (const auto status = BarelyInstrument_GetGain(capi_, id_, &gain);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return gain;
-}
-
-StatusOr<float> Instrument::GetParam(ParamId id) const {
-  float value = 0.0f;
-  if (const auto status = BarelyInstrument_GetParam(capi_, id_, id, &value);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return value;
-}
-
-StatusOr<ParamDefinition> Instrument::GetParamDefinition(ParamId id) const {
-  BarelyParamDefinition definition;
-  if (const auto status =
-          BarelyInstrument_GetParamDefinition(capi_, id_, id, &definition);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
-}
-
-StatusOr<bool> Instrument::IsMuted() const {
-  bool is_muted = false;
-  if (const auto status = BarelyInstrument_IsMuted(capi_, id_, &is_muted);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return is_muted;
-}
-
-StatusOr<bool> Instrument::IsNoteOn(float pitch) const {
-  bool is_note_on = false;
-  // TODO(#85): Support other `NotePitchType`s.
-  if (const auto status = BarelyInstrument_IsNoteOn(
-          capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, &is_note_on);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return is_note_on;
-}
-
-Status Instrument::Process(double timestamp, float* output,
-                           int num_output_channels, int num_output_frames) {
-  return static_cast<Status>(BarelyInstrument_Process(
-      capi_, id_, timestamp, output, num_output_channels, num_output_frames));
-}
-
-Status Instrument::ResetAllParams() {
-  return static_cast<Status>(BarelyInstrument_ResetAllParams(capi_, id_));
-}
-
-Status Instrument::ResetParam(ParamId id) {
-  return static_cast<Status>(BarelyInstrument_ResetParam(capi_, id_, id));
-}
-
-Status Instrument::SetData(void* data) {
-  return static_cast<Status>(BarelyInstrument_SetData(capi_, id_, data));
-}
-
-Status Instrument::SetGain(float gain) {
-  return static_cast<Status>(BarelyInstrument_SetGain(capi_, id_, gain));
-}
-
-Status Instrument::SetMuted(bool is_muted) {
-  return static_cast<Status>(BarelyInstrument_SetMuted(capi_, id_, is_muted));
-}
-
-Status Instrument::SetNoteOffCallback(NoteOffCallback note_off_callback) {
-  if (note_off_callback) {
-    note_off_callback_ = std::move(note_off_callback);
-    return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
-        capi_, id_,
-        [](float pitch, double timestamp, void* user_data) {
-          (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
-        },
-        static_cast<void*>(&note_off_callback_)));
-  } else {
-    return static_cast<Status>(
-        BarelyInstrument_SetNoteOffCallback(capi_, id_, nullptr, nullptr));
-  }
-}
-
-Status Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) {
-  if (note_on_callback) {
-    note_on_callback_ = std::move(note_on_callback);
-    return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
-        capi_, id_,
-        [](float pitch, float intensity, double timestamp, void* user_data) {
-          (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity,
-                                                     timestamp);
-        },
-        static_cast<void*>(&note_on_callback_)));
-  } else {
-    return static_cast<Status>(
-        BarelyInstrument_SetNoteOnCallback(capi_, id_, nullptr, nullptr));
-  }
-}
-
-Status Instrument::SetParam(ParamId id, float value) {
-  return static_cast<Status>(BarelyInstrument_SetParam(capi_, id_, id, value));
-}
-
-Status Instrument::StartNote(float pitch, float intensity) {
-  // TODO(#85): Support other `NotePitchType`s.
-  return static_cast<Status>(BarelyInstrument_StartNote(
-      capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, intensity));
-}
-
-Status Instrument::StopAllNotes() {
-  return static_cast<Status>(BarelyInstrument_StopAllNotes(capi_, id_));
-}
-
-Status Instrument::StopNote(float pitch) {
-  // TODO(#85): Support other `NotePitchType`s.
-  return static_cast<Status>(BarelyInstrument_StopNote(
-      capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch));
-}
-
-Sequence::Sequence(const Api& api) : capi_(api.capi_) {
-  const auto status = BarelySequence_Create(capi_, &id_);
-  assert(status == BarelyStatus_kOk);
-}
-
-Sequence::~Sequence() { BarelySequence_Destroy(capi_, id_); }
-
-StatusOr<double> Sequence::GetBeginOffset() const {
-  double begin_offset = 0.0;
-  if (const auto status =
-          BarelySequence_GetBeginOffset(capi_, id_, &begin_offset);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return begin_offset;
-}
-
-StatusOr<double> Sequence::GetBeginPosition() const {
-  double begin_position = 0.0;
-  if (const auto status =
-          BarelySequence_GetBeginPosition(capi_, id_, &begin_position);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return begin_position;
-}
-
-StatusOr<double> Sequence::GetEndPosition() const {
-  double end_position = 0.0;
-  if (const auto status =
-          BarelySequence_GetEndPosition(capi_, id_, &end_position);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return end_position;
-}
-
-StatusOr<double> Sequence::GetLoopBeginOffset() const {
-  double loop_begin_offset = 0.0;
-  if (const auto status =
-          BarelySequence_GetLoopBeginOffset(capi_, id_, &loop_begin_offset);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return loop_begin_offset;
-}
-
-StatusOr<double> Sequence::GetLoopLength() const {
-  double loop_length = 0.0;
-  if (const auto status =
-          BarelySequence_GetLoopLength(capi_, id_, &loop_length);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return loop_length;
-}
-
-StatusOr<bool> Sequence::IsEmpty() const {
-  bool is_empty = false;
-  if (const auto status = BarelySequence_IsEmpty(capi_, id_, &is_empty);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return is_empty;
-}
-
-StatusOr<bool> Sequence::IsLooping() const {
-  bool is_looping = false;
-  if (const auto status = BarelySequence_IsLooping(capi_, id_, &is_looping);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return is_looping;
-}
-
-Status Sequence::SetBeginOffset(double begin_offset) {
-  return static_cast<Status>(
-      BarelySequence_SetBeginOffset(capi_, id_, begin_offset));
-}
-
-Status Sequence::SetBeginPosition(double begin_position) {
-  return static_cast<Status>(
-      BarelySequence_SetBeginPosition(capi_, id_, begin_position));
-}
-
-Status Sequence::SetEndPosition(double end_position) {
-  return static_cast<Status>(
-      BarelySequence_SetEndPosition(capi_, id_, end_position));
-}
-
-Status Sequence::SetLoopBeginOffset(double loop_begin_offset) {
-  return static_cast<Status>(
-      BarelySequence_SetLoopBeginOffset(capi_, id_, loop_begin_offset));
-}
-
-Status Sequence::SetLoopLength(double loop_length) {
-  return static_cast<Status>(
-      BarelySequence_SetLoopLength(capi_, id_, loop_length));
-}
-
-Status Sequence::SetLooping(bool is_looping) {
-  return static_cast<Status>(BarelySequence_SetLooping(capi_, id_, is_looping));
-}
-
-Transport::Transport(const Api& api)
-    : capi_(api.capi_), beat_callback_(nullptr), update_callback_(nullptr) {}
-
-StatusOr<double> Transport::GetPosition() const {
-  double position = 0.0;
-  if (const auto status = BarelyTransport_GetPosition(capi_, &position);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return position;
-}
-
-StatusOr<double> Transport::GetTempo() const {
-  double tempo = 0.0;
-  if (const auto status = BarelyTransport_GetTempo(capi_, &tempo);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return tempo;
-}
-
-StatusOr<bool> Transport::IsPlaying() const {
-  bool is_playing = false;
-  if (const auto status = BarelyTransport_IsPlaying(capi_, &is_playing);
-      status != BarelyStatus_kOk) {
-    return static_cast<Status>(status);
-  }
-  return is_playing;
-}
-
-// TODO(#85): Ensure that the beat callback is updated accordingly for when
-//    transport is copied/moved/destroyed.
-Status Transport::SetBeatCallback(BeatCallback beat_callback) {
-  if (beat_callback) {
-    beat_callback_ = std::move(beat_callback);
-    return static_cast<Status>(BarelyTransport_SetBeatCallback(
-        capi_,
-        [](double position, double timestamp, void* user_data) {
-          if (user_data) {
-            (*static_cast<BeatCallback*>(user_data))(position, timestamp);
-          }
-        },
-        static_cast<void*>(&beat_callback_)));
-  } else {
-    return static_cast<Status>(
-        BarelyTransport_SetBeatCallback(capi_, nullptr, nullptr));
-  }
-}
-
-Status Transport::SetPosition(double position) {
-  return static_cast<Status>(BarelyTransport_SetPosition(capi_, position));
-}
-
-Status Transport::SetTempo(double tempo) {
-  return static_cast<Status>(BarelyTransport_SetTempo(capi_, tempo));
-}
-
-// TODO(#85): Ensure that the update callback is updated accordingly for when
-//    transport is copied/moved/destroyed.
-Status Transport::SetUpdateCallback(UpdateCallback update_callback) {
-  if (update_callback) {
-    update_callback_ = std::move(update_callback);
-    return static_cast<Status>(BarelyTransport_SetUpdateCallback(
-        capi_,
-        [](double begin_position, double end_position, double begin_timestamp,
-           double end_timestamp, void* user_data) {
-          if (user_data) {
-            (*static_cast<UpdateCallback*>(user_data))(
-                begin_position, end_position, begin_timestamp, end_timestamp);
-          }
-        },
-        static_cast<void*>(&beat_callback_)));
-  } else {
-    return static_cast<Status>(
-        BarelyTransport_SetUpdateCallback(capi_, nullptr, nullptr));
-  }
-}
-
-Status Transport::Start() {
-  return static_cast<Status>(BarelyTransport_Start(capi_));
-}
-
-Status Transport::Stop() {
-  return static_cast<Status>(BarelyTransport_Stop(capi_));
-}
 
 }  // namespace barely
 

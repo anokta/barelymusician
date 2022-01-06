@@ -36,6 +36,12 @@ enum class Status : BarelyStatus {
   kUnknown = BarelyStatus_kUnknown,
 };
 
+/// Returns whether status is okay or not.
+///
+/// @param status Status.
+/// @return True if okay, false otherwise.
+inline bool IsOk(Status status) { return status == Status::kOk; }
+
 /// Value or error status.
 template <typename ValueType>
 class StatusOr {
@@ -44,7 +50,7 @@ class StatusOr {
   ///
   /// @param error_status Error status.
   StatusOr(Status error_status) : value_or_(error_status) {
-    assert(error_status != Status::kOk);
+    assert(!IsOk(error_status));
   }
 
   /// Constructs new `StatusOr` with a value.
@@ -76,7 +82,7 @@ class StatusOr {
     return std::get<ValueType>(value_or_);
   }
 
-  /// Returns whether a value is contained or not.
+  /// Returns whether value is contained or not.
   ///
   /// @return True if contained, false otherwise.
   bool IsOk() const { return std::holds_alternative<ValueType>(value_or_); }
@@ -109,11 +115,13 @@ class Api {
     assert(status == BarelyStatus_kOk);
   }
 
-  /// Non-copyable and non-movable.
+  /// Non-copyable.
   Api(const Api& other) = delete;
   Api& operator=(const Api& other) noexcept = delete;
-  Api(Api&& other) = delete;
-  Api& operator=(Api&& other) noexcept = delete;
+
+  /// Movable.
+  Api(Api&& other) = default;
+  Api& operator=(Api&& other) noexcept = default;
 
   /// Returns sampling rate.
   ///
@@ -205,24 +213,6 @@ struct ParamDefinition {
 
   /// Maximum value.
   float max_value;
-
- private:
-  friend class Conductor;
-  friend struct ConductorDefinition;
-  friend class Instrument;
-  friend struct InstrumentDefinition;
-
-  /// Returns corresponding `ParamDefinition` for C type for internal use.
-  static ParamDefinition FromBarelyParamDefinition(
-      BarelyParamDefinition definition) {
-    return ParamDefinition(definition.id, definition.default_value,
-                           definition.min_value, definition.max_value);
-  }
-
-  // Returns corresponding C type for internal use.
-  BarelyParamDefinition GetBarelyParamDefinition() const {
-    return BarelyParamDefinition{id, default_value, min_value, max_value};
-  }
 };
 
 /// Conductor definition.
@@ -292,19 +282,6 @@ struct ConductorDefinition {
 
   /// List of parameter definitions.
   std::vector<ParamDefinition> param_definitions;
-
- private:
-  friend class Conductor;
-
-  // Returns corresponding C type for internal use.
-  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const {
-    std::vector<BarelyParamDefinition> cparam_definitions;
-    cparam_definitions.reserve(param_definitions.size());
-    for (const auto& param_definition : param_definitions) {
-      cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
-    }
-    return cparam_definitions;
-  }
 };
 
 /// Conductor.
@@ -353,7 +330,8 @@ class Conductor {
         status != BarelyStatus_kOk) {
       return static_cast<Status>(status);
     }
-    return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
+    return ParamDefinition(definition.id, definition.default_value,
+                           definition.min_value, definition.max_value);
   }
 
   /// Returns root note.
@@ -422,23 +400,27 @@ class Conductor {
   /// @param definition Conductor definition.
   /// @return Status.
   Status SetDefinition(ConductorDefinition definition) {
-    auto cparam_definitions = definition.GetBarelyParamDefinitions();
+    std::vector<BarelyParamDefinition> param_definitions;
+    param_definitions.reserve(definition.param_definitions.size());
+    for (const auto& param_definition : definition.param_definitions) {
+      param_definitions.emplace_back(
+          param_definition.id, param_definition.default_value,
+          param_definition.min_value, param_definition.max_value);
+    }
     // TODO(#85): Define and include the transform functions.
-    auto cdefinition =
-        BarelyConductorDefinition{std::move(definition.create_fn),
-                                  std::move(definition.destroy_fn),
-                                  std::move(definition.set_data_fn),
-                                  std::move(definition.set_energy_fn),
-                                  std::move(definition.set_param_fn),
-                                  std::move(definition.set_stress_fn),
-                                  /*transform_duration_fn=*/nullptr,
-                                  /*transform_intensity_fn=*/nullptr,
-                                  /*transform_pitch_fn=*/nullptr,
-                                  /*transform_tempo_fn=*/nullptr,
-                                  cparam_definitions.data(),
-                                  static_cast<int>(cparam_definitions.size())};
-    return static_cast<Status>(
-        BarelyConductor_SetDefinition(capi_, std::move(cdefinition)));
+    return static_cast<Status>(BarelyConductor_SetDefinition(
+        capi_,
+        BarelyConductorDefinition{
+            std::move(definition.create_fn), std::move(definition.destroy_fn),
+            std::move(definition.set_data_fn),
+            std::move(definition.set_energy_fn),
+            std::move(definition.set_param_fn),
+            std::move(definition.set_stress_fn),
+            /*transform_duration_fn=*/nullptr,
+            /*transform_intensity_fn=*/nullptr,
+            /*transform_pitch_fn=*/nullptr,
+            /*transform_tempo_fn=*/nullptr, param_definitions.data(),
+            static_cast<int>(param_definitions.size())}));
   }
 
   /// Sets energy.
@@ -559,19 +541,6 @@ struct InstrumentDefinition {
 
   /// List of parameter definitions.
   std::vector<ParamDefinition> param_definitions;
-
- private:
-  friend class Instrument;
-
-  // Returns corresponding C type for internal use.
-  std::vector<BarelyParamDefinition> GetBarelyParamDefinitions() const {
-    std::vector<BarelyParamDefinition> cparam_definitions;
-    cparam_definitions.reserve(param_definitions.size());
-    for (const auto& param_definition : param_definitions) {
-      cparam_definitions.push_back(param_definition.GetBarelyParamDefinition());
-    }
-    return cparam_definitions;
-  }
 };
 
 /// Instrument.
@@ -597,19 +566,23 @@ class Instrument {
   /// @param definition Definition.
   Instrument(const Api& api, InstrumentDefinition definition)
       : capi_(api.capi_) {
-    auto cparam_definitions = definition.GetBarelyParamDefinitions();
-    auto cdefinition =
-        BarelyInstrumentDefinition{std::move(definition.create_fn),
-                                   std::move(definition.destroy_fn),
-                                   std::move(definition.process_fn),
-                                   std::move(definition.set_data_fn),
-                                   std::move(definition.set_note_off_fn),
-                                   std::move(definition.set_note_on_fn),
-                                   std::move(definition.set_param_fn),
-                                   cparam_definitions.data(),
-                                   static_cast<int>(cparam_definitions.size())};
-    const auto status =
-        BarelyInstrument_Create(capi_, std::move(cdefinition), &id_);
+    std::vector<BarelyParamDefinition> param_definitions;
+    param_definitions.reserve(definition.param_definitions.size());
+    for (const auto& param_definition : definition.param_definitions) {
+      param_definitions.emplace_back(
+          param_definition.id, param_definition.default_value,
+          param_definition.min_value, param_definition.max_value);
+    }
+    const auto status = BarelyInstrument_Create(
+        capi_,
+        BarelyInstrumentDefinition{
+            std::move(definition.create_fn), std::move(definition.destroy_fn),
+            std::move(definition.process_fn), std::move(definition.set_data_fn),
+            std::move(definition.set_note_off_fn),
+            std::move(definition.set_note_on_fn),
+            std::move(definition.set_param_fn), param_definitions.data(),
+            static_cast<int>(param_definitions.size())},
+        &id_);
     assert(status == BarelyStatus_kOk);
   }
 
@@ -659,7 +632,8 @@ class Instrument {
         status != BarelyStatus_kOk) {
       return static_cast<Status>(status);
     }
-    return ParamDefinition::FromBarelyParamDefinition(std::move(definition));
+    return ParamDefinition(definition.id, definition.default_value,
+                           definition.min_value, definition.max_value);
   }
 
   /// Returns whether instrument is muted or not.

@@ -27,8 +27,8 @@ class Conductor {
 
   /// Copyable and movable.
   Conductor(const Conductor& other) = default;
-  Conductor& operator=(const Conductor& other) noexcept = default;
-  Conductor(Conductor&& other) = default;
+  Conductor& operator=(const Conductor& other) = default;
+  Conductor(Conductor&& other) noexcept = default;
   Conductor& operator=(Conductor&& other) noexcept = default;
 
   /// Returns parameter.
@@ -75,8 +75,8 @@ class Conductor {
 
   /// Transforms playback tempo.
   ///
-  /// @param tempo Original tempo in BPM.
-  /// @return Transformed tempo in BPM.
+  /// @param tempo Original tempo in bpm.
+  /// @return Transformed tempo in bpm.
   double TransformPlaybackTempo(double tempo) noexcept;
 
  private:

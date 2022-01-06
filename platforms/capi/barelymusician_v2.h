@@ -148,8 +148,8 @@ typedef BarelyStatus (*BarelyConductorDefinition_TransformNotePitchFn)(
 /// Conductor transform tempo function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param tempo Tempo in BPM.
-/// @param out_tempo Output tempo in BPM.
+/// @param tempo Tempo in bpm.
+/// @param out_tempo Output tempo in bpm.
 /// @return Status.
 typedef BarelyStatus (*BarelyConductorDefinition_TransformTempoFn)(
     void** state, double tempo, double* out_tempo);
@@ -1041,7 +1041,7 @@ BARELY_EXPORT BarelyStatus BarelyTransport_GetPosition(BarelyApi api,
 /// Gets transport tempo.
 ///
 /// @param api BarelyMusician api.
-/// @param out_tempo Output tempo in BPM.
+/// @param out_tempo Output tempo in bpm.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyTransport_GetTempo(BarelyApi api,
                                                     double* out_tempo);
@@ -1074,7 +1074,7 @@ BARELY_EXPORT BarelyStatus BarelyTransport_SetPosition(BarelyApi api,
 /// Sets transport tempo.
 ///
 /// @param api BarelyMusician api.
-/// @param tempo Tempo in BPM.
+/// @param tempo Tempo in bpm.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyTransport_SetTempo(BarelyApi api,
                                                     double tempo);

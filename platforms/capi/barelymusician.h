@@ -299,7 +299,7 @@ BARELY_EXPORT BarelyStatus BarelyGetPlaybackPosition(BarelyApi api,
 /// Gets the playback tempo.
 ///
 /// @param api BarelyMusician api.
-/// @param out_tempo Output tempo in BPM.
+/// @param out_tempo Output tempo in bpm.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyApi api,
                                                   double* out_tempo);
@@ -552,7 +552,7 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackPosition(BarelyApi api,
 /// Sets the playback tempo.
 ///
 /// @param api BarelyMusician api.
-/// @param tempo Playback tempo in BPM.
+/// @param tempo Playback tempo in bpm.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackTempo(BarelyApi api, double tempo);
 

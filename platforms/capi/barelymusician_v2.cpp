@@ -21,6 +21,9 @@ struct BarelyMusician {
   double tempo;
   double begin_offset;
 
+  BarelyTransport_BeatCallback beat_callback;
+  void* user_data;
+
  private:
   // Ensure that the instance can only be destroyed via the api call.
   friend BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi);
@@ -578,10 +581,10 @@ BarelyStatus BarelyTransport_SetBeatCallback(
     void* user_data) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  beat_callback;
-  user_data;
-  return BarelyStatus_kUnimplemented;
+  // TODO(#85): Implement - this is a temp POC for testing.
+  api->beat_callback = beat_callback;
+  api->user_data = user_data;
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyTransport_SetPosition(BarelyApi api, double position) {
@@ -614,8 +617,12 @@ BarelyStatus BarelyTransport_SetUpdateCallback(
 BarelyStatus BarelyTransport_Start(BarelyApi api) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  // TODO(#85): Implement - this is a temp POC for testing.
+  if (api->beat_callback) {
+    api->beat_callback(api->tempo, static_cast<double>(api->sample_rate),
+                       api->user_data);
+  }
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyTransport_Stop(BarelyApi api) {

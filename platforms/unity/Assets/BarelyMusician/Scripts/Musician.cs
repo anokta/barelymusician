@@ -190,7 +190,7 @@ namespace Barely {
 
     /// Sets playback tempo.
     ///
-    /// @param tempo Playback tempo in BPM.
+    /// @param tempo Playback tempo in bpm.
     /// @return True if success, false otherwise.
     public static bool SetPlaybackTempo(double tempo) {
       return IsOk(SetPlaybackTempoNative(Api, tempo));

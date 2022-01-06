@@ -103,7 +103,7 @@ class Engine {
 
   /// Returns the playback tempo.
   ///
-  /// @return Tempo in BPM.
+  /// @return Tempo in bpm.
   double GetPlaybackTempo() const noexcept;
 
   /// Returns whether the performer is empty or not.
@@ -321,7 +321,7 @@ class Engine {
 
   /// Sets the playback tempo.
   ///
-  /// @param tempo Tempo in BPM.
+  /// @param tempo Tempo in bpm.
   void SetPlaybackTempo(double tempo) noexcept;
 
   /// Sets the playback update callback.
@@ -359,7 +359,7 @@ class Engine {
   // List of performers.
   std::unordered_map<Id, Performer> performers_;
 
-  // Playback tempo in BPM.
+  // Playback tempo in bpm.
   double playback_tempo_;
 
   // Playback update callback.

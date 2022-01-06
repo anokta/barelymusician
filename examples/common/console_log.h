@@ -18,8 +18,8 @@ class ConsoleLog {
 
   /// Non-copyable and non-movable.
   ConsoleLog(const ConsoleLog& other) = delete;
-  ConsoleLog& operator=(const ConsoleLog& other) noexcept = delete;
-  ConsoleLog(ConsoleLog&& other) = delete;
+  ConsoleLog& operator=(const ConsoleLog& other) = delete;
+  ConsoleLog(ConsoleLog&& other) noexcept = delete;
   ConsoleLog& operator=(ConsoleLog&& other) noexcept = delete;
 
   /// Overloads output stream operator.

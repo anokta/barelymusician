@@ -19,7 +19,7 @@ namespace barelyapi {
 
 namespace {
 
-// Default playback tempo in BPM.
+// Default playback tempo in bpm.
 constexpr double kDefaultPlaybackTempo = 120.0;
 
 // Converts seconds from minutes.

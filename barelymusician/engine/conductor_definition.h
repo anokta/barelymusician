@@ -68,8 +68,8 @@ using TransformNotePitchFn = std::function<StatusOr<float>(
 /// Conductor transform playback tempo function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param tempo Original tempo in BPM.
-/// @return Transformed tempo in BPM.
+/// @param tempo Original tempo in bpm.
+/// @return Transformed tempo in bpm.
 using TransformPlaybackTempoFn =
     std::function<double(ConductorState* state, double tempo)>;
 

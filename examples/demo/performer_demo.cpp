@@ -254,7 +254,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     engine.SetPlaybackTempo(tempo);
-    ConsoleLog() << "Tempo set to " << tempo << " BPM";
+    ConsoleLog() << "Tempo set to " << tempo << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

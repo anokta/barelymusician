@@ -7,10 +7,12 @@ namespace {
 using ::barely::Api;
 using ::barely::Instrument;
 using ::barely::InstrumentDefinition;
+using ::barely::IsOk;
 using ::barely::ParamDefinition;
 using ::barely::ParamId;
 using ::barely::Sequence;
 using ::barely::Status;
+using ::barely::ToString;
 using ::barely::Transport;
 using ::barely::examples::ConsoleLog;
 
@@ -22,16 +24,14 @@ constexpr double kTempo = 120.0;
 int main(int /*argc*/, char* /*argv*/[]) {
   Api api(kSampleRate);
 
-  const auto sample_rate_or = api.GetSampleRate();
-  assert(sample_rate_or.IsOk());
-  ConsoleLog() << "Sample Rate: " << sample_rate_or.GetValue();
+  ConsoleLog() << "Sample rate: " << api.GetSampleRate();
 
-  Transport transport(api);
-  assert(transport.SetTempo(kTempo) == Status::kOk);
-
-  const auto tempo_or = transport.GetTempo();
-  assert(tempo_or.IsOk());
-  ConsoleLog() << "Tempo: " << tempo_or.GetValue();
+  auto& transport = api.GetTransport();
+  if (const auto status = transport.SetTempo(kTempo); !IsOk(status)) {
+    ConsoleLog() << "Failed to set tempo: " << ToString(status);
+    return -1;
+  }
+  ConsoleLog() << "Tempo: " << transport.GetTempo();
 
   Instrument instrument(
       api, InstrumentDefinition{
@@ -39,14 +39,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const auto gain_or = instrument.GetGain();
   assert(gain_or.IsOk());
-  ConsoleLog() << "Instrument Gain: " << gain_or.GetValue();
+  ConsoleLog() << "Instrument gain: " << gain_or.GetValue();
 
   Sequence sequence(api);
-  assert(sequence.SetBeginOffset(3.25) == Status::kOk);
+  if (const auto status = sequence.SetBeginOffset(3.25); !IsOk(status)) {
+    ConsoleLog() << "Failed to set begin offset: " << ToString(status);
+    return -1;
+  }
 
   const auto begin_offset_or = sequence.GetBeginOffset();
   assert(begin_offset_or.IsOk());
-  ConsoleLog() << "Sequence Begin Offset: " << begin_offset_or.GetValue();
+  ConsoleLog() << "Sequence begin offset: " << begin_offset_or.GetValue();
 
   return 0;
 }

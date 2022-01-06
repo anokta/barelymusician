@@ -21,8 +21,8 @@ class Instrument {
 
   /// Copyable and movable.
   Instrument(const Instrument& other) = default;
-  Instrument& operator=(const Instrument& other) noexcept = default;
-  Instrument(Instrument&& other) = default;
+  Instrument& operator=(const Instrument& other) = default;
+  Instrument(Instrument&& other) noexcept = default;
   Instrument& operator=(Instrument&& other) noexcept = default;
 
   /// Processes the next output buffer.

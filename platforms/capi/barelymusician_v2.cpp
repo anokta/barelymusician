@@ -618,6 +618,24 @@ BarelyStatus BarelyTransport_IsPlaying(BarelyApi api, bool* out_is_playing) {
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelyTransport_Pause(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyTransport_Play(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement - this is a temp POC for testing.
+  if (api->beat_callback) {
+    api->beat_callback(api->tempo, static_cast<double>(api->sample_rate),
+                       api->user_data);
+  }
+  return BarelyStatus_kOk;
+}
+
 BarelyStatus BarelyTransport_SetBeatCallback(
     BarelyApi api, BarelyTransport_BeatCallback beat_callback,
     void* user_data) {
@@ -654,17 +672,6 @@ BarelyStatus BarelyTransport_SetUpdateCallback(
   update_callback;
   user_data;
   return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyTransport_Start(BarelyApi api) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement - this is a temp POC for testing.
-  if (api->beat_callback) {
-    api->beat_callback(api->tempo, static_cast<double>(api->sample_rate),
-                       api->user_data);
-  }
-  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyTransport_Stop(BarelyApi api) {

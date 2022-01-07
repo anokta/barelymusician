@@ -495,23 +495,6 @@ BARELY_EXPORT BarelyStatus BarelyConductor_SetScale(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyConductor_SetStress(BarelyApi api,
                                                      float stress);
 
-/// Cancels all scheduled instrument notes.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_CancelAllScheduledNotes(BarelyApi api, BarelyId instrument_id);
-
-/// Cancels scheduled instrument note.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @param note_id Note identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_CancelScheduledNote(
-    BarelyApi api, BarelyId instrument_id, BarelyId note_id);
-
 /// Clones instrument.
 ///
 /// @param api BarelyMusician api.
@@ -594,6 +577,20 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(
     BarelyApi api, BarelyId instrument_id, BarelyNotePitchType pitch_type,
     float pitch, bool* out_is_note_on);
 
+/// Plays instrument note at position.
+///
+/// @param api BarelyMusician api.
+/// @param instrument_id Instrument identifier.
+/// @param position Note position in beats.
+/// @param duration Note duration in beats.
+/// @param pitch_type Note pitch type.
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_PlayNote(
+    BarelyApi api, BarelyId instrument_id, double position, double duration,
+    BarelyNotePitchType pitch_type, float pitch, float intensity);
+
 /// Processes instrument output buffer at timestamp.
 ///
 /// @param api BarelyMusician api.
@@ -624,22 +621,6 @@ BarelyInstrument_ResetAllParams(BarelyApi api, BarelyId instrument_id);
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParam(BarelyApi api,
                                                        BarelyId instrument_id,
                                                        BarelyParamId id);
-
-/// Schedules instrument note at position.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @param position Note position in beats.
-/// @param duration Note duration.
-/// @param pitch_type Note pitch type.
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-/// @param out_note_id Output note identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_ScheduleNote(
-    BarelyApi api, BarelyId instrument_id, double position, double duration,
-    BarelyNotePitchType pitch_type, float pitch, float intensity,
-    BarelyId* out_note_id);
 
 /// Sets instrument data.
 ///
@@ -1054,6 +1035,18 @@ BARELY_EXPORT BarelyStatus BarelyTransport_GetTempo(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyTransport_IsPlaying(BarelyApi api,
                                                      bool* out_is_playing);
 
+/// Pauses transport.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_Pause(BarelyApi api);
+
+/// Plays transport.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_Play(BarelyApi api);
+
 /// Sets transport beat callback.
 ///
 /// @param api BarelyMusician api.
@@ -1089,13 +1082,7 @@ BARELY_EXPORT BarelyStatus BarelyTransport_SetUpdateCallback(
     BarelyApi api, BarelyTransport_UpdateCallback update_callback,
     void* user_data);
 
-/// Starts transport playback.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyTransport_Start(BarelyApi api);
-
-/// Stops transport playback.
+/// Stops transport.
 ///
 /// @param api BarelyMusician api.
 /// @return Status.

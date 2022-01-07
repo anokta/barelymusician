@@ -591,9 +591,6 @@ class Instrument {
     return *this;
   }
 
-  // TODO(#85): Implement `BarelyInstrument_CancelAllScheduledNotes`.
-  // TODO(#85): Implement `BarelyInstrument_CancelScheduledNote`.
-
   /// Returns gain.
   ///
   /// @return Gain in amplitude.
@@ -689,7 +686,7 @@ class Instrument {
     return static_cast<Status>(BarelyInstrument_ResetParam(capi_, id_, id));
   }
 
-  // TODO(#85): Implement `BarelyInstrument_ScheduleNote`.
+  // TODO(#85): Implement `BarelyInstrument_PlayNote`.
 
   /// Sets data.
   ///
@@ -837,6 +834,8 @@ class Instrument {
   // Note on callback.
   NoteOnCallback note_on_callback_;
 };
+
+class Note {};
 
 /// Note sequence.
 class Sequence {
@@ -1136,6 +1135,16 @@ class Transport {
     return is_playing;
   }
 
+  /// Pauses playback.
+  ///
+  /// @return Status.
+  Status Pause() { return static_cast<Status>(BarelyTransport_Pause(capi_)); }
+
+  /// Starts playback.
+  ///
+  /// @return Status.
+  Status Play() { return static_cast<Status>(BarelyTransport_Play(capi_)); }
+
   /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
@@ -1192,10 +1201,9 @@ class Transport {
     }
   }
 
-  /// Starts playback.
-  Status Start() { return static_cast<Status>(BarelyTransport_Start(capi_)); }
-
   /// Stops playback.
+  ///
+  /// @return Status.
   Status Stop() { return static_cast<Status>(BarelyTransport_Stop(capi_)); }
 
  private:

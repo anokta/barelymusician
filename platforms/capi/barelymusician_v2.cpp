@@ -411,11 +411,22 @@ BarelyStatus BarelyInstrument_StopNote(BarelyApi api, BarelyId instrument_id,
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelySequence_Clone(BarelyApi api, BarelyId sequence_id,
+                                  BarelyId* out_sequence_id) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelySequence_Create(BarelyApi api, BarelyId* out_sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement - this is a temp POC for testing.
+  *out_sequence_id = 0;
   return BarelyStatus_kOk;
 }
 
@@ -453,6 +464,16 @@ BarelyStatus BarelySequence_GetEndPosition(BarelyApi api, BarelyId sequence_id,
                                            double* out_end_position) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_end_position) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_GetInstrument(BarelyApi api, BarelyId sequence_id,
+                                          BarelyId* out_instrument_id) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
   sequence_id;
@@ -528,6 +549,16 @@ BarelyStatus BarelySequence_SetEndPosition(BarelyApi api, BarelyId sequence_id,
   // TODO(#85): Implement.
   sequence_id;
   end_position;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_SetInstrument(BarelyApi api, BarelyId sequence_id,
+                                          BarelyId instrument_id) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  instrument_id;
   return BarelyStatus_kUnimplemented;
 }
 

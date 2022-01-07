@@ -23,7 +23,6 @@ constexpr double kTempo = 120.0;
 
 int main(int /*argc*/, char* /*argv*/[]) {
   Api api(kSampleRate);
-
   ConsoleLog() << "Sample rate: " << api.GetSampleRate();
 
   auto& transport = api.GetTransport();
@@ -40,15 +39,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Instrument instrument2 = instrument1;
   ConsoleLog() << "Instrument 2 gain: " << instrument2.GetGain();
 
-  Sequence sequence(api);
+  Sequence sequence = api.CreateSequence();
   if (const auto status = sequence.SetBeginOffset(3.25); !IsOk(status)) {
     ConsoleLog() << "Failed to set begin offset: " << ToString(status);
     return -1;
   }
+  ConsoleLog() << "Sequence begin offset: " << sequence.GetBeginOffset();
 
-  const auto begin_offset_or = sequence.GetBeginOffset();
-  assert(begin_offset_or.IsOk());
-  ConsoleLog() << "Sequence begin offset: " << begin_offset_or.GetValue();
+  assert(sequence.SetInstrument(&instrument1) == Status::kUnimplemented);
+  assert(sequence.GetInstrument() == &instrument1);
 
   return 0;
 }

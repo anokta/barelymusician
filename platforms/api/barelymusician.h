@@ -542,9 +542,6 @@ class Instrument {
     }
   }
 
-  // TODO(#85): Implement `BarelyInstrument_CancelAllScheduledNotes`.
-  // TODO(#85): Implement `BarelyInstrument_CancelScheduledNote`.
-
   /// Constructs new `Instrument` via copy.
   ///
   /// @param other Other instrument.
@@ -593,6 +590,9 @@ class Instrument {
     }
     return *this;
   }
+
+  // TODO(#85): Implement `BarelyInstrument_CancelAllScheduledNotes`.
+  // TODO(#85): Implement `BarelyInstrument_CancelScheduledNote`.
 
   /// Returns gain.
   ///
@@ -794,8 +794,9 @@ class Instrument {
 
  private:
   friend class Api;
+  friend class Sequence;
 
-  // Constructs new `Instrument` with definition.
+  // Constructs new `Instrument` with internal api handle and definition.
   Instrument(BarelyApi capi, InstrumentDefinition definition)
       : capi_(capi),
         id_(BarelyId_kInvalid),
@@ -835,6 +836,249 @@ class Instrument {
 
   // Note on callback.
   NoteOnCallback note_on_callback_;
+};
+
+/// Note sequence.
+class Sequence {
+ public:
+  /// Destroys `Sequence`.
+  ~Sequence() { BarelySequence_Destroy(capi_, id_); }
+
+  /// Constructs new `Sequence` via copy.
+  ///
+  /// @param other Other sequence.
+  Sequence(const Sequence& other)
+      : capi_(other.capi_), id_(BarelyId_kInvalid), instrument_(nullptr) {
+    if (other.id_ != BarelyId_kInvalid) {
+      const auto status = BarelySequence_Clone(capi_, other.id_, &id_);
+      assert(status == BarelyStatus_kOk);
+      SetInstrument(other.instrument_);
+    }
+  }
+
+  /// Assigns `Sequence` via copy.
+  ///
+  /// @param other Other sequence.
+  Sequence& operator=(const Sequence& other) { return *this = Sequence(other); }
+
+  /// Constructs new `Sequence` via move.
+  ///
+  /// @param other Other sequence.
+  Sequence(Sequence&& other) noexcept
+      : capi_(std::exchange(other.capi_, nullptr)),
+        id_(std::exchange(other.id_, BarelyId_kInvalid)),
+        instrument_(std::exchange(other.instrument_, nullptr)) {}
+
+  /// Assigns `Sequence` via move.
+  ///
+  /// @param other Other sequence.
+  Sequence& operator=(Sequence&& other) noexcept {
+    if (this != &other) {
+      if (id_ != BarelyId_kInvalid) {
+        BarelySequence_Destroy(capi_, id_);
+      }
+      capi_ = std::exchange(other.capi_, nullptr);
+      id_ = std::exchange(other.id_, BarelyId_kInvalid);
+      instrument_ = std::exchange(other.instrument_, nullptr);
+    }
+    return *this;
+  }
+
+  // TODO(#85): Implement `BarelySequence_AddNote`.
+
+  /// Returns begin offset.
+  ///
+  /// @return Begin offset in beats.
+  double GetBeginOffset() const {
+    double begin_offset = 0.0;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelySequence_GetBeginOffset(capi_, id_, &begin_offset);
+      assert(status == BarelyStatus_kOk);
+    }
+    return begin_offset;
+  }
+
+  /// Returns begin position.
+  ///
+  /// @return Begin position in beats.
+  StatusOr<double> GetBeginPosition() const {
+    double begin_position = 0.0;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelySequence_GetBeginPosition(capi_, id_, &begin_position);
+      assert(status == BarelyStatus_kOk);
+    }
+    return begin_position;
+  }
+
+  /// Returns end position.
+  ///
+  /// @return End position in beats.
+  StatusOr<double> GetEndPosition() const {
+    double end_position = 0.0;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelySequence_GetEndPosition(capi_, id_, &end_position);
+      assert(status == BarelyStatus_kOk);
+    }
+    return end_position;
+  }
+
+  /// Returns instrument.
+  ///
+  /// @return Pointer to instrument, or nullptr.
+  const Instrument* GetInstrument() const { return instrument_; }
+
+  /// Returns loop begin offset.
+  ///
+  /// @return Loop begin offset in beats.
+  double GetLoopBeginOffset() const {
+    double loop_begin_offset = 0.0;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelySequence_GetLoopBeginOffset(capi_, id_, &loop_begin_offset);
+      assert(status == BarelyStatus_kOk);
+    }
+    return loop_begin_offset;
+  }
+
+  /// Returns loop length.
+  ///
+  /// @return Loop length in beats.
+  double GetLoopLength() const {
+    double loop_length = 0.0;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelySequence_GetLoopLength(capi_, id_, &loop_length);
+      assert(status == BarelyStatus_kOk);
+    }
+    return loop_length;
+  }
+
+  // TODO(#85): Implement `BarelySequence_GetNoteDuration`.
+  // TODO(#85): Implement `BarelySequence_GetNoteIntensity`.
+  // TODO(#85): Implement `BarelySequence_GetNotePitch`.
+  // TODO(#85): Implement `BarelySequence_GetNotePosition`.
+
+  /// Returns whether sequence is empty or not.
+  ///
+  /// @return True if empty, false otherwise.
+  StatusOr<bool> IsEmpty() const {
+    bool is_empty = false;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status = BarelySequence_IsEmpty(capi_, id_, &is_empty);
+      assert(status == BarelyStatus_kOk);
+    }
+    return is_empty;
+  }
+
+  /// Returns whether sequence should be looping or not.
+  ///
+  /// @return True if looping, false otherwise.
+  StatusOr<bool> IsLooping() const {
+    bool is_looping = false;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status = BarelySequence_IsLooping(capi_, id_, &is_looping);
+      assert(status == BarelyStatus_kOk);
+    }
+    return is_looping;
+  }
+
+  // TODO(#85): Implement `BarelySequence_RemoveAllNotes`.
+  // TODO(#85): Implement `BarelySequence_RemoveNote`.
+
+  /// Sets begin offset.
+  ///
+  /// @param begin_offset Begin offset in beats.
+  /// @return Status.
+  Status SetBeginOffset(double begin_offset) {
+    return static_cast<Status>(
+        BarelySequence_SetBeginOffset(capi_, id_, begin_offset));
+  }
+
+  /// Sets begin position.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @return Status.
+  Status SetBeginPosition(double begin_position) {
+    return static_cast<Status>(
+        BarelySequence_SetBeginPosition(capi_, id_, begin_position));
+  }
+
+  /// Sets end position.
+  ///
+  /// @param end_position End position in beats.
+  /// @return Status.
+  Status SetEndPosition(double end_position) {
+    return static_cast<Status>(
+        BarelySequence_SetEndPosition(capi_, id_, end_position));
+  }
+
+  /// Sets instrument.
+  ///
+  /// @param instrument Pointer to instrument, or nullptr.
+  /// @return Status.
+  Status SetInstrument(const Instrument* instrument) {
+    instrument_ = instrument;
+    return static_cast<Status>(BarelySequence_SetInstrument(
+        capi_, id_, instrument_ ? instrument_->id_ : BarelyId_kInvalid));
+  }
+
+  // TODO(#85): Implement `BarelySequence_SetInstrument`.
+
+  /// Sets loop begin offset.
+  ///
+  /// @param loop_begin_offset Loop begin offset in beats.
+  /// @return Status.
+  Status SetLoopBeginOffset(double loop_begin_offset) {
+    return static_cast<Status>(
+        BarelySequence_SetLoopBeginOffset(capi_, id_, loop_begin_offset));
+  }
+
+  /// Sets loop length.
+  ///
+  /// @param loop_length Loop length in beats.
+  /// @return Status.
+  Status SetLoopLength(double loop_length) {
+    return static_cast<Status>(
+        BarelySequence_SetLoopLength(capi_, id_, loop_length));
+  }
+
+  /// Sets whether sequence should be looping or not.
+  ///
+  /// @param is_looping True if looping, false otherwise.
+  /// @return Status.
+  Status SetLooping(bool is_looping) {
+    return static_cast<Status>(
+        BarelySequence_SetLooping(capi_, id_, is_looping));
+  }
+
+  // TODO(#85): Implement `BarelySequence_SetNoteDuration`.
+  // TODO(#85): Implement `BarelySequence_SetNoteIntensity`.
+  // TODO(#85): Implement `BarelySequence_SetNotePitch`.
+  // TODO(#85): Implement `BarelySequence_SetNotePosition`.
+
+ private:
+  friend class Api;
+
+  /// Constructs new `Sequence` with internal api handle.
+  explicit Sequence(BarelyApi capi)
+      : capi_(capi), id_(BarelyId_kInvalid), instrument_(nullptr) {
+    if (capi_) {
+      const auto status = BarelySequence_Create(capi_, &id_);
+      assert(status == BarelyStatus_kOk);
+    }
+  }
+
+  // Internal api handle.
+  BarelyApi capi_;
+
+  // Identifier.
+  BarelyId id_;
+
+  // Instrument.
+  const Instrument* instrument_;
 };
 
 /// Playback transport.
@@ -1052,6 +1296,11 @@ class Api {
     return Instrument(capi_, std::move(definition));
   }
 
+  /// Creates new sequence.
+  ///
+  /// @return Sequence.
+  Sequence CreateSequence() { return Sequence(capi_); }
+
   /// Returns conductor.
   ///
   /// @return Conductor.
@@ -1101,9 +1350,6 @@ class Api {
   }
 
  private:
-  friend class Instrument;
-  friend class Sequence;
-
   // Creates new internal api and returns corresponding handle.
   BarelyApi CreateCapi() {
     BarelyApi capi = nullptr;
@@ -1128,194 +1374,6 @@ class Api {
 
   // Playback transport.
   Transport transport_;
-};
-
-/// Note sequence.
-class Sequence {
- public:
-  /// Constructs new `Sequence`.
-  ///
-  /// @param api BarelyMusician C++ api.
-  explicit Sequence(const Api& api) : capi_(api.capi_) {
-    const auto status = BarelySequence_Create(capi_, &id_);
-    assert(status == BarelyStatus_kOk);
-  }
-
-  /// Destroys `Sequence`.
-  ~Sequence() { BarelySequence_Destroy(capi_, id_); }
-
-  // TODO(#85): Should `Sequence` be non-movable and non-copyable?
-
-  // TODO(#85): Implement `BarelySequence_Clone` (via copy?).
-
-  // TODO(#85): Implement `BarelySequence_AddNote`.
-
-  /// Returns begin offset.
-  ///
-  /// @return Begin offset in beats, or error status.
-  StatusOr<double> GetBeginOffset() const {
-    double begin_offset = 0.0;
-    if (const auto status =
-            BarelySequence_GetBeginOffset(capi_, id_, &begin_offset);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return begin_offset;
-  }
-
-  /// Returns begin position.
-  ///
-  /// @return Begin position in beats, or error status.
-  StatusOr<double> GetBeginPosition() const {
-    double begin_position = 0.0;
-    if (const auto status =
-            BarelySequence_GetBeginPosition(capi_, id_, &begin_position);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return begin_position;
-  }
-
-  /// Returns end position.
-  ///
-  /// @return End position in beats, or error status.
-  StatusOr<double> GetEndPosition() const {
-    double end_position = 0.0;
-    if (const auto status =
-            BarelySequence_GetEndPosition(capi_, id_, &end_position);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return end_position;
-  }
-
-  // TODO(#85): Implement `BarelySequence_GetInstrument`.
-
-  /// Returns loop begin offset.
-  ///
-  /// @return Loop begin offset in beats, or error status.
-  StatusOr<double> GetLoopBeginOffset() const {
-    double loop_begin_offset = 0.0;
-    if (const auto status =
-            BarelySequence_GetLoopBeginOffset(capi_, id_, &loop_begin_offset);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return loop_begin_offset;
-  }
-
-  /// Returns loop length.
-  ///
-  /// @return Loop length in beats, or error status.
-  StatusOr<double> GetLoopLength() const {
-    double loop_length = 0.0;
-    if (const auto status =
-            BarelySequence_GetLoopLength(capi_, id_, &loop_length);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return loop_length;
-  }
-
-  // TODO(#85): Implement `BarelySequence_GetNoteDuration`.
-  // TODO(#85): Implement `BarelySequence_GetNoteIntensity`.
-  // TODO(#85): Implement `BarelySequence_GetNotePitch`.
-  // TODO(#85): Implement `BarelySequence_GetNotePosition`.
-
-  /// Returns whether sequence is empty or not.
-  ///
-  /// @return True if empty, false otherwise, or error status.
-  StatusOr<bool> IsEmpty() const {
-    bool is_empty = false;
-    if (const auto status = BarelySequence_IsEmpty(capi_, id_, &is_empty);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return is_empty;
-  }
-
-  /// Returns whether sequence should be looping or not.
-  ///
-  /// @return True if looping, false otherwise, or error status.
-  StatusOr<bool> IsLooping() const {
-    bool is_looping = false;
-    if (const auto status = BarelySequence_IsLooping(capi_, id_, &is_looping);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return is_looping;
-  }
-
-  // TODO(#85): Implement `BarelySequence_RemoveAllNotes`.
-  // TODO(#85): Implement `BarelySequence_RemoveNote`.
-
-  /// Sets begin offset.
-  ///
-  /// @param begin_offset Begin offset in beats.
-  /// @return Status.
-  Status SetBeginOffset(double begin_offset) {
-    return static_cast<Status>(
-        BarelySequence_SetBeginOffset(capi_, id_, begin_offset));
-  }
-
-  /// Sets begin position.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @return Status.
-  Status SetBeginPosition(double begin_position) {
-    return static_cast<Status>(
-        BarelySequence_SetBeginPosition(capi_, id_, begin_position));
-  }
-
-  /// Sets end position.
-  ///
-  /// @param end_position End position in beats.
-  /// @return Status.
-  Status SetEndPosition(double end_position) {
-    return static_cast<Status>(
-        BarelySequence_SetEndPosition(capi_, id_, end_position));
-  }
-
-  // TODO(#85): Implement `BarelySequence_SetInstrument`.
-
-  /// Sets loop begin offset.
-  ///
-  /// @param loop_begin_offset Loop begin offset in beats.
-  /// @return Status.
-  Status SetLoopBeginOffset(double loop_begin_offset) {
-    return static_cast<Status>(
-        BarelySequence_SetLoopBeginOffset(capi_, id_, loop_begin_offset));
-  }
-
-  /// Sets loop length.
-  ///
-  /// @param loop_length Loop length in beats.
-  /// @return Status.
-  Status SetLoopLength(double loop_length) {
-    return static_cast<Status>(
-        BarelySequence_SetLoopLength(capi_, id_, loop_length));
-  }
-
-  /// Sets whether sequence should be looping or not.
-  ///
-  /// @param is_looping True if looping, false otherwise.
-  /// @return Status.
-  Status SetLooping(bool is_looping) {
-    return static_cast<Status>(
-        BarelySequence_SetLooping(capi_, id_, is_looping));
-  }
-
-  // TODO(#85): Implement `BarelySequence_SetNoteDuration`.
-  // TODO(#85): Implement `BarelySequence_SetNoteIntensity`.
-  // TODO(#85): Implement `BarelySequence_SetNotePitch`.
-  // TODO(#85): Implement `BarelySequence_SetNotePosition`.
-
- private:
-  // Internal api handle.
-  const BarelyApi& capi_;
-
-  // Identifier.
-  BarelyId id_;
 };
 
 }  // namespace barely

@@ -33,13 +33,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
   ConsoleLog() << "Tempo: " << transport.GetTempo();
 
-  Instrument instrument(
-      api, InstrumentDefinition{
-               .param_definitions = {ParamDefinition(ParamId{1}, 5)}});
+  Instrument instrument1 = api.CreateInstrument(InstrumentDefinition{
+      .param_definitions = {ParamDefinition(ParamId{1}, 5)}});
+  ConsoleLog() << "Instrument 1 gain: " << instrument1.GetGain();
 
-  const auto gain_or = instrument.GetGain();
-  assert(gain_or.IsOk());
-  ConsoleLog() << "Instrument gain: " << gain_or.GetValue();
+  Instrument instrument2 = instrument1;
+  ConsoleLog() << "Instrument 2 gain: " << instrument2.GetGain();
 
   Sequence sequence(api);
   if (const auto status = sequence.SetBeginOffset(3.25); !IsOk(status)) {

@@ -189,6 +189,17 @@ BarelyStatus BarelyConductor_SetStress(BarelyApi api, float stress) {
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelyInstrument_Clone(BarelyApi api, BarelyId instrument_id,
+                                    BarelyId* out_instrument_id) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement - this is a temp POC for testing.
+  *out_instrument_id = instrument_id + 1;
+  return BarelyStatus_kOk;
+}
+
 BarelyStatus BarelyInstrument_Create(BarelyApi api,
                                      BarelyInstrumentDefinition definition,
                                      BarelyId* out_instrument_id) {

@@ -249,8 +249,10 @@ class Conductor {
   /// @return Energy.
   float GetEnergy() const {
     float energy = 0.0f;
-    const auto status = BarelyConductor_GetEnergy(capi_, &energy);
-    assert(status == BarelyStatus_kOk);
+    if (capi_) {
+      const auto status = BarelyConductor_GetEnergy(capi_, &energy);
+      assert(status == BarelyStatus_kOk);
+    }
     return energy;
   }
 
@@ -287,8 +289,10 @@ class Conductor {
   /// @return Root note pitch.
   float GetRootNote() const {
     float root_pitch = 0.0f;
-    const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
-    assert(status == BarelyStatus_kOk);
+    if (capi_) {
+      const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
+      assert(status == BarelyStatus_kOk);
+    }
     return root_pitch;
   }
 
@@ -296,11 +300,13 @@ class Conductor {
   ///
   /// @return List of scale note pitches.
   std::vector<float> GetScale() const {
-    float* scale_pitches;
-    int num_scale_pitches;
-    const auto status =
-        BarelyConductor_GetScale(capi_, &scale_pitches, &num_scale_pitches);
-    assert(status == BarelyStatus_kOk);
+    float* scale_pitches = nullptr;
+    int num_scale_pitches = 0;
+    if (capi_) {
+      const auto status =
+          BarelyConductor_GetScale(capi_, &scale_pitches, &num_scale_pitches);
+      assert(status == BarelyStatus_kOk);
+    }
     return std::vector<float>(scale_pitches, scale_pitches + num_scale_pitches);
   }
 
@@ -309,8 +315,10 @@ class Conductor {
   /// @return Stress.
   float GetStress() const {
     float stress = 0.0f;
-    const auto status = BarelyConductor_GetStress(capi_, &stress);
-    assert(status == BarelyStatus_kOk);
+    if (capi_) {
+      const auto status = BarelyConductor_GetStress(capi_, &stress);
+      assert(status == BarelyStatus_kOk);
+    }
     return stress;
   }
 
@@ -411,19 +419,29 @@ class Conductor {
   friend class Api;
 
   // Constructs new `Conductor` with internal api handle.
-  explicit Conductor(const BarelyApi& capi) : capi_(capi) {}
+  explicit Conductor(BarelyApi capi) : capi_(capi) {}
 
-  // Default constructor.
+  // Default destructor.
   ~Conductor() = default;
 
-  // Non-copyable and non-movable.
+  // Non-copyable.
   Conductor(const Conductor& other) = delete;
   Conductor& operator=(const Conductor& other) = delete;
-  Conductor(Conductor&& other) noexcept = delete;
-  Conductor& operator=(Conductor&& other) noexcept = delete;
+
+  // Constructs new `Conductor` via move.
+  Conductor(Conductor&& other) noexcept
+      : capi_(std::exchange(other.capi_, nullptr)) {}
+
+  // Assigns `Conductor` via move.
+  Conductor& operator=(Conductor&& other) noexcept {
+    if (this != &other) {
+      capi_ = std::exchange(other.capi_, nullptr);
+    }
+    return *this;
+  }
 
   // Internal api handle.
-  const BarelyApi& capi_;
+  BarelyApi capi_;
 };
 
 /// Playback transport.
@@ -450,8 +468,10 @@ class Transport {
   /// @return Position in beats.
   double GetPosition() const {
     double position = 0.0;
-    const auto status = BarelyTransport_GetPosition(capi_, &position);
-    assert(status == BarelyStatus_kOk);
+    if (capi_) {
+      const auto status = BarelyTransport_GetPosition(capi_, &position);
+      assert(status == BarelyStatus_kOk);
+    }
     return position;
   }
 
@@ -460,8 +480,10 @@ class Transport {
   /// @return Tempo in bpm.
   double GetTempo() const {
     double tempo = 0.0;
-    const auto status = BarelyTransport_GetTempo(capi_, &tempo);
-    assert(status == BarelyStatus_kOk);
+    if (capi_) {
+      const auto status = BarelyTransport_GetTempo(capi_, &tempo);
+      assert(status == BarelyStatus_kOk);
+    }
     return tempo;
   }
 
@@ -470,8 +492,10 @@ class Transport {
   /// @return True if playing, false otherwise.
   bool IsPlaying() const {
     bool is_playing = false;
-    const auto status = BarelyTransport_IsPlaying(capi_, &is_playing);
-    assert(status == BarelyStatus_kOk);
+    if (capi_) {
+      const auto status = BarelyTransport_IsPlaying(capi_, &is_playing);
+      assert(status == BarelyStatus_kOk);
+    }
     return is_playing;
   }
 
@@ -541,20 +565,39 @@ class Transport {
   friend class Api;
 
   // Constructs new `Transport` with internal api handle.
-  explicit Transport(const BarelyApi& capi)
+  explicit Transport(BarelyApi capi)
       : capi_(capi), beat_callback_(nullptr), update_callback_(nullptr) {}
 
-  // Default constructor.
+  // Default destructor.
   ~Transport() = default;
 
-  // Non-copyable and non-movable.
+  // Non-copyable.
   Transport(const Transport& other) = delete;
   Transport& operator=(const Transport& other) = delete;
-  Transport(Transport&& other) noexcept = delete;
-  Transport& operator=(Transport&& other) noexcept = delete;
+
+  // Constructs new `Transport` via move.
+  Transport(Transport&& other) noexcept
+      : capi_(std::exchange(other.capi_, nullptr)) {
+    SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
+    SetUpdateCallback(std::exchange(other.update_callback_, nullptr));
+  }
+
+  // Assigns `Transport` via move.
+  Transport& operator=(Transport&& other) noexcept {
+    if (this != &other) {
+      if (capi_) {
+        SetBeatCallback(nullptr);
+        SetUpdateCallback(nullptr);
+      }
+      capi_ = std::exchange(other.capi_, nullptr);
+      SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
+      SetUpdateCallback(std::exchange(other.update_callback_, nullptr));
+    }
+    return *this;
+  }
 
   // Internal api handle.
-  const BarelyApi& capi_;
+  BarelyApi capi_;
 
   // Beat callback.
   BeatCallback beat_callback_;
@@ -567,10 +610,7 @@ class Transport {
 class Api {
  public:
   /// Constructs new `Api`.
-  Api() : conductor_(capi_), transport_(capi_) {
-    const auto status = BarelyApi_Create(&capi_);
-    assert(status == BarelyStatus_kOk);
-  }
+  Api() : capi_(CreateCapi()), conductor_(capi_), transport_(capi_) {}
 
   /// Constructs new `Api` with an initial sampling rate.
   ///
@@ -582,15 +622,34 @@ class Api {
 
   /// Destroys `Api`.
   ~Api() {
-    const auto status = BarelyApi_Destroy(capi_);
-    assert(status == BarelyStatus_kOk);
+    DestroyCapi(capi_);
+    capi_ = nullptr;
   }
 
-  /// Non-copyable and non-movable.
+  /// Non-copyable.
   Api(const Api& other) = delete;
   Api& operator=(const Api& other) = delete;
-  Api(Api&& other) noexcept = delete;
-  Api& operator=(Api&& other) noexcept = delete;
+
+  /// Constructs new `Api` via move.
+  ///
+  /// @param other Other api.
+  Api(Api&& other) noexcept
+      : capi_(std::exchange(other.capi_, nullptr)),
+        conductor_(std::move(other.conductor_)),
+        transport_(std::move(other.transport_)) {}
+
+  /// Assigns `Api` via move.
+  ///
+  /// @param other Other api.
+  Api& operator=(Api&& other) noexcept {
+    if (this != &other) {
+      conductor_ = std::move(other.conductor_);
+      transport_ = std::move(other.transport_);
+      DestroyCapi(capi_);
+      capi_ = std::exchange(other.capi_, nullptr);
+    }
+    return *this;
+  }
 
   /// Returns conductor.
   ///
@@ -607,8 +666,10 @@ class Api {
   /// @return Sampling rate in hz, or error status.
   int GetSampleRate() const {
     int sample_rate = 0;
-    const auto status = BarelyApi_GetSampleRate(capi_, &sample_rate);
-    assert(status == BarelyStatus_kOk);
+    if (capi_) {
+      const auto status = BarelyApi_GetSampleRate(capi_, &sample_rate);
+      assert(status == BarelyStatus_kOk);
+    }
     return sample_rate;
   }
 
@@ -642,7 +703,23 @@ class Api {
   friend class Instrument;
   friend class Sequence;
 
-  // Internal C api handle.
+  // Creates new internal api and returns corresponding handle.
+  BarelyApi CreateCapi() {
+    BarelyApi capi = nullptr;
+    const auto status = BarelyApi_Create(&capi);
+    assert(status == BarelyStatus_kOk);
+    return capi;
+  }
+
+  // Destroys internal api with corresponding handle.
+  void DestroyCapi(BarelyApi capi) {
+    if (capi) {
+      const auto status = BarelyApi_Destroy(capi);
+      assert(status == BarelyStatus_kOk);
+    }
+  }
+
+  // Internal api handle.
   BarelyApi capi_;
 
   // Conductor.

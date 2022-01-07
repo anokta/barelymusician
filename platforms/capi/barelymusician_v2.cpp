@@ -266,14 +266,12 @@ BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId instrument_id,
 }
 
 BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api, BarelyId instrument_id,
-                                       BarelyNotePitchType pitch_type,
                                        float pitch, bool* out_is_note_on) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_note_on) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
   instrument_id;
-  pitch_type;
   pitch;
   return BarelyStatus_kUnimplemented;
 }
@@ -378,13 +376,11 @@ BarelyStatus BarelyInstrument_SetParam(BarelyApi api, BarelyId instrument_id,
 }
 
 BarelyStatus BarelyInstrument_StartNote(BarelyApi api, BarelyId instrument_id,
-                                        BarelyNotePitchType pitch_type,
                                         float pitch, float intensity) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
   instrument_id;
-  pitch_type;
   pitch;
   intensity;
   return BarelyStatus_kUnimplemented;
@@ -400,13 +396,11 @@ BarelyStatus BarelyInstrument_StopAllNotes(BarelyApi api,
 }
 
 BarelyStatus BarelyInstrument_StopNote(BarelyApi api, BarelyId instrument_id,
-                                       BarelyNotePitchType pitch_type,
                                        float pitch) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
   instrument_id;
-  pitch_type;
   pitch;
   return BarelyStatus_kUnimplemented;
 }

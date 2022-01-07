@@ -649,10 +649,9 @@ class Instrument {
   /// @return True if active, false otherwise.
   bool IsNoteOn(float pitch) const {
     bool is_note_on = false;
-    // TODO(#85): Support other `NotePitchType`s.
     if (id_ != BarelyId_kInvalid) {
-      const auto status = BarelyInstrument_IsNoteOn(
-          capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, &is_note_on);
+      const auto status =
+          BarelyInstrument_IsNoteOn(capi_, id_, pitch, &is_note_on);
       assert(status == BarelyStatus_kOk);
     }
     return is_note_on;
@@ -767,9 +766,8 @@ class Instrument {
   /// @param intensity Note intensity.
   /// @return Status.
   Status StartNote(float pitch, float intensity = 1.0f) {
-    // TODO(#85): Support other `NotePitchType`s.
-    return static_cast<Status>(BarelyInstrument_StartNote(
-        capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch, intensity));
+    return static_cast<Status>(
+        BarelyInstrument_StartNote(capi_, id_, pitch, intensity));
   }
 
   /// Stops all notes.
@@ -784,9 +782,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @return Status.
   Status StopNote(float pitch) {
-    // TODO(#85): Support other `NotePitchType`s.
-    return static_cast<Status>(BarelyInstrument_StopNote(
-        capi_, id_, BarelyNotePitchType_AbsolutePitch, pitch));
+    return static_cast<Status>(BarelyInstrument_StopNote(capi_, id_, pitch));
   }
 
  private:
@@ -835,7 +831,10 @@ class Instrument {
   NoteOnCallback note_on_callback_;
 };
 
-class Note {};
+/// Note.
+class Note {
+ private:
+};
 
 /// Note sequence.
 class Sequence {
@@ -955,9 +954,7 @@ class Sequence {
     return loop_length;
   }
 
-  // TODO(#85): Implement `BarelySequence_GetNoteDuration`.
-  // TODO(#85): Implement `BarelySequence_GetNoteIntensity`.
-  // TODO(#85): Implement `BarelySequence_GetNotePitch`.
+  // TODO(#85): Implement `BarelySequence_GetNoteDefinition`
   // TODO(#85): Implement `BarelySequence_GetNotePosition`.
 
   /// Returns whether sequence is empty or not.
@@ -1024,8 +1021,6 @@ class Sequence {
         capi_, id_, instrument_ ? instrument_->id_ : BarelyId_kInvalid));
   }
 
-  // TODO(#85): Implement `BarelySequence_SetInstrument`.
-
   /// Sets loop begin offset.
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
@@ -1053,9 +1048,7 @@ class Sequence {
         BarelySequence_SetLooping(capi_, id_, is_looping));
   }
 
-  // TODO(#85): Implement `BarelySequence_SetNoteDuration`.
-  // TODO(#85): Implement `BarelySequence_SetNoteIntensity`.
-  // TODO(#85): Implement `BarelySequence_SetNotePitch`.
+  // TODO(#85): Implement `BarelySequence_SetNoteDefinition`.
   // TODO(#85): Implement `BarelySequence_SetNotePosition`.
 
  private:
@@ -1267,8 +1260,11 @@ class Api {
 
   /// Destroys `Api`.
   ~Api() {
-    DestroyCapi(capi_);
-    capi_ = nullptr;
+    if (capi_) {
+      const auto status = BarelyApi_Destroy(capi_);
+      assert(status == BarelyStatus_kOk);
+      capi_ = nullptr;
+    }
   }
 
   /// Non-copyable.
@@ -1290,7 +1286,10 @@ class Api {
     if (this != &other) {
       conductor_ = std::move(other.conductor_);
       transport_ = std::move(other.transport_);
-      DestroyCapi(capi_);
+      if (capi_) {
+        const auto status = BarelyApi_Destroy(capi_);
+        assert(status == BarelyStatus_kOk);
+      }
       capi_ = std::exchange(other.capi_, nullptr);
     }
     return *this;
@@ -1364,14 +1363,6 @@ class Api {
     const auto status = BarelyApi_Create(&capi);
     assert(status == BarelyStatus_kOk);
     return capi;
-  }
-
-  // Destroys internal api with corresponding handle.
-  void DestroyCapi(BarelyApi capi) {
-    if (capi) {
-      const auto status = BarelyApi_Destroy(capi);
-      assert(status == BarelyStatus_kOk);
-    }
   }
 
   // Internal api handle.

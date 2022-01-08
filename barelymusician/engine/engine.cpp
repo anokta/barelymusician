@@ -287,16 +287,16 @@ Status Engine::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
       instrument_id, transport_.GetLastTimestamp(), note_pitch, note_intensity);
 }
 
-Status Engine::SetInstrumentParam(Id instrument_id, int param_id,
+Status Engine::SetInstrumentParam(Id instrument_id, int param_index,
                                   float param_value) noexcept {
   return instrument_manager_.SetParam(
-      instrument_id, transport_.GetLastTimestamp(), param_id, param_value);
+      instrument_id, transport_.GetLastTimestamp(), param_index, param_value);
 }
 
 Status Engine::SetInstrumentParamToDefault(Id instrument_id,
-                                           int param_id) noexcept {
+                                           int param_index) noexcept {
   return instrument_manager_.SetParamToDefault(
-      instrument_id, transport_.GetLastTimestamp(), param_id);
+      instrument_id, transport_.GetLastTimestamp(), param_index);
 }
 
 void Engine::SetInstrumentNoteOnCallback(

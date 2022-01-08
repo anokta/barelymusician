@@ -20,9 +20,8 @@ ConductorDefinition GetTestConductorDefinition() {
       .create_fn = [](ConductorState* state) { state->emplace<float>(0.0f); },
       .destroy_fn = [](ConductorState* state) { state->reset(); },
       .set_param_fn =
-          [](ConductorState* state, int index, float value) {
-            *std::any_cast<float>(state) =
-                static_cast<float>(index + 1) * value;
+          [](ConductorState* state, ParamId id, float value) {
+            *std::any_cast<float>(state) = static_cast<float>(id + 1) * value;
           },
       .transform_note_duration_fn =
           [](ConductorState* state, const NoteDuration& note_duration) {

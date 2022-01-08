@@ -12,6 +12,7 @@ namespace barely::examples {
 using ::barelyapi::FindOrNull;
 using ::barelyapi::InstrumentDefinition;
 using ::barelyapi::ParamDefinition;
+using ::barelyapi::ParamId;
 
 DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
     : sample_rate_(sample_rate) {}
@@ -49,7 +50,7 @@ void DrumkitInstrument::SetCustomData(std::any data) noexcept {
   }
 }
 
-void DrumkitInstrument::SetParam(int id, float value) noexcept {
+void DrumkitInstrument::SetParam(ParamId id, float value) noexcept {
   switch (static_cast<DrumkitInstrumentParam>(id)) {
     case DrumkitInstrumentParam::kPadRelease:
       for (auto& [pitch, pad] : pads_) {

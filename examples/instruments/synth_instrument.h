@@ -33,7 +33,7 @@ class SynthInstrument : public GenericInstrument {
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
   void SetCustomData(std::any /*data*/) noexcept override {}
-  void SetParam(int index, float value) noexcept override;
+  void SetParam(barelyapi::ParamId id, float value) noexcept override;
 
   /// Returns instrument definition.
   static barelyapi::InstrumentDefinition GetDefinition() noexcept;

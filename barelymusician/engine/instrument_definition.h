@@ -58,10 +58,10 @@ using SetInstrumentNoteOnFn =
 /// Instrument set parameter function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param index Parameter index.
+/// @param id Parameter identifier.
 /// @param value Parameter value.
 using SetInstrumentParamFn =
-    std::function<void(InstrumentState* state, int index, float value)>;
+    std::function<void(InstrumentState* state, ParamId id, float value)>;
 
 /// Instrument definition.
 struct InstrumentDefinition {

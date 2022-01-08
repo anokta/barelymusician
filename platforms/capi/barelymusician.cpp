@@ -441,20 +441,20 @@ BarelyStatus BarelySetInstrumentNoteOnCallback(
 }
 
 BarelyStatus BarelySetInstrumentParam(BarelyApi api, BarelyId instrument_id,
-                                      int32_t param_index, float param_value) {
+                                      int32_t param_id, float param_value) {
   if (api) {
     return GetStatus(api->instance.SetInstrumentParam(
-        instrument_id, param_index, param_value));
+        instrument_id, param_id, param_value));
   }
   return kBarelyStatus_NotFound;
 }
 
 BarelyStatus BarelySetInstrumentParamToDefault(BarelyApi api,
                                                BarelyId instrument_id,
-                                               int32_t param_index) {
+                                               int32_t param_id) {
   if (api) {
     return GetStatus(
-        api->instance.SetInstrumentParamToDefault(instrument_id, param_index));
+        api->instance.SetInstrumentParamToDefault(instrument_id, param_id));
   }
   return kBarelyStatus_NotFound;
 }

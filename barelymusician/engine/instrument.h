@@ -55,7 +55,7 @@ class Instrument {
 
   /// Sets parameter.
   ///
-  /// @param index Parameter index.
+  /// @param id Parameter identifier.
   /// @param value Parameter value.
   void SetParam(int index, float value) noexcept;
 

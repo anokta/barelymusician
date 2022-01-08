@@ -77,19 +77,19 @@ namespace Barely {
 
     /// Sets parameter value.
     ///
-    /// @param index Parameter index.
+    /// @param id Parameter identifier.
     /// @param value Parameter value.
     /// @return True if success, false otherwise.
-    public bool SetParam(int index, float value) {
-      return Musician.SetInstrumentParam(this, index, value);
+    public bool SetParam(Int32 id, float value) {
+      return Musician.SetInstrumentParam(this, id, value);
     }
 
     /// Sets parameter to default value.
     ///
-    /// @param index Parameter index.
+    /// @param id Parameter identifier.
     /// @return True if success, false otherwise.
-    public bool SetParamToDefault(int index) {
-      return Musician.SetInstrumentParamToDefault(this, index);
+    public bool SetParamToDefault(Int32 id) {
+      return Musician.SetInstrumentParamToDefault(this, id);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

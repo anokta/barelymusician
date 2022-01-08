@@ -28,7 +28,7 @@ class DrumkitInstrument : public GenericInstrument {
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
   void SetCustomData(std::any data) noexcept override;
-  void SetParam(int, float) noexcept override;
+  void SetParam(barelyapi::ParamId, float) noexcept override;
 
   /// Returns instrument definition.
   static barelyapi::InstrumentDefinition GetDefinition() noexcept;

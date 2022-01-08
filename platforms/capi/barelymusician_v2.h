@@ -885,6 +885,15 @@ BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
                                                          BarelyId sequence_id);
 
+/// Removes sequence note at position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtPosition(
+    BarelyApi api, BarelyId sequence_id, double position);
+
 /// Removes all sequence notes at range.
 ///
 /// @param api BarelyMusician api.

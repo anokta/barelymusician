@@ -599,6 +599,17 @@ BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelySequence_RemoveAllNotesAtPosition(BarelyApi api,
+                                                     BarelyId sequence_id,
+                                                     double position) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  position;
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelySequence_RemoveAllNotesAtRange(BarelyApi api,
                                                   BarelyId sequence_id,
                                                   double begin_position,

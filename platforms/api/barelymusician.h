@@ -1229,12 +1229,22 @@ class Sequence {
     return static_cast<Status>(BarelySequence_RemoveAllNotes(capi_, id_));
   }
 
+  /// Removes all notes at position.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  /// @return Status.
+  Status RemoveAllNotes(double position) {
+    return static_cast<Status>(
+        BarelySequence_RemoveAllNotesAtPosition(capi_, id_, position));
+  }
+
   /// Removes all notes at range.
   ///
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
   /// @return Status.
-  Status RemoveAllNotesAtRange(double begin_position, double end_position) {
+  Status RemoveAllNotes(double begin_position, double end_position) {
     return static_cast<Status>(BarelySequence_RemoveAllNotesAtRange(
         capi_, id_, begin_position, end_position));
   }

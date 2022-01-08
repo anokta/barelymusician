@@ -445,6 +445,15 @@ BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelySequence_Clone(BarelyApi api, BarelyId sequence_id,
+                                  BarelyId* out_sequence_id) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelySequence_Create(BarelyApi api, BarelyId* out_sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
@@ -456,6 +465,18 @@ BarelyStatus BarelySequence_Create(BarelyApi api, BarelyId* out_sequence_id) {
 
 BarelyStatus BarelySequence_Destroy(BarelyApi api, BarelyId sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_GetAllNotes(BarelyApi api, BarelyId sequence_id,
+                                        BarelyId** out_note_ids,
+                                        int32_t* out_num_note_ids) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_note_ids) return BarelyStatus_kInvalidArgument;
+  if (!out_num_note_ids) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
   sequence_id;
@@ -575,6 +596,19 @@ BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
 
   // TODO(#85): Implement.
   sequence_id;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_RemoveAllNotesAtRange(BarelyApi api,
+                                                  BarelyId sequence_id,
+                                                  double begin_position,
+                                                  double end_position) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  sequence_id;
+  begin_position;
+  end_position;
   return BarelyStatus_kUnimplemented;
 }
 

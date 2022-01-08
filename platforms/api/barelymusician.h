@@ -1049,9 +1049,22 @@ class Sequence {
     }
   }
 
-  /// Non-copyable.
-  Sequence(const Sequence& other);
-  Sequence& operator=(const Sequence& other);
+  /// Constructs new `Sequence` via copy.
+  ///
+  /// @param other Other sequence.
+  Sequence(const Sequence& other)
+      : capi_(other.capi_), id_(BarelyId_kInvalid), instrument_(nullptr) {
+    if (other.id_ != BarelyId_kInvalid) {
+      const auto status = BarelySequence_Clone(capi_, other.id_, &id_);
+      assert(status == BarelyStatus_kOk);
+      SetInstrument(other.instrument_);
+    }
+  }
+
+  /// Assigns `Sequence` via copy.
+  ///
+  /// @param other Other sequence.
+  Sequence& operator=(const Sequence& other) { return *this = Sequence(other); }
 
   /// Constructs new `Sequence` via move.
   ///
@@ -1094,6 +1107,25 @@ class Sequence {
           &note_id);
     }
     return NoteReference(capi_, id_, note_id);
+  }
+
+  /// Returns all notes.
+  ///
+  /// @return List of note references.
+  std::vector<NoteReference> GetAllNotes() const {
+    BarelyId* note_ids = nullptr;
+    int num_note_ids = 0;
+    if (capi_) {
+      const auto status =
+          BarelySequence_GetAllNotes(capi_, id_, &note_ids, &num_note_ids);
+      assert(status == BarelyStatus_kOk);
+    }
+    std::vector<NoteReference> notes;
+    notes.reserve(num_note_ids);
+    for (int i = 0; i < num_note_ids; ++i) {
+      notes.push_back(NoteReference(capi_, id_, note_ids[i]));
+    }
+    return notes;
   }
 
   /// Returns begin offset.
@@ -1195,6 +1227,16 @@ class Sequence {
   /// @return Status.
   Status RemoveAllNotes() {
     return static_cast<Status>(BarelySequence_RemoveAllNotes(capi_, id_));
+  }
+
+  /// Removes all notes at range.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  /// @return Status.
+  Status RemoveAllNotesAtRange(double begin_position, double end_position) {
+    return static_cast<Status>(BarelySequence_RemoveAllNotesAtRange(
+        capi_, id_, begin_position, end_position));
   }
 
   /// Removes note.

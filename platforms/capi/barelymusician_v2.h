@@ -744,6 +744,16 @@ BARELY_EXPORT BarelyStatus
 BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id, double position,
                        BarelyNoteDefinition definition, BarelyId* out_note_id);
 
+/// Clones sequence.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_sequence_id Output sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_Clone(BarelyApi api,
+                                                BarelyId sequence_id,
+                                                BarelyId* out_sequence_id);
+
 /// Creates new sequence.
 ///
 /// @param api BarelyMusician api.
@@ -759,6 +769,17 @@ BARELY_EXPORT BarelyStatus BarelySequence_Create(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_Destroy(BarelyApi api,
                                                   BarelyId sequence_id);
+
+/// Gets all sequence notes.
+///
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_note_ids List of note ids.
+/// @param out_num_note_ids Number of note ids.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySequence_GetAllNotes(BarelyApi api, BarelyId sequence_id,
+                           BarelyId** out_note_ids, int32_t* out_num_note_ids);
 
 /// Gets sequence begin offset.
 ///
@@ -816,7 +837,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_GetLoopLength(
 /// Gets sequence note pitch.
 ///
 /// @param api BarelyMusician api.
-/// @param instrument_id Sequence identifier.
+/// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
 /// @param out_definition Note definition.
 /// @return Status.
@@ -827,7 +848,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_GetNoteDefinition(
 /// Gets sequence note position.
 ///
 /// @param api BarelyMusician api.
-/// @param instrument_id Sequence identifier.
+/// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
 /// @param out_position Output note position.
 /// @return Status.
@@ -859,15 +880,26 @@ BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyApi api,
 /// Removes all sequence notes.
 ///
 /// @param api BarelyMusician api.
-/// @param instrument_id Sequence identifier.
+/// @param sequence_id Sequence identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_RemoveAllNotes(BarelyApi api, BarelyId instrument_id);
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
+                                                         BarelyId sequence_id);
+
+/// Removes all sequence notes at range.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtRange(
+    BarelyApi api, BarelyId sequence_id, double begin_position,
+    double end_position);
 
 /// Removes sequence note.
 ///
 /// @param api BarelyMusician api.
-/// @param instrument_id Sequence identifier.
+/// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_RemoveNote(BarelyApi api,
@@ -944,7 +976,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(BarelyApi api,
 /// Sets sequence note pitch.
 ///
 /// @param api BarelyMusician api.
-/// @param instrument_id Sequence identifier.
+/// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
 /// @param definition Note definition.
 /// @return Status.
@@ -955,7 +987,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetNoteDefinition(
 /// Sets sequence note position.
 ///
 /// @param api BarelyMusician api.
-/// @param instrument_id Sequence identifier.
+/// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
 /// @param position Note position.
 /// @return Status.

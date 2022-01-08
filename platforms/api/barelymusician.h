@@ -1231,8 +1231,7 @@ class Sequence {
 
   /// Removes all notes at position.
   ///
-  /// @param begin_position Begin position in beats.
-  /// @param end_position End position in beats.
+  /// @param position Position in beats.
   /// @return Status.
   Status RemoveAllNotes(double position) {
     return static_cast<Status>(

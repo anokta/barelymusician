@@ -1323,12 +1323,16 @@ class Sequence {
  private:
   friend class Api;
 
-  /// Constructs new `Sequence` with internal api handle.
-  explicit Sequence(BarelyApi capi)
-      : capi_(capi), id_(BarelyId_kInvalid), instrument_(nullptr) {
+  /// Constructs new `Sequence` with internal api handle and instrument.
+  Sequence(BarelyApi capi, const Instrument* instrument)
+      : capi_(capi), id_(BarelyId_kInvalid), instrument_(instrument) {
     if (capi_) {
-      const auto status = BarelySequence_Create(capi_, &id_);
+      auto status = BarelySequence_Create(capi_, &id_);
       assert(status == BarelyStatus_kOk);
+      if (instrument_) {
+        status = BarelySequence_SetInstrument(capi_, id_, instrument_->id_);
+        assert(status == BarelyStatus_kOk);
+      }
     }
   }
 
@@ -1574,8 +1578,11 @@ class Api {
 
   /// Creates new sequence.
   ///
+  /// @param instrument Pointer to instrument.
   /// @return Sequence.
-  Sequence CreateSequence() { return Sequence(capi_); }
+  Sequence CreateSequence(const Instrument* instrument = nullptr) {
+    return Sequence(capi_, instrument);
+  }
 
   /// Returns conductor.
   ///

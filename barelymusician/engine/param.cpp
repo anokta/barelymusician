@@ -29,12 +29,8 @@ bool Param::ResetValue() noexcept {
 }
 
 bool Param::SetValue(float value) noexcept {
-  if (definition_.max_value.has_value()) {
-    value = std::min(value, *definition_.max_value);
-  }
-  if (definition_.min_value.has_value()) {
-    value = std::max(value, *definition_.min_value);
-  }
+  value =
+      std::min(std::max(value, definition_.min_value), definition_.max_value);
   if (value_ != value) {
     value_ = value;
     return true;

@@ -62,8 +62,10 @@ void DrumkitInstrument::SetParam(int id, float value) noexcept {
 InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<DrumkitInstrument>(
       [](int sample_rate) { return DrumkitInstrument(sample_rate); },
-      {// Pad release.
-       ParamDefinition{0.1f, 0.0f}});
+      {
+          // Pad release.
+          ParamDefinition{0.1f, 0.0f},
+      });
 }
 
 }  // namespace barely::examples

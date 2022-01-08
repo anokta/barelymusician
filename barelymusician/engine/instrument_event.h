@@ -7,7 +7,6 @@
 #include <variant>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/engine/param_definition.h"
 
 namespace barelyapi {
 
@@ -46,8 +45,8 @@ struct SetNoteOnEvent {
 
 /// Set parameter value event.
 struct SetParamEvent {
-  /// Parameter identifier.
-  ParamId id;
+  /// Parameter id.
+  int id;
 
   /// Parameter value.
   float value;
@@ -55,8 +54,8 @@ struct SetParamEvent {
 
 /// Set parameter to default value event.
 struct SetParamToDefaultEvent {
-  /// Parameter identifier.
-  ParamId id;
+  /// Parameter id.
+  int id;
 };
 
 /// Instrument event type.

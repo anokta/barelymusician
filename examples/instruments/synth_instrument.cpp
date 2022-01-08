@@ -34,8 +34,8 @@ void SynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-void SynthInstrument::SetParam(barelyapi::ParamId id, float value) noexcept {
-  switch (static_cast<SynthInstrumentParam>(id)) {
+void SynthInstrument::SetParam(int index, float value) noexcept {
+  switch (static_cast<SynthInstrumentParam>(index)) {
     case SynthInstrumentParam::kEnvelopeAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetAttack(value);

@@ -65,11 +65,11 @@ StatusOr<float> InstrumentManager::GetGain(Id instrument_id) const noexcept {
 }
 
 StatusOr<Param> InstrumentManager::GetParam(Id instrument_id,
-                                            ParamId param_id) const noexcept {
+                                            int param_index) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (param_id >= 0 &&
-        param_id < static_cast<ParamId>(controller->params.size())) {
-      return controller->params[param_id];
+    if (param_index >= 0 &&
+        param_index < static_cast<int>(controller->params.size())) {
+      return controller->params[param_index];
     }
     return Status::kInvalidArgument;
   }
@@ -362,15 +362,15 @@ void InstrumentManager::SetNoteOnCallback(
 }
 
 Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
-                                   ParamId param_id,
+                                   int param_index,
                                    float param_value) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (param_id >= 0 &&
-        param_id < static_cast<ParamId>(controller->params.size())) {
-      auto& param = controller->params[param_id];
+    if (param_index >= 0 &&
+        param_index < static_cast<int>(controller->params.size())) {
+      auto& param = controller->params[param_index];
       if (param.SetValue(param_value)) {
         update_events_[instrument_id].emplace(
-            timestamp, SetParamEvent{param_id, param.GetValue()});
+            timestamp, SetParamEvent{param_index, param.GetValue()});
       }
       return Status::kOk;
     }
@@ -380,14 +380,14 @@ Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
 }
 
 Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
-                                            ParamId param_id) noexcept {
+                                            int param_index) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (param_id >= 0 &&
-        param_id < static_cast<ParamId>(controller->params.size())) {
-      auto& param = controller->params[param_id];
+    if (param_index >= 0 &&
+        param_index < static_cast<int>(controller->params.size())) {
+      auto& param = controller->params[param_index];
       if (param.ResetValue()) {
         update_events_[instrument_id].emplace(
-            timestamp, SetParamEvent{param_id, param.GetValue()});
+            timestamp, SetParamEvent{param_index, param.GetValue()});
       }
       return Status::kOk;
     }

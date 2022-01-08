@@ -6,9 +6,6 @@
 
 namespace barelyapi {
 
-/// Parameter identifier type.
-using ParamId = std::int32_t;
-
 /// Parameter definition.
 struct ParamDefinition {
   /// Constructs new |ParamDefinition|.

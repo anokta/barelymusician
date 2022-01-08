@@ -36,10 +36,10 @@ using SetCustomConductorDataFn =
 /// Conductor set parameter function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param id Parameter identifier.
+/// @param id Parameter id.
 /// @param value Parameter value.
 using SetConductorParamFn =
-    std::function<void(ConductorState* state, ParamId id, float value)>;
+    std::function<void(ConductorState* state, int id, float value)>;
 
 /// Conductor transform note duration function signature.
 ///

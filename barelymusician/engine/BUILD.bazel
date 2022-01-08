@@ -68,7 +68,6 @@ cc_library(
     name = "instrument_event",
     hdrs = ["instrument_event.h"],
     deps = [
-        "param_definition",
         "//barelymusician/common:id",
     ],
 )

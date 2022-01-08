@@ -43,9 +43,9 @@ class GenericInstrument {
 
   /// Sets parameter value.
   ///
-  /// @param id Parameter identifier.
+  /// @param id Parameter index.
   /// @param value Parameter value.
-  virtual void SetParam(barelyapi::ParamId id, float value) noexcept = 0;
+  virtual void SetParam(int index, float value) noexcept = 0;
 };
 
 /// Returns instrument definition for the given create instrument function.
@@ -84,10 +84,10 @@ barelyapi::InstrumentDefinition GetInstrumentDefinition(
             instrument->NoteOn(pitch, intensity);
           },
       .set_param_fn =
-          [](barelyapi::InstrumentState* state, barelyapi::ParamId param_id,
+          [](barelyapi::InstrumentState* state, int param_index,
              float param_value) noexcept {
             auto* instrument = std::any_cast<InstrumentType>(state);
-            instrument->SetParam(param_id, param_value);
+            instrument->SetParam(param_index, param_value);
           },
       .param_definitions = std::move(param_definitions)};
 }

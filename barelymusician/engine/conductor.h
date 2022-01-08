@@ -33,9 +33,9 @@ class Conductor {
 
   /// Returns parameter.
   ///
-  /// @param id Parameter identifier.
+  /// @param id Parameter id.
   /// @return Parameter or error status.
-  StatusOr<Param> GetParam(ParamId id) const noexcept;
+  StatusOr<Param> GetParam(int id) const noexcept;
 
   /// Sets custom data.
   ///
@@ -44,16 +44,16 @@ class Conductor {
 
   /// Sets parameter.
   ///
-  /// @param id Parameter identifier.
+  /// @param id Parameter id.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParam(ParamId id, float value) noexcept;
+  Status SetParam(int id, float value) noexcept;
 
   /// Sets parameter to default.
   ///
-  /// @param id Parameter identifier.
+  /// @param id Parameter id.
   /// @return Status.
-  Status SetParamToDefault(ParamId id) noexcept;
+  Status SetParamToDefault(int id) noexcept;
 
   /// Transforms note duration.
   ///

@@ -250,19 +250,18 @@ class Engine {
   /// Sets instrument parameter.
   ///
   /// @param instrument_id Instrument id.
-  /// @param param_id Parameter identifier.
+  /// @param param_id Parameter id.
   /// @param param_value Parameter value.
   /// @return Status.
-  Status SetInstrumentParam(Id instrument_id, ParamId param_id,
+  Status SetInstrumentParam(Id instrument_id, int param_id,
                             float param_value) noexcept;
 
   /// Sets instrument parameter to default.
   ///
   /// @param instrument_id Instrument id.
-  /// @param param_id Parameter identifier.
+  /// @param param_id Parameter id.
   /// @return Status.
-  Status SetInstrumentParamToDefault(Id instrument_id,
-                                     ParamId param_id) noexcept;
+  Status SetInstrumentParamToDefault(Id instrument_id, int param_id) noexcept;
 
   /// Sets performer begin offset.
   ///

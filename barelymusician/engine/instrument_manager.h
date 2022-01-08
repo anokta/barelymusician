@@ -56,9 +56,9 @@ class InstrumentManager {
   /// Returns instrument parameter.
   ///
   /// @param instrument_id Instrument id.
-  /// @param param_id Parameter identifier.
+  /// @param param_index Parameter index.
   /// @return Instrument parameter or error status.
-  StatusOr<Param> GetParam(Id instrument_id, ParamId param_id) const noexcept;
+  StatusOr<Param> GetParam(Id instrument_id, int param_index) const noexcept;
 
   /// Returns instrument gain.
   ///
@@ -192,20 +192,20 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param param_id Parameter identifier.
+  /// @param param_index Parameter index.
   /// @param param_value Parameter value.
   /// @return Status.
-  Status SetParam(Id instrument_id, double timestamp, ParamId param_id,
+  Status SetParam(Id instrument_id, double timestamp, int param_index,
                   float param_value) noexcept;
 
   /// Sets instrument parameter to default value at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param param_id Parameter identifier.
+  /// @param param_index Parameter index.
   /// @return Status.
   Status SetParamToDefault(Id instrument_id, double timestamp,
-                           ParamId param_id) noexcept;
+                           int param_index) noexcept;
 
   /// Sets sampling rate at timestamp.
   ///

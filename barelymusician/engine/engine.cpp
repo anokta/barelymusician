@@ -1,7 +1,6 @@
 #include "barelymusician/engine/engine.h"
 
 #include <algorithm>
-#include <any>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -249,10 +248,9 @@ Status Engine::SetAllInstrumentParamsToDefault(Id instrument_id) noexcept {
       instrument_id, transport_.GetLastTimestamp());
 }
 
-Status Engine::SetCustomInstrumentData(Id instrument_id,
-                                       std::any custom_data) noexcept {
-  return instrument_manager_.SetCustomData(
-      instrument_id, transport_.GetLastTimestamp(), std::move(custom_data));
+Status Engine::SetInstrumentData(Id instrument_id, void* data) noexcept {
+  return instrument_manager_.SetData(instrument_id,
+                                     transport_.GetLastTimestamp(), data);
 }
 
 void Engine::SetConductor(ConductorDefinition definition) noexcept {

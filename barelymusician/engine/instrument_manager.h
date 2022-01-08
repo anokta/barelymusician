@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
-#include <any>
 #include <atomic>
 #include <functional>
 #include <optional>
@@ -134,14 +133,13 @@ class InstrumentManager {
   /// @return Status.
   Status SetAllParamsToDefault(Id instrument_id, double timestamp) noexcept;
 
-  /// Sets custom instrument data at timestamp.
+  /// Sets instrument data at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param custom_data Custom data.
+  /// @param data Data.
   /// @return Status.
-  Status SetCustomData(Id instrument_id, double timestamp,
-                       std::any custom_data) noexcept;
+  Status SetData(Id instrument_id, double timestamp, void* data) noexcept;
 
   /// Sets instrument gain at timestamp.
   ///

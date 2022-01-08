@@ -1,7 +1,6 @@
 #include "barelymusician/engine/instrument_manager.h"
 
 #include <algorithm>
-#include <any>
 #include <utility>
 #include <variant>
 
@@ -124,43 +123,41 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
         process_until_fn(message_frame);
         frame = message_frame;
       }
-      std::visit(
-          Visitor{[&](CreateEvent& create_event) noexcept {
-                    instrument.emplace(sample_rate,
-                                       std::move(create_event.definition));
-                  },
-                  [&](DestroyEvent& /*destroy_event*/) noexcept {
-                    instrument.reset();
-                  },
-                  [&](SetCustomDataEvent& set_custom_data_event) noexcept {
-                    if (instrument) {
-                      instrument->SetCustomData(
-                          std::move(set_custom_data_event.data));
-                    }
-                  },
-                  [&](SetGainEvent& set_gain_event) noexcept {
-                    if (instrument) {
-                      instrument->SetGain(set_gain_event.gain);
-                    }
-                  },
-                  [&](SetNoteOffEvent& set_note_off_event) noexcept {
-                    if (instrument) {
-                      instrument->SetNoteOff(set_note_off_event.pitch);
-                    }
-                  },
-                  [&](SetNoteOnEvent& set_note_on_event) noexcept {
-                    if (instrument) {
-                      instrument->SetNoteOn(set_note_on_event.pitch,
-                                            set_note_on_event.intensity);
-                    }
-                  },
-                  [&](SetParamEvent& set_param_event) noexcept {
-                    if (instrument) {
-                      instrument->SetParam(set_param_event.id,
-                                           set_param_event.value);
-                    }
-                  }},
-          it->second);
+      std::visit(Visitor{[&](CreateEvent& create_event) noexcept {
+                           instrument.emplace(
+                               sample_rate, std::move(create_event.definition));
+                         },
+                         [&](DestroyEvent& /*destroy_event*/) noexcept {
+                           instrument.reset();
+                         },
+                         [&](SetDataEvent& set_data_event) noexcept {
+                           if (instrument) {
+                             instrument->SetData(set_data_event.data);
+                           }
+                         },
+                         [&](SetGainEvent& set_gain_event) noexcept {
+                           if (instrument) {
+                             instrument->SetGain(set_gain_event.gain);
+                           }
+                         },
+                         [&](SetNoteOffEvent& set_note_off_event) noexcept {
+                           if (instrument) {
+                             instrument->SetNoteOff(set_note_off_event.pitch);
+                           }
+                         },
+                         [&](SetNoteOnEvent& set_note_on_event) noexcept {
+                           if (instrument) {
+                             instrument->SetNoteOn(set_note_on_event.pitch,
+                                                   set_note_on_event.intensity);
+                           }
+                         },
+                         [&](SetParamEvent& set_param_event) noexcept {
+                           if (instrument) {
+                             instrument->SetParam(set_param_event.id,
+                                                  set_param_event.value);
+                           }
+                         }},
+                 it->second);
     }
     // Process the rest of the buffer.
     if (frame < num_frames) {
@@ -186,9 +183,8 @@ void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
                   /*set_all_params_to_default_event*/) noexcept {
                 SetAllParamsToDefault(instrument_id, timestamp);
               },
-              [&](SetCustomDataEvent& set_custom_data_event) noexcept {
-                SetCustomData(instrument_id, timestamp,
-                              std::move(set_custom_data_event.data));
+              [&](SetDataEvent& set_data_event) noexcept {
+                SetData(instrument_id, timestamp, set_data_event.data);
               },
               [&](SetGainEvent& set_gain_event) noexcept {
                 SetGain(instrument_id, timestamp, set_gain_event.gain);
@@ -284,11 +280,10 @@ Status InstrumentManager::SetAllParamsToDefault(Id instrument_id,
   return Status::kNotFound;
 }
 
-Status InstrumentManager::SetCustomData(Id instrument_id, double timestamp,
-                                        std::any custom_data) noexcept {
+Status InstrumentManager::SetData(Id instrument_id, double timestamp,
+                                  void* data) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    update_events_[instrument_id].emplace(
-        timestamp, SetCustomDataEvent{std::move(custom_data)});
+    update_events_[instrument_id].emplace(timestamp, SetDataEvent{data});
     return Status::kOk;
   }
   return Status::kNotFound;

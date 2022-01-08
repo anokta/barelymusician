@@ -20,7 +20,7 @@ struct DestroyEvent {};
 
 /// Instrument processor event type.
 using InstrumentProcessorEvent =
-    std::variant<CreateEvent, DestroyEvent, SetCustomDataEvent, SetGainEvent,
+    std::variant<CreateEvent, DestroyEvent, SetDataEvent, SetGainEvent,
                  SetNoteOffEvent, SetNoteOnEvent, SetParamEvent>;
 
 /// Instrument processor event by timestamp map type.

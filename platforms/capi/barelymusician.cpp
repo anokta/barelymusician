@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-#include <any>
 #include <optional>
 #include <vector>
 
@@ -20,7 +19,6 @@ using ::barelyapi::Engine;
 using ::barelyapi::GetStatusOrStatus;
 using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::InstrumentDefinition;
-using ::barelyapi::InstrumentState;
 using ::barelyapi::IsOk;
 using ::barelyapi::Note;
 using ::barelyapi::ParamDefinition;
@@ -38,66 +36,22 @@ ParamDefinition GetParamDefinition(
 // Returns the corresponding |InstrumentDefinition| for a given |definition|.
 InstrumentDefinition GetInstrumentDefinition(
     BarelyInstrumentDefinition definition) noexcept {
-  InstrumentDefinition result;
-  if (definition.create_fn) {
-    result.create_fn = [create_fn = std::move(definition.create_fn)](
-                           InstrumentState* state, int sample_rate) noexcept {
-      create_fn(&state->emplace<BarelyInstrumentState>(), sample_rate);
-    };
+  std::vector<ParamDefinition> param_definitions;
+  param_definitions.reserve(definition.num_param_definitions);
+  for (int i = 0; i < definition.num_param_definitions; ++i) {
+    const auto& param_definition = definition.param_definitions[i];
+    param_definitions.emplace_back(param_definition.default_value,
+                                   param_definition.min_value,
+                                   param_definition.max_value);
   }
-  if (definition.destroy_fn) {
-    result.destroy_fn = [destroy_fn = std::move(definition.destroy_fn)](
-                            InstrumentState* state) noexcept {
-      destroy_fn(std::any_cast<BarelyInstrumentState*>(&state));
-      state->reset();
-    };
-  }
-  if (definition.process_fn) {
-    result.process_fn = [process_fn = std::move(definition.process_fn)](
-                            InstrumentState* state, float* output,
-                            int num_channels, int num_frames) noexcept {
-      process_fn(std::any_cast<BarelyInstrumentState*>(&state), output,
-                 num_channels, num_frames);
-    };
-  }
-  if (definition.set_custom_data_fn) {
-    result.set_custom_data_fn =
-        [set_custom_data_fn = std::move(definition.set_custom_data_fn)](
-            InstrumentState* state, std::any custom_data) {
-          set_custom_data_fn(std::any_cast<BarelyInstrumentState*>(&state),
-                             std::any_cast<void*>(std::move(custom_data)));
-        };
-  }
-  if (definition.set_note_off_fn) {
-    result.set_note_off_fn = [set_note_off_fn =
-                                  std::move(definition.set_note_off_fn)](
-                                 InstrumentState* state, float pitch) noexcept {
-      set_note_off_fn(std::any_cast<BarelyInstrumentState*>(&state), pitch);
-    };
-  }
-  if (definition.set_note_on_fn) {
-    result.set_note_on_fn =
-        [set_note_on_fn = std::move(definition.set_note_on_fn)](
-            InstrumentState* state, float pitch, float intensity) noexcept {
-          set_note_on_fn(std::any_cast<BarelyInstrumentState*>(&state), pitch,
-                         intensity);
-        };
-  }
-  if (definition.set_param_fn) {
-    result.set_param_fn = [set_param_fn = std::move(definition.set_param_fn)](
-                              InstrumentState* state, int32_t index,
-                              float value) noexcept {
-      set_param_fn(std::any_cast<BarelyInstrumentState*>(&state), index, value);
-    };
-  }
-  if (definition.num_param_definitions > 0) {
-    result.param_definitions.reserve(definition.num_param_definitions);
-    for (int32_t i = 0; i < definition.num_param_definitions; ++i) {
-      result.param_definitions.emplace_back(
-          GetParamDefinition(definition.param_definitions[i]));
-    }
-  }
-  return result;
+  return InstrumentDefinition{std::move(definition.create_fn),
+                              std::move(definition.destroy_fn),
+                              std::move(definition.process_fn),
+                              std::move(definition.set_data_fn),
+                              std::move(definition.set_note_off_fn),
+                              std::move(definition.set_note_on_fn),
+                              std::move(definition.set_param_fn),
+                              std::move(param_definitions)};
 }
 
 // Returns the corresponding |BarelyStatus| value for a given |status|.

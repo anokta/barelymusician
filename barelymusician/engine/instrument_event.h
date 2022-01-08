@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 
-#include <any>
 #include <map>
 #include <utility>
 #include <variant>
@@ -16,10 +15,10 @@ struct SetAllNotesOffEvent {};
 /// Set all parameters to default value event.
 struct SetAllParamsToDefaultEvent {};
 
-/// Set custom data event.
-struct SetCustomDataEvent {
-  /// Custom data.
-  std::any data;
+/// Set data event.
+struct SetDataEvent {
+  /// Data.
+  void* data;
 };
 
 /// Set gain event.
@@ -60,9 +59,9 @@ struct SetParamToDefaultEvent {
 
 /// Instrument event type.
 using InstrumentEvent =
-    std::variant<SetAllNotesOffEvent, SetAllParamsToDefaultEvent,
-                 SetCustomDataEvent, SetGainEvent, SetNoteOffEvent,
-                 SetNoteOnEvent, SetParamEvent, SetParamToDefaultEvent>;
+    std::variant<SetAllNotesOffEvent, SetAllParamsToDefaultEvent, SetDataEvent,
+                 SetGainEvent, SetNoteOffEvent, SetNoteOnEvent, SetParamEvent,
+                 SetParamToDefaultEvent>;
 
 /// Instrument id-event pair.
 using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;

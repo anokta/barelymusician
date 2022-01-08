@@ -69,22 +69,20 @@ void SynthInstrument::SetParam(int index, float value) noexcept {
 }
 
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
-  return GetInstrumentDefinition<SynthInstrument>(
-      [](int sample_rate) { return SynthInstrument(sample_rate); },
-      {
-          // Attack.
-          ParamDefinition{0.05f, 0.0f},
-          // Decay.
-          ParamDefinition{0.0f, 0.0f},
-          // Sustain.
-          ParamDefinition{1.0f, 0.0f, 1.0f},
-          // Release.
-          ParamDefinition{0.25f, 0.0f},
-          // Oscillator type.
-          ParamDefinition{static_cast<float>(OscillatorType::kSine)},
-          // Number of voices.
-          ParamDefinition{8.0f, 0.0f},
-      });
+  return GetInstrumentDefinition<SynthInstrument>({
+      // Attack.
+      ParamDefinition{0.05f, 0.0f},
+      // Decay.
+      ParamDefinition{0.0f, 0.0f},
+      // Sustain.
+      ParamDefinition{1.0f, 0.0f, 1.0f},
+      // Release.
+      ParamDefinition{0.25f, 0.0f},
+      // Oscillator type.
+      ParamDefinition{static_cast<float>(OscillatorType::kSine)},
+      // Number of voices.
+      ParamDefinition{8.0f, 0.0f},
+  });
 }
 
 }  // namespace barely::examples

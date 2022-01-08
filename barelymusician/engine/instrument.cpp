@@ -1,7 +1,6 @@
 #include "barelymusician/engine/instrument.h"
 
 #include <algorithm>
-#include <any>
 #include <utility>
 
 #include "barelymusician/engine/instrument_definition.h"
@@ -10,25 +9,23 @@ namespace barelyapi {
 
 namespace {
 
-// Dummy set custom instrument data function that does nothing.
-void NoopSetCustomInstrumentDataFn(InstrumentState* /*state*/,
-                                   std::any /*data*/) noexcept {}
+// Dummy set data function that does nothing.
+void NoopSetDataFn(void** /*state*/, void* /*data*/) noexcept {}
 
-// Dummy set instrument note off function that does nothing.
-void NoopSetInstrumentNoteOffFn(InstrumentState* /*state*/,
-                                float /*pitch*/) noexcept {}
+// Dummy set note off function that does nothing.
+void NoopSetNoteOffFn(void** /*state*/, float /*pitch*/) noexcept {}
 
 // Dummy set instrument note on function that does nothing.
-void NoopSetInstrumentNoteOnFn(InstrumentState* /*state*/, float /*pitch*/,
-                               float /*intensity*/) noexcept {}
+void NoopSetNoteOnFn(void** /*state*/, float /*pitch*/,
+                     float /*intensity*/) noexcept {}
 
 // Dummy set instrument parameter function that does nothing.
-void NoopSetInstrumentParamFn(InstrumentState* /*state*/, int /*index*/,
-                              float /*value*/) noexcept {}
+void NoopSetParamFn(void** /*state*/, int /*index*/, float /*value*/) noexcept {
+}
 
-// Process instrument function that fills the output buffer with zeros.
-void ZeroFillProcessInstrumentFn(InstrumentState* /*state*/, float* output,
-                                 int num_channels, int num_frames) noexcept {
+// Process function that fills the output buffer with zeros.
+void ZeroFillProcessFn(void** /*state*/, float* output, int num_channels,
+                       int num_frames) noexcept {
   std::fill_n(output, num_channels * num_frames, 0.0f);
 }
 
@@ -38,18 +35,17 @@ Instrument::Instrument(int sample_rate,
                        InstrumentDefinition definition) noexcept
     : destroy_fn_(std::move(definition.destroy_fn)),
       process_fn_(definition.process_fn ? std::move(definition.process_fn)
-                                        : &ZeroFillProcessInstrumentFn),
-      set_custom_data_fn_(definition.set_custom_data_fn
-                              ? std::move(definition.set_custom_data_fn)
-                              : &NoopSetCustomInstrumentDataFn),
+                                        : &ZeroFillProcessFn),
+      set_data_fn_(definition.set_data_fn ? std::move(definition.set_data_fn)
+                                          : &NoopSetDataFn),
       set_note_off_fn_(definition.set_note_off_fn
                            ? std::move(definition.set_note_off_fn)
-                           : &NoopSetInstrumentNoteOffFn),
+                           : &NoopSetNoteOffFn),
       set_note_on_fn_(definition.set_note_on_fn
                           ? std::move(definition.set_note_on_fn)
-                          : &NoopSetInstrumentNoteOnFn),
+                          : &NoopSetNoteOnFn),
       set_param_fn_(definition.set_param_fn ? std::move(definition.set_param_fn)
-                                            : &NoopSetInstrumentParamFn),
+                                            : &NoopSetParamFn),
       gain_(1.0f) {
   if (definition.create_fn) {
     definition.create_fn(&state_, sample_rate);
@@ -72,8 +68,8 @@ void Instrument::Process(float* output, int num_channels,
   }
 }
 
-void Instrument::SetCustomData(std::any data) noexcept {
-  set_custom_data_fn_(&state_, std::move(data));
+void Instrument::SetData(void* data) noexcept {
+  set_data_fn_(&state_, std::move(data));
 }
 
 void Instrument::SetGain(float gain) noexcept { gain_ = gain; }

@@ -1,7 +1,6 @@
 #include "barelymusician/engine/instrument_manager.h"
 
 #include <algorithm>
-#include <any>
 #include <vector>
 
 #include "barelymusician/common/id.h"
@@ -26,26 +25,25 @@ constexpr Id kInstrumentId = 1;
 // Returns test instrument definition that produces constant output that is set.
 InstrumentDefinition GetTestInstrumentDefinition() {
   return InstrumentDefinition{
-      .create_fn = [](InstrumentState* state,
-                      int /*sample_rate*/) { state->emplace<float>(0.0f); },
-      .destroy_fn = [](InstrumentState* state) { state->reset(); },
+      .create_fn = [](void** state,
+                      int /*sample_rate*/) { *state = new float{0.0f}; },
+      .destroy_fn = [](void** state) { delete *state; },
       .process_fn =
-          [](InstrumentState* state, float* output, int num_channels,
-             int num_frames) {
+          [](void** state, float* output, int num_channels, int num_frames) {
             std::fill_n(output, num_channels * num_frames,
-                        *std::any_cast<float>(state));
+                        *reinterpret_cast<float*>(*state));
           },
       .set_note_off_fn =
-          [](InstrumentState* state, float /*pitch*/) {
-            *std::any_cast<float>(state) = 0.0f;
+          [](void** state, float /*pitch*/) {
+            *reinterpret_cast<float*>(*state) = 0.0f;
           },
       .set_note_on_fn =
-          [](InstrumentState* state, float pitch, float intensity) {
-            *std::any_cast<float>(state) = pitch * intensity;
+          [](void** state, float pitch, float intensity) {
+            *reinterpret_cast<float*>(*state) = pitch * intensity;
           },
       .set_param_fn =
-          [](InstrumentState* state, int index, float value) {
-            *std::any_cast<float>(state) =
+          [](void** state, int index, float value) {
+            *reinterpret_cast<float*>(*state) =
                 static_cast<float>(index + 1) * value;
           },
       .param_definitions = {ParamDefinition{0.0f}}};

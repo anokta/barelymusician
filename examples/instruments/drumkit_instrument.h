@@ -1,7 +1,6 @@
 #ifndef EXAMPLES_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
 
-#include <any>
 #include <unordered_map>
 #include <vector>
 
@@ -27,7 +26,7 @@ class DrumkitInstrument : public GenericInstrument {
   void NoteOn(float pitch, float intensity) noexcept override;
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
-  void SetCustomData(std::any data) noexcept override;
+  void SetData(void* data) noexcept override;
   void SetParam(int, float) noexcept override;
 
   /// Returns instrument definition.

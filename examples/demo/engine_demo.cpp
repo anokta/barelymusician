@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <any>
 #include <cassert>
 #include <cctype>
 #include <chrono>
@@ -263,8 +262,8 @@ int main(int /*argc*/, char* argv[]) {
     const std::string path = runfiles->Rlocation(kDrumsBaseFilename + name);
     assert(it.first->second.Load(path));
   }
-  engine.SetCustomInstrumentData(instrument_ids.back(),
-                                 std::any{std::move(drumkit_files)});
+  engine.SetInstrumentData(instrument_ids.back(),
+                           reinterpret_cast<void*>(&drumkit_files));
   const auto drumkit_beat_composer_callback =
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, &random, std::placeholders::_5,

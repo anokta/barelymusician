@@ -72,89 +72,87 @@ typedef struct BarelyParamDefinition {
 
 // TODO(#85): Add |BarelyConductorDefinition|.
 
-/// Instrument state type.
-typedef void* BarelyInstrumentState;
-
 /// Instrument create function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param sample_rate Sampling rate in hz.
-typedef void (*BarelyInstrumentCreateFn)(BarelyInstrumentState* state,
-                                         int32_t sample_rate);
+typedef void (*BarelyInstrumentDefinition_CreateFn)(void** state,
+                                                    int32_t sample_rate);
 
 /// Instrument destroy function signature.
 ///
 /// @param state Pointer to instrument state.
-typedef void (*BarelyInstrumentDestroyFn)(BarelyInstrumentState* state);
+typedef void (*BarelyInstrumentDefinition_DestroyFn)(void** state);
 
 /// Instrument process function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param output Output buffer.
-/// @param num_channels Number of channels.
-/// @param num_frames Number of frames.
-typedef void (*BarelyInstrumentProcessFn)(BarelyInstrumentState* state,
-                                          float* output, int32_t num_channels,
-                                          int32_t num_frames);
+/// @param num_output_channels Number of channels.
+/// @param num_output_frames Number of frames.
+typedef void (*BarelyInstrumentDefinition_ProcessFn)(
+    void** state, float* output, int32_t num_output_channels,
+    int32_t num_output_frames);
 
-/// Instrument set custom data function signature.
+/// Instrument set data function signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param custom_data Custom data.
-typedef void (*BarelyInstrumentSetCustomDataFn)(BarelyInstrumentState* state,
-                                                void* custom_data);
+/// @param data Data.
+typedef void (*BarelyInstrumentDefinition_SetDataFn)(void** state, void* data);
 
 /// Instrument set note off function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrumentSetNoteOffFn)(BarelyInstrumentState* state,
-                                             float pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOffFn)(void** state,
+                                                        float pitch);
 
 /// Instrument set note on function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyInstrumentSetNoteOnFn)(BarelyInstrumentState* state,
-                                            float pitch, float intensity);
+typedef void (*BarelyInstrumentDefinition_SetNoteOnFn)(void** state,
+                                                       float pitch,
+                                                       float intensity);
 
 /// Instrument set parameter function signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param index Parameter index.
 /// @param value Parameter value.
-typedef void (*BarelyInstrumentSetParamFn)(BarelyInstrumentState* state,
-                                           int32_t index, float value);
+typedef void (*BarelyInstrumentDefinition_SetParamFn)(void** state,
+                                                      int32_t index,
+                                                      float value);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create function.
-  BarelyInstrumentCreateFn create_fn;
+  BarelyInstrumentDefinition_CreateFn create_fn;
 
   /// Destroy function.
-  BarelyInstrumentDestroyFn destroy_fn;
+  BarelyInstrumentDefinition_DestroyFn destroy_fn;
 
   /// Process function.
-  BarelyInstrumentProcessFn process_fn;
+  BarelyInstrumentDefinition_ProcessFn process_fn;
 
-  /// Set custom_data function.
-  BarelyInstrumentSetCustomDataFn set_custom_data_fn;
+  /// Set data function.
+  BarelyInstrumentDefinition_SetDataFn set_data_fn;
 
   /// Set note off function.
-  BarelyInstrumentSetNoteOffFn set_note_off_fn;
+  BarelyInstrumentDefinition_SetNoteOffFn set_note_off_fn;
 
   /// Set note on function.
-  BarelyInstrumentSetNoteOnFn set_note_on_fn;
+  BarelyInstrumentDefinition_SetNoteOnFn set_note_on_fn;
 
   /// Set parameter function.
-  BarelyInstrumentSetParamFn set_param_fn;
-
-  /// Number of parameter definitions.
-  int32_t num_param_definitions;
+  BarelyInstrumentDefinition_SetParamFn set_param_fn;
 
   /// List of parameter definitions.
   BarelyParamDefinition* param_definitions;
+
+  /// Number of parameter definitions.
+  int32_t num_param_definitions;
 } BarelyInstrumentDefinition;
 
 /// Instrument note off callback signature.

@@ -1,6 +1,5 @@
 #include "barelymusician/engine/conductor.h"
 
-#include <any>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -17,17 +16,16 @@ namespace barelyapi {
 
 namespace {
 
-// Dummy set custom conductor data function that does nothing.
-void NoopSetCustomConductorDataFn(ConductorState* /*state*/,
-                                  std::any /*data*/) noexcept {}
+// Dummy set conductor data function that does nothing.
+void NoopSetConductorDataFn(void** /*state*/, void* /*data*/) noexcept {}
 
 // Dummy set conductor parameter function that does nothing.
-void NoopSetConductorParamFn(ConductorState* /*state*/, int /*index*/,
+void NoopSetConductorParamFn(void** /*state*/, int /*index*/,
                              float /*value*/) noexcept {}
 
 // Dummy transform note duration function that returns raw note duration.
 StatusOr<double> NoopTransformNoteDurationFn(
-    ConductorState* /*state*/, const NoteDuration& note_duration) noexcept {
+    void** /*state*/, const NoteDuration& note_duration) noexcept {
   if (std::holds_alternative<double>(note_duration)) {
     return std::get<double>(note_duration);
   }
@@ -36,7 +34,7 @@ StatusOr<double> NoopTransformNoteDurationFn(
 
 // Dummy transform note intensity function that returns raw note intensity.
 StatusOr<float> NoopTransformNoteIntensityFn(
-    ConductorState* /*state*/, const NoteIntensity& note_intensity) noexcept {
+    void** /*state*/, const NoteIntensity& note_intensity) noexcept {
   if (std::holds_alternative<float>(note_intensity)) {
     return std::get<float>(note_intensity);
   }
@@ -44,7 +42,7 @@ StatusOr<float> NoopTransformNoteIntensityFn(
 }
 
 // Dummy transform note pitch function that returns raw note pitch.
-StatusOr<float> NoopTransformNotePitchFn(ConductorState* /*state*/,
+StatusOr<float> NoopTransformNotePitchFn(void** /*state*/,
                                          const NotePitch& note_pitch) noexcept {
   if (std::holds_alternative<float>(note_pitch)) {
     return std::get<float>(note_pitch);
@@ -53,8 +51,7 @@ StatusOr<float> NoopTransformNotePitchFn(ConductorState* /*state*/,
 }
 
 // Dummy transform playback tempo function that returns the original tempo.
-double NoopTransformPlaybackTempoFn(ConductorState* /*state*/,
-                                    double tempo) noexcept {
+double NoopTransformPlaybackTempoFn(void** /*state*/, double tempo) noexcept {
   return tempo;
 }
 
@@ -62,9 +59,8 @@ double NoopTransformPlaybackTempoFn(ConductorState* /*state*/,
 
 Conductor::Conductor(ConductorDefinition definition) noexcept
     : destroy_fn_(std::move(definition.destroy_fn)),
-      set_custom_data_fn_(definition.set_custom_data_fn
-                              ? std::move(definition.set_custom_data_fn)
-                              : &NoopSetCustomConductorDataFn),
+      set_data_fn_(definition.set_data_fn ? std::move(definition.set_data_fn)
+                                          : &NoopSetConductorDataFn),
       set_param_fn_(definition.set_param_fn ? std::move(definition.set_param_fn)
                                             : &NoopSetConductorParamFn),
       transform_note_duration_fn_(
@@ -106,9 +102,7 @@ StatusOr<Param> Conductor::GetParam(int index) const noexcept {
   return Status::kInvalidArgument;
 }
 
-void Conductor::SetCustomData(std::any data) noexcept {
-  set_custom_data_fn_(&state_, std::move(data));
-}
+void Conductor::SetData(void* data) noexcept { set_data_fn_(&state_, data); }
 
 Status Conductor::SetParam(int index, float value) noexcept {
   if (index >= 0 && index < static_cast<int>(params_.size())) {

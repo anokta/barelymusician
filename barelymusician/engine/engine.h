@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
-#include <any>
 #include <optional>
 #include <unordered_map>
 #include <vector>
@@ -197,13 +196,12 @@ class Engine {
   /// @param definition Conductor definition.
   void SetConductor(ConductorDefinition definition) noexcept;
 
-  /// Sets custom instrument data.
+  /// Sets instrument data.
   ///
   /// @param instrument_id Instrument id.
-  /// @param custom_data Custom data.
+  /// @param data Data.
   /// @return Status.
-  Status SetCustomInstrumentData(Id instrument_id,
-                                 std::any custom_data) noexcept;
+  Status SetInstrumentData(Id instrument_id, void* data) noexcept;
 
   /// Sets instrument gain.
   ///
@@ -261,7 +259,8 @@ class Engine {
   /// @param instrument_id Instrument id.
   /// @param param_index Parameter index.
   /// @return Status.
-  Status SetInstrumentParamToDefault(Id instrument_id, int param_index) noexcept;
+  Status SetInstrumentParamToDefault(Id instrument_id,
+                                     int param_index) noexcept;
 
   /// Sets performer begin offset.
   ///

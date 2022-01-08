@@ -31,7 +31,6 @@ using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParam;
 using ::barelyapi::ConductorDefinition;
-using ::barelyapi::ConductorState;
 using ::barelyapi::Engine;
 using ::barelyapi::Id;
 using ::barelyapi::IsOk;
@@ -210,26 +209,24 @@ int main(int /*argc*/, char* /*argv*/[]) {
             use_conductor
                 ? ConductorDefinition{
                       .transform_note_duration_fn =
-                          [&](ConductorState*,
-                              const NoteDuration& note_duration) {
+                          [&](void**, const NoteDuration& note_duration) {
                             return std::get<double>(note_duration) * 0.25 *
                                    static_cast<double>(
                                        random.DrawUniform(0, 4));
                           },
                       .transform_note_intensity_fn =
-                          [&](ConductorState*,
-                              const NoteIntensity& note_intensity) {
+                          [&](void**, const NoteIntensity& note_intensity) {
                             return std::get<float>(note_intensity) * 0.25f *
                                    static_cast<float>(random.DrawUniform(1, 4));
                           },
                       .transform_note_pitch_fn =
-                          [&](ConductorState*, const NotePitch& note_pitch) {
+                          [&](void**, const NotePitch& note_pitch) {
                             return std::get<float>(note_pitch) +
                                    static_cast<float>(
                                        random.DrawUniform(-1, 1));
                           },
                       .transform_playback_tempo_fn =
-                          [&](ConductorState*, double playback_tempo) {
+                          [&](void**, double playback_tempo) {
                             return 1.25 * playback_tempo;
                           }}
                 : ConductorDefinition{});

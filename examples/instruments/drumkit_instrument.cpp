@@ -1,6 +1,5 @@
 #include "examples/instruments/drumkit_instrument.h"
 
-#include <any>
 #include <unordered_map>
 
 #include "barelymusician/common/find_or_null.h"
@@ -42,9 +41,9 @@ void DrumkitInstrument::Process(float* output, int num_channels,
   }
 }
 
-void DrumkitInstrument::SetCustomData(std::any data) noexcept {
+void DrumkitInstrument::SetData(void* data) noexcept {
   for (const auto& [pitch, file] :
-       std::any_cast<std::unordered_map<float, WavFile>&>(data)) {
+       *reinterpret_cast<std::unordered_map<float, WavFile>*>(data)) {
     pads_.insert({pitch, DrumkitPad{file, sample_rate_}});
   }
 }
@@ -60,12 +59,10 @@ void DrumkitInstrument::SetParam(int id, float value) noexcept {
 }
 
 InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
-  return GetInstrumentDefinition<DrumkitInstrument>(
-      [](int sample_rate) { return DrumkitInstrument(sample_rate); },
-      {
-          // Pad release.
-          ParamDefinition{0.1f, 0.0f},
-      });
+  return GetInstrumentDefinition<DrumkitInstrument>({
+      // Pad release.
+      ParamDefinition{0.1f, 0.0f},
+  });
 }
 
 }  // namespace barely::examples

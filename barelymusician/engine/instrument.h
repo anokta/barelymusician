@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
-#include <any>
-
 #include "barelymusician/engine/instrument_definition.h"
 
 namespace barelyapi {
@@ -32,10 +30,10 @@ class Instrument {
   /// @param num_frames Number of output frames.
   void Process(float* output, int num_channels, int num_frames) noexcept;
 
-  /// Sets custom data.
+  /// Sets data.
   ///
-  /// @param data Custom data.
-  void SetCustomData(std::any data) noexcept;
+  /// @param data Data.
+  void SetData(void* data) noexcept;
 
   /// Sets gain.
   ///
@@ -61,25 +59,25 @@ class Instrument {
 
  private:
   // Instrument destroy function.
-  DestroyInstrumentFn destroy_fn_;
+  InstrumentDefinition::DestroyFn destroy_fn_;
 
   // Instrument process function.
-  ProcessInstrumentFn process_fn_;
+  InstrumentDefinition::ProcessFn process_fn_;
 
-  // Instrument set custom data function.
-  SetCustomInstrumentDataFn set_custom_data_fn_;
+  // Instrument set data function.
+  InstrumentDefinition::SetDataFn set_data_fn_;
 
   // Instrument set note off function.
-  SetInstrumentNoteOffFn set_note_off_fn_;
+  InstrumentDefinition::SetNoteOffFn set_note_off_fn_;
 
   // Instrument set note on function.
-  SetInstrumentNoteOnFn set_note_on_fn_;
+  InstrumentDefinition::SetNoteOnFn set_note_on_fn_;
 
   // Instrument set parameter function.
-  SetInstrumentParamFn set_param_fn_;
+  InstrumentDefinition::SetParamFn set_param_fn_;
 
   // Instrument state.
-  InstrumentState state_;
+  void* state_;
 
   // Instrument gain.
   float gain_;

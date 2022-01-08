@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 #define BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 
-#include <any>
 #include <vector>
 
 #include "barelymusician/common/status.h"
@@ -37,10 +36,10 @@ class Conductor {
   /// @return Parameter or error status.
   StatusOr<Param> GetParam(int id) const noexcept;
 
-  /// Sets custom data.
+  /// Sets data.
   ///
-  /// @param data Custom data.
-  void SetCustomData(std::any data) noexcept;
+  /// @param data Data.
+  void SetData(void* data) noexcept;
 
   /// Sets parameter.
   ///
@@ -83,8 +82,8 @@ class Conductor {
   // Conductor destroy function.
   DestroyConductorFn destroy_fn_;
 
-  // Conductor set custom data function.
-  SetCustomConductorDataFn set_custom_data_fn_;
+  // Conductor set data function.
+  SetConductorDataFn set_data_fn_;
 
   // Conductor set parameter function.
   SetConductorParamFn set_param_fn_;
@@ -102,7 +101,7 @@ class Conductor {
   TransformPlaybackTempoFn transform_playback_tempo_fn_;
 
   // Conductor state.
-  ConductorState state_;
+  void* state_;
 
   // Conductor parameters.
   std::vector<Param> params_;

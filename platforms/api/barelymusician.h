@@ -115,6 +115,60 @@ class StatusOr {
   std::variant<Status, ValueType> value_or_;
 };
 
+/// Note pitch type.
+enum class NotePitchType : BarelyNotePitchType {
+  /// Absolute pitch.
+  kAbsolutePitch = BarelyNotePitchType_kAbsolutePitch,
+  /// Relative pitch with respect to conductor root note.
+  kRelativePitch = BarelyNotePitchType_kRelativePitch,
+  /// Scale index with respect to conductor root note and scale.
+  kScaleIndex = BarelyNotePitchType_kScaleIndex,
+};
+
+/// Note definition.
+struct NoteDefinition {
+  /// Constructs new `NoteDefinition`.
+  ///
+  /// @param duration Note duration.
+  /// @param pitch_type Note pitch type.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @param bypass_adjustment True to bypass conductor adjustment.
+  NoteDefinition(double duration, NotePitchType pitch_type, float pitch,
+                 float intensity = 1.0f, bool bypass_adjustment = false)
+      : duration(duration),
+        pitch_type(pitch_type),
+        pitch(pitch),
+        intensity(intensity),
+        bypass_adjustment(bypass_adjustment) {}
+
+  /// Constructs new `NoteDefinition` with absolute pitch.
+  ///
+  /// @param duration Note duration.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @param bypass_adjustment True to bypass conductor adjustment.
+  NoteDefinition(double duration, float pitch, float intensity = 1.0f,
+                 bool bypass_adjustment = false)
+      : NoteDefinition(duration, NotePitchType::kAbsolutePitch, pitch,
+                       intensity, bypass_adjustment) {}
+
+  /// Duration.
+  double duration;
+
+  /// Pitch type.
+  NotePitchType pitch_type;
+
+  /// Pitch value.
+  float pitch;
+
+  /// Intensity.
+  float intensity;
+
+  /// Denotes whether conductor adjust should be bypassed or not.
+  bool bypass_adjustment;
+};
+
 /// Parameter identifier type.
 using ParamId = std::int32_t;
 
@@ -174,6 +228,33 @@ struct ParamDefinition {
 
 /// Conductor definition.
 struct ConductorDefinition {
+  /// Conductor adjust note duration function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param duration Pointer to note duration.
+  using AdjustNoteDurationFn = void (*)(void** state, double* duration);
+
+  /// Conductor adjust note intensity function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param intensity Pointer to note intensity.
+  using AdjustNoteIntensityFn = void (*)(void** state, float* intensity);
+
+  /// Conductor adjust note pitch function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param pitch_type Pointer to note pitch type.
+  /// @param pitch Pointer to note pitch.
+  using AdjustNotePitchFn = void (*)(void** state,
+                                     BarelyNotePitchType* pitch_type,
+                                     float* pitch);
+
+  /// Conductor adjust tempo function signature.
+  ///
+  /// @param state Pointer to conductor state.
+  /// @param tempo Tempo in bpm.
+  using AdjustTempoFn = void (*)(void** state, double* tempo);
+
   /// Create function signature.
   ///
   /// @param state Pointer to conductor state.
@@ -209,10 +290,17 @@ struct ConductorDefinition {
   /// @param stress Stress.
   using SetStressFn = void (*)(void** state, float stress);
 
-  // TODO(#85): Implement `BarelyConductorDefinition_TransformNoteDurationFn`.
-  // TODO(#85): Implement `BarelyConductorDefinition_TransformNoteIntensityFn`.
-  // TODO(#85): Implement `BarelyConductorDefinition_TransformNotePitchFn`.
-  // TODO(#85): Implement `BarelyConductorDefinition_TransformTempoFn`.
+  /// Adjust note duration function.
+  AdjustNoteDurationFn adjust_note_duration_fn;
+
+  /// Adjust note intensity function.
+  AdjustNoteIntensityFn adjust_note_intensity_fn;
+
+  /// Adjust note pitch function.
+  AdjustNotePitchFn adjust_note_pitch_fn;
+
+  /// Adjust tempo function.
+  AdjustTempoFn adjust_tempo_fn;
 
   /// Create function.
   CreateFn create_fn;
@@ -232,11 +320,6 @@ struct ConductorDefinition {
   /// Set stress function.
   SetStressFn set_stress_fn;
 
-  // TODO(#85): Add `transform_duration_fn`.
-  // TODO(#85): Add `transform_intensity_fn`.
-  // TODO(#85): Add `transform_pitch_fn`.
-  // TODO(#85): Add `transform_tempo_fn`.
-
   /// List of parameter definitions.
   std::vector<ParamDefinition> param_definitions;
 };
@@ -244,6 +327,24 @@ struct ConductorDefinition {
 /// Conductor.
 class Conductor {
  public:
+  /// Conducts note.
+  ///
+  /// @param pitch_type Note pitch type.
+  /// @param pitch Note pitch.
+  /// @param bypass_adjustment True to bypass conductor adjustment.
+  /// @return Conducted note pitch.
+  float ConductNote(NotePitchType pitch_type, float pitch,
+                    bool bypass_adjustment = false) {
+    float conducted_pitch = pitch;
+    if (capi_) {
+      const auto status = BarelyConductor_ConductNote(
+          capi_, static_cast<BarelyNotePitchType>(pitch_type), pitch,
+          bypass_adjustment, &conducted_pitch);
+      assert(status == BarelyStatus_kOk);
+    }
+    return conducted_pitch;
+  }
+
   /// Returns energy.
   ///
   /// @return Energy.
@@ -357,19 +458,18 @@ class Conductor {
           param_definition.id, param_definition.default_value,
           param_definition.min_value, param_definition.max_value);
     }
-    // TODO(#85): Define and include the transform functions.
     return static_cast<Status>(BarelyConductor_SetDefinition(
         capi_,
         BarelyConductorDefinition{
+            std::move(definition.adjust_note_duration_fn),
+            std::move(definition.adjust_note_intensity_fn),
+            std::move(definition.adjust_note_pitch_fn),
+            std::move(definition.adjust_tempo_fn),
             std::move(definition.create_fn), std::move(definition.destroy_fn),
             std::move(definition.set_data_fn),
             std::move(definition.set_energy_fn),
             std::move(definition.set_param_fn),
-            std::move(definition.set_stress_fn),
-            /*transform_duration_fn=*/nullptr,
-            /*transform_intensity_fn=*/nullptr,
-            /*transform_pitch_fn=*/nullptr,
-            /*transform_tempo_fn=*/nullptr, param_definitions.data(),
+            std::move(definition.set_stress_fn), param_definitions.data(),
             static_cast<int>(param_definitions.size())}));
   }
 
@@ -657,6 +757,21 @@ class Instrument {
     return is_note_on;
   }
 
+  /// Plays note at position.
+  ///
+  /// @param position Note position.
+  /// @param definition Note definition.
+  /// @return Status.
+  Status PlayNote(double position, NoteDefinition definition) {
+    return static_cast<Status>(BarelyInstrument_PlayNote(
+        capi_, id_, position,
+        BarelyNoteDefinition{
+            definition.duration,
+            static_cast<BarelyNotePitchType>(definition.pitch_type),
+            definition.pitch, definition.intensity,
+            definition.bypass_adjustment}));
+  }
+
   /// Processes output buffer at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
@@ -684,8 +799,6 @@ class Instrument {
   Status ResetParam(ParamId id) {
     return static_cast<Status>(BarelyInstrument_ResetParam(capi_, id_, id));
   }
-
-  // TODO(#85): Implement `BarelyInstrument_PlayNote`.
 
   /// Sets data.
   ///
@@ -831,33 +944,114 @@ class Instrument {
   NoteOnCallback note_on_callback_;
 };
 
-/// Note.
-class Note {
+/// Note reference.
+class NoteReference {
+ public:
+  // Default destructor.
+  ~NoteReference() = default;
+
+  // Copyable.
+  NoteReference(const NoteReference& other) = default;
+  NoteReference& operator=(const NoteReference& other) = default;
+
+  // Constructs new `NoteReference` via move.
+  NoteReference(NoteReference&& other) noexcept
+      : capi_(std::exchange(other.capi_, nullptr)),
+        sequence_id_(std::exchange(other.sequence_id_, BarelyId_kInvalid)),
+        id_(std::exchange(other.id_, BarelyId_kInvalid)) {}
+
+  // Assigns `NoteReference` via move.
+  NoteReference& operator=(NoteReference&& other) noexcept {
+    if (this != &other) {
+      capi_ = std::exchange(other.capi_, nullptr);
+      sequence_id_ = std::exchange(other.sequence_id_, BarelyId_kInvalid);
+      id_ = std::exchange(other.id_, BarelyId_kInvalid);
+    }
+    return *this;
+  }
+
+  /// Returns note definition.
+  ///
+  /// @return Note definition.
+  NoteDefinition GetNoteDefinition() const {
+    BarelyNoteDefinition definition;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status = BarelySequence_GetNoteDefinition(capi_, sequence_id_,
+                                                           id_, &definition);
+      assert(status == BarelyStatus_kOk);
+    }
+    return NoteDefinition(
+        definition.duration, static_cast<NotePitchType>(definition.pitch_type),
+        definition.pitch, definition.intensity, definition.bypass_adjustment);
+  }
+
+  /// Returns note position.
+  ///
+  /// @return Note position.
+  double GetNotePosition() const {
+    double position = 0.0;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelySequence_GetNotePosition(capi_, sequence_id_, id_, &position);
+      assert(status == BarelyStatus_kOk);
+    }
+    return position;
+  }
+
+  /// Sets note definition.
+  ///
+  /// @param definition Note definition.
+  /// @retun Status.
+  Status SetNoteDefinition(NoteDefinition definition) {
+    return static_cast<Status>(BarelySequence_SetNoteDefinition(
+        capi_, sequence_id_, id_,
+        BarelyNoteDefinition{
+            definition.duration,
+            static_cast<BarelyNotePitchType>(definition.pitch_type),
+            definition.pitch, definition.intensity,
+            definition.bypass_adjustment}));
+  }
+
+  /// Sets note position.
+  ///
+  /// @param position Note position in beats.
+  /// @retun Status.
+  Status SetNotePosition(double position) {
+    return static_cast<Status>(
+        BarelySequence_SetNotePosition(capi_, sequence_id_, id_, position));
+  }
+
  private:
+  friend class Sequence;
+
+  // Creates new `NoteReference` with internal api and identifiers.
+  NoteReference(BarelyApi capi, BarelyId sequence_id, BarelyId id)
+      : capi_(capi), sequence_id_(sequence_id), id_(id) {}
+
+  // Internal api handle.
+  BarelyApi capi_;
+
+  // Sequence identifier.
+  BarelyId sequence_id_;
+
+  // Identifier.
+  BarelyId id_;
 };
 
 /// Note sequence.
 class Sequence {
  public:
   /// Destroys `Sequence`.
-  ~Sequence() { BarelySequence_Destroy(capi_, id_); }
-
-  /// Constructs new `Sequence` via copy.
-  ///
-  /// @param other Other sequence.
-  Sequence(const Sequence& other)
-      : capi_(other.capi_), id_(BarelyId_kInvalid), instrument_(nullptr) {
-    if (other.id_ != BarelyId_kInvalid) {
-      const auto status = BarelySequence_Clone(capi_, other.id_, &id_);
-      assert(status == BarelyStatus_kOk);
-      SetInstrument(other.instrument_);
+  ~Sequence() {
+    if (id_ != BarelyId_kInvalid) {
+      BarelySequence_Destroy(capi_, id_);
+      id_ = BarelyId_kInvalid;
     }
   }
 
-  /// Assigns `Sequence` via copy.
-  ///
-  /// @param other Other sequence.
-  Sequence& operator=(const Sequence& other) { return *this = Sequence(other); }
+  /// Non-copyable.
+  Sequence(const Sequence& other);
+  Sequence& operator=(const Sequence& other);
 
   /// Constructs new `Sequence` via move.
   ///
@@ -882,7 +1076,25 @@ class Sequence {
     return *this;
   }
 
-  // TODO(#85): Implement `BarelySequence_AddNote`.
+  /// Adds note at position.
+  ///
+  /// @param position Note position.
+  /// @param definition Note definition.
+  /// @return Note reference.
+  NoteReference AddNote(double position, NoteDefinition definition) {
+    BarelyId note_id = BarelyId_kInvalid;
+    if (id_ != BarelyId_kInvalid) {
+      const auto status = BarelySequence_AddNote(
+          capi_, id_, position,
+          BarelyNoteDefinition{
+              definition.duration,
+              static_cast<BarelyNotePitchType>(definition.pitch_type),
+              definition.pitch, definition.intensity,
+              definition.bypass_adjustment},
+          &note_id);
+    }
+    return NoteReference(capi_, id_, note_id);
+  }
 
   /// Returns begin offset.
   ///
@@ -954,9 +1166,6 @@ class Sequence {
     return loop_length;
   }
 
-  // TODO(#85): Implement `BarelySequence_GetNoteDefinition`
-  // TODO(#85): Implement `BarelySequence_GetNotePosition`.
-
   /// Returns whether sequence is empty or not.
   ///
   /// @return True if empty, false otherwise.
@@ -981,8 +1190,20 @@ class Sequence {
     return is_looping;
   }
 
-  // TODO(#85): Implement `BarelySequence_RemoveAllNotes`.
-  // TODO(#85): Implement `BarelySequence_RemoveNote`.
+  /// Removes all notes.
+  ///
+  /// @return Status.
+  Status RemoveAllNotes() {
+    return static_cast<Status>(BarelySequence_RemoveAllNotes(capi_, id_));
+  }
+
+  /// Removes note.
+  ///
+  /// @param note Note reference.
+  /// @return Status.
+  Status RemoveNote(NoteReference note) {
+    return static_cast<Status>(BarelySequence_RemoveNote(capi_, id_, note.id_));
+  }
 
   /// Sets begin offset.
   ///
@@ -1047,9 +1268,6 @@ class Sequence {
     return static_cast<Status>(
         BarelySequence_SetLooping(capi_, id_, is_looping));
   }
-
-  // TODO(#85): Implement `BarelySequence_SetNoteDefinition`.
-  // TODO(#85): Implement `BarelySequence_SetNotePosition`.
 
  private:
   friend class Api;

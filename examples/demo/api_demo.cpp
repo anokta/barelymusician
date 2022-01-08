@@ -8,6 +8,7 @@ using ::barely::Api;
 using ::barely::Instrument;
 using ::barely::InstrumentDefinition;
 using ::barely::IsOk;
+using ::barely::NoteDefinition;
 using ::barely::ParamDefinition;
 using ::barely::ParamId;
 using ::barely::Sequence;
@@ -48,6 +49,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   assert(sequence.SetInstrument(&instrument1) == Status::kUnimplemented);
   assert(sequence.GetInstrument() == &instrument1);
+
+  const auto note = sequence.AddNote(2.0, NoteDefinition(1.0, 0.0f));
+  assert(sequence.RemoveNote(note) == Status::kUnimplemented);
 
   return 0;
 }

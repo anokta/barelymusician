@@ -77,6 +77,35 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 7,
 };
 
+/// Conductor adjust note duration function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param duration Pointer to note duration.
+typedef void (*BarelyConductorDefinition_AdjustNoteDurationFn)(
+    void** state, double* duration);
+
+/// Conductor adjust note intensity function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param intensity Pointer to note intensity.
+typedef void (*BarelyConductorDefinition_AdjustNoteIntensityFn)(
+    void** state, float* intensity);
+
+/// Conductor adjust note pitch function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param pitch_type Pointer to note pitch type.
+/// @param pitch Pointer to note pitch.
+typedef void (*BarelyConductorDefinition_AdjustNotePitchFn)(
+    void** state, BarelyNotePitchType* pitch_type, float* pitch);
+
+/// Conductor adjust tempo function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param tempo Pointer to tempo.
+typedef void (*BarelyConductorDefinition_AdjustTempoFn)(void** state,
+                                                        double* tempo);
+
 /// Conductor create function signature.
 ///
 /// @param state Pointer to conductor state.
@@ -115,44 +144,6 @@ typedef void (*BarelyConductorDefinition_SetParamFn)(void** state,
 /// @param stress Stress.
 typedef void (*BarelyConductorDefinition_SetStressFn)(void** state,
                                                       float stress);
-
-/// Conductor transform note duration function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param duration Note duration.
-/// @param out_duration Output note duration.
-/// @return Status.
-typedef BarelyStatus (*BarelyConductorDefinition_TransformNoteDurationFn)(
-    void** state, double duration, double* out_duration);
-
-/// Conductor transform note intensity function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param intensity Note intensity.
-/// @param out_intensity Output note intensity.
-/// @return Status.
-typedef BarelyStatus (*BarelyConductorDefinition_TransformNoteIntensityFn)(
-    void** state, float intensity, float* out_intensity);
-
-/// Conductor transform note pitch function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param pitch_type Note pitch type.
-/// @param pitch Note pitch.
-/// @param out_pitch Output note pitch.
-/// @return Status.
-typedef BarelyStatus (*BarelyConductorDefinition_TransformNotePitchFn)(
-    void** state, BarelyNotePitchType pitch_type, float pitch,
-    float* out_pitch);
-
-/// Conductor transform tempo function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param tempo Tempo in bpm.
-/// @param out_tempo Output tempo in bpm.
-/// @return Status.
-typedef BarelyStatus (*BarelyConductorDefinition_TransformTempoFn)(
-    void** state, double tempo, double* out_tempo);
 
 /// Instrument note off callback signature.
 ///
@@ -263,8 +254,8 @@ typedef struct BarelyNoteDefinition {
   /// Intensity.
   float intensity;
 
-  /// Denotes whether conductor transform should be bypassed or not.
-  bool bypass_conductor_transform;
+  /// Denotes whether conductor adjustment should be bypassed or not.
+  bool bypass_adjustment;
 } BarelyNoteDefinition;
 
 /// Parameter definition.
@@ -284,6 +275,18 @@ typedef struct BarelyParamDefinition {
 
 /// Conductor definition.
 typedef struct BarelyConductorDefinition {
+  /// Adjust note duration function.
+  BarelyConductorDefinition_AdjustNoteDurationFn adjust_note_duration_fn;
+
+  /// Adjust note intensity function.
+  BarelyConductorDefinition_AdjustNoteIntensityFn adjust_note_intensity_fn;
+
+  /// Adjust note pitch function.
+  BarelyConductorDefinition_AdjustNotePitchFn adjust_note_pitch_fn;
+
+  /// Adjust tempo function.
+  BarelyConductorDefinition_AdjustTempoFn adjust_tempo_fn;
+
   /// Create function.
   BarelyConductorDefinition_CreateFn create_fn;
 
@@ -301,19 +304,6 @@ typedef struct BarelyConductorDefinition {
 
   /// Set stress function.
   BarelyConductorDefinition_SetStressFn set_stress_fn;
-
-  /// Transform note duration function.
-  BarelyConductorDefinition_TransformNoteDurationFn transform_note_duration_fn;
-
-  /// Transform note intensity function.
-  BarelyConductorDefinition_TransformNoteIntensityFn
-      transform_note_intensity_fn;
-
-  /// Transform note pitch function.
-  BarelyConductorDefinition_TransformNotePitchFn transform_note_pitch_fn;
-
-  /// Transform tempo function.
-  BarelyConductorDefinition_TransformTempoFn transform_tempo_fn;
 
   /// List of parameter definitions.
   BarelyParamDefinition* param_definitions;
@@ -386,6 +376,18 @@ BARELY_EXPORT BarelyStatus BarelyApi_SetSampleRate(BarelyApi api,
 /// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp);
+
+/// Conducts note.
+///
+/// @param api BarelyMusician api.
+/// @param pitch_type Note pitch type.
+/// @param pitch Note pitch.
+/// @param bypass_adjustment True to bypass conductor adjustment.
+/// @param out_pitch Output note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_ConductNote(
+    BarelyApi api, BarelyNotePitchType pitch_type, float pitch,
+    bool bypass_adjustment, float* out_pitch);
 
 /// Gets conductor energy.
 ///
@@ -741,16 +743,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyApi api,
 BARELY_EXPORT BarelyStatus
 BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id, double position,
                        BarelyNoteDefinition definition, BarelyId* out_note_id);
-
-/// Clones sequence.
-///
-/// @param api BarelyMusician api.
-/// @param sequence_id Sequence identifier.
-/// @param out_sequence_id Output sequence identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_Clone(BarelyApi api,
-                                                BarelyId sequence_id,
-                                                BarelyId* out_sequence_id);
 
 /// Creates new sequence.
 ///

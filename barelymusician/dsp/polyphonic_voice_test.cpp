@@ -22,10 +22,10 @@ class FakeVoice : public Voice {
  public:
   FakeVoice() noexcept : active_(false), output_(0.0f) {}
 
-  // Implements |UnitGenerator|.
+  // Implements `UnitGenerator`.
   float Next(int) noexcept override { return active_ ? output_ : 0.0f; }
 
-  // Implements |Voice|.
+  // Implements `Voice`.
   bool IsActive() const noexcept override { return active_; }
   void Start() noexcept override { active_ = true; }
   void Stop() noexcept override { active_ = false; }

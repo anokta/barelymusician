@@ -9,12 +9,12 @@ namespace barelyapi {
 /// samples according to its current state.
 class Envelope : public Generator {
  public:
-  /// Constructs new |Envelope|.
+  /// Constructs new `Envelope`.
   ///
   /// @param sample_rate Sampling rate in hz.
   explicit Envelope(int sample_rate) noexcept;
 
-  /// Implements |Generator|.
+  /// Implements `Generator`.
   float Next() noexcept override;
   void Reset() noexcept override;
 

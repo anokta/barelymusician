@@ -27,7 +27,7 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
   }
 }
 
-// Tests that amplitude/decibels conversion snaps to |kMinDecibels| threshold.
+// Tests that amplitude/decibels conversion snaps to `kMinDecibels` threshold.
 TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_FLOAT_EQ(AmplitudeFromDecibels(kMinDecibels), 0.0f);
   EXPECT_FLOAT_EQ(DecibelsFromAmplitude(0.0f), kMinDecibels);

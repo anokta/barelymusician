@@ -35,8 +35,8 @@ InputManager::InputManager() noexcept
                            CGEventRef event,
                            void* refcon) noexcept -> CGEventRef {
     if (refcon) {
-      // Access the event callback via |refcon| (to avoid capturing
-      // |event_callback_|).
+      // Access the event callback via `refcon` (to avoid capturing
+      // `event_callback_`).
       const auto& event_callback = *reinterpret_cast<EventCallback*>(refcon);
       event_callback(type, event);
     }

@@ -19,7 +19,7 @@ namespace barelyapi {
 
 namespace {
 
-// Maximum number of tasks to be executed per each |Process| call.
+// Maximum number of tasks to be executed per each `Process` call.
 constexpr int kNumMaxTasks = 100;
 
 // Dummy note off callback that does nothing.
@@ -395,7 +395,7 @@ void InstrumentManager::SetSampleRate(double timestamp,
                                       int sample_rate) noexcept {
   if (sample_rate_ != sample_rate) {
     // Note that the sample accurate timing of the existing instrument events
-    // could flactuate during this switch, until the given |timestamp|.
+    // could flactuate during this switch, until the given `timestamp`.
     sample_rate_ = sample_rate;
     for (auto& [instrument_id, controller] : controllers_) {
       auto& update_events = update_events_[instrument_id];

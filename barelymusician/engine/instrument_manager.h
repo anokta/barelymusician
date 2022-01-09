@@ -38,7 +38,7 @@ class InstrumentManager {
   using NoteOnCallback = std::function<void(Id instrument_id, float note_pitch,
                                             float note_intensity)>;
 
-  /// Constructs new |InstrumentManager|.
+  /// Constructs new `InstrumentManager`.
   ///
   /// @param sample_rate Sampling rate in hz.
   explicit InstrumentManager(int sample_rate) noexcept;
@@ -217,7 +217,7 @@ class InstrumentManager {
  private:
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
-    // Constructs new |InstrumentController|.
+    // Constructs new `InstrumentController`.
     explicit InstrumentController(InstrumentDefinition definition) noexcept;
 
     // Instrument definition.

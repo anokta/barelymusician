@@ -8,13 +8,13 @@ namespace barelyapi {
 /// Class that wraps an instrument.
 class Instrument {
  public:
-  /// Constructs new |Instrument|.
+  /// Constructs new `Instrument`.
   ///
   /// @param sample_rate Sampling rate in hz.
   /// @param definition Instrument definition.
   Instrument(int sample_rate, InstrumentDefinition definition) noexcept;
 
-  /// Destroys |Instrument|.
+  /// Destroys `Instrument`.
   ~Instrument() noexcept;
 
   /// Copyable and movable.

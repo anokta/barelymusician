@@ -17,12 +17,12 @@ class PolyphonicVoice {
   /// @param voice Pointer to voice.
   using VoiceCallback = std::function<void(VoiceType* voice)>;
 
-  /// Constructs new |PolyphonicVoice| with the given |base_voice|.
+  /// Constructs new `PolyphonicVoice` with the given `base_voice`.
   ///
   /// @param base_voice Base voice type to be used.
   explicit PolyphonicVoice(VoiceType&& base_voice) noexcept;
 
-  /// Returns the next output sample for the given output |channel|.
+  /// Returns the next output sample for the given output `channel`.
   ///
   /// @param channel Output channel.
   /// @return Accumulated output sample.
@@ -33,13 +33,13 @@ class PolyphonicVoice {
   /// @param num_voices Number of available voices.
   void Resize(int num_voices) noexcept;
 
-  /// Starts new voice for the given |pitch|.
+  /// Starts new voice for the given `pitch`.
   ///
   /// @param pitch Voice pitch.
   /// @param init_voice Callback to initialize the voice for playback.
   void Start(float pitch, const VoiceCallback& init_voice = nullptr) noexcept;
 
-  /// Stops the voice with the given |pitch|.
+  /// Stops the voice with the given `pitch`.
   ///
   /// @param pitch Voice pitch.
   /// @param shutdown_voice Callback to shutdown the voice.

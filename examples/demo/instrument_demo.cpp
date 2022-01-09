@@ -41,7 +41,7 @@ constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr float kMaxOffsetOctaves = 3.0f;
 
-// Returns the pitch for the given |key|.
+// Returns the pitch for the given `key`.
 std::optional<float> PitchFromKey(const InputManager::Key& key) {
   const auto it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
                             std::toupper(key));

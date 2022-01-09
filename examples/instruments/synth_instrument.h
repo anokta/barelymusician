@@ -22,10 +22,10 @@ enum SynthInstrumentParam {
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public GenericInstrument {
  public:
-  /// Constructs new |SynthInstrument|.
+  /// Constructs new `SynthInstrument`.
   explicit SynthInstrument(int sample_rate) noexcept;
 
-  /// Implements |GenericInstrument|.
+  /// Implements `GenericInstrument`.
   void NoteOff(float pitch) noexcept override;
   void NoteOn(float pitch, float intensity) noexcept override;
   void Process(float* output, int num_channels,

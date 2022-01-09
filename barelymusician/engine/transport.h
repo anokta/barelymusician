@@ -20,7 +20,7 @@ class Transport {
   using UpdateCallback =
       std::function<void(double begin_position, double end_position)>;
 
-  /// Constructs new |Transport|.
+  /// Constructs new `Transport`.
   Transport() noexcept;
 
   /// Returns the last updated position.

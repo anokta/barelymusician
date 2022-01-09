@@ -31,7 +31,7 @@ enum class Status {
 template <typename ValueType>
 using StatusOr = std::variant<Status, ValueType>;
 
-/// Returns |status_or| status.
+/// Returns `status_or` status.
 ///
 /// @param status_or Value or error status.
 /// @return Error status.
@@ -41,7 +41,7 @@ Status GetStatusOrStatus(const StatusOr<ValueType>& status_or) noexcept {
   return std::get<Status>(status_or);
 }
 
-/// Returns |status_or| value.
+/// Returns `status_or` value.
 ///
 /// @param status_or Value or error status.
 /// @return Value.
@@ -51,7 +51,7 @@ ValueType& GetStatusOrValue(StatusOr<ValueType>& status_or) noexcept {
   return std::get<ValueType>(status_or);
 }
 
-/// Returns |status_or| value.
+/// Returns `status_or` value.
 ///
 /// @param status_or Value or error status.
 /// @return Value.
@@ -62,7 +62,7 @@ const ValueType& GetStatusOrValue(
   return std::get<ValueType>(status_or);
 }
 
-/// Returns |status_or| value.
+/// Returns `status_or` value.
 ///
 /// @param status_or Value or error status.
 /// @return Value.
@@ -72,7 +72,7 @@ ValueType&& GetStatusOrValue(StatusOr<ValueType>&& status_or) noexcept {
   return std::move(std::get<ValueType>(status_or));
 }
 
-/// Returns whether |status_or| is ok, i.e., holding a value.
+/// Returns whether `status_or` is ok, i.e., holding a value.
 ///
 /// @param status_or Value or error status.
 /// @return True if ok.
@@ -81,7 +81,7 @@ bool IsOk(const StatusOr<ValueType>& status_or) noexcept {
   return std::holds_alternative<ValueType>(status_or);
 }
 
-/// Returns whether |status| is ok.
+/// Returns whether `status` is ok.
 ///
 /// @param status Status.
 /// @return True if ok.

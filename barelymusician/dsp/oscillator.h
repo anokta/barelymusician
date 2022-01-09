@@ -22,12 +22,12 @@ enum class OscillatorType {
 /// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator : public Generator {
  public:
-  /// Constructs new |Oscillator|.
+  /// Constructs new `Oscillator`.
   ///
   /// @param sample_rate Sampling rate in hz.
   explicit Oscillator(int sample_rate) noexcept;
 
-  /// Implements |Generator|.
+  /// Implements `Generator`.
   float Next() noexcept override;
   void Reset() noexcept override;
 

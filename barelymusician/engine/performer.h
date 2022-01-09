@@ -19,7 +19,7 @@ namespace barelyapi {
 /// Class that performs a musical sequence with a set of instruments.
 class Performer {
  public:
-  /// Constructs new |Performer|.
+  /// Constructs new `Performer`.
   Performer() noexcept;
 
   /// Adds instrument.
@@ -97,10 +97,10 @@ class Performer {
     float pitch;
   };
 
-  // Clamps |begin_position| with |sequence_begin_position_|.
+  // Clamps `begin_position` with `sequence_begin_position_`.
   double ClampBeginPosition(double begin_position) noexcept;
 
-  // Clamps |end_position| with |sequence_end_position_|.
+  // Clamps `end_position` with `sequence_end_position_`.
   double ClampEndPosition(double end_position) noexcept;
 
   // List of active notes.

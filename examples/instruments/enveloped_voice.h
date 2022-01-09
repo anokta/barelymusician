@@ -10,12 +10,12 @@ namespace barely::examples {
 template <class GeneratorType>
 class EnvelopedVoice : public barelyapi::Voice {
  public:
-  /// Constructs new |EnvelopedVoice| with the given |sample_rate|.
+  /// Constructs new `EnvelopedVoice` with the given `sample_rate`.
   ///
   /// @param sample_rate Sampling rate in hz.
   explicit EnvelopedVoice(int sample_rate) noexcept;
 
-  /// Implements |Voice|.
+  /// Implements `Voice`.
   bool IsActive() const noexcept override;
   float Next(int channel) noexcept override;
   void Start() noexcept override;

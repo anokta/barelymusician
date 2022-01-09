@@ -14,10 +14,10 @@ enum class FilterType {
 /// One-pole filter that features basic low-pass and high-pass filtering.
 class OnePoleFilter : public Filter {
  public:
-  /// Constructs new |OnePoleFilter|.
+  /// Constructs new `OnePoleFilter`.
   OnePoleFilter() noexcept;
 
-  /// Implements |Processor|.
+  /// Implements `Processor`.
   float Next(float input) noexcept override;
   void Reset() noexcept override;
 

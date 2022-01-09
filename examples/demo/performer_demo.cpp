@@ -57,7 +57,7 @@ constexpr float kRelease = 0.1f;
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
 
-// Returns the MIDI key number for the given |pitch|.
+// Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(float pitch) {
   return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }

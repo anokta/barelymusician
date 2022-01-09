@@ -32,7 +32,7 @@ class Sequence {
   using ProcessCallback =
       std::function<void(double position, const Note& note)>;
 
-  /// Constructs new |Sequence|.
+  /// Constructs new `Sequence`.
   Sequence() noexcept;
 
   /// Adds new note at position.

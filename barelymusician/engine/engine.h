@@ -33,7 +33,7 @@ class Engine {
   /// Playback update callback signature.
   using PlaybackUpdateCallback = Transport::UpdateCallback;
 
-  /// Constructs new |Engine|.
+  /// Constructs new `Engine`.
   ///
   /// @param sample_rate System sampling rate in hz.
   explicit Engine(int sample_rate) noexcept;

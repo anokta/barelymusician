@@ -89,7 +89,7 @@ Conductor::Conductor(ConductorDefinition definition) noexcept
 }
 
 Conductor::~Conductor() noexcept {
-  // Make sure to call |destroy_fn_| only if it's still valid (e.g., not moved).
+  // Make sure to call `destroy_fn_` only if it's still valid (e.g., not moved).
   if (destroy_fn_) {
     destroy_fn_(&state_);
   }

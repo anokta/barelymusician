@@ -40,7 +40,7 @@ TEST(RandomTest, Reset) {
 
   // Reset the seed with the same value.
   random.Reset(kSeed);
-  // Validate that the same numbers are generated for the next |kNumValues|.
+  // Validate that the same numbers are generated for the next `kNumValues`.
   for (int i = 0; i < kNumValues; ++i) {
     EXPECT_FLOAT_EQ(random.DrawNormal(kMean, kVariance), values[i]);
   }

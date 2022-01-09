@@ -21,7 +21,7 @@ void AudioOutput::Start(int sample_rate, int num_channels,
   assert(num_channels >= 0);
   assert(num_frames >= 0);
   if (stream_) {
-    // Stop the existing |stream_| first.
+    // Stop the existing `stream_` first.
     Stop();
   }
 
@@ -40,8 +40,8 @@ void AudioOutput::Start(int sample_rate, int num_channels,
                            PaStreamCallbackFlags /*status_flags*/,
                            void* user_data) noexcept {
     if (user_data) {
-      // Access the audio process callback via |user_data| (to avoid capturing
-      // |process_callback_|).
+      // Access the audio process callback via `user_data` (to avoid capturing
+      // `process_callback_`).
       const auto& process_callback =
           *reinterpret_cast<ProcessCallback*>(user_data);
       process_callback(reinterpret_cast<float*>(output_buffer));

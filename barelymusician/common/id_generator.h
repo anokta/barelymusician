@@ -8,7 +8,7 @@ namespace barelyapi {
 // Unique numerical id generator.
 class IdGenerator {
  public:
-  /// Constructs new |IdGenerator|.
+  /// Constructs new `IdGenerator`.
   IdGenerator() noexcept;
 
   /// Generates next id.

@@ -385,7 +385,7 @@ namespace Barely {
       Unknown = 7,
     }
 
-    // Returns whether given |status| is ok.
+    // Returns whether given `status` is ok.
     private static bool IsOk(Status status) {
       return (status == Status.Ok);
     }

@@ -8,7 +8,7 @@ namespace barelyapi {
 /// Class that wraps a parameter.
 class Param {
  public:
-  /// Constructs new |Param|.
+  /// Constructs new `Param`.
   ///
   /// @param definition Parameter definition.
   explicit Param(ParamDefinition definition) noexcept;

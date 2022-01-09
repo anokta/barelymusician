@@ -16,12 +16,12 @@ namespace barelyapi {
 /// Class that wraps a conductor.
 class Conductor {
  public:
-  /// Constructs new |Conductor|.
+  /// Constructs new `Conductor`.
   ///
   /// @param definition Conductor definition.
   explicit Conductor(ConductorDefinition definition = {}) noexcept;
 
-  /// Destroys |Conductor|.
+  /// Destroys `Conductor`.
   ~Conductor() noexcept;
 
   /// Copyable and movable.

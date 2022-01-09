@@ -15,10 +15,10 @@ class AudioOutput {
   /// @param output Output buffer.
   using ProcessCallback = std::function<void(float* output)>;
 
-  /// Constructs new |AudioOutput|.
+  /// Constructs new `AudioOutput`.
   AudioOutput() noexcept;
 
-  /// Destructs |AudioOutput|.
+  /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;
 
   /// Starts audio processing routine with the given configuration.

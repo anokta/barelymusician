@@ -102,7 +102,7 @@ TEST(TaskRunnerTest, RunTasksExeedingMaxSize) {
     for (int i = 0; i < kNumTasksToAdd; ++i) {
       task_runner.Add(task);
     }
-    // Verify that tasks added after |kNumMaxTasks| are dropped.
+    // Verify that tasks added after `kNumMaxTasks` are dropped.
     task_runner.Run();
     EXPECT_EQ(counter, (n + 1) * kMaxSize);
   }

@@ -56,17 +56,17 @@ constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
 
 constexpr double kTempo = 132.0;
 
-// Returns the pitch for the given |midi_key_number|.
+// Returns the pitch for the given `midi_key_number`.
 float PitchFromMidiKeyNumber(int midi_key_number) {
   return static_cast<float>(midi_key_number - 69) / barelyapi::kNumSemitones;
 }
 
-// Returns the MIDI key number for the given |pitch|.
+// Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(float pitch) {
   return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
-// Adds the score to |performer_id| from the given |midi_events|.
+// Adds the score to `performer_id` from the given `midi_events`.
 void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
               Engine* engine, Id performer_id) {
   const auto get_position = [ticks_per_beat](int tick) -> double {

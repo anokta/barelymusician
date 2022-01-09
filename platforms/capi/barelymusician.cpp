@@ -24,7 +24,7 @@ using ::barelyapi::ParamDefinition;
 using ::barelyapi::Status;
 using ::barelyapi::StatusOr;
 
-// Returns the corresponding |InstrumentDefinition| for a given |definition|.
+// Returns the corresponding `InstrumentDefinition` for a given `definition`.
 InstrumentDefinition GetInstrumentDefinition(
     const BarelyInstrumentDefinition& definition) noexcept {
   std::vector<ParamDefinition> param_definitions;
@@ -42,7 +42,7 @@ InstrumentDefinition GetInstrumentDefinition(
       definition.set_param_fn,    param_definitions};
 }
 
-// Returns the corresponding |BarelyStatus| value for a given |status|.
+// Returns the corresponding `BarelyStatus` value for a given `status`.
 BarelyStatus GetStatus(Status status) noexcept {
   switch (status) {
     case Status::kOk:
@@ -65,7 +65,7 @@ BarelyStatus GetStatus(Status status) noexcept {
   }
 }
 
-// Returns the corresponding |BarelyStatus| value for a given |status_or|.
+// Returns the corresponding `BarelyStatus` value for a given `status_or`.
 template <typename ValueType>
 BarelyStatus GetStatus(const StatusOr<ValueType>& status_or) noexcept {
   return GetStatus(GetStatusOrStatus(status_or));

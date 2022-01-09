@@ -24,7 +24,7 @@ class WavFile {
   /// @return Audio sampling rate.
   int GetSampleRate() const noexcept;
 
-  /// Loads Wave file with the given |file_path|.
+  /// Loads Wave file with the given `file_path`.
   ///
   /// @param file_path Absolute file path.
   /// @return True if successful.

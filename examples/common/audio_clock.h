@@ -8,7 +8,7 @@ namespace barely::examples {
 /// Thread-safe audio dsp clock.
 class AudioClock {
  public:
-  /// Constructs new |AudioClock|.
+  /// Constructs new `AudioClock`.
   explicit AudioClock(int sample_rate) noexcept;
 
   /// Returns the timestamp.

@@ -8,7 +8,7 @@ namespace barelyapi {
 /// Pseudo-random number generator.
 class Random {
  public:
-  /// Constructs new |Random|.
+  /// Constructs new `Random`.
   ///
   /// @param seed Seed value.
   explicit Random(int seed = static_cast<int>(

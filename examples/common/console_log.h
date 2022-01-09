@@ -13,7 +13,7 @@ class ConsoleLog {
   /// Default constructor.
   ConsoleLog() = default;
 
-  /// Destroys |ConsoleLog|.
+  /// Destroys `ConsoleLog`.
   ~ConsoleLog() noexcept { std::cout << stream_.str() << std::endl; }
 
   /// Non-copyable and non-movable.

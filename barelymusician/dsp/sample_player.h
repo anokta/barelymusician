@@ -8,12 +8,12 @@ namespace barelyapi {
 /// Sample player that generates output samples from the provided mono data.
 class SamplePlayer : public Generator {
  public:
-  /// Construct new |SamplePlayer| with the given sample data.
+  /// Construct new `SamplePlayer` with the given sample data.
   ///
   /// @param sample_rate Sampling rate in hz.
   explicit SamplePlayer(int sample_rate) noexcept;
 
-  /// Implements |Generator|.
+  /// Implements `Generator`.
   float Next() noexcept override;
   void Reset() noexcept override;
 

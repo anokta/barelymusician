@@ -4,21 +4,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Barely {
-  /// Performer.
-  public class Performer : MonoBehaviour {
-    /// Performer id.
+  /// Sequence.
+  public class Sequence : MonoBehaviour {
+    /// Sequence id.
     public Int64 Id { get; private set; } = Musician.InvalidId;
 
     /// Begin offset.
     public double BeginOffset = 0.0;
 
     /// Optional begin position.
-    public double? BeginPosition = null;
+    public double BeginPosition = 0.0;
 
     /// Optional end position.
-    public double? EndPosition = null;
+    public double EndPosition = double.MaxValue;
 
-    /// Denotes whether the performer is looping or not.
+    /// Denotes whether the sequence is looping or not.
     public bool Loop = false;
 
     /// Loop begin offset.
@@ -27,31 +27,31 @@ namespace Barely {
     /// Loop length.
     public double LoopLength = 1.0;
 
-    /// Instruments to perform.
-    public Instrument[] Instruments = null;
+    /// Instrument to perform.
+    public Instrument Instrument = null;
 
     [Range(0, 128)]
     public int RootNote = 60;
 
     /// Notes to perform.
     [System.Serializable]
-    public struct PerformerNote {
+    public struct SequenceNote {
       public double position;
       public Note note;
     }
-    public PerformerNote[] Notes = null;
+    public SequenceNote[] Notes = null;
 
     private bool _changed = false;
 
     void OnEnable() {
       if (Id == Musician.InvalidId) {
-        Id = Musician.AddPerformer(this);
+        Id = Musician.AddSequence(this);
       }
     }
 
     void OnDisable() {
       if (Id != Musician.InvalidId) {
-        Musician.RemovePerformer(this);
+        Musician.RemoveSequence(this);
         Id = Musician.InvalidId;
       }
     }
@@ -63,7 +63,7 @@ namespace Barely {
     void Update() {
       if (_changed) {
         _changed = false;
-        Musician.UpdatePerformer(this);
+        Musician.UpdateSequence(this);
       }
     }
   }

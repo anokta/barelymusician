@@ -1,10 +1,9 @@
-#ifndef BARELYMUSICIAN_ENGINE_MUSICIAN_H_
-#define BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
+#define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
-#include <any>
-#include <functional>
 #include <optional>
 #include <unordered_map>
+#include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/id_generator.h"
@@ -17,48 +16,33 @@
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
-namespace barely {
+namespace barelyapi {
 
-// barely::Musician C++ API.
-class Musician {
+// Class that wraps the internal BarelyMusician engine.
+class Engine {
  public:
   /// Instrument note off callback signature.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  using InstrumentNoteOffCallback =
-      std::function<void(Id instrument_id, float note_pitch)>;
+  using InstrumentNoteOffCallback = InstrumentManager::NoteOffCallback;
 
   /// Instrument note on callback signature.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  /// @param note_intensity Note intensity.
-  using InstrumentNoteOnCallback = std::function<void(
-      Id instrument_id, float note_pitch, float note_intensity)>;
+  using InstrumentNoteOnCallback = InstrumentManager::NoteOnCallback;
 
   /// Playback beat callback signature.
   using PlaybackBeatCallback = Transport::BeatCallback;
 
   /// Playback update callback signature.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @param end_position End position in beats.
-  using PlaybackUpdateCallback =
-      std::function<void(double begin_position, double end_position)>;
+  using PlaybackUpdateCallback = Transport::UpdateCallback;
 
-  /// Constructs new |Musician|.
+  /// Constructs new |Engine|.
   ///
-  /// @param sample_rate System sampling rate in Hz.
-  explicit Musician(int sample_rate) noexcept;
+  /// @param sample_rate System sampling rate in hz.
+  explicit Engine(int sample_rate) noexcept;
 
   /// Adds new instrument.
   ///
   /// @param definition Instrument definition.
-  /// @param param_definitions Instrument parameter definitions.
   /// @return Instrument id.
-  Id AddInstrument(InstrumentDefinition definition,
-                   ParamDefinitionMap param_definitions) noexcept;
+  Id AddInstrument(InstrumentDefinition definition) noexcept;
 
   /// Adds new performer.
   ///
@@ -118,7 +102,7 @@ class Musician {
 
   /// Returns the playback tempo.
   ///
-  /// @return Tempo in BPM.
+  /// @return Tempo in bpm.
   double GetPlaybackTempo() const noexcept;
 
   /// Returns whether the performer is empty or not.
@@ -142,7 +126,7 @@ class Musician {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param output Pointer to the output buffer.
+  /// @param output Output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   void ProcessInstrument(Id instrument_id, double timestamp, float* output,
@@ -195,17 +179,11 @@ class Musician {
   /// @return Status.
   Status RemovePerformerNote(Id performer_id, Id note_id) noexcept;
 
-  /// Sets all notes of all instruments off.
-  void SetAllInstrumentNotesOff() noexcept;
-
   /// Sets all instrument notes off.
   ///
   /// @param instrument_id Instrument id.
   /// @return Status.
   Status SetAllInstrumentNotesOff(Id instrument_id) noexcept;
-
-  /// Sets all parameters of all instruments to default.
-  void SetAllInstrumentParamsToDefault() noexcept;
 
   /// Sets all instrument parameters to default.
   ///
@@ -216,17 +194,28 @@ class Musician {
   /// Sets conductor.
   ///
   /// @param definition Conductor definition.
-  /// @param definition Conductor parameter definitions.
-  void SetConductor(ConductorDefinition definition,
-                    ParamDefinitionMap param_definitions) noexcept;
+  void SetConductor(ConductorDefinition definition) noexcept;
 
-  /// Sets custom instrument data.
+  /// Sets instrument data.
   ///
   /// @param instrument_id Instrument id.
-  /// @param custom_data Custom data.
+  /// @param data Data.
   /// @return Status.
-  Status SetCustomInstrumentData(Id instrument_id,
-                                 std::any custom_data) noexcept;
+  Status SetInstrumentData(Id instrument_id, void* data) noexcept;
+
+  /// Sets instrument gain.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param gain Gain in amplitude.
+  /// @return Status.
+  Status SetInstrumentGain(Id instrument_id, float gain) noexcept;
+
+  /// Sets whether instrument should be muted or not.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param is_muted True if muted, false otherwise.
+  /// @return Status.
+  Status SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept;
 
   /// Sets instrument note off.
   ///
@@ -259,18 +248,19 @@ class Musician {
   /// Sets instrument parameter.
   ///
   /// @param instrument_id Instrument id.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @param param_value Parameter value.
   /// @return Status.
-  Status SetInstrumentParam(Id instrument_id, int param_id,
+  Status SetInstrumentParam(Id instrument_id, int param_index,
                             float param_value) noexcept;
 
   /// Sets instrument parameter to default.
   ///
   /// @param instrument_id Instrument id.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @return Status.
-  Status SetInstrumentParamToDefault(Id instrument_id, int param_id) noexcept;
+  Status SetInstrumentParamToDefault(Id instrument_id,
+                                     int param_index) noexcept;
 
   /// Sets performer begin offset.
   ///
@@ -330,7 +320,7 @@ class Musician {
 
   /// Sets the playback tempo.
   ///
-  /// @param tempo Tempo in BPM.
+  /// @param tempo Tempo in bpm.
   void SetPlaybackTempo(double tempo) noexcept;
 
   /// Sets the playback update callback.
@@ -341,7 +331,7 @@ class Musician {
 
   /// Sets the sample rate.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   void SetSampleRate(int sample_rate) noexcept;
 
   /// Starts the playback.
@@ -365,16 +355,10 @@ class Musician {
   // Instrument manager.
   InstrumentManager instrument_manager_;
 
-  // Instrument note off callback.
-  InstrumentNoteOffCallback instrument_note_off_callback_;
-
-  // Instrument note on callback.
-  InstrumentNoteOnCallback instrument_note_on_callback_;
-
   // List of performers.
   std::unordered_map<Id, Performer> performers_;
 
-  // Playback tempo in BPM.
+  // Playback tempo in bpm.
   double playback_tempo_;
 
   // Playback update callback.
@@ -384,6 +368,6 @@ class Musician {
   Transport transport_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_MUSICIAN_H_
+#endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_

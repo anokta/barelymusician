@@ -16,10 +16,6 @@ namespace Barely {
       Noise = 3,
     }
 
-    /// Gain.
-    [Range(0.0f, 1.0f)]
-    public float gain = 0.25f;
-
     /// Envelope attack.
     public float attack = 0.05f;
 
@@ -41,13 +37,12 @@ namespace Barely {
     public int numVoices = 8;
 
     private void Update() {
-      SetParam(0, gain);
-      SetParam(1, attack);
-      SetParam(2, decay);
-      SetParam(3, sustain);
-      SetParam(4, release);
-      SetParam(5, (float)oscillatorType);
-      SetParam(6, (float)numVoices);
+      SetParam(0, attack);
+      SetParam(1, decay);
+      SetParam(2, sustain);
+      SetParam(3, release);
+      SetParam(4, (float)oscillatorType);
+      SetParam(5, (float)numVoices);
     }
   }
 }

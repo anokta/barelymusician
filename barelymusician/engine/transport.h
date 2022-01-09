@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace barely {
+namespace barelyapi {
 
 /// Transport that controls playback.
 class Transport {
@@ -13,23 +13,30 @@ class Transport {
   /// @param position Beat position in beats.
   using BeatCallback = std::function<void(double position)>;
 
-  /// Get timestamp function signature.
-  ///
-  /// @param position Position in beats.
-  /// @return Timestamp in seconds.
-  using GetTimestampFn = std::function<double(double position)>;
-
   /// Update callback signature.
   ///
   /// @param begin_position Begin position in beats (inclusive).
   /// @param end_position End position in beats (exclusive).
-  /// @param get_timestamp_fn Get timestamp function.
   using UpdateCallback =
-      std::function<void(double begin_position, double end_position,
-                         const GetTimestampFn& get_timestamp_fn)>;
+      std::function<void(double begin_position, double end_position)>;
 
   /// Constructs new |Transport|.
   Transport() noexcept;
+
+  /// Returns the last updated position.
+  ///
+  /// @return Last updated position in beats.
+  double GetLastPosition() const noexcept;
+
+  /// Returns the last updated timestamp.
+  ///
+  /// @return Last updated timestamp in seconds.
+  double GetLastTimestamp() const noexcept;
+
+  /// Returns the last updated timestamp at position.
+  ///
+  /// @return Last updated timestamp in seconds.
+  double GetLastTimestamp(double position) const noexcept;
 
   /// Returns the current position.
   ///
@@ -45,6 +52,11 @@ class Transport {
   ///
   /// @return Timestamp in seconds.
   double GetTimestamp() const noexcept;
+
+  /// Returns the current timestamp at position.
+  ///
+  /// @return Timestamp in seconds.
+  double GetTimestamp(double position) const noexcept;
 
   /// Returns whether the transport is currently playing or not.
   ///
@@ -86,25 +98,34 @@ class Transport {
   // Denotes whether the transport is playing or not.
   bool is_playing_;
 
+  // Last updated position in beats.
+  double last_position_;
+
+  // Last updated timestamp in seconds.
+  double last_timestamp_;
+
+  // Next beat position in beats.
+  double next_beat_position_;
+
+  // Next beat timestamp in seconds.
+  double next_beat_timestamp_;
+
   // Position in beats.
   double position_;
 
   // Tempo in beats per second.
   double tempo_;
 
-  // Last updated timestamp in seconds.
+  // Timestamp in seconds.
   double timestamp_;
 
   // Beat callback.
   BeatCallback beat_callback_;
 
-  // Get timestamp function.
-  GetTimestampFn get_timestamp_fn_;
-
   // Update callback.
   UpdateCallback update_callback_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_TRANSPORT_H_

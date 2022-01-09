@@ -8,11 +8,11 @@ namespace barely::examples {
 
 /// Simple enveloped voice template.
 template <class GeneratorType>
-class EnvelopedVoice : public Voice {
+class EnvelopedVoice : public barelyapi::Voice {
  public:
   /// Constructs new |EnvelopedVoice| with the given |sample_rate|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit EnvelopedVoice(int sample_rate) noexcept;
 
   /// Implements |Voice|.
@@ -22,8 +22,8 @@ class EnvelopedVoice : public Voice {
   void Stop() noexcept override;
 
   /// Inline getter/setter functions.
-  const Envelope& envelope() const noexcept { return envelope_; }
-  Envelope& envelope() noexcept { return envelope_; }
+  const barelyapi::Envelope& envelope() const noexcept { return envelope_; }
+  barelyapi::Envelope& envelope() noexcept { return envelope_; }
 
   const GeneratorType& generator() const noexcept { return generator_; }
   GeneratorType& generator() noexcept { return generator_; }
@@ -33,7 +33,7 @@ class EnvelopedVoice : public Voice {
 
  private:
   // Voice envelope.
-  Envelope envelope_;
+  barelyapi::Envelope envelope_;
 
   // Voice unit generator.
   GeneratorType generator_;

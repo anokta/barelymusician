@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 // Tests that expected note pitches are returned for a given arbitrary scale.
@@ -25,4 +25,4 @@ TEST(NotePitchTest, GetPitch) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

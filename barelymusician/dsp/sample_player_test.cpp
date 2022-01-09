@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 // Sampling rate.
@@ -91,4 +91,4 @@ TEST(SamplePlayerTest, Reset) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

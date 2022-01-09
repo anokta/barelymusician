@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 class PositionTest : public testing::TestWithParam<int> {};
@@ -42,4 +42,4 @@ INSTANTIATE_TEST_SUITE_P(NoteDurationTest, PositionTest,
                                          kNumThirtySecondTripletNotesPerBeat));
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

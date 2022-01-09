@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace barely {
+namespace barelyapi {
 
 OnePoleFilter::OnePoleFilter() noexcept
     : coefficient_(1.0f), type_(FilterType::kLowPass), output_(0.0f) {}
@@ -23,4 +23,4 @@ void OnePoleFilter::SetCoefficient(float coefficient) noexcept {
 
 void OnePoleFilter::SetType(FilterType type) noexcept { type_ = type; }
 
-}  // namespace barely
+}  // namespace barelyapi

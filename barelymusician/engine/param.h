@@ -1,11 +1,9 @@
 #ifndef BARELYMUSICIAN_ENGINE_PARAM_H_
 #define BARELYMUSICIAN_ENGINE_PARAM_H_
 
-#include <unordered_map>
-
 #include "barelymusician/engine/param_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that wraps a parameter.
 class Param {
@@ -44,9 +42,6 @@ class Param {
   float value_;
 };
 
-/// Parameter by id map type.
-using ParamMap = std::unordered_map<int, Param>;
-
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_PARAM_H_

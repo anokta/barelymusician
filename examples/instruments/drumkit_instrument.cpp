@@ -1,6 +1,5 @@
 #include "examples/instruments/drumkit_instrument.h"
 
-#include <any>
 #include <unordered_map>
 
 #include "barelymusician/common/find_or_null.h"
@@ -9,8 +8,12 @@
 
 namespace barely::examples {
 
+using ::barelyapi::FindOrNull;
+using ::barelyapi::InstrumentDefinition;
+using ::barelyapi::ParamDefinition;
+
 DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
-    : sample_rate_(sample_rate), gain_(0.0f) {}
+    : sample_rate_(sample_rate) {}
 
 void DrumkitInstrument::NoteOff(float pitch) noexcept {
   if (auto* pad = FindOrNull(pads_, pitch)) {
@@ -32,25 +35,21 @@ void DrumkitInstrument::Process(float* output, int num_channels,
     for (auto& [pitch, pad] : pads_) {
       mono_sample += pad.voice.Next(0);
     }
-    mono_sample *= gain_;
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }
   }
 }
 
-void DrumkitInstrument::SetCustomData(std::any data) noexcept {
+void DrumkitInstrument::SetData(void* data) noexcept {
   for (const auto& [pitch, file] :
-       std::any_cast<std::unordered_map<float, WavFile>&>(data)) {
+       *reinterpret_cast<std::unordered_map<float, WavFile>*>(data)) {
     pads_.insert({pitch, DrumkitPad{file, sample_rate_}});
   }
 }
 
 void DrumkitInstrument::SetParam(int id, float value) noexcept {
   switch (static_cast<DrumkitInstrumentParam>(id)) {
-    case DrumkitInstrumentParam::kPadGain:
-      gain_ = value;
-      break;
     case DrumkitInstrumentParam::kPadRelease:
       for (auto& [pitch, pad] : pads_) {
         pad.voice.envelope().SetRelease(value);
@@ -60,15 +59,10 @@ void DrumkitInstrument::SetParam(int id, float value) noexcept {
 }
 
 InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
-  return GetInstrumentDefinition<DrumkitInstrument>(
-      [](int sample_rate) { return DrumkitInstrument(sample_rate); });
-}
-
-ParamDefinitionMap DrumkitInstrument::GetParamDefinitions() noexcept {
-  return {
-      {DrumkitInstrumentParam::kPadGain, ParamDefinition{0.5f, 0.0f, 1.0f}},
-      {DrumkitInstrumentParam::kPadRelease, ParamDefinition{0.1f, 0.0f}},
-  };
+  return GetInstrumentDefinition<DrumkitInstrument>({
+      // Pad release.
+      ParamDefinition{0.1f, 0.0f},
+  });
 }
 
 }  // namespace barely::examples

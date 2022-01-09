@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_COMMON_VISITOR_H_
 #define BARELYMUSICIAN_COMMON_VISITOR_H_
 
-namespace barely {
+namespace barelyapi {
 
 /// Visitor template.
 template <class... Types>
@@ -11,6 +11,6 @@ struct Visitor : Types... {
 template <class... Types>
 Visitor(Types...) -> Visitor<Types...>;
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_COMMON_VISITOR_H_

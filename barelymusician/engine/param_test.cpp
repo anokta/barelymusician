@@ -3,7 +3,7 @@
 #include "barelymusician/engine/param_definition.h"
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 // Tests that the parameter sets its value as expected.
@@ -68,4 +68,4 @@ TEST(ParamTest, SetValueMinMax) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

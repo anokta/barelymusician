@@ -4,7 +4,7 @@
 #include <cassert>
 #include <utility>
 
-namespace barely {
+namespace barelyapi {
 
 TaskRunner::TaskRunner(int max_size) noexcept : nodes_(max_size) {
   assert(max_size > 0);
@@ -68,4 +68,4 @@ void TaskRunner::PushNode(std::atomic<Node*>* head, Node* node) noexcept {
       old_head, node, std::memory_order_release, std::memory_order_relaxed));
 }
 
-}  // namespace barely
+}  // namespace barelyapi

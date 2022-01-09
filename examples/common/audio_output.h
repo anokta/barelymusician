@@ -12,7 +12,7 @@ class AudioOutput {
  public:
   /// Audio process callback signature.
   ///
-  /// @param output Pointer to output buffer.
+  /// @param output Output buffer.
   using ProcessCallback = std::function<void(float* output)>;
 
   /// Constructs new |AudioOutput|.
@@ -23,7 +23,7 @@ class AudioOutput {
 
   /// Starts audio processing routine with the given configuration.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames per buffer.
   void Start(int sample_rate, int num_channels, int num_frames) noexcept;

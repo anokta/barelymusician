@@ -22,7 +22,7 @@ class AudioClock {
   void Update(int num_frames) noexcept;
 
  private:
-  // Sampling rate in Hz.
+  // Sampling rate in hz.
   const int sample_rate_;
 
   // Monothonic timestamp in seconds.

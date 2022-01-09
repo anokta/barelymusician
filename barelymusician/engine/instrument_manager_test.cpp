@@ -1,7 +1,6 @@
 #include "barelymusician/engine/instrument_manager.h"
 
 #include <algorithm>
-#include <any>
 #include <vector>
 
 #include "barelymusician/common/id.h"
@@ -12,12 +11,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
-using ::testing::Pair;
 using ::testing::Property;
-using ::testing::UnorderedElementsAre;
 
 constexpr int kSampleRate = 48000;
 constexpr int kNumChannels = 2;
@@ -28,32 +25,35 @@ constexpr Id kInstrumentId = 1;
 // Returns test instrument definition that produces constant output that is set.
 InstrumentDefinition GetTestInstrumentDefinition() {
   return InstrumentDefinition{
-      .create_fn = [](InstrumentState* state,
-                      int /*sample_rate*/) { state->emplace<float>(0.0f); },
-      .destroy_fn = [](InstrumentState* state) { state->reset(); },
+      .create_fn = [](void** state,
+                      int /*sample_rate*/) { *state = new float{0.0f}; },
+      .destroy_fn = [](void** state) { delete *state; },
       .process_fn =
-          [](InstrumentState* state, float* output, int num_channels,
-             int num_frames) {
+          [](void** state, float* output, int num_channels, int num_frames) {
             std::fill_n(output, num_channels * num_frames,
-                        *std::any_cast<float>(state));
+                        *reinterpret_cast<float*>(*state));
           },
       .set_note_off_fn =
-          [](InstrumentState* state, float /*pitch*/) {
-            *std::any_cast<float>(state) = 0.0f;
+          [](void** state, float /*pitch*/) {
+            *reinterpret_cast<float*>(*state) = 0.0f;
           },
       .set_note_on_fn =
-          [](InstrumentState* state, float pitch, float intensity) {
-            *std::any_cast<float>(state) = pitch * intensity;
+          [](void** state, float pitch, float intensity) {
+            *reinterpret_cast<float*>(*state) = pitch * intensity;
           },
       .set_param_fn =
-          [](InstrumentState* state, int id, float value) {
-            *std::any_cast<float>(state) = static_cast<float>(id) * value;
-          }};
+          [](void** state, int index, float value) {
+            *reinterpret_cast<float*>(*state) =
+                static_cast<float>(index + 1) * value;
+          },
+      .param_definitions = {ParamDefinition{0.0f}}};
 }
 
-// Returns test instrument parameter definition.
-ParamDefinitionMap GetTestParamDefinitions() {
-  return ParamDefinitionMap{{1, ParamDefinition{0.0f}}};
+TEST(InstrumentManagerTest, GetParam) {
+  InstrumentManager instrument_manager(kSampleRate);
+  EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
+                                          GetTestInstrumentDefinition())));
+  EXPECT_TRUE(IsOk(instrument_manager.GetParam(kInstrumentId, 0)));
 }
 
 // Tests that instruments are added and removed as expected.
@@ -67,14 +67,8 @@ TEST(InstrumentManagerTest, AddRemove) {
   // Add instrument.
   EXPECT_FALSE(instrument_manager.IsValid(kInstrumentId));
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
   EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
-
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-              UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
   instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
@@ -88,9 +82,8 @@ TEST(InstrumentManagerTest, AddRemove) {
   // Set note on.
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 0.0, kNotePitch,
                                                 kNoteIntensity)));
-
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre(kNotePitch));
+  EXPECT_TRUE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
 
   instrument_manager.Update();
 
@@ -108,11 +101,6 @@ TEST(InstrumentManagerTest, AddRemove) {
   EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
   EXPECT_TRUE(IsOk(instrument_manager.Remove(kInstrumentId, 0.0)));
   EXPECT_FALSE(instrument_manager.IsValid(kInstrumentId));
-
-  EXPECT_EQ(GetStatusOrStatus(instrument_manager.GetAllNotes(kInstrumentId)),
-            Status::kNotFound);
-  EXPECT_EQ(GetStatusOrStatus(instrument_manager.GetAllParams(kInstrumentId)),
-            Status::kNotFound);
 
   instrument_manager.Update();
 
@@ -133,8 +121,7 @@ TEST(InstrumentManagerTest, ProcessEvents) {
   InstrumentManager instrument_manager(kSampleRate);
 
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, kTimestamp,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   // Set note on.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
@@ -152,21 +139,23 @@ TEST(InstrumentManagerTest, ProcessEvents) {
   for (const float note_pitch : {1.0f, 2.0f, 3.0f}) {
     instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
                                     SetNoteOnEvent{note_pitch, 1.0f});
+    EXPECT_TRUE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(kInstrumentId, note_pitch)));
   }
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre(1.0f, 2.0f, 3.0f));
 
   // Set all notes off.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
                                   SetAllNotesOffEvent{});
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
+  for (const float note_pitch : {1.0f, 2.0f, 3.0f}) {
+    EXPECT_FALSE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(kInstrumentId, note_pitch)));
+  }
 
   // Set parameter value.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
-                                  SetParamEvent{1, 5.0f});
+                                  SetParamEvent{0, 5.0f});
   EXPECT_FLOAT_EQ(
-      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1))
+      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0))
           .GetValue(),
       5.0f);
 
@@ -174,7 +163,7 @@ TEST(InstrumentManagerTest, ProcessEvents) {
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
                                   SetAllParamsToDefaultEvent{});
   EXPECT_FLOAT_EQ(
-      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 1))
+      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0))
           .GetValue(),
       0.0f);
 }
@@ -190,8 +179,7 @@ TEST(InstrumentManagerTest, SetNote) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, kTimestamp,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   instrument_manager.Update();
 
@@ -253,8 +241,7 @@ TEST(InstrumentManagerTest, SetNotes) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   instrument_manager.Update();
 
@@ -324,12 +311,8 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
     EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
     EXPECT_TRUE(IsOk(instrument_manager.Add(instrument_id, 0.0,
-                                            GetTestInstrumentDefinition(),
-                                            GetTestParamDefinitions())));
+                                            GetTestInstrumentDefinition())));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
-
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(instrument_id)),
-                UnorderedElementsAre());
 
     instrument_manager.Update();
 
@@ -350,9 +333,8 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
     EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(instrument_id, 0.0,
                                                   note_pitch, kNoteIntensity)));
-
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(instrument_id)),
-                UnorderedElementsAre(note_pitch));
+    EXPECT_TRUE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(instrument_id, note_pitch)));
 
     instrument_manager.Update();
 
@@ -374,9 +356,10 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
+    const float note_pitch = static_cast<float>(i);
 
-    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(instrument_id)),
-                UnorderedElementsAre());
+    EXPECT_FALSE(GetStatusOrValue(
+        instrument_manager.IsNoteOn(instrument_id, note_pitch)));
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
     instrument_manager.Process(instrument_id, 0.0, buffer.data(), kNumChannels,
@@ -402,13 +385,10 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
 
     EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
     EXPECT_TRUE(IsOk(instrument_manager.Add(instrument_id, 0.0,
-                                            GetTestInstrumentDefinition(),
-                                            GetTestParamDefinitions())));
+                                            GetTestInstrumentDefinition())));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
-
-    EXPECT_THAT(
-        GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
+                Property(&Param::GetValue, 0.0f));
 
     instrument_manager.Update();
 
@@ -428,11 +408,9 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
     const float param_value = static_cast<float>(i + 1);
 
     EXPECT_TRUE(
-        IsOk(instrument_manager.SetParam(instrument_id, 0.0, 1, param_value)));
-
-    EXPECT_THAT(
-        GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, param_value))));
+        IsOk(instrument_manager.SetParam(instrument_id, 0.0, 0, param_value)));
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
+                Property(&Param::GetValue, param_value));
 
     instrument_manager.Update();
 
@@ -454,9 +432,8 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
   for (int i = 0; i < kNumInstruments; ++i) {
     const Id instrument_id = static_cast<Id>(i);
 
-    EXPECT_THAT(
-        GetStatusOrValue(instrument_manager.GetAllParams(instrument_id)),
-        UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
+    EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
+                Property(&Param::GetValue, 0.0f));
 
     std::fill(buffer.begin(), buffer.end(), 0.0f);
     instrument_manager.Process(instrument_id, 0.0, buffer.data(), kNumChannels,
@@ -478,24 +455,19 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
+                                          GetTestInstrumentDefinition())));
 
   // Trigger note on callback.
   Id note_on_instrument_id = 0;
-  double note_on_timestamp = 0.0;
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
-  instrument_manager.SetNoteOnCallback([&](Id instrument_id, double timestamp,
-                                           float note_pitch,
-                                           float note_intensity) {
-    note_on_instrument_id = instrument_id;
-    note_on_timestamp = timestamp;
-    note_on_pitch = note_pitch;
-    note_on_intensity = note_intensity;
-  });
+  instrument_manager.SetNoteOnCallback(
+      [&](Id instrument_id, float note_pitch, float note_intensity) {
+        note_on_instrument_id = instrument_id;
+        note_on_pitch = note_pitch;
+        note_on_intensity = note_intensity;
+      });
   EXPECT_NE(note_on_instrument_id, kInstrumentId);
-  EXPECT_NE(note_on_timestamp, 1.0);
   EXPECT_NE(note_on_pitch, kNotePitch);
   EXPECT_NE(note_on_intensity, kNoteIntensity);
 
@@ -503,7 +475,6 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
                                                 kNoteIntensity)));
 
   EXPECT_EQ(note_on_instrument_id, kInstrumentId);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
 
@@ -512,48 +483,40 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
                                          kNoteIntensity),
             Status::kFailedPrecondition);
 
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
 
   // Trigger note on callback again with another note.
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(
       kInstrumentId, 15.0, kNotePitch + 2.0f, kNoteIntensity)));
 
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 15.0);
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch + 2.0f);
 
   // Trigger note off callback.
   Id note_off_instrument_id = 0;
-  double note_off_timestamp = 0.0;
   float note_off_pitch = 0.0f;
   instrument_manager.SetNoteOffCallback(
-      [&](Id instrument_id, double timestamp, float note_pitch) {
+      [&](Id instrument_id, float note_pitch) {
         note_off_instrument_id = instrument_id;
-        note_off_timestamp = timestamp;
         note_off_pitch = note_pitch;
       });
   EXPECT_NE(note_off_instrument_id, kInstrumentId);
-  EXPECT_NE(note_off_timestamp, 20.0);
   EXPECT_NE(note_off_pitch, kNotePitch);
 
   EXPECT_TRUE(
       IsOk(instrument_manager.SetNoteOff(kInstrumentId, 20.0, kNotePitch)));
 
   EXPECT_EQ(note_off_instrument_id, kInstrumentId);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // This should not trigger the callback since the note is already off.
   EXPECT_EQ(instrument_manager.SetNoteOff(kInstrumentId, 25.0, kNotePitch),
             Status::kFailedPrecondition);
 
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
 
   // Finally, remove to trigger the note off callback with the remaining note.
   EXPECT_TRUE(IsOk(instrument_manager.Remove(kInstrumentId, 30.0)));
 
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 30.0);
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch + 2.0f);
 }
 
@@ -568,13 +531,7 @@ TEST(InstrumentManagerTest, SetSampleRate) {
 
   // Add instrument.
   EXPECT_TRUE(IsOk(instrument_manager.Add(kInstrumentId, 0.0,
-                                          GetTestInstrumentDefinition(),
-                                          GetTestParamDefinitions())));
-
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-              UnorderedElementsAre(Pair(1, Property(&Param::GetValue, 0.0f))));
+                                          GetTestInstrumentDefinition())));
 
   instrument_manager.Update();
 
@@ -590,17 +547,15 @@ TEST(InstrumentManagerTest, SetSampleRate) {
   // Set note on.
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 0.0, kNotePitch,
                                                 kNoteIntensity)));
-
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre(kNotePitch));
+  EXPECT_TRUE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
 
   // Set parameter.
   EXPECT_TRUE(
-      IsOk(instrument_manager.SetParam(kInstrumentId, 0.0, 1, kParamValue)));
+      IsOk(instrument_manager.SetParam(kInstrumentId, 0.0, 0, kParamValue)));
 
-  EXPECT_THAT(
-      GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-      UnorderedElementsAre(Pair(1, Property(&Param::GetValue, kParamValue))));
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0)),
+              Property(&Param::GetValue, kParamValue));
 
   instrument_manager.Update();
 
@@ -616,11 +571,10 @@ TEST(InstrumentManagerTest, SetSampleRate) {
   // Update sampling rate.
   instrument_manager.SetSampleRate(0.0, 2);
 
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetAllNotes(kInstrumentId)),
-              UnorderedElementsAre());
-  EXPECT_THAT(
-      GetStatusOrValue(instrument_manager.GetAllParams(kInstrumentId)),
-      UnorderedElementsAre(Pair(1, Property(&Param::GetValue, kParamValue))));
+  EXPECT_FALSE(
+      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
+  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0)),
+              Property(&Param::GetValue, kParamValue));
 
   instrument_manager.Update();
 
@@ -635,4 +589,4 @@ TEST(InstrumentManagerTest, SetSampleRate) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

@@ -1,7 +1,5 @@
 #include "examples/instruments/synth_instrument.h"
 
-#include <vector>
-
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/engine/param_definition.h"
@@ -9,8 +7,13 @@
 
 namespace barely::examples {
 
+using ::barelyapi::GetFrequency;
+using ::barelyapi::InstrumentDefinition;
+using ::barelyapi::OscillatorType;
+using ::barelyapi::ParamDefinition;
+
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
-    : gain_(0.0f), voice_(SynthVoice(sample_rate)) {}
+    : voice_(SynthVoice(sample_rate)) {}
 
 void SynthInstrument::NoteOff(float pitch) noexcept { voice_.Stop(pitch); }
 
@@ -24,18 +27,15 @@ void SynthInstrument::NoteOn(float pitch, float intensity) noexcept {
 void SynthInstrument::Process(float* output, int num_channels,
                               int num_frames) noexcept {
   for (int frame = 0; frame < num_frames; ++frame) {
-    const float mono_sample = gain_ * voice_.Next(0);
+    const float mono_sample = voice_.Next(0);
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
     }
   }
 }
 
-void SynthInstrument::SetParam(int id, float value) noexcept {
-  switch (static_cast<SynthInstrumentParam>(id)) {
-    case SynthInstrumentParam::kGain:
-      gain_ = value;
-      break;
+void SynthInstrument::SetParam(int index, float value) noexcept {
+  switch (static_cast<SynthInstrumentParam>(index)) {
     case SynthInstrumentParam::kEnvelopeAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetAttack(value);
@@ -69,21 +69,20 @@ void SynthInstrument::SetParam(int id, float value) noexcept {
 }
 
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
-  return GetInstrumentDefinition<SynthInstrument>(
-      [](int sample_rate) { return SynthInstrument(sample_rate); });
-}
-
-ParamDefinitionMap SynthInstrument::GetParamDefinitions() noexcept {
-  return {
-      {SynthInstrumentParam::kGain, ParamDefinition{0.25f, 0.0f, 1.0f}},
-      {SynthInstrumentParam::kEnvelopeAttack, ParamDefinition{0.05f, 0.0f}},
-      {SynthInstrumentParam::kEnvelopeDecay, ParamDefinition{0.0f, 0.0f}},
-      {SynthInstrumentParam::kEnvelopeSustain,
-       ParamDefinition{1.0f, 0.0f, 1.0f}},
-      {SynthInstrumentParam::kEnvelopeRelease, ParamDefinition{0.25f, 0.0f}},
-      {SynthInstrumentParam::kOscillatorType,
-       ParamDefinition{static_cast<int>(OscillatorType::kSine)}},
-      {SynthInstrumentParam::kNumVoices, ParamDefinition{8, 0}}};
+  return GetInstrumentDefinition<SynthInstrument>({
+      // Attack.
+      ParamDefinition{0.05f, 0.0f},
+      // Decay.
+      ParamDefinition{0.0f, 0.0f},
+      // Sustain.
+      ParamDefinition{1.0f, 0.0f, 1.0f},
+      // Release.
+      ParamDefinition{0.25f, 0.0f},
+      // Oscillator type.
+      ParamDefinition{static_cast<float>(OscillatorType::kSine)},
+      // Number of voices.
+      ParamDefinition{8.0f, 0.0f},
+  });
 }
 
 }  // namespace barely::examples

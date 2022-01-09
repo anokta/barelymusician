@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barely {
+namespace barelyapi {
 namespace {
 
 // Tests that the uniform random generation always returns a value within the
@@ -47,4 +47,4 @@ TEST(RandomTest, Reset) {
 }
 
 }  // namespace
-}  // namespace barely
+}  // namespace barelyapi

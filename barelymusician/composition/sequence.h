@@ -11,7 +11,7 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Musical note sequence.
 class Sequence {
@@ -181,6 +181,6 @@ class Sequence {
   std::unordered_map<Id, double> positions_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_

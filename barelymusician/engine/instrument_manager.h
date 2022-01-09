@@ -1,13 +1,12 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
-#include <any>
 #include <atomic>
 #include <functional>
-#include <map>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
@@ -19,7 +18,7 @@
 #include "barelymusician/engine/param_definition.h"
 #include "barelymusician/engine/task_runner.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that manages processing of instruments.
 class InstrumentManager {
@@ -27,24 +26,21 @@ class InstrumentManager {
   /// Note off callback signature.
   ///
   /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
   using NoteOffCallback =
-      std::function<void(Id instrument_id, double timestamp, float note_pitch)>;
+      std::function<void(Id instrument_id, float note_pitch)>;
 
   /// Note on callback signature.
   ///
   /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
   /// @param note_pitch Note pitch.
   /// @param note_intensity Note intensity.
-  using NoteOnCallback =
-      std::function<void(Id instrument_id, double timestamp, float note_pitch,
-                         float note_intensity)>;
+  using NoteOnCallback = std::function<void(Id instrument_id, float note_pitch,
+                                            float note_intensity)>;
 
   /// Constructs new |InstrumentManager|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit InstrumentManager(int sample_rate) noexcept;
 
   /// Adds new instrument at timestamp.
@@ -52,30 +48,28 @@ class InstrumentManager {
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param definition Instrument definition.
-  /// @param param_definitions Instrument parameter definitions.
   /// @return Status.
   Status Add(Id instrument_id, double timestamp,
-             InstrumentDefinition definition,
-             ParamDefinitionMap param_definitions) noexcept;
-
-  /// Returns all active instrument notes.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return List of active note pitches or error status.
-  StatusOr<std::vector<float>> GetAllNotes(Id instrument_id) const noexcept;
-
-  /// Returns all instrument parameters.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return Parameters or error status.
-  StatusOr<ParamMap> GetAllParams(Id instrument_id) const noexcept;
+             InstrumentDefinition definition) noexcept;
 
   /// Returns instrument parameter.
   ///
   /// @param instrument_id Instrument id.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @return Instrument parameter or error status.
-  StatusOr<Param> GetParam(Id instrument_id, int param_id) const noexcept;
+  StatusOr<Param> GetParam(Id instrument_id, int param_index) const noexcept;
+
+  /// Returns instrument gain.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Instrument gain or error status.
+  StatusOr<float> GetGain(Id instrument_id) const noexcept;
+
+  /// Returns whether instrument is muted or not.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return True if muted, or false if not, or error status.
+  StatusOr<bool> IsMuted(Id instrument_id) const noexcept;
 
   /// Returns whether instrument note is active or not.
   ///
@@ -94,7 +88,7 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param output Pointer to the output buffer.
+  /// @param output Output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   void Process(Id instrument_id, double timestamp, float* output,
@@ -139,14 +133,29 @@ class InstrumentManager {
   /// @return Status.
   Status SetAllParamsToDefault(Id instrument_id, double timestamp) noexcept;
 
-  /// Sets custom instrument data at timestamp.
+  /// Sets instrument data at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param custom_data Custom data.
+  /// @param data Data.
   /// @return Status.
-  Status SetCustomData(Id instrument_id, double timestamp,
-                       std::any custom_data) noexcept;
+  Status SetData(Id instrument_id, double timestamp, void* data) noexcept;
+
+  /// Sets instrument gain at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param gain Gain in amplitude.
+  /// @return Status.
+  Status SetGain(Id instrument_id, double timestamp, float gain) noexcept;
+
+  /// Sets whether instrument should be muted or not at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @param is_muted True if muted, false otherwise.
+  /// @return Status.
+  Status SetMuted(Id instrument_id, double timestamp, bool is_muted) noexcept;
 
   /// Sets instrument note off at timestamp.
   ///
@@ -181,25 +190,25 @@ class InstrumentManager {
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @param param_value Parameter value.
   /// @return Status.
-  Status SetParam(Id instrument_id, double timestamp, int param_id,
+  Status SetParam(Id instrument_id, double timestamp, int param_index,
                   float param_value) noexcept;
 
   /// Sets instrument parameter to default value at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
-  /// @param param_id Parameter id.
+  /// @param param_index Parameter index.
   /// @return Status.
   Status SetParamToDefault(Id instrument_id, double timestamp,
-                           int param_id) noexcept;
+                           int param_index) noexcept;
 
   /// Sets sampling rate at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   void SetSampleRate(double timestamp, int sample_rate) noexcept;
 
   /// Updates the internal state.
@@ -209,14 +218,19 @@ class InstrumentManager {
   // Instrument controller that wraps the main thread calls of an instrument.
   struct InstrumentController {
     // Constructs new |InstrumentController|.
-    InstrumentController(InstrumentDefinition definition,
-                         ParamDefinitionMap param_definitions) noexcept;
+    explicit InstrumentController(InstrumentDefinition definition) noexcept;
 
     // Instrument definition.
     InstrumentDefinition definition;
 
+    // Instrument gain.
+    float gain;
+
+    // Denotes whether instrument is muted or not.
+    bool is_muted;
+
     // Instrument parameters.
-    ParamMap params;
+    std::vector<Param> params;
 
     // List of active note pitches.
     std::unordered_set<float> pitches;
@@ -245,10 +259,10 @@ class InstrumentManager {
   // Instrument note on callback.
   NoteOnCallback note_on_callback_;
 
-  // Sampling rate in Hz.
+  // Sampling rate in hz.
   std::atomic<int> sample_rate_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_

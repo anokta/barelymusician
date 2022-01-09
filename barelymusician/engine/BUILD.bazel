@@ -22,10 +22,28 @@ cc_library(
     name = "conductor_definition",
     hdrs = ["conductor_definition.h"],
     deps = [
+        ":param_definition",
         "//barelymusician/common:status",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_intensity",
         "//barelymusician/composition:note_pitch",
+    ],
+)
+
+cc_library(
+    name = "engine",
+    srcs = ["engine.cpp"],
+    hdrs = ["engine.h"],
+    deps = [
+        ":conductor",
+        ":conductor_definition",
+        ":instrument_manager",
+        ":performer",
+        ":transport",
+        "//barelymusician/common:find_or_null",
+        "//barelymusician/common:id",
+        "//barelymusician/common:id_generator",
+        "//barelymusician/common:status",
     ],
 )
 
@@ -41,6 +59,9 @@ cc_library(
 cc_library(
     name = "instrument_definition",
     hdrs = ["instrument_definition.h"],
+    deps = [
+        ":param_definition",
+    ],
 )
 
 cc_library(
@@ -77,23 +98,6 @@ cc_library(
     deps = [
         ":instrument_definition",
         ":instrument_event",
-    ],
-)
-
-cc_library(
-    name = "musician",
-    srcs = ["musician.cpp"],
-    hdrs = ["musician.h"],
-    deps = [
-        ":conductor",
-        ":conductor_definition",
-        ":instrument_manager",
-        ":performer",
-        ":transport",
-        "//barelymusician/common:find_or_null",
-        "//barelymusician/common:id",
-        "//barelymusician/common:id_generator",
-        "//barelymusician/common:status",
     ],
 )
 

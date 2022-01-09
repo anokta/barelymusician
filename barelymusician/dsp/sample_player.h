@@ -3,14 +3,14 @@
 
 #include "barelymusician/dsp/generator.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Sample player that generates output samples from the provided mono data.
 class SamplePlayer : public Generator {
  public:
   /// Construct new |SamplePlayer| with the given sample data.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   explicit SamplePlayer(int sample_rate) noexcept;
 
   /// Implements |Generator|.
@@ -20,7 +20,7 @@ class SamplePlayer : public Generator {
   /// Sets the sample data.
   ///
   /// @param data Sample data.
-  /// @param frequency Data sampling frequency in Hz.
+  /// @param frequency Data sampling frequency in hz.
   /// @param length Data length in samples.
   void SetData(const float* data, int frequency, int length) noexcept;
 
@@ -44,7 +44,7 @@ class SamplePlayer : public Generator {
   // Sample data.
   const float* data_;
 
-  // Sample data sampling rate in Hz.
+  // Sample data sampling rate in hz.
   float frequency_;
 
   // Sample data length in samples.
@@ -63,6 +63,6 @@ class SamplePlayer : public Generator {
   float increment_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_

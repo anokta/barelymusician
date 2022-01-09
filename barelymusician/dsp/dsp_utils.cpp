@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace barely {
+namespace barelyapi {
 
 namespace {
 
@@ -55,4 +55,4 @@ double SecondsFromSamples(int sample_rate, int samples) noexcept {
              : 0.0;
 }
 
-}  // namespace barely
+}  // namespace barelyapi

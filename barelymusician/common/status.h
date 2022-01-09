@@ -5,7 +5,7 @@
 #include <utility>
 #include <variant>
 
-namespace barely {
+namespace barelyapi {
 
 /// Status codes.
 enum class Status {
@@ -87,6 +87,6 @@ bool IsOk(const StatusOr<ValueType>& status_or) noexcept {
 /// @return True if ok.
 inline bool IsOk(Status status) noexcept { return status == Status::kOk; }
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_COMMON_STATUS_H_

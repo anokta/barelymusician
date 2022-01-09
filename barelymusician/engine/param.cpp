@@ -5,7 +5,7 @@
 
 #include "barelymusician/engine/param_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 Param::Param(ParamDefinition definition) noexcept
     : definition_(std::move(definition)) {
@@ -29,12 +29,8 @@ bool Param::ResetValue() noexcept {
 }
 
 bool Param::SetValue(float value) noexcept {
-  if (definition_.max_value.has_value()) {
-    value = std::min(value, *definition_.max_value);
-  }
-  if (definition_.min_value.has_value()) {
-    value = std::max(value, *definition_.min_value);
-  }
+  value =
+      std::min(std::max(value, definition_.min_value), definition_.max_value);
   if (value_ != value) {
     value_ = value;
     return true;
@@ -42,4 +38,4 @@ bool Param::SetValue(float value) noexcept {
   return false;
 }
 
-}  // namespace barely
+}  // namespace barelyapi

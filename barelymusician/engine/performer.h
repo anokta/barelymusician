@@ -14,7 +14,7 @@
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/instrument_event.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that performs a musical sequence with a set of instruments.
 class Performer {
@@ -122,6 +122,6 @@ class Performer {
   double sequence_position_offset_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_PERFORMER_H_

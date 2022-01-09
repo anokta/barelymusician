@@ -1,89 +1,85 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_
 
-#include <any>
-#include <functional>
+#include <vector>
 
-namespace barely {
+#include "barelymusician/engine/param_definition.h"
 
-/// Instrument state type.
-using InstrumentState = std::any;
-
-/// Instrument create function signature.
-///
-/// @param state Pointer to instrument state.
-/// @param sample_rate Sampling rate in Hz.
-using CreateInstrumentFn =
-    std::function<void(InstrumentState* state, int sample_rate)>;
-
-/// Instrument destroy function signature.
-///
-/// @param state Pointer to instrument state.
-using DestroyInstrumentFn = std::function<void(InstrumentState* state)>;
-
-/// Instrument process function signature.
-///
-/// @param state Pointer to instrument state.
-/// @param output Pointer to output buffer.
-/// @param num_channels Number of channels.
-/// @param num_frames Number of frames.
-using ProcessInstrumentFn = std::function<void(
-    InstrumentState* state, float* output, int num_channels, int num_frames)>;
-
-/// Instrument set custom data function signature.
-///
-/// @param state Pointer to instrument state.
-/// @param data Custom data.
-using SetCustomInstrumentDataFn =
-    std::function<void(InstrumentState* state, std::any data)>;
-
-/// Instrument set note off function signature.
-///
-/// @param state Pointer to instrument state.
-/// @param pitch Note pitch.
-using SetInstrumentNoteOffFn =
-    std::function<void(InstrumentState* state, float pitch)>;
-
-/// Instrument set note on function signature.
-///
-/// @param state Pointer to instrument state.
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-using SetInstrumentNoteOnFn =
-    std::function<void(InstrumentState* state, float pitch, float intensity)>;
-
-/// Instrument set parameter function signature.
-///
-/// @param state Pointer to instrument state.
-/// @param id Parameter id.
-/// @param value Parameter value.
-using SetInstrumentParamFn =
-    std::function<void(InstrumentState* state, int id, float value)>;
+namespace barelyapi {
 
 /// Instrument definition.
 struct InstrumentDefinition {
+  /// Create function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param sample_rate Sampling rate in hz.
+  using CreateFn = void (*)(void** state, int sample_rate);
+
+  /// Destroy function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  using DestroyFn = void (*)(void** state);
+
+  /// Process function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param output Output buffer.
+  /// @param num_output_channels Number of channels.
+  /// @param num_output_frames Number of frames.
+  using ProcessFn = void (*)(void** state, float* output,
+                             int num_output_channels, int num_output_frames);
+
+  /// Set data function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param data Data.
+  using SetDataFn = void (*)(void** state, void* data);
+
+  /// Set note off function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param pitch Note pitch.
+  using SetNoteOffFn = void (*)(void** state, float pitch);
+
+  /// Set note on function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  using SetNoteOnFn = void (*)(void** state, float pitch, float intensity);
+
+  /// Set parameter function signature.
+  ///
+  /// @param state Pointer to instrument state.
+  /// @param index Parameter index.
+  /// @param value Parameter value.
+  using SetParamFn = void (*)(void** state, int index, float value);
+
   /// Create function.
-  CreateInstrumentFn create_fn;
+  CreateFn create_fn = nullptr;
 
   /// Destroy function.
-  DestroyInstrumentFn destroy_fn;
+  DestroyFn destroy_fn = nullptr;
 
   /// Process function.
-  ProcessInstrumentFn process_fn;
+  ProcessFn process_fn = nullptr;
 
-  /// Set custom data function.
-  SetCustomInstrumentDataFn set_custom_data_fn;
+  /// Set data function.
+  SetDataFn set_data_fn = nullptr;
 
   /// Set note off function.
-  SetInstrumentNoteOffFn set_note_off_fn;
+  SetNoteOffFn set_note_off_fn = nullptr;
 
   /// Set note on function.
-  SetInstrumentNoteOnFn set_note_on_fn;
+  SetNoteOnFn set_note_on_fn = nullptr;
 
   /// Set parameter function.
-  SetInstrumentParamFn set_param_fn;
+  SetParamFn set_param_fn = nullptr;
+
+  /// List of parameter definitions.
+  std::vector<ParamDefinition> param_definitions = {};
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_DEFINITION_H_

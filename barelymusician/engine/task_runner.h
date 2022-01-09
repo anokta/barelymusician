@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-namespace barely {
+namespace barelyapi {
 
 /// Lock-free thread-safe task runner (single producer, single consumer).
 class TaskRunner {
@@ -56,6 +56,6 @@ class TaskRunner {
   std::vector<Task> temp_tasks_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_TASK_RUNNER_H_

@@ -1,35 +1,32 @@
 #ifndef BARELYMUSICIAN_ENGINE_CONDUCTOR_DEFINITION_H_
 #define BARELYMUSICIAN_ENGINE_CONDUCTOR_DEFINITION_H_
 
-#include <any>
 #include <functional>
+#include <vector>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/engine/param_definition.h"
 
-namespace barely {
-
-/// Conductor state type.
-using ConductorState = std::any;
+namespace barelyapi {
 
 /// Conductor create function signature.
 ///
 /// @param state Pointer to conductor state.
-using CreateConductorFn = std::function<void(ConductorState* state)>;
+using CreateConductorFn = std::function<void(void** state)>;
 
 /// Conductor destroy function signature.
 ///
 /// @param state Pointer to conductor state.
-using DestroyConductorFn = std::function<void(ConductorState* state)>;
+using DestroyConductorFn = std::function<void(void** state)>;
 
-/// Conductor set custom data function signature.
+/// Conductor set data function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param data Custom data.
-using SetCustomConductorDataFn =
-    std::function<void(ConductorState* state, std::any data)>;
+/// @param data Data.
+using SetConductorDataFn = std::function<void(void** state, void* data)>;
 
 /// Conductor set parameter function signature.
 ///
@@ -37,7 +34,7 @@ using SetCustomConductorDataFn =
 /// @param id Parameter id.
 /// @param value Parameter value.
 using SetConductorParamFn =
-    std::function<void(ConductorState* state, int id, float value)>;
+    std::function<void(void** state, int id, float value)>;
 
 /// Conductor transform note duration function signature.
 ///
@@ -45,7 +42,7 @@ using SetConductorParamFn =
 /// @param note_duration Note duration.
 /// @return Raw note duration, or error status.
 using TransformNoteDurationFn = std::function<StatusOr<double>(
-    ConductorState* state, const NoteDuration& note_duration)>;
+    void** state, const NoteDuration& note_duration)>;
 
 /// Conductor transform note intensity function signature.
 ///
@@ -53,23 +50,23 @@ using TransformNoteDurationFn = std::function<StatusOr<double>(
 /// @param note_intensity Note intensity.
 /// @return Raw note intensity, or error status.
 using TransformNoteIntensityFn = std::function<StatusOr<float>(
-    ConductorState* state, const NoteIntensity& note_intensity)>;
+    void** state, const NoteIntensity& note_intensity)>;
 
 /// Conductor transform note intensity function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param note_pitch Note pitch.
 /// @return Raw note pitch, or error status.
-using TransformNotePitchFn = std::function<StatusOr<float>(
-    ConductorState* state, const NotePitch& note_pitch)>;
+using TransformNotePitchFn =
+    std::function<StatusOr<float>(void** state, const NotePitch& note_pitch)>;
 
 /// Conductor transform playback tempo function signature.
 ///
 /// @param state Pointer to conductor state.
-/// @param tempo Original tempo in BPM.
-/// @return Transformed tempo in BPM.
+/// @param tempo Original tempo in bpm.
+/// @return Transformed tempo in bpm.
 using TransformPlaybackTempoFn =
-    std::function<double(ConductorState* state, double tempo)>;
+    std::function<double(void** state, double tempo)>;
 
 /// Conductor definition.
 struct ConductorDefinition {
@@ -79,8 +76,8 @@ struct ConductorDefinition {
   /// Destroy function.
   DestroyConductorFn destroy_fn;
 
-  /// Set custom data function.
-  SetCustomConductorDataFn set_custom_data_fn;
+  /// Set data function.
+  SetConductorDataFn set_data_fn;
 
   /// Set parameter function.
   SetConductorParamFn set_param_fn;
@@ -96,8 +93,11 @@ struct ConductorDefinition {
 
   /// Transform playback tempo function.
   TransformPlaybackTempoFn transform_playback_tempo_fn;
+
+  /// Parameter definitions.
+  std::vector<ParamDefinition> param_definitions;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_CONDUCTOR_DEFINITION_H_

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <span>
 
-namespace barely {
+namespace barelyapi {
 
 float GetPitch(std::span<const float> scale, int index) noexcept {
   assert(!scale.empty());
@@ -17,4 +17,4 @@ float GetPitch(std::span<const float> scale, int index) noexcept {
   return octave_offset + scale[scale_offset];
 }
 
-}  // namespace barely
+}  // namespace barelyapi

@@ -4,7 +4,7 @@
 #include <span>
 #include <variant>
 
-namespace barely {
+namespace barelyapi {
 
 /// Number of semitones in an octave (twelwe-tone equal temperament).
 inline constexpr float kNumSemitones = 12.0f;
@@ -149,6 +149,6 @@ using NotePitch = std::variant<float>;
 /// @return Note pitch.
 float GetPitch(std::span<const float> scale, int index) noexcept;
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_

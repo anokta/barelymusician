@@ -1,8 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 #define BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 
-#include <any>
-#include <unordered_map>
+#include <vector>
 
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
@@ -12,7 +11,7 @@
 #include "barelymusician/engine/param.h"
 #include "barelymusician/engine/param_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that wraps a conductor.
 class Conductor {
@@ -20,17 +19,15 @@ class Conductor {
   /// Constructs new |Conductor|.
   ///
   /// @param definition Conductor definition.
-  /// @param param_definitions Conductor parameter definitions.
-  explicit Conductor(ConductorDefinition definition = {},
-                     ParamDefinitionMap param_definitions = {}) noexcept;
+  explicit Conductor(ConductorDefinition definition = {}) noexcept;
 
   /// Destroys |Conductor|.
   ~Conductor() noexcept;
 
   /// Copyable and movable.
   Conductor(const Conductor& other) = default;
-  Conductor& operator=(const Conductor& other) noexcept = default;
-  Conductor(Conductor&& other) = default;
+  Conductor& operator=(const Conductor& other) = default;
+  Conductor(Conductor&& other) noexcept = default;
   Conductor& operator=(Conductor&& other) noexcept = default;
 
   /// Returns parameter.
@@ -39,10 +36,10 @@ class Conductor {
   /// @return Parameter or error status.
   StatusOr<Param> GetParam(int id) const noexcept;
 
-  /// Sets custom data.
+  /// Sets data.
   ///
-  /// @param data Custom data.
-  void SetCustomData(std::any data) noexcept;
+  /// @param data Data.
+  void SetData(void* data) noexcept;
 
   /// Sets parameter.
   ///
@@ -77,16 +74,16 @@ class Conductor {
 
   /// Transforms playback tempo.
   ///
-  /// @param tempo Original tempo in BPM.
-  /// @return Transformed tempo in BPM.
+  /// @param tempo Original tempo in bpm.
+  /// @return Transformed tempo in bpm.
   double TransformPlaybackTempo(double tempo) noexcept;
 
  private:
   // Conductor destroy function.
   DestroyConductorFn destroy_fn_;
 
-  // Conductor set custom data function.
-  SetCustomConductorDataFn set_custom_data_fn_;
+  // Conductor set data function.
+  SetConductorDataFn set_data_fn_;
 
   // Conductor set parameter function.
   SetConductorParamFn set_param_fn_;
@@ -104,12 +101,12 @@ class Conductor {
   TransformPlaybackTempoFn transform_playback_tempo_fn_;
 
   // Conductor state.
-  ConductorState state_;
+  void* state_;
 
   // Conductor parameters.
-  ParamMap params_;
+  std::vector<Param> params_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_CONDUCTOR_H_

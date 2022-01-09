@@ -1,18 +1,16 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
-#include <any>
-
 #include "barelymusician/engine/instrument_definition.h"
 
-namespace barely {
+namespace barelyapi {
 
 /// Class that wraps an instrument.
 class Instrument {
  public:
   /// Constructs new |Instrument|.
   ///
-  /// @param sample_rate Sampling rate in Hz.
+  /// @param sample_rate Sampling rate in hz.
   /// @param definition Instrument definition.
   Instrument(int sample_rate, InstrumentDefinition definition) noexcept;
 
@@ -21,21 +19,26 @@ class Instrument {
 
   /// Copyable and movable.
   Instrument(const Instrument& other) = default;
-  Instrument& operator=(const Instrument& other) noexcept = default;
-  Instrument(Instrument&& other) = default;
+  Instrument& operator=(const Instrument& other) = default;
+  Instrument(Instrument&& other) noexcept = default;
   Instrument& operator=(Instrument&& other) noexcept = default;
 
   /// Processes the next output buffer.
   ///
-  /// @param output Pointer to the output buffer.
+  /// @param output Output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
   void Process(float* output, int num_channels, int num_frames) noexcept;
 
-  /// Sets custom data.
+  /// Sets data.
   ///
-  /// @param data Custom data.
-  void SetCustomData(std::any data) noexcept;
+  /// @param data Data.
+  void SetData(void* data) noexcept;
+
+  /// Sets gain.
+  ///
+  /// @param gain Gain in amplitude.
+  void SetGain(float gain) noexcept;
 
   /// Sets note off.
   ///
@@ -50,33 +53,36 @@ class Instrument {
 
   /// Sets parameter.
   ///
-  /// @param id Parameter id.
+  /// @param index Parameter index.
   /// @param value Parameter value.
-  void SetParam(int id, float value) noexcept;
+  void SetParam(int index, float value) noexcept;
 
  private:
   // Instrument destroy function.
-  DestroyInstrumentFn destroy_fn_;
+  InstrumentDefinition::DestroyFn destroy_fn_;
 
   // Instrument process function.
-  ProcessInstrumentFn process_fn_;
+  InstrumentDefinition::ProcessFn process_fn_;
 
-  // Instrument set custom data function.
-  SetCustomInstrumentDataFn set_custom_data_fn_;
+  // Instrument set data function.
+  InstrumentDefinition::SetDataFn set_data_fn_;
 
   // Instrument set note off function.
-  SetInstrumentNoteOffFn set_note_off_fn_;
+  InstrumentDefinition::SetNoteOffFn set_note_off_fn_;
 
   // Instrument set note on function.
-  SetInstrumentNoteOnFn set_note_on_fn_;
+  InstrumentDefinition::SetNoteOnFn set_note_on_fn_;
 
   // Instrument set parameter function.
-  SetInstrumentParamFn set_param_fn_;
+  InstrumentDefinition::SetParamFn set_param_fn_;
 
   // Instrument state.
-  InstrumentState state_;
+  void* state_;
+
+  // Instrument gain.
+  float gain_;
 };
 
-}  // namespace barely
+}  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

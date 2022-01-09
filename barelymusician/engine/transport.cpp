@@ -8,7 +8,7 @@ namespace barelyapi {
 namespace {
 
 // Dummy beat callback function that does nothing.
-void NoopBeatCallback(double /*beat*/) noexcept {}
+void NoopBeatCallback(double /*position*/) noexcept {}
 
 // Dummy update callback function that does nothing.
 void NoopUpdateCallback(double /*begin_position*/,

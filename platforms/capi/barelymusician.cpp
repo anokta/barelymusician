@@ -817,9 +817,7 @@ BarelyStatus BarelyTransport_SetBeatCallback(
     void* user_data) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  beat_callback;
-  user_data;
+  api->instance.SetPlaybackBeatCallback(beat_callback, user_data);
   return BarelyStatus_kUnimplemented;
 }
 
@@ -842,9 +840,7 @@ BarelyStatus BarelyTransport_SetUpdateCallback(
     void* user_data) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  update_callback;
-  user_data;
+  api->instance.SetPlaybackUpdateCallback(update_callback, user_data);
   return BarelyStatus_kUnimplemented;
 }
 
@@ -906,39 +902,6 @@ BarelyStatus BarelySetInstrumentNoteOnCallback(
           });
     } else {
       api->instance.SetInstrumentNoteOffCallback(nullptr);
-    }
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySetPlaybackBeatCallback(
-    BarelyApi api, BarelyPlaybackBeatCallback playback_beat_callback) {
-  if (api) {
-    if (playback_beat_callback) {
-      api->instance.SetPlaybackBeatCallback(
-          [playback_beat_callback](double position) {
-            playback_beat_callback(position);
-          });
-    } else {
-      api->instance.SetPlaybackBeatCallback(nullptr);
-    }
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySetPlaybackUpdateCallback(
-    BarelyApi api, BarelyPlaybackUpdateCallback playback_update_callback) {
-  if (api) {
-    if (playback_update_callback) {
-      api->instance.SetPlaybackUpdateCallback(
-          [playback_update_callback](double begin_position,
-                                     double end_position) {
-            playback_update_callback(begin_position, end_position);
-          });
-    } else {
-      api->instance.SetPlaybackUpdateCallback(nullptr);
     }
     return BarelyStatus_kOk;
   }

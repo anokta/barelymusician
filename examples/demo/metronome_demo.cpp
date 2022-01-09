@@ -66,7 +66,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                             static_cast<float>(kNumVoices));
 
   // Beat callback.
-  const auto beat_callback = [&](double position) {
+  std::function<void(double)> beat_callback = [&](double position) {
     const int current_bar = static_cast<int>(position) / kNumBeats;
     const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
@@ -74,7 +74,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     engine.SetInstrumentNoteOn(metronome_id, pitch, kGain);
     engine.SetInstrumentNoteOff(metronome_id, pitch);
   };
-  engine.SetPlaybackBeatCallback(beat_callback);
+  engine.SetPlaybackBeatCallback(
+      [](double position, double, void* user_data) {
+        (*reinterpret_cast<std::function<void(double)>*>(user_data))(position);
+      },
+      reinterpret_cast<void*>(&beat_callback));
 
   // Audio process callback.
   const auto process_callback = [&](float* output) {

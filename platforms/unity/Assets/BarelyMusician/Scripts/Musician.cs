@@ -10,6 +10,10 @@ namespace Barely {
     /// Invalid id.
     public const Int64 InvalidId = -1;
 
+    /// Beat event.
+    public delegate void BeatEvent(double position);
+    public static event BeatEvent OnBeat;
+
     /// Instrument note off event.
     public delegate void InstrumentNoteOffEvent(Instrument instrument, float notePitch);
     public static event InstrumentNoteOffEvent OnInstrumentNoteOff;
@@ -18,10 +22,6 @@ namespace Barely {
     public delegate void InstrumentNoteOnEvent(Instrument instrument, float notePitch,
                                                float noteIntensity);
     public static event InstrumentNoteOnEvent OnInstrumentNoteOn;
-
-    /// Playback beat event.
-    public delegate void PlaybackBeatEvent(double position);
-    public static event PlaybackBeatEvent OnPlaybackBeat;
 
     /// Adds new instrument.
     ///
@@ -285,6 +285,10 @@ namespace Barely {
 
     // Internal component to update the native state.
     private class MusicianInternal : MonoBehaviour {
+      // Beat callback.
+      private delegate void BeatCallback(double position, double timestamp);
+      private BeatCallback _beatCallback = null;
+
       // Instrument note off callback.
       private delegate void InstrumentNoteOffCallback(Int64 instrumentId, float notePitch);
       private InstrumentNoteOffCallback _instrumentNoteOffCallback = null;
@@ -293,10 +297,6 @@ namespace Barely {
       private delegate void InstrumentNoteOnCallback(Int64 instrument_id, float notePitch,
                                                      float noteIntensity);
       private InstrumentNoteOnCallback _instrumentNoteOnCallback = null;
-
-      // Playback beat callback.
-      private delegate void PlaybackBeatCallback(double position);
-      private PlaybackBeatCallback _playbackBeatCallback = null;
 
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
@@ -326,11 +326,11 @@ namespace Barely {
         };
         SetInstrumentNoteOnCallbackNative(
             _api, Marshal.GetFunctionPointerForDelegate(_instrumentNoteOnCallback));
-        _playbackBeatCallback = delegate(double position) {
-          OnPlaybackBeat?.Invoke(position);
+        _beatCallback = delegate(double position, double timestamp) {
+          OnBeat?.Invoke(position);
         };
-        SetPlaybackBeatCallbackNative(_api,
-                                      Marshal.GetFunctionPointerForDelegate(_playbackBeatCallback));
+        BarelyTransport_SetBeatCallback(_api, Marshal.GetFunctionPointerForDelegate(_beatCallback),
+                                        IntPtr.Zero);
       }
 
       private void OnDestroy() {
@@ -531,8 +531,8 @@ namespace Barely {
     private static extern Status SetInstrumentNoteOnCallbackNative(IntPtr api,
                                                                    IntPtr noteOnCallbackPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelySetPlaybackBeatCallback")]
-    private static extern Status SetPlaybackBeatCallbackNative(IntPtr api,
-                                                               IntPtr playbackBeatCallbackPtr);
+    [DllImport(pluginName, EntryPoint = "BarelyTransport_SetBeatCallback")]
+    private static extern Status BarelyTransport_SetBeatCallback(IntPtr api, IntPtr beatCallback,
+                                                                 IntPtr userData);
   }
 }

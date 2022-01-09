@@ -24,31 +24,14 @@ constexpr double kDefaultPlaybackTempo = 120.0;
 // Converts seconds from minutes.
 constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 
-// Dummy playback update callback function that does nothing.
-void NoopPlaybackUpdateCallback(double /*begin_position*/,
-                                double /*end_position*/) noexcept {}
-
 }  // namespace
 
 Engine::Engine(int sample_rate) noexcept
-    : instrument_manager_(sample_rate),
-      playback_tempo_(kDefaultPlaybackTempo),
-      playback_update_callback_(&NoopPlaybackUpdateCallback) {
-  transport_.SetUpdateCallback([&](double begin_position,
-                                   double end_position) noexcept {
-    playback_update_callback_(begin_position, end_position);
-    InstrumentIdEventPairMap id_event_pairs;
-    for (auto& [performer_id, performer] : performers_) {
-      id_event_pairs.merge(
-          performer.Perform(begin_position, end_position, conductor_));
-    }
-    for (auto& [position, id_event_pair] : id_event_pairs) {
-      auto& [instrument_id, event] = id_event_pair;
-      instrument_manager_.ProcessEvent(instrument_id,
-                                       transport_.GetLastTimestamp(position),
-                                       std::move(event));
-    }
-  });
+    : instrument_manager_(sample_rate), playback_tempo_(kDefaultPlaybackTempo) {
+  transport_.SetUpdateCallback(
+      [this](double begin_position, double end_position) noexcept {
+        UpdateSequences(begin_position, end_position);
+      });
 }
 
 Id Engine::AddInstrument(InstrumentDefinition definition) noexcept {
@@ -355,9 +338,16 @@ Status Engine::SetPerformerLoopLength(Id performer_id,
   return Status::kNotFound;
 }
 
-void Engine::SetPlaybackBeatCallback(
-    PlaybackBeatCallback playback_beat_callback) noexcept {
-  transport_.SetBeatCallback(std::move(playback_beat_callback));
+void Engine::SetPlaybackBeatCallback(BeatCallback beat_callback,
+                                     void* user_data) noexcept {
+  if (beat_callback) {
+    transport_.SetBeatCallback(
+        [this, beat_callback, user_data](double position) {
+          beat_callback(position, transport_.GetTimestamp(), user_data);
+        });
+  } else {
+    transport_.SetBeatCallback(nullptr);
+  }
 }
 
 void Engine::SetPlaybackPosition(double position) noexcept {
@@ -368,11 +358,23 @@ void Engine::SetPlaybackTempo(double tempo) noexcept {
   playback_tempo_ = std::max(tempo, 0.0);
 }
 
-void Engine::SetPlaybackUpdateCallback(
-    PlaybackUpdateCallback playback_update_callback) noexcept {
-  playback_update_callback_ = playback_update_callback
-                                  ? std::move(playback_update_callback)
-                                  : &NoopPlaybackUpdateCallback;
+void Engine::SetPlaybackUpdateCallback(UpdateCallback update_callback,
+                                       void* user_data) noexcept {
+  if (update_callback) {
+    transport_.SetUpdateCallback(
+        [this, update_callback, user_data](double begin_position,
+                                           double end_position) {
+          update_callback(begin_position, end_position,
+                          transport_.GetLastTimestamp(),
+                          transport_.GetTimestamp(), user_data);
+          UpdateSequences(begin_position, end_position);
+        });
+  } else {
+    transport_.SetUpdateCallback(
+        [this](double begin_position, double end_position) {
+          UpdateSequences(begin_position, end_position);
+        });
+  }
 }
 
 void Engine::SetSampleRate(int sample_rate) noexcept {
@@ -398,6 +400,19 @@ void Engine::Update(double timestamp) noexcept {
                       kMinutesFromSeconds);
   transport_.Update(timestamp);
   instrument_manager_.Update();
+}
+
+void Engine::UpdateSequences(double begin_position, double end_position) {
+  InstrumentIdEventPairMap id_event_pairs;
+  for (auto& [performer_id, performer] : performers_) {
+    id_event_pairs.merge(
+        performer.Perform(begin_position, end_position, conductor_));
+  }
+  for (auto& [position, id_event_pair] : id_event_pairs) {
+    auto& [instrument_id, event] = id_event_pair;
+    instrument_manager_.ProcessEvent(
+        instrument_id, transport_.GetLastTimestamp(position), std::move(event));
+  }
 }
 
 }  // namespace barelyapi

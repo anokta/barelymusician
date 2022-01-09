@@ -27,11 +27,12 @@ class Engine {
   /// Instrument note on callback signature.
   using InstrumentNoteOnCallback = InstrumentManager::NoteOnCallback;
 
-  /// Playback beat callback signature.
-  using PlaybackBeatCallback = Transport::BeatCallback;
-
-  /// Playback update callback signature.
-  using PlaybackUpdateCallback = Transport::UpdateCallback;
+  // TODO(#85): Temp definition to allow callback setter.
+  using BeatCallback = void (*)(double position, double timestamp,
+                                void* user_data);
+  using UpdateCallback = void (*)(double begin_position, double end_position,
+                                  double begin_timestamp, double end_timestamp,
+                                  void* user_data);
 
   /// Constructs new `Engine`.
   ///
@@ -309,9 +310,10 @@ class Engine {
 
   /// Sets the playback beat callback.
   ///
-  /// @param playback_beat_callback Playback beat callback.
-  void SetPlaybackBeatCallback(
-      PlaybackBeatCallback playback_beat_callback) noexcept;
+  /// @param beat_callback Beat callback.
+  /// @param user_data User data.
+  void SetPlaybackBeatCallback(BeatCallback beat_callback,
+                               void* user_data) noexcept;
 
   /// Sets the playback position.
   ///
@@ -325,9 +327,10 @@ class Engine {
 
   /// Sets the playback update callback.
   ///
-  /// @param playback_update_callback Playback update callback.
-  void SetPlaybackUpdateCallback(
-      PlaybackUpdateCallback playback_update_callback) noexcept;
+  /// @param update_callback Update callback.
+  /// @param user_data User data.
+  void SetPlaybackUpdateCallback(UpdateCallback update_callback,
+                                 void* user_data) noexcept;
 
   /// Sets the sample rate.
   ///
@@ -346,6 +349,9 @@ class Engine {
   void Update(double timestamp) noexcept;
 
  private:
+  // Updates sequences.
+  void UpdateSequences(double begin_position, double end_position);
+
   // Conductor.
   Conductor conductor_;
 
@@ -360,9 +366,6 @@ class Engine {
 
   // Playback tempo in bpm.
   double playback_tempo_;
-
-  // Playback update callback.
-  PlaybackUpdateCallback playback_update_callback_;
 
   // Playback transport.
   Transport transport_;

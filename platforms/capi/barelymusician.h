@@ -1097,18 +1097,6 @@ typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
                                                float note_pitch,
                                                float note_intensity);
 
-/// Playback beat callback signature.
-///
-/// @param position Beat position in beats.
-typedef void (*BarelyPlaybackBeatCallback)(double position);
-
-/// Playback update callback signature.
-///
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
-                                             double end_position);
-
 /// Adds performer note.
 ///
 /// @param api BarelyMusician api.
@@ -1140,22 +1128,6 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
     BarelyApi api, BarelyInstrumentNoteOnCallback instrument_note_on_callback);
-
-/// Sets the playback beat callback.
-///
-/// @param api BarelyMusician api.
-/// @param playback_beat_callback Playback beat callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPlaybackBeatCallback(
-    BarelyApi api, BarelyPlaybackBeatCallback playback_beat_callback);
-
-/// Sets the playback update callback.
-///
-/// @param api BarelyMusician api.
-/// @param playback_update_callback Playback update callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPlaybackUpdateCallback(
-    BarelyApi api, BarelyPlaybackUpdateCallback playback_update_callback);
 
 #ifdef __cplusplus
 }  // extern "C"

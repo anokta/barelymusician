@@ -137,7 +137,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Random random;
 
   double reset_position = false;
-  engine.SetPlaybackBeatCallback([&](double /*position*/) {
+  std::function<void(double)> beat_callback = [&](double /*position*/) {
     engine.SetInstrumentNoteOn(metronome_id, barelyapi::kPitchC3, 1.0);
     engine.SetInstrumentNoteOff(metronome_id, barelyapi::kPitchC3);
     if (reset_position) {
@@ -145,7 +145,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
       engine.SetPlaybackPosition(0.0);
     }
     ConsoleLog() << "Beat: " << engine.GetPlaybackPosition();
-  });
+  };
+  engine.SetPlaybackBeatCallback(
+      [](double position, double, void* user_data) {
+        (*reinterpret_cast<std::function<void(double)>*>(user_data))(position);
+      },
+      reinterpret_cast<void*>(&beat_callback));
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

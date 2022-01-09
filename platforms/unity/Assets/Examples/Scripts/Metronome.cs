@@ -27,11 +27,11 @@ public class Metronome : MonoBehaviour {
   public bool tick = true;
 
   void OnEnable() {
-    Musician.OnPlaybackBeat += OnPlaybackBeat;
+    Musician.OnBeat += OnBeat;
   }
 
   void OnDisable() {
-    Musician.OnPlaybackBeat -= OnPlaybackBeat;
+    Musician.OnBeat -= OnBeat;
   }
 
   void Update() {
@@ -56,7 +56,7 @@ public class Metronome : MonoBehaviour {
     }
   }
 
-  private void OnPlaybackBeat(double position) {
+  private void OnBeat(double position) {
     int bar = (int)(position) / numBeats;
     int beat = (int)(position) % numBeats;
     float pitch = (beat == 0.0) ? barPitch : beatPitch;

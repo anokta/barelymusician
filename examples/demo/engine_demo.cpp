@@ -279,7 +279,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Beat callback.
   int harmonic = 0;
-  const auto beat_callback = [&](double beat) {
+  std::function<void(double)> beat_callback = [&](double beat) {
     // Update transport.
     const int current_bar = static_cast<int>(beat) / kNumBeats;
     const int current_beat = static_cast<int>(beat) % kNumBeats;
@@ -297,7 +297,11 @@ int main(int /*argc*/, char* argv[]) {
       }
     }
   };
-  engine.SetPlaybackBeatCallback(beat_callback);
+  engine.SetPlaybackBeatCallback(
+      [](double position, double, void* user_data) {
+        (*reinterpret_cast<std::function<void(double)>*>(user_data))(position);
+      },
+      reinterpret_cast<void*>(&beat_callback));
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

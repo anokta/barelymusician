@@ -23,6 +23,32 @@ namespace Barely {
                                                float noteIntensity);
     public static event InstrumentNoteOnEvent OnInstrumentNoteOn;
 
+    /// Note pitch types.
+    public enum NotePitchType {
+      /// Absolute pitch.
+      AbsolutePitch = 0,
+      /// Relative pitch with respect to conductor root note.
+      RelativePitch = 1,
+      /// Scale index with respect to conductor root note and scale.
+      ScaleIndex = 2,
+    }
+
+    /// Note definition.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct NoteDefinition {
+      /// Duration.
+      public double duration;
+
+      /// Pitch type.
+      public NotePitchType pitchType;
+
+      /// Pitch.
+      public float pitch;
+
+      /// Intensity.
+      public float intensity;
+    }
+
     /// Adds new instrument.
     ///
     /// @param instrument Instrument to add.
@@ -230,10 +256,13 @@ namespace Barely {
       BarelySequence_SetLoopLength(Api, sequence.Id, sequence.LoopLength);
 
       BarelySequence_RemoveAllNotes(Api, sequence.Id);
+      NoteDefinition definition;
+      definition.pitchType = NotePitchType.AbsolutePitch;
       foreach (var sequenceNote in sequence.Notes) {
-        float pitch = (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
-        AddPerformerNoteNative(Api, sequence.Id, sequenceNote.position, sequenceNote.note.Duration,
-                               pitch, sequenceNote.note.Intensity, _int64Ptr);
+        definition.duration = sequenceNote.note.Duration;
+        definition.pitch = (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
+        definition.intensity = sequenceNote.note.Intensity;
+        BarelySequence_AddNote(Api, sequence.Id, sequenceNote.position, definition, _int64Ptr);
       }
       BarelySequence_SetInstrument(Api, sequence.Id,
                                    sequence.Instrument ? sequence.Instrument.Id : InvalidId);
@@ -246,7 +275,9 @@ namespace Barely {
           return IntPtr.Zero;
         }
         if (_api == IntPtr.Zero) {
-          _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
+          if (_intPtrPtr == IntPtr.Zero) {
+            _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
+          }
           var instance = new GameObject() { hideFlags = HideFlags.HideAndDontSave }
                              .AddComponent<MusicianInternal>();
           GameObject.DontDestroyOnLoad(instance.gameObject);
@@ -258,7 +289,10 @@ namespace Barely {
             Debug.LogError("Could not initialize BarelyMusician.");
             GameObject.DestroyImmediate(instance.gameObject);
           }
-          Marshal.FreeHGlobal(_intPtrPtr);
+          if (_intPtrPtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_intPtrPtr);
+            _intPtrPtr = IntPtr.Zero;
+          }
         }
         return _api;
       }
@@ -452,6 +486,11 @@ namespace Barely {
     private static extern Status BarelyInstrument_StopNote(IntPtr api, Int64 instrumentId,
                                                            float pitch);
 
+    [DllImport(pluginName, EntryPoint = "BarelySequence_AddNote")]
+    private static extern Status BarelySequence_AddNote(IntPtr api, Int64 sequenceId,
+                                                        double position, NoteDefinition definition,
+                                                        IntPtr outNoteId);
+
     [DllImport(pluginName, EntryPoint = "BarelySequence_Create")]
     private static extern Status BarelySequence_Create(IntPtr api, IntPtr outSequenceId);
 
@@ -492,12 +531,6 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelySequence_SetLooping")]
     private static extern Status BarelySequence_SetLooping(IntPtr api, Int64 sequenceId,
                                                            bool isLooping);
-
-    [DllImport(pluginName, EntryPoint = "BarelyAddPerformerNote")]
-    private static extern Status AddPerformerNoteNative(IntPtr api, Int64 performerId,
-                                                        double notePosition, double noteDuration,
-                                                        float notePitch, float noteIntensity,
-                                                        IntPtr outNoteId);
 
     [DllImport(pluginName, EntryPoint = "BarelyTransport_GetPosition")]
     private static extern Status BarelyTransport_GetPosition(IntPtr api, IntPtr positionPtr);

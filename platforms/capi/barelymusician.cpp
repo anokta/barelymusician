@@ -862,17 +862,6 @@ BarelyStatus BarelyExamples_CreateSynthInstrument(BarelyApi api,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyAddPerformerNote(BarelyApi api, BarelyId performer_id,
-                                    double note_position, double note_duration,
-                                    float note_pitch, float note_intensity,
-                                    BarelyId* out_note_id) {
-  return BarelySequence_AddNote(
-      api, performer_id, note_position,
-      BarelyNoteDefinition{note_duration, BarelyNotePitchType_kAbsolutePitch,
-                           note_pitch, note_intensity},
-      out_note_id);
-}
-
 BarelyStatus BarelySetInstrumentNoteOffCallback(
     BarelyApi api,
     BarelyInstrumentNoteOffCallback instrument_note_off_callback) {

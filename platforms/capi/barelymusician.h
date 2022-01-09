@@ -1097,21 +1097,6 @@ typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
                                                float note_pitch,
                                                float note_intensity);
 
-/// Adds performer note.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param note_position Note position.
-/// @param note_duration Note duration.
-/// @param note_pitch Note pitch.
-/// @param note_intensity Note intensity.
-/// @param out_note_id Output note id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyAddPerformerNote(
-    BarelyApi api, BarelyId performer_id, double note_position,
-    double note_duration, float note_pitch, float note_intensity,
-    BarelyId* out_note_id);
-
 /// Sets the instrument note off callback.
 ///
 /// @param api BarelyMusician api.

@@ -89,14 +89,9 @@ extern "C" {
 
 /// BarelyMusician C api.
 struct BarelyMusician {
-  /// Constructs new |BarelyMusician|.
-  ///
-  /// @param sample_rate Sampling rate in hz.
-  explicit BarelyMusician(int32_t sample_rate) noexcept
-      : instance(sample_rate) {}
-
   /// Engine instance.
-  Engine instance;
+  // TODO(#85): Temp hack to create `Engine` without sample rate.
+  Engine instance = Engine(0);
 
  private:
   // Ensure that the instance can only be destroyed via the api call.
@@ -104,8 +99,11 @@ struct BarelyMusician {
   ~BarelyMusician() = default;
 };
 
-BarelyApi BarelyApi_Create(int32_t sample_rate) {
-  return new BarelyMusician(sample_rate);
+BarelyStatus BarelyApi_Create(BarelyApi* out_api) {
+  if (!out_api) return BarelyStatus_kInvalidArgument;
+
+  *out_api = new BarelyMusician();
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyApi_Destroy(BarelyApi api) {
@@ -135,6 +133,140 @@ BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp) {
 
   api->instance.Update(timestamp);
   return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyConductor_ConductNote(BarelyApi api,
+                                         BarelyNotePitchType pitch_type,
+                                         float pitch, bool bypass_adjustment,
+                                         float* out_pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_pitch) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  pitch_type;
+  pitch;
+  bypass_adjustment;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetEnergy(BarelyApi api, float* out_energy) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_energy) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetParamDefinition(
+    BarelyApi api, int32_t index, BarelyParamDefinition* out_param_definition) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_param_definition) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  index;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetRootNote(BarelyApi api, float* out_root_pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_root_pitch) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetScale(BarelyApi api, float** out_scale_pitches,
+                                      int32_t* out_num_scale_pitches) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_scale_pitches) return BarelyStatus_kInvalidArgument;
+  if (!out_num_scale_pitches) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetStress(BarelyApi api, float* out_stress) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_stress) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_ResetAllParams(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_ResetParam(BarelyApi api, int32_t index) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  index;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetData(BarelyApi api, void* data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  data;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetDefinition(
+    BarelyApi api, BarelyConductorDefinition definition) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  definition;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float energy) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  energy;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetParam(BarelyApi api, int32_t index,
+                                      float value) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  index;
+  value;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetRootNote(BarelyApi api, float root_pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  root_pitch;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetScale(BarelyApi api, float* scale_pitches,
+                                      int32_t num_scale_pitches) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  scale_pitches;
+  num_scale_pitches;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_SetStress(BarelyApi api, float stress) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  stress;
+  return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelyInstrument_Clone(BarelyApi api, BarelyId instrument_id,

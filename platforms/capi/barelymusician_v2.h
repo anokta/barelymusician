@@ -534,6 +534,7 @@ BarelyInstrument_Create(BarelyApi api, BarelyInstrumentDefinition definition,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyApi api,
                                                     BarelyId instrument_id);
+
 /// Gets instrument gain.
 ///
 /// @param api BarelyMusician api.

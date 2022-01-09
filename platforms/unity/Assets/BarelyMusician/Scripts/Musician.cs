@@ -246,6 +246,7 @@ namespace Barely {
           return IntPtr.Zero;
         }
         if (_api == IntPtr.Zero) {
+          _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
           var instance = new GameObject() { hideFlags = HideFlags.HideAndDontSave }
                              .AddComponent<MusicianInternal>();
           GameObject.DontDestroyOnLoad(instance.gameObject);
@@ -257,20 +258,24 @@ namespace Barely {
             Debug.LogError("Could not initialize BarelyMusician.");
             GameObject.DestroyImmediate(instance.gameObject);
           }
+          Marshal.FreeHGlobal(_intPtrPtr);
         }
         return _api;
       }
     }
     private static IntPtr _api = IntPtr.Zero;
 
-    // Boolean type pointer.
+    // `Boolean` type pointer.
     private static IntPtr _booleanPtr = IntPtr.Zero;
 
-    // Double type pointer.
+    // `Double` type pointer.
     private static IntPtr _doublePtr = IntPtr.Zero;
 
-    // Int64 type pointer.
+    // `Int64` type pointer.
     private static IntPtr _int64Ptr = IntPtr.Zero;
+
+    // `IntPtr` type pointer.
+    private static IntPtr _intPtrPtr = IntPtr.Zero;
 
     // List of instruments.
     private static Dictionary<Int64, Instrument> _instruments = new Dictionary<Int64, Instrument>();
@@ -295,7 +300,11 @@ namespace Barely {
 
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-        _api = BarelyApi_Create(AudioSettings.outputSampleRate);
+        if (!IsOk(BarelyApi_Create(_intPtrPtr))) {
+          return;
+        }
+        _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
+        SetSampleRateNative(_api, AudioSettings.outputSampleRate);
         _instrumentNoteOffCallback = delegate(Int64 instrumentId, float notePitch) {
           Instrument instrument = null;
           if (_instruments.TryGetValue(instrumentId, out instrument)) {
@@ -331,6 +340,7 @@ namespace Barely {
         Marshal.FreeHGlobal(_booleanPtr);
         Marshal.FreeHGlobal(_doublePtr);
         Marshal.FreeHGlobal(_int64Ptr);
+        Marshal.FreeHGlobal(_intPtrPtr);
       }
 
       private void OnApplicationQuit() {
@@ -387,7 +397,7 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
     [DllImport(pluginName, EntryPoint = "BarelyApi_Create")]
-    private static extern IntPtr BarelyApi_Create(Int32 sampleRate);
+    private static extern Status BarelyApi_Create(IntPtr outApi);
 
     [DllImport(pluginName, EntryPoint = "BarelyApi_Destroy")]
     private static extern Status BarelyApi_Destroy(IntPtr api);

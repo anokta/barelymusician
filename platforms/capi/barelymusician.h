@@ -338,10 +338,9 @@ typedef struct BarelyInstrumentDefinition {
 
 /// Creates new BarelyMusician api.
 ///
-/// @param sample_rate Sampling rate in hz.
-/// @return BarelyMusician api.
-// TODO(#85): Refactor to match `barelymusician_v2.h`.
-BARELY_EXPORT BarelyApi BarelyApi_Create(int32_t sample_rate);
+/// @param out_api Output BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApi_Create(BarelyApi* out_api);
 
 /// Destroys BarelyMusician api.
 ///
@@ -372,6 +371,142 @@ BARELY_EXPORT BarelyStatus BarelyApi_SetSampleRate(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp);
 
+/// Conducts note.
+///
+/// @param api BarelyMusician api.
+/// @param pitch_type Note pitch type.
+/// @param pitch Note pitch.
+/// @param bypass_adjustment True to bypass conductor adjustment.
+/// @param out_pitch Output note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_ConductNote(
+    BarelyApi api, BarelyNotePitchType pitch_type, float pitch,
+    bool bypass_adjustment, float* out_pitch);
+
+/// Gets conductor energy.
+///
+/// @param api BarelyMusician api.
+/// @param out_energy Output energy in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_GetEnergy(BarelyApi api,
+                                                     float* out_energy);
+
+/// Gets conductor parameter value.
+///
+/// @param api BarelyMusician api.
+/// @param index Parameter index.
+/// @param out_value Output parameter value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_GetParam(BarelyApi api,
+                                                    int32_t index,
+                                                    float* out_value);
+
+/// Gets conductor parameter definition.
+///
+/// @param api BarelyMusician api.
+/// @param index Parameter index.
+/// @param out_param_definition Output parameter definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_GetParamDefinition(
+    BarelyApi api, int32_t index, BarelyParamDefinition* out_param_definition);
+
+/// Gets conductor root note.
+///
+/// @param api BarelyMusician api.
+/// @param out_root_pitch Output root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_GetRootNote(BarelyApi api,
+                                                       float* out_root_pitch);
+
+/// Gets conductor scale.
+///
+/// @param api BarelyMusician api.
+/// @param out_scale_pitches Output list of scale note pitches.
+/// @param out_num_scale_pitches Output number of scale note pitches.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_GetScale(
+    BarelyApi api, float** out_scale_pitches, int32_t* out_num_scale_pitches);
+
+/// Gets conductor stress.
+///
+/// @param api BarelyMusician api.
+/// @param out_stress Stress in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_GetStress(BarelyApi api,
+                                                     float* out_stress);
+
+/// Resets all conductor parameters to default value.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_ResetAllParams(BarelyApi api);
+
+/// Resets conductor parameter to default value.
+///
+/// @param api BarelyMusician api.
+/// @param index Parameter index.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_ResetParam(BarelyApi api,
+                                                      int32_t index);
+
+/// Sets conductor data.
+///
+/// @param api BarelyMusician api.
+/// @param data Data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_SetData(BarelyApi api, void* data);
+
+/// Sets conductor definition.
+///
+/// @param api BarelyMusician api.
+/// @param definition Conductor definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_SetDefinition(
+    BarelyApi api, BarelyConductorDefinition definition);
+
+/// Sets conductor energy.
+///
+/// @param api BarelyMusician api.
+/// @param energy Energy in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_SetEnergy(BarelyApi api,
+                                                     float energy);
+
+/// Sets conductor parameter value.
+///
+/// @param api BarelyMusician api.
+/// @param index Parameter index.
+/// @param value Parameter value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_SetParam(BarelyApi api,
+                                                    int32_t index, float value);
+
+/// Sets conductor root note.
+///
+/// @param api BarelyMusician api.
+/// @param root_pitch Root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_SetRootNote(BarelyApi api,
+                                                       float root_pitch);
+
+/// Sets conductor scale.
+///
+/// @param api BarelyMusician api.
+/// @param scale_pitches List of scale note pitches.
+/// @param num_scale_pitches Number of scale note pitches.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_SetScale(BarelyApi api,
+                                                    float* scale_pitches,
+                                                    int32_t num_scale_pitches);
+
+/// Sets conductor stress.
+///
+/// @param api BarelyMusician api.
+/// @param stress Stress in range [0, 1].
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyConductor_SetStress(BarelyApi api,
+                                                     float stress);
+
 /// Clones instrument.
 ///
 /// @param api BarelyMusician api.
@@ -399,14 +534,6 @@ BarelyInstrument_Create(BarelyApi api, BarelyInstrumentDefinition definition,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyApi api,
                                                     BarelyId instrument_id);
-
-/// Adds new performer.
-///
-/// @param api BarelyMusician api.
-/// @param out_performer_id Output performer id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyAddPerformer(BarelyApi api,
-                                              BarelyId* out_performer_id);
 
 /// Gets instrument gain.
 ///
@@ -951,6 +1078,8 @@ BARELY_EXPORT BarelyStatus BarelyTransport_Stop(BarelyApi api);
 // TODO(#85): Temporary shortcut to test instruments, move to `//examples/capi`.
 BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
     BarelyApi api, BarelyId* out_instrument_id);
+
+// TODO(#85): Remove everything below - all obsolete.
 
 /// Instrument note off callback signature.
 ///

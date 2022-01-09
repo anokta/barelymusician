@@ -29,48 +29,118 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// BarelyMusician C api type.
-typedef struct BarelyMusician* BarelyApi;
-
-/// Status type.
-typedef int32_t BarelyStatus;
-
-/// Status values.
-enum BarelyStatusValues {
-  /// Success.
-  kBarelyStatus_Ok = 0,
-  /// Invalid argument error.
-  kBarelyStatus_InvalidArgument = 1,
-  /// Not found error.
-  kBarelyStatus_NotFound = 2,
-  /// Already exists error.
-  kBarelyStatus_AlreadyExists = 3,
-  /// Failed precondition error.
-  kBarelyStatus_FailedPrecondition = 4,
-  /// Unimplemented error.
-  kBarelyStatus_Unimplemented = 5,
-  /// Internal error.
-  kBarelyStatus_Internal = 6,
-  /// Unknown error.
-  kBarelyStatus_Unknown = 7,
-};
-
-/// Id type.
+/// Identifier alias.
 typedef int64_t BarelyId;
 
-/// Parameter definition.
-typedef struct BarelyParamDefinition {
-  /// Default value.
-  float default_value;
+/// Identifier values.
+enum BarelyId_Values {
+  /// Invalid identifier.
+  BarelyId_kInvalid = -1,
+};
 
-  /// Minimum value.
-  float min_value;
+/// Note pitch type enum alias.
+typedef int32_t BarelyNotePitchType;
 
-  /// Maximum value.
-  float max_value;
-} BarelyParamDefinition;
+/// Note pitch type enum values.
+enum BarelyNotePitchType_Values {
+  /// Absolute pitch.
+  BarelyNotePitchType_kAbsolutePitch = 0,
+  /// Relative pitch with respect to conductor root note.
+  BarelyNotePitchType_kRelativePitch = 1,
+  /// Scale index with respect to conductor root note and scale.
+  BarelyNotePitchType_kScaleIndex = 2,
+};
 
-// TODO(#85): Add |BarelyConductorDefinition|.
+/// Status enum alias.
+typedef int32_t BarelyStatus;
+
+/// Status enum values.
+enum BarelyStatus_Values {
+  /// Success.
+  BarelyStatus_kOk = 0,
+  /// Invalid argument error.
+  BarelyStatus_kInvalidArgument = 1,
+  /// Not found error.
+  BarelyStatus_kNotFound = 2,
+  /// Already exists error.
+  BarelyStatus_kAlreadyExists = 3,
+  /// Failed precondition error.
+  BarelyStatus_kFailedPrecondition = 4,
+  /// Unimplemented error.
+  BarelyStatus_kUnimplemented = 5,
+  /// Internal error.
+  BarelyStatus_kInternal = 6,
+  /// Unknown error.
+  BarelyStatus_kUnknown = 7,
+};
+
+/// Conductor adjust note duration function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param duration Pointer to note duration.
+typedef void (*BarelyConductorDefinition_AdjustNoteDurationFn)(
+    void** state, double* duration);
+
+/// Conductor adjust note intensity function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param intensity Pointer to note intensity.
+typedef void (*BarelyConductorDefinition_AdjustNoteIntensityFn)(
+    void** state, float* intensity);
+
+/// Conductor adjust note pitch function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param pitch_type Pointer to note pitch type.
+/// @param pitch Pointer to note pitch.
+typedef void (*BarelyConductorDefinition_AdjustNotePitchFn)(
+    void** state, BarelyNotePitchType* pitch_type, float* pitch);
+
+/// Conductor adjust tempo function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param tempo Pointer to tempo.
+typedef void (*BarelyConductorDefinition_AdjustTempoFn)(void** state,
+                                                        double* tempo);
+
+/// Conductor create function signature.
+///
+/// @param state Pointer to conductor state.
+typedef void (*BarelyConductorDefinition_CreateFn)(void** state);
+
+/// Conductor destroy function signature.
+///
+/// @param state Pointer to conductor state.
+typedef void (*BarelyConductorDefinition_DestroyFn)(void** state);
+
+/// Conductor set data function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param data Data.
+typedef void (*BarelyConductorDefinition_SetDataFn)(void** state, void* data);
+
+/// Conductor set energy function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param energy Energy.
+typedef void (*BarelyConductorDefinition_SetEnergyFn)(void** state,
+                                                      float energy);
+
+/// Conductor set parameter function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param index Parameter index.
+/// @param value Parameter value.
+typedef void (*BarelyConductorDefinition_SetParamFn)(void** state,
+                                                     int32_t index,
+                                                     float value);
+
+/// Conductor set stress function signature.
+///
+/// @param state Pointer to conductor state.
+/// @param stress Stress.
+typedef void (*BarelyConductorDefinition_SetStressFn)(void** state,
+                                                      float stress);
 
 /// Instrument create function signature.
 ///
@@ -124,6 +194,78 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOnFn)(void** state,
 typedef void (*BarelyInstrumentDefinition_SetParamFn)(void** state,
                                                       int32_t index,
                                                       float value);
+
+/// BarelyMusician api.
+typedef struct BarelyMusician* BarelyApi;
+
+/// Note definition.
+typedef struct BarelyNoteDefinition {
+  /// Duration.
+  double duration;
+
+  /// Pitch type.
+  BarelyNotePitchType pitch_type;
+
+  /// Pitch value.
+  float pitch;
+
+  /// Intensity.
+  float intensity;
+
+  /// Denotes whether conductor adjustment should be bypassed or not.
+  bool bypass_adjustment;
+} BarelyNoteDefinition;
+
+/// Parameter definition.
+typedef struct BarelyParamDefinition {
+  /// Default value.
+  float default_value;
+
+  /// Minimum value.
+  float min_value;
+
+  /// Maximum value.
+  float max_value;
+} BarelyParamDefinition;
+
+/// Conductor definition.
+typedef struct BarelyConductorDefinition {
+  /// Adjust note duration function.
+  BarelyConductorDefinition_AdjustNoteDurationFn adjust_note_duration_fn;
+
+  /// Adjust note intensity function.
+  BarelyConductorDefinition_AdjustNoteIntensityFn adjust_note_intensity_fn;
+
+  /// Adjust note pitch function.
+  BarelyConductorDefinition_AdjustNotePitchFn adjust_note_pitch_fn;
+
+  /// Adjust tempo function.
+  BarelyConductorDefinition_AdjustTempoFn adjust_tempo_fn;
+
+  /// Create function.
+  BarelyConductorDefinition_CreateFn create_fn;
+
+  /// Destroy function.
+  BarelyConductorDefinition_DestroyFn destroy_fn;
+
+  /// Set data function.
+  BarelyConductorDefinition_SetDataFn set_data_fn;
+
+  /// Set energy function.
+  BarelyConductorDefinition_SetEnergyFn set_energy_fn;
+
+  /// Set parameter function.
+  BarelyConductorDefinition_SetParamFn set_param_fn;
+
+  /// Set stress function.
+  BarelyConductorDefinition_SetStressFn set_stress_fn;
+
+  /// List of parameter definitions.
+  BarelyParamDefinition* param_definitions;
+
+  /// Number of parameter definitions.
+  int32_t num_param_definitions;
+} BarelyConductorDefinition;
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {

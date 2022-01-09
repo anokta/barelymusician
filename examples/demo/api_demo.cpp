@@ -23,7 +23,7 @@ constexpr double kTempo = 120.0;
 
 int main(int /*argc*/, char* /*argv*/[]) {
   Api api(kSampleRate);
-  ConsoleLog() << "Sample rate: " << api.GetSampleRate();
+  // ConsoleLog() << "Sample rate: " << api.GetSampleRate();
 
   auto& transport = api.GetTransport();
   if (const auto status = transport.SetTempo(kTempo); !IsOk(status)) {
@@ -34,23 +34,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument instrument1 = api.CreateInstrument(
       InstrumentDefinition{.param_definitions = {ParamDefinition(5)}});
-  ConsoleLog() << "Instrument 1 gain: " << instrument1.GetGain();
+  // ConsoleLog() << "Instrument 1 gain: " << instrument1.GetGain();
 
-  Instrument instrument2 = instrument1;
-  ConsoleLog() << "Instrument 2 gain: " << instrument2.GetGain();
+  // Instrument instrument2 = instrument1;
+  // ConsoleLog() << "Instrument 2 gain: " << instrument2.GetGain();
 
-  Sequence sequence = api.CreateSequence();
+  Sequence sequence = api.CreateSequence(&instrument1);
   if (const auto status = sequence.SetBeginOffset(3.25); !IsOk(status)) {
     ConsoleLog() << "Failed to set begin offset: " << ToString(status);
     return -1;
   }
-  ConsoleLog() << "Sequence begin offset: " << sequence.GetBeginOffset();
-
-  assert(sequence.SetInstrument(&instrument1) == Status::kUnimplemented);
-  assert(sequence.GetInstrument() == &instrument1);
+  // ConsoleLog() << "Sequence begin offset: " << sequence.GetBeginOffset();
 
   const auto note = sequence.AddNote(2.0, NoteDefinition(1.0, 0.0f));
-  assert(sequence.RemoveNote(note) == Status::kUnimplemented);
+  assert(IsOk(sequence.RemoveNote(note)));
 
   return 0;
 }

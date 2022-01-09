@@ -9,7 +9,7 @@
 #include <variant>
 #include <vector>
 
-#include "platforms/capi/barelymusician_v2.h"
+#include "platforms/capi/barelymusician.h"
 
 namespace barely {
 

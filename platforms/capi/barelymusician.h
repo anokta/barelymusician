@@ -213,6 +213,27 @@ typedef void (*BarelyInstrumentDefinition_SetParamFn)(void** state,
                                                       int32_t index,
                                                       float value);
 
+/// Transport beat callback signature.
+///
+/// @param position Beat position in beats.
+/// @param timestamp Beat timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyTransport_BeatCallback)(double position, double timestamp,
+                                             void* user_data);
+
+/// Transport update callback signature.
+///
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @param begin_timestamp Begin timestamp in seconds.
+/// @param end_timestamp End timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyTransport_UpdateCallback)(double begin_position,
+                                               double end_position,
+                                               double begin_timestamp,
+                                               double end_timestamp,
+                                               void* user_data);
+
 /// BarelyMusician api.
 typedef struct BarelyMusician* BarelyApi;
 
@@ -314,35 +335,6 @@ typedef struct BarelyInstrumentDefinition {
   /// Number of parameter definitions.
   int32_t num_param_definitions;
 } BarelyInstrumentDefinition;
-
-/// Instrument note off callback signature.
-///
-/// @param instrument_id Instrument id.
-/// @param note_pitch Note pitch.
-typedef void (*BarelyInstrumentNoteOffCallback)(BarelyId instrument_id,
-                                                float note_pitch);
-
-/// Instrument note on callback signature.
-///
-/// @param instrument_id Instrument id.
-/// @param note_pitch Note pitch.
-/// @param note_intensity Note intensity.
-typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
-                                               float note_pitch,
-                                               float note_intensity);
-
-// TODO(#85): Should this be more generic (beyond the beat granularity)?
-/// Playback beat callback signature.
-///
-/// @param position Beat position in beats.
-typedef void (*BarelyPlaybackBeatCallback)(double position);
-
-/// Playback update callback signature.
-///
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
-                                             double end_position);
 
 /// Creates new BarelyMusician api.
 ///
@@ -606,9 +598,115 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyApi api,
                                                      BarelyId instrument_id,
                                                      float pitch);
 
+/// Gets transport position.
+///
+/// @param api BarelyMusician api.
+/// @param out_position Output position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_GetPosition(BarelyApi api,
+                                                       double* out_position);
+
+/// Gets transport tempo.
+///
+/// @param api BarelyMusician api.
+/// @param out_tempo Output tempo in bpm.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_GetTempo(BarelyApi api,
+                                                    double* out_tempo);
+
+/// Gets whether transport is playing or not.
+///
+/// @param api BarelyMusician api.
+/// @param out_is_playing Output true if playing, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_IsPlaying(BarelyApi api,
+                                                     bool* out_is_playing);
+
+/// Pauses transport.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_Pause(BarelyApi api);
+
+/// Plays transport.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_Play(BarelyApi api);
+
+/// Sets transport beat callback.
+///
+/// @param api BarelyMusician api.
+/// @param beat_callback Beat callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetBeatCallback(
+    BarelyApi api, BarelyTransport_BeatCallback beat_callback, void* user_data);
+
+/// Sets transport position.
+///
+/// @param api BarelyMusician api.
+/// @param position Transport position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetPosition(BarelyApi api,
+                                                       double position);
+
+/// Sets transport tempo.
+///
+/// @param api BarelyMusician api.
+/// @param tempo Tempo in bpm.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetTempo(BarelyApi api,
+                                                    double tempo);
+
+/// Sets transport update callback.
+///
+/// @param api BarelyMusician api.
+/// @param update_callback Update callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_SetUpdateCallback(
+    BarelyApi api, BarelyTransport_UpdateCallback update_callback,
+    void* user_data);
+
+/// Stops transport.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTransport_Stop(BarelyApi api);
+
 // TODO(#85): Temporary shortcut to test instruments.
 BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
     BarelyApi api, BarelyId* out_instrument_id);
+
+/// Instrument note off callback signature.
+///
+/// @param instrument_id Instrument id.
+/// @param note_pitch Note pitch.
+typedef void (*BarelyInstrumentNoteOffCallback)(BarelyId instrument_id,
+                                                float note_pitch);
+
+/// Instrument note on callback signature.
+///
+/// @param instrument_id Instrument id.
+/// @param note_pitch Note pitch.
+/// @param note_intensity Note intensity.
+typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
+                                               float note_pitch,
+                                               float note_intensity);
+
+// TODO(#85): Should this be more generic (beyond the beat granularity)?
+/// Playback beat callback signature.
+///
+/// @param position Beat position in beats.
+typedef void (*BarelyPlaybackBeatCallback)(double position);
+
+/// Playback update callback signature.
+///
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
+                                             double end_position);
 
 /// Adds performer note.
 ///
@@ -670,22 +768,6 @@ BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopBeginOffset(
 BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopLength(
     BarelyApi api, BarelyId performer_id, double* out_loop_length);
 
-/// Gets the playback position.
-///
-/// @param api BarelyMusician api.
-/// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyGetPlaybackPosition(BarelyApi api,
-                                                     double* out_position);
-
-/// Gets the playback tempo.
-///
-/// @param api BarelyMusician api.
-/// @param out_tempo Output tempo in bpm.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyGetPlaybackTempo(BarelyApi api,
-                                                  double* out_tempo);
-
 /// Gets whether the performer is empty or not.
 ///
 /// @param api BarelyMusician api.
@@ -705,13 +787,6 @@ BARELY_EXPORT BarelyStatus BarelyIsPerformerEmpty(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyIsPerformerLooping(BarelyApi api,
                                                     BarelyId performer_id,
                                                     bool* out_is_looping);
-
-/// Gets whether the playback is currently active or not.
-///
-/// @param api BarelyMusician api.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyIsPlaying(BarelyApi api, bool* out_is_playing);
 
 /// Removes all performer notes.
 ///
@@ -843,21 +918,6 @@ BARELY_EXPORT BarelyStatus BarelySetPerformerLoopLength(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelySetPlaybackBeatCallback(
     BarelyApi api, BarelyPlaybackBeatCallback playback_beat_callback);
 
-/// Sets the playback position.
-///
-/// @param api BarelyMusician api.
-/// @param position Playback position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPlaybackPosition(BarelyApi api,
-                                                     double position);
-
-/// Sets the playback tempo.
-///
-/// @param api BarelyMusician api.
-/// @param tempo Playback tempo in bpm.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPlaybackTempo(BarelyApi api, double tempo);
-
 /// Sets the playback update callback.
 ///
 /// @param api BarelyMusician api.
@@ -865,18 +925,6 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackTempo(BarelyApi api, double tempo);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetPlaybackUpdateCallback(
     BarelyApi api, BarelyPlaybackUpdateCallback playback_update_callback);
-
-/// Starts the playback.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyStartPlayback(BarelyApi api);
-
-/// Stops the playback.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyStopPlayback(BarelyApi api);
 
 #ifdef __cplusplus
 }  // extern "C"

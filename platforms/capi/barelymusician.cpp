@@ -334,6 +334,88 @@ BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* out_performer_id) {
   return BarelyStatus_kOk;
 }
 
+BarelyStatus BarelyTransport_GetPosition(BarelyApi api, double* out_position) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_position) return BarelyStatus_kInvalidArgument;
+
+  *out_position = api->instance.GetPlaybackPosition();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyTransport_GetTempo(BarelyApi api, double* out_tempo) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_tempo) return BarelyStatus_kInvalidArgument;
+
+  *out_tempo = api->instance.GetPlaybackTempo();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyTransport_IsPlaying(BarelyApi api, bool* out_is_playing) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_is_playing) return BarelyStatus_kInvalidArgument;
+
+  *out_is_playing = api->instance.IsPlaying();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyTransport_Pause(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.StopPlayback();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyTransport_Play(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.StartPlayback();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyTransport_SetBeatCallback(
+    BarelyApi api, BarelyTransport_BeatCallback beat_callback,
+    void* user_data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  beat_callback;
+  user_data;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyTransport_SetPosition(BarelyApi api, double position) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.SetPlaybackPosition(position);
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyTransport_SetTempo(BarelyApi api, double tempo) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.SetPlaybackTempo(tempo);
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyTransport_SetUpdateCallback(
+    BarelyApi api, BarelyTransport_UpdateCallback update_callback,
+    void* user_data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  update_callback;
+  user_data;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyTransport_Stop(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.StopPlayback();
+  api->instance.SetPlaybackPosition(0.0);
+  return BarelyStatus_kOk;
+}
+
 BarelyStatus BarelyAddPerformerNote(BarelyApi api, BarelyId performer_id,
                                     double note_position, double note_duration,
                                     float note_pitch, float note_intensity,
@@ -419,20 +501,6 @@ BarelyStatus BarelyGetPerformerLoopLength(BarelyApi api, BarelyId performer_id,
   return GetStatus(loop_length_or);
 }
 
-BarelyStatus BarelyGetPlaybackPosition(BarelyApi api, double* out_position) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_position) return BarelyStatus_kInvalidArgument;
-  *out_position = api->instance.GetPlaybackPosition();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyGetPlaybackTempo(BarelyApi api, double* out_tempo) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_tempo) return BarelyStatus_kInvalidArgument;
-  *out_tempo = api->instance.GetPlaybackTempo();
-  return BarelyStatus_kOk;
-}
-
 BarelyStatus BarelyIsPerformerEmpty(BarelyApi api, BarelyId performer_id,
                                     bool* out_is_empty) {
   if (!api) return BarelyStatus_kNotFound;
@@ -455,13 +523,6 @@ BarelyStatus BarelyIsPerformerLooping(BarelyApi api, BarelyId performer_id,
     return BarelyStatus_kOk;
   }
   return GetStatus(is_looping_or);
-}
-
-BarelyStatus BarelyIsPlaying(BarelyApi api, bool* out_is_playing) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_is_playing) return BarelyStatus_kInvalidArgument;
-  *out_is_playing = api->instance.IsPlaying();
-  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyRemoveAllPerformerNotes(BarelyApi api,
@@ -614,22 +675,6 @@ BarelyStatus BarelySetPlaybackBeatCallback(
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySetPlaybackPosition(BarelyApi api, double position) {
-  if (api) {
-    api->instance.SetPlaybackPosition(position);
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySetPlaybackTempo(BarelyApi api, double tempo) {
-  if (api) {
-    api->instance.SetPlaybackTempo(tempo);
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
 BarelyStatus BarelySetPlaybackUpdateCallback(
     BarelyApi api, BarelyPlaybackUpdateCallback playback_update_callback) {
   if (api) {
@@ -642,22 +687,6 @@ BarelyStatus BarelySetPlaybackUpdateCallback(
     } else {
       api->instance.SetPlaybackUpdateCallback(nullptr);
     }
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelyStartPlayback(BarelyApi api) {
-  if (api) {
-    api->instance.StartPlayback();
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelyStopPlayback(BarelyApi api) {
-  if (api) {
-    api->instance.StopPlayback();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

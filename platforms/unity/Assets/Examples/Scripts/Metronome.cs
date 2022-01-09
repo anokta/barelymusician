@@ -38,19 +38,21 @@ public class Metronome : MonoBehaviour {
     Musician.SetPlaybackTempo(tempo);
     if (Input.GetKeyDown(KeyCode.Space)) {
       if (Musician.IsPlaying()) {
-        Musician.StopPlayback();
+        Musician.Pause();
         if (logToConsole) {
-          Debug.Log("Playback stopped");
+          Debug.Log("Playback paused");
         }
       } else {
-        Musician.StartPlayback();
+        Musician.Play();
         if (logToConsole) {
           Debug.Log("Playback started");
         }
       }
     } else if (Input.GetKeyDown(KeyCode.Backspace)) {
-      Musician.StopPlayback();
-      Musician.SetPlaybackPosition(0.0);
+      Musician.Stop();
+      if (logToConsole) {
+        Debug.Log("Playback stopped");
+      }
     }
   }
 

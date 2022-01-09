@@ -31,6 +31,8 @@ struct BarelyMusician {
 };
 
 BarelyStatus BarelyApi_Create(BarelyApi* out_api) {
+  if (!out_api) return BarelyStatus_kInvalidArgument;
+
   *out_api = new BarelyMusician();
 
   return BarelyStatus_kOk;

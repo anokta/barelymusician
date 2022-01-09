@@ -100,9 +100,42 @@ struct BarelyMusician {
 
  private:
   // Ensure that the instance can only be destroyed via the api call.
-  friend BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi);
+  friend BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi);
   ~BarelyMusician() = default;
 };
+
+BarelyApi BarelyApi_Create(int32_t sample_rate) {
+  return new BarelyMusician(sample_rate);
+}
+
+BarelyStatus BarelyApi_Destroy(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  delete api;
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyApi_GetSampleRate(BarelyApi api, int32_t* out_sample_rate) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_sample_rate) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyApi_SetSampleRate(BarelyApi api, int32_t sample_rate) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.SetSampleRate(sample_rate);
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.Update(timestamp);
+  return BarelyStatus_kOk;
+}
 
 BarelyStatus BarelyAddPerformer(BarelyApi api, BarelyId* out_performer_id) {
   if (!api) return BarelyStatus_kNotFound;
@@ -129,10 +162,6 @@ BarelyStatus BarelyAddPerformerNote(BarelyApi api, BarelyId performer_id,
   return GetStatus(note_id_or);
 }
 
-BarelyApi BarelyCreateApi(int32_t sample_rate) {
-  return new BarelyMusician(sample_rate);
-}
-
 BarelyStatus BarelyCreateInstrument(BarelyApi api,
                                     BarelyInstrumentDefinition definition,
                                     BarelyId* out_instrument_id) {
@@ -150,14 +179,6 @@ BarelyStatus BarelyCreateSynthInstrument(BarelyApi api,
   *out_instrument_id =
       api->instance.AddInstrument(SynthInstrument::GetDefinition());
   return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyDestroyApi(BarelyApi api) {
-  if (api) {
-    delete api;
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelyDestroyInstrument(BarelyApi api, BarelyId instrument_id) {
@@ -538,22 +559,6 @@ BarelyStatus BarelyStartPlayback(BarelyApi api) {
 BarelyStatus BarelyStopPlayback(BarelyApi api) {
   if (api) {
     api->instance.StopPlayback();
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySetSampleRate(BarelyApi api, int32_t sample_rate) {
-  if (api) {
-    api->instance.SetSampleRate(sample_rate);
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelyUpdate(BarelyApi api, double timestamp) {
-  if (api) {
-    api->instance.Update(timestamp);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

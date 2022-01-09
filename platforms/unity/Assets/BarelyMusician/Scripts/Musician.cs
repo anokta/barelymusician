@@ -387,13 +387,13 @@ namespace Barely {
                                                         float notePitch, float noteIntensity,
                                                         IntPtr noteIdPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelyCreateApi")]
+    [DllImport(pluginName, EntryPoint = "BarelyApi_Create")]
     private static extern IntPtr CreateApiNative(Int32 sampleRate);
 
     [DllImport(pluginName, EntryPoint = "BarelyCreateSynthInstrument")]
     private static extern Status CreateSynthInstrumentNative(IntPtr api, IntPtr instrumentIdPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelyDestroyApi")]
+    [DllImport(pluginName, EntryPoint = "BarelyApi_Destroy")]
     private static extern Status DestroyApiNative(IntPtr api);
 
     [DllImport(pluginName, EntryPoint = "BarelyDestroyInstrument")]
@@ -491,7 +491,7 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelySetPlaybackTempo")]
     private static extern Status SetPlaybackTempoNative(IntPtr api, double tempo);
 
-    [DllImport(pluginName, EntryPoint = "BarelySetSampleRate")]
+    [DllImport(pluginName, EntryPoint = "BarelyApi_SetSampleRate")]
     private static extern Status SetSampleRateNative(IntPtr api, Int32 sampleRate);
 
     [DllImport(pluginName, EntryPoint = "BarelyStartPlayback")]
@@ -500,7 +500,7 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyStopPlayback")]
     private static extern Status StopPlaybackNative(IntPtr api);
 
-    [DllImport(pluginName, EntryPoint = "BarelyUpdate")]
+    [DllImport(pluginName, EntryPoint = "BarelyApi_Update")]
     private static extern Status UpdateNative(IntPtr api, double timestamp);
   }
 }

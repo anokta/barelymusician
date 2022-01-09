@@ -326,6 +326,42 @@ typedef void (*BarelyPlaybackBeatCallback)(double position);
 typedef void (*BarelyPlaybackUpdateCallback)(double begin_position,
                                              double end_position);
 
+/// Creates new BarelyMusician api.
+///
+/// @param sample_rate Sampling rate in hz.
+/// @return BarelyMusician api.
+// TODO(#85): Refactor to match `barelymusician_v2.h`.
+BARELY_EXPORT BarelyApi BarelyApi_Create(int32_t sample_rate);
+
+/// Destroys BarelyMusician api.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi api);
+
+/// Gets sampling rate.
+///
+/// @param api BarelyMusician api.
+/// @param out_sample_rate Output sampling rate in hz.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApi_GetSampleRate(BarelyApi api,
+                                                   int32_t* out_sample_rate);
+
+/// Sets sampling rate.
+///
+/// @param api BarelyMusician api.
+/// @param sample_rate Sampling rate in hz.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApi_SetSampleRate(BarelyApi api,
+                                                   int32_t sample_rate);
+
+/// Updates internal state at timestamp.
+///
+/// @param api BarelyMusician api.
+/// @param timestamp Timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp);
+
 /// Adds new performer.
 ///
 /// @param api BarelyMusician api.
@@ -349,12 +385,6 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformerNote(
     double note_duration, float note_pitch, float note_intensity,
     BarelyId* out_note_id);
 
-/// Creates new BarelyMusician api.
-///
-/// @param sample_rate Sampling rate in hz.
-/// @return BarelyMusician api.
-BARELY_EXPORT BarelyApi BarelyCreateApi(int32_t sample_rate);
-
 /// Create new instrument.
 ///
 /// @param api BarelyMusician api.
@@ -368,12 +398,6 @@ BarelyCreateInstrument(BarelyApi api, BarelyInstrumentDefinition definition,
 // TODO(#85): Temporary shortcut to test instruments.
 BARELY_EXPORT BarelyStatus
 BarelyCreateSynthInstrument(BarelyApi api, BarelyId* out_instrument_id);
-
-/// Destroys BarelyMusician api.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyDestroyApi(BarelyApi api);
 
 /// Destroys instrument.
 ///
@@ -704,14 +728,6 @@ BARELY_EXPORT BarelyStatus BarelySetPlaybackTempo(BarelyApi api, double tempo);
 BARELY_EXPORT BarelyStatus BarelySetPlaybackUpdateCallback(
     BarelyApi api, BarelyPlaybackUpdateCallback playback_update_callback);
 
-/// Sets the sample rate.
-///
-/// @param api BarelyMusician api.
-/// @param sample_rate Sampling rate in hz.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetSampleRate(BarelyApi api,
-                                               int32_t sample_rate);
-
 /// Starts the playback.
 ///
 /// @param api BarelyMusician api.
@@ -723,13 +739,6 @@ BARELY_EXPORT BarelyStatus BarelyStartPlayback(BarelyApi api);
 /// @param api BarelyMusician api.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyStopPlayback(BarelyApi api);
-
-/// Updates the internal state at timestamp.
-///
-/// @param api BarelyMusician api.
-/// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyUpdate(BarelyApi api, double timestamp);
 
 #ifdef __cplusplus
 }  // extern "C"

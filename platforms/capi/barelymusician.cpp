@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 
-#include <optional>
 #include <vector>
 
 #include "barelymusician/common/status.h"
@@ -25,17 +24,9 @@ using ::barelyapi::ParamDefinition;
 using ::barelyapi::Status;
 using ::barelyapi::StatusOr;
 
-// Returns the corresponding |ParamDefinition| for a given |param_definition|.
-ParamDefinition GetParamDefinition(
-    const BarelyParamDefinition& param_definition) noexcept {
-  return ParamDefinition(param_definition.default_value,
-                         param_definition.min_value,
-                         param_definition.max_value);
-}
-
 // Returns the corresponding |InstrumentDefinition| for a given |definition|.
 InstrumentDefinition GetInstrumentDefinition(
-    BarelyInstrumentDefinition definition) noexcept {
+    const BarelyInstrumentDefinition& definition) noexcept {
   std::vector<ParamDefinition> param_definitions;
   param_definitions.reserve(definition.num_param_definitions);
   for (int i = 0; i < definition.num_param_definitions; ++i) {
@@ -44,14 +35,11 @@ InstrumentDefinition GetInstrumentDefinition(
                                    param_definition.min_value,
                                    param_definition.max_value);
   }
-  return InstrumentDefinition{std::move(definition.create_fn),
-                              std::move(definition.destroy_fn),
-                              std::move(definition.process_fn),
-                              std::move(definition.set_data_fn),
-                              std::move(definition.set_note_off_fn),
-                              std::move(definition.set_note_on_fn),
-                              std::move(definition.set_param_fn),
-                              std::move(param_definitions)};
+  return InstrumentDefinition{
+      definition.create_fn,       definition.destroy_fn,
+      definition.process_fn,      definition.set_data_fn,
+      definition.set_note_off_fn, definition.set_note_on_fn,
+      definition.set_param_fn,    param_definitions};
 }
 
 // Returns the corresponding |BarelyStatus| value for a given |status|.
@@ -295,8 +283,8 @@ BarelyStatus BarelyInstrument_Create(BarelyApi api,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id = api->instance.AddInstrument(
-      GetInstrumentDefinition(std::move(definition)));
+  *out_instrument_id =
+      api->instance.AddInstrument(GetInstrumentDefinition(definition));
   return BarelyStatus_kOk;
 }
 

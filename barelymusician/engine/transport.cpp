@@ -76,7 +76,10 @@ void Transport::SetUpdateCallback(UpdateCallback update_callback) noexcept {
       update_callback ? std::move(update_callback) : &NoopUpdateCallback;
 }
 
-void Transport::Start() noexcept { is_playing_ = true; }
+void Transport::Start() noexcept {
+  next_beat_timestamp_ = GetTimestamp(next_beat_position_);
+  is_playing_ = true;
+}
 
 void Transport::Stop() noexcept { is_playing_ = false; }
 

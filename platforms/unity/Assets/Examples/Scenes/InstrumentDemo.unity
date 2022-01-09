@@ -372,7 +372,7 @@ GameObject:
   - component: {fileID: 1298915919}
   - component: {fileID: 1298915922}
   m_Layer: 0
-  m_Name: Performer 1
+  m_Name: Sequence 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -583,7 +583,7 @@ GameObject:
   - component: {fileID: 1714525513}
   - component: {fileID: 1714525516}
   m_Layer: 0
-  m_Name: Performer 2
+  m_Name: Sequence 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

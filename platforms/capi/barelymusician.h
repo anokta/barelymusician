@@ -598,6 +598,279 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyApi api,
                                                      BarelyId instrument_id,
                                                      float pitch);
 
+/// Adds sequence note at position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param position Note position in beats.
+/// @param definition Note definition.
+/// @param out_note_id Output note identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id, double position,
+                       BarelyNoteDefinition definition, BarelyId* out_note_id);
+
+/// Clones sequence.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_sequence_id Output sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_Clone(BarelyApi api,
+                                                BarelyId sequence_id,
+                                                BarelyId* out_sequence_id);
+
+/// Creates new sequence.
+///
+/// @param api BarelyMusician api.
+/// @param out_sequence_id Output sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_Create(BarelyApi api,
+                                                 BarelyId* out_sequence_id);
+
+/// Destroys sequence.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_Destroy(BarelyApi api,
+                                                  BarelyId sequence_id);
+
+/// Gets all sequence notes.
+///
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_note_ids List of note ids.
+/// @param out_num_note_ids Number of note ids.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySequence_GetAllNotes(BarelyApi api, BarelyId sequence_id,
+                           BarelyId** out_note_ids, int32_t* out_num_note_ids);
+
+/// Gets sequence begin offset.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_begin_offset Output begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetBeginOffset(
+    BarelyApi api, BarelyId sequence_id, double* out_begin_offset);
+
+/// Gets sequence begin position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_begin_position Output begin position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetBeginPosition(
+    BarelyApi api, BarelyId sequence_id, double* out_begin_position);
+
+/// Gets sequence end position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_end_position Output end position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetEndPosition(
+    BarelyApi api, BarelyId sequence_id, double* out_end_position);
+
+/// Gets sequence instrument.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_instrument_id Instrument identifier.
+BARELY_EXPORT BarelyStatus BarelySequence_GetInstrument(
+    BarelyApi api, BarelyId sequence_id, BarelyId* out_instrument_id);
+
+/// Gets sequence loop begin offset.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_loop_begin_offset Output loop begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetLoopBeginOffset(
+    BarelyApi api, BarelyId sequence_id, double* out_loop_begin_offset);
+
+/// Gets sequence loop length.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_loop_length Output loop length in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetLoopLength(
+    BarelyApi api, BarelyId sequence_id, double* out_loop_length);
+
+/// Gets sequence note pitch.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_definition Note definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetNoteDefinition(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_id,
+    BarelyNoteDefinition* out_definition);
+
+/// Gets sequence note position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_position Output note position.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetNotePosition(BarelyApi api,
+                                                          BarelyId sequence_id,
+                                                          BarelyId note_id,
+                                                          double* out_position);
+
+/// Gets whether sequence is empty or not.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_is_empty Output true if empty, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_IsEmpty(BarelyApi api,
+                                                  BarelyId sequence_id,
+                                                  bool* out_is_empty);
+
+/// Gets whether sequence is looping or not.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param out_is_looping Output true if looping, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyApi api,
+                                                    BarelyId sequence_id,
+                                                    bool* out_is_looping);
+
+/// Removes all sequence notes.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
+                                                         BarelyId sequence_id);
+
+/// Removes sequence note at position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtPosition(
+    BarelyApi api, BarelyId sequence_id, double position);
+
+/// Removes all sequence notes at range.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtRange(
+    BarelyApi api, BarelyId sequence_id, double begin_position,
+    double end_position);
+
+/// Removes sequence note.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveNote(BarelyApi api,
+                                                     BarelyId sequence_id,
+                                                     BarelyId note_id);
+
+/// Sets sequence begin offset.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param begin_offset Begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetBeginOffset(BarelyApi api,
+                                                         BarelyId sequence_id,
+                                                         double begin_offset);
+
+/// Sets sequence begin position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param begin_position Begin position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetBeginPosition(
+    BarelyApi api, BarelyId sequence_id, double begin_position);
+
+/// Sets sequence end position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param end_position End position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetEndPosition(BarelyApi api,
+                                                         BarelyId sequence_id,
+                                                         double end_position);
+
+/// Sets sequence instrument.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param instrument_id Instrument identifier.
+BARELY_EXPORT BarelyStatus BarelySequence_SetInstrument(BarelyApi api,
+                                                        BarelyId sequence_id,
+                                                        BarelyId instrument_id);
+
+/// Sets sequence loop begin offset.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param loop_begin_offset Loop begin offset in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetLoopBeginOffset(
+    BarelyApi api, BarelyId sequence_id, double loop_begin_offset);
+
+/// Sets sequence loop length.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param loop_length Loop length in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetLoopLength(BarelyApi api,
+                                                        BarelyId sequence_id,
+                                                        double loop_length);
+
+/// Sets whether sequence should be looping or not.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param is_looping True if looping, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(BarelyApi api,
+                                                     BarelyId sequence_id,
+                                                     bool is_looping);
+
+/// Sets sequence note pitch.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param definition Note definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetNoteDefinition(
+    BarelyApi api, BarelyId sequence_id, BarelyId note_id,
+    BarelyNoteDefinition definition);
+
+/// Sets sequence note position.
+///
+/// @param api BarelyMusician api.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param position Note position.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetNotePosition(BarelyApi api,
+                                                          BarelyId sequence_id,
+                                                          BarelyId note_id,
+                                                          double position);
+
 /// Gets transport position.
 ///
 /// @param api BarelyMusician api.
@@ -675,7 +948,7 @@ BARELY_EXPORT BarelyStatus BarelyTransport_SetUpdateCallback(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyTransport_Stop(BarelyApi api);
 
-// TODO(#85): Temporary shortcut to test instruments.
+// TODO(#85): Temporary shortcut to test instruments, move to `//examples/capi`.
 BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
     BarelyApi api, BarelyId* out_instrument_id);
 
@@ -695,7 +968,6 @@ typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
                                                float note_pitch,
                                                float note_intensity);
 
-// TODO(#85): Should this be more generic (beyond the beat granularity)?
 /// Playback beat callback signature.
 ///
 /// @param position Beat position in beats.
@@ -723,108 +995,6 @@ BARELY_EXPORT BarelyStatus BarelyAddPerformerNote(
     double note_duration, float note_pitch, float note_intensity,
     BarelyId* out_note_id);
 
-/// Gets performer begin offset.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param out_begin_offset Output begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginOffset(
-    BarelyApi api, BarelyId performer_id, double* out_begin_offset);
-
-/// Gets performer begin position.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param out_begin_position Output optional begin position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyGetPerformerBeginPosition(
-    BarelyApi api, BarelyId performer_id, double* out_begin_position);
-
-/// Gets performer end position.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param out_end_position Output optional end position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyGetPerformerEndPosition(
-    BarelyApi api, BarelyId performer_id, double* out_end_position);
-
-/// Gets performer loop begin offset.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param out_loop_begin_offset Output loop begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopBeginOffset(
-    BarelyApi api, BarelyId performer_id, double* out_begin_offset);
-
-/// Gets performer loop length.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param out_loop_length Output loop length in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyGetPerformerLoopLength(
-    BarelyApi api, BarelyId performer_id, double* out_loop_length);
-
-/// Gets whether the performer is empty or not.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param out_is_empty Output true if empty, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyIsPerformerEmpty(BarelyApi api,
-                                                  BarelyId performer_id,
-                                                  bool* out_is_empty);
-
-/// Gets whether the performer is looping or not.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param out_is_looping Ponter to true if looping, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyIsPerformerLooping(BarelyApi api,
-                                                    BarelyId performer_id,
-                                                    bool* out_is_looping);
-
-/// Removes all performer notes.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyRemoveAllPerformerNotes(BarelyApi api,
-                                                         BarelyId performer_id);
-
-/// Removes all performer notes at given range.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyRemoveAllPerformerNotesAt(BarelyApi api, BarelyId performer_id,
-                                double begin_position, double end_position);
-
-/// Removes performer.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyRemovePerformer(BarelyApi api,
-                                                 BarelyId performer_id);
-
-/// Removes performer note.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param note_id Note id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyRemovePerformerNote(BarelyApi api,
-                                                     BarelyId performer_id,
-                                                     BarelyId note_id);
-
 /// Sets the instrument note off callback.
 ///
 /// @param api BarelyMusician api.
@@ -841,74 +1011,6 @@ BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
     BarelyApi api, BarelyInstrumentNoteOnCallback instrument_note_on_callback);
-
-/// Sets performer begin offset.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param begin_offset Begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerBeginOffset(BarelyApi api,
-                                                         BarelyId performer_id,
-                                                         double begin_offset);
-
-/// Sets performer begin position.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param begin_position Optional begin position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerBeginPosition(
-    BarelyApi api, BarelyId performer_id, double* begin_position);
-
-/// Sets performer end position.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param end_position Optional end position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerEndPosition(BarelyApi api,
-                                                         BarelyId performer_id,
-                                                         double* end_position);
-
-/// Sets performer instrument.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param instrument_id Instrument id.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerInstrument(BarelyApi api,
-                                                        BarelyId performer_id,
-                                                        BarelyId instrument_id);
-
-/// Sets whether performer should be looping or not.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param loop True if looping.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerLoop(BarelyApi api,
-                                                  BarelyId performer_id,
-                                                  bool loop);
-
-/// Sets performer loop begin offset.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param loop_begin_offset Loop begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerLoopBeginOffset(
-    BarelyApi api, BarelyId performer_id, double loop_begin_offset);
-
-/// Sets performer loop length.
-///
-/// @param api BarelyMusician api.
-/// @param performer_id Performer id.
-/// @param loop_length Loop length in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetPerformerLoopLength(BarelyApi api,
-                                                        BarelyId performer_id,
-                                                        double loop_length);
 
 /// Sets the playback beat callback.
 ///

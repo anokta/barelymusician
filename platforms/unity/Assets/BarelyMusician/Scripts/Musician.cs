@@ -46,19 +46,19 @@ namespace Barely {
       return instrumentId;
     }
 
-    /// Adds new performer.
+    /// Adds new sequence.
     ///
-    /// @param performer Performer to add.
-    /// @return Performer id.
-    public static Int64 AddPerformer(Performer performer) {
-      Int64 performerId = InvalidId;
-      Status status = AddPerformerNative(Api, _int64Ptr);
+    /// @param sequence Sequence to add.
+    /// @return Sequence id.
+    public static Int64 AddSequence(Sequence sequence) {
+      Int64 sequenceId = InvalidId;
+      Status status = BarelySequence_Create(Api, _int64Ptr);
       if (IsOk(status)) {
-        performerId = Marshal.ReadInt64(_int64Ptr);
+        sequenceId = Marshal.ReadInt64(_int64Ptr);
       } else {
-        Debug.LogError("Failed to add performer (" + performer.name + "): " + status);
+        Debug.LogError("Failed to add sequence (" + sequence.name + "): " + status);
       }
-      return performerId;
+      return sequenceId;
     }
 
     /// Returns the playback position.
@@ -132,11 +132,11 @@ namespace Barely {
       _instruments.Remove(instrument.Id);
     }
 
-    /// Removes performer.
+    /// Removes sequence.
     ///
-    /// @param performer Performer to remove.
-    public static void RemovePerformer(Performer performer) {
-      RemovePerformerNative(Api, performer.Id);
+    /// @param sequence Sequence to remove.
+    public static void RemoveSequence(Sequence sequence) {
+      BarelySequence_Destroy(Api, sequence.Id);
     }
 
     /// Sets all instrument notes off.
@@ -217,25 +217,26 @@ namespace Barely {
       return IsOk(BarelyTransport_Stop(Api));
     }
 
-    /// Updates performer.
+    /// Updates sequence.
     ///
-    /// @param performer Performer to update.
-    /// TODO(#85): This is a POC implementation only, also missing begin/end position setters.
-    public static void UpdatePerformer(Performer performer) {
-      SetPerformerBeginOffsetNative(Api, performer.Id, performer.BeginOffset);
-      SetPerformerLoopNative(Api, performer.Id, performer.Loop);
-      SetPerformerLoopBeginOffsetNative(Api, performer.Id, performer.LoopBeginOffset);
-      SetPerformerLoopLengthNative(Api, performer.Id, performer.LoopLength);
+    /// @param sequence Sequence to update.
+    /// TODO(#85): This is a POC implementation only.
+    public static void UpdateSequence(Sequence sequence) {
+      BarelySequence_SetBeginOffset(Api, sequence.Id, sequence.BeginOffset);
+      BarelySequence_SetBeginPosition(Api, sequence.Id, sequence.BeginPosition);
+      BarelySequence_SetEndPosition(Api, sequence.Id, sequence.EndPosition);
+      BarelySequence_SetLooping(Api, sequence.Id, sequence.Loop);
+      BarelySequence_SetLoopBeginOffset(Api, sequence.Id, sequence.LoopBeginOffset);
+      BarelySequence_SetLoopLength(Api, sequence.Id, sequence.LoopLength);
 
-      RemoveAllPerformerNotesNative(Api, performer.Id);
-      foreach (var performerNote in performer.Notes) {
-        float pitch = (float)(performer.RootNote + performerNote.note.Pitch - 69) / 12.0f;
-        AddPerformerNoteNative(Api, performer.Id, performerNote.position,
-                               performerNote.note.Duration, pitch, performerNote.note.Intensity,
-                               _int64Ptr);
+      BarelySequence_RemoveAllNotes(Api, sequence.Id);
+      foreach (var sequenceNote in sequence.Notes) {
+        float pitch = (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
+        AddPerformerNoteNative(Api, sequence.Id, sequenceNote.position, sequenceNote.note.Duration,
+                               pitch, sequenceNote.note.Intensity, _int64Ptr);
       }
-      SetPerformerInstrumentNative(Api, performer.Id,
-                                   performer.Instrument ? performer.Instrument.Id : InvalidId);
+      BarelySequence_SetInstrument(Api, sequence.Id,
+                                   sequence.Instrument ? sequence.Instrument.Id : InvalidId);
     }
 
     // Singleton api.
@@ -441,6 +442,53 @@ namespace Barely {
     private static extern Status BarelyInstrument_StopNote(IntPtr api, Int64 instrumentId,
                                                            float pitch);
 
+    [DllImport(pluginName, EntryPoint = "BarelySequence_Create")]
+    private static extern Status BarelySequence_Create(IntPtr api, IntPtr outSequenceId);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_Destroy")]
+    private static extern Status BarelySequence_Destroy(IntPtr api, Int64 sequenceId);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_RemoveAllNotes")]
+    private static extern Status BarelySequence_RemoveAllNotes(IntPtr api, Int64 sequenceId);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_RemoveNote")]
+    private static extern Status BarelySequence_RemoveNote(IntPtr api, Int64 sequenceId,
+                                                           Int64 noteId);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetBeginOffset")]
+    private static extern Status BarelySequence_SetBeginOffset(IntPtr api, Int64 sequenceId,
+                                                               double beginOffset);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetBeginPosition")]
+    private static extern Status BarelySequence_SetBeginPosition(IntPtr api, Int64 sequenceId,
+                                                                 double beginPosition);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetEndPosition")]
+    private static extern Status BarelySequence_SetEndPosition(IntPtr api, Int64 sequenceId,
+                                                               double endPosition);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetInstrument")]
+    private static extern Status BarelySequence_SetInstrument(IntPtr api, Int64 sequenceId,
+                                                              Int64 instrumentId);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetLoopBeginOffset")]
+    private static extern Status BarelySequence_SetLoopBeginOffset(IntPtr api, Int64 sequenceId,
+                                                                   double loopBeginOffset);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetLoopLength")]
+    private static extern Status BarelySequence_SetLoopLength(IntPtr api, Int64 sequenceId,
+                                                              double loopLength);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetLooping")]
+    private static extern Status BarelySequence_SetLooping(IntPtr api, Int64 sequenceId,
+                                                           bool isLooping);
+
+    [DllImport(pluginName, EntryPoint = "BarelyAddPerformerNote")]
+    private static extern Status AddPerformerNoteNative(IntPtr api, Int64 performerId,
+                                                        double notePosition, double noteDuration,
+                                                        float notePitch, float noteIntensity,
+                                                        IntPtr outNoteId);
+
     [DllImport(pluginName, EntryPoint = "BarelyTransport_GetPosition")]
     private static extern Status BarelyTransport_GetPosition(IntPtr api, IntPtr positionPtr);
 
@@ -465,25 +513,6 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyTransport_Stop")]
     private static extern Status BarelyTransport_Stop(IntPtr api);
 
-    [DllImport(pluginName, EntryPoint = "BarelyAddPerformer")]
-    private static extern Status AddPerformerNative(IntPtr api, IntPtr performerIdPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelyAddPerformerNote")]
-    private static extern Status AddPerformerNoteNative(IntPtr api, Int64 performerId,
-                                                        double notePosition, double noteDuration,
-                                                        float notePitch, float noteIntensity,
-                                                        IntPtr noteIdPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelyRemoveAllPerformerNotes")]
-    private static extern Status RemoveAllPerformerNotesNative(IntPtr api, Int64 performerId);
-
-    [DllImport(pluginName, EntryPoint = "BarelyRemovePerformer")]
-    private static extern Status RemovePerformerNative(IntPtr api, Int64 performerId);
-
-    [DllImport(pluginName, EntryPoint = "BarelyRemovePerformerNote")]
-    private static extern Status RemovePerformerNoteNative(IntPtr api, Int64 performerId,
-                                                           Int64 noteId);
-
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOffCallback")]
     private static extern Status SetInstrumentNoteOffCallbackNative(IntPtr api,
                                                                     IntPtr noteOffCallbackPtr);
@@ -491,33 +520,6 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOnCallback")]
     private static extern Status SetInstrumentNoteOnCallbackNative(IntPtr api,
                                                                    IntPtr noteOnCallbackPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerBeginOffset")]
-    private static extern Status SetPerformerBeginOffsetNative(IntPtr api, Int64 performerId,
-                                                               double beginOffset);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerBeginPosition")]
-    private static extern Status SetPerformerBeginPositionNative(IntPtr api, Int64 performerId,
-                                                                 IntPtr beginPosition);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerEndPosition")]
-    private static extern Status SetPerformerEndPositionNative(IntPtr api, Int64 performerId,
-                                                               IntPtr endPosition);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerInstrument")]
-    private static extern Status SetPerformerInstrumentNative(IntPtr api, Int64 performerId,
-                                                              Int64 instrumentId);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoop")]
-    private static extern Status SetPerformerLoopNative(IntPtr api, Int64 performerId, bool loop);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoopBeginOffset")]
-    private static extern Status SetPerformerLoopBeginOffsetNative(IntPtr api, Int64 performerId,
-                                                                   double loopBeginOffset);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetPerformerLoopLength")]
-    private static extern Status SetPerformerLoopLengthNative(IntPtr api, Int64 performerId,
-                                                              double loopLength);
 
     [DllImport(pluginName, EntryPoint = "BarelySetPlaybackBeatCallback")]
     private static extern Status SetPlaybackBeatCallbackNative(IntPtr api,

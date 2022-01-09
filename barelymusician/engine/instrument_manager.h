@@ -25,18 +25,17 @@ class InstrumentManager {
  public:
   /// Note off callback signature.
   ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  using NoteOffCallback =
-      std::function<void(Id instrument_id, float note_pitch)>;
+  /// @param pitch Note pitch.
+  /// @param timestamp Note timestamp.
+  using NoteOffCallback = std::function<void(float pitch, double timestamp)>;
 
   /// Note on callback signature.
   ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  /// @param note_intensity Note intensity.
-  using NoteOnCallback = std::function<void(Id instrument_id, float note_pitch,
-                                            float note_intensity)>;
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @param timestamp Note timestamp.
+  using NoteOnCallback =
+      std::function<void(float pitch, float intensity, double timestamp)>;
 
   /// Constructs new `InstrumentManager`.
   ///
@@ -169,7 +168,9 @@ class InstrumentManager {
   /// Sets the note off callback.
   ///
   /// @param note_off_callback Instrument note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept;
+  /// @return Status.
+  Status SetNoteOffCallback(Id instrument_id,
+                            NoteOffCallback note_off_callback) noexcept;
 
   /// Sets instrument note on at timestamp.
   ///
@@ -184,7 +185,9 @@ class InstrumentManager {
   /// Sets the note on callback.
   ///
   /// @param note_on_callback Instrument note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept;
+  /// @return Status.
+  Status SetNoteOnCallback(Id instrument_id,
+                           NoteOnCallback note_on_callback) noexcept;
 
   /// Sets instrument parameter value at timestamp.
   ///
@@ -229,6 +232,12 @@ class InstrumentManager {
     // Denotes whether instrument is muted or not.
     bool is_muted;
 
+    // Note off callback.
+    NoteOffCallback note_off_callback;
+
+    // Note on callback.
+    NoteOnCallback note_on_callback;
+
     // Instrument parameters.
     std::vector<Param> params;
 
@@ -252,12 +261,6 @@ class InstrumentManager {
 
   // Audio thread task runner.
   TaskRunner audio_runner_;
-
-  // Instrument note off callback.
-  NoteOffCallback note_off_callback_;
-
-  // Instrument note on callback.
-  NoteOnCallback note_on_callback_;
 
   // Sampling rate in hz.
   std::atomic<int> sample_rate_;

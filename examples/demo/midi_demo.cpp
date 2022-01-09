@@ -111,16 +111,6 @@ int main(int /*argc*/, char* argv[]) {
   Engine engine(kSampleRate);
   engine.SetPlaybackTempo(kTempo);
 
-  engine.SetInstrumentNoteOnCallback([](Id instrument_id, float pitch,
-                                        float intensity) {
-    ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOn("
-                 << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
-  });
-  engine.SetInstrumentNoteOffCallback([](Id instrument_id, float pitch) {
-    ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOff("
-                 << MidiKeyNumberFromPitch(pitch) << ") ";
-  });
-
   std::vector<Id> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
@@ -134,6 +124,18 @@ int main(int /*argc*/, char* argv[]) {
     // Add instrument.
     const Id instrument_id =
         engine.AddInstrument(SynthInstrument::GetDefinition());
+    engine.SetInstrumentNoteOnCallback(
+        instrument_id,
+        [instrument_id](float pitch, float intensity, double /*timestamp*/) {
+          ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOn("
+                       << MidiKeyNumberFromPitch(pitch) << ", " << intensity
+                       << ")";
+        });
+    engine.SetInstrumentNoteOffCallback(
+        instrument_id, [instrument_id](float pitch, double /*timestamp*/) {
+          ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOff("
+                       << MidiKeyNumberFromPitch(pitch) << ") ";
+        });
     engine.SetInstrumentGain(instrument_id, kInstrumentGain);
     engine.SetInstrumentParam(instrument_id,
                               SynthInstrumentParam::kEnvelopeAttack,

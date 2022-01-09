@@ -1079,41 +1079,6 @@ BARELY_EXPORT BarelyStatus BarelyTransport_Stop(BarelyApi api);
 BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
     BarelyApi api, BarelyId* out_instrument_id);
 
-// TODO(#85): Remove everything below - all obsolete.
-
-/// Instrument note off callback signature.
-///
-/// @param instrument_id Instrument id.
-/// @param note_pitch Note pitch.
-typedef void (*BarelyInstrumentNoteOffCallback)(BarelyId instrument_id,
-                                                float note_pitch);
-
-/// Instrument note on callback signature.
-///
-/// @param instrument_id Instrument id.
-/// @param note_pitch Note pitch.
-/// @param note_intensity Note intensity.
-typedef void (*BarelyInstrumentNoteOnCallback)(BarelyId instrument_id,
-                                               float note_pitch,
-                                               float note_intensity);
-
-/// Sets the instrument note off callback.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_note_off_callback Instrument note off callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOffCallback(
-    BarelyApi api,
-    BarelyInstrumentNoteOffCallback instrument_note_off_callback);
-
-/// Sets the instrument note on callback.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_note_on_callback Instrument note on callback.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySetInstrumentNoteOnCallback(
-    BarelyApi api, BarelyInstrumentNoteOnCallback instrument_note_on_callback);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus

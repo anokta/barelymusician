@@ -83,6 +83,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetInstrumentParam(performer_instrument_id,
                             SynthInstrumentParam::kOscillatorType,
                             static_cast<float>(kOscillatorType));
+  engine.SetInstrumentNoteOnCallback(
+      performer_instrument_id,
+      [](float pitch, float intensity, double /*timestamp*/) {
+        ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << ", "
+                     << intensity << "}";
+      });
 
   const Id metronome_id =
       engine.AddInstrument(SynthInstrument::GetDefinition());
@@ -93,14 +99,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
                             SynthInstrumentParam::kEnvelopeRelease, 0.025f);
   engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kOscillatorType,
                             static_cast<float>(OscillatorType::kSquare));
-
-  engine.SetInstrumentNoteOnCallback(
-      [&](Id instrument_id, float note_pitch, float note_intensity) {
-        if (instrument_id == performer_instrument_id) {
-          ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(note_pitch) << ", "
-                       << note_intensity << "}";
-        }
-      });
 
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {

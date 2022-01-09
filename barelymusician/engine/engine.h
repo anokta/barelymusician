@@ -227,8 +227,10 @@ class Engine {
 
   /// Sets the instrument note off callback.
   ///
+  /// @param instrument_id Instrument id.
   /// @param instrument_note_off_callback Instrument note off callback.
   void SetInstrumentNoteOffCallback(
+      Id instrument_id,
       InstrumentNoteOffCallback instrument_note_off_callback) noexcept;
 
   /// Sets instrument note on.
@@ -242,8 +244,10 @@ class Engine {
 
   /// Sets the instrument note on callback.
   ///
+  /// @param instrument_id Instrument id.
   /// @param instrument_note_on_callback Instrument note on callback.
   void SetInstrumentNoteOnCallback(
+      Id instrument_id,
       InstrumentNoteOnCallback instrument_note_on_callback) noexcept;
 
   /// Sets instrument parameter.

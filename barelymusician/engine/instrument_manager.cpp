@@ -23,19 +23,16 @@ namespace {
 constexpr int kNumMaxTasks = 100;
 
 // Dummy note off callback that does nothing.
-void NoopNoteOffCallback(Id /*instrument_id*/, float /*note_pitch*/) noexcept {}
+void NoopNoteOffCallback(float /*note_pitch*/, double /*timestamp*/) noexcept {}
 
 // Dummy note on callback that does nothing.
-void NoopNoteOnCallback(Id /*instrument_id*/, float /*note_pitch*/,
-                        float /*note_intensity*/) noexcept {}
+void NoopNoteOnCallback(float /*note_pitch*/, float /*note_intensity*/,
+                        double /*timestamp*/) noexcept {}
 
 }  // namespace
 
 InstrumentManager::InstrumentManager(int sample_rate) noexcept
-    : audio_runner_(kNumMaxTasks),
-      note_off_callback_(&NoopNoteOffCallback),
-      note_on_callback_(&NoopNoteOnCallback),
-      sample_rate_(sample_rate) {}
+    : audio_runner_(kNumMaxTasks), sample_rate_(sample_rate) {}
 
 Status InstrumentManager::Add(Id instrument_id, double timestamp,
                               InstrumentDefinition definition) noexcept {
@@ -212,7 +209,7 @@ Status InstrumentManager::Remove(Id instrument_id, double timestamp) noexcept {
       controller_it != controllers_.end()) {
     auto& update_events = update_events_[instrument_id];
     for (const float pitch : controller_it->second.pitches) {
-      note_off_callback_(instrument_id, pitch);
+      controller_it->second.note_off_callback(pitch, timestamp);
       update_events.emplace(timestamp, SetNoteOffEvent{pitch});
     }
     update_events.emplace(timestamp, DestroyEvent{});
@@ -227,7 +224,7 @@ void InstrumentManager::SetAllNotesOff(double timestamp) noexcept {
     if (!controller.pitches.empty()) {
       auto& update_events = update_events_[instrument_id];
       for (const float pitch : controller.pitches) {
-        note_off_callback_(instrument_id, pitch);
+        controller.note_off_callback(pitch, timestamp);
         update_events.emplace(timestamp, SetNoteOffEvent{pitch});
       }
       controller.pitches.clear();
@@ -241,7 +238,7 @@ Status InstrumentManager::SetAllNotesOff(Id instrument_id,
     if (!controller->pitches.empty()) {
       auto& update_events = update_events_[instrument_id];
       for (const float pitch : controller->pitches) {
-        note_off_callback_(instrument_id, pitch);
+        controller->note_off_callback(pitch, timestamp);
         update_events.emplace(timestamp, SetNoteOffEvent{pitch});
       }
       controller->pitches.clear();
@@ -319,7 +316,7 @@ Status InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
                                      float note_pitch) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.erase(note_pitch) > 0) {
-      note_off_callback_(instrument_id, note_pitch);
+      controller->note_off_callback(note_pitch, timestamp);
       update_events_[instrument_id].emplace(timestamp,
                                             SetNoteOffEvent{note_pitch});
       return Status::kOk;
@@ -329,10 +326,14 @@ Status InstrumentManager::SetNoteOff(Id instrument_id, double timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetNoteOffCallback(
-    NoteOffCallback note_off_callback) noexcept {
-  note_off_callback_ =
-      note_off_callback ? std::move(note_off_callback) : &NoopNoteOffCallback;
+Status InstrumentManager::SetNoteOffCallback(
+    Id instrument_id, NoteOffCallback note_off_callback) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->note_off_callback =
+        note_off_callback ? std::move(note_off_callback) : &NoopNoteOffCallback;
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 Status InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
@@ -340,7 +341,7 @@ Status InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
                                     float note_intensity) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
     if (controller->pitches.emplace(note_pitch).second) {
-      note_on_callback_(instrument_id, note_pitch, note_intensity);
+      controller->note_on_callback(note_pitch, note_intensity, timestamp);
       update_events_[instrument_id].emplace(
           timestamp, SetNoteOnEvent{note_pitch, note_intensity});
       return Status::kOk;
@@ -350,10 +351,14 @@ Status InstrumentManager::SetNoteOn(Id instrument_id, double timestamp,
   return Status::kNotFound;
 }
 
-void InstrumentManager::SetNoteOnCallback(
-    NoteOnCallback note_on_callback) noexcept {
-  note_on_callback_ =
-      note_on_callback ? std::move(note_on_callback) : &NoopNoteOnCallback;
+Status InstrumentManager::SetNoteOnCallback(
+    Id instrument_id, NoteOnCallback note_on_callback) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->note_on_callback =
+        note_on_callback ? std::move(note_on_callback) : &NoopNoteOnCallback;
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 Status InstrumentManager::SetParam(Id instrument_id, double timestamp,
@@ -400,7 +405,7 @@ void InstrumentManager::SetSampleRate(double timestamp,
     for (auto& [instrument_id, controller] : controllers_) {
       auto& update_events = update_events_[instrument_id];
       for (const float pitch : controller.pitches) {
-        note_off_callback_(instrument_id, pitch);
+        controller.note_off_callback(pitch, timestamp);
       }
       controller.pitches.clear();
       update_events.emplace(timestamp, DestroyEvent{});
@@ -426,7 +431,11 @@ void InstrumentManager::Update() noexcept {
 
 InstrumentManager::InstrumentController::InstrumentController(
     InstrumentDefinition definition) noexcept
-    : definition(std::move(definition)), gain(1.0f), is_muted(false) {
+    : definition(std::move(definition)),
+      gain(1.0f),
+      is_muted(false),
+      note_off_callback(&NoopNoteOffCallback),
+      note_on_callback(&NoopNoteOnCallback) {
   params.reserve(this->definition.param_definitions.size());
   for (const auto& param_definition : this->definition.param_definitions) {
     params.emplace_back(param_definition);

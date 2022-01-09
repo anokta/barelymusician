@@ -181,19 +181,19 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetPlaybackTempo(kTempo);
 
   // Note on callback.
-  const auto note_on_callback = [](Id instrument_id, float pitch,
-                                   float intensity) {
-    ConsoleLog() << "Instrument #" << instrument_id << ": NoteOn(" << pitch
-                 << ", " << intensity << ")";
+  const auto set_note_callbacks_fn = [&](Id instrument_id) {
+    engine.SetInstrumentNoteOffCallback(
+        instrument_id, [instrument_id](double pitch, double /*timestamp*/) {
+          ConsoleLog() << "Instrument #" << instrument_id << ": NoteOff("
+                       << pitch << ")";
+        });
+    engine.SetInstrumentNoteOnCallback(
+        instrument_id,
+        [instrument_id](double pitch, double intensity, double /*timestamp*/) {
+          ConsoleLog() << "Instrument #" << instrument_id << ": NoteOn("
+                       << pitch << ", " << intensity << ")";
+        });
   };
-  engine.SetInstrumentNoteOnCallback(note_on_callback);
-
-  // Note off callback.
-  const auto note_off_callback = [](Id performer_id, float pitch) {
-    ConsoleLog() << "Instrument #" << performer_id << ": NoteOff(" << pitch
-                 << ")";
-  };
-  engine.SetInstrumentNoteOffCallback(note_off_callback);
 
   const std::vector<int> progression = {0, 3, 4, 0};
   const std::vector<float> scale(std::cbegin(barelyapi::kPitchMajorScale),
@@ -215,6 +215,7 @@ int main(int /*argc*/, char* argv[]) {
     engine.SetInstrumentParam(instrument_ids.back(),
                               SynthInstrumentParam::kOscillatorType,
                               static_cast<float>(type));
+    set_note_callbacks_fn(instrument_ids.back());
   };
 
   // Add synth instruments.
@@ -251,6 +252,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument_ids.push_back(
       engine.AddInstrument(DrumkitInstrument::GetDefinition()));
   engine.SetInstrumentGain(instrument_ids.back(), 0.5f);
+  set_note_callbacks_fn(instrument_ids.back());
   std::unordered_map<float, std::string> drumkit_map = {
       {barelyapi::kPitchKick, "basic_kick.wav"},
       {barelyapi::kPitchSnare, "basic_snare.wav"},

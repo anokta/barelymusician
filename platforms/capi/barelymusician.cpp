@@ -422,11 +422,16 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
     BarelyInstrument_NoteOffCallback note_off_callback, void* user_data) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  instrument_id;
-  note_off_callback;
-  user_data;
-  return BarelyStatus_kUnimplemented;
+  if (note_off_callback) {
+    api->instance.SetInstrumentNoteOffCallback(
+        instrument_id,
+        [note_off_callback, user_data](float pitch, double timestamp) {
+          note_off_callback(pitch, timestamp, user_data);
+        });
+  } else {
+    api->instance.SetInstrumentNoteOffCallback(instrument_id, nullptr);
+  }
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyInstrument_SetNoteOnCallback(
@@ -434,11 +439,16 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
     BarelyInstrument_NoteOnCallback note_on_callback, void* user_data) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  instrument_id;
-  note_on_callback;
-  user_data;
-  return BarelyStatus_kUnimplemented;
+  if (note_on_callback) {
+    api->instance.SetInstrumentNoteOnCallback(
+        instrument_id, [note_on_callback, user_data](
+                           float pitch, float intensity, double timestamp) {
+          note_on_callback(pitch, intensity, timestamp, user_data);
+        });
+  } else {
+    api->instance.SetInstrumentNoteOnCallback(instrument_id, nullptr);
+  }
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyInstrument_SetParam(BarelyApi api, BarelyId instrument_id,
@@ -860,41 +870,6 @@ BarelyStatus BarelyExamples_CreateSynthInstrument(BarelyApi api,
   *out_instrument_id =
       api->instance.AddInstrument(SynthInstrument::GetDefinition());
   return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelySetInstrumentNoteOffCallback(
-    BarelyApi api,
-    BarelyInstrumentNoteOffCallback instrument_note_off_callback) {
-  if (api) {
-    if (instrument_note_off_callback) {
-      api->instance.SetInstrumentNoteOffCallback(
-          [instrument_note_off_callback](auto instrument_id, float note_pitch) {
-            instrument_note_off_callback(instrument_id, note_pitch);
-          });
-    } else {
-      api->instance.SetInstrumentNoteOffCallback(nullptr);
-    }
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySetInstrumentNoteOnCallback(
-    BarelyApi api, BarelyInstrumentNoteOnCallback instrument_note_on_callback) {
-  if (api) {
-    if (instrument_note_on_callback) {
-      api->instance.SetInstrumentNoteOnCallback(
-          [instrument_note_on_callback](auto instrument_id, float note_pitch,
-                                        float note_intensity) {
-            instrument_note_on_callback(instrument_id, note_pitch,
-                                        note_intensity);
-          });
-    } else {
-      api->instance.SetInstrumentNoteOffCallback(nullptr);
-    }
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
 }
 
 }  // extern "C"

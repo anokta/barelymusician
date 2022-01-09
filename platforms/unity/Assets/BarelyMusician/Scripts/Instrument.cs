@@ -21,6 +21,15 @@ namespace Barely {
     public delegate void NoteOnEvent(float pitch, float intensity);
     public event NoteOnEvent OnNoteOn;
 
+    // TODO(#85): Temp shortcut, note callbacks should be private.
+    // Note off callback.
+    public delegate void NoteOffCallback(float pitch, double timestamp);
+    public NoteOffCallback _noteOffCallback = null;
+
+    // Note on callback.
+    public delegate void NoteOnCallback(float pitch, float intensity, double timestamp);
+    public NoteOnCallback _noteOnCallback = null;
+
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
     }
@@ -31,8 +40,12 @@ namespace Barely {
 
     protected virtual void OnEnable() {
       if (Id == Musician.InvalidId) {
-        Musician.OnInstrumentNoteOff += OnInstrumentNoteOff;
-        Musician.OnInstrumentNoteOn += OnInstrumentNoteOn;
+        _noteOffCallback = delegate(float pitch, double timestamp) {
+          OnNoteOff?.Invoke(pitch);
+        };
+        _noteOnCallback = delegate(float pitch, float intensity, double timestamp) {
+          OnNoteOn?.Invoke(pitch, intensity);
+        };
         Id = Musician.AddInstrument(this);
       }
       Source?.Play();
@@ -42,8 +55,6 @@ namespace Barely {
       Source?.Stop();
       if (Id != Musician.InvalidId) {
         Musician.RemoveInstrument(this);
-        Musician.OnInstrumentNoteOff -= OnInstrumentNoteOff;
-        Musician.OnInstrumentNoteOn -= OnInstrumentNoteOn;
         Id = Musician.InvalidId;
       }
     }
@@ -94,18 +105,6 @@ namespace Barely {
 
     private void OnAudioFilterRead(float[] data, int channels) {
       Musician.ProcessInstrument(this, data, channels);
-    }
-
-    private void OnInstrumentNoteOff(Instrument instrument, float notePitch) {
-      if (instrument == this) {
-        OnNoteOff?.Invoke(notePitch);
-      }
-    }
-
-    private void OnInstrumentNoteOn(Instrument instrument, float notePitch, float noteIntensity) {
-      if (instrument == this) {
-        OnNoteOn?.Invoke(notePitch, noteIntensity);
-      }
     }
   }
 }

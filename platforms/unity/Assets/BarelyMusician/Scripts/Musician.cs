@@ -14,15 +14,6 @@ namespace Barely {
     public delegate void BeatEvent(double position);
     public static event BeatEvent OnBeat;
 
-    /// Instrument note off event.
-    public delegate void InstrumentNoteOffEvent(Instrument instrument, float notePitch);
-    public static event InstrumentNoteOffEvent OnInstrumentNoteOff;
-
-    /// Instrument note on event.
-    public delegate void InstrumentNoteOnEvent(Instrument instrument, float notePitch,
-                                               float noteIntensity);
-    public static event InstrumentNoteOnEvent OnInstrumentNoteOn;
-
     /// Note pitch types.
     public enum NotePitchType {
       /// Absolute pitch.
@@ -67,6 +58,12 @@ namespace Barely {
         Debug.LogError("Unsupported instrument type: " + instrumentType);
       }
       if (instrumentId != InvalidId) {
+        BarelyInstrument_SetNoteOffCallback(
+            _api, instrumentId, Marshal.GetFunctionPointerForDelegate(instrument._noteOffCallback),
+            IntPtr.Zero);
+        BarelyInstrument_SetNoteOnCallback(
+            _api, instrumentId, Marshal.GetFunctionPointerForDelegate(instrument._noteOnCallback),
+            IntPtr.Zero);
         _instruments.Add(instrumentId, instrument);
       }
       return instrumentId;
@@ -323,15 +320,6 @@ namespace Barely {
       private delegate void BeatCallback(double position, double timestamp);
       private BeatCallback _beatCallback = null;
 
-      // Instrument note off callback.
-      private delegate void InstrumentNoteOffCallback(Int64 instrumentId, float notePitch);
-      private InstrumentNoteOffCallback _instrumentNoteOffCallback = null;
-
-      // Instrument note on callback.
-      private delegate void InstrumentNoteOnCallback(Int64 instrument_id, float notePitch,
-                                                     float noteIntensity);
-      private InstrumentNoteOnCallback _instrumentNoteOnCallback = null;
-
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
         if (!IsOk(BarelyApi_Create(_intPtrPtr))) {
@@ -339,27 +327,6 @@ namespace Barely {
         }
         _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
         SetSampleRateNative(_api, AudioSettings.outputSampleRate);
-        _instrumentNoteOffCallback = delegate(Int64 instrumentId, float notePitch) {
-          Instrument instrument = null;
-          if (_instruments.TryGetValue(instrumentId, out instrument)) {
-            OnInstrumentNoteOff?.Invoke(instrument, notePitch);
-          } else {
-            Debug.LogWarning("Instrument does not exist: " + instrumentId);
-          }
-        };
-        SetInstrumentNoteOffCallbackNative(
-            _api, Marshal.GetFunctionPointerForDelegate(_instrumentNoteOffCallback));
-        _instrumentNoteOnCallback =
-            delegate(Int64 instrumentId, float notePitch, float noteIntensity) {
-          Instrument instrument = null;
-          if (_instruments.TryGetValue(instrumentId, out instrument)) {
-            OnInstrumentNoteOn?.Invoke(instrument, notePitch, noteIntensity);
-          } else {
-            Debug.LogWarning("Instrument does not exist: " + instrumentId);
-          }
-        };
-        SetInstrumentNoteOnCallbackNative(
-            _api, Marshal.GetFunctionPointerForDelegate(_instrumentNoteOnCallback));
         _beatCallback = delegate(double position, double timestamp) {
           OnBeat?.Invoke(position);
         };
@@ -464,12 +431,14 @@ namespace Barely {
                                                              Int32 index);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffCallback")]
-    private static extern Status BarelyInstrument_SetNoteOffCallback(IntPtr api,
-                                                                     IntPtr noteOffCallback);
+    private static extern Status BarelyInstrument_SetNoteOffCallback(IntPtr api, Int64 instrumentId,
+                                                                     IntPtr noteOffCallback,
+                                                                     IntPtr userData);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnCallback")]
-    private static extern Status BarelyInstrument_SetNoteOnCallback(IntPtr api,
-                                                                    IntPtr noteOnCallback);
+    private static extern Status BarelyInstrument_SetNoteOnCallback(IntPtr api, Int64 instrumentId,
+                                                                    IntPtr noteOnCallback,
+                                                                    IntPtr userData);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetParam")]
     private static extern Status BarelyInstrument_SetParam(IntPtr api, Int64 instrumentId,
@@ -547,6 +516,10 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyTransport_Play")]
     private static extern Status BarelyTransport_Play(IntPtr api);
 
+    [DllImport(pluginName, EntryPoint = "BarelyTransport_SetBeatCallback")]
+    private static extern Status BarelyTransport_SetBeatCallback(IntPtr api, IntPtr beatCallback,
+                                                                 IntPtr userData);
+
     [DllImport(pluginName, EntryPoint = "BarelyTransport_SetPosition")]
     private static extern Status BarelyTransport_SetPosition(IntPtr api, double position);
 
@@ -555,17 +528,5 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyTransport_Stop")]
     private static extern Status BarelyTransport_Stop(IntPtr api);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOffCallback")]
-    private static extern Status SetInstrumentNoteOffCallbackNative(IntPtr api,
-                                                                    IntPtr noteOffCallbackPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelySetInstrumentNoteOnCallback")]
-    private static extern Status SetInstrumentNoteOnCallbackNative(IntPtr api,
-                                                                   IntPtr noteOnCallbackPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelyTransport_SetBeatCallback")]
-    private static extern Status BarelyTransport_SetBeatCallback(IntPtr api, IntPtr beatCallback,
-                                                                 IntPtr userData);
   }
 }

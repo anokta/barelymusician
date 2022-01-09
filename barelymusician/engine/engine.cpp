@@ -257,9 +257,10 @@ Status Engine::SetInstrumentNoteOff(Id instrument_id,
 }
 
 void Engine::SetInstrumentNoteOffCallback(
+    Id instrument_id,
     InstrumentNoteOffCallback instrument_note_off_callback) noexcept {
   instrument_manager_.SetNoteOffCallback(
-      std::move(instrument_note_off_callback));
+      instrument_id, std::move(instrument_note_off_callback));
 }
 
 Status Engine::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
@@ -281,8 +282,10 @@ Status Engine::SetInstrumentParamToDefault(Id instrument_id,
 }
 
 void Engine::SetInstrumentNoteOnCallback(
+    Id instrument_id,
     InstrumentNoteOnCallback instrument_note_on_callback) noexcept {
-  instrument_manager_.SetNoteOnCallback(std::move(instrument_note_on_callback));
+  instrument_manager_.SetNoteOnCallback(instrument_id,
+                                        std::move(instrument_note_on_callback));
 }
 
 Status Engine::SetPerformerBeginOffset(Id performer_id,

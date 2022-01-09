@@ -4,16 +4,6 @@
 
 extern "C" {
 
-BarelyStatus BarelyConductor_GetParam(BarelyApi api, int32_t index,
-                                      float* out_value) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_value) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  index;
-  return BarelyStatus_kUnimplemented;
-}
-
 /// BarelyMusician C api.
 struct BarelyMusician {
   // TODO(#85): This is a temp POC for testing.
@@ -89,6 +79,16 @@ BarelyStatus BarelyConductor_GetEnergy(BarelyApi api, float* out_energy) {
   if (!out_energy) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyConductor_GetParam(BarelyApi api, int32_t index,
+                                      float* out_value) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_value) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  index;
   return BarelyStatus_kUnimplemented;
 }
 

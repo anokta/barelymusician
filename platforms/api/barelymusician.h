@@ -446,15 +446,12 @@ class Conductor {
     return static_cast<Status>(BarelyConductor_SetDefinition(
         capi_,
         BarelyConductorDefinition{
-            std::move(definition.adjust_note_duration_fn),
-            std::move(definition.adjust_note_intensity_fn),
-            std::move(definition.adjust_note_pitch_fn),
-            std::move(definition.adjust_tempo_fn),
-            std::move(definition.create_fn), std::move(definition.destroy_fn),
-            std::move(definition.set_data_fn),
-            std::move(definition.set_energy_fn),
-            std::move(definition.set_param_fn),
-            std::move(definition.set_stress_fn), param_definitions.data(),
+            definition.adjust_note_duration_fn,
+            definition.adjust_note_intensity_fn,
+            definition.adjust_note_pitch_fn, definition.adjust_tempo_fn,
+            definition.create_fn, definition.destroy_fn, definition.set_data_fn,
+            definition.set_energy_fn, definition.set_param_fn,
+            definition.set_stress_fn, param_definitions.data(),
             static_cast<int>(param_definitions.size())}));
   }
 
@@ -816,7 +813,7 @@ class Instrument {
   /// @return Status.
   Status SetNoteOffCallback(NoteOffCallback note_off_callback) {
     if (note_off_callback) {
-      note_off_callback_ = std::move(note_off_callback);
+      note_off_callback_ = note_off_callback;
       return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
           capi_, id_,
           [](float pitch, double timestamp, void* user_data) {
@@ -835,7 +832,7 @@ class Instrument {
   /// @return Status.
   Status SetNoteOnCallback(NoteOnCallback note_on_callback) {
     if (note_on_callback) {
-      note_on_callback_ = std::move(note_on_callback);
+      note_on_callback_ = note_on_callback;
       return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
           capi_, id_,
           [](float pitch, float intensity, double timestamp, void* user_data) {
@@ -905,12 +902,10 @@ class Instrument {
       const auto status = BarelyInstrument_Create(
           capi_,
           BarelyInstrumentDefinition{
-              std::move(definition.create_fn), std::move(definition.destroy_fn),
-              std::move(definition.process_fn),
-              std::move(definition.set_data_fn),
-              std::move(definition.set_note_off_fn),
-              std::move(definition.set_note_on_fn),
-              std::move(definition.set_param_fn), param_definitions.data(),
+              definition.create_fn, definition.destroy_fn,
+              definition.process_fn, definition.set_data_fn,
+              definition.set_note_off_fn, definition.set_note_on_fn,
+              definition.set_param_fn, param_definitions.data(),
               static_cast<int>(param_definitions.size())},
           &id_);
       assert(status == BarelyStatus_kOk);
@@ -1403,7 +1398,7 @@ class Transport {
   /// @return Status.
   Status SetBeatCallback(BeatCallback beat_callback) {
     if (beat_callback) {
-      beat_callback_ = std::move(beat_callback);
+      beat_callback_ = beat_callback;
       return static_cast<Status>(BarelyTransport_SetBeatCallback(
           capi_,
           [](double position, double timestamp, void* user_data) {
@@ -1438,7 +1433,7 @@ class Transport {
   /// @return Status.
   Status SetUpdateCallback(UpdateCallback update_callback) {
     if (update_callback) {
-      update_callback_ = std::move(update_callback);
+      update_callback_ = update_callback;
       return static_cast<Status>(BarelyTransport_SetUpdateCallback(
           capi_,
           [](double begin_position, double end_position, double begin_timestamp,

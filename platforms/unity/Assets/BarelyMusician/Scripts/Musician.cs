@@ -64,7 +64,6 @@ namespace Barely {
         BarelyInstrument_SetNoteOnCallback(
             _api, instrumentId, Marshal.GetFunctionPointerForDelegate(instrument._noteOnCallback),
             IntPtr.Zero);
-        _instruments.Add(instrumentId, instrument);
       }
       return instrumentId;
     }
@@ -152,7 +151,6 @@ namespace Barely {
     /// @param instrument Instrument to remove.
     public static void RemoveInstrument(Instrument instrument) {
       BarelyInstrument_Destroy(Api, instrument.Id);
-      _instruments.Remove(instrument.Id);
     }
 
     /// Removes sequence.
@@ -308,9 +306,6 @@ namespace Barely {
     // `IntPtr` type pointer.
     private static IntPtr _intPtrPtr = IntPtr.Zero;
 
-    // List of instruments.
-    private static Dictionary<Int64, Instrument> _instruments = new Dictionary<Int64, Instrument>();
-
     // Denotes if the system is shutting down to avoid re-initialization.
     private static bool _isShuttingDown = false;
 
@@ -346,15 +341,13 @@ namespace Barely {
 
       private void OnApplicationQuit() {
         _isShuttingDown = true;
-        foreach (var instrument in _instruments.Values) {
-          BarelyInstrument_StopAllNotes(_api, instrument.Id);
-        }
+        BarelyTransport_Stop(_api);
         GameObject.Destroy(gameObject);
       }
 
       private void OnAudioConfigurationChanged(bool deviceWasChanged) {
         SetSampleRateNative(_api, AudioSettings.outputSampleRate);
-        foreach (var instrument in _instruments.Values) {
+        foreach (var instrument in FindObjectsOfType<Instrument>()) {
           instrument.Source?.Play();
         }
       }

@@ -46,6 +46,7 @@ namespace Barely {
     void OnEnable() {
       if (Id == Musician.InvalidId) {
         Id = Musician.AddSequence(this);
+        _changed = true;
       }
     }
 

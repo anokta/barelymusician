@@ -10,6 +10,7 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
+#include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/param_definition.h"
@@ -22,10 +23,10 @@ namespace barelyapi {
 class Engine {
  public:
   /// Instrument note off callback signature.
-  using InstrumentNoteOffCallback = InstrumentManager::NoteOffCallback;
+  using InstrumentNoteOffCallback = InstrumentController::NoteOffCallback;
 
   /// Instrument note on callback signature.
-  using InstrumentNoteOnCallback = InstrumentManager::NoteOnCallback;
+  using InstrumentNoteOnCallback = InstrumentController::NoteOnCallback;
 
   // TODO(#85): Temp definition to allow callback setter.
   using BeatCallback = void (*)(double position, double timestamp,

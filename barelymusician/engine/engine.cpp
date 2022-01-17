@@ -36,8 +36,8 @@ Engine::Engine(int sample_rate) noexcept
 
 Id Engine::AddInstrument(InstrumentDefinition definition) noexcept {
   const Id instrument_id = id_generator_.Next();
-  instrument_manager_.Add(instrument_id, transport_.GetLastTimestamp(),
-                          std::move(definition));
+  instrument_manager_.Create(instrument_id, transport_.GetLastTimestamp(),
+                             std::move(definition));
   return instrument_id;
 }
 
@@ -173,7 +173,7 @@ Status Engine::RemoveAllPerformerNotes(Id performer_id, double begin_position,
 
 Status Engine::RemoveInstrument(Id instrument_id) noexcept {
   const auto status =
-      instrument_manager_.Remove(instrument_id, transport_.GetLastTimestamp());
+      instrument_manager_.Destroy(instrument_id, transport_.GetLastTimestamp());
   if (IsOk(status)) {
     for (auto& [performer_id, performer] : performers_) {
       performer.RemoveInstrument(instrument_id);

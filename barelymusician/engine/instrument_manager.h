@@ -10,10 +10,10 @@
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/instrument_processor_event.h"
+#include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/param.h"
 #include "barelymusician/engine/param_definition.h"
 #include "barelymusician/engine/task_runner.h"
@@ -23,23 +23,8 @@ namespace barelyapi {
 /// Class that manages processing of instruments.
 class InstrumentManager {
  public:
-  /// Note off callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param timestamp Note timestamp.
-  using NoteOffCallback = std::function<void(float pitch, double timestamp)>;
-
-  /// Note on callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @param timestamp Note timestamp.
-  using NoteOnCallback =
-      std::function<void(float pitch, float intensity, double timestamp)>;
-
   /// Constructs new `InstrumentManager`.
-  ///
-  /// @param sample_rate Sampling rate in hz.
+  // TODO(#85): `sample_rate` unnecessary here, move to `Create`?
   explicit InstrumentManager(int sample_rate) noexcept;
 
   /// Adds new instrument at timestamp.
@@ -48,8 +33,15 @@ class InstrumentManager {
   /// @param timestamp Timestamp in seconds.
   /// @param definition Instrument definition.
   /// @return Status.
-  Status Add(Id instrument_id, double timestamp,
-             InstrumentDefinition definition) noexcept;
+  Status Create(Id instrument_id, double timestamp,
+                InstrumentDefinition definition) noexcept;
+
+  /// Removes instrument at timestamp.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status Destroy(Id instrument_id, double timestamp) noexcept;
 
   /// Returns instrument parameter.
   ///
@@ -100,13 +92,6 @@ class InstrumentManager {
   /// @param event Instrument event.
   void ProcessEvent(Id instrument_id, double timestamp,
                     InstrumentEvent event) noexcept;
-
-  /// Removes instrument at timestamp.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
-  /// @return Status.
-  Status Remove(Id instrument_id, double timestamp) noexcept;
 
   /// Sets all notes of all instruments off at timestamp.
   ///
@@ -169,8 +154,9 @@ class InstrumentManager {
   ///
   /// @param note_off_callback Instrument note off callback.
   /// @return Status.
-  Status SetNoteOffCallback(Id instrument_id,
-                            NoteOffCallback note_off_callback) noexcept;
+  Status SetNoteOffCallback(
+      Id instrument_id,
+      InstrumentController::NoteOffCallback note_off_callback) noexcept;
 
   /// Sets instrument note on at timestamp.
   ///
@@ -186,8 +172,9 @@ class InstrumentManager {
   ///
   /// @param note_on_callback Instrument note on callback.
   /// @return Status.
-  Status SetNoteOnCallback(Id instrument_id,
-                           NoteOnCallback note_on_callback) noexcept;
+  Status SetNoteOnCallback(
+      Id instrument_id,
+      InstrumentController::NoteOnCallback note_on_callback) noexcept;
 
   /// Sets instrument parameter value at timestamp.
   ///
@@ -218,52 +205,15 @@ class InstrumentManager {
   void Update() noexcept;
 
  private:
-  // Instrument controller that wraps the main thread calls of an instrument.
-  struct InstrumentController {
-    // Constructs new `InstrumentController`.
-    explicit InstrumentController(InstrumentDefinition definition) noexcept;
-
-    // Instrument definition.
-    InstrumentDefinition definition;
-
-    // Instrument gain.
-    float gain;
-
-    // Denotes whether instrument is muted or not.
-    bool is_muted;
-
-    // Note off callback.
-    NoteOffCallback note_off_callback;
-
-    // Note on callback.
-    NoteOnCallback note_on_callback;
-
-    // Instrument parameters.
-    std::vector<Param> params;
-
-    // List of active note pitches.
-    std::unordered_set<float> pitches;
-  };
-
-  // Instrument processor that wraps the audio thread calls of an instrument.
-  struct InstrumentProcessor {
-    // Instrument.
-    std::optional<Instrument> instrument;
-
-    // List of scheduled instrument events.
-    InstrumentProcessorEventMap events;
-  };
-
   // List of instruments.
   std::unordered_map<Id, InstrumentController> controllers_;
   std::unordered_map<Id, InstrumentProcessor> processors_;
-  std::unordered_map<Id, InstrumentProcessorEventMap> update_events_;
 
   // Audio thread task runner.
-  TaskRunner audio_runner_;
+  TaskRunner runner_;
 
   // Sampling rate in hz.
-  std::atomic<int> sample_rate_;
+  int sample_rate_;
 };
 
 }  // namespace barelyapi

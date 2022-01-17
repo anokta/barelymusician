@@ -9,12 +9,6 @@
 
 namespace barelyapi {
 
-/// Set all notes off event.
-struct SetAllNotesOffEvent {};
-
-/// Set all parameters to default value event.
-struct SetAllParamsToDefaultEvent {};
-
 /// Set data event.
 struct SetDataEvent {
   /// Data.
@@ -27,14 +21,17 @@ struct SetGainEvent {
   float gain;
 };
 
-/// Set note off event.
-struct SetNoteOffEvent {
-  /// Note pitch.
-  float pitch;
+/// Set parameter event.
+struct SetParamEvent {
+  /// Parameter index.
+  int index;
+
+  /// Parameter value.
+  float value;
 };
 
-/// Set note on event.
-struct SetNoteOnEvent {
+/// Start note event.
+struct StartNoteEvent {
   /// Note pitch.
   float pitch;
 
@@ -42,26 +39,15 @@ struct SetNoteOnEvent {
   float intensity;
 };
 
-/// Set parameter value event.
-struct SetParamEvent {
-  /// Parameter id.
-  int id;
-
-  /// Parameter value.
-  float value;
-};
-
-/// Set parameter to default value event.
-struct SetParamToDefaultEvent {
-  /// Parameter id.
-  int id;
+/// Stop note event.
+struct StopNoteEvent {
+  /// Note pitch.
+  float pitch;
 };
 
 /// Instrument event type.
-using InstrumentEvent =
-    std::variant<SetAllNotesOffEvent, SetAllParamsToDefaultEvent, SetDataEvent,
-                 SetGainEvent, SetNoteOffEvent, SetNoteOnEvent, SetParamEvent,
-                 SetParamToDefaultEvent>;
+using InstrumentEvent = std::variant<SetDataEvent, SetGainEvent, SetParamEvent,
+                                     StartNoteEvent, StopNoteEvent>;
 
 /// Instrument id-event pair.
 using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;

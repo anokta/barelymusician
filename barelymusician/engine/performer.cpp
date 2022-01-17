@@ -64,7 +64,7 @@ InstrumentIdEventPairMap Performer::Perform(double begin_position,
     id_event_pairs.emplace(
         note_end_position,
         InstrumentIdEventPair{active_note.instrument_id,
-                              SetNoteOffEvent{active_note.pitch}});
+                              StopNoteEvent{active_note.pitch}});
     it = active_notes_.erase(it);
   }
 
@@ -102,12 +102,12 @@ InstrumentIdEventPairMap Performer::Perform(double begin_position,
             // Perform note on event.
             id_event_pairs.emplace(
                 position, InstrumentIdEventPair{
-                              instrument_id, SetNoteOnEvent{pitch, intensity}});
+                              instrument_id, StartNoteEvent{pitch, intensity}});
             // Perform note off event.
             if (note_end_position < end_position) {
               id_event_pairs.emplace(
                   note_end_position,
-                  InstrumentIdEventPair{instrument_id, SetNoteOffEvent{pitch}});
+                  InstrumentIdEventPair{instrument_id, StopNoteEvent{pitch}});
             } else {
               active_notes_.emplace(
                   position, ActiveNote{instrument_id, note.duration, pitch});
@@ -126,7 +126,7 @@ std::vector<InstrumentIdEventPair> Performer::RemoveAllInstruments() noexcept {
     id_event_pairs.reserve(active_notes_.size());
     for (const auto& [position, active_note] : active_notes_) {
       id_event_pairs.emplace_back(active_note.instrument_id,
-                                  SetNoteOffEvent{active_note.pitch});
+                                  StopNoteEvent{active_note.pitch});
     }
   }
   return id_event_pairs;
@@ -138,7 +138,7 @@ StatusOr<std::vector<InstrumentEvent>> Performer::RemoveInstrument(
     std::vector<InstrumentEvent> events;
     for (auto it = active_notes_.begin(); it != active_notes_.end();) {
       if (it->second.instrument_id == instrument_id) {
-        events.push_back(SetNoteOffEvent{it->second.pitch});
+        events.push_back(StopNoteEvent{it->second.pitch});
         it = active_notes_.erase(it);
       } else {
         ++it;

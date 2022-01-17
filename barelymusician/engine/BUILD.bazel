@@ -37,6 +37,8 @@ cc_library(
     deps = [
         ":conductor",
         ":conductor_definition",
+        ":instrument_controller",
+        ":instrument_definition",
         ":instrument_manager",
         ":performer",
         ":transport",
@@ -48,11 +50,14 @@ cc_library(
 )
 
 cc_library(
-    name = "instrument",
-    srcs = ["instrument.cpp"],
-    hdrs = ["instrument.h"],
+    name = "instrument_controller",
+    srcs = ["instrument_controller.cpp"],
+    hdrs = ["instrument_controller.h"],
     deps = [
         ":instrument_definition",
+        ":instrument_event",
+        ":param",
+        ":param_definition",
     ],
 )
 
@@ -77,10 +82,10 @@ cc_library(
     srcs = ["instrument_manager.cpp"],
     hdrs = ["instrument_manager.h"],
     deps = [
-        ":instrument",
+        ":instrument_controller",
         ":instrument_definition",
         ":instrument_event",
-        ":instrument_processor_event",
+        ":instrument_processor",
         ":param",
         ":param_definition",
         ":task_runner",
@@ -93,11 +98,14 @@ cc_library(
 )
 
 cc_library(
-    name = "instrument_processor_event",
-    hdrs = ["instrument_processor_event.h"],
+    name = "instrument_processor",
+    srcs = ["instrument_processor.cpp"],
+    hdrs = ["instrument_processor.h"],
     deps = [
         ":instrument_definition",
         ":instrument_event",
+        "//barelymusician/common:visitor",
+        "//barelymusician/dsp:dsp_utils",
     ],
 )
 
@@ -168,15 +176,16 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "instrument_test",
-    srcs = ["instrument_test.cpp"],
-    deps = [
-        ":instrument",
-        ":instrument_definition",
-        "@googletest//:gtest_main",
-    ],
-)
+# TODO: Refactor and reenable unit tests for instrument controller & processor.
+# cc_test(
+#     name = "instrument_test",
+#     srcs = ["instrument_test.cpp"],
+#     deps = [
+#         ":instrument",
+#         ":instrument_definition",
+#         "@googletest//:gtest_main",
+#     ],
+# )
 
 cc_test(
     name = "param_test",

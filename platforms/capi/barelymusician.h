@@ -1,6 +1,7 @@
 #ifndef PLATFORMS_CAPI_BARELYMUSICIAN_H_
 #define PLATFORMS_CAPI_BARELYMUSICIAN_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #if defined(_WIN32) || defined(__CYGWIN__)

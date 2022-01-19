@@ -1,6 +1,5 @@
 #include "barelymusician/engine/instrument_processor.h"
 
-#include <algorithm>
 #include <map>
 #include <variant>
 
@@ -11,52 +10,16 @@
 
 namespace barelyapi {
 
-namespace {
-
-// Dummy create function that does nothing.
-void NoopCreateFn(void** /*state*/, int /*sample_rate*/) noexcept {}
-
-// Dummy destroy function that does nothing.
-void NoopDestroyFn(void** /*state*/) noexcept {}
-
-// Dummy set data function that does nothing.
-void NoopSetDataFn(void** /*state*/, void* /*data*/) noexcept {}
-
-// Dummy set note off function that does nothing.
-void NoopSetNoteOffFn(void** /*state*/, float /*pitch*/) noexcept {}
-
-// Dummy set instrument note on function that does nothing.
-void NoopSetNoteOnFn(void** /*state*/, float /*pitch*/,
-                     float /*intensity*/) noexcept {}
-
-// Dummy set instrument parameter function that does nothing.
-void NoopSetParamFn(void** /*state*/, int /*index*/, float /*value*/) noexcept {
-}
-
-// Process function that fills the output buffer with zeros.
-void ZeroFillProcessFn(void** /*state*/, float* output, int num_channels,
-                       int num_frames) noexcept {
-  std::fill_n(output, num_channels * num_frames, 0.0f);
-}
-
-}  // namespace
-
 InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
                                          std::vector<float> param_values,
                                          int sample_rate) noexcept
-    : create_fn_(definition.create_fn ? definition.create_fn : &NoopCreateFn),
-      destroy_fn_(definition.destroy_fn ? definition.destroy_fn
-                                        : &NoopDestroyFn),
-      process_fn_(definition.process_fn ? definition.process_fn
-                                        : &ZeroFillProcessFn),
-      set_data_fn_(definition.set_data_fn ? definition.set_data_fn
-                                          : &NoopSetDataFn),
-      set_note_off_fn_(definition.set_note_off_fn ? definition.set_note_off_fn
-                                                  : &NoopSetNoteOffFn),
-      set_note_on_fn_(definition.set_note_on_fn ? definition.set_note_on_fn
-                                                : &NoopSetNoteOnFn),
-      set_param_fn_(definition.set_param_fn ? definition.set_param_fn
-                                            : &NoopSetParamFn),
+    : create_fn_(definition.create_fn),
+      destroy_fn_(definition.destroy_fn),
+      process_fn_(definition.process_fn),
+      set_data_fn_(definition.set_data_fn),
+      set_note_off_fn_(definition.set_note_off_fn),
+      set_note_on_fn_(definition.set_note_on_fn),
+      set_param_fn_(definition.set_param_fn),
       gain_(1.0f),
       sample_rate_(sample_rate) {
   create_fn_(&state_, sample_rate_);

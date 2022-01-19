@@ -162,19 +162,20 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "instrument_manager_test",
-    srcs = ["instrument_manager_test.cpp"],
-    deps = [
-        ":instrument_definition",
-        ":instrument_manager",
-        ":param",
-        ":param_definition",
-        "//barelymusician/common:id",
-        "//barelymusician/common:status",
-        "@googletest//:gtest_main",
-    ],
-)
+# TODO: Refactor and reenable unit tests for instrument manager.
+# cc_test(
+#     name = "instrument_manager_test",
+#     srcs = ["instrument_manager_test.cpp"],
+#     deps = [
+#         ":instrument_definition",
+#         ":instrument_manager",
+#         ":param",
+#         ":param_definition",
+#         "//barelymusician/common:id",
+#         "//barelymusician/common:status",
+#         "@googletest//:gtest_main",
+#     ],
+# )
 
 # TODO: Refactor and reenable unit tests for instrument controller & processor.
 # cc_test(
@@ -197,19 +198,20 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "performer_test",
-    srcs = ["performer_test.cpp"],
-    deps = [
-        ":conductor",
-        ":instrument_event",
-        ":performer",
-        "//barelymusician/common:id",
-        "//barelymusician/common:status",
-        "//barelymusician/composition:note",
-        "@googletest//:gtest_main",
-    ],
-)
+# TODO: Refactor and reenable unit tests for sequence.
+# cc_test(
+#     name = "performer_test",
+#     srcs = ["performer_test.cpp"],
+#     deps = [
+#         ":conductor",
+#         ":instrument_event",
+#         ":performer",
+#         "//barelymusician/common:id",
+#         "//barelymusician/common:status",
+#         "//barelymusician/composition:note",
+#         "@googletest//:gtest_main",
+#     ],
+# )
 
 cc_test(
     name = "task_runner_test",

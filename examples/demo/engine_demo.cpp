@@ -222,31 +222,32 @@ int main(int /*argc*/, char* argv[]) {
   const auto chords_beat_composer_callback = std::bind(
       ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
       std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
-  performers.emplace_back(engine.AddPerformer(), chords_beat_composer_callback);
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
-  engine.AddPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddPerformer(), chords_beat_composer_callback);
+  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
 
   build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
-  engine.AddPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddPerformer(), chords_beat_composer_callback);
+  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
 
   const auto line_beat_composer_callback = std::bind(
       ComposeLine, kRootNote - 1.0f, scale, 1.0f, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
       std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
-  performers.emplace_back(engine.AddPerformer(), line_beat_composer_callback);
 
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
-  engine.AddPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddPerformer(), line_beat_composer_callback);
+  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
 
   const auto line_2_beat_composer_callback = std::bind(
       ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
       std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
       std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
-  performers.emplace_back(engine.AddPerformer(), line_2_beat_composer_callback);
 
   build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
-  engine.AddPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddPerformer(), line_2_beat_composer_callback);
+  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
 
   // Add drumkit instrument.
   instrument_ids.push_back(
@@ -270,9 +271,10 @@ int main(int /*argc*/, char* argv[]) {
       std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3, &random, std::placeholders::_5,
                 std::placeholders::_6, std::placeholders::_7);
+
   performers.emplace_back(engine.AddPerformer(),
                           drumkit_beat_composer_callback);
-  engine.AddPerformerInstrument(performers.back().first, instrument_ids.back());
+  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
 
   // Bar callback.
   const auto bar_composer_callback = [&progression](int bar) -> int {

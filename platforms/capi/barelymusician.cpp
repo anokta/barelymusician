@@ -764,9 +764,8 @@ BarelyStatus BarelySequence_SetInstrument(BarelyApi api, BarelyId sequence_id,
                                           BarelyId instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  api->instance.RemoveAllPerformerInstruments(sequence_id);
   return GetStatus(
-      api->instance.AddPerformerInstrument(sequence_id, instrument_id));
+      api->instance.SetPerformerInstrument(sequence_id, instrument_id));
 }
 
 BarelyStatus BarelySequence_SetLoopBeginOffset(BarelyApi api,

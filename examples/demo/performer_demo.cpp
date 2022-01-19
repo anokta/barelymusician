@@ -118,7 +118,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
 
   const Id performer_id = engine.AddPerformer();
-  engine.AddPerformerInstrument(performer_id, performer_instrument_id);
+  engine.SetPerformerInstrument(performer_id, performer_instrument_id);
   engine.SetPerformerBeginPosition(performer_id, 2.0);
   engine.SetPerformerEndPosition(performer_id, 19.5);
   engine.SetPerformerBeginOffset(performer_id, -1.0);

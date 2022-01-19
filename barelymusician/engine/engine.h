@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
-#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -50,13 +49,6 @@ class Engine {
   ///
   /// @return Performer id.
   Id AddPerformer() noexcept;
-
-  /// Adds performer instrument.
-  ///
-  /// @param performer_id Performer id.
-  /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status AddPerformerInstrument(Id performer_id, Id instrument_id) noexcept;
 
   /// Adds performer note.
   ///
@@ -134,12 +126,6 @@ class Engine {
   void ProcessInstrument(Id instrument_id, double timestamp, float* output,
                          int num_channels, int num_frames) noexcept;
 
-  /// Removes all performer instruments.
-  ///
-  /// @param performer_id Performer id.
-  /// @return Status.
-  Status RemoveAllPerformerInstruments(Id performer_id) noexcept;
-
   /// Removes all performer notes.
   ///
   /// @param performer_id Performer id.
@@ -166,13 +152,6 @@ class Engine {
   /// @param performer_id Performer id.
   /// @return Status.
   Status RemovePerformer(Id performer_id) noexcept;
-
-  /// Removes performer instrument.
-  ///
-  /// @param performer_id Performer id.
-  /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status RemovePerformerInstrument(Id performer_id, Id instrument_id) noexcept;
 
   /// Removes performer note.
   ///
@@ -278,18 +257,24 @@ class Engine {
   /// Sets performer begin position.
   ///
   /// @param performer_id Performer id.
-  /// @param begin_position Optional begin position in beats.
+  /// @param begin_position Begin position in beats.
   /// @return Status.
-  Status SetPerformerBeginPosition(
-      Id performer_id, std::optional<double> begin_position) noexcept;
+  Status SetPerformerBeginPosition(Id performer_id,
+                                   double begin_position) noexcept;
 
   /// Sets performer end position.
   ///
   /// @param performer_id Performer id.
-  /// @param end_position Optional end position in beats.
+  /// @param end_position End position in beats.
   /// @return Status.
-  Status SetPerformerEndPosition(Id performer_id,
-                                 std::optional<double> end_position) noexcept;
+  Status SetPerformerEndPosition(Id performer_id, double end_position) noexcept;
+
+  /// Sets performer instrument.
+  ///
+  /// @param performer_id Performer id.
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status SetPerformerInstrument(Id performer_id, Id instrument_id) noexcept;
 
   /// Sets whether performer should be looping or not.
   ///

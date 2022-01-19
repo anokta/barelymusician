@@ -148,7 +148,7 @@ int main(int /*argc*/, char* argv[]) {
                               static_cast<float>(kInstrumentOscillatorType));
     engine.SetInstrumentParam(instrument_id, SynthInstrumentParam::kNumVoices,
                               static_cast<float>(kNumInstrumentVoices));
-    engine.AddPerformerInstrument(performer_id, instrument_id);
+    engine.SetPerformerInstrument(performer_id, instrument_id);
     instrument_ids.push_back(instrument_id);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << instrument_ids.size();

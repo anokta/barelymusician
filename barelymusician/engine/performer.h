@@ -2,12 +2,10 @@
 #define BARELYMUSICIAN_ENGINE_PERFORMER_H_
 
 #include <map>
-#include <optional>
 #include <unordered_set>
 #include <vector>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/sequence.h"
@@ -22,14 +20,13 @@ class Performer {
   /// Constructs new `Performer`.
   Performer() noexcept;
 
-  /// Adds instrument.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status AddInstrument(Id instrument_id) noexcept;
-
   /// Clears all active notes.
   void ClearAllActiveNotes() noexcept;
+
+  /// Returns instrument.
+  ///
+  /// @return Instrument identifier.
+  Id GetInstrument() const noexcept;
 
   /// Returns mutable sequence.
   ///
@@ -44,12 +41,12 @@ class Performer {
   /// Returns sequence begin position.
   ///
   /// @return Optional sequence begin position in beats.
-  std::optional<double> GetSequenceBeginPosition() const noexcept;
+  double GetSequenceBeginPosition() const noexcept;
 
   /// Returns sequence end position.
   ///
   /// @return Optional sequence end position in beats.
-  std::optional<double> GetSequenceEndPosition() const noexcept;
+  double GetSequenceEndPosition() const noexcept;
 
   /// Performs instruments at given range.
   ///
@@ -60,36 +57,25 @@ class Performer {
   InstrumentIdEventPairMap Perform(double begin_position, double end_position,
                                    Conductor& conductor) noexcept;
 
-  /// Removes all instruments.
-  ///
-  /// @return Instrument id-event pairs to be processed.
-  std::vector<InstrumentIdEventPair> RemoveAllInstruments() noexcept;
-
-  /// Removes instrument.
+  /// Sets instrument.
   ///
   /// @param instrument_id Instrument id.
-  /// @return Instrument events to be processed, or error status.
-  StatusOr<std::vector<InstrumentEvent>> RemoveInstrument(
-      Id instrument_id) noexcept;
+  /// @return List of instrument events.
+  std::vector<InstrumentEvent> SetInstrument(Id instrument_id) noexcept;
 
   /// Sets sequence begin position.
   ///
   /// @param sequence_begin_position Optional sequence begin position in beats.
-  void SetSequenceBeginPosition(
-      std::optional<double> sequence_begin_position) noexcept;
+  void SetSequenceBeginPosition(double sequence_begin_position) noexcept;
 
   /// Sets sequence end position.
   ///
   /// @param sequence_end_position Optional sequence end position in beats.
-  void SetSequenceEndPosition(
-      std::optional<double> sequence_end_position) noexcept;
+  void SetSequenceEndPosition(double sequence_end_position) noexcept;
 
  private:
   // Active note that is being performed.
   struct ActiveNote {
-    // Instrument id.
-    Id instrument_id;
-
     // Note duration.
     NoteDuration duration;
 
@@ -97,29 +83,20 @@ class Performer {
     float pitch;
   };
 
-  // Clamps `begin_position` with `sequence_begin_position_`.
-  double ClampBeginPosition(double begin_position) noexcept;
-
-  // Clamps `end_position` with `sequence_end_position_`.
-  double ClampEndPosition(double end_position) noexcept;
-
   // List of active notes.
   std::multimap<double, ActiveNote> active_notes_;
 
-  // List of instrument ids to perform.
-  std::unordered_set<Id> instrument_ids_;
+  // Instrument id to perform.
+  Id instrument_id_;
 
   // Sequence to perform.
   Sequence sequence_;
 
   // Optional sequence begin position in beats.
-  std::optional<double> sequence_begin_position_;
+  double sequence_begin_position_;
 
   // Optional sequence end position in beats.
-  std::optional<double> sequence_end_position_;
-
-  // Sequence position offset in beats.
-  double sequence_position_offset_;
+  double sequence_end_position_;
 };
 
 }  // namespace barelyapi

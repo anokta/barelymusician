@@ -59,9 +59,11 @@ InstrumentDefinition GetInstrumentDefinition(
   param_definitions.reserve(definition.num_param_definitions);
   for (int i = 0; i < definition.num_param_definitions; ++i) {
     const auto& param_definition = definition.param_definitions[i];
-    param_definitions.emplace_back(param_definition.default_value,
-                                   param_definition.min_value,
-                                   param_definition.max_value);
+    param_definitions.emplace_back(
+        std::min(std::max(param_definition.default_value,
+                          param_definition.min_value),
+                 param_definition.max_value),
+        param_definition.min_value, param_definition.max_value);
   }
   return InstrumentDefinition{
       definition.create_fn ? definition.create_fn : &NoopCreateFn,

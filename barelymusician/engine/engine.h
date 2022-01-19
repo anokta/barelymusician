@@ -1,19 +1,20 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
+#include <map>
 #include <unordered_map>
 #include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/status.h"
+#include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_manager.h"
 #include "barelymusician/engine/param_definition.h"
-#include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
@@ -339,6 +340,25 @@ class Engine {
   void Update(double timestamp) noexcept;
 
  private:
+  // Active note that is being performed.
+  struct ActiveNote {
+    // Note duration.
+    NoteDuration duration;
+
+    // Note pitch.
+    float pitch;
+  };
+  struct Performer {
+    // List of active notes.
+    std::multimap<double, ActiveNote> active_notes;
+
+    // Instrument id to perform.
+    Id instrument_id;
+
+    // Sequence to perform.
+    Sequence sequence;
+  };
+
   // Updates sequences.
   void UpdateSequences(double begin_position, double end_position);
 

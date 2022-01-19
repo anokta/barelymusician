@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <map>
 #include <optional>
 #include <utility>
@@ -15,6 +16,8 @@ namespace barelyapi {
 
 Sequence::Sequence() noexcept
     : begin_offset_(0.0),
+      begin_position_(0.0),
+      end_position_(std::numeric_limits<double>::max()),
       loop_(false),
       loop_begin_offset_(0.0),
       loop_length_(1.0) {}
@@ -44,6 +47,10 @@ std::vector<Sequence::NoteWithPositionIdPair> Sequence::GetAllNotes()
 
 double Sequence::GetBeginOffset() const noexcept { return begin_offset_; }
 
+double Sequence::GetBeginPosition() const noexcept { return begin_position_; }
+
+double Sequence::GetEndPosition() const noexcept { return end_position_; }
+
 double Sequence::GetLoopBeginOffset() const noexcept {
   return loop_begin_offset_;
 }
@@ -63,12 +70,14 @@ bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 bool Sequence::IsLooping() const noexcept { return loop_; }
 
 void Sequence::Process(double begin_position, double end_position,
-                       double position_offset,
                        const ProcessCallback& process_callback) const noexcept {
-  if (begin_position >= end_position) {
-    return;
-  }
-  position_offset -= begin_offset_;
+  if (notes_.empty()) return;
+
+  begin_position = std::max(begin_position, begin_position_);
+  end_position = std::min(end_position, end_position_);
+  if (begin_position >= end_position) return;
+
+  double position_offset = begin_position_ - begin_offset_;
   begin_position -= position_offset;
   end_position -= position_offset;
   if (loop_) {
@@ -139,6 +148,14 @@ Status Sequence::RemoveNote(Id id) noexcept {
 
 void Sequence::SetBeginOffset(double begin_offset) noexcept {
   begin_offset_ = begin_offset;
+}
+
+void Sequence::SetBeginPosition(double begin_position) noexcept {
+  begin_position_ = begin_position;
+}
+
+void Sequence::SetEndPosition(double end_position) noexcept {
+  end_position_ = end_position;
 }
 
 void Sequence::SetLoop(bool loop) noexcept { loop_ = loop; }

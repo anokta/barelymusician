@@ -40,12 +40,12 @@ cc_library(
         ":instrument_controller",
         ":instrument_definition",
         ":instrument_manager",
-        ":performer",
         ":transport",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:id_generator",
         "//barelymusician/common:status",
+        "//barelymusician/composition:sequence",
     ],
 )
 
@@ -124,21 +124,6 @@ cc_library(
 )
 
 cc_library(
-    name = "performer",
-    srcs = ["performer.cpp"],
-    hdrs = ["performer.h"],
-    deps = [
-        ":conductor",
-        ":instrument_event",
-        "//barelymusician/common:id",
-        "//barelymusician/common:status",
-        "//barelymusician/composition:note",
-        "//barelymusician/composition:note_duration",
-        "//barelymusician/composition:sequence",
-    ],
-)
-
-cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],
@@ -197,21 +182,6 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
-
-# TODO: Refactor and reenable unit tests for sequence.
-# cc_test(
-#     name = "performer_test",
-#     srcs = ["performer_test.cpp"],
-#     deps = [
-#         ":conductor",
-#         ":instrument_event",
-#         ":performer",
-#         "//barelymusician/common:id",
-#         "//barelymusician/common:status",
-#         "//barelymusician/composition:note",
-#         "@googletest//:gtest_main",
-#     ],
-# )
 
 cc_test(
     name = "task_runner_test",

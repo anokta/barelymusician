@@ -53,6 +53,16 @@ class Sequence {
   /// @return Begin offset in beats.
   double GetBeginOffset() const noexcept;
 
+  /// Returns the begin position.
+  ///
+  /// @return Begin position in beats.
+  double GetBeginPosition() const noexcept;
+
+  /// Returns the end position.
+  ///
+  /// @return End position in beats.
+  double GetEndPosition() const noexcept;
+
   /// Returns the loop begin offset.
   ///
   /// @return Loop begin offset in beats.
@@ -79,14 +89,12 @@ class Sequence {
   /// @return True if looping.
   bool IsLooping() const noexcept;
 
-  /// Processes the sequence at given position range with offset.
+  /// Processes the sequence at given position range.
   ///
   /// @param begin_position Begin position.
   /// @param end_position End position.
-  /// @param position_offset Position offset in beats.
   /// @param process_callback Process callback.
   void Process(double begin_position, double end_position,
-               double position_offset,
                const ProcessCallback& process_callback) const noexcept;
 
   /// Removes all notes.
@@ -108,6 +116,16 @@ class Sequence {
   ///
   /// @param begin_offset Begin offset in beats.
   void SetBeginOffset(double begin_offset) noexcept;
+
+  /// Sets the begin position.
+  ///
+  /// @param begin_position Begin position in beats.
+  void SetBeginPosition(double begin_position) noexcept;
+
+  /// Sets the end position.
+  ///
+  /// @param end_position End position in beats.
+  void SetEndPosition(double end_position) noexcept;
 
   /// Sets whether the sequence should be looping or not.
   ///
@@ -164,6 +182,12 @@ class Sequence {
 
   // Begin offset in beats.
   double begin_offset_;
+
+  // Begin position in beats.
+  double begin_position_;
+
+  // End position in beats.
+  double end_position_;
 
   // Denotes whether the sequence is looping or not.
   bool loop_;

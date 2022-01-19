@@ -37,32 +37,33 @@ TEST(SequenceTest, ProcessSingleNote) {
   };
 
   // Process before the note position.
-  sequence.Process(0.0, 1.0, 0.0, process_callback);
+  sequence.Process(0.0, 1.0, process_callback);
   EXPECT_TRUE(notes.empty());
   notes.clear();
 
   // Process just before the note position.
-  sequence.Process(4.0, 5.0, 0.0, process_callback);
+  sequence.Process(4.0, 5.0, process_callback);
   EXPECT_TRUE(notes.empty());
   notes.clear();
 
   // Process starting with the note position.
-  sequence.Process(5.0, 6.0, 0.0, process_callback);
+  sequence.Process(5.0, 6.0, process_callback);
   EXPECT_THAT(notes, ElementsAre(Pair(5.0, kNote)));
   notes.clear();
 
   // Process overlapping the note position.
-  sequence.Process(4.75, 5.5, 0.0, process_callback);
+  sequence.Process(4.75, 5.5, process_callback);
   EXPECT_THAT(notes, ElementsAre(Pair(5.0, kNote)));
   notes.clear();
 
   // Process just after the note position.
-  sequence.Process(6.0, 7.0, 0.0, process_callback);
+  sequence.Process(6.0, 7.0, process_callback);
   EXPECT_TRUE(notes.empty());
   notes.clear();
 
-  // Process after the note position, but with a position offset to compensate.
-  sequence.Process(6.0, 7.0, 1.5, process_callback);
+  // Process after the note position, but with a begin position to compensate.
+  sequence.SetBeginPosition(1.5);
+  sequence.Process(6.0, 7.0, process_callback);
   EXPECT_THAT(notes, ElementsAre(Pair(6.5, kNote)));
   notes.clear();
 
@@ -70,7 +71,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetBeginOffset(4.0);
   EXPECT_DOUBLE_EQ(sequence.GetBeginOffset(), 4.0);
 
-  sequence.Process(1.0, 2.0, 0.0, process_callback);
+  sequence.SetBeginPosition(0.0);
+  sequence.Process(1.0, 2.0, process_callback);
   EXPECT_THAT(notes, ElementsAre(Pair(1.0, kNote)));
   notes.clear();
 
@@ -78,7 +80,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetLoop(true);
   EXPECT_TRUE(sequence.IsLooping());
 
-  sequence.Process(1.0, 11.0, 1.0, process_callback);
+  sequence.SetBeginPosition(1.0);
+  sequence.Process(1.0, 11.0, process_callback);
   EXPECT_TRUE(notes.empty());
   notes.clear();
 
@@ -89,7 +92,7 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetLoopLength(4.0);
   EXPECT_DOUBLE_EQ(sequence.GetLoopLength(), 4.0);
 
-  sequence.Process(1.0, 11.0, 1.0, process_callback);
+  sequence.Process(1.0, 11.0, process_callback);
   EXPECT_THAT(notes,
               ElementsAre(Pair(2.0, kNote), Pair(6.0, kNote), Pair(10, kNote)));
   notes.clear();
@@ -99,7 +102,7 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_THAT(GetStatusOrStatus(sequence.GetNote(kId)), Status::kNotFound);
   EXPECT_TRUE(sequence.IsEmpty());
 
-  sequence.Process(1.0, 11.0, 1.0, process_callback);
+  sequence.Process(1.0, 11.0, process_callback);
   EXPECT_TRUE(notes.empty());
 }
 
@@ -127,7 +130,7 @@ TEST(SequenceTest, ProcessMultipleNotes) {
     notes.emplace_back(position, note);
   };
 
-  sequence.Process(0.0, 10.0, 0.0, process_callback);
+  sequence.Process(0.0, 10.0, process_callback);
   EXPECT_THAT(notes, ElementsAre(Pair(0.0, Note{.pitch = 1.0f}),
                                  Pair(1.0, Note{.pitch = 2.0f}),
                                  Pair(2.0, Note{.pitch = 3.0f}),
@@ -140,7 +143,7 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   sequence.SetLoopBeginOffset(2.0);
   sequence.SetLoopLength(2.0);
 
-  sequence.Process(0.0, 10.0, 0.0, process_callback);
+  sequence.Process(0.0, 10.0, process_callback);
   EXPECT_THAT(
       notes,
       ElementsAre(
@@ -156,7 +159,7 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   EXPECT_TRUE(sequence.GetAllNotes().empty());
   EXPECT_TRUE(sequence.IsEmpty());
 
-  sequence.Process(0.0, 10.0, 0.0, process_callback);
+  sequence.Process(0.0, 10.0, process_callback);
   EXPECT_TRUE(notes.empty());
 }
 

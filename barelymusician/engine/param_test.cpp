@@ -29,10 +29,8 @@ TEST(ParamTest, SetValue) {
 // Tests that the parameter sets its value with respect to its minimum and
 // maximum boundaries as expected.
 TEST(ParamTest, SetValueMinMax) {
-  Param param(ParamDefinition{5.0f, 10.0f, 20.0f});
-
-  // Verify that the default value is also clamped at the minimum value.
-  EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
+  Param param(ParamDefinition{15.0f, 10.0f, 20.0f});
+  EXPECT_FLOAT_EQ(param.GetValue(), 15.0f);
 
   EXPECT_TRUE(param.SetValue(12.0f));
   EXPECT_FLOAT_EQ(param.GetValue(), 12.0f);
@@ -60,11 +58,11 @@ TEST(ParamTest, SetValueMinMax) {
   EXPECT_FLOAT_EQ(param.GetValue(), 20.0f);
 
   EXPECT_TRUE(param.ResetValue());
-  EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
+  EXPECT_FLOAT_EQ(param.GetValue(), 15.0f);
 
   // The parameter value is already reset.
   EXPECT_FALSE(param.ResetValue());
-  EXPECT_FLOAT_EQ(param.GetValue(), 10.0f);
+  EXPECT_FLOAT_EQ(param.GetValue(), 15.0f);
 }
 
 }  // namespace

@@ -8,11 +8,7 @@
 namespace barelyapi {
 
 Param::Param(ParamDefinition definition) noexcept
-    : definition_(std::move(definition)) {
-  // Make sure that the default value is within the minimum and maximum values.
-  SetValue(definition_.default_value);
-  definition_.default_value = value_;
-}
+    : definition_(std::move(definition)), value_(definition_.default_value) {}
 
 const ParamDefinition& Param::GetDefinition() const noexcept {
   return definition_;

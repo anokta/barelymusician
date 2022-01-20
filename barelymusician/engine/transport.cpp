@@ -81,10 +81,7 @@ void Transport::Start() noexcept {
   next_beat_position_ = std::ceil(position_);
   if (position_ == next_beat_position_) {
     beat_callback_(position_);
-    if (!is_playing_ || tempo_ <= 0.0) {
-      return;
-    }
-    if (position_ == next_beat_position_) {
+    if (is_playing_ && position_ == next_beat_position_) {
       ++next_beat_position_;
     }
   }

@@ -77,8 +77,18 @@ void Transport::SetUpdateCallback(UpdateCallback update_callback) noexcept {
 }
 
 void Transport::Start() noexcept {
-  next_beat_timestamp_ = GetTimestamp(next_beat_position_);
   is_playing_ = true;
+  next_beat_position_ = std::ceil(position_);
+  if (position_ == next_beat_position_) {
+    beat_callback_(position_);
+    if (!is_playing_ || tempo_ <= 0.0) {
+      return;
+    }
+    if (position_ == next_beat_position_) {
+      ++next_beat_position_;
+    }
+  }
+  next_beat_timestamp_ = GetTimestamp(next_beat_position_);
 }
 
 void Transport::Stop() noexcept { is_playing_ = false; }

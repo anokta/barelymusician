@@ -315,13 +315,18 @@ namespace Barely {
       private delegate void BeatCallback(double position, double timestamp);
       private BeatCallback _beatCallback = null;
 
+      // Lookahead in seconds.
+      private double _lookahead = 0.0;
+
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
+        var config = AudioSettings.GetConfiguration();
+        _lookahead = (double)(config.dspBufferSize + 1) / (double)config.sampleRate;
         if (!IsOk(BarelyApi_Create(_intPtrPtr))) {
           return;
         }
         _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
-        SetSampleRateNative(_api, AudioSettings.outputSampleRate);
+        SetSampleRateNative(_api, config.sampleRate);
         _beatCallback = delegate(double position, double timestamp) {
           OnBeat?.Invoke(position);
         };
@@ -346,16 +351,16 @@ namespace Barely {
       }
 
       private void OnAudioConfigurationChanged(bool deviceWasChanged) {
-        SetSampleRateNative(_api, AudioSettings.outputSampleRate);
+        var config = AudioSettings.GetConfiguration();
+        _lookahead = (double)(config.dspBufferSize + 1) / (double)config.sampleRate;
+        SetSampleRateNative(_api, config.sampleRate);
         foreach (var instrument in FindObjectsOfType<Instrument>()) {
           instrument.Source?.Play();
         }
       }
 
       private void LateUpdate() {
-        double lookahead = 2.0 * (double)Time.smoothDeltaTime;
-        double updateTime = AudioSettings.dspTime + lookahead;
-        UpdateNative(_api, updateTime);
+        UpdateNative(_api, AudioSettings.dspTime + _lookahead);
       }
     }
 

@@ -343,7 +343,7 @@ class Engine {
   // Active note that is being performed.
   struct ActiveNote {
     // Note duration.
-    NoteDuration duration;
+    double duration;
 
     // Note pitch.
     float pitch;

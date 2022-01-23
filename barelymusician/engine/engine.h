@@ -342,8 +342,8 @@ class Engine {
  private:
   // Active note that is being performed.
   struct ActiveNote {
-    // Note duration.
-    double duration;
+    // Note end position.
+    double end_position;
 
     // Note pitch.
     float pitch;

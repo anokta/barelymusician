@@ -386,7 +386,7 @@ void Engine::UpdateSequences(double begin_position, double end_position) {
     for (auto it = performer.active_notes.begin();
          it != performer.active_notes.end();) {
       const auto& [note_begin_position, active_note] = *it;
-      double note_end_position = note_begin_position + active_note.duration;
+      double note_end_position = active_note.end_position;
       if (note_end_position < end_position) {
         note_end_position = std::max(begin_position, note_end_position);
       } else if (begin_position < note_begin_position) {
@@ -426,10 +426,9 @@ void Engine::UpdateSequences(double begin_position, double end_position) {
           if (!IsOk(duration_or)) {
             return;
           }
-          const double duration =
-              std::min(std::max(GetStatusOrValue(duration_or), 0.0),
-                       performer.sequence.GetEndPosition() - position);
-          const double note_end_position = position + duration;
+          const double note_end_position =
+              std::min(position + std::max(GetStatusOrValue(duration_or), 0.0),
+                       performer.sequence.GetEndPosition());
 
           // Perform note on event.
           id_event_pairs.emplace(
@@ -441,8 +440,8 @@ void Engine::UpdateSequences(double begin_position, double end_position) {
                 note_end_position,
                 InstrumentIdEventPair{instrument_id, StopNoteEvent{pitch}});
           } else {
-            performer.active_notes.emplace(position,
-                                           ActiveNote{duration, pitch});
+            performer.active_notes.emplace(
+                position, ActiveNote{note_end_position, pitch});
           }
         });
   }

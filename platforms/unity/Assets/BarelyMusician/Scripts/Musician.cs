@@ -126,14 +126,14 @@ namespace Barely {
     ///
     /// @return True if success, false otherwise.
     public static bool Pause() {
-      return IsOk(BarelyTransport_Pause(Api));
+      return IsOk(BarelyTransport_Stop(Api));
     }
 
     /// Plays transport.
     ///
     /// @return True if success, false otherwise.
     public static bool Play() {
-      return IsOk(BarelyTransport_Play(Api));
+      return IsOk(BarelyTransport_Start(Api));
     }
 
     /// Processes the next instrument buffer.
@@ -235,7 +235,7 @@ namespace Barely {
     ///
     /// @return True if success, false otherwise.
     public static bool Stop() {
-      return IsOk(BarelyTransport_Stop(Api));
+      return Pause() && SetPlaybackPosition(0.0);
     }
 
     /// Updates sequence.
@@ -508,12 +508,6 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyTransport_IsPlaying")]
     private static extern Status BarelyTransport_IsPlaying(IntPtr api, IntPtr isPlayingPtr);
 
-    [DllImport(pluginName, EntryPoint = "BarelyTransport_Pause")]
-    private static extern Status BarelyTransport_Pause(IntPtr api);
-
-    [DllImport(pluginName, EntryPoint = "BarelyTransport_Play")]
-    private static extern Status BarelyTransport_Play(IntPtr api);
-
     [DllImport(pluginName, EntryPoint = "BarelyTransport_SetBeatCallback")]
     private static extern Status BarelyTransport_SetBeatCallback(IntPtr api, IntPtr beatCallback,
                                                                  IntPtr userData);
@@ -523,6 +517,9 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyTransport_SetTempo")]
     private static extern Status BarelyTransport_SetTempo(IntPtr api, double tempo);
+
+    [DllImport(pluginName, EntryPoint = "BarelyTransport_Start")]
+    private static extern Status BarelyTransport_Start(IntPtr api);
 
     [DllImport(pluginName, EntryPoint = "BarelyTransport_Stop")]
     private static extern Status BarelyTransport_Stop(IntPtr api);

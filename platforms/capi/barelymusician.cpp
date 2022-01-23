@@ -383,18 +383,6 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api, BarelyId instrument_id,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_PlayNote(BarelyApi api, BarelyId instrument_id,
-                                       double position,
-                                       BarelyNoteDefinition definition) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  instrument_id;
-  position;
-  definition;
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
                                       double timestamp, float* output,
                                       int32_t num_output_channels,
@@ -842,20 +830,6 @@ BarelyStatus BarelyTransport_IsPlaying(BarelyApi api, bool* out_is_playing) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyTransport_Pause(BarelyApi api) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.StopPlayback();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyTransport_Play(BarelyApi api) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.StartPlayback();
-  return BarelyStatus_kOk;
-}
-
 BarelyStatus BarelyTransport_SetBeatCallback(
     BarelyApi api, BarelyTransport_BeatCallback beat_callback,
     void* user_data) {
@@ -888,11 +862,17 @@ BarelyStatus BarelyTransport_SetUpdateCallback(
   return BarelyStatus_kUnimplemented;
 }
 
+BarelyStatus BarelyTransport_Start(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.StartPlayback();
+  return BarelyStatus_kOk;
+}
+
 BarelyStatus BarelyTransport_Stop(BarelyApi api) {
   if (!api) return BarelyStatus_kNotFound;
 
   api->instance.StopPlayback();
-  api->instance.SetPlaybackPosition(0.0);
   return BarelyStatus_kOk;
 }
 

@@ -740,21 +740,6 @@ class Instrument {
     return is_note_on;
   }
 
-  /// Plays note at position.
-  ///
-  /// @param position Note position.
-  /// @param definition Note definition.
-  /// @return Status.
-  Status PlayNote(double position, NoteDefinition definition) {
-    return static_cast<Status>(BarelyInstrument_PlayNote(
-        capi_, id_, position,
-        BarelyNoteDefinition{
-            definition.duration,
-            static_cast<BarelyNotePitchType>(definition.pitch_type),
-            definition.pitch, definition.intensity,
-            definition.bypass_adjustment}));
-  }
-
   /// Processes output buffer at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
@@ -1382,16 +1367,6 @@ class Transport {
     return is_playing;
   }
 
-  /// Pauses playback.
-  ///
-  /// @return Status.
-  Status Pause() { return static_cast<Status>(BarelyTransport_Pause(capi_)); }
-
-  /// Starts playback.
-  ///
-  /// @return Status.
-  Status Play() { return static_cast<Status>(BarelyTransport_Play(capi_)); }
-
   /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
@@ -1447,6 +1422,11 @@ class Transport {
           capi_, /*update_callback=*/nullptr, /*user_data=*/nullptr));
     }
   }
+
+  /// Starts playback.
+  ///
+  /// @return Status.
+  Status Start() { return static_cast<Status>(BarelyTransport_Start(capi_)); }
 
   /// Stops playback.
   ///

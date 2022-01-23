@@ -315,23 +315,15 @@ namespace Barely {
       private delegate void BeatCallback(double position, double timestamp);
       private BeatCallback _beatCallback = null;
 
-      // Lookahead in seconds.
-      private double _lookahead = 0.0;
+      // Latency in seconds.
+      private double _latency = 0.0;
+
+      // Sampling rate in hz.
+      private int _sampleRate = 0;
 
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-        var config = AudioSettings.GetConfiguration();
-        _lookahead = (double)(config.dspBufferSize + 1) / (double)config.sampleRate;
-        if (!IsOk(BarelyApi_Create(_intPtrPtr))) {
-          return;
-        }
-        _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
-        SetSampleRateNative(_api, config.sampleRate);
-        _beatCallback = delegate(double position, double timestamp) {
-          OnBeat?.Invoke(position);
-        };
-        BarelyTransport_SetBeatCallback(_api, Marshal.GetFunctionPointerForDelegate(_beatCallback),
-                                        IntPtr.Zero);
+        Init();
       }
 
       private void OnDestroy() {
@@ -346,21 +338,48 @@ namespace Barely {
 
       private void OnApplicationQuit() {
         _isShuttingDown = true;
-        BarelyTransport_Stop(_api);
-        GameObject.Destroy(gameObject);
+        Shutdown();
       }
 
       private void OnAudioConfigurationChanged(bool deviceWasChanged) {
-        var config = AudioSettings.GetConfiguration();
-        _lookahead = (double)(config.dspBufferSize + 1) / (double)config.sampleRate;
-        SetSampleRateNative(_api, config.sampleRate);
+        if (_sampleRate != AudioSettings.outputSampleRate) {
+          Shutdown();
+          Init();
+        }
+        // TODO: There might be a cleaner way to handle this?
         foreach (var instrument in FindObjectsOfType<Instrument>()) {
-          instrument.Source?.Play();
+          instrument.enabled = false;
+          instrument.enabled = true;
+        }
+        foreach (var sequence in FindObjectsOfType<Sequence>()) {
+          sequence.enabled = false;
+          sequence.enabled = true;
         }
       }
 
       private void LateUpdate() {
-        UpdateNative(_api, AudioSettings.dspTime + _lookahead);
+        double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
+        UpdateNative(_api, AudioSettings.dspTime + lookahead);
+      }
+
+      private void Init() {
+        var config = AudioSettings.GetConfiguration();
+        _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
+        _sampleRate = config.sampleRate;
+        if (!IsOk(BarelyApi_Create(_sampleRate, _intPtrPtr))) {
+          return;
+        }
+        _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
+        _beatCallback = delegate(double position, double timestamp) {
+          OnBeat?.Invoke(position);
+        };
+        BarelyTransport_SetBeatCallback(_api, Marshal.GetFunctionPointerForDelegate(_beatCallback),
+                                        IntPtr.Zero);
+      }
+
+      private void Shutdown() {
+        BarelyApi_Destroy(_api);
+        _api = IntPtr.Zero;
       }
     }
 
@@ -396,13 +415,10 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
     [DllImport(pluginName, EntryPoint = "BarelyApi_Create")]
-    private static extern Status BarelyApi_Create(IntPtr outApi);
+    private static extern Status BarelyApi_Create(Int32 sampleRate, IntPtr outApi);
 
     [DllImport(pluginName, EntryPoint = "BarelyApi_Destroy")]
     private static extern Status BarelyApi_Destroy(IntPtr api);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_SetSampleRate")]
-    private static extern Status SetSampleRateNative(IntPtr api, Int32 sampleRate);
 
     [DllImport(pluginName, EntryPoint = "BarelyApi_Update")]
     private static extern Status UpdateNative(IntPtr api, double timestamp);

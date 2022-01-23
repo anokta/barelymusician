@@ -112,9 +112,13 @@ extern "C" {
 
 /// BarelyMusician C api.
 struct BarelyMusician {
+  /// Constructs new `BarelyMusician`.
+  ///
+  /// @param sample_rate Sampling rate in hz.
+  explicit BarelyMusician(int32_t sample_rate) : instance(sample_rate) {}
+
   /// Engine instance.
-  // TODO(#85): Temp hack to create `Engine` without sample rate.
-  Engine instance = Engine(0);
+  Engine instance;
 
  private:
   // Ensure that the instance can only be destroyed via the api call.
@@ -122,10 +126,10 @@ struct BarelyMusician {
   ~BarelyMusician() = default;
 };
 
-BarelyStatus BarelyApi_Create(BarelyApi* out_api) {
+BarelyStatus BarelyApi_Create(int32_t sample_rate, BarelyApi* out_api) {
   if (!out_api) return BarelyStatus_kInvalidArgument;
 
-  *out_api = new BarelyMusician();
+  *out_api = new BarelyMusician(sample_rate);
   return BarelyStatus_kOk;
 }
 
@@ -133,21 +137,6 @@ BarelyStatus BarelyApi_Destroy(BarelyApi api) {
   if (!api) return BarelyStatus_kNotFound;
 
   delete api;
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_GetSampleRate(BarelyApi api, int32_t* out_sample_rate) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_sample_rate) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyApi_SetSampleRate(BarelyApi api, int32_t sample_rate) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.SetSampleRate(sample_rate);
   return BarelyStatus_kOk;
 }
 

@@ -1482,15 +1482,10 @@ class Transport {
 class Api {
  public:
   /// Constructs new `Api`.
-  Api() : capi_(CreateCapi()), conductor_(capi_), transport_(capi_) {}
-
-  /// Constructs new `Api` with an initial sampling rate.
   ///
   /// @param sample_rate Sampling rate in hz.
-  explicit Api(int sample_rate) : Api() {
-    const auto status = BarelyApi_SetSampleRate(capi_, sample_rate);
-    assert(status == BarelyStatus_kOk);
-  }
+  explicit Api(int sample_rate)
+      : capi_(CreateCapi(sample_rate)), conductor_(capi_), transport_(capi_) {}
 
   /// Destroys `Api`.
   ~Api() {
@@ -1555,18 +1550,6 @@ class Api {
   /// @return Mutable conductor.
   Conductor& GetConductor() { return conductor_; }
 
-  /// Returns sampling rate.
-  ///
-  /// @return Sampling rate in hz, or error status.
-  int GetSampleRate() const {
-    int sample_rate = 0;
-    if (capi_) {
-      const auto status = BarelyApi_GetSampleRate(capi_, &sample_rate);
-      assert(status == BarelyStatus_kOk);
-    }
-    return sample_rate;
-  }
-
   /// Returns transport.
   ///
   /// @return Transport.
@@ -1576,14 +1559,6 @@ class Api {
   ///
   /// @return Mutable transport.
   Transport& GetTransport() { return transport_; }
-
-  /// Sets sampling rate.
-  ///
-  /// @param sample_rate Sampling rate in hz.
-  /// @return Status.
-  Status SetSampleRate(int sample_rate) {
-    return static_cast<Status>(BarelyApi_SetSampleRate(capi_, sample_rate));
-  }
 
   /// Updates internal state at timestamp.
   ///
@@ -1595,9 +1570,9 @@ class Api {
 
  private:
   // Creates new internal api and returns corresponding handle.
-  BarelyApi CreateCapi() {
+  BarelyApi CreateCapi(int sample_rate) {
     BarelyApi capi = nullptr;
-    const auto status = BarelyApi_Create(&capi);
+    const auto status = BarelyApi_Create(sample_rate, &capi);
     assert(status == BarelyStatus_kOk);
     return capi;
   }

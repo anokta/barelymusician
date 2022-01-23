@@ -23,7 +23,6 @@ constexpr double kTempo = 120.0;
 
 int main(int /*argc*/, char* /*argv*/[]) {
   Api api(kSampleRate);
-  // ConsoleLog() << "Sample rate: " << api.GetSampleRate();
 
   auto& transport = api.GetTransport();
   if (const auto status = transport.SetTempo(kTempo); !IsOk(status)) {

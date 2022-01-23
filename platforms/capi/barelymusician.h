@@ -339,31 +339,17 @@ typedef struct BarelyInstrumentDefinition {
 
 /// Creates new BarelyMusician api.
 ///
+/// @param sample_rate Sampling rate in hz.
 /// @param out_api Output BarelyMusician api.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_Create(BarelyApi* out_api);
+BARELY_EXPORT BarelyStatus BarelyApi_Create(int32_t sample_rate,
+                                            BarelyApi* out_api);
 
 /// Destroys BarelyMusician api.
 ///
 /// @param api BarelyMusician api.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi api);
-
-/// Gets sampling rate.
-///
-/// @param api BarelyMusician api.
-/// @param out_sample_rate Output sampling rate in hz.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_GetSampleRate(BarelyApi api,
-                                                   int32_t* out_sample_rate);
-
-/// Sets sampling rate.
-///
-/// @param api BarelyMusician api.
-/// @param sample_rate Sampling rate in hz.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetSampleRate(BarelyApi api,
-                                                   int32_t sample_rate);
 
 /// Updates internal state at timestamp.
 ///

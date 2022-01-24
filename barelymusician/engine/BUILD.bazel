@@ -147,20 +147,19 @@ cc_test(
     ],
 )
 
-# TODO: Refactor and reenable unit tests for instrument manager.
-# cc_test(
-#     name = "instrument_manager_test",
-#     srcs = ["instrument_manager_test.cpp"],
-#     deps = [
-#         ":instrument_definition",
-#         ":instrument_manager",
-#         ":param",
-#         ":param_definition",
-#         "//barelymusician/common:id",
-#         "//barelymusician/common:status",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "instrument_manager_test",
+    srcs = ["instrument_manager_test.cpp"],
+    deps = [
+        ":instrument_definition",
+        ":instrument_manager",
+        ":param",
+        ":param_definition",
+        "//barelymusician/common:id",
+        "//barelymusician/common:status",
+        "@googletest//:gtest_main",
+    ],
+)
 
 # TODO: Refactor and reenable unit tests for instrument controller & processor.
 # cc_test(

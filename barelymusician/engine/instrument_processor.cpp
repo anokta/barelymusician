@@ -82,14 +82,4 @@ void InstrumentProcessor::Process(float* output, int num_output_channels,
   }
 }
 
-void InstrumentProcessor::Reset(std::vector<float> param_values,
-                                int sample_rate) noexcept {
-  destroy_fn_(&state_);
-  sample_rate_ = sample_rate;
-  create_fn_(&state_, sample_rate_);
-  for (int i = 0; i < static_cast<int>(param_values.size()); ++i) {
-    set_param_fn_(&state_, i, param_values[i]);
-  }
-}
-
 }  // namespace barelyapi

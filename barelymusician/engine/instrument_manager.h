@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
-#include <atomic>
 #include <functional>
 #include <optional>
 #include <unordered_map>
@@ -194,12 +193,6 @@ class InstrumentManager {
   /// @return Status.
   Status SetParamToDefault(Id instrument_id, double timestamp,
                            int param_index) noexcept;
-
-  /// Sets sampling rate at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  /// @param sample_rate Sampling rate in hz.
-  void SetSampleRate(double timestamp, int sample_rate) noexcept;
 
   /// Updates the internal state.
   void Update() noexcept;

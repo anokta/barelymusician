@@ -135,22 +135,6 @@ TEST(InstrumentManagerTest, ProcessEvents) {
   EXPECT_FALSE(
       GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, -0.5f)));
 
-  // Set multiple notes on at once.
-  for (const float note_pitch : {1.0f, 2.0f, 3.0f}) {
-    instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
-                                    StartNoteEvent{note_pitch, 1.0f});
-    EXPECT_TRUE(GetStatusOrValue(
-        instrument_manager.IsNoteOn(kInstrumentId, note_pitch)));
-  }
-
-  // Set all notes off.
-  instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
-                                  SetAllNotesOffEvent{});
-  for (const float note_pitch : {1.0f, 2.0f, 3.0f}) {
-    EXPECT_FALSE(GetStatusOrValue(
-        instrument_manager.IsNoteOn(kInstrumentId, note_pitch)));
-  }
-
   // Set parameter value.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
                                   SetParamEvent{0, 5.0f});
@@ -158,14 +142,6 @@ TEST(InstrumentManagerTest, ProcessEvents) {
       GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0))
           .GetValue(),
       5.0f);
-
-  // Set all parameters to default value.
-  instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
-                                  SetAllParamsToDefaultEvent{});
-  EXPECT_FLOAT_EQ(
-      GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0))
-          .GetValue(),
-      0.0f);
 }
 
 // Tests that setting a single instrument note produces the expected output.
@@ -460,125 +436,70 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   // Trigger note on callback.
   float note_on_pitch = 0.0f;
   float note_on_intensity = 0.0f;
+  double note_on_timestamp = 0.0;
   instrument_manager.SetNoteOnCallback(
       kInstrumentId,
-      [&](float note_pitch, float note_intensity, double /*timestamp*/) {
+      [&](float note_pitch, float note_intensity, double timestamp) {
         note_on_pitch = note_pitch;
         note_on_intensity = note_intensity;
+        note_on_timestamp = timestamp;
       });
-  EXPECT_NE(note_on_pitch, kNotePitch);
-  EXPECT_NE(note_on_intensity, kNoteIntensity);
+  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
+  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
+  EXPECT_DOUBLE_EQ(note_on_timestamp, 0.0);
 
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 10.0, kNotePitch,
                                                 kNoteIntensity)));
 
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
   EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
+  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
 
   // This should not trigger the callback since the note is already on.
-  EXPECT_EQ(instrument_manager.SetNoteOn(kInstrumentId, 15.0, kNotePitch,
-                                         kNoteIntensity),
-            Status::kFailedPrecondition);
+  EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 15.0, kNotePitch,
+                                                kNoteIntensity)));
 
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
+  EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
+  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
 
   // Trigger note on callback again with another note.
   EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(
       kInstrumentId, 15.0, kNotePitch + 2.0f, kNoteIntensity)));
 
   EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch + 2.0f);
+  EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
+  EXPECT_DOUBLE_EQ(note_on_timestamp, 15.0);
 
   // Trigger note off callback.
   float note_off_pitch = 0.0f;
+  double note_off_timestamp = 0.0;
   instrument_manager.SetNoteOffCallback(
-      kInstrumentId, [&](float note_pitch, double /*timestamp*/) {
+      kInstrumentId, [&](float note_pitch, double timestamp) {
         note_off_pitch = note_pitch;
+        note_off_timestamp = timestamp;
       });
-  EXPECT_NE(note_off_pitch, kNotePitch);
+  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
+  EXPECT_DOUBLE_EQ(note_off_timestamp, 0.0);
 
   EXPECT_TRUE(
       IsOk(instrument_manager.SetNoteOff(kInstrumentId, 20.0, kNotePitch)));
 
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
+  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
 
   // This should not trigger the callback since the note is already off.
-  EXPECT_EQ(instrument_manager.SetNoteOff(kInstrumentId, 25.0, kNotePitch),
-            Status::kFailedPrecondition);
+  EXPECT_TRUE(
+      IsOk(instrument_manager.SetNoteOff(kInstrumentId, 25.0, kNotePitch)));
 
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
+  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
 
   // Finally, remove to trigger the note off callback with the remaining note.
   EXPECT_TRUE(IsOk(instrument_manager.Destroy(kInstrumentId, 30.0)));
 
   EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch + 2.0f);
-}
-
-// Tests that the instrument manager updates its sampling rate as expected.
-TEST(InstrumentManagerTest, SetSampleRate) {
-  const float kNotePitch = 3.0f;
-  const float kNoteIntensity = 1.0f;
-  const float kParamValue = -0.25f;
-
-  InstrumentManager instrument_manager(1);
-  std::vector<float> buffer(kNumChannels * kNumFrames);
-
-  // Create instrument.
-  EXPECT_TRUE(IsOk(instrument_manager.Create(kInstrumentId, 0.0,
-                                             GetTestInstrumentDefinition())));
-
-  instrument_manager.Update();
-
-  std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
-                             kNumFrames);
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], 0.0f);
-    }
-  }
-
-  // Set note on.
-  EXPECT_TRUE(IsOk(instrument_manager.SetNoteOn(kInstrumentId, 0.0, kNotePitch,
-                                                kNoteIntensity)));
-  EXPECT_TRUE(
-      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
-
-  // Set parameter.
-  EXPECT_TRUE(
-      IsOk(instrument_manager.SetParam(kInstrumentId, 0.0, 0, kParamValue)));
-
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0)),
-              Property(&Param::GetValue, kParamValue));
-
-  instrument_manager.Update();
-
-  std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
-                             kNumFrames);
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], kParamValue);
-    }
-  }
-
-  // Update sampling rate.
-  instrument_manager.SetSampleRate(0.0, 2);
-
-  EXPECT_FALSE(
-      GetStatusOrValue(instrument_manager.IsNoteOn(kInstrumentId, kNotePitch)));
-  EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(kInstrumentId, 0)),
-              Property(&Param::GetValue, kParamValue));
-
-  instrument_manager.Update();
-
-  std::fill(buffer.begin(), buffer.end(), 0.0f);
-  instrument_manager.Process(kInstrumentId, 0.0, buffer.data(), kNumChannels,
-                             kNumFrames);
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], kParamValue);
-    }
-  }
+  EXPECT_DOUBLE_EQ(note_off_timestamp, 30.0);
 }
 
 }  // namespace

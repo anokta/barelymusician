@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 
 #include <map>
+#include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -42,12 +43,6 @@ class InstrumentProcessor {
   /// @param timestamp Timestamp in seconds.
   void Process(float* output, int num_output_channels, int num_output_frames,
                double timestamp) noexcept;
-
-  /// Resets instrument.
-  ///
-  /// @param param_values List of parameter values.
-  /// @param sample_rate Sampling rate in hz.
-  void Reset(std::vector<float> param_values, int sample_rate) noexcept;
 
  private:
   // Create function.

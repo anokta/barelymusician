@@ -36,12 +36,11 @@ Status InstrumentManager::Create(Id instrument_id, double /*timestamp*/,
       success) {
     runner_.Add([this, instrument_id = instrument_id,
                  definition = std::move(definition),
-                 param_values = controller_it->second.GetAllParams(),
-                 sample_rate = sample_rate_]() {
+                 param_values = controller_it->second.GetAllParams()]() {
       processors_.emplace(
           std::piecewise_construct, std::forward_as_tuple(instrument_id),
           std::forward_as_tuple(std::move(definition), std::move(param_values),
-                                sample_rate));
+                                sample_rate_));
     });
     return Status::kOk;
   }
@@ -249,28 +248,6 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
     return Status::kInvalidArgument;
   }
   return Status::kNotFound;
-}
-
-void InstrumentManager::SetSampleRate(double timestamp,
-                                      int sample_rate) noexcept {
-  if (sample_rate_ != sample_rate) {
-    // Note that the sample accurate timing of the existing instrument events
-    // could flactuate during this switch, until the given `timestamp`.
-    sample_rate_ = sample_rate;
-    std::unordered_map<Id, std::vector<float>> param_values_map;
-    for (auto& [instrument_id, controller] : controllers_) {
-      controller.StopAllNotes(timestamp);
-      param_values_map.emplace(instrument_id, controller.GetAllParams());
-    }
-    runner_.Add([this, param_values_map = std::move(param_values_map),
-                 sample_rate = sample_rate_]() {
-      for (auto& [instrument_id, processor] : processors_) {
-        if (auto* param_values = FindOrNull(param_values_map, instrument_id)) {
-          processor.Reset(std::move(*param_values), sample_rate);
-        }
-      }
-    });
-  }
 }
 
 void InstrumentManager::Update() noexcept {

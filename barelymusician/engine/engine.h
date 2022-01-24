@@ -323,11 +323,6 @@ class Engine {
   void SetPlaybackUpdateCallback(UpdateCallback update_callback,
                                  void* user_data) noexcept;
 
-  /// Sets the sample rate.
-  ///
-  /// @param sample_rate Sampling rate in hz.
-  void SetSampleRate(int sample_rate) noexcept;
-
   /// Starts the playback.
   void StartPlayback() noexcept;
 

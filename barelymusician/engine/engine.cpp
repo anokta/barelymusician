@@ -353,14 +353,6 @@ void Engine::SetPlaybackUpdateCallback(UpdateCallback update_callback,
   }
 }
 
-void Engine::SetSampleRate(int sample_rate) noexcept {
-  for (auto& [performer_id, performer] : performers_) {
-    performer.active_notes.clear();
-  }
-  instrument_manager_.SetSampleRate(transport_.GetLastTimestamp(),
-                                    std::max(sample_rate, 0));
-}
-
 void Engine::StartPlayback() noexcept { transport_.Start(); }
 
 void Engine::StopPlayback() noexcept {

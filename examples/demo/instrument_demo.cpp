@@ -59,10 +59,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine(kSampleRate);
+  Engine engine;
 
   const auto instrument_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition());
+      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(instrument_id, kGain);
   engine.SetInstrumentParam(
       instrument_id, SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack);

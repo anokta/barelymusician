@@ -24,23 +24,23 @@ constexpr int kNumMaxTasks = 100;
 
 }  // namespace
 
-InstrumentManager::InstrumentManager(int sample_rate) noexcept
-    : runner_(kNumMaxTasks), sample_rate_(sample_rate) {}
+InstrumentManager::InstrumentManager() noexcept : runner_(kNumMaxTasks) {}
 
 Status InstrumentManager::Create(Id instrument_id, double /*timestamp*/,
-                                 InstrumentDefinition definition) noexcept {
+                                 InstrumentDefinition definition,
+                                 int sample_rate) noexcept {
   if (instrument_id == kInvalidId) return Status::kInvalidArgument;
   if (const auto [controller_it, success] = controllers_.emplace(
           instrument_id,
           InstrumentController(std::move(definition.param_definitions)));
       success) {
-    runner_.Add([this, instrument_id = instrument_id,
+    runner_.Add([this, instrument_id, sample_rate,
                  definition = std::move(definition),
                  param_values = controller_it->second.GetAllParams()]() {
       processors_.emplace(
           std::piecewise_construct, std::forward_as_tuple(instrument_id),
           std::forward_as_tuple(std::move(definition), std::move(param_values),
-                                sample_rate_));
+                                sample_rate));
     });
     return Status::kOk;
   }

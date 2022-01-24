@@ -50,12 +50,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kSampleRate);
 
-  Engine engine(kSampleRate);
+  Engine engine;
   engine.SetPlaybackTempo(kInitialTempo);
 
   // Create metronome instrument.
   const auto metronome_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition());
+      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kEnvelopeAttack,
                             kAttack);
   engine.SetInstrumentParam(metronome_id,

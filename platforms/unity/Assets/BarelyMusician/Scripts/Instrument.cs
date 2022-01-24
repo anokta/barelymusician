@@ -30,6 +30,14 @@ namespace Barely {
     public delegate void NoteOnCallback(float pitch, float intensity, double timestamp);
     public NoteOnCallback _noteOnCallback = null;
 
+    protected virtual void Awake() {
+      Source = GetComponent<AudioSource>();
+    }
+
+    protected virtual void OnDestroy() {
+      Source = null;
+    }
+
     protected virtual void OnEnable() {
       if (Id == Musician.InvalidId) {
         _noteOffCallback = delegate(float pitch, double timestamp) {
@@ -40,13 +48,11 @@ namespace Barely {
         };
         Id = Musician.AddInstrument(this);
       }
-      Source = GetComponent<AudioSource>();
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      Source = null;
       if (Id != Musician.InvalidId) {
         Musician.RemoveInstrument(this);
         Id = Musician.InvalidId;

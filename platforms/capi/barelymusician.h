@@ -339,11 +339,9 @@ typedef struct BarelyInstrumentDefinition {
 
 /// Creates new BarelyMusician api.
 ///
-/// @param sample_rate Sampling rate in hz.
 /// @param out_api Output BarelyMusician api.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_Create(int32_t sample_rate,
-                                            BarelyApi* out_api);
+BARELY_EXPORT BarelyStatus BarelyApi_Create(BarelyApi* out_api);
 
 /// Destroys BarelyMusician api.
 ///
@@ -508,11 +506,12 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Clone(BarelyApi api,
 ///
 /// @param api BarelyMusician api.
 /// @param definition Instrument definition.
+/// @param sample_rate Sampling rate in hz.
 /// @param out_instrument_id Output instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_Create(BarelyApi api, BarelyInstrumentDefinition definition,
-                        BarelyId* out_instrument_id);
+                        int32_t sample_rate, BarelyId* out_instrument_id);
 
 /// Destroys instrument.
 ///
@@ -1047,7 +1046,7 @@ BARELY_EXPORT BarelyStatus BarelyTransport_Stop(BarelyApi api);
 
 // TODO(#85): Temporary shortcut to test instruments, move to `//examples/capi`.
 BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
-    BarelyApi api, BarelyId* out_instrument_id);
+    BarelyApi api, int32_t sample_rate, BarelyId* out_instrument_id);
 
 #ifdef __cplusplus
 }  // extern "C"

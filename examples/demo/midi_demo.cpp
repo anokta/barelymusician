@@ -108,7 +108,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kSampleRate);
 
-  Engine engine(kSampleRate);
+  Engine engine;
   engine.SetPlaybackTempo(kTempo);
 
   std::vector<Id> instrument_ids;
@@ -123,7 +123,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Add instrument.
     const Id instrument_id =
-        engine.AddInstrument(SynthInstrument::GetDefinition());
+        engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
     engine.SetInstrumentNoteOnCallback(
         instrument_id,
         [instrument_id](float pitch, float intensity, double /*timestamp*/) {

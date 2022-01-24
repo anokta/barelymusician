@@ -26,18 +26,18 @@ constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 
 }  // namespace
 
-Engine::Engine(int sample_rate) noexcept
-    : instrument_manager_(sample_rate), playback_tempo_(kDefaultPlaybackTempo) {
+Engine::Engine() noexcept : playback_tempo_(kDefaultPlaybackTempo) {
   transport_.SetUpdateCallback(
       [this](double begin_position, double end_position) noexcept {
         UpdateSequences(begin_position, end_position);
       });
 }
 
-Id Engine::AddInstrument(InstrumentDefinition definition) noexcept {
+Id Engine::AddInstrument(InstrumentDefinition definition,
+                         int sample_rate) noexcept {
   const Id instrument_id = id_generator_.Next();
   instrument_manager_.Create(instrument_id, transport_.GetLastTimestamp(),
-                             std::move(definition));
+                             std::move(definition), sample_rate);
   return instrument_id;
 }
 
@@ -285,12 +285,14 @@ Status Engine::SetPerformerLoop(Id performer_id, bool loop) noexcept {
 Status Engine::SetPerformerInstrument(Id performer_id,
                                       Id instrument_id) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
-    for (auto& [position, active_note] : performer->active_notes) {
-      instrument_manager_.ProcessEvent(instrument_id,
-                                       transport_.GetLastTimestamp(),
-                                       StopNoteEvent{active_note.pitch});
+    if (performer->instrument_id != instrument_id) {
+      for (auto& [position, active_note] : performer->active_notes) {
+        instrument_manager_.ProcessEvent(instrument_id,
+                                         transport_.GetLastTimestamp(),
+                                         StopNoteEvent{active_note.pitch});
+      }
+      performer->instrument_id = instrument_id;
     }
-    performer->instrument_id = instrument_id;
     return Status::kOk;
   }
   return Status::kNotFound;

@@ -22,7 +22,7 @@ constexpr double kTempo = 120.0;
 }  // namespace
 
 int main(int /*argc*/, char* /*argv*/[]) {
-  Api api(kSampleRate);
+  Api api;
 
   auto& transport = api.GetTransport();
   if (const auto status = transport.SetTempo(kTempo); !IsOk(status)) {
@@ -32,7 +32,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   ConsoleLog() << "Tempo: " << transport.GetTempo();
 
   Instrument instrument1 = api.CreateInstrument(
-      InstrumentDefinition{.param_definitions = {ParamDefinition(5)}});
+      InstrumentDefinition{.param_definitions = {ParamDefinition(5)}},
+      kSampleRate);
   // ConsoleLog() << "Instrument 1 gain: " << instrument1.GetGain();
 
   // Instrument instrument2 = instrument1;

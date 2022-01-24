@@ -70,11 +70,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kSampleRate);
 
-  Engine engine(kSampleRate);
+  Engine engine;
   engine.SetPlaybackTempo(kInitialTempo);
 
   const Id performer_instrument_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition());
+      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(performer_instrument_id, kGain);
   engine.SetInstrumentParam(performer_instrument_id,
                             SynthInstrumentParam::kEnvelopeAttack, kAttack);
@@ -91,7 +91,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       });
 
   const Id metronome_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition());
+      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(metronome_id, 0.5f * kGain);
   engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kEnvelopeAttack,
                             kAttack);

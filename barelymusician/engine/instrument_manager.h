@@ -23,17 +23,17 @@ namespace barelyapi {
 class InstrumentManager {
  public:
   /// Constructs new `InstrumentManager`.
-  // TODO(#85): `sample_rate` unnecessary here, move to `Create`?
-  explicit InstrumentManager(int sample_rate) noexcept;
+  InstrumentManager() noexcept;
 
   /// Adds new instrument at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param definition Instrument definition.
+  /// @param sample_rate Sampling rate in hz.
   /// @return Status.
   Status Create(Id instrument_id, double timestamp,
-                InstrumentDefinition definition) noexcept;
+                InstrumentDefinition definition, int sample_rate) noexcept;
 
   /// Removes instrument at timestamp.
   ///
@@ -204,9 +204,6 @@ class InstrumentManager {
 
   // Audio thread task runner.
   TaskRunner runner_;
-
-  // Sampling rate in hz.
-  int sample_rate_;
 };
 
 }  // namespace barelyapi

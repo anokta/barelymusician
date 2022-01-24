@@ -36,15 +36,14 @@ class Engine {
                                   void* user_data);
 
   /// Constructs new `Engine`.
-  ///
-  /// @param sample_rate System sampling rate in hz.
-  explicit Engine(int sample_rate) noexcept;
+  Engine() noexcept;
 
   /// Adds new instrument.
   ///
   /// @param definition Instrument definition.
+  /// @param sample_rate Sampling rate in hz.
   /// @return Instrument id.
-  Id AddInstrument(InstrumentDefinition definition) noexcept;
+  Id AddInstrument(InstrumentDefinition definition, int sample_rate) noexcept;
 
   /// Adds new performer.
   ///

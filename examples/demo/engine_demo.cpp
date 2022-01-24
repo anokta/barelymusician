@@ -177,7 +177,7 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kSampleRate);
 
-  Engine engine(kSampleRate);
+  Engine engine;
   engine.SetPlaybackTempo(kTempo);
 
   // Note on callback.
@@ -206,7 +206,7 @@ int main(int /*argc*/, char* argv[]) {
   const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
                                              float attack, float release) {
     instrument_ids.push_back(
-        engine.AddInstrument(SynthInstrument::GetDefinition()));
+        engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate));
     engine.SetInstrumentGain(instrument_ids.back(), gain);
     engine.SetInstrumentParam(instrument_ids.back(),
                               SynthInstrumentParam::kEnvelopeAttack, attack);
@@ -251,7 +251,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Add drumkit instrument.
   instrument_ids.push_back(
-      engine.AddInstrument(DrumkitInstrument::GetDefinition()));
+      engine.AddInstrument(DrumkitInstrument::GetDefinition(), kSampleRate));
   engine.SetInstrumentGain(instrument_ids.back(), 0.5f);
   set_note_callbacks_fn(instrument_ids.back());
   std::unordered_map<float, std::string> drumkit_map = {

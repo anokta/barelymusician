@@ -48,7 +48,8 @@ namespace Barely {
       Int64 instrumentId = InvalidId;
       Type instrumentType = instrument.GetType();
       if (instrumentType == typeof(SynthInstrument)) {
-        Status status = BarelyExamples_CreateSynthInstrument(Api, _int64Ptr);
+        Status status =
+            BarelyExamples_CreateSynthInstrument(Api, AudioSettings.outputSampleRate, _int64Ptr);
         if (IsOk(status)) {
           instrumentId = Marshal.ReadInt64(_int64Ptr);
         } else {
@@ -242,25 +243,27 @@ namespace Barely {
     ///
     /// @param sequence Sequence to update.
     /// TODO(#85): This is a POC implementation only.
-    public static void UpdateSequence(Sequence sequence) {
+    public static void UpdateSequence(Sequence sequence, bool changed) {
       BarelySequence_SetBeginOffset(Api, sequence.Id, sequence.BeginOffset);
       BarelySequence_SetBeginPosition(Api, sequence.Id, sequence.BeginPosition);
       BarelySequence_SetEndPosition(Api, sequence.Id, sequence.EndPosition);
       BarelySequence_SetLooping(Api, sequence.Id, sequence.Loop);
       BarelySequence_SetLoopBeginOffset(Api, sequence.Id, sequence.LoopBeginOffset);
       BarelySequence_SetLoopLength(Api, sequence.Id, sequence.LoopLength);
-
-      BarelySequence_RemoveAllNotes(Api, sequence.Id);
-      NoteDefinition definition;
-      definition.pitchType = NotePitchType.AbsolutePitch;
-      foreach (var sequenceNote in sequence.Notes) {
-        definition.duration = sequenceNote.note.Duration;
-        definition.pitch = (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
-        definition.intensity = sequenceNote.note.Intensity;
-        BarelySequence_AddNote(Api, sequence.Id, sequenceNote.position, definition, _int64Ptr);
-      }
       BarelySequence_SetInstrument(Api, sequence.Id,
                                    sequence.Instrument ? sequence.Instrument.Id : InvalidId);
+
+      if (changed) {
+        BarelySequence_RemoveAllNotes(Api, sequence.Id);
+        NoteDefinition definition;
+        definition.pitchType = NotePitchType.AbsolutePitch;
+        foreach (var sequenceNote in sequence.Notes) {
+          definition.duration = sequenceNote.note.Duration;
+          definition.pitch = (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
+          definition.intensity = sequenceNote.note.Intensity;
+          BarelySequence_AddNote(Api, sequence.Id, sequenceNote.position, definition, _int64Ptr);
+        }
+      }
     }
 
     // Singleton api.
@@ -318,12 +321,19 @@ namespace Barely {
       // Latency in seconds.
       private double _latency = 0.0;
 
-      // Sampling rate in hz.
-      private int _sampleRate = 0;
-
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-        Init();
+        if (!IsOk(BarelyApi_Create(_intPtrPtr))) {
+          return;
+        }
+        _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
+        _beatCallback = delegate(double position, double timestamp) {
+          OnBeat?.Invoke(position);
+        };
+        BarelyTransport_SetBeatCallback(_api, Marshal.GetFunctionPointerForDelegate(_beatCallback),
+                                        IntPtr.Zero);
+        var config = AudioSettings.GetConfiguration();
+        _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
       }
 
       private void OnDestroy() {
@@ -338,48 +348,22 @@ namespace Barely {
 
       private void OnApplicationQuit() {
         _isShuttingDown = true;
-        Shutdown();
+        BarelyApi_Destroy(_api);
+        _api = IntPtr.Zero;
       }
 
       private void OnAudioConfigurationChanged(bool deviceWasChanged) {
-        if (_sampleRate != AudioSettings.outputSampleRate) {
-          Shutdown();
-          Init();
-        }
-        // TODO: There might be a cleaner way to handle this?
+        var config = AudioSettings.GetConfiguration();
+        _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
         foreach (var instrument in FindObjectsOfType<Instrument>()) {
           instrument.enabled = false;
           instrument.enabled = true;
-        }
-        foreach (var sequence in FindObjectsOfType<Sequence>()) {
-          sequence.enabled = false;
-          sequence.enabled = true;
         }
       }
 
       private void LateUpdate() {
         double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
         UpdateNative(_api, AudioSettings.dspTime + lookahead);
-      }
-
-      private void Init() {
-        var config = AudioSettings.GetConfiguration();
-        _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
-        _sampleRate = config.sampleRate;
-        if (!IsOk(BarelyApi_Create(_sampleRate, _intPtrPtr))) {
-          return;
-        }
-        _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
-        _beatCallback = delegate(double position, double timestamp) {
-          OnBeat?.Invoke(position);
-        };
-        BarelyTransport_SetBeatCallback(_api, Marshal.GetFunctionPointerForDelegate(_beatCallback),
-                                        IntPtr.Zero);
-      }
-
-      private void Shutdown() {
-        BarelyApi_Destroy(_api);
-        _api = IntPtr.Zero;
       }
     }
 
@@ -415,7 +399,7 @@ namespace Barely {
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
     [DllImport(pluginName, EntryPoint = "BarelyApi_Create")]
-    private static extern Status BarelyApi_Create(Int32 sampleRate, IntPtr outApi);
+    private static extern Status BarelyApi_Create(IntPtr outApi);
 
     [DllImport(pluginName, EntryPoint = "BarelyApi_Destroy")]
     private static extern Status BarelyApi_Destroy(IntPtr api);
@@ -424,7 +408,7 @@ namespace Barely {
     private static extern Status UpdateNative(IntPtr api, double timestamp);
 
     [DllImport(pluginName, EntryPoint = "BarelyExamples_CreateSynthInstrument")]
-    private static extern Status BarelyExamples_CreateSynthInstrument(IntPtr api,
+    private static extern Status BarelyExamples_CreateSynthInstrument(IntPtr api, Int32 sampleRate,
                                                                       IntPtr outInstrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_Destroy")]

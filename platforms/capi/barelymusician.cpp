@@ -112,11 +112,6 @@ extern "C" {
 
 /// BarelyMusician C api.
 struct BarelyMusician {
-  /// Constructs new `BarelyMusician`.
-  ///
-  /// @param sample_rate Sampling rate in hz.
-  explicit BarelyMusician(int32_t sample_rate) : instance(sample_rate) {}
-
   /// Engine instance.
   Engine instance;
 
@@ -126,10 +121,10 @@ struct BarelyMusician {
   ~BarelyMusician() = default;
 };
 
-BarelyStatus BarelyApi_Create(int32_t sample_rate, BarelyApi* out_api) {
+BarelyStatus BarelyApi_Create(BarelyApi* out_api) {
   if (!out_api) return BarelyStatus_kInvalidArgument;
 
-  *out_api = new BarelyMusician(sample_rate);
+  *out_api = new BarelyMusician();
   return BarelyStatus_kOk;
 }
 
@@ -303,12 +298,13 @@ BarelyStatus BarelyInstrument_Clone(BarelyApi api, BarelyId instrument_id,
 
 BarelyStatus BarelyInstrument_Create(BarelyApi api,
                                      BarelyInstrumentDefinition definition,
+                                     int32_t sample_rate,
                                      BarelyId* out_instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id =
-      api->instance.AddInstrument(GetInstrumentDefinition(definition));
+  *out_instrument_id = api->instance.AddInstrument(
+      GetInstrumentDefinition(definition), sample_rate);
   return BarelyStatus_kOk;
 }
 
@@ -866,12 +862,13 @@ BarelyStatus BarelyTransport_Stop(BarelyApi api) {
 }
 
 BarelyStatus BarelyExamples_CreateSynthInstrument(BarelyApi api,
+                                                  int32_t sample_rate,
                                                   BarelyId* out_instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id =
-      api->instance.AddInstrument(SynthInstrument::GetDefinition());
+  *out_instrument_id = api->instance.AddInstrument(
+      SynthInstrument::GetDefinition(), sample_rate);
   return BarelyStatus_kOk;
 }
 

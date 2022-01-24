@@ -50,9 +50,9 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 }
 
 TEST(InstrumentManagerTest, GetParam) {
-  InstrumentManager instrument_manager(kSampleRate);
-  EXPECT_TRUE(IsOk(instrument_manager.Create(kInstrumentId, 0.0,
-                                             GetTestInstrumentDefinition())));
+  InstrumentManager instrument_manager;
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, 0.0, GetTestInstrumentDefinition(), kSampleRate)));
   EXPECT_TRUE(IsOk(instrument_manager.GetParam(kInstrumentId, 0)));
 }
 
@@ -61,13 +61,13 @@ TEST(InstrumentManagerTest, CreateDestroy) {
   const float kNotePitch = 1.25f;
   const float kNoteIntensity = 0.75f;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  InstrumentManager instrument_manager;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
   EXPECT_FALSE(instrument_manager.IsValid(kInstrumentId));
-  EXPECT_TRUE(IsOk(instrument_manager.Create(kInstrumentId, 0.0,
-                                             GetTestInstrumentDefinition())));
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, 0.0, GetTestInstrumentDefinition(), kSampleRate)));
   EXPECT_TRUE(instrument_manager.IsValid(kInstrumentId));
 
   std::fill(buffer.begin(), buffer.end(), 0.0f);
@@ -118,10 +118,10 @@ TEST(InstrumentManagerTest, CreateDestroy) {
 TEST(InstrumentManagerTest, ProcessEvents) {
   const double kTimestamp = 16.0;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  InstrumentManager instrument_manager;
 
-  EXPECT_TRUE(IsOk(instrument_manager.Create(kInstrumentId, kTimestamp,
-                                             GetTestInstrumentDefinition())));
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, kTimestamp, GetTestInstrumentDefinition(), kSampleRate)));
 
   // Set note on.
   instrument_manager.ProcessEvent(kInstrumentId, kTimestamp,
@@ -150,12 +150,12 @@ TEST(InstrumentManagerTest, SetNote) {
   const float kNotePitch = 32.0f;
   const float kNoteIntensity = 0.5f;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  InstrumentManager instrument_manager;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  EXPECT_TRUE(IsOk(instrument_manager.Create(kInstrumentId, kTimestamp,
-                                             GetTestInstrumentDefinition())));
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, kTimestamp, GetTestInstrumentDefinition(), kSampleRate)));
 
   instrument_manager.Update();
 
@@ -212,12 +212,12 @@ TEST(InstrumentManagerTest, SetNote) {
 TEST(InstrumentManagerTest, SetNotes) {
   const float kNoteIntensity = 1.0f;
 
-  InstrumentManager instrument_manager(1);
+  InstrumentManager instrument_manager;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instrument.
-  EXPECT_TRUE(IsOk(instrument_manager.Create(kInstrumentId, 0.0,
-                                             GetTestInstrumentDefinition())));
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, 0.0, GetTestInstrumentDefinition(), 1)));
 
   instrument_manager.Update();
 
@@ -278,7 +278,7 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
   const int kNumInstruments = 3;
   const float kNoteIntensity = 0.1f;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  InstrumentManager instrument_manager;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
@@ -286,8 +286,8 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
     const Id instrument_id = static_cast<Id>(i);
 
     EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
-    EXPECT_TRUE(IsOk(instrument_manager.Create(instrument_id, 0.0,
-                                               GetTestInstrumentDefinition())));
+    EXPECT_TRUE(IsOk(instrument_manager.Create(
+        instrument_id, 0.0, GetTestInstrumentDefinition(), kSampleRate)));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
 
     instrument_manager.Update();
@@ -352,7 +352,7 @@ TEST(InstrumentManagerTest, SetAllNotesOff) {
 TEST(InstrumentManagerTest, SetAllParamsToDefault) {
   const int kNumInstruments = 2;
 
-  InstrumentManager instrument_manager(kSampleRate);
+  InstrumentManager instrument_manager;
   std::vector<float> buffer(kNumChannels * kNumFrames);
 
   // Create instruments.
@@ -360,8 +360,8 @@ TEST(InstrumentManagerTest, SetAllParamsToDefault) {
     const Id instrument_id = static_cast<Id>(i);
 
     EXPECT_FALSE(instrument_manager.IsValid(instrument_id));
-    EXPECT_TRUE(IsOk(instrument_manager.Create(instrument_id, 0.0,
-                                               GetTestInstrumentDefinition())));
+    EXPECT_TRUE(IsOk(instrument_manager.Create(
+        instrument_id, 0.0, GetTestInstrumentDefinition(), kSampleRate)));
     EXPECT_TRUE(instrument_manager.IsValid(instrument_id));
     EXPECT_THAT(GetStatusOrValue(instrument_manager.GetParam(instrument_id, 0)),
                 Property(&Param::GetValue, 0.0f));
@@ -427,11 +427,11 @@ TEST(InstrumentManagerTest, SetNoteCallbacks) {
   const float kNotePitch = 4.0f;
   const float kNoteIntensity = 0.25f;
 
-  InstrumentManager instrument_manager(1);
+  InstrumentManager instrument_manager;
 
   // Create instrument.
-  EXPECT_TRUE(IsOk(instrument_manager.Create(kInstrumentId, 0.0,
-                                             GetTestInstrumentDefinition())));
+  EXPECT_TRUE(IsOk(instrument_manager.Create(
+      kInstrumentId, 0.0, GetTestInstrumentDefinition(), 1)));
 
   // Trigger note on callback.
   float note_on_pitch = 0.0f;

@@ -871,7 +871,7 @@ class Instrument {
   friend class Sequence;
 
   // Constructs new `Instrument` with internal api handle and definition.
-  Instrument(BarelyApi capi, InstrumentDefinition definition)
+  Instrument(BarelyApi capi, InstrumentDefinition definition, int sample_rate)
       : capi_(capi),
         id_(BarelyId_kInvalid),
         note_off_callback_(nullptr),
@@ -892,7 +892,7 @@ class Instrument {
               definition.set_note_off_fn, definition.set_note_on_fn,
               definition.set_param_fn, param_definitions.data(),
               static_cast<int>(param_definitions.size())},
-          &id_);
+          sample_rate, &id_);
       assert(status == BarelyStatus_kOk);
     }
   }
@@ -1482,10 +1482,7 @@ class Transport {
 class Api {
  public:
   /// Constructs new `Api`.
-  ///
-  /// @param sample_rate Sampling rate in hz.
-  explicit Api(int sample_rate)
-      : capi_(CreateCapi(sample_rate)), conductor_(capi_), transport_(capi_) {}
+  Api() : capi_(CreateCapi()), conductor_(capi_), transport_(capi_) {}
 
   /// Destroys `Api`.
   ~Api() {
@@ -1527,9 +1524,11 @@ class Api {
   /// Creates new instrument.
   ///
   /// @param definition Instrument definition.
+  /// @param sample_rate Sampling rate in hz.
   /// @return Instrument.
-  Instrument CreateInstrument(InstrumentDefinition definition) {
-    return Instrument(capi_, std::move(definition));
+  Instrument CreateInstrument(InstrumentDefinition definition,
+                              int sample_rate) {
+    return Instrument(capi_, std::move(definition), sample_rate);
   }
 
   /// Creates new sequence.
@@ -1570,9 +1569,9 @@ class Api {
 
  private:
   // Creates new internal api and returns corresponding handle.
-  BarelyApi CreateCapi(int sample_rate) {
+  BarelyApi CreateCapi() {
     BarelyApi capi = nullptr;
-    const auto status = BarelyApi_Create(sample_rate, &capi);
+    const auto status = BarelyApi_Create(&capi);
     assert(status == BarelyStatus_kOk);
     return capi;
   }

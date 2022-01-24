@@ -62,10 +62,8 @@ namespace Barely {
     }
 
     void Update() {
-      if (_changed) {
-        _changed = false;
-        Musician.UpdateSequence(this);
-      }
+      Musician.UpdateSequence(this, _changed);
+      _changed = false;
     }
   }
 }

@@ -820,7 +820,14 @@ BarelyStatus BarelyTransport_SetBeatCallback(
     void* user_data) {
   if (!api) return BarelyStatus_kNotFound;
 
-  api->instance.SetPlaybackBeatCallback(beat_callback, user_data);
+  if (beat_callback) {
+    api->instance.SetPlaybackBeatCallback(
+        [beat_callback, user_data](double position, double timestamp) {
+          beat_callback(position, timestamp, user_data);
+        });
+  } else {
+    api->instance.SetPlaybackBeatCallback(nullptr);
+  }
   return BarelyStatus_kUnimplemented;
 }
 
@@ -836,15 +843,6 @@ BarelyStatus BarelyTransport_SetTempo(BarelyApi api, double tempo) {
 
   api->instance.SetPlaybackTempo(tempo);
   return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyTransport_SetUpdateCallback(
-    BarelyApi api, BarelyTransport_UpdateCallback update_callback,
-    void* user_data) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.SetPlaybackUpdateCallback(update_callback, user_data);
-  return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelyTransport_Start(BarelyApi api) {

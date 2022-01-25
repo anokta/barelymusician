@@ -1321,16 +1321,6 @@ class Transport {
   /// @param timestamp Beat timestamp in seconds.
   using BeatCallback = std::function<void(double position, double timestamp)>;
 
-  /// Update callback signature.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @param end_position End position in beats.
-  /// @param begin_timestamp Begin timestamp in seconds.
-  /// @param end_timestamp End timestamp in seconds.
-  using UpdateCallback =
-      std::function<void(double begin_position, double end_position,
-                         double begin_timestamp, double end_timestamp)>;
-
   /// Returns position.
   ///
   /// @return Position in beats.
@@ -1402,27 +1392,6 @@ class Transport {
     return static_cast<Status>(BarelyTransport_SetTempo(capi_, tempo));
   }
 
-  /// Sets update callback.
-  ///
-  /// @param update_callback Update callback.
-  /// @return Status.
-  Status SetUpdateCallback(UpdateCallback update_callback) {
-    if (update_callback) {
-      update_callback_ = update_callback;
-      return static_cast<Status>(BarelyTransport_SetUpdateCallback(
-          capi_,
-          [](double begin_position, double end_position, double begin_timestamp,
-             double end_timestamp, void* user_data) {
-            (*reinterpret_cast<UpdateCallback*>(user_data))(
-                begin_position, end_position, begin_timestamp, end_timestamp);
-          },
-          reinterpret_cast<void*>(&update_callback_)));
-    } else {
-      return static_cast<Status>(BarelyTransport_SetUpdateCallback(
-          capi_, /*update_callback=*/nullptr, /*user_data=*/nullptr));
-    }
-  }
-
   /// Starts playback.
   ///
   /// @return Status.
@@ -1437,8 +1406,7 @@ class Transport {
   friend class Api;
 
   // Constructs new `Transport` with internal api handle.
-  explicit Transport(BarelyApi capi)
-      : capi_(capi), beat_callback_(nullptr), update_callback_(nullptr) {}
+  explicit Transport(BarelyApi capi) : capi_(capi), beat_callback_(nullptr) {}
 
   // Default destructor.
   ~Transport() = default;
@@ -1451,7 +1419,6 @@ class Transport {
   Transport(Transport&& other) noexcept
       : capi_(std::exchange(other.capi_, nullptr)) {
     SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
-    SetUpdateCallback(std::exchange(other.update_callback_, nullptr));
   }
 
   // Assigns `Transport` via move.
@@ -1459,11 +1426,9 @@ class Transport {
     if (this != &other) {
       if (capi_) {
         SetBeatCallback(nullptr);
-        SetUpdateCallback(nullptr);
       }
       capi_ = std::exchange(other.capi_, nullptr);
       SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
-      SetUpdateCallback(std::exchange(other.update_callback_, nullptr));
     }
     return *this;
   }
@@ -1473,9 +1438,6 @@ class Transport {
 
   // Beat callback.
   BeatCallback beat_callback_;
-
-  // Update callback.
-  UpdateCallback update_callback_;
 };
 
 /// BarelyMusician C++ api.

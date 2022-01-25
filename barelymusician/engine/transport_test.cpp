@@ -43,9 +43,9 @@ TEST(TransportTest, SetCallbacks) {
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 0.0);
 
   std::vector<std::tuple<std::string, std::vector<double>>> callback_values;
-  transport.SetBeatCallback([&](double position) {
-    callback_values.emplace_back(
-        "Beat", std::vector<double>{position, transport.GetTimestamp()});
+  transport.SetBeatCallback([&](double position, double timestamp) {
+    callback_values.emplace_back("Beat",
+                                 std::vector<double>{position, timestamp});
     if (position == 2.0) {
       // Halve the playback tempo.
       transport.SetTempo(0.5);

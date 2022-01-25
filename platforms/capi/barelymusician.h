@@ -222,19 +222,6 @@ typedef void (*BarelyInstrumentDefinition_SetParamFn)(void** state,
 typedef void (*BarelyTransport_BeatCallback)(double position, double timestamp,
                                              void* user_data);
 
-/// Transport update callback signature.
-///
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-/// @param begin_timestamp Begin timestamp in seconds.
-/// @param end_timestamp End timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyTransport_UpdateCallback)(double begin_position,
-                                               double end_position,
-                                               double begin_timestamp,
-                                               double end_timestamp,
-                                               void* user_data);
-
 /// BarelyMusician api.
 typedef struct BarelyMusician* BarelyApi;
 
@@ -1021,16 +1008,6 @@ BARELY_EXPORT BarelyStatus BarelyTransport_SetPosition(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyTransport_SetTempo(BarelyApi api,
                                                     double tempo);
-
-/// Sets transport update callback.
-///
-/// @param api BarelyMusician api.
-/// @param update_callback Update callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyTransport_SetUpdateCallback(
-    BarelyApi api, BarelyTransport_UpdateCallback update_callback,
-    void* user_data);
 
 /// Starts playing transport.
 ///

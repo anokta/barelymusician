@@ -11,7 +11,8 @@ class Transport {
   /// Beat callback signature.
   ///
   /// @param position Beat position in beats.
-  using BeatCallback = std::function<void(double position)>;
+  /// @param position Beat timestamp in seconds.
+  using BeatCallback = std::function<void(double position, double timestamp)>;
 
   /// Update callback signature.
   ///
@@ -22,21 +23,6 @@ class Transport {
 
   /// Constructs new |Transport|.
   Transport() noexcept;
-
-  /// Returns the last updated position.
-  ///
-  /// @return Last updated position in beats.
-  double GetLastPosition() const noexcept;
-
-  /// Returns the last updated timestamp.
-  ///
-  /// @return Last updated timestamp in seconds.
-  double GetLastTimestamp() const noexcept;
-
-  /// Returns the last updated timestamp at position.
-  ///
-  /// @return Last updated timestamp in seconds.
-  double GetLastTimestamp(double position) const noexcept;
 
   /// Returns the current position.
   ///
@@ -97,12 +83,6 @@ class Transport {
  private:
   // Denotes whether the transport is playing or not.
   bool is_playing_;
-
-  // Last updated position in beats.
-  double last_position_;
-
-  // Last updated timestamp in seconds.
-  double last_timestamp_;
 
   // Next beat position in beats.
   double next_beat_position_;

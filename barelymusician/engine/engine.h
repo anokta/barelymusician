@@ -23,17 +23,13 @@ namespace barelyapi {
 class Engine {
  public:
   /// Instrument note off callback signature.
-  using InstrumentNoteOffCallback = InstrumentController::NoteOffCallback;
+  using NoteOffCallback = InstrumentController::NoteOffCallback;
 
   /// Instrument note on callback signature.
-  using InstrumentNoteOnCallback = InstrumentController::NoteOnCallback;
+  using NoteOnCallback = InstrumentController::NoteOnCallback;
 
-  // TODO(#85): Temp definition to allow callback setter.
-  using BeatCallback = void (*)(double position, double timestamp,
-                                void* user_data);
-  using UpdateCallback = void (*)(double begin_position, double end_position,
-                                  double begin_timestamp, double end_timestamp,
-                                  void* user_data);
+  /// Beat callback signature.
+  using BeatCallback = Transport::BeatCallback;
 
   /// Constructs new `Engine`.
   Engine() noexcept;
@@ -208,10 +204,9 @@ class Engine {
   /// Sets the instrument note off callback.
   ///
   /// @param instrument_id Instrument id.
-  /// @param instrument_note_off_callback Instrument note off callback.
-  void SetInstrumentNoteOffCallback(
-      Id instrument_id,
-      InstrumentNoteOffCallback instrument_note_off_callback) noexcept;
+  /// @param note_off_callback Instrument note off callback.
+  void SetInstrumentNoteOffCallback(Id instrument_id,
+                                    NoteOffCallback note_off_callback) noexcept;
 
   /// Sets instrument note on.
   ///
@@ -225,10 +220,9 @@ class Engine {
   /// Sets the instrument note on callback.
   ///
   /// @param instrument_id Instrument id.
-  /// @param instrument_note_on_callback Instrument note on callback.
-  void SetInstrumentNoteOnCallback(
-      Id instrument_id,
-      InstrumentNoteOnCallback instrument_note_on_callback) noexcept;
+  /// @param note_on_callback Instrument note on callback.
+  void SetInstrumentNoteOnCallback(Id instrument_id,
+                                   NoteOnCallback note_on_callback) noexcept;
 
   /// Sets instrument parameter.
   ///
@@ -301,9 +295,7 @@ class Engine {
   /// Sets the playback beat callback.
   ///
   /// @param beat_callback Beat callback.
-  /// @param user_data User data.
-  void SetPlaybackBeatCallback(BeatCallback beat_callback,
-                               void* user_data) noexcept;
+  void SetPlaybackBeatCallback(BeatCallback beat_callback) noexcept;
 
   /// Sets the playback position.
   ///
@@ -314,13 +306,6 @@ class Engine {
   ///
   /// @param tempo Tempo in bpm.
   void SetPlaybackTempo(double tempo) noexcept;
-
-  /// Sets the playback update callback.
-  ///
-  /// @param update_callback Update callback.
-  /// @param user_data User data.
-  void SetPlaybackUpdateCallback(UpdateCallback update_callback,
-                                 void* user_data) noexcept;
 
   /// Starts the playback.
   void StartPlayback() noexcept;
@@ -352,9 +337,6 @@ class Engine {
     // Sequence to perform.
     Sequence sequence;
   };
-
-  // Updates sequences.
-  void UpdateSequences(double begin_position, double end_position);
 
   // Conductor.
   Conductor conductor_;

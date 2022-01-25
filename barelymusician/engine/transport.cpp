@@ -8,7 +8,7 @@ namespace barelyapi {
 namespace {
 
 // Dummy beat callback function that does nothing.
-void NoopBeatCallback(double /*position*/) noexcept {}
+void NoopBeatCallback(double /*position*/, double /*timestamp*/) noexcept {}
 
 // Dummy update callback function that does nothing.
 void NoopUpdateCallback(double /*begin_position*/,
@@ -18,8 +18,6 @@ void NoopUpdateCallback(double /*begin_position*/,
 
 Transport::Transport() noexcept
     : is_playing_(false),
-      last_position_(0.0),
-      last_timestamp_(0.0),
       next_beat_position_(0.0),
       next_beat_timestamp_(0.0),
       position_(0.0),
@@ -27,14 +25,6 @@ Transport::Transport() noexcept
       timestamp_(0.0),
       beat_callback_(&NoopBeatCallback),
       update_callback_(&NoopUpdateCallback) {}
-
-double Transport::GetLastPosition() const noexcept { return last_position_; }
-
-double Transport::GetLastTimestamp() const noexcept { return last_timestamp_; }
-
-double Transport::GetLastTimestamp(double position) const noexcept {
-  return last_timestamp_ + (position - last_position_) / tempo_;
-}
 
 double Transport::GetPosition() const noexcept { return position_; }
 
@@ -54,11 +44,7 @@ void Transport::SetBeatCallback(BeatCallback beat_callback) noexcept {
 
 void Transport::SetPosition(double position) noexcept {
   if (position != position_) {
-    const bool is_updated = (position_ == last_position_);
     position_ = std::max(position, 0.0);
-    if (is_updated) {
-      last_position_ = position_;
-    }
     next_beat_position_ = std::ceil(position_);
     next_beat_timestamp_ = GetTimestamp(next_beat_position_);
   }
@@ -80,7 +66,7 @@ void Transport::Start() noexcept {
   is_playing_ = true;
   next_beat_position_ = std::ceil(position_);
   if (position_ == next_beat_position_) {
-    beat_callback_(position_);
+    beat_callback_(position_, timestamp_);
     if (is_playing_ && position_ == next_beat_position_) {
       ++next_beat_position_;
     }
@@ -94,15 +80,13 @@ void Transport::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (!is_playing_ || tempo_ <= 0.0) {
       timestamp_ = timestamp;
-      last_timestamp_ = timestamp_;
       return;
     }
     // Compute next beat.
     if (position_ == next_beat_position_) {
-      beat_callback_(position_);
+      beat_callback_(position_, timestamp_);
       if (!is_playing_ || tempo_ <= 0.0) {
         timestamp_ = timestamp;
-        last_timestamp_ = timestamp_;
         return;
       }
       if (position_ == next_beat_position_) {
@@ -110,6 +94,7 @@ void Transport::Update(double timestamp) noexcept {
       }
     }
     // Update position.
+    const double begin_position = position_;
     if (next_beat_timestamp_ < timestamp) {
       position_ = next_beat_position_;
       timestamp_ = next_beat_timestamp_;
@@ -117,9 +102,7 @@ void Transport::Update(double timestamp) noexcept {
       position_ += tempo_ * (timestamp - timestamp_);
       timestamp_ = timestamp;
     }
-    update_callback_(last_position_, position_);
-    last_position_ = position_;
-    last_timestamp_ = timestamp_;
+    update_callback_(begin_position, position_);
   }
 }
 

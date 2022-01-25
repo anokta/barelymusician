@@ -283,29 +283,25 @@ int main(int /*argc*/, char* argv[]) {
 
   // Beat callback.
   int harmonic = 0;
-  std::function<void(double)> beat_callback = [&](double beat) {
+  const auto beat_callback = [&](double position, double /*timestamp*/) {
     // Update transport.
-    const int current_bar = static_cast<int>(beat) / kNumBeats;
-    const int current_beat = static_cast<int>(beat) % kNumBeats;
+    const int bar = static_cast<int>(position) / kNumBeats;
+    const int beat = static_cast<int>(position) % kNumBeats;
 
-    if (current_beat == 0) {
+    if (beat == 0) {
       // Compose next bar.
-      harmonic = bar_composer_callback(current_bar);
+      harmonic = bar_composer_callback(bar);
     }
     // Update members.
-    for (const auto& [performer_id, beat_callback] : performers) {
+    for (const auto& [performer_id, beat_composer_callback] : performers) {
       // Compose next beat notes.
-      if (beat_callback) {
-        beat_callback(current_bar, current_beat, kNumBeats, harmonic, beat,
-                      &engine, performer_id);
+      if (beat_composer_callback) {
+        beat_composer_callback(bar, beat, kNumBeats, harmonic, position,
+                               &engine, performer_id);
       }
     }
   };
-  engine.SetPlaybackBeatCallback(
-      [](double position, double, void* user_data) {
-        (*reinterpret_cast<std::function<void(double)>*>(user_data))(position);
-      },
-      reinterpret_cast<void*>(&beat_callback));
+  engine.SetPlaybackBeatCallback(beat_callback);
 
   // Audio process callback.
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);

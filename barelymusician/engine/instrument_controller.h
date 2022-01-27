@@ -39,11 +39,6 @@ class InstrumentController {
   /// @return Map of instrument events by their timestamps.
   std::multimap<double, InstrumentEvent> ExtractEvents();
 
-  /// Returns all parameters.
-  ///
-  /// @return List of parameter values.
-  std::vector<float> GetAllParams() const;
-
   /// Returns gain.
   ///
   /// @return gain Gain in amplitude.

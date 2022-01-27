@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_PROCESSOR_H_
 
 #include <map>
-#include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -15,10 +14,8 @@ class InstrumentProcessor {
   /// Constructs new `InstrumentProcessor`.
   ///
   /// @param definition Instrument definition.
-  /// @param param_values Parameter values.
   /// @param sample_rate Sampling rate in hz.
   InstrumentProcessor(InstrumentDefinition definition,
-                      std::vector<float> param_values,
                       int sample_rate) noexcept;
 
   /// Destroys `InstrumentProcessor`.

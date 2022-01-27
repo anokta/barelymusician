@@ -11,7 +11,6 @@
 namespace barelyapi {
 
 InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
-                                         std::vector<float> param_values,
                                          int sample_rate) noexcept
     : create_fn_(definition.create_fn),
       destroy_fn_(definition.destroy_fn),
@@ -23,8 +22,9 @@ InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
       gain_(1.0f),
       sample_rate_(sample_rate) {
   create_fn_(&state_, sample_rate_);
-  for (int i = 0; i < static_cast<int>(param_values.size()); ++i) {
-    set_param_fn_(&state_, i, param_values[i]);
+  const auto& param_definitions = definition.param_definitions;
+  for (int i = 0; i < static_cast<int>(param_definitions.size()); ++i) {
+    set_param_fn_(&state_, i, param_definitions[i].default_value);
   }
 }
 

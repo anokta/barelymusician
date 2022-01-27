@@ -31,16 +31,13 @@ Status InstrumentManager::Create(Id instrument_id, double /*timestamp*/,
                                  int sample_rate) noexcept {
   if (instrument_id == kInvalidId) return Status::kInvalidArgument;
   if (const auto [controller_it, success] = controllers_.emplace(
-          instrument_id,
-          InstrumentController(std::move(definition.param_definitions)));
+          instrument_id, InstrumentController(definition.param_definitions));
       success) {
     runner_.Add([this, instrument_id, sample_rate,
-                 definition = std::move(definition),
-                 param_values = controller_it->second.GetAllParams()]() {
+                 definition = std::move(definition)]() {
       processors_.emplace(
           std::piecewise_construct, std::forward_as_tuple(instrument_id),
-          std::forward_as_tuple(std::move(definition), std::move(param_values),
-                                sample_rate));
+          std::forward_as_tuple(std::move(definition), sample_rate));
     });
     return Status::kOk;
   }

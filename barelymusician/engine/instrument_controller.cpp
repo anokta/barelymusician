@@ -36,15 +36,6 @@ std::multimap<double, InstrumentEvent> InstrumentController::ExtractEvents() {
   return std::exchange(events_, {});
 }
 
-std::vector<float> InstrumentController::GetAllParams() const {
-  std::vector<float> params;
-  params.reserve(params_.size());
-  for (const auto& param : params_) {
-    params.push_back(param.GetValue());
-  }
-  return params;
-}
-
 float InstrumentController::GetGain() const { return gain_; }
 
 const Param* InstrumentController::GetParam(int index) const {

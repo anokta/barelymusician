@@ -24,6 +24,12 @@ constexpr double kDefaultPlaybackTempo = 120.0;
 // Converts seconds from minutes.
 constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 
+/// Instrument id-event pair.
+using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;
+
+/// Instrument id-event pair by position map type.
+using InstrumentIdEventPairMap = std::multimap<double, InstrumentIdEventPair>;
+
 }  // namespace
 
 Engine::Engine() noexcept : playback_tempo_(kDefaultPlaybackTempo) {

@@ -5,9 +5,21 @@
 #include <utility>
 #include <variant>
 
-#include "barelymusician/common/id.h"
+#include "barelymusician/engine/instrument_definition.h"
 
 namespace barelyapi {
+
+/// Create event.
+struct CreateEvent {
+  /// Definition.
+  InstrumentDefinition definition;
+
+  /// Sampling rate in hz.
+  int sample_rate;
+};
+
+/// Destroy event.
+struct DestroyEvent {};
 
 /// Set data event.
 struct SetDataEvent {
@@ -46,14 +58,9 @@ struct StopNoteEvent {
 };
 
 /// Instrument event type.
-using InstrumentEvent = std::variant<SetDataEvent, SetGainEvent, SetParamEvent,
-                                     StartNoteEvent, StopNoteEvent>;
-
-/// Instrument id-event pair.
-using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;
-
-/// Instrument id-event pair by position map type.
-using InstrumentIdEventPairMap = std::multimap<double, InstrumentIdEventPair>;
+using InstrumentEvent =
+    std::variant<CreateEvent, DestroyEvent, SetDataEvent, SetGainEvent,
+                 SetParamEvent, StartNoteEvent, StopNoteEvent>;
 
 }  // namespace barelyapi
 

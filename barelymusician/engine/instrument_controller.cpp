@@ -4,8 +4,8 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/param_definition.h"
 
 namespace barelyapi {
 
@@ -20,16 +20,17 @@ void NoopNoteOnCallback(float /*pitch*/, float /*intensity*/,
 
 }  // namespace
 
-InstrumentController::InstrumentController(
-    std::vector<ParamDefinition> param_definitions)
+InstrumentController::InstrumentController(InstrumentDefinition definition,
+                                           int sample_rate, double timestamp)
     : gain_(1.0f),
       is_muted_(false),
       note_off_callback_(&NoopNoteOffCallback),
       note_on_callback_(&NoopNoteOnCallback) {
-  params_.reserve(param_definitions.size());
-  for (auto& param_definition : param_definitions) {
-    params_.emplace_back(std::move(param_definition));
+  params_.reserve(definition.param_definitions.size());
+  for (const auto& param_definition : definition.param_definitions) {
+    params_.emplace_back(param_definition);
   }
+  events_.emplace(timestamp, CreateEvent{std::move(definition), sample_rate});
 }
 
 std::multimap<double, InstrumentEvent> InstrumentController::ExtractEvents() {

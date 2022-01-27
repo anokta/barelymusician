@@ -26,19 +26,17 @@ constexpr int kNumMaxTasks = 100;
 
 InstrumentManager::InstrumentManager() noexcept : runner_(kNumMaxTasks) {}
 
-Status InstrumentManager::Create(Id instrument_id, double /*timestamp*/,
+Status InstrumentManager::Create(Id instrument_id, double timestamp,
                                  InstrumentDefinition definition,
                                  int sample_rate) noexcept {
   if (instrument_id == kInvalidId) return Status::kInvalidArgument;
-  if (const auto [controller_it, success] = controllers_.emplace(
-          instrument_id, InstrumentController(definition.param_definitions));
-      success) {
-    runner_.Add([this, instrument_id, sample_rate,
-                 definition = std::move(definition)]() {
-      processors_.emplace(
-          std::piecewise_construct, std::forward_as_tuple(instrument_id),
-          std::forward_as_tuple(std::move(definition), sample_rate));
-    });
+  if (update_events_
+          .emplace(instrument_id, std::multimap<double, InstrumentEvent>{})
+          .second &&
+      controllers_
+          .emplace(instrument_id, InstrumentController(std::move(definition),
+                                                       sample_rate, timestamp))
+          .second) {
     return Status::kOk;
   }
   return Status::kAlreadyExists;
@@ -49,9 +47,7 @@ Status InstrumentManager::Destroy(Id instrument_id, double timestamp) noexcept {
       controller_it != controllers_.end()) {
     controller_it->second.StopAllNotes(timestamp);
     controllers_.erase(controller_it);
-    runner_.Add([this, instrument_id = instrument_id]() {
-      processors_.erase(instrument_id);
-    });
+    update_events_[instrument_id].emplace(timestamp, DestroyEvent{});
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -108,7 +104,15 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
 void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
                                      InstrumentEvent event) noexcept {
   std::visit(
-      Visitor{[&](SetDataEvent& set_data_event) noexcept {
+      Visitor{[&](CreateEvent& create_event) noexcept {
+                Create(instrument_id, timestamp,
+                       std::move(create_event.definition),
+                       create_event.sample_rate);
+              },
+              [&](DestroyEvent& /*destroy_event*/) noexcept {
+                Destroy(instrument_id, timestamp);
+              },
+              [&](SetDataEvent& set_data_event) noexcept {
                 SetData(instrument_id, timestamp, set_data_event.data);
               },
               [&](SetGainEvent& set_gain_event) noexcept {
@@ -248,16 +252,37 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
 }
 
 void InstrumentManager::Update() noexcept {
+  // TODO: This is a temp hack to keep update working until controller is
+  // refactored back to using external update events map.
   for (auto& [instrument_id, controller] : controllers_) {
     auto events = controller.ExtractEvents();
     if (!events.empty()) {
-      runner_.Add(
-          [this, instrument_id = instrument_id, events = std::move(events)]() {
-            if (auto* processor = FindOrNull(processors_, instrument_id)) {
-              processor->MergeEvents(std::move(events));
-            }
-          });
+      update_events_[instrument_id].merge(std::move(events));
     }
+  }
+  if (!update_events_.empty()) {
+    runner_.Add([this,
+                 update_events = std::exchange(update_events_, {})]() mutable {
+      for (auto& [instrument_id, events] : update_events) {
+        // TODO: This is a temp hack to keep create/destroy working until
+        // processor is refactored back to having optional instrument.
+        for (auto& [timestamp, event] : events) {
+          if (std::holds_alternative<CreateEvent>(event)) {
+            auto& create_event = std::get<CreateEvent>(event);
+            processors_.emplace(
+                std::piecewise_construct, std::forward_as_tuple(instrument_id),
+                std::forward_as_tuple(std::move(create_event.definition),
+                                      create_event.sample_rate));
+          } else if (std::holds_alternative<DestroyEvent>(event)) {
+            processors_.erase(instrument_id);
+          }
+        }
+
+        if (auto* processor = FindOrNull(processors_, instrument_id)) {
+          processor->MergeEvents(std::move(events));
+        }
+      }
+    });
   }
 }
 

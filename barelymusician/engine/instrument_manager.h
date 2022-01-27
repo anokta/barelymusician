@@ -198,9 +198,14 @@ class InstrumentManager {
   void Update() noexcept;
 
  private:
-  // List of instruments.
+  // Instrument controller by id map.
   std::unordered_map<Id, InstrumentController> controllers_;
+
+  // Instrument controller by id map.
   std::unordered_map<Id, InstrumentProcessor> processors_;
+
+  // Instrument update events by id map.
+  std::unordered_map<Id, std::multimap<double, InstrumentEvent>> update_events_;
 
   // Audio thread task runner.
   TaskRunner runner_;

@@ -6,9 +6,9 @@
 #include <unordered_set>
 #include <vector>
 
+#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/param.h"
-#include "barelymusician/engine/param_definition.h"
 
 namespace barelyapi {
 
@@ -31,8 +31,11 @@ class InstrumentController {
 
   /// Constructs new `InstrumentController`.
   ///
-  /// @param param_definitions List of parameter definitions.
-  explicit InstrumentController(std::vector<ParamDefinition> param_definitions);
+  /// @param definition Instrument definition.
+  /// @param sample_rate Sampling rate in hz.
+  /// @param timestamp Timestamp in seconds.
+  InstrumentController(InstrumentDefinition definition, int sample_rate,
+                       double timestamp);
 
   /// Extracts events to be processed.
   ///

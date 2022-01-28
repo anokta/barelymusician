@@ -112,8 +112,7 @@ Engine::Engine() noexcept : playback_tempo_(kDefaultPlaybackTempo) {
 Id Engine::AddInstrument(InstrumentDefinition definition,
                          int sample_rate) noexcept {
   const Id instrument_id = id_generator_.Next();
-  instrument_manager_.Create(instrument_id, transport_.GetTimestamp(),
-                             std::move(definition), sample_rate);
+  instrument_manager_.Create(instrument_id, std::move(definition), sample_rate);
   return instrument_id;
 }
 
@@ -211,9 +210,10 @@ Status Engine::RemoveAllPerformerNotes(Id performer_id) noexcept {
 }
 
 Status Engine::RemoveInstrument(Id instrument_id) noexcept {
-  const auto status =
-      instrument_manager_.Destroy(instrument_id, transport_.GetTimestamp());
+  const auto status = instrument_manager_.SetAllNotesOff(
+      instrument_id, transport_.GetTimestamp());
   if (IsOk(status)) {
+    instrument_manager_.Destroy(instrument_id);
     for (auto& [performer_id, performer] : performers_) {
       if (performer.instrument_id == instrument_id) {
         performer.instrument_id = kInvalidId;
@@ -237,7 +237,7 @@ Status Engine::RemovePerformer(Id performer_id) noexcept {
       performer_it != performers_.end()) {
     const double timestamp = transport_.GetTimestamp();
     const auto instrument_id = performer_it->second.instrument_id;
-    if (instrument_manager_.IsValid(instrument_id)) {
+    if (instrument_id != kInvalidId) {
       for (auto& [position, active_note] : performer_it->second.active_notes) {
         instrument_manager_.ProcessEvent(instrument_id, timestamp,
                                          StopNoteEvent{active_note.pitch});

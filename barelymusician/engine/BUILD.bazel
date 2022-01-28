@@ -58,6 +58,7 @@ cc_library(
         ":instrument_event",
         ":param",
         ":param_definition",
+        "//barelymusician/common:visitor",
     ],
 )
 
@@ -92,7 +93,6 @@ cc_library(
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
-        "//barelymusician/common:visitor",
         "//barelymusician/dsp:dsp_utils",
     ],
 )

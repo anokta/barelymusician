@@ -2,12 +2,10 @@
 
 #include <algorithm>
 #include <utility>
-#include <variant>
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/common/visitor.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
@@ -26,28 +24,27 @@ constexpr int kNumMaxTasks = 100;
 
 InstrumentManager::InstrumentManager() noexcept : runner_(kNumMaxTasks) {}
 
-Status InstrumentManager::Create(Id instrument_id, double timestamp,
+Status InstrumentManager::Create(Id instrument_id,
                                  InstrumentDefinition definition,
                                  int sample_rate) noexcept {
   if (instrument_id == kInvalidId) return Status::kInvalidArgument;
-  if (update_events_
-          .emplace(instrument_id, std::multimap<double, InstrumentEvent>{})
-          .second &&
-      controllers_
-          .emplace(instrument_id, InstrumentController(std::move(definition),
-                                                       sample_rate, timestamp))
+  if (controllers_.emplace(instrument_id, InstrumentController(definition))
           .second) {
+    runner_.Add([this, instrument_id, definition = std::move(definition),
+                 sample_rate]() noexcept {
+      processors_.emplace(
+          std::piecewise_construct, std::forward_as_tuple(instrument_id),
+          std::forward_as_tuple(std::move(definition), sample_rate));
+    });
     return Status::kOk;
   }
   return Status::kAlreadyExists;
 }
 
-Status InstrumentManager::Destroy(Id instrument_id, double timestamp) noexcept {
-  if (const auto controller_it = controllers_.find(instrument_id);
-      controller_it != controllers_.end()) {
-    controller_it->second.StopAllNotes(timestamp);
-    controllers_.erase(controller_it);
-    update_events_[instrument_id].emplace(timestamp, DestroyEvent{});
+Status InstrumentManager::Destroy(Id instrument_id) noexcept {
+  if (controllers_.erase(instrument_id) > 0) {
+    runner_.Add(
+        [this, instrument_id]() noexcept { processors_.erase(instrument_id); });
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -86,10 +83,6 @@ StatusOr<bool> InstrumentManager::IsNoteOn(Id instrument_id,
   return Status::kNotFound;
 }
 
-bool InstrumentManager::IsValid(Id instrument_id) const noexcept {
-  return controllers_.contains(instrument_id);
-}
-
 void InstrumentManager::Process(Id instrument_id, double timestamp,
                                 float* output, int num_channels,
                                 int num_frames) noexcept {
@@ -103,33 +96,9 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
 
 void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
                                      InstrumentEvent event) noexcept {
-  std::visit(
-      Visitor{[&](CreateEvent& create_event) noexcept {
-                Create(instrument_id, timestamp,
-                       std::move(create_event.definition),
-                       create_event.sample_rate);
-              },
-              [&](DestroyEvent& /*destroy_event*/) noexcept {
-                Destroy(instrument_id, timestamp);
-              },
-              [&](SetDataEvent& set_data_event) noexcept {
-                SetData(instrument_id, timestamp, set_data_event.data);
-              },
-              [&](SetGainEvent& set_gain_event) noexcept {
-                SetGain(instrument_id, timestamp, set_gain_event.gain);
-              },
-              [&](SetParamEvent& set_param_event) noexcept {
-                SetParam(instrument_id, timestamp, set_param_event.index,
-                         set_param_event.value);
-              },
-              [&](StartNoteEvent& start_note_event) noexcept {
-                SetNoteOn(instrument_id, timestamp, start_note_event.pitch,
-                          start_note_event.intensity);
-              },
-              [&](StopNoteEvent& stop_note_event) noexcept {
-                SetNoteOff(instrument_id, timestamp, stop_note_event.pitch);
-              }},
-      event);
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->ProcessEvent(std::move(event), timestamp);
+  }
 }
 
 void InstrumentManager::SetAllNotesOff(double timestamp) noexcept {
@@ -261,28 +230,14 @@ void InstrumentManager::Update() noexcept {
     }
   }
   if (!update_events_.empty()) {
-    runner_.Add([this,
-                 update_events = std::exchange(update_events_, {})]() mutable {
-      for (auto& [instrument_id, events] : update_events) {
-        // TODO: This is a temp hack to keep create/destroy working until
-        // processor is refactored back to having optional instrument.
-        for (auto& [timestamp, event] : events) {
-          if (std::holds_alternative<CreateEvent>(event)) {
-            auto& create_event = std::get<CreateEvent>(event);
-            processors_.emplace(
-                std::piecewise_construct, std::forward_as_tuple(instrument_id),
-                std::forward_as_tuple(std::move(create_event.definition),
-                                      create_event.sample_rate));
-          } else if (std::holds_alternative<DestroyEvent>(event)) {
-            processors_.erase(instrument_id);
+    runner_.Add(
+        [this, update_events = std::exchange(update_events_, {})]() noexcept {
+          for (auto& [instrument_id, events] : update_events) {
+            if (auto* processor = FindOrNull(processors_, instrument_id)) {
+              processor->MergeEvents(std::move(events));
+            }
           }
-        }
-
-        if (auto* processor = FindOrNull(processors_, instrument_id)) {
-          processor->MergeEvents(std::move(events));
-        }
-      }
-    });
+        });
   }
 }
 

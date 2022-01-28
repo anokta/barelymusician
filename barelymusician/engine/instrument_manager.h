@@ -28,19 +28,17 @@ class InstrumentManager {
   /// Adds new instrument at timestamp.
   ///
   /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
   /// @param definition Instrument definition.
   /// @param sample_rate Sampling rate in hz.
   /// @return Status.
-  Status Create(Id instrument_id, double timestamp,
-                InstrumentDefinition definition, int sample_rate) noexcept;
+  Status Create(Id instrument_id, InstrumentDefinition definition,
+                int sample_rate) noexcept;
 
   /// Removes instrument at timestamp.
   ///
   /// @param instrument_id Instrument id.
-  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status Destroy(Id instrument_id, double timestamp) noexcept;
+  Status Destroy(Id instrument_id) noexcept;
 
   /// Returns instrument parameter.
   ///
@@ -67,12 +65,6 @@ class InstrumentManager {
   /// @param note_pitch Note pitch.
   /// @return True if note is active, or false if not, or error status.
   StatusOr<bool> IsNoteOn(Id instrument_id, float note_pitch) const noexcept;
-
-  /// Returns whether instrument is valid or not.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return True if instrument is valid (i.e., exists), false otherwise.
-  bool IsValid(Id instrument_id) const noexcept;
 
   /// Processes the next instrument output buffer at timestamp.
   ///

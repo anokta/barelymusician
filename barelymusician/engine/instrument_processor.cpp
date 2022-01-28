@@ -51,28 +51,24 @@ void InstrumentProcessor::Process(float* output, int num_output_channels,
                   num_output_channels, message_frame - frame);
       frame = message_frame;
     }
-    std::visit(
-        Visitor{// TODO: Refactor to avoid redundant create/destroy event cases.
-                [](CreateEvent& /*create_event*/) noexcept {},
-                [](DestroyEvent& /*destroy_event*/) noexcept {},
-                [this](const SetDataEvent& set_data_event) noexcept {
-                  set_data_fn_(&state_, set_data_event.data);
-                },
-                [this](const SetGainEvent& set_gain_event) noexcept {
-                  gain_ = set_gain_event.gain;
-                },
-                [this](const SetParamEvent& set_param_event) noexcept {
-                  set_param_fn_(&state_, set_param_event.index,
-                                set_param_event.value);
-                },
-                [this](const StartNoteEvent& start_note_event) noexcept {
-                  set_note_on_fn_(&state_, start_note_event.pitch,
-                                  start_note_event.intensity);
-                },
-                [this](const StopNoteEvent& stop_note_event) noexcept {
-                  set_note_off_fn_(&state_, stop_note_event.pitch);
-                }},
-        it->second);
+    std::visit(Visitor{[this](const SetDataEvent& set_data_event) noexcept {
+                         set_data_fn_(&state_, set_data_event.data);
+                       },
+                       [this](const SetGainEvent& set_gain_event) noexcept {
+                         gain_ = set_gain_event.gain;
+                       },
+                       [this](const SetParamEvent& set_param_event) noexcept {
+                         set_param_fn_(&state_, set_param_event.index,
+                                       set_param_event.value);
+                       },
+                       [this](const StartNoteEvent& start_note_event) noexcept {
+                         set_note_on_fn_(&state_, start_note_event.pitch,
+                                         start_note_event.intensity);
+                       },
+                       [this](const StopNoteEvent& stop_note_event) noexcept {
+                         set_note_off_fn_(&state_, stop_note_event.pitch);
+                       }},
+               it->second);
   }
   events_.erase(begin, end);
   // Process the rest of the buffer.

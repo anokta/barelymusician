@@ -1,25 +1,9 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_EVENT_H_
 
-#include <map>
-#include <utility>
 #include <variant>
 
-#include "barelymusician/engine/instrument_definition.h"
-
 namespace barelyapi {
-
-/// Create event.
-struct CreateEvent {
-  /// Definition.
-  InstrumentDefinition definition;
-
-  /// Sampling rate in hz.
-  int sample_rate;
-};
-
-/// Destroy event.
-struct DestroyEvent {};
 
 /// Set data event.
 struct SetDataEvent {
@@ -58,9 +42,8 @@ struct StopNoteEvent {
 };
 
 /// Instrument event type.
-using InstrumentEvent =
-    std::variant<CreateEvent, DestroyEvent, SetDataEvent, SetGainEvent,
-                 SetParamEvent, StartNoteEvent, StopNoteEvent>;
+using InstrumentEvent = std::variant<SetDataEvent, SetGainEvent, SetParamEvent,
+                                     StartNoteEvent, StopNoteEvent>;
 
 }  // namespace barelyapi
 

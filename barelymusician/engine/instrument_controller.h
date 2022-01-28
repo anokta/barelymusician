@@ -32,10 +32,7 @@ class InstrumentController {
   /// Constructs new `InstrumentController`.
   ///
   /// @param definition Instrument definition.
-  /// @param sample_rate Sampling rate in hz.
-  /// @param timestamp Timestamp in seconds.
-  InstrumentController(InstrumentDefinition definition, int sample_rate,
-                       double timestamp);
+  explicit InstrumentController(InstrumentDefinition definition);
 
   /// Extracts events to be processed.
   ///
@@ -64,7 +61,11 @@ class InstrumentController {
   /// @return True if active, false otherwise.
   bool IsNoteOn(float pitch) const;
 
-  // TODO(#85): Implement `ProcessEvent`?
+  /// Processes event at timestamp.
+  ///
+  /// @param event Instrument event.
+  /// @param timestamp Timestamp in seconds.
+  bool ProcessEvent(InstrumentEvent event, double timestamp);
 
   /// Resets all parameters to default value at timestamp.
   ///

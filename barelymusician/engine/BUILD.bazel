@@ -114,7 +114,7 @@ cc_library(
     srcs = ["param.cpp"],
     hdrs = ["param.h"],
     deps = [
-        "param_definition",
+        ":param_definition",
     ],
 )
 
@@ -157,6 +157,9 @@ cc_test(
         ":param_definition",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_intensity",
+        "//barelymusician/composition:note_pitch",
         "@googletest//:gtest_main",
     ],
 )

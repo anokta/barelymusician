@@ -4,9 +4,9 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 
 git_repository(
     name = "googletest",
-    commit = "e7e591764baba0a0c3c9ad0014430e7a27331d16",
+    commit = "e2239ee6043f73722e7aa812a459f54a28552929",
     remote = "https://github.com/google/googletest.git",
-    shallow_since = "1614877659 -0500",
+    shallow_since = "1623433346 -0700",
 )
 
 new_git_repository(
@@ -23,8 +23,9 @@ cc_library(
     hdrs = ["dr_wav.h"],
 )
     """,
-    commit = "cac1785cee4abb455817b43d5dee33b49d61be2f",
+    commit = "4aff56541f5e6bd4b74053a0d5c9e6156e736059",
     remote = "https://github.com/mackron/dr_libs.git",
+    shallow_since = "1641552114 +1000",
 )
 
 new_git_repository(
@@ -49,9 +50,9 @@ cc_library(
     includes = ["include"],
 )
     """,
-    commit = "988d55b80a9b85fc194454293950cf233cdcb8c4",
+    commit = "de6aa0c8f82f9dff29b62dba013a65c9034d633d",
     remote = "https://github.com/craigsapp/midifile.git",
-    shallow_since = "1591146060 -0700",
+    shallow_since = "1624599610 -0700",
 )
 
 new_git_repository(
@@ -89,6 +90,7 @@ cc_library(
     hdrs = ["include/portaudio.h"],
     copts = select({
         "@platforms//os:osx": ["-Wno-deprecated-declarations"],
+        "@platforms//os:windows": ["/w"],
         "//conditions:default": [],
     }),
     defines = select({
@@ -112,7 +114,7 @@ cc_library(
     }),
 )
     """,
-    commit = "eec7bb739771381ab698a6a611d933bdd72cbd8f",
+    commit = "147dd722548358763a8b649b3e4b41dfffbcfbb6",
     remote = "https://github.com/PortAudio/portaudio.git",
-    shallow_since = "1616176291 -0700",
+    shallow_since = "1617236250 -0700",
 )

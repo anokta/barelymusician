@@ -42,6 +42,6 @@ jobs:
         run: |
           mkdir -p cmake-build && cd cmake-build
           cmake ..
-          cmake --build . --verbose --config Debug
+          cmake --build .
       - name: test
-        run: ctest --output-on-failure . --verbose -C Debug
+        run: ctest --output-on-failure

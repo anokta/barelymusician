@@ -18,12 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install
-        if: ${{ matrix.os }} == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y libasound-dev
       - name: build
         run: bazel build ...
       - name: test
-        run: bazel test --test-output=errors ...
+        run: bazel test --test_output=errors ...
 
   cmake:
     name: cmake on ${{ matrix.os }}
@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: install
-        if: ${{ matrix.os }} == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y libasound-dev
       - name: build
         run: |

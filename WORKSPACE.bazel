@@ -74,8 +74,8 @@ cc_library(
         "include/*.h",
     ]) + select({
         "@platforms//os:linux": glob([
-            "src/hostapi/jack/*.c",
-            "src/hostapi/jack/*.h",
+            "src/hostapi/alsa/*.c",
+            "src/hostapi/alsa/*.h",
             "src/os/unix/*.c",
             "src/os/unix/*.h",
         ]),
@@ -99,7 +99,7 @@ cc_library(
         "//conditions:default": ["-w"],
     }),
     defines = select({
-        "@platforms//os:linux": ["PA_USE_JACK=1"],
+        "@platforms//os:linux": ["PA_USE_ALSA=1"],
         "@platforms//os:osx": ["PA_USE_COREAUDIO=1"],
         "@platforms//os:windows": ["PA_USE_WMME=1"],
         "//conditions:default": [],

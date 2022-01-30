@@ -10,23 +10,33 @@ if (MSVC)
     /W4
     /WX
   )
+elseif (APPLE)
+  add_compile_options(
+    -Wall
+    -Wextra
+    -Wno-missing-field-initializers
+    -Wno-unused-lambda-capture
+    -Werror
+  )
 else ()
   add_compile_options(
     -Wall
     -Wextra
-    -Wno-unused-lambda-capture
+    -Wno-missing-field-initializers
     -Werror
   )
 endif ()
 
+enable_testing()
 include(FetchContent)
 FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
 )
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+if (MSVC)
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif ()
 FetchContent_MakeAvailable(googletest)
-enable_testing()
 include(GoogleTest)
 
 include_directories(.)

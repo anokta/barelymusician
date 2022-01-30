@@ -40,7 +40,7 @@ std::multimap<double, InstrumentEvent> InstrumentController::ExtractEvents() {
 float InstrumentController::GetGain() const { return gain_; }
 
 const Param* InstrumentController::GetParam(int index) const {
-  if (index >= 0 && index < params_.size()) {
+  if (index >= 0 && index < static_cast<int>(params_.size())) {
     return &params_[index];
   }
   return nullptr;
@@ -86,7 +86,7 @@ void InstrumentController::ResetAllParams(double timestamp) {
 }
 
 bool InstrumentController::ResetParam(int index, double timestamp) {
-  if (index >= 0 && index < params_.size()) {
+  if (index >= 0 && index < static_cast<int>(params_.size())) {
     if (params_[index].ResetValue()) {
       events_.emplace_hint(events_.end(), timestamp,
                            SetParamEvent{index, params_[index].GetValue()});
@@ -129,7 +129,7 @@ void InstrumentController::SetNoteOnCallback(NoteOnCallback note_on_callback) {
 }
 
 bool InstrumentController::SetParam(int index, float value, double timestamp) {
-  if (index >= 0 && index < params_.size()) {
+  if (index >= 0 && index < static_cast<int>(params_.size())) {
     if (params_[index].SetValue(value)) {
       events_.emplace_hint(events_.end(), timestamp,
                            SetParamEvent{index, params_[index].GetValue()});

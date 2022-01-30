@@ -73,6 +73,12 @@ cc_library(
         "src/common/*.h",
         "include/*.h",
     ]) + select({
+        "@platforms//os:linux": glob([
+            "src/hostapi/alsa/*.c",
+            "src/hostapi/alsa/*.h",
+            "src/os/unix/*.c",
+            "src/os/unix/*.h",
+        ]),
         "@platforms//os:osx": glob([
             "src/hostapi/coreaudio/*.c",
             "src/hostapi/coreaudio/*.h",
@@ -89,11 +95,11 @@ cc_library(
     }),
     hdrs = ["include/portaudio.h"],
     copts = select({
-        "@platforms//os:osx": ["-Wno-deprecated-declarations"],
         "@platforms//os:windows": ["/w"],
-        "//conditions:default": [],
+        "//conditions:default": ["-w"],
     }),
     defines = select({
+        "@platforms//os:linux": ["PA_USE_ALSA=1"],
         "@platforms//os:osx": ["PA_USE_COREAUDIO=1"],
         "@platforms//os:windows": ["PA_USE_WMME=1"],
         "//conditions:default": [],
@@ -104,6 +110,10 @@ cc_library(
         "src/os/unix",
     ],
     linkopts = select({
+        "@platforms//os:linux": [
+            "-lasound",
+            "-pthread",
+        ],
         "@platforms//os:osx": [
             "-framework AudioUnit",
             "-framework CoreAudio",

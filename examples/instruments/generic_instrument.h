@@ -54,9 +54,12 @@ barelyapi::InstrumentDefinition GetInstrumentDefinition(
   return barelyapi::InstrumentDefinition{
       .create_fn =
           [](void** state, int sample_rate) noexcept {
-            *state = new InstrumentType(sample_rate);
+            *state = reinterpret_cast<void*>(new InstrumentType(sample_rate));
           },
-      .destroy_fn = [](void** state) noexcept { delete *state; },
+      .destroy_fn =
+          [](void** state) noexcept {
+            delete reinterpret_cast<InstrumentType*>(*state);
+          },
       .process_fn =
           [](void** state, float* output, int num_channels,
              int num_frames) noexcept {

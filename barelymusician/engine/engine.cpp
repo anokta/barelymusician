@@ -36,7 +36,8 @@ Engine::Engine() noexcept : playback_tempo_(kDefaultPlaybackTempo) {
   transport_.SetUpdateCallback([this](double begin_position,
                                       double end_position) noexcept {
     InstrumentIdEventPairMap id_event_pairs;
-    for (auto& [performer_id, performer] : performers_) {
+    for (auto& performer_it : performers_) {
+      auto& performer = performer_it.second;
       const auto instrument_id = performer.instrument_id;
       // Perform active note events.
       for (auto it = performer.active_notes.begin();

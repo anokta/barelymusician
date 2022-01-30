@@ -42,6 +42,7 @@ jobs:
         run: |
           mkdir -p cmake-build && cd cmake-build
           cmake ..
+          cmake -DBUILD_TESTS=ON .
           cmake --build .
       - name: test
         run: ctest --output-on-failure

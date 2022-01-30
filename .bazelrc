@@ -9,7 +9,6 @@ build:windows --cxxopt=-std:c++latest
 build:linux --cxxopt=-Wall
 build:linux --cxxopt=-Wextra
 build:linux --cxxopt=-Wno-missing-field-initializers
-build:linux --cxxopt=-Wno-unused-lambda-capture
 build:linux --cxxopt=-Werror
 build:macos --cxxopt=-Wall
 build:macos --cxxopt=-Wextra

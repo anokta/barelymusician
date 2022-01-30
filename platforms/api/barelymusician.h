@@ -1257,7 +1257,9 @@ class Sequence {
   Status SetInstrument(const Instrument* instrument) {
     instrument_ = instrument;
     return static_cast<Status>(BarelySequence_SetInstrument(
-        capi_, id_, instrument_ ? instrument_->id_ : BarelyId_kInvalid));
+        capi_, id_,
+        instrument_ ? instrument_->id_
+                    : static_cast<BarelyId>(BarelyId_kInvalid)));
   }
 
   /// Sets loop begin offset.

@@ -8,8 +8,8 @@ namespace barelyapi {
 /// @param map Map.
 /// @param key Key.
 /// @return Const pointer to value if succeeds, nullptr otherwise.
-template <typename MapType, typename KeyType = MapType::key_type,
-          typename ValueType = MapType::mapped_type>
+template <typename MapType, typename KeyType = typename MapType::key_type,
+          typename ValueType = typename MapType::mapped_type>
 const ValueType* FindOrNull(const MapType& map, const KeyType& key) noexcept;
 
 /// Returns a map value by key.
@@ -17,8 +17,8 @@ const ValueType* FindOrNull(const MapType& map, const KeyType& key) noexcept;
 /// @param map Map.
 /// @param key Key.
 /// @return Pointer to value if succeeds, nullptr otherwise.
-template <typename MapType, typename KeyType = MapType::key_type,
-          typename ValueType = MapType::mapped_type>
+template <typename MapType, typename KeyType = typename MapType::key_type,
+          typename ValueType = typename MapType::mapped_type>
 ValueType* FindOrNull(MapType& map, const KeyType& key) noexcept;
 
 template <typename MapType, typename KeyType, typename ValueType>

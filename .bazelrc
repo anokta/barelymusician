@@ -8,12 +8,10 @@ build:windows --cxxopt=-std:c++latest
 # treat warnings as errors.
 build:linux --cxxopt=-Wall
 build:linux --cxxopt=-Wextra
-build:linux --cxxopt=-Wno-enum-compare
 build:linux --cxxopt=-Wno-missing-field-initializers
 build:linux --cxxopt=-Werror
 build:macos --cxxopt=-Wall
 build:macos --cxxopt=-Wextra
-build:linux --cxxopt=-Wno-enum-compare
 build:macos --cxxopt=-Wno-missing-field-initializers
 build:macos --cxxopt=-Wno-unused-lambda-capture
 build:macos --cxxopt=-Werror

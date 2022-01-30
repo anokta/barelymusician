@@ -439,9 +439,9 @@ class Conductor {
     std::vector<BarelyParamDefinition> param_definitions;
     param_definitions.reserve(definition.param_definitions.size());
     for (const auto& param_definition : definition.param_definitions) {
-      param_definitions.emplace_back(param_definition.default_value,
-                                     param_definition.min_value,
-                                     param_definition.max_value);
+      param_definitions.push_back(BarelyParamDefinition{
+          param_definition.default_value, param_definition.min_value,
+          param_definition.max_value});
     }
     return static_cast<Status>(BarelyConductor_SetDefinition(
         capi_,
@@ -880,9 +880,9 @@ class Instrument {
       std::vector<BarelyParamDefinition> param_definitions;
       param_definitions.reserve(definition.param_definitions.size());
       for (const auto& param_definition : definition.param_definitions) {
-        param_definitions.emplace_back(param_definition.default_value,
-                                       param_definition.min_value,
-                                       param_definition.max_value);
+        param_definitions.push_back(BarelyParamDefinition{
+            param_definition.default_value, param_definition.min_value,
+            param_definition.max_value});
       }
       const auto status = BarelyInstrument_Create(
           capi_,
@@ -1071,6 +1071,7 @@ class Sequence {
               definition.pitch, definition.intensity,
               definition.bypass_adjustment},
           &note_id);
+      assert(status == BarelyStatus_kOk);
     }
     return NoteReference(capi_, id_, note_id);
   }
@@ -1550,4 +1551,4 @@ class Api {
 
 }  // namespace barely
 
-#endif PLATFORMS_API_BARELYMUSICIAN_H_
+#endif  // PLATFORMS_API_BARELYMUSICIAN_H_

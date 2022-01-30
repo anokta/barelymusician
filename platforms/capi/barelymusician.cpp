@@ -59,11 +59,11 @@ InstrumentDefinition GetInstrumentDefinition(
   param_definitions.reserve(definition.num_param_definitions);
   for (int i = 0; i < definition.num_param_definitions; ++i) {
     const auto& param_definition = definition.param_definitions[i];
-    param_definitions.emplace_back(
+    param_definitions.push_back(ParamDefinition(
         std::min(std::max(param_definition.default_value,
                           param_definition.min_value),
                  param_definition.max_value),
-        param_definition.min_value, param_definition.max_value);
+        param_definition.min_value, param_definition.max_value));
   }
   return InstrumentDefinition{
       definition.create_fn ? definition.create_fn : &NoopCreateFn,
@@ -143,16 +143,14 @@ BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp) {
 }
 
 BarelyStatus BarelyConductor_ConductNote(BarelyApi api,
-                                         BarelyNotePitchType pitch_type,
-                                         float pitch, bool bypass_adjustment,
+                                         BarelyNotePitchType /*pitch_type*/,
+                                         float /*pitch*/,
+                                         bool /*bypass_adjustment*/,
                                          float* out_pitch) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_pitch) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  pitch_type;
-  pitch;
-  bypass_adjustment;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -164,23 +162,22 @@ BarelyStatus BarelyConductor_GetEnergy(BarelyApi api, float* out_energy) {
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_GetParam(BarelyApi api, int32_t index,
+BarelyStatus BarelyConductor_GetParam(BarelyApi api, int32_t /*index*/,
                                       float* out_value) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  index;
   return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelyConductor_GetParamDefinition(
-    BarelyApi api, int32_t index, BarelyParamDefinition* out_param_definition) {
+    BarelyApi api, int32_t /*index*/,
+    BarelyParamDefinition* out_param_definition) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_param_definition) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  index;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -217,82 +214,71 @@ BarelyStatus BarelyConductor_ResetAllParams(BarelyApi api) {
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_ResetParam(BarelyApi api, int32_t index) {
+BarelyStatus BarelyConductor_ResetParam(BarelyApi api, int32_t /*index*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  index;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_SetData(BarelyApi api, void* data) {
+BarelyStatus BarelyConductor_SetData(BarelyApi api, void* /*data*/) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  data;
+  // TODO(#85): Implement.x
   return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelyConductor_SetDefinition(
-    BarelyApi api, BarelyConductorDefinition definition) {
+    BarelyApi api, BarelyConductorDefinition /*definition*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  definition;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float energy) {
+BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float /*energy*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  energy;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_SetParam(BarelyApi api, int32_t index,
-                                      float value) {
+BarelyStatus BarelyConductor_SetParam(BarelyApi api, int32_t /*index*/,
+                                      float /*value*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  index;
-  value;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_SetRootNote(BarelyApi api, float root_pitch) {
+BarelyStatus BarelyConductor_SetRootNote(BarelyApi api, float /*root_pitch*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  root_pitch;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_SetScale(BarelyApi api, float* scale_pitches,
-                                      int32_t num_scale_pitches) {
+BarelyStatus BarelyConductor_SetScale(BarelyApi api, float* /*scale_pitches*/,
+                                      int32_t /*num_scale_pitches*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  scale_pitches;
-  num_scale_pitches;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_SetStress(BarelyApi api, float stress) {
+BarelyStatus BarelyConductor_SetStress(BarelyApi api, float /*stress*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  stress;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_Clone(BarelyApi api, BarelyId instrument_id,
+BarelyStatus BarelyInstrument_Clone(BarelyApi api, BarelyId /*instrument_id*/,
                                     BarelyId* out_instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  instrument_id;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -314,57 +300,51 @@ BarelyStatus BarelyInstrument_Destroy(BarelyApi api, BarelyId instrument_id) {
   return GetStatus(api->instance.RemoveInstrument(instrument_id));
 }
 
-BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
+BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId /*instrument_id*/,
                                       float* out_gain) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_gain) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  instrument_id;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_GetParam(BarelyApi api, BarelyId instrument_id,
-                                       int32_t index, float* out_value) {
+BarelyStatus BarelyInstrument_GetParam(BarelyApi api,
+                                       BarelyId /*instrument_id*/,
+                                       int32_t /*index*/, float* out_value) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  instrument_id;
-  index;
   return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelyInstrument_GetParamDefinition(
-    BarelyApi api, BarelyId instrument_id, int32_t index,
+    BarelyApi api, BarelyId /*instrument_id*/, int32_t /*index*/,
     BarelyParamDefinition* out_param_definition) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_param_definition) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  instrument_id;
-  index;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId instrument_id,
+BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId /*instrument_id*/,
                                       bool* out_is_muted) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_muted) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  instrument_id;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api, BarelyId instrument_id,
-                                       float pitch, bool* out_is_note_on) {
+BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api,
+                                       BarelyId /*instrument_id*/,
+                                       float /*pitch*/, bool* out_is_note_on) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_note_on) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  instrument_id;
-  pitch;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -395,33 +375,28 @@ BarelyStatus BarelyInstrument_ResetParam(BarelyApi api, BarelyId instrument_id,
       api->instance.SetInstrumentParamToDefault(instrument_id, index));
 }
 
-BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId instrument_id,
-                                      void* data) {
+BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId /*instrument_id*/,
+                                      void* /*data*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  instrument_id;
-  data;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId instrument_id,
-                                      float gain) {
+BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId /*instrument_id*/,
+                                      float /*gain*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  instrument_id;
-  gain;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_SetMuted(BarelyApi api, BarelyId instrument_id,
-                                       bool is_muted) {
+BarelyStatus BarelyInstrument_SetMuted(BarelyApi api,
+                                       BarelyId /*instrument_id*/,
+                                       bool /*is_muted*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  instrument_id;
-  is_muted;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -532,7 +507,7 @@ BarelyStatus BarelySequence_Destroy(BarelyApi api, BarelyId sequence_id) {
   return GetStatus(api->instance.RemovePerformer(sequence_id));
 }
 
-BarelyStatus BarelySequence_GetAllNotes(BarelyApi api, BarelyId sequence_id,
+BarelyStatus BarelySequence_GetAllNotes(BarelyApi api, BarelyId /*sequence_id*/,
                                         BarelyId** out_note_ids,
                                         int32_t* out_num_note_ids) {
   if (!api) return BarelyStatus_kNotFound;
@@ -540,7 +515,6 @@ BarelyStatus BarelySequence_GetAllNotes(BarelyApi api, BarelyId sequence_id,
   if (!out_num_note_ids) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  sequence_id;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -587,13 +561,13 @@ BarelyStatus BarelySequence_GetEndPosition(BarelyApi api, BarelyId sequence_id,
   return GetStatus(end_position_or);
 }
 
-BarelyStatus BarelySequence_GetInstrument(BarelyApi api, BarelyId sequence_id,
+BarelyStatus BarelySequence_GetInstrument(BarelyApi api,
+                                          BarelyId /*sequence_id*/,
                                           BarelyId* out_instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  sequence_id;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -626,26 +600,23 @@ BarelyStatus BarelySequence_GetLoopLength(BarelyApi api, BarelyId sequence_id,
 }
 
 BarelyStatus BarelySequence_GetNoteDefinition(
-    BarelyApi api, BarelyId sequence_id, BarelyId note_id,
+    BarelyApi api, BarelyId /*sequence_id*/, BarelyId /*note_id*/,
     BarelyNoteDefinition* out_definition) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_definition) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  sequence_id;
-  note_id;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelySequence_GetNotePosition(BarelyApi api, BarelyId sequence_id,
-                                            BarelyId note_id,
+BarelyStatus BarelySequence_GetNotePosition(BarelyApi api,
+                                            BarelyId /*sequence_id*/,
+                                            BarelyId /*note_id*/,
                                             double* out_position) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  sequence_id;
-  note_id;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -683,13 +654,11 @@ BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
 }
 
 BarelyStatus BarelySequence_RemoveAllNotesAtPosition(BarelyApi api,
-                                                     BarelyId sequence_id,
-                                                     double position) {
+                                                     BarelyId /*sequence_id*/,
+                                                     double /*position*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  sequence_id;
-  position;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -767,27 +736,22 @@ BarelyStatus BarelySequence_SetLooping(BarelyApi api, BarelyId sequence_id,
   return GetStatus(api->instance.SetPerformerLoop(sequence_id, is_looping));
 }
 
-BarelyStatus BarelySequence_SetNoteDefinition(BarelyApi api,
-                                              BarelyId sequence_id,
-                                              BarelyId note_id,
-                                              BarelyNoteDefinition definition) {
+BarelyStatus BarelySequence_SetNoteDefinition(
+    BarelyApi api, BarelyId /*sequence_id*/, BarelyId /*note_id*/,
+    BarelyNoteDefinition /*definition*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  sequence_id;
-  note_id;
-  definition;
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelySequence_SetNotePosition(BarelyApi api, BarelyId sequence_id,
-                                            BarelyId note_id, double position) {
+BarelyStatus BarelySequence_SetNotePosition(BarelyApi api,
+                                            BarelyId /*sequence_id*/,
+                                            BarelyId /*note_id*/,
+                                            double /*position*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
-  sequence_id;
-  note_id;
-  position;
   return BarelyStatus_kUnimplemented;
 }
 

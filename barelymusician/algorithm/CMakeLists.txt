@@ -8,7 +8,6 @@ target_link_libraries(
 )
 
 enable_testing()
-include(GoogleTest)
 
 add_executable(
   context_free_grammar_test
@@ -21,4 +20,5 @@ target_link_libraries(
   gmock
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(context_free_grammar_test)

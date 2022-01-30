@@ -27,6 +27,7 @@ else ()
   )
 endif ()
 
+enable_testing()
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -34,8 +35,6 @@ FetchContent_Declare(
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-
-enable_testing()
 include(GoogleTest)
 
 include_directories(.)

@@ -57,7 +57,6 @@ add_library(
 )
 
 enable_testing()
-include(GoogleTest)
 
 add_executable(
   dsp_utils_test
@@ -68,6 +67,7 @@ target_link_libraries(
   dsp_utils
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(dsp_utils_test)
 
 add_executable(
@@ -79,6 +79,7 @@ target_link_libraries(
   envelope
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(envelope_test)
 
 add_executable(
@@ -90,6 +91,7 @@ target_link_libraries(
   one_pole_filter
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(one_pole_filter_test)
 
 add_executable(
@@ -101,6 +103,7 @@ target_link_libraries(
   polyphonic_voice
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(polyphonic_voice_test)
 
 add_executable(
@@ -112,5 +115,6 @@ target_link_libraries(
   sample_player
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(sample_player_test)
 

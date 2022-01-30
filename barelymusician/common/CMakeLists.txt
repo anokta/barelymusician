@@ -29,7 +29,6 @@ add_library(
 )
 
 enable_testing()
-include(GoogleTest)
 
 add_executable(
   find_or_null_test
@@ -40,6 +39,7 @@ target_link_libraries(
   find_or_null
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(find_or_null_test)
 
 add_executable(
@@ -51,6 +51,7 @@ target_link_libraries(
   id_generator
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(id_generator_test)
 
 add_executable(
@@ -62,6 +63,7 @@ target_link_libraries(
   random
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(random_test)
 
 add_executable(
@@ -73,4 +75,5 @@ target_link_libraries(
   visitor
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(visitor_test)

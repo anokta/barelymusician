@@ -35,7 +35,6 @@ target_link_libraries(
 )
 
 enable_testing()
-include(GoogleTest)
 
 add_executable(
   note_duration_test
@@ -46,6 +45,7 @@ target_link_libraries(
   note_duration
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(note_duration_test)
 
 add_executable(
@@ -57,6 +57,7 @@ target_link_libraries(
   note_pitch
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(note_pitch_test)
 
 add_executable(
@@ -71,4 +72,5 @@ target_link_libraries(
   gmock
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(sequence_test)

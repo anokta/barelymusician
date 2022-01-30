@@ -129,7 +129,6 @@ add_library(
 )
 
 enable_testing()
-include(GoogleTest)
 
 add_executable(
   conductor_test
@@ -146,6 +145,7 @@ target_link_libraries(
   note_pitch
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(conductor_test)
 
 add_executable(
@@ -163,6 +163,7 @@ target_link_libraries(
   gmock
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(instrument_manager_test)
 
 add_executable(
@@ -175,6 +176,7 @@ target_link_libraries(
   param_definition
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(param_test)
 
 add_executable(
@@ -186,6 +188,7 @@ target_link_libraries(
   task_runner
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(task_runner_test)
 
 add_executable(
@@ -198,5 +201,6 @@ target_link_libraries(
   gmock
   gtest_main
 )
+include(GoogleTest)
 gtest_discover_tests(transport_test)
 

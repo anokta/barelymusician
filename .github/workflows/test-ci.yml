@@ -1,0 +1,20 @@
+name: test-ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: bazel test --test_output=errors //barelymusician/...
+        run: bazel test --test_output=errors //barelymusician/...

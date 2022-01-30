@@ -7,6 +7,9 @@ target_link_libraries(
   random
 )
 
+enable_testing()
+include(GoogleTest)
+
 add_executable(
   context_free_grammar_test
   context_free_grammar_test.cpp

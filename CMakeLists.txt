@@ -18,7 +18,7 @@ elseif (APPLE)
     -Wno-unused-lambda-capture
     -Werror
   )
-else()
+else ()
   add_compile_options(
     -Wall
     -Wextra
@@ -34,8 +34,6 @@ FetchContent_Declare(
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-enable_testing()
-include(GoogleTest)
 
 include_directories(.)
 

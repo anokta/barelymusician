@@ -28,6 +28,9 @@ add_library(
   visitor INTERFACE
 )
 
+enable_testing()
+include(GoogleTest)
+
 add_executable(
   find_or_null_test
   find_or_null_test.cpp

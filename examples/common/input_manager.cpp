@@ -31,7 +31,7 @@ InputManager::InputManager() noexcept
       HandleKeyUp(key);
     }
   };
-  const auto callback = [](CGEventTapProxy proxy, CGEventType type,
+  const auto callback = [](CGEventTapProxy /*proxy*/, CGEventType type,
                            CGEventRef event,
                            void* refcon) noexcept -> CGEventRef {
     if (refcon) {

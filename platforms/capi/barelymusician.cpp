@@ -59,11 +59,11 @@ InstrumentDefinition GetInstrumentDefinition(
   param_definitions.reserve(definition.num_param_definitions);
   for (int i = 0; i < definition.num_param_definitions; ++i) {
     const auto& param_definition = definition.param_definitions[i];
-    param_definitions.push_back(ParamDefinition(
+    param_definitions.push_back(ParamDefinition{
         std::min(std::max(param_definition.default_value,
                           param_definition.min_value),
                  param_definition.max_value),
-        param_definition.min_value, param_definition.max_value));
+        param_definition.min_value, param_definition.max_value});
   }
   return InstrumentDefinition{
       definition.create_fn ? definition.create_fn : &NoopCreateFn,
@@ -483,13 +483,12 @@ BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,
   return GetStatus(note_id_or);
 }
 
-BarelyStatus BarelySequence_Clone(BarelyApi api, BarelyId sequence_id,
+BarelyStatus BarelySequence_Clone(BarelyApi api, BarelyId /*sequence_id*/,
                                   BarelyId* out_sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
-  sequence_id;
   return BarelyStatus_kUnimplemented;
 }
 

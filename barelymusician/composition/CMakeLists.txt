@@ -34,6 +34,9 @@ target_link_libraries(
   status
 )
 
+enable_testing()
+include(GoogleTest)
+
 add_executable(
   note_duration_test
   note_duration_test.cpp

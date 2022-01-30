@@ -56,6 +56,9 @@ add_library(
   voice INTERFACE
 )
 
+enable_testing()
+include(GoogleTest)
+
 add_executable(
   dsp_utils_test
   dsp_utils_test.cpp

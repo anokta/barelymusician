@@ -128,6 +128,9 @@ add_library(
   transport.cpp
 )
 
+enable_testing()
+include(GoogleTest)
+
 add_executable(
   conductor_test
   conductor_test.cpp

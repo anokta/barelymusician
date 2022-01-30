@@ -17,9 +17,12 @@ constexpr int kNumFrames = 4;
 // Returns test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestInstrumentDefinition() {
   return InstrumentDefinition{
-      .create_fn = [](void** state,
-                      int /*sample_rate*/) { *state = new float{0.0f}; },
-      .destroy_fn = [](void** state) { delete *state; },
+      .create_fn =
+          [](void** state, int /*sample_rate*/) {
+            *state = reinterpret_cast<void*>(new float{0.0f});
+          },
+      .destroy_fn =
+          [](void** state) { delete reinterpret_cast<float*>(*state); },
       .process_fn =
           [](void** state, float* output, int num_channels, int num_frames) {
             std::fill_n(output, num_channels * num_frames,

@@ -16,8 +16,12 @@ namespace {
 // Returns test conductor definition.
 ConductorDefinition GetTestConductorDefinition() {
   return ConductorDefinition{
-      .create_fn = [](void** state) { *state = new float{0.0f}; },
-      .destroy_fn = [](void** state) { delete *state; },
+      .create_fn =
+          [](void** state) {
+            *state = reinterpret_cast<void*>(new float{0.0f});
+          },
+      .destroy_fn =
+          [](void** state) { delete reinterpret_cast<float*>(*state); },
       .set_param_fn =
           [](void** state, int index, float value) {
             *reinterpret_cast<float*>(*state) =

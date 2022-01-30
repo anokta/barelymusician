@@ -1,8 +1,8 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 #define BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 
-#include <span>
 #include <variant>
+#include <vector>
 
 namespace barelyapi {
 
@@ -147,7 +147,7 @@ using NotePitch = std::variant<float>;
 /// @param scale Cumulative scale intervals of an octave in increasing order.
 /// @param index Scale index.
 /// @return Note pitch.
-float GetPitch(std::span<const float> scale, int index) noexcept;
+float GetPitch(const std::vector<float>& scale, int index) noexcept;
 
 }  // namespace barelyapi
 

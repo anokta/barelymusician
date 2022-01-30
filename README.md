@@ -1,4 +1,5 @@
 barelymusician
+[![test-ci](https://github.com/anokta/barelymusician/actions/workflows/test-ci.yml/badge.svg)](https://github.com/anokta/barelymusician/actions/workflows/test-ci.yml)
 ==============
 
 an adaptive music engine for interactive systems.

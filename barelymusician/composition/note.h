@@ -19,7 +19,13 @@ struct Note {
   NoteDuration duration;
 
   /// Default comparators.
-  auto operator<=>(const Note& other) const noexcept = default;
+  bool operator==(const Note& other) const noexcept {
+    return pitch == other.pitch && intensity == other.intensity &&
+           duration == other.duration;
+  }
+  bool operator!=(const Note& other) const noexcept {
+    return !(*this == other);
+  }
 };
 
 }  // namespace barelyapi

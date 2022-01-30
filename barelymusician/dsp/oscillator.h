@@ -43,7 +43,7 @@ class Oscillator : public Generator {
 
  private:
   // Inverse sampling rate in seconds.
-  const float sample_interval_;
+  float sample_interval_;
 
   // Oscillator type.
   OscillatorType type_;

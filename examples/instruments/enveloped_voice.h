@@ -28,7 +28,7 @@ class EnvelopedVoice : public barelyapi::Voice {
   const GeneratorType& generator() const noexcept { return generator_; }
   GeneratorType& generator() noexcept { return generator_; }
 
-  const float gain() const noexcept { return gain_; }
+  float gain() const noexcept { return gain_; }
   void set_gain(float gain) noexcept { gain_ = gain; }
 
  private:

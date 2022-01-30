@@ -39,7 +39,7 @@ class SamplePlayer : public Generator {
   void CalculateIncrementPerSample() noexcept;
 
   // Inverse sampling rate in seconds.
-  const float sample_interval_;
+  float sample_interval_;
 
   // Sample data.
   const float* data_;

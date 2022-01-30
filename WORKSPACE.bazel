@@ -110,6 +110,10 @@ cc_library(
         "src/os/unix",
     ],
     linkopts = select({
+        "@platforms//os:linux": [
+            "-lasound",
+            "-pthread",
+        ],
         "@platforms//os:osx": [
             "-framework AudioUnit",
             "-framework CoreAudio",

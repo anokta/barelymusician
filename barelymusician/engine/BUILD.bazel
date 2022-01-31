@@ -164,16 +164,7 @@ cc_test(
     ],
 )
 
-# TODO: Refactor and reenable unit tests for instrument controller & processor.
-# cc_test(
-#     name = "instrument_test",
-#     srcs = ["instrument_test.cpp"],
-#     deps = [
-#         ":instrument",
-#         ":instrument_definition",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+# TODO: Add unit tests for instrument controller & processor.
 
 cc_test(
     name = "param_test",

@@ -1,31 +1,24 @@
 #include "barelymusician/engine/transport.h"
 
-#include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <utility>
 
 namespace barelyapi {
 
-namespace {
-
-// Dummy beat callback function that does nothing.
-void NoopBeatCallback(double /*position*/, double /*timestamp*/) noexcept {}
-
-// Dummy update callback function that does nothing.
-void NoopUpdateCallback(double /*begin_position*/,
-                        double /*end_position*/) noexcept {}
-
-}  // namespace
-
-Transport::Transport() noexcept
+Transport::Transport(BeatCallback beat_callback,
+                     UpdateCallback update_callback) noexcept
     : is_playing_(false),
       next_beat_position_(0.0),
       next_beat_timestamp_(0.0),
       position_(0.0),
       tempo_(1.0),
       timestamp_(0.0),
-      beat_callback_(&NoopBeatCallback),
-      update_callback_(&NoopUpdateCallback) {}
+      beat_callback_(std::move(beat_callback)),
+      update_callback_(std::move(update_callback)) {
+  assert(beat_callback_);
+  assert(update_callback_);
+}
 
 double Transport::GetPosition() const noexcept { return position_; }
 
@@ -34,33 +27,37 @@ double Transport::GetTempo() const noexcept { return tempo_; }
 double Transport::GetTimestamp() const noexcept { return timestamp_; }
 
 double Transport::GetTimestamp(double position) const noexcept {
+  assert(position >= 0.0);
   return timestamp_ + (position - position_) / tempo_;
 }
 
 bool Transport::IsPlaying() const noexcept { return is_playing_; }
 
 void Transport::SetBeatCallback(BeatCallback beat_callback) noexcept {
-  beat_callback_ = beat_callback ? std::move(beat_callback) : &NoopBeatCallback;
+  assert(beat_callback);
+  beat_callback_ = std::move(beat_callback);
 }
 
 void Transport::SetPosition(double position) noexcept {
+  assert(position >= 0.0);
   if (position != position_) {
-    position_ = std::max(position, 0.0);
+    position_ = position;
     next_beat_position_ = std::ceil(position_);
     next_beat_timestamp_ = GetTimestamp(next_beat_position_);
   }
 }
 
 void Transport::SetTempo(double tempo) noexcept {
+  assert(tempo >= 0.0);
   if (tempo != tempo_) {
-    tempo_ = std::max(tempo, 0.0);
+    tempo_ = tempo;
     next_beat_timestamp_ = GetTimestamp(next_beat_position_);
   }
 }
 
 void Transport::SetUpdateCallback(UpdateCallback update_callback) noexcept {
-  update_callback_ =
-      update_callback ? std::move(update_callback) : &NoopUpdateCallback;
+  assert(update_callback);
+  update_callback_ = std::move(update_callback);
 }
 
 void Transport::Start() noexcept {
@@ -71,6 +68,7 @@ void Transport::Start() noexcept {
 void Transport::Stop() noexcept { is_playing_ = false; }
 
 void Transport::Update(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   while (timestamp_ < timestamp) {
     if (!is_playing_ || tempo_ <= 0.0) {
       timestamp_ = timestamp;

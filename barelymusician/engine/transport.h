@@ -22,7 +22,11 @@ class Transport {
       std::function<void(double begin_position, double end_position)>;
 
   /// Constructs new |Transport|.
-  Transport() noexcept;
+  ///
+  /// @param beat_callback Beat callback.
+  /// @param update_callback Update callback.
+  Transport(BeatCallback beat_callback,
+            UpdateCallback update_callback) noexcept;
 
   /// Returns the current position.
   ///

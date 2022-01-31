@@ -1,5 +1,6 @@
 #include "barelymusician/engine/instrument_processor.h"
 
+#include <cassert>
 #include <map>
 #include <variant>
 
@@ -21,6 +22,14 @@ InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
       set_param_fn_(definition.set_param_fn),
       gain_(1.0f),
       sample_rate_(sample_rate) {
+  assert(create_fn_);
+  assert(destroy_fn_);
+  assert(process_fn_);
+  assert(set_data_fn_);
+  assert(set_note_off_fn_);
+  assert(set_note_on_fn_);
+  assert(set_param_fn_);
+  assert(sample_rate_ >= 0);
   create_fn_(&state_, sample_rate_);
   const auto& param_definitions = definition.param_definitions;
   for (int i = 0; i < static_cast<int>(param_definitions.size()); ++i) {
@@ -30,14 +39,17 @@ InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
 
 InstrumentProcessor::~InstrumentProcessor() noexcept { destroy_fn_(&state_); }
 
-void InstrumentProcessor::MergeEvents(
+void InstrumentProcessor::AddEvents(
     std::multimap<double, InstrumentEvent> events) noexcept {
-  events_.merge(events);
+  events_.merge(std::move(events));
 }
 
 void InstrumentProcessor::Process(float* output, int num_output_channels,
                                   int num_output_frames,
                                   double timestamp) noexcept {
+  assert(output);
+  assert(num_output_channels >= 0);
+  assert(num_output_frames >= 0);
   int frame = 0;
   // Process *all* events before the end timestamp.
   const auto begin = events_.begin();

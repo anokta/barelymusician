@@ -36,6 +36,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
             std::fill_n(output, num_channels * num_frames,
                         *reinterpret_cast<float*>(*state));
           },
+      .set_data_fn = [](void** /*state*/, void* /*data*/) {},
       .set_note_off_fn =
           [](void** state, float /*pitch*/) {
             *reinterpret_cast<float*>(*state) = 0.0f;

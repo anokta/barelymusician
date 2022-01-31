@@ -1,11 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_MANAGER_H_
 
-#include <functional>
-#include <optional>
 #include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
@@ -195,9 +191,6 @@ class InstrumentManager {
 
   // Instrument controller by id map.
   std::unordered_map<Id, InstrumentProcessor> processors_;
-
-  // Instrument update events by id map.
-  std::unordered_map<Id, std::multimap<double, InstrumentEvent>> update_events_;
 
   // Audio thread task runner.
   TaskRunner runner_;

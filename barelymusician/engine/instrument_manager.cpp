@@ -18,7 +18,14 @@ namespace barelyapi {
 namespace {
 
 // Maximum number of tasks to be executed per each `Process` call.
-constexpr int kNumMaxTasks = 100;
+constexpr int kNumMaxTasks = 1000;
+
+// Dummy note off callback that does nothing.
+void NoopNoteOffCallback(float /*pitch*/, double /*timestamp*/) noexcept {}
+
+// Dummy note on callback that does nothing.
+void NoopNoteOnCallback(float /*pitch*/, float /*intensity*/,
+                        double /*timestamp*/) noexcept {}
 
 }  // namespace
 
@@ -28,7 +35,10 @@ Status InstrumentManager::Create(Id instrument_id,
                                  InstrumentDefinition definition,
                                  int sample_rate) noexcept {
   if (instrument_id == kInvalidId) return Status::kInvalidArgument;
-  if (controllers_.emplace(instrument_id, InstrumentController(definition))
+  if (controllers_
+          .emplace(instrument_id,
+                   InstrumentController{definition, &NoopNoteOffCallback,
+                                        &NoopNoteOnCallback})
           .second) {
     runner_.Add([this, instrument_id, definition = std::move(definition),
                  sample_rate]() noexcept {
@@ -171,7 +181,9 @@ Status InstrumentManager::SetNoteOffCallback(
     Id instrument_id,
     InstrumentController::NoteOffCallback note_off_callback) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->SetNoteOffCallback(std::move(note_off_callback));
+    controller->SetNoteOffCallback(note_off_callback
+                                       ? std::move(note_off_callback)
+                                       : &NoopNoteOffCallback);
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -191,7 +203,8 @@ Status InstrumentManager::SetNoteOnCallback(
     Id instrument_id,
     InstrumentController::NoteOnCallback note_on_callback) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->SetNoteOnCallback(std::move(note_on_callback));
+    controller->SetNoteOnCallback(note_on_callback ? std::move(note_on_callback)
+                                                   : &NoopNoteOnCallback);
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -221,23 +234,21 @@ Status InstrumentManager::SetParamToDefault(Id instrument_id, double timestamp,
 }
 
 void InstrumentManager::Update() noexcept {
-  // TODO: This is a temp hack to keep update working until controller is
-  // refactored back to using external update events map.
+  std::unordered_map<Id, std::multimap<double, InstrumentEvent>> update_events;
   for (auto& [instrument_id, controller] : controllers_) {
-    auto events = controller.ExtractEvents();
-    if (!events.empty()) {
-      update_events_[instrument_id].merge(std::move(events));
+    if (!controller.GetEvents().empty()) {
+      update_events.emplace(instrument_id,
+                            std::exchange(controller.GetEvents(), {}));
     }
   }
-  if (!update_events_.empty()) {
-    runner_.Add(
-        [this, update_events = std::exchange(update_events_, {})]() noexcept {
-          for (auto& [instrument_id, events] : update_events) {
-            if (auto* processor = FindOrNull(processors_, instrument_id)) {
-              processor->MergeEvents(std::move(events));
-            }
-          }
-        });
+  if (!update_events.empty()) {
+    runner_.Add([this, update_events = std::move(update_events)]() noexcept {
+      for (auto& [instrument_id, events] : update_events) {
+        if (auto* processor = FindOrNull(processors_, instrument_id)) {
+          processor->AddEvents(std::move(events));
+        }
+      }
+    });
   }
 }
 

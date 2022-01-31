@@ -32,12 +32,16 @@ class InstrumentController {
   /// Constructs new `InstrumentController`.
   ///
   /// @param definition Instrument definition.
-  explicit InstrumentController(InstrumentDefinition definition);
+  /// @param note_off_callback Note off callback.
+  /// @param note_on_callback Note on callback.
+  InstrumentController(InstrumentDefinition definition,
+                       NoteOffCallback note_off_callback,
+                       NoteOnCallback note_on_callback);
 
-  /// Extracts events to be processed.
+  /// Returns events to be processed.
   ///
   /// @return Map of instrument events by their timestamps.
-  std::multimap<double, InstrumentEvent> ExtractEvents();
+  std::multimap<double, InstrumentEvent>& GetEvents();
 
   /// Returns gain.
   ///
@@ -65,7 +69,7 @@ class InstrumentController {
   ///
   /// @param event Instrument event.
   /// @param timestamp Timestamp in seconds.
-  bool ProcessEvent(InstrumentEvent event, double timestamp);
+  void ProcessEvent(InstrumentEvent event, double timestamp);
 
   /// Resets all parameters to default value at timestamp.
   ///

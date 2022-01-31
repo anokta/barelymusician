@@ -27,10 +27,10 @@ class InstrumentProcessor {
   InstrumentProcessor(InstrumentProcessor&& other) noexcept = delete;
   InstrumentProcessor& operator=(InstrumentProcessor&& other) noexcept = delete;
 
-  /// Merges events.
+  /// Adds events.
   ///
   /// @param events Map of instrument events by their timestamps.
-  void MergeEvents(std::multimap<double, InstrumentEvent> events) noexcept;
+  void AddEvents(std::multimap<double, InstrumentEvent> events) noexcept;
 
   /// Processes next output buffer.
   ///

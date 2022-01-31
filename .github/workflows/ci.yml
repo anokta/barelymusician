@@ -1,4 +1,4 @@
-name: barelymusician-ci
+name: ci
 
 on:
   push:

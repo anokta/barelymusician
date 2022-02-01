@@ -8,7 +8,7 @@
 namespace barelyapi {
 
 Param::Param(ParamDefinition definition) noexcept
-    : definition_(std::move(definition)), value_(definition_.default_value) {}
+    : definition_(definition), value_(definition_.default_value) {}
 
 const ParamDefinition& Param::GetDefinition() const noexcept {
   return definition_;

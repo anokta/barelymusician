@@ -34,7 +34,7 @@ class InstrumentController {
   /// @param definition Instrument definition.
   /// @param note_off_callback Note off callback.
   /// @param note_on_callback Note on callback.
-  InstrumentController(InstrumentDefinition definition,
+  InstrumentController(const InstrumentDefinition& definition,
                        NoteOffCallback note_off_callback,
                        NoteOnCallback note_on_callback);
 

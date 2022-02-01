@@ -11,7 +11,7 @@
 
 namespace barelyapi {
 
-InstrumentProcessor::InstrumentProcessor(InstrumentDefinition definition,
+InstrumentProcessor::InstrumentProcessor(const InstrumentDefinition& definition,
                                          int sample_rate) noexcept
     : create_fn_(definition.create_fn),
       destroy_fn_(definition.destroy_fn),

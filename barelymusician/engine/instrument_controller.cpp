@@ -11,9 +11,9 @@
 
 namespace barelyapi {
 
-InstrumentController::InstrumentController(InstrumentDefinition definition,
-                                           NoteOffCallback note_off_callback,
-                                           NoteOnCallback note_on_callback)
+InstrumentController::InstrumentController(
+    const InstrumentDefinition& definition, NoteOffCallback note_off_callback,
+    NoteOnCallback note_on_callback)
     : gain_(1.0f),
       is_muted_(false),
       note_off_callback_(std::move(note_off_callback)),
@@ -21,8 +21,8 @@ InstrumentController::InstrumentController(InstrumentDefinition definition,
   assert(note_off_callback_);
   assert(note_on_callback_);
   params_.reserve(definition.param_definitions.size());
-  for (auto& param_definition : definition.param_definitions) {
-    params_.push_back(Param{std::move(param_definition)});
+  for (const auto& param_definition : definition.param_definitions) {
+    params_.emplace_back(param_definition);
   }
 }
 

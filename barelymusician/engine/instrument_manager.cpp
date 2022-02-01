@@ -42,9 +42,9 @@ Status InstrumentManager::Create(Id instrument_id,
           .second) {
     runner_.Add([this, instrument_id, definition = std::move(definition),
                  sample_rate]() noexcept {
-      processors_.emplace(
-          std::piecewise_construct, std::forward_as_tuple(instrument_id),
-          std::forward_as_tuple(std::move(definition), sample_rate));
+      processors_.emplace(std::piecewise_construct,
+                          std::forward_as_tuple(instrument_id),
+                          std::forward_as_tuple(definition, sample_rate));
     });
     return Status::kOk;
   }
@@ -243,9 +243,9 @@ void InstrumentManager::Update() noexcept {
   }
   if (!update_events.empty()) {
     runner_.Add([this, update_events = std::move(update_events)]() noexcept {
-      for (auto& [instrument_id, events] : update_events) {
+      for (const auto& [instrument_id, events] : update_events) {
         if (auto* processor = FindOrNull(processors_, instrument_id)) {
-          processor->AddEvents(std::move(events));
+          processor->AddEvents(events);
         }
       }
     });

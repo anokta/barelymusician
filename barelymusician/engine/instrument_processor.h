@@ -15,7 +15,7 @@ class InstrumentProcessor {
   ///
   /// @param definition Instrument definition.
   /// @param sample_rate Sampling rate in hz.
-  InstrumentProcessor(InstrumentDefinition definition,
+  InstrumentProcessor(const InstrumentDefinition& definition,
                       int sample_rate) noexcept;
 
   /// Destroys `InstrumentProcessor`.

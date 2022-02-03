@@ -31,27 +31,27 @@ class Transport {
   /// Returns the current position.
   ///
   /// @return Position in beats.
-  double GetPosition() const noexcept;
+  [[nodiscard]] double GetPosition() const noexcept;
 
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per second.
-  double GetTempo() const noexcept;
+  [[nodiscard]] double GetTempo() const noexcept;
 
   /// Returns the current timestamp.
   ///
   /// @return Timestamp in seconds.
-  double GetTimestamp() const noexcept;
+  [[nodiscard]] double GetTimestamp() const noexcept;
 
   /// Returns the current timestamp at position.
   ///
   /// @return Timestamp in seconds.
-  double GetTimestamp(double position) const noexcept;
+  [[nodiscard]] double GetTimestamp(double position) const noexcept;
 
   /// Returns whether the transport is currently playing or not.
   ///
   /// @return True if playing, false otherwise.
-  bool IsPlaying() const noexcept;
+  [[nodiscard]] bool IsPlaying() const noexcept;
 
   /// Sets the beat callback.
   ///

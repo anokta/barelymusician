@@ -1,7 +1,6 @@
 #include "barelymusician/engine/task_runner.h"
 
 #include <chrono>
-#include <functional>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -54,7 +53,7 @@ TEST(TaskRunnerTest, RunMultipleTasksConcurrently) {
                           kProducerDelayMs]() {
       std::lock_guard<std::mutex> lock(producer_mutex);
       std::this_thread::sleep_for(std::chrono::milliseconds(kProducerDelayMs));
-      task_runner.Add(std::bind(push_value, value++));
+      task_runner.Add([&]() mutable { push_value(value++); });
     };
     producers.emplace_back(produce);
   }

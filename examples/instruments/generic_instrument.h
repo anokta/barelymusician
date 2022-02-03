@@ -50,7 +50,7 @@ class GenericInstrument {
 /// Returns instrument definition for the given create instrument function.
 template <typename InstrumentType>
 barelyapi::InstrumentDefinition GetInstrumentDefinition(
-    std::vector<barelyapi::ParamDefinition> param_definitions) noexcept {
+    const std::vector<barelyapi::ParamDefinition>& param_definitions) noexcept {
   return barelyapi::InstrumentDefinition{
       .create_fn =
           [](void** state, int sample_rate) noexcept {
@@ -86,7 +86,7 @@ barelyapi::InstrumentDefinition GetInstrumentDefinition(
             auto* instrument = reinterpret_cast<InstrumentType*>(*state);
             instrument->SetParam(index, value);
           },
-      .param_definitions = std::move(param_definitions)};
+      .param_definitions = param_definitions};
 }
 
 }  // namespace barely::examples

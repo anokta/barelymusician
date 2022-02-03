@@ -81,7 +81,7 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       note.duration = get_position(midi_event.getTickDuration());
       engine->AddPerformerNote(performer_id, get_position(midi_event.tick),
-                               std::move(note));
+                               note);
     }
   }
 }

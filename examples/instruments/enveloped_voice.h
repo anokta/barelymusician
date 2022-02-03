@@ -16,19 +16,23 @@ class EnvelopedVoice : public barelyapi::Voice {
   explicit EnvelopedVoice(int sample_rate) noexcept;
 
   /// Implements `Voice`.
-  bool IsActive() const noexcept override;
+  [[nodiscard]] bool IsActive() const noexcept override;
   float Next(int channel) noexcept override;
   void Start() noexcept override;
   void Stop() noexcept override;
 
   /// Inline getter/setter functions.
-  const barelyapi::Envelope& envelope() const noexcept { return envelope_; }
-  barelyapi::Envelope& envelope() noexcept { return envelope_; }
+  [[nodiscard]] const barelyapi::Envelope& envelope() const noexcept {
+    return envelope_;
+  }
+  [[nodiscard]] barelyapi::Envelope& envelope() noexcept { return envelope_; }
 
-  const GeneratorType& generator() const noexcept { return generator_; }
-  GeneratorType& generator() noexcept { return generator_; }
+  [[nodiscard]] const GeneratorType& generator() const noexcept {
+    return generator_;
+  }
+  [[nodiscard]] GeneratorType& generator() noexcept { return generator_; }
 
-  float gain() const noexcept { return gain_; }
+  [[nodiscard]] float gain() const noexcept { return gain_; }
   void set_gain(float gain) noexcept { gain_ = gain; }
 
  private:

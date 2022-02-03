@@ -83,8 +83,8 @@ Conductor::Conductor(ConductorDefinition definition) noexcept
     definition.create_fn(&state_);
   }
   params_.reserve(definition.param_definitions.size());
-  for (auto& param_definition : definition.param_definitions) {
-    params_.emplace_back(std::move(std::move(param_definition)));
+  for (const auto& param_definition : definition.param_definitions) {
+    params_.emplace_back(param_definition);
   }
 }
 
@@ -126,16 +126,16 @@ Status Conductor::SetParamToDefault(int index) noexcept {
 
 StatusOr<double> Conductor::TransformNoteDuration(
     NoteDuration note_duration) noexcept {
-  return transform_note_duration_fn_(&state_, std::move(note_duration));
+  return transform_note_duration_fn_(&state_, note_duration);
 }
 
 StatusOr<float> Conductor::TransformNoteIntensity(
     NoteIntensity note_intensity) noexcept {
-  return transform_note_intensity_fn_(&state_, std::move(note_intensity));
+  return transform_note_intensity_fn_(&state_, note_intensity);
 }
 
 StatusOr<float> Conductor::TransformNotePitch(NotePitch note_pitch) noexcept {
-  return transform_note_pitch_fn_(&state_, std::move(note_pitch));
+  return transform_note_pitch_fn_(&state_, note_pitch);
 }
 
 double Conductor::TransformPlaybackTempo(double tempo) noexcept {

@@ -37,10 +37,10 @@ class TaskRunner {
   };
 
   // Pops and returns node from the given `head`.
-  Node* PopNode(std::atomic<Node*>* head) noexcept;
+  static Node* PopNode(std::atomic<Node*>* head) noexcept;
 
   // Pushes the given `node` to the given `head`.
-  void PushNode(std::atomic<Node*>* head, Node* node) noexcept;
+  static void PushNode(std::atomic<Node*>* head, Node* node) noexcept;
 
   // Active list head node.
   std::atomic<Node*> active_head_;

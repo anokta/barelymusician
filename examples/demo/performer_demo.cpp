@@ -154,7 +154,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       engine.ProcessInstrument(instrument_id, audio_clock.GetTimestamp(),
                                temp_buffer.data(), kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     std::plus<float>());
+                     std::plus<>());
     }
     audio_clock.Update(kNumFrames);
   };

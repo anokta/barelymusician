@@ -48,8 +48,8 @@ void DrumkitInstrument::SetData(void* data) noexcept {
   }
 }
 
-void DrumkitInstrument::SetParam(int id, float value) noexcept {
-  switch (static_cast<DrumkitInstrumentParam>(id)) {
+void DrumkitInstrument::SetParam(int index, float value) noexcept {
+  switch (static_cast<DrumkitInstrumentParam>(index)) {
     case DrumkitInstrumentParam::kPadRelease:
       for (auto& [pitch, pad] : pads_) {
         pad.voice.envelope().SetRelease(value);

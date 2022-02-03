@@ -84,7 +84,7 @@ class StatusOr {
   /// Returns contained error status.
   ///
   /// @return Error status.
-  Status GetErrorStatus() const {
+  [[nodiscard]] Status GetErrorStatus() const {
     assert(std::holds_alternative<Status>(value_or_));
     return std::get<Status>(value_or_);
   }
@@ -92,7 +92,7 @@ class StatusOr {
   /// Returns contained value.
   ///
   /// @return Value.
-  const ValueType& GetValue() const {
+  [[nodiscard]] const ValueType& GetValue() const {
     assert(std::holds_alternative<ValueType>(value_or_));
     return std::get<ValueType>(value_or_);
   }
@@ -100,7 +100,7 @@ class StatusOr {
   /// Returns contained value.
   ///
   /// @return Mutable value.
-  ValueType& GetValue() {
+  [[nodiscard]] ValueType& GetValue() {
     assert(std::holds_alternative<ValueType>(value_or_));
     return std::get<ValueType>(value_or_);
   }
@@ -108,7 +108,9 @@ class StatusOr {
   /// Returns whether value is contained or not.
   ///
   /// @return True if contained, false otherwise.
-  bool IsOk() const { return std::holds_alternative<ValueType>(value_or_); }
+  [[nodiscard]] bool IsOk() const {
+    return std::holds_alternative<ValueType>(value_or_);
+  }
 
  private:
   // Value or error status.
@@ -176,9 +178,10 @@ struct ParamDefinition {
   /// @param default_value Default float value.
   /// @param min_value Minimum float value.
   /// @param max_value Maximum float value.
-  ParamDefinition(float default_value,
-                  float min_value = std::numeric_limits<float>::lowest(),
-                  float max_value = std::numeric_limits<float>::max())
+  explicit ParamDefinition(
+      float default_value,
+      float min_value = std::numeric_limits<float>::lowest(),
+      float max_value = std::numeric_limits<float>::max())
       : default_value(default_value),
         min_value(min_value),
         max_value(max_value) {}
@@ -186,7 +189,7 @@ struct ParamDefinition {
   /// Constructs new `ParamDefinition` for a boolean value.
   ///
   /// @param default_value Default boolean value.
-  ParamDefinition(bool default_value)
+  explicit ParamDefinition(bool default_value)
       : ParamDefinition(static_cast<float>(default_value)) {}
 
   /// Constructs new `ParamDefinition` for an integer value.
@@ -194,9 +197,9 @@ struct ParamDefinition {
   /// @param default_value Default integer value.
   /// @param min_value Minimum integer value.
   /// @param max_value Maximum integer value.
-  ParamDefinition(int default_value,
-                  int min_value = std::numeric_limits<int>::lowest(),
-                  int max_value = std::numeric_limits<int>::max())
+  explicit ParamDefinition(int default_value,
+                           int min_value = std::numeric_limits<int>::lowest(),
+                           int max_value = std::numeric_limits<int>::max())
       : ParamDefinition(static_cast<float>(default_value),
                         static_cast<float>(min_value),
                         static_cast<float>(max_value)) {}
@@ -333,7 +336,7 @@ class Conductor {
   /// Returns energy.
   ///
   /// @return Energy.
-  float GetEnergy() const {
+  [[nodiscard]] float GetEnergy() const {
     float energy = 0.0f;
     if (capi_) {
       const auto status = BarelyConductor_GetEnergy(capi_, &energy);
@@ -346,7 +349,7 @@ class Conductor {
   ///
   /// @param index Parameter index.
   /// @return Parameter value, or error status.
-  StatusOr<float> GetParam(int index) const {
+  [[nodiscard]] StatusOr<float> GetParam(int index) const {
     float value = 0.0f;
     if (const auto status = BarelyConductor_GetParam(capi_, index, &value);
         status != BarelyStatus_kOk) {
@@ -359,7 +362,7 @@ class Conductor {
   ///
   /// @param index Parameter index.
   /// @return Parameter definition, or error status.
-  StatusOr<ParamDefinition> GetParamDefinition(int index) const {
+  [[nodiscard]] StatusOr<ParamDefinition> GetParamDefinition(int index) const {
     BarelyParamDefinition definition;
     if (const auto status =
             BarelyConductor_GetParamDefinition(capi_, index, &definition);
@@ -373,7 +376,7 @@ class Conductor {
   /// Returns root note.
   ///
   /// @return Root note pitch.
-  float GetRootNote() const {
+  [[nodiscard]] float GetRootNote() const {
     float root_pitch = 0.0f;
     if (capi_) {
       const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
@@ -385,7 +388,7 @@ class Conductor {
   /// Returns scale.
   ///
   /// @return List of scale note pitches.
-  std::vector<float> GetScale() const {
+  [[nodiscard]] std::vector<float> GetScale() const {
     float* scale_pitches = nullptr;
     int num_scale_pitches = 0;
     if (capi_) {
@@ -399,7 +402,7 @@ class Conductor {
   /// Returns stress.
   ///
   /// @return Stress.
-  float GetStress() const {
+  [[nodiscard]] float GetStress() const {
     float stress = 0.0f;
     if (capi_) {
       const auto status = BarelyConductor_GetStress(capi_, &stress);
@@ -676,7 +679,7 @@ class Instrument {
   /// Returns gain.
   ///
   /// @return Gain in amplitude.
-  float GetGain() const {
+  [[nodiscard]] float GetGain() const {
     float gain = 0.0f;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelyInstrument_GetGain(capi_, id_, &gain);
@@ -689,7 +692,7 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @return Parameter value, or error status.
-  StatusOr<float> GetParam(int index) const {
+  [[nodiscard]] StatusOr<float> GetParam(int index) const {
     float value = 0.0f;
     if (const auto status =
             BarelyInstrument_GetParam(capi_, id_, index, &value);
@@ -703,7 +706,7 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @return Parameter definition, or error status.
-  StatusOr<ParamDefinition> GetParamDefinition(int index) const {
+  [[nodiscard]] StatusOr<ParamDefinition> GetParamDefinition(int index) const {
     BarelyParamDefinition definition;
     if (const auto status =
             BarelyInstrument_GetParamDefinition(capi_, id_, index, &definition);
@@ -717,7 +720,7 @@ class Instrument {
   /// Returns whether instrument is muted or not.
   ///
   /// @return True if muted, false otherwise.
-  bool IsMuted() const {
+  [[nodiscard]] bool IsMuted() const {
     bool is_muted = false;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelyInstrument_IsMuted(capi_, id_, &is_muted);
@@ -730,7 +733,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  bool IsNoteOn(float pitch) const {
+  [[nodiscard]] bool IsNoteOn(float pitch) const {
     bool is_note_on = false;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -798,17 +801,16 @@ class Instrument {
   /// @return Status.
   Status SetNoteOffCallback(NoteOffCallback note_off_callback) {
     if (note_off_callback) {
-      note_off_callback_ = note_off_callback;
+      note_off_callback_ = std::move(note_off_callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
           capi_, id_,
           [](float pitch, double timestamp, void* user_data) {
             (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
           },
           static_cast<void*>(&note_off_callback_)));
-    } else {
-      return static_cast<Status>(
-          BarelyInstrument_SetNoteOffCallback(capi_, id_, nullptr, nullptr));
     }
+    return static_cast<Status>(
+        BarelyInstrument_SetNoteOffCallback(capi_, id_, nullptr, nullptr));
   }
 
   /// Sets note on callback.
@@ -817,7 +819,7 @@ class Instrument {
   /// @return Status.
   Status SetNoteOnCallback(NoteOnCallback note_on_callback) {
     if (note_on_callback) {
-      note_on_callback_ = note_on_callback;
+      note_on_callback_ = std::move(note_on_callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
           capi_, id_,
           [](float pitch, float intensity, double timestamp, void* user_data) {
@@ -825,10 +827,9 @@ class Instrument {
                                                        timestamp);
           },
           static_cast<void*>(&note_on_callback_)));
-    } else {
-      return static_cast<Status>(
-          BarelyInstrument_SetNoteOnCallback(capi_, id_, nullptr, nullptr));
     }
+    return static_cast<Status>(
+        BarelyInstrument_SetNoteOnCallback(capi_, id_, nullptr, nullptr));
   }
 
   /// Sets parameter value.
@@ -939,7 +940,7 @@ class NoteReference {
   /// Returns note definition.
   ///
   /// @return Note definition.
-  NoteDefinition GetNoteDefinition() const {
+  [[nodiscard]] NoteDefinition GetNoteDefinition() const {
     BarelyNoteDefinition definition;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelySequence_GetNoteDefinition(capi_, sequence_id_,
@@ -954,7 +955,7 @@ class NoteReference {
   /// Returns note position.
   ///
   /// @return Note position.
-  double GetNotePosition() const {
+  [[nodiscard]] double GetNotePosition() const {
     double position = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -1079,7 +1080,7 @@ class Sequence {
   /// Returns all notes.
   ///
   /// @return List of note references.
-  std::vector<NoteReference> GetAllNotes() const {
+  [[nodiscard]] std::vector<NoteReference> GetAllNotes() const {
     BarelyId* note_ids = nullptr;
     int num_note_ids = 0;
     if (capi_) {
@@ -1098,7 +1099,7 @@ class Sequence {
   /// Returns begin offset.
   ///
   /// @return Begin offset in beats.
-  double GetBeginOffset() const {
+  [[nodiscard]] double GetBeginOffset() const {
     double begin_offset = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -1111,7 +1112,7 @@ class Sequence {
   /// Returns begin position.
   ///
   /// @return Begin position in beats.
-  StatusOr<double> GetBeginPosition() const {
+  [[nodiscard]] StatusOr<double> GetBeginPosition() const {
     double begin_position = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -1124,7 +1125,7 @@ class Sequence {
   /// Returns end position.
   ///
   /// @return End position in beats.
-  StatusOr<double> GetEndPosition() const {
+  [[nodiscard]] StatusOr<double> GetEndPosition() const {
     double end_position = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -1137,12 +1138,12 @@ class Sequence {
   /// Returns instrument.
   ///
   /// @return Pointer to instrument, or nullptr.
-  const Instrument* GetInstrument() const { return instrument_; }
+  [[nodiscard]] const Instrument* GetInstrument() const { return instrument_; }
 
   /// Returns loop begin offset.
   ///
   /// @return Loop begin offset in beats.
-  double GetLoopBeginOffset() const {
+  [[nodiscard]] double GetLoopBeginOffset() const {
     double loop_begin_offset = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -1155,7 +1156,7 @@ class Sequence {
   /// Returns loop length.
   ///
   /// @return Loop length in beats.
-  double GetLoopLength() const {
+  [[nodiscard]] double GetLoopLength() const {
     double loop_length = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -1168,7 +1169,7 @@ class Sequence {
   /// Returns whether sequence is empty or not.
   ///
   /// @return True if empty, false otherwise.
-  StatusOr<bool> IsEmpty() const {
+  [[nodiscard]] StatusOr<bool> IsEmpty() const {
     bool is_empty = false;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelySequence_IsEmpty(capi_, id_, &is_empty);
@@ -1180,7 +1181,7 @@ class Sequence {
   /// Returns whether sequence should be looping or not.
   ///
   /// @return True if looping, false otherwise.
-  StatusOr<bool> IsLooping() const {
+  [[nodiscard]] StatusOr<bool> IsLooping() const {
     bool is_looping = false;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelySequence_IsLooping(capi_, id_, &is_looping);
@@ -1327,7 +1328,7 @@ class Transport {
   /// Returns position.
   ///
   /// @return Position in beats.
-  double GetPosition() const {
+  [[nodiscard]] double GetPosition() const {
     double position = 0.0;
     if (capi_) {
       const auto status = BarelyTransport_GetPosition(capi_, &position);
@@ -1339,7 +1340,7 @@ class Transport {
   /// Returns tempo.
   ///
   /// @return Tempo in bpm.
-  double GetTempo() const {
+  [[nodiscard]] double GetTempo() const {
     double tempo = 0.0;
     if (capi_) {
       const auto status = BarelyTransport_GetTempo(capi_, &tempo);
@@ -1351,7 +1352,7 @@ class Transport {
   /// Returns whether transport is playing or not.
   ///
   /// @return True if playing, false otherwise.
-  bool IsPlaying() const {
+  [[nodiscard]] bool IsPlaying() const {
     bool is_playing = false;
     if (capi_) {
       const auto status = BarelyTransport_IsPlaying(capi_, &is_playing);
@@ -1373,10 +1374,9 @@ class Transport {
             (*reinterpret_cast<BeatCallback*>(user_data))(position, timestamp);
           },
           reinterpret_cast<void*>(&beat_callback_)));
-    } else {
-      return static_cast<Status>(BarelyTransport_SetBeatCallback(
-          capi_, /*beat_callback=*/nullptr, /*user_data=*/nullptr));
     }
+    return static_cast<Status>(BarelyTransport_SetBeatCallback(
+        capi_, /*beat_callback=*/nullptr, /*user_data=*/nullptr));
   }
 
   /// Sets position.
@@ -1493,7 +1493,7 @@ class Api {
   /// @return Instrument.
   Instrument CreateInstrument(InstrumentDefinition definition,
                               int sample_rate) {
-    return Instrument(capi_, std::move(definition), sample_rate);
+    return Instrument{capi_, std::move(definition), sample_rate};
   }
 
   /// Creates new sequence.
@@ -1501,28 +1501,28 @@ class Api {
   /// @param instrument Pointer to instrument.
   /// @return Sequence.
   Sequence CreateSequence(const Instrument* instrument = nullptr) {
-    return Sequence(capi_, instrument);
+    return Sequence{capi_, instrument};
   }
 
   /// Returns conductor.
   ///
   /// @return Conductor.
-  const Conductor& GetConductor() const { return conductor_; }
+  [[nodiscard]] const Conductor& GetConductor() const { return conductor_; }
 
   /// Returns conductor.
   ///
   /// @return Mutable conductor.
-  Conductor& GetConductor() { return conductor_; }
+  [[nodiscard]] Conductor& GetConductor() { return conductor_; }
 
   /// Returns transport.
   ///
   /// @return Transport.
-  const Transport& GetTransport() const { return transport_; }
+  [[nodiscard]] const Transport& GetTransport() const { return transport_; }
 
   /// Returns transport.
   ///
   /// @return Mutable transport.
-  Transport& GetTransport() { return transport_; }
+  [[nodiscard]] Transport& GetTransport() { return transport_; }
 
   /// Updates internal state at timestamp.
   ///
@@ -1534,7 +1534,7 @@ class Api {
 
  private:
   // Creates new internal api and returns corresponding handle.
-  BarelyApi CreateCapi() {
+  static BarelyApi CreateCapi() {
     BarelyApi capi = nullptr;
     const auto status = BarelyApi_Create(&capi);
     assert(status == BarelyStatus_kOk);

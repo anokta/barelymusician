@@ -8,9 +8,6 @@ namespace barelyapi {
 // Unique numerical id generator.
 class IdGenerator {
  public:
-  /// Constructs new `IdGenerator`.
-  IdGenerator() noexcept;
-
   /// Generates next id.
   ///
   /// @return Unique id.
@@ -18,7 +15,7 @@ class IdGenerator {
 
  private:
   // Id counter.
-  Id counter_;
+  Id counter_ = 0;
 };
 
 }  // namespace barelyapi

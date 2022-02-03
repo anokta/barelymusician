@@ -4,8 +4,6 @@
 
 namespace barelyapi {
 
-IdGenerator::IdGenerator() noexcept : counter_(0) {}
-
 Id IdGenerator::Next() noexcept { return ++counter_; }
 
 }  // namespace barelyapi

@@ -19,7 +19,7 @@ enum DrumkitInstrumentParam {
 /// Simple drumkit instrument.
 class DrumkitInstrument : public GenericInstrument {
  public:
-  DrumkitInstrument(int sample_rate) noexcept;
+  explicit DrumkitInstrument(int sample_rate) noexcept;
 
   /// Implements `GenericInstrument`.
   void NoteOff(float pitch) noexcept override;
@@ -27,7 +27,7 @@ class DrumkitInstrument : public GenericInstrument {
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
   void SetData(void* data) noexcept override;
-  void SetParam(int, float) noexcept override;
+  void SetParam(int index, float value) noexcept override;
 
   /// Returns instrument definition.
   static barelyapi::InstrumentDefinition GetDefinition() noexcept;

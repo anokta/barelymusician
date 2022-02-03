@@ -12,7 +12,7 @@ class Voice {
   /// Returns whether the voice is currently active (i.e., playing).
   ///
   /// @return True if active.
-  virtual bool IsActive() const noexcept = 0;
+  [[nodiscard]] virtual bool IsActive() const noexcept = 0;
 
   /// Returns the next output sample for the given output channel.
   ///

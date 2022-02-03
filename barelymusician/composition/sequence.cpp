@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <limits>
 #include <map>
 #include <optional>
 #include <utility>
@@ -14,20 +13,12 @@
 
 namespace barelyapi {
 
-Sequence::Sequence() noexcept
-    : begin_offset_(0.0),
-      begin_position_(0.0),
-      end_position_(std::numeric_limits<double>::max()),
-      loop_(false),
-      loop_begin_offset_(0.0),
-      loop_length_(1.0) {}
-
 Status Sequence::AddNote(Id id, double position, Note note) noexcept {
   if (id == kInvalidId) {
     return Status::kInvalidArgument;
   }
   if (positions_.emplace(id, position).second) {
-    notes_.emplace(NotePositionIdPair{position, id}, std::move(note));
+    notes_.emplace(NotePositionIdPair{position, id}, note);
     return Status::kOk;
   }
   return Status::kAlreadyExists;
@@ -173,7 +164,7 @@ Status Sequence::SetNote(Id id, double position, Note note) noexcept {
       position_it != positions_.end()) {
     const auto note_it =
         notes_.find(NotePositionIdPair{position_it->second, id});
-    note_it->second = std::move(note);
+    note_it->second = note;
     if (position_it->second != position) {
       auto note_node = notes_.extract(note_it);
       note_node.key().first = position;
@@ -188,7 +179,7 @@ Status Sequence::SetNote(Id id, double position, Note note) noexcept {
 Status Sequence::SetNoteDuration(Id id, NoteDuration note_duration) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
-      note->duration = std::move(note_duration);
+      note->duration = note_duration;
       return Status::kOk;
     }
   }
@@ -199,7 +190,7 @@ Status Sequence::SetNoteIntensity(Id id,
                                   NoteIntensity note_intensity) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
-      note->intensity = std::move(note_intensity);
+      note->intensity = note_intensity;
       return Status::kOk;
     }
   }
@@ -209,7 +200,7 @@ Status Sequence::SetNoteIntensity(Id id,
 Status Sequence::SetNotePitch(Id id, NotePitch note_pitch) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
-      note->pitch = std::move(note_pitch);
+      note->pitch = note_pitch;
       return Status::kOk;
     }
   }

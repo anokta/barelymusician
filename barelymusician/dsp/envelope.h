@@ -21,7 +21,7 @@ class Envelope : public Generator {
   /// Returns whether the envelope is currently active (i.e., not idle).
   ///
   /// @return True if active.
-  bool IsActive() const noexcept;
+  [[nodiscard]] bool IsActive() const noexcept;
 
   /// Sets the attack of the envelope in seconds.
   ///

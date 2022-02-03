@@ -21,6 +21,12 @@ class AudioOutput {
   /// Destructs `AudioOutput`.
   ~AudioOutput() noexcept;
 
+  /// Non-copyable and non-movable.
+  AudioOutput(const AudioOutput& other) = delete;
+  AudioOutput& operator=(const AudioOutput& other) = delete;
+  AudioOutput(AudioOutput&& other) noexcept = delete;
+  AudioOutput& operator=(AudioOutput&& other) noexcept = delete;
+
   /// Starts audio processing routine with the given configuration.
   ///
   /// @param sample_rate Sampling rate in hz.
@@ -38,10 +44,10 @@ class AudioOutput {
 
  private:
   // Process callback.
-  ProcessCallback process_callback_;
+  ProcessCallback process_callback_ = nullptr;
 
   // Stream for audio processing.
-  PaStream* stream_;
+  PaStream* stream_ = nullptr;
 };
 
 }  // namespace barely::examples

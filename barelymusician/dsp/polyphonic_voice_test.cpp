@@ -20,13 +20,13 @@ constexpr int kChannel = 0;
 // Fake voice that produces constant output for testing.
 class FakeVoice : public Voice {
  public:
-  FakeVoice() noexcept : active_(false), output_(0.0f) {}
-
   // Implements `UnitGenerator`.
-  float Next(int) noexcept override { return active_ ? output_ : 0.0f; }
+  float Next(int /*channel*/) noexcept override {
+    return active_ ? output_ : 0.0f;
+  }
 
   // Implements `Voice`.
-  bool IsActive() const noexcept override { return active_; }
+  [[nodiscard]] bool IsActive() const noexcept override { return active_; }
   void Start() noexcept override { active_ = true; }
   void Stop() noexcept override { active_ = false; }
 
@@ -34,8 +34,8 @@ class FakeVoice : public Voice {
   void SetOutput(float output) noexcept { output_ = output; }
 
  private:
-  bool active_;
-  float output_;
+  bool active_ = false;
+  float output_ = 0.0f;
 };
 
 // Tests that playing a single voice produces the expected output.

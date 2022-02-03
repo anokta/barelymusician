@@ -4,9 +4,6 @@
 
 namespace barelyapi {
 
-OnePoleFilter::OnePoleFilter() noexcept
-    : coefficient_(1.0f), type_(FilterType::kLowPass), output_(0.0f) {}
-
 float OnePoleFilter::Next(float input) noexcept {
   output_ = coefficient_ * (output_ - input) + input;
   if (type_ == FilterType::kHighPass) {

@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_
 
 #include <functional>
+#include <limits>
 #include <map>
 #include <unordered_map>
 #include <utility>
@@ -32,9 +33,6 @@ class Sequence {
   using ProcessCallback =
       std::function<void(double position, const Note& note)>;
 
-  /// Constructs new `Sequence`.
-  Sequence() noexcept;
-
   /// Adds new note at position.
   ///
   /// @param id Note id.
@@ -46,48 +44,49 @@ class Sequence {
   /// Returns all notes in the sequence.
   ///
   /// @return List of notes with their position-id pairs.
-  std::vector<NoteWithPositionIdPair> GetAllNotes() const noexcept;
+  [[nodiscard]] std::vector<NoteWithPositionIdPair> GetAllNotes()
+      const noexcept;
 
   /// Returns the begin offset.
   ///
   /// @return Begin offset in beats.
-  double GetBeginOffset() const noexcept;
+  [[nodiscard]] double GetBeginOffset() const noexcept;
 
   /// Returns the begin position.
   ///
   /// @return Begin position in beats.
-  double GetBeginPosition() const noexcept;
+  [[nodiscard]] double GetBeginPosition() const noexcept;
 
   /// Returns the end position.
   ///
   /// @return End position in beats.
-  double GetEndPosition() const noexcept;
+  [[nodiscard]] double GetEndPosition() const noexcept;
 
   /// Returns the loop begin offset.
   ///
   /// @return Loop begin offset in beats.
-  double GetLoopBeginOffset() const noexcept;
+  [[nodiscard]] double GetLoopBeginOffset() const noexcept;
 
   /// Returns the loop length.
   ///
   /// @return Loop length in beats.
-  double GetLoopLength() const noexcept;
+  [[nodiscard]] double GetLoopLength() const noexcept;
 
   /// Returns note.
   ///
   /// @param id Note id.
   /// @return Note with position, or error status.
-  StatusOr<NoteWithPosition> GetNote(Id id) const noexcept;
+  [[nodiscard]] StatusOr<NoteWithPosition> GetNote(Id id) const noexcept;
 
   /// Returns whether the sequence is empty or not.
   ///
   /// @return True if empty.
-  bool IsEmpty() const noexcept;
+  [[nodiscard]] bool IsEmpty() const noexcept;
 
   /// Returns whether the sequence is looping or not.
   ///
   /// @return True if looping.
-  bool IsLooping() const noexcept;
+  [[nodiscard]] bool IsLooping() const noexcept;
 
   /// Processes the sequence at given position range.
   ///
@@ -135,7 +134,7 @@ class Sequence {
   /// Sets the loop begin offset.
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
-  void SetLoopBeginOffset(double loop_begin_position) noexcept;
+  void SetLoopBeginOffset(double loop_begin_offset) noexcept;
 
   /// Sets the loop length.
   ///
@@ -181,22 +180,22 @@ class Sequence {
                        const ProcessCallback& process_callback) const noexcept;
 
   // Begin offset in beats.
-  double begin_offset_;
+  double begin_offset_ = 0.0;
 
   // Begin position in beats.
-  double begin_position_;
+  double begin_position_ = 0.0;
 
   // End position in beats.
-  double end_position_;
+  double end_position_ = std::numeric_limits<double>::max();
 
   // Denotes whether the sequence is looping or not.
-  bool loop_;
+  bool loop_ = false;
 
   // Loop begin offset in beats.
-  double loop_begin_offset_;
+  double loop_begin_offset_ = 0.0;
 
   // Loop length in beats.
-  double loop_length_;
+  double loop_length_ = 1.0;
 
   // Sorted notes by their positions.
   std::map<NotePositionIdPair, Note> notes_;

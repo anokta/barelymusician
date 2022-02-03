@@ -16,12 +16,12 @@ class Param {
   /// Returns definition.
   ///
   /// @return Parameter definition.
-  const ParamDefinition& GetDefinition() const noexcept;
+  [[nodiscard]] const ParamDefinition& GetDefinition() const noexcept;
 
   /// Returns value.
   ///
   /// @return Parameter value.
-  float GetValue() const noexcept;
+  [[nodiscard]] float GetValue() const noexcept;
 
   /// Resets value.
   ///

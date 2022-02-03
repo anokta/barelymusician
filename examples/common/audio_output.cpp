@@ -8,8 +8,7 @@
 
 namespace barely::examples {
 
-AudioOutput::AudioOutput() noexcept
-    : process_callback_(nullptr), stream_(nullptr) {
+AudioOutput::AudioOutput() noexcept {
   Pa_Initialize();
 }
 

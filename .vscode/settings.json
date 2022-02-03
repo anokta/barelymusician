@@ -1,26 +1,12 @@
 {
   "bazel.buildifierFixOnFormat": true,
-  "C_Cpp.clang_format_sortIncludes": true,
-  "C_Cpp.clang_format_style": "Google",
-  "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
-    "misc-non-private-member-variables-in-classes",
-    "modernize-avoid-c-arrays",
-    "modernize-use-trailing-return-type",
-    "readability-uppercase-literal-suffix",
-  ],
-  "C_Cpp.codeAnalysis.clangTidy.checks.enabled": [
-    "bugprone-*",
-    "google-*",
-    "misc-*",
-    "modernize-*",
-    "performance-*",
-    "portability-*",
-    "readability-*"
-  ],
+  "C_Cpp.clang_format_style": "file",
+  "C_Cpp.codeAnalysis.clangTidy.config": "",
   "C_Cpp.codeAnalysis.clangTidy.enabled": true,
   "C_Cpp.codeAnalysis.exclude": {
     "bazel-*/**": true,
     "cmake-*/**": true,
+    "platforms/capi/barelymusician.h": true,
   },
   "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp.default.includePath": [
@@ -28,8 +14,10 @@
     "bazel-barelymusician/external/dr_libs",
     "bazel-barelymusician/external/googletest/googlemock/include",
     "bazel-barelymusician/external/googletest/googletest/include",
+    "bazel-barelymusician/external/midifile/include",
     "bazel-barelymusician/external/portaudio/include",
-    "bazel-barelymusician/external/bazel_tools"
+    "bazel-barelymusician/external/bazel_tools",
+    "${default}",
   ],
   "clang-format.language.c.enable": false,
   "clang-format.language.cpp.enable": false,

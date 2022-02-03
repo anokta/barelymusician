@@ -35,8 +35,8 @@ TEST(OnePoleFilterTest, LowPassAllPass) {
   low_pass_filter.SetType(FilterType::kLowPass);
   low_pass_filter.SetCoefficient(0.0f);
 
-  for (int i = 0; i < kInputLength; ++i) {
-    EXPECT_FLOAT_EQ(low_pass_filter.Next(kInput[i]), kInput[i]);
+  for (const float input : kInput) {
+    EXPECT_FLOAT_EQ(low_pass_filter.Next(input), input);
   }
 }
 
@@ -62,8 +62,8 @@ TEST(OnePoleFilterTest, HighPassAllPass) {
   high_pass_filter.SetType(FilterType::kHighPass);
   high_pass_filter.SetCoefficient(1.0f);
 
-  for (int i = 0; i < kInputLength; ++i) {
-    EXPECT_FLOAT_EQ(high_pass_filter.Next(kInput[i]), kInput[i]);
+  for (const float input : kInput) {
+    EXPECT_FLOAT_EQ(high_pass_filter.Next(input), input);
   }
 }
 

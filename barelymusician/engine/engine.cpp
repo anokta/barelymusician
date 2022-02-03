@@ -110,9 +110,8 @@ Engine::Engine() noexcept
         }
         for (auto& [position, id_event_pair] : id_event_pairs) {
           auto& [instrument_id, event] = id_event_pair;
-          instrument_manager_.ProcessEvent(instrument_id,
-                                           transport_.GetTimestamp(position),
-                                           std::move(event));
+          instrument_manager_.ProcessEvent(
+              instrument_id, transport_.GetTimestamp(position), event);
         }
       }) {}
 
@@ -133,7 +132,7 @@ StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
                                       Note note) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     const Id note_id = id_generator_.Next();
-    performer->sequence.AddNote(note_id, position, std::move(note));
+    performer->sequence.AddNote(note_id, position, note);
     return note_id;
   }
   return Status::kNotFound;

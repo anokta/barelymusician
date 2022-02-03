@@ -117,7 +117,7 @@ struct BarelyMusician {
 
  private:
   // Ensure that the instance can only be destroyed via the api call.
-  friend BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi);
+  friend BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi api);
   ~BarelyMusician() = default;
 };
 

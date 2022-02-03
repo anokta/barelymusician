@@ -29,10 +29,9 @@ float Envelope::Next() noexcept {
         state_ = State::kDecay;
       }
       return output_;
-    } else {
-      phase_ = 0.0f;
-      state_ = State::kDecay;
     }
+    phase_ = 0.0f;
+    state_ = State::kDecay;
   }
   if (state_ == State::kDecay) {
     if (decay_increment_ > 0.0f) {
@@ -43,10 +42,9 @@ float Envelope::Next() noexcept {
         state_ = State::kSustain;
       }
       return output_;
-    } else {
-      phase_ = 0.0f;
-      state_ = State::kSustain;
     }
+    phase_ = 0.0f;
+    state_ = State::kSustain;
   }
   if (state_ == State::kSustain) {
     output_ = sustain_;
@@ -61,10 +59,9 @@ float Envelope::Next() noexcept {
         state_ = State::kIdle;
       }
       return output_;
-    } else {
-      phase_ = 0.0f;
-      state_ = State::kIdle;
     }
+    phase_ = 0.0f;
+    state_ = State::kIdle;
   }
   return 0.0f;
 }

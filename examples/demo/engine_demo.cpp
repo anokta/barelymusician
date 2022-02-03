@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cctype>
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <thread>
 #include <unordered_map>
@@ -219,9 +220,12 @@ int main(int /*argc*/, char* argv[]) {
   };
 
   // Add synth instruments.
-  const auto chords_beat_composer_callback = std::bind(
-      ComposeChord, kRootNote, scale, 0.5f, std::placeholders::_4,
-      std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
+  const auto chords_beat_composer_callback =
+      [&](int /*bar*/, int /*beat*/, int /*num_beats*/, int harmonic,
+          double offset, Engine* engine, Id performer_id) {
+        ComposeChord(kRootNote, scale, 0.5f, harmonic, offset, engine,
+                     performer_id);
+      };
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
   performers.emplace_back(engine.AddPerformer(), chords_beat_composer_callback);
@@ -231,19 +235,23 @@ int main(int /*argc*/, char* argv[]) {
   performers.emplace_back(engine.AddPerformer(), chords_beat_composer_callback);
   engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
 
-  const auto line_beat_composer_callback = std::bind(
-      ComposeLine, kRootNote - 1.0f, scale, 1.0f, std::placeholders::_1,
-      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-      std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
+  const auto line_beat_composer_callback =
+      [&](int bar, int beat, int num_beats, int harmonic, double offset,
+          Engine* engine, Id performer_id) {
+        ComposeLine(kRootNote - 1.0f, scale, 1.0f, bar, beat, num_beats,
+                    harmonic, offset, engine, performer_id);
+      };
 
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
   performers.emplace_back(engine.AddPerformer(), line_beat_composer_callback);
   engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
 
-  const auto line_2_beat_composer_callback = std::bind(
-      ComposeLine, kRootNote, scale, 1.0f, std::placeholders::_1,
-      std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-      std::placeholders::_5, std::placeholders::_6, std::placeholders::_7);
+  const auto line_2_beat_composer_callback =
+      [&](int bar, int beat, int num_beats, int harmonic, double offset,
+          Engine* engine, Id performer_id) {
+        ComposeLine(kRootNote, scale, 1.0f, bar, beat, num_beats, harmonic,
+                    offset, engine, performer_id);
+      };
 
   build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
   performers.emplace_back(engine.AddPerformer(), line_2_beat_composer_callback);
@@ -267,10 +275,13 @@ int main(int /*argc*/, char* argv[]) {
   }
   engine.SetInstrumentData(instrument_ids.back(),
                            reinterpret_cast<void*>(&drumkit_files));
-  const auto drumkit_beat_composer_callback =
-      std::bind(ComposeDrums, std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3, &random, std::placeholders::_5,
-                std::placeholders::_6, std::placeholders::_7);
+  const auto drumkit_beat_composer_callback = [&](int bar, int beat,
+                                                  int num_beats,
+                                                  int /*harmonic*/,
+                                                  double offset, Engine* engine,
+                                                  Id performer_id) {
+    ComposeDrums(bar, beat, num_beats, &random, offset, engine, performer_id);
+  };
 
   performers.emplace_back(engine.AddPerformer(),
                           drumkit_beat_composer_callback);
@@ -311,7 +322,7 @@ int main(int /*argc*/, char* argv[]) {
       engine.ProcessInstrument(instrument_id, clock.GetTimestamp(),
                                temp_buffer.data(), kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     std::plus<float>());
+                     std::plus<>());
     }
     clock.Update(kNumFrames);
   };

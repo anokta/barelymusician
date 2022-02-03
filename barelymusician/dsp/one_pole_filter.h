@@ -14,9 +14,6 @@ enum class FilterType {
 /// One-pole filter that features basic low-pass and high-pass filtering.
 class OnePoleFilter : public Filter {
  public:
-  /// Constructs new `OnePoleFilter`.
-  OnePoleFilter() noexcept;
-
   /// Implements `Processor`.
   float Next(float input) noexcept override;
   void Reset() noexcept override;
@@ -33,13 +30,13 @@ class OnePoleFilter : public Filter {
 
  private:
   // Transfer function coefficient of the filter.
-  float coefficient_;
+  float coefficient_ = 1.0f;
 
   // Filter type.
-  FilterType type_;
+  FilterType type_ = FilterType::kLowPass;
 
   // The last output sample.
-  float output_;
+  float output_ = 0.0f;
 };
 
 }  // namespace barelyapi

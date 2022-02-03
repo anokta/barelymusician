@@ -46,24 +46,24 @@ class InstrumentController {
   /// Returns gain.
   ///
   /// @return gain Gain in amplitude.
-  float GetGain() const;
+  [[nodiscard]] float GetGain() const;
 
   /// Returns parameter.
   ///
   /// @param index Parameter index.
   /// @return Pointer to parameter.
-  const Param* GetParam(int index) const;
+  [[nodiscard]] const Param* GetParam(int index) const;
 
   /// Returns whether instrument is muted or not.
   ///
   /// @return True if muted, false otherwise.
-  bool IsMuted() const;
+  [[nodiscard]] bool IsMuted() const;
 
   /// Returns whether note is active or not.
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  bool IsNoteOn(float pitch) const;
+  [[nodiscard]] bool IsNoteOn(float pitch) const;
 
   /// Processes event at timestamp.
   ///

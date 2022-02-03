@@ -22,9 +22,6 @@ Checks: >
   -readability-implicit-bool-conversion,
   -readability-uppercase-literal-suffix,
 
-  -bugprone-exception-escape,
-  -readability-magic-numbers,
-
 CheckOptions:
   - key: bugprone-easily-swappable-parameters.ModelImplicitConversions
     value: '0'

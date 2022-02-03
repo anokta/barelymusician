@@ -1,7 +1,7 @@
 #include "platforms/capi/barelymusician.h"
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <stdbool.h>  // NOLINT
+#include <stdint.h>   // NOLINT
 
 #include <algorithm>
 #include <vector>

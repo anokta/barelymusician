@@ -308,8 +308,7 @@ Status Engine::RemovePerformer(Id performer_id) noexcept {
     const auto instrument_id = performer_it->second.instrument_id;
     if (auto* controller = FindOrNull(controllers_, instrument_id)) {
       for (auto& [position, active_note] : performer_it->second.active_notes) {
-        controller->ProcessEvent(StopNoteEvent{active_note.pitch},
-                                 transport_.GetTimestamp());
+        controller->ProcessEvent(StopNoteEvent{active_note.pitch}, timestamp);
       }
     }
     performers_.erase(performer_it);

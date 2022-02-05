@@ -396,7 +396,7 @@ class Conductor {
           BarelyConductor_GetScale(capi_, &scale_pitches, &num_scale_pitches);
       assert(status == BarelyStatus_kOk);
     }
-    return std::vector<float>(scale_pitches, scale_pitches + num_scale_pitches);
+    return std::vector<float>{scale_pitches, scale_pitches + num_scale_pitches};
   }
 
   /// Returns stress.
@@ -438,7 +438,7 @@ class Conductor {
   ///
   /// @param definition Conductor definition.
   /// @return Status.
-  Status SetDefinition(ConductorDefinition definition) {
+  Status SetDefinition(const ConductorDefinition& definition) {
     std::vector<BarelyParamDefinition> param_definitions;
     param_definitions.reserve(definition.param_definitions.size());
     for (const auto& param_definition : definition.param_definitions) {
@@ -872,7 +872,8 @@ class Instrument {
   friend class Sequence;
 
   // Constructs new `Instrument` with internal api handle and definition.
-  Instrument(BarelyApi capi, InstrumentDefinition definition, int sample_rate)
+  Instrument(BarelyApi capi, const InstrumentDefinition& definition,
+             int sample_rate)
       : capi_(capi),
         id_(BarelyId_kInvalid),
         note_off_callback_(nullptr),
@@ -947,9 +948,9 @@ class NoteReference {
                                                            id_, &definition);
       assert(status == BarelyStatus_kOk);
     }
-    return NoteDefinition(
-        definition.duration, static_cast<NotePitchType>(definition.pitch_type),
-        definition.pitch, definition.intensity, definition.bypass_adjustment);
+    return {definition.duration,
+            static_cast<NotePitchType>(definition.pitch_type), definition.pitch,
+            definition.intensity, definition.bypass_adjustment};
   }
 
   /// Returns note position.
@@ -1074,7 +1075,7 @@ class Sequence {
           &note_id);
       assert(status == BarelyStatus_kOk);
     }
-    return NoteReference(capi_, id_, note_id);
+    return {capi_, id_, note_id};
   }
 
   /// Returns all notes.
@@ -1367,7 +1368,7 @@ class Transport {
   /// @return Status.
   Status SetBeatCallback(BeatCallback beat_callback) {
     if (beat_callback) {
-      beat_callback_ = beat_callback;
+      beat_callback_ = std::move(beat_callback);
       return static_cast<Status>(BarelyTransport_SetBeatCallback(
           capi_,
           [](double position, double timestamp, void* user_data) {
@@ -1491,9 +1492,9 @@ class Api {
   /// @param definition Instrument definition.
   /// @param sample_rate Sampling rate in hz.
   /// @return Instrument.
-  Instrument CreateInstrument(InstrumentDefinition definition,
+  Instrument CreateInstrument(const InstrumentDefinition& definition,
                               int sample_rate) {
-    return Instrument{capi_, std::move(definition), sample_rate};
+    return Instrument{capi_, definition, sample_rate};
   }
 
   /// Creates new sequence.

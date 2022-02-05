@@ -107,7 +107,7 @@ void InstrumentManager::Process(Id instrument_id, double timestamp,
 void InstrumentManager::ProcessEvent(Id instrument_id, double timestamp,
                                      InstrumentEvent event) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->ProcessEvent(std::move(event), timestamp);
+    controller->ProcessEvent(event, timestamp);
   }
 }
 

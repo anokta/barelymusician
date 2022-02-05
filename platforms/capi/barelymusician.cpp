@@ -289,7 +289,7 @@ BarelyStatus BarelyInstrument_Create(BarelyApi api,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id = api->instance.AddInstrument(
+  *out_instrument_id = api->instance.CreateInstrument(
       GetInstrumentDefinition(definition), sample_rate);
   return BarelyStatus_kOk;
 }
@@ -297,55 +297,77 @@ BarelyStatus BarelyInstrument_Create(BarelyApi api,
 BarelyStatus BarelyInstrument_Destroy(BarelyApi api, BarelyId instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.RemoveInstrument(instrument_id));
+  return GetStatus(api->instance.DestroyInstrument(instrument_id));
 }
 
-BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId /*instrument_id*/,
+BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
                                       float* out_gain) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_gain) return BarelyStatus_kInvalidArgument;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  const auto gain_or = api->instance.GetInstrumentGain(instrument_id);
+  if (IsOk(gain_or)) {
+    *out_gain = GetStatusOrValue(gain_or);
+    return BarelyStatus_kOk;
+  }
+  return GetStatus(gain_or);
 }
 
-BarelyStatus BarelyInstrument_GetParam(BarelyApi api,
-                                       BarelyId /*instrument_id*/,
-                                       int32_t /*index*/, float* out_value) {
+BarelyStatus BarelyInstrument_GetParam(BarelyApi api, BarelyId instrument_id,
+                                       int32_t index, float* out_value) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  const auto param_or = api->instance.GetInstrumentParam(instrument_id, index);
+  if (IsOk(param_or)) {
+    *out_value = GetStatusOrValue(param_or).GetValue();
+    return BarelyStatus_kOk;
+  }
+  return GetStatus(param_or);
 }
 
 BarelyStatus BarelyInstrument_GetParamDefinition(
-    BarelyApi api, BarelyId /*instrument_id*/, int32_t /*index*/,
+    BarelyApi api, BarelyId instrument_id, int32_t index,
     BarelyParamDefinition* out_param_definition) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_param_definition) return BarelyStatus_kInvalidArgument;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  const auto param_or = api->instance.GetInstrumentParam(instrument_id, index);
+  if (IsOk(param_or)) {
+    const auto& param_definition = GetStatusOrValue(param_or).GetDefinition();
+    out_param_definition->default_value = param_definition.default_value;
+    out_param_definition->min_value = param_definition.min_value;
+    out_param_definition->max_value = param_definition.max_value;
+    return BarelyStatus_kOk;
+  }
+  return GetStatus(param_or);
 }
 
-BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId /*instrument_id*/,
+BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId instrument_id,
                                       bool* out_is_muted) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_muted) return BarelyStatus_kInvalidArgument;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  const auto is_muted_or = api->instance.IsInstrumentMuted(instrument_id);
+  if (IsOk(is_muted_or)) {
+    *out_is_muted = GetStatusOrValue(is_muted_or);
+    return BarelyStatus_kOk;
+  }
+  return GetStatus(is_muted_or);
 }
 
-BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api,
-                                       BarelyId /*instrument_id*/,
-                                       float /*pitch*/, bool* out_is_note_on) {
+BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api, BarelyId instrument_id,
+                                       float pitch, bool* out_is_note_on) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_note_on) return BarelyStatus_kInvalidArgument;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  const auto is_note_on_or =
+      api->instance.IsInstrumentNoteOn(instrument_id, pitch);
+  if (IsOk(is_note_on_or)) {
+    *out_is_note_on = GetStatusOrValue(is_note_on_or);
+    return BarelyStatus_kOk;
+  }
+  return GetStatus(is_note_on_or);
 }
 
 BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
@@ -354,50 +376,44 @@ BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
                                       int32_t num_output_frames) {
   if (!api) return BarelyStatus_kNotFound;
 
-  api->instance.ProcessInstrument(instrument_id, timestamp, output,
-                                  num_output_channels, num_output_frames);
-  return BarelyStatus_kOk;
+  return GetStatus(api->instance.ProcessInstrument(instrument_id, timestamp,
+                                                   output, num_output_channels,
+                                                   num_output_frames));
 }
 
 BarelyStatus BarelyInstrument_ResetAllParams(BarelyApi api,
                                              BarelyId instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(
-      api->instance.SetAllInstrumentParamsToDefault(instrument_id));
+  return GetStatus(api->instance.ResetAllInstrumentParams(instrument_id));
 }
 
 BarelyStatus BarelyInstrument_ResetParam(BarelyApi api, BarelyId instrument_id,
                                          int32_t index) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(
-      api->instance.SetInstrumentParamToDefault(instrument_id, index));
+  return GetStatus(api->instance.ResetInstrumentParam(instrument_id, index));
 }
 
-BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId /*instrument_id*/,
-                                      void* /*data*/) {
+BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId instrument_id,
+                                      void* data) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  return GetStatus(api->instance.SetInstrumentData(instrument_id, data));
 }
 
-BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId /*instrument_id*/,
-                                      float /*gain*/) {
+BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId instrument_id,
+                                      float gain) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  return GetStatus(api->instance.SetInstrumentGain(instrument_id, gain));
 }
 
-BarelyStatus BarelyInstrument_SetMuted(BarelyApi api,
-                                       BarelyId /*instrument_id*/,
-                                       bool /*is_muted*/) {
+BarelyStatus BarelyInstrument_SetMuted(BarelyApi api, BarelyId instrument_id,
+                                       bool is_muted) {
   if (!api) return BarelyStatus_kNotFound;
 
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
+  return GetStatus(api->instance.SetInstrumentMuted(instrument_id, is_muted));
 }
 
 BarelyStatus BarelyInstrument_SetNoteOffCallback(
@@ -447,21 +463,21 @@ BarelyStatus BarelyInstrument_StartNote(BarelyApi api, BarelyId instrument_id,
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(
-      api->instance.SetInstrumentNoteOn(instrument_id, pitch, intensity));
+      api->instance.StartInstrumentNote(instrument_id, pitch, intensity));
 }
 
 BarelyStatus BarelyInstrument_StopAllNotes(BarelyApi api,
                                            BarelyId instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.SetAllInstrumentNotesOff(instrument_id));
+  return GetStatus(api->instance.StopAllInstrumentNotes(instrument_id));
 }
 
 BarelyStatus BarelyInstrument_StopNote(BarelyApi api, BarelyId instrument_id,
                                        float pitch) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.SetInstrumentNoteOff(instrument_id, pitch));
+  return GetStatus(api->instance.StopInstrumentNote(instrument_id, pitch));
 }
 
 BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,
@@ -828,7 +844,7 @@ BarelyStatus BarelyExamples_CreateSynthInstrument(BarelyApi api,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id = api->instance.AddInstrument(
+  *out_instrument_id = api->instance.CreateInstrument(
       SynthInstrument::GetDefinition(), sample_rate);
   return BarelyStatus_kOk;
 }

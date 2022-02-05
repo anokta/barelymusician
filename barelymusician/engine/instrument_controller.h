@@ -69,7 +69,7 @@ class InstrumentController {
   ///
   /// @param event Instrument event.
   /// @param timestamp Timestamp in seconds.
-  void ProcessEvent(InstrumentEvent event, double timestamp);
+  void ProcessEvent(const InstrumentEvent& event, double timestamp);
 
   /// Resets all parameters to default value at timestamp.
   ///

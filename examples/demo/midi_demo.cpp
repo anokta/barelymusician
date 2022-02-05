@@ -123,7 +123,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Add instrument.
     const Id instrument_id =
-        engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
+        engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
     engine.SetInstrumentNoteOnCallback(
         instrument_id,
         [instrument_id](float pitch, float intensity, double /*timestamp*/) {

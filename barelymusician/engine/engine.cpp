@@ -9,14 +9,20 @@
 #include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
+#include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_processor.h"
+#include "barelymusician/engine/param.h"
 #include "barelymusician/engine/param_definition.h"
 #include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
 
 namespace {
+
+// Maximum number of tasks to be executed per each `Process` call.
+constexpr int kNumMaxTasks = 1000;
 
 // Default playback tempo in bpm.
 constexpr double kDefaultPlaybackTempo = 120.0;
@@ -33,10 +39,18 @@ using InstrumentIdEventPairMap = std::multimap<double, InstrumentIdEventPair>;
 // Dummy beat callback function that does nothing.
 void NoopBeatCallback(double /*position*/, double /*timestamp*/) noexcept {}
 
+// Dummy note off callback that does nothing.
+void NoopNoteOffCallback(float /*pitch*/, double /*timestamp*/) noexcept {}
+
+// Dummy note on callback that does nothing.
+void NoopNoteOnCallback(float /*pitch*/, float /*intensity*/,
+                        double /*timestamp*/) noexcept {}
+
 }  // namespace
 
 Engine::Engine() noexcept
-    : playback_tempo_(kDefaultPlaybackTempo),
+    : runner_(kNumMaxTasks),
+      playback_tempo_(kDefaultPlaybackTempo),
       transport_(&NoopBeatCallback, [this](double begin_position,
                                            double end_position) noexcept {
         InstrumentIdEventPairMap id_event_pairs;
@@ -108,19 +122,13 @@ Engine::Engine() noexcept
                 }
               });
         }
-        for (auto& [position, id_event_pair] : id_event_pairs) {
-          auto& [instrument_id, event] = id_event_pair;
-          instrument_manager_.ProcessEvent(
-              instrument_id, transport_.GetTimestamp(position), event);
+        for (const auto& [position, id_event_pair] : id_event_pairs) {
+          const auto& [instrument_id, event] = id_event_pair;
+          if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+            controller->ProcessEvent(event, transport_.GetTimestamp(position));
+          }
         }
       }) {}
-
-Id Engine::AddInstrument(InstrumentDefinition definition,
-                         int sample_rate) noexcept {
-  const Id instrument_id = id_generator_.Next();
-  instrument_manager_.Create(instrument_id, std::move(definition), sample_rate);
-  return instrument_id;
-}
 
 Id Engine::AddPerformer() noexcept {
   const Id performer_id = id_generator_.Next();
@@ -134,6 +142,56 @@ StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
     const Id note_id = id_generator_.Next();
     performer->sequence.AddNote(note_id, position, note);
     return note_id;
+  }
+  return Status::kNotFound;
+}
+
+Id Engine::CreateInstrument(InstrumentDefinition definition,
+                            int sample_rate) noexcept {
+  const Id instrument_id = id_generator_.Next();
+  controllers_.emplace(instrument_id,
+                       InstrumentController{definition, &NoopNoteOffCallback,
+                                            &NoopNoteOnCallback});
+  runner_.Add([this, instrument_id, definition = std::move(definition),
+               sample_rate]() noexcept {
+    processors_.emplace(std::piecewise_construct,
+                        std::forward_as_tuple(instrument_id),
+                        std::forward_as_tuple(definition, sample_rate));
+  });
+  return instrument_id;
+}
+
+Status Engine::DestroyInstrument(Id instrument_id) noexcept {
+  if (const auto controller_it = controllers_.find(instrument_id);
+      controller_it != controllers_.end()) {
+    for (auto& [performer_id, performer] : performers_) {
+      if (performer.instrument_id == instrument_id) {
+        performer.instrument_id = kInvalidId;
+      }
+    }
+    controller_it->second.StopAllNotes(transport_.GetTimestamp());
+    controllers_.erase(controller_it);
+    runner_.Add(
+        [this, instrument_id]() noexcept { processors_.erase(instrument_id); });
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<float> Engine::GetInstrumentGain(Id instrument_id) const noexcept {
+  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
+    return controller->GetGain();
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<Param> Engine::GetInstrumentParam(Id instrument_id,
+                                           int index) const noexcept {
+  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (const auto* param = controller->GetParam(index)) {
+      return *param;
+    }
+    return Status::kInvalidArgument;
   }
   return Status::kNotFound;
 }
@@ -184,6 +242,21 @@ double Engine::GetPlaybackPosition() const noexcept {
 
 double Engine::GetPlaybackTempo() const noexcept { return playback_tempo_; }
 
+StatusOr<bool> Engine::IsInstrumentMuted(Id instrument_id) const noexcept {
+  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
+    return controller->IsMuted();
+  }
+  return Status::kNotFound;
+}
+
+StatusOr<bool> Engine::IsInstrumentNoteOn(Id instrument_id,
+                                          float pitch) const noexcept {
+  if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
+    return controller->IsNoteOn(pitch);
+  }
+  return Status::kNotFound;
+}
+
 StatusOr<bool> Engine::IsPerformerEmpty(Id performer_id) const noexcept {
   if (const auto* performer = FindOrNull(performers_, performer_id)) {
     return performer->sequence.IsEmpty();
@@ -200,11 +273,15 @@ StatusOr<bool> Engine::IsPerformerLooping(Id performer_id) const noexcept {
 
 bool Engine::IsPlaying() const noexcept { return transport_.IsPlaying(); }
 
-void Engine::ProcessInstrument(Id instrument_id, double timestamp,
-                               float* output, int num_channels,
-                               int num_frames) noexcept {
-  instrument_manager_.Process(instrument_id, timestamp, output, num_channels,
-                              num_frames);
+Status Engine::ProcessInstrument(Id instrument_id, double timestamp,
+                                 float* output, int num_channels,
+                                 int num_frames) noexcept {
+  runner_.Run();
+  if (auto* processor = FindOrNull(processors_, instrument_id)) {
+    processor->Process(output, num_channels, num_frames, timestamp);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 Status Engine::RemoveAllPerformerNotes(Id performer_id) noexcept {
@@ -213,20 +290,6 @@ Status Engine::RemoveAllPerformerNotes(Id performer_id) noexcept {
     return Status::kOk;
   }
   return Status::kNotFound;
-}
-
-Status Engine::RemoveInstrument(Id instrument_id) noexcept {
-  const auto status = instrument_manager_.SetAllNotesOff(
-      instrument_id, transport_.GetTimestamp());
-  if (IsOk(status)) {
-    instrument_manager_.Destroy(instrument_id);
-    for (auto& [performer_id, performer] : performers_) {
-      if (performer.instrument_id == instrument_id) {
-        performer.instrument_id = kInvalidId;
-      }
-    }
-  }
-  return status;
 }
 
 Status Engine::RemoveAllPerformerNotes(Id performer_id, double begin_position,
@@ -243,10 +306,10 @@ Status Engine::RemovePerformer(Id performer_id) noexcept {
       performer_it != performers_.end()) {
     const double timestamp = transport_.GetTimestamp();
     const auto instrument_id = performer_it->second.instrument_id;
-    if (instrument_id != kInvalidId) {
+    if (auto* controller = FindOrNull(controllers_, instrument_id)) {
       for (auto& [position, active_note] : performer_it->second.active_notes) {
-        instrument_manager_.ProcessEvent(instrument_id, timestamp,
-                                         StopNoteEvent{active_note.pitch});
+        controller->ProcessEvent(StopNoteEvent{active_note.pitch},
+                                 transport_.GetTimestamp());
       }
     }
     performers_.erase(performer_it);
@@ -262,69 +325,82 @@ Status Engine::RemovePerformerNote(Id performer_id, Id note_id) noexcept {
   return Status::kNotFound;
 }
 
-Status Engine::SetAllInstrumentNotesOff(Id instrument_id) noexcept {
-  return instrument_manager_.SetAllNotesOff(instrument_id,
-                                            transport_.GetTimestamp());
+Status Engine::ResetAllInstrumentParams(Id instrument_id) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->ResetAllParams(transport_.GetTimestamp());
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
-Status Engine::SetAllInstrumentParamsToDefault(Id instrument_id) noexcept {
-  return instrument_manager_.SetAllParamsToDefault(instrument_id,
-                                                   transport_.GetTimestamp());
-}
-
-Status Engine::SetInstrumentData(Id instrument_id, void* data) noexcept {
-  return instrument_manager_.SetData(instrument_id, transport_.GetTimestamp(),
-                                     data);
+Status Engine::ResetInstrumentParam(Id instrument_id, int index) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (controller->ResetParam(index, transport_.GetTimestamp())) {
+      return Status::kOk;
+    }
+    return Status::kInvalidArgument;
+  }
+  return Status::kNotFound;
 }
 
 void Engine::SetConductor(ConductorDefinition definition) noexcept {
   conductor_ = Conductor{std::move(definition)};
 }
 
+Status Engine::SetInstrumentData(Id instrument_id, void* data) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->SetData(data, transport_.GetTimestamp());
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
 Status Engine::SetInstrumentGain(Id instrument_id, float gain) noexcept {
-  return instrument_manager_.SetGain(instrument_id, transport_.GetTimestamp(),
-                                     gain);
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->SetGain(gain, transport_.GetTimestamp());
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
 Status Engine::SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept {
-  return instrument_manager_.SetMuted(instrument_id, transport_.GetTimestamp(),
-                                      is_muted);
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->SetMuted(is_muted, transport_.GetTimestamp());
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
-Status Engine::SetInstrumentNoteOff(Id instrument_id,
-                                    float note_pitch) noexcept {
-  return instrument_manager_.SetNoteOff(instrument_id,
-                                        transport_.GetTimestamp(), note_pitch);
-}
-
-void Engine::SetInstrumentNoteOffCallback(
+Status Engine::SetInstrumentNoteOffCallback(
     Id instrument_id, NoteOffCallback note_off_callback) noexcept {
-  instrument_manager_.SetNoteOffCallback(instrument_id,
-                                         std::move(note_off_callback));
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->SetNoteOffCallback(note_off_callback
+                                       ? std::move(note_off_callback)
+                                       : &NoopNoteOffCallback);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
 }
 
-Status Engine::SetInstrumentNoteOn(Id instrument_id, float note_pitch,
-                                   float note_intensity) noexcept {
-  return instrument_manager_.SetNoteOn(instrument_id, transport_.GetTimestamp(),
-                                       note_pitch, note_intensity);
-}
-
-Status Engine::SetInstrumentParam(Id instrument_id, int param_index,
-                                  float param_value) noexcept {
-  return instrument_manager_.SetParam(instrument_id, transport_.GetTimestamp(),
-                                      param_index, param_value);
-}
-
-Status Engine::SetInstrumentParamToDefault(Id instrument_id,
-                                           int param_index) noexcept {
-  return instrument_manager_.SetParamToDefault(
-      instrument_id, transport_.GetTimestamp(), param_index);
-}
-
-void Engine::SetInstrumentNoteOnCallback(
+Status Engine::SetInstrumentNoteOnCallback(
     Id instrument_id, NoteOnCallback note_on_callback) noexcept {
-  instrument_manager_.SetNoteOnCallback(instrument_id,
-                                        std::move(note_on_callback));
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->SetNoteOnCallback(note_on_callback ? std::move(note_on_callback)
+                                                   : &NoopNoteOnCallback);
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status Engine::SetInstrumentParam(Id instrument_id, int index,
+                                  float value) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    if (controller->SetParam(index, value, transport_.GetTimestamp())) {
+      return Status::kOk;
+    }
+    return Status::kInvalidArgument;
+  }
+  return Status::kNotFound;
 }
 
 Status Engine::SetPerformerBeginOffset(Id performer_id,
@@ -366,10 +442,12 @@ Status Engine::SetPerformerInstrument(Id performer_id,
                                       Id instrument_id) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     if (performer->instrument_id != instrument_id) {
-      for (auto& [position, active_note] : performer->active_notes) {
-        instrument_manager_.ProcessEvent(instrument_id,
-                                         transport_.GetTimestamp(),
-                                         StopNoteEvent{active_note.pitch});
+      if (auto* controller =
+              FindOrNull(controllers_, performer->instrument_id)) {
+        for (auto& [position, active_note] : performer->active_notes) {
+          controller->ProcessEvent(StopNoteEvent{active_note.pitch},
+                                   transport_.GetTimestamp());
+        }
       }
       performer->instrument_id = instrument_id;
     }
@@ -409,21 +487,64 @@ void Engine::SetPlaybackTempo(double tempo) noexcept {
   playback_tempo_ = std::max(tempo, 0.0);
 }
 
+Status Engine::StartInstrumentNote(Id instrument_id, float pitch,
+                                   float intensity) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->StartNote(pitch, intensity, transport_.GetTimestamp());
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
 void Engine::StartPlayback() noexcept { transport_.Start(); }
+
+Status Engine::StopAllInstrumentNotes(Id instrument_id) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->StopAllNotes(transport_.GetTimestamp());
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
+
+Status Engine::StopInstrumentNote(Id instrument_id, float pitch) noexcept {
+  if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+    controller->StopNote(pitch, transport_.GetTimestamp());
+    return Status::kOk;
+  }
+  return Status::kNotFound;
+}
 
 void Engine::StopPlayback() noexcept {
   for (auto& [performer_id, performer] : performers_) {
     performer.active_notes.clear();
   }
   transport_.Stop();
-  instrument_manager_.SetAllNotesOff(transport_.GetTimestamp());
+  for (auto& [instrument_id, controller] : controllers_) {
+    controller.StopAllNotes(transport_.GetTimestamp());
+  }
 }
 
 void Engine::Update(double timestamp) noexcept {
   transport_.SetTempo(conductor_.TransformPlaybackTempo(playback_tempo_) *
                       kMinutesFromSeconds);
   transport_.Update(timestamp);
-  instrument_manager_.Update();
+
+  std::unordered_map<Id, std::multimap<double, InstrumentEvent>> update_events;
+  for (auto& [instrument_id, controller] : controllers_) {
+    if (!controller.GetEvents().empty()) {
+      update_events.emplace(instrument_id,
+                            std::exchange(controller.GetEvents(), {}));
+    }
+  }
+  if (!update_events.empty()) {
+    runner_.Add([this, update_events = std::move(update_events)]() noexcept {
+      for (const auto& [instrument_id, events] : update_events) {
+        if (auto* processor = FindOrNull(processors_, instrument_id)) {
+          processor->AddEvents(events);
+        }
+      }
+    });
+  }
 }
 
 }  // namespace barelyapi

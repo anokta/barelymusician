@@ -55,7 +55,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Create metronome instrument.
   const auto metronome_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
+      engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kEnvelopeAttack,
                             kAttack);
   engine.SetInstrumentParam(metronome_id,
@@ -71,8 +71,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    engine.SetInstrumentNoteOn(metronome_id, pitch, kGain);
-    engine.SetInstrumentNoteOff(metronome_id, pitch);
+    engine.StartInstrumentNote(metronome_id, pitch, kGain);
+    engine.StopInstrumentNote(metronome_id, pitch);
   };
   engine.SetPlaybackBeatCallback(beat_callback);
 

@@ -74,7 +74,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   engine.SetPlaybackTempo(kInitialTempo);
 
   const Id performer_instrument_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
+      engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(performer_instrument_id, kGain);
   engine.SetInstrumentParam(performer_instrument_id,
                             SynthInstrumentParam::kEnvelopeAttack, kAttack);
@@ -91,7 +91,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       });
 
   const Id metronome_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
+      engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(metronome_id, 0.5f * kGain);
   engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kEnvelopeAttack,
                             kAttack);
@@ -136,8 +136,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   bool reset_position = false;
   const auto beat_callback = [&](double /*position*/, double /*timestamp*/) {
-    engine.SetInstrumentNoteOn(metronome_id, barelyapi::kPitchC3, 1.0);
-    engine.SetInstrumentNoteOff(metronome_id, barelyapi::kPitchC3);
+    engine.StartInstrumentNote(metronome_id, barelyapi::kPitchC3, 1.0);
+    engine.StopInstrumentNote(metronome_id, barelyapi::kPitchC3);
     if (reset_position) {
       reset_position = false;
       engine.SetPlaybackPosition(0.0);

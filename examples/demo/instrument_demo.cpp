@@ -62,7 +62,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Engine engine;
 
   const auto instrument_id =
-      engine.AddInstrument(SynthInstrument::GetDefinition(), kSampleRate);
+      engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(instrument_id, kGain);
   engine.SetInstrumentParam(
       instrument_id, SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack);
@@ -102,7 +102,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      engine.SetAllInstrumentNotesOff(instrument_id);
+      engine.StopAllInstrumentNotes(instrument_id);
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -116,7 +116,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      engine.SetInstrumentNoteOn(instrument_id, offset_octaves + *pitch,
+      engine.StartInstrumentNote(instrument_id, offset_octaves + *pitch,
                                  kNoteIntensity);
     }
   };
@@ -126,7 +126,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      engine.SetInstrumentNoteOff(instrument_id, offset_octaves + *pitch);
+      engine.StopInstrumentNote(instrument_id, offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

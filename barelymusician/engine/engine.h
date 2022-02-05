@@ -13,8 +13,11 @@
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/instrument_manager.h"
+#include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/instrument_processor.h"
+#include "barelymusician/engine/param.h"
 #include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/task_runner.h"
 #include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
@@ -34,13 +37,6 @@ class Engine {
   /// Constructs new `Engine`.
   Engine() noexcept;
 
-  /// Adds new instrument.
-  ///
-  /// @param definition Instrument definition.
-  /// @param sample_rate Sampling rate in hz.
-  /// @return Instrument id.
-  Id AddInstrument(InstrumentDefinition definition, int sample_rate) noexcept;
-
   /// Adds new performer.
   ///
   /// @return Performer id.
@@ -55,72 +51,123 @@ class Engine {
   StatusOr<Id> AddPerformerNote(Id performer_id, double position,
                                 Note note) noexcept;
 
+  /// Creates new instrument.
+  ///
+  /// @param definition Instrument definition.
+  /// @param sample_rate Sampling rate in hz.
+  /// @return Instrument id.
+  Id CreateInstrument(InstrumentDefinition definition,
+                      int sample_rate) noexcept;
+
+  /// Destroys instrument.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status DestroyInstrument(Id instrument_id) noexcept;
+
+  /// Returns instrument gain.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Instrument gain or error status.
+  [[nodiscard]] StatusOr<float> GetInstrumentGain(
+      Id instrument_id) const noexcept;
+
+  /// Returns instrument parameter.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param index Parameter index.
+  /// @return Instrument parameter or error status.
+  [[nodiscard]] StatusOr<Param> GetInstrumentParam(Id instrument_id,
+                                                   int index) const noexcept;
+
   /// Returns performer begin offset.
   ///
   /// @param performer_id Performer id.
   /// @return Begin offset in beats.
-  StatusOr<double> GetPerformerBeginOffset(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetPerformerBeginOffset(
+      Id performer_id) const noexcept;
 
   /// Returns performer begin position.
   ///
   /// @param performer_id Performer id.
   /// @return Optional begin position in beats.
-  StatusOr<double> GetPerformerBeginPosition(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetPerformerBeginPosition(
+      Id performer_id) const noexcept;
 
   /// Returns performer end position.
   ///
   /// @param performer_id Performer id.
   /// @return Optional end position in beats.
-  StatusOr<double> GetPerformerEndPosition(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetPerformerEndPosition(
+      Id performer_id) const noexcept;
 
   /// Returns performer loop begin offset.
   ///
   /// @param performer_id Performer id.
   /// @return Loop begin offset in beats.
-  StatusOr<double> GetPerformerLoopBeginOffset(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetPerformerLoopBeginOffset(
+      Id performer_id) const noexcept;
 
   /// Returns performer loop length.
   ///
   /// @param performer_id Performer id.
   /// @return Loop length in beats.
-  StatusOr<double> GetPerformerLoopLength(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetPerformerLoopLength(
+      Id performer_id) const noexcept;
 
   /// Returns the playback position.
   ///
   /// @return Position in beats.
-  double GetPlaybackPosition() const noexcept;
+  [[nodiscard]] double GetPlaybackPosition() const noexcept;
 
   /// Returns the playback tempo.
   ///
   /// @return Tempo in bpm.
-  double GetPlaybackTempo() const noexcept;
+  [[nodiscard]] double GetPlaybackTempo() const noexcept;
+
+  /// Returns whether instrument is muted or not.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return True if muted, or false if not, or error status.
+  [[nodiscard]] StatusOr<bool> IsInstrumentMuted(
+      Id instrument_id) const noexcept;
+
+  /// Returns whether instrument note is active or not.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param pitch Note pitch.
+  /// @return True if note is active, or false if not, or error status.
+  [[nodiscard]] StatusOr<bool> IsInstrumentNoteOn(Id instrument_id,
+                                                  float pitch) const noexcept;
 
   /// Returns whether the performer is empty or not.
   ///
   /// @param performer_id Performer id.
   /// @return True if empty (i.e., has no notes), false if not, or error status.
-  StatusOr<bool> IsPerformerEmpty(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<bool> IsPerformerEmpty(Id performer_id) const noexcept;
 
   /// Returns whether the performer is looping or not.
   ///
   /// @param performer_id Performer id.
   /// @return True if looping, false if not, or error status.
-  StatusOr<bool> IsPerformerLooping(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<bool> IsPerformerLooping(
+      Id performer_id) const noexcept;
 
   /// Returns whether the playback is currently active or not.
   ///
   /// @return True if playing, false otherwise.
-  bool IsPlaying() const noexcept;
+  [[nodiscard]] bool IsPlaying() const noexcept;
 
-  /// Processes the next instrument output buffer at timestamp.
+  /// Processes next instrument output buffer at timestamp.
   ///
   /// @param instrument_id Instrument id.
   /// @param timestamp Timestamp in seconds.
   /// @param output Output buffer.
   /// @param num_channels Number of output channels.
   /// @param num_frames Number of output frames.
-  void ProcessInstrument(Id instrument_id, double timestamp, float* output,
-                         int num_channels, int num_frames) noexcept;
+  /// @return Status.
+  Status ProcessInstrument(Id instrument_id, double timestamp, float* output,
+                           int num_channels, int num_frames) noexcept;
 
   /// Removes all performer notes.
   ///
@@ -137,12 +184,6 @@ class Engine {
   Status RemoveAllPerformerNotes(Id performer_id, double begin_position,
                                  double end_position) noexcept;
 
-  /// Removes instrument.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @return Status.
-  Status RemoveInstrument(Id instrument_id) noexcept;
-
   /// Removes performer.
   ///
   /// @param performer_id Performer id.
@@ -156,17 +197,18 @@ class Engine {
   /// @return Status.
   Status RemovePerformerNote(Id performer_id, Id note_id) noexcept;
 
-  /// Sets all instrument notes off.
+  /// Resets all instrument parameters to default value.
   ///
   /// @param instrument_id Instrument id.
   /// @return Status.
-  Status SetAllInstrumentNotesOff(Id instrument_id) noexcept;
+  Status ResetAllInstrumentParams(Id instrument_id) noexcept;
 
-  /// Sets all instrument parameters to default.
+  /// Resets instrument parameter to default value.
   ///
   /// @param instrument_id Instrument id.
+  /// @param index Parameter index.
   /// @return Status.
-  Status SetAllInstrumentParamsToDefault(Id instrument_id) noexcept;
+  Status ResetInstrumentParam(Id instrument_id, int index) noexcept;
 
   /// Sets conductor.
   ///
@@ -194,52 +236,27 @@ class Engine {
   /// @return Status.
   Status SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept;
 
-  /// Sets instrument note off.
+  /// Sets instrument note off callback.
   ///
   /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
+  /// @param note_off_callback Note off callback.
+  Status SetInstrumentNoteOffCallback(
+      Id instrument_id, NoteOffCallback note_off_callback) noexcept;
+
+  /// Sets instrument note on callback.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param note_on_callback Note on callback.
+  Status SetInstrumentNoteOnCallback(Id instrument_id,
+                                     NoteOnCallback note_on_callback) noexcept;
+
+  /// Sets instrument parameter value.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param index Parameter index.
+  /// @param value Parameter value.
   /// @return Status.
-  Status SetInstrumentNoteOff(Id instrument_id, float note_pitch) noexcept;
-
-  /// Sets the instrument note off callback.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_off_callback Instrument note off callback.
-  void SetInstrumentNoteOffCallback(Id instrument_id,
-                                    NoteOffCallback note_off_callback) noexcept;
-
-  /// Sets instrument note on.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_pitch Note pitch.
-  /// @param note_intensity Note intensity.
-  /// @return Status.
-  Status SetInstrumentNoteOn(Id instrument_id, float note_pitch,
-                             float note_intensity) noexcept;
-
-  /// Sets the instrument note on callback.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param note_on_callback Instrument note on callback.
-  void SetInstrumentNoteOnCallback(Id instrument_id,
-                                   NoteOnCallback note_on_callback) noexcept;
-
-  /// Sets instrument parameter.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param param_index Parameter index.
-  /// @param param_value Parameter value.
-  /// @return Status.
-  Status SetInstrumentParam(Id instrument_id, int param_index,
-                            float param_value) noexcept;
-
-  /// Sets instrument parameter to default.
-  ///
-  /// @param instrument_id Instrument id.
-  /// @param param_index Parameter index.
-  /// @return Status.
-  Status SetInstrumentParamToDefault(Id instrument_id,
-                                     int param_index) noexcept;
+  Status SetInstrumentParam(Id instrument_id, int index, float value) noexcept;
 
   /// Sets performer begin offset.
   ///
@@ -307,8 +324,30 @@ class Engine {
   /// @param tempo Tempo in bpm.
   void SetPlaybackTempo(double tempo) noexcept;
 
+  /// Starts instrument note.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @return Status.
+  Status StartInstrumentNote(Id instrument_id, float pitch,
+                             float intensity) noexcept;
+
   /// Starts the playback.
   void StartPlayback() noexcept;
+
+  /// Stop all instrument notes.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @return Status.
+  Status StopAllInstrumentNotes(Id instrument_id) noexcept;
+
+  /// Stops instrument note.
+  ///
+  /// @param instrument_id Instrument id.
+  /// @param pitch Note pitch.
+  /// @return Status.
+  Status StopInstrumentNote(Id instrument_id, float pitch) noexcept;
 
   /// Stops the playback.
   void StopPlayback() noexcept;
@@ -344,8 +383,14 @@ class Engine {
   // Id generator.
   IdGenerator id_generator_;
 
-  // Instrument manager.
-  InstrumentManager instrument_manager_;
+  // Instrument controller by id map.
+  std::unordered_map<Id, InstrumentController> controllers_;
+
+  // Instrument controller by id map.
+  std::unordered_map<Id, InstrumentProcessor> processors_;
+
+  // Audio thread task runner.
+  TaskRunner runner_;
 
   // List of performers.
   std::unordered_map<Id, Performer> performers_;

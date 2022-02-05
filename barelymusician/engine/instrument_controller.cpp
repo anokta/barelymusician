@@ -46,7 +46,7 @@ bool InstrumentController::IsNoteOn(float pitch) const {
   return pitches_.contains(pitch);
 }
 
-void InstrumentController::ProcessEvent(InstrumentEvent event,
+void InstrumentController::ProcessEvent(const InstrumentEvent& event,
                                         double timestamp) {
   std::visit(Visitor{[&](const SetDataEvent& set_data_event) noexcept {
                        SetData(set_data_event.data, timestamp);

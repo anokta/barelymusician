@@ -36,13 +36,18 @@ target_link_libraries(
   conductor_definition
   instrument_controller
   instrument_definition
-  instrument_manager
+  instrument_event
+  instrument_processor
+  param
+  param_definition
+  task_runner
   transport
   find_or_null
   id
   id_generator
   status
   sequence
+  dsp_utils
 )
 
 add_library(
@@ -72,25 +77,6 @@ add_library(
 target_link_libraries(
   instrument_event INTERFACE
   instrument_definition
-)
-
-add_library(
-  instrument_manager
-  instrument_manager.cpp
-)
-target_link_libraries(
-  instrument_manager
-  instrument_controller
-  instrument_definition
-  instrument_event
-  instrument_processor
-  param
-  param_definition
-  task_runner
-  find_or_null
-  id
-  status
-  dsp_utils
 )
 
 add_library(
@@ -146,13 +132,13 @@ target_link_libraries(
 gtest_discover_tests(conductor_test)
 
 add_executable(
-  instrument_manager_test
-  instrument_manager_test.cpp
+  engine_test
+  engine_test.cpp
 )
 target_link_libraries(
-  instrument_manager_test
+  engine_test
+  engine
   instrument_definition
-  instrument_manager
   param
   param_definition
   id
@@ -160,7 +146,7 @@ target_link_libraries(
   gmock
   gtest_main
 )
-gtest_discover_tests(instrument_manager_test)
+gtest_discover_tests(engine_test)
 
 add_executable(
   param_test

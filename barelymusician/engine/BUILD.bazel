@@ -39,13 +39,18 @@ cc_library(
         ":conductor_definition",
         ":instrument_controller",
         ":instrument_definition",
-        ":instrument_manager",
+        ":instrument_event",
+        ":instrument_processor",
+        ":param",
+        ":param_definition",
+        ":task_runner",
         ":transport",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:id_generator",
         "//barelymusician/common:status",
         "//barelymusician/composition:sequence",
+        "//barelymusician/dsp:dsp_utils",
     ],
 )
 
@@ -75,25 +80,6 @@ cc_library(
     hdrs = ["instrument_event.h"],
     deps = [
         ":instrument_definition",
-    ],
-)
-
-cc_library(
-    name = "instrument_manager",
-    srcs = ["instrument_manager.cpp"],
-    hdrs = ["instrument_manager.h"],
-    deps = [
-        ":instrument_controller",
-        ":instrument_definition",
-        ":instrument_event",
-        ":instrument_processor",
-        ":param",
-        ":param_definition",
-        ":task_runner",
-        "//barelymusician/common:find_or_null",
-        "//barelymusician/common:id",
-        "//barelymusician/common:status",
-        "//barelymusician/dsp:dsp_utils",
     ],
 )
 
@@ -148,18 +134,15 @@ cc_test(
 )
 
 cc_test(
-    name = "instrument_manager_test",
-    srcs = ["instrument_manager_test.cpp"],
+    name = "engine_test",
+    srcs = ["engine_test.cpp"],
     deps = [
+        ":engine",
         ":instrument_definition",
-        ":instrument_manager",
         ":param",
         ":param_definition",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
-        "//barelymusician/composition:note_duration",
-        "//barelymusician/composition:note_intensity",
-        "//barelymusician/composition:note_pitch",
         "@googletest//:gtest_main",
     ],
 )

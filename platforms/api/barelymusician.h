@@ -629,28 +629,9 @@ class Instrument {
     }
   }
 
-  /// Constructs new `Instrument` via copy.
-  ///
-  /// @param other Other instrument.
-  Instrument(const Instrument& other)
-      : capi_(other.capi_),
-        id_(BarelyId_kInvalid),
-        note_off_callback_(nullptr),
-        note_on_callback_(nullptr) {
-    if (other.id_ != BarelyId_kInvalid) {
-      const auto status = BarelyInstrument_Clone(capi_, other.id_, &id_);
-      assert(status == BarelyStatus_kOk);
-      SetNoteOffCallback(other.note_off_callback_);
-      SetNoteOnCallback(other.note_on_callback_);
-    }
-  }
-
-  /// Assigns `Instrument` via copy.
-  ///
-  /// @param other Other instrument.
-  Instrument& operator=(const Instrument& other) {
-    return *this = Instrument(other);
-  }
+  /// Non-copyable.
+  Instrument(const Instrument& other) = delete;
+  Instrument& operator=(const Instrument& other) = delete;
 
   /// Constructs new `Instrument` via move.
   ///
@@ -1022,22 +1003,9 @@ class Sequence {
     }
   }
 
-  /// Constructs new `Sequence` via copy.
-  ///
-  /// @param other Other sequence.
-  Sequence(const Sequence& other)
-      : capi_(other.capi_), id_(BarelyId_kInvalid), instrument_(nullptr) {
-    if (other.id_ != BarelyId_kInvalid) {
-      const auto status = BarelySequence_Clone(capi_, other.id_, &id_);
-      assert(status == BarelyStatus_kOk);
-      SetInstrument(other.instrument_);
-    }
-  }
-
-  /// Assigns `Sequence` via copy.
-  ///
-  /// @param other Other sequence.
-  Sequence& operator=(const Sequence& other) { return *this = Sequence(other); }
+  /// Non-copyable.
+  Sequence(const Sequence& other) = delete;
+  Sequence& operator=(const Sequence& other) = delete;
 
   /// Constructs new `Sequence` via move.
   ///
@@ -1081,25 +1049,6 @@ class Sequence {
       assert(status == BarelyStatus_kOk);
     }
     return {capi_, id_, note_id};
-  }
-
-  /// Returns all notes.
-  ///
-  /// @return List of note references.
-  [[nodiscard]] std::vector<NoteReference> GetAllNotes() const {
-    BarelyId* note_ids = nullptr;
-    int num_note_ids = 0;
-    if (capi_) {
-      const auto status =
-          BarelySequence_GetAllNotes(capi_, id_, &note_ids, &num_note_ids);
-      assert(status == BarelyStatus_kOk);
-    }
-    std::vector<NoteReference> notes;
-    notes.reserve(num_note_ids);
-    for (int i = 0; i < num_note_ids; ++i) {
-      notes.push_back(NoteReference(capi_, id_, note_ids[i]));
-    }
-    return notes;
   }
 
   /// Returns begin offset.

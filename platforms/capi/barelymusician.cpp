@@ -275,15 +275,6 @@ BarelyStatus BarelyConductor_SetStress(BarelyApi api, float /*stress*/) {
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyInstrument_Clone(BarelyApi api, BarelyId /*instrument_id*/,
-                                    BarelyId* out_instrument_id) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelyInstrument_Create(BarelyApi api,
                                      BarelyInstrumentDefinition definition,
                                      int32_t sample_rate,
@@ -507,15 +498,6 @@ BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,
   return GetStatus(note_id_or);
 }
 
-BarelyStatus BarelySequence_Clone(BarelyApi api, BarelyId /*sequence_id*/,
-                                  BarelyId* out_sequence_id) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelySequence_Create(BarelyApi api, BarelyId* out_sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
@@ -528,17 +510,6 @@ BarelyStatus BarelySequence_Destroy(BarelyApi api, BarelyId sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(api->instance.RemovePerformer(sequence_id));
-}
-
-BarelyStatus BarelySequence_GetAllNotes(BarelyApi api, BarelyId /*sequence_id*/,
-                                        BarelyId** out_note_ids,
-                                        int32_t* out_num_note_ids) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_note_ids) return BarelyStatus_kInvalidArgument;
-  if (!out_num_note_ids) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelySequence_GetBeginOffset(BarelyApi api, BarelyId sequence_id,

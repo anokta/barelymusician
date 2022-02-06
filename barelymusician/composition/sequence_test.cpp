@@ -18,7 +18,6 @@ TEST(SequenceTest, ProcessSingleNote) {
   const Note kNote = Note{.pitch = 10.0f, .duration = 1.0};
 
   Sequence sequence;
-  EXPECT_TRUE(sequence.GetAllNotes().empty());
   EXPECT_DOUBLE_EQ(sequence.GetBeginOffset(), 0.0);
   EXPECT_DOUBLE_EQ(sequence.GetLoopBeginOffset(), 0.0);
   EXPECT_DOUBLE_EQ(sequence.GetLoopLength(), 1.0);
@@ -109,7 +108,6 @@ TEST(SequenceTest, ProcessSingleNote) {
 // Tests that multiple sequence notes are processed as expected.
 TEST(SequenceTest, ProcessMultipleNotes) {
   Sequence sequence;
-  EXPECT_TRUE(sequence.GetAllNotes().empty());
   EXPECT_TRUE(sequence.IsEmpty());
 
   // Add notes.
@@ -118,11 +116,6 @@ TEST(SequenceTest, ProcessMultipleNotes) {
         IsOk(sequence.AddNote(static_cast<Id>(i), static_cast<double>(i),
                               Note{.pitch = static_cast<float>(i + 1)})));
   }
-  EXPECT_THAT(sequence.GetAllNotes(),
-              ElementsAre(Pair(Pair(0.0, Id{0}), Note{.pitch = 1.0f}),
-                          Pair(Pair(1.0, Id{1}), Note{.pitch = 2.0f}),
-                          Pair(Pair(2.0, Id{2}), Note{.pitch = 3.0f}),
-                          Pair(Pair(3.0, Id{3}), Note{.pitch = 4.0f})));
   EXPECT_FALSE(sequence.IsEmpty());
 
   std::vector<Sequence::NoteWithPosition> notes;
@@ -156,7 +149,6 @@ TEST(SequenceTest, ProcessMultipleNotes) {
 
   // Remove all notes.
   sequence.RemoveAllNotes();
-  EXPECT_TRUE(sequence.GetAllNotes().empty());
   EXPECT_TRUE(sequence.IsEmpty());
 
   sequence.Process(0.0, 10.0, process_callback);

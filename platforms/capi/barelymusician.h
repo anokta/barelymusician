@@ -482,16 +482,6 @@ BARELY_EXPORT BarelyStatus BarelyConductor_SetScale(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyConductor_SetStress(BarelyApi api,
                                                      float stress);
 
-/// Clones instrument.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @param out_instrument_id Output instrument identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_Clone(BarelyApi api,
-                                                  BarelyId instrument_id,
-                                                  BarelyId* out_instrument_id);
-
 /// Creates new instrument.
 ///
 /// @param api BarelyMusician api.
@@ -701,16 +691,6 @@ BARELY_EXPORT BarelyStatus
 BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id, double position,
                        BarelyNoteDefinition definition, BarelyId* out_note_id);
 
-/// Clones sequence.
-///
-/// @param api BarelyMusician api.
-/// @param sequence_id Sequence identifier.
-/// @param out_sequence_id Output sequence identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_Clone(BarelyApi api,
-                                                BarelyId sequence_id,
-                                                BarelyId* out_sequence_id);
-
 /// Creates new sequence.
 ///
 /// @param api BarelyMusician api.
@@ -726,17 +706,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_Create(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_Destroy(BarelyApi api,
                                                   BarelyId sequence_id);
-
-/// Gets all sequence notes.
-///
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param out_note_ids List of note ids.
-/// @param out_num_note_ids Number of note ids.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_GetAllNotes(BarelyApi api, BarelyId sequence_id,
-                           BarelyId** out_note_ids, int32_t* out_num_note_ids);
 
 /// Gets sequence begin offset.
 ///

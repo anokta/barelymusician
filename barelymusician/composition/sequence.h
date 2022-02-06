@@ -41,12 +41,6 @@ class Sequence {
   /// @return Status.
   Status AddNote(Id id, double position, Note note) noexcept;
 
-  /// Returns all notes in the sequence.
-  ///
-  /// @return List of notes with their position-id pairs.
-  [[nodiscard]] std::vector<NoteWithPositionIdPair> GetAllNotes()
-      const noexcept;
-
   /// Returns the begin offset.
   ///
   /// @return Begin offset in beats.

@@ -24,18 +24,6 @@ Status Sequence::AddNote(Id id, double position, Note note) noexcept {
   return Status::kAlreadyExists;
 }
 
-std::vector<Sequence::NoteWithPositionIdPair> Sequence::GetAllNotes()
-    const noexcept {
-  std::vector<NoteWithPositionIdPair> notes;
-  if (!notes_.empty()) {
-    notes.reserve(notes_.size());
-    for (const auto& [position_id_pair, note] : notes_) {
-      notes.emplace_back(position_id_pair, note);
-    }
-  }
-  return notes;
-}
-
 double Sequence::GetBeginOffset() const noexcept { return begin_offset_; }
 
 double Sequence::GetBeginPosition() const noexcept { return begin_position_; }

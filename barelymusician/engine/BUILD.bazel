@@ -47,7 +47,6 @@ cc_library(
         ":transport",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
-        "//barelymusician/common:id_generator",
         "//barelymusician/common:status",
         "//barelymusician/composition:sequence",
         "//barelymusician/dsp:dsp_utils",

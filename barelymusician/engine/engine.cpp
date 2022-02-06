@@ -131,7 +131,7 @@ Engine::Engine() noexcept
       }) {}
 
 Id Engine::AddPerformer() noexcept {
-  const Id performer_id = id_generator_.Next();
+  const Id performer_id = ++id_counter_;
   performers_.emplace(performer_id, Performer{});
   return performer_id;
 }
@@ -139,7 +139,7 @@ Id Engine::AddPerformer() noexcept {
 StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
                                       Note note) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
-    const Id note_id = id_generator_.Next();
+    const Id note_id = ++id_counter_;
     performer->sequence.AddNote(note_id, position, note);
     return note_id;
   }
@@ -148,7 +148,7 @@ StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
 
 Id Engine::CreateInstrument(InstrumentDefinition definition,
                             int sample_rate) noexcept {
-  const Id instrument_id = id_generator_.Next();
+  const Id instrument_id = ++id_counter_;
   controllers_.emplace(instrument_id,
                        InstrumentController{definition, &NoopNoteOffCallback,
                                             &NoopNoteOnCallback});

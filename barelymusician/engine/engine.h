@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/id_generator.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
@@ -381,8 +380,8 @@ class Engine {
   // Conductor.
   Conductor conductor_;
 
-  // Id generator.
-  IdGenerator id_generator_;
+  // Monotonic identifier counter.
+  Id id_counter_ = 0;
 
   // Instrument controller by id map.
   std::unordered_map<Id, InstrumentController> controllers_;

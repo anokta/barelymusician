@@ -13,7 +13,6 @@ using ::barely::ParameterDefinition;
 using ::barely::Sequence;
 using ::barely::Status;
 using ::barely::ToString;
-using ::barely::Transport;
 using ::barely::examples::ConsoleLog;
 
 constexpr int kSampleRate = 48000;
@@ -24,12 +23,11 @@ constexpr double kTempo = 120.0;
 int main(int /*argc*/, char* /*argv*/[]) {
   Api api;
 
-  auto& transport = api.GetTransport();
-  if (const auto status = transport.SetTempo(kTempo); !IsOk(status)) {
+  if (const auto status = api.SetTempo(kTempo); !IsOk(status)) {
     ConsoleLog() << "Failed to set tempo: " << ToString(status);
     return -1;
   }
-  ConsoleLog() << "Tempo: " << transport.GetTempo();
+  ConsoleLog() << "Tempo: " << api.GetTempo();
 
   Instrument instrument1 = api.CreateInstrument(
       InstrumentDefinition{.parameter_definitions = {ParameterDefinition(5)}},

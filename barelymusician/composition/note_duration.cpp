@@ -15,7 +15,8 @@ double Lerp(double a, double b, double t) { return a + t * (b - a); }
 double GetPosition(int step, int num_steps) noexcept {
   assert(step >= 0);
   assert(num_steps > 0);
-  const double num_beats = static_cast<double>(step / num_steps);  // NOLINT
+  const double num_beats = static_cast<double>(
+      step / num_steps);  // NOLINT(bugprone-integer-division)
   return num_beats +
          static_cast<double>(step % num_steps) / static_cast<double>(num_steps);
 }

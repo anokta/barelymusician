@@ -6,7 +6,6 @@
   "C_Cpp.codeAnalysis.exclude": {
     "bazel-*/**": true,
     "cmake-*/**": true,
-    "platforms/capi/barelymusician.h": true,
   },
   "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp.default.includePath": [

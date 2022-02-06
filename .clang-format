@@ -1,4 +1,6 @@
 ---
 BasedOnStyle: Google
 Standard: Latest
+DerivePointerAlignment: false
+PointerAlignment: Left
 ...

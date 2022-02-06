@@ -1,6 +1,7 @@
 #ifndef PLATFORMS_CAPI_BARELYMUSICIAN_H_
 #define PLATFORMS_CAPI_BARELYMUSICIAN_H_
 
+// NOLINTBEGIN
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -1029,5 +1030,6 @@ BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
+// NOLINTEND
 
 #endif  // PLATFORMS_CAPI_BARELYMUSICIAN_H_

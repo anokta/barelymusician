@@ -31,20 +31,20 @@ void AudioOutput::Start(int sample_rate, int num_channels,
       Pa_GetDeviceInfo(output_parameters.device)->defaultLowOutputLatency;
   output_parameters.hostApiSpecificStreamInfo = nullptr;
 
-  const auto callback = [](const void* /*input_buffer*/, void* output_buffer,
-                           unsigned long /*frames_per_buffer*/,  // NOLINT
-                           const PaStreamCallbackTimeInfo* /*time_info*/,
-                           PaStreamCallbackFlags /*status_flags*/,
-                           void* user_data) noexcept {
-    if (user_data) {
-      // Access the audio process callback via `user_data` (to avoid capturing
-      // `process_callback_`).
-      const auto& process_callback =
-          *reinterpret_cast<ProcessCallback*>(user_data);
-      process_callback(reinterpret_cast<float*>(output_buffer));
-    }
-    return static_cast<int>(paContinue);
-  };
+  const auto callback =
+      [](const void* /*input_buffer*/, void* output_buffer,
+         unsigned long /*frames_per_buffer*/,  // NOLINT(google-runtime-int)
+         const PaStreamCallbackTimeInfo* /*time_info*/,
+         PaStreamCallbackFlags /*status_flags*/, void* user_data) noexcept {
+        if (user_data) {
+          // Access the audio process callback via `user_data` (to avoid
+          // capturing `process_callback_`).
+          const auto& process_callback =
+              *reinterpret_cast<ProcessCallback*>(user_data);
+          process_callback(reinterpret_cast<float*>(output_buffer));
+        }
+        return static_cast<int>(paContinue);
+      };
   Pa_OpenStream(&stream_, nullptr, &output_parameters, sample_rate, num_frames,
                 paClipOff, callback,
                 reinterpret_cast<void*>(&process_callback_));

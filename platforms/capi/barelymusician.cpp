@@ -1,7 +1,7 @@
 #include "platforms/capi/barelymusician.h"
 
-#include <stdbool.h>  // NOLINT
-#include <stdint.h>   // NOLINT
+#include <stdbool.h>  // NOLINT(modernize-deprecated-headers)
+#include <stdint.h>   // NOLINT(modernize-deprecated-headers)
 
 #include <algorithm>
 #include <vector>

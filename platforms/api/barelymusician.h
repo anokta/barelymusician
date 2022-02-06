@@ -503,7 +503,7 @@ class Conductor {
   }
 
  private:
-  friend class Api;
+  friend class Musician;
 
   // Constructs new `Conductor` with internal api handle.
   explicit Conductor(BarelyApi capi) : capi_(capi) {}
@@ -853,7 +853,7 @@ class Instrument {
   }
 
  private:
-  friend class Api;
+  friend class Musician;
   friend class Sequence;
 
   // Constructs new `Instrument` with internal api handle and definition.
@@ -1246,7 +1246,7 @@ class Sequence {
   }
 
  private:
-  friend class Api;
+  friend class Musician;
 
   /// Constructs new `Sequence` with internal api handle and instrument.
   Sequence(BarelyApi capi, const Instrument* instrument)
@@ -1272,7 +1272,7 @@ class Sequence {
 };
 
 /// BarelyMusician C++ api.
-class Api {
+class Musician {
  public:
   /// Beat callback signature.
   ///
@@ -1280,39 +1280,40 @@ class Api {
   /// @param timestamp Beat timestamp in seconds.
   using BeatCallback = std::function<void(double position, double timestamp)>;
 
-  /// Constructs new `Api`.
-  Api() : beat_callback_(nullptr), capi_(CreateCapi()), conductor_(capi_) {}
+  /// Constructs new `Musician`.
+  Musician()
+      : beat_callback_(nullptr), capi_(CreateCapi()), conductor_(capi_) {}
 
-  /// Destroys `Api`.
-  ~Api() {
+  /// Destroys `Musician`.
+  ~Musician() {
     if (capi_) {
-      const auto status = BarelyApi_Destroy(capi_);
+      const auto status = BarelyMusician_Destroy(capi_);
       assert(status == BarelyStatus_kOk);
       capi_ = nullptr;
     }
   }
 
   /// Non-copyable.
-  Api(const Api& other) = delete;
-  Api& operator=(const Api& other) = delete;
+  Musician(const Musician& other) = delete;
+  Musician& operator=(const Musician& other) = delete;
 
-  /// Constructs new `Api` via move.
+  /// Constructs new `Musician` via move.
   ///
   /// @param other Other api.
-  Api(Api&& other) noexcept
+  Musician(Musician&& other) noexcept
       : capi_(std::exchange(other.capi_, nullptr)),
         conductor_(std::move(other.conductor_)) {
     SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
   }
 
-  /// Assigns `Api` via move.
+  /// Assigns `Musician` via move.
   ///
   /// @param other Other api.
-  Api& operator=(Api&& other) noexcept {
+  Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
       conductor_ = std::move(other.conductor_);
       if (capi_) {
-        const auto status = BarelyApi_Destroy(capi_);
+        const auto status = BarelyMusician_Destroy(capi_);
         assert(status == BarelyStatus_kOk);
       }
       capi_ = std::exchange(other.capi_, nullptr);
@@ -1355,7 +1356,7 @@ class Api {
   [[nodiscard]] double GetPosition() const {
     double position = 0.0;
     if (capi_) {
-      const auto status = BarelyApi_GetPosition(capi_, &position);
+      const auto status = BarelyMusician_GetPosition(capi_, &position);
       assert(status == BarelyStatus_kOk);
     }
     return position;
@@ -1367,7 +1368,7 @@ class Api {
   [[nodiscard]] double GetTempo() const {
     double tempo = 0.0;
     if (capi_) {
-      const auto status = BarelyApi_GetTempo(capi_, &tempo);
+      const auto status = BarelyMusician_GetTempo(capi_, &tempo);
       assert(status == BarelyStatus_kOk);
     }
     return tempo;
@@ -1379,7 +1380,7 @@ class Api {
   [[nodiscard]] bool IsPlaying() const {
     bool is_playing = false;
     if (capi_) {
-      const auto status = BarelyApi_IsPlaying(capi_, &is_playing);
+      const auto status = BarelyMusician_IsPlaying(capi_, &is_playing);
       assert(status == BarelyStatus_kOk);
     }
     return is_playing;
@@ -1392,14 +1393,14 @@ class Api {
   Status SetBeatCallback(BeatCallback beat_callback) {
     if (beat_callback) {
       beat_callback_ = std::move(beat_callback);
-      return static_cast<Status>(BarelyApi_SetBeatCallback(
+      return static_cast<Status>(BarelyMusician_SetBeatCallback(
           capi_,
           [](double position, double timestamp, void* user_data) {
             (*reinterpret_cast<BeatCallback*>(user_data))(position, timestamp);
           },
           reinterpret_cast<void*>(&beat_callback_)));
     }
-    return static_cast<Status>(BarelyApi_SetBeatCallback(
+    return static_cast<Status>(BarelyMusician_SetBeatCallback(
         capi_, /*beat_callback=*/nullptr, /*user_data=*/nullptr));
   }
 
@@ -1408,7 +1409,7 @@ class Api {
   /// @param position Position in beats.
   /// @return Status.
   Status SetPosition(double position) {
-    return static_cast<Status>(BarelyApi_SetPosition(capi_, position));
+    return static_cast<Status>(BarelyMusician_SetPosition(capi_, position));
   }
 
   /// Sets playback tempo.
@@ -1416,32 +1417,32 @@ class Api {
   /// @param tempo Tempo in bpm.
   /// @return Status.
   Status SetTempo(double tempo) {
-    return static_cast<Status>(BarelyApi_SetTempo(capi_, tempo));
+    return static_cast<Status>(BarelyMusician_SetTempo(capi_, tempo));
   }
 
   /// Starts playback.
   ///
   /// @return Status.
-  Status Start() { return static_cast<Status>(BarelyApi_Start(capi_)); }
+  Status Start() { return static_cast<Status>(BarelyMusician_Start(capi_)); }
 
   /// Stops playback.
   ///
   /// @return Status.
-  Status Stop() { return static_cast<Status>(BarelyApi_Stop(capi_)); }
+  Status Stop() { return static_cast<Status>(BarelyMusician_Stop(capi_)); }
 
   /// Updates internal state at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status Update(double timestamp) {
-    return static_cast<Status>(BarelyApi_Update(capi_, timestamp));
+    return static_cast<Status>(BarelyMusician_Update(capi_, timestamp));
   }
 
  private:
   // Creates new internal api and returns corresponding handle.
   static BarelyApi CreateCapi() {
     BarelyApi capi = nullptr;
-    const auto status = BarelyApi_Create(&capi);
+    const auto status = BarelyMusician_Create(&capi);
     assert(status == BarelyStatus_kOk);
     return capi;
   }

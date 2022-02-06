@@ -119,98 +119,9 @@ struct BarelyMusician {
 
  private:
   // Ensure that the instance can only be destroyed via the api call.
-  friend BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi api);
+  friend BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyApi api);
   ~BarelyMusician() = default;
 };
-
-BarelyStatus BarelyApi_Create(BarelyApi* out_api) {
-  if (!out_api) return BarelyStatus_kInvalidArgument;
-
-  *out_api = new BarelyMusician();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_Destroy(BarelyApi api) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  delete api;
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_GetPosition(BarelyApi api, double* out_position) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_position) return BarelyStatus_kInvalidArgument;
-
-  *out_position = api->instance.GetPlaybackPosition();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_GetTempo(BarelyApi api, double* out_tempo) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_tempo) return BarelyStatus_kInvalidArgument;
-
-  *out_tempo = api->instance.GetPlaybackTempo();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_IsPlaying(BarelyApi api, bool* out_is_playing) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_is_playing) return BarelyStatus_kInvalidArgument;
-
-  *out_is_playing = api->instance.IsPlaying();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_SetBeatCallback(BarelyApi api,
-                                       BarelyApi_BeatCallback beat_callback,
-                                       void* user_data) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  if (beat_callback) {
-    api->instance.SetPlaybackBeatCallback(
-        [beat_callback, user_data](double position, double timestamp) {
-          beat_callback(position, timestamp, user_data);
-        });
-  } else {
-    api->instance.SetPlaybackBeatCallback(nullptr);
-  }
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyApi_SetPosition(BarelyApi api, double position) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.SetPlaybackPosition(position);
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_SetTempo(BarelyApi api, double tempo) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.SetPlaybackTempo(tempo);
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_Start(BarelyApi api) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.StartPlayback();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_Stop(BarelyApi api) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.StopPlayback();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  api->instance.Update(timestamp);
-  return BarelyStatus_kOk;
-}
 
 BarelyStatus BarelyConductor_ConductNote(BarelyApi api,
                                          BarelyNotePitchType /*pitch_type*/,
@@ -545,6 +456,94 @@ BarelyStatus BarelyInstrument_StopNote(BarelyApi api, BarelyId instrument_id,
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(api->instance.StopInstrumentNote(instrument_id, pitch));
+}
+
+BarelyStatus BarelyMusician_Create(BarelyApi* out_api) {
+  if (!out_api) return BarelyStatus_kInvalidArgument;
+
+  *out_api = new BarelyMusician();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_Destroy(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  delete api;
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_GetPosition(BarelyApi api, double* out_position) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_position) return BarelyStatus_kInvalidArgument;
+
+  *out_position = api->instance.GetPlaybackPosition();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_GetTempo(BarelyApi api, double* out_tempo) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_tempo) return BarelyStatus_kInvalidArgument;
+
+  *out_tempo = api->instance.GetPlaybackTempo();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_IsPlaying(BarelyApi api, bool* out_is_playing) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_is_playing) return BarelyStatus_kInvalidArgument;
+
+  *out_is_playing = api->instance.IsPlaying();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_SetBeatCallback(
+    BarelyApi api, BarelyMusician_BeatCallback beat_callback, void* user_data) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  if (beat_callback) {
+    api->instance.SetPlaybackBeatCallback(
+        [beat_callback, user_data](double position, double timestamp) {
+          beat_callback(position, timestamp, user_data);
+        });
+  } else {
+    api->instance.SetPlaybackBeatCallback(nullptr);
+  }
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyMusician_SetPosition(BarelyApi api, double position) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.SetPlaybackPosition(position);
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_SetTempo(BarelyApi api, double tempo) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.SetPlaybackTempo(tempo);
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_Start(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.StartPlayback();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_Stop(BarelyApi api) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.StopPlayback();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_Update(BarelyApi api, double timestamp) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.Update(timestamp);
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,

@@ -4,10 +4,10 @@
 
 namespace {
 
-using ::barely::Api;
 using ::barely::Instrument;
 using ::barely::InstrumentDefinition;
 using ::barely::IsOk;
+using ::barely::Musician;
 using ::barely::NoteDefinition;
 using ::barely::ParameterDefinition;
 using ::barely::Sequence;
@@ -21,15 +21,15 @@ constexpr double kTempo = 120.0;
 }  // namespace
 
 int main(int /*argc*/, char* /*argv*/[]) {
-  Api api;
+  Musician musician;
 
-  if (const auto status = api.SetTempo(kTempo); !IsOk(status)) {
+  if (const auto status = musician.SetTempo(kTempo); !IsOk(status)) {
     ConsoleLog() << "Failed to set tempo: " << ToString(status);
     return -1;
   }
-  ConsoleLog() << "Tempo: " << api.GetTempo();
+  ConsoleLog() << "Tempo: " << musician.GetTempo();
 
-  Instrument instrument1 = api.CreateInstrument(
+  Instrument instrument1 = musician.CreateInstrument(
       InstrumentDefinition{.parameter_definitions = {ParameterDefinition(5)}},
       kSampleRate);
   // ConsoleLog() << "Instrument 1 gain: " << instrument1.GetGain();
@@ -37,7 +37,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Instrument instrument2 = instrument1;
   // ConsoleLog() << "Instrument 2 gain: " << instrument2.GetGain();
 
-  Sequence sequence = api.CreateSequence(&instrument1);
+  Sequence sequence = musician.CreateSequence(&instrument1);
   if (const auto status = sequence.SetBeginOffset(3.25); !IsOk(status)) {
     ConsoleLog() << "Failed to set begin offset: " << ToString(status);
     return -1;

@@ -88,7 +88,7 @@ namespace Barely {
     ///
     /// @return Playback position in beats.
     public static double GetPlaybackPosition() {
-      Status status = BarelyApi_GetPosition(Api, _doublePtr);
+      Status status = BarelyMusician_GetPosition(Api, _doublePtr);
       if (IsOk(status)) {
         return Marshal.PtrToStructure<Double>(_doublePtr);
       } else {
@@ -101,7 +101,7 @@ namespace Barely {
     ///
     /// @return Playback tempo.
     public static double GetPlaybackTempo() {
-      Status status = BarelyApi_GetTempo(Api, _doublePtr);
+      Status status = BarelyMusician_GetTempo(Api, _doublePtr);
       if (IsOk(status)) {
         return Marshal.PtrToStructure<Double>(_doublePtr);
       } else {
@@ -114,7 +114,7 @@ namespace Barely {
     ///
     /// @return True if playing, false otherwise.
     public static bool IsPlaying() {
-      Status status = BarelyApi_IsPlaying(Api, _booleanPtr);
+      Status status = BarelyMusician_IsPlaying(Api, _booleanPtr);
       if (IsOk(status)) {
         return Marshal.PtrToStructure<Boolean>(_booleanPtr);
       } else {
@@ -127,14 +127,14 @@ namespace Barely {
     ///
     /// @return True if success, false otherwise.
     public static bool Pause() {
-      return IsOk(BarelyApi_Stop(Api));
+      return IsOk(BarelyMusician_Stop(Api));
     }
 
     /// Starts playback.
     ///
     /// @return True if success, false otherwise.
     public static bool Play() {
-      return IsOk(BarelyApi_Start(Api));
+      return IsOk(BarelyMusician_Start(Api));
     }
 
     /// Processes the next instrument buffer.
@@ -193,7 +193,7 @@ namespace Barely {
     /// @param position Playback position in beats.
     /// @return True if success, false otherwise.
     public static bool SetPlaybackPosition(double position) {
-      return IsOk(BarelyApi_SetPosition(Api, position));
+      return IsOk(BarelyMusician_SetPosition(Api, position));
     }
 
     /// Sets playback tempo.
@@ -201,7 +201,7 @@ namespace Barely {
     /// @param tempo Playback tempo in bpm.
     /// @return True if success, false otherwise.
     public static bool SetPlaybackTempo(double tempo) {
-      return IsOk(BarelyApi_SetTempo(Api, tempo));
+      return IsOk(BarelyMusician_SetTempo(Api, tempo));
     }
 
     /// Starts instrument note.
@@ -275,16 +275,16 @@ namespace Barely {
           if (_intPtrPtr == IntPtr.Zero) {
             _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
           }
-          var instance = new GameObject() { hideFlags = HideFlags.HideAndDontSave }
+          var musician = new GameObject() { hideFlags = HideFlags.HideAndDontSave }
                              .AddComponent<MusicianInternal>();
-          GameObject.DontDestroyOnLoad(instance.gameObject);
+          GameObject.DontDestroyOnLoad(musician.gameObject);
           if (_api != IntPtr.Zero) {
             _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
             _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
             _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
           } else {
             Debug.LogError("Could not initialize BarelyMusician.");
-            GameObject.DestroyImmediate(instance.gameObject);
+            GameObject.DestroyImmediate(musician.gameObject);
           }
           if (_intPtrPtr != IntPtr.Zero) {
             Marshal.FreeHGlobal(_intPtrPtr);
@@ -311,7 +311,7 @@ namespace Barely {
     // Denotes if the system is shutting down to avoid re-initialization.
     private static bool _isShuttingDown = false;
 
-    // Internal component to update the native state.
+    // Internal component to manage the native state.
     private class MusicianInternal : MonoBehaviour {
       // Beat callback.
       private delegate void BeatCallback(double position, double timestamp);
@@ -322,22 +322,22 @@ namespace Barely {
 
       private void Awake() {
         AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-        if (!IsOk(BarelyApi_Create(_intPtrPtr))) {
+        if (!IsOk(BarelyMusician_Create(_intPtrPtr))) {
           return;
         }
         _api = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
         _beatCallback = delegate(double position, double timestamp) {
           OnBeat?.Invoke(position);
         };
-        BarelyApi_SetBeatCallback(_api, Marshal.GetFunctionPointerForDelegate(_beatCallback),
-                                  IntPtr.Zero);
+        BarelyMusician_SetBeatCallback(_api, Marshal.GetFunctionPointerForDelegate(_beatCallback),
+                                       IntPtr.Zero);
         var config = AudioSettings.GetConfiguration();
         _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
       }
 
       private void OnDestroy() {
         AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
-        BarelyApi_Destroy(_api);
+        BarelyMusician_Destroy(_api);
         _api = IntPtr.Zero;
         Marshal.FreeHGlobal(_booleanPtr);
         Marshal.FreeHGlobal(_doublePtr);
@@ -347,7 +347,7 @@ namespace Barely {
 
       private void OnApplicationQuit() {
         _isShuttingDown = true;
-        BarelyApi_Destroy(_api);
+        BarelyMusician_Destroy(_api);
         _api = IntPtr.Zero;
       }
 
@@ -397,40 +397,6 @@ namespace Barely {
     private const string pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
-    [DllImport(pluginName, EntryPoint = "BarelyApi_Create")]
-    private static extern Status BarelyApi_Create(IntPtr outApi);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_Destroy")]
-    private static extern Status BarelyApi_Destroy(IntPtr api);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_GetPosition")]
-    private static extern Status BarelyApi_GetPosition(IntPtr api, IntPtr positionPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_GetTempo")]
-    private static extern Status BarelyApi_GetTempo(IntPtr api, IntPtr tempoPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_IsPlaying")]
-    private static extern Status BarelyApi_IsPlaying(IntPtr api, IntPtr isPlayingPtr);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_SetBeatCallback")]
-    private static extern Status BarelyApi_SetBeatCallback(IntPtr api, IntPtr beatCallback,
-                                                           IntPtr userData);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_SetPosition")]
-    private static extern Status BarelyApi_SetPosition(IntPtr api, double position);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_SetTempo")]
-    private static extern Status BarelyApi_SetTempo(IntPtr api, double tempo);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_Start")]
-    private static extern Status BarelyApi_Start(IntPtr api);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_Stop")]
-    private static extern Status BarelyApi_Stop(IntPtr api);
-
-    [DllImport(pluginName, EntryPoint = "BarelyApi_Update")]
-    private static extern Status UpdateNative(IntPtr api, double timestamp);
-
     [DllImport(pluginName, EntryPoint = "BarelyExamples_CreateSynthInstrument")]
     private static extern Status BarelyExamples_CreateSynthInstrument(IntPtr api, Int32 sampleRate,
                                                                       IntPtr outInstrumentId);
@@ -477,6 +443,40 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_StopNote")]
     private static extern Status BarelyInstrument_StopNote(IntPtr api, Int64 instrumentId,
                                                            float pitch);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
+    private static extern Status BarelyMusician_Create(IntPtr outApi);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
+    private static extern Status BarelyMusician_Destroy(IntPtr api);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_GetPosition")]
+    private static extern Status BarelyMusician_GetPosition(IntPtr api, IntPtr positionPtr);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
+    private static extern Status BarelyMusician_GetTempo(IntPtr api, IntPtr tempoPtr);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_IsPlaying")]
+    private static extern Status BarelyMusician_IsPlaying(IntPtr api, IntPtr isPlayingPtr);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_SetBeatCallback")]
+    private static extern Status BarelyMusician_SetBeatCallback(IntPtr api, IntPtr beatCallback,
+                                                                IntPtr userData);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_SetPosition")]
+    private static extern Status BarelyMusician_SetPosition(IntPtr api, double position);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_SetTempo")]
+    private static extern Status BarelyMusician_SetTempo(IntPtr api, double tempo);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_Start")]
+    private static extern Status BarelyMusician_Start(IntPtr api);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_Stop")]
+    private static extern Status BarelyMusician_Stop(IntPtr api);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_Update")]
+    private static extern Status UpdateNative(IntPtr api, double timestamp);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_AddNote")]
     private static extern Status BarelySequence_AddNote(IntPtr api, Int64 sequenceId,

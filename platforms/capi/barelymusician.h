@@ -76,14 +76,6 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 7,
 };
 
-/// Beat callback signature.
-///
-/// @param position Beat position in beats.
-/// @param timestamp Beat timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyApi_BeatCallback)(double position, double timestamp,
-                                       void* user_data);
-
 /// Conductor adjust note duration function signature.
 ///
 /// @param state Pointer to conductor state.
@@ -325,83 +317,13 @@ typedef struct BarelyInstrumentDefinition {
   int32_t num_parameter_definitions;
 } BarelyInstrumentDefinition;
 
-/// Creates new BarelyMusician api.
+/// Beat callback signature.
 ///
-/// @param out_api Output BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_Create(BarelyApi* out_api);
-
-/// Destroys BarelyMusician api.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_Destroy(BarelyApi api);
-
-/// Gets playback position.
-///
-/// @param api BarelyMusician api.
-/// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_GetPosition(BarelyApi api,
-                                                 double* out_position);
-
-/// Gets playback tempo.
-///
-/// @param api BarelyMusician api.
-/// @param out_tempo Output tempo in bpm.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_GetTempo(BarelyApi api, double* out_tempo);
-
-/// Gets whether playback is active or not.
-///
-/// @param api BarelyMusician api.
-/// @param out_is_playing Output true if active, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_IsPlaying(BarelyApi api,
-                                               bool* out_is_playing);
-
-/// Sets beat callback.
-///
-/// @param api BarelyMusician api.
-/// @param beat_callback Beat callback.
+/// @param position Beat position in beats.
+/// @param timestamp Beat timestamp in seconds.
 /// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetBeatCallback(
-    BarelyApi api, BarelyApi_BeatCallback beat_callback, void* user_data);
-
-/// Sets playback position.
-///
-/// @param api BarelyMusician api.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetPosition(BarelyApi api,
-                                                 double position);
-
-/// Sets playback tempo.
-///
-/// @param api BarelyMusician api.
-/// @param tempo Tempo in bpm.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_SetTempo(BarelyApi api, double tempo);
-
-/// Starts playback.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_Start(BarelyApi api);
-
-/// Stops playback.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_Stop(BarelyApi api);
-
-/// Updates internal state at timestamp.
-///
-/// @param api BarelyMusician api.
-/// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyApi_Update(BarelyApi api, double timestamp);
+typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
+                                            void* user_data);
 
 /// Conducts note.
 ///
@@ -737,6 +659,86 @@ BarelyInstrument_StopAllNotes(BarelyApi api, BarelyId instrument_id);
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyApi api,
                                                      BarelyId instrument_id,
                                                      float pitch);
+
+/// Creates new BarelyMusician api.
+///
+/// @param out_api Output BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_Create(BarelyApi* out_api);
+
+/// Destroys BarelyMusician api.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyApi api);
+
+/// Gets playback position.
+///
+/// @param api BarelyMusician api.
+/// @param out_position Output position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetPosition(BarelyApi api,
+                                                      double* out_position);
+
+/// Gets playback tempo.
+///
+/// @param api BarelyMusician api.
+/// @param out_tempo Output tempo in bpm.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyApi api,
+                                                   double* out_tempo);
+
+/// Gets whether playback is active or not.
+///
+/// @param api BarelyMusician api.
+/// @param out_is_playing Output true if active, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyApi api,
+                                                    bool* out_is_playing);
+
+/// Sets beat callback.
+///
+/// @param api BarelyMusician api.
+/// @param beat_callback Beat callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetBeatCallback(
+    BarelyApi api, BarelyMusician_BeatCallback beat_callback, void* user_data);
+
+/// Sets playback position.
+///
+/// @param api BarelyMusician api.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetPosition(BarelyApi api,
+                                                      double position);
+
+/// Sets playback tempo.
+///
+/// @param api BarelyMusician api.
+/// @param tempo Tempo in bpm.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyApi api, double tempo);
+
+/// Starts playback.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_Start(BarelyApi api);
+
+/// Stops playback.
+///
+/// @param api BarelyMusician api.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_Stop(BarelyApi api);
+
+/// Updates internal state at timestamp.
+///
+/// @param api BarelyMusician api.
+/// @param timestamp Timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyApi api,
+                                                 double timestamp);
 
 /// Adds sequence note at position.
 ///

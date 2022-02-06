@@ -18,7 +18,7 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParam;
+using ::barely::examples::SynthInstrumentParameter;
 using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
 
@@ -64,15 +64,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto instrument_id =
       engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(instrument_id, kGain);
-  engine.SetInstrumentParam(
-      instrument_id, SynthInstrumentParam::kEnvelopeAttack, kEnvelopeAttack);
-  engine.SetInstrumentParam(
-      instrument_id, SynthInstrumentParam::kEnvelopeRelease, kEnvelopeRelease);
-  engine.SetInstrumentParam(instrument_id,
-                            SynthInstrumentParam::kOscillatorType,
-                            static_cast<float>(kOscillatorType));
-  engine.SetInstrumentParam(instrument_id, SynthInstrumentParam::kNumVoices,
-                            static_cast<float>(kNumVoices));
+  engine.SetInstrumentParameter(instrument_id,
+                                SynthInstrumentParameter::kEnvelopeAttack,
+                                kEnvelopeAttack);
+  engine.SetInstrumentParameter(instrument_id,
+                                SynthInstrumentParameter::kEnvelopeRelease,
+                                kEnvelopeRelease);
+  engine.SetInstrumentParameter(instrument_id,
+                                SynthInstrumentParameter::kOscillatorType,
+                                static_cast<float>(kOscillatorType));
+  engine.SetInstrumentParameter(instrument_id,
+                                SynthInstrumentParameter::kNumVoices,
+                                static_cast<float>(kNumVoices));
 
   engine.SetInstrumentNoteOnCallback(
       instrument_id, [](float pitch, float intensity, double /*timestamp*/) {

@@ -10,7 +10,7 @@
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter_definition.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
@@ -22,9 +22,10 @@ using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::InstrumentDefinition;
 using ::barelyapi::IsOk;
 using ::barelyapi::Note;
-using ::barelyapi::ParamDefinition;
 using ::barelyapi::Status;
 using ::barelyapi::StatusOr;
+
+using ParameterDefinition = ::barelyapi::ParameterDefinition;
 
 // Dummy create function that does nothing.
 void NoopCreateFn(void** /*state*/, int /*sample_rate*/) noexcept {}
@@ -43,8 +44,8 @@ void NoopSetNoteOnFn(void** /*state*/, float /*pitch*/,
                      float /*intensity*/) noexcept {}
 
 // Dummy set instrument parameter function that does nothing.
-void NoopSetParamFn(void** /*state*/, int /*index*/, float /*value*/) noexcept {
-}
+void NoopSetParameterFn(void** /*state*/, int /*index*/,
+                        float /*value*/) noexcept {}
 
 // Dummy process function that fills the output buffer with zeros.
 void ZeroFillProcessFn(void** /*state*/, float* output, int num_output_channels,
@@ -55,15 +56,15 @@ void ZeroFillProcessFn(void** /*state*/, float* output, int num_output_channels,
 // Returns the corresponding `InstrumentDefinition` for a given `definition`.
 InstrumentDefinition GetInstrumentDefinition(
     const BarelyInstrumentDefinition& definition) noexcept {
-  std::vector<ParamDefinition> param_definitions;
-  param_definitions.reserve(definition.num_param_definitions);
-  for (int i = 0; i < definition.num_param_definitions; ++i) {
-    const auto& param_definition = definition.param_definitions[i];
-    param_definitions.push_back(ParamDefinition{
-        std::min(std::max(param_definition.default_value,
-                          param_definition.min_value),
-                 param_definition.max_value),
-        param_definition.min_value, param_definition.max_value});
+  std::vector<ParameterDefinition> parameter_definitions;
+  parameter_definitions.reserve(definition.num_parameter_definitions);
+  for (int i = 0; i < definition.num_parameter_definitions; ++i) {
+    const auto& parameter_definition = definition.parameter_definitions[i];
+    parameter_definitions.push_back(ParameterDefinition{
+        std::min(std::max(parameter_definition.default_value,
+                          parameter_definition.min_value),
+                 parameter_definition.max_value),
+        parameter_definition.min_value, parameter_definition.max_value});
   }
   return InstrumentDefinition{
       definition.create_fn ? definition.create_fn : &NoopCreateFn,
@@ -73,8 +74,9 @@ InstrumentDefinition GetInstrumentDefinition(
       definition.set_note_off_fn ? definition.set_note_off_fn
                                  : &NoopSetNoteOffFn,
       definition.set_note_on_fn ? definition.set_note_on_fn : &NoopSetNoteOnFn,
-      definition.set_param_fn ? definition.set_param_fn : &NoopSetParamFn,
-      param_definitions};
+      definition.set_parameter_fn ? definition.set_parameter_fn
+                                  : &NoopSetParameterFn,
+      parameter_definitions};
 }
 
 // Returns the corresponding `BarelyStatus` value for a given `status`.
@@ -162,8 +164,8 @@ BarelyStatus BarelyConductor_GetEnergy(BarelyApi api, float* out_energy) {
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_GetParam(BarelyApi api, int32_t /*index*/,
-                                      float* out_value) {
+BarelyStatus BarelyConductor_GetParameter(BarelyApi api, int32_t /*index*/,
+                                          float* out_value) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
@@ -171,11 +173,11 @@ BarelyStatus BarelyConductor_GetParam(BarelyApi api, int32_t /*index*/,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_GetParamDefinition(
+BarelyStatus BarelyConductor_GetParameterDefinition(
     BarelyApi api, int32_t /*index*/,
-    BarelyParamDefinition* out_param_definition) {
+    BarelyParameterDefinition* out_parameter_definition) {
   if (!api) return BarelyStatus_kNotFound;
-  if (!out_param_definition) return BarelyStatus_kInvalidArgument;
+  if (!out_parameter_definition) return BarelyStatus_kInvalidArgument;
 
   // TODO(#85): Implement.
   return BarelyStatus_kUnimplemented;
@@ -207,14 +209,14 @@ BarelyStatus BarelyConductor_GetStress(BarelyApi api, float* out_stress) {
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_ResetAllParams(BarelyApi api) {
+BarelyStatus BarelyConductor_ResetAllParameters(BarelyApi api) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_ResetParam(BarelyApi api, int32_t /*index*/) {
+BarelyStatus BarelyConductor_ResetParameter(BarelyApi api, int32_t /*index*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
@@ -243,8 +245,8 @@ BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float /*energy*/) {
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_SetParam(BarelyApi api, int32_t /*index*/,
-                                      float /*value*/) {
+BarelyStatus BarelyConductor_SetParameter(BarelyApi api, int32_t /*index*/,
+                                          float /*value*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
@@ -313,34 +315,37 @@ BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
   return GetStatus(gain_or);
 }
 
-BarelyStatus BarelyInstrument_GetParam(BarelyApi api, BarelyId instrument_id,
-                                       int32_t index, float* out_value) {
+BarelyStatus BarelyInstrument_GetParameter(BarelyApi api,
+                                           BarelyId instrument_id,
+                                           int32_t index, float* out_value) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
-  const auto param_or = api->instance.GetInstrumentParam(instrument_id, index);
-  if (IsOk(param_or)) {
-    *out_value = GetStatusOrValue(param_or).GetValue();
+  const auto parameter_or =
+      api->instance.GetInstrumentParameter(instrument_id, index);
+  if (IsOk(parameter_or)) {
+    *out_value = GetStatusOrValue(parameter_or).GetValue();
     return BarelyStatus_kOk;
   }
-  return GetStatus(param_or);
+  return GetStatus(parameter_or);
 }
 
 BarelyStatus BarelyInstrument_GetParamDefinition(
     BarelyApi api, BarelyId instrument_id, int32_t index,
-    BarelyParamDefinition* out_param_definition) {
+    BarelyParameterDefinition* out_parameter_definition) {
   if (!api) return BarelyStatus_kNotFound;
-  if (!out_param_definition) return BarelyStatus_kInvalidArgument;
+  if (!out_parameter_definition) return BarelyStatus_kInvalidArgument;
 
-  const auto param_or = api->instance.GetInstrumentParam(instrument_id, index);
-  if (IsOk(param_or)) {
-    const auto& param_definition = GetStatusOrValue(param_or).GetDefinition();
-    out_param_definition->default_value = param_definition.default_value;
-    out_param_definition->min_value = param_definition.min_value;
-    out_param_definition->max_value = param_definition.max_value;
+  const auto parameter_or =
+      api->instance.GetInstrumentParameter(instrument_id, index);
+  if (IsOk(parameter_or)) {
+    const auto& definition = GetStatusOrValue(parameter_or).GetDefinition();
+    out_parameter_definition->default_value = definition.default_value;
+    out_parameter_definition->min_value = definition.min_value;
+    out_parameter_definition->max_value = definition.max_value;
     return BarelyStatus_kOk;
   }
-  return GetStatus(param_or);
+  return GetStatus(parameter_or);
 }
 
 BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId instrument_id,
@@ -381,18 +386,20 @@ BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
                                                    num_output_frames));
 }
 
-BarelyStatus BarelyInstrument_ResetAllParams(BarelyApi api,
-                                             BarelyId instrument_id) {
+BarelyStatus BarelyInstrument_ResetAllParameters(BarelyApi api,
+                                                 BarelyId instrument_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.ResetAllInstrumentParams(instrument_id));
+  return GetStatus(api->instance.ResetAllInstrumentParameters(instrument_id));
 }
 
-BarelyStatus BarelyInstrument_ResetParam(BarelyApi api, BarelyId instrument_id,
-                                         int32_t index) {
+BarelyStatus BarelyInstrument_ResetParameter(BarelyApi api,
+                                             BarelyId instrument_id,
+                                             int32_t index) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.ResetInstrumentParam(instrument_id, index));
+  return GetStatus(
+      api->instance.ResetInstrumentParameter(instrument_id, index));
 }
 
 BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId instrument_id,
@@ -450,12 +457,13 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyInstrument_SetParam(BarelyApi api, BarelyId instrument_id,
-                                       int32_t index, float value) {
+BarelyStatus BarelyInstrument_SetParameter(BarelyApi api,
+                                           BarelyId instrument_id,
+                                           int32_t index, float value) {
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(
-      api->instance.SetInstrumentParam(instrument_id, index, value));
+      api->instance.SetInstrumentParameter(instrument_id, index, value));
 }
 
 BarelyStatus BarelyInstrument_StartNote(BarelyApi api, BarelyId instrument_id,

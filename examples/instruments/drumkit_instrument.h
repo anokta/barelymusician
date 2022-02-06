@@ -5,14 +5,14 @@
 #include <vector>
 
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter_definition.h"
 #include "examples/common/wav_file.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"
 
 namespace barely::examples {
 
-enum DrumkitInstrumentParam {
+enum DrumkitInstrumentParameter {
   kPadRelease = 0,
 };
 
@@ -27,7 +27,7 @@ class DrumkitInstrument : public GenericInstrument {
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
   void SetData(void* data) noexcept override;
-  void SetParam(int index, float value) noexcept override;
+  void SetParameter(int index, float value) noexcept override;
 
   /// Returns instrument definition.
   static barelyapi::InstrumentDefinition GetDefinition() noexcept;

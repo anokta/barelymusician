@@ -29,7 +29,7 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParam;
+using ::barely::examples::SynthInstrumentParameter;
 using ::barelyapi::ConductorDefinition;
 using ::barelyapi::Engine;
 using ::barelyapi::Id;
@@ -76,13 +76,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const Id performer_instrument_id =
       engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(performer_instrument_id, kGain);
-  engine.SetInstrumentParam(performer_instrument_id,
-                            SynthInstrumentParam::kEnvelopeAttack, kAttack);
-  engine.SetInstrumentParam(performer_instrument_id,
-                            SynthInstrumentParam::kEnvelopeRelease, kRelease);
-  engine.SetInstrumentParam(performer_instrument_id,
-                            SynthInstrumentParam::kOscillatorType,
-                            static_cast<float>(kOscillatorType));
+  engine.SetInstrumentParameter(performer_instrument_id,
+                                SynthInstrumentParameter::kEnvelopeAttack,
+                                kAttack);
+  engine.SetInstrumentParameter(performer_instrument_id,
+                                SynthInstrumentParameter::kEnvelopeRelease,
+                                kRelease);
+  engine.SetInstrumentParameter(performer_instrument_id,
+                                SynthInstrumentParameter::kOscillatorType,
+                                static_cast<float>(kOscillatorType));
   engine.SetInstrumentNoteOnCallback(
       performer_instrument_id,
       [](float pitch, float intensity, double /*timestamp*/) {
@@ -93,12 +95,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const Id metronome_id =
       engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   engine.SetInstrumentGain(metronome_id, 0.5f * kGain);
-  engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kEnvelopeAttack,
-                            kAttack);
-  engine.SetInstrumentParam(metronome_id,
-                            SynthInstrumentParam::kEnvelopeRelease, 0.025f);
-  engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kOscillatorType,
-                            static_cast<float>(OscillatorType::kSquare));
+  engine.SetInstrumentParameter(
+      metronome_id, SynthInstrumentParameter::kEnvelopeAttack, kAttack);
+  engine.SetInstrumentParameter(
+      metronome_id, SynthInstrumentParameter::kEnvelopeRelease, 0.025f);
+  engine.SetInstrumentParameter(metronome_id,
+                                SynthInstrumentParameter::kOscillatorType,
+                                static_cast<float>(OscillatorType::kSquare));
 
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {

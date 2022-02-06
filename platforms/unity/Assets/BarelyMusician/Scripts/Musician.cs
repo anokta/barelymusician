@@ -161,59 +161,31 @@ namespace Barely {
       BarelySequence_Destroy(Api, sequence.Id);
     }
 
-    /// Sets all instrument notes off.
+    /// Resets all instrument parameters to default value.
     ///
     /// @param instrument Instrument to set.
     /// @return True if success, false otherwise.
-    public static bool SetAllInstrumentNotesOff(Instrument instrument) {
-      return IsOk(BarelyInstrument_StopAllNotes(Api, instrument.Id));
+    public static bool ResetAllInstrumentParameters(Instrument instrument) {
+      return IsOk(BarelyInstrument_ResetAllParameters(Api, instrument.Id));
     }
 
-    /// Sets all instrument parameters to default value.
+    /// Resets instrument parameter to default value.
     ///
     /// @param instrument Instrument to set.
+    /// @param index Parameter index.
     /// @return True if success, false otherwise.
-    public static bool SetAllInstrumentParamsToDefault(Instrument instrument) {
-      return IsOk(BarelyInstrument_ResetAllParams(Api, instrument.Id));
-    }
-
-    /// Sets instrument note off.
-    ///
-    /// @param instrument Instrument to set.
-    /// @param notePitch Note pitch.
-    /// @return True if success, false otherwise.
-    public static bool SetInstrumentNoteOff(Instrument instrument, float notePitch) {
-      return IsOk(BarelyInstrument_StopNote(Api, instrument.Id, notePitch));
-    }
-
-    /// Sets instrument note on.
-    ///
-    /// @param instrument Instrument to set.
-    /// @param notePitch Note pitch.
-    /// @param noteIntensity Note intensity.
-    /// @return True if success, false otherwise.
-    public static bool SetInstrumentNoteOn(Instrument instrument, float notePitch,
-                                           float noteIntensity) {
-      return IsOk(BarelyInstrument_StartNote(Api, instrument.Id, notePitch, noteIntensity));
+    public static bool ResetInstrumentParameter(Instrument instrument, int index) {
+      return IsOk(BarelyInstrument_ResetParameter(Api, instrument.Id, index));
     }
 
     /// Sets instrument parameter value.
     ///
     /// @param instrument Instrument to set.
-    /// @param paramIndex Parameter index.
-    /// @param paramValue Parameter value.
+    /// @param index Parameter index.
+    /// @param value Parameter value.
     /// @return True if success, false otherwise.
-    public static bool SetInstrumentParam(Instrument instrument, int paramIndex, float paramValue) {
-      return IsOk(BarelyInstrument_SetParam(Api, instrument.Id, paramIndex, paramValue));
-    }
-
-    /// Sets instrument parameter value to default.
-    ///
-    /// @param instrument Instrument to set.
-    /// @param paramIndex Parameter index.
-    /// @return True if success, false otherwise.
-    public static bool SetInstrumentParamToDefault(Instrument instrument, int paramIndex) {
-      return IsOk(BarelyInstrument_ResetParam(Api, instrument.Id, paramIndex));
+    public static bool SetInstrumentParameter(Instrument instrument, int index, float value) {
+      return IsOk(BarelyInstrument_SetParameter(Api, instrument.Id, index, value));
     }
 
     /// Sets playback position.
@@ -232,11 +204,38 @@ namespace Barely {
       return IsOk(BarelyTransport_SetTempo(Api, tempo));
     }
 
+    /// Starts instrument note.
+    ///
+    /// @param instrument Instrument to set.
+    /// @param pitch Note pitch.
+    /// @param intensity Note intensity.
+    /// @return True if success, false otherwise.
+    public static bool StartInstrumentNote(Instrument instrument, float pitch, float intensity) {
+      return IsOk(BarelyInstrument_StartNote(Api, instrument.Id, pitch, intensity));
+    }
+
     /// Stops transport.
     ///
     /// @return True if success, false otherwise.
     public static bool Stop() {
       return Pause() && SetPlaybackPosition(0.0);
+    }
+
+    /// Stops all instrument notes.
+    ///
+    /// @param instrument Instrument to set.
+    /// @return True if success, false otherwise.
+    public static bool StopAllInstrumentNotes(Instrument instrument) {
+      return IsOk(BarelyInstrument_StopAllNotes(Api, instrument.Id));
+    }
+
+    /// Stops instrument note.
+    ///
+    /// @param instrument Instrument to set.
+    /// @param pitch Note pitch.
+    /// @return True if success, false otherwise.
+    public static bool StopInstrumentNote(Instrument instrument, float pitch) {
+      return IsOk(BarelyInstrument_StopNote(Api, instrument.Id, pitch));
     }
 
     /// Updates sequence.
@@ -421,12 +420,13 @@ namespace Barely {
                                                           Int32 numOutputChannels,
                                                           Int32 numOutputFrames);
 
-    [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllParams")]
-    private static extern Status BarelyInstrument_ResetAllParams(IntPtr api, Int64 instrumentId);
+    [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllParameters")]
+    private static extern Status BarelyInstrument_ResetAllParameters(IntPtr api,
+                                                                     Int64 instrumentId);
 
-    [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetParam")]
-    private static extern Status BarelyInstrument_ResetParam(IntPtr api, Int64 instrumentId,
-                                                             Int32 index);
+    [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetParameter")]
+    private static extern Status BarelyInstrument_ResetParameter(IntPtr api, Int64 instrumentId,
+                                                                 Int32 index);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffCallback")]
     private static extern Status BarelyInstrument_SetNoteOffCallback(IntPtr api, Int64 instrumentId,
@@ -438,9 +438,9 @@ namespace Barely {
                                                                     IntPtr noteOnCallback,
                                                                     IntPtr userData);
 
-    [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetParam")]
-    private static extern Status BarelyInstrument_SetParam(IntPtr api, Int64 instrumentId,
-                                                           Int32 index, float value);
+    [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetParameter")]
+    private static extern Status BarelyInstrument_SetParameter(IntPtr api, Int64 instrumentId,
+                                                               Int32 index, float value);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_StartNote")]
     private static extern Status BarelyInstrument_StartNote(IntPtr api, Int64 instrumentId,

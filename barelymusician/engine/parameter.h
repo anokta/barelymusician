@@ -1,22 +1,22 @@
-#ifndef BARELYMUSICIAN_ENGINE_PARAM_H_
-#define BARELYMUSICIAN_ENGINE_PARAM_H_
+#ifndef BARELYMUSICIAN_ENGINE_PARAMETER_H_
+#define BARELYMUSICIAN_ENGINE_PARAMETER_H_
 
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter_definition.h"
 
 namespace barelyapi {
 
 /// Class that wraps a parameter.
-class Param {
+class Parameter {
  public:
-  /// Constructs new `Param`.
+  /// Constructs new `Parameter`.
   ///
   /// @param definition Parameter definition.
-  explicit Param(ParamDefinition definition) noexcept;
+  explicit Parameter(ParameterDefinition definition) noexcept;
 
   /// Returns definition.
   ///
   /// @return Parameter definition.
-  [[nodiscard]] const ParamDefinition& GetDefinition() const noexcept;
+  [[nodiscard]] const ParameterDefinition& GetDefinition() const noexcept;
 
   /// Returns value.
   ///
@@ -36,7 +36,7 @@ class Param {
 
  private:
   // Parameter definition.
-  ParamDefinition definition_;
+  ParameterDefinition definition_;
 
   // Parameter value.
   float value_;
@@ -44,4 +44,4 @@ class Param {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_PARAM_H_
+#endif  // BARELYMUSICIAN_ENGINE_PARAMETER_H_

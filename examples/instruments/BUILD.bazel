@@ -12,7 +12,7 @@ cc_library(
         "//barelymusician/common:find_or_null",
         "//barelymusician/dsp:sample_player",
         "//barelymusician/engine:instrument_definition",
-        "//barelymusician/engine:param_definition",
+        "//barelymusician/engine:parameter_definition",
         "//examples/common:wav_file",
     ],
 )
@@ -45,6 +45,6 @@ cc_library(
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
         "//barelymusician/engine:instrument_definition",
-        "//barelymusician/engine:param_definition",
+        "//barelymusician/engine:parameter_definition",
     ],
 )

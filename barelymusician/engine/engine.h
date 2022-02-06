@@ -15,8 +15,8 @@
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
-#include "barelymusician/engine/param.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/parameter_definition.h"
 #include "barelymusician/engine/task_runner.h"
 #include "barelymusician/engine/transport.h"
 
@@ -77,8 +77,8 @@ class Engine {
   /// @param instrument_id Instrument id.
   /// @param index Parameter index.
   /// @return Instrument parameter or error status.
-  [[nodiscard]] StatusOr<Param> GetInstrumentParam(Id instrument_id,
-                                                   int index) const noexcept;
+  [[nodiscard]] StatusOr<Parameter> GetInstrumentParameter(
+      Id instrument_id, int index) const noexcept;
 
   /// Returns performer begin offset.
   ///
@@ -201,14 +201,14 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @return Status.
-  Status ResetAllInstrumentParams(Id instrument_id) noexcept;
+  Status ResetAllInstrumentParameters(Id instrument_id) noexcept;
 
   /// Resets instrument parameter to default value.
   ///
   /// @param instrument_id Instrument id.
   /// @param index Parameter index.
   /// @return Status.
-  Status ResetInstrumentParam(Id instrument_id, int index) noexcept;
+  Status ResetInstrumentParameter(Id instrument_id, int index) noexcept;
 
   /// Sets conductor.
   ///
@@ -256,7 +256,8 @@ class Engine {
   /// @param index Parameter index.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetInstrumentParam(Id instrument_id, int index, float value) noexcept;
+  Status SetInstrumentParameter(Id instrument_id, int index,
+                                float value) noexcept;
 
   /// Sets performer begin offset.
   ///

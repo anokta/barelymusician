@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter_definition.h"
 
 namespace barelyapi {
 
@@ -53,7 +53,7 @@ struct InstrumentDefinition {
   /// @param state Pointer to instrument state.
   /// @param index Parameter index.
   /// @param value Parameter value.
-  using SetParamFn = void (*)(void** state, int index, float value);
+  using SetParameterFn = void (*)(void** state, int index, float value);
 
   /// Create function.
   CreateFn create_fn = nullptr;
@@ -74,10 +74,10 @@ struct InstrumentDefinition {
   SetNoteOnFn set_note_on_fn = nullptr;
 
   /// Set parameter function.
-  SetParamFn set_param_fn = nullptr;
+  SetParameterFn set_parameter_fn = nullptr;
 
   /// List of parameter definitions.
-  std::vector<ParamDefinition> param_definitions = {};
+  std::vector<ParameterDefinition> parameter_definitions = {};
 };
 
 }  // namespace barelyapi

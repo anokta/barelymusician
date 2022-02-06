@@ -59,31 +59,17 @@ namespace Barely {
       }
     }
 
-    /// Stops all notes.
-    public bool SetAllNotesOff() {
-      return Musician.SetAllInstrumentNotesOff(this);
+    /// Resets all parameters to default value.
+    public bool ResetAllParameters() {
+      return Musician.ResetAllInstrumentParameters(this);
     }
 
-    /// Sets all parameters to default.
-    public bool SetAllParamsToDefault() {
-      return Musician.SetAllInstrumentParamsToDefault(this);
-    }
-
-    /// Stops playing note.
+    /// Resets parameter to default value.
     ///
-    /// @param pitch Note pitch.
+    /// @param index Parameter index.
     /// @return True if success, false otherwise.
-    public bool SetNoteOff(float pitch) {
-      return Musician.SetInstrumentNoteOff(this, pitch);
-    }
-
-    /// Starts playing note.
-    ///
-    /// @param pitch Note pitch.
-    /// @param intensity Note intensity.
-    /// @return True if success, false otherwise.
-    public bool SetNoteOn(float pitch, float intensity) {
-      return Musician.SetInstrumentNoteOn(this, pitch, intensity);
+    public bool ResetParameter(int index) {
+      return Musician.ResetInstrumentParameter(this, index);
     }
 
     /// Sets parameter value.
@@ -91,16 +77,30 @@ namespace Barely {
     /// @param index Parameter index.
     /// @param value Parameter value.
     /// @return True if success, false otherwise.
-    public bool SetParam(int index, float value) {
-      return Musician.SetInstrumentParam(this, index, value);
+    public bool SetParameter(int index, float value) {
+      return Musician.SetInstrumentParameter(this, index, value);
     }
 
-    /// Sets parameter to default value.
+    /// Starts playing note.
     ///
-    /// @param index Parameter index.
+    /// @param pitch Note pitch.
+    /// @param intensity Note intensity.
     /// @return True if success, false otherwise.
-    public bool SetParamToDefault(int index) {
-      return Musician.SetInstrumentParamToDefault(this, index);
+    public bool StartNote(float pitch, float intensity) {
+      return Musician.StartInstrumentNote(this, pitch, intensity);
+    }
+
+    /// Stops all notes.
+    public bool StopAllNotes() {
+      return Musician.StopAllInstrumentNotes(this);
+    }
+
+    /// Stops playing note.
+    ///
+    /// @param pitch Note pitch.
+    /// @return True if success, false otherwise.
+    public bool StopNote(float pitch) {
+      return Musician.StopInstrumentNote(this, pitch);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

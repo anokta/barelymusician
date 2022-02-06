@@ -61,8 +61,8 @@ public class Metronome : MonoBehaviour {
     int beat = (int)(position) % numBeats;
     float pitch = (beat == 0.0) ? barPitch : beatPitch;
     if (tick && instrument) {
-      instrument.SetNoteOn(pitch, intensity);
-      instrument.SetNoteOff(pitch);
+      instrument.StartNote(pitch, intensity);
+      instrument.StopNote(pitch);
     }
     if (logToConsole) {
       Debug.Log("Tick " + bar + "." + beat);

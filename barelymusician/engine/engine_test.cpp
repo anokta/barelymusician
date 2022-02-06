@@ -6,8 +6,8 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/param.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/parameter_definition.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -44,12 +44,12 @@ InstrumentDefinition GetTestInstrumentDefinition() {
           [](void** state, float pitch, float intensity) {
             *reinterpret_cast<float*>(*state) = pitch * intensity;
           },
-      .set_param_fn =
+      .set_parameter_fn =
           [](void** state, int index, float value) {
             *reinterpret_cast<float*>(*state) =
                 static_cast<float>(index + 1) * value;
           },
-      .param_definitions = {ParamDefinition{0.0f}}};
+      .parameter_definitions = {ParameterDefinition{0.0f}}};
 }
 
 // Tests that instruments are added and removed as expected.
@@ -108,12 +108,12 @@ TEST(EngineTest, CreateDestroy) {
 }
 
 // Tests that instrument parameter is returned as expected.
-TEST(EngineTest, GetInstrumentParam) {
+TEST(EngineTest, GetInstrumentParameter) {
   Engine engine;
   const Id instrument_id =
       engine.CreateInstrument(GetTestInstrumentDefinition(), kSampleRate);
   EXPECT_NE(instrument_id, kInvalidId);
-  EXPECT_TRUE(IsOk(engine.GetInstrumentParam(instrument_id, 0)));
+  EXPECT_TRUE(IsOk(engine.GetInstrumentParameter(instrument_id, 0)));
 }
 
 // Tests that playing a single instrument note produces the expected output.
@@ -309,8 +309,8 @@ TEST(EngineTest, StopAllNotes) {
 }
 
 // Tests that instrument parameters are reset as expected.
-TEST(EngineTest, ResetAllParams) {
-  const float kParamValue = 4.0f;
+TEST(EngineTest, ResetAllParameters) {
+  const float kParameterValue = 4.0f;
 
   Engine engine;
   std::vector<float> buffer(kNumChannels * kNumFrames);
@@ -319,8 +319,8 @@ TEST(EngineTest, ResetAllParams) {
   const Id instrument_id =
       engine.CreateInstrument(GetTestInstrumentDefinition(), kSampleRate);
   EXPECT_NE(instrument_id, kInvalidId);
-  EXPECT_THAT(GetStatusOrValue(engine.GetInstrumentParam(instrument_id, 0)),
-              Property(&Param::GetValue, 0.0f));
+  EXPECT_THAT(GetStatusOrValue(engine.GetInstrumentParameter(instrument_id, 0)),
+              Property(&Parameter::GetValue, 0.0f));
 
   engine.Update(0.0);
 
@@ -334,9 +334,10 @@ TEST(EngineTest, ResetAllParams) {
   }
 
   // Set parameter value.
-  EXPECT_TRUE(IsOk(engine.SetInstrumentParam(instrument_id, 0, kParamValue)));
-  EXPECT_THAT(GetStatusOrValue(engine.GetInstrumentParam(instrument_id, 0)),
-              Property(&Param::GetValue, kParamValue));
+  EXPECT_TRUE(
+      IsOk(engine.SetInstrumentParameter(instrument_id, 0, kParameterValue)));
+  EXPECT_THAT(GetStatusOrValue(engine.GetInstrumentParameter(instrument_id, 0)),
+              Property(&Parameter::GetValue, kParameterValue));
 
   engine.Update(0.0);
 
@@ -345,14 +346,14 @@ TEST(EngineTest, ResetAllParams) {
                                             kNumChannels, kNumFrames)));
   for (int frame = 0; frame < kNumFrames; ++frame) {
     for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], kParamValue);
+      EXPECT_FLOAT_EQ(buffer[kNumChannels * frame + channel], kParameterValue);
     }
   }
 
   // Reset all parameters.
-  engine.ResetAllInstrumentParams(instrument_id);
-  EXPECT_THAT(GetStatusOrValue(engine.GetInstrumentParam(instrument_id, 0)),
-              Property(&Param::GetValue, 0.0f));
+  EXPECT_TRUE(IsOk(engine.ResetAllInstrumentParameters(instrument_id)));
+  EXPECT_THAT(GetStatusOrValue(engine.GetInstrumentParameter(instrument_id, 0)),
+              Property(&Parameter::GetValue, 0.0f));
 
   engine.Update(0.0);
 

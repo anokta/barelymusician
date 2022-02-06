@@ -2,7 +2,7 @@
 
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter_definition.h"
 #include "examples/instruments/enveloped_voice.h"
 
 namespace barely::examples {
@@ -10,7 +10,7 @@ namespace barely::examples {
 using ::barelyapi::GetFrequency;
 using ::barelyapi::InstrumentDefinition;
 using ::barelyapi::OscillatorType;
-using ::barelyapi::ParamDefinition;
+using ::barelyapi::ParameterDefinition;
 
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
     : voice_(SynthVoice(sample_rate)) {}
@@ -34,35 +34,35 @@ void SynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-void SynthInstrument::SetParam(int index, float value) noexcept {
-  switch (static_cast<SynthInstrumentParam>(index)) {
-    case SynthInstrumentParam::kEnvelopeAttack:
+void SynthInstrument::SetParameter(int index, float value) noexcept {
+  switch (static_cast<SynthInstrumentParameter>(index)) {
+    case SynthInstrumentParameter::kEnvelopeAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetAttack(value);
       });
       break;
-    case SynthInstrumentParam::kEnvelopeDecay:
+    case SynthInstrumentParameter::kEnvelopeDecay:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetRelease(value);
       });
       break;
-    case SynthInstrumentParam::kEnvelopeSustain:
+    case SynthInstrumentParameter::kEnvelopeSustain:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetSustain(value);
       });
       break;
-    case SynthInstrumentParam::kEnvelopeRelease:
+    case SynthInstrumentParameter::kEnvelopeRelease:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetRelease(value);
       });
       break;
-    case SynthInstrumentParam::kOscillatorType:
+    case SynthInstrumentParameter::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
-    case SynthInstrumentParam::kNumVoices:
+    case SynthInstrumentParameter::kNumVoices:
       voice_.Resize(static_cast<int>(value));
       break;
   }
@@ -71,17 +71,17 @@ void SynthInstrument::SetParam(int index, float value) noexcept {
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<SynthInstrument>({
       // Attack.
-      ParamDefinition{0.05f, 0.0f},
+      ParameterDefinition{0.05f, 0.0f},
       // Decay.
-      ParamDefinition{0.0f, 0.0f},
+      ParameterDefinition{0.0f, 0.0f},
       // Sustain.
-      ParamDefinition{1.0f, 0.0f, 1.0f},
+      ParameterDefinition{1.0f, 0.0f, 1.0f},
       // Release.
-      ParamDefinition{0.25f, 0.0f},
+      ParameterDefinition{0.25f, 0.0f},
       // Oscillator type.
-      ParamDefinition{static_cast<float>(OscillatorType::kSine)},
+      ParameterDefinition{static_cast<float>(OscillatorType::kSine)},
       // Number of voices.
-      ParamDefinition{8.0f, 0.0f},
+      ParameterDefinition{8.0f, 0.0f},
   });
 }
 

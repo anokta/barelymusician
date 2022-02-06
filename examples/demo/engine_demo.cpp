@@ -34,7 +34,7 @@ using ::barely::examples::ConsoleLog;
 using ::barely::examples::DrumkitInstrument;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParam;
+using ::barely::examples::SynthInstrumentParameter;
 using ::barely::examples::WavFile;
 using ::barelyapi::Engine;
 using ::barelyapi::GetPitch;
@@ -209,13 +209,15 @@ int main(int /*argc*/, char* argv[]) {
     instrument_ids.push_back(
         engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate));
     engine.SetInstrumentGain(instrument_ids.back(), gain);
-    engine.SetInstrumentParam(instrument_ids.back(),
-                              SynthInstrumentParam::kEnvelopeAttack, attack);
-    engine.SetInstrumentParam(instrument_ids.back(),
-                              SynthInstrumentParam::kEnvelopeRelease, release);
-    engine.SetInstrumentParam(instrument_ids.back(),
-                              SynthInstrumentParam::kOscillatorType,
-                              static_cast<float>(type));
+    engine.SetInstrumentParameter(instrument_ids.back(),
+                                  SynthInstrumentParameter::kEnvelopeAttack,
+                                  attack);
+    engine.SetInstrumentParameter(instrument_ids.back(),
+                                  SynthInstrumentParameter::kEnvelopeRelease,
+                                  release);
+    engine.SetInstrumentParameter(instrument_ids.back(),
+                                  SynthInstrumentParameter::kOscillatorType,
+                                  static_cast<float>(type));
     set_note_callbacks_fn(instrument_ids.back());
   };
 

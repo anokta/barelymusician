@@ -8,8 +8,8 @@ cc_library(
     hdrs = ["conductor.h"],
     deps = [
         ":conductor_definition",
-        ":param",
-        ":param_definition",
+        ":parameter",
+        ":parameter_definition",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:status",
         "//barelymusician/composition:note_duration",
@@ -22,7 +22,7 @@ cc_library(
     name = "conductor_definition",
     hdrs = ["conductor_definition.h"],
     deps = [
-        ":param_definition",
+        ":parameter_definition",
         "//barelymusician/common:status",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_intensity",
@@ -41,8 +41,8 @@ cc_library(
         ":instrument_definition",
         ":instrument_event",
         ":instrument_processor",
-        ":param",
-        ":param_definition",
+        ":parameter",
+        ":parameter_definition",
         ":task_runner",
         ":transport",
         "//barelymusician/common:find_or_null",
@@ -61,8 +61,8 @@ cc_library(
     deps = [
         ":instrument_definition",
         ":instrument_event",
-        ":param",
-        ":param_definition",
+        ":parameter",
+        ":parameter_definition",
         "//barelymusician/common:visitor",
     ],
 )
@@ -71,7 +71,7 @@ cc_library(
     name = "instrument_definition",
     hdrs = ["instrument_definition.h"],
     deps = [
-        ":param_definition",
+        ":parameter_definition",
     ],
 )
 
@@ -96,17 +96,17 @@ cc_library(
 )
 
 cc_library(
-    name = "param",
-    srcs = ["param.cpp"],
-    hdrs = ["param.h"],
+    name = "parameter",
+    srcs = ["parameter.cpp"],
+    hdrs = ["parameter.h"],
     deps = [
-        ":param_definition",
+        ":parameter_definition",
     ],
 )
 
 cc_library(
-    name = "param_definition",
-    hdrs = ["param_definition.h"],
+    name = "parameter_definition",
+    hdrs = ["parameter_definition.h"],
 )
 
 cc_library(
@@ -127,7 +127,7 @@ cc_test(
     deps = [
         ":conductor",
         ":conductor_definition",
-        ":param_definition",
+        ":parameter_definition",
         "//barelymusician/common:status",
         "@googletest//:gtest_main",
     ],
@@ -139,8 +139,8 @@ cc_test(
     deps = [
         ":engine",
         ":instrument_definition",
-        ":param",
-        ":param_definition",
+        ":parameter",
+        ":parameter_definition",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
         "@googletest//:gtest_main",
@@ -150,11 +150,11 @@ cc_test(
 # TODO: Add unit tests for instrument controller & processor.
 
 cc_test(
-    name = "param_test",
-    srcs = ["param_test.cpp"],
+    name = "parameter_test",
+    srcs = ["parameter_test.cpp"],
     deps = [
-        ":param",
-        ":param_definition",
+        ":parameter",
+        ":parameter_definition",
         "@googletest//:gtest_main",
     ],
 )

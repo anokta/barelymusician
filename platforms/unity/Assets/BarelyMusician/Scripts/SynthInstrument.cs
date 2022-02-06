@@ -37,12 +37,12 @@ namespace Barely {
     public int numVoices = 8;
 
     private void Update() {
-      SetParam(0, attack);
-      SetParam(1, decay);
-      SetParam(2, sustain);
-      SetParam(3, release);
-      SetParam(4, (float)oscillatorType);
-      SetParam(5, (float)numVoices);
+      SetParameter(0, attack);
+      SetParameter(1, decay);
+      SetParameter(2, sustain);
+      SetParameter(3, release);
+      SetParameter(4, (float)oscillatorType);
+      SetParameter(5, (float)numVoices);
     }
   }
 }

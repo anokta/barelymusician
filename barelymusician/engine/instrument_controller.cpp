@@ -20,9 +20,9 @@ InstrumentController::InstrumentController(
       note_on_callback_(std::move(note_on_callback)) {
   assert(note_off_callback_);
   assert(note_on_callback_);
-  params_.reserve(definition.param_definitions.size());
-  for (const auto& param_definition : definition.param_definitions) {
-    params_.emplace_back(param_definition);
+  parameters_.reserve(definition.parameter_definitions.size());
+  for (const auto& parameter_definition : definition.parameter_definitions) {
+    parameters_.emplace_back(parameter_definition);
   }
 }
 
@@ -32,10 +32,10 @@ std::multimap<double, InstrumentEvent>& InstrumentController::GetEvents() {
 
 float InstrumentController::GetGain() const { return gain_; }
 
-const Param* InstrumentController::GetParam(int index) const {
+const Parameter* InstrumentController::GetParameter(int index) const {
   assert(index >= 0);
-  if (index < static_cast<int>(params_.size())) {
-    return &params_[index];
+  if (index < static_cast<int>(parameters_.size())) {
+    return &parameters_[index];
   }
   return nullptr;
 }
@@ -48,43 +48,46 @@ bool InstrumentController::IsNoteOn(float pitch) const {
 
 void InstrumentController::ProcessEvent(const InstrumentEvent& event,
                                         double timestamp) {
-  std::visit(Visitor{[&](const SetDataEvent& set_data_event) noexcept {
-                       SetData(set_data_event.data, timestamp);
-                     },
-                     [&](const SetGainEvent& set_gain_event) noexcept {
-                       SetGain(set_gain_event.gain, timestamp);
-                     },
-                     [&](const SetParamEvent& set_param_event) noexcept {
-                       SetParam(set_param_event.index, set_param_event.value,
-                                timestamp);
-                     },
-                     [&](const StartNoteEvent& start_note_event) noexcept {
-                       StartNote(start_note_event.pitch,
-                                 start_note_event.intensity, timestamp);
-                     },
-                     [&](const StopNoteEvent& stop_note_event) noexcept {
-                       StopNote(stop_note_event.pitch, timestamp);
-                     }},
-             event);
+  std::visit(
+      Visitor{[&](const SetDataEvent& set_data_event) noexcept {
+                SetData(set_data_event.data, timestamp);
+              },
+              [&](const SetGainEvent& set_gain_event) noexcept {
+                SetGain(set_gain_event.gain, timestamp);
+              },
+              [&](const SetParameterEvent& set_parameter_event) noexcept {
+                SetParameter(set_parameter_event.index,
+                             set_parameter_event.value, timestamp);
+              },
+              [&](const StartNoteEvent& start_note_event) noexcept {
+                StartNote(start_note_event.pitch, start_note_event.intensity,
+                          timestamp);
+              },
+              [&](const StopNoteEvent& stop_note_event) noexcept {
+                StopNote(stop_note_event.pitch, timestamp);
+              }},
+      event);
 }
 
-void InstrumentController::ResetAllParams(double timestamp) {
+void InstrumentController::ResetAllParameters(double timestamp) {
   assert(timestamp >= 0.0);
-  for (int index = 0; index < static_cast<int>(params_.size()); ++index) {
-    if (params_[index].ResetValue()) {
-      events_.emplace_hint(events_.end(), timestamp,
-                           SetParamEvent{index, params_[index].GetValue()});
+  for (int index = 0; index < static_cast<int>(parameters_.size()); ++index) {
+    if (parameters_[index].ResetValue()) {
+      events_.emplace_hint(
+          events_.end(), timestamp,
+          SetParameterEvent{index, parameters_[index].GetValue()});
     }
   }
 }
 
-bool InstrumentController::ResetParam(int index, double timestamp) {
+bool InstrumentController::ResetParameter(int index, double timestamp) {
   assert(index >= 0);
   assert(timestamp >= 0.0);
-  if (index < static_cast<int>(params_.size())) {
-    if (params_[index].ResetValue()) {
-      events_.emplace_hint(events_.end(), timestamp,
-                           SetParamEvent{index, params_[index].GetValue()});
+  if (index < static_cast<int>(parameters_.size())) {
+    if (parameters_[index].ResetValue()) {
+      events_.emplace_hint(
+          events_.end(), timestamp,
+          SetParameterEvent{index, parameters_[index].GetValue()});
     }
     return true;
   }
@@ -126,13 +129,15 @@ void InstrumentController::SetNoteOnCallback(NoteOnCallback note_on_callback) {
   note_on_callback_ = std::move(note_on_callback);
 }
 
-bool InstrumentController::SetParam(int index, float value, double timestamp) {
+bool InstrumentController::SetParameter(int index, float value,
+                                        double timestamp) {
   assert(index >= 0);
   assert(timestamp >= 0.0);
-  if (index < static_cast<int>(params_.size())) {
-    if (params_[index].SetValue(value)) {
-      events_.emplace_hint(events_.end(), timestamp,
-                           SetParamEvent{index, params_[index].GetValue()});
+  if (index < static_cast<int>(parameters_.size())) {
+    if (parameters_[index].SetValue(value)) {
+      events_.emplace_hint(
+          events_.end(), timestamp,
+          SetParameterEvent{index, parameters_[index].GetValue()});
     }
     return true;
   }

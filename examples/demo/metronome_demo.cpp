@@ -17,7 +17,7 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParam;
+using ::barely::examples::SynthInstrumentParameter;
 using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
 
@@ -56,14 +56,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Create metronome instrument.
   const auto metronome_id =
       engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kEnvelopeAttack,
-                            kAttack);
-  engine.SetInstrumentParam(metronome_id,
-                            SynthInstrumentParam::kEnvelopeRelease, kRelease);
-  engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kOscillatorType,
-                            static_cast<float>(kOscillatorType));
-  engine.SetInstrumentParam(metronome_id, SynthInstrumentParam::kNumVoices,
-                            static_cast<float>(kNumVoices));
+  engine.SetInstrumentParameter(
+      metronome_id, SynthInstrumentParameter::kEnvelopeAttack, kAttack);
+  engine.SetInstrumentParameter(
+      metronome_id, SynthInstrumentParameter::kEnvelopeRelease, kRelease);
+  engine.SetInstrumentParameter(metronome_id,
+                                SynthInstrumentParameter::kOscillatorType,
+                                static_cast<float>(kOscillatorType));
+  engine.SetInstrumentParameter(metronome_id,
+                                SynthInstrumentParameter::kNumVoices,
+                                static_cast<float>(kNumVoices));
 
   // Beat callback.
   const auto beat_callback = [&](double position, double /*timestamp*/) {

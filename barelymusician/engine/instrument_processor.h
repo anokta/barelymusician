@@ -61,7 +61,7 @@ class InstrumentProcessor {
   InstrumentDefinition::SetNoteOnFn set_note_on_fn_;
 
   // Set parameter function.
-  InstrumentDefinition::SetParamFn set_param_fn_;
+  InstrumentDefinition::SetParameterFn set_parameter_fn_;
 
   // Map of events by their timestamps.
   std::multimap<double, InstrumentEvent> events_;

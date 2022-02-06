@@ -8,8 +8,8 @@
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
-#include "barelymusician/engine/param.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/parameter_definition.h"
 
 namespace barelyapi {
 
@@ -34,7 +34,7 @@ class Conductor {
   ///
   /// @param index Parameter index.
   /// @return Parameter or error status.
-  [[nodiscard]] StatusOr<Param> GetParam(int index) const noexcept;
+  [[nodiscard]] StatusOr<Parameter> GetParam(int index) const noexcept;
 
   /// Sets data.
   ///
@@ -104,7 +104,7 @@ class Conductor {
   void* state_;
 
   // Conductor parameters.
-  std::vector<Param> params_;
+  std::vector<Parameter> params_;
 };
 
 }  // namespace barelyapi

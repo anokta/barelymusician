@@ -8,7 +8,7 @@
 
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/param.h"
+#include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
 
@@ -52,7 +52,7 @@ class InstrumentController {
   ///
   /// @param index Parameter index.
   /// @return Pointer to parameter.
-  [[nodiscard]] const Param* GetParam(int index) const;
+  [[nodiscard]] const Parameter* GetParameter(int index) const;
 
   /// Returns whether instrument is muted or not.
   ///
@@ -74,14 +74,14 @@ class InstrumentController {
   /// Resets all parameters to default value at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void ResetAllParams(double timestamp);
+  void ResetAllParameters(double timestamp);
 
   /// Resets parameter to default value at timestamp.
   ///
   /// @param index Parameter index.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool ResetParam(int index, double timestamp);
+  bool ResetParameter(int index, double timestamp);
 
   /// Sets data at timestamp.
   ///
@@ -117,7 +117,7 @@ class InstrumentController {
   /// @param value Parameter value.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetParam(int index, float value, double timestamp);
+  bool SetParameter(int index, float value, double timestamp);
 
   /// Starts note at timestamp.
   ///
@@ -154,7 +154,7 @@ class InstrumentController {
   NoteOnCallback note_on_callback_;
 
   // List of parameters.
-  std::vector<Param> params_;
+  std::vector<Parameter> parameters_;
 
   // List of active note pitches.
   std::unordered_set<float> pitches_;

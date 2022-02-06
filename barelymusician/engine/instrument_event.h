@@ -18,7 +18,7 @@ struct SetGainEvent {
 };
 
 /// Set parameter event.
-struct SetParamEvent {
+struct SetParameterEvent {
   /// Parameter index.
   int index;
 
@@ -42,8 +42,9 @@ struct StopNoteEvent {
 };
 
 /// Instrument event type.
-using InstrumentEvent = std::variant<SetDataEvent, SetGainEvent, SetParamEvent,
-                                     StartNoteEvent, StopNoteEvent>;
+using InstrumentEvent =
+    std::variant<SetDataEvent, SetGainEvent, SetParameterEvent, StartNoteEvent,
+                 StopNoteEvent>;
 
 }  // namespace barelyapi
 

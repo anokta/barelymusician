@@ -172,13 +172,13 @@ struct NoteDefinition {
 };
 
 /// Parameter definition.
-struct ParamDefinition {
-  /// Constructs new `ParamDefinition` for a float value.
+struct ParameterDefinition {
+  /// Constructs new `ParameterDefinition` for a float value.
   ///
   /// @param default_value Default float value.
   /// @param min_value Minimum float value.
   /// @param max_value Maximum float value.
-  explicit ParamDefinition(
+  explicit ParameterDefinition(
       float default_value,
       float min_value = std::numeric_limits<float>::lowest(),
       float max_value = std::numeric_limits<float>::max())
@@ -186,23 +186,23 @@ struct ParamDefinition {
         min_value(min_value),
         max_value(max_value) {}
 
-  /// Constructs new `ParamDefinition` for a boolean value.
+  /// Constructs new `ParameterDefinition` for a boolean value.
   ///
   /// @param default_value Default boolean value.
-  explicit ParamDefinition(bool default_value)
-      : ParamDefinition(static_cast<float>(default_value)) {}
+  explicit ParameterDefinition(bool default_value)
+      : ParameterDefinition(static_cast<float>(default_value)) {}
 
-  /// Constructs new `ParamDefinition` for an integer value.
+  /// Constructs new `ParameterDefinition` for an integer value.
   ///
   /// @param default_value Default integer value.
   /// @param min_value Minimum integer value.
   /// @param max_value Maximum integer value.
-  explicit ParamDefinition(int default_value,
-                           int min_value = std::numeric_limits<int>::lowest(),
-                           int max_value = std::numeric_limits<int>::max())
-      : ParamDefinition(static_cast<float>(default_value),
-                        static_cast<float>(min_value),
-                        static_cast<float>(max_value)) {}
+  explicit ParameterDefinition(
+      int default_value, int min_value = std::numeric_limits<int>::lowest(),
+      int max_value = std::numeric_limits<int>::max())
+      : ParameterDefinition(static_cast<float>(default_value),
+                            static_cast<float>(min_value),
+                            static_cast<float>(max_value)) {}
 
   /// Default value.
   float default_value;
@@ -270,7 +270,7 @@ struct ConductorDefinition {
   /// @param state Pointer to conductor state.
   /// @param index Parameter index.
   /// @param value Parameter value.
-  using SetParamFn = void (*)(void** state, int index, float value);
+  using SetParameterFn = void (*)(void** state, int index, float value);
 
   /// Set stress function signature.
   ///
@@ -303,13 +303,13 @@ struct ConductorDefinition {
   SetEnergyFn set_energy_fn;
 
   /// Set parameter function.
-  SetParamFn set_param_fn;
+  SetParameterFn set_parameter_fn;
 
   /// Set stress function.
   SetStressFn set_stress_fn;
 
   /// List of parameter definitions.
-  std::vector<ParamDefinition> param_definitions;
+  std::vector<ParameterDefinition> parameter_definitions;
 };
 
 /// Conductor.
@@ -349,9 +349,9 @@ class Conductor {
   ///
   /// @param index Parameter index.
   /// @return Parameter value, or error status.
-  [[nodiscard]] StatusOr<float> GetParam(int index) const {
+  [[nodiscard]] StatusOr<float> GetParameter(int index) const {
     float value = 0.0f;
-    if (const auto status = BarelyConductor_GetParam(capi_, index, &value);
+    if (const auto status = BarelyConductor_GetParameter(capi_, index, &value);
         status != BarelyStatus_kOk) {
       return static_cast<Status>(status);
     }
@@ -362,15 +362,16 @@ class Conductor {
   ///
   /// @param index Parameter index.
   /// @return Parameter definition, or error status.
-  [[nodiscard]] StatusOr<ParamDefinition> GetParamDefinition(int index) const {
-    BarelyParamDefinition definition;
+  [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
+      int index) const {
+    BarelyParameterDefinition definition;
     if (const auto status =
-            BarelyConductor_GetParamDefinition(capi_, index, &definition);
+            BarelyConductor_GetParameterDefinition(capi_, index, &definition);
         status != BarelyStatus_kOk) {
       return static_cast<Status>(status);
     }
-    return ParamDefinition(definition.default_value, definition.min_value,
-                           definition.max_value);
+    return ParameterDefinition(definition.default_value, definition.min_value,
+                               definition.max_value);
   }
 
   /// Returns root note.
@@ -414,16 +415,16 @@ class Conductor {
   /// Resets all parameters.
   ///
   /// @return Status.
-  Status ResetAllParams() {
-    return static_cast<Status>(BarelyConductor_ResetAllParams(capi_));
+  Status ResetAllParameters() {
+    return static_cast<Status>(BarelyConductor_ResetAllParameters(capi_));
   }
 
   /// Resets parameter value.
   ///
   /// @param index Parameter index.
   /// @return Status.
-  Status ResetParam(int index) {
-    return static_cast<Status>(BarelyConductor_ResetParam(capi_, index));
+  Status ResetParameter(int index) {
+    return static_cast<Status>(BarelyConductor_ResetParameter(capi_, index));
   }
 
   /// Sets data.
@@ -439,12 +440,12 @@ class Conductor {
   /// @param definition Conductor definition.
   /// @return Status.
   Status SetDefinition(const ConductorDefinition& definition) {
-    std::vector<BarelyParamDefinition> param_definitions;
-    param_definitions.reserve(definition.param_definitions.size());
-    for (const auto& param_definition : definition.param_definitions) {
-      param_definitions.push_back(BarelyParamDefinition{
-          param_definition.default_value, param_definition.min_value,
-          param_definition.max_value});
+    std::vector<BarelyParameterDefinition> parameter_definitions;
+    parameter_definitions.reserve(definition.parameter_definitions.size());
+    for (const auto& parameter_definition : definition.parameter_definitions) {
+      parameter_definitions.push_back(BarelyParameterDefinition{
+          parameter_definition.default_value, parameter_definition.min_value,
+          parameter_definition.max_value});
     }
     return static_cast<Status>(BarelyConductor_SetDefinition(
         capi_,
@@ -453,9 +454,9 @@ class Conductor {
             definition.adjust_note_intensity_fn,
             definition.adjust_note_pitch_fn, definition.adjust_tempo_fn,
             definition.create_fn, definition.destroy_fn, definition.set_data_fn,
-            definition.set_energy_fn, definition.set_param_fn,
-            definition.set_stress_fn, param_definitions.data(),
-            static_cast<int>(param_definitions.size())}));
+            definition.set_energy_fn, definition.set_parameter_fn,
+            definition.set_stress_fn, parameter_definitions.data(),
+            static_cast<int>(parameter_definitions.size())}));
   }
 
   /// Sets energy.
@@ -471,8 +472,9 @@ class Conductor {
   /// @param index Parameter index.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParam(int index, float value) {
-    return static_cast<Status>(BarelyConductor_SetParam(capi_, index, value));
+  Status SetParameter(int index, float value) {
+    return static_cast<Status>(
+        BarelyConductor_SetParameter(capi_, index, value));
   }
 
   /// Sets root note.
@@ -575,7 +577,7 @@ struct InstrumentDefinition {
   /// @param state Pointer to instrument state.
   /// @param index Parameter index.
   /// @param value Parameter value.
-  using SetParamFn = void (*)(void** state, int index, float value);
+  using SetParameterFn = void (*)(void** state, int index, float value);
 
   /// Create function.
   CreateFn create_fn;
@@ -596,10 +598,10 @@ struct InstrumentDefinition {
   SetNoteOnFn set_note_on_fn;
 
   /// Set parameter function.
-  SetParamFn set_param_fn;
+  SetParameterFn set_parameter_fn;
 
   /// List of parameter definitions.
-  std::vector<ParamDefinition> param_definitions;
+  std::vector<ParameterDefinition> parameter_definitions;
 };
 
 /// Instrument.
@@ -692,10 +694,10 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @return Parameter value, or error status.
-  [[nodiscard]] StatusOr<float> GetParam(int index) const {
+  [[nodiscard]] StatusOr<float> GetParameter(int index) const {
     float value = 0.0f;
     if (const auto status =
-            BarelyInstrument_GetParam(capi_, id_, index, &value);
+            BarelyInstrument_GetParameter(capi_, id_, index, &value);
         status != BarelyStatus_kOk) {
       return static_cast<Status>(status);
     }
@@ -706,15 +708,16 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @return Parameter definition, or error status.
-  [[nodiscard]] StatusOr<ParamDefinition> GetParamDefinition(int index) const {
-    BarelyParamDefinition definition;
-    if (const auto status =
-            BarelyInstrument_GetParamDefinition(capi_, id_, index, &definition);
+  [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
+      int index) const {
+    BarelyParameterDefinition definition;
+    if (const auto status = BarelyInstrument_GetParameterDefinition(
+            capi_, id_, index, &definition);
         status != BarelyStatus_kOk) {
       return static_cast<Status>(status);
     }
-    return ParamDefinition(definition.default_value, definition.min_value,
-                           definition.max_value);
+    return ParameterDefinition(definition.default_value, definition.min_value,
+                               definition.max_value);
   }
 
   /// Returns whether instrument is muted or not.
@@ -759,16 +762,17 @@ class Instrument {
   /// Resets all parameters.
   ///
   /// @return Status.
-  Status ResetAllParams() {
-    return static_cast<Status>(BarelyInstrument_ResetAllParams(capi_, id_));
+  Status ResetAllParameters() {
+    return static_cast<Status>(BarelyInstrument_ResetAllParameters(capi_, id_));
   }
 
   /// Resets parameter value.
   ///
   /// @param index Parameter index.
   /// @return Status.
-  Status ResetParam(int index) {
-    return static_cast<Status>(BarelyInstrument_ResetParam(capi_, id_, index));
+  Status ResetParameter(int index) {
+    return static_cast<Status>(
+        BarelyInstrument_ResetParameter(capi_, id_, index));
   }
 
   /// Sets data.
@@ -837,9 +841,9 @@ class Instrument {
   /// @param index Parameter index.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParam(int index, float value) {
+  Status SetParameter(int index, float value) {
     return static_cast<Status>(
-        BarelyInstrument_SetParam(capi_, id_, index, value));
+        BarelyInstrument_SetParameter(capi_, id_, index, value));
   }
 
   /// Starts note.
@@ -879,12 +883,13 @@ class Instrument {
         note_off_callback_(nullptr),
         note_on_callback_(nullptr) {
     if (capi_) {
-      std::vector<BarelyParamDefinition> param_definitions;
-      param_definitions.reserve(definition.param_definitions.size());
-      for (const auto& param_definition : definition.param_definitions) {
-        param_definitions.push_back(BarelyParamDefinition{
-            param_definition.default_value, param_definition.min_value,
-            param_definition.max_value});
+      std::vector<BarelyParameterDefinition> parameter_definitions;
+      parameter_definitions.reserve(definition.parameter_definitions.size());
+      for (const auto& parameter_definition :
+           definition.parameter_definitions) {
+        parameter_definitions.push_back(BarelyParameterDefinition{
+            parameter_definition.default_value, parameter_definition.min_value,
+            parameter_definition.max_value});
       }
       const auto status = BarelyInstrument_Create(
           capi_,
@@ -892,8 +897,8 @@ class Instrument {
               definition.create_fn, definition.destroy_fn,
               definition.process_fn, definition.set_data_fn,
               definition.set_note_off_fn, definition.set_note_on_fn,
-              definition.set_param_fn, param_definitions.data(),
-              static_cast<int>(param_definitions.size())},
+              definition.set_parameter_fn, parameter_definitions.data(),
+              static_cast<int>(parameter_definitions.size())},
           sample_rate, &id_);
       assert(status == BarelyStatus_kOk);
     }

@@ -9,7 +9,7 @@ using ::barely::Instrument;
 using ::barely::InstrumentDefinition;
 using ::barely::IsOk;
 using ::barely::NoteDefinition;
-using ::barely::ParamDefinition;
+using ::barely::ParameterDefinition;
 using ::barely::Sequence;
 using ::barely::Status;
 using ::barely::ToString;
@@ -32,7 +32,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   ConsoleLog() << "Tempo: " << transport.GetTempo();
 
   Instrument instrument1 = api.CreateInstrument(
-      InstrumentDefinition{.param_definitions = {ParamDefinition(5)}},
+      InstrumentDefinition{.parameter_definitions = {ParameterDefinition(5)}},
       kSampleRate);
   // ConsoleLog() << "Instrument 1 gain: " << instrument1.GetGain();
 

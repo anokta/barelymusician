@@ -10,7 +10,7 @@
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
-#include "barelymusician/engine/param.h"
+#include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
 
@@ -95,7 +95,7 @@ Conductor::~Conductor() noexcept {
   }
 }
 
-StatusOr<Param> Conductor::GetParam(int index) const noexcept {
+StatusOr<Parameter> Conductor::GetParam(int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(params_.size())) {
     return params_[index];
   }

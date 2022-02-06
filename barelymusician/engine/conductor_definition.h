@@ -8,7 +8,7 @@
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter_definition.h"
 
 namespace barelyapi {
 
@@ -95,7 +95,7 @@ struct ConductorDefinition {
   TransformPlaybackTempoFn transform_playback_tempo_fn;
 
   /// Parameter definitions.
-  std::vector<ParamDefinition> param_definitions;
+  std::vector<ParameterDefinition> param_definitions;
 };
 
 }  // namespace barelyapi

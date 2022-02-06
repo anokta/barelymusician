@@ -5,8 +5,8 @@ add_library(
 target_link_libraries(
   conductor
   conductor_definition
-  param
-  param_definition
+  parameter
+  parameter_definition
   find_or_null
   status
   note_duration
@@ -19,7 +19,7 @@ add_library(
 )
 target_link_libraries(
   conductor_definition INTERFACE
-  param_definition
+  parameter_definition
   status
   note_duration
   note_intensity
@@ -38,8 +38,8 @@ target_link_libraries(
   instrument_definition
   instrument_event
   instrument_processor
-  param
-  param_definition
+  parameter
+  parameter_definition
   task_runner
   transport
   find_or_null
@@ -58,8 +58,8 @@ target_link_libraries(
   instrument_controller
   instrument_definition
   instrument_event
-  param
-  param_definition
+  parameter
+  parameter_definition
   visitor
 )
 
@@ -68,7 +68,7 @@ add_library(
 )
 target_link_libraries(
   instrument_definition INTERFACE
-  param_definition
+  parameter_definition
 )
 
 add_library(
@@ -92,16 +92,16 @@ target_link_libraries(
 )
 
 add_library(
-  param
-  param.cpp
+  parameter
+  parameter.cpp
 )
 target_link_libraries(
-  param
-  param_definition
+  parameter
+  parameter_definition
 )
 
 add_library(
-  param_definition INTERFACE
+  parameter_definition INTERFACE
 )
 
 add_library(
@@ -122,7 +122,7 @@ target_link_libraries(
   conductor_test
   conductor
   conductor_definition
-  param_definition
+  parameter_definition
   status
   note_duration
   note_intensity
@@ -139,8 +139,8 @@ target_link_libraries(
   engine_test
   engine
   instrument_definition
-  param
-  param_definition
+  parameter
+  parameter_definition
   id
   status
   gmock
@@ -149,16 +149,16 @@ target_link_libraries(
 gtest_discover_tests(engine_test)
 
 add_executable(
-  param_test
-  param_test.cpp
+  parameter_test
+  parameter_test.cpp
 )
 target_link_libraries(
-  param_test
-  param
-  param_definition
+  parameter_test
+  parameter
+  parameter_definition
   gtest_main
 )
-gtest_discover_tests(param_test)
+gtest_discover_tests(parameter_test)
 
 add_executable(
   task_runner_test

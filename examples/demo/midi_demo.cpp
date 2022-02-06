@@ -25,7 +25,7 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParam;
+using ::barely::examples::SynthInstrumentParameter;
 using ::barelyapi::Engine;
 using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
@@ -137,17 +137,18 @@ int main(int /*argc*/, char* argv[]) {
                        << MidiKeyNumberFromPitch(pitch) << ") ";
         });
     engine.SetInstrumentGain(instrument_id, kInstrumentGain);
-    engine.SetInstrumentParam(instrument_id,
-                              SynthInstrumentParam::kEnvelopeAttack,
-                              kInstrumentEnvelopeAttack);
-    engine.SetInstrumentParam(instrument_id,
-                              SynthInstrumentParam::kEnvelopeRelease,
-                              kInstrumentEnvelopeRelease);
-    engine.SetInstrumentParam(instrument_id,
-                              SynthInstrumentParam::kOscillatorType,
-                              static_cast<float>(kInstrumentOscillatorType));
-    engine.SetInstrumentParam(instrument_id, SynthInstrumentParam::kNumVoices,
-                              static_cast<float>(kNumInstrumentVoices));
+    engine.SetInstrumentParameter(instrument_id,
+                                  SynthInstrumentParameter::kEnvelopeAttack,
+                                  kInstrumentEnvelopeAttack);
+    engine.SetInstrumentParameter(instrument_id,
+                                  SynthInstrumentParameter::kEnvelopeRelease,
+                                  kInstrumentEnvelopeRelease);
+    engine.SetInstrumentParameter(
+        instrument_id, SynthInstrumentParameter::kOscillatorType,
+        static_cast<float>(kInstrumentOscillatorType));
+    engine.SetInstrumentParameter(instrument_id,
+                                  SynthInstrumentParameter::kNumVoices,
+                                  static_cast<float>(kNumInstrumentVoices));
     engine.SetPerformerInstrument(performer_id, instrument_id);
     instrument_ids.push_back(instrument_id);
   }

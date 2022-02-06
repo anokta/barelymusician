@@ -13,8 +13,8 @@
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
-#include "barelymusician/engine/param.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/parameter_definition.h"
 #include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
@@ -185,11 +185,11 @@ StatusOr<float> Engine::GetInstrumentGain(Id instrument_id) const noexcept {
   return Status::kNotFound;
 }
 
-StatusOr<Param> Engine::GetInstrumentParam(Id instrument_id,
-                                           int index) const noexcept {
+StatusOr<Parameter> Engine::GetInstrumentParameter(Id instrument_id,
+                                                   int index) const noexcept {
   if (const auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (const auto* param = controller->GetParam(index)) {
-      return *param;
+    if (const auto* parameter = controller->GetParameter(index)) {
+      return *parameter;
     }
     return Status::kInvalidArgument;
   }
@@ -324,17 +324,17 @@ Status Engine::RemovePerformerNote(Id performer_id, Id note_id) noexcept {
   return Status::kNotFound;
 }
 
-Status Engine::ResetAllInstrumentParams(Id instrument_id) noexcept {
+Status Engine::ResetAllInstrumentParameters(Id instrument_id) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->ResetAllParams(transport_.GetTimestamp());
+    controller->ResetAllParameters(transport_.GetTimestamp());
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::ResetInstrumentParam(Id instrument_id, int index) noexcept {
+Status Engine::ResetInstrumentParameter(Id instrument_id, int index) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->ResetParam(index, transport_.GetTimestamp())) {
+    if (controller->ResetParameter(index, transport_.GetTimestamp())) {
       return Status::kOk;
     }
     return Status::kInvalidArgument;
@@ -391,10 +391,10 @@ Status Engine::SetInstrumentNoteOnCallback(
   return Status::kNotFound;
 }
 
-Status Engine::SetInstrumentParam(Id instrument_id, int index,
-                                  float value) noexcept {
+Status Engine::SetInstrumentParameter(Id instrument_id, int index,
+                                      float value) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    if (controller->SetParam(index, value, transport_.GetTimestamp())) {
+    if (controller->SetParameter(index, value, transport_.GetTimestamp())) {
       return Status::kOk;
     }
     return Status::kInvalidArgument;

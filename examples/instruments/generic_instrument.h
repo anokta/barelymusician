@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/param_definition.h"
+#include "barelymusician/engine/parameter_definition.h"
 
 namespace barely::examples {
 
@@ -44,13 +44,14 @@ class GenericInstrument {
   ///
   /// @param id Parameter index.
   /// @param value Parameter value.
-  virtual void SetParam(int index, float value) noexcept = 0;
+  virtual void SetParameter(int index, float value) noexcept = 0;
 };
 
 /// Returns instrument definition for the given create instrument function.
 template <typename InstrumentType>
 barelyapi::InstrumentDefinition GetInstrumentDefinition(
-    const std::vector<barelyapi::ParamDefinition>& param_definitions) noexcept {
+    const std::vector<barelyapi::ParameterDefinition>&
+        parameter_definitions) noexcept {
   return barelyapi::InstrumentDefinition{
       .create_fn =
           [](void** state, int sample_rate) noexcept {
@@ -81,12 +82,12 @@ barelyapi::InstrumentDefinition GetInstrumentDefinition(
             auto* instrument = reinterpret_cast<InstrumentType*>(*state);
             instrument->NoteOn(pitch, intensity);
           },
-      .set_param_fn =
+      .set_parameter_fn =
           [](void** state, int index, float value) noexcept {
             auto* instrument = reinterpret_cast<InstrumentType*>(*state);
-            instrument->SetParam(index, value);
+            instrument->SetParameter(index, value);
           },
-      .param_definitions = param_definitions};
+      .parameter_definitions = parameter_definitions};
 }
 
 }  // namespace barely::examples

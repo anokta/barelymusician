@@ -41,7 +41,9 @@ void AudioOutput::Start(int sample_rate, int num_channels,
           // capturing `process_callback_`).
           const auto& process_callback =
               *reinterpret_cast<ProcessCallback*>(user_data);
-          process_callback(reinterpret_cast<float*>(output_buffer));
+          if (process_callback) {
+            process_callback(reinterpret_cast<float*>(output_buffer));
+          }
         }
         return static_cast<int>(paContinue);
       };

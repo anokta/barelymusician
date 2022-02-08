@@ -27,32 +27,6 @@ using ::barelyapi::StatusOr;
 
 using ParameterDefinition = ::barelyapi::ParameterDefinition;
 
-// Dummy create function that does nothing.
-void NoopCreateFn(void** /*state*/, int /*sample_rate*/) noexcept {}
-
-// Dummy destroy function that does nothing.
-void NoopDestroyFn(void** /*state*/) noexcept {}
-
-// Dummy set data function that does nothing.
-void NoopSetDataFn(void** /*state*/, void* /*data*/) noexcept {}
-
-// Dummy set note off function that does nothing.
-void NoopSetNoteOffFn(void** /*state*/, float /*pitch*/) noexcept {}
-
-// Dummy set instrument note on function that does nothing.
-void NoopSetNoteOnFn(void** /*state*/, float /*pitch*/,
-                     float /*intensity*/) noexcept {}
-
-// Dummy set instrument parameter function that does nothing.
-void NoopSetParameterFn(void** /*state*/, int /*index*/,
-                        float /*value*/) noexcept {}
-
-// Dummy process function that fills the output buffer with zeros.
-void ZeroFillProcessFn(void** /*state*/, float* output, int num_output_channels,
-                       int num_output_frames) noexcept {
-  std::fill_n(output, num_output_channels * num_output_frames, 0.0f);
-}
-
 // Returns the corresponding `InstrumentDefinition` for a given `definition`.
 InstrumentDefinition GetInstrumentDefinition(
     const BarelyInstrumentDefinition& definition) noexcept {
@@ -66,17 +40,10 @@ InstrumentDefinition GetInstrumentDefinition(
                  parameter_definition.max_value),
         parameter_definition.min_value, parameter_definition.max_value});
   }
-  return InstrumentDefinition{
-      definition.create_fn ? definition.create_fn : &NoopCreateFn,
-      definition.destroy_fn ? definition.destroy_fn : &NoopDestroyFn,
-      definition.process_fn ? definition.process_fn : &ZeroFillProcessFn,
-      definition.set_data_fn ? definition.set_data_fn : &NoopSetDataFn,
-      definition.set_note_off_fn ? definition.set_note_off_fn
-                                 : &NoopSetNoteOffFn,
-      definition.set_note_on_fn ? definition.set_note_on_fn : &NoopSetNoteOnFn,
-      definition.set_parameter_fn ? definition.set_parameter_fn
-                                  : &NoopSetParameterFn,
-      parameter_definitions};
+  return {definition.create_fn,        definition.destroy_fn,
+          definition.process_fn,       definition.set_data_fn,
+          definition.set_note_off_fn,  definition.set_note_on_fn,
+          definition.set_parameter_fn, parameter_definitions};
 }
 
 // Returns the corresponding `BarelyStatus` value for a given `status`.

@@ -21,13 +21,6 @@ class Transport {
   using UpdateCallback =
       std::function<void(double begin_position, double end_position)>;
 
-  /// Constructs new |Transport|.
-  ///
-  /// @param beat_callback Beat callback.
-  /// @param update_callback Update callback.
-  Transport(BeatCallback beat_callback,
-            UpdateCallback update_callback) noexcept;
-
   /// Returns the current position.
   ///
   /// @return Position in beats.
@@ -86,28 +79,28 @@ class Transport {
 
  private:
   // Denotes whether the transport is playing or not.
-  bool is_playing_;
+  bool is_playing_ = false;
 
   // Next beat position in beats.
-  double next_beat_position_;
+  double next_beat_position_ = 0.0;
 
   // Next beat timestamp in seconds.
-  double next_beat_timestamp_;
+  double next_beat_timestamp_ = 0.0;
 
   // Position in beats.
-  double position_;
+  double position_ = 0.0;
 
   // Tempo in beats per second.
-  double tempo_;
+  double tempo_ = 1.0;
 
   // Timestamp in seconds.
-  double timestamp_;
+  double timestamp_ = 0.0;
 
   // Beat callback.
-  BeatCallback beat_callback_;
+  BeatCallback beat_callback_ = nullptr;
 
   // Update callback.
-  UpdateCallback update_callback_;
+  UpdateCallback update_callback_ = nullptr;
 };
 
 }  // namespace barelyapi

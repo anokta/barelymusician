@@ -19,7 +19,7 @@ class Conductor {
   /// Constructs new `Conductor`.
   ///
   /// @param definition Conductor definition.
-  explicit Conductor(ConductorDefinition definition = {}) noexcept;
+  explicit Conductor(const ConductorDefinition& definition = {}) noexcept;
 
   /// Destroys `Conductor`.
   ~Conductor() noexcept;

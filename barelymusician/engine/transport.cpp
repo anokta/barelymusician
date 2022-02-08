@@ -6,20 +6,6 @@
 
 namespace barelyapi {
 
-Transport::Transport(BeatCallback beat_callback,
-                     UpdateCallback update_callback) noexcept
-    : is_playing_(false),
-      next_beat_position_(0.0),
-      next_beat_timestamp_(0.0),
-      position_(0.0),
-      tempo_(1.0),
-      timestamp_(0.0),
-      beat_callback_(std::move(beat_callback)),
-      update_callback_(std::move(update_callback)) {
-  assert(beat_callback_);
-  assert(update_callback_);
-}
-
 double Transport::GetPosition() const noexcept { return position_; }
 
 double Transport::GetTempo() const noexcept { return tempo_; }
@@ -34,7 +20,6 @@ double Transport::GetTimestamp(double position) const noexcept {
 bool Transport::IsPlaying() const noexcept { return is_playing_; }
 
 void Transport::SetBeatCallback(BeatCallback beat_callback) noexcept {
-  assert(beat_callback);
   beat_callback_ = std::move(beat_callback);
 }
 
@@ -56,7 +41,6 @@ void Transport::SetTempo(double tempo) noexcept {
 }
 
 void Transport::SetUpdateCallback(UpdateCallback update_callback) noexcept {
-  assert(update_callback);
   update_callback_ = std::move(update_callback);
 }
 
@@ -76,10 +60,12 @@ void Transport::Update(double timestamp) noexcept {
     }
     // Compute next beat.
     if (position_ == next_beat_position_) {
-      beat_callback_(position_, timestamp_);
-      if (!is_playing_ || tempo_ <= 0.0) {
-        timestamp_ = timestamp;
-        return;
+      if (beat_callback_) {
+        beat_callback_(position_, timestamp_);
+        if (!is_playing_ || tempo_ <= 0.0) {
+          timestamp_ = timestamp;
+          return;
+        }
       }
       if (position_ == next_beat_position_) {
         next_beat_timestamp_ = GetTimestamp(++next_beat_position_);
@@ -94,7 +80,9 @@ void Transport::Update(double timestamp) noexcept {
       position_ += tempo_ * (timestamp - timestamp_);
       timestamp_ = timestamp;
     }
-    update_callback_(begin_position, position_);
+    if (update_callback_) {
+      update_callback_(begin_position, position_);
+    }
   }
 }
 

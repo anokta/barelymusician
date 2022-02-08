@@ -32,11 +32,7 @@ class InstrumentController {
   /// Constructs new `InstrumentController`.
   ///
   /// @param definition Instrument definition.
-  /// @param note_off_callback Note off callback.
-  /// @param note_on_callback Note on callback.
-  InstrumentController(const InstrumentDefinition& definition,
-                       NoteOffCallback note_off_callback,
-                       NoteOnCallback note_on_callback);
+  explicit InstrumentController(const InstrumentDefinition& definition);
 
   /// Returns events to be processed.
   ///
@@ -142,16 +138,16 @@ class InstrumentController {
   std::multimap<double, InstrumentEvent> events_;
 
   // Gain in amplitude.
-  float gain_;
+  float gain_ = 1.0f;
 
   // Denotes whether instrument is muted or not.
-  bool is_muted_;
+  bool is_muted_ = false;
 
   // Note off callback.
-  NoteOffCallback note_off_callback_;
+  NoteOffCallback note_off_callback_ = nullptr;
 
   // Note on callback.
-  NoteOnCallback note_on_callback_;
+  NoteOnCallback note_on_callback_ = nullptr;
 
   // List of parameters.
   std::vector<Parameter> parameters_;

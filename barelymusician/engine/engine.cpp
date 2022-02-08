@@ -36,99 +36,87 @@ using InstrumentIdEventPair = std::pair<Id, InstrumentEvent>;
 /// Instrument id-event pair by position map type.
 using InstrumentIdEventPairMap = std::multimap<double, InstrumentIdEventPair>;
 
-// Dummy beat callback function that does nothing.
-void NoopBeatCallback(double /*position*/, double /*timestamp*/) noexcept {}
-
-// Dummy note off callback that does nothing.
-void NoopNoteOffCallback(float /*pitch*/, double /*timestamp*/) noexcept {}
-
-// Dummy note on callback that does nothing.
-void NoopNoteOnCallback(float /*pitch*/, float /*intensity*/,
-                        double /*timestamp*/) noexcept {}
-
 }  // namespace
 
 Engine::Engine() noexcept
-    : runner_(kNumMaxTasks),
-      playback_tempo_(kDefaultPlaybackTempo),
-      transport_(&NoopBeatCallback, [this](double begin_position,
-                                           double end_position) noexcept {
-        InstrumentIdEventPairMap id_event_pairs;
-        for (auto& performer_it : performers_) {
-          auto& performer = performer_it.second;
-          const auto instrument_id = performer.instrument_id;
-          // Perform active note events.
-          for (auto it = performer.active_notes.begin();
-               it != performer.active_notes.end();) {
-            const auto& [note_begin_position, active_note] = *it;
-            double note_end_position = active_note.end_position;
-            if (note_end_position < end_position) {
-              note_end_position = std::max(begin_position, note_end_position);
-            } else if (begin_position < note_begin_position) {
-              note_end_position = begin_position;
-            } else {
-              ++it;
-              continue;
+    : runner_(kNumMaxTasks), playback_tempo_(kDefaultPlaybackTempo) {
+  transport_.SetUpdateCallback([this](double begin_position,
+                                      double end_position) noexcept {
+    InstrumentIdEventPairMap id_event_pairs;
+    for (auto& performer_it : performers_) {
+      auto& performer = performer_it.second;
+      const auto instrument_id = performer.instrument_id;
+      // Perform active note events.
+      for (auto it = performer.active_notes.begin();
+           it != performer.active_notes.end();) {
+        const auto& [note_begin_position, active_note] = *it;
+        double note_end_position = active_note.end_position;
+        if (note_end_position < end_position) {
+          note_end_position = std::max(begin_position, note_end_position);
+        } else if (begin_position < note_begin_position) {
+          note_end_position = begin_position;
+        } else {
+          ++it;
+          continue;
+        }
+        // Perform note off event.
+        id_event_pairs.emplace(
+            note_end_position,
+            InstrumentIdEventPair{instrument_id,
+                                  StopNoteEvent{active_note.pitch}});
+        it = performer.active_notes.erase(it);
+      }
+
+      // Perform sequence events.
+      performer.sequence.Process(
+          begin_position, end_position,
+          [&](double position, const Note& note) noexcept {
+            // Get pitch.
+            const auto pitch_or = conductor_.TransformNotePitch(note.pitch);
+            if (!IsOk(pitch_or)) {
+              return;
             }
-            // Perform note off event.
+            const float pitch = GetStatusOrValue(pitch_or);
+            // Get intensity.
+            const auto intensity_or =
+                conductor_.TransformNoteIntensity(note.intensity);
+            if (!IsOk(intensity_or)) {
+              return;
+            }
+            const float intensity = GetStatusOrValue(intensity_or);
+            // Get duration.
+            const auto duration_or =
+                conductor_.TransformNoteDuration(note.duration);
+            if (!IsOk(duration_or)) {
+              return;
+            }
+            const double note_end_position = std::min(
+                position + std::max(GetStatusOrValue(duration_or), 0.0),
+                performer.sequence.GetEndPosition());
+
+            // Perform note on event.
             id_event_pairs.emplace(
-                note_end_position,
-                InstrumentIdEventPair{instrument_id,
-                                      StopNoteEvent{active_note.pitch}});
-            it = performer.active_notes.erase(it);
-          }
-
-          // Perform sequence events.
-          performer.sequence.Process(
-              begin_position, end_position,
-              [&](double position, const Note& note) noexcept {
-                // Get pitch.
-                const auto pitch_or = conductor_.TransformNotePitch(note.pitch);
-                if (!IsOk(pitch_or)) {
-                  return;
-                }
-                const float pitch = GetStatusOrValue(pitch_or);
-                // Get intensity.
-                const auto intensity_or =
-                    conductor_.TransformNoteIntensity(note.intensity);
-                if (!IsOk(intensity_or)) {
-                  return;
-                }
-                const float intensity = GetStatusOrValue(intensity_or);
-                // Get duration.
-                const auto duration_or =
-                    conductor_.TransformNoteDuration(note.duration);
-                if (!IsOk(duration_or)) {
-                  return;
-                }
-                const double note_end_position = std::min(
-                    position + std::max(GetStatusOrValue(duration_or), 0.0),
-                    performer.sequence.GetEndPosition());
-
-                // Perform note on event.
-                id_event_pairs.emplace(
-                    position,
-                    InstrumentIdEventPair{instrument_id,
-                                          StartNoteEvent{pitch, intensity}});
-                // Perform note off event.
-                if (note_end_position < end_position) {
-                  id_event_pairs.emplace(
-                      note_end_position,
-                      InstrumentIdEventPair{instrument_id,
-                                            StopNoteEvent{pitch}});
-                } else {
-                  performer.active_notes.emplace(
-                      position, ActiveNote{note_end_position, pitch});
-                }
-              });
-        }
-        for (const auto& [position, id_event_pair] : id_event_pairs) {
-          const auto& [instrument_id, event] = id_event_pair;
-          if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-            controller->ProcessEvent(event, transport_.GetTimestamp(position));
-          }
-        }
-      }) {}
+                position, InstrumentIdEventPair{
+                              instrument_id, StartNoteEvent{pitch, intensity}});
+            // Perform note off event.
+            if (note_end_position < end_position) {
+              id_event_pairs.emplace(
+                  note_end_position,
+                  InstrumentIdEventPair{instrument_id, StopNoteEvent{pitch}});
+            } else {
+              performer.active_notes.emplace(
+                  position, ActiveNote{note_end_position, pitch});
+            }
+          });
+    }
+    for (const auto& [position, id_event_pair] : id_event_pairs) {
+      const auto& [instrument_id, event] = id_event_pair;
+      if (auto* controller = FindOrNull(controllers_, instrument_id)) {
+        controller->ProcessEvent(event, transport_.GetTimestamp(position));
+      }
+    }
+  });
+}
 
 Id Engine::AddPerformer() noexcept {
   const Id performer_id = ++id_counter_;
@@ -149,9 +137,7 @@ StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
 Id Engine::CreateInstrument(InstrumentDefinition definition,
                             int sample_rate) noexcept {
   const Id instrument_id = ++id_counter_;
-  controllers_.emplace(instrument_id,
-                       InstrumentController{definition, &NoopNoteOffCallback,
-                                            &NoopNoteOnCallback});
+  controllers_.emplace(instrument_id, InstrumentController{definition});
   runner_.Add([this, instrument_id, definition = std::move(definition),
                sample_rate]() noexcept {
     processors_.emplace(std::piecewise_construct,
@@ -373,9 +359,7 @@ Status Engine::SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept {
 Status Engine::SetInstrumentNoteOffCallback(
     Id instrument_id, NoteOffCallback note_off_callback) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->SetNoteOffCallback(note_off_callback
-                                       ? std::move(note_off_callback)
-                                       : &NoopNoteOffCallback);
+    controller->SetNoteOffCallback(std::move(note_off_callback));
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -384,8 +368,7 @@ Status Engine::SetInstrumentNoteOffCallback(
 Status Engine::SetInstrumentNoteOnCallback(
     Id instrument_id, NoteOnCallback note_on_callback) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->SetNoteOnCallback(note_on_callback ? std::move(note_on_callback)
-                                                   : &NoopNoteOnCallback);
+    controller->SetNoteOnCallback(std::move(note_on_callback));
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -474,8 +457,7 @@ Status Engine::SetPerformerLoopLength(Id performer_id,
 }
 
 void Engine::SetPlaybackBeatCallback(BeatCallback beat_callback) noexcept {
-  transport_.SetBeatCallback(beat_callback ? std::move(beat_callback)
-                                           : &NoopBeatCallback);
+  transport_.SetBeatCallback(std::move(beat_callback));
 }
 
 void Engine::SetPlaybackPosition(double position) noexcept {

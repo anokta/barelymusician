@@ -14,71 +14,14 @@
 
 namespace barelyapi {
 
-namespace {
-
-// Dummy set conductor data function that does nothing.
-void NoopSetConductorDataFn(void** /*state*/, void* /*data*/) noexcept {}
-
-// Dummy set conductor parameter function that does nothing.
-void NoopSetConductorParamFn(void** /*state*/, int /*index*/,
-                             float /*value*/) noexcept {}
-
-// Dummy transform note duration function that returns raw note duration.
-StatusOr<double> NoopTransformNoteDurationFn(
-    void** /*state*/, const NoteDuration& note_duration) noexcept {
-  if (std::holds_alternative<double>(note_duration)) {
-    return std::get<double>(note_duration);
-  }
-  return Status::kUnimplemented;
-}
-
-// Dummy transform note intensity function that returns raw note intensity.
-StatusOr<float> NoopTransformNoteIntensityFn(
-    void** /*state*/, const NoteIntensity& note_intensity) noexcept {
-  if (std::holds_alternative<float>(note_intensity)) {
-    return std::get<float>(note_intensity);
-  }
-  return Status::kUnimplemented;
-}
-
-// Dummy transform note pitch function that returns raw note pitch.
-StatusOr<float> NoopTransformNotePitchFn(void** /*state*/,
-                                         const NotePitch& note_pitch) noexcept {
-  if (std::holds_alternative<float>(note_pitch)) {
-    return std::get<float>(note_pitch);
-  }
-  return Status::kUnimplemented;
-}
-
-// Dummy transform playback tempo function that returns the original tempo.
-double NoopTransformPlaybackTempoFn(void** /*state*/, double tempo) noexcept {
-  return tempo;
-}
-
-}  // namespace
-
-Conductor::Conductor(ConductorDefinition definition) noexcept
-    : destroy_fn_(std::move(definition.destroy_fn)),
-      set_data_fn_(definition.set_data_fn ? std::move(definition.set_data_fn)
-                                          : &NoopSetConductorDataFn),
-      set_param_fn_(definition.set_param_fn ? std::move(definition.set_param_fn)
-                                            : &NoopSetConductorParamFn),
-      transform_note_duration_fn_(
-          definition.transform_note_duration_fn
-              ? std::move(definition.transform_note_duration_fn)
-              : &NoopTransformNoteDurationFn),
-      transform_note_intensity_fn_(
-          definition.transform_note_intensity_fn
-              ? std::move(definition.transform_note_intensity_fn)
-              : &NoopTransformNoteIntensityFn),
-      transform_note_pitch_fn_(
-          definition.transform_note_pitch_fn
-              ? std::move(definition.transform_note_pitch_fn)
-              : &NoopTransformNotePitchFn),
-      transform_playback_tempo_fn_(
-          definition.transform_playback_tempo_fn
-              ? std::move(definition.transform_playback_tempo_fn)
-              : &NoopTransformPlaybackTempoFn) {
+Conductor::Conductor(const ConductorDefinition& definition) noexcept
+    : destroy_fn_(definition.destroy_fn),
+      set_data_fn_(definition.set_data_fn),
+      set_param_fn_(definition.set_param_fn),
+      transform_note_duration_fn_(definition.transform_note_duration_fn),
+      transform_note_intensity_fn_(definition.transform_note_intensity_fn),
+      transform_note_pitch_fn_(definition.transform_note_pitch_fn),
+      transform_playback_tempo_fn_(definition.transform_playback_tempo_fn) {
   if (definition.create_fn) {
     definition.create_fn(&state_);
   }
@@ -106,7 +49,7 @@ void Conductor::SetData(void* data) noexcept { set_data_fn_(&state_, data); }
 
 Status Conductor::SetParam(int index, float value) noexcept {
   if (index >= 0 && index < static_cast<int>(params_.size())) {
-    if (params_[index].SetValue(value)) {
+    if (params_[index].SetValue(value) && set_param_fn_) {
       set_param_fn_(&state_, index, params_[index].GetValue());
     }
     return Status::kOk;
@@ -116,7 +59,7 @@ Status Conductor::SetParam(int index, float value) noexcept {
 
 Status Conductor::SetParamToDefault(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(params_.size())) {
-    if (params_[index].ResetValue()) {
+    if (params_[index].ResetValue() && set_param_fn_) {
       set_param_fn_(&state_, index, params_[index].GetValue());
     }
     return Status::kOk;
@@ -126,19 +69,23 @@ Status Conductor::SetParamToDefault(int index) noexcept {
 
 StatusOr<double> Conductor::TransformNoteDuration(
     NoteDuration note_duration) noexcept {
+  if (!transform_note_duration_fn_) return std::get<double>(note_duration);
   return transform_note_duration_fn_(&state_, note_duration);
 }
 
 StatusOr<float> Conductor::TransformNoteIntensity(
     NoteIntensity note_intensity) noexcept {
+  if (!transform_note_intensity_fn_) return std::get<float>(note_intensity);
   return transform_note_intensity_fn_(&state_, note_intensity);
 }
 
 StatusOr<float> Conductor::TransformNotePitch(NotePitch note_pitch) noexcept {
+  if (!transform_note_pitch_fn_) return std::get<float>(note_pitch);
   return transform_note_pitch_fn_(&state_, note_pitch);
 }
 
 double Conductor::TransformPlaybackTempo(double tempo) noexcept {
+  if (!transform_playback_tempo_fn_) return tempo;
   return transform_playback_tempo_fn_(&state_, tempo);
 }
 

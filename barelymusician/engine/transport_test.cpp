@@ -14,16 +14,9 @@ using ::testing::ElementsAre;
 
 constexpr double kTempo = 1.5;
 
-// Dummy beat callback function that does nothing.
-void NoopBeatCallback(double /*position*/, double /*timestamp*/) noexcept {}
-
-// Dummy update callback function that does nothing.
-void NoopUpdateCallback(double /*begin_position*/,
-                        double /*end_position*/) noexcept {}
-
 // Tests that the transport sets its tempo as expected.
 TEST(TransportTest, SetTempo) {
-  Transport transport(&NoopBeatCallback, &NoopUpdateCallback);
+  Transport transport;
   EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
 
   transport.SetTempo(kTempo);
@@ -34,7 +27,7 @@ TEST(TransportTest, SetTempo) {
 TEST(TransportTest, SetPosition) {
   const double kPosition = 2.75f;
 
-  Transport transport(&NoopBeatCallback, &NoopUpdateCallback);
+  Transport transport;
   EXPECT_EQ(transport.GetPosition(), 0.0);
 
   transport.SetPosition(kPosition);
@@ -44,7 +37,7 @@ TEST(TransportTest, SetPosition) {
 // Tests that updating the transport position tirggers the corresponding
 // callbacks as expected.
 TEST(TransportTest, SetCallbacks) {
-  Transport transport(&NoopBeatCallback, &NoopUpdateCallback);
+  Transport transport;
 
   EXPECT_FALSE(transport.IsPlaying());
   EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
@@ -104,7 +97,7 @@ TEST(TransportTest, SetCallbacks) {
 
 // Tests that the transport updates its internal state as expected.
 TEST(TransportTest, Update) {
-  Transport transport(&NoopBeatCallback, &NoopUpdateCallback);
+  Transport transport;
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 0.0);
 

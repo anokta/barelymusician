@@ -12,14 +12,7 @@
 namespace barelyapi {
 
 InstrumentController::InstrumentController(
-    const InstrumentDefinition& definition, NoteOffCallback note_off_callback,
-    NoteOnCallback note_on_callback)
-    : gain_(1.0f),
-      is_muted_(false),
-      note_off_callback_(std::move(note_off_callback)),
-      note_on_callback_(std::move(note_on_callback)) {
-  assert(note_off_callback_);
-  assert(note_on_callback_);
+    const InstrumentDefinition& definition) {
   parameters_.reserve(definition.parameter_definitions.size());
   for (const auto& parameter_definition : definition.parameter_definitions) {
     parameters_.emplace_back(parameter_definition);
@@ -120,12 +113,10 @@ void InstrumentController::SetMuted(bool is_muted, double timestamp) {
 
 void InstrumentController::SetNoteOffCallback(
     NoteOffCallback note_off_callback) {
-  assert(note_off_callback);
   note_off_callback_ = std::move(note_off_callback);
 }
 
 void InstrumentController::SetNoteOnCallback(NoteOnCallback note_on_callback) {
-  assert(note_on_callback);
   note_on_callback_ = std::move(note_on_callback);
 }
 
@@ -148,7 +139,9 @@ void InstrumentController::StartNote(float pitch, float intensity,
                                      double timestamp) {
   assert(timestamp >= 0.0);
   if (pitches_.insert(pitch).second) {
-    note_on_callback_(pitch, intensity, timestamp);
+    if (note_on_callback_) {
+      note_on_callback_(pitch, intensity, timestamp);
+    }
     events_.emplace_hint(events_.end(), timestamp,
                          StartNoteEvent{pitch, intensity});
   }
@@ -157,7 +150,9 @@ void InstrumentController::StartNote(float pitch, float intensity,
 void InstrumentController::StopAllNotes(double timestamp) {
   assert(timestamp >= 0.0);
   for (const float pitch : std::exchange(pitches_, {})) {
-    note_off_callback_(pitch, timestamp);
+    if (note_off_callback_) {
+      note_off_callback_(pitch, timestamp);
+    }
     events_.emplace_hint(events_.end(), timestamp, StopNoteEvent{pitch});
   }
 }
@@ -165,7 +160,9 @@ void InstrumentController::StopAllNotes(double timestamp) {
 void InstrumentController::StopNote(float pitch, double timestamp) {
   assert(timestamp >= 0.0);
   if (pitches_.erase(pitch) > 0) {
-    note_off_callback_(pitch, timestamp);
+    if (note_off_callback_) {
+      note_off_callback_(pitch, timestamp);
+    }
     events_.emplace_hint(events_.end(), timestamp, StopNoteEvent{pitch});
   }
 }

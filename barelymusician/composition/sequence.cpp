@@ -214,6 +214,7 @@ Status Sequence::SetNotePosition(Id id, double position) noexcept {
 void Sequence::ProcessInternal(
     double begin_position, double end_position, double position_offset,
     const ProcessCallback& process_callback) const noexcept {
+  if (!process_callback) return;
   const auto begin =
       notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
   const auto end =

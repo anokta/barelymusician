@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/engine/parameter.h"
 #include "examples/common/wav_file.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"
@@ -30,7 +30,7 @@ class DrumkitInstrument : public GenericInstrument {
   void SetParameter(int index, float value) noexcept override;
 
   /// Returns instrument definition.
-  static barelyapi::InstrumentDefinition GetDefinition() noexcept;
+  static BarelyInstrumentDefinition GetDefinition() noexcept;
 
  private:
   struct DrumkitPad {

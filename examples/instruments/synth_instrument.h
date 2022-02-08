@@ -1,10 +1,9 @@
 #ifndef EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 #define EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
-#include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/parameter.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"
 
@@ -34,7 +33,7 @@ class SynthInstrument : public GenericInstrument {
   void SetParameter(int index, float value) noexcept override;
 
   /// Returns instrument definition.
-  static barelyapi::InstrumentDefinition GetDefinition() noexcept;
+  static BarelyInstrumentDefinition GetDefinition() noexcept;
 
  private:
   using SynthVoice = EnvelopedVoice<barelyapi::Oscillator>;

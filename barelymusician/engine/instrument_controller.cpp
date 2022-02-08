@@ -5,17 +5,17 @@
 #include <utility>
 #include <variant>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/visitor.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
 
 InstrumentController::InstrumentController(
-    const InstrumentDefinition& definition) {
-  parameters_.reserve(definition.parameter_definitions.size());
-  for (const auto& parameter_definition : definition.parameter_definitions) {
-    parameters_.emplace_back(parameter_definition);
+    const BarelyInstrumentDefinition& definition) {
+  parameters_.reserve(definition.num_parameter_definitions);
+  for (int index = 0; index < definition.num_parameter_definitions; ++index) {
+    parameters_.emplace_back(definition.parameter_definitions[index]);
   }
 }
 

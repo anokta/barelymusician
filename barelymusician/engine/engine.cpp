@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
@@ -10,7 +11,6 @@
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_controller.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/parameter.h"
@@ -133,7 +133,7 @@ StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
   return Status::kNotFound;
 }
 
-Id Engine::CreateInstrument(InstrumentDefinition definition,
+Id Engine::CreateInstrument(BarelyInstrumentDefinition definition,
                             int sample_rate) noexcept {
   const Id instrument_id = ++id_counter_;
   controllers_.emplace(instrument_id, InstrumentController{definition});

@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/parameter.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -21,8 +21,10 @@ constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 12;
 
 // Returns test instrument definition that produces constant output that is set.
-InstrumentDefinition GetTestInstrumentDefinition() {
-  return InstrumentDefinition{
+BarelyInstrumentDefinition GetTestInstrumentDefinition() {
+  static std::vector<BarelyParameterDefinition> parameter_definitions = {
+      BarelyParameterDefinition{0.0f, -10.0f, 10.0f}};
+  return {
       .create_fn =
           [](void** state, int /*sample_rate*/) {
             *state = reinterpret_cast<void*>(new float{0.0f});
@@ -48,7 +50,9 @@ InstrumentDefinition GetTestInstrumentDefinition() {
             *reinterpret_cast<float*>(*state) =
                 static_cast<float>(index + 1) * value;
           },
-      .parameter_definitions = {ParameterDefinition{0.0f, -10.0f, 10.0f}}};
+      .parameter_definitions = parameter_definitions.data(),
+      .num_parameter_definitions =
+          static_cast<int>(parameter_definitions.size())};
 }
 
 // Tests that instruments are added and removed as expected.

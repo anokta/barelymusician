@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/parameter.h"
 
@@ -32,7 +32,7 @@ class InstrumentController {
   /// Constructs new `InstrumentController`.
   ///
   /// @param definition Instrument definition.
-  explicit InstrumentController(const InstrumentDefinition& definition);
+  explicit InstrumentController(const BarelyInstrumentDefinition& definition);
 
   /// Returns events to be processed.
   ///

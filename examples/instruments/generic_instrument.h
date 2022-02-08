@@ -5,8 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/parameter.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barely::examples {
 
@@ -49,45 +48,46 @@ class GenericInstrument {
 
 /// Returns instrument definition for the given create instrument function.
 template <typename InstrumentType>
-barelyapi::InstrumentDefinition GetInstrumentDefinition(
-    const std::vector<barelyapi::ParameterDefinition>&
-        parameter_definitions) noexcept {
-  return barelyapi::InstrumentDefinition{
-      .create_fn =
-          [](void** state, int sample_rate) noexcept {
-            *state = reinterpret_cast<void*>(new InstrumentType(sample_rate));
-          },
-      .destroy_fn =
-          [](void** state) noexcept {
-            delete reinterpret_cast<InstrumentType*>(*state);
-          },
-      .process_fn =
-          [](void** state, float* output, int num_channels,
-             int num_frames) noexcept {
-            auto* instrument = reinterpret_cast<InstrumentType*>(*state);
-            instrument->Process(output, num_channels, num_frames);
-          },
-      .set_data_fn =
-          [](void** state, void* data) noexcept {
-            auto* instrument = reinterpret_cast<InstrumentType*>(*state);
-            instrument->SetData(data);
-          },
-      .set_note_off_fn =
-          [](void** state, float pitch) noexcept {
-            auto* instrument = reinterpret_cast<InstrumentType*>(*state);
-            instrument->NoteOff(pitch);
-          },
-      .set_note_on_fn =
-          [](void** state, float pitch, float intensity) noexcept {
-            auto* instrument = reinterpret_cast<InstrumentType*>(*state);
-            instrument->NoteOn(pitch, intensity);
-          },
-      .set_parameter_fn =
-          [](void** state, int index, float value) noexcept {
-            auto* instrument = reinterpret_cast<InstrumentType*>(*state);
-            instrument->SetParameter(index, value);
-          },
-      .parameter_definitions = parameter_definitions};
+BarelyInstrumentDefinition GetInstrumentDefinition(
+    std::vector<BarelyParameterDefinition>& parameter_definitions) noexcept {
+  return {.create_fn =
+              [](void** state, int sample_rate) noexcept {
+                *state =
+                    reinterpret_cast<void*>(new InstrumentType(sample_rate));
+              },
+          .destroy_fn =
+              [](void** state) noexcept {
+                delete reinterpret_cast<InstrumentType*>(*state);
+              },
+          .process_fn =
+              [](void** state, float* output, int num_channels,
+                 int num_frames) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
+                instrument->Process(output, num_channels, num_frames);
+              },
+          .set_data_fn =
+              [](void** state, void* data) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
+                instrument->SetData(data);
+              },
+          .set_note_off_fn =
+              [](void** state, float pitch) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
+                instrument->NoteOff(pitch);
+              },
+          .set_note_on_fn =
+              [](void** state, float pitch, float intensity) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
+                instrument->NoteOn(pitch, intensity);
+              },
+          .set_parameter_fn =
+              [](void** state, int index, float value) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
+                instrument->SetParameter(index, value);
+              },
+          .parameter_definitions = parameter_definitions.data(),
+          .num_parameter_definitions =
+              static_cast<int>(parameter_definitions.size())};
 }
 
 }  // namespace barely::examples

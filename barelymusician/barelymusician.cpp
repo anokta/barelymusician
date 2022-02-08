@@ -9,7 +9,6 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
@@ -18,25 +17,10 @@ using ::barely::examples::SynthInstrument;
 using ::barelyapi::Engine;
 using ::barelyapi::GetStatusOrStatus;
 using ::barelyapi::GetStatusOrValue;
-using ::barelyapi::InstrumentDefinition;
 using ::barelyapi::IsOk;
 using ::barelyapi::Note;
 using ::barelyapi::Status;
 using ::barelyapi::StatusOr;
-
-using ParameterDefinition = ::barelyapi::ParameterDefinition;
-
-// Returns the corresponding `InstrumentDefinition` for a given `definition`.
-InstrumentDefinition GetInstrumentDefinition(
-    const BarelyInstrumentDefinition& definition) noexcept {
-  const std::vector<ParameterDefinition> parameter_definitions(
-      definition.parameter_definitions,
-      definition.parameter_definitions + definition.num_parameter_definitions);
-  return {definition.create_fn,        definition.destroy_fn,
-          definition.process_fn,       definition.set_data_fn,
-          definition.set_note_off_fn,  definition.set_note_on_fn,
-          definition.set_parameter_fn, parameter_definitions};
-}
 
 // Returns the corresponding `BarelyStatus` value for a given `status`.
 BarelyStatus GetStatus(Status status) noexcept {
@@ -220,8 +204,8 @@ BarelyStatus BarelyInstrument_Create(BarelyApi api,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id = api->instance.CreateInstrument(
-      GetInstrumentDefinition(definition), sample_rate);
+  *out_instrument_id =
+      api->instance.CreateInstrument(std::move(definition), sample_rate);
   return BarelyStatus_kOk;
 }
 

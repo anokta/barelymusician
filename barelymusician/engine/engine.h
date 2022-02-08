@@ -5,13 +5,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_controller.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
 #include "barelymusician/engine/parameter.h"
@@ -54,7 +54,7 @@ class Engine {
   /// @param definition Instrument definition.
   /// @param sample_rate Sampling rate in hz.
   /// @return Instrument id.
-  Id CreateInstrument(InstrumentDefinition definition,
+  Id CreateInstrument(BarelyInstrumentDefinition definition,
                       int sample_rate) noexcept;
 
   /// Destroys instrument.

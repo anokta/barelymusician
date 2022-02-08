@@ -4,15 +4,15 @@
 #include <map>
 #include <variant>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/visitor.h"
 #include "barelymusician/dsp/dsp_utils.h"
-#include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
 
-InstrumentProcessor::InstrumentProcessor(const InstrumentDefinition& definition,
-                                         int sample_rate) noexcept
+InstrumentProcessor::InstrumentProcessor(
+    const BarelyInstrumentDefinition& definition, int sample_rate) noexcept
     : create_fn_(definition.create_fn),
       destroy_fn_(definition.destroy_fn),
       process_fn_(definition.process_fn),
@@ -27,9 +27,9 @@ InstrumentProcessor::InstrumentProcessor(const InstrumentDefinition& definition,
     create_fn_(&state_, sample_rate_);
   }
   if (set_parameter_fn_) {
-    const auto& parameter_definitions = definition.parameter_definitions;
-    for (int i = 0; i < static_cast<int>(parameter_definitions.size()); ++i) {
-      set_parameter_fn_(&state_, i, parameter_definitions[i].default_value);
+    for (int index = 0; index < definition.num_parameter_definitions; ++index) {
+      set_parameter_fn_(&state_, index,
+                        definition.parameter_definitions[index].default_value);
     }
   }
 }

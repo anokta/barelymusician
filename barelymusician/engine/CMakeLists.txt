@@ -34,12 +34,12 @@ target_link_libraries(
   conductor
   conductor_definition
   instrument_controller
-  instrument_definition
   instrument_event
   instrument_processor
   parameter
   task_runner
   transport
+  barelymusician
   find_or_null
   id
   status
@@ -53,26 +53,14 @@ add_library(
 )
 target_link_libraries(
   instrument_controller
-  instrument_definition
   instrument_event
   parameter
+  barelymusician
   visitor
 )
 
 add_library(
-  instrument_definition INTERFACE
-)
-target_link_libraries(
-  instrument_definition INTERFACE
-  parameter
-)
-
-add_library(
   instrument_event INTERFACE
-)
-target_link_libraries(
-  instrument_event INTERFACE
-  instrument_definition
 )
 
 add_library(
@@ -81,8 +69,8 @@ add_library(
 )
 target_link_libraries(
   instrument_processor
-  instrument_definition
   instrument_event
+  barelymusician
   visitor
   dsp_utils
 )
@@ -130,8 +118,8 @@ add_executable(
 target_link_libraries(
   engine_test
   engine
-  instrument_definition
   parameter
+  barelymusician
   id
   status
   gmock

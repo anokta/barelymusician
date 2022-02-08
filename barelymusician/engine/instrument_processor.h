@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "barelymusician/engine/instrument_definition.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
@@ -15,7 +15,7 @@ class InstrumentProcessor {
   ///
   /// @param definition Instrument definition.
   /// @param sample_rate Sampling rate in hz.
-  InstrumentProcessor(const InstrumentDefinition& definition,
+  InstrumentProcessor(const BarelyInstrumentDefinition& definition,
                       int sample_rate) noexcept;
 
   /// Destroys `InstrumentProcessor`.
@@ -43,25 +43,25 @@ class InstrumentProcessor {
 
  private:
   // Create function.
-  InstrumentDefinition::CreateFn create_fn_;
+  BarelyInstrumentDefinition_CreateFn create_fn_;
 
   // Destroy function.
-  InstrumentDefinition::DestroyFn destroy_fn_;
+  BarelyInstrumentDefinition_DestroyFn destroy_fn_;
 
   // Process function.
-  InstrumentDefinition::ProcessFn process_fn_;
+  BarelyInstrumentDefinition_ProcessFn process_fn_;
 
   // Set data function.
-  InstrumentDefinition::SetDataFn set_data_fn_;
+  BarelyInstrumentDefinition_SetDataFn set_data_fn_;
 
   // Set note off function.
-  InstrumentDefinition::SetNoteOffFn set_note_off_fn_;
+  BarelyInstrumentDefinition_SetNoteOffFn set_note_off_fn_;
 
   // Set note on function.
-  InstrumentDefinition::SetNoteOnFn set_note_on_fn_;
+  BarelyInstrumentDefinition_SetNoteOnFn set_note_on_fn_;
 
   // Set parameter function.
-  InstrumentDefinition::SetParameterFn set_parameter_fn_;
+  BarelyInstrumentDefinition_SetParameterFn set_parameter_fn_;
 
   // Map of events by their timestamps.
   std::multimap<double, InstrumentEvent> events_;

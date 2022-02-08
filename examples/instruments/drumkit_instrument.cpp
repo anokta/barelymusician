@@ -1,7 +1,9 @@
 #include "examples/instruments/drumkit_instrument.h"
 
 #include <unordered_map>
+#include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "examples/common/wav_file.h"
 #include "examples/instruments/generic_instrument.h"
@@ -9,8 +11,6 @@
 namespace barely::examples {
 
 using ::barelyapi::FindOrNull;
-using ::barelyapi::InstrumentDefinition;
-using ::barelyapi::ParameterDefinition;
 
 DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
     : sample_rate_(sample_rate) {}
@@ -58,11 +58,12 @@ void DrumkitInstrument::SetParameter(int index, float value) noexcept {
   }
 }
 
-InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
-  return GetInstrumentDefinition<DrumkitInstrument>({
+BarelyInstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
+  static std::vector<BarelyParameterDefinition> parameter_definitions = {
       // Pad release.
-      ParameterDefinition{0.1f, 0.0f, 60.0f},
-  });
+      BarelyParameterDefinition{0.1f, 0.0f, 60.0f},
+  };
+  return GetInstrumentDefinition<DrumkitInstrument>(parameter_definitions);
 }
 
 }  // namespace barely::examples

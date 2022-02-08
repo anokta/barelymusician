@@ -8,7 +8,7 @@
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/engine/parameter_definition.h"
+#include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
 

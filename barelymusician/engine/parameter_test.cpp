@@ -1,34 +1,12 @@
 #include "barelymusician/engine/parameter.h"
 
-#include "barelymusician/engine/parameter_definition.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
 namespace {
 
-// Tests that the parameter sets its value as expected.
+// Tests that parameter sets its value as expected.
 TEST(ParameterTest, SetValue) {
-  Parameter parameter(ParameterDefinition{-2.0f});
-  EXPECT_FLOAT_EQ(parameter.GetValue(), -2.0f);
-
-  EXPECT_TRUE(parameter.SetValue(0.5f));
-  EXPECT_FLOAT_EQ(parameter.GetValue(), 0.5f);
-
-  // The parameter value is already set to 0.5f.
-  EXPECT_FALSE(parameter.SetValue(0.5f));
-  EXPECT_FLOAT_EQ(parameter.GetValue(), 0.5f);
-
-  EXPECT_TRUE(parameter.ResetValue());
-  EXPECT_FLOAT_EQ(parameter.GetValue(), -2.0f);
-
-  // The parameter value is already reset.
-  EXPECT_FALSE(parameter.ResetValue());
-  EXPECT_FLOAT_EQ(parameter.GetValue(), -2.0f);
-}
-
-// Tests that the parameter sets its value with respect to its minimum and
-// maximum boundaries as expected.
-TEST(ParameterTest, SetValueMinMax) {
   Parameter parameter(ParameterDefinition{15.0f, 10.0f, 20.0f});
   EXPECT_FLOAT_EQ(parameter.GetValue(), 15.0f);
 

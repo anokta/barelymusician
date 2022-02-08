@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "barelymusician/engine/parameter_definition.h"
+#include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
 

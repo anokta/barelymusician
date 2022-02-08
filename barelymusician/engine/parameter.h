@@ -1,9 +1,12 @@
 #ifndef BARELYMUSICIAN_ENGINE_PARAMETER_H_
 #define BARELYMUSICIAN_ENGINE_PARAMETER_H_
 
-#include "barelymusician/engine/parameter_definition.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barelyapi {
+
+/// Parameter definition alias.
+using ParameterDefinition = BarelyParameterDefinition;
 
 /// Class that wraps a parameter.
 class Parameter {

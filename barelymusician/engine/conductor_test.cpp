@@ -7,7 +7,7 @@
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
-#include "barelymusician/engine/parameter_definition.h"
+#include "barelymusician/engine/parameter.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {
@@ -47,7 +47,7 @@ ConductorDefinition GetTestConductorDefinition() {
             return tempo +
                    static_cast<double>(*reinterpret_cast<float*>(*state));
           },
-      .param_definitions = {ParameterDefinition{0.0f}}};
+      .param_definitions = {ParameterDefinition{0.0f, 0.0f, 100.0f}}};
 }
 
 // Tests that the conductor behaves as expected with an empty definition.

@@ -10,7 +10,6 @@
 #include "barelymusician/composition/note.h"
 #include "barelymusician/engine/engine.h"
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/parameter_definition.h"
 #include "examples/instruments/synth_instrument.h"
 
 namespace {
@@ -30,16 +29,9 @@ using ParameterDefinition = ::barelyapi::ParameterDefinition;
 // Returns the corresponding `InstrumentDefinition` for a given `definition`.
 InstrumentDefinition GetInstrumentDefinition(
     const BarelyInstrumentDefinition& definition) noexcept {
-  std::vector<ParameterDefinition> parameter_definitions;
-  parameter_definitions.reserve(definition.num_parameter_definitions);
-  for (int i = 0; i < definition.num_parameter_definitions; ++i) {
-    const auto& parameter_definition = definition.parameter_definitions[i];
-    parameter_definitions.push_back(ParameterDefinition{
-        std::min(std::max(parameter_definition.default_value,
-                          parameter_definition.min_value),
-                 parameter_definition.max_value),
-        parameter_definition.min_value, parameter_definition.max_value});
-  }
+  const std::vector<ParameterDefinition> parameter_definitions(
+      definition.parameter_definitions,
+      definition.parameter_definitions + definition.num_parameter_definitions);
   return {definition.create_fn,        definition.destroy_fn,
           definition.process_fn,       definition.set_data_fn,
           definition.set_note_off_fn,  definition.set_note_on_fn,

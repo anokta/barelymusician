@@ -9,7 +9,6 @@
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/parameter.h"
-#include "barelymusician/engine/parameter_definition.h"
 
 namespace barelyapi {
 

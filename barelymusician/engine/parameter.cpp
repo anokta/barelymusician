@@ -4,8 +4,6 @@
 #include <cassert>
 #include <utility>
 
-#include "barelymusician/engine/parameter_definition.h"
-
 namespace barelyapi {
 
 Parameter::Parameter(ParameterDefinition definition) noexcept

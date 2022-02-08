@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/engine/parameter_definition.h"
+#include "barelymusician/engine/parameter.h"
 #include "examples/common/wav_file.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"

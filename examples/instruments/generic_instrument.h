@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barelymusician/engine/instrument_definition.h"
-#include "barelymusician/engine/parameter_definition.h"
+#include "barelymusician/engine/parameter.h"
 
 namespace barely::examples {
 

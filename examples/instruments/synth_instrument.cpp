@@ -2,7 +2,7 @@
 
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/engine/parameter_definition.h"
+#include "barelymusician/engine/parameter.h"
 #include "examples/instruments/enveloped_voice.h"
 
 namespace barely::examples {
@@ -71,17 +71,18 @@ void SynthInstrument::SetParameter(int index, float value) noexcept {
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<SynthInstrument>({
       // Attack.
-      ParameterDefinition{0.05f, 0.0f},
+      ParameterDefinition{0.05f, 0.0f, 60.0f},
       // Decay.
-      ParameterDefinition{0.0f, 0.0f},
+      ParameterDefinition{0.0f, 0.0f, 60.0f},
       // Sustain.
       ParameterDefinition{1.0f, 0.0f, 1.0f},
       // Release.
-      ParameterDefinition{0.25f, 0.0f},
+      ParameterDefinition{0.25f, 0.0f, 60.0f},
       // Oscillator type.
-      ParameterDefinition{static_cast<float>(OscillatorType::kSine)},
+      ParameterDefinition{static_cast<float>(OscillatorType::kSine), 0.0f,
+                          static_cast<float>(OscillatorType::kNoise)},
       // Number of voices.
-      ParameterDefinition{8.0f, 0.0f},
+      ParameterDefinition{8.0f, 1.0f, 64.0f},
   });
 }
 

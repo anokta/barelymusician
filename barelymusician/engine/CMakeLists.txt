@@ -6,7 +6,6 @@ target_link_libraries(
   conductor
   conductor_definition
   parameter
-  parameter_definition
   find_or_null
   status
   note_duration
@@ -19,7 +18,7 @@ add_library(
 )
 target_link_libraries(
   conductor_definition INTERFACE
-  parameter_definition
+  parameter
   status
   note_duration
   note_intensity
@@ -39,7 +38,6 @@ target_link_libraries(
   instrument_event
   instrument_processor
   parameter
-  parameter_definition
   task_runner
   transport
   find_or_null
@@ -58,7 +56,6 @@ target_link_libraries(
   instrument_definition
   instrument_event
   parameter
-  parameter_definition
   visitor
 )
 
@@ -67,7 +64,7 @@ add_library(
 )
 target_link_libraries(
   instrument_definition INTERFACE
-  parameter_definition
+  parameter
 )
 
 add_library(
@@ -96,11 +93,7 @@ add_library(
 )
 target_link_libraries(
   parameter
-  parameter_definition
-)
-
-add_library(
-  parameter_definition INTERFACE
+  barelymusician
 )
 
 add_library(
@@ -121,7 +114,7 @@ target_link_libraries(
   conductor_test
   conductor
   conductor_definition
-  parameter_definition
+  parameter
   status
   note_duration
   note_intensity
@@ -139,7 +132,6 @@ target_link_libraries(
   engine
   instrument_definition
   parameter
-  parameter_definition
   id
   status
   gmock
@@ -154,7 +146,6 @@ add_executable(
 target_link_libraries(
   parameter_test
   parameter
-  parameter_definition
   gtest_main
 )
 gtest_discover_tests(parameter_test)

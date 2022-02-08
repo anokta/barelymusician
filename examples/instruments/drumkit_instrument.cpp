@@ -61,7 +61,7 @@ void DrumkitInstrument::SetParameter(int index, float value) noexcept {
 InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
   return GetInstrumentDefinition<DrumkitInstrument>({
       // Pad release.
-      ParameterDefinition{0.1f, 0.0f},
+      ParameterDefinition{0.1f, 0.0f, 60.0f},
   });
 }
 

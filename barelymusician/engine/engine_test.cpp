@@ -7,7 +7,6 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/engine/instrument_definition.h"
 #include "barelymusician/engine/parameter.h"
-#include "barelymusician/engine/parameter_definition.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -49,7 +48,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
             *reinterpret_cast<float*>(*state) =
                 static_cast<float>(index + 1) * value;
           },
-      .parameter_definitions = {ParameterDefinition{0.0f}}};
+      .parameter_definitions = {ParameterDefinition{0.0f, -10.0f, 10.0f}}};
 }
 
 // Tests that instruments are added and removed as expected.

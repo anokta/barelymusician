@@ -1,5 +1,5 @@
-#ifndef PLATFORMS_API_BARELYMUSICIAN_H_
-#define PLATFORMS_API_BARELYMUSICIAN_H_
+#ifndef BARELYMUSICIAN_API_BARELYMUSICIAN_H_
+#define BARELYMUSICIAN_API_BARELYMUSICIAN_H_
 
 #include <cassert>
 #include <functional>
@@ -9,7 +9,7 @@
 #include <variant>
 #include <vector>
 
-#include "platforms/capi/barelymusician.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barely {
 
@@ -1459,4 +1459,4 @@ class Musician {
 
 }  // namespace barely
 
-#endif  // PLATFORMS_API_BARELYMUSICIAN_H_
+#endif  // BARELYMUSICIAN_API_BARELYMUSICIAN_H_

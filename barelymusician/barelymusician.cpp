@@ -1,4 +1,4 @@
-#include "platforms/capi/barelymusician.h"
+#include "barelymusician/barelymusician.h"
 
 #include <stdbool.h>  // NOLINT(modernize-deprecated-headers)
 #include <stdint.h>   // NOLINT(modernize-deprecated-headers)

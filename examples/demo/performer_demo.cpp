@@ -87,10 +87,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                 static_cast<float>(kOscillatorType));
   engine.SetInstrumentNoteOnCallback(
       performer_instrument_id,
-      [](float pitch, float intensity, double /*timestamp*/) {
+      [](float pitch, float intensity, double /*timestamp*/,
+         void* /*user_data*/) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << ", "
                      << intensity << "}";
-      });
+      },
+      nullptr);
 
   const Id metronome_id =
       engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);

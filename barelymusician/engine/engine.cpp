@@ -356,18 +356,20 @@ Status Engine::SetInstrumentMuted(Id instrument_id, bool is_muted) noexcept {
 }
 
 Status Engine::SetInstrumentNoteOffCallback(
-    Id instrument_id, NoteOffCallback note_off_callback) noexcept {
+    Id instrument_id, BarelyInstrument_NoteOffCallback note_off_callback,
+    void* user_data) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->SetNoteOffCallback(std::move(note_off_callback));
+    controller->SetNoteOffCallback(note_off_callback, user_data);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
 Status Engine::SetInstrumentNoteOnCallback(
-    Id instrument_id, NoteOnCallback note_on_callback) noexcept {
+    Id instrument_id, BarelyInstrument_NoteOnCallback note_on_callback,
+    void* user_data) noexcept {
   if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-    controller->SetNoteOnCallback(std::move(note_on_callback));
+    controller->SetNoteOnCallback(note_on_callback, user_data);
     return Status::kOk;
   }
   return Status::kNotFound;

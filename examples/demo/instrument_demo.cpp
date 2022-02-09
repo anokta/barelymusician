@@ -78,13 +78,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                 static_cast<float>(kNumVoices));
 
   engine.SetInstrumentNoteOnCallback(
-      instrument_id, [](float pitch, float intensity, double /*timestamp*/) {
+      instrument_id,
+      [](float pitch, float intensity, double /*timestamp*/,
+         void* /*user_data*/) {
         ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-      });
+      },
+      nullptr);
   engine.SetInstrumentNoteOffCallback(
-      instrument_id, [](float pitch, double /*timestamp*/) {
+      instrument_id,
+      [](float pitch, double /*timestamp*/, void* /*user_data*/) {
         ConsoleLog() << "NoteOff(" << pitch << ") ";
-      });
+      },
+      nullptr);
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {

@@ -126,16 +126,22 @@ int main(int /*argc*/, char* argv[]) {
         engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
     engine.SetInstrumentNoteOnCallback(
         instrument_id,
-        [instrument_id](float pitch, float intensity, double /*timestamp*/) {
-          ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOn("
-                       << MidiKeyNumberFromPitch(pitch) << ", " << intensity
-                       << ")";
-        });
+        [](float pitch, float intensity, double /*timestamp*/,
+           void* user_data) {
+          // TODO: This won't work, but should be resolved by demo api refactor.
+          ConsoleLog() << "MIDI track #" << *reinterpret_cast<Id*>(&user_data)
+                       << ": NoteOn(" << MidiKeyNumberFromPitch(pitch) << ", "
+                       << intensity << ")";
+        },
+        reinterpret_cast<void*>(instrument_id));
     engine.SetInstrumentNoteOffCallback(
-        instrument_id, [instrument_id](float pitch, double /*timestamp*/) {
-          ConsoleLog() << "MIDI track #" << instrument_id << ": NoteOff("
-                       << MidiKeyNumberFromPitch(pitch) << ") ";
-        });
+        instrument_id,
+        [](float pitch, double /*timestamp*/, void* user_data) {
+          // TODO: This won't work, but should be resolved by demo api refactor.
+          ConsoleLog() << "MIDI track #" << *reinterpret_cast<Id*>(&user_data)
+                       << ": NoteOff(" << MidiKeyNumberFromPitch(pitch) << ") ";
+        },
+        reinterpret_cast<void*>(instrument_id));
     engine.SetInstrumentGain(instrument_id, kInstrumentGain);
     engine.SetInstrumentParameter(instrument_id,
                                   SynthInstrumentParameter::kEnvelopeAttack,

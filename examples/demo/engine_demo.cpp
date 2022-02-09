@@ -184,16 +184,20 @@ int main(int /*argc*/, char* argv[]) {
   // Note on callback.
   const auto set_note_callbacks_fn = [&](Id instrument_id) {
     engine.SetInstrumentNoteOffCallback(
-        instrument_id, [instrument_id](double pitch, double /*timestamp*/) {
-          ConsoleLog() << "Instrument #" << instrument_id << ": NoteOff("
-                       << pitch << ")";
-        });
+        instrument_id,
+        [](float pitch, double /*timestamp*/, void* user_data) {
+          ConsoleLog() << "Instrument #" << *reinterpret_cast<Id*>(&user_data)
+                       << ": NoteOff(" << pitch << ")";
+        },
+        reinterpret_cast<void*>(instrument_id));
     engine.SetInstrumentNoteOnCallback(
         instrument_id,
-        [instrument_id](double pitch, double intensity, double /*timestamp*/) {
-          ConsoleLog() << "Instrument #" << instrument_id << ": NoteOn("
-                       << pitch << ", " << intensity << ")";
-        });
+        [](float pitch, float intensity, double /*timestamp*/,
+           void* user_data) {
+          ConsoleLog() << "Instrument #" << *reinterpret_cast<Id*>(&user_data)
+                       << ": NoteOn(" << pitch << ", " << intensity << ")";
+        },
+        reinterpret_cast<void*>(instrument_id));
   };
 
   const std::vector<int> progression = {0, 3, 4, 0};

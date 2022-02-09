@@ -23,12 +23,6 @@ namespace barelyapi {
 // Class that wraps the internal BarelyMusician engine.
 class Engine {
  public:
-  /// Instrument note off callback signature.
-  using NoteOffCallback = InstrumentController::NoteOffCallback;
-
-  /// Instrument note on callback signature.
-  using NoteOnCallback = InstrumentController::NoteOnCallback;
-
   /// Beat callback signature.
   using BeatCallback = Transport::BeatCallback;
 
@@ -238,15 +232,19 @@ class Engine {
   ///
   /// @param instrument_id Instrument id.
   /// @param note_off_callback Note off callback.
+  /// @param user_data User data.
   Status SetInstrumentNoteOffCallback(
-      Id instrument_id, NoteOffCallback note_off_callback) noexcept;
+      Id instrument_id, BarelyInstrument_NoteOffCallback note_off_callback,
+      void* user_data) noexcept;
 
   /// Sets instrument note on callback.
   ///
   /// @param instrument_id Instrument id.
   /// @param note_on_callback Note on callback.
-  Status SetInstrumentNoteOnCallback(Id instrument_id,
-                                     NoteOnCallback note_on_callback) noexcept;
+  /// @param user_data User data.
+  Status SetInstrumentNoteOnCallback(
+      Id instrument_id, BarelyInstrument_NoteOnCallback note_on_callback,
+      void* user_data) noexcept;
 
   /// Sets instrument parameter value.
   ///

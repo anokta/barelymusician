@@ -1,6 +1,7 @@
 #include "barelymusician/engine/engine.h"
 
 #include <algorithm>
+#include <tuple>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -383,79 +384,64 @@ TEST(EngineTest, SetNoteCallbacks) {
   EXPECT_NE(instrument_id, kInvalidId);
 
   // Trigger note on callback.
-  float note_on_pitch = 0.0f;
-  float note_on_intensity = 0.0f;
-  double note_on_timestamp = 0.0;
+  std::tuple<float, float, double> note_on_data;
+  // float note_on_pitch = 0.0f;
+  // float note_on_intensity = 0.0f;
+  // double note_on_timestamp = 0.0;
   engine.SetInstrumentNoteOnCallback(
-      instrument_id, [&](float pitch, float intensity, double timestamp) {
-        note_on_pitch = pitch;
-        note_on_intensity = intensity;
-        note_on_timestamp = timestamp;
-      });
-  EXPECT_FLOAT_EQ(note_on_pitch, 0.0f);
-  EXPECT_FLOAT_EQ(note_on_intensity, 0.0f);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 0.0);
+      instrument_id,
+      [](float pitch, float intensity, double timestamp, void* user_data) {
+        *reinterpret_cast<std::tuple<float, float, double>*>(user_data) = {
+            pitch, intensity, timestamp};
+      },
+      reinterpret_cast<void*>(&note_on_data));
+  EXPECT_EQ(note_on_data, std::tuple(0.0f, 0.0f, 0.0));
 
   engine.Update(10.0);
 
   EXPECT_TRUE(IsOk(
       engine.StartInstrumentNote(instrument_id, kNotePitch, kNoteIntensity)));
-
-  EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
-  EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
+  EXPECT_EQ(note_on_data, std::tuple(kNotePitch, kNoteIntensity, 10.0));
 
   engine.Update(15.0);
 
   // This should not trigger the callback since the note is already on.
   EXPECT_TRUE(IsOk(
       engine.StartInstrumentNote(instrument_id, kNotePitch, kNoteIntensity)));
-
-  EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch);
-  EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
+  EXPECT_EQ(note_on_data, std::tuple(kNotePitch, kNoteIntensity, 10.0));
 
   // Trigger note on callback again with another note.
   EXPECT_TRUE(IsOk(engine.StartInstrumentNote(instrument_id, kNotePitch + 2.0f,
                                               kNoteIntensity)));
-
-  EXPECT_FLOAT_EQ(note_on_pitch, kNotePitch + 2.0f);
-  EXPECT_FLOAT_EQ(note_on_intensity, kNoteIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 15.0);
+  EXPECT_EQ(note_on_data, std::tuple(kNotePitch + 2.0f, kNoteIntensity, 15.0));
 
   // Trigger note off callback.
-  float note_off_pitch = 0.0f;
-  double note_off_timestamp = 0.0;
-  engine.SetInstrumentNoteOffCallback(instrument_id,
-                                      [&](float pitch, double timestamp) {
-                                        note_off_pitch = pitch;
-                                        note_off_timestamp = timestamp;
-                                      });
-  EXPECT_FLOAT_EQ(note_off_pitch, 0.0f);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 0.0);
+  std::tuple<float, double> note_off_data;
+  engine.SetInstrumentNoteOffCallback(
+      instrument_id,
+      [](float pitch, double timestamp, void* user_data) {
+        *reinterpret_cast<std::tuple<float, double>*>(user_data) = {pitch,
+                                                                    timestamp};
+      },
+      reinterpret_cast<void*>(&note_off_data));
+  EXPECT_EQ(note_off_data, std::tuple(0.0f, 0.0));
 
   engine.Update(20.0);
 
   EXPECT_TRUE(IsOk(engine.StopInstrumentNote(instrument_id, kNotePitch)));
-
-  EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
+  EXPECT_EQ(note_off_data, std::tuple(kNotePitch, 20.0));
 
   engine.Update(25.0);
 
   // This should not trigger the callback since the note is already off.
   EXPECT_TRUE(IsOk(engine.StopInstrumentNote(instrument_id, kNotePitch)));
-
-  EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
+  EXPECT_EQ(note_off_data, std::tuple(kNotePitch, 20.0));
 
   engine.Update(30.0);
 
   // This should trigger the note off callback with the remaining note.
   EXPECT_TRUE(IsOk(engine.StopAllInstrumentNotes(instrument_id)));
-
-  EXPECT_FLOAT_EQ(note_off_pitch, kNotePitch + 2.0f);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 30.0);
+  EXPECT_EQ(note_off_data, std::tuple(kNotePitch + 2.0f, 30.0));
 }
 
 }  // namespace

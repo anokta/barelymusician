@@ -15,20 +15,6 @@ namespace barelyapi {
 /// Class that wraps main thread functionality of an instrument.
 class InstrumentController {
  public:
-  /// Note off callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param timestamp Note timestamp.
-  using NoteOffCallback = std::function<void(float pitch, double timestamp)>;
-
-  /// Note on callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @param timestamp Note timestamp.
-  using NoteOnCallback =
-      std::function<void(float pitch, float intensity, double timestamp)>;
-
   /// Constructs new `InstrumentController`.
   ///
   /// @param definition Instrument definition.
@@ -100,12 +86,16 @@ class InstrumentController {
   /// Sets note off callback.
   ///
   /// @param note_off_callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback);
+  /// @param user_data User data.
+  void SetNoteOffCallback(BarelyInstrument_NoteOffCallback note_off_callback,
+                          void* user_data);
 
   /// Sets note on callback.
   ///
   /// @param note_on_callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback);
+  /// @param user_data User data.
+  void SetNoteOnCallback(BarelyInstrument_NoteOnCallback note_on_callback,
+                         void* user_data);
 
   /// Sets parameter value at timestamp.
   ///
@@ -144,10 +134,10 @@ class InstrumentController {
   bool is_muted_ = false;
 
   // Note off callback.
-  NoteOffCallback note_off_callback_ = nullptr;
+  std::function<void(float, double)> note_off_callback_;
 
   // Note on callback.
-  NoteOnCallback note_on_callback_ = nullptr;
+  std::function<void(float, float, double)> note_on_callback_;
 
   // List of parameters.
   std::vector<Parameter> parameters_;

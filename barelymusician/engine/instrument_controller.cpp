@@ -112,12 +112,23 @@ void InstrumentController::SetMuted(bool is_muted, double timestamp) {
 }
 
 void InstrumentController::SetNoteOffCallback(
-    NoteOffCallback note_off_callback) {
-  note_off_callback_ = std::move(note_off_callback);
+    BarelyInstrument_NoteOffCallback note_off_callback, void* user_data) {
+  note_off_callback_ = [note_off_callback, user_data](float pitch,
+                                                      double timestamp) {
+    if (note_off_callback) {
+      note_off_callback(pitch, timestamp, user_data);
+    }
+  };
 }
 
-void InstrumentController::SetNoteOnCallback(NoteOnCallback note_on_callback) {
-  note_on_callback_ = std::move(note_on_callback);
+void InstrumentController::SetNoteOnCallback(
+    BarelyInstrument_NoteOnCallback note_on_callback, void* user_data) {
+  note_on_callback_ = [note_on_callback, user_data](
+                          float pitch, float intensity, double timestamp) {
+    if (note_on_callback) {
+      note_on_callback(pitch, intensity, timestamp, user_data);
+    }
+  };
 }
 
 bool InstrumentController::SetParameter(int index, float value,

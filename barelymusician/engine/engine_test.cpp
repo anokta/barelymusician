@@ -385,9 +385,6 @@ TEST(EngineTest, SetNoteCallbacks) {
 
   // Trigger note on callback.
   std::tuple<float, float, double> note_on_data;
-  // float note_on_pitch = 0.0f;
-  // float note_on_intensity = 0.0f;
-  // double note_on_timestamp = 0.0;
   engine.SetInstrumentNoteOnCallback(
       instrument_id,
       [](float pitch, float intensity, double timestamp, void* user_data) {

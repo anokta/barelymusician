@@ -70,29 +70,14 @@ Engine::Engine() noexcept
       performer.sequence.Process(
           begin_position, end_position,
           [&](double position, const Note& note) noexcept {
-            // Get pitch.
-            const auto pitch_or = conductor_.TransformNotePitch(note.pitch);
-            if (!IsOk(pitch_or)) {
-              return;
-            }
-            const float pitch = GetStatusOrValue(pitch_or);
-            // Get intensity.
-            const auto intensity_or =
+            const float pitch = conductor_.TransformNotePitch(note.pitch);
+            const float intensity =
                 conductor_.TransformNoteIntensity(note.intensity);
-            if (!IsOk(intensity_or)) {
-              return;
-            }
-            const float intensity = GetStatusOrValue(intensity_or);
-            // Get duration.
-            const auto duration_or =
+            const double duration =
                 conductor_.TransformNoteDuration(note.duration);
-            if (!IsOk(duration_or)) {
-              return;
-            }
-            const double note_end_position = std::min(
-                position + std::max(GetStatusOrValue(duration_or), 0.0),
-                performer.sequence.GetEndPosition());
-
+            const double note_end_position =
+                std::min(position + std::max(duration, 0.0),
+                         performer.sequence.GetEndPosition());
             // Perform note on event.
             id_event_pairs.emplace(
                 position, InstrumentIdEventPair{

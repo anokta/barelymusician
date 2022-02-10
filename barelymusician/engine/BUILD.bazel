@@ -22,7 +22,6 @@ cc_library(
     hdrs = ["conductor_definition.h"],
     deps = [
         ":parameter",
-        "//barelymusician/common:status",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_intensity",
         "//barelymusician/composition:note_pitch",
@@ -108,7 +107,9 @@ cc_test(
         ":conductor",
         ":conductor_definition",
         ":parameter",
-        "//barelymusician/common:status",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_intensity",
+        "//barelymusician/composition:note_pitch",
         "@googletest//:gtest_main",
     ],
 )

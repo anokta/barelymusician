@@ -4,7 +4,6 @@
 #include <functional>
 #include <vector>
 
-#include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
@@ -40,25 +39,25 @@ using SetConductorParamFn =
 ///
 /// @param state Pointer to conductor state.
 /// @param note_duration Note duration.
-/// @return Raw note duration, or error status.
-using TransformNoteDurationFn = std::function<StatusOr<double>(
-    void** state, const NoteDuration& note_duration)>;
+/// @return Raw note duration.
+using TransformNoteDurationFn =
+    std::function<double(void** state, const NoteDuration& note_duration)>;
 
 /// Conductor transform note intensity function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param note_intensity Note intensity.
-/// @return Raw note intensity, or error status.
-using TransformNoteIntensityFn = std::function<StatusOr<float>(
-    void** state, const NoteIntensity& note_intensity)>;
+/// @return Raw note intensity.
+using TransformNoteIntensityFn =
+    std::function<float(void** state, const NoteIntensity& note_intensity)>;
 
 /// Conductor transform note intensity function signature.
 ///
 /// @param state Pointer to conductor state.
 /// @param note_pitch Note pitch.
-/// @return Raw note pitch, or error status.
+/// @return Raw note pitch.
 using TransformNotePitchFn =
-    std::function<StatusOr<float>(void** state, const NotePitch& note_pitch)>;
+    std::function<float(void** state, const NotePitch& note_pitch)>;
 
 /// Conductor transform playback tempo function signature.
 ///

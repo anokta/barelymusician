@@ -56,20 +56,20 @@ class Conductor {
   /// Transforms note duration.
   ///
   /// @param note_duration Note duration.
-  /// @return Raw note duration, or error status.
-  StatusOr<double> TransformNoteDuration(NoteDuration note_duration) noexcept;
+  /// @return Raw note duration.
+  double TransformNoteDuration(NoteDuration note_duration) noexcept;
 
   /// Transforms note intensity.
   ///
   /// @param note_intensity Note intensity.
-  /// @return Raw note intensity, or error status.
-  StatusOr<float> TransformNoteIntensity(NoteIntensity note_intensity) noexcept;
+  /// @return Raw note intensity.
+  float TransformNoteIntensity(NoteIntensity note_intensity) noexcept;
 
   /// Transforms note pitch.
   ///
   /// @param note_pitch Note pitch.
-  /// @return Raw note pitch, or error status.
-  StatusOr<float> TransformNotePitch(NotePitch note_pitch) noexcept;
+  /// @return Raw note pitch.
+  float TransformNotePitch(NotePitch note_pitch) noexcept;
 
   /// Transforms playback tempo.
   ///

@@ -67,19 +67,17 @@ Status Conductor::SetParamToDefault(int index) noexcept {
   return Status::kInvalidArgument;
 }
 
-StatusOr<double> Conductor::TransformNoteDuration(
-    NoteDuration note_duration) noexcept {
+double Conductor::TransformNoteDuration(NoteDuration note_duration) noexcept {
   if (!transform_note_duration_fn_) return std::get<double>(note_duration);
   return transform_note_duration_fn_(&state_, note_duration);
 }
 
-StatusOr<float> Conductor::TransformNoteIntensity(
-    NoteIntensity note_intensity) noexcept {
+float Conductor::TransformNoteIntensity(NoteIntensity note_intensity) noexcept {
   if (!transform_note_intensity_fn_) return std::get<float>(note_intensity);
   return transform_note_intensity_fn_(&state_, note_intensity);
 }
 
-StatusOr<float> Conductor::TransformNotePitch(NotePitch note_pitch) noexcept {
+float Conductor::TransformNotePitch(NotePitch note_pitch) noexcept {
   if (!transform_note_pitch_fn_) return std::get<float>(note_pitch);
   return transform_note_pitch_fn_(&state_, note_pitch);
 }

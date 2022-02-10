@@ -19,7 +19,6 @@ add_library(
 target_link_libraries(
   conductor_definition INTERFACE
   parameter
-  status
   note_duration
   note_intensity
   note_pitch
@@ -103,7 +102,6 @@ target_link_libraries(
   conductor
   conductor_definition
   parameter
-  status
   note_duration
   note_intensity
   note_pitch

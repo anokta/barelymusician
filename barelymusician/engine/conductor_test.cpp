@@ -2,7 +2,6 @@
 
 #include <variant>
 
-#include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
@@ -53,39 +52,24 @@ ConductorDefinition GetTestConductorDefinition() {
 // Tests that the conductor behaves as expected with an empty definition.
 TEST(ConductorTest, EmptyDefinition) {
   Conductor conductor;
-  EXPECT_DOUBLE_EQ(
-      GetStatusOrValue(conductor.TransformNoteDuration(NoteDuration{5.0})),
-      5.0);
-  EXPECT_FLOAT_EQ(
-      GetStatusOrValue(conductor.TransformNoteIntensity(NoteIntensity{1.0f})),
-      1.0f);
-  EXPECT_FLOAT_EQ(
-      GetStatusOrValue(conductor.TransformNotePitch(NotePitch{-0.4f})), -0.4f);
+  EXPECT_DOUBLE_EQ(conductor.TransformNoteDuration(NoteDuration{5.0}), 5.0);
+  EXPECT_FLOAT_EQ(conductor.TransformNoteIntensity(NoteIntensity{1.0f}), 1.0f);
+  EXPECT_FLOAT_EQ(conductor.TransformNotePitch(NotePitch{-0.4f}), -0.4f);
   EXPECT_DOUBLE_EQ(conductor.TransformPlaybackTempo(100.0), 100.0);
 }
 
 // Tests that the conductor behaves as expected with a test definition.
 TEST(ConductorTest, TestDefinition) {
   Conductor conductor(GetTestConductorDefinition());
-  EXPECT_DOUBLE_EQ(
-      GetStatusOrValue(conductor.TransformNoteDuration(NoteDuration{5.0})),
-      0.0);
-  EXPECT_FLOAT_EQ(
-      GetStatusOrValue(conductor.TransformNoteIntensity(NoteIntensity{1.0f})),
-      0.0f);
-  EXPECT_FLOAT_EQ(
-      GetStatusOrValue(conductor.TransformNotePitch(NotePitch{-0.4f})), -0.4f);
+  EXPECT_DOUBLE_EQ(conductor.TransformNoteDuration(NoteDuration{5.0}), 0.0);
+  EXPECT_FLOAT_EQ(conductor.TransformNoteIntensity(NoteIntensity{1.0f}), 0.0f);
+  EXPECT_FLOAT_EQ(conductor.TransformNotePitch(NotePitch{-0.4f}), -0.4f);
   EXPECT_DOUBLE_EQ(conductor.TransformPlaybackTempo(100.0), 100.0);
 
   conductor.SetParam(0, 10.0f);
-  EXPECT_DOUBLE_EQ(
-      GetStatusOrValue(conductor.TransformNoteDuration(NoteDuration{5.0})),
-      50.0);
-  EXPECT_FLOAT_EQ(
-      GetStatusOrValue(conductor.TransformNoteIntensity(NoteIntensity{1.0f})),
-      10.0f);
-  EXPECT_FLOAT_EQ(
-      GetStatusOrValue(conductor.TransformNotePitch(NotePitch{-0.4f})), -10.4f);
+  EXPECT_DOUBLE_EQ(conductor.TransformNoteDuration(NoteDuration{5.0}), 50.0);
+  EXPECT_FLOAT_EQ(conductor.TransformNoteIntensity(NoteIntensity{1.0f}), 10.0f);
+  EXPECT_FLOAT_EQ(conductor.TransformNotePitch(NotePitch{-0.4f}), -10.4f);
   EXPECT_DOUBLE_EQ(conductor.TransformPlaybackTempo(100.0), 110.0);
 }
 

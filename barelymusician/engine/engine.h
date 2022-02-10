@@ -10,7 +10,6 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
-#include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
@@ -205,7 +204,7 @@ class Engine {
   /// Sets conductor.
   ///
   /// @param definition Conductor definition.
-  void SetConductor(ConductorDefinition definition) noexcept;
+  void SetConductor(BarelyConductorDefinition definition) noexcept;
 
   /// Sets instrument data.
   ///

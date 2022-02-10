@@ -7,21 +7,10 @@ cc_library(
     srcs = ["conductor.cpp"],
     hdrs = ["conductor.h"],
     deps = [
-        ":conductor_definition",
         ":parameter",
+        "//barelymusician:header",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:status",
-        "//barelymusician/composition:note_duration",
-        "//barelymusician/composition:note_intensity",
-        "//barelymusician/composition:note_pitch",
-    ],
-)
-
-cc_library(
-    name = "conductor_definition",
-    hdrs = ["conductor_definition.h"],
-    deps = [
-        ":parameter",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_intensity",
         "//barelymusician/composition:note_pitch",
@@ -34,7 +23,6 @@ cc_library(
     hdrs = ["engine.h"],
     deps = [
         ":conductor",
-        ":conductor_definition",
         ":instrument_controller",
         ":instrument_event",
         ":instrument_processor",
@@ -105,8 +93,8 @@ cc_test(
     srcs = ["conductor_test.cpp"],
     deps = [
         ":conductor",
-        ":conductor_definition",
         ":parameter",
+        "//barelymusician:header",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_intensity",
         "//barelymusician/composition:note_pitch",

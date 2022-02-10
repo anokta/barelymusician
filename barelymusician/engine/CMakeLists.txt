@@ -4,21 +4,10 @@ add_library(
 )
 target_link_libraries(
   conductor
-  conductor_definition
   parameter
+  barelymusician
   find_or_null
   status
-  note_duration
-  note_intensity
-  note_pitch
-)
-
-add_library(
-  conductor_definition INTERFACE
-)
-target_link_libraries(
-  conductor_definition INTERFACE
-  parameter
   note_duration
   note_intensity
   note_pitch
@@ -31,7 +20,6 @@ add_library(
 target_link_libraries(
   engine
   conductor
-  conductor_definition
   instrument_controller
   instrument_event
   instrument_processor
@@ -100,8 +88,8 @@ add_executable(
 target_link_libraries(
   conductor_test
   conductor
-  conductor_definition
   parameter
+  barelymusician
   note_duration
   note_intensity
   note_pitch

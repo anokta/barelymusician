@@ -9,25 +9,24 @@
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
 
-Conductor::Conductor(const ConductorDefinition& definition) noexcept
-    : destroy_fn_(definition.destroy_fn),
+Conductor::Conductor(const BarelyConductorDefinition& definition) noexcept
+    : adjust_note_duration_fn_(definition.adjust_note_duration_fn),
+      adjust_note_intensity_fn_(definition.adjust_note_intensity_fn),
+      adjust_note_pitch_fn_(definition.adjust_note_pitch_fn),
+      adjust_tempo_fn_(definition.adjust_tempo_fn),
+      destroy_fn_(definition.destroy_fn),
       set_data_fn_(definition.set_data_fn),
-      set_param_fn_(definition.set_param_fn),
-      transform_note_duration_fn_(definition.transform_note_duration_fn),
-      transform_note_intensity_fn_(definition.transform_note_intensity_fn),
-      transform_note_pitch_fn_(definition.transform_note_pitch_fn),
-      transform_playback_tempo_fn_(definition.transform_playback_tempo_fn) {
+      set_parameter_fn_(definition.set_parameter_fn) {
   if (definition.create_fn) {
     definition.create_fn(&state_);
   }
-  params_.reserve(definition.param_definitions.size());
-  for (const auto& param_definition : definition.param_definitions) {
-    params_.emplace_back(param_definition);
+  parameters_.reserve(definition.num_parameter_definitions);
+  for (int index = 0; index < definition.num_parameter_definitions; ++index) {
+    parameters_.emplace_back(definition.parameter_definitions[index]);
   }
 }
 
@@ -38,53 +37,61 @@ Conductor::~Conductor() noexcept {
   }
 }
 
-StatusOr<Parameter> Conductor::GetParam(int index) const noexcept {
-  if (index >= 0 && index < static_cast<int>(params_.size())) {
-    return params_[index];
+double Conductor::AdjustNoteDuration(NoteDuration note_duration) noexcept {
+  if (!adjust_note_duration_fn_) return std::get<double>(note_duration);
+  double duration = std::get<double>(note_duration);
+  adjust_note_duration_fn_(&state_, &duration);
+  return duration;
+}
+
+float Conductor::AdjustNoteIntensity(NoteIntensity note_intensity) noexcept {
+  if (!adjust_note_intensity_fn_) return std::get<float>(note_intensity);
+  float intensity = std::get<float>(note_intensity);
+  adjust_note_intensity_fn_(&state_, &intensity);
+  return intensity;
+}
+
+float Conductor::AdjustNotePitch(NotePitch note_pitch) noexcept {
+  if (!adjust_note_pitch_fn_) return std::get<float>(note_pitch);
+  BarelyNotePitchType pitch_type = BarelyNotePitchType_kAbsolutePitch;
+  float pitch = std::get<float>(note_pitch);
+  adjust_note_pitch_fn_(&state_, &pitch_type, &pitch);
+  return pitch;
+}
+
+double Conductor::AdjustTempo(double tempo) noexcept {
+  if (!adjust_tempo_fn_) return tempo;
+  adjust_tempo_fn_(&state_, &tempo);
+  return tempo;
+}
+
+StatusOr<Parameter> Conductor::GetParameter(int index) const noexcept {
+  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+    return parameters_[index];
+  }
+  return Status::kInvalidArgument;
+}
+
+Status Conductor::ResetParameter(int index) noexcept {
+  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+    if (parameters_[index].ResetValue() && set_parameter_fn_) {
+      set_parameter_fn_(&state_, index, parameters_[index].GetValue());
+    }
+    return Status::kOk;
   }
   return Status::kInvalidArgument;
 }
 
 void Conductor::SetData(void* data) noexcept { set_data_fn_(&state_, data); }
 
-Status Conductor::SetParam(int index, float value) noexcept {
-  if (index >= 0 && index < static_cast<int>(params_.size())) {
-    if (params_[index].SetValue(value) && set_param_fn_) {
-      set_param_fn_(&state_, index, params_[index].GetValue());
+Status Conductor::SetParameter(int index, float value) noexcept {
+  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+    if (parameters_[index].SetValue(value) && set_parameter_fn_) {
+      set_parameter_fn_(&state_, index, parameters_[index].GetValue());
     }
     return Status::kOk;
   }
   return Status::kInvalidArgument;
-}
-
-Status Conductor::SetParamToDefault(int index) noexcept {
-  if (index >= 0 && index < static_cast<int>(params_.size())) {
-    if (params_[index].ResetValue() && set_param_fn_) {
-      set_param_fn_(&state_, index, params_[index].GetValue());
-    }
-    return Status::kOk;
-  }
-  return Status::kInvalidArgument;
-}
-
-double Conductor::TransformNoteDuration(NoteDuration note_duration) noexcept {
-  if (!transform_note_duration_fn_) return std::get<double>(note_duration);
-  return transform_note_duration_fn_(&state_, note_duration);
-}
-
-float Conductor::TransformNoteIntensity(NoteIntensity note_intensity) noexcept {
-  if (!transform_note_intensity_fn_) return std::get<float>(note_intensity);
-  return transform_note_intensity_fn_(&state_, note_intensity);
-}
-
-float Conductor::TransformNotePitch(NotePitch note_pitch) noexcept {
-  if (!transform_note_pitch_fn_) return std::get<float>(note_pitch);
-  return transform_note_pitch_fn_(&state_, note_pitch);
-}
-
-double Conductor::TransformPlaybackTempo(double tempo) noexcept {
-  if (!transform_playback_tempo_fn_) return tempo;
-  return transform_playback_tempo_fn_(&state_, tempo);
 }
 
 }  // namespace barelyapi

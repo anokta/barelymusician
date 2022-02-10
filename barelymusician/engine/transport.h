@@ -97,10 +97,10 @@ class Transport {
   double timestamp_ = 0.0;
 
   // Beat callback.
-  BeatCallback beat_callback_ = nullptr;
+  BeatCallback beat_callback_;
 
   // Update callback.
-  UpdateCallback update_callback_ = nullptr;
+  UpdateCallback update_callback_;
 };
 
 }  // namespace barelyapi

@@ -91,7 +91,6 @@ cc_binary(
         "//barelymusician/composition:note_intensity",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine",
-        "//barelymusician/engine:conductor_definition",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:console_log",

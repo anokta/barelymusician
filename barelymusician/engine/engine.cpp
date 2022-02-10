@@ -9,7 +9,6 @@
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/sequence.h"
 #include "barelymusician/engine/conductor.h"
-#include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
@@ -70,11 +69,11 @@ Engine::Engine() noexcept
       performer.sequence.Process(
           begin_position, end_position,
           [&](double position, const Note& note) noexcept {
-            const float pitch = conductor_.TransformNotePitch(note.pitch);
+            const float pitch = conductor_.AdjustNotePitch(note.pitch);
             const float intensity =
-                conductor_.TransformNoteIntensity(note.intensity);
+                conductor_.AdjustNoteIntensity(note.intensity);
             const double duration =
-                conductor_.TransformNoteDuration(note.duration);
+                conductor_.AdjustNoteDuration(note.duration);
             const double note_end_position =
                 std::min(position + std::max(duration, 0.0),
                          performer.sequence.GetEndPosition());
@@ -312,7 +311,7 @@ Status Engine::ResetInstrumentParameter(Id instrument_id, int index) noexcept {
   return Status::kNotFound;
 }
 
-void Engine::SetConductor(ConductorDefinition definition) noexcept {
+void Engine::SetConductor(BarelyConductorDefinition definition) noexcept {
   conductor_ = Conductor{std::move(definition)};
 }
 
@@ -492,7 +491,7 @@ void Engine::StopPlayback() noexcept {
 }
 
 void Engine::Update(double timestamp) noexcept {
-  transport_.SetTempo(conductor_.TransformPlaybackTempo(playback_tempo_) *
+  transport_.SetTempo(conductor_.AdjustTempo(playback_tempo_) *
                       kMinutesFromSeconds);
   transport_.Update(timestamp);
 

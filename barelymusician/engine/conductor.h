@@ -3,11 +3,11 @@
 
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_intensity.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/engine/conductor_definition.h"
 #include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
@@ -18,7 +18,7 @@ class Conductor {
   /// Constructs new `Conductor`.
   ///
   /// @param definition Conductor definition.
-  explicit Conductor(const ConductorDefinition& definition = {}) noexcept;
+  explicit Conductor(const BarelyConductorDefinition& definition = {}) noexcept;
 
   /// Destroys `Conductor`.
   ~Conductor() noexcept;
@@ -29,81 +29,81 @@ class Conductor {
   Conductor(Conductor&& other) noexcept = default;
   Conductor& operator=(Conductor&& other) noexcept = default;
 
+  /// Adjusts note duration.
+  ///
+  /// @param note_duration Note duration.
+  /// @return Raw note duration.
+  double AdjustNoteDuration(NoteDuration note_duration) noexcept;
+
+  /// Adjusts note intensity.
+  ///
+  /// @param note_intensity Note intensity.
+  /// @return Raw note intensity.
+  float AdjustNoteIntensity(NoteIntensity note_intensity) noexcept;
+
+  /// Adjusts note pitch.
+  ///
+  /// @param note_pitch Note pitch.
+  /// @return Raw note pitch.
+  float AdjustNotePitch(NotePitch note_pitch) noexcept;
+
+  /// Adjusts tempo.
+  ///
+  /// @param tempo Original tempo in bpm.
+  /// @return Adjusted tempo in bpm.
+  double AdjustTempo(double tempo) noexcept;
+
   /// Returns parameter.
   ///
   /// @param index Parameter index.
   /// @return Parameter or error status.
-  [[nodiscard]] StatusOr<Parameter> GetParam(int index) const noexcept;
+  [[nodiscard]] StatusOr<Parameter> GetParameter(int index) const noexcept;
+
+  /// Resets parameter to default value.
+  ///
+  /// @param index Parameter index.
+  /// @return Status.
+  Status ResetParameter(int index) noexcept;
 
   /// Sets data.
   ///
   /// @param data Data.
   void SetData(void* data) noexcept;
 
-  /// Sets parameter.
+  /// Sets parameter value.
   ///
   /// @param index Parameter index.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParam(int index, float value) noexcept;
-
-  /// Sets parameter to default.
-  ///
-  /// @param index Parameter index.
-  /// @return Status.
-  Status SetParamToDefault(int index) noexcept;
-
-  /// Transforms note duration.
-  ///
-  /// @param note_duration Note duration.
-  /// @return Raw note duration.
-  double TransformNoteDuration(NoteDuration note_duration) noexcept;
-
-  /// Transforms note intensity.
-  ///
-  /// @param note_intensity Note intensity.
-  /// @return Raw note intensity.
-  float TransformNoteIntensity(NoteIntensity note_intensity) noexcept;
-
-  /// Transforms note pitch.
-  ///
-  /// @param note_pitch Note pitch.
-  /// @return Raw note pitch.
-  float TransformNotePitch(NotePitch note_pitch) noexcept;
-
-  /// Transforms playback tempo.
-  ///
-  /// @param tempo Original tempo in bpm.
-  /// @return Transformed tempo in bpm.
-  double TransformPlaybackTempo(double tempo) noexcept;
+  Status SetParameter(int index, float value) noexcept;
 
  private:
+  // Adjust note duration function.
+  BarelyConductorDefinition_AdjustNoteDurationFn adjust_note_duration_fn_;
+
+  // Adjust note intensity function.
+  BarelyConductorDefinition_AdjustNoteIntensityFn adjust_note_intensity_fn_;
+
+  // Adjust note pitch function.
+  BarelyConductorDefinition_AdjustNotePitchFn adjust_note_pitch_fn_;
+
+  // Adjust tempo function.
+  BarelyConductorDefinition_AdjustTempoFn adjust_tempo_fn_;
+
   // Conductor destroy function.
-  DestroyConductorFn destroy_fn_;
+  BarelyConductorDefinition_DestroyFn destroy_fn_;
 
   // Conductor set data function.
-  SetConductorDataFn set_data_fn_;
+  BarelyConductorDefinition_SetDataFn set_data_fn_;
 
   // Conductor set parameter function.
-  SetConductorParamFn set_param_fn_;
-
-  // Transform note duration function.
-  TransformNoteDurationFn transform_note_duration_fn_;
-
-  // Transform note intensity function.
-  TransformNoteIntensityFn transform_note_intensity_fn_;
-
-  // Transform note pitch function.
-  TransformNotePitchFn transform_note_pitch_fn_;
-
-  // Transform playback tempo function.
-  TransformPlaybackTempoFn transform_playback_tempo_fn_;
+  BarelyConductorDefinition_SetParameterFn set_parameter_fn_;
 
   // Conductor state.
   void* state_;
 
   // Conductor parameters.
-  std::vector<Parameter> params_;
+  std::vector<Parameter> parameters_;
 };
 
 }  // namespace barelyapi

@@ -374,32 +374,6 @@ class Conductor {
                                definition.max_value);
   }
 
-  /// Returns root note.
-  ///
-  /// @return Root note pitch.
-  [[nodiscard]] float GetRootNote() const {
-    float root_pitch = 0.0f;
-    if (capi_) {
-      const auto status = BarelyConductor_GetRootNote(capi_, &root_pitch);
-      assert(status == BarelyStatus_kOk);
-    }
-    return root_pitch;
-  }
-
-  /// Returns scale.
-  ///
-  /// @return List of scale note pitches.
-  [[nodiscard]] std::vector<float> GetScale() const {
-    float* scale_pitches = nullptr;
-    int num_scale_pitches = 0;
-    if (capi_) {
-      const auto status =
-          BarelyConductor_GetScale(capi_, &scale_pitches, &num_scale_pitches);
-      assert(status == BarelyStatus_kOk);
-    }
-    return std::vector<float>{scale_pitches, scale_pitches + num_scale_pitches};
-  }
-
   /// Returns stress.
   ///
   /// @return Stress.
@@ -475,23 +449,6 @@ class Conductor {
   Status SetParameter(int index, float value) {
     return static_cast<Status>(
         BarelyConductor_SetParameter(capi_, index, value));
-  }
-
-  /// Sets root note.
-  ///
-  /// @param root_pitch Root note pitch.
-  /// @return Status.
-  Status SetRootNote(float root_pitch) {
-    return static_cast<Status>(BarelyConductor_SetRootNote(capi_, root_pitch));
-  }
-
-  /// Sets scale.
-  ///
-  /// @param scale_pitches List of scale note pitches.
-  /// @return Status.
-  Status SetScale(std::vector<float> scale_pitches) {
-    return static_cast<Status>(BarelyConductor_SetScale(
-        capi_, scale_pitches.data(), static_cast<int>(scale_pitches.size())));
   }
 
   /// Sets stress.
@@ -1362,6 +1319,32 @@ class Musician {
     return position;
   }
 
+  /// Returns root note.
+  ///
+  /// @return Root note pitch.
+  [[nodiscard]] float GetRootNote() const {
+    float root_pitch = 0.0f;
+    if (capi_) {
+      const auto status = BarelyMusician_GetRootNote(capi_, &root_pitch);
+      assert(status == BarelyStatus_kOk);
+    }
+    return root_pitch;
+  }
+
+  /// Returns scale.
+  ///
+  /// @return List of scale note pitches.
+  [[nodiscard]] std::vector<float> GetScale() const {
+    float* scale_pitches = nullptr;
+    int num_scale_pitches = 0;
+    if (capi_) {
+      const auto status =
+          BarelyMusician_GetScale(capi_, &scale_pitches, &num_scale_pitches);
+      assert(status == BarelyStatus_kOk);
+    }
+    return std::vector<float>{scale_pitches, scale_pitches + num_scale_pitches};
+  }
+
   /// Returns playback tempo.
   ///
   /// @return Tempo in bpm.
@@ -1410,6 +1393,23 @@ class Musician {
   /// @return Status.
   Status SetPosition(double position) {
     return static_cast<Status>(BarelyMusician_SetPosition(capi_, position));
+  }
+
+  /// Sets root note.
+  ///
+  /// @param root_pitch Root note pitch.
+  /// @return Status.
+  Status SetRootNote(float root_pitch) {
+    return static_cast<Status>(BarelyMusician_SetRootNote(capi_, root_pitch));
+  }
+
+  /// Sets scale.
+  ///
+  /// @param scale_pitches List of scale note pitches.
+  /// @return Status.
+  Status SetScale(std::vector<float> scale_pitches) {
+    return static_cast<Status>(BarelyMusician_SetScale(
+        capi_, scale_pitches.data(), static_cast<int>(scale_pitches.size())));
   }
 
   /// Sets playback tempo.

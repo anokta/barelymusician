@@ -105,24 +105,6 @@ BarelyStatus BarelyConductor_GetParameterDefinition(
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyConductor_GetRootNote(BarelyApi api, float* out_root_pitch) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_root_pitch) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyConductor_GetScale(BarelyApi api, float** out_scale_pitches,
-                                      int32_t* out_num_scale_pitches) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_scale_pitches) return BarelyStatus_kInvalidArgument;
-  if (!out_num_scale_pitches) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelyConductor_GetStress(BarelyApi api, float* out_stress) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_stress) return BarelyStatus_kInvalidArgument;
@@ -169,21 +151,6 @@ BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float /*energy*/) {
 
 BarelyStatus BarelyConductor_SetParameter(BarelyApi api, int32_t /*index*/,
                                           float /*value*/) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyConductor_SetRootNote(BarelyApi api, float /*root_pitch*/) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyConductor_SetScale(BarelyApi api, float* /*scale_pitches*/,
-                                      int32_t /*num_scale_pitches*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
@@ -409,6 +376,24 @@ BarelyStatus BarelyMusician_GetPosition(BarelyApi api, double* out_position) {
   return BarelyStatus_kOk;
 }
 
+BarelyStatus BarelyMusician_GetRootNote(BarelyApi api, float* out_root_pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_root_pitch) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyMusician_GetScale(BarelyApi api, float** out_scale_pitches,
+                                     int32_t* out_num_scale_pitches) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_scale_pitches) return BarelyStatus_kInvalidArgument;
+  if (!out_num_scale_pitches) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyMusician_GetTempo(BarelyApi api, double* out_tempo) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_tempo) return BarelyStatus_kInvalidArgument;
@@ -445,6 +430,21 @@ BarelyStatus BarelyMusician_SetPosition(BarelyApi api, double position) {
 
   api->instance.SetPlaybackPosition(position);
   return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_SetRootNote(BarelyApi api, float /*root_pitch*/) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyMusician_SetScale(BarelyApi api, float* /*scale_pitches*/,
+                                     int32_t /*num_scale_pitches*/) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelyMusician_SetTempo(BarelyApi api, double tempo) {

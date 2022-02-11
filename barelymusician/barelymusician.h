@@ -365,23 +365,6 @@ BARELY_EXPORT BarelyStatus BarelyConductor_GetParameterDefinition(
     BarelyApi api, int32_t index,
     BarelyParameterDefinition* out_parameter_definition);
 
-/// Gets conductor root note.
-///
-/// @param api BarelyMusician api.
-/// @param out_root_pitch Output root note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_GetRootNote(BarelyApi api,
-                                                       float* out_root_pitch);
-
-/// Gets conductor scale.
-///
-/// @param api BarelyMusician api.
-/// @param out_scale_pitches Output list of scale note pitches.
-/// @param out_num_scale_pitches Output number of scale note pitches.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_GetScale(
-    BarelyApi api, float** out_scale_pitches, int32_t* out_num_scale_pitches);
-
 /// Gets conductor stress.
 ///
 /// @param api BarelyMusician api.
@@ -436,24 +419,6 @@ BARELY_EXPORT BarelyStatus BarelyConductor_SetEnergy(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyConductor_SetParameter(BarelyApi api,
                                                         int32_t index,
                                                         float value);
-
-/// Sets conductor root note.
-///
-/// @param api BarelyMusician api.
-/// @param root_pitch Root note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_SetRootNote(BarelyApi api,
-                                                       float root_pitch);
-
-/// Sets conductor scale.
-///
-/// @param api BarelyMusician api.
-/// @param scale_pitches List of scale note pitches.
-/// @param num_scale_pitches Number of scale note pitches.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_SetScale(BarelyApi api,
-                                                    float* scale_pitches,
-                                                    int32_t num_scale_pitches);
 
 /// Sets conductor stress.
 ///
@@ -680,6 +645,23 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyApi api);
 BARELY_EXPORT BarelyStatus BarelyMusician_GetPosition(BarelyApi api,
                                                       double* out_position);
 
+/// Gets root note.
+///
+/// @param api BarelyMusician api.
+/// @param out_root_pitch Output root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetRootNote(BarelyApi api,
+                                                      float* out_root_pitch);
+
+/// Gets scale.
+///
+/// @param api BarelyMusician api.
+/// @param out_scale_pitches Output list of scale note pitches.
+/// @param out_num_scale_pitches Output number of scale note pitches.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetScale(
+    BarelyApi api, float** out_scale_pitches, int32_t* out_num_scale_pitches);
+
 /// Gets playback tempo.
 ///
 /// @param api BarelyMusician api.
@@ -712,6 +694,24 @@ BARELY_EXPORT BarelyStatus BarelyMusician_SetBeatCallback(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetPosition(BarelyApi api,
                                                       double position);
+
+/// Sets root note.
+///
+/// @param api BarelyMusician api.
+/// @param root_pitch Root note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetRootNote(BarelyApi api,
+                                                      float root_pitch);
+
+/// Sets scale.
+///
+/// @param api BarelyMusician api.
+/// @param scale_pitches List of scale note pitches.
+/// @param num_scale_pitches Number of scale note pitches.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetScale(BarelyApi api,
+                                                   float* scale_pitches,
+                                                   int32_t num_scale_pitches);
 
 /// Sets playback tempo.
 ///

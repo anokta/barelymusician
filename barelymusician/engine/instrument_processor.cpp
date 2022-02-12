@@ -13,28 +13,31 @@ namespace barelyapi {
 
 InstrumentProcessor::InstrumentProcessor(
     const BarelyInstrumentDefinition& definition, int sample_rate) noexcept
-    : create_fn_(definition.create_fn),
-      destroy_fn_(definition.destroy_fn),
-      process_fn_(definition.process_fn),
-      set_data_fn_(definition.set_data_fn),
-      set_note_off_fn_(definition.set_note_off_fn),
-      set_note_on_fn_(definition.set_note_on_fn),
-      set_parameter_fn_(definition.set_parameter_fn),
+    : create_callback_(definition.create_callback),
+      destroy_callback_(definition.destroy_callback),
+      process_callback_(definition.process_callback),
+      set_data_callback_(definition.set_data_callback),
+      set_note_off_callback_(definition.set_note_off_callback),
+      set_note_on_callback_(definition.set_note_on_callback),
+      set_parameter_callback_(definition.set_parameter_callback),
       gain_(1.0f),
       sample_rate_(sample_rate) {
   assert(sample_rate_ >= 0);
-  if (create_fn_) {
-    create_fn_(&state_, sample_rate_);
+  if (create_callback_) {
+    create_callback_(&state_, sample_rate_);
   }
-  if (set_parameter_fn_) {
+  if (set_parameter_callback_) {
     for (int index = 0; index < definition.num_parameter_definitions; ++index) {
-      set_parameter_fn_(&state_, index,
-                        definition.parameter_definitions[index].default_value);
+      set_parameter_callback_(
+          &state_, index,
+          definition.parameter_definitions[index].default_value);
     }
   }
 }
 
-InstrumentProcessor::~InstrumentProcessor() noexcept { destroy_fn_(&state_); }
+InstrumentProcessor::~InstrumentProcessor() noexcept {
+  destroy_callback_(&state_);
+}
 
 void InstrumentProcessor::AddEvents(
     std::multimap<double, InstrumentEvent> events) noexcept {
@@ -56,45 +59,45 @@ void InstrumentProcessor::Process(float* output, int num_output_channels,
     const int message_frame =
         SamplesFromSeconds(sample_rate_, it->first - timestamp);
     if (frame < message_frame) {
-      if (process_fn_) {
-        process_fn_(&state_, &output[num_output_channels * frame],
-                    num_output_channels, message_frame - frame);
+      if (process_callback_) {
+        process_callback_(&state_, &output[num_output_channels * frame],
+                          num_output_channels, message_frame - frame);
       }
       frame = message_frame;
     }
     std::visit(
         Visitor{[this](const SetDataEvent& set_data_event) noexcept {
-                  if (set_data_fn_) {
-                    set_data_fn_(&state_, set_data_event.data);
+                  if (set_data_callback_) {
+                    set_data_callback_(&state_, set_data_event.data);
                   }
                 },
                 [this](const SetGainEvent& set_gain_event) noexcept {
                   gain_ = set_gain_event.gain;
                 },
                 [this](const SetParameterEvent& set_parameter_event) noexcept {
-                  if (set_parameter_fn_) {
-                    set_parameter_fn_(&state_, set_parameter_event.index,
-                                      set_parameter_event.value);
+                  if (set_parameter_callback_) {
+                    set_parameter_callback_(&state_, set_parameter_event.index,
+                                            set_parameter_event.value);
                   }
                 },
                 [this](const StartNoteEvent& start_note_event) noexcept {
-                  if (set_note_on_fn_) {
-                    set_note_on_fn_(&state_, start_note_event.pitch,
-                                    start_note_event.intensity);
+                  if (set_note_on_callback_) {
+                    set_note_on_callback_(&state_, start_note_event.pitch,
+                                          start_note_event.intensity);
                   }
                 },
                 [this](const StopNoteEvent& stop_note_event) noexcept {
-                  if (set_note_off_fn_) {
-                    set_note_off_fn_(&state_, stop_note_event.pitch);
+                  if (set_note_off_callback_) {
+                    set_note_off_callback_(&state_, stop_note_event.pitch);
                   }
                 }},
         it->second);
   }
   events_.erase(begin, end);
   // Process the rest of the buffer.
-  if (frame < num_output_frames && process_fn_) {
-    process_fn_(&state_, &output[num_output_channels * frame],
-                num_output_channels, num_output_frames - frame);
+  if (frame < num_output_frames && process_callback_) {
+    process_callback_(&state_, &output[num_output_channels * frame],
+                      num_output_channels, num_output_frames - frame);
   }
   // TODO(#88): Revisit gain processing.
   for (int i = 0; i < num_output_channels * num_output_frames; ++i) {

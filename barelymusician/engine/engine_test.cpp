@@ -26,27 +26,27 @@ BarelyInstrumentDefinition GetTestInstrumentDefinition() {
   static std::vector<BarelyParameterDefinition> parameter_definitions = {
       BarelyParameterDefinition{0.0f, -10.0f, 10.0f}};
   return {
-      .create_fn =
+      .create_callback =
           [](void** state, int /*sample_rate*/) {
             *state = reinterpret_cast<void*>(new float{0.0f});
           },
-      .destroy_fn =
+      .destroy_callback =
           [](void** state) { delete reinterpret_cast<float*>(*state); },
-      .process_fn =
+      .process_callback =
           [](void** state, float* output, int num_channels, int num_frames) {
             std::fill_n(output, num_channels * num_frames,
                         *reinterpret_cast<float*>(*state));
           },
-      .set_data_fn = [](void** /*state*/, void* /*data*/) {},
-      .set_note_off_fn =
+      .set_data_callback = [](void** /*state*/, void* /*data*/) {},
+      .set_note_off_callback =
           [](void** state, float /*pitch*/) {
             *reinterpret_cast<float*>(*state) = 0.0f;
           },
-      .set_note_on_fn =
+      .set_note_on_callback =
           [](void** state, float pitch, float intensity) {
             *reinterpret_cast<float*>(*state) = pitch * intensity;
           },
-      .set_parameter_fn =
+      .set_parameter_callback =
           [](void** state, int index, float value) {
             *reinterpret_cast<float*>(*state) =
                 static_cast<float>(index + 1) * value;

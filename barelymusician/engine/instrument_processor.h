@@ -43,25 +43,25 @@ class InstrumentProcessor {
 
  private:
   // Create function.
-  BarelyInstrumentDefinition_CreateFn create_fn_;
+  BarelyInstrumentDefinition_CreateCallback create_callback_;
 
   // Destroy function.
-  BarelyInstrumentDefinition_DestroyFn destroy_fn_;
+  BarelyInstrumentDefinition_DestroyCallback destroy_callback_;
 
   // Process function.
-  BarelyInstrumentDefinition_ProcessFn process_fn_;
+  BarelyInstrumentDefinition_ProcessCallback process_callback_;
 
   // Set data function.
-  BarelyInstrumentDefinition_SetDataFn set_data_fn_;
+  BarelyInstrumentDefinition_SetDataCallback set_data_callback_;
 
   // Set note off function.
-  BarelyInstrumentDefinition_SetNoteOffFn set_note_off_fn_;
+  BarelyInstrumentDefinition_SetNoteOffCallback set_note_off_callback_;
 
   // Set note on function.
-  BarelyInstrumentDefinition_SetNoteOnFn set_note_on_fn_;
+  BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback_;
 
   // Set parameter function.
-  BarelyInstrumentDefinition_SetParameterFn set_parameter_fn_;
+  BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback_;
 
   // Map of events by their timestamps.
   std::multimap<double, InstrumentEvent> events_;

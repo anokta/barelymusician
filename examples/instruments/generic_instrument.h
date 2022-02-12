@@ -50,37 +50,37 @@ class GenericInstrument {
 template <typename InstrumentType>
 BarelyInstrumentDefinition GetInstrumentDefinition(
     std::vector<BarelyParameterDefinition>& parameter_definitions) noexcept {
-  return {.create_fn =
+  return {.create_callback =
               [](void** state, int sample_rate) noexcept {
                 *state =
                     reinterpret_cast<void*>(new InstrumentType(sample_rate));
               },
-          .destroy_fn =
+          .destroy_callback =
               [](void** state) noexcept {
                 delete reinterpret_cast<InstrumentType*>(*state);
               },
-          .process_fn =
+          .process_callback =
               [](void** state, float* output, int num_channels,
                  int num_frames) noexcept {
                 auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->Process(output, num_channels, num_frames);
               },
-          .set_data_fn =
+          .set_data_callback =
               [](void** state, void* data) noexcept {
                 auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->SetData(data);
               },
-          .set_note_off_fn =
+          .set_note_off_callback =
               [](void** state, float pitch) noexcept {
                 auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->NoteOff(pitch);
               },
-          .set_note_on_fn =
+          .set_note_on_callback =
               [](void** state, float pitch, float intensity) noexcept {
                 auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->NoteOn(pitch, intensity);
               },
-          .set_parameter_fn =
+          .set_parameter_callback =
               [](void** state, int index, float value) noexcept {
                 auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->SetParameter(index, value);

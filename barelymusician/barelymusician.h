@@ -31,6 +31,9 @@
 extern "C" {
 #endif  // __cplusplus
 
+/// BarelyMusician api.
+typedef struct BarelyMusician* BarelyApi;
+
 /// Identifier alias.
 typedef int64_t BarelyId;
 
@@ -94,58 +97,59 @@ typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity,
                                                 double timestamp,
                                                 void* user_data);
 
-/// Instrument create function signature.
+/// Instrument create callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param sample_rate Sampling rate in hz.
-typedef void (*BarelyInstrumentDefinition_CreateFn)(void** state,
-                                                    int32_t sample_rate);
+typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state,
+                                                          int32_t sample_rate);
 
-/// Instrument destroy function signature.
+/// Instrument destroy callback signature.
 ///
 /// @param state Pointer to instrument state.
-typedef void (*BarelyInstrumentDefinition_DestroyFn)(void** state);
+typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 
-/// Instrument process function signature.
+/// Instrument process callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param output Output buffer.
 /// @param num_output_channels Number of channels.
 /// @param num_output_frames Number of frames.
-typedef void (*BarelyInstrumentDefinition_ProcessFn)(
+typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
     void** state, float* output, int32_t num_output_channels,
     int32_t num_output_frames);
 
-/// Instrument set data function signature.
+/// Instrument set data callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param data Data.
-typedef void (*BarelyInstrumentDefinition_SetDataFn)(void** state, void* data);
+typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
+                                                           void* data);
 
-/// Instrument set note off function signature.
+/// Instrument set note off callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrumentDefinition_SetNoteOffFn)(void** state,
-                                                        float pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
+                                                              float pitch);
 
-/// Instrument set note on function signature.
+/// Instrument set note on callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyInstrumentDefinition_SetNoteOnFn)(void** state,
-                                                       float pitch,
-                                                       float intensity);
+typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
+                                                             float pitch,
+                                                             float intensity);
 
-/// Instrument set parameter function signature.
+/// Instrument set parameter callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param index Parameter index.
 /// @param value Parameter value.
-typedef void (*BarelyInstrumentDefinition_SetParameterFn)(void** state,
-                                                          int32_t index,
-                                                          float value);
+typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
+                                                                int32_t index,
+                                                                float value);
 
 /// Beat callback signature.
 ///
@@ -154,9 +158,6 @@ typedef void (*BarelyInstrumentDefinition_SetParameterFn)(void** state,
 /// @param user_data User data.
 typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
                                             void* user_data);
-
-/// BarelyMusician api.
-typedef struct BarelyMusician* BarelyApi;
 
 /// Note definition.
 typedef struct BarelyNoteDefinition {
@@ -190,26 +191,26 @@ typedef struct BarelyParameterDefinition {
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
-  /// Create function.
-  BarelyInstrumentDefinition_CreateFn create_fn;
+  /// Create callback.
+  BarelyInstrumentDefinition_CreateCallback create_callback;
 
-  /// Destroy function.
-  BarelyInstrumentDefinition_DestroyFn destroy_fn;
+  /// Destroy callback.
+  BarelyInstrumentDefinition_DestroyCallback destroy_callback;
 
-  /// Process function.
-  BarelyInstrumentDefinition_ProcessFn process_fn;
+  /// Process callback.
+  BarelyInstrumentDefinition_ProcessCallback process_callback;
 
-  /// Set data function.
-  BarelyInstrumentDefinition_SetDataFn set_data_fn;
+  /// Set data callback.
+  BarelyInstrumentDefinition_SetDataCallback set_data_callback;
 
-  /// Set note off function.
-  BarelyInstrumentDefinition_SetNoteOffFn set_note_off_fn;
+  /// Set note off callback.
+  BarelyInstrumentDefinition_SetNoteOffCallback set_note_off_callback;
 
-  /// Set note on function.
-  BarelyInstrumentDefinition_SetNoteOnFn set_note_on_fn;
+  /// Set note on callback.
+  BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback;
 
-  /// Set parameter function.
-  BarelyInstrumentDefinition_SetParameterFn set_parameter_fn;
+  /// Set parameter callback.
+  BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback;
 
   /// List of parameter definitions.
   BarelyParameterDefinition* parameter_definitions;

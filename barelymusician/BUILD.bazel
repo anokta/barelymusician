@@ -5,10 +5,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "barelymusician",
     srcs = ["barelymusician.cpp"],
-    defines = select({
-        "@platforms//os:windows": ["BARELYMUSICIAN_EXPORTS"],
-        "//conditions:default": [],
-    }),
+    defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":header",
         "//barelymusician/common:status",

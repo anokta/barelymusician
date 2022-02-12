@@ -18,9 +18,9 @@ namespace Barely {
     public enum NotePitchType {
       /// Absolute pitch.
       AbsolutePitch = 0,
-      /// Relative pitch with respect to conductor root note.
+      /// Relative pitch with respect to root note.
       RelativePitch = 1,
-      /// Scale index with respect to conductor root note and scale.
+      /// Scale index with respect to root note and scale.
       ScaleIndex = 2,
     }
 

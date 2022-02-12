@@ -66,28 +66,6 @@ struct BarelyMusician {
   ~BarelyMusician() = default;
 };
 
-BarelyStatus BarelyConductor_SetEnergy(BarelyApi api, float /*energy*/) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyConductor_SetParameter(BarelyApi api, int32_t /*index*/,
-                                          float /*value*/) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyConductor_SetStress(BarelyApi api, float /*stress*/) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  // TODO(#85): Implement.
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelyInstrument_Create(BarelyApi api,
                                      BarelyInstrumentDefinition definition,
                                      int32_t sample_rate,

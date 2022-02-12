@@ -12,9 +12,6 @@
 #include "barelymusician/common/random.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/note.h"
-#include "barelymusician/composition/note_duration.h"
-#include "barelymusician/composition/note_intensity.h"
-#include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -34,9 +31,6 @@ using ::barelyapi::Engine;
 using ::barelyapi::Id;
 using ::barelyapi::IsOk;
 using ::barelyapi::Note;
-using ::barelyapi::NoteDuration;
-using ::barelyapi::NoteIntensity;
-using ::barelyapi::NotePitch;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
 
@@ -207,42 +201,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
       case 'C':
         use_conductor = !use_conductor;
-        // TODO: This seems to cause "Segmentation fault", should figure out why
-        // if it still exists after api/conductor refactor.
-        engine.SetConductor(
-            use_conductor
-                ? BarelyConductorDefinition{
-                      .adjust_note_duration_fn =
-                          [](void** state, double* duration) {
-                            auto* random = reinterpret_cast<Random*>(*state);
-                            *duration *= 0.25 * static_cast<double>(
-                                                    random->DrawUniform(0, 4));
-                          },
-                      .adjust_note_intensity_fn =
-                          [](void** state, float* intensity) {
-                            auto* random = reinterpret_cast<Random*>(*state);
-                            *intensity *=
-                                0.25f *
-                                static_cast<float>(random->DrawUniform(1, 4));
-                          },
-                      .adjust_note_pitch_fn =
-                          [](void** state, BarelyNotePitchType* /*pitch_type*/,
-                             float* pitch) {
-                            auto* random = reinterpret_cast<Random*>(*state);
-                            *pitch +=
-                                static_cast<float>(random->DrawUniform(-1, 1));
-                          },
-                      .adjust_tempo_fn = [](void** /*state*/,
-                                            double* tempo) { *tempo *= 1.25; },
-                      .create_fn =
-                          [](void** state) {
-                            *state = reinterpret_cast<void*>(new Random());
-                          },
-                      .destroy_fn =
-                          [](void** state) {
-                            delete reinterpret_cast<Random*>(*state);
-                          }}
-                : BarelyConductorDefinition{});
+        // TODO: Add back conductor adjustment.
         ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':

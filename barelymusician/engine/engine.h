@@ -9,7 +9,6 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
 #include "barelymusician/composition/sequence.h"
-#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"
@@ -201,11 +200,6 @@ class Engine {
   /// @return Status.
   Status ResetInstrumentParameter(Id instrument_id, int index) noexcept;
 
-  /// Sets conductor.
-  ///
-  /// @param definition Conductor definition.
-  void SetConductor(BarelyConductorDefinition definition) noexcept;
-
   /// Sets instrument data.
   ///
   /// @param instrument_id Instrument id.
@@ -372,9 +366,6 @@ class Engine {
     // Sequence to perform.
     Sequence sequence;
   };
-
-  // Conductor.
-  Conductor conductor_;
 
   // Monotonic identifier counter.
   Id id_counter_ = 0;

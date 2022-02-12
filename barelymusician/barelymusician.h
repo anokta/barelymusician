@@ -47,9 +47,9 @@ typedef int32_t BarelyNotePitchType;
 enum BarelyNotePitchType_Values {
   /// Absolute pitch.
   BarelyNotePitchType_kAbsolutePitch = 0,
-  /// Relative pitch with respect to conductor root note.
+  /// Relative pitch with respect to root note.
   BarelyNotePitchType_kRelativePitch = 1,
-  /// Scale index with respect to conductor root note and scale.
+  /// Scale index with respect to root note and scale.
   BarelyNotePitchType_kScaleIndex = 2,
 };
 
@@ -75,74 +75,6 @@ enum BarelyStatus_Values {
   /// Unknown error.
   BarelyStatus_kUnknown = 7,
 };
-
-/// Conductor adjust note duration function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param duration Pointer to note duration.
-typedef void (*BarelyConductorDefinition_AdjustNoteDurationFn)(
-    void** state, double* duration);
-
-/// Conductor adjust note intensity function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param intensity Pointer to note intensity.
-typedef void (*BarelyConductorDefinition_AdjustNoteIntensityFn)(
-    void** state, float* intensity);
-
-/// Conductor adjust note pitch function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param pitch_type Pointer to note pitch type.
-/// @param pitch Pointer to note pitch.
-typedef void (*BarelyConductorDefinition_AdjustNotePitchFn)(
-    void** state, BarelyNotePitchType* pitch_type, float* pitch);
-
-/// Conductor adjust tempo function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param tempo Pointer to tempo.
-typedef void (*BarelyConductorDefinition_AdjustTempoFn)(void** state,
-                                                        double* tempo);
-
-/// Conductor create function signature.
-///
-/// @param state Pointer to conductor state.
-typedef void (*BarelyConductorDefinition_CreateFn)(void** state);
-
-/// Conductor destroy function signature.
-///
-/// @param state Pointer to conductor state.
-typedef void (*BarelyConductorDefinition_DestroyFn)(void** state);
-
-/// Conductor set data function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param data Data.
-typedef void (*BarelyConductorDefinition_SetDataFn)(void** state, void* data);
-
-/// Conductor set energy function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param energy Energy.
-typedef void (*BarelyConductorDefinition_SetEnergyFn)(void** state,
-                                                      float energy);
-
-/// Conductor set parameter function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param index Parameter index.
-/// @param value Parameter value.
-typedef void (*BarelyConductorDefinition_SetParameterFn)(void** state,
-                                                         int32_t index,
-                                                         float value);
-
-/// Conductor set stress function signature.
-///
-/// @param state Pointer to conductor state.
-/// @param stress Stress.
-typedef void (*BarelyConductorDefinition_SetStressFn)(void** state,
-                                                      float stress);
 
 /// Instrument note off callback signature.
 ///
@@ -215,6 +147,14 @@ typedef void (*BarelyInstrumentDefinition_SetParameterFn)(void** state,
                                                           int32_t index,
                                                           float value);
 
+/// Beat callback signature.
+///
+/// @param position Beat position in beats.
+/// @param timestamp Beat timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
+                                            void* user_data);
+
 /// BarelyMusician api.
 typedef struct BarelyMusician* BarelyApi;
 
@@ -232,7 +172,7 @@ typedef struct BarelyNoteDefinition {
   /// Intensity.
   float intensity;
 
-  /// Denotes whether conductor adjustment should be bypassed or not.
+  /// Denotes whether note adjustment should be bypassed or not.
   bool bypass_adjustment;
 } BarelyNoteDefinition;
 
@@ -247,45 +187,6 @@ typedef struct BarelyParameterDefinition {
   /// Maximum value.
   float max_value;
 } BarelyParameterDefinition;
-
-/// Conductor definition.
-typedef struct BarelyConductorDefinition {
-  /// Adjust note duration function.
-  BarelyConductorDefinition_AdjustNoteDurationFn adjust_note_duration_fn;
-
-  /// Adjust note intensity function.
-  BarelyConductorDefinition_AdjustNoteIntensityFn adjust_note_intensity_fn;
-
-  /// Adjust note pitch function.
-  BarelyConductorDefinition_AdjustNotePitchFn adjust_note_pitch_fn;
-
-  /// Adjust tempo function.
-  BarelyConductorDefinition_AdjustTempoFn adjust_tempo_fn;
-
-  /// Create function.
-  BarelyConductorDefinition_CreateFn create_fn;
-
-  /// Destroy function.
-  BarelyConductorDefinition_DestroyFn destroy_fn;
-
-  /// Set data function.
-  BarelyConductorDefinition_SetDataFn set_data_fn;
-
-  /// Set energy function.
-  BarelyConductorDefinition_SetEnergyFn set_energy_fn;
-
-  /// Set parameter function.
-  BarelyConductorDefinition_SetParameterFn set_parameter_fn;
-
-  /// Set stress function.
-  BarelyConductorDefinition_SetStressFn set_stress_fn;
-
-  /// List of parameter definitions.
-  BarelyParameterDefinition* parameter_definitions;
-
-  /// Number of parameter definitions.
-  int32_t num_parameter_definitions;
-} BarelyConductorDefinition;
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -316,117 +217,6 @@ typedef struct BarelyInstrumentDefinition {
   /// Number of parameter definitions.
   int32_t num_parameter_definitions;
 } BarelyInstrumentDefinition;
-
-/// Beat callback signature.
-///
-/// @param position Beat position in beats.
-/// @param timestamp Beat timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
-                                            void* user_data);
-
-/// Conducts note.
-///
-/// @param api BarelyMusician api.
-/// @param pitch_type Note pitch type.
-/// @param pitch Note pitch.
-/// @param bypass_adjustment True to bypass conductor adjustment.
-/// @param out_pitch Output note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_ConductNote(
-    BarelyApi api, BarelyNotePitchType pitch_type, float pitch,
-    bool bypass_adjustment, float* out_pitch);
-
-/// Gets conductor energy.
-///
-/// @param api BarelyMusician api.
-/// @param out_energy Output energy in range [0, 1].
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_GetEnergy(BarelyApi api,
-                                                     float* out_energy);
-
-/// Gets conductor parameter value.
-///
-/// @param api BarelyMusician api.
-/// @param index Parameter index.
-/// @param out_value Output parameter value.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_GetParameter(BarelyApi api,
-                                                        int32_t index,
-                                                        float* out_value);
-
-/// Gets conductor parameter definition.
-///
-/// @param api BarelyMusician api.
-/// @param index Parameter index.
-/// @param out_parameter_definition Output parameter definition.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_GetParameterDefinition(
-    BarelyApi api, int32_t index,
-    BarelyParameterDefinition* out_parameter_definition);
-
-/// Gets conductor stress.
-///
-/// @param api BarelyMusician api.
-/// @param out_stress Stress in range [0, 1].
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_GetStress(BarelyApi api,
-                                                     float* out_stress);
-
-/// Resets all conductor parameters to default value.
-///
-/// @param api BarelyMusician api.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_ResetAllParameters(BarelyApi api);
-
-/// Resets conductor parameter to default value.
-///
-/// @param api BarelyMusician api.
-/// @param index Parameter index.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_ResetParameter(BarelyApi api,
-                                                          int32_t index);
-
-/// Sets conductor data.
-///
-/// @param api BarelyMusician api.
-/// @param data Data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_SetData(BarelyApi api, void* data);
-
-/// Sets conductor definition.
-///
-/// @param api BarelyMusician api.
-/// @param definition Conductor definition.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_SetDefinition(
-    BarelyApi api, BarelyConductorDefinition definition);
-
-/// Sets conductor energy.
-///
-/// @param api BarelyMusician api.
-/// @param energy Energy in range [0, 1].
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_SetEnergy(BarelyApi api,
-                                                     float energy);
-
-/// Sets conductor parameter value.
-///
-/// @param api BarelyMusician api.
-/// @param index Parameter index.
-/// @param value Parameter value.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_SetParameter(BarelyApi api,
-                                                        int32_t index,
-                                                        float value);
-
-/// Sets conductor stress.
-///
-/// @param api BarelyMusician api.
-/// @param stress Stress in range [0, 1].
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyConductor_SetStress(BarelyApi api,
-                                                     float stress);
 
 /// Creates new instrument.
 ///

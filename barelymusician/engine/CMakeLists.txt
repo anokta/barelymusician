@@ -1,25 +1,9 @@
 add_library(
-  conductor
-  conductor.cpp
-)
-target_link_libraries(
-  conductor
-  parameter
-  barelymusician
-  find_or_null
-  status
-  note_duration
-  note_intensity
-  note_pitch
-)
-
-add_library(
   engine
   engine.cpp
 )
 target_link_libraries(
   engine
-  conductor
   instrument_controller
   instrument_event
   instrument_processor
@@ -80,22 +64,6 @@ add_library(
   transport
   transport.cpp
 )
-
-add_executable(
-  conductor_test
-  conductor_test.cpp
-)
-target_link_libraries(
-  conductor_test
-  conductor
-  parameter
-  barelymusician
-  note_duration
-  note_intensity
-  note_pitch
-  gtest_main
-)
-gtest_discover_tests(conductor_test)
 
 add_executable(
   engine_test

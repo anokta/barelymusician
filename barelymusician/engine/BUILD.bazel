@@ -3,26 +3,10 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "conductor",
-    srcs = ["conductor.cpp"],
-    hdrs = ["conductor.h"],
-    deps = [
-        ":parameter",
-        "//barelymusician:header",
-        "//barelymusician/common:find_or_null",
-        "//barelymusician/common:status",
-        "//barelymusician/composition:note_duration",
-        "//barelymusician/composition:note_intensity",
-        "//barelymusician/composition:note_pitch",
-    ],
-)
-
-cc_library(
     name = "engine",
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
     deps = [
-        ":conductor",
         ":instrument_controller",
         ":instrument_event",
         ":instrument_processor",
@@ -86,20 +70,6 @@ cc_library(
     name = "transport",
     srcs = ["transport.cpp"],
     hdrs = ["transport.h"],
-)
-
-cc_test(
-    name = "conductor_test",
-    srcs = ["conductor_test.cpp"],
-    deps = [
-        ":conductor",
-        ":parameter",
-        "//barelymusician:header",
-        "//barelymusician/composition:note_duration",
-        "//barelymusician/composition:note_intensity",
-        "//barelymusician/composition:note_pitch",
-        "@googletest//:gtest_main",
-    ],
 )
 
 cc_test(

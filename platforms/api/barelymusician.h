@@ -121,9 +121,9 @@ class StatusOr {
 enum class NotePitchType : BarelyNotePitchType {
   /// Absolute pitch.
   kAbsolutePitch = BarelyNotePitchType_kAbsolutePitch,
-  /// Relative pitch with respect to conductor root note.
+  /// Relative pitch with respect to root note.
   kRelativePitch = BarelyNotePitchType_kRelativePitch,
-  /// Scale index with respect to conductor root note and scale.
+  /// Scale index with respect to root note and scale.
   kScaleIndex = BarelyNotePitchType_kScaleIndex,
 };
 
@@ -135,7 +135,7 @@ struct NoteDefinition {
   /// @param pitch_type Note pitch type.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  /// @param bypass_adjustment True to bypass conductor adjustment.
+  /// @param bypass_adjustment True to bypass note adjustment.
   NoteDefinition(double duration, NotePitchType pitch_type, float pitch,
                  float intensity = 1.0f, bool bypass_adjustment = false)
       : duration(duration),
@@ -149,7 +149,7 @@ struct NoteDefinition {
   /// @param duration Note duration.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  /// @param bypass_adjustment True to bypass conductor adjustment.
+  /// @param bypass_adjustment True to bypass note adjustment.
   NoteDefinition(double duration, float pitch, float intensity = 1.0f,
                  bool bypass_adjustment = false)
       : NoteDefinition(duration, NotePitchType::kAbsolutePitch, pitch,
@@ -167,7 +167,7 @@ struct NoteDefinition {
   /// Intensity.
   float intensity;
 
-  /// Denotes whether conductor adjust should be bypassed or not.
+  /// Denotes whether note adjust should be bypassed or not.
   bool bypass_adjustment;
 };
 
@@ -212,280 +212,6 @@ struct ParameterDefinition {
 
   /// Maximum value.
   float max_value;
-};
-
-/// Conductor definition.
-struct ConductorDefinition {
-  /// Conductor adjust note duration function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param duration Pointer to note duration.
-  using AdjustNoteDurationFn = void (*)(void** state, double* duration);
-
-  /// Conductor adjust note intensity function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param intensity Pointer to note intensity.
-  using AdjustNoteIntensityFn = void (*)(void** state, float* intensity);
-
-  /// Conductor adjust note pitch function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param pitch_type Pointer to note pitch type.
-  /// @param pitch Pointer to note pitch.
-  using AdjustNotePitchFn = void (*)(void** state,
-                                     BarelyNotePitchType* pitch_type,
-                                     float* pitch);
-
-  /// Conductor adjust tempo function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param tempo Tempo in bpm.
-  using AdjustTempoFn = void (*)(void** state, double* tempo);
-
-  /// Create function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  using CreateFn = void (*)(void** state);
-
-  /// Destroy function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  using DestroyFn = void (*)(void** state);
-
-  /// Set data function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param data Data.
-  using SetDataFn = void (*)(void** state, void* data);
-
-  /// Set energy function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param energy Energy.
-  using SetEnergyFn = void (*)(void** state, float energy);
-
-  /// Set parameter function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param index Parameter index.
-  /// @param value Parameter value.
-  using SetParameterFn = void (*)(void** state, int index, float value);
-
-  /// Set stress function signature.
-  ///
-  /// @param state Pointer to conductor state.
-  /// @param stress Stress.
-  using SetStressFn = void (*)(void** state, float stress);
-
-  /// Adjust note duration function.
-  AdjustNoteDurationFn adjust_note_duration_fn;
-
-  /// Adjust note intensity function.
-  AdjustNoteIntensityFn adjust_note_intensity_fn;
-
-  /// Adjust note pitch function.
-  AdjustNotePitchFn adjust_note_pitch_fn;
-
-  /// Adjust tempo function.
-  AdjustTempoFn adjust_tempo_fn;
-
-  /// Create function.
-  CreateFn create_fn;
-
-  /// Destroy function.
-  DestroyFn destroy_fn;
-
-  /// Set data function.
-  SetDataFn set_data_fn;
-
-  /// Set energy function.
-  SetEnergyFn set_energy_fn;
-
-  /// Set parameter function.
-  SetParameterFn set_parameter_fn;
-
-  /// Set stress function.
-  SetStressFn set_stress_fn;
-
-  /// List of parameter definitions.
-  std::vector<ParameterDefinition> parameter_definitions;
-};
-
-/// Conductor.
-class Conductor {
- public:
-  /// Conducts note.
-  ///
-  /// @param pitch_type Note pitch type.
-  /// @param pitch Note pitch.
-  /// @param bypass_adjustment True to bypass conductor adjustment.
-  /// @return Conducted note pitch.
-  float ConductNote(NotePitchType pitch_type, float pitch,
-                    bool bypass_adjustment = false) {
-    float conducted_pitch = pitch;
-    if (capi_) {
-      const auto status = BarelyConductor_ConductNote(
-          capi_, static_cast<BarelyNotePitchType>(pitch_type), pitch,
-          bypass_adjustment, &conducted_pitch);
-      assert(status == BarelyStatus_kOk);
-    }
-    return conducted_pitch;
-  }
-
-  /// Returns energy.
-  ///
-  /// @return Energy.
-  [[nodiscard]] float GetEnergy() const {
-    float energy = 0.0f;
-    if (capi_) {
-      const auto status = BarelyConductor_GetEnergy(capi_, &energy);
-      assert(status == BarelyStatus_kOk);
-    }
-    return energy;
-  }
-
-  /// Returns parameter value.
-  ///
-  /// @param index Parameter index.
-  /// @return Parameter value, or error status.
-  [[nodiscard]] StatusOr<float> GetParameter(int index) const {
-    float value = 0.0f;
-    if (const auto status = BarelyConductor_GetParameter(capi_, index, &value);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return value;
-  }
-
-  /// Returns parameter definition.
-  ///
-  /// @param index Parameter index.
-  /// @return Parameter definition, or error status.
-  [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
-      int index) const {
-    BarelyParameterDefinition definition;
-    if (const auto status =
-            BarelyConductor_GetParameterDefinition(capi_, index, &definition);
-        status != BarelyStatus_kOk) {
-      return static_cast<Status>(status);
-    }
-    return ParameterDefinition(definition.default_value, definition.min_value,
-                               definition.max_value);
-  }
-
-  /// Returns stress.
-  ///
-  /// @return Stress.
-  [[nodiscard]] float GetStress() const {
-    float stress = 0.0f;
-    if (capi_) {
-      const auto status = BarelyConductor_GetStress(capi_, &stress);
-      assert(status == BarelyStatus_kOk);
-    }
-    return stress;
-  }
-
-  /// Resets all parameters.
-  ///
-  /// @return Status.
-  Status ResetAllParameters() {
-    return static_cast<Status>(BarelyConductor_ResetAllParameters(capi_));
-  }
-
-  /// Resets parameter value.
-  ///
-  /// @param index Parameter index.
-  /// @return Status.
-  Status ResetParameter(int index) {
-    return static_cast<Status>(BarelyConductor_ResetParameter(capi_, index));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Data.
-  /// @return Status.
-  Status SetData(void* data) {
-    return static_cast<Status>(BarelyConductor_SetData(capi_, data));
-  }
-
-  /// Sets definition.
-  ///
-  /// @param definition Conductor definition.
-  /// @return Status.
-  Status SetDefinition(const ConductorDefinition& definition) {
-    std::vector<BarelyParameterDefinition> parameter_definitions;
-    parameter_definitions.reserve(definition.parameter_definitions.size());
-    for (const auto& parameter_definition : definition.parameter_definitions) {
-      parameter_definitions.push_back(BarelyParameterDefinition{
-          parameter_definition.default_value, parameter_definition.min_value,
-          parameter_definition.max_value});
-    }
-    return static_cast<Status>(BarelyConductor_SetDefinition(
-        capi_,
-        BarelyConductorDefinition{
-            definition.adjust_note_duration_fn,
-            definition.adjust_note_intensity_fn,
-            definition.adjust_note_pitch_fn, definition.adjust_tempo_fn,
-            definition.create_fn, definition.destroy_fn, definition.set_data_fn,
-            definition.set_energy_fn, definition.set_parameter_fn,
-            definition.set_stress_fn, parameter_definitions.data(),
-            static_cast<int>(parameter_definitions.size())}));
-  }
-
-  /// Sets energy.
-  ///
-  /// @param energy Energy.
-  /// @return Status.
-  Status SetEnergy(float energy) {
-    return static_cast<Status>(BarelyConductor_SetEnergy(capi_, energy));
-  }
-
-  /// Sets parameter value.
-  ///
-  /// @param index Parameter index.
-  /// @param value Parameter value.
-  /// @return Status.
-  Status SetParameter(int index, float value) {
-    return static_cast<Status>(
-        BarelyConductor_SetParameter(capi_, index, value));
-  }
-
-  /// Sets stress.
-  ///
-  /// @param stress Stress.
-  /// @return Status.
-  Status SetStress(float stress) {
-    return static_cast<Status>(BarelyConductor_SetStress(capi_, stress));
-  }
-
- private:
-  friend class Musician;
-
-  // Constructs new `Conductor` with internal api handle.
-  explicit Conductor(BarelyApi capi) : capi_(capi) {}
-
-  // Default destructor.
-  ~Conductor() = default;
-
-  // Non-copyable.
-  Conductor(const Conductor& other) = delete;
-  Conductor& operator=(const Conductor& other) = delete;
-
-  // Constructs new `Conductor` via move.
-  Conductor(Conductor&& other) noexcept
-      : capi_(std::exchange(other.capi_, nullptr)) {}
-
-  // Assigns `Conductor` via move.
-  Conductor& operator=(Conductor&& other) noexcept {
-    if (this != &other) {
-      capi_ = std::exchange(other.capi_, nullptr);
-    }
-    return *this;
-  }
-
-  // Internal api handle.
-  BarelyApi capi_;
 };
 
 /// Instrument definition.
@@ -1238,8 +964,10 @@ class Musician {
   using BeatCallback = std::function<void(double position, double timestamp)>;
 
   /// Constructs new `Musician`.
-  Musician()
-      : beat_callback_(nullptr), capi_(CreateCapi()), conductor_(capi_) {}
+  Musician() {
+    const auto status = BarelyMusician_Create(&capi_);
+    assert(status == BarelyStatus_kOk);
+  }
 
   /// Destroys `Musician`.
   ~Musician() {
@@ -1258,8 +986,7 @@ class Musician {
   ///
   /// @param other Other api.
   Musician(Musician&& other) noexcept
-      : capi_(std::exchange(other.capi_, nullptr)),
-        conductor_(std::move(other.conductor_)) {
+      : capi_(std::exchange(other.capi_, nullptr)) {
     SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
   }
 
@@ -1268,7 +995,6 @@ class Musician {
   /// @param other Other api.
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
-      conductor_ = std::move(other.conductor_);
       if (capi_) {
         const auto status = BarelyMusician_Destroy(capi_);
         assert(status == BarelyStatus_kOk);
@@ -1296,16 +1022,6 @@ class Musician {
   Sequence CreateSequence(const Instrument* instrument = nullptr) {
     return Sequence{capi_, instrument};
   }
-
-  /// Returns conductor.
-  ///
-  /// @return Conductor.
-  [[nodiscard]] const Conductor& GetConductor() const { return conductor_; }
-
-  /// Returns conductor.
-  ///
-  /// @return Mutable conductor.
-  [[nodiscard]] Conductor& GetConductor() { return conductor_; }
 
   /// Returns playback position.
   ///
@@ -1439,22 +1155,11 @@ class Musician {
   }
 
  private:
-  // Creates new internal api and returns corresponding handle.
-  static BarelyApi CreateCapi() {
-    BarelyApi capi = nullptr;
-    const auto status = BarelyMusician_Create(&capi);
-    assert(status == BarelyStatus_kOk);
-    return capi;
-  }
-
   // Beat callback.
   BeatCallback beat_callback_;
 
   // Internal api handle.
-  BarelyApi capi_;
-
-  // Conductor.
-  Conductor conductor_;
+  BarelyApi capi_ = nullptr;
 };
 
 }  // namespace barely

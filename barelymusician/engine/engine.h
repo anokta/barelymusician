@@ -347,6 +347,9 @@ class Engine {
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept;
 
+  // TODO: Temp until engine is removed.
+  Transport& transport() { return transport_; }
+
  private:
   // Active note that is being performed.
   struct ActiveNote {

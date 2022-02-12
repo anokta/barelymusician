@@ -304,6 +304,24 @@ BarelyStatus BarelyMusician_GetTempo(BarelyApi api, double* out_tempo) {
   return BarelyStatus_kOk;
 }
 
+BarelyStatus BarelyMusician_GetTimestamp(BarelyApi api, double* out_timestamp) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_timestamp) return BarelyStatus_kInvalidArgument;
+
+  *out_timestamp = api->instance.transport().GetTimestamp();
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_GetTimestampAtPosition(BarelyApi api,
+                                                   double position,
+                                                   double* out_timestamp) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_timestamp) return BarelyStatus_kInvalidArgument;
+
+  *out_timestamp = api->instance.transport().GetTimestamp(position);
+  return BarelyStatus_kOk;
+}
+
 BarelyStatus BarelyMusician_IsPlaying(BarelyApi api, bool* out_is_playing) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_playing) return BarelyStatus_kInvalidArgument;
@@ -353,6 +371,13 @@ BarelyStatus BarelyMusician_SetTempo(BarelyApi api, double tempo) {
   if (!api) return BarelyStatus_kNotFound;
 
   api->instance.SetPlaybackTempo(tempo);
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_SetTimestamp(BarelyApi api, double timestamp) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  api->instance.transport().SetTimestamp(timestamp);
   return BarelyStatus_kOk;
 }
 

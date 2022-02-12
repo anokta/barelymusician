@@ -21,64 +21,69 @@ class Transport {
   using UpdateCallback =
       std::function<void(double begin_position, double end_position)>;
 
-  /// Returns the current position.
+  /// Returns current position.
   ///
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept;
 
-  /// Returns the tempo.
+  /// Returns tempo.
   ///
   /// @return Tempo in beats per second.
   [[nodiscard]] double GetTempo() const noexcept;
 
-  /// Returns the current timestamp.
+  /// Returns current timestamp.
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
-  /// Returns the current timestamp at position.
+  /// Returns current timestamp at position.
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp(double position) const noexcept;
 
-  /// Returns whether the transport is currently playing or not.
+  /// Returns whether transport is currently playing or not.
   ///
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
 
-  /// Sets the beat callback.
+  /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
   void SetBeatCallback(BeatCallback beat_callback) noexcept;
 
-  /// Sets the current position.
+  /// Sets current position.
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept;
 
-  /// Sets the tempo.
+  /// Sets tempo.
   ///
   /// @param tempo Tempo in beats per second.
   void SetTempo(double tempo) noexcept;
 
-  /// Sets the update callback.
+  /// Sets timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void SetTimestamp(double timestamp) noexcept;
+
+  /// Sets update callback.
   ///
   /// @param update_callback Update callback.
   void SetUpdateCallback(UpdateCallback update_callback) noexcept;
 
-  /// Starts the playback.
+  /// Starts playback.
   void Start() noexcept;
 
-  /// Stops the playback.
+  /// Stops playback.
   void Stop() noexcept;
 
-  /// Updates the transport at timestamp.
+  /// Updates transport at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept;
 
  private:
-  // Denotes whether the transport is playing or not.
+  // Denotes whether transport is playing or not.
   bool is_playing_ = false;
 
   // Next beat position in beats.

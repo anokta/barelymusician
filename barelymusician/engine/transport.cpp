@@ -25,7 +25,7 @@ void Transport::SetBeatCallback(BeatCallback beat_callback) noexcept {
 
 void Transport::SetPosition(double position) noexcept {
   assert(position >= 0.0);
-  if (position != position_) {
+  if (position_ != position) {
     position_ = position;
     next_beat_position_ = std::ceil(position_);
     next_beat_timestamp_ = GetTimestamp(next_beat_position_);
@@ -34,8 +34,16 @@ void Transport::SetPosition(double position) noexcept {
 
 void Transport::SetTempo(double tempo) noexcept {
   assert(tempo >= 0.0);
-  if (tempo != tempo_) {
+  if (tempo_ != tempo) {
     tempo_ = tempo;
+    next_beat_timestamp_ = GetTimestamp(next_beat_position_);
+  }
+}
+
+void Transport::SetTimestamp(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
+  if (timestamp_ != timestamp) {
+    timestamp_ = timestamp;
     next_beat_timestamp_ = GetTimestamp(next_beat_position_);
   }
 }

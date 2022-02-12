@@ -1073,6 +1073,32 @@ class Musician {
     return tempo;
   }
 
+  /// Returns timestamp.
+  ///
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp() const {
+    double timestamp = 0.0;
+    if (capi_) {
+      const auto status = BarelyMusician_GetTimestamp(capi_, &timestamp);
+      assert(status == BarelyStatus_kOk);
+    }
+    return timestamp;
+  }
+
+  /// Returns timestamp at position.
+  ///
+  /// @param position Position in beats.
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestampAtPosition(double position) const {
+    double timestamp = 0.0;
+    if (capi_) {
+      const auto status =
+          BarelyMusician_GetTimestampAtPosition(capi_, position, &timestamp);
+      assert(status == BarelyStatus_kOk);
+    }
+    return timestamp;
+  }
+
   /// Returns whether playback is active or not.
   ///
   /// @return True if playing, false otherwise.
@@ -1134,6 +1160,14 @@ class Musician {
   /// @return Status.
   Status SetTempo(double tempo) {
     return static_cast<Status>(BarelyMusician_SetTempo(capi_, tempo));
+  }
+
+  /// Sets timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status SetTimestamp(double timestamp) {
+    return static_cast<Status>(BarelyMusician_SetTimestamp(capi_, timestamp));
   }
 
   /// Starts playback.

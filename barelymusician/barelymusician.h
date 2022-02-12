@@ -461,6 +461,23 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetScale(
 BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyApi api,
                                                    double* out_tempo);
 
+/// Gets timestamp.
+///
+/// @param api BarelyMusician api.
+/// @param out_timestamp Output timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestamp(BarelyApi api,
+                                                       double* out_timestamp);
+
+/// Gets timestamp at position.
+///
+/// @param api BarelyMusician api.
+/// @param position Position in beats.
+/// @param out_timestamp Output timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestampAtPosition(
+    BarelyApi api, double position, double* out_timestamp);
+
 /// Gets whether playback is active or not.
 ///
 /// @param api BarelyMusician api.
@@ -510,6 +527,14 @@ BARELY_EXPORT BarelyStatus BarelyMusician_SetScale(BarelyApi api,
 /// @param tempo Tempo in bpm.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyApi api, double tempo);
+
+/// Sets timestamp.
+///
+/// @param api BarelyMusician api.
+/// @param timestamp Timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetTimestamp(BarelyApi api,
+                                                       double timestamp);
 
 /// Starts playback.
 ///

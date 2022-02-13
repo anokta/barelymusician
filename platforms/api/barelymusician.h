@@ -13,6 +13,61 @@
 
 namespace barely {
 
+/// Note pitch type.
+enum class NotePitchType : BarelyNotePitchType {
+  /// Absolute pitch.
+  kAbsolutePitch = BarelyNotePitchType_kAbsolutePitch,
+  /// Relative pitch with respect to root note.
+  kRelativePitch = BarelyNotePitchType_kRelativePitch,
+  /// Scale index with respect to root note and scale.
+  kScaleIndex = BarelyNotePitchType_kScaleIndex,
+};
+
+/// Note definition.
+// TODO: Update to reflect `BarelyNoteDefinition`.
+struct NoteDefinition {
+  /// Constructs new `NoteDefinition`.
+  ///
+  /// @param duration Note duration.
+  /// @param pitch_type Note pitch type.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @param bypass_adjustment True to bypass note adjustment.
+  NoteDefinition(double duration, NotePitchType pitch_type, float pitch,
+                 float intensity = 1.0f, bool bypass_adjustment = false)
+      : duration(duration),
+        pitch_type(pitch_type),
+        pitch(pitch),
+        intensity(intensity),
+        bypass_adjustment(bypass_adjustment) {}
+
+  /// Constructs new `NoteDefinition` with absolute pitch.
+  ///
+  /// @param duration Note duration.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @param bypass_adjustment True to bypass note adjustment.
+  NoteDefinition(double duration, float pitch, float intensity = 1.0f,
+                 bool bypass_adjustment = false)
+      : NoteDefinition(duration, NotePitchType::kAbsolutePitch, pitch,
+                       intensity, bypass_adjustment) {}
+
+  /// Duration.
+  double duration;
+
+  /// Pitch type.
+  NotePitchType pitch_type;
+
+  /// Pitch value.
+  float pitch;
+
+  /// Intensity.
+  float intensity;
+
+  /// Denotes whether note adjust should be bypassed or not.
+  bool bypass_adjustment;
+};
+
 /// Status.
 enum class Status : BarelyStatus {
   /// Success.
@@ -115,60 +170,6 @@ class StatusOr {
  private:
   // Value or error status.
   std::variant<Status, ValueType> value_or_;
-};
-
-/// Note pitch type.
-enum class NotePitchType : BarelyNotePitchType {
-  /// Absolute pitch.
-  kAbsolutePitch = BarelyNotePitchType_kAbsolutePitch,
-  /// Relative pitch with respect to root note.
-  kRelativePitch = BarelyNotePitchType_kRelativePitch,
-  /// Scale index with respect to root note and scale.
-  kScaleIndex = BarelyNotePitchType_kScaleIndex,
-};
-
-/// Note definition.
-struct NoteDefinition {
-  /// Constructs new `NoteDefinition`.
-  ///
-  /// @param duration Note duration.
-  /// @param pitch_type Note pitch type.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @param bypass_adjustment True to bypass note adjustment.
-  NoteDefinition(double duration, NotePitchType pitch_type, float pitch,
-                 float intensity = 1.0f, bool bypass_adjustment = false)
-      : duration(duration),
-        pitch_type(pitch_type),
-        pitch(pitch),
-        intensity(intensity),
-        bypass_adjustment(bypass_adjustment) {}
-
-  /// Constructs new `NoteDefinition` with absolute pitch.
-  ///
-  /// @param duration Note duration.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @param bypass_adjustment True to bypass note adjustment.
-  NoteDefinition(double duration, float pitch, float intensity = 1.0f,
-                 bool bypass_adjustment = false)
-      : NoteDefinition(duration, NotePitchType::kAbsolutePitch, pitch,
-                       intensity, bypass_adjustment) {}
-
-  /// Duration.
-  double duration;
-
-  /// Pitch type.
-  NotePitchType pitch_type;
-
-  /// Pitch value.
-  float pitch;
-
-  /// Intensity.
-  float intensity;
-
-  /// Denotes whether note adjust should be bypassed or not.
-  bool bypass_adjustment;
 };
 
 /// Parameter definition.
@@ -617,9 +618,14 @@ class NoteReference {
                                                            id_, &definition);
       assert(status == BarelyStatus_kOk);
     }
-    return {definition.duration,
-            static_cast<NotePitchType>(definition.pitch_type), definition.pitch,
-            definition.intensity, definition.bypass_adjustment};
+    // TODO: Temporary until `NoteDefinition` is updated.
+    return {definition.duration_definition.duration,
+            static_cast<NotePitchType>(definition.pitch_definition.type),
+            definition.pitch_definition.absolute_pitch,
+            definition.intensity_definition.intensity,
+            definition.bypass_duration_adjustment ||
+                definition.bypass_intensity_adjustment ||
+                definition.bypass_pitch_adjustment};
   }
 
   /// Returns note position.
@@ -643,10 +649,14 @@ class NoteReference {
     return static_cast<Status>(BarelySequence_SetNoteDefinition(
         capi_, sequence_id_, id_,
         BarelyNoteDefinition{
-            definition.duration,
-            static_cast<BarelyNotePitchType>(definition.pitch_type),
-            definition.pitch, definition.intensity,
-            definition.bypass_adjustment}));
+            .duration_definition = {.duration = definition.duration},
+            .bypass_duration_adjustment = definition.bypass_adjustment,
+            .intensity_definition = {.intensity = definition.intensity},
+            .bypass_intensity_adjustment = definition.bypass_adjustment,
+            .pitch_definition = {.type = static_cast<BarelyNotePitchType>(
+                                     definition.pitch_type),
+                                 .absolute_pitch = definition.pitch},
+            .bypass_pitch_adjustment = definition.bypass_adjustment}));
   }
 
   /// Sets note position.
@@ -724,10 +734,14 @@ class Sequence {
       const auto status = BarelySequence_AddNote(
           capi_, id_, position,
           BarelyNoteDefinition{
-              definition.duration,
-              static_cast<BarelyNotePitchType>(definition.pitch_type),
-              definition.pitch, definition.intensity,
-              definition.bypass_adjustment},
+              .duration_definition = {.duration = definition.duration},
+              .bypass_duration_adjustment = definition.bypass_adjustment,
+              .intensity_definition = {.intensity = definition.intensity},
+              .bypass_intensity_adjustment = definition.bypass_adjustment,
+              .pitch_definition = {.type = static_cast<BarelyNotePitchType>(
+                                       definition.pitch_type),
+                                   .absolute_pitch = definition.pitch},
+              .bypass_pitch_adjustment = definition.bypass_adjustment},
           &note_id);
       assert(status == BarelyStatus_kOk);
     }

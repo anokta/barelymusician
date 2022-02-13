@@ -43,6 +43,18 @@ enum BarelyId_Values {
   BarelyId_kInvalid = -1,
 };
 
+/// Note duration definition.
+typedef struct BarelyNoteDurationDefinition {
+  /// Value.
+  double duration;
+} BarelyNoteDurationDefinition;
+
+/// Note intensity definition.
+typedef struct BarelyNoteIntensityDefinition {
+  /// Value.
+  float intensity;
+} BarelyNoteIntensityDefinition;
+
 /// Note pitch type enum alias.
 typedef int32_t BarelyNotePitchType;
 
@@ -55,6 +67,55 @@ enum BarelyNotePitchType_Values {
   /// Scale index with respect to root note and scale.
   BarelyNotePitchType_kScaleIndex = 2,
 };
+
+/// Note pitch definition.
+typedef struct BarelyNotePitchDefinition {
+  /// Type.
+  BarelyNotePitchType type;
+
+  /// Value.
+  union {
+    /// Absolute pitch.
+    float absolute_pitch;
+    /// Relative pitch.
+    float relative_pitch;
+    /// Scale index.
+    int scale_index;
+  };
+} BarelyNotePitchDefinition;
+
+/// Note definition.
+typedef struct BarelyNoteDefinition {
+  /// Duration definition.
+  BarelyNoteDurationDefinition duration_definition;
+
+  /// Denotes whether duration adjustment should be bypassed or not.
+  bool bypass_duration_adjustment;
+
+  /// Intensity definition.
+  BarelyNoteIntensityDefinition intensity_definition;
+
+  /// Denotes whether intensity adjustment should be bypassed or not.
+  bool bypass_intensity_adjustment;
+
+  /// Pitch definition.
+  BarelyNotePitchDefinition pitch_definition;
+
+  /// Denotes whether pitch adjustment should be bypassed or not.
+  bool bypass_pitch_adjustment;
+} BarelyNoteDefinition;
+
+/// Parameter definition.
+typedef struct BarelyParameterDefinition {
+  /// Default value.
+  float default_value;
+
+  /// Minimum value.
+  float min_value;
+
+  /// Maximum value.
+  float max_value;
+} BarelyParameterDefinition;
 
 /// Status enum alias.
 typedef int32_t BarelyStatus;
@@ -151,44 +212,6 @@ typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
                                                                 int32_t index,
                                                                 float value);
 
-/// Beat callback signature.
-///
-/// @param position Beat position in beats.
-/// @param timestamp Beat timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
-                                            void* user_data);
-
-/// Note definition.
-typedef struct BarelyNoteDefinition {
-  /// Duration.
-  double duration;
-
-  /// Pitch type.
-  BarelyNotePitchType pitch_type;
-
-  /// Pitch value.
-  float pitch;
-
-  /// Intensity.
-  float intensity;
-
-  /// Denotes whether note adjustment should be bypassed or not.
-  bool bypass_adjustment;
-} BarelyNoteDefinition;
-
-/// Parameter definition.
-typedef struct BarelyParameterDefinition {
-  /// Default value.
-  float default_value;
-
-  /// Minimum value.
-  float min_value;
-
-  /// Maximum value.
-  float max_value;
-} BarelyParameterDefinition;
-
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create callback.
@@ -218,6 +241,35 @@ typedef struct BarelyInstrumentDefinition {
   /// Number of parameter definitions.
   int32_t num_parameter_definitions;
 } BarelyInstrumentDefinition;
+
+/// Beat callback signature.
+///
+/// @param position Beat position in beats.
+/// @param timestamp Beat timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
+                                            void* user_data);
+
+/// Note duration adjustment callback signature.
+///
+/// @param definition Mutable note duration definition.
+/// @param user_data User data.
+typedef void (*BarelyMusician_NoteDurationAdjustmentCallback)(
+    BarelyNoteDurationDefinition* definition, void* user_data);
+
+/// Note intensity adjustment callback signature.
+///
+/// @param definition Mutable note intensity definition.
+/// @param user_data User data.
+typedef void (*BarelyMusician_NoteIntensityAdjustmentCallback)(
+    BarelyNoteIntensityDefinition* definition, void* user_data);
+
+/// Note pitch adjustment callback signature.
+///
+/// @param definition Mutable note pitch definition.
+/// @param user_data User data.
+typedef void (*BarelyMusician_NotePitchAdjustmentCallback)(
+    BarelyNotePitchDefinition* definition, void* user_data);
 
 /// Creates new instrument.
 ///
@@ -428,6 +480,39 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Create(BarelyApi* out_api);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyApi api);
 
+/// Gets note duration.
+///
+/// @param api BarelyMusician api.
+/// @param definition Note duration definition.
+/// @param bypass_adjustment True if duration adjustment should be bypassed.
+/// @param out_duration Output note duration.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetNoteDuration(
+    BarelyApi api, BarelyNoteDurationDefinition definition,
+    bool bypass_adjustment, double* out_duration);
+
+/// Gets note intensity.
+///
+/// @param api BarelyMusician api.
+/// @param intensity Note pitch intensity.
+/// @param bypass_adjustment True if intensity adjustment should be bypassed.
+/// @param out_intensity Output note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetNoteIntensity(
+    BarelyApi api, BarelyNoteIntensityDefinition definition,
+    bool bypass_adjustment, float* out_intensity);
+
+/// Gets note pitch.
+///
+/// @param api BarelyMusician api.
+/// @param definition Note pitch definition.
+/// @param bypass_adjustment True if pitch adjustment should be bypassed.
+/// @param out_pitch Output note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetNotePitch(BarelyApi api, BarelyNotePitchDefinition definition,
+                            bool bypass_adjustment, float* out_pitch);
+
 /// Gets playback position.
 ///
 /// @param api BarelyMusician api.
@@ -494,6 +579,39 @@ BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetBeatCallback(
     BarelyApi api, BarelyMusician_BeatCallback beat_callback, void* user_data);
+
+/// Sets note duration adjustment callback.
+///
+/// @param api BarelyMusician api.
+/// @param adjustment_callback Note duration adjustment callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetNoteDurationAdjustmentCallback(
+    BarelyApi api,
+    BarelyMusician_NoteDurationAdjustmentCallback adjustment_callback,
+    void* user_data);
+
+/// Sets note intensity adjustment callback.
+///
+/// @param api BarelyMusician api.
+/// @param adjustment_callback Note intensity adjustment callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetNoteIntensityAdjustmentCallback(
+    BarelyApi api,
+    BarelyMusician_NoteIntensityAdjustmentCallback adjustment_callback,
+    void* user_data);
+
+/// Sets note pitch adjustment callback.
+///
+/// @param api BarelyMusician api.
+/// @param adjustment_callback Note pitch adjustment callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetNotePitchAdjustmentCallback(
+    BarelyApi api,
+    BarelyMusician_NotePitchAdjustmentCallback adjustment_callback,
+    void* user_data);
 
 /// Sets playback position.
 ///

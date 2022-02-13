@@ -270,6 +270,36 @@ BarelyStatus BarelyMusician_Destroy(BarelyApi api) {
   return BarelyStatus_kOk;
 }
 
+BarelyStatus BarelyMusician_GetNoteDuration(
+    BarelyApi api, BarelyNoteDurationDefinition /*definition*/,
+    bool /*bypass_adjustment*/, double* out_duration) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_duration) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyMusician_GetNoteIntensity(
+    BarelyApi api, BarelyNoteIntensityDefinition /*definition*/,
+    bool /*bypass_adjustment*/, float* out_intensity) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_intensity) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyMusician_GetNotePitch(
+    BarelyApi api, BarelyNotePitchDefinition /*definition*/,
+    bool /*bypass_adjustment*/, float* out_pitch) {
+  if (!api) return BarelyStatus_kNotFound;
+  if (!out_pitch) return BarelyStatus_kInvalidArgument;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
 BarelyStatus BarelyMusician_GetPosition(BarelyApi api, double* out_position) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_position) return BarelyStatus_kInvalidArgument;
@@ -342,6 +372,36 @@ BarelyStatus BarelyMusician_SetBeatCallback(
   } else {
     api->instance.SetPlaybackBeatCallback(nullptr);
   }
+  return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_SetNoteDurationAdjustmentCallback(
+    BarelyApi api,
+    BarelyMusician_NoteDurationAdjustmentCallback /*adjustment_callback*/,
+    void* /*user_data*/) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyMusician_SetNoteIntensityAdjustmentCallback(
+    BarelyApi api,
+    BarelyMusician_NoteIntensityAdjustmentCallback /*adjustment_callback*/,
+    void* /*user_data*/) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyMusician_SetNotePitchAdjustmentCallback(
+    BarelyApi api,
+    BarelyMusician_NotePitchAdjustmentCallback /*adjustment_callback*/,
+    void* /*user_data*/) {
+  if (!api) return BarelyStatus_kNotFound;
+
+  // TODO(#85): Implement.
   return BarelyStatus_kUnimplemented;
 }
 
@@ -409,11 +469,11 @@ BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_note_id) return BarelyStatus_kInvalidArgument;
 
-  const auto note_id_or =
-      api->instance.AddPerformerNote(sequence_id, position,
-                                     Note{.pitch = definition.pitch,
-                                          .intensity = definition.intensity,
-                                          .duration = definition.duration});
+  const auto note_id_or = api->instance.AddPerformerNote(
+      sequence_id, position,
+      Note{.pitch = definition.pitch_definition.absolute_pitch,
+           .intensity = definition.intensity_definition.intensity,
+           .duration = definition.duration_definition.duration});
   if (IsOk(note_id_or)) {
     *out_note_id = GetStatusOrValue(note_id_or);
     return BarelyStatus_kOk;

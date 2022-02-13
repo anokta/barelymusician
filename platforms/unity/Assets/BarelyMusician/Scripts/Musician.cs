@@ -14,6 +14,20 @@ namespace Barely {
     public delegate void BeatEvent(double position);
     public static event BeatEvent OnBeat;
 
+    /// Note duration definition.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct NoteDurationDefinition {
+      /// Value.
+      public double duration;
+    }
+
+    /// Note intensity definition.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct NoteIntensityDefinition {
+      /// Value.
+      public float intensity;
+    }
+
     /// Note pitch types.
     public enum NotePitchType {
       /// Absolute pitch.
@@ -24,20 +38,44 @@ namespace Barely {
       ScaleIndex = 2,
     }
 
+    /// Note pitch definition.
+    [StructLayout(LayoutKind.Explicit)]
+    public struct NotePitchDefinition {
+      /// Type.
+      [FieldOffset(0)]
+      public NotePitchType type;
+
+      /// Absolute pitch.
+      [FieldOffset(4)]
+      public float absolutePitch;
+      /// Relative pitch.
+      [FieldOffset(4)]
+      public float relativePitch;
+      /// Scale index.
+      [FieldOffset(4)]
+      public float scaleIndex;
+    }
+
     /// Note definition.
     [StructLayout(LayoutKind.Sequential)]
     public struct NoteDefinition {
-      /// Duration.
-      public double duration;
+      /// Duration definition.
+      public NoteDurationDefinition durationDefinition;
 
-      /// Pitch type.
-      public NotePitchType pitchType;
+      /// Denotes whether duration adjustment should be bypassed or not.
+      public bool bypassDurationAdjustment;
 
-      /// Pitch.
-      public float pitch;
+      /// Intensity definition.
+      public NoteIntensityDefinition intensityDefinition;
 
-      /// Intensity.
-      public float intensity;
+      /// Denotes whether intensity adjustment should be bypassed or not.
+      public bool bypassIntensityAdjustment;
+
+      /// Pitch definition.
+      public NotePitchDefinition pitchDefinition;
+
+      /// Denotes whether pitch adjustment should be bypassed or not.
+      public bool bypassPitchAdjustment;
     }
 
     /// Adds new instrument.
@@ -254,12 +292,16 @@ namespace Barely {
 
       if (changed) {
         BarelySequence_RemoveAllNotes(Api, sequence.Id);
-        NoteDefinition definition;
-        definition.pitchType = NotePitchType.AbsolutePitch;
+        NoteDefinition definition = new NoteDefinition{};
+        definition.bypassDurationAdjustment = false;
+        definition.bypassIntensityAdjustment = false;
+        definition.bypassPitchAdjustment = false;
+        definition.pitchDefinition.type = NotePitchType.AbsolutePitch;
         foreach (var sequenceNote in sequence.Notes) {
-          definition.duration = sequenceNote.note.Duration;
-          definition.pitch = (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
-          definition.intensity = sequenceNote.note.Intensity;
+          definition.durationDefinition.duration = sequenceNote.note.Duration;
+          definition.pitchDefinition.absolutePitch =
+              (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
+          definition.intensityDefinition.intensity = sequenceNote.note.Intensity;
           BarelySequence_AddNote(Api, sequence.Id, sequenceNote.position, definition, _int64Ptr);
         }
       }

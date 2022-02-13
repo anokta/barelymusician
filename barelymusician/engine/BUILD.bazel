@@ -18,7 +18,6 @@ cc_library(
         "//barelymusician/common:id",
         "//barelymusician/common:status",
         "//barelymusician/composition:sequence",
-        "//barelymusician/dsp:dsp_utils",
     ],
 )
 
@@ -47,7 +46,6 @@ cc_library(
         ":instrument_event",
         "//barelymusician:header",
         "//barelymusician/common:visitor",
-        "//barelymusician/dsp:dsp_utils",
     ],
 )
 

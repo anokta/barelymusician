@@ -43,16 +43,4 @@ float GetFrequency(float pitch) noexcept {
   return kFrequencyA4 * std::pow(2.0f, pitch);
 }
 
-int SamplesFromSeconds(int sample_rate, double seconds) noexcept {
-  return sample_rate > 0
-             ? static_cast<int>(seconds * static_cast<double>(sample_rate))
-             : 0;
-}
-
-double SecondsFromSamples(int sample_rate, int samples) noexcept {
-  return sample_rate > 0
-             ? static_cast<double>(samples) / static_cast<double>(sample_rate)
-             : 0.0;
-}
-
 }  // namespace barelyapi

@@ -15,7 +15,6 @@ target_link_libraries(
   id
   status
   sequence
-  dsp_utils
 )
 
 add_library(
@@ -43,7 +42,6 @@ target_link_libraries(
   instrument_event
   barelymusician
   visitor
-  dsp_utils
 )
 
 add_library(

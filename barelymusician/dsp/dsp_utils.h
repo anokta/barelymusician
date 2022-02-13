@@ -35,20 +35,6 @@ float GetFilterCoefficient(int sample_rate, float cuttoff_frequency) noexcept;
 /// @return Frequency in hz.
 float GetFrequency(float pitch) noexcept;
 
-/// Returns the corresponding number of samples for the given number of seconds.
-///
-/// @param sample_rate Sampling rate in hz.
-/// @param seconds Number of seconds.
-/// @return Number of samples.
-int SamplesFromSeconds(int sample_rate, double seconds) noexcept;
-
-/// Returns the corresponding number of seconds for the given number of samples.
-///
-/// @param sample_rate Sampling rate in hz.
-/// @param samples Number of samples.
-/// @return Number of seconds.
-double SecondsFromSamples(int sample_rate, int samples) noexcept;
-
 }  // namespace barelyapi
 
 #endif  // BARELYMUSICIAN_DSP_DSP_UTILS_H_

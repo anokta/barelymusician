@@ -6,7 +6,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/visitor.h"
-#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
@@ -20,7 +19,6 @@ InstrumentProcessor::InstrumentProcessor(
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
       set_parameter_callback_(definition.set_parameter_callback),
-      gain_(1.0f),
       sample_rate_(sample_rate) {
   assert(sample_rate_ >= 0);
   if (create_callback_) {
@@ -53,11 +51,10 @@ void InstrumentProcessor::Process(float* output, int num_output_channels,
   int frame = 0;
   // Process *all* events before the end timestamp.
   const auto begin = events_.begin();
-  const auto end = events_.lower_bound(
-      timestamp + SecondsFromSamples(sample_rate_, num_output_frames));
+  const auto end =
+      events_.lower_bound(timestamp + GetSeconds(num_output_frames));
   for (auto it = begin; it != end; ++it) {
-    const int message_frame =
-        SamplesFromSeconds(sample_rate_, it->first - timestamp);
+    const int message_frame = GetSamples(it->first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
         process_callback_(&state_, &output[num_output_channels * frame],
@@ -103,6 +100,18 @@ void InstrumentProcessor::Process(float* output, int num_output_channels,
   for (int i = 0; i < num_output_channels * num_output_frames; ++i) {
     output[i] *= gain_;
   }
+}
+
+int InstrumentProcessor::GetSamples(double seconds) const noexcept {
+  return sample_rate_ > 0
+             ? static_cast<int>(seconds * static_cast<double>(sample_rate_))
+             : 0;
+}
+
+double InstrumentProcessor::GetSeconds(int samples) const noexcept {
+  return sample_rate_ > 0
+             ? static_cast<double>(samples) / static_cast<double>(sample_rate_)
+             : 0.0;
 }
 
 }  // namespace barelyapi

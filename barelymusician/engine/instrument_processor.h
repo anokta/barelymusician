@@ -42,6 +42,12 @@ class InstrumentProcessor {
                double timestamp) noexcept;
 
  private:
+  // Returns corresponding number of samples for given number of `seconds`.
+  int GetSamples(double seconds) const noexcept;
+
+  // Returns corresponding number of seconds for given number of `samples`.
+  double GetSeconds(int samples) const noexcept;
+
   // Create function.
   BarelyInstrumentDefinition_CreateCallback create_callback_;
 
@@ -67,13 +73,13 @@ class InstrumentProcessor {
   std::multimap<double, InstrumentEvent> events_;
 
   // Gain in amplitude.
-  float gain_;
+  float gain_ = 1.0f;
 
   // Sampling rate in hz.
-  int sample_rate_;
+  int sample_rate_ = 0;
 
   // State.
-  void* state_;
+  void* state_ = nullptr;
 };
 
 }  // namespace barelyapi

@@ -39,7 +39,7 @@ class Engine {
   /// @param note Note.
   /// @return Note id.
   StatusOr<Id> AddPerformerNote(Id performer_id, double position,
-                                Note note) noexcept;
+                                BarelyNoteDefinition note) noexcept;
 
   /// Creates new instrument.
   ///

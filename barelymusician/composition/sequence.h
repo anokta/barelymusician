@@ -8,9 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/status.h"
-#include "barelymusician/composition/note.h"
 
 namespace barelyapi {
 
@@ -21,25 +20,26 @@ class Sequence {
   using NotePositionIdPair = std::pair<double, Id>;
 
   /// Note with position type.
-  using NoteWithPosition = std::pair<double, Note>;
+  using NoteWithPosition = std::pair<double, BarelyNoteDefinition>;
 
   /// Note with position-id pair type.
-  using NoteWithPositionIdPair = std::pair<NotePositionIdPair, Note>;
+  using NoteWithPositionIdPair =
+      std::pair<NotePositionIdPair, BarelyNoteDefinition>;
 
   /// Process callback signature.
   ///
   /// @param position Note position.
   /// @param note Note.
   using ProcessCallback =
-      std::function<void(double position, const Note& note)>;
+      std::function<void(double position, const BarelyNoteDefinition& note)>;
 
   /// Adds new note at position.
   ///
-  /// @param id Note id.
+  /// @param id Note identifier.
   /// @param position Note position.
   /// @param note Note.
-  /// @return Status.
-  Status AddNote(Id id, double position, Note note) noexcept;
+  /// @return True if success.
+  bool AddNote(Id id, double position, BarelyNoteDefinition note) noexcept;
 
   /// Returns the begin offset.
   ///
@@ -65,12 +65,6 @@ class Sequence {
   ///
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept;
-
-  /// Returns note.
-  ///
-  /// @param id Note id.
-  /// @return Note with position, or error status.
-  [[nodiscard]] StatusOr<NoteWithPosition> GetNote(Id id) const noexcept;
 
   /// Returns whether the sequence is empty or not.
   ///
@@ -101,9 +95,9 @@ class Sequence {
 
   /// Removes note.
   ///
-  /// @param id Note id.
-  /// @return Status.
-  Status RemoveNote(Id id) noexcept;
+  /// @param id Note identifier.
+  /// @return True if success.
+  bool RemoveNote(Id id) noexcept;
 
   /// Sets the begin offset.
   ///
@@ -137,35 +131,16 @@ class Sequence {
 
   /// Sets note.
   ///
-  /// @param id Note id.
-  /// @param position Note position.
-  /// @param note Note.
-  /// @return Status.
-  Status SetNote(Id id, double position, Note note) noexcept;
-
-  /// Sets note duration.
-  ///
-  /// @param id Note id.
-  /// @return Status.
-  Status SetNoteDuration(Id id, NoteDuration note_duration) noexcept;
-
-  /// Sets note intensity.
-  ///
-  /// @param id Note id.
-  /// @return Status.
-  Status SetNoteIntensity(Id id, NoteIntensity note_intensity) noexcept;
-
-  /// Sets note pitch.
-  ///
-  /// @param id Note id.
-  /// @return Status.
-  Status SetNotePitch(Id id, NotePitch note_pitch) noexcept;
+  /// @param id Note identifier.
+  /// @param definition Note definition.
+  /// @return True if success.
+  bool SetNoteDefinition(Id id, BarelyNoteDefinition definition) noexcept;
 
   /// Sets note position.
   ///
-  /// @param id Note id.
-  /// @return Status.
-  Status SetNotePosition(Id id, double position) noexcept;
+  /// @param id Note identifier.
+  /// @return True if success.
+  bool SetNotePosition(Id id, double position) noexcept;
 
  private:
   // Internal process helper function.
@@ -192,7 +167,7 @@ class Sequence {
   double loop_length_ = 1.0;
 
   // Sorted notes by their positions.
-  std::map<NotePositionIdPair, Note> notes_;
+  std::map<NotePositionIdPair, BarelyNoteDefinition> notes_;
 
   // Note positions.
   std::unordered_map<Id, double> positions_;

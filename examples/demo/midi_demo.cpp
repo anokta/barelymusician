@@ -9,7 +9,7 @@
 #include "MidiFile.h"
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/note.h"
+#include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -29,7 +29,6 @@ using ::barely::examples::SynthInstrumentParameter;
 using ::barelyapi::Engine;
 using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
-using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
@@ -75,11 +74,13 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      Note note;
-      note.pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
-      note.intensity =
+      BarelyNoteDefinition note;
+      note.pitch_definition.absolute_pitch =
+          PitchFromMidiKeyNumber(midi_event.getKeyNumber());
+      note.intensity_definition.intensity =
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
-      note.duration = get_position(midi_event.getTickDuration());
+      note.duration_definition.duration =
+          get_position(midi_event.getTickDuration());
       engine->AddPerformerNote(performer_id, get_position(midi_event.tick),
                                note);
     }

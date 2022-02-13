@@ -469,11 +469,8 @@ BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_note_id) return BarelyStatus_kInvalidArgument;
 
-  const auto note_id_or = api->instance.AddPerformerNote(
-      sequence_id, position,
-      Note{.pitch = definition.pitch_definition.absolute_pitch,
-           .intensity = definition.intensity_definition.intensity,
-           .duration = definition.duration_definition.duration});
+  const auto note_id_or =
+      api->instance.AddPerformerNote(sequence_id, position, definition);
   if (IsOk(note_id_or)) {
     *out_note_id = GetStatusOrValue(note_id_or);
     return BarelyStatus_kOk;

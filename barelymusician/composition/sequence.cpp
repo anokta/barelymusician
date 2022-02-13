@@ -6,22 +6,19 @@
 #include <optional>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/id.h"
-#include "barelymusician/common/status.h"
-#include "barelymusician/composition/note.h"
 
 namespace barelyapi {
 
-Status Sequence::AddNote(Id id, double position, Note note) noexcept {
-  if (id == kInvalidId) {
-    return Status::kInvalidArgument;
-  }
+bool Sequence::AddNote(Id id, double position,
+                       BarelyNoteDefinition note) noexcept {
   if (positions_.emplace(id, position).second) {
-    notes_.emplace(NotePositionIdPair{position, id}, note);
-    return Status::kOk;
+    notes_.emplace(NotePositionIdPair{position, id}, std::move(note));
+    return true;
   }
-  return Status::kAlreadyExists;
+  return false;
 }
 
 double Sequence::GetBeginOffset() const noexcept { return begin_offset_; }
@@ -35,14 +32,6 @@ double Sequence::GetLoopBeginOffset() const noexcept {
 }
 
 double Sequence::GetLoopLength() const noexcept { return loop_length_; }
-
-StatusOr<Sequence::NoteWithPosition> Sequence::GetNote(Id id) const noexcept {
-  if (const auto* position = FindOrNull(positions_, id)) {
-    return NoteWithPosition{
-        *position, notes_.find(NotePositionIdPair{*position, id})->second};
-  }
-  return Status::kNotFound;
-}
 
 bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 
@@ -115,14 +104,14 @@ void Sequence::RemoveAllNotes(double begin_position,
   }
 }
 
-Status Sequence::RemoveNote(Id id) noexcept {
+bool Sequence::RemoveNote(Id id) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     notes_.erase(NotePositionIdPair{position_it->second, id});
     positions_.erase(position_it);
-    return Status::kOk;
+    return true;
   }
-  return Status::kNotFound;
+  return false;
 }
 
 void Sequence::SetBeginOffset(double begin_offset) noexcept {
@@ -147,55 +136,17 @@ void Sequence::SetLoopLength(double loop_length) noexcept {
   loop_length_ = std::max(loop_length, 0.0);
 }
 
-Status Sequence::SetNote(Id id, double position, Note note) noexcept {
-  if (const auto position_it = positions_.find(id);
-      position_it != positions_.end()) {
-    const auto note_it =
-        notes_.find(NotePositionIdPair{position_it->second, id});
-    note_it->second = note;
-    if (position_it->second != position) {
-      auto note_node = notes_.extract(note_it);
-      note_node.key().first = position;
-      notes_.insert(std::move(note_node));
-      position_it->second = position;
-    }
-    return Status::kOk;
-  }
-  return Status::kNotFound;
-}
-
-Status Sequence::SetNoteDuration(Id id, NoteDuration note_duration) noexcept {
+bool Sequence::SetNoteDefinition(Id id,
+                                 BarelyNoteDefinition definition) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
-    if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
-      note->duration = note_duration;
-      return Status::kOk;
-    }
+    auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id});
+    *note = std::move(definition);
+    return true;
   }
-  return Status::kNotFound;
+  return false;
 }
 
-Status Sequence::SetNoteIntensity(Id id,
-                                  NoteIntensity note_intensity) noexcept {
-  if (const auto* position = FindOrNull(positions_, id)) {
-    if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
-      note->intensity = note_intensity;
-      return Status::kOk;
-    }
-  }
-  return Status::kNotFound;
-}
-
-Status Sequence::SetNotePitch(Id id, NotePitch note_pitch) noexcept {
-  if (const auto* position = FindOrNull(positions_, id)) {
-    if (auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id})) {
-      note->pitch = note_pitch;
-      return Status::kOk;
-    }
-  }
-  return Status::kNotFound;
-}
-
-Status Sequence::SetNotePosition(Id id, double position) noexcept {
+bool Sequence::SetNotePosition(Id id, double position) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     if (position_it->second != position) {
@@ -206,9 +157,9 @@ Status Sequence::SetNotePosition(Id id, double position) noexcept {
       notes_.insert(std::move(note_node));
       position_it->second = position;
     }
-    return Status::kOk;
+    return true;
   }
-  return Status::kNotFound;
+  return false;
 }
 
 void Sequence::ProcessInternal(

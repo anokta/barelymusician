@@ -17,7 +17,6 @@ cc_binary(
         "//barelymusician/common:id",
         "//barelymusician/common:random",
         "//barelymusician/common:status",
-        "//barelymusician/composition:note",
         "//barelymusician/composition:note_duration",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine",
@@ -66,7 +65,6 @@ cc_binary(
     deps = [
         "//barelymusician/common:id",
         "//barelymusician/common:status",
-        "//barelymusician/composition:note",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/engine",
         "//examples/common:audio_clock",

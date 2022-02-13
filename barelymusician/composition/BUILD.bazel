@@ -34,10 +34,9 @@ cc_library(
     srcs = ["sequence.cpp"],
     hdrs = ["sequence.h"],
     deps = [
-        ":note",
+        "//barelymusician:header",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
-        "//barelymusician/common:status",
     ],
 )
 
@@ -59,13 +58,4 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "sequence_test",
-    srcs = ["sequence_test.cpp"],
-    deps = [
-        ":note",
-        ":sequence",
-        "//barelymusician/common:status",
-        "@googletest//:gtest_main",
-    ],
-)
+# TODO: Add back sequence test.

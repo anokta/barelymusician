@@ -13,7 +13,6 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/note.h"
 #include "barelymusician/composition/note_duration.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/engine.h"
@@ -40,7 +39,6 @@ using ::barelyapi::Engine;
 using ::barelyapi::GetPitch;
 using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::Id;
-using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
 using ::bazel::tools::cpp::runfiles::Runfiles;
@@ -81,7 +79,11 @@ void ComposeChord(float root_note, const std::vector<float>& scale,
   const auto add_chord_note = [&](int index) {
     engine->AddPerformerNote(
         performer_id, offset,
-        Note{root_note + GetPitch(scale, index), intensity, 1.0});
+        BarelyNoteDefinition{
+            .duration_definition = {.duration = 1.0},
+            .intensity_definition = {.intensity = intensity},
+            .pitch_definition = {.absolute_pitch =
+                                     root_note + GetPitch(scale, index)}});
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -95,9 +97,13 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
-    engine->AddPerformerNote(performer_id, begin_position + offset,
-                             Note{root_note + GetPitch(scale, index), intensity,
-                                  end_position - begin_position});
+    engine->AddPerformerNote(
+        performer_id, begin_position + offset,
+        BarelyNoteDefinition{
+            .duration_definition = {.duration = end_position - begin_position},
+            .intensity_definition = {.intensity = intensity},
+            .pitch_definition = {.absolute_pitch =
+                                     root_note + GetPitch(scale, index)}});
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.25, harmonic);
@@ -126,7 +132,10 @@ void ComposeDrums(int bar, int beat, int num_beats, Random* random,
                             float pitch, float intensity) {
     engine->AddPerformerNote(
         performer_id, begin_position + offset,
-        Note{pitch, intensity, end_position - begin_position});
+        BarelyNoteDefinition{
+            .duration_definition = {.duration = end_position - begin_position},
+            .intensity_definition = {.intensity = intensity},
+            .pitch_definition = {.absolute_pitch = pitch}});
   };
 
   // Kick.

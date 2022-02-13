@@ -100,9 +100,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {
-    return Note{.pitch = pitch, .intensity = intensity, .duration = duration};
+    return BarelyNoteDefinition{
+        .duration_definition = {.duration = duration},
+        .intensity_definition = {.intensity = intensity},
+        .pitch_definition = {.absolute_pitch = pitch}};
   };
-  std::vector<std::pair<double, Note>> notes;
+  std::vector<std::pair<double, BarelyNoteDefinition>> notes;
   notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));
   notes.emplace_back(1.0, build_note(barelyapi::kPitchD4, 1.0));
   notes.emplace_back(2.0, build_note(barelyapi::kPitchE4, 1.0));

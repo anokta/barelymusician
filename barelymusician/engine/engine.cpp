@@ -67,11 +67,11 @@ Engine::Engine() noexcept
       // Perform sequence events.
       performer.sequence.Process(
           begin_position, end_position,
-          [&](double position, const Note& note) noexcept {
+          [&](double position, const BarelyNoteDefinition& note) noexcept {
             // TODO: Include note adjustments.
-            const float pitch = std::get<float>(note.pitch);
-            const float intensity = std::get<float>(note.intensity);
-            const double duration = std::get<double>(note.duration);
+            const float pitch = note.pitch_definition.absolute_pitch;
+            const float intensity = note.intensity_definition.intensity;
+            const double duration = note.duration_definition.duration;
             const double note_end_position =
                 std::min(position + std::max(duration, 0.0),
                          performer.sequence.GetEndPosition());
@@ -106,7 +106,7 @@ Id Engine::AddPerformer() noexcept {
 }
 
 StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
-                                      Note note) noexcept {
+                                      BarelyNoteDefinition note) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
     const Id note_id = ++id_counter_;
     performer->sequence.AddNote(note_id, position, note);
@@ -286,7 +286,10 @@ Status Engine::RemovePerformer(Id performer_id) noexcept {
 
 Status Engine::RemovePerformerNote(Id performer_id, Id note_id) noexcept {
   if (auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.RemoveNote(note_id);
+    if (performer->sequence.RemoveNote(note_id)) {
+      return Status::kOk;
+    }
+    return Status::kInternal;
   }
   return Status::kNotFound;
 }

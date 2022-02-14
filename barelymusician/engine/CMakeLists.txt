@@ -1,24 +1,4 @@
 add_library(
-  engine
-  engine.cpp
-  engine.h
-)
-target_link_libraries(
-  engine
-  instrument_controller
-  instrument_event
-  instrument_processor
-  parameter
-  sequence
-  task_runner
-  transport
-  header
-  find_or_null
-  id
-  status
-)
-
-add_library(
   instrument_controller
   instrument_controller.cpp
   instrument_controller.h
@@ -68,7 +48,6 @@ target_link_libraries(
   instrument_event
   header
   find_or_null
-  id
 )
 
 add_library(
@@ -82,22 +61,6 @@ add_library(
   transport.cpp
   transport.h
 )
-
-add_executable(
-  engine_test
-  engine_test.cpp
-)
-target_link_libraries(
-  engine_test
-  engine
-  parameter
-  header
-  id
-  status
-  gmock
-  gtest_main
-)
-gtest_discover_tests(engine_test)
 
 add_executable(
   parameter_test

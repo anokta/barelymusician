@@ -8,19 +8,9 @@ cc_library(
 )
 
 cc_library(
-    name = "id",
-    hdrs = ["id.h"],
-)
-
-cc_library(
     name = "random",
     srcs = ["random.cpp"],
     hdrs = ["random.h"],
-)
-
-cc_library(
-    name = "status",
-    hdrs = ["status.h"],
 )
 
 cc_library(

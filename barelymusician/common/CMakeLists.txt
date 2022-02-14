@@ -4,19 +4,9 @@ add_library(
 )
 
 add_library(
-  id INTERFACE
-  id.h
-)
-
-add_library(
   random
   random.cpp
   random.h
-)
-
-add_library(
-  status INTERFACE
-  status.h
 )
 
 add_library(

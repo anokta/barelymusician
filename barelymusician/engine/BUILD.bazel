@@ -3,25 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "engine",
-    srcs = ["engine.cpp"],
-    hdrs = ["engine.h"],
-    deps = [
-        ":instrument_controller",
-        ":instrument_event",
-        ":instrument_processor",
-        ":parameter",
-        ":sequence",
-        ":task_runner",
-        ":transport",
-        "//barelymusician:header",
-        "//barelymusician/common:find_or_null",
-        "//barelymusician/common:id",
-        "//barelymusician/common:status",
-    ],
-)
-
-cc_library(
     name = "instrument_controller",
     srcs = ["instrument_controller.cpp"],
     hdrs = ["instrument_controller.h"],
@@ -66,7 +47,6 @@ cc_library(
         ":instrument_event",
         "//barelymusician:header",
         "//barelymusician/common:find_or_null",
-        "//barelymusician/common:id",
     ],
 )
 
@@ -80,19 +60,6 @@ cc_library(
     name = "transport",
     srcs = ["transport.cpp"],
     hdrs = ["transport.h"],
-)
-
-cc_test(
-    name = "engine_test",
-    srcs = ["engine_test.cpp"],
-    deps = [
-        ":engine",
-        ":parameter",
-        "//barelymusician:header",
-        "//barelymusician/common:id",
-        "//barelymusician/common:status",
-        "@googletest//:gtest_main",
-    ],
 )
 
 # TODO: Add unit tests for instrument controller & processor.

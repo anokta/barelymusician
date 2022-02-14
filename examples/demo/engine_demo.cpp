@@ -51,7 +51,7 @@ using ::bazel::tools::cpp::runfiles::Runfiles;
 // @param harmonic Harmonic index.
 // @param offset Position offset in beats.
 // @param engine Pointer to engine.
-// @param performer_id Performer id.
+// @param performer_id Sequence id.
 using BeatComposerCallback =
     std::function<void(int bar, int beat, int num_beats, int harmonic,
                        double offset, Engine* engine, Id performer_id)>;
@@ -77,7 +77,7 @@ void ComposeChord(float root_note, const std::vector<float>& scale,
                   float intensity, int harmonic, double offset, Engine* engine,
                   Id performer_id) {
   const auto add_chord_note = [&](int index) {
-    engine->AddPerformerNote(
+    engine->AddSequenceNote(
         performer_id, offset,
         BarelyNoteDefinition{
             .duration_definition = {.duration = 1.0},
@@ -97,7 +97,7 @@ void ComposeLine(float root_note, const std::vector<float>& scale,
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
-    engine->AddPerformerNote(
+    engine->AddSequenceNote(
         performer_id, begin_position + offset,
         BarelyNoteDefinition{
             .duration_definition = {.duration = end_position - begin_position},
@@ -130,7 +130,7 @@ void ComposeDrums(int bar, int beat, int num_beats, Random* random,
   };
   const auto add_note = [&](double begin_position, double end_position,
                             float pitch, float intensity) {
-    engine->AddPerformerNote(
+    engine->AddSequenceNote(
         performer_id, begin_position + offset,
         BarelyNoteDefinition{
             .duration_definition = {.duration = end_position - begin_position},
@@ -243,12 +243,12 @@ int main(int /*argc*/, char* argv[]) {
       };
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
-  performers.emplace_back(engine.AddPerformer(), chords_beat_composer_callback);
-  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddSequence(), chords_beat_composer_callback);
+  engine.SetSequenceInstrument(performers.back().first, instrument_ids.back());
 
   build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
-  performers.emplace_back(engine.AddPerformer(), chords_beat_composer_callback);
-  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddSequence(), chords_beat_composer_callback);
+  engine.SetSequenceInstrument(performers.back().first, instrument_ids.back());
 
   const auto line_beat_composer_callback =
       [&](int bar, int beat, int num_beats, int harmonic, double offset,
@@ -258,8 +258,8 @@ int main(int /*argc*/, char* argv[]) {
       };
 
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
-  performers.emplace_back(engine.AddPerformer(), line_beat_composer_callback);
-  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddSequence(), line_beat_composer_callback);
+  engine.SetSequenceInstrument(performers.back().first, instrument_ids.back());
 
   const auto line_2_beat_composer_callback =
       [&](int bar, int beat, int num_beats, int harmonic, double offset,
@@ -269,8 +269,8 @@ int main(int /*argc*/, char* argv[]) {
       };
 
   build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
-  performers.emplace_back(engine.AddPerformer(), line_2_beat_composer_callback);
-  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddSequence(), line_2_beat_composer_callback);
+  engine.SetSequenceInstrument(performers.back().first, instrument_ids.back());
 
   // Add drumkit instrument.
   instrument_ids.push_back(
@@ -298,9 +298,8 @@ int main(int /*argc*/, char* argv[]) {
     ComposeDrums(bar, beat, num_beats, &random, offset, engine, performer_id);
   };
 
-  performers.emplace_back(engine.AddPerformer(),
-                          drumkit_beat_composer_callback);
-  engine.SetPerformerInstrument(performers.back().first, instrument_ids.back());
+  performers.emplace_back(engine.AddSequence(), drumkit_beat_composer_callback);
+  engine.SetSequenceInstrument(performers.back().first, instrument_ids.back());
 
   // Bar callback.
   const auto bar_composer_callback = [&progression](int bar) -> int {

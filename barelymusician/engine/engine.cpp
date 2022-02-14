@@ -40,55 +40,14 @@ Engine::Engine() noexcept
   transport_.SetUpdateCallback([this](double begin_position,
                                       double end_position) noexcept {
     InstrumentIdEventPairMap id_event_pairs;
-    for (auto& performer_it : performers_) {
-      auto& performer = performer_it.second;
-      const auto instrument_id = performer.instrument_id;
-      // Perform active note events.
-      for (auto it = performer.active_notes.begin();
-           it != performer.active_notes.end();) {
-        const auto& [note_begin_position, active_note] = *it;
-        double note_end_position = active_note.end_position;
-        if (note_end_position < end_position) {
-          note_end_position = std::max(begin_position, note_end_position);
-        } else if (begin_position < note_begin_position) {
-          note_end_position = begin_position;
-        } else {
-          ++it;
-          continue;
-        }
-        // Perform note off event.
-        id_event_pairs.emplace(
-            note_end_position,
-            InstrumentIdEventPair{instrument_id,
-                                  StopNoteEvent{active_note.pitch}});
-        it = performer.active_notes.erase(it);
-      }
-
-      // Perform sequence events.
-      performer.sequence.Process(
-          begin_position, end_position,
-          [&](double position, const BarelyNoteDefinition& note) noexcept {
-            // TODO: Include note adjustments.
-            const float pitch = note.pitch_definition.absolute_pitch;
-            const float intensity = note.intensity_definition.intensity;
-            const double duration = note.duration_definition.duration;
-            const double note_end_position =
-                std::min(position + std::max(duration, 0.0),
-                         performer.sequence.GetEndPosition());
-            // Perform note on event.
-            id_event_pairs.emplace(
-                position, InstrumentIdEventPair{
-                              instrument_id, StartNoteEvent{pitch, intensity}});
-            // Perform note off event.
-            if (note_end_position < end_position) {
-              id_event_pairs.emplace(
-                  note_end_position,
-                  InstrumentIdEventPair{instrument_id, StopNoteEvent{pitch}});
-            } else {
-              performer.active_notes.emplace(
-                  position, ActiveNote{note_end_position, pitch});
-            }
-          });
+    for (auto& sequence_it : sequences_) {
+      auto& sequence = sequence_it.second;
+      const auto instrument_id = sequence.GetInstrument();
+      sequence.SetEventCallback([&](double position, InstrumentEvent event) {
+        id_event_pairs.emplace(position,
+                               InstrumentIdEventPair{instrument_id, event});
+      });
+      sequence.Process(begin_position, end_position);
     }
     for (const auto& [position, id_event_pair] : id_event_pairs) {
       const auto& [instrument_id, event] = id_event_pair;
@@ -99,17 +58,17 @@ Engine::Engine() noexcept
   });
 }
 
-Id Engine::AddPerformer() noexcept {
-  const Id performer_id = ++id_counter_;
-  performers_.emplace(performer_id, Performer{});
-  return performer_id;
+Id Engine::AddSequence() noexcept {
+  const Id sequence_id = ++id_counter_;
+  sequences_.emplace(sequence_id, Sequence{});
+  return sequence_id;
 }
 
-StatusOr<Id> Engine::AddPerformerNote(Id performer_id, double position,
-                                      BarelyNoteDefinition note) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
+StatusOr<Id> Engine::AddSequenceNote(Id sequence_id, double position,
+                                     BarelyNoteDefinition note) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
     const Id note_id = ++id_counter_;
-    performer->sequence.AddNote(note_id, position, note);
+    sequence->AddNote(note_id, position, note);
     return note_id;
   }
   return Status::kNotFound;
@@ -131,9 +90,9 @@ Id Engine::CreateInstrument(BarelyInstrumentDefinition definition,
 Status Engine::DestroyInstrument(Id instrument_id) noexcept {
   if (const auto controller_it = controllers_.find(instrument_id);
       controller_it != controllers_.end()) {
-    for (auto& [performer_id, performer] : performers_) {
-      if (performer.instrument_id == instrument_id) {
-        performer.instrument_id = kInvalidId;
+    for (auto& [sequence_id, sequence] : sequences_) {
+      if (sequence.GetInstrument() == instrument_id) {
+        sequence.SetInstrument(kInvalidId);
       }
     }
     controller_it->second.StopAllNotes(transport_.GetTimestamp());
@@ -163,42 +122,39 @@ StatusOr<Parameter> Engine::GetInstrumentParameter(Id instrument_id,
   return Status::kNotFound;
 }
 
-StatusOr<double> Engine::GetPerformerBeginOffset(
-    Id performer_id) const noexcept {
-  if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.GetBeginOffset();
+StatusOr<double> Engine::GetSequenceBeginOffset(Id sequence_id) const noexcept {
+  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return sequence->GetBeginOffset();
   }
   return Status::kNotFound;
 }
 
-StatusOr<double> Engine::GetPerformerBeginPosition(
-    Id performer_id) const noexcept {
-  if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.GetBeginPosition();
+StatusOr<double> Engine::GetSequenceBeginPosition(
+    Id sequence_id) const noexcept {
+  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return sequence->GetBeginPosition();
   }
   return Status::kNotFound;
 }
 
-StatusOr<double> Engine::GetPerformerEndPosition(
-    Id performer_id) const noexcept {
-  if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.GetEndPosition();
+StatusOr<double> Engine::GetSequenceEndPosition(Id sequence_id) const noexcept {
+  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return sequence->GetEndPosition();
   }
   return Status::kNotFound;
 }
 
-StatusOr<double> Engine::GetPerformerLoopBeginOffset(
-    Id performer_id) const noexcept {
-  if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.GetLoopBeginOffset();
+StatusOr<double> Engine::GetSequenceLoopBeginOffset(
+    Id sequence_id) const noexcept {
+  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return sequence->GetLoopBeginOffset();
   }
   return Status::kNotFound;
 }
 
-StatusOr<double> Engine::GetPerformerLoopLength(
-    Id performer_id) const noexcept {
-  if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.GetLoopLength();
+StatusOr<double> Engine::GetSequenceLoopLength(Id sequence_id) const noexcept {
+  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return sequence->GetLoopLength();
   }
   return Status::kNotFound;
 }
@@ -224,16 +180,16 @@ StatusOr<bool> Engine::IsInstrumentNoteOn(Id instrument_id,
   return Status::kNotFound;
 }
 
-StatusOr<bool> Engine::IsPerformerEmpty(Id performer_id) const noexcept {
-  if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.IsEmpty();
+StatusOr<bool> Engine::IsSequenceEmpty(Id sequence_id) const noexcept {
+  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return sequence->IsEmpty();
   }
   return Status::kNotFound;
 }
 
-StatusOr<bool> Engine::IsPerformerLooping(Id performer_id) const noexcept {
-  if (const auto* performer = FindOrNull(performers_, performer_id)) {
-    return performer->sequence.IsLooping();
+StatusOr<bool> Engine::IsSequenceLooping(Id sequence_id) const noexcept {
+  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return sequence->IsLooping();
   }
   return Status::kNotFound;
 }
@@ -251,42 +207,42 @@ Status Engine::ProcessInstrument(Id instrument_id, double timestamp,
   return Status::kNotFound;
 }
 
-Status Engine::RemoveAllPerformerNotes(Id performer_id) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.RemoveAllNotes();
+Status Engine::RemoveAllSequenceNotes(Id sequence_id) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->RemoveAllNotes();
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::RemoveAllPerformerNotes(Id performer_id, double begin_position,
-                                       double end_position) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.RemoveAllNotes(begin_position, end_position);
+Status Engine::RemoveAllSequenceNotes(Id sequence_id, double begin_position,
+                                      double end_position) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->RemoveAllNotes(begin_position, end_position);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::RemovePerformer(Id performer_id) noexcept {
-  if (const auto performer_it = performers_.find(performer_id);
-      performer_it != performers_.end()) {
+Status Engine::RemoveSequence(Id sequence_id) noexcept {
+  if (const auto sequence_it = sequences_.find(sequence_id);
+      sequence_it != sequences_.end()) {
     const double timestamp = transport_.GetTimestamp();
-    const auto instrument_id = performer_it->second.instrument_id;
+    const auto instrument_id = sequence_it->second.GetInstrument();
     if (auto* controller = FindOrNull(controllers_, instrument_id)) {
-      for (auto& [position, active_note] : performer_it->second.active_notes) {
-        controller->ProcessEvent(StopNoteEvent{active_note.pitch}, timestamp);
+      for (const float pitch : sequence_it->second.GetActiveNotes()) {
+        controller->ProcessEvent(StopNoteEvent{pitch}, timestamp);
       }
     }
-    performers_.erase(performer_it);
+    sequences_.erase(sequence_it);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::RemovePerformerNote(Id performer_id, Id note_id) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    if (performer->sequence.RemoveNote(note_id)) {
+Status Engine::RemoveSequenceNote(Id sequence_id, Id note_id) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    if (sequence->RemoveNote(note_id)) {
       return Status::kOk;
     }
     return Status::kInternal;
@@ -367,72 +323,72 @@ Status Engine::SetInstrumentParameter(Id instrument_id, int index,
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerBeginOffset(Id performer_id,
-                                       double begin_offset) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.SetBeginOffset(begin_offset);
+Status Engine::SetSequenceBeginOffset(Id sequence_id,
+                                      double begin_offset) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->SetBeginOffset(begin_offset);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerBeginPosition(Id performer_id,
-                                         double begin_position) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.SetBeginPosition(begin_position);
+Status Engine::SetSequenceBeginPosition(Id sequence_id,
+                                        double begin_position) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->SetBeginPosition(begin_position);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerEndPosition(Id performer_id,
-                                       double end_position) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.SetEndPosition(end_position);
+Status Engine::SetSequenceEndPosition(Id sequence_id,
+                                      double end_position) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->SetEndPosition(end_position);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerLoop(Id performer_id, bool loop) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.SetLoop(loop);
+Status Engine::SetSequenceLoop(Id sequence_id, bool loop) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->SetLoop(loop);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerInstrument(Id performer_id,
-                                      Id instrument_id) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    if (performer->instrument_id != instrument_id) {
+Status Engine::SetSequenceInstrument(Id sequence_id,
+                                     Id instrument_id) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    if (sequence->GetInstrument() != instrument_id) {
       if (auto* controller =
-              FindOrNull(controllers_, performer->instrument_id)) {
-        for (auto& [position, active_note] : performer->active_notes) {
-          controller->ProcessEvent(StopNoteEvent{active_note.pitch},
+              FindOrNull(controllers_, sequence->GetInstrument())) {
+        for (const float pitch : sequence->GetActiveNotes()) {
+          controller->ProcessEvent(StopNoteEvent{pitch},
                                    transport_.GetTimestamp());
         }
       }
-      performer->instrument_id = instrument_id;
+      sequence->SetInstrument(instrument_id);
     }
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerLoopBeginOffset(Id performer_id,
-                                           double loop_begin_offset) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.SetLoopBeginOffset(loop_begin_offset);
+Status Engine::SetSequenceLoopBeginOffset(Id sequence_id,
+                                          double loop_begin_offset) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->SetLoopBeginOffset(loop_begin_offset);
     return Status::kOk;
   }
   return Status::kNotFound;
 }
 
-Status Engine::SetPerformerLoopLength(Id performer_id,
-                                      double loop_length) noexcept {
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    performer->sequence.SetLoopLength(loop_length);
+Status Engine::SetSequenceLoopLength(Id sequence_id,
+                                     double loop_length) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    sequence->SetLoopLength(loop_length);
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -478,8 +434,8 @@ Status Engine::StopInstrumentNote(Id instrument_id, float pitch) noexcept {
 }
 
 void Engine::StopPlayback() noexcept {
-  for (auto& [performer_id, performer] : performers_) {
-    performer.active_notes.clear();
+  for (auto& [sequence_id, sequence] : sequences_) {
+    sequence.Stop();
   }
   transport_.Stop();
   for (auto& [instrument_id, controller] : controllers_) {

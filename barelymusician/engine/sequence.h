@@ -10,6 +10,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/id.h"
+#include "barelymusician/engine/instrument_event.h"
 
 namespace barelyapi {
 
@@ -26,12 +27,8 @@ class Sequence {
   using NoteWithPositionIdPair =
       std::pair<NotePositionIdPair, BarelyNoteDefinition>;
 
-  /// Process callback signature.
-  ///
-  /// @param position Note position.
-  /// @param note Note.
-  using ProcessCallback =
-      std::function<void(double position, const BarelyNoteDefinition& note)>;
+  // TODO: Refactor this.
+  using EventCallback = std::function<void(double, InstrumentEvent)>;
 
   /// Adds new note at position.
   ///
@@ -41,48 +38,53 @@ class Sequence {
   /// @return True if success.
   bool AddNote(Id id, double position, BarelyNoteDefinition note) noexcept;
 
-  /// Returns the begin offset.
+  /// Returns begin offset.
   ///
   /// @return Begin offset in beats.
   [[nodiscard]] double GetBeginOffset() const noexcept;
 
-  /// Returns the begin position.
+  /// Returns begin position.
   ///
   /// @return Begin position in beats.
   [[nodiscard]] double GetBeginPosition() const noexcept;
 
-  /// Returns the end position.
+  /// Returns end position.
   ///
   /// @return End position in beats.
   [[nodiscard]] double GetEndPosition() const noexcept;
 
-  /// Returns the loop begin offset.
+  /// Returns instrument.
+  ///
+  /// @return Instrument identifier.
+  [[nodiscard]] Id GetInstrument() const noexcept;
+
+  /// Returns loop begin offset.
   ///
   /// @return Loop begin offset in beats.
   [[nodiscard]] double GetLoopBeginOffset() const noexcept;
 
-  /// Returns the loop length.
+  /// Returns loop length.
   ///
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept;
 
-  /// Returns whether the sequence is empty or not.
+  /// Returns whether sequence is empty or not.
   ///
   /// @return True if empty.
   [[nodiscard]] bool IsEmpty() const noexcept;
 
-  /// Returns whether the sequence is looping or not.
+  /// Returns whether sequence is looping or not.
   ///
   /// @return True if looping.
   [[nodiscard]] bool IsLooping() const noexcept;
 
-  /// Processes the sequence at given position range.
+  /// Processes sequence at given position range.
   ///
   /// @param begin_position Begin position.
   /// @param end_position End position.
   /// @param process_callback Process callback.
-  void Process(double begin_position, double end_position,
-               const ProcessCallback& process_callback) const noexcept;
+  // TODO: Pass conductor.
+  void Process(double begin_position, double end_position) noexcept;
 
   /// Removes all notes.
   void RemoveAllNotes() noexcept;
@@ -99,32 +101,39 @@ class Sequence {
   /// @return True if success.
   bool RemoveNote(Id id) noexcept;
 
-  /// Sets the begin offset.
+  /// Sets begin offset.
   ///
   /// @param begin_offset Begin offset in beats.
   void SetBeginOffset(double begin_offset) noexcept;
 
-  /// Sets the begin position.
+  /// Sets begin position.
   ///
   /// @param begin_position Begin position in beats.
   void SetBeginPosition(double begin_position) noexcept;
 
-  /// Sets the end position.
+  /// Sets end position.
   ///
   /// @param end_position End position in beats.
   void SetEndPosition(double end_position) noexcept;
 
-  /// Sets whether the sequence should be looping or not.
+  void SetEventCallback(EventCallback event_callback) noexcept;
+
+  /// Sets instrument.
+  ///
+  /// @param instrument_id Instrument identifier.
+  void SetInstrument(Id instrument_id) noexcept;
+
+  /// Sets whether sequence should be looping or not.
   ///
   /// @param loop True if looping.
   void SetLoop(bool loop) noexcept;
 
-  /// Sets the loop begin offset.
+  /// Sets loop begin offset.
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
   void SetLoopBeginOffset(double loop_begin_offset) noexcept;
 
-  /// Sets the loop length.
+  /// Sets loop length.
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept;
@@ -142,11 +151,37 @@ class Sequence {
   /// @return True if success.
   bool SetNotePosition(Id id, double position) noexcept;
 
+  // TODO: Temp.
+  void Stop() { active_notes_.clear(); }
+
+  // TODO: Temp.
+  std::vector<float> GetActiveNotes() {
+    std::vector<float> pitches;
+    pitches.reserve(active_notes_.size());
+    for (const auto& [position, note] : active_notes_) {
+      pitches.push_back(note.pitch);
+    }
+    return pitches;
+  }
+
  private:
   // Internal process helper function.
   void ProcessInternal(double begin_position, double end_position,
-                       double position_offset,
-                       const ProcessCallback& process_callback) const noexcept;
+                       double position_offset) noexcept;
+
+  // Active note that is being performed.
+  struct ActiveNote {
+    // TODO: Add note id to check remove events etc.
+
+    // Note end position.
+    double end_position;
+
+    // Note pitch.
+    float pitch;
+  };
+
+  // List of active notes.
+  std::multimap<double, ActiveNote> active_notes_;
 
   // Begin offset in beats.
   double begin_offset_ = 0.0;
@@ -157,7 +192,13 @@ class Sequence {
   // End position in beats.
   double end_position_ = std::numeric_limits<double>::max();
 
-  // Denotes whether the sequence is looping or not.
+  // TODO: Refactor this.
+  EventCallback event_callback_;
+
+  // Instrument identifier.
+  Id instrument_id_ = kInvalidId;
+
+  // Denotes whether sequence is looping or not.
   bool loop_ = false;
 
   // Loop begin offset in beats.
@@ -166,7 +207,7 @@ class Sequence {
   // Loop length in beats.
   double loop_length_ = 1.0;
 
-  // Sorted notes by their positions.
+  // Sorted note by position map.
   std::map<NotePositionIdPair, BarelyNoteDefinition> notes_;
 
   // Note positions.

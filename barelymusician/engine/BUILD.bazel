@@ -63,6 +63,7 @@ cc_library(
     srcs = ["sequence.cpp"],
     hdrs = ["sequence.h"],
     deps = [
+        ":instrument_event",
         "//barelymusician:header",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",

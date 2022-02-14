@@ -65,6 +65,7 @@ add_library(
 )
 target_link_libraries(
   sequence
+  instrument_event
   header
   find_or_null
   id

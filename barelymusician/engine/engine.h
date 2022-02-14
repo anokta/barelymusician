@@ -27,19 +27,19 @@ class Engine {
   /// Constructs new `Engine`.
   Engine() noexcept;
 
-  /// Adds new performer.
+  /// Adds new sequence.
   ///
-  /// @return Performer id.
-  Id AddPerformer() noexcept;
+  /// @return Sequence identifier.
+  Id AddSequence() noexcept;
 
-  /// Adds performer note.
+  /// Adds sequence note.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param position Note position.
   /// @param note Note.
   /// @return Note id.
-  StatusOr<Id> AddPerformerNote(Id performer_id, double position,
-                                BarelyNoteDefinition note) noexcept;
+  StatusOr<Id> AddSequenceNote(Id sequence_id, double position,
+                               BarelyNoteDefinition note) noexcept;
 
   /// Creates new instrument.
   ///
@@ -70,40 +70,40 @@ class Engine {
   [[nodiscard]] StatusOr<Parameter> GetInstrumentParameter(
       Id instrument_id, int index) const noexcept;
 
-  /// Returns performer begin offset.
+  /// Returns sequence begin offset.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return Begin offset in beats.
-  [[nodiscard]] StatusOr<double> GetPerformerBeginOffset(
-      Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetSequenceBeginOffset(
+      Id sequence_id) const noexcept;
 
-  /// Returns performer begin position.
+  /// Returns sequence begin position.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return Optional begin position in beats.
-  [[nodiscard]] StatusOr<double> GetPerformerBeginPosition(
-      Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetSequenceBeginPosition(
+      Id sequence_id) const noexcept;
 
-  /// Returns performer end position.
+  /// Returns sequence end position.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return Optional end position in beats.
-  [[nodiscard]] StatusOr<double> GetPerformerEndPosition(
-      Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetSequenceEndPosition(
+      Id sequence_id) const noexcept;
 
-  /// Returns performer loop begin offset.
+  /// Returns sequence loop begin offset.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return Loop begin offset in beats.
-  [[nodiscard]] StatusOr<double> GetPerformerLoopBeginOffset(
-      Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetSequenceLoopBeginOffset(
+      Id sequence_id) const noexcept;
 
-  /// Returns performer loop length.
+  /// Returns sequence loop length.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return Loop length in beats.
-  [[nodiscard]] StatusOr<double> GetPerformerLoopLength(
-      Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetSequenceLoopLength(
+      Id sequence_id) const noexcept;
 
   /// Returns the playback position.
   ///
@@ -130,18 +130,17 @@ class Engine {
   [[nodiscard]] StatusOr<bool> IsInstrumentNoteOn(Id instrument_id,
                                                   float pitch) const noexcept;
 
-  /// Returns whether the performer is empty or not.
+  /// Returns whether the sequence is empty or not.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return True if empty (i.e., has no notes), false if not, or error status.
-  [[nodiscard]] StatusOr<bool> IsPerformerEmpty(Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<bool> IsSequenceEmpty(Id sequence_id) const noexcept;
 
-  /// Returns whether the performer is looping or not.
+  /// Returns whether the sequence is looping or not.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return True if looping, false if not, or error status.
-  [[nodiscard]] StatusOr<bool> IsPerformerLooping(
-      Id performer_id) const noexcept;
+  [[nodiscard]] StatusOr<bool> IsSequenceLooping(Id sequence_id) const noexcept;
 
   /// Returns whether the playback is currently active or not.
   ///
@@ -159,33 +158,33 @@ class Engine {
   Status ProcessInstrument(Id instrument_id, double timestamp, float* output,
                            int num_channels, int num_frames) noexcept;
 
-  /// Removes all performer notes.
+  /// Removes all sequence notes.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return Status.
-  Status RemoveAllPerformerNotes(Id performer_id) noexcept;
+  Status RemoveAllSequenceNotes(Id sequence_id) noexcept;
 
-  /// Removes all performer notes at range.
+  /// Removes all sequence notes at range.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
   /// @return Status.
-  Status RemoveAllPerformerNotes(Id performer_id, double begin_position,
-                                 double end_position) noexcept;
+  Status RemoveAllSequenceNotes(Id sequence_id, double begin_position,
+                                double end_position) noexcept;
 
-  /// Removes performer.
+  /// Removes sequence.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @return Status.
-  Status RemovePerformer(Id performer_id) noexcept;
+  Status RemoveSequence(Id sequence_id) noexcept;
 
-  /// Removes performer note.
+  /// Removes sequence note.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param note_id Note id.
   /// @return Status.
-  Status RemovePerformerNote(Id performer_id, Id note_id) noexcept;
+  Status RemoveSequenceNote(Id sequence_id, Id note_id) noexcept;
 
   /// Resets all instrument parameters to default value.
   ///
@@ -248,56 +247,56 @@ class Engine {
   Status SetInstrumentParameter(Id instrument_id, int index,
                                 float value) noexcept;
 
-  /// Sets performer begin offset.
+  /// Sets sequence begin offset.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param begin_offset Begin offset in beats.
   /// @return Status.
-  Status SetPerformerBeginOffset(Id performer_id, double begin_offset) noexcept;
+  Status SetSequenceBeginOffset(Id sequence_id, double begin_offset) noexcept;
 
-  /// Sets performer begin position.
+  /// Sets sequence begin position.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param begin_position Begin position in beats.
   /// @return Status.
-  Status SetPerformerBeginPosition(Id performer_id,
-                                   double begin_position) noexcept;
+  Status SetSequenceBeginPosition(Id sequence_id,
+                                  double begin_position) noexcept;
 
-  /// Sets performer end position.
+  /// Sets sequence end position.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param end_position End position in beats.
   /// @return Status.
-  Status SetPerformerEndPosition(Id performer_id, double end_position) noexcept;
+  Status SetSequenceEndPosition(Id sequence_id, double end_position) noexcept;
 
-  /// Sets performer instrument.
+  /// Sets sequence instrument.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param instrument_id Instrument id.
   /// @return Status.
-  Status SetPerformerInstrument(Id performer_id, Id instrument_id) noexcept;
+  Status SetSequenceInstrument(Id sequence_id, Id instrument_id) noexcept;
 
-  /// Sets whether performer should be looping or not.
+  /// Sets whether sequence should be looping or not.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param loop True if looping.
   /// @return Status.
-  Status SetPerformerLoop(Id performer_id, bool loop) noexcept;
+  Status SetSequenceLoop(Id sequence_id, bool loop) noexcept;
 
-  /// Sets performer loop begin offset.
+  /// Sets sequence loop begin offset.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param loop_begin_offset Loop begin offset in beats.
   /// @return Status.
-  Status SetPerformerLoopBeginOffset(Id performer_id,
-                                     double loop_begin_offset) noexcept;
+  Status SetSequenceLoopBeginOffset(Id sequence_id,
+                                    double loop_begin_offset) noexcept;
 
-  /// Sets performer loop length.
+  /// Sets sequence loop length.
   ///
-  /// @param performer_id Performer id.
+  /// @param sequence_id Sequence identifier.
   /// @param loop_length Loop length in beats.
   /// @return Status.
-  Status SetPerformerLoopLength(Id performer_id, double loop_length) noexcept;
+  Status SetSequenceLoopLength(Id sequence_id, double loop_length) noexcept;
 
   /// Sets the playback beat callback.
   ///
@@ -351,25 +350,6 @@ class Engine {
   Transport& transport() { return transport_; }
 
  private:
-  // Active note that is being performed.
-  struct ActiveNote {
-    // Note end position.
-    double end_position;
-
-    // Note pitch.
-    float pitch;
-  };
-  struct Performer {
-    // List of active notes.
-    std::multimap<double, ActiveNote> active_notes;
-
-    // Instrument id to perform.
-    Id instrument_id;
-
-    // Sequence to perform.
-    Sequence sequence;
-  };
-
   // Monotonic identifier counter.
   Id id_counter_ = 0;
 
@@ -382,8 +362,8 @@ class Engine {
   // Audio thread task runner.
   TaskRunner runner_;
 
-  // List of performers.
-  std::unordered_map<Id, Performer> performers_;
+  // List of sequences.
+  std::unordered_map<Id, Sequence> sequences_;
 
   // Playback tempo in bpm.
   double playback_tempo_;

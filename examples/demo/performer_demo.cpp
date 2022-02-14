@@ -117,18 +117,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
                      build_note(barelyapi::kPitchB5, 1.0 / 3.0));
   notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
 
-  const Id performer_id = engine.AddPerformer();
-  engine.SetPerformerInstrument(performer_id, performer_instrument_id);
-  engine.SetPerformerBeginPosition(performer_id, 2.0);
-  engine.SetPerformerEndPosition(performer_id, 19.5);
-  engine.SetPerformerBeginOffset(performer_id, -1.0);
-  engine.SetPerformerLoop(performer_id, true);
-  engine.SetPerformerLoopBeginOffset(performer_id, 3.0);
-  engine.SetPerformerLoopLength(performer_id, 5.0);
+  const Id performer_id = engine.AddSequence();
+  engine.SetSequenceInstrument(performer_id, performer_instrument_id);
+  engine.SetSequenceBeginPosition(performer_id, 2.0);
+  engine.SetSequenceEndPosition(performer_id, 19.5);
+  engine.SetSequenceBeginOffset(performer_id, -1.0);
+  engine.SetSequenceLoop(performer_id, true);
+  engine.SetSequenceLoopBeginOffset(performer_id, 3.0);
+  engine.SetSequenceLoopLength(performer_id, 5.0);
   std::vector<Id> note_ids;
   for (const auto& [position, note] : notes) {
-    note_ids.push_back(GetStatusOrValue(
-        engine.AddPerformerNote(performer_id, position, note)));
+    note_ids.push_back(
+        GetStatusOrValue(engine.AddSequenceNote(performer_id, position, note)));
   }
 
   bool use_conductor = false;
@@ -170,11 +170,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
       // Toggle notes.
-      if (IsOk(engine.RemovePerformerNote(performer_id, note_ids[index]))) {
+      if (IsOk(engine.RemoveSequenceNote(performer_id, note_ids[index]))) {
         ConsoleLog() << "Removed note " << index;
         note_ids[index] = barelyapi::kInvalidId;
       } else {
-        note_ids[index] = GetStatusOrValue(engine.AddPerformerNote(
+        note_ids[index] = GetStatusOrValue(engine.AddSequenceNote(
             performer_id, notes[index].first, notes[index].second));
         ConsoleLog() << "Added note " << index;
       }
@@ -193,11 +193,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'L':
-        if (GetStatusOrValue(engine.IsPerformerLooping(performer_id))) {
-          engine.SetPerformerLoop(performer_id, false);
+        if (GetStatusOrValue(engine.IsSequenceLooping(performer_id))) {
+          engine.SetSequenceLoop(performer_id, false);
           ConsoleLog() << "Loop turned off";
         } else {
-          engine.SetPerformerLoop(performer_id, true);
+          engine.SetSequenceLoop(performer_id, true);
           ConsoleLog() << "Loop turned on";
         }
         return;

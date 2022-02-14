@@ -27,6 +27,8 @@ double Sequence::GetBeginPosition() const noexcept { return begin_position_; }
 
 double Sequence::GetEndPosition() const noexcept { return end_position_; }
 
+Id Sequence::GetInstrument() const noexcept { return instrument_id_; }
+
 double Sequence::GetLoopBeginOffset() const noexcept {
   return loop_begin_offset_;
 }
@@ -37,8 +39,28 @@ bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 
 bool Sequence::IsLooping() const noexcept { return loop_; }
 
-void Sequence::Process(double begin_position, double end_position,
-                       const ProcessCallback& process_callback) const noexcept {
+void Sequence::Process(double begin_position, double end_position) noexcept {
+  if (instrument_id_ == kInvalidId) return;
+
+  // Perform active note events.
+  for (auto it = active_notes_.begin(); it != active_notes_.end();) {
+    const auto& [note_begin_position, active_note] = *it;
+    double note_end_position = active_note.end_position;
+    if (note_end_position < end_position) {
+      note_end_position = std::max(begin_position, note_end_position);
+    } else if (begin_position < note_begin_position) {
+      note_end_position = begin_position;
+    } else {
+      ++it;
+      continue;
+    }
+    // Perform note off event.
+    if (event_callback_) {
+      event_callback_(note_end_position, StopNoteEvent{active_note.pitch});
+    }
+    it = active_notes_.erase(it);
+  }
+
   if (notes_.empty()) return;
 
   begin_position = std::max(begin_position, begin_position_);
@@ -65,8 +87,7 @@ void Sequence::Process(double begin_position, double end_position,
     if (double loop_end_position = loop_begin_offset_ + loop_length_;
         begin_position < loop_end_position) {
       loop_end_position = std::min(loop_end_position, end_position);
-      ProcessInternal(begin_position, loop_end_position, position_offset,
-                      process_callback);
+      ProcessInternal(begin_position, loop_end_position, position_offset);
       begin_position = loop_end_position;
     }
     // Process the rest of the loop iterations.
@@ -76,12 +97,11 @@ void Sequence::Process(double begin_position, double end_position,
           loop_begin_offset_ +
           std::min(loop_length_, end_position - begin_position);
       ProcessInternal(loop_begin_offset_, loop_end_position,
-                      position_offset + begin_position, process_callback);
+                      position_offset + begin_position);
       begin_position += loop_length_;
     }
   } else {
-    ProcessInternal(begin_position, end_position, position_offset,
-                    process_callback);
+    ProcessInternal(begin_position, end_position, position_offset);
   }
 }
 
@@ -92,6 +112,7 @@ void Sequence::RemoveAllNotes() noexcept {
 
 void Sequence::RemoveAllNotes(double begin_position,
                               double end_position) noexcept {
+  // TODO: Remove and send note off event for active notes.
   if (begin_position < end_position) {
     const auto begin =
         notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
@@ -105,6 +126,7 @@ void Sequence::RemoveAllNotes(double begin_position,
 }
 
 bool Sequence::RemoveNote(Id id) noexcept {
+  // TODO: Remove and send note off event if active note.
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     notes_.erase(NotePositionIdPair{position_it->second, id});
@@ -124,6 +146,16 @@ void Sequence::SetBeginPosition(double begin_position) noexcept {
 
 void Sequence::SetEndPosition(double end_position) noexcept {
   end_position_ = end_position;
+}
+
+void Sequence::SetEventCallback(EventCallback event_callback) noexcept {
+  event_callback_ = std::move(event_callback);
+}
+
+void Sequence::SetInstrument(Id instrument_id) noexcept {
+  // TODO: Send note off event for active notes.
+  active_notes_.clear();
+  instrument_id_ = instrument_id;
 }
 
 void Sequence::SetLoop(bool loop) noexcept { loop_ = loop; }
@@ -162,16 +194,31 @@ bool Sequence::SetNotePosition(Id id, double position) noexcept {
   return false;
 }
 
-void Sequence::ProcessInternal(
-    double begin_position, double end_position, double position_offset,
-    const ProcessCallback& process_callback) const noexcept {
-  if (!process_callback) return;
+void Sequence::ProcessInternal(double begin_position, double end_position,
+                               double position_offset) noexcept {
   const auto begin =
       notes_.lower_bound(NotePositionIdPair{begin_position, kInvalidId});
   const auto end =
       notes_.lower_bound(NotePositionIdPair{end_position, kInvalidId});
   for (auto it = begin; it != end; ++it) {
-    process_callback(it->first.first + position_offset, it->second);
+    const double position = it->first.first + position_offset;
+    const auto& note = it->second;
+    // TODO: Include note adjustments.
+    const float pitch = note.pitch_definition.absolute_pitch;
+    const float intensity = note.intensity_definition.intensity;
+    const double duration = note.duration_definition.duration;
+    const double note_end_position =
+        std::min(position + std::max(duration, 0.0), end_position_);
+    // Perform note on event.
+    if (event_callback_) {
+      event_callback_(position, StartNoteEvent{pitch, intensity});
+    }
+    // Perform note off event.
+    if (note_end_position >= end_position) {
+      active_notes_.emplace(position, ActiveNote{note_end_position, pitch});
+    } else if (event_callback_) {
+      event_callback_(note_end_position, StopNoteEvent{pitch});
+    }
   }
 }
 

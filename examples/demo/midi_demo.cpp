@@ -81,8 +81,8 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
           static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
       note.duration_definition.duration =
           get_position(midi_event.getTickDuration());
-      engine->AddPerformerNote(performer_id, get_position(midi_event.tick),
-                               note);
+      engine->AddSequenceNote(performer_id, get_position(midi_event.tick),
+                              note);
     }
   }
 }
@@ -115,11 +115,11 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<Id> instrument_ids;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
-    const Id performer_id = engine.AddPerformer();
+    const Id performer_id = engine.AddSequence();
     AddScore(midi_file[i], ticks_per_quarter, &engine, performer_id);
-    if (GetStatusOrValue(engine.IsPerformerEmpty(performer_id))) {
+    if (GetStatusOrValue(engine.IsSequenceEmpty(performer_id))) {
       ConsoleLog() << "Empty MIDI track: " << i;
-      engine.RemovePerformer(performer_id);
+      engine.RemoveSequence(performer_id);
       continue;
     }
     // Add instrument.
@@ -156,7 +156,7 @@ int main(int /*argc*/, char* argv[]) {
     engine.SetInstrumentParameter(instrument_id,
                                   SynthInstrumentParameter::kNumVoices,
                                   static_cast<float>(kNumInstrumentVoices));
-    engine.SetPerformerInstrument(performer_id, instrument_id);
+    engine.SetSequenceInstrument(performer_id, instrument_id);
     instrument_ids.push_back(instrument_id);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << instrument_ids.size();

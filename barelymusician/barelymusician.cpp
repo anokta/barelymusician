@@ -468,7 +468,7 @@ BarelyStatus BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id,
   if (!out_note_id) return BarelyStatus_kInvalidArgument;
 
   const auto note_id_or =
-      api->instance.AddPerformerNote(sequence_id, position, definition);
+      api->instance.AddSequenceNote(sequence_id, position, definition);
   if (IsOk(note_id_or)) {
     *out_note_id = GetStatusOrValue(note_id_or);
     return BarelyStatus_kOk;
@@ -480,14 +480,14 @@ BarelyStatus BarelySequence_Create(BarelyApi api, BarelyId* out_sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
 
-  *out_sequence_id = api->instance.AddPerformer();
+  *out_sequence_id = api->instance.AddSequence();
   return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelySequence_Destroy(BarelyApi api, BarelyId sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.RemovePerformer(sequence_id));
+  return GetStatus(api->instance.RemoveSequence(sequence_id));
 }
 
 BarelyStatus BarelySequence_GetBeginOffset(BarelyApi api, BarelyId sequence_id,
@@ -496,7 +496,7 @@ BarelyStatus BarelySequence_GetBeginOffset(BarelyApi api, BarelyId sequence_id,
   if (!out_begin_offset) return BarelyStatus_kInvalidArgument;
 
   const auto begin_offset_or =
-      api->instance.GetPerformerBeginOffset(sequence_id);
+      api->instance.GetSequenceBeginOffset(sequence_id);
   if (IsOk(begin_offset_or)) {
     *out_begin_offset = GetStatusOrValue(begin_offset_or);
     return BarelyStatus_kOk;
@@ -511,7 +511,7 @@ BarelyStatus BarelySequence_GetBeginPosition(BarelyApi api,
   if (!out_begin_position) return BarelyStatus_kInvalidArgument;
 
   const auto begin_position_or =
-      api->instance.GetPerformerBeginPosition(sequence_id);
+      api->instance.GetSequenceBeginPosition(sequence_id);
   if (IsOk(begin_position_or)) {
     *out_begin_position = GetStatusOrValue(begin_position_or);
     return BarelyStatus_kOk;
@@ -525,7 +525,7 @@ BarelyStatus BarelySequence_GetEndPosition(BarelyApi api, BarelyId sequence_id,
   if (!out_end_position) return BarelyStatus_kInvalidArgument;
 
   const auto end_position_or =
-      api->instance.GetPerformerEndPosition(sequence_id);
+      api->instance.GetSequenceEndPosition(sequence_id);
   if (IsOk(end_position_or)) {
     *out_end_position = GetStatusOrValue(end_position_or);
     return BarelyStatus_kOk;
@@ -550,7 +550,7 @@ BarelyStatus BarelySequence_GetLoopBeginOffset(BarelyApi api,
   if (!out_loop_begin_offset) return BarelyStatus_kInvalidArgument;
 
   const auto loop_begin_offset_or =
-      api->instance.GetPerformerLoopBeginOffset(sequence_id);
+      api->instance.GetSequenceLoopBeginOffset(sequence_id);
   if (IsOk(loop_begin_offset_or)) {
     *out_loop_begin_offset = GetStatusOrValue(loop_begin_offset_or);
     return BarelyStatus_kOk;
@@ -563,7 +563,7 @@ BarelyStatus BarelySequence_GetLoopLength(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_loop_length) return BarelyStatus_kInvalidArgument;
 
-  const auto loop_length_or = api->instance.GetPerformerLoopLength(sequence_id);
+  const auto loop_length_or = api->instance.GetSequenceLoopLength(sequence_id);
   if (IsOk(loop_length_or)) {
     *out_loop_length = GetStatusOrValue(loop_length_or);
     return BarelyStatus_kOk;
@@ -597,7 +597,7 @@ BarelyStatus BarelySequence_IsEmpty(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_empty) return BarelyStatus_kInvalidArgument;
 
-  const auto is_empty_or = api->instance.IsPerformerEmpty(sequence_id);
+  const auto is_empty_or = api->instance.IsSequenceEmpty(sequence_id);
   if (IsOk(is_empty_or)) {
     *out_is_empty = GetStatusOrValue(is_empty_or);
     return BarelyStatus_kOk;
@@ -610,7 +610,7 @@ BarelyStatus BarelySequence_IsLooping(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_looping) return BarelyStatus_kInvalidArgument;
 
-  const auto is_looping_or = api->instance.IsPerformerLooping(sequence_id);
+  const auto is_looping_or = api->instance.IsSequenceLooping(sequence_id);
   if (IsOk(is_looping_or)) {
     *out_is_looping = GetStatusOrValue(is_looping_or);
     return BarelyStatus_kOk;
@@ -622,7 +622,7 @@ BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
                                            BarelyId sequence_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.RemoveAllPerformerNotes(sequence_id));
+  return GetStatus(api->instance.RemoveAllSequenceNotes(sequence_id));
 }
 
 BarelyStatus BarelySequence_RemoveAllNotesAtPosition(BarelyApi api,
@@ -640,7 +640,7 @@ BarelyStatus BarelySequence_RemoveAllNotesAtRange(BarelyApi api,
                                                   double end_position) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.RemoveAllPerformerNotes(
+  return GetStatus(api->instance.RemoveAllSequenceNotes(
       sequence_id, begin_position, end_position));
 }
 
@@ -648,7 +648,7 @@ BarelyStatus BarelySequence_RemoveNote(BarelyApi api, BarelyId sequence_id,
                                        BarelyId note_id) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.RemovePerformerNote(sequence_id, note_id));
+  return GetStatus(api->instance.RemoveSequenceNote(sequence_id, note_id));
 }
 
 BarelyStatus BarelySequence_SetBeginOffset(BarelyApi api, BarelyId sequence_id,
@@ -656,7 +656,7 @@ BarelyStatus BarelySequence_SetBeginOffset(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(
-      api->instance.SetPerformerBeginOffset(sequence_id, begin_offset));
+      api->instance.SetSequenceBeginOffset(sequence_id, begin_offset));
 }
 
 BarelyStatus BarelySequence_SetBeginPosition(BarelyApi api,
@@ -665,7 +665,7 @@ BarelyStatus BarelySequence_SetBeginPosition(BarelyApi api,
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(
-      api->instance.SetPerformerBeginPosition(sequence_id, begin_position));
+      api->instance.SetSequenceBeginPosition(sequence_id, begin_position));
 }
 
 BarelyStatus BarelySequence_SetEndPosition(BarelyApi api, BarelyId sequence_id,
@@ -673,7 +673,7 @@ BarelyStatus BarelySequence_SetEndPosition(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(
-      api->instance.SetPerformerEndPosition(sequence_id, end_position));
+      api->instance.SetSequenceEndPosition(sequence_id, end_position));
 }
 
 BarelyStatus BarelySequence_SetInstrument(BarelyApi api, BarelyId sequence_id,
@@ -681,7 +681,7 @@ BarelyStatus BarelySequence_SetInstrument(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(
-      api->instance.SetPerformerInstrument(sequence_id, instrument_id));
+      api->instance.SetSequenceInstrument(sequence_id, instrument_id));
 }
 
 BarelyStatus BarelySequence_SetLoopBeginOffset(BarelyApi api,
@@ -689,8 +689,8 @@ BarelyStatus BarelySequence_SetLoopBeginOffset(BarelyApi api,
                                                double loop_begin_offset) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.SetPerformerLoopBeginOffset(
-      sequence_id, loop_begin_offset));
+  return GetStatus(
+      api->instance.SetSequenceLoopBeginOffset(sequence_id, loop_begin_offset));
 }
 
 BarelyStatus BarelySequence_SetLoopLength(BarelyApi api, BarelyId sequence_id,
@@ -698,14 +698,14 @@ BarelyStatus BarelySequence_SetLoopLength(BarelyApi api, BarelyId sequence_id,
   if (!api) return BarelyStatus_kNotFound;
 
   return GetStatus(
-      api->instance.SetPerformerLoopLength(sequence_id, loop_length));
+      api->instance.SetSequenceLoopLength(sequence_id, loop_length));
 }
 
 BarelyStatus BarelySequence_SetLooping(BarelyApi api, BarelyId sequence_id,
                                        bool is_looping) {
   if (!api) return BarelyStatus_kNotFound;
 
-  return GetStatus(api->instance.SetPerformerLoop(sequence_id, is_looping));
+  return GetStatus(api->instance.SetSequenceLoop(sequence_id, is_looping));
 }
 
 BarelyStatus BarelySequence_SetNoteDefinition(

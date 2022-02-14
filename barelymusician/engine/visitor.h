@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMMON_VISITOR_H_
-#define BARELYMUSICIAN_COMMON_VISITOR_H_
+#ifndef BARELYMUSICIAN_ENGINE_VISITOR_H_
+#define BARELYMUSICIAN_ENGINE_VISITOR_H_
 
 namespace barelyapi {
 
@@ -13,4 +13,4 @@ Visitor(Types...) -> Visitor<Types...>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMMON_VISITOR_H_
+#endif  // BARELYMUSICIAN_ENGINE_VISITOR_H_

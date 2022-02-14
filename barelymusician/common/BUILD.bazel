@@ -13,11 +13,6 @@ cc_library(
     hdrs = ["random.h"],
 )
 
-cc_library(
-    name = "visitor",
-    hdrs = ["visitor.h"],
-)
-
 cc_test(
     name = "find_or_null_test",
     srcs = ["find_or_null_test.cpp"],
@@ -32,15 +27,6 @@ cc_test(
     srcs = ["random_test.cpp"],
     deps = [
         ":random",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "visitor_test",
-    srcs = ["visitor_test.cpp"],
-    deps = [
-        ":visitor",
         "@googletest//:gtest_main",
     ],
 )

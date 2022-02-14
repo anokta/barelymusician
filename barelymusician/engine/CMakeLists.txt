@@ -7,8 +7,8 @@ target_link_libraries(
   instrument_controller
   instrument_event
   parameter
-  header
   visitor
+  header
 )
 
 add_library(
@@ -24,8 +24,8 @@ add_library(
 target_link_libraries(
   instrument_processor
   instrument_event
-  header
   visitor
+  header
 )
 
 add_library(
@@ -62,6 +62,11 @@ add_library(
   transport.h
 )
 
+add_library(
+  visitor INTERFACE
+  visitor.h
+)
+
 add_executable(
   parameter_test
   parameter_test.cpp
@@ -96,3 +101,13 @@ target_link_libraries(
 )
 gtest_discover_tests(transport_test)
 
+add_executable(
+  visitor_test
+  visitor_test.cpp
+)
+target_link_libraries(
+  visitor_test
+  visitor
+  gtest_main
+)
+gtest_discover_tests(visitor_test)

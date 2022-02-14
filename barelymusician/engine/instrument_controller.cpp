@@ -5,8 +5,8 @@
 #include <variant>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/visitor.h"
 #include "barelymusician/engine/instrument_event.h"
+#include "barelymusician/engine/visitor.h"
 
 namespace barelyapi {
 

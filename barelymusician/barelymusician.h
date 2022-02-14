@@ -317,11 +317,11 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(BarelyApi api,
 /// @param api BarelyMusician api.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
-/// @param out_parameter_definition Output parameter definition.
+/// @param out_definition Output parameter definition.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
     BarelyApi api, BarelyId instrument_id, int32_t index,
-    BarelyParameterDefinition* out_parameter_definition);
+    BarelyParameterDefinition* out_definition);
 
 /// Gets whether instrument is muted or not.
 ///

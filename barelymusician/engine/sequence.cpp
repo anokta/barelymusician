@@ -158,8 +158,6 @@ void Sequence::SetInstrument(Id instrument_id) noexcept {
   instrument_id_ = instrument_id;
 }
 
-void Sequence::SetLoop(bool loop) noexcept { loop_ = loop; }
-
 void Sequence::SetLoopBeginOffset(double loop_begin_offset) noexcept {
   loop_begin_offset_ = loop_begin_offset;
 }
@@ -167,6 +165,8 @@ void Sequence::SetLoopBeginOffset(double loop_begin_offset) noexcept {
 void Sequence::SetLoopLength(double loop_length) noexcept {
   loop_length_ = std::max(loop_length, 0.0);
 }
+
+void Sequence::SetLooping(bool is_looping) noexcept { loop_ = is_looping; }
 
 bool Sequence::SetNoteDefinition(Id id,
                                  BarelyNoteDefinition definition) noexcept {

@@ -123,11 +123,6 @@ class Sequence {
   /// @param instrument_id Instrument identifier.
   void SetInstrument(Id instrument_id) noexcept;
 
-  /// Sets whether sequence should be looping or not.
-  ///
-  /// @param loop True if looping.
-  void SetLoop(bool loop) noexcept;
-
   /// Sets loop begin offset.
   ///
   /// @param loop_begin_offset Loop begin offset in beats.
@@ -137,6 +132,11 @@ class Sequence {
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept;
+
+  /// Sets whether sequence should be looping or not.
+  ///
+  /// @param is_looping True if looping.
+  void SetLooping(bool is_looping) noexcept;
 
   /// Sets note.
   ///

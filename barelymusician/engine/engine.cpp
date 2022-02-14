@@ -352,7 +352,7 @@ Status Engine::SetSequenceEndPosition(Id sequence_id,
 
 Status Engine::SetSequenceLoop(Id sequence_id, bool loop) noexcept {
   if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
-    sequence->SetLoop(loop);
+    sequence->SetLooping(loop);
     return Status::kOk;
   }
   return Status::kNotFound;

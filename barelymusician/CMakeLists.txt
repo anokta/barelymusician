@@ -1,5 +1,6 @@
-# TODO(#91): Add `barelymusician` and `header` targets separately.
+# TODO(#91): Add `barelymusician` target.
 
 add_library(
-  barelymusician INTERFACE
+  header INTERFACE
+  barelymusician.h
 )

@@ -1,5 +1,6 @@
 add_library(
   context_free_grammar INTERFACE
+  context_free_grammar.h
 )
 target_link_libraries(
   context_free_grammar INTERFACE

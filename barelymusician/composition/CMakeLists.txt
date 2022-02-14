@@ -1,11 +1,13 @@
 add_library(
   note_duration
   note_duration.cpp
+  note_duration.h
 )
 
 add_library(
   note_pitch
   note_pitch.cpp
+  note_pitch.h
 )
 
 add_executable(

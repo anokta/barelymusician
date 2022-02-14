@@ -1,6 +1,7 @@
 add_library(
   engine
   engine.cpp
+  engine.h
 )
 target_link_libraries(
   engine
@@ -11,7 +12,7 @@ target_link_libraries(
   sequence
   task_runner
   transport
-  barelymusician
+  header
   find_or_null
   id
   status
@@ -20,46 +21,51 @@ target_link_libraries(
 add_library(
   instrument_controller
   instrument_controller.cpp
+  instrument_controller.h
 )
 target_link_libraries(
   instrument_controller
   instrument_event
   parameter
-  barelymusician
+  header
   visitor
 )
 
 add_library(
   instrument_event INTERFACE
+  instrument_event.h
 )
 
 add_library(
   instrument_processor
   instrument_processor.cpp
+  instrument_processor.h
 )
 target_link_libraries(
   instrument_processor
   instrument_event
-  barelymusician
+  header
   visitor
 )
 
 add_library(
   parameter
   parameter.cpp
+  parameter.h
 )
 target_link_libraries(
   parameter
-  barelymusician
+  header
 )
 
 add_library(
   sequence
   sequence.cpp
+  sequence.h
 )
 target_link_libraries(
   sequence
-  barelymusician
+  header
   find_or_null
   id
 )
@@ -67,11 +73,13 @@ target_link_libraries(
 add_library(
   task_runner
   task_runner.cpp
+  task_runner.h
 )
 
 add_library(
   transport
   transport.cpp
+  transport.h
 )
 
 add_executable(
@@ -82,7 +90,7 @@ target_link_libraries(
   engine_test
   engine
   parameter
-  barelymusician
+  header
   id
   status
   gmock

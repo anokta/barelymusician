@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/note.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/instruments/synth_instrument.h"
 
@@ -18,7 +17,6 @@ using ::barelyapi::Engine;
 using ::barelyapi::GetStatusOrStatus;
 using ::barelyapi::GetStatusOrValue;
 using ::barelyapi::IsOk;
-using ::barelyapi::Note;
 using ::barelyapi::Status;
 using ::barelyapi::StatusOr;
 

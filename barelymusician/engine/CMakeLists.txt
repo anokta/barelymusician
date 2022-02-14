@@ -8,13 +8,13 @@ target_link_libraries(
   instrument_event
   instrument_processor
   parameter
+  sequence
   task_runner
   transport
   barelymusician
   find_or_null
   id
   status
-  sequence
 )
 
 add_library(
@@ -51,6 +51,17 @@ add_library(
 target_link_libraries(
   parameter
   barelymusician
+)
+
+add_library(
+  sequence
+  sequence.cpp
+)
+target_link_libraries(
+  sequence
+  barelymusician
+  find_or_null
+  id
 )
 
 add_library(

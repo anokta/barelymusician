@@ -3,41 +3,15 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "note",
-    hdrs = ["note.h"],
-    deps = [
-        ":note_duration",
-        ":note_intensity",
-        ":note_pitch",
-    ],
-)
-
-cc_library(
     name = "note_duration",
     srcs = ["note_duration.cpp"],
     hdrs = ["note_duration.h"],
 )
 
 cc_library(
-    name = "note_intensity",
-    hdrs = ["note_intensity.h"],
-)
-
-cc_library(
     name = "note_pitch",
     srcs = ["note_pitch.cpp"],
     hdrs = ["note_pitch.h"],
-)
-
-cc_library(
-    name = "sequence",
-    srcs = ["sequence.cpp"],
-    hdrs = ["sequence.h"],
-    deps = [
-        "//barelymusician:header",
-        "//barelymusician/common:find_or_null",
-        "//barelymusician/common:id",
-    ],
 )
 
 cc_test(
@@ -57,5 +31,3 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
-
-# TODO: Add back sequence test.

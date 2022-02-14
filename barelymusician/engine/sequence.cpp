@@ -1,4 +1,4 @@
-#include "barelymusician/composition/sequence.h"
+#include "barelymusician/engine/sequence.h"
 
 #include <algorithm>
 #include <cmath>

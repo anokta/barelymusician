@@ -11,13 +11,13 @@ cc_library(
         ":instrument_event",
         ":instrument_processor",
         ":parameter",
+        ":sequence",
         ":task_runner",
         ":transport",
         "//barelymusician:header",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:id",
         "//barelymusician/common:status",
-        "//barelymusician/composition:sequence",
     ],
 )
 
@@ -59,6 +59,17 @@ cc_library(
 )
 
 cc_library(
+    name = "sequence",
+    srcs = ["sequence.cpp"],
+    hdrs = ["sequence.h"],
+    deps = [
+        "//barelymusician:header",
+        "//barelymusician/common:find_or_null",
+        "//barelymusician/common:id",
+    ],
+)
+
+cc_library(
     name = "task_runner",
     srcs = ["task_runner.cpp"],
     hdrs = ["task_runner.h"],
@@ -93,6 +104,8 @@ cc_test(
         "@googletest//:gtest_main",
     ],
 )
+
+# TODO: Add back sequence unit test.
 
 cc_test(
     name = "task_runner_test",

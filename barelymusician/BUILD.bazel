@@ -9,7 +9,6 @@ cc_library(
     deps = [
         ":header",
         "//barelymusician/common:status",
-        "//barelymusician/composition:note",
         "//barelymusician/engine",
         "//examples/instruments:synth_instrument",
     ],

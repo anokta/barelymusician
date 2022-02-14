@@ -11,7 +11,7 @@
 #include "barelymusician/common/id.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/common/status.h"
-#include "barelymusician/composition/note.h"
+#include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/engine/engine.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -30,7 +30,6 @@ using ::barely::examples::SynthInstrumentParameter;
 using ::barelyapi::Engine;
 using ::barelyapi::Id;
 using ::barelyapi::IsOk;
-using ::barelyapi::Note;
 using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
 

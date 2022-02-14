@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 #define BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 
-#include <variant>
 #include <vector>
 
 namespace barelyapi {
@@ -138,9 +137,6 @@ inline constexpr float kPitchKick = kPitchC3;
 inline constexpr float kPitchSnare = kPitchD3;
 inline constexpr float kPitchHihatClosed = kPitchE3;
 inline constexpr float kPitchHihatOpen = kPitchF3;
-
-/// Note pitch type.
-using NotePitch = std::variant<float>;
 
 /// Returns note pitch for a given scale and index.
 ///

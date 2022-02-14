@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_COMPOSITION_NOTE_DURATION_H_
 #define BARELYMUSICIAN_COMPOSITION_NOTE_DURATION_H_
 
-#include <variant>
-
 namespace barelyapi {
 
 /// Common note values in relation to quarter note beat duration.
@@ -13,9 +11,6 @@ inline constexpr int kNumSixteenthNotesPerBeat = 4;
 inline constexpr int kNumSixteenthTripletNotesPerBeat = 6;
 inline constexpr int kNumThirtySecondNotesPerBeat = 8;
 inline constexpr int kNumThirtySecondTripletNotesPerBeat = 12;
-
-/// Note duration type.
-using NoteDuration = std::variant<double>;
 
 /// Returns quantized position for a given number of beat steps.
 ///

@@ -1,15 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
-    name = "api_demo",
-    srcs = ["api_demo.cpp"],
-    deps = [
-        "//examples/common:console_log",
-        "//platforms/api:barelymusician",
-    ],
-)
-
-cc_binary(
     name = "engine_demo",
     srcs = ["engine_demo.cpp"],
     data = ["//examples/data:audio"],
@@ -84,7 +75,7 @@ cc_binary(
         "//barelymusician/common:id",
         "//barelymusician/common:random",
         "//barelymusician/common:status",
-        "//barelymusician/composition:note",
+        "//barelymusician/composition:note_pitch",
         "//barelymusician/engine",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",

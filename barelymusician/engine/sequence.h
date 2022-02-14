@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_
-#define BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_
+#ifndef BARELYMUSICIAN_ENGINE_SEQUENCE_H_
+#define BARELYMUSICIAN_ENGINE_SEQUENCE_H_
 
 #include <functional>
 #include <limits>
@@ -175,4 +175,4 @@ class Sequence {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_COMPOSITION_SEQUENCE_H_
+#endif  // BARELYMUSICIAN_ENGINE_SEQUENCE_H_

@@ -86,3 +86,15 @@ BarelyInstrumentDefinition SynthInstrument::GetDefinition() noexcept {
 }
 
 }  // namespace barely::examples
+
+extern "C" {
+
+BarelyStatus BarelyExamples_CreateSynthInstrument(BarelyApi api,
+                                                  int32_t sample_rate,
+                                                  BarelyId* out_instrument_id) {
+  return BarelyInstrument_Create(
+      api, barely::examples::SynthInstrument::GetDefinition(), sample_rate,
+      out_instrument_id);
+}
+
+}  // extern "C"

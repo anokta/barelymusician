@@ -926,10 +926,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetNotePosition(BarelyApi api,
                                                           BarelyId note_id,
                                                           double position);
 
-// TODO(#85): Temporary shortcut to test instruments, move to `//examples/capi`.
-BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
-    BarelyApi api, int32_t sample_rate, BarelyId* out_instrument_id);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus

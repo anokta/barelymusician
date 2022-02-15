@@ -16,7 +16,6 @@ cc_library(
         "//barelymusician/engine:sequence",
         "//barelymusician/engine:task_runner",
         "//barelymusician/engine:transport",
-        "//examples/instruments:synth_instrument",
     ],
     alwayslink = True,
 )

@@ -15,11 +15,9 @@
 #include "barelymusician/engine/sequence.h"
 #include "barelymusician/engine/task_runner.h"
 #include "barelymusician/engine/transport.h"
-#include "examples/instruments/synth_instrument.h"
 
 namespace {
 
-using ::barely::examples::SynthInstrument;
 using ::barelyapi::FindOrNull;
 using ::barelyapi::InstrumentController;
 using ::barelyapi::InstrumentEvent;
@@ -878,13 +876,6 @@ BarelyStatus BarelySequence_SetNotePosition(BarelyApi api,
 
   // TODO(#85): Implement.
   return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelyExamples_CreateSynthInstrument(BarelyApi api,
-                                                  int32_t sample_rate,
-                                                  BarelyId* out_instrument_id) {
-  return BarelyInstrument_Create(api, SynthInstrument::GetDefinition(),
-                                 sample_rate, out_instrument_id);
 }
 
 }  // extern "C"

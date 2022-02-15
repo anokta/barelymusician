@@ -173,7 +173,7 @@ class StatusOr {
 };
 
 /// Parameter definition.
-struct ParameterDefinition {
+struct ParameterDefinition : public BarelyParameterDefinition {
   /// Constructs new `ParameterDefinition` for a float value.
   ///
   /// @param default_value Default float value.
@@ -183,9 +183,7 @@ struct ParameterDefinition {
       float default_value,
       float min_value = std::numeric_limits<float>::lowest(),
       float max_value = std::numeric_limits<float>::max())
-      : default_value(default_value),
-        min_value(min_value),
-        max_value(max_value) {}
+      : BarelyParameterDefinition{default_value, min_value, max_value} {}
 
   /// Constructs new `ParameterDefinition` for a boolean value.
   ///
@@ -205,87 +203,74 @@ struct ParameterDefinition {
                             static_cast<float>(min_value),
                             static_cast<float>(max_value)) {}
 
-  /// Default value.
-  float default_value;
-
-  /// Minimum value.
-  float min_value;
-
-  /// Maximum value.
-  float max_value;
+  /// Constructs new `ParameterDefinition` from internal type.
+  ///
+  /// @param definition Internal parameter definition.
+  explicit ParameterDefinition(BarelyParameterDefinition definition)
+      : BarelyParameterDefinition(definition) {}
 };
 
 /// Instrument definition.
-struct InstrumentDefinition {
+struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Create function signature.
-  ///
-  /// @param state Pointer to instrument state.
-  /// @param sample_rate Sampling rate in hz.
-  using CreateFn = void (*)(void** state, int sample_rate);
+  using CreateCallback = BarelyInstrumentDefinition_CreateCallback;
 
   /// Destroy function signature.
-  ///
-  /// @param state Pointer to instrument state.
-  using DestroyFn = void (*)(void** state);
+  using DestroyCallback = BarelyInstrumentDefinition_DestroyCallback;
 
   /// Process function signature.
-  ///
-  /// @param state Pointer to instrument state.
-  /// @param output Output buffer.
-  /// @param num_output_channels Number of channels.
-  /// @param num_output_frames Number of frames.
-  using ProcessFn = void (*)(void** state, float* output,
-                             int num_output_channels, int num_output_frames);
+  using ProcessCallback = BarelyInstrumentDefinition_ProcessCallback;
 
   /// Set data function signature.
-  ///
-  /// @param state Pointer to instrument state.
-  /// @param data Data.
-  using SetDataFn = void (*)(void** state, void* data);
+  using SetDataCallback = BarelyInstrumentDefinition_SetDataCallback;
 
-  /// Set note off function signature.
-  ///
-  /// @param state Pointer to instrument state.
-  /// @param pitch Note pitch.
-  using SetNoteOffFn = void (*)(void** state, float pitch);
+  /// Set note off function signature
+  using SetNoteOffCallback = BarelyInstrumentDefinition_SetNoteOffCallback;
 
   /// Set note on function signature.
-  ///
-  /// @param state Pointer to instrument state.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  using SetNoteOnFn = void (*)(void** state, float pitch, float intensity);
+  using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
 
   /// Set parameter function signature.
+  using SetParameterCallback = BarelyInstrumentDefinition_SetParameterCallback;
+
+  /// Constructs new `InstrumentDefinition`.
   ///
-  /// @param state Pointer to instrument state.
-  /// @param index Parameter index.
-  /// @param value Parameter value.
-  using SetParameterFn = void (*)(void** state, int index, float value);
+  /// @param create_callback Create callback.
+  /// @param destroy_callback Destroy callback.
+  /// @param process_callback Process callback.
+  /// @param set_data_callback Set data callback.
+  /// @param set_note_off_callback Set note off callback.
+  /// @param set_note_on_callback Set note on callback.
+  /// @param set_parameter Set parameter callback.
+  /// @param parameter_definitions List of parameter definitions.
+  InstrumentDefinition(
+      CreateCallback create_callback, DestroyCallback destroy_callback,
+      ProcessCallback process_callback, SetDataCallback set_data_callback,
+      SetNoteOffCallback set_note_off_callback,
+      SetNoteOnCallback set_note_on_callback,
+      SetParameterCallback set_parameter_callback = nullptr,
+      std::vector<ParameterDefinition> parameter_definitions = {})
+      : parameter_definitions_(std::move(parameter_definitions)),
+        BarelyInstrumentDefinition{
+            create_callback,
+            destroy_callback,
+            process_callback,
+            set_data_callback,
+            set_note_off_callback,
+            set_note_on_callback,
+            set_parameter_callback,
+            parameter_definitions_.data(),
+            static_cast<int>(parameter_definitions_.size())} {}
 
-  /// Create function.
-  CreateFn create_fn;
+  /// Constructs new `InstrumentDefinition` from internal type.
+  ///
+  /// @param definition Internal instrument definition.
+  explicit InstrumentDefinition(BarelyInstrumentDefinition definition)
+      : BarelyInstrumentDefinition(definition) {}
 
-  /// Destroy function.
-  DestroyFn destroy_fn;
-
-  /// Process function.
-  ProcessFn process_fn;
-
-  /// Set data function.
-  SetDataFn set_data_fn;
-
-  /// Set note off function.
-  SetNoteOffFn set_note_off_fn;
-
-  /// Set note on function.
-  SetNoteOnFn set_note_on_fn;
-
-  /// Set parameter function.
-  SetParameterFn set_parameter_fn;
-
+ private:
   /// List of parameter definitions.
-  std::vector<ParameterDefinition> parameter_definitions;
+  std::vector<ParameterDefinition> parameter_definitions_;
 };
 
 /// Instrument.
@@ -548,23 +533,8 @@ class Instrument {
         note_off_callback_(nullptr),
         note_on_callback_(nullptr) {
     if (capi_) {
-      std::vector<BarelyParameterDefinition> parameter_definitions;
-      parameter_definitions.reserve(definition.parameter_definitions.size());
-      for (const auto& parameter_definition :
-           definition.parameter_definitions) {
-        parameter_definitions.push_back(BarelyParameterDefinition{
-            parameter_definition.default_value, parameter_definition.min_value,
-            parameter_definition.max_value});
-      }
-      const auto status = BarelyInstrument_Create(
-          capi_,
-          BarelyInstrumentDefinition{
-              definition.create_fn, definition.destroy_fn,
-              definition.process_fn, definition.set_data_fn,
-              definition.set_note_off_fn, definition.set_note_on_fn,
-              definition.set_parameter_fn, parameter_definitions.data(),
-              static_cast<int>(parameter_definitions.size())},
-          sample_rate, &id_);
+      const auto status =
+          BarelyInstrument_Create(capi_, definition, sample_rate, &id_);
       assert(status == BarelyStatus_kOk);
     }
   }

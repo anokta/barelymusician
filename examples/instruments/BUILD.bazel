@@ -9,7 +9,7 @@ cc_library(
     deps = [
         ":enveloped_voice",
         ":generic_instrument",
-        "//barelymusician:header",
+        "//barelymusician",
         "//barelymusician/common:find_or_null",
         "//barelymusician/dsp:sample_player",
         "//examples/common:wav_file",
@@ -29,7 +29,7 @@ cc_library(
     name = "generic_instrument",
     hdrs = ["generic_instrument.h"],
     deps = [
-        "//barelymusician:header",
+        "//barelymusician",
     ],
 )
 
@@ -37,12 +37,14 @@ cc_library(
     name = "synth_instrument",
     srcs = ["synth_instrument.cpp"],
     hdrs = ["synth_instrument.h"],
+    defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":enveloped_voice",
         ":generic_instrument",
-        "//barelymusician:header",
+        "//barelymusician",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
     ],
+    alwayslink = True,
 )

@@ -43,4 +43,11 @@ class SynthInstrument : public GenericInstrument {
 
 }  // namespace barely::examples
 
+extern "C" {
+
+BARELY_EXPORT BarelyStatus BarelyExamples_CreateSynthInstrument(
+    BarelyApi api, int32_t sample_rate, BarelyId* out_instrument_id);
+
+}  // extern "C"
+
 #endif  // EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_

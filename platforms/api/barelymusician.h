@@ -232,17 +232,14 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       SetNoteOnCallback set_note_on_callback,
       SetParameterCallback set_parameter_callback = nullptr,
       std::vector<ParameterDefinition> parameter_definitions = {})
-      : BarelyInstrumentDefinition{create_callback,
-                                   destroy_callback,
-                                   process_callback,
-                                   set_data_callback,
-                                   set_note_off_callback,
-                                   set_note_on_callback,
-                                   set_parameter_callback,
-                                   parameter_definitions_.data(),
-                                   static_cast<int>(
-                                       parameter_definitions.size())},
-        parameter_definitions_(std::move(parameter_definitions)) {}
+      : BarelyInstrumentDefinition{create_callback,       destroy_callback,
+                                   process_callback,      set_data_callback,
+                                   set_note_off_callback, set_note_on_callback,
+                                   set_parameter_callback},
+        parameter_definitions_(std::move(parameter_definitions)) {
+    this->parameter_definitions = parameter_definitions_.data();
+    num_parameter_definitions = static_cast<int>(parameter_definitions_.size());
+  }
 
   /// Constructs new `InstrumentDefinition` from internal type.
   ///

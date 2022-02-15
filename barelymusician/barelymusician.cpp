@@ -104,6 +104,7 @@ BarelyStatus BarelyInstrument_Create(BarelyApi api,
   const BarelyId instrument_id = ++api->id_counter;
   *out_instrument_id = instrument_id;
   api->controllers.emplace(instrument_id, InstrumentController{definition});
+  // TODO: Copy parameter definitions before passing to audio thread!
   api->runner.Add([api, instrument_id, definition = std::move(definition),
                    sample_rate]() noexcept {
     api->processors.emplace(std::piecewise_construct,

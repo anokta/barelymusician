@@ -25,22 +25,7 @@ enum class NotePitchType : BarelyNotePitchType {
 
 /// Note definition.
 // TODO: Update to reflect `BarelyNoteDefinition`.
-struct NoteDefinition {
-  /// Constructs new `NoteDefinition`.
-  ///
-  /// @param duration Note duration.
-  /// @param pitch_type Note pitch type.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @param bypass_adjustment True to bypass note adjustment.
-  NoteDefinition(double duration, NotePitchType pitch_type, float pitch,
-                 float intensity = 1.0f, bool bypass_adjustment = false)
-      : duration(duration),
-        pitch_type(pitch_type),
-        pitch(pitch),
-        intensity(intensity),
-        bypass_adjustment(bypass_adjustment) {}
-
+struct NoteDefinition : public BarelyNoteDefinition {
   /// Constructs new `NoteDefinition` with absolute pitch.
   ///
   /// @param duration Note duration.
@@ -49,23 +34,20 @@ struct NoteDefinition {
   /// @param bypass_adjustment True to bypass note adjustment.
   NoteDefinition(double duration, float pitch, float intensity = 1.0f,
                  bool bypass_adjustment = false)
-      : NoteDefinition(duration, NotePitchType::kAbsolutePitch, pitch,
-                       intensity, bypass_adjustment) {}
+      : BarelyNoteDefinition{BarelyNoteDurationDefinition{duration},
+                             bypass_adjustment,
+                             BarelyNoteIntensityDefinition{intensity},
+                             bypass_adjustment,
+                             BarelyNotePitchDefinition{
+                                 .type = BarelyNotePitchType_kAbsolutePitch,
+                                 .absolute_pitch = pitch},
+                             bypass_adjustment} {}
 
-  /// Duration.
-  double duration;
-
-  /// Pitch type.
-  NotePitchType pitch_type;
-
-  /// Pitch value.
-  float pitch;
-
-  /// Intensity.
-  float intensity;
-
-  /// Denotes whether note adjust should be bypassed or not.
-  bool bypass_adjustment;
+  /// Constructs new `NoteDefinition` from internal type.
+  ///
+  /// @param definition Internal note definition.
+  NoteDefinition(BarelyNoteDefinition definition)
+      : BarelyNoteDefinition(definition) {}
 };
 
 /// Status.
@@ -206,7 +188,7 @@ struct ParameterDefinition : public BarelyParameterDefinition {
   /// Constructs new `ParameterDefinition` from internal type.
   ///
   /// @param definition Internal parameter definition.
-  explicit ParameterDefinition(BarelyParameterDefinition definition)
+  ParameterDefinition(BarelyParameterDefinition definition)
       : BarelyParameterDefinition(definition) {}
 };
 
@@ -265,7 +247,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Constructs new `InstrumentDefinition` from internal type.
   ///
   /// @param definition Internal instrument definition.
-  explicit InstrumentDefinition(BarelyInstrumentDefinition definition)
+  InstrumentDefinition(BarelyInstrumentDefinition definition)
       : BarelyInstrumentDefinition(definition) {}
 
  private:
@@ -588,14 +570,7 @@ class NoteReference {
                                                            id_, &definition);
       assert(status == BarelyStatus_kOk);
     }
-    // TODO: Temporary until `NoteDefinition` is updated.
-    return {definition.duration_definition.duration,
-            static_cast<NotePitchType>(definition.pitch_definition.type),
-            definition.pitch_definition.absolute_pitch,
-            definition.intensity_definition.intensity,
-            definition.bypass_duration_adjustment ||
-                definition.bypass_intensity_adjustment ||
-                definition.bypass_pitch_adjustment};
+    return NoteDefinition{definition};
   }
 
   /// Returns note position.
@@ -617,16 +592,7 @@ class NoteReference {
   /// @retun Status.
   Status SetNoteDefinition(NoteDefinition definition) {
     return static_cast<Status>(BarelySequence_SetNoteDefinition(
-        capi_, sequence_id_, id_,
-        BarelyNoteDefinition{
-            .duration_definition = {.duration = definition.duration},
-            .bypass_duration_adjustment = definition.bypass_adjustment,
-            .intensity_definition = {.intensity = definition.intensity},
-            .bypass_intensity_adjustment = definition.bypass_adjustment,
-            .pitch_definition = {.type = static_cast<BarelyNotePitchType>(
-                                     definition.pitch_type),
-                                 .absolute_pitch = definition.pitch},
-            .bypass_pitch_adjustment = definition.bypass_adjustment}));
+        capi_, sequence_id_, id_, BarelyNoteDefinition{definition}));
   }
 
   /// Sets note position.
@@ -702,17 +668,7 @@ class Sequence {
     BarelyId note_id = BarelyId_kInvalid;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelySequence_AddNote(
-          capi_, id_, position,
-          BarelyNoteDefinition{
-              .duration_definition = {.duration = definition.duration},
-              .bypass_duration_adjustment = definition.bypass_adjustment,
-              .intensity_definition = {.intensity = definition.intensity},
-              .bypass_intensity_adjustment = definition.bypass_adjustment,
-              .pitch_definition = {.type = static_cast<BarelyNotePitchType>(
-                                       definition.pitch_type),
-                                   .absolute_pitch = definition.pitch},
-              .bypass_pitch_adjustment = definition.bypass_adjustment},
-          &note_id);
+          capi_, id_, position, BarelyNoteDefinition{definition}, &note_id);
       assert(status == BarelyStatus_kOk);
     }
     return {capi_, id_, note_id};
@@ -734,7 +690,7 @@ class Sequence {
   /// Returns begin position.
   ///
   /// @return Begin position in beats.
-  [[nodiscard]] StatusOr<double> GetBeginPosition() const {
+  [[nodiscard]] double GetBeginPosition() const {
     double begin_position = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -747,7 +703,7 @@ class Sequence {
   /// Returns end position.
   ///
   /// @return End position in beats.
-  [[nodiscard]] StatusOr<double> GetEndPosition() const {
+  [[nodiscard]] double GetEndPosition() const {
     double end_position = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -791,7 +747,7 @@ class Sequence {
   /// Returns whether sequence is empty or not.
   ///
   /// @return True if empty, false otherwise.
-  [[nodiscard]] StatusOr<bool> IsEmpty() const {
+  [[nodiscard]] bool IsEmpty() const {
     bool is_empty = false;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelySequence_IsEmpty(capi_, id_, &is_empty);
@@ -803,7 +759,7 @@ class Sequence {
   /// Returns whether sequence should be looping or not.
   ///
   /// @return True if looping, false otherwise.
-  [[nodiscard]] StatusOr<bool> IsLooping() const {
+  [[nodiscard]] bool IsLooping() const {
     bool is_looping = false;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelySequence_IsLooping(capi_, id_, &is_looping);

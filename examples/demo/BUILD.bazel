@@ -23,32 +23,32 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 #     ],
 # )
 
-# cc_binary(
-#     name = "instrument_demo",
-#     srcs = ["instrument_demo.cpp"],
-#     deps = [
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/engine",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/instruments:synth_instrument",
-#     ],
-# )
+cc_binary(
+    name = "instrument_demo",
+    srcs = ["instrument_demo.cpp"],
+    deps = [
+        "//barelymusician/composition:note_pitch",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/instruments:synth_instrument",
+        "//platforms/api:barelymusician",
+    ],
+)
 
-# cc_binary(
-#     name = "metronome_demo",
-#     srcs = ["metronome_demo.cpp"],
-#     deps = [
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/engine",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/instruments:synth_instrument",
-#     ],
-# )
+cc_binary(
+    name = "metronome_demo",
+    srcs = ["metronome_demo.cpp"],
+    deps = [
+        "//barelymusician/composition:note_pitch",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/instruments:synth_instrument",
+        "//platforms/api:barelymusician",
+    ],
+)
 
 # cc_binary(
 #     name = "midi_demo",
@@ -69,19 +69,17 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 #     ],
 # )
 
-# cc_binary(
-#     name = "performer_demo",
-#     srcs = ["performer_demo.cpp"],
-#     deps = [
-#         "//barelymusician/common:id",
-#         "//barelymusician/common:random",
-#         "//barelymusician/common:status",
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/engine",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/instruments:synth_instrument",
-#     ],
-# )
+cc_binary(
+    name = "performer_demo",
+    srcs = ["performer_demo.cpp"],
+    deps = [
+        "//barelymusician/common:random",
+        "//barelymusician/composition:note_pitch",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/instruments:synth_instrument",
+        "//platforms/api:barelymusician",
+    ],
+)

@@ -6,20 +6,21 @@
 #include <thread>
 
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/engine/engine.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/instruments/synth_instrument.h"
+#include "platforms/api/barelymusician.h"
 
 namespace {
 
+using ::barely::Instrument;
+using ::barely::Musician;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::Engine;
 using ::barelyapi::OscillatorType;
 
 // System audio settings.
@@ -59,42 +60,31 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine;
+  Musician musician;
 
-  const auto instrument_id =
-      engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  engine.SetInstrumentGain(instrument_id, kGain);
-  engine.SetInstrumentParameter(instrument_id,
-                                SynthInstrumentParameter::kEnvelopeAttack,
-                                kEnvelopeAttack);
-  engine.SetInstrumentParameter(instrument_id,
-                                SynthInstrumentParameter::kEnvelopeRelease,
-                                kEnvelopeRelease);
-  engine.SetInstrumentParameter(instrument_id,
-                                SynthInstrumentParameter::kOscillatorType,
-                                static_cast<float>(kOscillatorType));
-  engine.SetInstrumentParameter(instrument_id,
-                                SynthInstrumentParameter::kNumVoices,
-                                static_cast<float>(kNumVoices));
+  Instrument instrument =
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
+  instrument.SetGain(kGain);
+  instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack,
+                          kEnvelopeAttack);
+  instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
+                          kEnvelopeRelease);
+  instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
+                          static_cast<float>(kOscillatorType));
+  instrument.SetParameter(SynthInstrumentParameter::kNumVoices,
+                          static_cast<float>(kNumVoices));
 
-  engine.SetInstrumentNoteOnCallback(
-      instrument_id,
-      [](float pitch, float intensity, double /*timestamp*/,
-         void* /*user_data*/) {
+  instrument.SetNoteOnCallback(
+      [](float pitch, float intensity, double /*timestamp*/) {
         ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-      },
-      nullptr);
-  engine.SetInstrumentNoteOffCallback(
-      instrument_id,
-      [](float pitch, double /*timestamp*/, void* /*user_data*/) {
-        ConsoleLog() << "NoteOff(" << pitch << ") ";
-      },
-      nullptr);
+      });
+  instrument.SetNoteOffCallback([](float pitch, double /*timestamp*/) {
+    ConsoleLog() << "NoteOff(" << pitch << ") ";
+  });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {
-    engine.ProcessInstrument(instrument_id, 0.0, output, kNumChannels,
-                             kNumFrames);
+    instrument.Process(0.0, output, kNumChannels, kNumFrames);
   });
 
   // Key down callback.
@@ -110,7 +100,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      engine.StopAllInstrumentNotes(instrument_id);
+      instrument.StopAllNotes();
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -124,8 +114,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      engine.StartInstrumentNote(instrument_id, offset_octaves + *pitch,
-                                 kNoteIntensity);
+      instrument.StartNote(offset_octaves + *pitch, kNoteIntensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -134,7 +123,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      engine.StopInstrumentNote(instrument_id, offset_octaves + *pitch);
+      instrument.StopNote(offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);
@@ -145,7 +134,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(0.0);
+    musician.Update(0.0);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

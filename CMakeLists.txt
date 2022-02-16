@@ -42,7 +42,4 @@ include(GoogleTest)
 include_directories(.)
 
 add_subdirectory(barelymusician)
-add_subdirectory(barelymusician/algorithm)
-add_subdirectory(examples/common)
-add_subdirectory(examples/composition)
 add_subdirectory(barelymusician/engine)

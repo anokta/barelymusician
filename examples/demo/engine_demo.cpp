@@ -10,9 +10,9 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/common/random.h"
-#include "barelymusician/composition/note_duration.h"
-#include "barelymusician/composition/note_pitch.h"
+#include "examples/common/random.h"
+#include "examples/composition/note_duration.h"
+#include "examples/composition/note_pitch.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"

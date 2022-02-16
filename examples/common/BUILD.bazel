@@ -33,10 +33,25 @@ cc_library(
 )
 
 cc_library(
+    name = "random",
+    srcs = ["random.cpp"],
+    hdrs = ["random.h"],
+)
+
+cc_library(
     name = "wav_file",
     srcs = ["wav_file.cpp"],
     hdrs = ["wav_file.h"],
     deps = [
         "@dr_libs//:dr_wav",
+    ],
+)
+
+cc_test(
+    name = "random_test",
+    srcs = ["random_test.cpp"],
+    deps = [
+        ":random",
+        "@googletest//:gtest_main",
     ],
 )

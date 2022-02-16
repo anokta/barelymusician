@@ -1,8 +1,8 @@
 #ifndef EXAMPLES_INSTRUMENTS_ENVELOPED_VOICE_H_
 #define EXAMPLES_INSTRUMENTS_ENVELOPED_VOICE_H_
 
-#include "barelymusician/dsp/envelope.h"
-#include "barelymusician/dsp/voice.h"
+#include "examples/dsp/envelope.h"
+#include "examples/dsp/voice.h"
 
 namespace barely::examples {
 

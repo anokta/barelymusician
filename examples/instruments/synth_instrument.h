@@ -2,8 +2,8 @@
 #define EXAMPLES_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/dsp/polyphonic_voice.h"
+#include "examples/dsp/oscillator.h"
+#include "examples/dsp/polyphonic_voice.h"
 #include "examples/instruments/enveloped_voice.h"
 #include "examples/instruments/generic_instrument.h"
 

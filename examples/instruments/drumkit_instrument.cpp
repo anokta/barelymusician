@@ -4,27 +4,24 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/find_or_null.h"
 #include "examples/common/wav_file.h"
 #include "examples/instruments/generic_instrument.h"
 
 namespace barely::examples {
 
-using ::barelyapi::FindOrNull;
-
 DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
     : sample_rate_(sample_rate) {}
 
 void DrumkitInstrument::NoteOff(float pitch) noexcept {
-  if (auto* pad = FindOrNull(pads_, pitch)) {
-    pad->voice.Stop();
+  if (const auto it = pads_.find(pitch); it != pads_.end()) {
+    it->second.voice.Stop();
   }
 }
 
 void DrumkitInstrument::NoteOn(float pitch, float intensity) noexcept {
-  if (auto* pad = FindOrNull(pads_, pitch)) {
-    pad->voice.set_gain(intensity);
-    pad->voice.Start();
+  if (const auto it = pads_.find(pitch); it != pads_.end()) {
+    it->second.voice.set_gain(intensity);
+    it->second.voice.Start();
   }
 }
 

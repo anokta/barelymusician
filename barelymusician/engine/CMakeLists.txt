@@ -1,4 +1,9 @@
 add_library(
+  find_or_null INTERFACE
+  find_or_null.h
+)
+
+add_library(
   instrument_controller
   instrument_controller.cpp
   instrument_controller.h
@@ -45,9 +50,9 @@ add_library(
 )
 target_link_libraries(
   sequence
+  find_or_null
   instrument_event
   header
-  find_or_null
 )
 
 add_library(
@@ -66,6 +71,17 @@ add_library(
   visitor INTERFACE
   visitor.h
 )
+
+add_executable(
+  find_or_null_test
+  find_or_null_test.cpp
+)
+target_link_libraries(
+  find_or_null_test
+  find_or_null
+  gtest_main
+)
+gtest_discover_tests(find_or_null_test)
 
 add_executable(
   parameter_test

@@ -8,7 +8,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":header",
-        "//barelymusician/common:find_or_null",
+        "//barelymusician/engine:find_or_null",
         "//barelymusician/engine:instrument_controller",
         "//barelymusician/engine:instrument_event",
         "//barelymusician/engine:instrument_processor",

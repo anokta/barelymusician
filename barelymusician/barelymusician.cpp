@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/common/find_or_null.h"
+#include "barelymusician/engine/find_or_null.h"
 #include "barelymusician/engine/instrument_controller.h"
 #include "barelymusician/engine/instrument_event.h"
 #include "barelymusician/engine/instrument_processor.h"

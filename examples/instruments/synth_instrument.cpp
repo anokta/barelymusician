@@ -1,8 +1,8 @@
 #include "examples/instruments/synth_instrument.h"
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/dsp_utils.h"
-#include "barelymusician/dsp/oscillator.h"
+#include "examples/dsp/dsp_utils.h"
+#include "examples/dsp/oscillator.h"
 #include "examples/instruments/enveloped_voice.h"
 
 namespace barely::examples {

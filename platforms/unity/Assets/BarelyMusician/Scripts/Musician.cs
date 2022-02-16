@@ -292,7 +292,7 @@ namespace Barely {
 
       if (changed) {
         BarelySequence_RemoveAllNotes(Api, sequence.Id);
-        NoteDefinition definition = new NoteDefinition{};
+        NoteDefinition definition = new NoteDefinition {};
         definition.bypassDurationAdjustment = false;
         definition.bypassIntensityAdjustment = false;
         definition.bypassPitchAdjustment = false;

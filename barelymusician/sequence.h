@@ -35,7 +35,8 @@ class Sequence {
   /// @param position Note position.
   /// @param note Note.
   /// @return True if success.
-  bool AddNote(BarelyId id, double position, BarelyNoteDefinition note) noexcept;
+  bool AddNote(BarelyId id, double position,
+               BarelyNoteDefinition note) noexcept;
 
   /// Returns begin offset.
   ///

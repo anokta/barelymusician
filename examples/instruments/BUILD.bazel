@@ -10,8 +10,8 @@ cc_library(
         ":enveloped_voice",
         ":generic_instrument",
         "//barelymusician",
-        "//examples/dsp:sample_player",
         "//examples/common:wav_file",
+        "//examples/dsp:sample_player",
     ],
 )
 

@@ -5,10 +5,10 @@
 #include <optional>
 #include <thread>
 
-#include "examples/composition/note_pitch.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
+#include "examples/composition/note_pitch.h"
 #include "examples/instruments/synth_instrument.h"
 #include "platforms/api/barelymusician.h"
 

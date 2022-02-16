@@ -17,10 +17,10 @@ add_library(
 )
 target_link_libraries(
   instrument_controller
+  barelymusician_headeronly
   instrument_event
   parameter
   visitor
-  header
 )
 
 add_library(
@@ -35,9 +35,9 @@ add_library(
 )
 target_link_libraries(
   instrument_processor
+  barelymusician_headeronly
   instrument_event
   visitor
-  header
 )
 
 add_library(
@@ -47,7 +47,7 @@ add_library(
 )
 target_link_libraries(
   parameter
-  header
+  barelymusician_headeronly
 )
 
 add_library(
@@ -57,9 +57,9 @@ add_library(
 )
 target_link_libraries(
   sequence
+  barelymusician_headeronly
   find_or_null
   instrument_event
-  header
 )
 
 add_library(

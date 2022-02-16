@@ -10,14 +10,14 @@
 #include <variant>
 #include <vector>
 
-#include "examples/common/random.h"
-#include "examples/composition/note_duration.h"
-#include "examples/composition/note_pitch.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
+#include "examples/common/random.h"
 #include "examples/common/wav_file.h"
+#include "examples/composition/note_duration.h"
+#include "examples/composition/note_pitch.h"
 #include "examples/instruments/drumkit_instrument.h"
 #include "examples/instruments/synth_instrument.h"
 #include "platforms/api/barelymusician.h"

@@ -1,27 +1,24 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary")
 
-# TODO: Refactor all tests to use new api.
-# cc_binary(
-#     name = "engine_demo",
-#     srcs = ["engine_demo.cpp"],
-#     data = ["//examples/data:audio"],
-#     deps = [
-#         "//barelymusician/common:id",
-#         "//barelymusician/common:random",
-#         "//barelymusician/common:status",
-#         "//barelymusician/composition:note_duration",
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/engine",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/common:wav_file",
-#         "//examples/instruments:drumkit_instrument",
-#         "//examples/instruments:synth_instrument",
-#         "@bazel_tools//tools/cpp/runfiles",
-#     ],
-# )
+cc_binary(
+    name = "engine_demo",
+    srcs = ["engine_demo.cpp"],
+    data = ["//examples/data:audio"],
+    deps = [
+        "//barelymusician/common:random",
+        "//barelymusician/composition:note_duration",
+        "//barelymusician/composition:note_pitch",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/common:wav_file",
+        "//examples/instruments:drumkit_instrument",
+        "//examples/instruments:synth_instrument",
+        "//platforms/api:barelymusician",
+        "@bazel_tools//tools/cpp/runfiles",
+    ],
+)
 
 cc_binary(
     name = "instrument_demo",
@@ -50,24 +47,22 @@ cc_binary(
     ],
 )
 
-# cc_binary(
-#     name = "midi_demo",
-#     srcs = ["midi_demo.cpp"],
-#     data = ["//examples/data:midi"],
-#     deps = [
-#         "//barelymusician/common:id",
-#         "//barelymusician/common:status",
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/engine",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/instruments:synth_instrument",
-#         "@bazel_tools//tools/cpp/runfiles",
-#         "@midifile",
-#     ],
-# )
+cc_binary(
+    name = "midi_demo",
+    srcs = ["midi_demo.cpp"],
+    data = ["//examples/data:midi"],
+    deps = [
+        "//barelymusician/composition:note_pitch",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/instruments:synth_instrument",
+        "//platforms/api:barelymusician",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@midifile",
+    ],
+)
 
 cc_binary(
     name = "performer_demo",

@@ -1,4 +1,4 @@
-#include "barelymusician/engine/parameter.h"
+#include "barelymusician/parameter.h"
 
 #include "gtest/gtest.h"
 

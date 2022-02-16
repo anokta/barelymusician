@@ -1,4 +1,4 @@
-#include "barelymusician/engine/visitor.h"
+#include "barelymusician/visitor.h"
 
 #include <variant>
 #include <vector>

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_CONTROLLER_H_
-#define BARELYMUSICIAN_ENGINE_INSTRUMENT_CONTROLLER_H_
+#ifndef BARELYMUSICIAN_INSTRUMENT_CONTROLLER_H_
+#define BARELYMUSICIAN_INSTRUMENT_CONTROLLER_H_
 
 #include <functional>
 #include <map>
@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/parameter.h"
+#include "barelymusician/instrument_event.h"
+#include "barelymusician/parameter.h"
 
 namespace barelyapi {
 
@@ -148,4 +148,4 @@ class InstrumentController {
 
 }  // namespace barelyapi
 
-#endif  //  BARELYMUSICIAN_ENGINE_INSTRUMENT_CONTROLLER_H_
+#endif  //  BARELYMUSICIAN_INSTRUMENT_CONTROLLER_H_

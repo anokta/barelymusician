@@ -1,12 +1,12 @@
-#include "barelymusician/engine/instrument_controller.h"
+#include "barelymusician/instrument_controller.h"
 
 #include <map>
 #include <utility>
 #include <variant>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/visitor.h"
+#include "barelymusician/instrument_event.h"
+#include "barelymusician/visitor.h"
 
 namespace barelyapi {
 

@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -7,22 +7,141 @@ cc_library(
     srcs = ["barelymusician.cpp"],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":header",
-        "//barelymusician/engine:find_or_null",
-        "//barelymusician/engine:instrument_controller",
-        "//barelymusician/engine:instrument_event",
-        "//barelymusician/engine:instrument_processor",
-        "//barelymusician/engine:parameter",
-        "//barelymusician/engine:sequence",
-        "//barelymusician/engine:task_runner",
-        "//barelymusician/engine:transport",
+        ":barelymusician_headeronly",
+        ":find_or_null",
+        ":instrument_controller",
+        ":instrument_event",
+        ":instrument_processor",
+        ":parameter",
+        ":sequence",
+        ":task_runner",
+        ":transport",
     ],
     alwayslink = True,
 )
 
 cc_library(
-    name = "header",
+    name = "barelymusician_headeronly",
     hdrs = ["barelymusician.h"],
+)
+
+cc_library(
+    name = "find_or_null",
+    hdrs = ["find_or_null.h"],
+)
+
+cc_library(
+    name = "instrument_controller",
+    srcs = ["instrument_controller.cpp"],
+    hdrs = ["instrument_controller.h"],
+    deps = [
+        ":barelymusician_headeronly",
+        ":instrument_event",
+        ":parameter",
+        ":visitor",
+    ],
+)
+
+cc_library(
+    name = "instrument_event",
+    hdrs = ["instrument_event.h"],
+)
+
+cc_library(
+    name = "instrument_processor",
+    srcs = ["instrument_processor.cpp"],
+    hdrs = ["instrument_processor.h"],
+    deps = [
+        ":barelymusician_headeronly",
+        ":instrument_event",
+        ":visitor",
+    ],
+)
+
+cc_library(
+    name = "parameter",
+    srcs = ["parameter.cpp"],
+    hdrs = ["parameter.h"],
+    deps = [
+        ":barelymusician_headeronly",
+    ],
+)
+
+cc_library(
+    name = "sequence",
+    srcs = ["sequence.cpp"],
+    hdrs = ["sequence.h"],
+    deps = [
+        ":barelymusician_headeronly",
+        ":find_or_null",
+        ":instrument_event",
+    ],
+)
+
+cc_library(
+    name = "task_runner",
+    srcs = ["task_runner.cpp"],
+    hdrs = ["task_runner.h"],
+)
+
+cc_library(
+    name = "transport",
+    srcs = ["transport.cpp"],
+    hdrs = ["transport.h"],
+)
+
+cc_library(
+    name = "visitor",
+    hdrs = ["visitor.h"],
+)
+
+cc_test(
+    name = "find_or_null_test",
+    srcs = ["find_or_null_test.cpp"],
+    deps = [
+        ":find_or_null",
+        "@googletest//:gtest_main",
+    ],
+)
+
+# TODO: Add unit tests for instrument controller & processor.
+
+cc_test(
+    name = "parameter_test",
+    srcs = ["parameter_test.cpp"],
+    deps = [
+        ":parameter",
+        "@googletest//:gtest_main",
+    ],
+)
+
+# TODO: Add back sequence unit test.
+
+cc_test(
+    name = "task_runner_test",
+    srcs = ["task_runner_test.cpp"],
+    deps = [
+        ":task_runner",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "transport_test",
+    srcs = ["transport_test.cpp"],
+    deps = [
+        ":transport",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "visitor_test",
+    srcs = ["visitor_test.cpp"],
+    deps = [
+        ":visitor",
+        "@googletest//:gtest_main",
+    ],
 )
 
 # TODO: Add unit tests (move old engine test back).

@@ -7,14 +7,14 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/engine/find_or_null.h"
-#include "barelymusician/engine/instrument_controller.h"
-#include "barelymusician/engine/instrument_event.h"
-#include "barelymusician/engine/instrument_processor.h"
-#include "barelymusician/engine/parameter.h"
-#include "barelymusician/engine/sequence.h"
-#include "barelymusician/engine/task_runner.h"
-#include "barelymusician/engine/transport.h"
+#include "barelymusician/find_or_null.h"
+#include "barelymusician/instrument_controller.h"
+#include "barelymusician/instrument_event.h"
+#include "barelymusician/instrument_processor.h"
+#include "barelymusician/parameter.h"
+#include "barelymusician/sequence.h"
+#include "barelymusician/task_runner.h"
+#include "barelymusician/transport.h"
 
 namespace {
 

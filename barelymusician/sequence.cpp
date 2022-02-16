@@ -1,4 +1,4 @@
-#include "barelymusician/engine/sequence.h"
+#include "barelymusician/sequence.h"
 
 #include <algorithm>
 #include <cmath>
@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/find_or_null.h"
+#include "barelymusician/find_or_null.h"
 
 namespace barelyapi {
 

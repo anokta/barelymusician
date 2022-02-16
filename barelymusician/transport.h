@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_TRANSPORT_H_
-#define BARELYMUSICIAN_ENGINE_TRANSPORT_H_
+#ifndef BARELYMUSICIAN_TRANSPORT_H_
+#define BARELYMUSICIAN_TRANSPORT_H_
 
 #include <functional>
 
@@ -110,4 +110,4 @@ class Transport {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINE_TRANSPORT_H_
+#endif  // BARELYMUSICIAN_TRANSPORT_H_

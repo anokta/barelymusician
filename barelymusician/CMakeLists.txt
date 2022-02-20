@@ -1,4 +1,18 @@
-# TODO(#91): Add `barelymusician` target.
+add_library(
+  barelymusician
+  barelymusician.cpp
+)
+target_link_libraries(
+  barelymusician
+  barelymusician_headeronly
+  find_or_null
+  instrument
+  instrument_event
+  parameter
+  sequence
+  task_runner
+  transport
+)
 
 add_library(
   barelymusician_headeronly INTERFACE
@@ -11,33 +25,22 @@ add_library(
 )
 
 add_library(
-  instrument_controller
-  instrument_controller.cpp
-  instrument_controller.h
+  instrument
+  instrument.cpp
+  instrument.h
 )
 target_link_libraries(
-  instrument_controller
+  instrument
   barelymusician_headeronly
   instrument_event
   parameter
+  task_runner
   visitor
 )
 
 add_library(
   instrument_event INTERFACE
   instrument_event.h
-)
-
-add_library(
-  instrument_processor
-  instrument_processor.cpp
-  instrument_processor.h
-)
-target_link_libraries(
-  instrument_processor
-  barelymusician_headeronly
-  instrument_event
-  visitor
 )
 
 add_library(

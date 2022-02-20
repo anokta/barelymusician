@@ -9,9 +9,8 @@ cc_library(
     deps = [
         ":barelymusician_headeronly",
         ":find_or_null",
-        ":instrument_controller",
+        ":instrument",
         ":instrument_event",
-        ":instrument_processor",
         ":parameter",
         ":sequence",
         ":task_runner",
@@ -31,13 +30,14 @@ cc_library(
 )
 
 cc_library(
-    name = "instrument_controller",
-    srcs = ["instrument_controller.cpp"],
-    hdrs = ["instrument_controller.h"],
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
     deps = [
         ":barelymusician_headeronly",
         ":instrument_event",
         ":parameter",
+        ":task_runner",
         ":visitor",
     ],
 )
@@ -45,17 +45,6 @@ cc_library(
 cc_library(
     name = "instrument_event",
     hdrs = ["instrument_event.h"],
-)
-
-cc_library(
-    name = "instrument_processor",
-    srcs = ["instrument_processor.cpp"],
-    hdrs = ["instrument_processor.h"],
-    deps = [
-        ":barelymusician_headeronly",
-        ":instrument_event",
-        ":visitor",
-    ],
 )
 
 cc_library(
@@ -104,7 +93,7 @@ cc_test(
     ],
 )
 
-# TODO: Add unit tests for instrument controller & processor.
+# TODO: Add unit tests for instrument.
 
 cc_test(
     name = "parameter_test",

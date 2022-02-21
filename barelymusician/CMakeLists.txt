@@ -10,7 +10,6 @@ target_link_libraries(
   instrument_event
   parameter
   sequence
-  task_runner
   transport
 )
 

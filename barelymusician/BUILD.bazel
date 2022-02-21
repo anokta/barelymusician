@@ -13,7 +13,6 @@ cc_library(
         ":instrument_event",
         ":parameter",
         ":sequence",
-        ":task_runner",
         ":transport",
     ],
     alwayslink = True,

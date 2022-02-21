@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <atomic>
 #include <memory>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -14,7 +15,6 @@
 #include "barelymusician/instrument_event.h"
 #include "barelymusician/parameter.h"
 #include "barelymusician/sequence.h"
-#include "barelymusician/task_runner.h"
 #include "barelymusician/transport.h"
 
 namespace {
@@ -23,11 +23,7 @@ using ::barelyapi::FindOrNull;
 using ::barelyapi::Instrument;
 using ::barelyapi::InstrumentEvent;
 using ::barelyapi::Sequence;
-using ::barelyapi::TaskRunner;
 using ::barelyapi::Transport;
-
-// Maximum number of tasks to be executed per each `Process` call.
-constexpr int kNumMaxTasks = 500;
 
 // Converts minutes from seconds.
 constexpr double kMinutesFromSeconds = 1.0 / 60.0;
@@ -41,6 +37,9 @@ using InstrumentIdEventPair = std::pair<BarelyId, InstrumentEvent>;
 /// Instrument id-event pair by position map type.
 using InstrumentIdEventPairMap = std::multimap<double, InstrumentIdEventPair>;
 
+/// Instrument reference by identifier map.
+using InstrumentReferenceMap = std::unordered_map<BarelyId, Instrument*>;
+
 }  // namespace
 
 extern "C" {
@@ -48,7 +47,9 @@ extern "C" {
 /// BarelyMusician C api.
 struct BarelyMusician {
   /// Constructs new `BarelyMusician`.
-  BarelyMusician() : runner(kNumMaxTasks) {
+  BarelyMusician()
+      : instrument_refs_holder{std::make_unique<InstrumentReferenceMap>()},
+        instrument_refs_ptr(instrument_refs_holder.get()) {
     transport.SetUpdateCallback([this](double begin_position,
                                        double end_position) noexcept {
       InstrumentIdEventPairMap id_event_pairs;
@@ -77,17 +78,29 @@ struct BarelyMusician {
     return nullptr;
   }
 
+  void UpdateInstrumentMap() {
+    auto instrument_refs = std::make_unique<InstrumentReferenceMap>();
+    instrument_refs->reserve(instruments.size());
+    for (const auto& [instrument_id, instrument] : instruments) {
+      instrument_refs->emplace(instrument_id, instrument.get());
+    }
+    for (auto* expected = instrument_refs_holder.get();
+         !instrument_refs_ptr.compare_exchange_strong(expected,
+                                                      instrument_refs.get());) {
+      expected = instrument_refs_holder.get();
+    }
+    instrument_refs_holder = std::move(instrument_refs);
+  }
+
   // Monotonic identifier counter.
   BarelyId id_counter = 0;
 
-  // Instrument by id map.
+  // Instrument by identifier map.
   std::unordered_map<BarelyId, std::unique_ptr<Instrument>> instruments;
 
-  // Instrument processor by id map.
-  // TODO(#60): Replace this via *cas* pattern.
-  std::unordered_map<BarelyId, Instrument*> processors;
-  TaskRunner runner;
-  std::atomic_bool flag = true;
+  // Instrument reference by identifier map.
+  std::unique_ptr<InstrumentReferenceMap> instrument_refs_holder;
+  std::atomic<InstrumentReferenceMap*> instrument_refs_ptr;
 
   // List of sequences.
   std::unordered_map<BarelyId, Sequence> sequences;
@@ -96,9 +109,15 @@ struct BarelyMusician {
   Transport transport;
 
  private:
-  // Ensure that the instance can only be destroyed via the api call.
+  // Ensures that the instance can only be destroyed via the api call.
   friend BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyApi api);
   ~BarelyMusician() = default;
+
+  // Non-copyable and non-movable.
+  BarelyMusician(const BarelyMusician& other) = delete;
+  BarelyMusician& operator=(const BarelyMusician& other) = delete;
+  BarelyMusician(BarelyMusician&& other) noexcept = delete;
+  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 };
 
 BarelyStatus BarelyInstrument_Create(BarelyApi api,
@@ -113,19 +132,7 @@ BarelyStatus BarelyInstrument_Create(BarelyApi api,
 
   api->instruments.emplace(
       instrument_id, std::make_unique<Instrument>(definition, sample_rate));
-
-  std::unordered_map<BarelyId, Instrument*> processors;
-  processors.reserve(api->instruments.size());
-  for (const auto& [id, instrument] : api->instruments) {
-    processors.emplace(id, instrument.get());
-  }
-  api->runner.Add([api, processors = std::move(processors)]() mutable {
-    // TODO: this currently does deallocation - should be resolved by *cas*.
-    api->processors = std::move(processors);
-  });
-  // TODO: pretty bad handling to be replaced via *cas*.
-  for (bool flag = api->flag; !flag; flag = api->flag)
-    ;
+  api->UpdateInstrumentMap();
 
   return BarelyStatus_kOk;
 }
@@ -135,29 +142,16 @@ BarelyStatus BarelyInstrument_Destroy(BarelyApi api, BarelyId instrument_id) {
 
   if (auto it = api->instruments.find(instrument_id);
       it != api->instruments.end()) {
+    auto instrument = std::move(it->second);
     for (auto& [sequence_id, sequence] : api->sequences) {
       if (sequence.GetInstrument() == instrument_id) {
         sequence.SetInstrument(BarelyId_kInvalid);
       }
     }
-    it->second->StopAllNotes(api->transport.GetTimestamp());
+    instrument->StopAllNotes(api->transport.GetTimestamp());
 
-    // TODO: avoid duplicate boilerplate code.
-    std::unordered_map<BarelyId, Instrument*> processors;
-    processors.reserve(api->instruments.size());
-    for (const auto& [id, instrument] : api->instruments) {
-      if (id != instrument_id) {
-        processors.emplace(id, instrument.get());
-      }
-    }
-    api->runner.Add([api, processors = std::move(processors)]() mutable {
-      // TODO: this currently does deallocation - should be resolved by *cas*.
-      api->processors = std::move(processors);
-    });
-    // TODO: pretty bad handling to be replaced via *cas*.
-    for (bool flag = api->flag; !flag; flag = api->flag)
-      ;
     api->instruments.erase(it);
+    api->UpdateInstrumentMap();
 
     return BarelyStatus_kOk;
   }
@@ -232,16 +226,15 @@ BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
                                       int32_t num_output_frames) {
   if (!api) return BarelyStatus_kNotFound;
 
-  api->flag = false;
-  api->runner.Run();
-  if (auto* instrument = FindOrNull(api->processors, instrument_id)) {
+  auto instrument_refs = api->instrument_refs_ptr.exchange(nullptr);
+  auto status = BarelyStatus_kNotFound;
+  if (auto* instrument = FindOrNull(*instrument_refs, instrument_id)) {
     (*instrument)
         ->Process(output, num_output_channels, num_output_frames, timestamp);
-    api->flag = true;
-    return BarelyStatus_kOk;
+    status = BarelyStatus_kOk;
   }
-  api->flag = true;
-  return BarelyStatus_kNotFound;
+  api->instrument_refs_ptr = instrument_refs;
+  return status;
 }
 
 BarelyStatus BarelyInstrument_ResetAllParameters(BarelyApi api,
@@ -382,10 +375,6 @@ BarelyStatus BarelyMusician_Create(BarelyApi* out_api) {
 
 BarelyStatus BarelyMusician_Destroy(BarelyApi api) {
   if (!api) return BarelyStatus_kNotFound;
-
-  // TODO: pretty bad handling to be replaced via *cas*.
-  for (bool flag = api->flag; !flag; flag = api->flag)
-    ;
 
   delete api;
   return BarelyStatus_kOk;

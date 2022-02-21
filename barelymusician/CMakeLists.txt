@@ -56,7 +56,6 @@ target_link_libraries(
   event
   event_queue
   parameter
-  visitor
 )
 
 add_library(
@@ -85,11 +84,6 @@ add_library(
   transport
   transport.cpp
   transport.h
-)
-
-add_library(
-  visitor INTERFACE
-  visitor.h
 )
 
 add_executable(
@@ -125,14 +119,3 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(transport_test)
-
-add_executable(
-  visitor_test
-  visitor_test.cpp
-)
-target_link_libraries(
-  visitor_test
-  visitor
-  gtest_main
-)
-gtest_discover_tests(visitor_test)

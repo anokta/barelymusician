@@ -58,7 +58,6 @@ cc_library(
         ":event_queue",
         ":gain_processor",
         ":parameter",
-        ":visitor",
     ],
 )
 
@@ -88,11 +87,6 @@ cc_library(
     hdrs = ["transport.h"],
 )
 
-cc_library(
-    name = "visitor",
-    hdrs = ["visitor.h"],
-)
-
 cc_test(
     name = "find_or_null_test",
     srcs = ["find_or_null_test.cpp"],
@@ -120,15 +114,6 @@ cc_test(
     srcs = ["transport_test.cpp"],
     deps = [
         ":transport",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "visitor_test",
-    srcs = ["visitor_test.cpp"],
-    deps = [
-        ":visitor",
         "@googletest//:gtest_main",
     ],
 )

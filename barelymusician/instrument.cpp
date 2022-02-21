@@ -6,9 +6,20 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/event.h"
-#include "barelymusician/visitor.h"
 
 namespace barelyapi {
+
+namespace {
+
+/// Event visitor template.
+template <class... EventTypes>
+struct EventVisitor : EventTypes... {
+  using EventTypes::operator()...;
+};
+template <class... EventTypes>
+EventVisitor(EventTypes...) -> EventVisitor<EventTypes...>;
+
+}  // namespace
 
 Instrument::Instrument(const BarelyInstrumentDefinition& definition,
                        int sample_rate) noexcept
@@ -76,31 +87,32 @@ void Instrument::Process(float* output, int num_output_channels,
       frame = message_frame;
     }
     std::visit(
-        Visitor{[this](const SetDataEvent& set_data_event) noexcept {
-                  if (set_data_callback_) {
-                    set_data_callback_(&state_, set_data_event.data);
-                  }
-                },
-                [this](const SetGainEvent& set_gain_event) noexcept {
-                  gain_processor_.SetGain(set_gain_event.gain);
-                },
-                [this](const SetParameterEvent& set_parameter_event) noexcept {
-                  if (set_parameter_callback_) {
-                    set_parameter_callback_(&state_, set_parameter_event.index,
-                                            set_parameter_event.value);
-                  }
-                },
-                [this](const StartNoteEvent& start_note_event) noexcept {
-                  if (set_note_on_callback_) {
-                    set_note_on_callback_(&state_, start_note_event.pitch,
-                                          start_note_event.intensity);
-                  }
-                },
-                [this](const StopNoteEvent& stop_note_event) noexcept {
-                  if (set_note_off_callback_) {
-                    set_note_off_callback_(&state_, stop_note_event.pitch);
-                  }
-                }},
+        EventVisitor{
+            [this](const SetDataEvent& set_data_event) noexcept {
+              if (set_data_callback_) {
+                set_data_callback_(&state_, set_data_event.data);
+              }
+            },
+            [this](const SetGainEvent& set_gain_event) noexcept {
+              gain_processor_.SetGain(set_gain_event.gain);
+            },
+            [this](const SetParameterEvent& set_parameter_event) noexcept {
+              if (set_parameter_callback_) {
+                set_parameter_callback_(&state_, set_parameter_event.index,
+                                        set_parameter_event.value);
+              }
+            },
+            [this](const StartNoteEvent& start_note_event) noexcept {
+              if (set_note_on_callback_) {
+                set_note_on_callback_(&state_, start_note_event.pitch,
+                                      start_note_event.intensity);
+              }
+            },
+            [this](const StopNoteEvent& stop_note_event) noexcept {
+              if (set_note_off_callback_) {
+                set_note_off_callback_(&state_, stop_note_event.pitch);
+              }
+            }},
         event.second);
   }
   // Process the rest of the buffer.
@@ -113,23 +125,23 @@ void Instrument::Process(float* output, int num_output_channels,
 
 void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
   std::visit(
-      Visitor{[&](const SetDataEvent& set_data_event) noexcept {
-                SetData(set_data_event.data, timestamp);
-              },
-              [&](const SetGainEvent& set_gain_event) noexcept {
-                SetGain(set_gain_event.gain, timestamp);
-              },
-              [&](const SetParameterEvent& set_parameter_event) noexcept {
-                SetParameter(set_parameter_event.index,
-                             set_parameter_event.value, timestamp);
-              },
-              [&](const StartNoteEvent& start_note_event) noexcept {
-                StartNote(start_note_event.pitch, start_note_event.intensity,
-                          timestamp);
-              },
-              [&](const StopNoteEvent& stop_note_event) noexcept {
-                StopNote(stop_note_event.pitch, timestamp);
-              }},
+      EventVisitor{[&](const SetDataEvent& set_data_event) noexcept {
+                     SetData(set_data_event.data, timestamp);
+                   },
+                   [&](const SetGainEvent& set_gain_event) noexcept {
+                     SetGain(set_gain_event.gain, timestamp);
+                   },
+                   [&](const SetParameterEvent& set_parameter_event) noexcept {
+                     SetParameter(set_parameter_event.index,
+                                  set_parameter_event.value, timestamp);
+                   },
+                   [&](const StartNoteEvent& start_note_event) noexcept {
+                     StartNote(start_note_event.pitch,
+                               start_note_event.intensity, timestamp);
+                   },
+                   [&](const StopNoteEvent& stop_note_event) noexcept {
+                     StopNote(stop_note_event.pitch, timestamp);
+                   }},
       event);
 }
 

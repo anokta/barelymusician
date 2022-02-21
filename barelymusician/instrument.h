@@ -3,14 +3,13 @@
 
 #include <functional>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/event.h"
+#include "barelymusician/event_queue.h"
 #include "barelymusician/gain_processor.h"
 #include "barelymusician/parameter.h"
-#include "barelymusician/task_runner.h"
 
 namespace barelyapi {
 
@@ -147,10 +146,8 @@ class Instrument {
   // Returns corresponding number of seconds for given number of `samples`.
   double GetSeconds(int samples) const noexcept;
 
-  // Map of events by their timestamps.
-  // TODO(#60): Turn this into a fixed size ring buffer.
-  std::vector<std::pair<double, Event>> events_;
-  TaskRunner runner_;
+  // Event queue.
+  EventQueue events_;
 
   // Gain in amplitude.
   float gain_ = 1.0f;

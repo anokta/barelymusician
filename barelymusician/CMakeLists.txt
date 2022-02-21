@@ -24,6 +24,16 @@ add_library(
 )
 
 add_library(
+  event_queue
+  event_queue.cpp
+  event_queue.h
+)
+target_link_libraries(
+  event_queue
+  event
+)
+
+add_library(
   find_or_null INTERFACE
   find_or_null.h
 )
@@ -44,8 +54,8 @@ target_link_libraries(
   barelymusician_headeronly
   gain_processor
   event
+  event_queue
   parameter
-  task_runner
   visitor
 )
 
@@ -69,12 +79,6 @@ target_link_libraries(
   barelymusician_headeronly
   event
   find_or_null
-)
-
-add_library(
-  task_runner
-  task_runner.cpp
-  task_runner.h
 )
 
 add_library(
@@ -109,17 +113,6 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(parameter_test)
-
-add_executable(
-  task_runner_test
-  task_runner_test.cpp
-)
-target_link_libraries(
-  task_runner_test
-  task_runner
-  gtest_main
-)
-gtest_discover_tests(task_runner_test)
 
 add_executable(
   transport_test

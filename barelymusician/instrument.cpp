@@ -1,7 +1,6 @@
 #include "barelymusician/instrument.h"
 
 #include <cassert>
-#include <map>
 #include <utility>
 #include <variant>
 
@@ -11,17 +10,9 @@
 
 namespace barelyapi {
 
-namespace {
-
-// Maximum number of tasks to be executed per each `Process` call.
-constexpr int kNumMaxTasks = 1000;
-
-}  // namespace
-
 Instrument::Instrument(const BarelyInstrumentDefinition& definition,
                        int sample_rate) noexcept
-    : runner_(kNumMaxTasks),
-      create_callback_(definition.create_callback),
+    : create_callback_(definition.create_callback),
       destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_data_callback_(definition.set_data_callback),
@@ -68,20 +59,15 @@ bool Instrument::IsNoteOn(float pitch) const noexcept {
 
 void Instrument::Process(float* output, int num_output_channels,
                          int num_output_frames, double timestamp) noexcept {
-  runner_.Run();
   assert(output);
   assert(num_output_channels >= 0);
   assert(num_output_frames >= 0);
   int frame = 0;
   // Process *all* events before the end timestamp.
-  const auto begin = events_.begin();
-  const auto end = std::lower_bound(
-      begin, events_.end(), timestamp + GetSeconds(num_output_frames),
-      [](const std::pair<double, Event>& event, double timestamp) {
-        return event.first < timestamp;
-      });
-  for (auto it = begin; it != end; ++it) {
-    const int message_frame = GetSamples(it->first - timestamp);
+  const double end_timestamp = timestamp + GetSeconds(num_output_frames);
+  std::pair<double, Event> event;
+  while (events_.GetNext(end_timestamp, event)) {
+    const int message_frame = GetSamples(event.first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
         process_callback_(&state_, &output[num_output_channels * frame],
@@ -115,9 +101,8 @@ void Instrument::Process(float* output, int num_output_channels,
                     set_note_off_callback_(&state_, stop_note_event.pitch);
                   }
                 }},
-        it->second);
+        event.second);
   }
-  events_.erase(begin, end);
   // Process the rest of the buffer.
   if (frame < num_output_frames && process_callback_) {
     process_callback_(&state_, &output[num_output_channels * frame],
@@ -151,10 +136,8 @@ void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
 void Instrument::ResetAllParameters(double timestamp) noexcept {
   for (int index = 0; index < static_cast<int>(parameters_.size()); ++index) {
     if (parameters_[index].ResetValue()) {
-      runner_.Add(
-          [this, timestamp, index, value = parameters_[index].GetValue()]() {
-            events_.emplace_back(timestamp, SetParameterEvent{index, value});
-          });
+      events_.Add(timestamp,
+                  SetParameterEvent{index, parameters_[index].GetValue()});
     }
   }
 }
@@ -162,10 +145,8 @@ void Instrument::ResetAllParameters(double timestamp) noexcept {
 bool Instrument::ResetParameter(int index, double timestamp) noexcept {
   if (index >= 0 && index < static_cast<int>(parameters_.size())) {
     if (parameters_[index].ResetValue()) {
-      runner_.Add(
-          [this, timestamp, index, value = parameters_[index].GetValue()]() {
-            events_.emplace_back(timestamp, SetParameterEvent{index, value});
-          });
+      events_.Add(timestamp,
+                  SetParameterEvent{index, parameters_[index].GetValue()});
     }
     return true;
   }
@@ -173,18 +154,14 @@ bool Instrument::ResetParameter(int index, double timestamp) noexcept {
 }
 
 void Instrument::SetData(void* data, double timestamp) noexcept {
-  runner_.Add([this, timestamp, data]() {
-    events_.emplace_back(timestamp, SetDataEvent{data});
-  });
+  events_.Add(timestamp, SetDataEvent{data});
 }
 
 void Instrument::SetGain(float gain, double timestamp) noexcept {
   if (gain_ != gain) {
     gain_ = gain;
     if (!is_muted_) {
-      runner_.Add([this, timestamp, gain = gain_]() {
-        events_.emplace_back(timestamp, SetGainEvent{gain});
-      });
+      events_.Add(timestamp, SetGainEvent{gain});
     }
   }
 }
@@ -192,9 +169,7 @@ void Instrument::SetGain(float gain, double timestamp) noexcept {
 void Instrument::SetMuted(bool is_muted, double timestamp) noexcept {
   if (is_muted_ != is_muted) {
     is_muted_ = is_muted;
-    runner_.Add([this, timestamp, gain = is_muted_ ? 0.0f : gain_]() {
-      events_.emplace_back(timestamp, SetGainEvent{gain});
-    });
+    events_.Add(timestamp, SetGainEvent{is_muted_ ? 0.0f : gain_});
   }
 }
 
@@ -230,10 +205,8 @@ bool Instrument::SetParameter(int index, float value,
                               double timestamp) noexcept {
   if (index >= 0 && index < static_cast<int>(parameters_.size())) {
     if (parameters_[index].SetValue(value)) {
-      runner_.Add(
-          [this, timestamp, index, value = parameters_[index].GetValue()]() {
-            events_.emplace_back(timestamp, SetParameterEvent{index, value});
-          });
+      events_.Add(timestamp,
+                  SetParameterEvent{index, parameters_[index].GetValue()});
     }
     return true;
   }
@@ -246,9 +219,7 @@ void Instrument::StartNote(float pitch, float intensity,
     if (note_on_callback_) {
       note_on_callback_(pitch, intensity, timestamp);
     }
-    runner_.Add([this, timestamp, pitch, intensity]() {
-      events_.emplace_back(timestamp, StartNoteEvent{pitch, intensity});
-    });
+    events_.Add(timestamp, StartNoteEvent{pitch, intensity});
   }
 }
 
@@ -257,9 +228,7 @@ void Instrument::StopAllNotes(double timestamp) noexcept {
     if (note_off_callback_) {
       note_off_callback_(pitch, timestamp);
     }
-    runner_.Add([this, timestamp, pitch]() {
-      events_.emplace_back(timestamp, StopNoteEvent{pitch});
-    });
+    events_.Add(timestamp, StopNoteEvent{pitch});
   }
 }
 
@@ -268,9 +237,7 @@ void Instrument::StopNote(float pitch, double timestamp) noexcept {
     if (note_off_callback_) {
       note_off_callback_(pitch, timestamp);
     }
-    runner_.Add([this, timestamp, pitch]() {
-      events_.emplace_back(timestamp, StopNoteEvent{pitch});
-    });
+    events_.Add(timestamp, StopNoteEvent{pitch});
   }
 }
 

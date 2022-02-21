@@ -10,18 +10,18 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/event.h"
 #include "barelymusician/find_or_null.h"
 #include "barelymusician/instrument.h"
-#include "barelymusician/instrument_event.h"
 #include "barelymusician/parameter.h"
 #include "barelymusician/sequence.h"
 #include "barelymusician/transport.h"
 
 namespace {
 
+using ::barelyapi::Event;
 using ::barelyapi::FindOrNull;
 using ::barelyapi::Instrument;
-using ::barelyapi::InstrumentEvent;
 using ::barelyapi::Sequence;
 using ::barelyapi::Transport;
 
@@ -32,7 +32,7 @@ constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 constexpr double kSecondsFromMinutes = 60.0;
 
 /// Instrument id-event pair.
-using InstrumentIdEventPair = std::pair<BarelyId, InstrumentEvent>;
+using InstrumentIdEventPair = std::pair<BarelyId, Event>;
 
 /// Instrument id-event pair by position map type.
 using InstrumentIdEventPairMap = std::multimap<double, InstrumentIdEventPair>;
@@ -47,47 +47,48 @@ extern "C" {
 /// BarelyMusician C api.
 struct BarelyMusician {
   /// Constructs new `BarelyMusician`.
-  BarelyMusician()
+  BarelyMusician() noexcept
       : instrument_refs_holder{std::make_unique<InstrumentReferenceMap>()},
         instrument_refs_ptr(instrument_refs_holder.get()) {
-    transport.SetUpdateCallback([this](double begin_position,
-                                       double end_position) noexcept {
-      InstrumentIdEventPairMap id_event_pairs;
-      for (auto& sequence_it : sequences) {
-        auto& sequence = sequence_it.second;
-        const auto instrument_id = sequence.GetInstrument();
-        sequence.SetEventCallback([&](double position, InstrumentEvent event) {
-          id_event_pairs.emplace(position,
-                                 InstrumentIdEventPair{instrument_id, event});
+    transport.SetUpdateCallback(
+        [this](double begin_position, double end_position) noexcept {
+          InstrumentIdEventPairMap id_event_pairs;
+          for (auto& sequence_it : sequences) {
+            auto& sequence = sequence_it.second;
+            const auto instrument_id = sequence.GetInstrument();
+            sequence.SetEventCallback([&](double position, Event event) {
+              id_event_pairs.emplace(
+                  position, InstrumentIdEventPair{instrument_id, event});
+            });
+            sequence.Process(begin_position, end_position);
+          }
+          for (const auto& [position, id_event_pair] : id_event_pairs) {
+            const auto& [instrument_id, event] = id_event_pair;
+            if (auto* instrument = GetInstrument(instrument_id)) {
+              instrument->ProcessEvent(event, transport.GetTimestamp(position));
+            }
+          }
         });
-        sequence.Process(begin_position, end_position);
-      }
-      for (const auto& [position, id_event_pair] : id_event_pairs) {
-        const auto& [instrument_id, event] = id_event_pair;
-        if (auto* instrument = GetInstrument(instrument_id)) {
-          instrument->ProcessEvent(event, transport.GetTimestamp(position));
-        }
-      }
-    });
   }
 
-  Instrument* GetInstrument(BarelyId instrument_id) const {
+  Instrument* GetInstrument(BarelyId instrument_id) const noexcept {
     if (auto it = instruments.find(instrument_id); it != instruments.end()) {
       return it->second.get();
     }
     return nullptr;
   }
 
-  void UpdateInstrumentMap() {
+  void UpdateInstrumentMap() noexcept {
     auto instrument_refs = std::make_unique<InstrumentReferenceMap>();
     instrument_refs->reserve(instruments.size());
     for (const auto& [instrument_id, instrument] : instruments) {
       instrument_refs->emplace(instrument_id, instrument.get());
     }
-    for (auto* expected = instrument_refs_holder.get();
-         !instrument_refs_ptr.compare_exchange_strong(expected,
-                                                      instrument_refs.get());) {
-      expected = instrument_refs_holder.get();
+    for (auto* current = instrument_refs_holder.get();
+         !instrument_refs_ptr.compare_exchange_weak(
+             current, instrument_refs.get(), std::memory_order_release,
+             std::memory_order_relaxed);) {
+      current = instrument_refs_holder.get();
     }
     instrument_refs_holder = std::move(instrument_refs);
   }

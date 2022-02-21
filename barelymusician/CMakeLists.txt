@@ -5,9 +5,9 @@ add_library(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
+  event
   find_or_null
   instrument
-  instrument_event
   parameter
   sequence
   transport
@@ -16,6 +16,11 @@ target_link_libraries(
 add_library(
   barelymusician_headeronly INTERFACE
   barelymusician.h
+)
+
+add_library(
+  event INTERFACE
+  event.h
 )
 
 add_library(
@@ -38,15 +43,10 @@ target_link_libraries(
   instrument
   barelymusician_headeronly
   gain_processor
-  instrument_event
+  event
   parameter
   task_runner
   visitor
-)
-
-add_library(
-  instrument_event INTERFACE
-  instrument_event.h
 )
 
 add_library(
@@ -67,8 +67,8 @@ add_library(
 target_link_libraries(
   sequence
   barelymusician_headeronly
+  event
   find_or_null
-  instrument_event
 )
 
 add_library(

@@ -6,7 +6,7 @@
 #include <variant>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instrument_event.h"
+#include "barelymusician/event.h"
 #include "barelymusician/visitor.h"
 
 namespace barelyapi {
@@ -77,7 +77,7 @@ void Instrument::Process(float* output, int num_output_channels,
   const auto begin = events_.begin();
   const auto end = std::lower_bound(
       begin, events_.end(), timestamp + GetSeconds(num_output_frames),
-      [](const std::pair<double, InstrumentEvent>& event, double timestamp) {
+      [](const std::pair<double, Event>& event, double timestamp) {
         return event.first < timestamp;
       });
   for (auto it = begin; it != end; ++it) {
@@ -126,8 +126,7 @@ void Instrument::Process(float* output, int num_output_channels,
   gain_processor_.Process(output, num_output_channels, num_output_frames);
 }
 
-void Instrument::ProcessEvent(const InstrumentEvent& event,
-                              double timestamp) noexcept {
+void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
   std::visit(
       Visitor{[&](const SetDataEvent& set_data_event) noexcept {
                 SetData(set_data_event.data, timestamp);

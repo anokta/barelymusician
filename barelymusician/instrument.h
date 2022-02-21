@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/event.h"
 #include "barelymusician/gain_processor.h"
-#include "barelymusician/instrument_event.h"
 #include "barelymusician/parameter.h"
 #include "barelymusician/task_runner.h"
 
@@ -68,7 +68,7 @@ class Instrument {
   ///
   /// @param event Instrument event.
   /// @param timestamp Timestamp in seconds.
-  void ProcessEvent(const InstrumentEvent& event, double timestamp) noexcept;
+  void ProcessEvent(const Event& event, double timestamp) noexcept;
 
   /// Resets all parameters to default value at timestamp.
   ///
@@ -149,7 +149,7 @@ class Instrument {
 
   // Map of events by their timestamps.
   // TODO(#60): Turn this into a fixed size ring buffer.
-  std::vector<std::pair<double, InstrumentEvent>> events_;
+  std::vector<std::pair<double, Event>> events_;
   TaskRunner runner_;
 
   // Gain in amplitude.

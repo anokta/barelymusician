@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_EVENT_H_
-#define BARELYMUSICIAN_INSTRUMENT_EVENT_H_
+#ifndef BARELYMUSICIAN_EVENT_H_
+#define BARELYMUSICIAN_EVENT_H_
 
 #include <variant>
 
@@ -42,10 +42,9 @@ struct StopNoteEvent {
 };
 
 /// Instrument event type.
-using InstrumentEvent =
-    std::variant<SetDataEvent, SetGainEvent, SetParameterEvent, StartNoteEvent,
-                 StopNoteEvent>;
+using Event = std::variant<SetDataEvent, SetGainEvent, SetParameterEvent,
+                           StartNoteEvent, StopNoteEvent>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_EVENT_H_
+#endif  // BARELYMUSICIAN_EVENT_H_

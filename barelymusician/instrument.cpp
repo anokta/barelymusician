@@ -28,6 +28,7 @@ Instrument::Instrument(const BarelyInstrumentDefinition& definition,
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
       set_parameter_callback_(definition.set_parameter_callback),
+      gain_processor_(sample_rate),
       sample_rate_(sample_rate) {
   assert(sample_rate_ >= 0);
   parameters_.reserve(definition.num_parameter_definitions);
@@ -44,7 +45,7 @@ Instrument::Instrument(const BarelyInstrumentDefinition& definition,
   }
 }
 
-Instrument::~Instrument() {
+Instrument::~Instrument() noexcept {
   if (destroy_callback_) {
     destroy_callback_(&state_);
   }
@@ -95,7 +96,7 @@ void Instrument::Process(float* output, int num_output_channels,
                   }
                 },
                 [this](const SetGainEvent& set_gain_event) noexcept {
-                  processor_gain_ = set_gain_event.gain;
+                  gain_processor_.SetGain(set_gain_event.gain);
                 },
                 [this](const SetParameterEvent& set_parameter_event) noexcept {
                   if (set_parameter_callback_) {
@@ -122,12 +123,7 @@ void Instrument::Process(float* output, int num_output_channels,
     process_callback_(&state_, &output[num_output_channels * frame],
                       num_output_channels, num_output_frames - frame);
   }
-  // TODO(#88): Revisit gain processing.
-  if (processor_gain_ != 1.0f) {
-    for (int i = 0; i < num_output_channels * num_output_frames; ++i) {
-      output[i] *= processor_gain_;
-    }
-  }
+  gain_processor_.Process(output, num_output_channels, num_output_frames);
 }
 
 void Instrument::ProcessEvent(const InstrumentEvent& event,

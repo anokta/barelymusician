@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/gain_processor.h"
 #include "barelymusician/instrument_event.h"
 #include "barelymusician/parameter.h"
 #include "barelymusician/task_runner.h"
@@ -24,7 +25,7 @@ class Instrument {
              int sample_rate) noexcept;
 
   /// Destroys `Instrument`.
-  ~Instrument();
+  ~Instrument() noexcept;
 
   /// Non-copyable and non-movable.
   Instrument(const Instrument& other) = delete;
@@ -190,9 +191,8 @@ class Instrument {
   // Set parameter function.
   BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback_;
 
-  // Gain in amplitude.
-  // TODO(#88): Turn this into `GainProcessor`.
-  float processor_gain_ = 1.0f;
+  // Gain processor.
+  GainProcessor gain_processor_;
 
   // Sampling rate in hz.
   int sample_rate_ = 0;

@@ -25,6 +25,12 @@ add_library(
 )
 
 add_library(
+  gain_processor
+  gain_processor.cpp
+  gain_processor.h
+)
+
+add_library(
   instrument
   instrument.cpp
   instrument.h
@@ -32,6 +38,7 @@ add_library(
 target_link_libraries(
   instrument
   barelymusician_headeronly
+  gain_processor
   instrument_event
   parameter
   task_runner

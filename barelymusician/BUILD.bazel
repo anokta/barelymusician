@@ -30,11 +30,18 @@ cc_library(
 )
 
 cc_library(
+    name = "gain_processor",
+    srcs = ["gain_processor.cpp"],
+    hdrs = ["gain_processor.h"],
+)
+
+cc_library(
     name = "instrument",
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],
     deps = [
         ":barelymusician_headeronly",
+        ":gain_processor",
         ":instrument_event",
         ":parameter",
         ":task_runner",

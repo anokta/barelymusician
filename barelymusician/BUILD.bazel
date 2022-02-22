@@ -11,6 +11,7 @@ cc_library(
         ":event",
         ":find_or_null",
         ":instrument",
+        ":mutable_data",
         ":parameter",
         ":sequence",
         ":transport",
@@ -59,6 +60,11 @@ cc_library(
         ":gain_processor",
         ":parameter",
     ],
+)
+
+cc_library(
+    name = "mutable_data",
+    hdrs = ["mutable_data.h"],
 )
 
 cc_library(

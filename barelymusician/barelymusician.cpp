@@ -4,7 +4,6 @@
 #include <stdint.h>   // NOLINT(modernize-deprecated-headers)
 
 #include <algorithm>
-#include <atomic>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -13,6 +12,7 @@
 #include "barelymusician/event.h"
 #include "barelymusician/find_or_null.h"
 #include "barelymusician/instrument.h"
+#include "barelymusician/mutable_data.h"
 #include "barelymusician/parameter.h"
 #include "barelymusician/sequence.h"
 #include "barelymusician/transport.h"
@@ -22,6 +22,7 @@ namespace {
 using ::barelyapi::Event;
 using ::barelyapi::FindOrNull;
 using ::barelyapi::Instrument;
+using ::barelyapi::MutableData;
 using ::barelyapi::Sequence;
 using ::barelyapi::Transport;
 
@@ -47,9 +48,7 @@ extern "C" {
 /// BarelyMusician C api.
 struct BarelyMusician {
   /// Constructs new `BarelyMusician`.
-  BarelyMusician() noexcept
-      : instrument_refs_holder{std::make_unique<InstrumentReferenceMap>()},
-        instrument_refs_ptr(instrument_refs_holder.get()) {
+  BarelyMusician() noexcept {
     transport.SetUpdateCallback(
         [this](double begin_position, double end_position) noexcept {
           InstrumentIdEventPairMap id_event_pairs;
@@ -79,18 +78,12 @@ struct BarelyMusician {
   }
 
   void UpdateInstrumentMap() noexcept {
-    auto instrument_refs = std::make_unique<InstrumentReferenceMap>();
-    instrument_refs->reserve(instruments.size());
+    InstrumentReferenceMap new_instrument_refs;
+    new_instrument_refs.reserve(instruments.size());
     for (const auto& [instrument_id, instrument] : instruments) {
-      instrument_refs->emplace(instrument_id, instrument.get());
+      new_instrument_refs.emplace(instrument_id, instrument.get());
     }
-    for (auto* current = instrument_refs_holder.get();
-         !instrument_refs_ptr.compare_exchange_weak(
-             current, instrument_refs.get(), std::memory_order_release,
-             std::memory_order_relaxed);) {
-      current = instrument_refs_holder.get();
-    }
-    instrument_refs_holder = std::move(instrument_refs);
+    instrument_refs.Update(std::move(new_instrument_refs));
   }
 
   // Monotonic identifier counter.
@@ -100,8 +93,7 @@ struct BarelyMusician {
   std::unordered_map<BarelyId, std::unique_ptr<Instrument>> instruments;
 
   // Instrument reference by identifier map.
-  std::unique_ptr<InstrumentReferenceMap> instrument_refs_holder;
-  std::atomic<InstrumentReferenceMap*> instrument_refs_ptr;
+  MutableData<InstrumentReferenceMap> instrument_refs;
 
   // List of sequences.
   std::unordered_map<BarelyId, Sequence> sequences;
@@ -227,15 +219,13 @@ BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
                                       int32_t num_output_frames) {
   if (!api) return BarelyStatus_kNotFound;
 
-  auto instrument_refs = api->instrument_refs_ptr.exchange(nullptr);
-  auto status = BarelyStatus_kNotFound;
+  auto instrument_refs = api->instrument_refs.GetScopedView();
   if (auto* instrument = FindOrNull(*instrument_refs, instrument_id)) {
     (*instrument)
         ->Process(output, num_output_channels, num_output_frames, timestamp);
-    status = BarelyStatus_kOk;
+    return BarelyStatus_kOk;
   }
-  api->instrument_refs_ptr = instrument_refs;
-  return status;
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelyInstrument_ResetAllParameters(BarelyApi api,
@@ -377,6 +367,7 @@ BarelyStatus BarelyMusician_Create(BarelyApi* out_api) {
 BarelyStatus BarelyMusician_Destroy(BarelyApi api) {
   if (!api) return BarelyStatus_kNotFound;
 
+  api->instrument_refs.Update({});
   delete api;
   return BarelyStatus_kOk;
 }

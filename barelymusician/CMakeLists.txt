@@ -8,6 +8,7 @@ target_link_libraries(
   event
   find_or_null
   instrument
+  mutable_data
   parameter
   sequence
   transport
@@ -56,6 +57,11 @@ target_link_libraries(
   event
   event_queue
   parameter
+)
+
+add_library(
+  mutable_data INTERFACE
+  mutable_data.h
 )
 
 add_library(

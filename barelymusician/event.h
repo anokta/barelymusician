@@ -11,12 +11,6 @@ struct SetDataEvent {
   void* data;
 };
 
-/// Set gain event.
-struct SetGainEvent {
-  /// Gain.
-  float gain;
-};
-
 /// Set parameter event.
 struct SetParameterEvent {
   /// Parameter index.
@@ -42,8 +36,8 @@ struct StopNoteEvent {
 };
 
 /// Instrument event type.
-using Event = std::variant<SetDataEvent, SetGainEvent, SetParameterEvent,
-                           StartNoteEvent, StopNoteEvent>;
+using Event = std::variant<SetDataEvent, SetParameterEvent, StartNoteEvent,
+                           StopNoteEvent>;
 
 }  // namespace barelyapi
 

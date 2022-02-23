@@ -93,9 +93,6 @@ void Instrument::Process(float* output, int num_output_channels,
                 set_data_callback_(&state_, set_data_event.data);
               }
             },
-            [this](const SetGainEvent& set_gain_event) noexcept {
-              gain_processor_.SetGain(set_gain_event.gain);
-            },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
               if (set_parameter_callback_) {
                 set_parameter_callback_(&state_, set_parameter_event.index,
@@ -127,9 +124,6 @@ void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
   std::visit(
       EventVisitor{[&](const SetDataEvent& set_data_event) noexcept {
                      SetData(set_data_event.data, timestamp);
-                   },
-                   [&](const SetGainEvent& set_gain_event) noexcept {
-                     SetGain(set_gain_event.gain, timestamp);
                    },
                    [&](const SetParameterEvent& set_parameter_event) noexcept {
                      SetParameter(set_parameter_event.index,
@@ -169,19 +163,19 @@ void Instrument::SetData(void* data, double timestamp) noexcept {
   events_.Add(timestamp, SetDataEvent{data});
 }
 
-void Instrument::SetGain(float gain, double timestamp) noexcept {
+void Instrument::SetGain(float gain) noexcept {
   if (gain_ != gain) {
     gain_ = gain;
     if (!is_muted_) {
-      events_.Add(timestamp, SetGainEvent{gain});
+      gain_processor_.SetGain(gain_);
     }
   }
 }
 
-void Instrument::SetMuted(bool is_muted, double timestamp) noexcept {
+void Instrument::SetMuted(bool is_muted) noexcept {
   if (is_muted_ != is_muted) {
     is_muted_ = is_muted;
-    events_.Add(timestamp, SetGainEvent{is_muted_ ? 0.0f : gain_});
+    gain_processor_.SetGain(is_muted_ ? 0.0f : gain_);
   }
 }
 

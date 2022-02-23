@@ -57,6 +57,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Create metronome instrument.
   Instrument metronome =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
+  metronome.SetGain(kGain);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
   metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
@@ -70,7 +71,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    metronome.StartNote(pitch, kGain);
+    metronome.StartNote(pitch);
     metronome.StopNote(pitch);
   };
   musician.SetBeatCallback(beat_callback);

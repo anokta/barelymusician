@@ -87,17 +87,15 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void SetData(void* data, double timestamp) noexcept;
 
-  /// Sets gain at timestamp.
+  /// Sets gain.
   ///
   /// @param gain Gain in amplitude.
-  /// @param timestamp Timestamp in seconds.
-  void SetGain(float gain, double timestamp) noexcept;
+  void SetGain(float gain) noexcept;
 
-  /// Sets whether instrument should be muted or not at timestamp.
+  /// Sets whether instrument should be muted or not.
   ///
   /// @param is_muted True if muted, false otherwise.
-  /// @param timestamp Timestamp in seconds.
-  void SetMuted(bool is_muted, double timestamp) noexcept;
+  void SetMuted(bool is_muted) noexcept;
 
   /// Sets note off callback.
   ///

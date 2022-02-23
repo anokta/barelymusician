@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_GAIN_PROCESSOR_H_
 #define BARELYMUSICIAN_GAIN_PROCESSOR_H_
 
+#include <atomic>
+
 namespace barelyapi {
 
 /// Gain processor with a linear ramp.
@@ -12,6 +14,7 @@ class GainProcessor {
   explicit GainProcessor(int sample_rate) noexcept;
 
   /// Processes next buffer.
+  ///
   /// @param buffer Buffer.
   /// @param num_channels Number of channels.
   /// @param num_frames Number of frames.
@@ -26,17 +29,14 @@ class GainProcessor {
   // Current gain in amplitude.
   float gain_ = 1.0f;
 
-  // Denotes whether processing is started or not.
+  // Denotes whether processor started processing or not.
   bool is_initialized_ = false;
 
-  // Total number of ramp frames
-  int num_unity_ramp_frames_ = 0;
+  // Total number of ramp frames for unity gain.
+  float num_unity_ramp_frames_ = 0.0f;
 
-  // Number of ramp frames left to process.
-  int num_ramp_frames_ = 0;
-
-  // Ramp increment per frame.
-  float ramp_increment_ = 0.0f;
+  // Target gain in amplitude.
+  std::atomic<float> target_gain_ = 1.0f;
 };
 
 }  // namespace barelyapi

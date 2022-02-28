@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_GAIN_PROCESSOR_H_
 #define BARELYMUSICIAN_GAIN_PROCESSOR_H_
 
-#include <atomic>
-
 namespace barelyapi {
 
 /// Gain processor with a linear ramp.
@@ -36,7 +34,7 @@ class GainProcessor {
   float num_unity_ramp_frames_ = 0.0f;
 
   // Target gain in amplitude.
-  std::atomic<float> target_gain_ = 1.0f;
+  float target_gain_ = 1.0f;
 };
 
 }  // namespace barelyapi

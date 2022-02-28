@@ -74,6 +74,7 @@ void Instrument::Process(float* output, int num_output_channels,
   assert(num_output_channels >= 0);
   assert(num_output_frames >= 0);
   int frame = 0;
+  int gain_frame = 0;
   // Process *all* events before the end timestamp.
   const double end_timestamp = timestamp + GetSeconds(num_output_frames);
   std::pair<double, Event> event;
@@ -92,6 +93,15 @@ void Instrument::Process(float* output, int num_output_channels,
               if (set_data_callback_) {
                 set_data_callback_(&state_, set_data_event.definition.data);
               }
+            },
+            [&](const SetGainEvent& set_gain_event) noexcept {
+              if (gain_frame < frame) {
+                gain_processor_.Process(
+                    &output[num_output_channels * gain_frame],
+                    num_output_channels, frame - gain_frame);
+                gain_frame = frame;
+              }
+              gain_processor_.SetGain(set_gain_event.gain);
             },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
               if (set_parameter_callback_) {
@@ -117,13 +127,19 @@ void Instrument::Process(float* output, int num_output_channels,
     process_callback_(&state_, &output[num_output_channels * frame],
                       num_output_channels, num_output_frames - frame);
   }
-  gain_processor_.Process(output, num_output_channels, num_output_frames);
+  if (gain_frame < num_output_frames) {
+    gain_processor_.Process(&output[num_output_channels * gain_frame],
+                            num_output_channels, num_output_frames);
+  }
 }
 
 void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
   std::visit(
       EventVisitor{[&](const SetDataEvent& set_data_event) noexcept {
                      SetData(set_data_event.definition, timestamp);
+                   },
+                   [&](const SetGainEvent& set_gain_event) noexcept {
+                     SetGain(set_gain_event.gain, timestamp);
                    },
                    [&](const SetParameterEvent& set_parameter_event) noexcept {
                      SetParameter(set_parameter_event.index,
@@ -169,11 +185,11 @@ void Instrument::SetData(BarelyDataDefinition definition,
   events_.Add(timestamp, SetDataEvent{definition});
 }
 
-void Instrument::SetGain(float gain) noexcept {
+void Instrument::SetGain(float gain, double timestamp) noexcept {
   if (gain_ != gain) {
     gain_ = gain;
     if (!is_muted_) {
-      gain_processor_.SetGain(gain_);
+      events_.Add(timestamp, SetGainEvent{gain});
     }
   }
 }

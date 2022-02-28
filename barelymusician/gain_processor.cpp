@@ -56,16 +56,16 @@ void GainProcessor::Process(float* buffer, int num_channels,
                             int num_frames) noexcept {
   int frame = 0;
   // Apply linear ramp.
-  if (const float target_gain = target_gain_; gain_ != target_gain) {
+  if (gain_ != target_gain_) {
     if (is_initialized_) {
       frame = static_cast<int>(num_unity_ramp_frames_ *
-                               std::abs(target_gain - gain_));
+                               std::abs(target_gain_ - gain_));
       if (frame > 0) {
-        gain_ = ApplyLinearRamp(gain_, target_gain, frame, buffer, num_channels,
-                                num_frames);
+        gain_ = ApplyLinearRamp(gain_, target_gain_, frame, buffer,
+                                num_channels, num_frames);
       }
     } else {
-      gain_ = target_gain;
+      gain_ = target_gain_;
     }
   }
   is_initialized_ = true;

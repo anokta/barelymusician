@@ -269,7 +269,7 @@ BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId instrument_id,
   if (!api) return BarelyStatus_kNotFound;
 
   if (auto* instrument = api->GetInstrument(instrument_id)) {
-    instrument->SetGain(gain);
+    instrument->SetGain(gain, api->transport.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

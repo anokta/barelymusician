@@ -87,10 +87,10 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void SetData(BarelyDataDefinition definition, double timestamp) noexcept;
 
-  /// Sets gain.
+  /// Sets gain at timestamp.
   ///
   /// @param gain Gain in amplitude.
-  void SetGain(float gain) noexcept;
+  void SetGain(float gain, double timestamp) noexcept;
 
   /// Sets whether instrument should be muted or not.
   ///

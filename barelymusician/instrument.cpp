@@ -90,7 +90,7 @@ void Instrument::Process(float* output, int num_output_channels,
         EventVisitor{
             [this](const SetDataEvent& set_data_event) noexcept {
               if (set_data_callback_) {
-                set_data_callback_(&state_, set_data_event.data);
+                set_data_callback_(&state_, set_data_event.definition.data);
               }
             },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
@@ -123,7 +123,7 @@ void Instrument::Process(float* output, int num_output_channels,
 void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
   std::visit(
       EventVisitor{[&](const SetDataEvent& set_data_event) noexcept {
-                     SetData(set_data_event.data, timestamp);
+                     SetData(set_data_event.definition, timestamp);
                    },
                    [&](const SetParameterEvent& set_parameter_event) noexcept {
                      SetParameter(set_parameter_event.index,
@@ -159,8 +159,14 @@ bool Instrument::ResetParameter(int index, double timestamp) noexcept {
   return false;
 }
 
-void Instrument::SetData(void* data, double timestamp) noexcept {
-  events_.Add(timestamp, SetDataEvent{data});
+void Instrument::SetData(BarelyDataDefinition definition,
+                         double timestamp) noexcept {
+  void* new_data = nullptr;
+  if (definition.move_callback) {
+    definition.move_callback(definition.data, &new_data);
+  }
+  definition.data = new_data;
+  events_.Add(timestamp, SetDataEvent{definition});
 }
 
 void Instrument::SetGain(float gain) noexcept {

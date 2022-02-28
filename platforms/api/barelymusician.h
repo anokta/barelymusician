@@ -408,8 +408,17 @@ class Instrument {
   ///
   /// @param data Data.
   /// @return Status.
-  Status SetData(void* data) {
-    return static_cast<Status>(BarelyInstrument_SetData(capi_, id_, data));
+  template <typename DataType>
+  Status SetData(DataType data) {
+    return static_cast<Status>(BarelyInstrument_SetData(
+        capi_, id_,
+        BarelyDataDefinition{
+            [](void* other_data, void** out_data) {
+              *out_data = reinterpret_cast<void*>(new DataType(
+                  std::move(*reinterpret_cast<DataType*>(other_data))));
+            },
+            [](void* data) { delete reinterpret_cast<DataType*>(data); },
+            reinterpret_cast<void*>(&data)}));
   }
 
   /// Sets gain.

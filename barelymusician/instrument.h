@@ -83,9 +83,9 @@ class Instrument {
 
   /// Sets data at timestamp.
   ///
-  /// @param data Data.
+  /// @param definition Data definition.
   /// @param timestamp Timestamp in seconds.
-  void SetData(void* data, double timestamp) noexcept;
+  void SetData(BarelyDataDefinition definition, double timestamp) noexcept;
 
   /// Sets gain.
   ///

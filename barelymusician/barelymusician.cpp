@@ -49,25 +49,25 @@ extern "C" {
 struct BarelyMusician {
   /// Constructs new `BarelyMusician`.
   BarelyMusician() noexcept {
-    transport.SetUpdateCallback(
-        [this](double begin_position, double end_position) noexcept {
-          InstrumentIdEventPairMap id_event_pairs;
-          for (auto& sequence_it : sequences) {
-            auto& sequence = sequence_it.second;
-            const auto instrument_id = sequence.GetInstrument();
-            sequence.SetEventCallback([&](double position, Event event) {
-              id_event_pairs.emplace(
-                  position, InstrumentIdEventPair{instrument_id, event});
-            });
-            sequence.Process(begin_position, end_position);
-          }
-          for (const auto& [position, id_event_pair] : id_event_pairs) {
-            const auto& [instrument_id, event] = id_event_pair;
-            if (auto* instrument = GetInstrument(instrument_id)) {
-              instrument->ProcessEvent(event, transport.GetTimestamp(position));
-            }
-          }
+    transport.SetUpdateCallback([this](double begin_position,
+                                       double end_position) noexcept {
+      InstrumentIdEventPairMap id_event_pairs;
+      for (auto& sequence_it : sequences) {
+        auto& sequence = sequence_it.second;
+        const auto instrument_id = sequence.GetInstrument();
+        sequence.SetEventCallback([&](double position, Event event) {
+          id_event_pairs.emplace(
+              position, InstrumentIdEventPair{instrument_id, std::move(event)});
         });
+        sequence.Process(begin_position, end_position);
+      }
+      for (const auto& [position, id_event_pair] : id_event_pairs) {
+        const auto& [instrument_id, event] = id_event_pair;
+        if (auto* instrument = GetInstrument(instrument_id)) {
+          instrument->ProcessEvent(event, transport.GetTimestamp(position));
+        }
+      }
+    });
   }
 
   Instrument* GetInstrument(BarelyId instrument_id) const noexcept {
@@ -254,11 +254,11 @@ BarelyStatus BarelyInstrument_ResetParameter(BarelyApi api,
 }
 
 BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId instrument_id,
-                                      void* data) {
+                                      BarelyDataDefinition definition) {
   if (!api) return BarelyStatus_kNotFound;
 
   if (auto* instrument = api->GetInstrument(instrument_id)) {
-    instrument->SetData(data, api->transport.GetTimestamp());
+    instrument->SetData(definition, api->transport.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

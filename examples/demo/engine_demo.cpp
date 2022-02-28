@@ -276,9 +276,10 @@ int main(int /*argc*/, char* argv[]) {
   for (const auto& [index, name] : drumkit_map) {
     auto it = drumkit_files.emplace(index, WavFile{});
     const std::string path = runfiles->Rlocation(kDrumsBaseFilename + name);
-    assert(it.first->second.Load(path));
+    const bool success = it.first->second.Load(path);
+    assert(success);
   }
-  instruments.back().SetData(reinterpret_cast<void*>(&drumkit_files));
+  instruments.back().SetData(std::move(drumkit_files));
   const auto drumkit_beat_composer_callback =
       [&](int bar, int beat, int num_beats, int /*harmonic*/, double offset,
           Sequence* sequence) {

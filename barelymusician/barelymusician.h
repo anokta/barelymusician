@@ -144,6 +144,7 @@ enum BarelyStatus_Values {
 ///
 /// @param other_data Other data to move.
 /// @param out_data Output data.
+// TODO: Can/should probably be create (copy) via `const void*` instead.
 typedef void (*BarelyDataDefinition_MoveCallback)(void* other_data,
                                                   void** out_data);
 

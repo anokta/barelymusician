@@ -9,9 +9,6 @@
 
 namespace barely::examples {
 
-DrumkitInstrument::DrumkitInstrument(int sample_rate) noexcept
-    : sample_rate_(sample_rate) {}
-
 void DrumkitInstrument::NoteOff(float pitch) noexcept {
   if (const auto it = pads_.find(pitch); it != pads_.end()) {
     it->second.voice.Stop();
@@ -39,9 +36,10 @@ void DrumkitInstrument::Process(float* output, int num_channels,
 }
 
 void DrumkitInstrument::SetData(void* data) noexcept {
-  for (const auto& [pitch, file] :
-       *reinterpret_cast<std::unordered_map<float, WavFile>*>(data)) {
-    pads_.insert({pitch, DrumkitPad{file, sample_rate_}});
+  if (data) {
+    pads_.swap(*reinterpret_cast<DrumkitPadMap*>(data));
+  } else {
+    pads_.clear();
   }
 }
 

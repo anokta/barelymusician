@@ -13,7 +13,7 @@ class EventQueue {
  public:
   bool Add(double timestamp, Event event) noexcept;
 
-  bool GetNext(double end_timestamp, std::pair<double, Event>& event) noexcept;
+  const std::pair<double, Event>* GetNext(double end_timestamp) noexcept;
 
  private:
   // Maximum number of events.

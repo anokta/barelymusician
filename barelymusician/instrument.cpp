@@ -77,9 +77,9 @@ void Instrument::Process(float* output, int num_output_channels,
   int gain_frame = 0;
   // Process *all* events before the end timestamp.
   const double end_timestamp = timestamp + GetSeconds(num_output_frames);
-  std::pair<double, Event> event;
-  while (events_.GetNext(end_timestamp, event)) {
-    const int message_frame = GetSamples(event.first - timestamp);
+  for (const auto* event = events_.GetNext(end_timestamp); event;
+       event = events_.GetNext(end_timestamp)) {
+    const int message_frame = GetSamples(event->first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
         process_callback_(&state_, &output[num_output_channels * frame],
@@ -120,7 +120,7 @@ void Instrument::Process(float* output, int num_output_channels,
                 set_note_off_callback_(&state_, stop_note_event.pitch);
               }
             }},
-        event.second);
+        event->second);
   }
   // Process the rest of the buffer.
   if (frame < num_output_frames && process_callback_) {

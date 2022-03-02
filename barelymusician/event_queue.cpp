@@ -15,15 +15,14 @@ bool EventQueue::Add(double timestamp, Event event) noexcept {
   return true;
 }
 
-bool EventQueue::GetNext(double end_timestamp,
-                         std::pair<double, Event>& event) noexcept {
+const std::pair<double, Event>* EventQueue::GetNext(
+    double end_timestamp) noexcept {
   const int index = read_index_;
   if (index == write_index_ || events_[index].first >= end_timestamp) {
-    return false;
+    return nullptr;
   }
-  event = std::move(events_[index]);
   read_index_ = (index + 1) % kMaxNumEvents;
-  return true;
+  return &events_[index];
 }
 
 }  // namespace barelyapi

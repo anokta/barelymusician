@@ -2,6 +2,10 @@ add_library(
   barelymusician
   barelymusician.cpp
 )
+target_compile_definitions(
+  barelymusician
+  PUBLIC BARELYMUSICIAN_EXPORTS
+)
 target_link_libraries(
   barelymusician
   barelymusician_headeronly

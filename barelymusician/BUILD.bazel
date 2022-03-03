@@ -8,13 +8,12 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":barelymusician_headeronly",
+        ":event",
         ":find_or_null",
-        ":instrument_controller",
-        ":instrument_event",
-        ":instrument_processor",
+        ":instrument",
+        ":mutable_data",
         ":parameter",
         ":sequence",
-        ":task_runner",
         ":transport",
     ],
     alwayslink = True,
@@ -26,36 +25,49 @@ cc_library(
 )
 
 cc_library(
+    name = "event",
+    hdrs = ["event.h"],
+    deps = [
+        ":barelymusician_headeronly",
+    ],
+)
+
+cc_library(
+    name = "event_queue",
+    srcs = ["event_queue.cpp"],
+    hdrs = ["event_queue.h"],
+    deps = [
+        ":event",
+    ],
+)
+
+cc_library(
     name = "find_or_null",
     hdrs = ["find_or_null.h"],
 )
 
 cc_library(
-    name = "instrument_controller",
-    srcs = ["instrument_controller.cpp"],
-    hdrs = ["instrument_controller.h"],
+    name = "gain_processor",
+    srcs = ["gain_processor.cpp"],
+    hdrs = ["gain_processor.h"],
+)
+
+cc_library(
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
     deps = [
         ":barelymusician_headeronly",
-        ":instrument_event",
+        ":event",
+        ":event_queue",
+        ":gain_processor",
         ":parameter",
-        ":visitor",
     ],
 )
 
 cc_library(
-    name = "instrument_event",
-    hdrs = ["instrument_event.h"],
-)
-
-cc_library(
-    name = "instrument_processor",
-    srcs = ["instrument_processor.cpp"],
-    hdrs = ["instrument_processor.h"],
-    deps = [
-        ":barelymusician_headeronly",
-        ":instrument_event",
-        ":visitor",
-    ],
+    name = "mutable_data",
+    hdrs = ["mutable_data.h"],
 )
 
 cc_library(
@@ -73,26 +85,15 @@ cc_library(
     hdrs = ["sequence.h"],
     deps = [
         ":barelymusician_headeronly",
+        ":event",
         ":find_or_null",
-        ":instrument_event",
     ],
-)
-
-cc_library(
-    name = "task_runner",
-    srcs = ["task_runner.cpp"],
-    hdrs = ["task_runner.h"],
 )
 
 cc_library(
     name = "transport",
     srcs = ["transport.cpp"],
     hdrs = ["transport.h"],
-)
-
-cc_library(
-    name = "visitor",
-    hdrs = ["visitor.h"],
 )
 
 cc_test(
@@ -104,7 +105,7 @@ cc_test(
     ],
 )
 
-# TODO: Add unit tests for instrument controller & processor.
+# TODO: Add unit tests for instrument.
 
 cc_test(
     name = "parameter_test",
@@ -118,28 +119,10 @@ cc_test(
 # TODO: Add back sequence unit test.
 
 cc_test(
-    name = "task_runner_test",
-    srcs = ["task_runner_test.cpp"],
-    deps = [
-        ":task_runner",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "transport_test",
     srcs = ["transport_test.cpp"],
     deps = [
         ":transport",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "visitor_test",
-    srcs = ["visitor_test.cpp"],
-    deps = [
-        ":visitor",
         "@googletest//:gtest_main",
     ],
 )

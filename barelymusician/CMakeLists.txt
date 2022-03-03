@@ -1,8 +1,41 @@
-# TODO(#91): Add `barelymusician` target.
+add_library(
+  barelymusician
+  barelymusician.cpp
+)
+target_compile_definitions(
+  barelymusician
+  PUBLIC BARELYMUSICIAN_EXPORTS
+)
+target_link_libraries(
+  barelymusician
+  barelymusician_headeronly
+  event
+  find_or_null
+  instrument
+  mutable_data
+  parameter
+  sequence
+  transport
+)
 
 add_library(
   barelymusician_headeronly INTERFACE
   barelymusician.h
+)
+
+add_library(
+  event INTERFACE
+  event.h
+)
+
+add_library(
+  event_queue
+  event_queue.cpp
+  event_queue.h
+)
+target_link_libraries(
+  event_queue
+  event
 )
 
 add_library(
@@ -11,33 +44,28 @@ add_library(
 )
 
 add_library(
-  instrument_controller
-  instrument_controller.cpp
-  instrument_controller.h
+  gain_processor
+  gain_processor.cpp
+  gain_processor.h
+)
+
+add_library(
+  instrument
+  instrument.cpp
+  instrument.h
 )
 target_link_libraries(
-  instrument_controller
+  instrument
   barelymusician_headeronly
-  instrument_event
+  gain_processor
+  event
+  event_queue
   parameter
-  visitor
 )
 
 add_library(
-  instrument_event INTERFACE
-  instrument_event.h
-)
-
-add_library(
-  instrument_processor
-  instrument_processor.cpp
-  instrument_processor.h
-)
-target_link_libraries(
-  instrument_processor
-  barelymusician_headeronly
-  instrument_event
-  visitor
+  mutable_data INTERFACE
+  mutable_data.h
 )
 
 add_library(
@@ -58,25 +86,14 @@ add_library(
 target_link_libraries(
   sequence
   barelymusician_headeronly
+  event
   find_or_null
-  instrument_event
-)
-
-add_library(
-  task_runner
-  task_runner.cpp
-  task_runner.h
 )
 
 add_library(
   transport
   transport.cpp
   transport.h
-)
-
-add_library(
-  visitor INTERFACE
-  visitor.h
 )
 
 add_executable(
@@ -102,17 +119,6 @@ target_link_libraries(
 gtest_discover_tests(parameter_test)
 
 add_executable(
-  task_runner_test
-  task_runner_test.cpp
-)
-target_link_libraries(
-  task_runner_test
-  task_runner
-  gtest_main
-)
-gtest_discover_tests(task_runner_test)
-
-add_executable(
   transport_test
   transport_test.cpp
 )
@@ -123,14 +129,3 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(transport_test)
-
-add_executable(
-  visitor_test
-  visitor_test.cpp
-)
-target_link_libraries(
-  visitor_test
-  visitor
-  gtest_main
-)
-gtest_discover_tests(visitor_test)

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instrument_event.h"
+#include "barelymusician/event.h"
 
 namespace barelyapi {
 
@@ -27,7 +27,7 @@ class Sequence {
       std::pair<NotePositionIdPair, BarelyNoteDefinition>;
 
   // TODO: Refactor this.
-  using EventCallback = std::function<void(double, InstrumentEvent)>;
+  using EventCallback = std::function<void(double, Event)>;
 
   /// Adds new note at position.
   ///

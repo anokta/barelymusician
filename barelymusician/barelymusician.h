@@ -140,6 +140,31 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 7,
 };
 
+/// Data move callback signature.
+///
+/// @param other_data Other data to move.
+/// @param out_data Output data.
+// TODO: Can/should probably be create (copy) via `const void*` instead.
+typedef void (*BarelyDataDefinition_MoveCallback)(void* other_data,
+                                                  void** out_data);
+
+/// Data destroy callback signature.
+///
+/// @param data Data to destroy.
+typedef void (*BarelyDataDefinition_DestroyCallback)(void* data);
+
+/// Data definition.
+typedef struct BarelyDataDefinition {
+  /// Move callback.
+  BarelyDataDefinition_MoveCallback move_callback;
+
+  /// Destroy callback.
+  BarelyDataDefinition_DestroyCallback destroy_callback;
+
+  /// Data.
+  void* data;
+} BarelyDataDefinition;
+
 /// Instrument note off callback signature.
 ///
 /// @param pitch Note pitch.
@@ -379,11 +404,10 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
 ///
 /// @param api BarelyMusician api.
 /// @param instrument_id Instrument identifier.
-/// @param data Data.
+/// @param definition Data definition.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyApi api,
-                                                    BarelyId instrument_id,
-                                                    void* data);
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(
+    BarelyApi api, BarelyId instrument_id, BarelyDataDefinition definition);
 
 /// Sets instrument gain.
 ///

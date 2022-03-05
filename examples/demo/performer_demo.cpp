@@ -41,7 +41,7 @@ constexpr int kNumFrames = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr float kGain = 0.2f;
+constexpr double kGain = 0.2;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kAttack = 0.0f;
 constexpr double kRelease = 0.1f;
@@ -80,7 +80,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument metronome =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  metronome.SetGain(0.5f * kGain);
+  metronome.SetGain(0.5 * kGain);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, 0.025);
   metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,

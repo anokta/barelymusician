@@ -39,7 +39,7 @@ struct SetDataEvent {
 /// Set gain event.
 struct SetGainEvent {
   /// Gain in amplitude.
-  float gain;
+  double gain;
 };
 
 /// Set parameter event.

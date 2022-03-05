@@ -29,7 +29,7 @@ constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 256;
 
 // Instrument settings.
-constexpr float kGain = 0.125f;
+constexpr double kGain = 0.125;
 constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kEnvelopeAttack = 0.05;

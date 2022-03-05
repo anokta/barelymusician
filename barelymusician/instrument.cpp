@@ -53,7 +53,7 @@ Instrument::~Instrument() noexcept {
   }
 }
 
-float Instrument::GetGain() const noexcept { return gain_; }
+double Instrument::GetGain() const noexcept { return gain_; }
 
 const Parameter* Instrument::GetParameter(int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(parameters_.size())) {
@@ -185,7 +185,7 @@ void Instrument::SetData(BarelyDataDefinition definition,
   events_.Add(timestamp, SetDataEvent{definition});
 }
 
-void Instrument::SetGain(float gain, double timestamp) noexcept {
+void Instrument::SetGain(double gain, double timestamp) noexcept {
   if (gain_ != gain) {
     gain_ = gain;
     if (!is_muted_) {
@@ -197,7 +197,7 @@ void Instrument::SetGain(float gain, double timestamp) noexcept {
 void Instrument::SetMuted(bool is_muted) noexcept {
   if (is_muted_ != is_muted) {
     is_muted_ = is_muted;
-    gain_processor_.SetGain(is_muted_ ? 0.0f : gain_);
+    gain_processor_.SetGain(is_muted_ ? 0.0 : gain_);
   }
 }
 

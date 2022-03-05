@@ -35,7 +35,7 @@ class Instrument {
   /// Returns gain.
   ///
   /// @return gain Gain in amplitude.
-  [[nodiscard]] float GetGain() const noexcept;
+  [[nodiscard]] double GetGain() const noexcept;
 
   /// Returns parameter.
   ///
@@ -90,7 +90,7 @@ class Instrument {
   /// Sets gain at timestamp.
   ///
   /// @param gain Gain in amplitude.
-  void SetGain(float gain, double timestamp) noexcept;
+  void SetGain(double gain, double timestamp) noexcept;
 
   /// Sets whether instrument should be muted or not.
   ///
@@ -148,7 +148,7 @@ class Instrument {
   EventQueue events_;
 
   // Gain in amplitude.
-  float gain_ = 1.0f;
+  double gain_ = 1.0;
 
   // Denotes whether instrument is muted or not.
   bool is_muted_ = false;

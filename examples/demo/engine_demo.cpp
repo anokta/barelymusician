@@ -209,7 +209,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::pair<Sequence, BeatComposerCallback>> performers;
   std::vector<Instrument> instruments;
 
-  const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
+  const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
     instruments.push_back(musician.CreateInstrument(
         SynthInstrument::GetDefinition(), kSampleRate));
@@ -230,12 +230,12 @@ int main(int /*argc*/, char* argv[]) {
         ComposeChord(kRootNote, scale, 0.5f, harmonic, offset, sequence);
       };
 
-  build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125, 0.125);
+  build_synth_instrument_fn(OscillatorType::kSine, 0.1, 0.125, 0.125);
   performers.emplace_back(musician.CreateSequence(),
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
 
-  build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5, 0.025);
+  build_synth_instrument_fn(OscillatorType::kNoise, 0.025, 0.5, 0.025);
   performers.emplace_back(musician.CreateSequence(),
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -247,7 +247,7 @@ int main(int /*argc*/, char* argv[]) {
                 offset, sequence);
   };
 
-  build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025, 0.125);
+  build_synth_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
   performers.emplace_back(musician.CreateSequence(),
                           line_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -259,7 +259,7 @@ int main(int /*argc*/, char* argv[]) {
                     offset, sequence);
       };
 
-  build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05, 0.05);
+  build_synth_instrument_fn(OscillatorType::kSquare, 0.125, 0.05, 0.05);
   performers.emplace_back(musician.CreateSequence(),
                           line_2_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -267,7 +267,7 @@ int main(int /*argc*/, char* argv[]) {
   // Add drumkit instrument.
   instruments.push_back(musician.CreateInstrument(
       DrumkitInstrument::GetDefinition(), kSampleRate));
-  instruments.back().SetGain(0.35f);
+  instruments.back().SetGain(0.35);
   set_note_callbacks_fn(instruments.size(), &instruments.back());
   auto& drumkit = instruments.back();
   const auto set_drumkit_pad_map_fn =

@@ -323,7 +323,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_GetGain(BarelyApi api,
                                                     BarelyId instrument_id,
-                                                    float* out_gain);
+                                                    double* out_gain);
 
 /// Gets instrument parameter value.
 ///
@@ -417,7 +417,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetGain(BarelyApi api,
                                                     BarelyId instrument_id,
-                                                    float gain);
+                                                    double gain);
 
 /// Sets whether volume should be muted or not.
 ///

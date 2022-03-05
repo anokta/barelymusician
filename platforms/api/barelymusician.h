@@ -310,8 +310,8 @@ class Instrument {
   /// Returns gain.
   ///
   /// @return Gain in amplitude.
-  [[nodiscard]] float GetGain() const {
-    float gain = 0.0f;
+  [[nodiscard]] double GetGain() const {
+    double gain = 0.0;
     if (id_ != BarelyId_kInvalid) {
       const auto status = BarelyInstrument_GetGain(capi_, id_, &gain);
       assert(status == BarelyStatus_kOk);
@@ -425,7 +425,7 @@ class Instrument {
   ///
   /// @param gain Gain in amplitude.
   /// @return Status.
-  Status SetGain(float gain) {
+  Status SetGain(double gain) {
     return static_cast<Status>(BarelyInstrument_SetGain(capi_, id_, gain));
   }
 

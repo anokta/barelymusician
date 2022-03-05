@@ -21,20 +21,20 @@ class GainProcessor {
   /// Sets gain.
   ///
   /// @param gain Gain in amplitude.
-  void SetGain(float gain) noexcept;
+  void SetGain(double gain) noexcept;
 
  private:
   // Current gain in amplitude.
-  float gain_ = 1.0f;
+  double gain_ = 1.0;
 
   // Denotes whether processor started processing or not.
   bool is_initialized_ = false;
 
   // Total number of ramp frames for unity gain.
-  float num_unity_ramp_frames_ = 0.0f;
+  double num_unity_ramp_frames_ = 0.0;
 
   // Target gain in amplitude.
-  float target_gain_ = 1.0f;
+  double target_gain_ = 1.0;
 };
 
 }  // namespace barelyapi

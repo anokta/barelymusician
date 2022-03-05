@@ -40,8 +40,8 @@ constexpr double kLookahead = 0.1;
 
 // Instrument settings.
 constexpr int kNumInstrumentVoices = 16;
-constexpr float kInstrumentGain =
-    1.0f / static_cast<float>(kNumInstrumentVoices);
+constexpr double kInstrumentGain =
+    1.0 / static_cast<double>(kNumInstrumentVoices);
 constexpr double kInstrumentEnvelopeAttack = 0.0f;
 constexpr double kInstrumentEnvelopeRelease = 0.2f;
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;

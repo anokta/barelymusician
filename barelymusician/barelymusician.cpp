@@ -152,7 +152,7 @@ BarelyStatus BarelyInstrument_Destroy(BarelyApi api, BarelyId instrument_id) {
 }
 
 BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
-                                      float* out_gain) {
+                                      double* out_gain) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_gain) return BarelyStatus_kInvalidArgument;
 
@@ -265,7 +265,7 @@ BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId instrument_id,
 }
 
 BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId instrument_id,
-                                      float gain) {
+                                      double gain) {
   if (!api) return BarelyStatus_kNotFound;
 
   if (auto* instrument = api->GetInstrument(instrument_id)) {

@@ -229,7 +229,7 @@ void Instrument::SetNoteOnCallback(
   }
 }
 
-bool Instrument::SetParameter(int index, float value,
+bool Instrument::SetParameter(int index, double value,
                               double timestamp) noexcept {
   if (index >= 0 && index < static_cast<int>(parameters_.size())) {
     if (parameters_[index].SetValue(value)) {

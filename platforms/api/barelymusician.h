@@ -162,16 +162,16 @@ struct ParameterDefinition : public BarelyParameterDefinition {
   /// @param min_value Minimum float value.
   /// @param max_value Maximum float value.
   explicit ParameterDefinition(
-      float default_value,
-      float min_value = std::numeric_limits<float>::lowest(),
-      float max_value = std::numeric_limits<float>::max())
+      double default_value,
+      double min_value = std::numeric_limits<double>::lowest(),
+      double max_value = std::numeric_limits<double>::max())
       : BarelyParameterDefinition{default_value, min_value, max_value} {}
 
   /// Constructs new `ParameterDefinition` for a boolean value.
   ///
   /// @param default_value Default boolean value.
   explicit ParameterDefinition(bool default_value)
-      : ParameterDefinition(static_cast<float>(default_value)) {}
+      : ParameterDefinition(static_cast<double>(default_value)) {}
 
   /// Constructs new `ParameterDefinition` for an integer value.
   ///
@@ -181,9 +181,9 @@ struct ParameterDefinition : public BarelyParameterDefinition {
   explicit ParameterDefinition(
       int default_value, int min_value = std::numeric_limits<int>::lowest(),
       int max_value = std::numeric_limits<int>::max())
-      : ParameterDefinition(static_cast<float>(default_value),
-                            static_cast<float>(min_value),
-                            static_cast<float>(max_value)) {}
+      : ParameterDefinition(static_cast<double>(default_value),
+                            static_cast<double>(min_value),
+                            static_cast<double>(max_value)) {}
 
   /// Constructs new `ParameterDefinition` from internal type.
   ///
@@ -323,8 +323,8 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @return Parameter value, or error status.
-  [[nodiscard]] StatusOr<float> GetParameter(int index) const {
-    float value = 0.0f;
+  [[nodiscard]] StatusOr<double> GetParameter(int index) const {
+    double value = 0.0;
     if (const auto status =
             BarelyInstrument_GetParameter(capi_, id_, index, &value);
         status != BarelyStatus_kOk) {
@@ -479,7 +479,7 @@ class Instrument {
   /// @param index Parameter index.
   /// @param value Parameter value.
   /// @return Status.
-  Status SetParameter(int index, float value) {
+  Status SetParameter(int index, double value) {
     return static_cast<Status>(
         BarelyInstrument_SetParameter(capi_, id_, index, value));
   }

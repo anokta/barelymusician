@@ -43,11 +43,11 @@ void DrumkitInstrument::SetData(void* data) noexcept {
   }
 }
 
-void DrumkitInstrument::SetParameter(int index, float value) noexcept {
+void DrumkitInstrument::SetParameter(int index, double value) noexcept {
   switch (static_cast<DrumkitInstrumentParameter>(index)) {
     case DrumkitInstrumentParameter::kPadRelease:
       for (auto& [pitch, pad] : pads_) {
-        pad.voice.envelope().SetRelease(value);
+        pad.voice.envelope().SetRelease(static_cast<float>(value));
       }
       break;
   }
@@ -56,7 +56,7 @@ void DrumkitInstrument::SetParameter(int index, float value) noexcept {
 BarelyInstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
   static std::vector<BarelyParameterDefinition> parameter_definitions = {
       // Pad release.
-      BarelyParameterDefinition{0.1f, 0.0f, 60.0f},
+      BarelyParameterDefinition{0.1, 0.0, 60.0},
   };
   return GetInstrumentDefinition<DrumkitInstrument>(parameter_definitions);
 }

@@ -33,8 +33,8 @@ constexpr double kLookahead = 0.1;
 constexpr int kNumVoices = 1;
 constexpr float kGain = 0.25f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.025f;
+constexpr double kAttack = 0.0f;
+constexpr double kRelease = 0.025f;
 
 constexpr float kBarPitch = barelyapi::kPitchA4;
 constexpr float kBeatPitch = barelyapi::kPitchA3;
@@ -61,9 +61,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
   metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                         static_cast<float>(kOscillatorType));
+                         static_cast<double>(kOscillatorType));
   metronome.SetParameter(SynthInstrumentParameter::kNumVoices,
-                         static_cast<float>(kNumVoices));
+                         static_cast<double>(kNumVoices));
 
   // Beat callback.
   const auto beat_callback = [&](double position, double /*timestamp*/) {

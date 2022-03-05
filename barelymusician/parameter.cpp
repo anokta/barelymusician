@@ -16,7 +16,7 @@ const ParameterDefinition& Parameter::GetDefinition() const noexcept {
   return definition_;
 }
 
-float Parameter::GetValue() const noexcept { return value_; }
+double Parameter::GetValue() const noexcept { return value_; }
 
 bool Parameter::ResetValue() noexcept {
   if (value_ != definition_.default_value) {
@@ -26,7 +26,7 @@ bool Parameter::ResetValue() noexcept {
   return false;
 }
 
-bool Parameter::SetValue(float value) noexcept {
+bool Parameter::SetValue(double value) noexcept {
   value =
       std::min(std::max(value, definition_.min_value), definition_.max_value);
   if (value_ != value) {

@@ -77,7 +77,7 @@ namespace Barely {
     /// @param index Parameter index.
     /// @param value Parameter value.
     /// @return True if success, false otherwise.
-    public bool SetParameter(int index, float value) {
+    public bool SetParameter(int index, double value) {
       return Musician.SetInstrumentParameter(this, index, value);
     }
 

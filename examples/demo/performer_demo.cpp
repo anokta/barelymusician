@@ -43,8 +43,8 @@ constexpr double kLookahead = 0.1;
 // Instrument settings.
 constexpr float kGain = 0.2f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr float kAttack = 0.0f;
-constexpr float kRelease = 0.1f;
+constexpr double kAttack = 0.0f;
+constexpr double kRelease = 0.1f;
 
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
@@ -71,7 +71,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
   performer.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
   performer.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                         static_cast<float>(kOscillatorType));
+                         static_cast<double>(kOscillatorType));
   performer.SetNoteOnCallback(
       [](float pitch, float intensity, double /*timestamp*/) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << ", "
@@ -82,9 +82,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
   metronome.SetGain(0.5f * kGain);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
-  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, 0.025f);
+  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, 0.025);
   metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                         static_cast<float>(OscillatorType::kSquare));
+                         static_cast<double>(OscillatorType::kSquare));
 
   const auto build_note = [](float pitch, double duration,
                              float intensity = 0.25f) {

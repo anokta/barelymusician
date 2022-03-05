@@ -117,7 +117,7 @@ class Instrument {
   /// @param value Parameter value.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetParameter(int index, float value, double timestamp) noexcept;
+  bool SetParameter(int index, double value, double timestamp) noexcept;
 
   /// Starts note at timestamp.
   ///

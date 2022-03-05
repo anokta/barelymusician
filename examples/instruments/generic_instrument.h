@@ -43,7 +43,7 @@ class GenericInstrument {
   ///
   /// @param id Parameter index.
   /// @param value Parameter value.
-  virtual void SetParameter(int index, float value) noexcept = 0;
+  virtual void SetParameter(int index, double value) noexcept = 0;
 };
 
 /// Returns instrument definition for the given create instrument function.
@@ -81,7 +81,7 @@ BarelyInstrumentDefinition GetInstrumentDefinition(
                 instrument->NoteOn(pitch, intensity);
               },
           .set_parameter_callback =
-              [](void** state, int index, float value) noexcept {
+              [](void** state, int index, double value) noexcept {
                 auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->SetParameter(index, value);
               },

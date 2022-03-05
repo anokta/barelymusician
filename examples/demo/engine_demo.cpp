@@ -210,7 +210,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<Instrument> instruments;
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
-                                             float attack, float release) {
+                                             double attack, double release) {
     instruments.push_back(musician.CreateInstrument(
         SynthInstrument::GetDefinition(), kSampleRate));
     auto& instrument = instruments.back();
@@ -219,7 +219,7 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
                             release);
     instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                            static_cast<float>(type));
+                            static_cast<double>(type));
     set_note_callbacks_fn(instruments.size(), &instrument);
   };
 
@@ -230,12 +230,12 @@ int main(int /*argc*/, char* argv[]) {
         ComposeChord(kRootNote, scale, 0.5f, harmonic, offset, sequence);
       };
 
-  build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125f, 0.125f);
+  build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125, 0.125);
   performers.emplace_back(musician.CreateSequence(),
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
 
-  build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5f, 0.025f);
+  build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5, 0.025);
   performers.emplace_back(musician.CreateSequence(),
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -247,7 +247,7 @@ int main(int /*argc*/, char* argv[]) {
                 offset, sequence);
   };
 
-  build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025f, 0.125f);
+  build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025, 0.125);
   performers.emplace_back(musician.CreateSequence(),
                           line_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -259,7 +259,7 @@ int main(int /*argc*/, char* argv[]) {
                     offset, sequence);
       };
 
-  build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05f, 0.05f);
+  build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05, 0.05);
   performers.emplace_back(musician.CreateSequence(),
                           line_2_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());

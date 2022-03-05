@@ -32,8 +32,8 @@ constexpr int kNumFrames = 256;
 constexpr float kGain = 0.125f;
 constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr float kEnvelopeAttack = 0.05f;
-constexpr float kEnvelopeRelease = 0.125f;
+constexpr double kEnvelopeAttack = 0.05;
+constexpr double kEnvelopeRelease = 0.125;
 
 // Note settings.
 constexpr float kRootPitch = barelyapi::kPitchC3;
@@ -70,9 +70,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
                           kEnvelopeRelease);
   instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                          static_cast<float>(kOscillatorType));
+                          static_cast<double>(kOscillatorType));
   instrument.SetParameter(SynthInstrumentParameter::kNumVoices,
-                          static_cast<float>(kNumVoices));
+                          static_cast<double>(kNumVoices));
 
   instrument.SetNoteOnCallback(
       [](float pitch, float intensity, double /*timestamp*/) {

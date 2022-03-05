@@ -42,8 +42,8 @@ constexpr double kLookahead = 0.1;
 constexpr int kNumInstrumentVoices = 16;
 constexpr float kInstrumentGain =
     1.0f / static_cast<float>(kNumInstrumentVoices);
-constexpr float kInstrumentEnvelopeAttack = 0.0f;
-constexpr float kInstrumentEnvelopeRelease = 0.2f;
+constexpr double kInstrumentEnvelopeAttack = 0.0f;
+constexpr double kInstrumentEnvelopeRelease = 0.2f;
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 
 constexpr float kMaxVelocity = 127.0f;
@@ -138,9 +138,9 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
                             kInstrumentEnvelopeRelease);
     instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                            static_cast<float>(kInstrumentOscillatorType));
+                            static_cast<double>(kInstrumentOscillatorType));
     instrument.SetParameter(SynthInstrumentParameter::kNumVoices,
-                            static_cast<float>(kNumInstrumentVoices));
+                            static_cast<double>(kNumInstrumentVoices));
     tracks.emplace_back(std::move(instrument), std::move(sequence));
     tracks.back().second.SetInstrument(&tracks.back().first);
   }

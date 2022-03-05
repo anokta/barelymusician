@@ -48,7 +48,7 @@ struct SetParameterEvent {
   int index;
 
   /// Parameter value.
-  float value;
+  double value;
 };
 
 /// Start note event.

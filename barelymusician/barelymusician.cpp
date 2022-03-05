@@ -165,7 +165,7 @@ BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
 
 BarelyStatus BarelyInstrument_GetParameter(BarelyApi api,
                                            BarelyId instrument_id,
-                                           int32_t index, float* out_value) {
+                                           int32_t index, double* out_value) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
@@ -312,7 +312,7 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
 
 BarelyStatus BarelyInstrument_SetParameter(BarelyApi api,
                                            BarelyId instrument_id,
-                                           int32_t index, float value) {
+                                           int32_t index, double value) {
   if (!api) return BarelyStatus_kNotFound;
 
   if (auto* instrument = api->GetInstrument(instrument_id)) {

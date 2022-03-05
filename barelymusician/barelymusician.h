@@ -108,13 +108,13 @@ typedef struct BarelyNoteDefinition {
 /// Parameter definition.
 typedef struct BarelyParameterDefinition {
   /// Default value.
-  float default_value;
+  double default_value;
 
   /// Minimum value.
-  float min_value;
+  double min_value;
 
   /// Maximum value.
-  float max_value;
+  double max_value;
 } BarelyParameterDefinition;
 
 /// Status enum alias.
@@ -235,7 +235,7 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
 /// @param value Parameter value.
 typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
                                                                 int32_t index,
-                                                                float value);
+                                                                double value);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -335,7 +335,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetGain(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(BarelyApi api,
                                                          BarelyId instrument_id,
                                                          int32_t index,
-                                                         float* out_value);
+                                                         double* out_value);
 
 /// Gets instrument parameter definition.
 ///
@@ -461,7 +461,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(BarelyApi api,
                                                          BarelyId instrument_id,
                                                          int32_t index,
-                                                         float value);
+                                                         double value);
 
 /// Starts instrument note.
 ///

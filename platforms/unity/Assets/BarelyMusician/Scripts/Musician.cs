@@ -222,7 +222,7 @@ namespace Barely {
     /// @param index Parameter index.
     /// @param value Parameter value.
     /// @return True if success, false otherwise.
-    public static bool SetInstrumentParameter(Instrument instrument, int index, float value) {
+    public static bool SetInstrumentParameter(Instrument instrument, int index, double value) {
       return IsOk(BarelyInstrument_SetParameter(Api, instrument.Id, index, value));
     }
 
@@ -473,7 +473,7 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetParameter")]
     private static extern Status BarelyInstrument_SetParameter(IntPtr api, Int64 instrumentId,
-                                                               Int32 index, float value);
+                                                               Int32 index, double value);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_StartNote")]
     private static extern Status BarelyInstrument_StartNote(IntPtr api, Int64 instrumentId,

@@ -38,7 +38,7 @@ class DrumkitInstrument : public GenericInstrument {
   void Process(float* output, int num_channels,
                int num_frames) noexcept override;
   void SetData(void* data) noexcept override;
-  void SetParameter(int index, float value) noexcept override;
+  void SetParameter(int index, double value) noexcept override;
 
   /// Returns instrument definition.
   static BarelyInstrumentDefinition GetDefinition() noexcept;

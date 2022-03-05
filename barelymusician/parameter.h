@@ -24,7 +24,7 @@ class Parameter {
   /// Returns value.
   ///
   /// @return Parameter value.
-  [[nodiscard]] float GetValue() const noexcept;
+  [[nodiscard]] double GetValue() const noexcept;
 
   /// Resets value.
   ///
@@ -35,14 +35,14 @@ class Parameter {
   ///
   /// @param value Parameter value.
   /// @return True if successful, false otherwise.
-  bool SetValue(float value) noexcept;
+  bool SetValue(double value) noexcept;
 
  private:
   // Parameter definition.
   ParameterDefinition definition_;
 
   // Parameter value.
-  float value_;
+  double value_ = 0.0;
 };
 
 }  // namespace barelyapi

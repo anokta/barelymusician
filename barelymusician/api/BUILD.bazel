@@ -1,0 +1,23 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "api",
+    defines = ["BARELYMUSICIAN_EXPORTS"],
+    deps = [
+        ":includes",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "includes",
+    hdrs = [
+        "data.h",
+        "instrument.h",
+        "status.h",
+        "visibility.h",
+    ],
+    visibility = ["//barelymusician:__subpackages__"],
+)

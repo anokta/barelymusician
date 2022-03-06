@@ -183,17 +183,12 @@ class Instrument {
   // Set note on function.
   BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback_;
 
-  // Set parameter function.
-  BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback_;
-
   // Gain processor.
   GainProcessor gain_processor_;
 
-  // Sampling rate in hz.
-  int sample_rate_ = 0;
-
-  // State.
-  void* state_ = nullptr;
+  BarelyInstrumentContext context_;
+  std::vector<BarelyParameterSnapshot> snapshots_;
+  double snapshot_timestamp_ = 0.0;
 };
 
 }  // namespace barelyapi

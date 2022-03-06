@@ -29,27 +29,25 @@ Instrument::Instrument(const BarelyInstrumentDefinition& definition,
       set_data_callback_(definition.set_data_callback),
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
-      set_parameter_callback_(definition.set_parameter_callback),
-      gain_processor_(sample_rate),
-      sample_rate_(sample_rate) {
-  assert(sample_rate_ >= 0);
+      gain_processor_(sample_rate) {
+  assert(sample_rate >= 0);
   parameters_.reserve(definition.num_parameter_definitions);
+  snapshots_.reserve(definition.num_parameter_definitions);
   for (int index = 0; index < definition.num_parameter_definitions; ++index) {
     parameters_.emplace_back(definition.parameter_definitions[index]);
+    snapshots_.push_back({parameters_[index].GetValue(), 0.0});
   }
+  context_ = {.sample_rate = sample_rate,
+              .parameter_snapshots = snapshots_.data(),
+              .num_parameter_snapshots = definition.num_parameter_definitions};
   if (create_callback_) {
-    create_callback_(&state_, sample_rate_);
-  }
-  if (set_parameter_callback_) {
-    for (int index = 0; index < definition.num_parameter_definitions; ++index) {
-      set_parameter_callback_(&state_, index, parameters_[index].GetValue());
-    }
+    create_callback_(&context_);
   }
 }
 
 Instrument::~Instrument() noexcept {
   if (destroy_callback_) {
-    destroy_callback_(&state_);
+    destroy_callback_(&context_);
   }
 }
 
@@ -82,7 +80,7 @@ void Instrument::Process(float* output, int num_output_channels,
     const int message_frame = GetSamples(event->first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
-        process_callback_(&state_, &output[num_output_channels * frame],
+        process_callback_(&context_, &output[num_output_channels * frame],
                           num_output_channels, message_frame - frame);
       }
       frame = message_frame;
@@ -91,7 +89,7 @@ void Instrument::Process(float* output, int num_output_channels,
         EventVisitor{
             [this](const SetDataEvent& set_data_event) noexcept {
               if (set_data_callback_) {
-                set_data_callback_(&state_, set_data_event.definition.data);
+                set_data_callback_(&context_, set_data_event.definition.data);
               }
             },
             [&](const SetGainEvent& set_gain_event) noexcept {
@@ -104,27 +102,25 @@ void Instrument::Process(float* output, int num_output_channels,
               gain_processor_.SetGain(set_gain_event.gain);
             },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
-              if (set_parameter_callback_) {
-                set_parameter_callback_(&state_, set_parameter_event.index,
-                                        set_parameter_event.value);
-              }
+              snapshots_[set_parameter_event.index] = {
+                  set_parameter_event.value, 0.0};
             },
             [this](const StartNoteEvent& start_note_event) noexcept {
               if (set_note_on_callback_) {
-                set_note_on_callback_(&state_, start_note_event.pitch,
+                set_note_on_callback_(&context_, start_note_event.pitch,
                                       start_note_event.intensity);
               }
             },
             [this](const StopNoteEvent& stop_note_event) noexcept {
               if (set_note_off_callback_) {
-                set_note_off_callback_(&state_, stop_note_event.pitch);
+                set_note_off_callback_(&context_, stop_note_event.pitch);
               }
             }},
         event->second);
   }
   // Process the rest of the buffer.
   if (frame < num_output_frames && process_callback_) {
-    process_callback_(&state_, &output[num_output_channels * frame],
+    process_callback_(&context_, &output[num_output_channels * frame],
                       num_output_channels, num_output_frames - frame);
   }
   if (gain_frame < num_output_frames) {
@@ -270,14 +266,16 @@ void Instrument::StopNote(float pitch, double timestamp) noexcept {
 }
 
 int Instrument::GetSamples(double seconds) const noexcept {
-  return sample_rate_ > 0
-             ? static_cast<int>(seconds * static_cast<double>(sample_rate_))
+  return context_.sample_rate > 0
+             ? static_cast<int>(seconds *
+                                static_cast<double>(context_.sample_rate))
              : 0;
 }
 
 double Instrument::GetSeconds(int samples) const noexcept {
-  return sample_rate_ > 0
-             ? static_cast<double>(samples) / static_cast<double>(sample_rate_)
+  return context_.sample_rate > 0
+             ? static_cast<double>(samples) /
+                   static_cast<double>(context_.sample_rate)
              : 0.0;
 }
 

@@ -1,0 +1,42 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "event",
+    hdrs = ["event.h"],
+    deps = [
+        "//barelymusician/api:includes",
+    ],
+)
+
+cc_library(
+    name = "event_queue",
+    srcs = ["event_queue.cpp"],
+    hdrs = ["event_queue.h"],
+    deps = [
+        ":event",
+    ],
+)
+
+cc_library(
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
+    deps = [
+        ":event",
+        ":event_queue",
+        ":parameter",
+        "//barelymusician:gain_processor",
+        "//barelymusician/api:includes",
+    ],
+)
+
+cc_library(
+    name = "parameter",
+    srcs = ["parameter.cpp"],
+    hdrs = ["parameter.h"],
+    deps = [
+        "//barelymusician/api:includes",
+    ],
+)

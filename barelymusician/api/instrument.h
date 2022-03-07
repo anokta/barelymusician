@@ -5,14 +5,57 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "barelymusician/api/data.h"
-#include "barelymusician/api/parameter.h"
 #include "barelymusician/api/status.h"
 #include "barelymusician/api/visibility.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif  // __cplusplus
+
+/// Data definition move callback signature.
+///
+/// @param other_data Other data to move.
+/// @param out_data Output data.
+typedef void (*BarelyDataDefinition_MoveCallback)(void* other_data,
+                                                  void** out_data);
+
+/// Data definition destroy callback signature.
+///
+/// @param data Data to destroy.
+typedef void (*BarelyDataDefinition_DestroyCallback)(void* data);
+
+/// Data definition.
+typedef struct BarelyDataDefinition {
+  /// Move callback.
+  BarelyDataDefinition_MoveCallback move_callback;
+
+  /// Destroy callback.
+  BarelyDataDefinition_DestroyCallback destroy_callback;
+
+  /// Data.
+  void* data;
+} BarelyDataDefinition;
+
+/// Parameter definition.
+typedef struct BarelyParameterDefinition {
+  /// Default value.
+  double default_value;
+
+  /// Minimum value.
+  double min_value;
+
+  /// Maximum value.
+  double max_value;
+} BarelyParameterDefinition;
+
+/// Parameter state.
+typedef struct BarelyParameterState {
+  /// Value.
+  double value;
+
+  /// Slope of value change per frame.
+  double slope;
+} BarelyParameterState;
 
 /// Instrument state.
 typedef struct BarelyInstrumentState {
@@ -305,10 +348,58 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
 #ifdef __cplusplus
 #include <cassert>
 #include <functional>
+#include <limits>
 #include <utility>
 #include <vector>
 
 namespace barely {
+
+/// Data definition.
+using DataDefinition = BarelyDataDefinition;
+
+/// Parameter definition.
+struct ParameterDefinition : public BarelyParameterDefinition {
+  /// Constructs new `ParameterDefinition`.
+  ///
+  /// @param default_value Default value.
+  /// @param min_value Minimum value.
+  /// @param max_value Maximum value.
+  explicit ParameterDefinition(
+      double default_value,
+      double min_value = std::numeric_limits<double>::lowest(),
+      double max_value = std::numeric_limits<double>::max())
+      : BarelyParameterDefinition{default_value, min_value, max_value} {}
+
+  /// Constructs new `ParameterDefinition` for a boolean value.
+  ///
+  /// @param default_value Default boolean value.
+  explicit ParameterDefinition(bool default_value)
+      : ParameterDefinition(static_cast<double>(default_value)) {}
+
+  /// Constructs new `ParameterDefinition` for an integer value.
+  ///
+  /// @param default_value Default integer value.
+  /// @param min_value Minimum integer value.
+  /// @param max_value Maximum integer value.
+  explicit ParameterDefinition(
+      int default_value, int min_value = std::numeric_limits<int>::lowest(),
+      int max_value = std::numeric_limits<int>::max())
+      : ParameterDefinition(static_cast<double>(default_value),
+                            static_cast<double>(min_value),
+                            static_cast<double>(max_value)) {}
+
+  /// Constructs new `ParameterDefinition` from internal type.
+  ///
+  /// @param definition Internal parameter definition.
+  explicit ParameterDefinition(BarelyParameterDefinition definition)
+      : BarelyParameterDefinition(definition) {}
+};
+
+/// Parameter state.
+using ParameterState = BarelyParameterState;
+
+/// Instrument state.
+using InstrumentState = BarelyInstrumentState;
 
 /// Instrument definition.
 struct InstrumentDefinition : public BarelyInstrumentDefinition {
@@ -496,16 +587,18 @@ class Instrument {
         handle_, timestamp, output, num_output_channels, num_output_frames));
   }
 
-  /// Resets all parameters.
+  /// Resets all parameters at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status ResetAllParameters(double timestamp) {
     return static_cast<Status>(
         BarelyInstrument_ResetAllParameters(handle_, timestamp));
   }
 
-  /// Resets parameter value.
+  /// Resets parameter value at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @param index Parameter index.
   /// @return Status.
   Status ResetParameter(double timestamp, int index) {
@@ -513,25 +606,27 @@ class Instrument {
         BarelyInstrument_ResetParameter(handle_, timestamp, index));
   }
 
-  /// Sets data.
+  /// Sets data at timestamp.
   ///
-  /// @param data Data.
+  /// @param timestamp Timestamp in seconds.
+  /// @param typed_data Typed data.
   /// @return Status.
   template <typename DataType>
-  Status SetData(double timestamp, DataType data) {
+  Status SetData(double timestamp, DataType typed_data) {
     return static_cast<Status>(BarelyInstrument_SetData(
         handle_,
-        BarelyDataDefinition{
+        DataDefinition{
             [](void* other_data, void** out_data) {
               *out_data = reinterpret_cast<void*>(new DataType(
                   std::move(*reinterpret_cast<DataType*>(other_data))));
             },
             [](void* data) { delete reinterpret_cast<DataType*>(data); },
-            reinterpret_cast<void*>(&data)}));
+            reinterpret_cast<void*>(&typed_data)}));
   }
 
-  /// Sets gain.
+  /// Sets gain at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @param gain Gain in amplitude.
   /// @return Status.
   Status SetGain(double timestamp, double gain) {
@@ -539,8 +634,9 @@ class Instrument {
         BarelyInstrument_SetGain(handle_, timestamp, gain));
   }
 
-  /// Sets whether instrument should be muted or not.
+  /// Sets whether instrument should be muted or not at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @param is_muted True if muted, false otherwise.
   /// @return Status.
   Status SetMuted(double timestamp, bool is_muted) {
@@ -585,8 +681,9 @@ class Instrument {
         BarelyInstrument_SetNoteOnCallback(handle_, nullptr, nullptr));
   }
 
-  /// Sets parameter value.
+  /// Sets parameter value at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @param index Parameter index.
   /// @param value Parameter value.
   /// @return Status.
@@ -595,8 +692,9 @@ class Instrument {
         BarelyInstrument_SetParameter(handle_, timestamp, index, value));
   }
 
-  /// Starts note.
+  /// Starts note at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   /// @return Status.
@@ -605,16 +703,18 @@ class Instrument {
         BarelyInstrument_StartNote(handle_, timestamp, pitch, intensity));
   }
 
-  /// Stops all notes.
+  /// Stops all notes at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status StopAllNotes(double timestamp) {
     return static_cast<Status>(
         BarelyInstrument_StopAllNotes(handle_, timestamp));
   }
 
-  /// Stops note.
+  /// Stops note at timestamp.
   ///
+  /// @param timestamp Timestamp in seconds.
   /// @param pitch Note pitch.
   /// @return Status.
   Status StopNote(double timestamp, float pitch) {

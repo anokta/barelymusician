@@ -6,7 +6,7 @@ cc_library(
     name = "event",
     hdrs = ["event.h"],
     deps = [
-        "//barelymusician/api:includes",
+        "//barelymusician/api:include",
     ],
 )
 
@@ -28,7 +28,7 @@ cc_library(
         ":event_queue",
         ":parameter",
         "//barelymusician:gain_processor",
-        "//barelymusician/api:includes",
+        "//barelymusician/api:include",
     ],
 )
 
@@ -37,6 +37,6 @@ cc_library(
     srcs = ["parameter.cpp"],
     hdrs = ["parameter.h"],
     deps = [
-        "//barelymusician/api:includes",
+        "//barelymusician/api:include",
     ],
 )

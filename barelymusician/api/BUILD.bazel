@@ -9,20 +9,17 @@ cc_library(
     ],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":includes",
+        ":include",
         "//barelymusician/instrument",
     ],
     alwayslink = True,
 )
 
 cc_library(
-    name = "includes",
+    name = "include",
     hdrs = [
-        "data.h",
         "instrument.h",
-        "parameter.h",
         "status.h",
         "visibility.h",
     ],
-    visibility = ["//barelymusician:__subpackages__"],
 )

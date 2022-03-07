@@ -3,13 +3,13 @@
 
 #include <variant>
 
-#include "barelymusician/api/data.h"
+#include "barelymusician/api/instrument.h"
 
 namespace barelyapi {
 
 /// Set data event.
 struct SetDataEvent {
-  explicit SetDataEvent(BarelyDataDefinition definition) noexcept
+  explicit SetDataEvent(barely::DataDefinition definition) noexcept
       : definition(definition) {}
   SetDataEvent() = default;
   ~SetDataEvent() {
@@ -33,7 +33,7 @@ struct SetDataEvent {
   }
 
   /// Data definition.
-  BarelyDataDefinition definition;
+  barely::DataDefinition definition;
 };
 
 /// Set gain event.

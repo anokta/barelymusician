@@ -1,12 +1,9 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_PARAMETER_H_
 #define BARELYMUSICIAN_INSTRUMENT_PARAMETER_H_
 
-#include "barelymusician/api/parameter.h"
+#include "barelymusician/api/instrument.h"
 
 namespace barelyapi {
-
-/// Parameter definition alias.
-using ParameterDefinition = BarelyParameterDefinition;
 
 /// Class that wraps a parameter.
 class Parameter {
@@ -14,12 +11,12 @@ class Parameter {
   /// Constructs new `Parameter`.
   ///
   /// @param definition Parameter definition.
-  explicit Parameter(ParameterDefinition definition) noexcept;
+  explicit Parameter(BarelyParameterDefinition definition) noexcept;
 
   /// Returns definition.
   ///
   /// @return Parameter definition.
-  [[nodiscard]] const ParameterDefinition& GetDefinition() const noexcept;
+  [[nodiscard]] const BarelyParameterDefinition& GetDefinition() const noexcept;
 
   /// Returns value.
   ///
@@ -39,7 +36,7 @@ class Parameter {
 
  private:
   // Parameter definition.
-  ParameterDefinition definition_;
+  BarelyParameterDefinition definition_;
 
   // Parameter value.
   double value_ = 0.0;

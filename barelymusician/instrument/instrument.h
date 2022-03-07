@@ -5,9 +5,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "barelymusician/api/data.h"
 #include "barelymusician/api/instrument.h"
-#include "barelymusician/api/parameter.h"
 #include "barelymusician/gain_processor.h"
 #include "barelymusician/instrument/event.h"
 #include "barelymusician/instrument/event_queue.h"
@@ -81,7 +79,7 @@ class Instrument {
   ///
   /// @param definition Data definition.
   /// @param timestamp Timestamp in seconds.
-  void SetData(BarelyDataDefinition definition, double timestamp) noexcept;
+  void SetData(barely::DataDefinition definition, double timestamp) noexcept;
 
   /// Sets gain at timestamp.
   ///
@@ -134,56 +132,62 @@ class Instrument {
   void StopNote(float pitch, double timestamp) noexcept;
 
  private:
-  // Returns corresponding number of samples for given number of `seconds`.
-  int GetSamples(double seconds) const noexcept;
+  // Controller that wraps main thread functionality.
+  struct Controller {
+    // Gain in amplitude.
+    double gain = 1.0;
 
-  // Returns corresponding number of seconds for given number of `samples`.
-  double GetSeconds(int samples) const noexcept;
+    // Denotes whether instrument is muted or not.
+    bool is_muted = false;
+
+    // Note off callback.
+    std::function<void(float, double)> note_off_callback;
+
+    // Note on callback.
+    std::function<void(float, float, double)> note_on_callback;
+
+    // List of parameters.
+    std::vector<Parameter> parameters;
+
+    // List of active note pitches.
+    std::unordered_set<float> pitches;
+  };
+
+  // Processor that wraps audio thread functionality.
+  struct Processor {
+    // Destroy function.
+    barely::InstrumentDefinition::DestroyCallback destroy_callback;
+
+    // Process function.
+    barely::InstrumentDefinition::ProcessCallback process_callback;
+
+    // Set data function.
+    barely::InstrumentDefinition::SetDataCallback set_data_callback;
+
+    // Set note off function.
+    barely::InstrumentDefinition::SetNoteOffCallback set_note_off_callback;
+
+    // Set note on function.
+    barely::InstrumentDefinition::SetNoteOnCallback set_note_on_callback;
+
+    // Gain processor.
+    GainProcessor gain_processor;
+
+    // List of parameter states.
+    std::vector<barely::ParameterState> parameters;
+
+    // Current state.
+    barely::InstrumentState state;
+  };
+
+  // Controller.
+  Controller controller_;
 
   // Event queue.
-  EventQueue events_;
+  EventQueue event_queue_;
 
-  // Gain in amplitude.
-  double gain_ = 1.0;
-
-  // Denotes whether instrument is muted or not.
-  bool is_muted_ = false;
-
-  // Note off callback.
-  std::function<void(float, double)> note_off_callback_;
-
-  // Note on callback.
-  std::function<void(float, float, double)> note_on_callback_;
-
-  // List of parameters.
-  std::vector<Parameter> parameters_;
-
-  // List of active note pitches.
-  std::unordered_set<float> pitches_;
-
-  // Create function.
-  BarelyInstrumentDefinition_CreateCallback create_callback_;
-
-  // Destroy function.
-  BarelyInstrumentDefinition_DestroyCallback destroy_callback_;
-
-  // Process function.
-  BarelyInstrumentDefinition_ProcessCallback process_callback_;
-
-  // Set data function.
-  BarelyInstrumentDefinition_SetDataCallback set_data_callback_;
-
-  // Set note off function.
-  BarelyInstrumentDefinition_SetNoteOffCallback set_note_off_callback_;
-
-  // Set note on function.
-  BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback_;
-
-  // Gain processor.
-  GainProcessor gain_processor_;
-
-  std::vector<BarelyParameterState> parameter_states_;
-  BarelyInstrumentState state_;
+  // Processor.
+  Processor processor_;
 };
 
 }  // namespace barelyapi

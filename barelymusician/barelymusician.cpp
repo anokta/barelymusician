@@ -151,18 +151,6 @@ BarelyStatus BarelyInstrument_Destroy(BarelyApi api, BarelyId instrument_id) {
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_GetGain(BarelyApi api, BarelyId instrument_id,
-                                      double* out_gain) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_gain) return BarelyStatus_kInvalidArgument;
-
-  if (const auto* instrument = api->GetInstrument(instrument_id)) {
-    *out_gain = instrument->GetGain();
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
 BarelyStatus BarelyInstrument_GetParameter(BarelyApi api,
                                            BarelyId instrument_id,
                                            int32_t index, double* out_value) {
@@ -184,18 +172,6 @@ BarelyStatus BarelyInstrument_GetParamDefinition(
 
   if (const auto* instrument = api->GetInstrument(instrument_id)) {
     *out_definition = instrument->GetParameter(index)->GetDefinition();
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelyInstrument_IsMuted(BarelyApi api, BarelyId instrument_id,
-                                      bool* out_is_muted) {
-  if (!api) return BarelyStatus_kNotFound;
-  if (!out_is_muted) return BarelyStatus_kInvalidArgument;
-
-  if (const auto* instrument = api->GetInstrument(instrument_id)) {
-    *out_is_muted = instrument->IsMuted();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -259,28 +235,6 @@ BarelyStatus BarelyInstrument_SetData(BarelyApi api, BarelyId instrument_id,
 
   if (auto* instrument = api->GetInstrument(instrument_id)) {
     instrument->SetData(definition, api->transport.GetTimestamp());
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelyInstrument_SetGain(BarelyApi api, BarelyId instrument_id,
-                                      double gain) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  if (auto* instrument = api->GetInstrument(instrument_id)) {
-    instrument->SetGain(gain, api->transport.GetTimestamp());
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelyInstrument_SetMuted(BarelyApi api, BarelyId instrument_id,
-                                       bool is_muted) {
-  if (!api) return BarelyStatus_kNotFound;
-
-  if (auto* instrument = api->GetInstrument(instrument_id)) {
-    instrument->SetMuted(is_muted);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

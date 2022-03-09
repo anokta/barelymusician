@@ -301,18 +301,6 @@ class Instrument {
     return *this;
   }
 
-  /// Returns gain.
-  ///
-  /// @return Gain in amplitude.
-  [[nodiscard]] double GetGain() const {
-    double gain = 0.0;
-    if (id_ != BarelyId_kInvalid) {
-      const auto status = BarelyInstrument_GetGain(capi_, id_, &gain);
-      assert(status == BarelyStatus_kOk);
-    }
-    return gain;
-  }
-
   /// Returns parameter value.
   ///
   /// @param index Parameter index.
@@ -341,18 +329,6 @@ class Instrument {
     }
     return ParameterDefinition(definition.default_value, definition.min_value,
                                definition.max_value);
-  }
-
-  /// Returns whether instrument is muted or not.
-  ///
-  /// @return True if muted, false otherwise.
-  [[nodiscard]] bool IsMuted() const {
-    bool is_muted = false;
-    if (id_ != BarelyId_kInvalid) {
-      const auto status = BarelyInstrument_IsMuted(capi_, id_, &is_muted);
-      assert(status == BarelyStatus_kOk);
-    }
-    return is_muted;
   }
 
   /// Returns whether note is active or not.
@@ -413,22 +389,6 @@ class Instrument {
             },
             [](void* data) { delete reinterpret_cast<DataType*>(data); },
             reinterpret_cast<void*>(&data)}));
-  }
-
-  /// Sets gain.
-  ///
-  /// @param gain Gain in amplitude.
-  /// @return Status.
-  Status SetGain(double gain) {
-    return static_cast<Status>(BarelyInstrument_SetGain(capi_, id_, gain));
-  }
-
-  /// Sets whether instrument should be muted or not.
-  ///
-  /// @param is_muted True if muted, false otherwise.
-  /// @return Status.
-  Status SetMuted(bool is_muted) {
-    return static_cast<Status>(BarelyInstrument_SetMuted(capi_, id_, is_muted));
   }
 
   /// Sets note off callback.

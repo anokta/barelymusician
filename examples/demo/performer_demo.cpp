@@ -41,7 +41,7 @@ constexpr int kNumFrames = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr double kGain = 0.2;
+constexpr float kGain = 0.2f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kAttack = 0.0f;
 constexpr double kRelease = 0.1f;
@@ -67,7 +67,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument performer =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  performer.SetGain(kGain);
   performer.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
   performer.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
   performer.SetParameter(SynthInstrumentParameter::kOscillatorType,
@@ -80,7 +79,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument metronome =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  metronome.SetGain(0.5 * kGain);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, 0.025);
   metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
@@ -134,14 +132,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetBeatCallback(beat_callback);
 
   // Audio process callback.
+  std::vector<float> gains = {kGain, 0.5f * kGain};
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (auto* instrument : {&metronome, &performer}) {
+    int i = 0;
+    for (auto* instrument : {&performer, &metronome}) {
+      const float gain = gains[i++];
       instrument->Process(audio_clock.GetTimestamp(), temp_buffer.data(),
                           kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     std::plus<>());
+                     [&](float sample, float output_sample) {
+                       return gain * sample + output_sample;
+                     });
     }
     audio_clock.Update(kNumFrames);
   };

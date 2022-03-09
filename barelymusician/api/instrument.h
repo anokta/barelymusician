@@ -181,14 +181,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_Destroy(BarelyInstrumentHandle handle);
 
-/// Gets instrument gain.
-///
-/// @param handle Instrument handle.
-/// @param out_gain Output gain in amplitude.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_GetGain(BarelyInstrumentHandle handle, double* out_gain);
-
 /// Gets instrument parameter value.
 ///
 /// @param handle Instrument handle.
@@ -207,14 +199,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(
 BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
     BarelyInstrumentHandle handle, int32_t index,
     BarelyParameterDefinition* out_definition);
-
-/// Gets whether instrument is muted or not.
-///
-/// @param handle Instrument handle.
-/// @param out_is_muted Output true if muted, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_IsMuted(BarelyInstrumentHandle handle, bool* out_is_muted);
 
 /// Gets whether instrument note is playing or not.
 ///
@@ -263,24 +247,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_SetData(BarelyInstrumentHandle handle, double timestamp,
                          BarelyDataDefinition definition);
-
-/// Sets instrument gain.
-///
-/// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
-/// @param gain Gain in amplitude.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetGain(
-    BarelyInstrumentHandle handle, double timestamp, double gain);
-
-/// Sets whether volume should be muted or not.
-///
-/// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
-/// @param is_muted True if muted, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetMuted(
-    BarelyInstrumentHandle handle, double timestamp, bool is_muted);
 
 /// Sets instrument note off callback.
 ///
@@ -511,16 +477,6 @@ class Instrument {
     return *this;
   }
 
-  /// Returns gain.
-  ///
-  /// @return Gain in amplitude.
-  [[nodiscard]] double GetGain() const {
-    double gain = 0.0;
-    const auto status = BarelyInstrument_GetGain(handle_, &gain);
-    assert(status == BarelyStatus_kOk);
-    return gain;
-  }
-
   /// Returns parameter value.
   ///
   /// @param index Parameter index.
@@ -549,17 +505,6 @@ class Instrument {
       return static_cast<Status>(status);
     }
     return ParameterDefinition(definition);
-  }
-
-  /// Returns whether instrument is muted or not.
-  ///
-  /// @return True if muted, false otherwise.
-  [[nodiscard]] bool IsMuted() const {
-    bool is_muted = false;
-    const auto status =
-        static_cast<Status>(BarelyInstrument_IsMuted(handle_, &is_muted));
-    assert(IsOk(status));
-    return is_muted;
   }
 
   /// Returns whether note is active or not.
@@ -622,26 +567,6 @@ class Instrument {
             },
             [](void* data) { delete reinterpret_cast<DataType*>(data); },
             reinterpret_cast<void*>(&typed_data)}));
-  }
-
-  /// Sets gain at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  /// @param gain Gain in amplitude.
-  /// @return Status.
-  Status SetGain(double timestamp, double gain) {
-    return static_cast<Status>(
-        BarelyInstrument_SetGain(handle_, timestamp, gain));
-  }
-
-  /// Sets whether instrument should be muted or not at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  /// @param is_muted True if muted, false otherwise.
-  /// @return Status.
-  Status SetMuted(double timestamp, bool is_muted) {
-    return static_cast<Status>(
-        BarelyInstrument_SetMuted(handle_, timestamp, is_muted));
   }
 
   /// Sets note off callback.

@@ -29,7 +29,7 @@ constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 256;
 
 // Instrument settings.
-constexpr double kGain = 0.125;
+constexpr float kGain = 0.125f;
 constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kEnvelopeAttack = 0.05;
@@ -64,7 +64,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  instrument.SetGain(kGain);
   instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack,
                           kEnvelopeAttack);
   instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
@@ -85,6 +84,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Audio process callback.
   audio_output.SetProcessCallback([&](float* output) {
     instrument.Process(0.0, output, kNumChannels, kNumFrames);
+    for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
+      output[i] *= kGain;
+    }
   });
 
   // Key down callback.

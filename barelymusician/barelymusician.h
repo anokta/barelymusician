@@ -319,16 +319,6 @@ BarelyInstrument_Create(BarelyApi api, BarelyInstrumentDefinition definition,
 BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyApi api,
                                                     BarelyId instrument_id);
 
-/// Gets instrument gain.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @param out_gain Output gain in amplitude.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_GetGain(BarelyApi api,
-                                                    BarelyId instrument_id,
-                                                    double* out_gain);
-
 /// Gets instrument parameter value.
 ///
 /// @param api BarelyMusician api.
@@ -351,16 +341,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(BarelyApi api,
 BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
     BarelyApi api, BarelyId instrument_id, int32_t index,
     BarelyParameterDefinition* out_definition);
-
-/// Gets whether instrument is muted or not.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @param out_is_muted Output true if muted, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_IsMuted(BarelyApi api,
-                                                    BarelyId instrument_id,
-                                                    bool* out_is_muted);
 
 /// Gets whether instrument note is playing or not.
 ///
@@ -412,26 +392,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(
     BarelyApi api, BarelyId instrument_id, BarelyDataDefinition definition);
-
-/// Sets instrument gain.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @param gain Gain in amplitude.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetGain(BarelyApi api,
-                                                    BarelyId instrument_id,
-                                                    double gain);
-
-/// Sets whether volume should be muted or not.
-///
-/// @param api BarelyMusician api.
-/// @param instrument_id Instrument identifier.
-/// @param is_muted True if muted, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetMuted(BarelyApi api,
-                                                     BarelyId instrument_id,
-                                                     bool is_muted);
 
 /// Sets instrument note off callback.
 ///

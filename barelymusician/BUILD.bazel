@@ -60,7 +60,6 @@ cc_library(
         ":barelymusician_headeronly",
         ":event",
         ":event_queue",
-        ":gain_processor",
         ":parameter",
     ],
 )

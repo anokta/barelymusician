@@ -46,15 +46,6 @@ BarelyStatus BarelyInstrument_Destroy(BarelyInstrumentHandle handle) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyInstrument_GetGain(BarelyInstrumentHandle handle,
-                                      double* out_gain) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_gain) return BarelyStatus_kInvalidArgument;
-
-  *out_gain = handle->instrument.GetGain();
-  return BarelyStatus_kOk;
-}
-
 BarelyStatus BarelyInstrument_GetParameter(BarelyInstrumentHandle handle,
                                            int32_t index, double* out_value) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -71,15 +62,6 @@ BarelyStatus BarelyInstrument_GetParamDefinition(
   if (!out_definition) return BarelyStatus_kInvalidArgument;
 
   *out_definition = handle->instrument.GetParameter(index)->GetDefinition();
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyInstrument_IsMuted(BarelyInstrumentHandle handle,
-                                      bool* out_is_muted) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_is_muted) return BarelyStatus_kInvalidArgument;
-
-  *out_is_muted = handle->instrument.IsMuted();
   return BarelyStatus_kOk;
 }
 
@@ -127,22 +109,6 @@ BarelyStatus BarelyInstrument_SetData(BarelyInstrumentHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
 
   handle->instrument.SetData(definition, timestamp);
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyInstrument_SetGain(BarelyInstrumentHandle handle,
-                                      double timestamp, double gain) {
-  if (!handle) return BarelyStatus_kNotFound;
-
-  handle->instrument.SetGain(gain, timestamp);
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyInstrument_SetMuted(BarelyInstrumentHandle handle,
-                                       double timestamp, bool is_muted) {
-  if (!handle) return BarelyStatus_kNotFound;
-
-  handle->instrument.SetMuted(is_muted, timestamp);
   return BarelyStatus_kOk;
 }
 

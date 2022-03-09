@@ -40,8 +40,8 @@ constexpr double kLookahead = 0.1;
 
 // Instrument settings.
 constexpr int kNumInstrumentVoices = 16;
-constexpr double kInstrumentGain =
-    1.0 / static_cast<double>(kNumInstrumentVoices);
+constexpr float kInstrumentGain =
+    1.0f / static_cast<float>(kNumInstrumentVoices);
 constexpr double kInstrumentEnvelopeAttack = 0.0f;
 constexpr double kInstrumentEnvelopeRelease = 0.2f;
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
@@ -132,7 +132,6 @@ int main(int /*argc*/, char* argv[]) {
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                        << MidiKeyNumberFromPitch(pitch) << ") ";
         });
-    instrument.SetGain(kInstrumentGain);
     instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack,
                             kInstrumentEnvelopeAttack);
     instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
@@ -154,7 +153,9 @@ int main(int /*argc*/, char* argv[]) {
       instrument.Process(clock.GetTimestamp(), temp_buffer.data(), kNumChannels,
                          kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     std::plus<>());
+                     [](float sample, float output_sample) {
+                       return kInstrumentGain * sample + output_sample;
+                     });
     }
     clock.Update(kNumFrames);
   };

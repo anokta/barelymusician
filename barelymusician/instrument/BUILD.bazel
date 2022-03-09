@@ -27,7 +27,6 @@ cc_library(
         ":event",
         ":event_queue",
         ":parameter",
-        "//barelymusician:gain_processor",
         "//barelymusician/api:include",
     ],
 )

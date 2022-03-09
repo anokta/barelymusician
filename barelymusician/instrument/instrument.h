@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "barelymusician/api/instrument.h"
-#include "barelymusician/gain_processor.h"
 #include "barelymusician/instrument/event.h"
 #include "barelymusician/instrument/event_queue.h"
 #include "barelymusician/instrument/parameter.h"
@@ -32,21 +31,11 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Returns gain.
-  ///
-  /// @return gain Gain in amplitude.
-  [[nodiscard]] double GetGain() const noexcept;
-
   /// Returns parameter.
   ///
   /// @param index Parameter index.
   /// @return Pointer to parameter.
   [[nodiscard]] const Parameter* GetParameter(int index) const noexcept;
-
-  /// Returns whether instrument is muted or not.
-  ///
-  /// @return True if muted, false otherwise.
-  [[nodiscard]] bool IsMuted() const noexcept;
 
   /// Returns whether note is active or not.
   ///
@@ -80,16 +69,6 @@ class Instrument {
   /// @param definition Data definition.
   /// @param timestamp Timestamp in seconds.
   void SetData(barely::DataDefinition definition, double timestamp) noexcept;
-
-  /// Sets gain at timestamp.
-  ///
-  /// @param gain Gain in amplitude.
-  void SetGain(double gain, double timestamp) noexcept;
-
-  /// Sets whether instrument should be muted or not.
-  ///
-  /// @param is_muted True if muted, false otherwise.
-  void SetMuted(bool is_muted, double timestamp) noexcept;
 
   /// Sets note off callback.
   ///
@@ -134,12 +113,6 @@ class Instrument {
  private:
   // Controller that wraps main thread functionality.
   struct Controller {
-    // Gain in amplitude.
-    double gain = 1.0;
-
-    // Denotes whether instrument is muted or not.
-    bool is_muted = false;
-
     // Note off callback.
     std::function<void(float, double)> note_off_callback;
 
@@ -169,9 +142,6 @@ class Instrument {
 
     // Set note on function.
     barely::InstrumentDefinition::SetNoteOnCallback set_note_on_callback;
-
-    // Gain processor.
-    GainProcessor gain_processor;
 
     // List of parameter states.
     std::vector<barely::ParameterState> parameters;

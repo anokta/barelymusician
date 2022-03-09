@@ -37,10 +37,9 @@ double SecondsFromSamples(int sample_rate, int samples) noexcept {
 
 Instrument::Instrument(const BarelyInstrumentDefinition& definition,
                        int sample_rate) noexcept
-    : processor_{
-          definition.destroy_callback,     definition.process_callback,
-          definition.set_data_callback,    definition.set_note_off_callback,
-          definition.set_note_on_callback, GainProcessor(sample_rate)} {
+    : processor_{definition.destroy_callback, definition.process_callback,
+                 definition.set_data_callback, definition.set_note_off_callback,
+                 definition.set_note_on_callback} {
   assert(sample_rate >= 0);
   controller_.parameters.reserve(definition.num_parameter_definitions);
   processor_.parameters.reserve(definition.num_parameter_definitions);
@@ -65,16 +64,12 @@ Instrument::~Instrument() noexcept {
   }
 }
 
-double Instrument::GetGain() const noexcept { return controller_.gain; }
-
 const Parameter* Instrument::GetParameter(int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(controller_.parameters.size())) {
     return &controller_.parameters[index];
   }
   return nullptr;
 }
-
-bool Instrument::IsMuted() const noexcept { return controller_.is_muted; }
 
 bool Instrument::IsNoteOn(float pitch) const noexcept {
   return controller_.pitches.contains(pitch);
@@ -86,7 +81,6 @@ void Instrument::Process(float* output, int num_output_channels,
   assert(num_output_channels >= 0);
   assert(num_output_frames >= 0);
   int frame = 0;
-  int gain_frame = 0;
   // Process *all* events before the end timestamp.
   const double end_timestamp =
       timestamp +
@@ -110,15 +104,6 @@ void Instrument::Process(float* output, int num_output_channels,
                 processor_.set_data_callback(&processor_.state,
                                              set_data_event.definition.data);
               }
-            },
-            [&](const SetGainEvent& set_gain_event) noexcept {
-              if (gain_frame < frame) {
-                processor_.gain_processor.Process(
-                    &output[num_output_channels * gain_frame],
-                    num_output_channels, frame - gain_frame);
-                gain_frame = frame;
-              }
-              processor_.gain_processor.SetGain(set_gain_event.gain);
             },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
               processor_.parameters[set_parameter_event.index] = {
@@ -144,10 +129,6 @@ void Instrument::Process(float* output, int num_output_channels,
     processor_.process_callback(&processor_.state,
                                 &output[num_output_channels * frame],
                                 num_output_channels, num_output_frames - frame);
-  }
-  if (gain_frame < num_output_frames) {
-    processor_.gain_processor.Process(&output[num_output_channels * gain_frame],
-                                      num_output_channels, num_output_frames);
   }
 }
 
@@ -182,23 +163,6 @@ void Instrument::SetData(barely::DataDefinition definition,
   }
   definition.data = new_data;
   event_queue_.Add(timestamp, SetDataEvent{definition});
-}
-
-void Instrument::SetGain(double gain, double timestamp) noexcept {
-  if (controller_.gain != gain) {
-    controller_.gain = gain;
-    if (!controller_.is_muted) {
-      event_queue_.Add(timestamp, SetGainEvent{gain});
-    }
-  }
-}
-
-void Instrument::SetMuted(bool is_muted, double timestamp) noexcept {
-  if (controller_.is_muted != is_muted) {
-    controller_.is_muted = is_muted;
-    event_queue_.Add(
-        timestamp, SetGainEvent{controller_.is_muted ? 0.0 : controller_.gain});
-  }
 }
 
 void Instrument::SetNoteOffCallback(

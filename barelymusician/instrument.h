@@ -8,7 +8,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/event.h"
 #include "barelymusician/event_queue.h"
-#include "barelymusician/gain_processor.h"
 #include "barelymusician/parameter.h"
 
 namespace barelyapi {
@@ -32,21 +31,11 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Returns gain.
-  ///
-  /// @return gain Gain in amplitude.
-  [[nodiscard]] double GetGain() const noexcept;
-
   /// Returns parameter.
   ///
   /// @param index Parameter index.
   /// @return Pointer to parameter.
   [[nodiscard]] const Parameter* GetParameter(int index) const noexcept;
-
-  /// Returns whether instrument is muted or not.
-  ///
-  /// @return True if muted, false otherwise.
-  [[nodiscard]] bool IsMuted() const noexcept;
 
   /// Returns whether note is active or not.
   ///
@@ -86,16 +75,6 @@ class Instrument {
   /// @param definition Data definition.
   /// @param timestamp Timestamp in seconds.
   void SetData(BarelyDataDefinition definition, double timestamp) noexcept;
-
-  /// Sets gain at timestamp.
-  ///
-  /// @param gain Gain in amplitude.
-  void SetGain(double gain, double timestamp) noexcept;
-
-  /// Sets whether instrument should be muted or not.
-  ///
-  /// @param is_muted True if muted, false otherwise.
-  void SetMuted(bool is_muted) noexcept;
 
   /// Sets note off callback.
   ///
@@ -147,9 +126,6 @@ class Instrument {
   // Event queue.
   EventQueue events_;
 
-  // Gain in amplitude.
-  double gain_ = 1.0;
-
   // Denotes whether instrument is muted or not.
   bool is_muted_ = false;
 
@@ -182,9 +158,6 @@ class Instrument {
 
   // Set note on function.
   BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback_;
-
-  // Gain processor.
-  GainProcessor gain_processor_;
 
   BarelyInstrumentContext context_;
   std::vector<BarelyParameterSnapshot> snapshots_;

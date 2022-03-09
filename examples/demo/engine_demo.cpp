@@ -208,13 +208,14 @@ int main(int /*argc*/, char* argv[]) {
   // Initialize performers.
   std::vector<std::pair<Sequence, BeatComposerCallback>> performers;
   std::vector<Instrument> instruments;
+  std::vector<float> gains;
 
-  const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
+  const auto build_synth_instrument_fn = [&](OscillatorType type, float gain,
                                              double attack, double release) {
     instruments.push_back(musician.CreateInstrument(
         SynthInstrument::GetDefinition(), kSampleRate));
     auto& instrument = instruments.back();
-    instrument.SetGain(gain);
+    gains.push_back(gain);
     instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, attack);
     instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
                             release);
@@ -230,12 +231,12 @@ int main(int /*argc*/, char* argv[]) {
         ComposeChord(kRootNote, scale, 0.5f, harmonic, offset, sequence);
       };
 
-  build_synth_instrument_fn(OscillatorType::kSine, 0.1, 0.125, 0.125);
+  build_synth_instrument_fn(OscillatorType::kSine, 0.1f, 0.125, 0.125);
   performers.emplace_back(musician.CreateSequence(),
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
 
-  build_synth_instrument_fn(OscillatorType::kNoise, 0.025, 0.5, 0.025);
+  build_synth_instrument_fn(OscillatorType::kNoise, 0.025f, 0.5, 0.025);
   performers.emplace_back(musician.CreateSequence(),
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -247,7 +248,7 @@ int main(int /*argc*/, char* argv[]) {
                 offset, sequence);
   };
 
-  build_synth_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
+  build_synth_instrument_fn(OscillatorType::kSaw, 0.1f, 0.0025, 0.125);
   performers.emplace_back(musician.CreateSequence(),
                           line_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -259,7 +260,7 @@ int main(int /*argc*/, char* argv[]) {
                     offset, sequence);
       };
 
-  build_synth_instrument_fn(OscillatorType::kSquare, 0.125, 0.05, 0.05);
+  build_synth_instrument_fn(OscillatorType::kSquare, 0.125f, 0.05, 0.05);
   performers.emplace_back(musician.CreateSequence(),
                           line_2_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
@@ -267,7 +268,7 @@ int main(int /*argc*/, char* argv[]) {
   // Add drumkit instrument.
   instruments.push_back(musician.CreateInstrument(
       DrumkitInstrument::GetDefinition(), kSampleRate));
-  instruments.back().SetGain(0.35);
+  gains.push_back(0.35f);
   set_note_callbacks_fn(instruments.size(), &instruments.back());
   auto& drumkit = instruments.back();
   const auto set_drumkit_pad_map_fn =
@@ -332,11 +333,15 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<float> temp_buffer(kNumChannels * kNumFrames);
   const auto process_callback = [&](float* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
+    int i = 0;
     for (auto& instrument : instruments) {
+      const float gain = gains[i++];
       instrument.Process(clock.GetTimestamp(), temp_buffer.data(), kNumChannels,
                          kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     std::plus<>());
+                     [&](float sample, float output_sample) {
+                       return gain * sample + output_sample;
+                     });
     }
     clock.Update(kNumFrames);
   };

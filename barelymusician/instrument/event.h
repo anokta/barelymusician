@@ -36,12 +36,6 @@ struct SetDataEvent {
   barely::DataDefinition definition;
 };
 
-/// Set gain event.
-struct SetGainEvent {
-  /// Gain in amplitude.
-  double gain;
-};
-
 /// Set parameter event.
 struct SetParameterEvent {
   /// Parameter index.
@@ -67,8 +61,8 @@ struct StopNoteEvent {
 };
 
 /// Instrument event type.
-using Event = std::variant<SetDataEvent, SetGainEvent, SetParameterEvent,
-                           StartNoteEvent, StopNoteEvent>;
+using Event = std::variant<SetDataEvent, SetParameterEvent, StartNoteEvent,
+                           StopNoteEvent>;
 
 }  // namespace barelyapi
 

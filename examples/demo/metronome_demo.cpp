@@ -31,7 +31,7 @@ constexpr double kLookahead = 0.1;
 
 // Metronome settings.
 constexpr int kNumVoices = 1;
-constexpr double kGain = 0.25;
+constexpr float kGain = 0.25f;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr double kAttack = 0.0f;
 constexpr double kRelease = 0.025f;
@@ -57,7 +57,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Create metronome instrument.
   Instrument metronome =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  metronome.SetGain(kGain);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
   metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
   metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
@@ -80,6 +79,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto process_callback = [&](float* output) {
     metronome.Process(audio_clock.GetTimestamp(), output, kNumChannels,
                       kNumFrames);
+    for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
+      output[i] *= kGain;
+    }
     audio_clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);

@@ -11,12 +11,13 @@ class Parameter {
   /// Constructs new `Parameter`.
   ///
   /// @param definition Parameter definition.
-  explicit Parameter(BarelyParameterDefinition definition) noexcept;
+  explicit Parameter(barely::ParameterDefinition definition) noexcept;
 
   /// Returns definition.
   ///
   /// @return Parameter definition.
-  [[nodiscard]] const BarelyParameterDefinition& GetDefinition() const noexcept;
+  [[nodiscard]] const barely::ParameterDefinition& GetDefinition()
+      const noexcept;
 
   /// Returns value.
   ///
@@ -36,7 +37,7 @@ class Parameter {
 
  private:
   // Parameter definition.
-  BarelyParameterDefinition definition_;
+  barely::ParameterDefinition definition_;
 
   // Parameter value.
   double value_ = 0.0;

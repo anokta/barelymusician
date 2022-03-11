@@ -6,13 +6,13 @@
 
 namespace barelyapi {
 
-Parameter::Parameter(BarelyParameterDefinition definition) noexcept
+Parameter::Parameter(barely::ParameterDefinition definition) noexcept
     : definition_(definition), value_(definition_.default_value) {
   assert(value_ >= definition.min_value);
   assert(value_ <= definition.max_value);
 }
 
-const BarelyParameterDefinition& Parameter::GetDefinition() const noexcept {
+const barely::ParameterDefinition& Parameter::GetDefinition() const noexcept {
   return definition_;
 }
 

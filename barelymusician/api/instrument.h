@@ -350,7 +350,8 @@ struct ParameterDefinition : public BarelyParameterDefinition {
   /// Constructs new `ParameterDefinition` from internal type.
   ///
   /// @param definition Internal parameter definition.
-  explicit ParameterDefinition(BarelyParameterDefinition definition)
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  ParameterDefinition(BarelyParameterDefinition definition)
       : BarelyParameterDefinition(definition) {}
 };
 
@@ -406,7 +407,8 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Constructs new `InstrumentDefinition` from internal type.
   ///
   /// @param definition Internal instrument definition.
-  explicit InstrumentDefinition(BarelyInstrumentDefinition definition)
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  InstrumentDefinition(BarelyInstrumentDefinition definition)
       : BarelyInstrumentDefinition(definition) {}
 
  private:

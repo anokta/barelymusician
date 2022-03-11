@@ -132,10 +132,10 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
 
 BarelyStatus BarelyInstrument_SetParameter(BarelyInstrumentHandle handle,
                                            double timestamp, int32_t index,
-                                           double value) {
+                                           double value, double slope) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  if (handle->instrument.SetParameter(index, value, timestamp)) {
+  if (handle->instrument.SetParameter(index, value, slope, timestamp)) {
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kInvalidArgument;

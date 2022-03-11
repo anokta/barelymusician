@@ -43,6 +43,9 @@ struct SetParameterEvent {
 
   /// Parameter value.
   double value;
+
+  /// Parameter slope in value per second.
+  double slope;
 };
 
 /// Start note event.

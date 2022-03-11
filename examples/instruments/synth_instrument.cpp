@@ -32,7 +32,8 @@ void SynthInstrument::Process(float* output, int num_channels,
   }
 }
 
-void SynthInstrument::SetParameter(int index, double value) noexcept {
+void SynthInstrument::SetParameter(int index, double value,
+                                   double /*slope*/) noexcept {
   switch (static_cast<SynthInstrumentParameter>(index)) {
     case SynthInstrumentParameter::kEnvelopeAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {

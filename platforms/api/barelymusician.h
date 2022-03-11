@@ -212,6 +212,9 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Set note on function signature.
   using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
 
+  /// Set parameter function signature.
+  using SetParameterCallback = BarelyInstrumentDefinition_SetParameterCallback;
+
   /// Constructs new `InstrumentDefinition`.
   ///
   /// @param create_callback Create callback.
@@ -219,17 +222,20 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// @param process_callback Process callback.
   /// @param set_data_callback Set data callback.
   /// @param set_note_off_callback Set note off callback.
-  /// @param set_note_on_callback Set note on callback.x
+  /// @param set_note_on_callback Set note on callback.
+  /// @param set_parameter_callback Set parameter callback.
   /// @param parameter_definitions List of parameter definitions.
   InstrumentDefinition(
       CreateCallback create_callback, DestroyCallback destroy_callback,
       ProcessCallback process_callback, SetDataCallback set_data_callback,
       SetNoteOffCallback set_note_off_callback,
       SetNoteOnCallback set_note_on_callback,
+      SetParameterCallback set_parameter_callback = nullptr,
       std::vector<ParameterDefinition> parameter_definitions = {})
       : BarelyInstrumentDefinition{create_callback,       destroy_callback,
                                    process_callback,      set_data_callback,
-                                   set_note_off_callback, set_note_on_callback},
+                                   set_note_off_callback, set_note_on_callback,
+                                   set_parameter_callback},
         parameter_definitions_(std::move(parameter_definitions)) {
     this->parameter_definitions = parameter_definitions_.data();
     num_parameter_definitions = static_cast<int>(parameter_definitions_.size());

@@ -183,66 +183,61 @@ typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity,
                                                 double timestamp,
                                                 void* user_data);
 
-/// Parameter snapshot.
-typedef struct BarelyParameterSnapshot {
-  /// Value.
-  double value;
-
-  /// Slope.
-  double slope;
-} BarelyParameterSnapshot;
-
-/// Instrument context.
-typedef struct BarelyInstrumentContext {
-  int32_t sample_rate;
-  void* state;
-  const BarelyParameterSnapshot* parameter_snapshots;
-  int32_t num_parameter_snapshots;
-} BarelyInstrumentContext;
-
 /// Instrument create callback signature.
 ///
-/// @param context Pointer to instrument context.
-typedef void (*BarelyInstrumentDefinition_CreateCallback)(
-    BarelyInstrumentContext* context);
+/// @param state Pointer to instrument state.
+/// @param sample_rate Sampling rate in hz.
+typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state,
+                                                          int sample_rate);
 
 /// Instrument destroy callback signature.
 ///
-/// @param context Pointer to instrument context.
-typedef void (*BarelyInstrumentDefinition_DestroyCallback)(
-    BarelyInstrumentContext* context);
+/// @param state Pointer to instrument state.
+typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 
 /// Instrument process callback signature.
 ///
-/// @param context Pointer to instrument context.
+/// @param state Pointer to instrument state.
 /// @param output Output buffer.
 /// @param num_output_channels Number of channels.
 /// @param num_output_frames Number of frames.
 typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
-    BarelyInstrumentContext* context, float* output,
-    int32_t num_output_channels, int32_t num_output_frames);
+    void** state, float* output, int32_t num_output_channels,
+    int32_t num_output_frames);
 
 /// Instrument set data callback signature.
 ///
-/// @param context Pointer to instrument context.
+/// @param state Pointer to instrument state.
 /// @param data Data.
-typedef void (*BarelyInstrumentDefinition_SetDataCallback)(
-    BarelyInstrumentContext* context, void* data);
+typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
+                                                           void* data);
 
 /// Instrument set note off callback signature.
 ///
-/// @param context Pointer to instrument context.
+/// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(
-    BarelyInstrumentContext* context, float pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
+                                                              float pitch);
 
 /// Instrument set note on callback signature.
 ///
-/// @param context Pointer to instrument context.
+/// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(
-    BarelyInstrumentContext* context, float pitch, float intensity);
+typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
+                                                             float pitch,
+                                                             float intensity);
+
+/// Instrument set parameter callback signature.
+///
+/// @param state Pointer to instrument state.
+/// @param index Parameter index.
+/// @param value Parameter value.
+/// @param slope Parameter slope in value change per frame.
+typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
+                                                                int32_t index,
+                                                                double value,
+                                                                double slope);
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -263,6 +258,9 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Set note on callback.
   BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback;
+
+  /// Set parameter callback.
+  BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback;
 
   /// List of parameter definitions.
   BarelyParameterDefinition* parameter_definitions;

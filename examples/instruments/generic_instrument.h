@@ -43,7 +43,8 @@ class GenericInstrument {
   ///
   /// @param id Parameter index.
   /// @param value Parameter value.
-  virtual void SetParameter(int index, double value) noexcept = 0;
+  /// @param slope Parameter slope in value change per frame.
+  virtual void SetParameter(int index, double value, double slope) noexcept = 0;
 };
 
 /// Returns instrument definition for the given create instrument function.
@@ -51,69 +52,40 @@ template <typename InstrumentType>
 BarelyInstrumentDefinition GetInstrumentDefinition(
     std::vector<BarelyParameterDefinition>& parameter_definitions) noexcept {
   return {.create_callback =
-              [](BarelyInstrumentContext* context) noexcept {
-                auto* instrument = new InstrumentType(context->sample_rate);
-                for (int index = 0; index < context->num_parameter_snapshots;
-                     ++index) {
-                  instrument->SetParameter(
-                      index, context->parameter_snapshots[index].value);
-                }
-                context->state = reinterpret_cast<void*>(instrument);
+              [](void** state, int sample_rate) noexcept {
+                *state =
+                    reinterpret_cast<void*>(new InstrumentType(sample_rate));
               },
           .destroy_callback =
-              [](BarelyInstrumentContext* context) noexcept {
-                delete reinterpret_cast<InstrumentType*>(context->state);
-                context->state = nullptr;
+              [](void** state) noexcept {
+                delete reinterpret_cast<InstrumentType*>(*state);
+                *state = nullptr;
               },
           .process_callback =
-              [](BarelyInstrumentContext* context, float* output,
-                 int num_channels, int num_frames) noexcept {
-                auto* instrument =
-                    reinterpret_cast<InstrumentType*>(context->state);
-                // TODO: temporary workaround to ensure parameters are updated.
-                for (int index = 0; index < context->num_parameter_snapshots;
-                     ++index) {
-                  instrument->SetParameter(
-                      index, context->parameter_snapshots[index].value);
-                }
+              [](void** state, float* output, int num_channels,
+                 int num_frames) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->Process(output, num_channels, num_frames);
               },
           .set_data_callback =
-              [](BarelyInstrumentContext* context, void* data) noexcept {
-                auto* instrument =
-                    reinterpret_cast<InstrumentType*>(context->state);
-                // TODO: temporary workaround to ensure parameters are updated.
-                for (int index = 0; index < context->num_parameter_snapshots;
-                     ++index) {
-                  instrument->SetParameter(
-                      index, context->parameter_snapshots[index].value);
-                }
+              [](void** state, void* data) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->SetData(data);
               },
           .set_note_off_callback =
-              [](BarelyInstrumentContext* context, float pitch) noexcept {
-                auto* instrument =
-                    reinterpret_cast<InstrumentType*>(context->state);
-                // TODO: temporary workaround to ensure parameters are updated.
-                for (int index = 0; index < context->num_parameter_snapshots;
-                     ++index) {
-                  instrument->SetParameter(
-                      index, context->parameter_snapshots[index].value);
-                }
+              [](void** state, float pitch) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->NoteOff(pitch);
               },
           .set_note_on_callback =
-              [](BarelyInstrumentContext* context, float pitch,
-                 float intensity) noexcept {
-                auto* instrument =
-                    reinterpret_cast<InstrumentType*>(context->state);
-                // TODO: temporary workaround to ensure parameters are updated.
-                for (int index = 0; index < context->num_parameter_snapshots;
-                     ++index) {
-                  instrument->SetParameter(
-                      index, context->parameter_snapshots[index].value);
-                }
+              [](void** state, float pitch, float intensity) noexcept {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
                 instrument->NoteOn(pitch, intensity);
+              },
+          .set_parameter_callback =
+              [](void** state, int index, double value, double slope) {
+                auto* instrument = reinterpret_cast<InstrumentType*>(*state);
+                instrument->SetParameter(index, value, slope);
               },
           .parameter_definitions = parameter_definitions.data(),
           .num_parameter_definitions =

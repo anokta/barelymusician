@@ -43,7 +43,8 @@ void DrumkitInstrument::SetData(void* data) noexcept {
   }
 }
 
-void DrumkitInstrument::SetParameter(int index, double value) noexcept {
+void DrumkitInstrument::SetParameter(int index, double value,
+                                     double /*slope*/) noexcept {
   switch (static_cast<DrumkitInstrumentParameter>(index)) {
     case DrumkitInstrumentParameter::kPadRelease:
       for (auto& [pitch, pad] : pads_) {

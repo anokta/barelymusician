@@ -42,19 +42,19 @@ Instrument::Instrument(const BarelyInstrumentDefinition& definition,
                  definition.set_note_on_callback} {
   assert(sample_rate >= 0);
   controller_.parameters.reserve(definition.num_parameter_definitions);
-  processor_.parameters.reserve(definition.num_parameter_definitions);
   for (int index = 0; index < definition.num_parameter_definitions; ++index) {
     controller_.parameters.emplace_back(
         definition.parameter_definitions[index]);
-    processor_.parameters.push_back(
-        {controller_.parameters[index].GetValue(), 0.0});
   }
-  processor_.state = {.sample_rate = sample_rate,
-                      .parameters = processor_.parameters.data(),
-                      .num_parameters = definition.num_parameter_definitions,
-                      .user_state = nullptr};
   if (definition.create_callback) {
-    definition.create_callback(&processor_.state);
+    definition.create_callback(&processor_.state, processor_.sample_rate);
+  }
+  if (processor_.set_parameter_callback) {
+    for (int index = 0; index < definition.num_parameter_definitions; ++index) {
+      processor_.set_parameter_callback(
+          &processor_.state, index, controller_.parameters[index].GetValue(),
+          0.0);
+    }
   }
 }
 
@@ -83,12 +83,11 @@ void Instrument::Process(float* output, int num_output_channels,
   int frame = 0;
   // Process *all* events before the end timestamp.
   const double end_timestamp =
-      timestamp +
-      SecondsFromSamples(processor_.state.sample_rate, num_output_frames);
+      timestamp + SecondsFromSamples(processor_.sample_rate, num_output_frames);
   for (const auto* event = event_queue_.GetNext(end_timestamp); event;
        event = event_queue_.GetNext(end_timestamp)) {
-    const int message_frame = SamplesFromSeconds(processor_.state.sample_rate,
-                                                 event->first - timestamp);
+    const int message_frame =
+        SamplesFromSeconds(processor_.sample_rate, event->first - timestamp);
     if (frame < message_frame) {
       if (processor_.process_callback) {
         processor_.process_callback(&processor_.state,
@@ -106,8 +105,13 @@ void Instrument::Process(float* output, int num_output_channels,
               }
             },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
-              processor_.parameters[set_parameter_event.index] = {
-                  set_parameter_event.value, 0.0};
+              if (processor_.set_parameter_callback) {
+                processor_.set_parameter_callback(
+                    &processor_.state, set_parameter_event.index,
+                    set_parameter_event.value,
+                    SamplesFromSeconds(processor_.sample_rate,
+                                       set_parameter_event.slope));
+              }
             },
             [this](const StartNoteEvent& start_note_event) noexcept {
               if (processor_.set_note_on_callback) {
@@ -137,8 +141,8 @@ void Instrument::ResetAllParameters(double timestamp) noexcept {
        ++index) {
     if (controller_.parameters[index].ResetValue()) {
       event_queue_.Add(
-          timestamp,
-          SetParameterEvent{index, controller_.parameters[index].GetValue()});
+          timestamp, SetParameterEvent{
+                         index, controller_.parameters[index].GetValue(), 0.0});
     }
   }
 }
@@ -147,8 +151,8 @@ bool Instrument::ResetParameter(int index, double timestamp) noexcept {
   if (index >= 0 && index < static_cast<int>(controller_.parameters.size())) {
     if (controller_.parameters[index].ResetValue()) {
       event_queue_.Add(
-          timestamp,
-          SetParameterEvent{index, controller_.parameters[index].GetValue()});
+          timestamp, SetParameterEvent{
+                         index, controller_.parameters[index].GetValue(), 0.0});
     }
     return true;
   }
@@ -194,13 +198,14 @@ void Instrument::SetNoteOnCallback(
   }
 }
 
-bool Instrument::SetParameter(int index, double value,
+bool Instrument::SetParameter(int index, double value, double slope,
                               double timestamp) noexcept {
   if (index >= 0 && index < static_cast<int>(controller_.parameters.size())) {
     if (controller_.parameters[index].SetValue(value)) {
       event_queue_.Add(
           timestamp,
-          SetParameterEvent{index, controller_.parameters[index].GetValue()});
+          SetParameterEvent{index, controller_.parameters[index].GetValue(),
+                            slope});
     }
     return true;
   }

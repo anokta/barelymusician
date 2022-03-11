@@ -88,9 +88,11 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @param value Parameter value.
+  /// @param slope Parameter slope in value change per second.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool SetParameter(int index, double value, double timestamp) noexcept;
+  bool SetParameter(int index, double value, double slope,
+                    double timestamp) noexcept;
 
   /// Starts note at timestamp.
   ///
@@ -143,11 +145,14 @@ class Instrument {
     // Set note on function.
     barely::InstrumentDefinition::SetNoteOnCallback set_note_on_callback;
 
-    // List of parameter states.
-    std::vector<barely::ParameterState> parameters;
+    // Set parameter function.
+    barely::InstrumentDefinition::SetParameterCallback set_parameter_callback;
 
-    // Current state.
-    barely::InstrumentState state;
+    // Sampling rate in hz.
+    int sample_rate;
+
+    // State.
+    void* state;
   };
 
   // Controller.

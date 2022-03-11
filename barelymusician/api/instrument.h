@@ -412,7 +412,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       : BarelyInstrumentDefinition(definition) {}
 
  private:
-  /// List of parameter definitions.
+  // List of parameter definitions.
   std::vector<ParameterDefinition> parameter_definitions_;
 };
 
@@ -536,7 +536,7 @@ class Instrument {
   ///
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status ResetAllParameters(double timestamp) {
+  Status ResetAllParameters(double timestamp = 0.0) {
     return static_cast<Status>(
         BarelyInstrument_ResetAllParameters(handle_, timestamp));
   }

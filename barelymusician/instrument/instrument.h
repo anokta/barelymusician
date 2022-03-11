@@ -18,9 +18,9 @@ class Instrument {
   /// Constructs new `Instrument`.
   ///
   /// @param definition Instrument definition.
-  /// @param sample_rate Sampling rate in hz.
+  /// @param frame_rate Frame rate in hz.
   Instrument(const BarelyInstrumentDefinition& definition,
-             int sample_rate) noexcept;
+             int frame_rate) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -41,7 +41,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(float pitch) const noexcept;
+  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
 
   /// Processes next output buffer.
   ///
@@ -49,7 +49,7 @@ class Instrument {
   /// @param num_output_channels Number of output channels.
   /// @param num_output_frames Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  void Process(float* output, int num_output_channels, int num_output_frames,
+  void Process(double* output, int num_output_channels, int num_output_frames,
                double timestamp) noexcept;
 
   /// Resets all parameters to default value at timestamp.
@@ -99,7 +99,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   /// @param timestamp Timestamp in seconds.
-  void StartNote(float pitch, float intensity, double timestamp) noexcept;
+  void StartNote(double pitch, double intensity, double timestamp) noexcept;
 
   /// Stops all notes at timestamp.
   ///
@@ -110,22 +110,22 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @param timestamp Timestamp in seconds.
-  void StopNote(float pitch, double timestamp) noexcept;
+  void StopNote(double pitch, double timestamp) noexcept;
 
  private:
   // Controller that wraps main thread functionality.
   struct Controller {
     // Note off callback.
-    std::function<void(float, double)> note_off_callback;
+    barely::Instrument::NoteOffCallback note_off_callback;
 
     // Note on callback.
-    std::function<void(float, float, double)> note_on_callback;
+    barely::Instrument::NoteOnCallback note_on_callback;
 
     // List of parameters.
     std::vector<Parameter> parameters;
 
     // List of active note pitches.
-    std::unordered_set<float> pitches;
+    std::unordered_set<double> pitches;
   };
 
   // Processor that wraps audio thread functionality.
@@ -149,7 +149,7 @@ class Instrument {
     barely::InstrumentDefinition::SetParameterCallback set_parameter_callback;
 
     // Sampling rate in hz.
-    int sample_rate;
+    int frame_rate;
 
     // State.
     void* state;

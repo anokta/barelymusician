@@ -19,35 +19,35 @@ struct EventVisitor : EventTypes... {
 template <class... EventTypes>
 EventVisitor(EventTypes...) -> EventVisitor<EventTypes...>;
 
-// Returns corresponding samples for given `seconds`.
-int SamplesFromSeconds(int sample_rate, double seconds) noexcept {
-  return sample_rate > 0
-             ? static_cast<int>(seconds * static_cast<double>(sample_rate))
+// Returns corresponding frames for given `seconds`.
+int FramesFromSeconds(int frame_rate, double seconds) noexcept {
+  return frame_rate > 0
+             ? static_cast<int>(seconds * static_cast<double>(frame_rate))
              : 0;
 }
 
-// Returns corresponding seconds for given `samples`.
-double SecondsFromSamples(int sample_rate, int samples) noexcept {
-  return sample_rate > 0
-             ? static_cast<double>(samples) / static_cast<double>(sample_rate)
+// Returns corresponding seconds for given `frames`.
+double SecondsFromFrames(int frame_rate, int frames) noexcept {
+  return frame_rate > 0
+             ? static_cast<double>(frames) / static_cast<double>(frame_rate)
              : 0.0;
 }
 
 }  // namespace
 
 Instrument::Instrument(const BarelyInstrumentDefinition& definition,
-                       int sample_rate) noexcept
+                       int frame_rate) noexcept
     : processor_{definition.destroy_callback, definition.process_callback,
                  definition.set_data_callback, definition.set_note_off_callback,
                  definition.set_note_on_callback} {
-  assert(sample_rate >= 0);
+  assert(frame_rate >= 0);
   controller_.parameters.reserve(definition.num_parameter_definitions);
   for (int index = 0; index < definition.num_parameter_definitions; ++index) {
     controller_.parameters.emplace_back(
         definition.parameter_definitions[index]);
   }
   if (definition.create_callback) {
-    definition.create_callback(&processor_.state, processor_.sample_rate);
+    definition.create_callback(&processor_.state, processor_.frame_rate);
   }
   if (processor_.set_parameter_callback) {
     for (int index = 0; index < definition.num_parameter_definitions; ++index) {
@@ -71,11 +71,11 @@ const Parameter* Instrument::GetParameter(int index) const noexcept {
   return nullptr;
 }
 
-bool Instrument::IsNoteOn(float pitch) const noexcept {
+bool Instrument::IsNoteOn(double pitch) const noexcept {
   return controller_.pitches.contains(pitch);
 }
 
-void Instrument::Process(float* output, int num_output_channels,
+void Instrument::Process(double* output, int num_output_channels,
                          int num_output_frames, double timestamp) noexcept {
   assert(output);
   assert(num_output_channels >= 0);
@@ -83,11 +83,11 @@ void Instrument::Process(float* output, int num_output_channels,
   int frame = 0;
   // Process *all* events before the end timestamp.
   const double end_timestamp =
-      timestamp + SecondsFromSamples(processor_.sample_rate, num_output_frames);
+      timestamp + SecondsFromFrames(processor_.frame_rate, num_output_frames);
   for (const auto* event = event_queue_.GetNext(end_timestamp); event;
        event = event_queue_.GetNext(end_timestamp)) {
     const int message_frame =
-        SamplesFromSeconds(processor_.sample_rate, event->first - timestamp);
+        FramesFromSeconds(processor_.frame_rate, event->first - timestamp);
     if (frame < message_frame) {
       if (processor_.process_callback) {
         processor_.process_callback(&processor_.state,
@@ -109,8 +109,8 @@ void Instrument::Process(float* output, int num_output_channels,
                 processor_.set_parameter_callback(
                     &processor_.state, set_parameter_event.index,
                     set_parameter_event.value,
-                    SamplesFromSeconds(processor_.sample_rate,
-                                       set_parameter_event.slope));
+                    FramesFromSeconds(processor_.frame_rate,
+                                      set_parameter_event.slope));
               }
             },
             [this](const StartNoteEvent& start_note_event) noexcept {
@@ -174,7 +174,7 @@ void Instrument::SetNoteOffCallback(
     void* user_data) noexcept {
   if (note_off_callback) {
     controller_.note_off_callback = [note_off_callback, user_data](
-                                        float pitch, double timestamp) {
+                                        double pitch, double timestamp) {
       if (note_off_callback) {
         note_off_callback(pitch, timestamp, user_data);
       }
@@ -189,7 +189,7 @@ void Instrument::SetNoteOnCallback(
     void* user_data) noexcept {
   if (note_on_callback) {
     controller_.note_on_callback = [note_on_callback, user_data](
-                                       float pitch, float intensity,
+                                       double pitch, double intensity,
                                        double timestamp) {
       note_on_callback(pitch, intensity, timestamp, user_data);
     };
@@ -212,7 +212,7 @@ bool Instrument::SetParameter(int index, double value, double slope,
   return false;
 }
 
-void Instrument::StartNote(float pitch, float intensity,
+void Instrument::StartNote(double pitch, double intensity,
                            double timestamp) noexcept {
   if (controller_.pitches.insert(pitch).second) {
     if (controller_.note_on_callback) {
@@ -223,7 +223,7 @@ void Instrument::StartNote(float pitch, float intensity,
 }
 
 void Instrument::StopAllNotes(double timestamp) noexcept {
-  for (const float pitch : std::exchange(controller_.pitches, {})) {
+  for (const double pitch : std::exchange(controller_.pitches, {})) {
     if (controller_.note_off_callback) {
       controller_.note_off_callback(pitch, timestamp);
     }
@@ -231,7 +231,7 @@ void Instrument::StopAllNotes(double timestamp) noexcept {
   }
 }
 
-void Instrument::StopNote(float pitch, double timestamp) noexcept {
+void Instrument::StopNote(double pitch, double timestamp) noexcept {
   if (controller_.pitches.erase(pitch) > 0) {
     if (controller_.note_off_callback) {
       controller_.note_off_callback(pitch, timestamp);

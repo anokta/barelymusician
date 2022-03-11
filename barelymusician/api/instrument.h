@@ -51,9 +51,9 @@ typedef struct BarelyParameterDefinition {
 /// Instrument create callback signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param sample_rate Sampling rate in hz.
+/// @param frame_rate Frame rate in hz.
 typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state,
-                                                          int32_t sample_rate);
+                                                          int32_t frame_rate);
 
 /// Instrument destroy callback signature.
 ///
@@ -67,7 +67,7 @@ typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 /// @param num_output_channels Number of channels.
 /// @param num_output_frames Number of frames.
 typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
-    void** state, float* output, int32_t num_output_channels,
+    void** state, double* output, int32_t num_output_channels,
     int32_t num_output_frames);
 
 /// Instrument set data callback signature.
@@ -82,7 +82,7 @@ typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
-                                                              float pitch);
+                                                              double pitch);
 
 /// Instrument set note on callback signature.
 ///
@@ -90,8 +90,8 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
-                                                             float pitch,
-                                                             float intensity);
+                                                             double pitch,
+                                                             double intensity);
 
 /// Instrument set parameter callback signature.
 ///
@@ -142,7 +142,7 @@ typedef struct BarelyInstrument* BarelyInstrumentHandle;
 /// @param pitch Note pitch.
 /// @param timestamp Note timestamp in seconds.
 /// @param user_data User data.
-typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, double timestamp,
+typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, double timestamp,
                                                  void* user_data);
 
 /// Instrument note on callback signature.
@@ -151,19 +151,19 @@ typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, double timestamp,
 /// @param intensity Note intensity.
 /// @param timestamp Note timestamp in seconds.
 /// @param user_data User data.
-typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity,
+typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 double timestamp,
                                                 void* user_data);
 
 /// Creates new instrument.
 ///
 /// @param definition Instrument definition.
-/// @param sample_rate Sampling rate in hz.
+/// @param frame_rate Frame rate in hz.
 /// @param out_handle Output instrument handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
-    BarelyInstrumentDefinition definition, int32_t sample_rate,
-    BarelyInstrumentHandle* out_handle);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_Create(BarelyInstrumentDefinition definition,
+                        int32_t frame_rate, BarelyInstrumentHandle* out_handle);
 
 /// Destroys instrument.
 ///
@@ -198,19 +198,19 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
 /// @param out_is_note_on Output true if playing, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(
-    BarelyInstrumentHandle handle, float pitch, bool* out_is_note_on);
+    BarelyInstrumentHandle handle, double pitch, bool* out_is_note_on);
 
 /// Processes instrument output buffer at timestamp.
 ///
 /// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
 /// @param output Output buffer.
 /// @param num_output_channels Number of output channels.
 /// @param num_output_frames Number of output frames.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
-    BarelyInstrumentHandle handle, double timestamp, float* output,
-    int32_t num_output_channels, int32_t num_output_frames);
+    BarelyInstrumentHandle handle, double* output, int32_t num_output_channels,
+    int32_t num_output_frames, double timestamp);
 
 /// Resets all instrument parameters to default value.
 ///
@@ -223,21 +223,21 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllParameters(
 /// Resets instrument parameter to default value.
 ///
 /// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
 /// @param index Parameter index.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
-    BarelyInstrumentHandle handle, double timestamp, int32_t index);
+    BarelyInstrumentHandle handle, int32_t index, double timestamp);
 
 /// Sets instrument data.
 ///
 /// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
 /// @param definition Data definition.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelyInstrument_SetData(BarelyInstrumentHandle handle, double timestamp,
-                         BarelyDataDefinition definition);
+BarelyInstrument_SetData(BarelyInstrumentHandle handle,
+                         BarelyDataDefinition definition, double timestamp);
 
 /// Sets instrument note off callback.
 ///
@@ -262,24 +262,25 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
 /// Sets instrument parameter value.
 ///
 /// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
 /// @param index Parameter index.
 /// @param value Parameter value.
 /// @param slope Parameter slope in value change per second.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelyInstrument_SetParameter(BarelyInstrumentHandle handle, double timestamp,
-                              int32_t index, double value, double slope);
+BarelyInstrument_SetParameter(BarelyInstrumentHandle handle, int32_t index,
+                              double value, double slope, double timestamp);
 
 /// Starts instrument note.
 ///
 /// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
 /// @param pitch Note pitch.
+/// @param intensity Note intensity.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelyInstrument_StartNote(BarelyInstrumentHandle handle, double timestamp,
-                           float pitch, float intensity);
+BarelyInstrument_StartNote(BarelyInstrumentHandle handle, double pitch,
+                           double intensity, double timestamp);
 
 /// Stops all instrument notes.
 ///
@@ -292,11 +293,11 @@ BarelyInstrument_StopAllNotes(BarelyInstrumentHandle handle, double timestamp);
 /// Stops instrument note.
 ///
 /// @param handle Instrument handle.
-/// @param timestamp Timestamp in seconds.
 /// @param pitch Note pitch.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
-    BarelyInstrumentHandle handle, double timestamp, float pitch);
+    BarelyInstrumentHandle handle, double pitch, double timestamp);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -420,7 +421,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @param timestamp Note timestamp in seconds.
-  using NoteOffCallback = std::function<void(float pitch, double timestamp)>;
+  using NoteOffCallback = std::function<void(double pitch, double timestamp)>;
 
   /// Note on callback signature.
   ///
@@ -428,19 +429,22 @@ class Instrument {
   /// @param intensity Note intensity.
   /// @param timestamp Note timestamp in seconds.
   using NoteOnCallback =
-      std::function<void(float pitch, float intensity, double timestamp)>;
+      std::function<void(double pitch, double intensity, double timestamp)>;
 
   /// Constructs new `Instrument`.
-  Instrument(InstrumentDefinition definition, int sample_rate) {
-    const auto status = static_cast<Status>(
-        BarelyInstrument_Create(std::move(definition), sample_rate, &handle_));
-    assert(IsOk(status));
+  Instrument(InstrumentDefinition definition, int frame_rate) {
+    const auto status =
+        BarelyInstrument_Create(std::move(definition), frame_rate, &handle_);
+    assert(IsOk(static_cast<Status>(status)));
   }
 
   /// Destroys `Instrument`.
   ~Instrument() {
-    BarelyInstrument_Destroy(handle_);
-    handle_ = nullptr;
+    if (handle_) {
+      const auto status = BarelyInstrument_Destroy(handle_);
+      assert(IsOk(static_cast<Status>(status)));
+      handle_ = nullptr;
+    }
   }
 
   /// Non-copyable.
@@ -461,7 +465,10 @@ class Instrument {
   /// @param other Other instrument.
   Instrument& operator=(Instrument&& other) noexcept {
     if (this != &other) {
-      BarelyInstrument_Destroy(handle_);
+      if (handle_) {
+        const auto status = BarelyInstrument_Destroy(handle_);
+        assert(IsOk(static_cast<Status>(status)));
+      }
       handle_ = std::exchange(other.handle_, nullptr);
       SetNoteOffCallback(std::exchange(other.note_off_callback_, nullptr));
       SetNoteOnCallback(std::exchange(other.note_on_callback_, nullptr));
@@ -494,7 +501,7 @@ class Instrument {
             static_cast<Status>(BarelyInstrument_GetParameterDefinition(
                 handle_, index, &definition));
         !IsOk(status)) {
-      return static_cast<Status>(status);
+      return status;
     }
     return ParameterDefinition(definition);
   }
@@ -503,25 +510,24 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(float pitch) const {
+  [[nodiscard]] bool IsNoteOn(double pitch) const {
     bool is_note_on = false;
-    const auto status = static_cast<Status>(
-        BarelyInstrument_IsNoteOn(handle_, pitch, &is_note_on));
-    assert(IsOk(status));
+    const auto status = BarelyInstrument_IsNoteOn(handle_, pitch, &is_note_on);
+    assert(IsOk(static_cast<Status>(status)));
     return is_note_on;
   }
 
   /// Processes output buffer at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
   /// @param output Output buffer.
   /// @param num_output_channels Number of output channels.
   /// @param num_output_frames Number of output frames.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status Process(double timestamp, float* output, int num_output_channels,
-                 int num_output_frames) {
+  Status Process(double* output, int num_output_channels, int num_output_frames,
+                 double timestamp = 0.0) {
     return static_cast<Status>(BarelyInstrument_Process(
-        handle_, timestamp, output, num_output_channels, num_output_frames));
+        handle_, output, num_output_channels, num_output_frames, timestamp));
   }
 
   /// Resets all parameters at timestamp.
@@ -535,30 +541,30 @@ class Instrument {
 
   /// Resets parameter value at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
   /// @param index Parameter index.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status ResetParameter(double timestamp, int index) {
+  Status ResetParameter(int index, double timestamp = 0.0) {
     return static_cast<Status>(
-        BarelyInstrument_ResetParameter(handle_, timestamp, index));
+        BarelyInstrument_ResetParameter(handle_, index, timestamp));
   }
 
   /// Sets data at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
   /// @param typed_data Typed data.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
   template <typename DataType>
-  Status SetData(double timestamp, DataType typed_data) {
+  Status SetData(DataType typed_data, double timestamp = 0.0) {
     return static_cast<Status>(BarelyInstrument_SetData(
         handle_,
-        DataDefinition{
-            [](void* other_data, void** out_data) {
-              *out_data = reinterpret_cast<void*>(new DataType(
-                  std::move(*reinterpret_cast<DataType*>(other_data))));
-            },
-            [](void* data) { delete reinterpret_cast<DataType*>(data); },
-            reinterpret_cast<void*>(&typed_data)}));
+        DataDefinition{[](void* other_data, void** out_data) {
+                         *out_data = static_cast<void*>(new DataType(
+                             std::move(*static_cast<DataType*>(other_data))));
+                       },
+                       [](void* data) { delete static_cast<DataType*>(data); },
+                       static_cast<void*>(&typed_data)},
+        timestamp));
   }
 
   /// Sets note off callback.
@@ -570,7 +576,7 @@ class Instrument {
       note_off_callback_ = std::move(note_off_callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
           handle_,
-          [](float pitch, double timestamp, void* user_data) {
+          [](double pitch, double timestamp, void* user_data) {
             (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
           },
           static_cast<void*>(&note_off_callback_)));
@@ -588,7 +594,8 @@ class Instrument {
       note_on_callback_ = std::move(note_on_callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
           handle_,
-          [](float pitch, float intensity, double timestamp, void* user_data) {
+          [](double pitch, double intensity, double timestamp,
+             void* user_data) {
             (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity,
                                                        timestamp);
           },
@@ -600,45 +607,46 @@ class Instrument {
 
   /// Sets parameter value at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
   /// @param index Parameter index.
   /// @param value Parameter value.
   /// @param slope Parameter slope in value change per second.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status SetParameter(double timestamp, int index, double value,
-                      double slope = 0.0) {
+  Status SetParameter(int index, double value, double slope = 0.0,
+                      double timestamp = 0.0) {
     return static_cast<Status>(
-        BarelyInstrument_SetParameter(handle_, timestamp, index, value, slope));
+        BarelyInstrument_SetParameter(handle_, index, value, slope, timestamp));
   }
 
   /// Starts note at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status StartNote(double timestamp, float pitch, float intensity = 1.0f) {
+  Status StartNote(double pitch, double intensity = 1.0f,
+                   double timestamp = 0.0) {
     return static_cast<Status>(
-        BarelyInstrument_StartNote(handle_, timestamp, pitch, intensity));
+        BarelyInstrument_StartNote(handle_, pitch, intensity, timestamp));
   }
 
   /// Stops all notes at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status StopAllNotes(double timestamp) {
+  Status StopAllNotes(double timestamp = 0.0) {
     return static_cast<Status>(
         BarelyInstrument_StopAllNotes(handle_, timestamp));
   }
 
   /// Stops note at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
   /// @param pitch Note pitch.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status StopNote(double timestamp, float pitch) {
+  Status StopNote(double pitch, double timestamp = 0.0) {
     return static_cast<Status>(
-        BarelyInstrument_StopNote(handle_, timestamp, pitch));
+        BarelyInstrument_StopNote(handle_, pitch, timestamp));
   }
 
  private:

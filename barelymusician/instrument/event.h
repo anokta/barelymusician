@@ -51,16 +51,16 @@ struct SetParameterEvent {
 /// Start note event.
 struct StartNoteEvent {
   /// Note pitch.
-  float pitch;
+  double pitch;
 
   /// Note intensity.
-  float intensity;
+  double intensity;
 };
 
 /// Stop note event.
 struct StopNoteEvent {
   /// Note pitch.
-  float pitch;
+  double pitch;
 };
 
 /// Instrument event type.

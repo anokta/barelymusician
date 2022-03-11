@@ -21,14 +21,12 @@ enum BarelyStatus_Values {
   BarelyStatus_kNotFound = 2,
   /// Already exists error.
   BarelyStatus_kAlreadyExists = 3,
-  /// Failed precondition error.
-  BarelyStatus_kFailedPrecondition = 4,
   /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 5,
+  BarelyStatus_kUnimplemented = 4,
   /// Internal error.
-  BarelyStatus_kInternal = 6,
+  BarelyStatus_kInternal = 5,
   /// Unknown error.
-  BarelyStatus_kUnknown = 7,
+  BarelyStatus_kUnknown = 6,
 };
 
 #ifdef __cplusplus
@@ -53,8 +51,6 @@ enum class Status : BarelyStatus {
   kNotFound = BarelyStatus_kNotFound,
   /// Already exists error.
   kAlreadyExists = BarelyStatus_kAlreadyExists,
-  /// Failed precondition error.
-  kFailedPrecondition = BarelyStatus_kFailedPrecondition,
   /// Unimplemented error.
   kUnimplemented = BarelyStatus_kUnimplemented,
   /// Internal error.
@@ -83,8 +79,6 @@ inline std::string ToString(Status status) {
       return "Not found error";
     case Status::kAlreadyExists:
       return "Already exists error";
-    case Status::kFailedPrecondition:
-      return "Failed precondition error";
     case Status::kUnimplemented:
       return "Unimplemented error";
     case Status::kInternal:
@@ -102,14 +96,16 @@ class StatusOr {
   /// Constructs new `StatusOr` with an error status.
   ///
   /// @param error_status Error status.
-  StatusOr(Status error_status) : value_or_(error_status) {
+  StatusOr(Status error_status)  // NOLINT(google-explicit-constructor)
+      : value_or_(error_status) {
     assert(error_status != Status::kOk);
   }
 
   /// Constructs new `StatusOr` with a value.
   ///
   /// @param value Value.
-  StatusOr(ValueType value) : value_or_(std::move(value)) {}
+  StatusOr(ValueType value)  // NOLINT(google-explicit-constructor)
+      : value_or_(std::move(value)) {}
 
   /// Returns contained error status.
   ///

@@ -73,16 +73,14 @@ class Instrument {
   /// Sets note off callback.
   ///
   /// @param note_off_callback Note off callback.
-  /// @param user_data User data.
-  void SetNoteOffCallback(BarelyInstrument_NoteOffCallback note_off_callback,
-                          void* user_data) noexcept;
+  void SetNoteOffCallback(
+      barely::Instrument::NoteOffCallback note_off_callback) noexcept;
 
   /// Sets note on callback.
   ///
   /// @param note_on_callback Note on callback.
-  /// @param user_data User data.
-  void SetNoteOnCallback(BarelyInstrument_NoteOnCallback note_on_callback,
-                         void* user_data) noexcept;
+  void SetNoteOnCallback(
+      barely::Instrument::NoteOnCallback note_on_callback) noexcept;
 
   /// Sets parameter value at timestamp.
   ///

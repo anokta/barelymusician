@@ -118,7 +118,14 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
     BarelyInstrument_NoteOffCallback note_off_callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.SetNoteOffCallback(note_off_callback, user_data);
+  if (note_off_callback) {
+    handle->instrument.SetNoteOffCallback(
+        [note_off_callback, user_data](double pitch, double timestamp) {
+          note_off_callback(pitch, timestamp, user_data);
+        });
+  } else {
+    handle->instrument.SetNoteOffCallback(nullptr);
+  }
   return BarelyStatus_kOk;
 }
 
@@ -127,7 +134,15 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
     BarelyInstrument_NoteOnCallback note_on_callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.SetNoteOnCallback(note_on_callback, user_data);
+  if (note_on_callback) {
+    handle->instrument.SetNoteOnCallback(
+        [note_on_callback, user_data](double pitch, double intensity,
+                                      double timestamp) {
+          note_on_callback(pitch, intensity, timestamp, user_data);
+        });
+  } else {
+    handle->instrument.SetNoteOnCallback(nullptr);
+  }
   return BarelyStatus_kOk;
 }
 

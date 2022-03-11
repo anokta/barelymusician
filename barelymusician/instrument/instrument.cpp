@@ -170,32 +170,13 @@ void Instrument::SetData(barely::DataDefinition definition,
 }
 
 void Instrument::SetNoteOffCallback(
-    BarelyInstrument_NoteOffCallback note_off_callback,
-    void* user_data) noexcept {
-  if (note_off_callback) {
-    controller_.note_off_callback = [note_off_callback, user_data](
-                                        double pitch, double timestamp) {
-      if (note_off_callback) {
-        note_off_callback(pitch, timestamp, user_data);
-      }
-    };
-  } else {
-    controller_.note_off_callback = nullptr;
-  }
+    barely::Instrument::NoteOffCallback note_off_callback) noexcept {
+  controller_.note_off_callback = std::move(note_off_callback);
 }
 
 void Instrument::SetNoteOnCallback(
-    BarelyInstrument_NoteOnCallback note_on_callback,
-    void* user_data) noexcept {
-  if (note_on_callback) {
-    controller_.note_on_callback = [note_on_callback, user_data](
-                                       double pitch, double intensity,
-                                       double timestamp) {
-      note_on_callback(pitch, intensity, timestamp, user_data);
-    };
-  } else {
-    controller_.note_on_callback = nullptr;
-  }
+    barely::Instrument::NoteOnCallback note_on_callback) noexcept {
+  controller_.note_on_callback = std::move(note_on_callback);
 }
 
 bool Instrument::SetParameter(int index, double value, double slope,

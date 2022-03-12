@@ -3,6 +3,7 @@
 #include <stdbool.h>  // NOLINT(modernize-deprecated-headers)
 #include <stdint.h>   // NOLINT(modernize-deprecated-headers)
 
+#include "barelymusician/api/status.h"
 #include "barelymusician/instrument/instrument.h"
 
 extern "C" {

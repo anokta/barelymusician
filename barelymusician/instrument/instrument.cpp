@@ -109,8 +109,8 @@ void Instrument::Process(double* output, int num_output_channels,
                 processor_.set_parameter_callback(
                     &processor_.state, set_parameter_event.index,
                     set_parameter_event.value,
-                    FramesFromSeconds(processor_.frame_rate,
-                                      set_parameter_event.slope));
+                    set_parameter_event.slope /
+                        static_cast<double>(processor_.frame_rate));
               }
             },
             [this](const StartNoteEvent& start_note_event) noexcept {

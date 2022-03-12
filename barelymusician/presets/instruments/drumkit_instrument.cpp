@@ -1,13 +1,16 @@
 #include "barelymusician/presets/instruments/drumkit_instrument.h"
 
-#include <unordered_map>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
+#include "barelymusician/api/instrument.h"
+#include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/presets/instruments/generic_instrument.h"
-#include "examples/common/wav_file.h"
 
 namespace barelyapi {
+
+using ::barely::InstrumentDefinition;
+using ::barely::ParameterDefinition;
+using ::barely::presets::DrumkitParameter;
 
 void DrumkitInstrument::Process(double* output, int num_channels,
                                 int num_frames) noexcept {
@@ -45,8 +48,8 @@ void DrumkitInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 
 void DrumkitInstrument::SetParameter(int index, double value,
                                      double /*slope*/) noexcept {
-  switch (static_cast<DrumkitInstrumentParameter>(index)) {
-    case DrumkitInstrumentParameter::kPadRelease:
+  switch (static_cast<DrumkitParameter>(index)) {
+    case DrumkitParameter::kPadRelease:
       for (auto& [pitch, pad] : pads_) {
         pad.voice.envelope().SetRelease(static_cast<double>(value));
       }
@@ -54,10 +57,10 @@ void DrumkitInstrument::SetParameter(int index, double value,
   }
 }
 
-BarelyInstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
-  static std::vector<BarelyParameterDefinition> parameter_definitions = {
+InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
+  static std::vector<ParameterDefinition> parameter_definitions = {
       // Pad release.
-      BarelyParameterDefinition{0.1, 0.0, 60.0},
+      ParameterDefinition{0.1, 0.0, 60.0},
   };
   return GetInstrumentDefinition<DrumkitInstrument>(parameter_definitions);
 }

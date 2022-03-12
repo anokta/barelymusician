@@ -37,9 +37,13 @@ double SecondsFromFrames(int frame_rate, int frames) noexcept {
 
 Instrument::Instrument(const BarelyInstrumentDefinition& definition,
                        int frame_rate) noexcept
-    : processor_{definition.destroy_callback, definition.process_callback,
-                 definition.set_data_callback, definition.set_note_off_callback,
-                 definition.set_note_on_callback} {
+    : processor_{definition.destroy_callback,
+                 definition.process_callback,
+                 definition.set_data_callback,
+                 definition.set_note_off_callback,
+                 definition.set_note_on_callback,
+                 definition.set_parameter_callback,
+                 frame_rate} {
   assert(frame_rate >= 0);
   controller_.parameters.reserve(definition.num_parameter_definitions);
   for (int index = 0; index < definition.num_parameter_definitions; ++index) {

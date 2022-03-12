@@ -106,7 +106,7 @@ enum class InstrumentType : BarelyPresetsInstrumentType {
 };
 
 /// Synth parameter.
-enum class SynthParameter : BarelyPresetsSynthParameter {
+enum SynthParameter : BarelyPresetsSynthParameter {
   /// Envelope attack.
   kAttack = BarelyPresetsSynthParameter_kAttack,
   /// Envelope decay.
@@ -122,7 +122,7 @@ enum class SynthParameter : BarelyPresetsSynthParameter {
 };
 
 /// Drumkit parameter.
-enum class DrumkitParameter : BarelyPresetsDrumkitParameter {
+enum DrumkitParameter : BarelyPresetsDrumkitParameter {
   /// Pad envelope release.
   kPadRelease = BarelyPresetsDrumkitParameter_kPadRelease,
 };

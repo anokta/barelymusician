@@ -43,8 +43,15 @@ class AudioOutput {
   void SetProcessCallback(ProcessCallback process_callback) noexcept;
 
  private:
-  // Process callback.
-  ProcessCallback process_callback_ = nullptr;
+  // Process data.
+  struct ProcessData {
+    // Buffer.
+    std::vector<double> buffer;
+
+    // Callback.
+    ProcessCallback callback = nullptr;
+  };
+  ProcessData process_data_;
 
   // Stream for audio processing.
   PaStream* stream_ = nullptr;

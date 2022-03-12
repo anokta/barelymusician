@@ -128,7 +128,7 @@ typedef struct BarelyInstrumentDefinition {
   BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback;
 
   /// List of parameter definitions.
-  BarelyParameterDefinition* parameter_definitions;
+  const BarelyParameterDefinition* parameter_definitions;
 
   /// Number of parameter definitions.
   int32_t num_parameter_definitions;
@@ -394,15 +394,17 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       SetNoteOffCallback set_note_off_callback,
       SetNoteOnCallback set_note_on_callback,
       SetParameterCallback set_parameter_callback = nullptr,
-      std::vector<ParameterDefinition> parameter_definitions = {})
-      : BarelyInstrumentDefinition{create_callback,       destroy_callback,
-                                   process_callback,      set_data_callback,
-                                   set_note_off_callback, set_note_on_callback,
-                                   set_parameter_callback},
-        parameter_definitions_(std::move(parameter_definitions)) {
-    this->parameter_definitions = parameter_definitions_.data();
-    num_parameter_definitions = static_cast<int>(parameter_definitions_.size());
-  }
+      const std::vector<ParameterDefinition>& parameter_definitions = {})
+      : BarelyInstrumentDefinition{
+            create_callback,
+            destroy_callback,
+            process_callback,
+            set_data_callback,
+            set_note_off_callback,
+            set_note_on_callback,
+            set_parameter_callback,
+            parameter_definitions.data(),
+            static_cast<int>(parameter_definitions.size())} {}
 
   /// Constructs new `InstrumentDefinition` from internal type.
   ///
@@ -410,10 +412,6 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   InstrumentDefinition(BarelyInstrumentDefinition definition)
       : BarelyInstrumentDefinition(definition) {}
-
- private:
-  // List of parameter definitions.
-  std::vector<ParameterDefinition> parameter_definitions_;
 };
 
 /// Instrument.
@@ -436,7 +434,7 @@ class Instrument {
   /// Constructs new `Instrument`.
   Instrument(InstrumentDefinition definition, int frame_rate) {
     const auto status =
-        BarelyInstrument_Create(std::move(definition), frame_rate, &handle_);
+        BarelyInstrument_Create(definition, frame_rate, &handle_);
     assert(IsOk(static_cast<Status>(status)));
   }
 

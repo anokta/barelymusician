@@ -1,7 +1,9 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
-    name = "modules",
+    name = "presets",
     srcs = [
         "instruments.cpp",
     ],
@@ -9,8 +11,8 @@ cc_library(
     deps = [
         ":include",
         "//barelymusician/api",
-        # "//examples/instruments:drumkit_instrument",
-        # "//examples/instruments:synth_instrument",
+        "//barelymusician/presets/instruments:drumkit_instrument",
+        "//barelymusician/presets/instruments:synth_instrument",
     ],
     alwayslink = True,
 )

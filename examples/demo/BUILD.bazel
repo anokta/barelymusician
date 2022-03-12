@@ -24,12 +24,12 @@ cc_binary(
     name = "instrument_demo",
     srcs = ["instrument_demo.cpp"],
     deps = [
+        "//barelymusician/api",
+        "//barelymusician/api/presets",
         "//examples/common:audio_output",
         "//examples/common:console_log",
         "//examples/common:input_manager",
         "//examples/composition:note_pitch",
-        "//examples/instruments:synth_instrument",
-        "//platforms/api:barelymusician",
     ],
 )
 

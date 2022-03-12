@@ -5,23 +5,23 @@
 #include <optional>
 #include <thread>
 
+#include "barelymusician/api/instrument.h"
+#include "barelymusician/api/presets/instruments.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/synth_instrument.h"
-#include "platforms/api/barelymusician.h"
 
 namespace {
 
 using ::barely::Instrument;
-using ::barely::Musician;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::OscillatorType;
+using ::barely::presets::CreateInstrument;
+using ::barely::presets::InstrumentType;
+using ::barely::presets::OscillatorType;
+using ::barely::presets::SynthParameter;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
@@ -32,8 +32,8 @@ constexpr int kNumFrames = 256;
 constexpr double kGain = 0.125;
 constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr double kEnvelopeAttack = 0.05;
-constexpr double kEnvelopeRelease = 0.125;
+constexpr double kAttack = 0.05;
+constexpr double kRelease = 0.125;
 
 // Note settings.
 constexpr double kRootPitch = barelyapi::kPitchC3;
@@ -60,17 +60,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Musician musician;
-
-  Instrument instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack,
-                          kEnvelopeAttack);
-  instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
-                          kEnvelopeRelease);
-  instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
+  Instrument instrument = CreateInstrument(InstrumentType::kSynth, kSampleRate);
+  instrument.SetParameter(SynthParameter::kAttack, kAttack);
+  instrument.SetParameter(SynthParameter::kRelease, kRelease);
+  instrument.SetParameter(SynthParameter::kOscillatorType,
                           static_cast<double>(kOscillatorType));
-  instrument.SetParameter(SynthInstrumentParameter::kNumVoices,
+  instrument.SetParameter(SynthParameter::kNumVoices,
                           static_cast<double>(kNumVoices));
 
   instrument.SetNoteOnCallback(
@@ -83,7 +78,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(0.0, output, kNumChannels, kNumFrames);
+    instrument.Process(output, kNumChannels, kNumFrames);
     for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
       output[i] *= kGain;
     }
@@ -136,7 +131,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(0.0);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

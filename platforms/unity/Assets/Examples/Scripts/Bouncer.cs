@@ -6,11 +6,11 @@ using Barely;
 public class Bouncer : MonoBehaviour {
   public Instrument instrument;
 
-  public float rootPitch = 0.0f;
+  public double rootPitch = 0.0f;
 
-  private readonly float[] MajorScale = new float[] { 0.0f, 2.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f };
+  private readonly double[] MajorScale = new double[] { 0.0f, 2.0f, 4.0f, 5.0f, 7.0f, 9.0f, 11.0f };
 
-  private readonly float NoteDuration = 0.05f;
+  private readonly double NoteDuration = 0.05f;
 
   private int lastIndex = 0;
 
@@ -26,13 +26,13 @@ public class Bouncer : MonoBehaviour {
   }
 
   private void OnCollisionEnter(Collision collision) {
-    float octaveOffset = lastIndex / MajorScale.Length;
-    float pitch = rootPitch + octaveOffset + MajorScale[lastIndex++ % MajorScale.Length] / 12.0f;
-    float intensity = Mathf.Min(1.0f, 0.125f * collision.relativeVelocity.sqrMagnitude);
+    double octaveOffset = lastIndex / MajorScale.Length;
+    double pitch = rootPitch + octaveOffset + MajorScale[lastIndex++ % MajorScale.Length] / 12.0f;
+    double intensity = Mathf.Min(1.0f, 0.125f * collision.relativeVelocity.sqrMagnitude);
     StartCoroutine(PlayNote(pitch, intensity, NoteDuration));
   }
 
-  IEnumerator PlayNote(float pitch, float intensity, float duration) {
+  IEnumerator PlayNote(double pitch, double intensity, double duration) {
     instrument.StartNote(pitch, intensity);
     yield return new WaitForSeconds(duration);
     instrument.StopNote(pitch);

@@ -31,13 +31,13 @@ constexpr double kLookahead = 0.1;
 
 // Metronome settings.
 constexpr int kNumVoices = 1;
-constexpr float kGain = 0.25f;
+constexpr double kGain = 0.25;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr double kAttack = 0.0f;
-constexpr double kRelease = 0.025f;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.025;
 
-constexpr float kBarPitch = barelyapi::kPitchA4;
-constexpr float kBeatPitch = barelyapi::kPitchA3;
+constexpr double kBarPitch = barelyapi::kPitchA4;
+constexpr double kBeatPitch = barelyapi::kPitchA3;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 120.0;
@@ -69,14 +69,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const int current_bar = static_cast<int>(position) / kNumBeats;
     const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
+    const double pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
     metronome.StartNote(pitch);
     metronome.StopNote(pitch);
   };
   musician.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto process_callback = [&](float* output) {
+  const auto process_callback = [&](double* output) {
     metronome.Process(audio_clock.GetTimestamp(), output, kNumChannels,
                       kNumFrames);
     for (int i = 0; i < kNumChannels * kNumFrames; ++i) {

@@ -14,13 +14,13 @@ public class Metronome : MonoBehaviour {
   public int numBeats = 4;
 
   [Range(-4.0f, 4.0f)]
-  public float barPitch = 1.0f;
+  public double barPitch = 1.0f;
 
   [Range(-4.0f, 4.0f)]
-  public float beatPitch = 0.0f;
+  public double beatPitch = 0.0f;
 
   [Range(0.0f, 1.0f)]
-  public float intensity = 1.0f;
+  public double intensity = 1.0f;
 
   public bool logToConsole = true;
 
@@ -59,7 +59,7 @@ public class Metronome : MonoBehaviour {
   private void OnBeat(double position) {
     int bar = (int)(position) / numBeats;
     int beat = (int)(position) % numBeats;
-    float pitch = (beat == 0.0) ? barPitch : beatPitch;
+    double pitch = (beat == 0.0) ? barPitch : beatPitch;
     if (tick && instrument) {
       instrument.StartNote(pitch, intensity);
       instrument.StopNote(pitch);

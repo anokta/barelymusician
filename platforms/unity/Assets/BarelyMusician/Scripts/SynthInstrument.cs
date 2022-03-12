@@ -23,7 +23,7 @@ namespace Barely {
     public double decay = 0.0;
 
     /// Envelope sustain.
-    [Range(0.0f, 1.0f)]
+    [Range(0.0, 1.0)]
     public double sustain = 1.0;
 
     /// Envelope release.

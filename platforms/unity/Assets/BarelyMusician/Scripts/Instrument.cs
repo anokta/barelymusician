@@ -14,20 +14,20 @@ namespace Barely {
     public AudioSource Source { get; private set; } = null;
 
     /// Note off event.
-    public delegate void NoteOffEvent(float pitch);
+    public delegate void NoteOffEvent(double pitch);
     public event NoteOffEvent OnNoteOff;
 
     /// Note on event.
-    public delegate void NoteOnEvent(float pitch, float intensity);
+    public delegate void NoteOnEvent(double pitch, double intensity);
     public event NoteOnEvent OnNoteOn;
 
     // TODO(#85): Temp shortcut, note callbacks should be private.
     // Note off callback.
-    public delegate void NoteOffCallback(float pitch, double timestamp);
+    public delegate void NoteOffCallback(double pitch, double timestamp);
     public NoteOffCallback _noteOffCallback = null;
 
     // Note on callback.
-    public delegate void NoteOnCallback(float pitch, float intensity, double timestamp);
+    public delegate void NoteOnCallback(double pitch, double intensity, double timestamp);
     public NoteOnCallback _noteOnCallback = null;
 
     protected virtual void Awake() {
@@ -40,10 +40,10 @@ namespace Barely {
 
     protected virtual void OnEnable() {
       if (Id == Musician.InvalidId) {
-        _noteOffCallback = delegate(float pitch, double timestamp) {
+        _noteOffCallback = delegate(double pitch, double timestamp) {
           OnNoteOff?.Invoke(pitch);
         };
-        _noteOnCallback = delegate(float pitch, float intensity, double timestamp) {
+        _noteOnCallback = delegate(double pitch, double intensity, double timestamp) {
           OnNoteOn?.Invoke(pitch, intensity);
         };
         Id = Musician.AddInstrument(this);
@@ -86,7 +86,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     /// @return True if success, false otherwise.
-    public bool StartNote(float pitch, float intensity) {
+    public bool StartNote(double pitch, double intensity) {
       return Musician.StartInstrumentNote(this, pitch, intensity);
     }
 
@@ -99,11 +99,11 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @return True if success, false otherwise.
-    public bool StopNote(float pitch) {
+    public bool StopNote(double pitch) {
       return Musician.StopInstrumentNote(this, pitch);
     }
 
-    private void OnAudioFilterRead(float[] data, int channels) {
+    private void OnAudioFilterRead(double[] data, int channels) {
       Musician.ProcessInstrument(this, data, channels);
     }
   }

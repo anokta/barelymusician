@@ -52,7 +52,7 @@ typedef struct BarelyNoteDurationDefinition {
 /// Note intensity definition.
 typedef struct BarelyNoteIntensityDefinition {
   /// Value.
-  float intensity;
+  double intensity;
 } BarelyNoteIntensityDefinition;
 
 /// Note pitch type enum alias.
@@ -76,9 +76,9 @@ typedef struct BarelyNotePitchDefinition {
   /// Value.
   union {
     /// Absolute pitch.
-    float absolute_pitch;
+    double absolute_pitch;
     /// Relative pitch.
-    float relative_pitch;
+    double relative_pitch;
     /// Scale index.
     int scale_index;
   };
@@ -170,7 +170,7 @@ typedef struct BarelyDataDefinition {
 /// @param pitch Note pitch.
 /// @param timestamp Note timestamp in seconds.
 /// @param user_data User data.
-typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, double timestamp,
+typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, double timestamp,
                                                  void* user_data);
 
 /// Instrument note on callback signature.
@@ -179,7 +179,7 @@ typedef void (*BarelyInstrument_NoteOffCallback)(float pitch, double timestamp,
 /// @param intensity Note intensity.
 /// @param timestamp Note timestamp in seconds.
 /// @param user_data User data.
-typedef void (*BarelyInstrument_NoteOnCallback)(float pitch, float intensity,
+typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 double timestamp,
                                                 void* user_data);
 
@@ -202,7 +202,7 @@ typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 /// @param num_output_channels Number of channels.
 /// @param num_output_frames Number of frames.
 typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
-    void** state, float* output, int32_t num_output_channels,
+    void** state, double* output, int32_t num_output_channels,
     int32_t num_output_frames);
 
 /// Instrument set data callback signature.
@@ -217,7 +217,7 @@ typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
-                                                              float pitch);
+                                                              double pitch);
 
 /// Instrument set note on callback signature.
 ///
@@ -225,8 +225,8 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
-                                                             float pitch,
-                                                             float intensity);
+                                                             double pitch,
+                                                             double intensity);
 
 /// Instrument set parameter callback signature.
 ///
@@ -349,7 +349,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api,
                                                      BarelyId instrument_id,
-                                                     float pitch,
+                                                     double pitch,
                                                      bool* out_is_note_on);
 
 /// Processes instrument output buffer at timestamp.
@@ -362,7 +362,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api,
 /// @param num_output_frames Number of output frames.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
-    BarelyApi api, BarelyId instrument_id, double timestamp, float* output,
+    BarelyApi api, BarelyId instrument_id, double timestamp, double* output,
     int32_t num_output_channels, int32_t num_output_frames);
 
 /// Resets all instrument parameters to default value.
@@ -433,8 +433,8 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(BarelyApi api,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_StartNote(BarelyApi api,
                                                       BarelyId instrument_id,
-                                                      float pitch,
-                                                      float intensity);
+                                                      double pitch,
+                                                      double intensity);
 
 /// Stops all instrument notes.
 ///
@@ -452,7 +452,7 @@ BarelyInstrument_StopAllNotes(BarelyApi api, BarelyId instrument_id);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyApi api,
                                                      BarelyId instrument_id,
-                                                     float pitch);
+                                                     double pitch);
 
 /// Creates new BarelyMusician api.
 ///
@@ -486,7 +486,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetNoteDuration(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_GetNoteIntensity(
     BarelyApi api, BarelyNoteIntensityDefinition definition,
-    bool bypass_adjustment, float* out_intensity);
+    bool bypass_adjustment, double* out_intensity);
 
 /// Gets note pitch.
 ///
@@ -497,7 +497,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetNoteIntensity(
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyMusician_GetNotePitch(BarelyApi api, BarelyNotePitchDefinition definition,
-                            bool bypass_adjustment, float* out_pitch);
+                            bool bypass_adjustment, double* out_pitch);
 
 /// Gets playback position.
 ///
@@ -513,7 +513,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetPosition(BarelyApi api,
 /// @param out_root_pitch Output root note pitch.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_GetRootNote(BarelyApi api,
-                                                      float* out_root_pitch);
+                                                      double* out_root_pitch);
 
 /// Gets scale.
 ///
@@ -522,7 +522,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetRootNote(BarelyApi api,
 /// @param out_num_scale_pitches Output number of scale note pitches.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_GetScale(
-    BarelyApi api, float** out_scale_pitches, int32_t* out_num_scale_pitches);
+    BarelyApi api, double** out_scale_pitches, int32_t* out_num_scale_pitches);
 
 /// Gets playback tempo.
 ///
@@ -613,7 +613,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_SetPosition(BarelyApi api,
 /// @param root_pitch Root note pitch.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetRootNote(BarelyApi api,
-                                                      float root_pitch);
+                                                      double root_pitch);
 
 /// Sets scale.
 ///
@@ -622,7 +622,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_SetRootNote(BarelyApi api,
 /// @param num_scale_pitches Number of scale note pitches.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetScale(BarelyApi api,
-                                                   float* scale_pitches,
+                                                   double* scale_pitches,
                                                    int32_t num_scale_pitches);
 
 /// Sets playback tempo.

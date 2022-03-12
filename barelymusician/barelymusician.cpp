@@ -178,7 +178,7 @@ BarelyStatus BarelyInstrument_GetParamDefinition(
 }
 
 BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api, BarelyId instrument_id,
-                                       float pitch, bool* out_is_note_on) {
+                                       double pitch, bool* out_is_note_on) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_is_note_on) return BarelyStatus_kInvalidArgument;
 
@@ -190,7 +190,7 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api, BarelyId instrument_id,
 }
 
 BarelyStatus BarelyInstrument_Process(BarelyApi api, BarelyId instrument_id,
-                                      double timestamp, float* output,
+                                      double timestamp, double* output,
                                       int32_t num_output_channels,
                                       int32_t num_output_frames) {
   if (!api) return BarelyStatus_kNotFound;
@@ -279,7 +279,7 @@ BarelyStatus BarelyInstrument_SetParameter(BarelyApi api,
 }
 
 BarelyStatus BarelyInstrument_StartNote(BarelyApi api, BarelyId instrument_id,
-                                        float pitch, float intensity) {
+                                        double pitch, double intensity) {
   if (!api) return BarelyStatus_kNotFound;
 
   if (auto* instrument = api->GetInstrument(instrument_id)) {
@@ -301,7 +301,7 @@ BarelyStatus BarelyInstrument_StopAllNotes(BarelyApi api,
 }
 
 BarelyStatus BarelyInstrument_StopNote(BarelyApi api, BarelyId instrument_id,
-                                       float pitch) {
+                                       double pitch) {
   if (!api) return BarelyStatus_kNotFound;
 
   if (auto* instrument = api->GetInstrument(instrument_id)) {
@@ -338,7 +338,7 @@ BarelyStatus BarelyMusician_GetNoteDuration(
 
 BarelyStatus BarelyMusician_GetNoteIntensity(
     BarelyApi api, BarelyNoteIntensityDefinition /*definition*/,
-    bool /*bypass_adjustment*/, float* out_intensity) {
+    bool /*bypass_adjustment*/, double* out_intensity) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_intensity) return BarelyStatus_kInvalidArgument;
 
@@ -348,7 +348,7 @@ BarelyStatus BarelyMusician_GetNoteIntensity(
 
 BarelyStatus BarelyMusician_GetNotePitch(
     BarelyApi api, BarelyNotePitchDefinition /*definition*/,
-    bool /*bypass_adjustment*/, float* out_pitch) {
+    bool /*bypass_adjustment*/, double* out_pitch) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_pitch) return BarelyStatus_kInvalidArgument;
 
@@ -364,7 +364,7 @@ BarelyStatus BarelyMusician_GetPosition(BarelyApi api, double* out_position) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_GetRootNote(BarelyApi api, float* out_root_pitch) {
+BarelyStatus BarelyMusician_GetRootNote(BarelyApi api, double* out_root_pitch) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_root_pitch) return BarelyStatus_kInvalidArgument;
 
@@ -372,7 +372,7 @@ BarelyStatus BarelyMusician_GetRootNote(BarelyApi api, float* out_root_pitch) {
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyMusician_GetScale(BarelyApi api, float** out_scale_pitches,
+BarelyStatus BarelyMusician_GetScale(BarelyApi api, double** out_scale_pitches,
                                      int32_t* out_num_scale_pitches) {
   if (!api) return BarelyStatus_kNotFound;
   if (!out_scale_pitches) return BarelyStatus_kInvalidArgument;
@@ -468,14 +468,14 @@ BarelyStatus BarelyMusician_SetPosition(BarelyApi api, double position) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_SetRootNote(BarelyApi api, float /*root_pitch*/) {
+BarelyStatus BarelyMusician_SetRootNote(BarelyApi api, double /*root_pitch*/) {
   if (!api) return BarelyStatus_kNotFound;
 
   // TODO(#85): Implement.
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyMusician_SetScale(BarelyApi api, float* /*scale_pitches*/,
+BarelyStatus BarelyMusician_SetScale(BarelyApi api, double* /*scale_pitches*/,
                                      int32_t /*num_scale_pitches*/) {
   if (!api) return BarelyStatus_kNotFound;
 
@@ -555,7 +555,7 @@ BarelyStatus BarelySequence_Destroy(BarelyApi api, BarelyId sequence_id) {
     const double timestamp = api->transport.GetTimestamp();
     const auto instrument_id = sequence_it->second.GetInstrument();
     if (auto* instrument = api->GetInstrument(instrument_id)) {
-      for (const float pitch : sequence_it->second.GetActiveNotes()) {
+      for (const double pitch : sequence_it->second.GetActiveNotes()) {
         instrument->ProcessEvent(barelyapi::StopNoteEvent{pitch}, timestamp);
       }
     }
@@ -769,7 +769,7 @@ BarelyStatus BarelySequence_SetInstrument(BarelyApi api, BarelyId sequence_id,
   if (auto* sequence = FindOrNull(api->sequences, sequence_id)) {
     if (sequence->GetInstrument() != instrument_id) {
       if (auto* instrument = api->GetInstrument(sequence->GetInstrument())) {
-        for (const float pitch : sequence->GetActiveNotes()) {
+        for (const double pitch : sequence->GetActiveNotes()) {
           instrument->ProcessEvent(barelyapi::StopNoteEvent{pitch},
                                    api->transport.GetTimestamp());
         }

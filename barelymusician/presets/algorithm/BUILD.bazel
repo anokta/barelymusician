@@ -1,0 +1,36 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "context_free_grammar",
+    hdrs = ["context_free_grammar.h"],
+    deps = [
+        ":random",
+    ],
+)
+
+cc_library(
+    name = "random",
+    srcs = ["random.cpp"],
+    hdrs = ["random.h"],
+)
+
+cc_test(
+    name = "context_free_grammar_test",
+    srcs = ["context_free_grammar_test.cpp"],
+    deps = [
+        ":context_free_grammar",
+        ":random",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "random_test",
+    srcs = ["random_test.cpp"],
+    deps = [
+        ":random",
+        "@googletest//:gtest_main",
+    ],
+)

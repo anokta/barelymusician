@@ -41,16 +41,16 @@ constexpr int kNumFrames = 1024;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
-constexpr float kGain = 0.2f;
+constexpr double kGain = 0.2;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr double kAttack = 0.0f;
-constexpr double kRelease = 0.1f;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.1;
 
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
 
 // Returns the MIDI key number for the given `pitch`.
-int MidiKeyNumberFromPitch(float pitch) {
+int MidiKeyNumberFromPitch(double pitch) {
   return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
@@ -72,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetParameter(SynthInstrumentParameter::kOscillatorType,
                          static_cast<double>(kOscillatorType));
   performer.SetNoteOnCallback(
-      [](float pitch, float intensity, double /*timestamp*/) {
+      [](double pitch, double intensity, double /*timestamp*/) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << ", "
                      << intensity << "}";
       });
@@ -84,8 +84,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
                          static_cast<double>(OscillatorType::kSquare));
 
-  const auto build_note = [](float pitch, double duration,
-                             float intensity = 0.25f) {
+  const auto build_note = [](double pitch, double duration,
+                             double intensity = 0.25) {
     return BarelyNoteDefinition{
         .duration_definition = {.duration = duration},
         .intensity_definition = {.intensity = intensity},
@@ -132,17 +132,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::vector<float> gains = {kGain, 0.5f * kGain};
-  std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&](float* output) {
-    std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
+  std::vector<double> gains = {kGain, 0.5 * kGain};
+  std::vector<double> temp_buffer(kNumChannels * kNumFrames);
+  const auto process_callback = [&](double* output) {
+    std::fill_n(output, kNumChannels * kNumFrames, 0.0);
     int i = 0;
     for (auto* instrument : {&performer, &metronome}) {
-      const float gain = gains[i++];
+      const double gain = gains[i++];
       instrument->Process(audio_clock.GetTimestamp(), temp_buffer.data(),
                           kNumChannels, kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     [&](float sample, float output_sample) {
+                     [&](double sample, double output_sample) {
                        return gain * sample + output_sample;
                      });
     }

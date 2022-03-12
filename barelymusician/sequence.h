@@ -155,8 +155,8 @@ class Sequence {
   void Stop() { active_notes_.clear(); }
 
   // TODO: Temp.
-  std::vector<float> GetActiveNotes() {
-    std::vector<float> pitches;
+  std::vector<double> GetActiveNotes() {
+    std::vector<double> pitches;
     pitches.reserve(active_notes_.size());
     for (const auto& [position, note] : active_notes_) {
       pitches.push_back(note.pitch);
@@ -177,7 +177,7 @@ class Sequence {
     double end_position;
 
     // Note pitch.
-    float pitch;
+    double pitch;
   };
 
   // List of active notes.

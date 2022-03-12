@@ -1,0 +1,26 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "modules",
+    srcs = [
+        "instruments.cpp",
+    ],
+    defines = ["BARELYMUSICIAN_EXPORTS"],
+    deps = [
+        ":include",
+        "//barelymusician/api",
+        # "//examples/instruments:drumkit_instrument",
+        # "//examples/instruments:synth_instrument",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "include",
+    hdrs = [
+        "instruments.h",
+    ],
+    deps = [
+        "//barelymusician/api:include",
+    ],
+)

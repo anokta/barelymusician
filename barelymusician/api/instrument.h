@@ -626,7 +626,7 @@ class Instrument {
   /// @param intensity Note intensity.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status StartNote(double pitch, double intensity = 1.0f,
+  Status StartNote(double pitch, double intensity = 1.0,
                    double timestamp = 0.0) {
     return static_cast<Status>(
         BarelyInstrument_StartNote(handle_, pitch, intensity, timestamp));

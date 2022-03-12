@@ -37,7 +37,7 @@ InputManager::InputManager() noexcept
     if (refcon) {
       // Access the event callback via `refcon` (to avoid capturing
       // `event_callback_`).
-      const auto& event_callback = *reinterpret_cast<EventCallback*>(refcon);
+      const auto& event_callback = *static_cast<EventCallback*>(refcon);
       event_callback(type, event);
     }
     return event;
@@ -45,7 +45,7 @@ InputManager::InputManager() noexcept
   const CGEventMask event_mask = (1 << kCGEventKeyDown) | (1 << kCGEventKeyUp);
   event_tap_ = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap,
                                 kCGEventTapOptionDefault, event_mask, callback,
-                                reinterpret_cast<void*>(&event_callback_));
+                                static_cast<void*>(&event_callback_));
   if (!event_tap_) {
     return;
   }

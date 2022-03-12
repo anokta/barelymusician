@@ -32,7 +32,7 @@ struct NoteDefinition : public BarelyNoteDefinition {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   /// @param bypass_adjustment True to bypass note adjustment.
-  NoteDefinition(double duration, float pitch, float intensity = 1.0f,
+  NoteDefinition(double duration, double pitch, double intensity = 1.0,
                  bool bypass_adjustment = false)
       : BarelyNoteDefinition{BarelyNoteDurationDefinition{duration},
                              bypass_adjustment,
@@ -156,11 +156,11 @@ class StatusOr {
 
 /// Parameter definition.
 struct ParameterDefinition : public BarelyParameterDefinition {
-  /// Constructs new `ParameterDefinition` for a float value.
+  /// Constructs new `ParameterDefinition` for a double value.
   ///
-  /// @param default_value Default float value.
-  /// @param min_value Minimum float value.
-  /// @param max_value Maximum float value.
+  /// @param default_value Default double value.
+  /// @param min_value Minimum double value.
+  /// @param max_value Maximum double value.
   explicit ParameterDefinition(
       double default_value,
       double min_value = std::numeric_limits<double>::lowest(),
@@ -259,7 +259,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @param timestamp Note timestamp in seconds.
-  using NoteOffCallback = std::function<void(float pitch, double timestamp)>;
+  using NoteOffCallback = std::function<void(double pitch, double timestamp)>;
 
   /// Note on callback signature.
   ///
@@ -267,7 +267,7 @@ class Instrument {
   /// @param intensity Note intensity.
   /// @param timestamp Note timestamp in seconds.
   using NoteOnCallback =
-      std::function<void(float pitch, float intensity, double timestamp)>;
+      std::function<void(double pitch, double intensity, double timestamp)>;
 
   /// Destroys `Instrument`.
   ~Instrument() {
@@ -341,7 +341,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(float pitch) const {
+  [[nodiscard]] bool IsNoteOn(double pitch) const {
     bool is_note_on = false;
     if (id_ != BarelyId_kInvalid) {
       const auto status =
@@ -358,7 +358,7 @@ class Instrument {
   /// @param num_output_channels Number of output channels.
   /// @param num_output_frames Number of output frames.
   /// @return Status.
-  Status Process(double timestamp, float* output, int num_output_channels,
+  Status Process(double timestamp, double* output, int num_output_channels,
                  int num_output_frames) {
     return static_cast<Status>(BarelyInstrument_Process(
         capi_, id_, timestamp, output, num_output_channels, num_output_frames));
@@ -390,11 +390,11 @@ class Instrument {
         capi_, id_,
         BarelyDataDefinition{
             [](void* other_data, void** out_data) {
-              *out_data = reinterpret_cast<void*>(new DataType(
-                  std::move(*reinterpret_cast<DataType*>(other_data))));
+              *out_data = static_cast<void*>(
+                  new DataType(std::move(*static_cast<DataType*>(other_data))));
             },
-            [](void* data) { delete reinterpret_cast<DataType*>(data); },
-            reinterpret_cast<void*>(&data)}));
+            [](void* data) { delete static_cast<DataType*>(data); },
+            static_cast<void*>(&data)}));
   }
 
   /// Sets note off callback.
@@ -406,7 +406,7 @@ class Instrument {
       note_off_callback_ = std::move(note_off_callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
           capi_, id_,
-          [](float pitch, double timestamp, void* user_data) {
+          [](double pitch, double timestamp, void* user_data) {
             (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
           },
           static_cast<void*>(&note_off_callback_)));
@@ -424,7 +424,8 @@ class Instrument {
       note_on_callback_ = std::move(note_on_callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
           capi_, id_,
-          [](float pitch, float intensity, double timestamp, void* user_data) {
+          [](double pitch, double intensity, double timestamp,
+             void* user_data) {
             (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity,
                                                        timestamp);
           },
@@ -449,7 +450,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   /// @return Status.
-  Status StartNote(float pitch, float intensity = 1.0f) {
+  Status StartNote(double pitch, double intensity = 1.0) {
     return static_cast<Status>(
         BarelyInstrument_StartNote(capi_, id_, pitch, intensity));
   }
@@ -465,7 +466,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return Status.
-  Status StopNote(float pitch) {
+  Status StopNote(double pitch) {
     return static_cast<Status>(BarelyInstrument_StopNote(capi_, id_, pitch));
   }
 
@@ -944,8 +945,8 @@ class Musician {
   /// Returns root note.
   ///
   /// @return Root note pitch.
-  [[nodiscard]] float GetRootNote() const {
-    float root_pitch = 0.0f;
+  [[nodiscard]] double GetRootNote() const {
+    double root_pitch = 0.0;
     if (capi_) {
       const auto status = BarelyMusician_GetRootNote(capi_, &root_pitch);
       assert(status == BarelyStatus_kOk);
@@ -956,15 +957,16 @@ class Musician {
   /// Returns scale.
   ///
   /// @return List of scale note pitches.
-  [[nodiscard]] std::vector<float> GetScale() const {
-    float* scale_pitches = nullptr;
+  [[nodiscard]] std::vector<double> GetScale() const {
+    double* scale_pitches = nullptr;
     int num_scale_pitches = 0;
     if (capi_) {
       const auto status =
           BarelyMusician_GetScale(capi_, &scale_pitches, &num_scale_pitches);
       assert(status == BarelyStatus_kOk);
     }
-    return std::vector<float>{scale_pitches, scale_pitches + num_scale_pitches};
+    return std::vector<double>{scale_pitches,
+                               scale_pitches + num_scale_pitches};
   }
 
   /// Returns playback tempo.
@@ -1027,9 +1029,9 @@ class Musician {
       return static_cast<Status>(BarelyMusician_SetBeatCallback(
           capi_,
           [](double position, double timestamp, void* user_data) {
-            (*reinterpret_cast<BeatCallback*>(user_data))(position, timestamp);
+            (*static_cast<BeatCallback*>(user_data))(position, timestamp);
           },
-          reinterpret_cast<void*>(&beat_callback_)));
+          static_cast<void*>(&beat_callback_)));
     }
     return static_cast<Status>(BarelyMusician_SetBeatCallback(
         capi_, /*beat_callback=*/nullptr, /*user_data=*/nullptr));
@@ -1047,7 +1049,7 @@ class Musician {
   ///
   /// @param root_pitch Root note pitch.
   /// @return Status.
-  Status SetRootNote(float root_pitch) {
+  Status SetRootNote(double root_pitch) {
     return static_cast<Status>(BarelyMusician_SetRootNote(capi_, root_pitch));
   }
 
@@ -1055,7 +1057,7 @@ class Musician {
   ///
   /// @param scale_pitches List of scale note pitches.
   /// @return Status.
-  Status SetScale(std::vector<float> scale_pitches) {
+  Status SetScale(std::vector<double> scale_pitches) {
     return static_cast<Status>(BarelyMusician_SetScale(
         capi_, scale_pitches.data(), static_cast<int>(scale_pitches.size())));
   }

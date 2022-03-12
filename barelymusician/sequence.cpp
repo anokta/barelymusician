@@ -203,8 +203,8 @@ void Sequence::ProcessInternal(double begin_position, double end_position,
     const double position = it->first.first + position_offset;
     const auto& note = it->second;
     // TODO: Include note adjustments.
-    const float pitch = note.pitch_definition.absolute_pitch;
-    const float intensity = note.intensity_definition.intensity;
+    const double pitch = note.pitch_definition.absolute_pitch;
+    const double intensity = note.intensity_definition.intensity;
     const double duration = note.duration_definition.duration;
     const double note_end_position =
         std::min(position + std::max(duration, 0.0), end_position_);

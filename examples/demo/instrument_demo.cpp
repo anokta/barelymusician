@@ -29,28 +29,28 @@ constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 256;
 
 // Instrument settings.
-constexpr float kGain = 0.125f;
+constexpr double kGain = 0.125;
 constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kEnvelopeAttack = 0.05;
 constexpr double kEnvelopeRelease = 0.125;
 
 // Note settings.
-constexpr float kRootPitch = barelyapi::kPitchC3;
-constexpr float kNoteIntensity = 1.0f;
+constexpr double kRootPitch = barelyapi::kPitchC3;
+constexpr double kNoteIntensity = 1.0;
 constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr float kMaxOffsetOctaves = 3.0f;
+constexpr double kMaxOffsetOctaves = 3.0;
 
 // Returns the pitch for the given `key`.
-std::optional<float> PitchFromKey(const InputManager::Key& key) {
+std::optional<double> PitchFromKey(const InputManager::Key& key) {
   const auto* it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
                              std::toupper(key));
   if (it == std::cend(kOctaveKeys)) {
     return std::nullopt;
   }
-  const float distance =
-      static_cast<float>(std::distance(std::cbegin(kOctaveKeys), it));
+  const double distance =
+      static_cast<double>(std::distance(std::cbegin(kOctaveKeys), it));
   return kRootPitch + distance / barelyapi::kNumSemitones;
 }
 
@@ -74,15 +74,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
                           static_cast<double>(kNumVoices));
 
   instrument.SetNoteOnCallback(
-      [](float pitch, float intensity, double /*timestamp*/) {
+      [](double pitch, double intensity, double /*timestamp*/) {
         ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
       });
-  instrument.SetNoteOffCallback([](float pitch, double /*timestamp*/) {
+  instrument.SetNoteOffCallback([](double pitch, double /*timestamp*/) {
     ConsoleLog() << "NoteOff(" << pitch << ") ";
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](float* output) {
+  audio_output.SetProcessCallback([&](double* output) {
     instrument.Process(0.0, output, kNumChannels, kNumFrames);
     for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
       output[i] *= kGain;
@@ -90,7 +90,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
-  float offset_octaves = 0.0f;
+  double offset_octaves = 0.0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {

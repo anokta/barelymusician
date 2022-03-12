@@ -26,7 +26,7 @@ void AudioOutput::Start(int sample_rate, int num_channels,
   output_parameters.device = Pa_GetDefaultOutputDevice();
   assert(output_parameters.device != paNoDevice);
   output_parameters.channelCount = num_channels;
-  output_parameters.sampleFormat = paFloat32;
+  output_parameters.sampleFormat = paDouble32;
   output_parameters.suggestedLatency =
       Pa_GetDeviceInfo(output_parameters.device)->defaultLowOutputLatency;
   output_parameters.hostApiSpecificStreamInfo = nullptr;
@@ -40,16 +40,15 @@ void AudioOutput::Start(int sample_rate, int num_channels,
           // Access the audio process callback via `user_data` (to avoid
           // capturing `process_callback_`).
           const auto& process_callback =
-              *reinterpret_cast<ProcessCallback*>(user_data);
+              *static_cast<ProcessCallback*>(user_data);
           if (process_callback) {
-            process_callback(reinterpret_cast<float*>(output_buffer));
+            process_callback(static_cast<double*>(output_buffer));
           }
         }
         return static_cast<int>(paContinue);
       };
   Pa_OpenStream(&stream_, nullptr, &output_parameters, sample_rate, num_frames,
-                paClipOff, callback,
-                reinterpret_cast<void*>(&process_callback_));
+                paClipOff, callback, static_cast<void*>(&process_callback_));
   Pa_StartStream(stream_);
 }
 

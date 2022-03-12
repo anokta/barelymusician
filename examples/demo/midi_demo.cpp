@@ -40,13 +40,13 @@ constexpr double kLookahead = 0.1;
 
 // Instrument settings.
 constexpr int kNumInstrumentVoices = 16;
-constexpr float kInstrumentGain =
-    1.0f / static_cast<float>(kNumInstrumentVoices);
-constexpr double kInstrumentEnvelopeAttack = 0.0f;
-constexpr double kInstrumentEnvelopeRelease = 0.2f;
+constexpr double kInstrumentGain =
+    1.0 / static_cast<double>(kNumInstrumentVoices);
+constexpr double kInstrumentEnvelopeAttack = 0.0;
+constexpr double kInstrumentEnvelopeRelease = 0.2;
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 
-constexpr float kMaxVelocity = 127.0f;
+constexpr double kMaxVelocity = 127.0;
 
 // Midi file name.
 constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
@@ -54,12 +54,12 @@ constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
 constexpr double kTempo = 132.0;
 
 // Returns the pitch for the given `midi_key_number`.
-float PitchFromMidiKeyNumber(int midi_key_number) {
-  return static_cast<float>(midi_key_number - 69) / barelyapi::kNumSemitones;
+double PitchFromMidiKeyNumber(int midi_key_number) {
+  return static_cast<double>(midi_key_number - 69) / barelyapi::kNumSemitones;
 }
 
 // Returns the MIDI key number for the given `pitch`.
-int MidiKeyNumberFromPitch(float pitch) {
+int MidiKeyNumberFromPitch(double pitch) {
   return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
@@ -76,7 +76,7 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       note.pitch_definition.absolute_pitch =
           PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       note.intensity_definition.intensity =
-          static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
+          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
       note.duration_definition.duration =
           get_position(midi_event.getTickDuration());
       sequence->AddNote(get_position(midi_event.tick), note);
@@ -122,13 +122,13 @@ int main(int /*argc*/, char* argv[]) {
     Instrument instrument = musician.CreateInstrument(
         SynthInstrument::GetDefinition(), kSampleRate);
     const auto track_index = tracks.size();
-    instrument.SetNoteOnCallback([track_index](float pitch, float intensity,
+    instrument.SetNoteOnCallback([track_index](double pitch, double intensity,
                                                double /*timestamp*/) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn("
                    << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
     });
     instrument.SetNoteOffCallback(
-        [track_index](float pitch, double /*timestamp*/) {
+        [track_index](double pitch, double /*timestamp*/) {
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                        << MidiKeyNumberFromPitch(pitch) << ") ";
         });
@@ -146,14 +146,14 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&](float* output) {
-    std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
+  std::vector<double> temp_buffer(kNumChannels * kNumFrames);
+  const auto process_callback = [&](double* output) {
+    std::fill_n(output, kNumChannels * kNumFrames, 0.0);
     for (auto& [instrument, sequence] : tracks) {
       instrument.Process(clock.GetTimestamp(), temp_buffer.data(), kNumChannels,
                          kNumFrames);
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     [](float sample, float output_sample) {
+                     [](double sample, double output_sample) {
                        return kInstrumentGain * sample + output_sample;
                      });
     }

@@ -47,35 +47,8 @@ cc_library(
 )
 
 cc_library(
-    name = "gain_processor",
-    srcs = ["gain_processor.cpp"],
-    hdrs = ["gain_processor.h"],
-)
-
-cc_library(
-    name = "instrument",
-    srcs = ["instrument.cpp"],
-    hdrs = ["instrument.h"],
-    deps = [
-        ":barelymusician_headeronly",
-        ":event",
-        ":event_queue",
-        ":parameter",
-    ],
-)
-
-cc_library(
     name = "mutable_data",
     hdrs = ["mutable_data.h"],
-)
-
-cc_library(
-    name = "parameter",
-    srcs = ["parameter.cpp"],
-    hdrs = ["parameter.h"],
-    deps = [
-        ":barelymusician_headeronly",
-    ],
 )
 
 cc_library(

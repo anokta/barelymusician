@@ -25,7 +25,7 @@ namespace Barely {
     [StructLayout(LayoutKind.Sequential)]
     public struct NoteIntensityDefinition {
       /// Value.
-      public float intensity;
+      public double intensity;
     }
 
     /// Note pitch types.
@@ -47,13 +47,13 @@ namespace Barely {
 
       /// Absolute pitch.
       [FieldOffset(4)]
-      public float absolutePitch;
+      public double absolutePitch;
       /// Relative pitch.
       [FieldOffset(4)]
-      public float relativePitch;
+      public double relativePitch;
       /// Scale index.
       [FieldOffset(4)]
-      public float scaleIndex;
+      public double scaleIndex;
     }
 
     /// Note definition.
@@ -180,7 +180,7 @@ namespace Barely {
     /// @param instrument Instrument to process.
     /// @param output Output buffer.
     /// @param numChannels Number of channels.
-    public static void ProcessInstrument(Instrument instrument, float[] output, int numChannels) {
+    public static void ProcessInstrument(Instrument instrument, double[] output, int numChannels) {
       BarelyInstrument_Process(Api, instrument.Id, AudioSettings.dspTime, output, numChannels,
                                output.Length / numChannels);
     }
@@ -248,7 +248,7 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     /// @return True if success, false otherwise.
-    public static bool StartInstrumentNote(Instrument instrument, float pitch, float intensity) {
+    public static bool StartInstrumentNote(Instrument instrument, double pitch, double intensity) {
       return IsOk(BarelyInstrument_StartNote(Api, instrument.Id, pitch, intensity));
     }
 
@@ -272,7 +272,7 @@ namespace Barely {
     /// @param instrument Instrument to set.
     /// @param pitch Note pitch.
     /// @return True if success, false otherwise.
-    public static bool StopInstrumentNote(Instrument instrument, float pitch) {
+    public static bool StopInstrumentNote(Instrument instrument, double pitch) {
       return IsOk(BarelyInstrument_StopNote(Api, instrument.Id, pitch));
     }
 
@@ -300,7 +300,7 @@ namespace Barely {
         foreach (var sequenceNote in sequence.Notes) {
           definition.durationDefinition.duration = sequenceNote.note.Duration;
           definition.pitchDefinition.absolutePitch =
-              (float)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0f;
+              (double)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0;
           definition.intensityDefinition.intensity = sequenceNote.note.Intensity;
           BarelySequence_AddNote(Api, sequence.Id, sequenceNote.position, definition, _int64Ptr);
         }
@@ -449,7 +449,7 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_Process")]
     private static extern Status BarelyInstrument_Process(IntPtr api, Int64 instrumentId,
                                                           double timestamp,
-                                                          [In, Out] float[] output,
+                                                          [In, Out] double[] output,
                                                           Int32 numOutputChannels,
                                                           Int32 numOutputFrames);
 
@@ -477,14 +477,14 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_StartNote")]
     private static extern Status BarelyInstrument_StartNote(IntPtr api, Int64 instrumentId,
-                                                            float pitch, float intensity);
+                                                            double pitch, double intensity);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_StopAllNotes")]
     private static extern Status BarelyInstrument_StopAllNotes(IntPtr api, Int64 instrumentId);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_StopNote")]
     private static extern Status BarelyInstrument_StopNote(IntPtr api, Int64 instrumentId,
-                                                           float pitch);
+                                                           double pitch);
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
     private static extern Status BarelyMusician_Create(IntPtr outApi);

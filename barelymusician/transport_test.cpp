@@ -25,7 +25,7 @@ TEST(TransportTest, SetTempo) {
 
 // Tests that the transport sets its current position as expected.
 TEST(TransportTest, SetPosition) {
-  const double kPosition = 2.75f;
+  const double kPosition = 2.75;
 
   Transport transport;
   EXPECT_EQ(transport.GetPosition(), 0.0);

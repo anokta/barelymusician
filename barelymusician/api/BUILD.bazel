@@ -19,6 +19,7 @@ cc_library(
     name = "include",
     hdrs = [
         "instrument.h",
+        "sequence.h",
         "status.h",
         "visibility.h",
     ],

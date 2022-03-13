@@ -18,9 +18,11 @@ cc_library(
 cc_library(
     name = "include",
     hdrs = [
+        "conductor.h",
         "instrument.h",
         "sequence.h",
         "status.h",
+        "transport.h",
         "visibility.h",
     ],
 )

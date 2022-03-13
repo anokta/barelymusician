@@ -63,8 +63,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Instrument instrument = CreateInstrument(InstrumentType::kSynth, kFrameRate);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
-  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
-  instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);
+  instrument.SetParameter(SynthParameter::kOscillatorType,
+                          static_cast<double>(kOscillatorType));
+  instrument.SetParameter(SynthParameter::kNumVoices,
+                          static_cast<double>(kNumVoices));
 
   instrument.SetNoteOnCallback(
       [](double pitch, double intensity, double /*timestamp*/) {

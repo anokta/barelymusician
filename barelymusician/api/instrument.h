@@ -191,11 +191,11 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
     BarelyInstrumentHandle handle, int32_t index,
     BarelyParameterDefinition* out_definition);
 
-/// Gets whether instrument note is playing or not.
+/// Gets whether instrument note is active or not.
 ///
 /// @param handle Instrument handle.
 /// @param pitch Note pitch.
-/// @param out_is_note_on Output true if playing, false otherwise.
+/// @param out_is_note_on Output true if active, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(
     BarelyInstrumentHandle handle, double pitch, bool* out_is_note_on);
@@ -321,12 +321,25 @@ struct DataDefinition : public BarelyDataDefinition {
   /// Destroy callback signature.
   using DestroyCallback = BarelyDataDefinition_DestroyCallback;
 
+  /// Constructs new `DataDefinition` of type.
+  ///
+  /// @param typed_data Typed data.
+  template <typename DataType>
+  explicit DataDefinition(DataType typed_data)
+      : BarelyDataDefinition{
+            [](void* other_data, void** out_data) {
+              *out_data = static_cast<void*>(
+                  new DataType(std::move(*static_cast<DataType*>(other_data))));
+            },
+            [](void* data) { delete static_cast<DataType*>(data); },
+            static_cast<void*>(&typed_data)} {}
+
   /// Constructs new `DataDefinition` from internal type.
   ///
   /// @param definition Internal data definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
   DataDefinition(BarelyDataDefinition definition)
-      : BarelyDataDefinition(definition) {}
+      : BarelyDataDefinition{definition} {}
 };
 
 /// Parameter definition.
@@ -365,7 +378,7 @@ struct ParameterDefinition : public BarelyParameterDefinition {
   /// @param definition Internal parameter definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
   ParameterDefinition(BarelyParameterDefinition definition)
-      : BarelyParameterDefinition(definition) {}
+      : BarelyParameterDefinition{definition} {}
 };
 
 /// Instrument definition.
@@ -424,7 +437,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// @param definition Internal instrument definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
   InstrumentDefinition(BarelyInstrumentDefinition definition)
-      : BarelyInstrumentDefinition(definition) {}
+      : BarelyInstrumentDefinition{definition} {}
 };
 
 /// Instrument.
@@ -564,21 +577,13 @@ class Instrument {
 
   /// Sets data at timestamp.
   ///
-  /// @param typed_data Typed data.
+  /// @param data Data.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
   template <typename DataType>
-  Status SetData(DataType typed_data, double timestamp = 0.0) {
+  Status SetData(DataType data, double timestamp = 0.0) {
     return static_cast<Status>(BarelyInstrument_SetData(
-        handle_,
-        BarelyDataDefinition{
-            [](void* other_data, void** out_data) {
-              *out_data = static_cast<void*>(
-                  new DataType(std::move(*static_cast<DataType*>(other_data))));
-            },
-            [](void* data) { delete static_cast<DataType*>(data); },
-            static_cast<void*>(&typed_data)},
-        timestamp));
+        handle_, DataDefinition(std::move(data)), timestamp));
   }
 
   /// Sets note off callback.
@@ -626,11 +631,10 @@ class Instrument {
   /// @param slope Parameter slope in value change per second.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  template <typename ValueType>
-  Status SetParameter(int index, ValueType value, double slope = 0.0,
+  Status SetParameter(int index, double value, double slope = 0.0,
                       double timestamp = 0.0) {
-    return static_cast<Status>(BarelyInstrument_SetParameter(
-        handle_, index, static_cast<double>(value), slope, timestamp));
+    return static_cast<Status>(
+        BarelyInstrument_SetParameter(handle_, index, value, slope, timestamp));
   }
 
   /// Starts note at timestamp.

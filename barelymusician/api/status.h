@@ -96,16 +96,16 @@ class StatusOr {
   /// Constructs new `StatusOr` with an error status.
   ///
   /// @param error_status Error status.
-  StatusOr(Status error_status)  // NOLINT(google-explicit-constructor)
-      : value_or_(error_status) {
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  StatusOr(Status error_status) : value_or_(error_status) {
     assert(error_status != Status::kOk);
   }
 
   /// Constructs new `StatusOr` with a value.
   ///
   /// @param value Value.
-  StatusOr(ValueType value)  // NOLINT(google-explicit-constructor)
-      : value_or_(std::move(value)) {}
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  StatusOr(ValueType value) : value_or_(std::move(value)) {}
 
   /// Returns contained error status.
   ///

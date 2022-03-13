@@ -3,37 +3,29 @@
 
 #include <variant>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/instrument/data.h"
 
 namespace barelyapi {
 
 /// Set data event.
 struct SetDataEvent {
-  explicit SetDataEvent(BarelyDataDefinition definition) noexcept
-      : definition(definition) {}
-  SetDataEvent() = default;
-  ~SetDataEvent() {
-    if (definition.data && definition.destroy_callback) {
-      definition.destroy_callback(definition.data);
-    }
-  }
-  SetDataEvent(const SetDataEvent& other) = delete;
-  SetDataEvent& operator=(const SetDataEvent& other) = delete;
-  SetDataEvent(SetDataEvent&& other) noexcept
-      : definition(std::exchange(other.definition, {})) {
-    other.definition.data = nullptr;
-  }
-  SetDataEvent& operator=(SetDataEvent&& other) noexcept {
-    if (definition.data && definition.destroy_callback) {
-      definition.destroy_callback(definition.data);
-    }
-    definition = std::exchange(other.definition, {});
-    other.definition.data = nullptr;
-    return *this;
-  }
+  /// Data.
+  Data data;
+};
 
-  /// Data definition.
-  BarelyDataDefinition definition;
+/// Set note off event.
+struct SetNoteOffEvent {
+  /// Note pitch.
+  double pitch;
+};
+
+/// Set note on event.
+struct SetNoteOnEvent {
+  /// Note pitch.
+  double pitch;
+
+  /// Note intensity.
+  double intensity;
 };
 
 /// Set parameter event.
@@ -48,24 +40,17 @@ struct SetParameterEvent {
   double slope;
 };
 
-/// Start note event.
-struct StartNoteEvent {
-  /// Note pitch.
-  double pitch;
+/// Instrument event alias.
+using Event = std::variant<SetDataEvent, SetNoteOffEvent, SetNoteOnEvent,
+                           SetParameterEvent>;
 
-  /// Note intensity.
-  double intensity;
+// Instrument event visitor.
+template <class... EventTypes>
+struct EventVisitor : EventTypes... {
+  using EventTypes::operator()...;
 };
-
-/// Stop note event.
-struct StopNoteEvent {
-  /// Note pitch.
-  double pitch;
-};
-
-/// Instrument event type.
-using Event = std::variant<SetDataEvent, SetParameterEvent, StartNoteEvent,
-                           StopNoteEvent>;
+template <class... EventTypes>
+EventVisitor(EventTypes...) -> EventVisitor<EventTypes...>;
 
 }  // namespace barelyapi
 

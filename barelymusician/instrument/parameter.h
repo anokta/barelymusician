@@ -5,7 +5,7 @@
 
 namespace barelyapi {
 
-/// Class that wraps a parameter.
+/// Class that wraps instrument parameter.
 class Parameter {
  public:
   /// Constructs new `Parameter`.

@@ -11,14 +11,6 @@ namespace barelyapi {
 
 namespace {
 
-// Event visitor template.
-template <class... EventTypes>
-struct EventVisitor : EventTypes... {
-  using EventTypes::operator()...;
-};
-template <class... EventTypes>
-EventVisitor(EventTypes...) -> EventVisitor<EventTypes...>;
-
 // Returns corresponding frames for given `seconds`.
 int FramesFromSeconds(int frame_rate, double seconds) noexcept {
   return frame_rate > 0
@@ -35,7 +27,7 @@ double SecondsFromFrames(int frame_rate, int frames) noexcept {
 
 }  // namespace
 
-Instrument::Instrument(const BarelyInstrumentDefinition& definition,
+Instrument::Instrument(const barely::InstrumentDefinition& definition,
                        int frame_rate) noexcept
     : processor_{definition.destroy_callback,
                  definition.process_callback,
@@ -105,7 +97,20 @@ void Instrument::Process(double* output, int num_output_channels,
             [this](const SetDataEvent& set_data_event) noexcept {
               if (processor_.set_data_callback) {
                 processor_.set_data_callback(&processor_.state,
-                                             set_data_event.definition.data);
+                                             set_data_event.data.GetMutable());
+              }
+            },
+            [this](const SetNoteOffEvent& set_note_off_event) noexcept {
+              if (processor_.set_note_off_callback) {
+                processor_.set_note_off_callback(&processor_.state,
+                                                 set_note_off_event.pitch);
+              }
+            },
+            [this](const SetNoteOnEvent& set_note_on_event) noexcept {
+              if (processor_.set_note_on_callback) {
+                processor_.set_note_on_callback(&processor_.state,
+                                                set_note_on_event.pitch,
+                                                set_note_on_event.intensity);
               }
             },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
@@ -115,19 +120,6 @@ void Instrument::Process(double* output, int num_output_channels,
                     set_parameter_event.value,
                     set_parameter_event.slope /
                         static_cast<double>(processor_.frame_rate));
-              }
-            },
-            [this](const StartNoteEvent& start_note_event) noexcept {
-              if (processor_.set_note_on_callback) {
-                processor_.set_note_on_callback(&processor_.state,
-                                                start_note_event.pitch,
-                                                start_note_event.intensity);
-              }
-            },
-            [this](const StopNoteEvent& stop_note_event) noexcept {
-              if (processor_.set_note_off_callback) {
-                processor_.set_note_off_callback(&processor_.state,
-                                                 stop_note_event.pitch);
               }
             }},
         event->second);
@@ -163,14 +155,14 @@ bool Instrument::ResetParameter(int index, double timestamp) noexcept {
   return false;
 }
 
-void Instrument::SetData(BarelyDataDefinition definition,
+void Instrument::SetData(barely::DataDefinition definition,
                          double timestamp) noexcept {
   void* new_data = nullptr;
   if (definition.move_callback) {
     definition.move_callback(definition.data, &new_data);
   }
   definition.data = new_data;
-  event_queue_.Add(timestamp, SetDataEvent{definition});
+  event_queue_.Add(timestamp, SetDataEvent{Data{definition}});
 }
 
 void Instrument::SetNoteOffCallback(
@@ -203,7 +195,7 @@ void Instrument::StartNote(double pitch, double intensity,
     if (controller_.note_on_callback) {
       controller_.note_on_callback(pitch, intensity, timestamp);
     }
-    event_queue_.Add(timestamp, StartNoteEvent{pitch, intensity});
+    event_queue_.Add(timestamp, SetNoteOnEvent{pitch, intensity});
   }
 }
 
@@ -212,7 +204,7 @@ void Instrument::StopAllNotes(double timestamp) noexcept {
     if (controller_.note_off_callback) {
       controller_.note_off_callback(pitch, timestamp);
     }
-    event_queue_.Add(timestamp, StopNoteEvent{pitch});
+    event_queue_.Add(timestamp, SetNoteOffEvent{pitch});
   }
 }
 
@@ -221,7 +213,7 @@ void Instrument::StopNote(double pitch, double timestamp) noexcept {
     if (controller_.note_off_callback) {
       controller_.note_off_callback(pitch, timestamp);
     }
-    event_queue_.Add(timestamp, StopNoteEvent{pitch});
+    event_queue_.Add(timestamp, SetNoteOffEvent{pitch});
   }
 }
 

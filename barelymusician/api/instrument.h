@@ -313,6 +313,22 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
 
 namespace barely {
 
+/// Data definition.
+struct DataDefinition : public BarelyDataDefinition {
+  /// Move callback signature.
+  using MoveCallback = BarelyDataDefinition_MoveCallback;
+
+  /// Destroy callback signature.
+  using DestroyCallback = BarelyDataDefinition_DestroyCallback;
+
+  /// Constructs new `DataDefinition` from internal type.
+  ///
+  /// @param definition Internal data definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  DataDefinition(BarelyDataDefinition definition)
+      : BarelyDataDefinition(definition) {}
+};
+
 /// Parameter definition.
 struct ParameterDefinition : public BarelyParameterDefinition {
   /// Constructs new `ParameterDefinition`.
@@ -354,25 +370,25 @@ struct ParameterDefinition : public BarelyParameterDefinition {
 
 /// Instrument definition.
 struct InstrumentDefinition : public BarelyInstrumentDefinition {
-  /// Create function signature.
+  /// Create callback signature.
   using CreateCallback = BarelyInstrumentDefinition_CreateCallback;
 
-  /// Destroy function signature.
+  /// Destroy callback signature.
   using DestroyCallback = BarelyInstrumentDefinition_DestroyCallback;
 
-  /// Process function signature.
+  /// Process callback signature.
   using ProcessCallback = BarelyInstrumentDefinition_ProcessCallback;
 
-  /// Set data function signature.
+  /// Set data callback signature.
   using SetDataCallback = BarelyInstrumentDefinition_SetDataCallback;
 
-  /// Set note off function signature
+  /// Set note off callback signature
   using SetNoteOffCallback = BarelyInstrumentDefinition_SetNoteOffCallback;
 
-  /// Set note on function signature.
+  /// Set note on callback signature.
   using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
 
-  /// Set parameter function signature.
+  /// Set parameter callback signature.
   using SetParameterCallback = BarelyInstrumentDefinition_SetParameterCallback;
 
   /// Constructs new `InstrumentDefinition`.

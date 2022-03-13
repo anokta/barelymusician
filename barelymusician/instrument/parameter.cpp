@@ -2,17 +2,20 @@
 
 #include <algorithm>
 #include <cassert>
-#include <utility>
+
+#include "barelymusician/api/instrument.h"
 
 namespace barelyapi {
 
-Parameter::Parameter(barely::ParameterDefinition definition) noexcept
+using ::barely::ParameterDefinition;
+
+Parameter::Parameter(ParameterDefinition definition) noexcept
     : definition_(definition), value_(definition_.default_value) {
   assert(value_ >= definition.min_value);
   assert(value_ <= definition.max_value);
 }
 
-const barely::ParameterDefinition& Parameter::GetDefinition() const noexcept {
+const ParameterDefinition& Parameter::GetDefinition() const noexcept {
   return definition_;
 }
 

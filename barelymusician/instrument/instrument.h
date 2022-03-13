@@ -19,7 +19,7 @@ class Instrument {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hz.
-  Instrument(const BarelyInstrumentDefinition& definition,
+  Instrument(const barely::InstrumentDefinition& definition,
              int frame_rate) noexcept;
 
   /// Destroys `Instrument`.
@@ -68,7 +68,7 @@ class Instrument {
   ///
   /// @param definition Data definition.
   /// @param timestamp Timestamp in seconds.
-  void SetData(BarelyDataDefinition definition, double timestamp) noexcept;
+  void SetData(barely::DataDefinition definition, double timestamp) noexcept;
 
   /// Sets note off callback.
   ///

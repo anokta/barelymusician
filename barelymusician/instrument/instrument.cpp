@@ -163,7 +163,7 @@ bool Instrument::ResetParameter(int index, double timestamp) noexcept {
   return false;
 }
 
-void Instrument::SetData(barely::DataDefinition definition,
+void Instrument::SetData(BarelyDataDefinition definition,
                          double timestamp) noexcept {
   void* new_data = nullptr;
   if (definition.move_callback) {

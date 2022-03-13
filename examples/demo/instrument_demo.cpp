@@ -24,7 +24,7 @@ using ::barely::presets::OscillatorType;
 using ::barely::presets::SynthParameter;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 256;
 
@@ -60,13 +60,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Instrument instrument = CreateInstrument(InstrumentType::kSynth, kSampleRate);
+  Instrument instrument = CreateInstrument(InstrumentType::kSynth, kFrameRate);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
-  instrument.SetParameter(SynthParameter::kOscillatorType,
-                          static_cast<double>(kOscillatorType));
-  instrument.SetParameter(SynthParameter::kNumVoices,
-                          static_cast<double>(kNumVoices));
+  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
+  instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   instrument.SetNoteOnCallback(
       [](double pitch, double intensity, double /*timestamp*/) {
@@ -127,7 +125,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
 
   while (!quit) {
     input_manager.Update();

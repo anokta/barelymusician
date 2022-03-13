@@ -9,7 +9,7 @@ namespace barelyapi {
 
 /// Set data event.
 struct SetDataEvent {
-  explicit SetDataEvent(barely::DataDefinition definition) noexcept
+  explicit SetDataEvent(BarelyDataDefinition definition) noexcept
       : definition(definition) {}
   SetDataEvent() = default;
   ~SetDataEvent() {
@@ -33,7 +33,7 @@ struct SetDataEvent {
   }
 
   /// Data definition.
-  barely::DataDefinition definition;
+  BarelyDataDefinition definition;
 };
 
 /// Set parameter event.

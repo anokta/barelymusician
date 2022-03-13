@@ -313,9 +313,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
 
 namespace barely {
 
-/// Data definition.
-using DataDefinition = BarelyDataDefinition;
-
 /// Parameter definition.
 struct ParameterDefinition : public BarelyParameterDefinition {
   /// Constructs new `ParameterDefinition`.
@@ -558,12 +555,13 @@ class Instrument {
   Status SetData(DataType typed_data, double timestamp = 0.0) {
     return static_cast<Status>(BarelyInstrument_SetData(
         handle_,
-        DataDefinition{[](void* other_data, void** out_data) {
-                         *out_data = static_cast<void*>(new DataType(
-                             std::move(*static_cast<DataType*>(other_data))));
-                       },
-                       [](void* data) { delete static_cast<DataType*>(data); },
-                       static_cast<void*>(&typed_data)},
+        BarelyDataDefinition{
+            [](void* other_data, void** out_data) {
+              *out_data = static_cast<void*>(
+                  new DataType(std::move(*static_cast<DataType*>(other_data))));
+            },
+            [](void* data) { delete static_cast<DataType*>(data); },
+            static_cast<void*>(&typed_data)},
         timestamp));
   }
 
@@ -612,10 +610,11 @@ class Instrument {
   /// @param slope Parameter slope in value change per second.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status SetParameter(int index, double value, double slope = 0.0,
+  template <typename ValueType>
+  Status SetParameter(int index, ValueType value, double slope = 0.0,
                       double timestamp = 0.0) {
-    return static_cast<Status>(
-        BarelyInstrument_SetParameter(handle_, index, value, slope, timestamp));
+    return static_cast<Status>(BarelyInstrument_SetParameter(
+        handle_, index, static_cast<double>(value), slope, timestamp));
   }
 
   /// Starts note at timestamp.

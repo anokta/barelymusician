@@ -13,9 +13,9 @@ AudioOutput::AudioOutput() noexcept { Pa_Initialize(); }
 
 AudioOutput::~AudioOutput() noexcept { Pa_Terminate(); }
 
-void AudioOutput::Start(int sample_rate, int num_channels,
+void AudioOutput::Start(int frame_rate, int num_channels,
                         int num_frames) noexcept {
-  assert(sample_rate >= 0);
+  assert(frame_rate >= 0);
   assert(num_channels >= 0);
   assert(num_frames >= 0);
   if (stream_) {
@@ -51,7 +51,7 @@ void AudioOutput::Start(int sample_rate, int num_channels,
         }
         return static_cast<int>(paContinue);
       };
-  Pa_OpenStream(&stream_, nullptr, &output_parameters, sample_rate, num_frames,
+  Pa_OpenStream(&stream_, nullptr, &output_parameters, frame_rate, num_frames,
                 paClipOff, callback, static_cast<void*>(&process_data_));
   Pa_StartStream(stream_);
 }

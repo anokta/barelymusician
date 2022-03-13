@@ -68,7 +68,7 @@ class Instrument {
   ///
   /// @param definition Data definition.
   /// @param timestamp Timestamp in seconds.
-  void SetData(barely::DataDefinition definition, double timestamp) noexcept;
+  void SetData(BarelyDataDefinition definition, double timestamp) noexcept;
 
   /// Sets note off callback.
   ///

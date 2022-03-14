@@ -9,20 +9,17 @@
 extern "C" {
 
 /// Instrument.
-struct BarelyInstrument {
+struct BarelyInstrument : public barelyapi::Instrument {
   // Constructs new `BarelyInstrument` with given `definition` and `frame_rate`.
   BarelyInstrument(BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
-      : instrument(definition, frame_rate) {}
+      : barelyapi::Instrument(definition, frame_rate) {}
 
   // Non-copyable and non-movable.
   BarelyInstrument(const BarelyInstrument& other) = delete;
   BarelyInstrument& operator=(const BarelyInstrument& other) = delete;
   BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
   BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
-
-  // Instrument instance.
-  barelyapi::Instrument instrument;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -52,7 +49,7 @@ BarelyStatus BarelyInstrument_GetParameter(BarelyInstrumentHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
-  *out_value = handle->instrument.GetParameter(index)->GetValue();
+  *out_value = handle->GetParameter(index)->GetValue();
   return BarelyStatus_kOk;
 }
 
@@ -62,7 +59,7 @@ BarelyStatus BarelyInstrument_GetParamDefinition(
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_definition) return BarelyStatus_kInvalidArgument;
 
-  *out_definition = handle->instrument.GetParameter(index)->GetDefinition();
+  *out_definition = handle->GetParameter(index)->GetDefinition();
   return BarelyStatus_kOk;
 }
 
@@ -71,7 +68,7 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyInstrumentHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_is_note_on) return BarelyStatus_kInvalidArgument;
 
-  *out_is_note_on = handle->instrument.IsNoteOn(pitch);
+  *out_is_note_on = handle->IsNoteOn(pitch);
   return BarelyStatus_kOk;
 }
 
@@ -82,8 +79,7 @@ BarelyStatus BarelyInstrument_Process(BarelyInstrumentHandle handle,
                                       double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.Process(output, num_output_channels, num_output_frames,
-                             timestamp);
+  handle->Process(output, num_output_channels, num_output_frames, timestamp);
   return BarelyStatus_kOk;
 }
 
@@ -91,7 +87,7 @@ BarelyStatus BarelyInstrument_ResetAllParameters(BarelyInstrumentHandle handle,
                                                  double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.ResetAllParameters(timestamp);
+  handle->ResetAllParameters(timestamp);
   return BarelyStatus_kOk;
 }
 
@@ -99,7 +95,7 @@ BarelyStatus BarelyInstrument_ResetParameter(BarelyInstrumentHandle handle,
                                              int32_t index, double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  if (handle->instrument.ResetParameter(index, timestamp)) {
+  if (handle->ResetParameter(index, timestamp)) {
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kInvalidArgument;
@@ -110,7 +106,7 @@ BarelyStatus BarelyInstrument_SetData(BarelyInstrumentHandle handle,
                                       double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.SetData(definition, timestamp);
+  handle->SetData(definition, timestamp);
   return BarelyStatus_kOk;
 }
 
@@ -120,12 +116,12 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
   if (!handle) return BarelyStatus_kNotFound;
 
   if (note_off_callback) {
-    handle->instrument.SetNoteOffCallback(
+    handle->SetNoteOffCallback(
         [note_off_callback, user_data](double pitch, double timestamp) {
           note_off_callback(pitch, timestamp, user_data);
         });
   } else {
-    handle->instrument.SetNoteOffCallback(nullptr);
+    handle->SetNoteOffCallback(nullptr);
   }
   return BarelyStatus_kOk;
 }
@@ -136,13 +132,13 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
   if (!handle) return BarelyStatus_kNotFound;
 
   if (note_on_callback) {
-    handle->instrument.SetNoteOnCallback(
-        [note_on_callback, user_data](double pitch, double intensity,
-                                      double timestamp) {
-          note_on_callback(pitch, intensity, timestamp, user_data);
-        });
+    handle->SetNoteOnCallback([note_on_callback, user_data](double pitch,
+                                                            double intensity,
+                                                            double timestamp) {
+      note_on_callback(pitch, intensity, timestamp, user_data);
+    });
   } else {
-    handle->instrument.SetNoteOnCallback(nullptr);
+    handle->SetNoteOnCallback(nullptr);
   }
   return BarelyStatus_kOk;
 }
@@ -152,7 +148,7 @@ BarelyStatus BarelyInstrument_SetParameter(BarelyInstrumentHandle handle,
                                            double slope, double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  if (handle->instrument.SetParameter(index, value, slope, timestamp)) {
+  if (handle->SetParameter(index, value, slope, timestamp)) {
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kInvalidArgument;
@@ -163,7 +159,7 @@ BarelyStatus BarelyInstrument_StartNote(BarelyInstrumentHandle handle,
                                         double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.StartNote(pitch, intensity, timestamp);
+  handle->StartNote(pitch, intensity, timestamp);
   return BarelyStatus_kOk;
 }
 
@@ -171,7 +167,7 @@ BarelyStatus BarelyInstrument_StopAllNotes(BarelyInstrumentHandle handle,
                                            double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.StopAllNotes(timestamp);
+  handle->StopAllNotes(timestamp);
   return BarelyStatus_kOk;
 }
 
@@ -179,7 +175,7 @@ BarelyStatus BarelyInstrument_StopNote(BarelyInstrumentHandle handle,
                                        double pitch, double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument.StopNote(pitch, timestamp);
+  handle->StopNote(pitch, timestamp);
   return BarelyStatus_kOk;
 }
 

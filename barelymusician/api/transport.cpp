@@ -18,7 +18,7 @@ constexpr double kSecondsFromMinutes = 60.0;
 }  // namespace
 
 /// Transport.
-struct BarelyTransport {
+struct BarelyTransport : public barelyapi::Transport {
   // Default constructor.
   BarelyTransport() = default;
 
@@ -27,9 +27,6 @@ struct BarelyTransport {
   BarelyTransport& operator=(const BarelyTransport& other) = delete;
   BarelyTransport(BarelyTransport&& other) noexcept = delete;
   BarelyTransport& operator=(BarelyTransport&& other) noexcept = delete;
-
-  // Transport instance.
-  barelyapi::Transport transport;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -57,7 +54,7 @@ BarelyStatus BarelyTransport_GetPosition(BarelyTransportHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  *out_position = handle->transport.GetPosition();
+  *out_position = handle->GetPosition();
   return BarelyStatus_kOk;
 }
 
@@ -66,7 +63,7 @@ BarelyStatus BarelyTransport_GetTempo(BarelyTransportHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_tempo) return BarelyStatus_kInvalidArgument;
 
-  *out_tempo = handle->transport.GetTempo() * kSecondsFromMinutes;
+  *out_tempo = handle->GetTempo() * kSecondsFromMinutes;
   return BarelyStatus_kOk;
 }
 
@@ -75,7 +72,7 @@ BarelyStatus BarelyTransport_GetTimestamp(BarelyTransportHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
-  *out_timestamp = handle->transport.GetTimestamp();
+  *out_timestamp = handle->GetTimestamp();
   return BarelyStatus_kOk;
 }
 
@@ -84,7 +81,7 @@ BarelyStatus BarelyTransport_GetTimestampAtPosition(
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
-  *out_timestamp = handle->transport.GetTimestamp(position);
+  *out_timestamp = handle->GetTimestamp(position);
   return BarelyStatus_kOk;
 }
 
@@ -93,7 +90,7 @@ BarelyStatus BarelyTransport_IsPlaying(BarelyTransportHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_is_playing) return BarelyStatus_kInvalidArgument;
 
-  *out_is_playing = handle->transport.IsPlaying();
+  *out_is_playing = handle->IsPlaying();
   return BarelyStatus_kOk;
 }
 
@@ -103,12 +100,12 @@ BarelyStatus BarelyTransport_SetBeatCallback(
   if (!handle) return BarelyStatus_kNotFound;
 
   if (beat_callback) {
-    handle->transport.SetBeatCallback(
+    handle->SetBeatCallback(
         [beat_callback, user_data](double position, double timestamp) {
           beat_callback(position, timestamp, user_data);
         });
   } else {
-    handle->transport.SetBeatCallback(nullptr);
+    handle->SetBeatCallback(nullptr);
   }
   return BarelyStatus_kOk;
 }
@@ -117,7 +114,7 @@ BarelyStatus BarelyTransport_SetPosition(BarelyTransportHandle handle,
                                          double position) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.SetPosition(position);
+  handle->SetPosition(position);
   return BarelyStatus_kOk;
 }
 
@@ -125,7 +122,7 @@ BarelyStatus BarelyTransport_SetTempo(BarelyTransportHandle handle,
                                       double tempo) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.SetTempo(tempo * kMinutesFromSeconds);
+  handle->SetTempo(tempo * kMinutesFromSeconds);
   return BarelyStatus_kOk;
 }
 
@@ -133,21 +130,21 @@ BarelyStatus BarelyTransport_SetTimestamp(BarelyTransportHandle handle,
                                           double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.SetTimestamp(timestamp);
+  handle->SetTimestamp(timestamp);
   return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyTransport_Start(BarelyTransportHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.Start();
+  handle->Start();
   return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyTransport_Stop(BarelyTransportHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.Stop();
+  handle->Stop();
   return BarelyStatus_kOk;
 }
 
@@ -155,7 +152,7 @@ BarelyStatus BarelyTransport_Update(BarelyTransportHandle handle,
                                     double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.Update(timestamp);
+  handle->Update(timestamp);
   return BarelyStatus_kOk;
 }
 

@@ -37,7 +37,6 @@ constexpr double kRelease = 0.125;
 
 // Note settings.
 constexpr double kRootPitch = barelyapi::kPitchC3;
-constexpr double kNoteIntensity = 1.0;
 constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr double kMaxOffsetOctaves = 3.0;
@@ -111,7 +110,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument.StartNote(offset_octaves + *pitch, kNoteIntensity);
+      instrument.StartNote(offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);

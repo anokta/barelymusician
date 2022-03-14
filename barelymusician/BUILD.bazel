@@ -62,12 +62,6 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "transport",
-    srcs = ["transport.cpp"],
-    hdrs = ["transport.h"],
-)
-
 cc_test(
     name = "find_or_null_test",
     srcs = ["find_or_null_test.cpp"],
@@ -89,14 +83,5 @@ cc_test(
 )
 
 # TODO: Add back sequence unit test.
-
-cc_test(
-    name = "transport_test",
-    srcs = ["transport_test.cpp"],
-    deps = [
-        ":transport",
-        "@googletest//:gtest_main",
-    ],
-)
 
 # TODO: Add unit tests (move old engine test back).

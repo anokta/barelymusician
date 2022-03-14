@@ -6,11 +6,13 @@ cc_library(
     name = "api",
     srcs = [
         "instrument.cpp",
+        "transport.cpp",
     ],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":include",
         "//barelymusician/instrument",
+        "//barelymusician/transport",
     ],
     alwayslink = True,
 )

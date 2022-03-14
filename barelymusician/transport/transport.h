@@ -1,19 +1,15 @@
-#ifndef BARELYMUSICIAN_TRANSPORT_H_
-#define BARELYMUSICIAN_TRANSPORT_H_
+#ifndef BARELYMUSICIAN_TRANSPORT_TRANSPORT_H_
+#define BARELYMUSICIAN_TRANSPORT_TRANSPORT_H_
 
 #include <functional>
 
+#include "barelymusician/api/transport.h"
+
 namespace barelyapi {
 
-/// Transport that controls playback.
+/// Class that wraps playback transport.
 class Transport {
  public:
-  /// Beat callback signature.
-  ///
-  /// @param position Beat position in beats.
-  /// @param position Beat timestamp in seconds.
-  using BeatCallback = std::function<void(double position, double timestamp)>;
-
   /// Update callback signature.
   ///
   /// @param begin_position Begin position in beats (inclusive).
@@ -49,7 +45,7 @@ class Transport {
   /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
-  void SetBeatCallback(BeatCallback beat_callback) noexcept;
+  void SetBeatCallback(barely::Transport::BeatCallback beat_callback) noexcept;
 
   /// Sets current position.
   ///
@@ -102,7 +98,7 @@ class Transport {
   double timestamp_ = 0.0;
 
   // Beat callback.
-  BeatCallback beat_callback_;
+  barely::Transport::BeatCallback beat_callback_;
 
   // Update callback.
   UpdateCallback update_callback_;
@@ -110,4 +106,4 @@ class Transport {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_TRANSPORT_H_
+#endif  // BARELYMUSICIAN_TRANSPORT_TRANSPORT_H_

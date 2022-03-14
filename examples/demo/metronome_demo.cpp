@@ -2,28 +2,30 @@
 #include <chrono>
 #include <thread>
 
+#include "barelymusician/api/instrument.h"
+#include "barelymusician/api/presets/instruments.h"
+#include "barelymusician/api/transport.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/synth_instrument.h"
-#include "platforms/api/barelymusician.h"
 
 namespace {
 
 using ::barely::Instrument;
-using ::barely::Musician;
+using ::barely::Transport;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::OscillatorType;
+using ::barely::presets::CreateInstrument;
+using ::barely::presets::InstrumentType;
+using ::barely::presets::OscillatorType;
+using ::barely::presets::SynthParameter;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
@@ -49,39 +51,36 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  AudioClock audio_clock(kSampleRate);
-
-  Musician musician;
-  musician.SetTempo(kInitialTempo);
+  AudioClock audio_clock(kFrameRate);
 
   // Create metronome instrument.
-  Instrument metronome =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
-  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
-  metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
+  Instrument metronome = CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  metronome.SetParameter(SynthParameter::kAttack, kAttack);
+  metronome.SetParameter(SynthParameter::kRelease, kRelease);
+  metronome.SetParameter(SynthParameter::kOscillatorType,
                          static_cast<double>(kOscillatorType));
-  metronome.SetParameter(SynthInstrumentParameter::kNumVoices,
+  metronome.SetParameter(SynthParameter::kNumVoices,
                          static_cast<double>(kNumVoices));
 
+  // Create transport.
+  Transport transport;
+  transport.SetTempo(kInitialTempo);
+
   // Beat callback.
-  const auto beat_callback = [&](double position, double /*timestamp*/) {
+  const auto beat_callback = [&](double position, double timestamp) {
     const int current_bar = static_cast<int>(position) / kNumBeats;
     const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const double pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    metronome.StartNote(pitch);
-    metronome.StopNote(pitch);
+    metronome.StartNote(pitch, kGain, timestamp);
+    metronome.StopNote(pitch, timestamp);
   };
-  musician.SetBeatCallback(beat_callback);
+  transport.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
-    metronome.Process(audio_clock.GetTimestamp(), output, kNumChannels,
-                      kNumFrames);
-    for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
-      output[i] *= kGain;
-    }
+    metronome.Process(output, kNumChannels, kNumFrames,
+                      audio_clock.GetTimestamp());
     audio_clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -95,14 +94,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    double tempo = transport.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (musician.IsPlaying()) {
-          musician.Stop();
+        if (transport.IsPlaying()) {
+          transport.Stop();
           ConsoleLog() << "Stopped playback";
         } else {
-          musician.Start();
+          transport.Start();
           ConsoleLog() << "Started playback";
         }
         return;
@@ -124,25 +123,25 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
+    transport.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << transport.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
-  musician.Start();
+  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
+  transport.Start();
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    transport.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  musician.Stop();
+  transport.Stop();
   audio_output.Stop();
 
   return 0;

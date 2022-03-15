@@ -1,4 +1,4 @@
-#include "barelymusician/sequence.h"
+#include "barelymusician/performer/sequence.h"
 
 #include <algorithm>
 #include <cmath>
@@ -6,8 +6,8 @@
 #include <optional>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/find_or_null.h"
+#include "barelymusician/api/performer.h"
+#include "barelymusician/performer/find_or_null.h"
 
 namespace barelyapi {
 
@@ -39,7 +39,7 @@ bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 bool Sequence::IsLooping() const noexcept { return loop_; }
 
 void Sequence::Process(double begin_position, double end_position) noexcept {
-  if (instrument_id_ == BarelyId_kInvalid) return;
+  // if (instrument_id_ == BarelyId_kInvalid) return;
 
   // Perform active note events.
   for (auto it = active_notes_.begin(); it != active_notes_.end();) {
@@ -55,7 +55,7 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
     }
     // Perform note off event.
     if (event_callback_) {
-      event_callback_(note_end_position, StopNoteEvent{active_note.pitch});
+      event_callback_(note_end_position, SetNoteOffEvent{active_note.pitch});
     }
     it = active_notes_.erase(it);
   }
@@ -203,20 +203,20 @@ void Sequence::ProcessInternal(double begin_position, double end_position,
     const double position = it->first.first + position_offset;
     const auto& note = it->second;
     // TODO: Include note adjustments.
-    const double pitch = note.pitch_definition.absolute_pitch;
-    const double intensity = note.intensity_definition.intensity;
-    const double duration = note.duration_definition.duration;
+    const double pitch = note.pitch.absolute_pitch;
+    const double intensity = note.intensity;
+    const double duration = note.duration;
     const double note_end_position =
         std::min(position + std::max(duration, 0.0), end_position_);
     // Perform note on event.
     if (event_callback_) {
-      event_callback_(position, StartNoteEvent{pitch, intensity});
+      event_callback_(position, SetNoteOnEvent{pitch, intensity});
     }
     // Perform note off event.
     if (note_end_position >= end_position) {
       active_notes_.emplace(position, ActiveNote{note_end_position, pitch});
     } else if (event_callback_) {
-      event_callback_(note_end_position, StopNoteEvent{pitch});
+      event_callback_(note_end_position, SetNoteOffEvent{pitch});
     }
   }
 }

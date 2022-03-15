@@ -132,6 +132,25 @@ void Instrument::Process(double* output, int num_output_channels,
   }
 }
 
+// TODO: temp workaround for testing.
+void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
+  std::visit(
+      EventVisitor{[&](const SetDataEvent& /*set_data_event*/) noexcept {},
+                   [&](const SetParameterEvent& set_parameter_event) noexcept {
+                     SetParameter(set_parameter_event.index,
+                                  set_parameter_event.value,
+                                  set_parameter_event.slope, timestamp);
+                   },
+                   [&](const SetNoteOnEvent& start_note_event) noexcept {
+                     StartNote(start_note_event.pitch,
+                               start_note_event.intensity, timestamp);
+                   },
+                   [&](const SetNoteOffEvent& stop_note_event) noexcept {
+                     StopNote(stop_note_event.pitch, timestamp);
+                   }},
+      event);
+}
+
 void Instrument::ResetAllParameters(double timestamp) noexcept {
   for (int index = 0; index < static_cast<int>(controller_.parameters.size());
        ++index) {

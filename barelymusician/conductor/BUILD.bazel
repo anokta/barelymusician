@@ -1,0 +1,46 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "find_or_null",
+    hdrs = ["find_or_null.h"],
+)
+
+cc_library(
+    name = "sequence",
+    srcs = ["sequence.cpp"],
+    hdrs = ["sequence.h"],
+    deps = [
+        ":barelymusician_headeronly",
+        ":event",
+        ":find_or_null",
+    ],
+)
+
+cc_library(
+    name = "transport",
+    srcs = ["transport.cpp"],
+    hdrs = ["transport.h"],
+    deps = [
+        "//barelymusician/api:include",
+    ],
+)
+
+cc_test(
+    name = "find_or_null_test",
+    srcs = ["find_or_null_test.cpp"],
+    deps = [
+        ":find_or_null",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "transport_test",
+    srcs = ["transport_test.cpp"],
+    deps = [
+        ":transport",
+        "@googletest//:gtest_main",
+    ],
+)

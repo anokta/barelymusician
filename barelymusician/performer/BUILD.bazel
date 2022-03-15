@@ -1,0 +1,28 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "find_or_null",
+    hdrs = ["find_or_null.h"],
+)
+
+cc_library(
+    name = "sequence",
+    srcs = ["sequence.cpp"],
+    hdrs = ["sequence.h"],
+    deps = [
+        ":find_or_null",
+        "//barelymusician/api:include",
+        "//barelymusician/instrument:event",
+    ],
+)
+
+cc_test(
+    name = "find_or_null_test",
+    srcs = ["find_or_null_test.cpp"],
+    deps = [
+        ":find_or_null",
+        "@googletest//:gtest_main",
+    ],
+)

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_SEQUENCE_H_
-#define BARELYMUSICIAN_SEQUENCE_H_
+#ifndef BARELYMUSICIAN_PERFORMER_SEQUENCE_H_
+#define BARELYMUSICIAN_PERFORMER_SEQUENCE_H_
 
 #include <functional>
 #include <limits>
@@ -8,10 +8,13 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/event.h"
+#include "barelymusician/api/performer.h"
+#include "barelymusician/instrument/event.h"
 
 namespace barelyapi {
+
+using BarelyId = int;
+inline constexpr BarelyId BarelyId_kInvalid = -1;
 
 /// Musical note sequence.
 class Sequence {
@@ -216,4 +219,4 @@ class Sequence {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_SEQUENCE_H_
+#endif  // BARELYMUSICIAN_PERFORMER_SEQUENCE_H_

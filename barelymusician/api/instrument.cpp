@@ -111,14 +111,14 @@ BarelyStatus BarelyInstrument_SetData(BarelyInstrumentHandle handle,
 }
 
 BarelyStatus BarelyInstrument_SetNoteOffCallback(
-    BarelyInstrumentHandle handle,
-    BarelyInstrument_NoteOffCallback note_off_callback, void* user_data) {
+    BarelyInstrumentHandle handle, BarelyInstrument_NoteOffCallback callback,
+    void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  if (note_off_callback) {
+  if (callback) {
     handle->SetNoteOffCallback(
-        [note_off_callback, user_data](double pitch, double timestamp) {
-          note_off_callback(pitch, timestamp, user_data);
+        [callback, user_data](double pitch, double timestamp) {
+          callback(pitch, timestamp, user_data);
         });
   } else {
     handle->SetNoteOffCallback(nullptr);
@@ -127,15 +127,15 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
 }
 
 BarelyStatus BarelyInstrument_SetNoteOnCallback(
-    BarelyInstrumentHandle handle,
-    BarelyInstrument_NoteOnCallback note_on_callback, void* user_data) {
+    BarelyInstrumentHandle handle, BarelyInstrument_NoteOnCallback callback,
+    void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  if (note_on_callback) {
-    handle->SetNoteOnCallback([note_on_callback, user_data](double pitch,
-                                                            double intensity,
-                                                            double timestamp) {
-      note_on_callback(pitch, intensity, timestamp, user_data);
+  if (callback) {
+    handle->SetNoteOnCallback([callback, user_data](double pitch,
+                                                    double intensity,
+                                                    double timestamp) {
+      callback(pitch, intensity, timestamp, user_data);
     });
   } else {
     handle->SetNoteOnCallback(nullptr);

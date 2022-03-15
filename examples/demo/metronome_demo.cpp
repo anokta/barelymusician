@@ -2,9 +2,9 @@
 #include <chrono>
 #include <thread>
 
+#include "barelymusician/api/conductor.h"
 #include "barelymusician/api/instrument.h"
 #include "barelymusician/api/presets/instruments.h"
-#include "barelymusician/api/transport.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -13,8 +13,8 @@
 
 namespace {
 
+using ::barely::Conductor;
 using ::barely::Instrument;
-using ::barely::Transport;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -62,9 +62,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   metronome.SetParameter(SynthParameter::kNumVoices,
                          static_cast<double>(kNumVoices));
 
-  // Create transport.
-  Transport transport;
-  transport.SetTempo(kInitialTempo);
+  // Create conductor.
+  Conductor conductor;
+  conductor.SetTempo(kInitialTempo);
 
   // Beat callback.
   const auto beat_callback = [&](double position, double timestamp) {
@@ -75,7 +75,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     metronome.StartNote(pitch, kGain, timestamp);
     metronome.StopNote(pitch, timestamp);
   };
-  transport.SetBeatCallback(beat_callback);
+  conductor.SetBeatCallback(beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
@@ -94,14 +94,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = transport.GetTempo();
+    double tempo = conductor.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (transport.IsPlaying()) {
-          transport.Stop();
+        if (conductor.IsPlaying()) {
+          conductor.Stop();
           ConsoleLog() << "Stopped playback";
         } else {
-          transport.Start();
+          conductor.Start();
           ConsoleLog() << "Started playback";
         }
         return;
@@ -123,25 +123,25 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    transport.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << transport.GetTempo() << " bpm";
+    conductor.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << conductor.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
-  transport.Start();
+  conductor.Start();
 
   while (!quit) {
     input_manager.Update();
-    transport.Update(audio_clock.GetTimestamp() + kLookahead);
+    conductor.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  transport.Stop();
+  conductor.Stop();
   audio_output.Stop();
 
   return 0;

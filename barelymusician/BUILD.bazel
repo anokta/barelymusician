@@ -42,33 +42,8 @@ cc_library(
 )
 
 cc_library(
-    name = "find_or_null",
-    hdrs = ["find_or_null.h"],
-)
-
-cc_library(
     name = "mutable_data",
     hdrs = ["mutable_data.h"],
-)
-
-cc_library(
-    name = "sequence",
-    srcs = ["sequence.cpp"],
-    hdrs = ["sequence.h"],
-    deps = [
-        ":barelymusician_headeronly",
-        ":event",
-        ":find_or_null",
-    ],
-)
-
-cc_test(
-    name = "find_or_null_test",
-    srcs = ["find_or_null_test.cpp"],
-    deps = [
-        ":find_or_null",
-        "@googletest//:gtest_main",
-    ],
 )
 
 # TODO: Add unit tests for instrument.

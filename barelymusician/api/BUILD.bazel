@@ -5,14 +5,16 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "api",
     srcs = [
+        "conductor.cpp",
         "instrument.cpp",
-        "transport.cpp",
+        "performer.cpp",
     ],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":include",
+        "//barelymusician/conductor:transport",
         "//barelymusician/instrument",
-        "//barelymusician/transport",
+        "//barelymusician/performer:sequence",
     ],
     alwayslink = True,
 )
@@ -22,9 +24,8 @@ cc_library(
     hdrs = [
         "conductor.h",
         "instrument.h",
-        "sequence.h",
+        "performer.h",
         "status.h",
-        "transport.h",
         "visibility.h",
     ],
 )

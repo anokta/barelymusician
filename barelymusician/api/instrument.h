@@ -242,22 +242,22 @@ BarelyInstrument_SetData(BarelyInstrumentHandle handle,
 /// Sets instrument note off callback.
 ///
 /// @param handle Instrument handle.
-/// @param note_off_callback Note off callback.
+/// @param callback Note off callback.
 /// @param user_data User data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
-    BarelyInstrumentHandle handle,
-    BarelyInstrument_NoteOffCallback note_off_callback, void* user_data);
+    BarelyInstrumentHandle handle, BarelyInstrument_NoteOffCallback callback,
+    void* user_data);
 
 /// Sets instrument note on callback.
 ///
 /// @param handle Instrument handle.
-/// @param note_on_callback Note on callback.
+/// @param callback Note on callback.
 /// @param user_data User data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
-    BarelyInstrumentHandle handle,
-    BarelyInstrument_NoteOnCallback note_on_callback, void* user_data);
+    BarelyInstrumentHandle handle, BarelyInstrument_NoteOnCallback callback,
+    void* user_data);
 
 /// Sets instrument parameter value.
 ///
@@ -588,11 +588,11 @@ class Instrument {
 
   /// Sets note off callback.
   ///
-  /// @param note_off_callback Note off callback.
+  /// @param callback Note off callback.
   /// @return Status.
-  Status SetNoteOffCallback(NoteOffCallback note_off_callback) {
-    if (note_off_callback) {
-      note_off_callback_ = std::move(note_off_callback);
+  Status SetNoteOffCallback(NoteOffCallback callback) {
+    if (callback) {
+      note_off_callback_ = std::move(callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
           handle_,
           [](double pitch, double timestamp, void* user_data) {
@@ -606,11 +606,11 @@ class Instrument {
 
   /// Sets note on callback.
   ///
-  /// @param note_on_callback Note on callback.
+  /// @param callback Note on callback.
   /// @return Status.
-  Status SetNoteOnCallback(NoteOnCallback note_on_callback) {
-    if (note_on_callback) {
-      note_on_callback_ = std::move(note_on_callback);
+  Status SetNoteOnCallback(NoteOnCallback callback) {
+    if (callback) {
+      note_on_callback_ = std::move(callback);
       return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
           handle_,
           [](double pitch, double intensity, double timestamp,
@@ -669,6 +669,8 @@ class Instrument {
   }
 
  private:
+  friend class Performer;
+
   // Internal handle.
   BarelyInstrumentHandle handle_ = nullptr;
 

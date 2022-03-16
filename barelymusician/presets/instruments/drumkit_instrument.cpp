@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/presets/instruments/generic_instrument.h"
 

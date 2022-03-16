@@ -4,9 +4,7 @@
 // NOLINTBEGIN
 #include <stdint.h>
 
-#include "barelymusician/api/instrument.h"
-#include "barelymusician/api/status.h"
-#include "barelymusician/api/visibility.h"
+#include "barelymusician/barelymusician.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -137,15 +135,6 @@ inline InstrumentDefinition GetInstrumentDefinition(InstrumentType type) {
       static_cast<BarelyPresetsInstrumentType>(type), &definition);
   assert(IsOk(static_cast<Status>(status)));
   return InstrumentDefinition{definition};
-}
-
-/// Returns instrument of type.
-///
-/// @param type Instrument type.
-/// @param frame_rate Frame rate in hz.
-/// @return Instrument.
-inline Instrument CreateInstrument(InstrumentType type, int frame_rate) {
-  return Instrument{GetInstrumentDefinition(type), frame_rate};
 }
 
 }  // namespace barely::presets

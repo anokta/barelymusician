@@ -3,13 +3,20 @@
 
 #include <functional>
 
-#include "barelymusician/api/conductor.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barelyapi {
 
 /// Class that wraps playback transport.
 class Transport {
  public:
+  /// Update callback signature.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  using UpdateCallback =
+      std::function<void(double begin_position, double end_position)>;
+
   /// Returns current position.
   ///
   /// @return Position in beats.
@@ -38,7 +45,7 @@ class Transport {
   /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
-  void SetBeatCallback(barely::Conductor::BeatCallback beat_callback) noexcept;
+  void SetBeatCallback(barely::Musician::BeatCallback beat_callback) noexcept;
 
   /// Sets current position.
   ///
@@ -58,8 +65,7 @@ class Transport {
   /// Sets update callback.
   ///
   /// @param update_callback Update callback.
-  void SetUpdateCallback(
-      barely::Conductor::UpdateCallback update_callback) noexcept;
+  void SetUpdateCallback(UpdateCallback update_callback) noexcept;
 
   /// Starts playback.
   void Start() noexcept;
@@ -92,10 +98,10 @@ class Transport {
   double timestamp_ = 0.0;
 
   // Beat callback.
-  barely::Conductor::BeatCallback beat_callback_;
+  barely::Musician::BeatCallback beat_callback_;
 
   // Update callback.
-  barely::Conductor::UpdateCallback update_callback_;
+  UpdateCallback update_callback_;
 };
 
 }  // namespace barelyapi

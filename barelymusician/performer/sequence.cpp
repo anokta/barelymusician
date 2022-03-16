@@ -6,7 +6,7 @@
 #include <optional>
 #include <utility>
 
-#include "barelymusician/api/performer.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/performer/find_or_null.h"
 
 namespace barelyapi {

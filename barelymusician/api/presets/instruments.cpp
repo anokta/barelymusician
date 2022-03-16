@@ -1,7 +1,6 @@
 #include "barelymusician/api/presets/instruments.h"
 
-#include "barelymusician/api/instrument.h"
-#include "barelymusician/api/status.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/presets/instruments/drumkit_instrument.h"
 #include "barelymusician/presets/instruments/synth_instrument.h"
 

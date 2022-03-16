@@ -13,7 +13,7 @@ cc_library(
     hdrs = ["sequence.h"],
     deps = [
         ":find_or_null",
-        "//barelymusician/api:include",
+        "//barelymusician:include",
         "//barelymusician/instrument:event",
     ],
 )

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/presets/dsp/dsp_utils.h"
 #include "barelymusician/presets/dsp/oscillator.h"
 #include "barelymusician/presets/instruments/enveloped_voice.h"

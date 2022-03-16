@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENT_PARAMETER_H_
 #define BARELYMUSICIAN_INSTRUMENT_PARAMETER_H_
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barelyapi {
 

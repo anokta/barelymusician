@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/presets/dsp/sample_player.h"
 #include "barelymusician/presets/instruments/enveloped_voice.h"
 #include "barelymusician/presets/instruments/generic_instrument.h"

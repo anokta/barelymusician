@@ -5,8 +5,8 @@
 #include <optional>
 #include <thread>
 
-#include "barelymusician/api/instrument.h"
 #include "barelymusician/api/presets/instruments.h"
+#include "barelymusician/barelymusician.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -15,10 +15,11 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::Musician;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::presets::CreateInstrument;
+using ::barely::presets::GetInstrumentDefinition;
 using ::barely::presets::InstrumentType;
 using ::barely::presets::OscillatorType;
 using ::barely::presets::SynthParameter;
@@ -59,7 +60,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Instrument instrument = CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  Musician musician;
+
+  Instrument instrument = musician.CreateInstrument(
+      GetInstrumentDefinition(InstrumentType::kSynth), kFrameRate);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
   instrument.SetParameter(SynthParameter::kOscillatorType,
@@ -77,7 +81,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kNumChannels, kNumFrames);
+    instrument.Process(output, kNumChannels, kNumFrames, 0.0);
     for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
       output[i] *= kGain;
     }

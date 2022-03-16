@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_PRESETS_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 #define BARELYMUSICIAN_PRESETS_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/presets/dsp/oscillator.h"
 #include "barelymusician/presets/dsp/polyphonic_voice.h"

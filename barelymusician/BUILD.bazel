@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -8,6 +8,10 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":include",
+        ":mutable_data",
+        "//barelymusician/conductor:transport",
+        "//barelymusician/instrument",
+        "//barelymusician/performer:sequence",
     ],
     alwayslink = True,
 )
@@ -18,38 +22,6 @@ cc_library(
 )
 
 cc_library(
-    name = "event",
-    hdrs = ["event.h"],
-    deps = [
-        ":barelymusician_headeronly",
-    ],
-)
-
-cc_library(
-    name = "event_queue",
-    srcs = ["event_queue.cpp"],
-    hdrs = ["event_queue.h"],
-    deps = [
-        ":event",
-    ],
-)
-
-cc_library(
     name = "mutable_data",
     hdrs = ["mutable_data.h"],
 )
-
-# TODO: Add unit tests for instrument.
-
-cc_test(
-    name = "parameter_test",
-    srcs = ["parameter_test.cpp"],
-    deps = [
-        ":parameter",
-        "@googletest//:gtest_main",
-    ],
-)
-
-# TODO: Add back sequence unit test.
-
-# TODO: Add unit tests (move old engine test back).

@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/api/performer.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/instrument/event.h"
 
 namespace barelyapi {

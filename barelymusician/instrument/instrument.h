@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/instrument/event.h"
 #include "barelymusician/instrument/event_queue.h"
 #include "barelymusician/instrument/parameter.h"

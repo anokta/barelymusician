@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barelyapi {
 

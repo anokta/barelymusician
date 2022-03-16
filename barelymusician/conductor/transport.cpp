@@ -4,7 +4,7 @@
 #include <cmath>
 #include <utility>
 
-#include "barelymusician/api/conductor.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barelyapi {
 
@@ -22,7 +22,7 @@ double Transport::GetTimestamp(double position) const noexcept {
 bool Transport::IsPlaying() const noexcept { return is_playing_; }
 
 void Transport::SetBeatCallback(
-    barely::Conductor::BeatCallback beat_callback) noexcept {
+    barely::Musician::BeatCallback beat_callback) noexcept {
   beat_callback_ = std::move(beat_callback);
 }
 
@@ -51,8 +51,7 @@ void Transport::SetTimestamp(double timestamp) noexcept {
   }
 }
 
-void Transport::SetUpdateCallback(
-    barely::Conductor::UpdateCallback update_callback) noexcept {
+void Transport::SetUpdateCallback(UpdateCallback update_callback) noexcept {
   update_callback_ = std::move(update_callback);
 }
 
@@ -94,7 +93,7 @@ void Transport::Update(double timestamp) noexcept {
       timestamp_ = timestamp;
     }
     if (update_callback_) {
-      update_callback_(begin_position, position_, begin_timestamp, timestamp_);
+      update_callback_(begin_position, position_);
     }
   }
 }

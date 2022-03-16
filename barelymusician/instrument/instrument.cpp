@@ -4,7 +4,7 @@
 #include <utility>
 #include <variant>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/instrument/event.h"
 
 namespace barelyapi {

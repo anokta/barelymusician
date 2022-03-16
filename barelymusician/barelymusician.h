@@ -694,11 +694,11 @@ BarelySequence_GetEndPosition(BarelyMusicianHandle handle, BarelyId sequence_id,
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param out_instrument Output instrument handle.
+/// @param out_instrument_id Output instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelySequence_GetInstrument(BarelyMusicianHandle handle, BarelyId sequence_id,
-                             BarelyInstrumentHandle* out_instrument_handle);
+                             BarelyId* out_instrument_id);
 
 /// Gets sequence loop begin offset.
 ///
@@ -903,11 +903,10 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetEndPosition(
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param instrument_handle Instrument handle.
+/// @param instrument_id Instrument identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_SetInstrument(BarelyMusicianHandle handle, BarelyId sequence_id,
-                             BarelyInstrumentHandle instrument_handle);
+BARELY_EXPORT BarelyStatus BarelySequence_SetInstrument(
+    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId instrument_id);
 
 /// Sets sequence loop begin offset.
 ///
@@ -1263,7 +1262,7 @@ class Instrument {
   /// @param other Other instrument.
   Instrument(Instrument&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)),
-        id_(std::exchange(other.handle_, BarelyId_kInvalid)) {
+        id_(std::exchange(other.id_, BarelyId_kInvalid)) {
     SetNoteOffCallback(std::exchange(other.note_off_callback_, nullptr));
     SetNoteOnCallback(std::exchange(other.note_on_callback_, nullptr));
   }
@@ -1332,11 +1331,13 @@ class Instrument {
   /// @param output Output buffer.
   /// @param num_output_channels Number of output channels.
   /// @param num_output_frames Number of output frames.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status Process(double* output, int num_output_channels,
-                 int num_output_frames) {
-    return static_cast<Status>(BarelyInstrument_Process(
-        handle_, id_, output, num_output_channels, num_output_frames));
+  Status Process(double* output, int num_output_channels, int num_output_frames,
+                 double timestamp) {
+    return static_cast<Status>(
+        BarelyInstrument_Process(handle_, id_, output, num_output_channels,
+                                 num_output_frames, timestamp));
   }
 
   /// Resets all parameters.
@@ -1440,12 +1441,14 @@ class Instrument {
   }
 
  private:
+  friend class Musician;
+
   // Constructs new `Instrument`.
   Instrument(BarelyMusicianHandle handle, InstrumentDefinition definition,
              int frame_rate)
       : handle_(handle) {
     const auto status =
-        BarelyInstrument_Create(handle_, definition, frame_rate, id_);
+        BarelyInstrument_Create(handle_, definition, frame_rate, &id_);
     assert(IsOk(static_cast<Status>(status)));
   }
 
@@ -1460,6 +1463,188 @@ class Instrument {
 
   // Note on callback.
   NoteOnCallback note_on_callback_;
+};
+
+/// Musician.
+class Musician {
+ public:
+  /// Beat callback signature.
+  ///
+  /// @param position Beat position in beats.
+  /// @param timestamp Beat timestamp in seconds.
+  using BeatCallback = std::function<void(double position, double timestamp)>;
+
+  /// Constructs new `Musician`.
+  Musician() {
+    const auto status = BarelyMusician_Create(&handle_);
+    assert(IsOk(static_cast<Status>(status)));
+  }
+
+  /// Destroys `Musician`.
+  ~Musician() {
+    if (handle_) {
+      const auto status =
+          BarelyMusician_Destroy(std::exchange(handle_, nullptr));
+      assert(IsOk(static_cast<Status>(status)));
+    }
+  }
+
+  /// Non-copyable.
+  Musician(const Musician& other) = delete;
+  Musician& operator=(const Musician& other) = delete;
+
+  /// Constructs new `Musician` via move.
+  ///
+  /// @param other Other musician.
+  Musician(Musician&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {
+    SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
+  }
+
+  /// Assigns `Musician` via move.
+  ///
+  /// @param other Other musician.
+  Musician& operator=(Musician&& other) noexcept {
+    if (this != &other) {
+      if (handle_) {
+        const auto status = BarelyMusician_Destroy(handle_);
+        assert(IsOk(static_cast<Status>(status)));
+      }
+      handle_ = std::exchange(other.handle_, nullptr);
+      SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
+    }
+    return *this;
+  }
+
+  /// Creates new instrument.
+  ///
+  /// @param definition Instrument definition.
+  /// @param frame_rate Frame rate in hz.
+  /// @return Instrument.
+  Instrument CreateInstrument(InstrumentDefinition definition, int frame_rate) {
+    return {handle_, definition, frame_rate};
+  }
+
+  /// Returns position.
+  ///
+  /// @return Position in beats.
+  [[nodiscard]] double GetPosition() const {
+    double position = 0.0;
+    if (handle_) {
+      const auto status = BarelyMusician_GetPosition(handle_, &position);
+      assert(IsOk(static_cast<Status>(status)));
+    }
+    return position;
+  }
+
+  /// Returns tempo.
+  ///
+  /// @return Tempo in bpm.
+  [[nodiscard]] double GetTempo() const {
+    double tempo = 0.0;
+    const auto status = BarelyMusician_GetTempo(handle_, &tempo);
+    assert(IsOk(static_cast<Status>(status)));
+    return tempo;
+  }
+
+  /// Returns timestamp.
+  ///
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp() const {
+    double timestamp = 0.0;
+    const auto status = BarelyMusician_GetTimestamp(handle_, &timestamp);
+    assert(IsOk(static_cast<Status>(status)));
+    return timestamp;
+  }
+
+  /// Returns timestamp at position.
+  ///
+  /// @param position Position in beats.
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestampAtPosition(double position) const {
+    double timestamp = 0.0;
+    const auto status =
+        BarelyMusician_GetTimestampAtPosition(handle_, position, &timestamp);
+    assert(IsOk(static_cast<Status>(status)));
+    return timestamp;
+  }
+
+  /// Returns whether musician is playing or not.
+  ///
+  /// @return True if playing, false otherwise.
+  [[nodiscard]] bool IsPlaying() const {
+    bool is_playing = false;
+    const auto status = BarelyMusician_IsPlaying(handle_, &is_playing);
+    assert(status == BarelyStatus_kOk);
+    return is_playing;
+  }
+
+  /// Sets beat callback.
+  ///
+  /// @param beat_callback Beat callback.
+  /// @return Status.
+  Status SetBeatCallback(BeatCallback callback) {
+    if (callback) {
+      beat_callback_ = std::move(callback);
+      return static_cast<Status>(BarelyMusician_SetBeatCallback(
+          handle_,
+          [](double beat, double timestamp, void* user_data) {
+            (*static_cast<BeatCallback*>(user_data))(beat, timestamp);
+          },
+          static_cast<void*>(&beat_callback_)));
+    }
+    return static_cast<Status>(
+        BarelyMusician_SetBeatCallback(handle_, nullptr, nullptr));
+  }
+
+  /// Sets position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status SetPosition(double position) {
+    return static_cast<Status>(BarelyMusician_SetPosition(handle_, position));
+  }
+
+  /// Sets tempo.
+  ///
+  /// @param tempo Tempo in bpm.
+  /// @return Status.
+  Status SetTempo(double tempo) {
+    return static_cast<Status>(BarelyMusician_SetTempo(handle_, tempo));
+  }
+
+  /// Sets timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status SetTimestamp(double timestamp) {
+    return static_cast<Status>(BarelyMusician_SetTimestamp(handle_, timestamp));
+  }
+
+  /// Starts playback.
+  ///
+  /// @return Status.
+  Status Start() { return static_cast<Status>(BarelyMusician_Start(handle_)); }
+
+  /// Stops playback.
+  ///
+  /// @return Status.
+  Status Stop() { return static_cast<Status>(BarelyMusician_Stop(handle_)); }
+
+  /// Updates internal state at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status Update(double timestamp) {
+    return static_cast<Status>(BarelyMusician_Update(handle_, timestamp));
+  }
+
+ private:
+  // Internal handle.
+  BarelyMusicianHandle handle_ = nullptr;
+
+  // Beat callback.
+  BeatCallback beat_callback_;
 };
 
 }  // namespace barely

@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -7,7 +7,7 @@ cc_library(
     hdrs = ["event.h"],
     deps = [
         ":data",
-        "//barelymusician/api:include",
+        "//barelymusician:include",
     ],
 )
 
@@ -16,7 +16,7 @@ cc_library(
     srcs = ["data.cpp"],
     hdrs = ["data.h"],
     deps = [
-        "//barelymusician/api:include",
+        "//barelymusician:include",
     ],
 )
 
@@ -38,7 +38,7 @@ cc_library(
         ":event",
         ":event_queue",
         ":parameter",
-        "//barelymusician/api:include",
+        "//barelymusician:include",
     ],
 )
 
@@ -47,6 +47,15 @@ cc_library(
     srcs = ["parameter.cpp"],
     hdrs = ["parameter.h"],
     deps = [
-        "//barelymusician/api:include",
+        "//barelymusician:include",
+    ],
+)
+
+cc_test(
+    name = "parameter_test",
+    srcs = ["parameter_test.cpp"],
+    deps = [
+        ":parameter",
+        "@googletest//:gtest_main",
     ],
 )

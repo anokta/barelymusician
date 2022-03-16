@@ -10,7 +10,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":include",
-        "//barelymusician/api",
+        "//barelymusician",
         "//barelymusician/presets/instruments:drumkit_instrument",
         "//barelymusician/presets/instruments:synth_instrument",
     ],
@@ -23,6 +23,6 @@ cc_library(
         "instruments.h",
     ],
     deps = [
-        "//barelymusician/api:include",
+        "//barelymusician:include",
     ],
 )

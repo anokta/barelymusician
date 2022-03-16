@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include "barelymusician/api/instrument.h"
+#include "barelymusician/barelymusician.h"
 
 namespace barelyapi {
 

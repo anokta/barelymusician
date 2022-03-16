@@ -31,8 +31,8 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// BarelyMusician api.
-typedef struct BarelyMusician* BarelyApi;
+/// Musician handle.
+typedef struct BarelyMusician* BarelyMusicianHandle;
 
 /// Identifier alias.
 typedef int64_t BarelyId;
@@ -40,82 +40,8 @@ typedef int64_t BarelyId;
 /// Identifier values.
 enum BarelyId_Values {
   /// Invalid identifier.
-  BarelyId_kInvalid = -1,
+  BarelyId_kInvalid = 0,
 };
-
-/// Note duration definition.
-typedef struct BarelyNoteDurationDefinition {
-  /// Value.
-  double duration;
-} BarelyNoteDurationDefinition;
-
-/// Note intensity definition.
-typedef struct BarelyNoteIntensityDefinition {
-  /// Value.
-  double intensity;
-} BarelyNoteIntensityDefinition;
-
-/// Note pitch type enum alias.
-typedef int32_t BarelyNotePitchType;
-
-/// Note pitch type enum values.
-enum BarelyNotePitchType_Values {
-  /// Absolute pitch.
-  BarelyNotePitchType_kAbsolutePitch = 0,
-  /// Relative pitch with respect to root note.
-  BarelyNotePitchType_kRelativePitch = 1,
-  /// Scale index with respect to root note and scale.
-  BarelyNotePitchType_kScaleIndex = 2,
-};
-
-/// Note pitch definition.
-typedef struct BarelyNotePitchDefinition {
-  /// Type.
-  BarelyNotePitchType type;
-
-  /// Value.
-  union {
-    /// Absolute pitch.
-    double absolute_pitch;
-    /// Relative pitch.
-    double relative_pitch;
-    /// Scale index.
-    int scale_index;
-  };
-} BarelyNotePitchDefinition;
-
-/// Note definition.
-typedef struct BarelyNoteDefinition {
-  /// Duration definition.
-  BarelyNoteDurationDefinition duration_definition;
-
-  /// Denotes whether duration adjustment should be bypassed or not.
-  bool bypass_duration_adjustment;
-
-  /// Intensity definition.
-  BarelyNoteIntensityDefinition intensity_definition;
-
-  /// Denotes whether intensity adjustment should be bypassed or not.
-  bool bypass_intensity_adjustment;
-
-  /// Pitch definition.
-  BarelyNotePitchDefinition pitch_definition;
-
-  /// Denotes whether pitch adjustment should be bypassed or not.
-  bool bypass_pitch_adjustment;
-} BarelyNoteDefinition;
-
-/// Parameter definition.
-typedef struct BarelyParameterDefinition {
-  /// Default value.
-  double default_value;
-
-  /// Minimum value.
-  double min_value;
-
-  /// Maximum value.
-  double max_value;
-} BarelyParameterDefinition;
 
 /// Status enum alias.
 typedef int32_t BarelyStatus;
@@ -140,15 +66,14 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 7,
 };
 
-/// Data move callback signature.
+/// Data definition move callback signature.
 ///
 /// @param other_data Other data to move.
 /// @param out_data Output data.
-// TODO: Can/should probably be create (copy) via `const void*` instead.
 typedef void (*BarelyDataDefinition_MoveCallback)(void* other_data,
                                                   void** out_data);
 
-/// Data destroy callback signature.
+/// Data definition destroy callback signature.
 ///
 /// @param data Data to destroy.
 typedef void (*BarelyDataDefinition_DestroyCallback)(void* data);
@@ -165,30 +90,74 @@ typedef struct BarelyDataDefinition {
   void* data;
 } BarelyDataDefinition;
 
-/// Instrument note off callback signature.
-///
-/// @param pitch Note pitch.
-/// @param timestamp Note timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, double timestamp,
-                                                 void* user_data);
+/// Note pitch type enum alias.
+typedef int32_t BarelyNotePitchType;
 
-/// Instrument note on callback signature.
-///
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-/// @param timestamp Note timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
-                                                double timestamp,
-                                                void* user_data);
+/// Note pitch type enum values.
+enum BarelyNotePitchType_Values {
+  /// Absolute pitch.
+  BarelyNotePitchType_kAbsolutePitch = 0,
+  /// Relative pitch with respect to root note.
+  BarelyNotePitchType_kRelativePitch = 1,
+  /// Scale index with respect to root note and scale.
+  BarelyNotePitchType_kScaleIndex = 2,
+};
+
+/// Note definition pitch.
+typedef struct BarelyNoteDefinition_Pitch {
+  /// Type.
+  BarelyNotePitchType type;
+
+  /// Value.
+  union {
+    /// Absolute pitch.
+    double absolute_pitch;
+    /// Relative pitch.
+    double relative_pitch;
+    /// Scale index.
+    int32_t scale_index;
+  };
+} BarelyNoteDefinition_Pitch;
+
+/// Note definition.
+typedef struct BarelyNoteDefinition {
+  /// Duration.
+  double duration;
+
+  /// Intensity.
+  double intensity;
+
+  /// Pitch.
+  BarelyNoteDefinition_Pitch pitch;
+} BarelyNoteDefinition;
+
+/// Parameter automation definition.
+typedef struct BarelyParameterAutomationDefinition {
+  /// Index.
+  int32_t index;
+
+  /// Value.
+  double value;
+} BarelyParameterAutomationDefinition;
+
+/// Parameter definition.
+typedef struct BarelyParameterDefinition {
+  /// Default value.
+  double default_value;
+
+  /// Minimum value.
+  double min_value;
+
+  /// Maximum value.
+  double max_value;
+} BarelyParameterDefinition;
 
 /// Instrument create callback signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param sample_rate Sampling rate in hz.
+/// @param frame_rate Frame rate in hz.
 typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state,
-                                                          int sample_rate);
+                                                          int32_t frame_rate);
 
 /// Instrument destroy callback signature.
 ///
@@ -263,13 +232,52 @@ typedef struct BarelyInstrumentDefinition {
   BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback;
 
   /// List of parameter definitions.
-  BarelyParameterDefinition* parameter_definitions;
+  const BarelyParameterDefinition* parameter_definitions;
 
   /// Number of parameter definitions.
   int32_t num_parameter_definitions;
 } BarelyInstrumentDefinition;
 
-/// Beat callback signature.
+/// Instrument note off callback signature.
+///
+/// @param pitch Note pitch.
+/// @param timestamp Note timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, double timestamp,
+                                                 void* user_data);
+
+/// Instrument note on callback signature.
+///
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+/// @param timestamp Note timestamp in seconds.
+/// @param user_data User data.
+typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
+                                                double timestamp,
+                                                void* user_data);
+
+/// Musician adjust note callback signature.
+///
+/// @param definition Mutable note definition.
+/// @param user_data User data.
+typedef void (*BarelyMusician_AdjustNoteCallback)(
+    BarelyNoteDefinition* definition, void* user_data);
+
+/// Musician adjust parameter automation callback signature.
+///
+/// @param definition Mutable parameter automation definition.
+/// @param user_data User data.
+typedef void (*BarelyMusician_AdjustParameterAutomationCallback)(
+    BarelyParameterAutomationDefinition* definition, void* user_data);
+
+/// Musician adjust tempo callback signature.
+///
+/// @param tempo Mutable tempo in bpm.
+/// @param user_data User data.
+typedef void (*BarelyMusician_AdjustTempoCallback)(double* tempo,
+                                                   void* user_data);
+
+/// Musician beat callback signature.
 ///
 /// @param position Beat position in beats.
 /// @param timestamp Beat timestamp in seconds.
@@ -277,640 +285,713 @@ typedef struct BarelyInstrumentDefinition {
 typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
                                             void* user_data);
 
-/// Note duration adjustment callback signature.
-///
-/// @param definition Mutable note duration definition.
-/// @param user_data User data.
-typedef void (*BarelyMusician_NoteDurationAdjustmentCallback)(
-    BarelyNoteDurationDefinition* definition, void* user_data);
-
-/// Note intensity adjustment callback signature.
-///
-/// @param definition Mutable note intensity definition.
-/// @param user_data User data.
-typedef void (*BarelyMusician_NoteIntensityAdjustmentCallback)(
-    BarelyNoteIntensityDefinition* definition, void* user_data);
-
-/// Note pitch adjustment callback signature.
-///
-/// @param definition Mutable note pitch definition.
-/// @param user_data User data.
-typedef void (*BarelyMusician_NotePitchAdjustmentCallback)(
-    BarelyNotePitchDefinition* definition, void* user_data);
-
 /// Creates new instrument.
 ///
-/// @param api BarelyMusician api.
 /// @param definition Instrument definition.
-/// @param sample_rate Sampling rate in hz.
-/// @param out_instrument_id Output instrument identifier.
+/// @param frame_rate Frame rate in hz.
+/// @param out_handle Output instrument handle.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelyInstrument_Create(BarelyApi api, BarelyInstrumentDefinition definition,
-                        int32_t sample_rate, BarelyId* out_instrument_id);
+BarelyInstrument_Create(BarelyInstrumentDefinition definition,
+                        int32_t frame_rate, BarelyInstrumentHandle* out_handle);
 
 /// Destroys instrument.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
                                                     BarelyId instrument_id);
 
 /// Gets instrument parameter value.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @param out_value Output parameter value.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(BarelyApi api,
-                                                         BarelyId instrument_id,
-                                                         int32_t index,
-                                                         double* out_value);
+BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
+    double* out_value);
 
 /// Gets instrument parameter definition.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @param out_definition Output parameter definition.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
-    BarelyApi api, BarelyId instrument_id, int32_t index,
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
     BarelyParameterDefinition* out_definition);
 
-/// Gets whether instrument note is playing or not.
+/// Gets whether instrument note is active or not.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
-/// @param out_is_note_on Output true if playing, false otherwise.
+/// @param out_is_note_on Output true if active, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(BarelyApi api,
-                                                     BarelyId instrument_id,
-                                                     double pitch,
-                                                     bool* out_is_note_on);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle, BarelyId instrument_id,
+                          double pitch, bool* out_is_note_on);
 
 /// Processes instrument output buffer at timestamp.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param timestamp Timestamp in seconds.
 /// @param output Output buffer.
 /// @param num_output_channels Number of output channels.
 /// @param num_output_frames Number of output frames.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
-    BarelyApi api, BarelyId instrument_id, double timestamp, double* output,
-    int32_t num_output_channels, int32_t num_output_frames);
+    BarelyMusicianHandle handle, BarelyId instrument_id, double* output,
+    int32_t num_output_channels, int32_t num_output_frames, double timestamp);
 
 /// Resets all instrument parameters to default value.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_ResetAllParameters(BarelyApi api, BarelyId instrument_id);
+BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllParameters(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double timestamp);
 
 /// Resets instrument parameter to default value.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
-    BarelyApi api, BarelyId instrument_id, int32_t index);
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
+    double timestamp);
 
 /// Sets instrument data.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param definition Data definition.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(
-    BarelyApi api, BarelyId instrument_id, BarelyDataDefinition definition);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_SetData(BarelyMusicianHandle handle, BarelyId instrument_id,
+                         BarelyDataDefinition definition, double timestamp);
 
 /// Sets instrument note off callback.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param note_off_callback Note off callback.
+/// @param callback Note off callback.
 /// @param user_data User data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
-    BarelyApi api, BarelyId instrument_id,
-    BarelyInstrument_NoteOffCallback note_off_callback, void* user_data);
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyInstrument_NoteOffCallback callback, void* user_data);
 
 /// Sets instrument note on callback.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param note_on_callback Note on callback.
+/// @param callback Note on callback.
 /// @param user_data User data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
-    BarelyApi api, BarelyId instrument_id,
-    BarelyInstrument_NoteOnCallback note_on_callback, void* user_data);
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyInstrument_NoteOnCallback callback, void* user_data);
 
 /// Sets instrument parameter value.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @param value Parameter value.
+/// @param slope Parameter slope in value change per second.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(BarelyApi api,
-                                                         BarelyId instrument_id,
-                                                         int32_t index,
-                                                         double value);
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
+    double value, double slope, double timestamp);
 
 /// Starts instrument note.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
+/// @param intensity Note intensity.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_StartNote(BarelyApi api,
-                                                      BarelyId instrument_id,
-                                                      double pitch,
-                                                      double intensity);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_StartNote(BarelyMusicianHandle handle, BarelyId instrument_id,
+                           double pitch, double intensity, double timestamp);
 
 /// Stops all instrument notes.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_StopAllNotes(BarelyApi api, BarelyId instrument_id);
+BARELY_EXPORT BarelyStatus BarelyInstrument_StopAllNotes(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double timestamp);
 
 /// Stops instrument note.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
+/// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyApi api,
-                                                     BarelyId instrument_id,
-                                                     double pitch);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_StopNote(BarelyMusicianHandle handle, BarelyId instrument_id,
+                          double pitch, double timestamp);
 
-/// Creates new BarelyMusician api.
+/// Creates new musician.
 ///
-/// @param out_api Output BarelyMusician api.
+/// @param out_handle Output musician handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Create(BarelyApi* out_api);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_Create(BarelyMusicianHandle* out_handle);
 
-/// Destroys BarelyMusician api.
+/// Destroys musician.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyApi api);
+BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
 
-/// Gets note duration.
+/// Gets musician note.
 ///
-/// @param api BarelyMusician api.
-/// @param definition Note duration definition.
-/// @param bypass_adjustment True if duration adjustment should be bypassed.
-/// @param out_duration Output note duration.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetNoteDuration(
-    BarelyApi api, BarelyNoteDurationDefinition definition,
-    bool bypass_adjustment, double* out_duration);
-
-/// Gets note intensity.
-///
-/// @param api BarelyMusician api.
-/// @param intensity Note pitch intensity.
-/// @param bypass_adjustment True if intensity adjustment should be bypassed.
-/// @param out_intensity Output note intensity.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetNoteIntensity(
-    BarelyApi api, BarelyNoteIntensityDefinition definition,
-    bool bypass_adjustment, double* out_intensity);
-
-/// Gets note pitch.
-///
-/// @param api BarelyMusician api.
-/// @param definition Note pitch definition.
-/// @param bypass_adjustment True if pitch adjustment should be bypassed.
+/// @param handle Musician handle.
+/// @param pitch Note pitch.
 /// @param out_pitch Output note pitch.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
-BarelyMusician_GetNotePitch(BarelyApi api, BarelyNotePitchDefinition definition,
-                            bool bypass_adjustment, double* out_pitch);
+BarelyMusician_GetNote(BarelyMusicianHandle handle,
+                       BarelyNoteDefinition_Pitch pitch, double* out_pitch);
 
-/// Gets playback position.
+/// Gets musician position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param out_position Output position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetPosition(BarelyApi api,
-                                                      double* out_position);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetPosition(BarelyMusicianHandle handle, double* out_position);
 
-/// Gets root note.
+/// Gets musician root note.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param out_root_pitch Output root note pitch.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetRootNote(BarelyApi api,
-                                                      double* out_root_pitch);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetRootNote(BarelyMusicianHandle handle, double* out_root_pitch);
 
-/// Gets scale.
+/// Gets musician scale.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param out_scale_pitches Output list of scale note pitches.
 /// @param out_num_scale_pitches Output number of scale note pitches.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetScale(
-    BarelyApi api, double** out_scale_pitches, int32_t* out_num_scale_pitches);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetScale(BarelyMusicianHandle handle, double** out_scale_pitches,
+                        int32_t* out_num_scale_pitches);
 
-/// Gets playback tempo.
+/// Gets musician tempo.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param out_tempo Output tempo in bpm.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
                                                    double* out_tempo);
 
-/// Gets timestamp.
+/// Gets musician timestamp.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param out_timestamp Output timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestamp(BarelyApi api,
-                                                       double* out_timestamp);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
 
-/// Gets timestamp at position.
+/// Gets musician timestamp at position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param position Position in beats.
 /// @param out_timestamp Output timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestampAtPosition(
-    BarelyApi api, double position, double* out_timestamp);
+    BarelyMusicianHandle handle, double position, double* out_timestamp);
 
-/// Gets whether playback is active or not.
+/// Gets whether musician is playing or not.
 ///
-/// @param api BarelyMusician api.
-/// @param out_is_playing Output true if active, false otherwise.
+/// @param handle Musician handle.
+/// @param out_is_playing Output true if playing, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyMusicianHandle handle,
                                                     bool* out_is_playing);
 
-/// Sets beat callback.
+/// Sets musician adjust note callback.
 ///
-/// @param api BarelyMusician api.
-/// @param beat_callback Beat callback.
+/// @param handle Musician handle.
+/// @param callback Adjust note callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustNoteCallback(
+    BarelyMusicianHandle handle, BarelyMusician_AdjustNoteCallback callback,
+    void* user_data);
+
+/// Sets musician adjust parameter automation callback.
+///
+/// @param handle Musician handle.
+/// @param callback Adjust parameter automation callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustParameterAutomationCallback(
+    BarelyMusicianHandle handle,
+    BarelyMusician_AdjustParameterAutomationCallback callback, void* user_data);
+
+/// Sets musician adjust tempo callback.
+///
+/// @param handle Musician handle.
+/// @param callback Adjust tempo callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustTempoCallback(
+    BarelyMusicianHandle handle, BarelyMusician_AdjustTempoCallback callback,
+    void* user_data);
+
+/// Sets musician beat callback.
+///
+/// @param handle Musician handle.
+/// @param callback Beat callback.
 /// @param user_data User data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetBeatCallback(
-    BarelyApi api, BarelyMusician_BeatCallback beat_callback, void* user_data);
-
-/// Sets note duration adjustment callback.
-///
-/// @param api BarelyMusician api.
-/// @param adjustment_callback Note duration adjustment callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetNoteDurationAdjustmentCallback(
-    BarelyApi api,
-    BarelyMusician_NoteDurationAdjustmentCallback adjustment_callback,
+    BarelyMusicianHandle handle, BarelyMusician_BeatCallback callback,
     void* user_data);
 
-/// Sets note intensity adjustment callback.
+/// Sets musician position.
 ///
-/// @param api BarelyMusician api.
-/// @param adjustment_callback Note intensity adjustment callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetNoteIntensityAdjustmentCallback(
-    BarelyApi api,
-    BarelyMusician_NoteIntensityAdjustmentCallback adjustment_callback,
-    void* user_data);
-
-/// Sets note pitch adjustment callback.
-///
-/// @param api BarelyMusician api.
-/// @param adjustment_callback Note pitch adjustment callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetNotePitchAdjustmentCallback(
-    BarelyApi api,
-    BarelyMusician_NotePitchAdjustmentCallback adjustment_callback,
-    void* user_data);
-
-/// Sets playback position.
-///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param position Position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetPosition(BarelyApi api,
-                                                      double position);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_SetPosition(BarelyMusicianHandle handle, double position);
 
-/// Sets root note.
+/// Sets musician root note.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param root_pitch Root note pitch.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetRootNote(BarelyApi api,
-                                                      double root_pitch);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_SetRootNote(BarelyMusicianHandle handle, double root_pitch);
 
-/// Sets scale.
+/// Sets musician scale.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param scale_pitches List of scale note pitches.
 /// @param num_scale_pitches Number of scale note pitches.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetScale(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelyMusician_SetScale(BarelyMusicianHandle handle,
                                                    double* scale_pitches,
                                                    int32_t num_scale_pitches);
 
-/// Sets playback tempo.
+/// Sets musician tempo.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param tempo Tempo in bpm.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyApi api, double tempo);
+BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
+                                                   double tempo);
 
-/// Sets timestamp.
+/// Sets musician timestamp.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetTimestamp(BarelyApi api,
-                                                       double timestamp);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_SetTimestamp(BarelyMusicianHandle handle, double timestamp);
 
-/// Starts playback.
+/// Starts musician playback.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Start(BarelyApi api);
+BARELY_EXPORT BarelyStatus BarelyMusician_Start(BarelyMusicianHandle handle);
 
-/// Stops playback.
+/// Stops musician playback.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Stop(BarelyApi api);
+BARELY_EXPORT BarelyStatus BarelyMusician_Stop(BarelyMusicianHandle handle);
 
-/// Updates internal state at timestamp.
+/// Updates musician at timestamp.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
                                                  double timestamp);
 
 /// Adds sequence note at position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param position Note position in beats.
 /// @param definition Note definition.
-/// @param out_note_id Output note identifier.
+/// @param position Note position in beats.
+/// @param out_note_id Output note handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_AddNote(BarelyApi api, BarelyId sequence_id, double position,
-                       BarelyNoteDefinition definition, BarelyId* out_note_id);
+BARELY_EXPORT BarelyStatus BarelySequence_AddNote(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyNoteDefinition definition, double position, BarelyId* out_note_id);
+
+/// Adds sequence parameter automation at position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param definition Parameter automation definition.
+/// @param position Parameter automation position in beats.
+/// @param out_parameter_automation_id Output parameter automation handle.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_AddParameterAutomation(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyParameterAutomationDefinition definition, double position,
+    BarelyId* out_parameter_automation_id);
 
 /// Creates new sequence.
 ///
-/// @param api BarelyMusician api.
 /// @param out_sequence_id Output sequence identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_Create(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelySequence_Create(BarelyMusicianHandle handle,
                                                  BarelyId* out_sequence_id);
 
 /// Destroys sequence.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_Destroy(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelySequence_Destroy(BarelyMusicianHandle handle,
                                                   BarelyId sequence_id);
 
-/// Gets sequence begin offset.
+/// Gets sequence begin offset in beats.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param out_begin_offset Output begin offset in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetBeginOffset(
-    BarelyApi api, BarelyId sequence_id, double* out_begin_offset);
+BARELY_EXPORT BarelyStatus
+BarelySequence_GetBeginOffset(BarelyMusicianHandle handle, BarelyId sequence_id,
+                              double* out_begin_offset);
 
-/// Gets sequence begin position.
+/// Gets sequence begin position in beats.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param out_begin_position Output begin position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_GetBeginPosition(
-    BarelyApi api, BarelyId sequence_id, double* out_begin_position);
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    double* out_begin_position);
 
-/// Gets sequence end position.
+/// Gets sequence end position in beats.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param out_end_position Output end position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetEndPosition(
-    BarelyApi api, BarelyId sequence_id, double* out_end_position);
+BARELY_EXPORT BarelyStatus
+BarelySequence_GetEndPosition(BarelyMusicianHandle handle, BarelyId sequence_id,
+                              double* out_end_position);
 
 /// Gets sequence instrument.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param out_instrument_id Instrument identifier.
-BARELY_EXPORT BarelyStatus BarelySequence_GetInstrument(
-    BarelyApi api, BarelyId sequence_id, BarelyId* out_instrument_id);
+/// @param out_instrument Output instrument handle.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySequence_GetInstrument(BarelyMusicianHandle handle, BarelyId sequence_id,
+                             BarelyInstrumentHandle* out_instrument_handle);
 
 /// Gets sequence loop begin offset.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param out_loop_begin_offset Output loop begin offset in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_GetLoopBeginOffset(
-    BarelyApi api, BarelyId sequence_id, double* out_loop_begin_offset);
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    double* out_loop_begin_offset);
 
 /// Gets sequence loop length.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param out_loop_length Output loop length in beats.
+/// @param out_loop_length Output loop length.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_GetLoopLength(
-    BarelyApi api, BarelyId sequence_id, double* out_loop_length);
+    BarelyMusicianHandle handle, BarelyId sequence_id, double* out_loop_length);
 
-/// Gets sequence note pitch.
+/// Gets sequence note definition.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
-/// @param out_definition Note definition.
+/// @param out_definition Output note definition.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_GetNoteDefinition(
-    BarelyApi api, BarelyId sequence_id, BarelyId note_id,
+    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
     BarelyNoteDefinition* out_definition);
 
 /// Gets sequence note position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
-/// @param out_position Output note position.
+/// @param out_position Output note position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetNotePosition(BarelyApi api,
-                                                          BarelyId sequence_id,
-                                                          BarelyId note_id,
-                                                          double* out_position);
+BARELY_EXPORT BarelyStatus BarelySequence_GetNotePosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
+    double* out_position);
+
+/// Gets sequence parameter automation definition.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param out_definition Output parameter automation definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetParameterAutomationDefinition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id,
+    BarelyParameterAutomationDefinition* out_definition);
+
+/// Gets sequence parameter automation position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param out_position Output parameter automation position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_GetParameterAutomationPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, double* out_position);
 
 /// Gets whether sequence is empty or not.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param out_is_empty Output true if empty, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_IsEmpty(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelySequence_IsEmpty(BarelyMusicianHandle handle,
                                                   BarelyId sequence_id,
                                                   bool* out_is_empty);
 
 /// Gets whether sequence is looping or not.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param out_is_looping Output true if looping, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyApi api,
+BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyMusicianHandle handle,
                                                     BarelyId sequence_id,
                                                     bool* out_is_looping);
 
+/// Performs sequence at range.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param musician_handle Musician handle.
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+BARELY_EXPORT BarelyStatus
+BarelySequence_Perform(BarelyMusicianHandle handle, BarelyId sequence_id,
+                       BarelyMusicianHandle musician_handle,
+                       double begin_position, double end_position);
+
 /// Removes all sequence notes.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotes(BarelyApi api,
-                                                         BarelyId sequence_id);
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotes(
+    BarelyMusicianHandle handle, BarelyId sequence_id);
 
 /// Removes sequence note at position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param position Position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtPosition(
-    BarelyApi api, BarelyId sequence_id, double position);
+    BarelyMusicianHandle handle, BarelyId sequence_id, double position);
 
 /// Removes all sequence notes at range.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param begin_position Begin position in beats.
 /// @param end_position End position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtRange(
-    BarelyApi api, BarelyId sequence_id, double begin_position,
+    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_position,
+    double end_position);
+
+/// Removes all sequence parameter automations.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllParameterAutomations(
+    BarelyMusicianHandle handle, BarelyId sequence_id);
+
+/// Removes all sequence parameter automations at position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySequence_RemoveAllParameterAutomationsAtPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id, double position);
+
+/// Removes all sequence parameter automations at range.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param begin_position Begin position in beats.
+/// @param end_position End position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllParameterAutomationsAtRange(
+    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_position,
     double end_position);
 
 /// Removes sequence note.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveNote(BarelyApi api,
-                                                     BarelyId sequence_id,
-                                                     BarelyId note_id);
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveNote(
+    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id);
+
+/// Removes sequence parameter automation.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_RemoveParameterAutomation(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id);
 
 /// Sets sequence begin offset.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param begin_offset Begin offset in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetBeginOffset(BarelyApi api,
-                                                         BarelyId sequence_id,
-                                                         double begin_offset);
+BARELY_EXPORT BarelyStatus BarelySequence_SetBeginOffset(
+    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_offset);
 
 /// Sets sequence begin position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param begin_position Begin position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_SetBeginPosition(
-    BarelyApi api, BarelyId sequence_id, double begin_position);
+    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_position);
 
 /// Sets sequence end position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param end_position End position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetEndPosition(BarelyApi api,
-                                                         BarelyId sequence_id,
-                                                         double end_position);
+BARELY_EXPORT BarelyStatus BarelySequence_SetEndPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id, double end_position);
 
 /// Sets sequence instrument.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param instrument_id Instrument identifier.
-BARELY_EXPORT BarelyStatus BarelySequence_SetInstrument(BarelyApi api,
-                                                        BarelyId sequence_id,
-                                                        BarelyId instrument_id);
+/// @param instrument_handle Instrument handle.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelySequence_SetInstrument(BarelyMusicianHandle handle, BarelyId sequence_id,
+                             BarelyInstrumentHandle instrument_handle);
 
 /// Sets sequence loop begin offset.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param loop_begin_offset Loop begin offset in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_SetLoopBeginOffset(
-    BarelyApi api, BarelyId sequence_id, double loop_begin_offset);
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    double loop_begin_offset);
 
 /// Sets sequence loop length.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param loop_length Loop length in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetLoopLength(BarelyApi api,
-                                                        BarelyId sequence_id,
-                                                        double loop_length);
+BARELY_EXPORT BarelyStatus BarelySequence_SetLoopLength(
+    BarelyMusicianHandle handle, BarelyId sequence_id, double loop_length);
 
 /// Sets whether sequence should be looping or not.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param is_looping True if looping, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(BarelyApi api,
-                                                     BarelyId sequence_id,
-                                                     bool is_looping);
+BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(
+    BarelyMusicianHandle handle, BarelyId sequence_id, bool is_looping);
 
-/// Sets sequence note pitch.
+/// Sets sequence note definition.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
 /// @param definition Note definition.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_SetNoteDefinition(
-    BarelyApi api, BarelyId sequence_id, BarelyId note_id,
+    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
     BarelyNoteDefinition definition);
 
 /// Sets sequence note position.
 ///
-/// @param api BarelyMusician api.
+/// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
-/// @param position Note position.
+/// @param position Note position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetNotePosition(BarelyApi api,
-                                                          BarelyId sequence_id,
-                                                          BarelyId note_id,
-                                                          double position);
+BARELY_EXPORT BarelyStatus BarelySequence_SetNotePosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
+    double position);
+
+/// Sets sequence parameter automation definition.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param definition Parameter automation definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetParameterAutomationDefinition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id,
+    BarelyParameterAutomationDefinition definition);
+
+/// Sets sequence parameter automation position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param position Parameter automation position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetParameterAutomationPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, double position);
 
 #ifdef __cplusplus
 }  // extern "C"

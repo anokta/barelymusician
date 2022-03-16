@@ -7,20 +7,13 @@ cc_library(
     srcs = ["barelymusician.cpp"],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":barelymusician_headeronly",
-        ":event",
-        ":find_or_null",
-        ":instrument",
-        ":mutable_data",
-        ":parameter",
-        ":sequence",
-        ":transport",
+        ":include",
     ],
     alwayslink = True,
 )
 
 cc_library(
-    name = "barelymusician_headeronly",
+    name = "include",
     hdrs = ["barelymusician.h"],
 )
 

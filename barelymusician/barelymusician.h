@@ -56,14 +56,12 @@ enum BarelyStatus_Values {
   BarelyStatus_kNotFound = 2,
   /// Already exists error.
   BarelyStatus_kAlreadyExists = 3,
-  /// Failed precondition error.
-  BarelyStatus_kFailedPrecondition = 4,
   /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 5,
+  BarelyStatus_kUnimplemented = 4,
   /// Internal error.
-  BarelyStatus_kInternal = 6,
+  BarelyStatus_kInternal = 5,
   /// Unknown error.
-  BarelyStatus_kUnknown = 7,
+  BarelyStatus_kUnknown = 6,
 };
 
 /// Data definition move callback signature.
@@ -287,13 +285,14 @@ typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
 
 /// Creates new instrument.
 ///
+/// @param handle Musician handle.
 /// @param definition Instrument definition.
 /// @param frame_rate Frame rate in hz.
-/// @param out_handle Output instrument handle.
+/// @param out_instrument_id Output instrument identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_Create(BarelyInstrumentDefinition definition,
-                        int32_t frame_rate, BarelyInstrumentHandle* out_handle);
+BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
+    BarelyMusicianHandle handle, BarelyInstrumentDefinition definition,
+    int32_t frame_rate, BarelyId* out_instrument_id);
 
 /// Destroys instrument.
 ///
@@ -353,32 +352,28 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllParameters(
-    BarelyMusicianHandle handle, BarelyId instrument_id, double timestamp);
+    BarelyMusicianHandle handle, BarelyId instrument_id);
 
 /// Resets instrument parameter to default value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
-/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
-    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
-    double timestamp);
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index);
 
 /// Sets instrument data.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param definition Data definition.
-/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_SetData(BarelyMusicianHandle handle, BarelyId instrument_id,
-                         BarelyDataDefinition definition, double timestamp);
+                         BarelyDataDefinition definition);
 
 /// Sets instrument note off callback.
 ///
@@ -408,12 +403,10 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @param value Parameter value.
-/// @param slope Parameter slope in value change per second.
-/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
     BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
-    double value, double slope, double timestamp);
+    double value);
 
 /// Starts instrument note.
 ///
@@ -421,31 +414,27 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_StartNote(BarelyMusicianHandle handle, BarelyId instrument_id,
-                           double pitch, double intensity, double timestamp);
+                           double pitch, double intensity);
 
 /// Stops all instrument notes.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopAllNotes(
-    BarelyMusicianHandle handle, BarelyId instrument_id, double timestamp);
+    BarelyMusicianHandle handle, BarelyId instrument_id);
 
 /// Stops instrument note.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
-/// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_StopNote(BarelyMusicianHandle handle, BarelyId instrument_id,
-                          double pitch, double timestamp);
+BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
 
 /// Creates new musician.
 ///
@@ -997,5 +986,483 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetParameterAutomationPosition(
 }  // extern "C"
 #endif  // __cplusplus
 // NOLINTEND
+
+#ifdef __cplusplus
+#include <cassert>
+#include <functional>
+#include <limits>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
+
+namespace barely {
+
+/// Status.
+enum class Status : BarelyStatus {
+  /// Success.
+  kOk = BarelyStatus_kOk,
+  /// Invalid argument error.
+  kInvalidArgument = BarelyStatus_kInvalidArgument,
+  /// Not found error.
+  kNotFound = BarelyStatus_kNotFound,
+  /// Already exists error.
+  kAlreadyExists = BarelyStatus_kAlreadyExists,
+  /// Unimplemented error.
+  kUnimplemented = BarelyStatus_kUnimplemented,
+  /// Internal error.
+  kInternal = BarelyStatus_kInternal,
+  /// Unknown error.
+  kUnknown = BarelyStatus_kUnknown,
+};
+
+/// Returns whether status is okay or not.
+///
+/// @param status Status.
+/// @return True if okay, false otherwise.
+inline bool IsOk(Status status) { return status == Status::kOk; }
+
+/// Returns status string.
+///
+/// @param status Status.
+/// @return Status string.
+inline std::string ToString(Status status) {
+  switch (status) {
+    case Status::kOk:
+      return "Ok";
+    case Status::kInvalidArgument:
+      return "Invalid argument error";
+    case Status::kNotFound:
+      return "Not found error";
+    case Status::kAlreadyExists:
+      return "Already exists error";
+    case Status::kUnimplemented:
+      return "Unimplemented error";
+    case Status::kInternal:
+      return "Internal error";
+    case Status::kUnknown:
+    default:
+      return "Unknown error";
+  }
+}
+
+/// Value or error status.
+template <typename ValueType>
+class StatusOr {
+ public:
+  /// Constructs new `StatusOr` with an error status.
+  ///
+  /// @param error_status Error status.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  StatusOr(Status error_status) : value_or_(error_status) {
+    assert(error_status != Status::kOk);
+  }
+
+  /// Constructs new `StatusOr` with a value.
+  ///
+  /// @param value Value.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  StatusOr(ValueType value) : value_or_(std::move(value)) {}
+
+  /// Returns contained error status.
+  ///
+  /// @return Error status.
+  [[nodiscard]] Status GetErrorStatus() const {
+    assert(std::holds_alternative<Status>(value_or_));
+    return std::get<Status>(value_or_);
+  }
+
+  /// Returns contained value.
+  ///
+  /// @return Value.
+  [[nodiscard]] const ValueType& GetValue() const {
+    assert(std::holds_alternative<ValueType>(value_or_));
+    return std::get<ValueType>(value_or_);
+  }
+
+  /// Returns contained value.
+  ///
+  /// @return Mutable value.
+  [[nodiscard]] ValueType& GetValue() {
+    assert(std::holds_alternative<ValueType>(value_or_));
+    return std::get<ValueType>(value_or_);
+  }
+
+  /// Returns whether value is contained or not.
+  ///
+  /// @return True if contained, false otherwise.
+  [[nodiscard]] bool IsOk() const {
+    return std::holds_alternative<ValueType>(value_or_);
+  }
+
+ private:
+  // Value or error status.
+  std::variant<Status, ValueType> value_or_;
+};
+
+/// Data definition.
+struct DataDefinition : public BarelyDataDefinition {
+  /// Move callback signature.
+  using MoveCallback = BarelyDataDefinition_MoveCallback;
+
+  /// Destroy callback signature.
+  using DestroyCallback = BarelyDataDefinition_DestroyCallback;
+
+  /// Constructs new `DataDefinition` of type.
+  ///
+  /// @param typed_data Typed data.
+  template <typename DataType>
+  explicit DataDefinition(DataType typed_data)
+      : BarelyDataDefinition{
+            [](void* other_data, void** out_data) {
+              *out_data = static_cast<void*>(
+                  new DataType(std::move(*static_cast<DataType*>(other_data))));
+            },
+            [](void* data) { delete static_cast<DataType*>(data); },
+            static_cast<void*>(&typed_data)} {}
+
+  /// Constructs new `DataDefinition` from internal type.
+  ///
+  /// @param definition Internal data definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  DataDefinition(BarelyDataDefinition definition)
+      : BarelyDataDefinition{definition} {}
+};
+
+/// Parameter definition.
+struct ParameterDefinition : public BarelyParameterDefinition {
+  /// Constructs new `ParameterDefinition`.
+  ///
+  /// @param default_value Default value.
+  /// @param min_value Minimum value.
+  /// @param max_value Maximum value.
+  explicit ParameterDefinition(
+      double default_value,
+      double min_value = std::numeric_limits<double>::lowest(),
+      double max_value = std::numeric_limits<double>::max())
+      : BarelyParameterDefinition{default_value, min_value, max_value} {}
+
+  /// Constructs new `ParameterDefinition` for a boolean value.
+  ///
+  /// @param default_value Default boolean value.
+  explicit ParameterDefinition(bool default_value)
+      : ParameterDefinition(static_cast<double>(default_value)) {}
+
+  /// Constructs new `ParameterDefinition` for an integer value.
+  ///
+  /// @param default_value Default integer value.
+  /// @param min_value Minimum integer value.
+  /// @param max_value Maximum integer value.
+  explicit ParameterDefinition(
+      int default_value, int min_value = std::numeric_limits<int>::lowest(),
+      int max_value = std::numeric_limits<int>::max())
+      : ParameterDefinition(static_cast<double>(default_value),
+                            static_cast<double>(min_value),
+                            static_cast<double>(max_value)) {}
+
+  /// Constructs new `ParameterDefinition` from internal type.
+  ///
+  /// @param definition Internal parameter definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  ParameterDefinition(BarelyParameterDefinition definition)
+      : BarelyParameterDefinition{definition} {}
+};
+
+/// Instrument definition.
+struct InstrumentDefinition : public BarelyInstrumentDefinition {
+  /// Create callback signature.
+  using CreateCallback = BarelyInstrumentDefinition_CreateCallback;
+
+  /// Destroy callback signature.
+  using DestroyCallback = BarelyInstrumentDefinition_DestroyCallback;
+
+  /// Process callback signature.
+  using ProcessCallback = BarelyInstrumentDefinition_ProcessCallback;
+
+  /// Set data callback signature.
+  using SetDataCallback = BarelyInstrumentDefinition_SetDataCallback;
+
+  /// Set note off callback signature
+  using SetNoteOffCallback = BarelyInstrumentDefinition_SetNoteOffCallback;
+
+  /// Set note on callback signature.
+  using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
+
+  /// Set parameter callback signature.
+  using SetParameterCallback = BarelyInstrumentDefinition_SetParameterCallback;
+
+  /// Constructs new `InstrumentDefinition`.
+  ///
+  /// @param create_callback Create callback.
+  /// @param destroy_callback Destroy callback.
+  /// @param process_callback Process callback.
+  /// @param set_data_callback Set data callback.
+  /// @param set_note_off_callback Set note off callback.
+  /// @param set_note_on_callback Set note on callback.
+  /// @param set_parameter_callback Set parameter callback.
+  /// @param parameter_definitions List of parameter definitions.
+  InstrumentDefinition(
+      CreateCallback create_callback, DestroyCallback destroy_callback,
+      ProcessCallback process_callback, SetDataCallback set_data_callback,
+      SetNoteOffCallback set_note_off_callback,
+      SetNoteOnCallback set_note_on_callback,
+      SetParameterCallback set_parameter_callback = nullptr,
+      const std::vector<ParameterDefinition>& parameter_definitions = {})
+      : BarelyInstrumentDefinition{
+            create_callback,
+            destroy_callback,
+            process_callback,
+            set_data_callback,
+            set_note_off_callback,
+            set_note_on_callback,
+            set_parameter_callback,
+            parameter_definitions.data(),
+            static_cast<int>(parameter_definitions.size())} {}
+
+  /// Constructs new `InstrumentDefinition` from internal type.
+  ///
+  /// @param definition Internal instrument definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  InstrumentDefinition(BarelyInstrumentDefinition definition)
+      : BarelyInstrumentDefinition{definition} {}
+};
+
+/// Instrument.
+class Instrument {
+ public:
+  /// Note off callback signature.
+  ///
+  /// @param pitch Note pitch.
+  /// @param timestamp Note timestamp in seconds.
+  using NoteOffCallback = std::function<void(double pitch, double timestamp)>;
+
+  /// Note on callback signature.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @param timestamp Note timestamp in seconds.
+  using NoteOnCallback =
+      std::function<void(double pitch, double intensity, double timestamp)>;
+
+  /// Destroys `Instrument`.
+  ~Instrument() {
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelyInstrument_Destroy(std::exchange(handle_, nullptr),
+                                   std::exchange(id_, BarelyId_kInvalid));
+      assert(IsOk(static_cast<Status>(status)));
+    }
+  }
+
+  /// Non-copyable.
+  Instrument(const Instrument& other) = delete;
+  Instrument& operator=(const Instrument& other) = delete;
+
+  /// Constructs new `Instrument` via move.
+  ///
+  /// @param other Other instrument.
+  Instrument(Instrument&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)),
+        id_(std::exchange(other.handle_, BarelyId_kInvalid)) {
+    SetNoteOffCallback(std::exchange(other.note_off_callback_, nullptr));
+    SetNoteOnCallback(std::exchange(other.note_on_callback_, nullptr));
+  }
+
+  /// Assigns `Instrument` via move.
+  ///
+  /// @param other Other instrument.
+  Instrument& operator=(Instrument&& other) noexcept {
+    if (this != &other) {
+      if (id_ != BarelyId_kInvalid) {
+        const auto status = BarelyInstrument_Destroy(handle_, id_);
+        assert(IsOk(static_cast<Status>(status)));
+      }
+      handle_ = std::exchange(other.handle_, nullptr);
+      id_ = std::exchange(other.id_, BarelyId_kInvalid);
+      SetNoteOffCallback(std::exchange(other.note_off_callback_, nullptr));
+      SetNoteOnCallback(std::exchange(other.note_on_callback_, nullptr));
+    }
+    return *this;
+  }
+
+  /// Returns parameter value.
+  ///
+  /// @param index Parameter index.
+  /// @return Parameter value, or error status.
+  [[nodiscard]] StatusOr<double> GetParameter(int index) const {
+    double value = 0.0;
+    if (const auto status = static_cast<Status>(
+            BarelyInstrument_GetParameter(handle_, id_, index, &value));
+        !IsOk(status)) {
+      return status;
+    }
+    return value;
+  }
+
+  /// Returns parameter definition.
+  ///
+  /// @param index Parameter index.
+  /// @return Parameter definition, or error status.
+  [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
+      int index) const {
+    BarelyParameterDefinition definition;
+    if (const auto status =
+            static_cast<Status>(BarelyInstrument_GetParameterDefinition(
+                handle_, id_, index, &definition));
+        !IsOk(status)) {
+      return status;
+    }
+    return ParameterDefinition(definition);
+  }
+
+  /// Returns whether note is active or not.
+  ///
+  /// @param pitch Note pitch.
+  /// @return True if active, false otherwise.
+  [[nodiscard]] bool IsNoteOn(double pitch) const {
+    bool is_note_on = false;
+    const auto status =
+        BarelyInstrument_IsNoteOn(handle_, id_, pitch, &is_note_on);
+    assert(IsOk(static_cast<Status>(status)));
+    return is_note_on;
+  }
+
+  /// Processes output buffer at timestamp.
+  ///
+  /// @param output Output buffer.
+  /// @param num_output_channels Number of output channels.
+  /// @param num_output_frames Number of output frames.
+  /// @return Status.
+  Status Process(double* output, int num_output_channels,
+                 int num_output_frames) {
+    return static_cast<Status>(BarelyInstrument_Process(
+        handle_, id_, output, num_output_channels, num_output_frames));
+  }
+
+  /// Resets all parameters.
+  ///
+  /// @return Status.
+  Status ResetAllParameters() {
+    return static_cast<Status>(
+        BarelyInstrument_ResetAllParameters(handle_, id_));
+  }
+
+  /// Resets parameter value.
+  ///
+  /// @param index Parameter index.
+  /// @return Status.
+  Status ResetParameter(int index) {
+    return static_cast<Status>(
+        BarelyInstrument_ResetParameter(handle_, id_, index));
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Data.
+  /// @return Status.
+  template <typename DataType>
+  Status SetData(DataType data) {
+    return static_cast<Status>(BarelyInstrument_SetData(
+        handle_, id_, DataDefinition(std::move(data))));
+  }
+
+  /// Sets note off callback.
+  ///
+  /// @param callback Note off callback.
+  /// @return Status.
+  Status SetNoteOffCallback(NoteOffCallback callback) {
+    if (callback) {
+      note_off_callback_ = std::move(callback);
+      return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
+          handle_, id_,
+          [](double pitch, double timestamp, void* user_data) {
+            (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
+          },
+          static_cast<void*>(&note_off_callback_)));
+    }
+    return static_cast<Status>(
+        BarelyInstrument_SetNoteOffCallback(handle_, id_, nullptr, nullptr));
+  }
+
+  /// Sets note on callback.
+  ///
+  /// @param callback Note on callback.
+  /// @return Status.
+  Status SetNoteOnCallback(NoteOnCallback callback) {
+    if (callback) {
+      note_on_callback_ = std::move(callback);
+      return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
+          handle_, id_,
+          [](double pitch, double intensity, double timestamp,
+             void* user_data) {
+            (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity,
+                                                       timestamp);
+          },
+          static_cast<void*>(&note_on_callback_)));
+    }
+    return static_cast<Status>(
+        BarelyInstrument_SetNoteOnCallback(handle_, id_, nullptr, nullptr));
+  }
+
+  /// Sets parameter value.
+  ///
+  /// @param index Parameter index.
+  /// @param value Parameter value.
+  /// @return Status.
+  Status SetParameter(int index, double value) {
+    return static_cast<Status>(
+        BarelyInstrument_SetParameter(handle_, id_, index, value));
+  }
+
+  /// Starts note.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @return Status.
+  Status StartNote(double pitch, double intensity = 1.0) {
+    return static_cast<Status>(
+        BarelyInstrument_StartNote(handle_, id_, pitch, intensity));
+  }
+
+  /// Stops all notes.
+  ///
+  /// @return Status.
+  Status StopAllNotes() {
+    return static_cast<Status>(BarelyInstrument_StopAllNotes(handle_, id_));
+  }
+
+  /// Stops note.
+  ///
+  /// @param pitch Note pitch.
+  /// @return Status.
+  Status StopNote(double pitch) {
+    return static_cast<Status>(BarelyInstrument_StopNote(handle_, id_, pitch));
+  }
+
+ private:
+  // Constructs new `Instrument`.
+  Instrument(BarelyMusicianHandle handle, InstrumentDefinition definition,
+             int frame_rate)
+      : handle_(handle) {
+    const auto status =
+        BarelyInstrument_Create(handle_, definition, frame_rate, id_);
+    assert(IsOk(static_cast<Status>(status)));
+  }
+
+  // Internal musician handle.
+  BarelyMusicianHandle handle_ = nullptr;
+
+  // Identifier.
+  BarelyId id_ = BarelyId_kInvalid;
+
+  // Note off callback.
+  NoteOffCallback note_off_callback_;
+
+  // Note on callback.
+  NoteOnCallback note_on_callback_;
+};
+
+}  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_BARELYMUSICIAN_H_

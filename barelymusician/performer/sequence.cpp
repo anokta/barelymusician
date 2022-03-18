@@ -39,7 +39,7 @@ bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 bool Sequence::IsLooping() const noexcept { return loop_; }
 
 void Sequence::Process(double begin_position, double end_position) noexcept {
-  // if (instrument_id_ == BarelyId_kInvalid) return;
+  if (instrument_id_ == BarelyId_kInvalid) return;
 
   // Perform active note events.
   for (auto it = active_notes_.begin(); it != active_notes_.end();) {

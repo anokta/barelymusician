@@ -1128,6 +1128,10 @@ struct DataDefinition : public BarelyDataDefinition {
       : BarelyDataDefinition{definition} {}
 };
 
+/// Note definition.
+// TODO: Refactor this similar to other definitions.
+using NoteDefinition = BarelyNoteDefinition;
+
 /// Parameter definition.
 struct ParameterDefinition : public BarelyParameterDefinition {
   /// Constructs new `ParameterDefinition`.
@@ -1442,10 +1446,11 @@ class Instrument {
 
  private:
   friend class Musician;
+  friend class Sequence;
 
   // Constructs new `Instrument`.
-  Instrument(BarelyMusicianHandle handle, InstrumentDefinition definition,
-             int frame_rate)
+  explicit Instrument(BarelyMusicianHandle handle,
+                      InstrumentDefinition definition, int frame_rate)
       : handle_(handle) {
     const auto status =
         BarelyInstrument_Create(handle_, definition, frame_rate, &id_);
@@ -1463,6 +1468,256 @@ class Instrument {
 
   // Note on callback.
   NoteOnCallback note_on_callback_;
+};
+
+/// Sequence.
+class Sequence {
+ public:
+  /// Destroys `Sequence`.
+  ~Sequence() {
+    if (id_ != BarelyId_kInvalid) {
+      const auto status =
+          BarelySequence_Destroy(std::exchange(handle_, nullptr),
+                                 std::exchange(id_, BarelyId_kInvalid));
+      assert(IsOk(static_cast<Status>(status)));
+    }
+  }
+
+  /// Non-copyable.
+  Sequence(const Sequence& other) = delete;
+  Sequence& operator=(const Sequence& other) = delete;
+
+  /// Constructs new `Sequence` via move.
+  ///
+  /// @param other Other sequence.
+  Sequence(Sequence&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {}
+
+  /// Assigns `Sequence` via move.
+  ///
+  /// @param other Other sequence.
+  Sequence& operator=(Sequence&& other) noexcept {
+    if (this != &other) {
+      if (handle_) {
+        BarelySequence_Destroy(handle_, id_);
+      }
+      handle_ = std::exchange(other.handle_, nullptr);
+    }
+    return *this;
+  }
+
+  /// Adds note at position.
+  ///
+  /// @param position Note position.
+  /// @param definition Note definition.
+  /// @return Note reference.
+  // TODO: refactor note api type.
+  BarelyId AddNote(double position, NoteDefinition definition) {
+    BarelyId note_id = BarelyId_kInvalid;
+    const auto status =
+        BarelySequence_AddNote(handle_, id_, definition, position, &note_id);
+    assert(IsOk(static_cast<Status>(status)));
+    return note_id;
+  }
+
+  // TODO: add parameter automation functions.
+
+  /// Returns begin offset.
+  ///
+  /// @return Begin offset in beats.
+  [[nodiscard]] double GetBeginOffset() const {
+    double begin_offset = 0.0;
+    const auto status =
+        BarelySequence_GetBeginOffset(handle_, id_, &begin_offset);
+    assert(IsOk(static_cast<Status>(status)));
+    return begin_offset;
+  }
+
+  /// Returns begin position.
+  ///
+  /// @return Begin position in beats.
+  [[nodiscard]] double GetBeginPosition() const {
+    double begin_position = 0.0;
+    const auto status =
+        BarelySequence_GetBeginPosition(handle_, id_, &begin_position);
+    assert(IsOk(static_cast<Status>(status)));
+    return begin_position;
+  }
+
+  /// Returns end position.
+  ///
+  /// @return End position in beats.
+  [[nodiscard]] double GetEndPosition() const {
+    double end_position = 0.0;
+    const auto status =
+        BarelySequence_GetEndPosition(handle_, id_, &end_position);
+    assert(IsOk(static_cast<Status>(status)));
+    return end_position;
+  }
+
+  /// Returns instrument.
+  ///
+  /// @return Pointer to instrument, or nullptr.
+  [[nodiscard]] const Instrument* GetInstrument() const { return instrument_; }
+
+  /// Returns loop begin offset.
+  ///
+  /// @return Loop begin offset in beats.
+  [[nodiscard]] double GetLoopBeginOffset() const {
+    double loop_begin_offset = 0.0;
+    const auto status =
+        BarelySequence_GetLoopBeginOffset(handle_, id_, &loop_begin_offset);
+    assert(IsOk(static_cast<Status>(status)));
+    return loop_begin_offset;
+  }
+
+  /// Returns loop length.
+  ///
+  /// @return Loop length in beats.
+  [[nodiscard]] double GetLoopLength() const {
+    double loop_length = 0.0;
+    const auto status =
+        BarelySequence_GetLoopLength(handle_, id_, &loop_length);
+    assert(IsOk(static_cast<Status>(status)));
+    return loop_length;
+  }
+
+  /// Returns whether sequence is empty or not.
+  ///
+  /// @return True if empty, false otherwise.
+  [[nodiscard]] bool IsEmpty() const {
+    bool is_empty = false;
+    const auto status = BarelySequence_IsEmpty(handle_, id_, &is_empty);
+    assert(IsOk(static_cast<Status>(status)));
+    return is_empty;
+  }
+
+  /// Returns whether sequence should be looping or not.
+  ///
+  /// @return True if looping, false otherwise.
+  [[nodiscard]] bool IsLooping() const {
+    bool is_looping = false;
+    const auto status = BarelySequence_IsLooping(handle_, id_, &is_looping);
+    assert(IsOk(static_cast<Status>(status)));
+    return is_looping;
+  }
+
+  /// Removes all notes.
+  ///
+  /// @return Status.
+  Status RemoveAllNotes() {
+    return static_cast<Status>(BarelySequence_RemoveAllNotes(handle_, id_));
+  }
+
+  /// Removes all notes at position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status RemoveAllNotes(double position) {
+    return static_cast<Status>(
+        BarelySequence_RemoveAllNotesAtPosition(handle_, id_, position));
+  }
+
+  /// Removes all notes at range.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
+  /// @return Status.
+  Status RemoveAllNotes(double begin_position, double end_position) {
+    return static_cast<Status>(BarelySequence_RemoveAllNotesAtRange(
+        handle_, id_, begin_position, end_position));
+  }
+
+  /// Removes note.
+  ///
+  /// @param note Note reference.
+  /// @return Status.
+  // TODO: refactor note api type.
+  Status RemoveNote(BarelyId note) {
+    return static_cast<Status>(BarelySequence_RemoveNote(handle_, id_, note));
+  }
+
+  /// Sets begin offset.
+  ///
+  /// @param begin_offset Begin offset in beats.
+  /// @return Status.
+  Status SetBeginOffset(double begin_offset) {
+    return static_cast<Status>(
+        BarelySequence_SetBeginOffset(handle_, id_, begin_offset));
+  }
+
+  /// Sets begin position.
+  ///
+  /// @param begin_position Begin position in beats.
+  /// @return Status.
+  Status SetBeginPosition(double begin_position) {
+    return static_cast<Status>(
+        BarelySequence_SetBeginPosition(handle_, id_, begin_position));
+  }
+
+  /// Sets end position.
+  ///
+  /// @param end_position End position in beats.
+  /// @return Status.
+  Status SetEndPosition(double end_position) {
+    return static_cast<Status>(
+        BarelySequence_SetEndPosition(handle_, id_, end_position));
+  }
+
+  /// Sets instrument.
+  ///
+  /// @param instrument Pointer to instrument, or nullptr.
+  /// @return Status.
+  Status SetInstrument(const Instrument* instrument) {
+    instrument_ = instrument;
+    return static_cast<Status>(BarelySequence_SetInstrument(
+        handle_, id_, instrument_ ? instrument_->id_ : BarelyId_kInvalid));
+  }
+
+  /// Sets loop begin offset.
+  ///
+  /// @param loop_begin_offset Loop begin offset in beats.
+  /// @return Status.
+  Status SetLoopBeginOffset(double loop_begin_offset) {
+    return static_cast<Status>(
+        BarelySequence_SetLoopBeginOffset(handle_, id_, loop_begin_offset));
+  }
+
+  /// Sets loop length.
+  ///
+  /// @param loop_length Loop length in beats.
+  /// @return Status.
+  Status SetLoopLength(double loop_length) {
+    return static_cast<Status>(
+        BarelySequence_SetLoopLength(handle_, id_, loop_length));
+  }
+
+  /// Sets whether sequence should be looping or not.
+  ///
+  /// @param is_looping True if looping, false otherwise.
+  /// @return Status.
+  Status SetLooping(bool is_looping) {
+    return static_cast<Status>(
+        BarelySequence_SetLooping(handle_, id_, is_looping));
+  }
+
+ private:
+  friend class Musician;
+
+  // Constructs new `Sequence`.
+  explicit Sequence(BarelyMusicianHandle handle) : handle_(handle) {
+    const auto status = BarelySequence_Create(handle_, &id_);
+    assert(IsOk(static_cast<Status>(status)));
+  }
+
+  // Internal musician handle.
+  BarelyMusicianHandle handle_ = nullptr;
+
+  // Identifier.
+  BarelyId id_ = BarelyId_kInvalid;
+
+  // Instrument.
+  const Instrument* instrument_ = nullptr;
 };
 
 /// Musician.
@@ -1522,8 +1777,13 @@ class Musician {
   /// @param frame_rate Frame rate in hz.
   /// @return Instrument.
   Instrument CreateInstrument(InstrumentDefinition definition, int frame_rate) {
-    return {handle_, definition, frame_rate};
+    return Instrument(handle_, definition, frame_rate);
   }
+
+  /// Creates new sequence.
+  ///
+  /// @return Sequence.
+  Sequence CreateSequence() { return Sequence(handle_); }
 
   /// Returns position.
   ///

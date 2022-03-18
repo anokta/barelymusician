@@ -13,9 +13,6 @@
 
 namespace barelyapi {
 
-using BarelyId = int;
-inline constexpr BarelyId BarelyId_kInvalid = -1;
-
 /// Musical note sequence.
 class Sequence {
  public:

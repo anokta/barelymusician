@@ -1491,17 +1491,20 @@ class Sequence {
   ///
   /// @param other Other sequence.
   Sequence(Sequence&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
+      : handle_(std::exchange(other.handle_, nullptr)),
+        id_(std::exchange(other.id_, BarelyId_kInvalid)) {}
 
   /// Assigns `Sequence` via move.
   ///
   /// @param other Other sequence.
   Sequence& operator=(Sequence&& other) noexcept {
     if (this != &other) {
-      if (handle_) {
-        BarelySequence_Destroy(handle_, id_);
+      if (id_ != BarelyId_kInvalid) {
+        const auto status = BarelySequence_Destroy(handle_, id_);
+        assert(IsOk(static_cast<Status>(status)));
       }
       handle_ = std::exchange(other.handle_, nullptr);
+      id_ = std::exchange(other.id_, BarelyId_kInvalid);
     }
     return *this;
   }

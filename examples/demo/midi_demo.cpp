@@ -7,27 +7,29 @@
 #include <vector>
 
 #include "MidiFile.h"
+#include "barelymusician/api/presets/instruments.h"
+#include "barelymusician/barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/synth_instrument.h"
-#include "platforms/api/barelymusician.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 namespace {
 
 using ::barely::Instrument;
 using ::barely::Musician;
+using ::barely::NoteDefinition;
 using ::barely::Sequence;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::OscillatorType;
+using ::barely::presets::GetInstrumentDefinition;
+using ::barely::presets::InstrumentType;
+using ::barely::presets::OscillatorType;
+using ::barely::presets::SynthParameter;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -72,13 +74,12 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      BarelyNoteDefinition note;
-      note.pitch_definition.absolute_pitch =
+      NoteDefinition note;
+      note.pitch.absolute_pitch =
           PitchFromMidiKeyNumber(midi_event.getKeyNumber());
-      note.intensity_definition.intensity =
+      note.intensity =
           static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
-      note.duration_definition.duration =
-          get_position(midi_event.getTickDuration());
+      note.duration = get_position(midi_event.getTickDuration());
       sequence->AddNote(get_position(midi_event.tick), note);
     }
   }
@@ -120,7 +121,7 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Add instrument.
     Instrument instrument = musician.CreateInstrument(
-        SynthInstrument::GetDefinition(), kSampleRate);
+        GetInstrumentDefinition(InstrumentType::kSynth), kSampleRate);
     const auto track_index = tracks.size();
     instrument.SetNoteOnCallback([track_index](double pitch, double intensity,
                                                double /*timestamp*/) {
@@ -132,13 +133,12 @@ int main(int /*argc*/, char* argv[]) {
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                        << MidiKeyNumberFromPitch(pitch) << ") ";
         });
-    instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack,
-                            kInstrumentEnvelopeAttack);
-    instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
+    instrument.SetParameter(SynthParameter::kAttack, kInstrumentEnvelopeAttack);
+    instrument.SetParameter(SynthParameter::kRelease,
                             kInstrumentEnvelopeRelease);
-    instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
+    instrument.SetParameter(SynthParameter::kOscillatorType,
                             static_cast<double>(kInstrumentOscillatorType));
-    instrument.SetParameter(SynthInstrumentParameter::kNumVoices,
+    instrument.SetParameter(SynthParameter::kNumVoices,
                             static_cast<double>(kNumInstrumentVoices));
     tracks.emplace_back(std::move(instrument), std::move(sequence));
     tracks.back().second.SetInstrument(&tracks.back().first);
@@ -150,8 +150,8 @@ int main(int /*argc*/, char* argv[]) {
   const auto process_callback = [&](double* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0);
     for (auto& [instrument, sequence] : tracks) {
-      instrument.Process(clock.GetTimestamp(), temp_buffer.data(), kNumChannels,
-                         kNumFrames);
+      instrument.Process(temp_buffer.data(), kNumChannels, kNumFrames,
+                         clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      [](double sample, double output_sample) {
                        return kInstrumentGain * sample + output_sample;

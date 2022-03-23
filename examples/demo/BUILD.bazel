@@ -47,22 +47,22 @@ cc_binary(
     ],
 )
 
-# cc_binary(
-#     name = "midi_demo",
-#     srcs = ["midi_demo.cpp"],
-#     data = ["//examples/data:midi"],
-#     deps = [
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/composition:note_pitch",
-#         "//examples/instruments:synth_instrument",
-#         "//platforms/api:barelymusician",
-#         "@bazel_tools//tools/cpp/runfiles",
-#         "@midifile",
-#     ],
-# )
+cc_binary(
+    name = "midi_demo",
+    srcs = ["midi_demo.cpp"],
+    data = ["//examples/data:midi"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/api/presets",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/composition:note_pitch",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@midifile",
+    ],
+)
 
 cc_binary(
     name = "performer_demo",

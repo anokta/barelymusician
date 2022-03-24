@@ -8,7 +8,6 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -19,18 +18,17 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentType;
 using ::barely::IsOk;
 using ::barely::Musician;
 using ::barely::NoteDefinition;
+using ::barely::OscillatorType;
 using ::barely::Sequence;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::presets::GetInstrumentDefinition;
-using ::barely::presets::InstrumentType;
-using ::barely::presets::OscillatorType;
-using ::barely::presets::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -64,24 +62,22 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  Instrument performer = musician.CreateInstrument(
-      GetInstrumentDefinition(InstrumentType::kSynth), kFrameRate);
+  Instrument performer =
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  performer.SetParameter(SynthParameter::kType, kOscillatorType);
   performer.SetParameter(SynthParameter::kAttack, kAttack);
   performer.SetParameter(SynthParameter::kRelease, kRelease);
-  performer.SetParameter(SynthParameter::kOscillatorType,
-                         static_cast<double>(kOscillatorType));
   performer.SetNoteOnCallback(
       [](double pitch, double intensity, double /*timestamp*/) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << ", "
                      << intensity << "}";
       });
 
-  Instrument metronome = musician.CreateInstrument(
-      GetInstrumentDefinition(InstrumentType::kSynth), kFrameRate);
+  Instrument metronome =
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  metronome.SetParameter(SynthParameter::kType, OscillatorType::kSquare);
   metronome.SetParameter(SynthParameter::kAttack, kAttack);
   metronome.SetParameter(SynthParameter::kRelease, 0.025);
-  metronome.SetParameter(SynthParameter::kOscillatorType,
-                         static_cast<double>(OscillatorType::kSquare));
 
   const auto build_note = [](double pitch, double duration,
                              double intensity = 0.25) {

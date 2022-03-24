@@ -5,7 +5,6 @@
 #include <optional>
 #include <thread>
 
-#include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/barelymusician.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -15,14 +14,13 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::OscillatorType;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::presets::GetInstrumentDefinition;
-using ::barely::presets::InstrumentType;
-using ::barely::presets::OscillatorType;
-using ::barely::presets::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -30,11 +28,11 @@ constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 256;
 
 // Instrument settings.
-constexpr double kGain = 0.125;
-constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
+constexpr double kGain = 0.125;
 constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;
+constexpr int kNumVoices = 16;
 
 // Note settings.
 constexpr double kRootPitch = barelyapi::kPitchC3;
@@ -62,14 +60,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Musician musician;
 
-  Instrument instrument = musician.CreateInstrument(
-      GetInstrumentDefinition(InstrumentType::kSynth), kFrameRate);
+  Instrument instrument =
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  instrument.SetParameter(SynthParameter::kType, kOscillatorType);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
-  instrument.SetParameter(SynthParameter::kOscillatorType,
-                          static_cast<double>(kOscillatorType));
-  instrument.SetParameter(SynthParameter::kNumVoices,
-                          static_cast<double>(kNumVoices));
+  instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   instrument.SetNoteOnCallback(
       [](double pitch, double intensity, double /*timestamp*/) {

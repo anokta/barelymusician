@@ -10,9 +10,9 @@
 namespace barelyapi {
 
 using ::barely::InstrumentDefinition;
+using ::barely::OscillatorType;
 using ::barely::ParameterDefinition;
-using ::barely::presets::OscillatorType;
-using ::barely::presets::SynthParameter;
+using ::barely::SynthParameter;
 
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
     : voice_(SynthVoice(sample_rate)) {}
@@ -39,6 +39,12 @@ void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 void SynthInstrument::SetParameter(int index, double value,
                                    double /*slope*/) noexcept {
   switch (static_cast<SynthParameter>(index)) {
+    case SynthParameter::kType:
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->generator().SetType(
+            static_cast<OscillatorType>(static_cast<int>(value)));
+      });
+      break;
     case SynthParameter::kAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetAttack(value);
@@ -57,12 +63,6 @@ void SynthInstrument::SetParameter(int index, double value,
     case SynthParameter::kRelease:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetRelease(value);
-      });
-      break;
-    case SynthParameter::kOscillatorType:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->generator().SetType(
-            static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
     case SynthParameter::kNumVoices:

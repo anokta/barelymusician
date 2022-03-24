@@ -2,7 +2,6 @@
 #include <chrono>
 #include <thread>
 
-#include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -13,15 +12,14 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::OscillatorType;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::presets::GetInstrumentDefinition;
-using ::barely::presets::InstrumentType;
-using ::barely::presets::OscillatorType;
-using ::barely::presets::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -31,11 +29,11 @@ constexpr int kNumFrames = 1024;
 constexpr double kLookahead = 0.1;
 
 // Metronome settings.
-constexpr int kNumVoices = 1;
-constexpr double kGain = 0.25;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
+constexpr double kGain = 0.25;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.025;
+constexpr int kNumVoices = 1;
 
 constexpr double kBarPitch = barelyapi::kPitchA4;
 constexpr double kBeatPitch = barelyapi::kPitchA3;
@@ -56,14 +54,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create metronome instrument.
-  Instrument metronome = musician.CreateInstrument(
-      GetInstrumentDefinition(InstrumentType::kSynth), kFrameRate);
+  Instrument metronome =
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  metronome.SetParameter(SynthParameter::kType, kOscillatorType);
   metronome.SetParameter(SynthParameter::kAttack, kAttack);
   metronome.SetParameter(SynthParameter::kRelease, kRelease);
-  metronome.SetParameter(SynthParameter::kOscillatorType,
-                         static_cast<double>(kOscillatorType));
-  metronome.SetParameter(SynthParameter::kNumVoices,
-                         static_cast<double>(kNumVoices));
+  metronome.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   // Beat callback.
   const auto beat_callback = [&](double position, double /*timestamp*/) {

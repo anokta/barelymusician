@@ -3,7 +3,7 @@
 
 #include <random>
 
-#include "barelymusician/api/presets/instruments.h"
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/presets/dsp/generator.h"
 
 namespace barelyapi {
@@ -11,6 +11,9 @@ namespace barelyapi {
 /// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator : public Generator {
  public:
+  /// Type alias.
+  using Type = barely::OscillatorType;
+
   /// Constructs new `Oscillator`.
   ///
   /// @param sample_rate Sampling rate in hz.
@@ -28,20 +31,20 @@ class Oscillator : public Generator {
   /// Sets the type of the oscillator.
   ///
   /// @param type Oscillator type.
-  void SetType(barely::presets::OscillatorType type) noexcept;
+  void SetType(Type type) noexcept;
 
  private:
   // Inverse sampling rate in seconds.
-  double sample_interval_;
+  double sample_interval_ = 0.0;
 
   // Oscillator type.
-  barely::presets::OscillatorType type_;
+  Type type_ = Type::kNoise;
 
   // Increment per sample.
-  double increment_;
+  double increment_ = 0.0;
 
   // Internal clock.
-  double phase_;
+  double phase_ = 0.0;
 
   // White noise random number generator.
   std::uniform_real_distribution<double> white_noise_distribution_;

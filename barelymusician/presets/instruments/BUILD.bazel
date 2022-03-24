@@ -10,7 +10,6 @@ cc_library(
         ":enveloped_voice",
         ":generic_instrument",
         "//barelymusician:include",
-        "//barelymusician/api/presets:include",
         "//barelymusician/presets/dsp:sample_player",
     ],
 )
@@ -40,7 +39,6 @@ cc_library(
         ":enveloped_voice",
         ":generic_instrument",
         "//barelymusician:include",
-        "//barelymusician/api/presets:include",
         "//barelymusician/presets/dsp:dsp_utils",
         "//barelymusician/presets/dsp:oscillator",
         "//barelymusician/presets/dsp:polyphonic_voice",

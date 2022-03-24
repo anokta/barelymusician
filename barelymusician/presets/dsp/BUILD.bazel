@@ -43,7 +43,7 @@ cc_library(
     deps = [
         ":dsp_utils",
         ":generator",
-        "//barelymusician/api/presets:include",
+        "//barelymusician:include",
     ],
 )
 

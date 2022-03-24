@@ -14,6 +14,8 @@
 #include "barelymusician/mutable_data.h"
 #include "barelymusician/performer/find_or_null.h"
 #include "barelymusician/performer/sequence.h"
+#include "barelymusician/presets/instruments/drumkit_instrument.h"
+#include "barelymusician/presets/instruments/synth_instrument.h"
 
 namespace {
 
@@ -74,11 +76,30 @@ struct BarelyMusician {
   BarelyMusician(BarelyMusician&& other) noexcept = delete;
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 
+  BarelyId CreateInstrument(BarelyInstrumentDefinition definition,
+                            int32_t frame_rate) noexcept {
+    const BarelyId instrument_id = ++id_counter;
+    instruments.emplace(instrument_id,
+                        std::make_unique<Instrument>(definition, frame_rate));
+    UpdateInstrumentMap();
+    return instrument_id;
+  }
+
   Instrument* GetInstrument(BarelyId instrument_id) const noexcept {
     if (auto it = instruments.find(instrument_id); it != instruments.end()) {
       return it->second.get();
     }
     return nullptr;
+  }
+
+  void Stop() noexcept {
+    for (auto& [sequence_id, sequence] : sequences) {
+      sequence.Stop();
+    }
+    transport.Stop();
+    for (auto& [instrument_id, instrument] : instruments) {
+      instrument->StopAllNotes(transport.GetTimestamp());
+    }
   }
 
   void UpdateInstrumentMap() noexcept {
@@ -119,13 +140,29 @@ BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  const BarelyId instrument_id = ++handle->id_counter;
-  *out_instrument_id = instrument_id;
+  *out_instrument_id = handle->CreateInstrument(definition, frame_rate);
+  return BarelyStatus_kOk;
+}
 
-  handle->instruments.emplace(
-      instrument_id, std::make_unique<Instrument>(definition, frame_rate));
-  handle->UpdateInstrumentMap();
+BarelyStatus BarelyInstrument_CreateOfType(BarelyMusicianHandle handle,
+                                           BarelyInstrumentType type,
+                                           int32_t frame_rate,
+                                           BarelyId* out_instrument_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
+  switch (type) {
+    case BarelyInstrumentType_kSynth:
+      *out_instrument_id = handle->CreateInstrument(
+          barelyapi::SynthInstrument::GetDefinition(), frame_rate);
+      break;
+    case BarelyInstrumentType_kPercussion:
+      *out_instrument_id = handle->CreateInstrument(
+          barelyapi::DrumkitInstrument::GetDefinition(), frame_rate);
+      break;
+    default:
+      return BarelyStatus_kInvalidArgument;
+  }
   return BarelyStatus_kOk;
 }
 
@@ -537,7 +574,7 @@ BarelyStatus BarelyMusician_Start(BarelyMusicianHandle handle) {
 BarelyStatus BarelyMusician_Stop(BarelyMusicianHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.Stop();
+  handle->Stop();
   return BarelyStatus_kOk;
 }
 
@@ -839,8 +876,9 @@ BarelyStatus BarelySequence_RemoveNote(BarelyMusicianHandle handle,
   }
 
   if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->RemoveNote(note_id);
-    return BarelyStatus_kOk;
+    if (sequence->RemoveNote(note_id)) {
+      return BarelyStatus_kOk;
+    }
   }
   return BarelyStatus_kNotFound;
 }

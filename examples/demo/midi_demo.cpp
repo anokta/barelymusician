@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "MidiFile.h"
-#include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -19,17 +18,16 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::NoteDefinition;
+using ::barely::OscillatorType;
 using ::barely::Sequence;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::presets::GetInstrumentDefinition;
-using ::barely::presets::InstrumentType;
-using ::barely::presets::OscillatorType;
-using ::barely::presets::SynthParameter;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -41,12 +39,12 @@ constexpr int kNumFrames = 512;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
+constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
+constexpr double kInstrumentEnvelopeAttack = 0.0;
+constexpr double kInstrumentEnvelopeRelease = 0.2;
 constexpr int kNumInstrumentVoices = 16;
 constexpr double kInstrumentGain =
     1.0 / static_cast<double>(kNumInstrumentVoices);
-constexpr double kInstrumentEnvelopeAttack = 0.0;
-constexpr double kInstrumentEnvelopeRelease = 0.2;
-constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 
 constexpr double kMaxVelocity = 127.0;
 
@@ -120,8 +118,8 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Add instrument.
-    Instrument instrument = musician.CreateInstrument(
-        GetInstrumentDefinition(InstrumentType::kSynth), kSampleRate);
+    Instrument instrument =
+        musician.CreateInstrument(InstrumentType::kSynth, kSampleRate);
     const auto track_index = tracks.size();
     instrument.SetNoteOnCallback([track_index](double pitch, double intensity,
                                                double /*timestamp*/) {
@@ -133,13 +131,11 @@ int main(int /*argc*/, char* argv[]) {
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                        << MidiKeyNumberFromPitch(pitch) << ") ";
         });
+    instrument.SetParameter(SynthParameter::kType, kInstrumentOscillatorType);
     instrument.SetParameter(SynthParameter::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetParameter(SynthParameter::kRelease,
                             kInstrumentEnvelopeRelease);
-    instrument.SetParameter(SynthParameter::kOscillatorType,
-                            static_cast<double>(kInstrumentOscillatorType));
-    instrument.SetParameter(SynthParameter::kNumVoices,
-                            static_cast<double>(kNumInstrumentVoices));
+    instrument.SetParameter(SynthParameter::kNumVoices, kNumInstrumentVoices);
     tracks.emplace_back(std::move(instrument), std::move(sequence));
     tracks.back().second.SetInstrument(&tracks.back().first);
   }

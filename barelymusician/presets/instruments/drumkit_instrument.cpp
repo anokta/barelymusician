@@ -3,14 +3,13 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/api/presets/instruments.h"
 #include "barelymusician/presets/instruments/generic_instrument.h"
 
 namespace barelyapi {
 
 using ::barely::InstrumentDefinition;
 using ::barely::ParameterDefinition;
-using ::barely::presets::DrumkitParameter;
+using ::barely::PercussionParameter;
 
 void DrumkitInstrument::Process(double* output, int num_channels,
                                 int num_frames) noexcept {
@@ -48,8 +47,8 @@ void DrumkitInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 
 void DrumkitInstrument::SetParameter(int index, double value,
                                      double /*slope*/) noexcept {
-  switch (static_cast<DrumkitParameter>(index)) {
-    case DrumkitParameter::kPadRelease:
+  switch (static_cast<PercussionParameter>(index)) {
+    case PercussionParameter::kRelease:
       for (auto& [pitch, pad] : pads_) {
         pad.voice.envelope().SetRelease(static_cast<double>(value));
       }

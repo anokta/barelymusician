@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_PARAMETER_H_
-#define BARELYMUSICIAN_INSTRUMENT_PARAMETER_H_
+#ifndef BARELYMUSICIAN_ENGINE_PARAMETER_H_
+#define BARELYMUSICIAN_ENGINE_PARAMETER_H_
 
 #include "barelymusician/barelymusician.h"
 
@@ -45,4 +45,4 @@ class Parameter {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_PARAMETER_H_
+#endif  // BARELYMUSICIAN_ENGINE_PARAMETER_H_

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
-#define BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_ENGINES_SYNTH_INSTRUMENT_H_
+#define BARELYMUSICIAN_ENGINES_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -33,4 +33,4 @@ class SynthInstrument : public GenericInstrument {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_ENGINES_SYNTH_INSTRUMENT_H_

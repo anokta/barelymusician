@@ -1,0 +1,109 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "data",
+    srcs = ["data.cpp"],
+    hdrs = ["data.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "event",
+    hdrs = ["event.h"],
+    deps = [
+        ":data",
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "event_queue",
+    srcs = ["event_queue.cpp"],
+    hdrs = ["event_queue.h"],
+    deps = [
+        ":event",
+    ],
+)
+
+cc_library(
+    name = "find_or_null",
+    hdrs = ["find_or_null.h"],
+)
+
+cc_library(
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
+    deps = [
+        ":data",
+        ":event",
+        ":event_queue",
+        ":parameter",
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "mutable_data",
+    hdrs = ["mutable_data.h"],
+)
+
+cc_library(
+    name = "parameter",
+    srcs = ["parameter.cpp"],
+    hdrs = ["parameter.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "sequence",
+    srcs = ["sequence.cpp"],
+    hdrs = ["sequence.h"],
+    deps = [
+        ":find_or_null",
+        "//barelymusician:include",
+        "//barelymusician/engine:event",
+    ],
+)
+
+cc_library(
+    name = "transport",
+    srcs = ["transport.cpp"],
+    hdrs = ["transport.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_test(
+    name = "find_or_null_test",
+    srcs = ["find_or_null_test.cpp"],
+    deps = [
+        ":find_or_null",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "parameter_test",
+    srcs = ["parameter_test.cpp"],
+    deps = [
+        ":parameter",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "transport_test",
+    srcs = ["transport_test.cpp"],
+    deps = [
+        ":transport",
+        "@googletest//:gtest_main",
+    ],
+)

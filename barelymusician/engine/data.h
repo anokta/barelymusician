@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_DATA_H_
-#define BARELYMUSICIAN_INSTRUMENT_DATA_H_
+#ifndef BARELYMUSICIAN_ENGINE_DATA_H_
+#define BARELYMUSICIAN_ENGINE_DATA_H_
 
 #include "barelymusician/barelymusician.h"
 
@@ -51,4 +51,4 @@ class Data {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_DATA_H_
+#endif  // BARELYMUSICIAN_ENGINE_DATA_H_

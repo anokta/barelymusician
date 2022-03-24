@@ -1,4 +1,4 @@
-#include "barelymusician/instrument/parameter.h"
+#include "barelymusician/engine/parameter.h"
 
 #include <algorithm>
 #include <cassert>

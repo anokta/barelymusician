@@ -1,11 +1,11 @@
-#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/engine/instrument.h"
 
 #include <cassert>
 #include <utility>
 #include <variant>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instrument/event.h"
+#include "barelymusician/engine/event.h"
 
 namespace barelyapi {
 

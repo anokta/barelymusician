@@ -1,14 +1,14 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
-#define BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
+#define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
 #include <functional>
 #include <unordered_set>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instrument/event.h"
-#include "barelymusician/instrument/event_queue.h"
-#include "barelymusician/instrument/parameter.h"
+#include "barelymusician/engine/event.h"
+#include "barelymusician/engine/event_queue.h"
+#include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
 
@@ -172,4 +172,4 @@ class Instrument {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

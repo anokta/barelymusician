@@ -1,4 +1,4 @@
-#include "barelymusician/instrument/event_queue.h"
+#include "barelymusician/engine/event_queue.h"
 
 #include <utility>
 

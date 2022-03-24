@@ -8,10 +8,10 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":include",
-        ":mutable_data",
-        "//barelymusician/conductor:transport",
-        "//barelymusician/instrument",
-        "//barelymusician/performer:sequence",
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:mutable_data",
+        "//barelymusician/engine:sequence",
+        "//barelymusician/engine:transport",
         "//barelymusician/instruments:drumkit_instrument",
         "//barelymusician/instruments:synth_instrument",
     ],
@@ -21,9 +21,4 @@ cc_library(
 cc_library(
     name = "include",
     hdrs = ["barelymusician.h"],
-)
-
-cc_library(
-    name = "mutable_data",
-    hdrs = ["mutable_data.h"],
 )

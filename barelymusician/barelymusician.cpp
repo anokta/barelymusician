@@ -9,13 +9,13 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/conductor/transport.h"
-#include "barelymusician/instrument/instrument.h"
+#include "barelymusician/engine/find_or_null.h"
+#include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/mutable_data.h"
+#include "barelymusician/engine/sequence.h"
+#include "barelymusician/engine/transport.h"
 #include "barelymusician/instruments/drumkit_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
-#include "barelymusician/mutable_data.h"
-#include "barelymusician/performer/find_or_null.h"
-#include "barelymusician/performer/sequence.h"
 
 namespace {
 

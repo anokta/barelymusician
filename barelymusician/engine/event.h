@@ -1,9 +1,9 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_EVENT_H_
-#define BARELYMUSICIAN_INSTRUMENT_EVENT_H_
+#ifndef BARELYMUSICIAN_ENGINE_EVENT_H_
+#define BARELYMUSICIAN_ENGINE_EVENT_H_
 
 #include <variant>
 
-#include "barelymusician/instrument/data.h"
+#include "barelymusician/engine/data.h"
 
 namespace barelyapi {
 
@@ -54,4 +54,4 @@ EventVisitor(EventTypes...) -> EventVisitor<EventTypes...>;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_EVENT_H_
+#endif  // BARELYMUSICIAN_ENGINE_EVENT_H_

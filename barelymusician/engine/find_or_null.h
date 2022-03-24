@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PERFORMER_FIND_OR_NULL_H_
-#define BARELYMUSICIAN_PERFORMER_FIND_OR_NULL_H_
+#ifndef BARELYMUSICIAN_ENGINE_FIND_OR_NULL_H_
+#define BARELYMUSICIAN_ENGINE_FIND_OR_NULL_H_
 
 namespace barelyapi {
 
@@ -39,4 +39,4 @@ ValueType* FindOrNull(MapType& map, const KeyType& key) noexcept {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PERFORMER_FIND_OR_NULL_H_
+#endif  // BARELYMUSICIAN_ENGINE_FIND_OR_NULL_H_

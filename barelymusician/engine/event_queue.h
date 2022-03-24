@@ -1,11 +1,11 @@
-#ifndef BARELYMUSICIAN_INSTRUMENT_EVENT_QUEUE_H_
-#define BARELYMUSICIAN_INSTRUMENT_EVENT_QUEUE_H_
+#ifndef BARELYMUSICIAN_ENGINE_EVENT_QUEUE_H_
+#define BARELYMUSICIAN_ENGINE_EVENT_QUEUE_H_
 
 #include <array>
 #include <atomic>
 #include <utility>
 
-#include "barelymusician/instrument/event.h"
+#include "barelymusician/engine/event.h"
 
 namespace barelyapi {
 
@@ -31,4 +31,4 @@ class EventQueue {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_INSTRUMENT_EVENT_QUEUE_H_
+#endif  // BARELYMUSICIAN_ENGINE_EVENT_QUEUE_H_

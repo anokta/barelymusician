@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PERFORMER_SEQUENCE_H_
-#define BARELYMUSICIAN_PERFORMER_SEQUENCE_H_
+#ifndef BARELYMUSICIAN_ENGINE_SEQUENCE_H_
+#define BARELYMUSICIAN_ENGINE_SEQUENCE_H_
 
 #include <functional>
 #include <limits>
@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instrument/event.h"
+#include "barelymusician/engine/event.h"
 
 namespace barelyapi {
 
@@ -216,4 +216,4 @@ class Sequence {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PERFORMER_SEQUENCE_H_
+#endif  // BARELYMUSICIAN_ENGINE_SEQUENCE_H_

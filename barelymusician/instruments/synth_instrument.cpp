@@ -1,11 +1,11 @@
-#include "barelymusician/presets/instruments/synth_instrument.h"
+#include "barelymusician/instruments/synth_instrument.h"
 
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/presets/instruments/enveloped_voice.h"
+#include "barelymusician/instruments/enveloped_voice.h"
 
 namespace barelyapi {
 

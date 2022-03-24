@@ -1,13 +1,13 @@
-#ifndef BARELYMUSICIAN_PRESETS_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
-#define BARELYMUSICIAN_PRESETS_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
+#define BARELYMUSICIAN_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
 
 #include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/presets/instruments/enveloped_voice.h"
-#include "barelymusician/presets/instruments/generic_instrument.h"
+#include "barelymusician/instruments/enveloped_voice.h"
+#include "barelymusician/instruments/generic_instrument.h"
 
 namespace barelyapi {
 
@@ -44,4 +44,4 @@ class DrumkitInstrument : public GenericInstrument {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PRESETS_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_INSTRUMENTS_DRUMKIT_INSTRUMENT_H_

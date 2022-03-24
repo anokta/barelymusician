@@ -11,11 +11,11 @@
 
 #include "barelymusician/conductor/transport.h"
 #include "barelymusician/instrument/instrument.h"
+#include "barelymusician/instruments/drumkit_instrument.h"
+#include "barelymusician/instruments/synth_instrument.h"
 #include "barelymusician/mutable_data.h"
 #include "barelymusician/performer/find_or_null.h"
 #include "barelymusician/performer/sequence.h"
-#include "barelymusician/presets/instruments/drumkit_instrument.h"
-#include "barelymusician/presets/instruments/synth_instrument.h"
 
 namespace {
 

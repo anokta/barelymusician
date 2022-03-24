@@ -12,8 +12,8 @@ cc_library(
         "//barelymusician/conductor:transport",
         "//barelymusician/instrument",
         "//barelymusician/performer:sequence",
-        "//barelymusician/presets/instruments:drumkit_instrument",
-        "//barelymusician/presets/instruments:synth_instrument",
+        "//barelymusician/instruments:drumkit_instrument",
+        "//barelymusician/instruments:synth_instrument",
     ],
     alwayslink = True,
 )

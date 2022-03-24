@@ -1,9 +1,9 @@
-#include "barelymusician/presets/instruments/drumkit_instrument.h"
+#include "barelymusician/instruments/drumkit_instrument.h"
 
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/presets/instruments/generic_instrument.h"
+#include "barelymusician/instruments/generic_instrument.h"
 
 namespace barelyapi {
 

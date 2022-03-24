@@ -21,4 +21,5 @@ cc_library(
 cc_library(
     name = "include",
     hdrs = ["barelymusician.h"],
+    visibility = ["//barelymusician:__subpackages__"],
 )

@@ -2,8 +2,8 @@
 #define BARELYMUSICIAN_PRESETS_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/presets/dsp/oscillator.h"
-#include "barelymusician/presets/dsp/polyphonic_voice.h"
+#include "barelymusician/dsp/oscillator.h"
+#include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/presets/instruments/enveloped_voice.h"
 #include "barelymusician/presets/instruments/generic_instrument.h"
 

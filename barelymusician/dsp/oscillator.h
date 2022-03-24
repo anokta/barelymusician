@@ -1,10 +1,10 @@
-#ifndef BARELYMUSICIAN_PRESETS_DSP_OSCILLATOR_H_
-#define BARELYMUSICIAN_PRESETS_DSP_OSCILLATOR_H_
+#ifndef BARELYMUSICIAN_DSP_OSCILLATOR_H_
+#define BARELYMUSICIAN_DSP_OSCILLATOR_H_
 
 #include <random>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/presets/dsp/generator.h"
+#include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
@@ -53,4 +53,4 @@ class Oscillator : public Generator {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PRESETS_DSP_OSCILLATOR_H_
+#endif  // BARELYMUSICIAN_DSP_OSCILLATOR_H_

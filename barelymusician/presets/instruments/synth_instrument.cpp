@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/presets/dsp/dsp_utils.h"
-#include "barelymusician/presets/dsp/oscillator.h"
+#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/presets/instruments/enveloped_voice.h"
 
 namespace barelyapi {

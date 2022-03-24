@@ -1,12 +1,12 @@
-#ifndef BARELYMUSICIAN_PRESETS_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
-#define BARELYMUSICIAN_PRESETS_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
+#ifndef BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
+#define BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
 
 #include <iterator>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include "examples/common/random.h"
+#include "barelymusician/algorithm/random.h"
 
 namespace barelyapi {
 
@@ -86,4 +86,4 @@ const std::vector<SymbolType>* ContextFreeGrammar<SymbolType>::GetSubstitution(
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PRESETS_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
+#endif  // BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_

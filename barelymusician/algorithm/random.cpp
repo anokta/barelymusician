@@ -1,4 +1,4 @@
-#include "barelymusician/presets/algorithm/random.h"
+#include "barelymusician/algorithm/random.h"
 
 #include <cassert>
 #include <random>

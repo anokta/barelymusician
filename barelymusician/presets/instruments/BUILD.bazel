@@ -10,7 +10,7 @@ cc_library(
         ":enveloped_voice",
         ":generic_instrument",
         "//barelymusician:include",
-        "//barelymusician/presets/dsp:sample_player",
+        "//barelymusician/dsp:sample_player",
     ],
 )
 
@@ -18,8 +18,8 @@ cc_library(
     name = "enveloped_voice",
     hdrs = ["enveloped_voice.h"],
     deps = [
-        "//barelymusician/presets/dsp:envelope",
-        "//barelymusician/presets/dsp:voice",
+        "//barelymusician/dsp:envelope",
+        "//barelymusician/dsp:voice",
     ],
 )
 
@@ -39,8 +39,8 @@ cc_library(
         ":enveloped_voice",
         ":generic_instrument",
         "//barelymusician:include",
-        "//barelymusician/presets/dsp:dsp_utils",
-        "//barelymusician/presets/dsp:oscillator",
-        "//barelymusician/presets/dsp:polyphonic_voice",
+        "//barelymusician/dsp:dsp_utils",
+        "//barelymusician/dsp:oscillator",
+        "//barelymusician/dsp:polyphonic_voice",
     ],
 )

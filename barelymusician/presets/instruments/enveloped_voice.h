@@ -1,8 +1,8 @@
 #ifndef BARELYMUSICIAN_PRESETS_INSTRUMENTS_ENVELOPED_VOICE_H_
 #define BARELYMUSICIAN_PRESETS_INSTRUMENTS_ENVELOPED_VOICE_H_
 
-#include "barelymusician/presets/dsp/envelope.h"
-#include "barelymusician/presets/dsp/voice.h"
+#include "barelymusician/dsp/envelope.h"
+#include "barelymusician/dsp/voice.h"
 
 namespace barelyapi {
 

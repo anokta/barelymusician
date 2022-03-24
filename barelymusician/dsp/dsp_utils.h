@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_PRESETS_DSP_DSP_UTILS_H_
-#define BARELYMUSICIAN_PRESETS_DSP_DSP_UTILS_H_
+#ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
+#define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
 namespace barelyapi {
 
@@ -37,4 +37,4 @@ double GetFrequency(double pitch) noexcept;
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PRESETS_DSP_DSP_UTILS_H_
+#endif  // BARELYMUSICIAN_DSP_DSP_UTILS_H_

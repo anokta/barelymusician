@@ -1,7 +1,7 @@
-#ifndef BARELYMUSICIAN_PRESETS_DSP_ONE_POLE_FILTER_H_
-#define BARELYMUSICIAN_PRESETS_DSP_ONE_POLE_FILTER_H_
+#ifndef BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
+#define BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 
-#include "barelymusician/presets/dsp/filter.h"
+#include "barelymusician/dsp/filter.h"
 
 namespace barelyapi {
 
@@ -41,4 +41,4 @@ class OnePoleFilter : public Filter {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PRESETS_DSP_ONE_POLE_FILTER_H_
+#endif  // BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_

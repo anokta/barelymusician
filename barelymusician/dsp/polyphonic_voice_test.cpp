@@ -1,8 +1,8 @@
-#include "barelymusician/presets/dsp/polyphonic_voice.h"
+#include "barelymusician/dsp/polyphonic_voice.h"
 
 #include <utility>
 
-#include "barelymusician/presets/dsp/voice.h"
+#include "barelymusician/dsp/voice.h"
 #include "gtest/gtest.h"
 
 namespace barelyapi {

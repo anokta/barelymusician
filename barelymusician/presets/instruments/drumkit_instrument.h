@@ -5,15 +5,11 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/presets/dsp/sample_player.h"
+#include "barelymusician/dsp/sample_player.h"
 #include "barelymusician/presets/instruments/enveloped_voice.h"
 #include "barelymusician/presets/instruments/generic_instrument.h"
 
 namespace barelyapi {
-
-enum DrumkitInstrumentParameter {
-  kPadRelease = 0,
-};
 
 struct DrumkitPad {
   explicit DrumkitPad(std::vector<double> data, int frequency, int frame_rate)

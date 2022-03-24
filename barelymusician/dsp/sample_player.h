@@ -1,7 +1,7 @@
-#ifndef BARELYMUSICIAN_PRESETS_DSP_SAMPLE_PLAYER_H_
-#define BARELYMUSICIAN_PRESETS_DSP_SAMPLE_PLAYER_H_
+#ifndef BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
+#define BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_
 
-#include "barelymusician/presets/dsp/generator.h"
+#include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
@@ -65,4 +65,4 @@ class SamplePlayer : public Generator {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_PRESETS_DSP_SAMPLE_PLAYER_H_
+#endif  // BARELYMUSICIAN_DSP_SAMPLE_PLAYER_H_

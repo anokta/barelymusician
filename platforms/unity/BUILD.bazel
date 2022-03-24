@@ -9,7 +9,6 @@ cc_binary(
     target_compatible_with = ["@platforms//os:linux"],
     deps = [
         "//barelymusician",
-        "//examples/instruments:synth_instrument",
     ],
 )
 
@@ -20,7 +19,6 @@ cc_binary(
     target_compatible_with = ["@platforms//os:osx"],
     deps = [
         "//barelymusician",
-        "//examples/instruments:synth_instrument",
     ],
 )
 
@@ -31,6 +29,5 @@ cc_binary(
     target_compatible_with = ["@platforms//os:windows"],
     deps = [
         "//barelymusician",
-        "//examples/instruments:synth_instrument",
     ],
 )

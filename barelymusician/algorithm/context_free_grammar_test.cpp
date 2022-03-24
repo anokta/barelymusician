@@ -1,9 +1,9 @@
-#include "barelymusician/presets/algorithm/context_free_grammar.h"
+#include "barelymusician/algorithm/context_free_grammar.h"
 
 #include <string>
 #include <vector>
 
-#include "examples/common/random.h"
+#include "barelymusician/algorithm/random.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

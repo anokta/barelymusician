@@ -1,4 +1,4 @@
-#include "barelymusician/presets/dsp/sample_player.h"
+#include "barelymusician/dsp/sample_player.h"
 
 #include <algorithm>
 #include <cmath>

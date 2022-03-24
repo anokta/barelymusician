@@ -1,8 +1,8 @@
-#include "barelymusician/presets/dsp/oscillator.h"
+#include "barelymusician/dsp/oscillator.h"
 
 #include <cmath>
 
-#include "barelymusician/presets/dsp/dsp_utils.h"
+#include "barelymusician/dsp/dsp_utils.h"
 
 namespace barelyapi {
 

@@ -1,4 +1,4 @@
-#include "barelymusician/presets/dsp/envelope.h"
+#include "barelymusician/dsp/envelope.h"
 
 #include <algorithm>
 

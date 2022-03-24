@@ -20,7 +20,7 @@ bool WavFile::Load(const std::string& file_path) noexcept {
   unsigned int wav_num_channels;
   unsigned int wav_sample_rate;
   drwav_uint64 wav_num_frames;
-  double* wav_data = drwav_open_file_and_read_pcm_frames_f32(
+  float* wav_data = drwav_open_file_and_read_pcm_frames_f32(
       file_path.c_str(), &wav_num_channels, &wav_sample_rate, &wav_num_frames,
       nullptr);
   if (!wav_data) {

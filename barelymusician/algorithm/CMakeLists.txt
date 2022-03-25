@@ -4,6 +4,7 @@ add_library(
 )
 target_link_libraries(
   context_free_grammar INTERFACE
+  find_or_null
   random
 )
 

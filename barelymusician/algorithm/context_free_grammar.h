@@ -6,7 +6,8 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/algorithm/random.h"
+#include "barelymusician/common/find_or_null.h"
+#include "barelymusician/common/random.h"
 
 namespace barelyapi {
 
@@ -56,7 +57,7 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
   // corresponding rules until reaching to the end.
   int i = 0;
   while (i < static_cast<int>(sequence.size())) {
-    if (rules_.find(sequence[i]) != rules_.cend()) {
+    if (const auto* substitutions = FindOrNull(rules_, sequence[i])) {
       const auto* substitution = GetSubstitution(sequence[i], random);
       sequence.erase(std::next(sequence.begin(), i));
       if (substitution) {
@@ -73,15 +74,14 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
 template <typename SymbolType>
 const std::vector<SymbolType>* ContextFreeGrammar<SymbolType>::GetSubstitution(
     const SymbolType& symbol, Random& random) const noexcept {
-  const auto it = rules_.find(symbol);
-  if (it == rules_.cend() || it->second.empty()) {
-    return nullptr;
-  }
   // Select a substitution randomly with equal probability for each selection.
-  const auto& substitutions = it->second;
-  const int index =
-      random.DrawUniform(0, static_cast<int>(substitutions.size()) - 1);
-  return &substitutions[index];
+  const auto* substitutions = FindOrNull(rules_, symbol);
+  if (substitutions && !substitutions->empty()) {
+    const int index =
+        random.DrawUniform(0, static_cast<int>(substitutions->size()) - 1);
+    return &(*substitutions)[index];
+  }
+  return nullptr;
 }
 
 }  // namespace barelyapi

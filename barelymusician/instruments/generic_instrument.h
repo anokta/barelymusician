@@ -49,8 +49,7 @@ class GenericInstrument {
 /// Returns instrument definition for `GenericInstrumentType`.
 template <typename GenericInstrumentType>
 Instrument::Definition GetInstrumentDefinition(
-    const std::vector<Parameter::Definition>&
-        parameter_definitions) noexcept {
+    const std::vector<Parameter::Definition>& parameter_definitions) noexcept {
   return Instrument::Definition(
       [](void** state, int frame_rate) noexcept {
         *state = static_cast<void*>(new GenericInstrumentType(frame_rate));

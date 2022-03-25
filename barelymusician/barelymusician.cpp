@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/engine/find_or_null.h"
+#include "barelymusician/common/find_or_null.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
 #include "barelymusician/engine/sequence.h"

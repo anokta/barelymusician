@@ -18,7 +18,7 @@ namespace Barely {
   /// Simple polyphonic synth instrument.
   public class SynthInstrument : Instrument {
     /// Oscillator type.
-    public OscillatorType type = OscillatorType.Sine;
+    public OscillatorType oscillatorType = OscillatorType.Sine;
 
     /// Envelope attack.
     public double attack = 0.05;
@@ -38,7 +38,7 @@ namespace Barely {
     public int numVoices = 8;
 
     private void Update() {
-      SetParameter(0, (double)type);
+      SetParameter(0, (double)oscillatorType);
       SetParameter(1, attack);
       SetParameter(2, decay);
       SetParameter(3, sustain);

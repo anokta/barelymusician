@@ -20,11 +20,11 @@ class Sequence {
   using NotePositionIdPair = std::pair<double, BarelyId>;
 
   /// Note with position type.
-  using NoteWithPosition = std::pair<double, BarelyNoteDefinition>;
+  using NoteWithPosition = std::pair<double, barely::NoteDefinition>;
 
   /// Note with position-id pair type.
   using NoteWithPositionIdPair =
-      std::pair<NotePositionIdPair, BarelyNoteDefinition>;
+      std::pair<NotePositionIdPair, barely::NoteDefinition>;
 
   // TODO: Refactor this.
   using EventCallback = std::function<void(double, Event)>;
@@ -36,7 +36,7 @@ class Sequence {
   /// @param note Note.
   /// @return True if success.
   bool AddNote(BarelyId id, double position,
-               BarelyNoteDefinition note) noexcept;
+               barely::NoteDefinition note) noexcept;
 
   /// Returns begin offset.
   ///
@@ -143,7 +143,8 @@ class Sequence {
   /// @param id Note identifier.
   /// @param definition Note definition.
   /// @return True if success.
-  bool SetNoteDefinition(BarelyId id, BarelyNoteDefinition definition) noexcept;
+  bool SetNoteDefinition(BarelyId id,
+                         barely::NoteDefinition definition) noexcept;
 
   /// Sets note position.
   ///
@@ -208,7 +209,7 @@ class Sequence {
   double loop_length_ = 1.0;
 
   // Sorted note by position map.
-  std::map<NotePositionIdPair, BarelyNoteDefinition> notes_;
+  std::map<NotePositionIdPair, barely::NoteDefinition> notes_;
 
   // Note positions.
   std::unordered_map<BarelyId, double> positions_;

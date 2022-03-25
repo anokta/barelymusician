@@ -12,10 +12,10 @@ namespace {
 
 using ::testing::ElementsAre;
 
-constexpr double kTempo = 1.5;
-
 // Tests that the transport sets its tempo as expected.
 TEST(TransportTest, SetTempo) {
+  const double kTempo = 1.5;
+
   Transport transport;
   EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
 

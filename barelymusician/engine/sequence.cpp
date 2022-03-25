@@ -7,12 +7,12 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/find_or_null.h"
+#include "barelymusician/common/find_or_null.h"
 
 namespace barelyapi {
 
 bool Sequence::AddNote(BarelyId id, double position,
-                       BarelyNoteDefinition note) noexcept {
+                       barely::NoteDefinition note) noexcept {
   if (positions_.emplace(id, position).second) {
     notes_.emplace(NotePositionIdPair{position, id}, std::move(note));
     return true;

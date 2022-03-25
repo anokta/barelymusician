@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ALGORITHM_RANDOM_H_
-#define BARELYMUSICIAN_ALGORITHM_RANDOM_H_
+#ifndef BARELYMUSICIAN_COMMON_RANDOM_H_
+#define BARELYMUSICIAN_COMMON_RANDOM_H_
 
 #include <random>
 
@@ -52,4 +52,4 @@ class Random {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ALGORITHM_RANDOM_H_
+#endif  // BARELYMUSICIAN_COMMON_RANDOM_H_

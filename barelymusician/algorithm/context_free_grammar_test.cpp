@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "barelymusician/algorithm/random.h"
+#include "barelymusician/common/random.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

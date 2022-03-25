@@ -1,4 +1,4 @@
-#include "barelymusician/algorithm/random.h"
+#include "barelymusician/common/random.h"
 
 #include <vector>
 

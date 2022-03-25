@@ -7,7 +7,7 @@ namespace {
 
 // Tests that parameter sets its value as expected.
 TEST(ParameterTest, SetValue) {
-  Parameter parameter(ParameterDefinition{15.0, 10.0, 20.0});
+  Parameter parameter(Parameter::Definition{15.0, 10.0, 20.0});
   EXPECT_DOUBLE_EQ(parameter.GetValue(), 15.0);
 
   EXPECT_TRUE(parameter.SetValue(12.0));

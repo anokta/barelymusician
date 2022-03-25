@@ -4,6 +4,7 @@
 #include <random>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/random.h"
 #include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
@@ -47,8 +48,7 @@ class Oscillator : public Generator {
   double phase_ = 0.0;
 
   // White noise random number generator.
-  std::uniform_real_distribution<double> white_noise_distribution_;
-  std::default_random_engine white_noise_engine_;
+  Random random_;
 };
 
 }  // namespace barelyapi

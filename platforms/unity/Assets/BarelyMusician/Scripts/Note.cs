@@ -10,7 +10,7 @@ namespace Barely {
     [Range(0, 128)]
     public int Pitch = 60;
 
-    [Range(0.0, 1.0)]
+    [Range(0.0f, 1.0f)]
     public double Intensity = 1.0;
 
     public double Duration = 1.0;

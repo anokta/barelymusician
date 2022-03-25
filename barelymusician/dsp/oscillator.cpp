@@ -8,8 +8,7 @@ namespace barelyapi {
 
 Oscillator::Oscillator(int sample_rate) noexcept
     : sample_interval_(sample_rate > 0 ? 1.0 / static_cast<double>(sample_rate)
-                                       : 0.0),
-      white_noise_distribution_(-1.0, 1.0) {}
+                                       : 0.0) {}
 
 double Oscillator::Next() noexcept {
   double output = 0.0;
@@ -26,7 +25,7 @@ double Oscillator::Next() noexcept {
       break;
     case Type::kNoise:
     default:
-      output = white_noise_distribution_(white_noise_engine_);
+      output = random_.DrawUniform(-1.0, 1.0);
       break;
   }
   // Update the phasor.

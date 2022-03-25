@@ -9,9 +9,6 @@
 
 namespace barelyapi {
 
-using ::barely::InstrumentDefinition;
-using ::barely::OscillatorType;
-using ::barely::ParameterDefinition;
 using ::barely::SynthParameter;
 
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
@@ -42,7 +39,7 @@ void SynthInstrument::SetParameter(int index, double value,
     case SynthParameter::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
-            static_cast<OscillatorType>(static_cast<int>(value)));
+            static_cast<Oscillator::Type>(static_cast<int>(value)));
       });
       break;
     case SynthParameter::kAttack:
@@ -71,21 +68,21 @@ void SynthInstrument::SetParameter(int index, double value,
   }
 }
 
-InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
-  static std::vector<ParameterDefinition> parameter_definitions = {
+Instrument::Definition SynthInstrument::GetDefinition() noexcept {
+  static std::vector<Parameter::Definition> parameter_definitions = {
       // Attack.
-      ParameterDefinition{0.05, 0.0, 60.0},
+      Parameter::Definition{0.05, 0.0, 60.0},
       // Decay.
-      ParameterDefinition{0.0, 0.0, 60.0},
+      Parameter::Definition{0.0, 0.0, 60.0},
       // Sustain.
-      ParameterDefinition{1.0, 0.0, 1.0},
+      Parameter::Definition{1.0, 0.0, 1.0},
       // Release.
-      ParameterDefinition{0.25, 0.0, 60.0},
+      Parameter::Definition{0.25, 0.0, 60.0},
       // Oscillator type.
-      ParameterDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
-                          static_cast<double>(OscillatorType::kNoise)},
+      Parameter::Definition{static_cast<double>(Oscillator::Type::kSine), 0.0,
+                            static_cast<double>(Oscillator::Type::kNoise)},
       // Number of voices.
-      ParameterDefinition{8, 1, 64},
+      Parameter::Definition{8, 1, 64},
   };
   return GetInstrumentDefinition<SynthInstrument>(parameter_definitions);
 }

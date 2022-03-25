@@ -10,6 +10,9 @@ namespace barelyapi {
 /// Class that wraps playback transport.
 class Transport {
  public:
+  /// Beat callback alias.
+  using BeatCallback = barely::Musician::BeatCallback;
+
   /// Update callback signature.
   ///
   /// @param begin_position Begin position in beats.
@@ -45,7 +48,7 @@ class Transport {
   /// Sets beat callback.
   ///
   /// @param beat_callback Beat callback.
-  void SetBeatCallback(barely::Musician::BeatCallback beat_callback) noexcept;
+  void SetBeatCallback(BeatCallback beat_callback) noexcept;
 
   /// Sets current position.
   ///
@@ -98,7 +101,7 @@ class Transport {
   double timestamp_ = 0.0;
 
   // Beat callback.
-  barely::Musician::BeatCallback beat_callback_;
+  BeatCallback beat_callback_;
 
   // Update callback.
   UpdateCallback update_callback_;

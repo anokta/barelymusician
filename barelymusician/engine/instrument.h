@@ -15,12 +15,20 @@ namespace barelyapi {
 /// Class that wraps an instrument.
 class Instrument {
  public:
+  /// Definition alias.
+  using Definition = barely::InstrumentDefinition;
+
+  /// Note off callback alias.
+  using NoteOffCallback = barely::Instrument::NoteOffCallback;
+
+  /// Note on callback alias.
+  using NoteOnCallback = barely::Instrument::NoteOnCallback;
+
   /// Constructs new `Instrument`.
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hz.
-  Instrument(const barely::InstrumentDefinition& definition,
-             int frame_rate) noexcept;
+  Instrument(const Definition& definition, int frame_rate) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -80,14 +88,12 @@ class Instrument {
   /// Sets note off callback.
   ///
   /// @param note_off_callback Note off callback.
-  void SetNoteOffCallback(
-      barely::Instrument::NoteOffCallback note_off_callback) noexcept;
+  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept;
 
   /// Sets note on callback.
   ///
   /// @param note_on_callback Note on callback.
-  void SetNoteOnCallback(
-      barely::Instrument::NoteOnCallback note_on_callback) noexcept;
+  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept;
 
   /// Sets parameter value at timestamp.
   ///
@@ -121,10 +127,10 @@ class Instrument {
   // Controller that wraps main thread functionality.
   struct Controller {
     // Note off callback.
-    barely::Instrument::NoteOffCallback note_off_callback;
+    NoteOffCallback note_off_callback;
 
     // Note on callback.
-    barely::Instrument::NoteOnCallback note_on_callback;
+    NoteOnCallback note_on_callback;
 
     // List of parameters.
     std::vector<Parameter> parameters;
@@ -136,22 +142,22 @@ class Instrument {
   // Processor that wraps audio thread functionality.
   struct Processor {
     // Destroy function.
-    barely::InstrumentDefinition::DestroyCallback destroy_callback;
+    Definition::DestroyCallback destroy_callback;
 
     // Process function.
-    barely::InstrumentDefinition::ProcessCallback process_callback;
+    Definition::ProcessCallback process_callback;
 
     // Set data function.
-    barely::InstrumentDefinition::SetDataCallback set_data_callback;
+    Definition::SetDataCallback set_data_callback;
 
     // Set note off function.
-    barely::InstrumentDefinition::SetNoteOffCallback set_note_off_callback;
+    Definition::SetNoteOffCallback set_note_off_callback;
 
     // Set note on function.
-    barely::InstrumentDefinition::SetNoteOnCallback set_note_on_callback;
+    Definition::SetNoteOnCallback set_note_on_callback;
 
     // Set parameter function.
-    barely::InstrumentDefinition::SetParameterCallback set_parameter_callback;
+    Definition::SetParameterCallback set_parameter_callback;
 
     // Sampling rate in hz.
     int frame_rate;

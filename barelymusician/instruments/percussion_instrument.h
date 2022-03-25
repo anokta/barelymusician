@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/sample_player.h"
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/instruments/enveloped_voice.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
@@ -37,7 +37,7 @@ class PercussionInstrument : public GenericInstrument {
   void SetParameter(int index, double value, double slope) noexcept override;
 
   /// Returns instrument definition.
-  static barely::InstrumentDefinition GetDefinition() noexcept;
+  static Instrument::Definition GetDefinition() noexcept;
 
  private:
   PercussionPadMap pads_;

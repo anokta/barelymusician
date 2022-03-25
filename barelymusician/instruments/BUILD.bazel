@@ -15,7 +15,8 @@ cc_library(
     name = "generic_instrument",
     hdrs = ["generic_instrument.h"],
     deps = [
-        "//barelymusician:include",
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:parameter",
     ],
 )
 
@@ -28,6 +29,8 @@ cc_library(
         ":generic_instrument",
         "//barelymusician:include",
         "//barelymusician/dsp:sample_player",
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:parameter",
     ],
 )
 
@@ -42,5 +45,7 @@ cc_library(
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:parameter",
     ],
 )

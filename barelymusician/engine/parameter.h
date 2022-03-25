@@ -8,16 +8,18 @@ namespace barelyapi {
 /// Class that wraps instrument parameter.
 class Parameter {
  public:
+  /// Definition alias.
+  using Definition = barely::ParameterDefinition;
+
   /// Constructs new `Parameter`.
   ///
   /// @param definition Parameter definition.
-  explicit Parameter(barely::ParameterDefinition definition) noexcept;
+  explicit Parameter(Definition definition) noexcept;
 
   /// Returns definition.
   ///
   /// @return Parameter definition.
-  [[nodiscard]] const barely::ParameterDefinition& GetDefinition()
-      const noexcept;
+  [[nodiscard]] const Definition& GetDefinition() const noexcept;
 
   /// Returns value.
   ///
@@ -37,7 +39,7 @@ class Parameter {
 
  private:
   // Parameter definition.
-  barely::ParameterDefinition definition_;
+  Definition definition_;
 
   // Parameter value.
   double value_ = 0.0;

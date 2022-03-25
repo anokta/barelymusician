@@ -48,10 +48,10 @@ class GenericInstrument {
 
 /// Returns instrument definition for `GenericInstrumentType`.
 template <typename GenericInstrumentType>
-barely::InstrumentDefinition GetInstrumentDefinition(
-    const std::vector<barely::ParameterDefinition>&
+Instrument::Definition GetInstrumentDefinition(
+    const std::vector<Parameter::Definition>&
         parameter_definitions) noexcept {
-  return barely::InstrumentDefinition(
+  return Instrument::Definition(
       [](void** state, int frame_rate) noexcept {
         *state = static_cast<void*>(new GenericInstrumentType(frame_rate));
       },

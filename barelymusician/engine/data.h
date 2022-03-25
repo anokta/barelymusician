@@ -8,10 +8,13 @@ namespace barelyapi {
 /// Class that wraps instrument data.
 class Data {
  public:
+  /// Definition alias.
+  using Definition = barely::DataDefinition;
+
   /// Constructs new `Data`.
   ///
   /// @param definition Data definition.
-  explicit Data(barely::DataDefinition definition) noexcept;
+  explicit Data(Definition definition) noexcept;
 
   /// Default constructor.
   Data() = default;
@@ -40,10 +43,10 @@ class Data {
 
  private:
   // Move callback.
-  barely::DataDefinition::MoveCallback move_callback_ = nullptr;
+  Definition::MoveCallback move_callback_ = nullptr;
 
   // Destroy callback.
-  barely::DataDefinition::DestroyCallback destroy_callback_ = nullptr;
+  Definition::DestroyCallback destroy_callback_ = nullptr;
 
   // Internal data.
   void* data_ = nullptr;

@@ -4,8 +4,6 @@
 #include <cmath>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
-
 namespace barelyapi {
 
 double Transport::GetPosition() const noexcept { return position_; }
@@ -21,8 +19,7 @@ double Transport::GetTimestamp(double position) const noexcept {
 
 bool Transport::IsPlaying() const noexcept { return is_playing_; }
 
-void Transport::SetBeatCallback(
-    barely::Musician::BeatCallback beat_callback) noexcept {
+void Transport::SetBeatCallback(BeatCallback beat_callback) noexcept {
   beat_callback_ = std::move(beat_callback);
 }
 

@@ -3,16 +3,15 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/engine/parameter.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
 namespace barelyapi {
 
-using ::barely::InstrumentDefinition;
-using ::barely::ParameterDefinition;
 using ::barely::PercussionParameter;
 
 void PercussionInstrument::Process(double* output, int num_channels,
-                                int num_frames) noexcept {
+                                   int num_frames) noexcept {
   for (int frame = 0; frame < num_frames; ++frame) {
     double mono_sample = 0.0;
     for (auto& [pitch, pad] : pads_) {
@@ -46,7 +45,7 @@ void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 }
 
 void PercussionInstrument::SetParameter(int index, double value,
-                                     double /*slope*/) noexcept {
+                                        double /*slope*/) noexcept {
   switch (static_cast<PercussionParameter>(index)) {
     case PercussionParameter::kRelease:
       for (auto& [pitch, pad] : pads_) {
@@ -56,10 +55,10 @@ void PercussionInstrument::SetParameter(int index, double value,
   }
 }
 
-InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
-  static std::vector<ParameterDefinition> parameter_definitions = {
+Instrument::Definition PercussionInstrument::GetDefinition() noexcept {
+  static std::vector<Parameter::Definition> parameter_definitions = {
       // Pad release.
-      ParameterDefinition{0.1, 0.0, 60.0},
+      Parameter::Definition{0.1, 0.0, 60.0},
   };
   return GetInstrumentDefinition<PercussionInstrument>(parameter_definitions);
 }

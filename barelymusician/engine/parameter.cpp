@@ -3,19 +3,15 @@
 #include <algorithm>
 #include <cassert>
 
-#include "barelymusician/barelymusician.h"
-
 namespace barelyapi {
 
-using ::barely::ParameterDefinition;
-
-Parameter::Parameter(ParameterDefinition definition) noexcept
+Parameter::Parameter(Definition definition) noexcept
     : definition_(definition), value_(definition_.default_value) {
   assert(value_ >= definition.min_value);
   assert(value_ <= definition.max_value);
 }
 
-const ParameterDefinition& Parameter::GetDefinition() const noexcept {
+const Parameter::Definition& Parameter::GetDefinition() const noexcept {
   return definition_;
 }
 

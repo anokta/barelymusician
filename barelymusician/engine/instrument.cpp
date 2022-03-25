@@ -4,7 +4,6 @@
 #include <utility>
 #include <variant>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/event.h"
 
 namespace barelyapi {
@@ -27,8 +26,7 @@ double SecondsFromFrames(int frame_rate, int frames) noexcept {
 
 }  // namespace
 
-Instrument::Instrument(const barely::InstrumentDefinition& definition,
-                       int frame_rate) noexcept
+Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
     : processor_{definition.destroy_callback,
                  definition.process_callback,
                  definition.set_data_callback,
@@ -185,12 +183,11 @@ void Instrument::SetData(barely::DataDefinition definition,
 }
 
 void Instrument::SetNoteOffCallback(
-    barely::Instrument::NoteOffCallback note_off_callback) noexcept {
+    NoteOffCallback note_off_callback) noexcept {
   controller_.note_off_callback = std::move(note_off_callback);
 }
 
-void Instrument::SetNoteOnCallback(
-    barely::Instrument::NoteOnCallback note_on_callback) noexcept {
+void Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept {
   controller_.note_on_callback = std::move(note_on_callback);
 }
 

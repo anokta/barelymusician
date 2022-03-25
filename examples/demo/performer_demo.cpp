@@ -64,7 +64,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument performer =
       musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
-  performer.SetParameter(SynthParameter::kType, kOscillatorType);
+  performer.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   performer.SetParameter(SynthParameter::kAttack, kAttack);
   performer.SetParameter(SynthParameter::kRelease, kRelease);
   performer.SetNoteOnCallback(
@@ -75,7 +75,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument metronome =
       musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
-  metronome.SetParameter(SynthParameter::kType, OscillatorType::kSquare);
+  metronome.SetParameter(SynthParameter::kOscillatorType,
+                         OscillatorType::kSquare);
   metronome.SetParameter(SynthParameter::kAttack, kAttack);
   metronome.SetParameter(SynthParameter::kRelease, 0.025);
 

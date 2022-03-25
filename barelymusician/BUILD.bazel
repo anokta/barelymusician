@@ -12,7 +12,7 @@ cc_library(
         "//barelymusician/engine:mutable_data",
         "//barelymusician/engine:sequence",
         "//barelymusician/engine:transport",
-        "//barelymusician/instruments:drumkit_instrument",
+        "//barelymusician/instruments:percussion_instrument",
         "//barelymusician/instruments:synth_instrument",
     ],
     alwayslink = True,
@@ -21,5 +21,4 @@ cc_library(
 cc_library(
     name = "include",
     hdrs = ["barelymusician.h"],
-    visibility = ["//barelymusician:__subpackages__"],
 )

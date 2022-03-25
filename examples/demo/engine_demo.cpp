@@ -18,7 +18,7 @@
 #include "examples/common/wav_file.h"
 #include "examples/composition/note_duration.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/drumkit_instrument.h"
+#include "examples/instruments/percussion_instrument.h"
 #include "examples/instruments/synth_instrument.h"
 #include "platforms/api/barelymusician.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -31,10 +31,10 @@ using ::barely::Sequence;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
-using ::barely::examples::DrumkitInstrument;
-using ::barely::examples::DrumkitPad;
-using ::barely::examples::DrumkitPadMap;
 using ::barely::examples::InputManager;
+using ::barely::examples::PercussionInstrument;
+using ::barely::examples::PercussionPad;
+using ::barely::examples::PercussionPadMap;
 using ::barely::examples::SynthInstrument;
 using ::barely::examples::SynthInstrumentParameter;
 using ::barely::examples::WavFile;
@@ -265,41 +265,41 @@ int main(int /*argc*/, char* argv[]) {
                           line_2_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
 
-  // Add drumkit instrument.
+  // Add percussion instrument.
   instruments.push_back(musician.CreateInstrument(
-      DrumkitInstrument::GetDefinition(), kSampleRate));
+      PercussionInstrument::GetDefinition(), kSampleRate));
   gains.push_back(0.35);
   set_note_callbacks_fn(instruments.size(), &instruments.back());
-  auto& drumkit = instruments.back();
-  const auto set_drumkit_pad_map_fn =
-      [&](std::unordered_map<double, std::string> drumkit_map) {
-        std::unordered_map<double, WavFile> drumkit_files;
-        for (const auto& [index, name] : drumkit_map) {
-          auto it = drumkit_files.emplace(index, WavFile{});
+  auto& percussion = instruments.back();
+  const auto set_percussion_pad_map_fn =
+      [&](std::unordered_map<double, std::string> percussion_map) {
+        std::unordered_map<double, WavFile> percussion_files;
+        for (const auto& [index, name] : percussion_map) {
+          auto it = percussion_files.emplace(index, WavFile{});
           const std::string path =
               runfiles->Rlocation(kDrumsBaseFilename + name);
           const bool success = it.first->second.Load(path);
           assert(success);
         }
-        DrumkitPadMap drumkit_pads;
-        for (const auto& [pitch, file] : drumkit_files) {
-          drumkit_pads.insert({pitch, DrumkitPad{file, kSampleRate}});
+        PercussionPadMap percussion_pads;
+        for (const auto& [pitch, file] : percussion_files) {
+          percussion_pads.insert({pitch, PercussionPad{file, kSampleRate}});
         }
-        drumkit.SetData(std::move(drumkit_pads));
+        percussion.SetData(std::move(percussion_pads));
       };
-  set_drumkit_pad_map_fn(
+  set_percussion_pad_map_fn(
       {{barelyapi::kPitchKick, "basic_kick.wav"},
        {barelyapi::kPitchSnare, "basic_snare.wav"},
        {barelyapi::kPitchHihatClosed, "basic_hihat_closed.wav"},
        {barelyapi::kPitchHihatOpen, "basic_hihat_open.wav"}});
-  const auto drumkit_beat_composer_callback =
+  const auto percussion_beat_composer_callback =
       [&](int bar, int beat, int num_beats, int /*harmonic*/, double offset,
           Sequence* sequence) {
         ComposeDrums(bar, beat, num_beats, &random, offset, sequence);
       };
 
   performers.emplace_back(musician.CreateSequence(),
-                          drumkit_beat_composer_callback);
+                          percussion_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
 
   // Bar callback.
@@ -378,14 +378,14 @@ int main(int /*argc*/, char* argv[]) {
         ConsoleLog() << "Tempo reset to " << kTempo;
         break;
       case 'D':
-        set_drumkit_pad_map_fn(
+        set_percussion_pad_map_fn(
             {{barelyapi::kPitchKick, "basic_kick.wav"},
              {barelyapi::kPitchSnare, "basic_snare.wav"},
              {barelyapi::kPitchHihatClosed, "basic_hihat_closed.wav"},
              {barelyapi::kPitchHihatOpen, "basic_hihat_open.wav"}});
         break;
       case 'H':
-        set_drumkit_pad_map_fn(
+        set_percussion_pad_map_fn(
             {{barelyapi::kPitchKick, "basic_hihat_closed.wav"},
              {barelyapi::kPitchSnare, "basic_hihat_open.wav"},
              {barelyapi::kPitchHihatClosed, "basic_hihat_closed.wav"},

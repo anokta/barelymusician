@@ -268,7 +268,7 @@ typedef int32_t BarelySynthParameter;
 /// Synth instrument parameter enum values.
 enum BarelySynthParameter_Values {
   /// Oscillator type.
-  BarelySynthParameter_kType = 0,
+  BarelySynthParameter_kOscillatorType = 0,
   /// Envelope attack.
   BarelySynthParameter_kAttack = 1,
   /// Envelope decay.
@@ -1318,7 +1318,7 @@ enum class InstrumentType : BarelyInstrumentType {
 /// Synth parameter.
 enum class SynthParameter : BarelySynthParameter {
   /// Oscillator type.
-  kType = BarelySynthParameter_kType,
+  kOscillatorType = BarelySynthParameter_kOscillatorType,
   /// Envelope attack.
   kAttack = BarelySynthParameter_kAttack,
   /// Envelope decay.
@@ -1399,26 +1399,28 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @return Parameter value, or error status.
-  [[nodiscard]] StatusOr<double> GetParameter(int index) const {
+  template <typename IndexType, typename ValueType>
+  [[nodiscard]] StatusOr<ValueType> GetParameter(IndexType index) const {
     double value = 0.0;
-    if (const auto status = static_cast<Status>(
-            BarelyInstrument_GetParameter(handle_, id_, index, &value));
+    if (const auto status = static_cast<Status>(BarelyInstrument_GetParameter(
+            handle_, id_, static_cast<int>(index), &value));
         !IsOk(status)) {
       return status;
     }
-    return value;
+    return static_cast<ValueType>(value);
   }
 
   /// Returns parameter definition.
   ///
   /// @param index Parameter index.
   /// @return Parameter definition, or error status.
+  template <typename IndexType>
   [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
-      int index) const {
+      IndexType index) const {
     BarelyParameterDefinition definition;
     if (const auto status =
             static_cast<Status>(BarelyInstrument_GetParameterDefinition(
-                handle_, id_, index, &definition));
+                handle_, id_, static_cast<int>(index), &definition));
         !IsOk(status)) {
       return status;
     }
@@ -1463,9 +1465,10 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @return Status.
-  Status ResetParameter(int index) {
+  template <typename IndexType>
+  Status ResetParameter(IndexType index) {
     return static_cast<Status>(
-        BarelyInstrument_ResetParameter(handle_, id_, index));
+        BarelyInstrument_ResetParameter(handle_, id_, static_cast<int>(index)));
   }
 
   /// Sets data.

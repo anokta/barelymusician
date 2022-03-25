@@ -62,7 +62,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument instrument =
       musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
-  instrument.SetParameter(SynthParameter::kType, kOscillatorType);
+  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
   instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);

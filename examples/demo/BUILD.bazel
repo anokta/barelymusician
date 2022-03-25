@@ -15,7 +15,7 @@ package(default_visibility = ["//visibility:public"])
 #         "//examples/common:wav_file",
 #         "//examples/composition:note_duration",
 #         "//examples/composition:note_pitch",
-#         "//examples/instruments:drumkit_instrument",
+#         "//examples/instruments:percussion_instrument",
 #         "//examples/instruments:synth_instrument",
 #         "//platforms/api:barelymusician",
 #         "@bazel_tools//tools/cpp/runfiles",

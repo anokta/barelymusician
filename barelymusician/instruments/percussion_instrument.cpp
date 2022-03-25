@@ -1,4 +1,4 @@
-#include "barelymusician/instruments/drumkit_instrument.h"
+#include "barelymusician/instruments/percussion_instrument.h"
 
 #include <vector>
 
@@ -11,7 +11,7 @@ using ::barely::InstrumentDefinition;
 using ::barely::ParameterDefinition;
 using ::barely::PercussionParameter;
 
-void DrumkitInstrument::Process(double* output, int num_channels,
+void PercussionInstrument::Process(double* output, int num_channels,
                                 int num_frames) noexcept {
   for (int frame = 0; frame < num_frames; ++frame) {
     double mono_sample = 0.0;
@@ -24,28 +24,28 @@ void DrumkitInstrument::Process(double* output, int num_channels,
   }
 }
 
-void DrumkitInstrument::SetData(void* data) noexcept {
+void PercussionInstrument::SetData(void* data) noexcept {
   if (data) {
-    pads_.swap(*static_cast<DrumkitPadMap*>(data));
+    pads_.swap(*static_cast<PercussionPadMap*>(data));
   } else {
     pads_.clear();
   }
 }
 
-void DrumkitInstrument::SetNoteOff(double pitch) noexcept {
+void PercussionInstrument::SetNoteOff(double pitch) noexcept {
   if (const auto it = pads_.find(pitch); it != pads_.end()) {
     it->second.voice.Stop();
   }
 }
 
-void DrumkitInstrument::SetNoteOn(double pitch, double intensity) noexcept {
+void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   if (const auto it = pads_.find(pitch); it != pads_.end()) {
     it->second.voice.set_gain(intensity);
     it->second.voice.Start();
   }
 }
 
-void DrumkitInstrument::SetParameter(int index, double value,
+void PercussionInstrument::SetParameter(int index, double value,
                                      double /*slope*/) noexcept {
   switch (static_cast<PercussionParameter>(index)) {
     case PercussionParameter::kRelease:
@@ -56,12 +56,12 @@ void DrumkitInstrument::SetParameter(int index, double value,
   }
 }
 
-InstrumentDefinition DrumkitInstrument::GetDefinition() noexcept {
+InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
   static std::vector<ParameterDefinition> parameter_definitions = {
       // Pad release.
       ParameterDefinition{0.1, 0.0, 60.0},
   };
-  return GetInstrumentDefinition<DrumkitInstrument>(parameter_definitions);
+  return GetInstrumentDefinition<PercussionInstrument>(parameter_definitions);
 }
 
 }  // namespace barelyapi

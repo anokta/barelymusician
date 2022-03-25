@@ -131,7 +131,8 @@ int main(int /*argc*/, char* argv[]) {
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                        << MidiKeyNumberFromPitch(pitch) << ") ";
         });
-    instrument.SetParameter(SynthParameter::kType, kInstrumentOscillatorType);
+    instrument.SetParameter(SynthParameter::kOscillatorType,
+                            kInstrumentOscillatorType);
     instrument.SetParameter(SynthParameter::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetParameter(SynthParameter::kRelease,
                             kInstrumentEnvelopeRelease);

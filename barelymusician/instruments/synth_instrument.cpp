@@ -39,7 +39,7 @@ void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 void SynthInstrument::SetParameter(int index, double value,
                                    double /*slope*/) noexcept {
   switch (static_cast<SynthParameter>(index)) {
-    case SynthParameter::kType:
+    case SynthParameter::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));

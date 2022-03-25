@@ -3,18 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//barelymusician:__subpackages__"])
 
 cc_library(
-    name = "drumkit_instrument",
-    srcs = ["drumkit_instrument.cpp"],
-    hdrs = ["drumkit_instrument.h"],
-    deps = [
-        ":enveloped_voice",
-        ":generic_instrument",
-        "//barelymusician:include",
-        "//barelymusician/dsp:sample_player",
-    ],
-)
-
-cc_library(
     name = "enveloped_voice",
     hdrs = ["enveloped_voice.h"],
     deps = [
@@ -28,6 +16,18 @@ cc_library(
     hdrs = ["generic_instrument.h"],
     deps = [
         "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "percussion_instrument",
+    srcs = ["percussion_instrument.cpp"],
+    hdrs = ["percussion_instrument.h"],
+    deps = [
+        ":enveloped_voice",
+        ":generic_instrument",
+        "//barelymusician:include",
+        "//barelymusician/dsp:sample_player",
     ],
 )
 

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINES_DRUMKIT_INSTRUMENT_H_
-#define BARELYMUSICIAN_ENGINES_DRUMKIT_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_ENGINES_PERCUSSION_INSTRUMENT_H_
+#define BARELYMUSICIAN_ENGINES_PERCUSSION_INSTRUMENT_H_
 
 #include <unordered_map>
 #include <vector>
@@ -11,8 +11,9 @@
 
 namespace barelyapi {
 
-struct DrumkitPad {
-  explicit DrumkitPad(std::vector<double> data, int frequency, int frame_rate)
+struct PercussionPad {
+  explicit PercussionPad(std::vector<double> data, int frequency,
+                         int frame_rate)
       : data(std::move(data)), voice(frame_rate) {
     voice.generator().SetData(this->data.data(), frequency,
                               static_cast<int>(this->data.size()));
@@ -20,12 +21,12 @@ struct DrumkitPad {
   std::vector<double> data;
   EnvelopedVoice<barelyapi::SamplePlayer> voice;
 };
-using DrumkitPadMap = std::unordered_map<double, DrumkitPad>;
+using PercussionPadMap = std::unordered_map<double, PercussionPad>;
 
-/// Simple drumkit instrument.
-class DrumkitInstrument : public GenericInstrument {
+/// Simple percussion instrument.
+class PercussionInstrument : public GenericInstrument {
  public:
-  explicit DrumkitInstrument(int /*sample_rate*/) noexcept {}
+  explicit PercussionInstrument(int /*sample_rate*/) noexcept {}
 
   /// Implements `GenericInstrument`.
   void Process(double* output, int num_channels,
@@ -39,9 +40,9 @@ class DrumkitInstrument : public GenericInstrument {
   static barely::InstrumentDefinition GetDefinition() noexcept;
 
  private:
-  DrumkitPadMap pads_;
+  PercussionPadMap pads_;
 };
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINES_DRUMKIT_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_ENGINES_PERCUSSION_INSTRUMENT_H_

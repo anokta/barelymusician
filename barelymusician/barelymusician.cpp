@@ -14,7 +14,7 @@
 #include "barelymusician/engine/mutable_data.h"
 #include "barelymusician/engine/sequence.h"
 #include "barelymusician/engine/transport.h"
-#include "barelymusician/instruments/drumkit_instrument.h"
+#include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
 
 namespace {
@@ -158,7 +158,7 @@ BarelyStatus BarelyInstrument_CreateOfType(BarelyMusicianHandle handle,
       break;
     case BarelyInstrumentType_kPercussion:
       *out_instrument_id = handle->CreateInstrument(
-          barelyapi::DrumkitInstrument::GetDefinition(), frame_rate);
+          barelyapi::PercussionInstrument::GetDefinition(), frame_rate);
       break;
     default:
       return BarelyStatus_kInvalidArgument;

@@ -56,7 +56,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Create metronome instrument.
   Instrument metronome =
       musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
-  metronome.SetParameter(SynthParameter::kType, kOscillatorType);
+  metronome.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   metronome.SetParameter(SynthParameter::kAttack, kAttack);
   metronome.SetParameter(SynthParameter::kRelease, kRelease);
   metronome.SetParameter(SynthParameter::kNumVoices, kNumVoices);

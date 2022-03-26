@@ -9,17 +9,27 @@
 
 namespace barelyapi {
 
+/// Single-consumer single-producer event queue.
 class EventQueue {
  public:
+  /// Adds event at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  /// @param event Event.
+  /// @return True if successful, false otherwise.
   bool Add(double timestamp, Event event) noexcept;
 
+  /// Returns next event before end timestamp.
+  ///
+  /// @param end_timestamp End timestamp in seconds.
+  /// @return Pointer to event if successful, nullptr otherwise.
   const std::pair<double, Event>* GetNext(double end_timestamp) noexcept;
 
  private:
   // Maximum number of events.
   static constexpr int kMaxNumEvents = 1024;
 
-  // List of events.
+  // List of events with their timestamps.
   std::array<std::pair<double, Event>, kMaxNumEvents> events_;
 
   // Read index.

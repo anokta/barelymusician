@@ -15,36 +15,36 @@ struct SetDataEvent {
 
 /// Set note off event.
 struct SetNoteOffEvent {
-  /// Note pitch.
+  /// Pitch.
   double pitch;
 };
 
 /// Set note on event.
 struct SetNoteOnEvent {
-  /// Note pitch.
+  /// Pitch.
   double pitch;
 
-  /// Note intensity.
+  /// Intensity.
   double intensity;
 };
 
 /// Set parameter event.
 struct SetParameterEvent {
-  /// Parameter index.
+  /// Index.
   int index;
 
-  /// Parameter value.
+  /// Value.
   double value;
 
-  /// Parameter slope in value per second.
+  /// Slope in value per second.
   double slope;
 };
 
-/// Instrument event alias.
+/// Event alias.
 using Event = std::variant<SetDataEvent, SetNoteOffEvent, SetNoteOnEvent,
                            SetParameterEvent>;
 
-// Instrument event visitor.
+// Event visitor.
 template <class... EventTypes>
 struct EventVisitor : EventTypes... {
   using EventTypes::operator()...;

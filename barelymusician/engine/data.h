@@ -5,7 +5,7 @@
 
 namespace barelyapi {
 
-/// Class that wraps instrument data.
+/// Class that wraps data.
 class Data {
  public:
   /// Definition alias.
@@ -48,7 +48,7 @@ class Data {
   // Destroy callback.
   Definition::DestroyCallback destroy_callback_ = nullptr;
 
-  // Internal data.
+  // Mutable data.
   void* data_ = nullptr;
 };
 

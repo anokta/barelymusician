@@ -5,6 +5,16 @@
 namespace barelyapi {
 namespace {
 
+// Tests that parameter returns its definition as expected.
+TEST(ParameterTest, GetDefinition) {
+  const Parameter parameter(Parameter::Definition{-1.0, -10.0, 10.0});
+
+  const auto definition = parameter.GetDefinition();
+  EXPECT_DOUBLE_EQ(definition.default_value, -1.0);
+  EXPECT_DOUBLE_EQ(definition.min_value, -10.0);
+  EXPECT_DOUBLE_EQ(definition.max_value, 10.0);
+}
+
 // Tests that parameter sets its value as expected.
 TEST(ParameterTest, SetValue) {
   Parameter parameter(Parameter::Definition{15.0, 10.0, 20.0});

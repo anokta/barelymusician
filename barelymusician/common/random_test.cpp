@@ -7,8 +7,7 @@
 namespace barelyapi {
 namespace {
 
-// Tests that the uniform random generation always returns a value within the
-// given range.
+// Tests that the generated uniform numbers are always within a given range.
 TEST(RandomTest, DrawUniformMinMax) {
   const int kNumValues = 1000;
   const int kMin = -7;
@@ -22,8 +21,7 @@ TEST(RandomTest, DrawUniformMinMax) {
   }
 }
 
-// Tests that the random generator returns the same values when it is reset with
-// the same seed.
+// Tests that the same values are generated when reset with the same seed.
 TEST(RandomTest, Reset) {
   const int kSeed = 1;
   const int kNumValues = 10;

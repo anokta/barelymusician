@@ -1172,19 +1172,6 @@ struct DataDefinition : public BarelyDataDefinition {
   /// Destroy callback signature.
   using DestroyCallback = BarelyDataDefinition_DestroyCallback;
 
-  /// Constructs new `DataDefinition` of type.
-  ///
-  /// @param typed_data Typed data.
-  template <typename DataType>
-  explicit DataDefinition(DataType typed_data)
-      : BarelyDataDefinition{
-            [](void* other_data, void** out_data) {
-              *out_data = static_cast<void*>(
-                  new DataType(std::move(*static_cast<DataType*>(other_data))));
-            },
-            [](void* data) { delete static_cast<DataType*>(data); },
-            static_cast<void*>(&typed_data)} {}
-
   /// Constructs new `DataDefinition` from internal type.
   ///
   /// @param definition Internal data definition.
@@ -1478,7 +1465,13 @@ class Instrument {
   template <typename DataType>
   Status SetData(DataType data) {
     return static_cast<Status>(BarelyInstrument_SetData(
-        handle_, id_, DataDefinition(std::move(data))));
+        handle_, id_,
+        {[](void* other_data, void** out_data) {
+           *out_data = static_cast<void*>(
+               new DataType(std::move(*static_cast<DataType*>(other_data))));
+         },
+         [](void* this_data) { delete static_cast<DataType*>(this_data); },
+         &data}));
   }
 
   /// Sets note off callback.

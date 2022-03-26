@@ -5,7 +5,7 @@
 
 namespace barelyapi {
 
-/// Class that wraps instrument parameter.
+/// Class that wraps parameter.
 class Parameter {
  public:
   /// Definition alias.
@@ -38,10 +38,10 @@ class Parameter {
   bool SetValue(double value) noexcept;
 
  private:
-  // Parameter definition.
+  // Definition.
   Definition definition_;
 
-  // Parameter value.
+  // Value.
   double value_ = 0.0;
 };
 

@@ -16,7 +16,6 @@ cc_library(
     hdrs = ["event.h"],
     deps = [
         ":data",
-        "//barelymusician:include",
     ],
 )
 
@@ -73,6 +72,15 @@ cc_library(
     hdrs = ["transport.h"],
     deps = [
         "//barelymusician:include",
+    ],
+)
+
+cc_test(
+    name = "data_test",
+    srcs = ["data_test.cpp"],
+    deps = [
+        ":data",
+        "@googletest//:gtest_main",
     ],
 )
 

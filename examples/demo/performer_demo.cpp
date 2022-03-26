@@ -82,7 +82,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const auto build_note = [](double pitch, double duration,
                              double intensity = 0.25) {
-    return NoteDefinition{duration, intensity, {.absolute_pitch = pitch}};
+    return NoteDefinition(duration, NoteDefinition::Pitch::AbsolutePitch(pitch),
+                          intensity);
   };
   std::vector<std::pair<double, NoteDefinition>> notes;
   notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));

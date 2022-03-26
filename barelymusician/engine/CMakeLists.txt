@@ -13,7 +13,7 @@ add_library(
   event.h
 )
 target_link_libraries(
-  event
+  event INTERFACE
   data
 )
 
@@ -28,6 +28,15 @@ target_link_libraries(
 )
 
 add_library(
+  id INTERFACE
+  id.h
+)
+target_link_libraries(
+  id INTERFACE
+  include
+)
+
+add_library(
   instrument
   instrument.cpp
   instrument.h
@@ -38,6 +47,16 @@ target_link_libraries(
   event
   event_queue
   parameter
+  include
+)
+
+add_library(
+  note
+  note.cpp
+  note.h
+)
+target_link_libraries(
+  note
   include
 )
 

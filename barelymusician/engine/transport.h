@@ -7,7 +7,7 @@
 
 namespace barelyapi {
 
-/// Class that wraps playback transport.
+/// Transport that controls playback.
 class Transport {
  public:
   /// Beat callback alias.

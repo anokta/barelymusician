@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINES_PERCUSSION_INSTRUMENT_H_
-#define BARELYMUSICIAN_ENGINES_PERCUSSION_INSTRUMENT_H_
+#ifndef BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
+#define BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 
 #include <unordered_map>
 #include <vector>
@@ -19,7 +19,7 @@ struct PercussionPad {
                               static_cast<int>(this->data.size()));
   }
   std::vector<double> data;
-  EnvelopedVoice<barelyapi::SamplePlayer> voice;
+  EnvelopedVoice<SamplePlayer> voice;
 };
 using PercussionPadMap = std::unordered_map<double, PercussionPad>;
 
@@ -45,4 +45,4 @@ class PercussionInstrument : public GenericInstrument {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINES_PERCUSSION_INSTRUMENT_H_
+#endif  // BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_

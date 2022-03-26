@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINES_ENVELOPED_VOICE_H_
-#define BARELYMUSICIAN_ENGINES_ENVELOPED_VOICE_H_
+#ifndef BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_
+#define BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_
 
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/voice.h"
@@ -82,4 +82,4 @@ void EnvelopedVoice<GeneratorType>::Stop() noexcept {
 
 }  // namespace barelyapi
 
-#endif  // BARELYMUSICIAN_ENGINES_ENVELOPED_VOICE_H_
+#endif  // BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_

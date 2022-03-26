@@ -8,8 +8,9 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/event.h"
+#include "barelymusician/engine/id.h"
+#include "barelymusician/engine/note.h"
 
 namespace barelyapi {
 
@@ -17,14 +18,13 @@ namespace barelyapi {
 class Sequence {
  public:
   /// Note position-id pair type.
-  using NotePositionIdPair = std::pair<double, BarelyId>;
+  using NotePositionIdPair = std::pair<double, Id>;
 
   /// Note with position type.
-  using NoteWithPosition = std::pair<double, barely::NoteDefinition>;
+  using NoteWithPosition = std::pair<double, Note>;
 
   /// Note with position-id pair type.
-  using NoteWithPositionIdPair =
-      std::pair<NotePositionIdPair, barely::NoteDefinition>;
+  using NoteWithPositionIdPair = std::pair<NotePositionIdPair, Note>;
 
   // TODO: Refactor this.
   using EventCallback = std::function<void(double, Event)>;
@@ -35,8 +35,7 @@ class Sequence {
   /// @param position Note position.
   /// @param note Note.
   /// @return True if success.
-  bool AddNote(BarelyId id, double position,
-               barely::NoteDefinition note) noexcept;
+  bool AddNote(Id id, double position, Note note) noexcept;
 
   /// Returns begin offset.
   ///
@@ -56,7 +55,7 @@ class Sequence {
   /// Returns instrument.
   ///
   /// @return Instrument identifier.
-  [[nodiscard]] BarelyId GetInstrument() const noexcept;
+  [[nodiscard]] Id GetInstrument() const noexcept;
 
   /// Returns loop begin offset.
   ///
@@ -99,7 +98,7 @@ class Sequence {
   ///
   /// @param id Note identifier.
   /// @return True if success.
-  bool RemoveNote(BarelyId id) noexcept;
+  bool RemoveNote(Id id) noexcept;
 
   /// Sets begin offset.
   ///
@@ -121,7 +120,7 @@ class Sequence {
   /// Sets instrument.
   ///
   /// @param instrument_id Instrument identifier.
-  void SetInstrument(BarelyId instrument_id) noexcept;
+  void SetInstrument(Id instrument_id) noexcept;
 
   /// Sets loop begin offset.
   ///
@@ -143,14 +142,13 @@ class Sequence {
   /// @param id Note identifier.
   /// @param definition Note definition.
   /// @return True if success.
-  bool SetNoteDefinition(BarelyId id,
-                         barely::NoteDefinition definition) noexcept;
+  bool SetNoteDefinition(Id id, Note::Definition definition) noexcept;
 
   /// Sets note position.
   ///
   /// @param id Note identifier.
   /// @return True if success.
-  bool SetNotePosition(BarelyId id, double position) noexcept;
+  bool SetNotePosition(Id id, double position) noexcept;
 
   // TODO: Temp.
   void Stop() { active_notes_.clear(); }
@@ -197,7 +195,7 @@ class Sequence {
   EventCallback event_callback_;
 
   // Instrument identifier.
-  BarelyId instrument_id_ = BarelyId_kInvalid;
+  Id instrument_id_ = kInvalid;
 
   // Denotes whether sequence is looping or not.
   bool loop_ = false;
@@ -209,10 +207,10 @@ class Sequence {
   double loop_length_ = 1.0;
 
   // Sorted note by position map.
-  std::map<NotePositionIdPair, barely::NoteDefinition> notes_;
+  std::map<NotePositionIdPair, Note> notes_;
 
   // Note positions.
-  std::unordered_map<BarelyId, double> positions_;
+  std::unordered_map<Id, double> positions_;
 };
 
 }  // namespace barelyapi

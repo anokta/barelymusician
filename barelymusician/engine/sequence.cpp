@@ -6,15 +6,15 @@
 #include <optional>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
+#include "barelymusician/engine/id.h"
+#include "barelymusician/engine/note.h"
 
 namespace barelyapi {
 
-bool Sequence::AddNote(BarelyId id, double position,
-                       barely::NoteDefinition note) noexcept {
+bool Sequence::AddNote(Id id, double position, Note note) noexcept {
   if (positions_.emplace(id, position).second) {
-    notes_.emplace(NotePositionIdPair{position, id}, std::move(note));
+    notes_.emplace(NotePositionIdPair{position, id}, note);
     return true;
   }
   return false;
@@ -26,7 +26,7 @@ double Sequence::GetBeginPosition() const noexcept { return begin_position_; }
 
 double Sequence::GetEndPosition() const noexcept { return end_position_; }
 
-BarelyId Sequence::GetInstrument() const noexcept { return instrument_id_; }
+Id Sequence::GetInstrument() const noexcept { return instrument_id_; }
 
 double Sequence::GetLoopBeginOffset() const noexcept {
   return loop_begin_offset_;
@@ -39,7 +39,7 @@ bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 bool Sequence::IsLooping() const noexcept { return loop_; }
 
 void Sequence::Process(double begin_position, double end_position) noexcept {
-  if (instrument_id_ == BarelyId_kInvalid) return;
+  if (instrument_id_ == kInvalid) return;
 
   // Perform active note events.
   for (auto it = active_notes_.begin(); it != active_notes_.end();) {
@@ -113,10 +113,10 @@ void Sequence::RemoveAllNotes(double begin_position,
                               double end_position) noexcept {
   // TODO: Remove and send note off event for active notes.
   if (begin_position < end_position) {
-    const auto begin = notes_.lower_bound(
-        NotePositionIdPair{begin_position, BarelyId_kInvalid});
+    const auto begin =
+        notes_.lower_bound(NotePositionIdPair{begin_position, kInvalid});
     const auto end =
-        notes_.lower_bound(NotePositionIdPair{end_position, BarelyId_kInvalid});
+        notes_.lower_bound(NotePositionIdPair{end_position, kInvalid});
     for (auto it = begin; it != end; ++it) {
       positions_.erase(it->first.second);
     }
@@ -124,7 +124,7 @@ void Sequence::RemoveAllNotes(double begin_position,
   }
 }
 
-bool Sequence::RemoveNote(BarelyId id) noexcept {
+bool Sequence::RemoveNote(Id id) noexcept {
   // TODO: Remove and send note off event if active note.
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
@@ -151,7 +151,7 @@ void Sequence::SetEventCallback(EventCallback event_callback) noexcept {
   event_callback_ = std::move(event_callback);
 }
 
-void Sequence::SetInstrument(BarelyId instrument_id) noexcept {
+void Sequence::SetInstrument(Id instrument_id) noexcept {
   // TODO: Send note off event for active notes.
   active_notes_.clear();
   instrument_id_ = instrument_id;
@@ -167,17 +167,16 @@ void Sequence::SetLoopLength(double loop_length) noexcept {
 
 void Sequence::SetLooping(bool is_looping) noexcept { loop_ = is_looping; }
 
-bool Sequence::SetNoteDefinition(BarelyId id,
-                                 BarelyNoteDefinition definition) noexcept {
+bool Sequence::SetNoteDefinition(Id id, Note::Definition definition) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id});
-    *note = std::move(definition);
+    *note = Note(definition);
     return true;
   }
   return false;
 }
 
-bool Sequence::SetNotePosition(BarelyId id, double position) noexcept {
+bool Sequence::SetNotePosition(Id id, double position) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     if (position_it->second != position) {
@@ -196,12 +195,12 @@ bool Sequence::SetNotePosition(BarelyId id, double position) noexcept {
 void Sequence::ProcessInternal(double begin_position, double end_position,
                                double position_offset) noexcept {
   const auto begin =
-      notes_.lower_bound(NotePositionIdPair{begin_position, BarelyId_kInvalid});
+      notes_.lower_bound(NotePositionIdPair{begin_position, kInvalid});
   const auto end =
-      notes_.lower_bound(NotePositionIdPair{end_position, BarelyId_kInvalid});
+      notes_.lower_bound(NotePositionIdPair{end_position, kInvalid});
   for (auto it = begin; it != end; ++it) {
     const double position = it->first.first + position_offset;
-    const auto& note = it->second;
+    const auto& note = it->second.GetDefinition();
     // TODO: Include note adjustments.
     const double pitch = note.pitch.absolute_pitch;
     const double intensity = note.intensity;

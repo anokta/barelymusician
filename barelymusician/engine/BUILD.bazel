@@ -29,6 +29,14 @@ cc_library(
 )
 
 cc_library(
+    name = "id",
+    hdrs = ["id.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
     name = "instrument",
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],
@@ -47,6 +55,15 @@ cc_library(
 )
 
 cc_library(
+    name = "note",
+    srcs = ["note.cpp"],
+    hdrs = ["note.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
     name = "parameter",
     srcs = ["parameter.cpp"],
     hdrs = ["parameter.h"],
@@ -60,7 +77,8 @@ cc_library(
     srcs = ["sequence.cpp"],
     hdrs = ["sequence.h"],
     deps = [
-        "//barelymusician:include",
+        ":id",
+        ":note",
         "//barelymusician/common:find_or_null",
         "//barelymusician/engine:event",
     ],

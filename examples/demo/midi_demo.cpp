@@ -72,13 +72,13 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      NoteDefinition note;
-      note.pitch.absolute_pitch =
-          PitchFromMidiKeyNumber(midi_event.getKeyNumber());
-      note.intensity =
-          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
-      note.duration = get_position(midi_event.getTickDuration());
-      sequence->AddNote(get_position(midi_event.tick), note);
+      sequence->AddNote(
+          get_position(midi_event.tick),
+          NoteDefinition(
+              get_position(midi_event.getTickDuration()),
+              NoteDefinition::Pitch::AbsolutePitch(
+                  PitchFromMidiKeyNumber(midi_event.getKeyNumber())),
+              static_cast<double>(midi_event.getVelocity()) / kMaxVelocity));
     }
   }
 }

@@ -23,6 +23,7 @@ using ::barelyapi::Event;
 using ::barelyapi::FindOrNull;
 using ::barelyapi::Instrument;
 using ::barelyapi::MutableData;
+using ::barelyapi::Note;
 using ::barelyapi::Sequence;
 using ::barelyapi::Transport;
 
@@ -247,8 +248,9 @@ BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   auto instrument_refs = handle->instrument_refs.GetScopedView();
-  if (auto* instrument = FindOrNull(*instrument_refs, instrument_id)) {
-    (*instrument)
+  if (const auto* instrument_ref =
+          FindOrNull(*instrument_refs, instrument_id)) {
+    (*instrument_ref)
         ->Process(output, num_output_channels, num_output_frames, timestamp);
     return BarelyStatus_kOk;
   }
@@ -599,7 +601,7 @@ BarelyStatus BarelySequence_AddNote(BarelyMusicianHandle handle,
 
   if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
     *out_note_id = ++handle->id_counter;
-    sequence->AddNote(*out_note_id, position, definition);
+    sequence->AddNote(*out_note_id, position, Note(definition));
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

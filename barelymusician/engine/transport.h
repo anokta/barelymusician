@@ -47,8 +47,8 @@ class Transport {
 
   /// Sets beat callback.
   ///
-  /// @param beat_callback Beat callback.
-  void SetBeatCallback(BeatCallback beat_callback) noexcept;
+  /// @param callback Beat callback.
+  void SetBeatCallback(BeatCallback callback) noexcept;
 
   /// Sets current position.
   ///
@@ -65,11 +65,6 @@ class Transport {
   /// @param timestamp Timestamp in seconds.
   void SetTimestamp(double timestamp) noexcept;
 
-  /// Sets update callback.
-  ///
-  /// @param update_callback Update callback.
-  void SetUpdateCallback(UpdateCallback update_callback) noexcept;
-
   /// Starts playback.
   void Start() noexcept;
 
@@ -79,7 +74,8 @@ class Transport {
   /// Updates transport at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept;
+  /// @param callback Update callback.
+  void Update(double timestamp, const UpdateCallback& callback) noexcept;
 
  private:
   // Denotes whether transport is playing or not.
@@ -102,9 +98,6 @@ class Transport {
 
   // Beat callback.
   BeatCallback beat_callback_;
-
-  // Update callback.
-  UpdateCallback update_callback_;
 };
 
 }  // namespace barelyapi

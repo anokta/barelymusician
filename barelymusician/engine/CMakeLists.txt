@@ -51,6 +51,28 @@ target_link_libraries(
   include
 )
 
+add_library(
+  transport
+  transport.cpp
+  transport.h
+)
+target_link_libraries(
+  transport
+  include
+)
+
+add_executable(
+  data_test
+  data_test.cpp
+)
+target_link_libraries(
+  data_test
+  data
+  gmock
+  gtest_main
+)
+gtest_discover_tests(data_test)
+
 add_executable(
   event_queue_test
   event_queue_test.cpp
@@ -59,6 +81,7 @@ target_link_libraries(
   event_queue_test
   event
   event_queue
+  gmock
   gtest_main
 )
 gtest_discover_tests(event_queue_test)
@@ -71,6 +94,7 @@ target_link_libraries(
   instrument_test
   instrument
   parameter
+  gmock
   gtest_main
 )
 gtest_discover_tests(instrument_test)
@@ -85,3 +109,15 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(parameter_test)
+
+add_executable(
+  transport_test
+  transport_test.cpp
+)
+target_link_libraries(
+  transport_test
+  transport
+  gmock
+  gtest_main
+)
+gtest_discover_tests(transport_test)

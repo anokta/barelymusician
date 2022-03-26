@@ -12,7 +12,7 @@ namespace {
 
 using ::testing::ElementsAre;
 
-// Tests that the transport sets its tempo as expected.
+// Tests that transport sets its tempo as expected.
 TEST(TransportTest, SetTempo) {
   const double kTempo = 1.5;
 
@@ -23,20 +23,21 @@ TEST(TransportTest, SetTempo) {
   EXPECT_DOUBLE_EQ(transport.GetTempo(), kTempo);
 }
 
-// Tests that the transport sets its current position as expected.
+// Tests that transport sets its current position as expected.
 TEST(TransportTest, SetPosition) {
   const double kPosition = 2.75;
 
   Transport transport;
   EXPECT_EQ(transport.GetPosition(), 0.0);
+  EXPECT_EQ(transport.GetTimestamp(0.0), 0.0);
 
   transport.SetPosition(kPosition);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), kPosition);
+  EXPECT_EQ(transport.GetTimestamp(kPosition), 0.0);
 }
 
-// Tests that updating the transport position tirggers the corresponding
-// callbacks as expected.
-TEST(TransportTest, SetCallbacks) {
+// Tests that updating transport triggers beat callback as expected.
+TEST(TransportTest, SetBeatCallback) {
   Transport transport;
 
   EXPECT_FALSE(transport.IsPlaying());
@@ -56,14 +57,14 @@ TEST(TransportTest, SetCallbacks) {
       transport.SetPosition(5.0);
     }
   });
-  transport.SetUpdateCallback([&](double begin_position, double end_position) {
+  const auto update_callback = [&](double begin_position, double end_position) {
     callback_values.emplace_back(
         "Update", std::vector<double>{
                       begin_position, transport.GetTimestamp(begin_position),
                       end_position, transport.GetTimestamp(end_position)});
-  });
+  };
 
-  transport.Update(10.0);
+  transport.Update(10.0, update_callback);
   EXPECT_TRUE(callback_values.empty());
 
   EXPECT_FALSE(transport.IsPlaying());
@@ -72,7 +73,7 @@ TEST(TransportTest, SetCallbacks) {
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 10.0);
 
   transport.Start();
-  transport.Update(20.0);
+  transport.Update(20.0, update_callback);
   EXPECT_THAT(
       callback_values,
       ElementsAre(
@@ -95,44 +96,77 @@ TEST(TransportTest, SetCallbacks) {
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 20.0);
 }
 
-// Tests that the transport updates its internal state as expected.
+// Tests that transport updates its state as expected.
 TEST(TransportTest, Update) {
   Transport transport;
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 0.0);
 
-  transport.Update(1.0);
+  double update_begin_position = 0.0;
+  double update_end_position = 0.0;
+  const auto update_callback = [&](double begin_position, double end_position) {
+    update_begin_position = begin_position;
+    update_end_position = end_position;
+  };
+  EXPECT_DOUBLE_EQ(update_begin_position, 0.0);
+  EXPECT_DOUBLE_EQ(update_end_position, 0.0);
+
+  transport.Update(1.0, update_callback);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 1.0);
+  EXPECT_DOUBLE_EQ(update_begin_position, 0.0);
+  EXPECT_DOUBLE_EQ(update_end_position, 0.0);
 
   transport.Start();
   EXPECT_TRUE(transport.IsPlaying());
   EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
 
-  transport.Update(2.0);
+  transport.Update(2.0, update_callback);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 2.0);
+  EXPECT_DOUBLE_EQ(update_begin_position, 0.0);
+  EXPECT_DOUBLE_EQ(update_end_position, 1.0);
 
-  transport.Update(2.0);
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(1.0), 2.0);
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(0.0), 1.0);
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(2.0), 3.0);
+
+  transport.Update(2.0, update_callback);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 2.0);
+  EXPECT_DOUBLE_EQ(update_begin_position, 0.0);
+  EXPECT_DOUBLE_EQ(update_end_position, 1.0);
+
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(1.0), 2.0);
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(0.0), 1.0);
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(2.0), 3.0);
 
   transport.SetTempo(1.5);
   EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.5);
 
-  transport.Update(3.0);
+  transport.Update(3.0, update_callback);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 2.5);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 3.0);
+  EXPECT_DOUBLE_EQ(update_begin_position, 2.0);
+  EXPECT_DOUBLE_EQ(update_end_position, 2.5);
+
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(2.5), 3.0);
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(1.0), 2.0);
+  EXPECT_DOUBLE_EQ(transport.GetTimestamp(4.0), 4.0);
 
   transport.Stop();
   EXPECT_FALSE(transport.IsPlaying());
   EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.5);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 2.5);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 3.0);
+  EXPECT_DOUBLE_EQ(update_begin_position, 2.0);
+  EXPECT_DOUBLE_EQ(update_end_position, 2.5);
 
-  transport.Update(4.0);
+  transport.Update(4.0, update_callback);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 2.5);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 4.0);
+  EXPECT_DOUBLE_EQ(update_begin_position, 2.0);
+  EXPECT_DOUBLE_EQ(update_end_position, 2.5);
 }
 
 }  // namespace

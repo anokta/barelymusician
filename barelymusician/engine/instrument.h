@@ -89,13 +89,13 @@ class Instrument {
 
   /// Sets note off callback.
   ///
-  /// @param note_off_callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback note_off_callback) noexcept;
+  /// @param callback Note off callback.
+  void SetNoteOffCallback(NoteOffCallback callback) noexcept;
 
   /// Sets note on callback.
   ///
-  /// @param note_on_callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept;
+  /// @param callback Note on callback.
+  void SetNoteOnCallback(NoteOnCallback callback) noexcept;
 
   /// Sets parameter value at timestamp.
   ///

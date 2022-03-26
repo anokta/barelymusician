@@ -47,29 +47,8 @@ extern "C" {
 
 /// Musician.
 struct BarelyMusician {
-  /// Constructs new `BarelyMusician`.
-  BarelyMusician() noexcept {
-    transport.SetUpdateCallback([this](double begin_position,
-                                       double end_position) noexcept {
-      InstrumentIdEventPairMap id_event_pairs;
-      for (auto& sequence_it : sequences) {
-        auto& sequence = sequence_it.second;
-        const auto instrument_id = sequence.GetInstrument();
-        sequence.SetEventCallback([&](double position, Event event) {
-          id_event_pairs.emplace(
-              position, InstrumentIdEventPair{instrument_id, std::move(event)});
-        });
-        sequence.Process(begin_position, end_position);
-      }
-      for (auto& [position, id_event_pair] : id_event_pairs) {
-        auto& [instrument_id, event] = id_event_pair;
-        if (auto* instrument = GetInstrument(instrument_id)) {
-          instrument->ProcessEvent(std::move(event),
-                                   transport.GetTimestamp(position));
-        }
-      }
-    });
-  }
+  // Default constructor.
+  BarelyMusician() = default;
 
   // Non-copyable and non-movable.
   BarelyMusician(const BarelyMusician& other) = delete;
@@ -101,6 +80,29 @@ struct BarelyMusician {
     for (auto& [instrument_id, instrument] : instruments) {
       instrument->StopAllNotes(transport.GetTimestamp());
     }
+  }
+
+  void Update(double timestamp) noexcept {
+    transport.Update(timestamp, [this](double begin_position,
+                                       double end_position) noexcept {
+      InstrumentIdEventPairMap id_event_pairs;
+      for (auto& sequence_it : sequences) {
+        auto& sequence = sequence_it.second;
+        const auto instrument_id = sequence.GetInstrument();
+        sequence.SetEventCallback([&](double position, Event event) {
+          id_event_pairs.emplace(
+              position, InstrumentIdEventPair{instrument_id, std::move(event)});
+        });
+        sequence.Process(begin_position, end_position);
+      }
+      for (auto& [position, id_event_pair] : id_event_pairs) {
+        auto& [instrument_id, event] = id_event_pair;
+        if (auto* instrument = GetInstrument(instrument_id)) {
+          instrument->ProcessEvent(std::move(event),
+                                   transport.GetTimestamp(position));
+        }
+      }
+    });
   }
 
   void UpdateInstrumentMap() noexcept {
@@ -583,7 +585,7 @@ BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
                                    double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.Update(timestamp);
+  handle->Update(timestamp);
   return BarelyStatus_kOk;
 }
 

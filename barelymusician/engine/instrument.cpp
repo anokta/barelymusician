@@ -159,13 +159,12 @@ void Instrument::SetData(Data::Definition definition,
   event_queue_.Add(timestamp, SetDataEvent{Data{definition}});
 }
 
-void Instrument::SetNoteOffCallback(
-    NoteOffCallback note_off_callback) noexcept {
-  note_off_callback_ = std::move(note_off_callback);
+void Instrument::SetNoteOffCallback(NoteOffCallback callback) noexcept {
+  note_off_callback_ = std::move(callback);
 }
 
-void Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept {
-  note_on_callback_ = std::move(note_on_callback);
+void Instrument::SetNoteOnCallback(NoteOnCallback callback) noexcept {
+  note_on_callback_ = std::move(callback);
 }
 
 bool Instrument::SetParameter(int index, double value, double slope,

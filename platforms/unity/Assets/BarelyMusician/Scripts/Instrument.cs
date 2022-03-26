@@ -103,7 +103,7 @@ namespace Barely {
       return Musician.StopInstrumentNote(this, pitch);
     }
 
-    private void OnAudioFilterRead(double[] data, int channels) {
+    private void OnAudioFilterRead(float[] data, int channels) {
       Musician.ProcessInstrument(this, data, channels);
     }
   }

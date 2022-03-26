@@ -1,18 +1,18 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
-#include <functional>
 #include <unordered_set>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/engine/data.h"
 #include "barelymusician/engine/event.h"
 #include "barelymusician/engine/event_queue.h"
 #include "barelymusician/engine/parameter.h"
 
 namespace barelyapi {
 
-/// Class that wraps an instrument.
+/// Class that wraps instrument.
 class Instrument {
  public:
   /// Definition alias.
@@ -28,6 +28,7 @@ class Instrument {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hz.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   Instrument(const Definition& definition, int frame_rate) noexcept;
 
   /// Destroys `Instrument`.
@@ -57,15 +58,16 @@ class Instrument {
   /// @param num_output_channels Number of output channels.
   /// @param num_output_frames Number of output frames.
   /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Process(double* output, int num_output_channels, int num_output_frames,
                double timestamp) noexcept;
 
-  // TODO: temp workaround for testing.
   /// Processes event at timestamp.
   ///
   /// @param event Instrument event.
   /// @param timestamp Timestamp in seconds.
-  void ProcessEvent(const Event& event, double timestamp) noexcept;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void ProcessEvent(Event event, double timestamp) noexcept;
 
   /// Resets all parameters to default value at timestamp.
   ///
@@ -83,7 +85,7 @@ class Instrument {
   ///
   /// @param definition Data definition.
   /// @param timestamp Timestamp in seconds.
-  void SetData(barely::DataDefinition definition, double timestamp) noexcept;
+  void SetData(Data::Definition definition, double timestamp) noexcept;
 
   /// Sets note off callback.
   ///
@@ -110,6 +112,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void StartNote(double pitch, double intensity, double timestamp) noexcept;
 
   /// Stops all notes at timestamp.
@@ -124,56 +127,53 @@ class Instrument {
   void StopNote(double pitch, double timestamp) noexcept;
 
  private:
-  // Controller that wraps main thread functionality.
-  struct Controller {
-    // Note off callback.
-    NoteOffCallback note_off_callback;
+  // Returns corresponding frames for given `seconds`.
+  int GetFrames(double seconds) const noexcept;
 
-    // Note on callback.
-    NoteOnCallback note_on_callback;
+  // Returns corresponding seconds for given `frames`.
+  double GetSeconds(int frames) const noexcept;
 
-    // List of parameters.
-    std::vector<Parameter> parameters;
+  // Returns corresponding slope per frame for a given `slope`.
+  double GetSlopePerFrame(double slope) const noexcept;
 
-    // List of active note pitches.
-    std::unordered_set<double> pitches;
-  };
+  // Note off callback.
+  NoteOffCallback note_off_callback_;
 
-  // Processor that wraps audio thread functionality.
-  struct Processor {
-    // Destroy function.
-    Definition::DestroyCallback destroy_callback;
+  // Note on callback.
+  NoteOnCallback note_on_callback_;
 
-    // Process function.
-    Definition::ProcessCallback process_callback;
+  // List of parameters.
+  std::vector<Parameter> parameters_;
 
-    // Set data function.
-    Definition::SetDataCallback set_data_callback;
+  // List of active note pitches.
+  std::unordered_set<double> pitches_;
 
-    // Set note off function.
-    Definition::SetNoteOffCallback set_note_off_callback;
+  // Destroy callback.
+  Definition::DestroyCallback destroy_callback_;
 
-    // Set note on function.
-    Definition::SetNoteOnCallback set_note_on_callback;
+  // Process callback.
+  Definition::ProcessCallback process_callback_;
 
-    // Set parameter function.
-    Definition::SetParameterCallback set_parameter_callback;
+  // Set data callback.
+  Definition::SetDataCallback set_data_callback_;
 
-    // Sampling rate in hz.
-    int frame_rate;
+  // Set note off callback.
+  Definition::SetNoteOffCallback set_note_off_callback_;
 
-    // State.
-    void* state;
-  };
+  // Set note on callback.
+  Definition::SetNoteOnCallback set_note_on_callback_;
 
-  // Controller.
-  Controller controller_;
+  // Set parameter callback.
+  Definition::SetParameterCallback set_parameter_callback_;
+
+  // Sampling rate in hz.
+  int frame_rate_;
+
+  // State.
+  void* state_ = nullptr;
 
   // Event queue.
   EventQueue event_queue_;
-
-  // Processor.
-  Processor processor_;
 };
 
 }  // namespace barelyapi

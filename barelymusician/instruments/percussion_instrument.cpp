@@ -56,7 +56,7 @@ void PercussionInstrument::SetParameter(int index, double value,
 }
 
 Instrument::Definition PercussionInstrument::GetDefinition() noexcept {
-  static std::vector<Parameter::Definition> parameter_definitions = {
+  static const std::vector<Parameter::Definition> parameter_definitions = {
       // Pad release.
       Parameter::Definition{0.1, 0.0, 60.0},
   };

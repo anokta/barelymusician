@@ -69,7 +69,7 @@ void SynthInstrument::SetParameter(int index, double value,
 }
 
 Instrument::Definition SynthInstrument::GetDefinition() noexcept {
-  static std::vector<Parameter::Definition> parameter_definitions = {
+  static const std::vector<Parameter::Definition> parameter_definitions = {
       // Attack.
       Parameter::Definition{0.05, 0.0, 60.0},
       // Decay.

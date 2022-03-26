@@ -61,10 +61,11 @@ struct BarelyMusician {
         });
         sequence.Process(begin_position, end_position);
       }
-      for (const auto& [position, id_event_pair] : id_event_pairs) {
-        const auto& [instrument_id, event] = id_event_pair;
+      for (auto& [position, id_event_pair] : id_event_pairs) {
+        auto& [instrument_id, event] = id_event_pair;
         if (auto* instrument = GetInstrument(instrument_id)) {
-          instrument->ProcessEvent(event, transport.GetTimestamp(position));
+          instrument->ProcessEvent(std::move(event),
+                                   transport.GetTimestamp(position));
         }
       }
     });

@@ -53,5 +53,7 @@ TEST(EventQueueTest, AddMultipleEvents) {
   EXPECT_THAT(events.GetNext(10.0), IsNull());
 }
 
+// TODO(#97): Add more tests with concurrency.
+
 }  // namespace
 }  // namespace barelyapi

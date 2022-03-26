@@ -7,7 +7,7 @@ public class BouncerManager : MonoBehaviour {
 
   public bool shouldAutoGenerate = false;
 
-  public double spawnLatency = 1.0f;
+  public float spawnLatency = 1.0f;
 
   private void Start() {
     if (shouldAutoGenerate) {

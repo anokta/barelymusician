@@ -34,6 +34,6 @@ public class Sparkler : MonoBehaviour {
   }
 
   private void OnNoteOn(double pitch, double intensity) {
-    targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, intensity, intensity);
+    targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, (float)intensity, (float)intensity);
   }
 }

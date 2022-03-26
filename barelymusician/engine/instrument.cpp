@@ -4,175 +4,152 @@
 #include <utility>
 #include <variant>
 
+#include "barelymusician/engine/data.h"
 #include "barelymusician/engine/event.h"
 
 namespace barelyapi {
 
-namespace {
-
-// Returns corresponding frames for given `seconds`.
-int FramesFromSeconds(int frame_rate, double seconds) noexcept {
-  return frame_rate > 0
-             ? static_cast<int>(seconds * static_cast<double>(frame_rate))
-             : 0;
-}
-
-// Returns corresponding seconds for given `frames`.
-double SecondsFromFrames(int frame_rate, int frames) noexcept {
-  return frame_rate > 0
-             ? static_cast<double>(frames) / static_cast<double>(frame_rate)
-             : 0.0;
-}
-
-}  // namespace
-
+// NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
-    : processor_{definition.destroy_callback,
-                 definition.process_callback,
-                 definition.set_data_callback,
-                 definition.set_note_off_callback,
-                 definition.set_note_on_callback,
-                 definition.set_parameter_callback,
-                 frame_rate} {
+    : destroy_callback_(definition.destroy_callback),
+      process_callback_(definition.process_callback),
+      set_data_callback_(definition.set_data_callback),
+      set_note_off_callback_(definition.set_note_off_callback),
+      set_note_on_callback_(definition.set_note_on_callback),
+      set_parameter_callback_(definition.set_parameter_callback),
+      frame_rate_(frame_rate) {
   assert(frame_rate >= 0);
-  controller_.parameters.reserve(definition.num_parameter_definitions);
+  parameters_.reserve(definition.num_parameter_definitions);
   for (int index = 0; index < definition.num_parameter_definitions; ++index) {
-    controller_.parameters.emplace_back(
-        definition.parameter_definitions[index]);
+    parameters_.emplace_back(definition.parameter_definitions[index]);
   }
   if (definition.create_callback) {
-    definition.create_callback(&processor_.state, processor_.frame_rate);
+    definition.create_callback(&state_, frame_rate);
   }
-  if (processor_.set_parameter_callback) {
+  if (set_parameter_callback_) {
     for (int index = 0; index < definition.num_parameter_definitions; ++index) {
-      processor_.set_parameter_callback(
-          &processor_.state, index, controller_.parameters[index].GetValue(),
-          0.0);
+      set_parameter_callback_(&state_, index, parameters_[index].GetValue(),
+                              0.0);
     }
   }
 }
 
 Instrument::~Instrument() noexcept {
-  if (processor_.destroy_callback) {
-    processor_.destroy_callback(&processor_.state);
+  if (destroy_callback_) {
+    destroy_callback_(&state_);
   }
 }
 
 const Parameter* Instrument::GetParameter(int index) const noexcept {
-  if (index >= 0 && index < static_cast<int>(controller_.parameters.size())) {
-    return &controller_.parameters[index];
+  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+    return &parameters_[index];
   }
   return nullptr;
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
-  return controller_.pitches.contains(pitch);
+  return pitches_.contains(pitch);
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::Process(double* output, int num_output_channels,
                          int num_output_frames, double timestamp) noexcept {
-  assert(output);
+  assert(output || num_output_channels == 0 || num_output_frames == 0);
   assert(num_output_channels >= 0);
   assert(num_output_frames >= 0);
   int frame = 0;
   // Process *all* events before the end timestamp.
-  const double end_timestamp =
-      timestamp + SecondsFromFrames(processor_.frame_rate, num_output_frames);
+  const double end_timestamp = timestamp + GetSeconds(num_output_frames);
   for (const auto* event = event_queue_.GetNext(end_timestamp); event;
        event = event_queue_.GetNext(end_timestamp)) {
-    const int message_frame =
-        FramesFromSeconds(processor_.frame_rate, event->first - timestamp);
+    const int message_frame = GetFrames(event->first - timestamp);
     if (frame < message_frame) {
-      if (processor_.process_callback) {
-        processor_.process_callback(&processor_.state,
-                                    &output[num_output_channels * frame],
-                                    num_output_channels, message_frame - frame);
+      if (process_callback_) {
+        process_callback_(&state_, &output[num_output_channels * frame],
+                          num_output_channels, message_frame - frame);
       }
       frame = message_frame;
     }
     std::visit(
         EventVisitor{
             [this](const SetDataEvent& set_data_event) noexcept {
-              if (processor_.set_data_callback) {
-                processor_.set_data_callback(&processor_.state,
-                                             set_data_event.data.GetMutable());
+              if (set_data_callback_) {
+                set_data_callback_(&state_, set_data_event.data.GetMutable());
               }
             },
             [this](const SetNoteOffEvent& set_note_off_event) noexcept {
-              if (processor_.set_note_off_callback) {
-                processor_.set_note_off_callback(&processor_.state,
-                                                 set_note_off_event.pitch);
+              if (set_note_off_callback_) {
+                set_note_off_callback_(&state_, set_note_off_event.pitch);
               }
             },
             [this](const SetNoteOnEvent& set_note_on_event) noexcept {
-              if (processor_.set_note_on_callback) {
-                processor_.set_note_on_callback(&processor_.state,
-                                                set_note_on_event.pitch,
-                                                set_note_on_event.intensity);
+              if (set_note_on_callback_) {
+                set_note_on_callback_(&state_, set_note_on_event.pitch,
+                                      set_note_on_event.intensity);
               }
             },
             [this](const SetParameterEvent& set_parameter_event) noexcept {
-              if (processor_.set_parameter_callback) {
-                processor_.set_parameter_callback(
-                    &processor_.state, set_parameter_event.index,
+              if (set_parameter_callback_) {
+                set_parameter_callback_(
+                    &state_, set_parameter_event.index,
                     set_parameter_event.value,
-                    set_parameter_event.slope /
-                        static_cast<double>(processor_.frame_rate));
+                    GetSlopePerFrame(set_parameter_event.slope));
               }
             }},
         event->second);
   }
   // Process the rest of the buffer.
-  if (frame < num_output_frames && processor_.process_callback) {
-    processor_.process_callback(&processor_.state,
-                                &output[num_output_channels * frame],
-                                num_output_channels, num_output_frames - frame);
+  if (frame < num_output_frames && process_callback_) {
+    process_callback_(&state_, &output[num_output_channels * frame],
+                      num_output_channels, num_output_frames - frame);
   }
 }
 
-// TODO: temp workaround for testing.
-void Instrument::ProcessEvent(const Event& event, double timestamp) noexcept {
-  std::visit(
-      EventVisitor{[&](const SetDataEvent& /*set_data_event*/) noexcept {},
-                   [&](const SetParameterEvent& set_parameter_event) noexcept {
-                     SetParameter(set_parameter_event.index,
-                                  set_parameter_event.value,
-                                  set_parameter_event.slope, timestamp);
-                   },
-                   [&](const SetNoteOnEvent& start_note_event) noexcept {
-                     StartNote(start_note_event.pitch,
-                               start_note_event.intensity, timestamp);
-                   },
-                   [&](const SetNoteOffEvent& stop_note_event) noexcept {
-                     StopNote(stop_note_event.pitch, timestamp);
-                   }},
-      event);
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Instrument::ProcessEvent(Event event, double timestamp) noexcept {
+  std::visit(EventVisitor{[&](SetDataEvent set_data_event) noexcept {
+                            event_queue_.Add(timestamp,
+                                             std::move(set_data_event));
+                          },
+                          [&](SetParameterEvent set_parameter_event) noexcept {
+                            SetParameter(set_parameter_event.index,
+                                         set_parameter_event.value,
+                                         set_parameter_event.slope, timestamp);
+                          },
+                          // NOLINTNEXTLINE(bugprone-exception-escape)
+                          [&](SetNoteOnEvent start_note_event) noexcept {
+                            StartNote(start_note_event.pitch,
+                                      start_note_event.intensity, timestamp);
+                          },
+                          [&](SetNoteOffEvent stop_note_event) noexcept {
+                            StopNote(stop_note_event.pitch, timestamp);
+                          }},
+             std::move(event));
 }
 
 void Instrument::ResetAllParameters(double timestamp) noexcept {
-  for (int index = 0; index < static_cast<int>(controller_.parameters.size());
-       ++index) {
-    if (controller_.parameters[index].ResetValue()) {
+  for (int index = 0; index < static_cast<int>(parameters_.size()); ++index) {
+    if (parameters_[index].ResetValue()) {
       event_queue_.Add(
-          timestamp, SetParameterEvent{
-                         index, controller_.parameters[index].GetValue(), 0.0});
+          timestamp,
+          SetParameterEvent{index, parameters_[index].GetValue(), 0.0});
     }
   }
 }
 
 bool Instrument::ResetParameter(int index, double timestamp) noexcept {
-  if (index >= 0 && index < static_cast<int>(controller_.parameters.size())) {
-    if (controller_.parameters[index].ResetValue()) {
+  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+    if (parameters_[index].ResetValue()) {
       event_queue_.Add(
-          timestamp, SetParameterEvent{
-                         index, controller_.parameters[index].GetValue(), 0.0});
+          timestamp,
+          SetParameterEvent{index, parameters_[index].GetValue(), 0.0});
     }
     return true;
   }
   return false;
 }
 
-void Instrument::SetData(barely::DataDefinition definition,
+void Instrument::SetData(Data::Definition definition,
                          double timestamp) noexcept {
   void* new_data = nullptr;
   if (definition.move_callback) {
@@ -184,53 +161,69 @@ void Instrument::SetData(barely::DataDefinition definition,
 
 void Instrument::SetNoteOffCallback(
     NoteOffCallback note_off_callback) noexcept {
-  controller_.note_off_callback = std::move(note_off_callback);
+  note_off_callback_ = std::move(note_off_callback);
 }
 
 void Instrument::SetNoteOnCallback(NoteOnCallback note_on_callback) noexcept {
-  controller_.note_on_callback = std::move(note_on_callback);
+  note_on_callback_ = std::move(note_on_callback);
 }
 
 bool Instrument::SetParameter(int index, double value, double slope,
                               double timestamp) noexcept {
-  if (index >= 0 && index < static_cast<int>(controller_.parameters.size())) {
-    if (controller_.parameters[index].SetValue(value)) {
+  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+    if (parameters_[index].SetValue(value)) {
       event_queue_.Add(
           timestamp,
-          SetParameterEvent{index, controller_.parameters[index].GetValue(),
-                            slope});
+          SetParameterEvent{index, parameters_[index].GetValue(), slope});
     }
     return true;
   }
   return false;
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::StartNote(double pitch, double intensity,
                            double timestamp) noexcept {
-  if (controller_.pitches.insert(pitch).second) {
-    if (controller_.note_on_callback) {
-      controller_.note_on_callback(pitch, intensity, timestamp);
+  if (pitches_.insert(pitch).second) {
+    if (note_on_callback_) {
+      note_on_callback_(pitch, intensity, timestamp);
     }
     event_queue_.Add(timestamp, SetNoteOnEvent{pitch, intensity});
   }
 }
 
 void Instrument::StopAllNotes(double timestamp) noexcept {
-  for (const double pitch : std::exchange(controller_.pitches, {})) {
-    if (controller_.note_off_callback) {
-      controller_.note_off_callback(pitch, timestamp);
+  for (const double pitch : std::exchange(pitches_, {})) {
+    if (note_off_callback_) {
+      note_off_callback_(pitch, timestamp);
     }
     event_queue_.Add(timestamp, SetNoteOffEvent{pitch});
   }
 }
 
 void Instrument::StopNote(double pitch, double timestamp) noexcept {
-  if (controller_.pitches.erase(pitch) > 0) {
-    if (controller_.note_off_callback) {
-      controller_.note_off_callback(pitch, timestamp);
+  if (pitches_.erase(pitch) > 0) {
+    if (note_off_callback_) {
+      note_off_callback_(pitch, timestamp);
     }
     event_queue_.Add(timestamp, SetNoteOffEvent{pitch});
   }
+}
+
+int Instrument::GetFrames(double seconds) const noexcept {
+  return frame_rate_ > 0
+             ? static_cast<int>(seconds * static_cast<double>(frame_rate_))
+             : 0;
+}
+
+double Instrument::GetSeconds(int frames) const noexcept {
+  return frame_rate_ > 0
+             ? static_cast<double>(frames) / static_cast<double>(frame_rate_)
+             : 0.0;
+}
+
+double Instrument::GetSlopePerFrame(double slope) const noexcept {
+  return frame_rate_ > 0 ? slope / static_cast<double>(frame_rate_) : 0.0;
 }
 
 }  // namespace barelyapi

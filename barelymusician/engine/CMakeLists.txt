@@ -28,6 +28,20 @@ target_link_libraries(
 )
 
 add_library(
+  instrument
+  instrument.cpp
+  instrument.h
+)
+target_link_libraries(
+  instrument
+  data
+  event
+  event_queue
+  parameter
+  include
+)
+
+add_library(
   parameter
   parameter.cpp
   parameter.h
@@ -48,6 +62,18 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(event_queue_test)
+
+add_executable(
+  instrument_test
+  instrument_test.cpp
+)
+target_link_libraries(
+  instrument_test
+  instrument
+  parameter
+  gtest_main
+)
+gtest_discover_tests(instrument_test)
 
 add_executable(
   parameter_test

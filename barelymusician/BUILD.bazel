@@ -8,6 +8,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":include",
+        "//barelymusician/engine:conductor",
         "//barelymusician/engine:instrument",
         "//barelymusician/engine:mutable_data",
         "//barelymusician/engine:sequence",

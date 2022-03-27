@@ -8,13 +8,18 @@
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/engine/id.h"
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
 
 namespace barelyapi {
 
-bool Sequence::AddNote(Id id, double position, Note note) noexcept {
+Sequence::Sequence(Conductor& conductor, const Transport& transport) noexcept
+    : conductor_(conductor), transport_(transport) {}
+
+bool Sequence::AddNote(Id id, Note::Definition definition,
+                       double position) noexcept {
   if (positions_.emplace(id, position).second) {
-    notes_.emplace(NotePositionIdPair{position, id}, note);
+    notes_.emplace(NotePositionIdPair{position, id}, definition);
     return true;
   }
   return false;
@@ -26,7 +31,7 @@ double Sequence::GetBeginPosition() const noexcept { return begin_position_; }
 
 double Sequence::GetEndPosition() const noexcept { return end_position_; }
 
-Id Sequence::GetInstrument() const noexcept { return instrument_id_; }
+Instrument* Sequence::GetInstrument() const noexcept { return instrument_; }
 
 double Sequence::GetLoopBeginOffset() const noexcept {
   return loop_begin_offset_;
@@ -39,9 +44,11 @@ bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 bool Sequence::IsLooping() const noexcept { return loop_; }
 
 void Sequence::Process(double begin_position, double end_position) noexcept {
-  if (instrument_id_ == kInvalid) return;
+  if (!instrument_) {
+    return;
+  }
 
-  // Perform active note events.
+  // Process active notes.
   for (auto it = active_notes_.begin(); it != active_notes_.end();) {
     const auto& [note_begin_position, active_note] = *it;
     double note_end_position = active_note.end_position;
@@ -53,10 +60,9 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
       ++it;
       continue;
     }
-    // Perform note off event.
-    if (event_callback_) {
-      event_callback_(note_end_position, SetNoteOffEvent{active_note.pitch});
-    }
+    // Perform note off.
+    instrument_->StopNote(active_note.pitch,
+                          transport_.GetTimestamp(note_end_position));
     it = active_notes_.erase(it);
   }
 
@@ -111,7 +117,6 @@ void Sequence::RemoveAllNotes() noexcept {
 
 void Sequence::RemoveAllNotes(double begin_position,
                               double end_position) noexcept {
-  // TODO: Remove and send note off event for active notes.
   if (begin_position < end_position) {
     const auto begin =
         notes_.lower_bound(NotePositionIdPair{begin_position, kInvalid});
@@ -125,7 +130,6 @@ void Sequence::RemoveAllNotes(double begin_position,
 }
 
 bool Sequence::RemoveNote(Id id) noexcept {
-  // TODO: Remove and send note off event if active note.
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     notes_.erase(NotePositionIdPair{position_it->second, id});
@@ -147,14 +151,16 @@ void Sequence::SetEndPosition(double end_position) noexcept {
   end_position_ = end_position;
 }
 
-void Sequence::SetEventCallback(EventCallback event_callback) noexcept {
-  event_callback_ = std::move(event_callback);
-}
-
-void Sequence::SetInstrument(Id instrument_id) noexcept {
-  // TODO: Send note off event for active notes.
-  active_notes_.clear();
-  instrument_id_ = instrument_id;
+void Sequence::SetInstrument(Instrument* instrument) noexcept {
+  if (instrument_ != instrument) {
+    if (instrument_ && !active_notes_.empty()) {
+      for (const auto& [position, active_note] : active_notes_) {
+        instrument_->StopNote(active_note.pitch, transport_.GetTimestamp());
+      }
+    }
+    active_notes_.clear();
+    instrument_ = instrument;
+  }
 }
 
 void Sequence::SetLoopBeginOffset(double loop_begin_offset) noexcept {
@@ -170,7 +176,7 @@ void Sequence::SetLooping(bool is_looping) noexcept { loop_ = is_looping; }
 bool Sequence::SetNoteDefinition(Id id, Note::Definition definition) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     auto* note = FindOrNull(notes_, NotePositionIdPair{*position, id});
-    *note = Note(definition);
+    *note = definition;
     return true;
   }
   return false;
@@ -192,6 +198,17 @@ bool Sequence::SetNotePosition(Id id, double position) noexcept {
   return false;
 }
 
+void Sequence::Stop() noexcept {
+  if (!active_notes_.empty()) {
+    if (instrument_) {
+      for (const auto& [position, active_note] : active_notes_) {
+        instrument_->StopNote(active_note.pitch, transport_.GetTimestamp());
+      }
+    }
+    active_notes_.clear();
+  }
+}
+
 void Sequence::ProcessInternal(double begin_position, double end_position,
                                double position_offset) noexcept {
   const auto begin =
@@ -200,22 +217,20 @@ void Sequence::ProcessInternal(double begin_position, double end_position,
       notes_.lower_bound(NotePositionIdPair{end_position, kInvalid});
   for (auto it = begin; it != end; ++it) {
     const double position = it->first.first + position_offset;
-    const auto& note = it->second.GetDefinition();
-    // TODO: Include note adjustments.
-    const double pitch = note.pitch.absolute_pitch;
-    const double intensity = note.intensity;
-    const double duration = note.duration;
+    // TODO: use bypass.
+    const auto note = conductor_.TransformNote(it->second, false);
     const double note_end_position =
-        std::min(position + std::max(duration, 0.0), end_position_);
-    // Perform note on event.
-    if (event_callback_) {
-      event_callback_(position, SetNoteOnEvent{pitch, intensity});
-    }
-    // Perform note off event.
+        std::min(position + std::max(note.duration, 0.0), end_position_);
+    // Perform note on.
+    instrument_->StartNote(note.pitch, note.intensity,
+                           transport_.GetTimestamp(position));
+    // Perform note off.
     if (note_end_position >= end_position) {
-      active_notes_.emplace(position, ActiveNote{note_end_position, pitch});
-    } else if (event_callback_) {
-      event_callback_(note_end_position, SetNoteOffEvent{pitch});
+      active_notes_.emplace(position,
+                            ActiveNote{note_end_position, note.pitch});
+    } else {
+      instrument_->StopNote(note.pitch,
+                            transport_.GetTimestamp(note_end_position));
     }
   }
 }

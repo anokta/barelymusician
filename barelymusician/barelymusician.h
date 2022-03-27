@@ -101,8 +101,8 @@ enum BarelyNotePitchType_Values {
   BarelyNotePitchType_kScaleIndex = 2,
 };
 
-/// Note pitch.
-typedef struct BarelyNotePitch {
+/// Note pitch definition.
+typedef struct BarelyNotePitchDefinition {
   /// Type.
   BarelyNotePitchType type;
 
@@ -115,7 +115,7 @@ typedef struct BarelyNotePitch {
     /// Scale index.
     int32_t scale_index;
   };
-} BarelyNotePitch;
+} BarelyNotePitchDefinition;
 
 /// Note definition.
 typedef struct BarelyNoteDefinition {
@@ -123,7 +123,7 @@ typedef struct BarelyNoteDefinition {
   double duration;
 
   /// Pitch.
-  BarelyNotePitch pitch;
+  BarelyNotePitchDefinition pitch;
 
   /// Intensity.
   double intensity;
@@ -308,18 +308,18 @@ typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 double timestamp,
                                                 void* user_data);
 
-/// Musician adjust note callback signature.
+/// Musician adjust note definition callback signature.
 ///
 /// @param definition Mutable note definition.
 /// @param user_data User data.
-typedef void (*BarelyMusician_AdjustNoteCallback)(
+typedef void (*BarelyMusician_AdjustNoteDefinitionCallback)(
     BarelyNoteDefinition* definition, void* user_data);
 
-/// Musician adjust parameter automation callback signature.
+/// Musician adjust parameter automation definition callback signature.
 ///
 /// @param definition Mutable parameter automation definition.
 /// @param user_data User data.
-typedef void (*BarelyMusician_AdjustParameterAutomationCallback)(
+typedef void (*BarelyMusician_AdjustParameterAutomationDefinitionCallback)(
     BarelyParameterAutomationDefinition* definition, void* user_data);
 
 /// Musician adjust tempo callback signature.
@@ -517,12 +517,12 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
 /// Gets musician note.
 ///
 /// @param handle Musician handle.
-/// @param pitch Note pitch.
+/// @param definition Note pitch definition.
 /// @param out_pitch Output note pitch.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetNote(BarelyMusicianHandle handle,
-                                                  BarelyNotePitch pitch,
-                                                  double* out_pitch);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetNote(BarelyMusicianHandle handle,
+                       BarelyNotePitchDefinition definition, double* out_pitch);
 
 /// Gets musician position.
 ///
@@ -546,9 +546,9 @@ BarelyMusician_GetRootNote(BarelyMusicianHandle handle, double* out_root_pitch);
 /// @param out_scale_pitches Output list of scale note pitches.
 /// @param out_num_scale_pitches Output number of scale note pitches.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_GetScale(BarelyMusicianHandle handle, double** out_scale_pitches,
-                        int32_t* out_num_scale_pitches);
+BARELY_EXPORT BarelyStatus BarelyMusician_GetScale(
+    BarelyMusicianHandle handle, const double** out_scale_pitches,
+    int32_t* out_num_scale_pitches);
 
 /// Gets musician tempo.
 ///
@@ -583,25 +583,27 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestampAtPosition(
 BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyMusicianHandle handle,
                                                     bool* out_is_playing);
 
-/// Sets musician adjust note callback.
+/// Sets musician adjust note definition callback.
 ///
 /// @param handle Musician handle.
-/// @param callback Adjust note callback.
+/// @param callback Adjust note definition callback.
 /// @param user_data User data.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustNoteCallback(
-    BarelyMusicianHandle handle, BarelyMusician_AdjustNoteCallback callback,
-    void* user_data);
-
-/// Sets musician adjust parameter automation callback.
-///
-/// @param handle Musician handle.
-/// @param callback Adjust parameter automation callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustParameterAutomationCallback(
+BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustNoteDefinitionCallback(
     BarelyMusicianHandle handle,
-    BarelyMusician_AdjustParameterAutomationCallback callback, void* user_data);
+    BarelyMusician_AdjustNoteDefinitionCallback callback, void* user_data);
+
+/// Sets musician adjust parameter automation definition callback.
+///
+/// @param handle Musician handle.
+/// @param callback Adjust parameter automation definition callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyMusician_SetAdjustParameterAutomationDefinitionCallback(
+    BarelyMusicianHandle handle,
+    BarelyMusician_AdjustParameterAutomationDefinitionCallback callback,
+    void* user_data);
 
 /// Sets musician adjust tempo callback.
 ///
@@ -1190,43 +1192,44 @@ enum class NotePitchType : BarelyNotePitchType {
   kScaleIndex = BarelyNotePitchType_kScaleIndex,
 };
 
-// Note pitch.
-struct NotePitch : public BarelyNotePitch {
+// Note pitch definition.
+struct NotePitchDefinition : public BarelyNotePitchDefinition {
   /// Returns new `NotePitch` with absolute pitch.
   ///
   /// @param absolute_pitch Absolute pitch.
   /// @return Pitch.
-  static NotePitch AbsolutePitch(double absolute_pitch) {
-    return NotePitch({.type = static_cast<BarelyNotePitchType>(
-                          NotePitchType::kAbsolutePitch),
-                      .absolute_pitch = absolute_pitch});
+  static NotePitchDefinition AbsolutePitch(double absolute_pitch) {
+    return NotePitchDefinition({.type = static_cast<BarelyNotePitchType>(
+                                    NotePitchType::kAbsolutePitch),
+                                .absolute_pitch = absolute_pitch});
   }
 
   /// Returns new `NotePitch` with relative pitch.
   ///
   /// @param relative_pitch Relative pitch.
   /// @return Note pitch.
-  static NotePitch RelativePitch(double relative_pitch) {
-    return NotePitch({.type = static_cast<BarelyNotePitchType>(
-                          NotePitchType::kRelativePitch),
-                      .relative_pitch = relative_pitch});
+  static NotePitchDefinition RelativePitch(double relative_pitch) {
+    return NotePitchDefinition({.type = static_cast<BarelyNotePitchType>(
+                                    NotePitchType::kRelativePitch),
+                                .relative_pitch = relative_pitch});
   }
 
   /// Returns new `NotePitch` with scale index.
   ///
   /// @param scale_index Scale index.
   /// @return Note pitch.
-  static NotePitch ScaleIndex(int scale_index) {
-    return NotePitch(
+  static NotePitchDefinition ScaleIndex(int scale_index) {
+    return NotePitchDefinition(
         {.type = static_cast<BarelyNotePitchType>(NotePitchType::kScaleIndex),
          .scale_index = scale_index});
   }
 
-  /// Constructs new `Pitch` from internal type.
+  /// Constructs new `NotePitchDefinition` from internal type.
   ///
-  /// @param note_pitch Internal note pitch.
+  /// @param definition Internal note pitch definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  NotePitch(BarelyNotePitch note_pitch) : BarelyNotePitch{note_pitch} {}
+  NotePitchDefinition(BarelyNotePitchDefinition definition)
+      : BarelyNotePitchDefinition{definition} {}
 };
 
 /// Note definition.
@@ -1236,7 +1239,8 @@ struct NoteDefinition : public BarelyNoteDefinition {
   /// @param duration Note duration.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  NoteDefinition(double duration, NotePitch pitch, double intensity = 1.0)
+  NoteDefinition(double duration, NotePitchDefinition pitch,
+                 double intensity = 1.0)
       : BarelyNoteDefinition{duration, pitch, intensity} {}
 
   /// Constructs new `NoteDefinition` from internal type.
@@ -1902,6 +1906,17 @@ class Sequence {
 /// Musician.
 class Musician {
  public:
+  /// Adjust note definition callback signature.
+  ///
+  /// @param definition Mutable note definition.
+  using AdjustNoteDefinitionCallback =
+      std::function<void(NoteDefinition* definition)>;
+
+  /// Adjust tempo callback signature.
+  ///
+  /// @param tempo Mutable tempo in bpm.
+  using AdjustTempoCallback = std::function<void(double* tempo)>;
+
   /// Beat callback signature.
   ///
   /// @param position Beat position in beats.
@@ -1932,6 +1947,10 @@ class Musician {
   /// @param other Other musician.
   Musician(Musician&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)) {
+    SetAdjustNoteDefinitionCallback(
+        std::exchange(other.adjust_note_definition_callback_, nullptr));
+    SetAdjustTempoCallback(
+        std::exchange(other.adjust_tempo_callback_, nullptr));
     SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
   }
 
@@ -1945,6 +1964,10 @@ class Musician {
         assert(IsOk(static_cast<Status>(status)));
       }
       handle_ = std::exchange(other.handle_, nullptr);
+      SetAdjustNoteDefinitionCallback(
+          std::exchange(other.adjust_note_definition_callback_, nullptr));
+      SetAdjustTempoCallback(
+          std::exchange(other.adjust_tempo_callback_, nullptr));
       SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
     }
     return *this;
@@ -1972,6 +1995,17 @@ class Musician {
   ///
   /// @return Sequence.
   Sequence CreateSequence() { return Sequence(handle_); }
+
+  /// Returns note.
+  ///
+  /// @param definition Note pitch definition.
+  /// @return Note pitch.
+  [[nodiscard]] double GetNote(NotePitchDefinition definition) const {
+    double pitch = 0.0;
+    const auto status = BarelyMusician_GetNote(handle_, definition, &pitch);
+    assert(IsOk(static_cast<Status>(status)));
+    return pitch;
+  }
 
   /// Returns position.
   ///
@@ -2027,9 +2061,47 @@ class Musician {
     return is_playing;
   }
 
+  /// Sets adjust note definition callback.
+  ///
+  /// @param callback Adjust note definition callback.
+  /// @return Status.
+  Status SetAdjustNoteDefinitionCallback(
+      AdjustNoteDefinitionCallback callback) {
+    if (callback) {
+      adjust_note_definition_callback_ = std::move(callback);
+      return static_cast<Status>(BarelyMusician_SetAdjustNoteDefinitionCallback(
+          handle_,
+          [](BarelyNoteDefinition* definition, void* user_data) {
+            (*static_cast<AdjustNoteDefinitionCallback*>(user_data))(
+                static_cast<NoteDefinition*>(definition));
+          },
+          static_cast<void*>(&adjust_note_definition_callback_)));
+    }
+    return static_cast<Status>(BarelyMusician_SetAdjustNoteDefinitionCallback(
+        handle_, nullptr, nullptr));
+  }
+
+  /// Sets adjust tempo callback.
+  ///
+  /// @param callback Adjust tempo callback.
+  /// @return Status.
+  Status SetAdjustTempoCallback(AdjustTempoCallback callback) {
+    if (callback) {
+      adjust_tempo_callback_ = std::move(callback);
+      return static_cast<Status>(BarelyMusician_SetAdjustTempoCallback(
+          handle_,
+          [](double* tempo, void* user_data) {
+            (*static_cast<AdjustTempoCallback*>(user_data))(tempo);
+          },
+          static_cast<void*>(&adjust_tempo_callback_)));
+    }
+    return static_cast<Status>(
+        BarelyMusician_SetAdjustTempoCallback(handle_, nullptr, nullptr));
+  }
+
   /// Sets beat callback.
   ///
-  /// @param beat_callback Beat callback.
+  /// @param callback Beat callback.
   /// @return Status.
   Status SetBeatCallback(BeatCallback callback) {
     if (callback) {
@@ -2090,6 +2162,12 @@ class Musician {
  private:
   // Internal handle.
   BarelyMusicianHandle handle_ = nullptr;
+
+  // Adjust note definition callback.
+  AdjustNoteDefinitionCallback adjust_note_definition_callback_;
+
+  // Adjust tempo callback.
+  AdjustTempoCallback adjust_tempo_callback_;
 
   // Beat callback.
   BeatCallback beat_callback_;

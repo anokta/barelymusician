@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/common/random.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -22,7 +23,7 @@ using ::barely::InstrumentType;
 using ::barely::IsOk;
 using ::barely::Musician;
 using ::barely::NoteDefinition;
-using ::barely::NotePitch;
+using ::barely::NotePitchDefinition;
 using ::barely::OscillatorType;
 using ::barely::Sequence;
 using ::barely::SynthParameter;
@@ -30,6 +31,8 @@ using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+// TODO: move random to public api.
+using ::barelyapi::Random;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -60,6 +63,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
+  Random random;
+
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
@@ -83,7 +88,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const auto build_note = [](double pitch, double duration,
                              double intensity = 0.25) {
-    return NoteDefinition(duration, NotePitch::AbsolutePitch(pitch), intensity);
+    return NoteDefinition(duration, NotePitchDefinition::AbsolutePitch(pitch),
+                          intensity);
   };
   std::vector<std::pair<double, NoteDefinition>> notes;
   notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));
@@ -113,6 +119,23 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   bool use_conductor = false;
+  musician.SetAdjustNoteDefinitionCallback([&](NoteDefinition* definition) {
+    if (use_conductor) {
+      definition->duration = 0.25 *
+                             static_cast<double>(random.DrawUniform(1, 4)) *
+                             definition->duration;
+      definition->pitch.absolute_pitch +=
+          static_cast<double>(random.DrawUniform(-1, 1));
+      definition->intensity = 0.5 *
+                              static_cast<double>(random.DrawUniform(1, 4)) *
+                              definition->intensity;
+    }
+  });
+  musician.SetAdjustTempoCallback([&](double* tempo) {
+    if (use_conductor) {
+      *tempo *= 1.25;
+    }
+  });
 
   bool reset_position = false;
   const auto beat_callback = [&](double /*position*/, double /*timestamp*/) {
@@ -188,7 +211,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
       case 'C':
         use_conductor = !use_conductor;
-        // TODO: Add back musician adjustment.
         ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':

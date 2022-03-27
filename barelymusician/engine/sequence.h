@@ -8,26 +8,28 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/engine/event.h"
+#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
+#include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
+#include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
 
-/// Musical note sequence.
+/// Class that wraps sequence.
 class Sequence {
  public:
   /// Note position-id pair type.
   using NotePositionIdPair = std::pair<double, Id>;
 
   /// Note with position type.
-  using NoteWithPosition = std::pair<double, Note>;
+  using NoteWithPosition = std::pair<double, Note::Definition>;
 
   /// Note with position-id pair type.
-  using NoteWithPositionIdPair = std::pair<NotePositionIdPair, Note>;
+  using NoteWithPositionIdPair =
+      std::pair<NotePositionIdPair, Note::Definition>;
 
-  // TODO: Refactor this.
-  using EventCallback = std::function<void(double, Event)>;
+  Sequence(Conductor& conductor, const Transport& transport) noexcept;
 
   /// Adds new note at position.
   ///
@@ -35,7 +37,7 @@ class Sequence {
   /// @param position Note position.
   /// @param note Note.
   /// @return True if success.
-  bool AddNote(Id id, double position, Note note) noexcept;
+  bool AddNote(Id id, Note::Definition definition, double position) noexcept;
 
   /// Returns begin offset.
   ///
@@ -54,8 +56,8 @@ class Sequence {
 
   /// Returns instrument.
   ///
-  /// @return Instrument identifier.
-  [[nodiscard]] Id GetInstrument() const noexcept;
+  /// @return Pointer to instrument.
+  [[nodiscard]] Instrument* GetInstrument() const noexcept;
 
   /// Returns loop begin offset.
   ///
@@ -69,20 +71,18 @@ class Sequence {
 
   /// Returns whether sequence is empty or not.
   ///
-  /// @return True if empty.
+  /// @return True if empty, false otherwise.
   [[nodiscard]] bool IsEmpty() const noexcept;
 
   /// Returns whether sequence is looping or not.
   ///
-  /// @return True if looping.
+  /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept;
 
   /// Processes sequence at given position range.
   ///
   /// @param begin_position Begin position.
   /// @param end_position End position.
-  /// @param process_callback Process callback.
-  // TODO: Pass conductor.
   void Process(double begin_position, double end_position) noexcept;
 
   /// Removes all notes.
@@ -115,12 +115,10 @@ class Sequence {
   /// @param end_position End position in beats.
   void SetEndPosition(double end_position) noexcept;
 
-  void SetEventCallback(EventCallback event_callback) noexcept;
-
   /// Sets instrument.
   ///
-  /// @param instrument_id Instrument identifier.
-  void SetInstrument(Id instrument_id) noexcept;
+  /// @param instrument Pointer to instrument.
+  void SetInstrument(Instrument* instrument) noexcept;
 
   /// Sets loop begin offset.
   ///
@@ -150,18 +148,8 @@ class Sequence {
   /// @return True if success.
   bool SetNotePosition(Id id, double position) noexcept;
 
-  // TODO: Temp.
-  void Stop() { active_notes_.clear(); }
-
-  // TODO: Temp.
-  std::vector<double> GetActiveNotes() {
-    std::vector<double> pitches;
-    pitches.reserve(active_notes_.size());
-    for (const auto& [position, note] : active_notes_) {
-      pitches.push_back(note.pitch);
-    }
-    return pitches;
-  }
+  /// Stops sequencer.
+  void Stop() noexcept;
 
  private:
   // Internal process helper function.
@@ -170,14 +158,18 @@ class Sequence {
 
   // Active note that is being performed.
   struct ActiveNote {
-    // TODO: Add note id to check remove events etc.
-
     // Note end position.
     double end_position;
 
     // Note pitch.
     double pitch;
   };
+
+  Conductor& conductor_;
+
+  const Transport& transport_;
+
+  Instrument* instrument_;
 
   // List of active notes.
   std::multimap<double, ActiveNote> active_notes_;
@@ -191,12 +183,6 @@ class Sequence {
   // End position in beats.
   double end_position_ = std::numeric_limits<double>::max();
 
-  // TODO: Refactor this.
-  EventCallback event_callback_;
-
-  // Instrument identifier.
-  Id instrument_id_ = kInvalid;
-
   // Denotes whether sequence is looping or not.
   bool loop_ = false;
 
@@ -207,7 +193,7 @@ class Sequence {
   double loop_length_ = 1.0;
 
   // Sorted note by position map.
-  std::map<NotePositionIdPair, Note> notes_;
+  std::map<NotePositionIdPair, Note::Definition> notes_;
 
   // Note positions.
   std::unordered_map<Id, double> positions_;

@@ -6,24 +6,25 @@
 namespace barelyapi {
 
 /// Class that wraps note.
-class Note {
+struct Note {
  public:
   /// Definition alias.
   using Definition = barely::NoteDefinition;
 
-  /// Constructs new `Note`.
-  ///
-  /// @param definition Note definition.
-  explicit Note(Definition definition) noexcept;
+  /// Pitch definition alias.
+  using PitchDefinition = barely::NotePitchDefinition;
 
-  /// Returns definition.
-  ///
-  /// @return Note definition.
-  [[nodiscard]] const Definition& GetDefinition() const noexcept;
+  /// Pitch type.
+  using PitchType = barely::NotePitchType;
 
- private:
-  // Definition.
-  Definition definition_;
+  /// Duration.
+  double duration;
+
+  /// Pitch.
+  double pitch;
+
+  /// Intensity.
+  double intensity;
 };
 
 }  // namespace barelyapi

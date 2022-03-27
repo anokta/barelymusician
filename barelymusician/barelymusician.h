@@ -101,8 +101,8 @@ enum BarelyNotePitchType_Values {
   BarelyNotePitchType_kScaleIndex = 2,
 };
 
-/// Note definition pitch.
-typedef struct BarelyNoteDefinition_Pitch {
+/// Note pitch.
+typedef struct BarelyNotePitch {
   /// Type.
   BarelyNotePitchType type;
 
@@ -115,7 +115,7 @@ typedef struct BarelyNoteDefinition_Pitch {
     /// Scale index.
     int32_t scale_index;
   };
-} BarelyNoteDefinition_Pitch;
+} BarelyNotePitch;
 
 /// Note definition.
 typedef struct BarelyNoteDefinition {
@@ -123,7 +123,7 @@ typedef struct BarelyNoteDefinition {
   double duration;
 
   /// Pitch.
-  BarelyNoteDefinition_Pitch pitch;
+  BarelyNotePitch pitch;
 
   /// Intensity.
   double intensity;
@@ -520,9 +520,9 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
 /// @param pitch Note pitch.
 /// @param out_pitch Output note pitch.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_GetNote(BarelyMusicianHandle handle,
-                       BarelyNoteDefinition_Pitch pitch, double* out_pitch);
+BARELY_EXPORT BarelyStatus BarelyMusician_GetNote(BarelyMusicianHandle handle,
+                                                  BarelyNotePitch pitch,
+                                                  double* out_pitch);
 
 /// Gets musician position.
 ///
@@ -1190,53 +1190,53 @@ enum class NotePitchType : BarelyNotePitchType {
   kScaleIndex = BarelyNotePitchType_kScaleIndex,
 };
 
+// Note pitch.
+struct NotePitch : public BarelyNotePitch {
+  /// Returns new `NotePitch` with absolute pitch.
+  ///
+  /// @param absolute_pitch Absolute pitch.
+  /// @return Pitch.
+  static NotePitch AbsolutePitch(double absolute_pitch) {
+    return NotePitch({.type = static_cast<BarelyNotePitchType>(
+                          NotePitchType::kAbsolutePitch),
+                      .absolute_pitch = absolute_pitch});
+  }
+
+  /// Returns new `NotePitch` with relative pitch.
+  ///
+  /// @param relative_pitch Relative pitch.
+  /// @return Note pitch.
+  static NotePitch RelativePitch(double relative_pitch) {
+    return NotePitch({.type = static_cast<BarelyNotePitchType>(
+                          NotePitchType::kRelativePitch),
+                      .relative_pitch = relative_pitch});
+  }
+
+  /// Returns new `NotePitch` with scale index.
+  ///
+  /// @param scale_index Scale index.
+  /// @return Note pitch.
+  static NotePitch ScaleIndex(int scale_index) {
+    return NotePitch(
+        {.type = static_cast<BarelyNotePitchType>(NotePitchType::kScaleIndex),
+         .scale_index = scale_index});
+  }
+
+  /// Constructs new `Pitch` from internal type.
+  ///
+  /// @param note_pitch Internal note pitch.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  NotePitch(BarelyNotePitch note_pitch) : BarelyNotePitch{note_pitch} {}
+};
+
 /// Note definition.
 struct NoteDefinition : public BarelyNoteDefinition {
-  struct Pitch : public BarelyNoteDefinition_Pitch {
-    /// Returns new `Pitch` with absolute pitch.
-    ///
-    /// @param absolute_pitch Absolute pitch.
-    /// @return Pitch.
-    static Pitch AbsolutePitch(double absolute_pitch) {
-      return Pitch({.type = static_cast<BarelyNotePitchType>(
-                        NotePitchType::kAbsolutePitch),
-                    .absolute_pitch = absolute_pitch});
-    }
-
-    /// Returns new `Pitch` with relative pitch.
-    ///
-    /// @param relative_pitch Relative pitch.
-    /// @return Pitch.
-    static Pitch RelativePitch(double relative_pitch) {
-      return Pitch({.type = static_cast<BarelyNotePitchType>(
-                        NotePitchType::kRelativePitch),
-                    .relative_pitch = relative_pitch});
-    }
-
-    /// Returns new `Pitch` with scale index.
-    ///
-    /// @param scale_index Scale index.
-    /// @return Pitch.
-    static Pitch ScaleIndex(int scale_index) {
-      return Pitch(
-          {.type = static_cast<BarelyNotePitchType>(NotePitchType::kScaleIndex),
-           .scale_index = scale_index});
-    }
-
-    /// Constructs new `Pitch` from internal type.
-    ///
-    /// @param pitch Internal pitch.
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    Pitch(BarelyNoteDefinition_Pitch pitch)
-        : BarelyNoteDefinition_Pitch{pitch} {}
-  };
-
   /// Constructs new `NoteDefinition`.
   ///
   /// @param duration Note duration.
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  NoteDefinition(double duration, Pitch pitch, double intensity = 1.0)
+  NoteDefinition(double duration, NotePitch pitch, double intensity = 1.0)
       : BarelyNoteDefinition{duration, pitch, intensity} {}
 
   /// Constructs new `NoteDefinition` from internal type.

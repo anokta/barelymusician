@@ -279,7 +279,7 @@ namespace Barely {
           definition.pitch.absolutePitch =
               (double)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0;
           definition.intensity = sequenceNote.note.Intensity;
-          BarelySequence_AddNote(Handle, sequence.Id, sequenceNote.position, definition, _int64Ptr);
+          BarelySequence_AddNote(Handle, sequence.Id, definition, sequenceNote.position, _int64Ptr);
         }
       }
     }
@@ -514,7 +514,7 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_AddNote")]
     private static extern Status BarelySequence_AddNote(IntPtr handle, Int64 sequenceId,
-                                                        double position, NoteDefinition definition,
+                                                        NoteDefinition definition, double position,
                                                         IntPtr outNoteId);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_Create")]

@@ -407,8 +407,7 @@ BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle) {
 }
 
 BarelyStatus BarelyMusician_GetNote(BarelyMusicianHandle handle,
-                                    BarelyNoteDefinition_Pitch pitch,
-                                    double* out_pitch) {
+                                    BarelyNotePitch pitch, double* out_pitch) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_pitch) return BarelyStatus_kInvalidArgument;
 

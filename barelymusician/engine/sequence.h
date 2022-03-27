@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_ENGINE_SEQUENCE_H_
 #define BARELYMUSICIAN_ENGINE_SEQUENCE_H_
 
-#include <functional>
 #include <limits>
 #include <map>
 #include <unordered_map>
@@ -19,24 +18,19 @@ namespace barelyapi {
 /// Class that wraps sequence.
 class Sequence {
  public:
-  /// Note position-id pair type.
-  using NotePositionIdPair = std::pair<double, Id>;
-
-  /// Note with position type.
-  using NoteWithPosition = std::pair<double, Note::Definition>;
-
-  /// Note with position-id pair type.
-  using NoteWithPositionIdPair =
-      std::pair<NotePositionIdPair, Note::Definition>;
-
+  /// Constructs new `Sequence`.
+  ///
+  /// @param conductor Conductor.
+  /// @param transport Transport.
   Sequence(Conductor& conductor, const Transport& transport) noexcept;
 
   /// Adds new note at position.
   ///
   /// @param id Note identifier.
-  /// @param position Note position.
-  /// @param note Note.
+  /// @param definition Note definition.
+  /// @param position Note position in beats.
   /// @return True if success.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   bool AddNote(Id id, Note::Definition definition, double position) noexcept;
 
   /// Returns begin offset.
@@ -69,6 +63,18 @@ class Sequence {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept;
 
+  /// Returns note definition.
+  ///
+  /// @param id Note identifier.
+  /// @return Pointer to note definition.
+  [[nodiscard]] const Note::Definition* GetNoteDefinition(Id id) const noexcept;
+
+  /// Returns note position.
+  ///
+  /// @param id Note identifier.
+  /// @return Ponter to note position in beats.
+  [[nodiscard]] const double* GetNotePosition(Id id) const noexcept;
+
   /// Returns whether sequence is empty or not.
   ///
   /// @return True if empty, false otherwise.
@@ -84,16 +90,21 @@ class Sequence {
   /// @return True if skipping, false otherwise.
   [[nodiscard]] bool IsSkippingAdjustments() const noexcept;
 
-  /// Processes sequence at given position range.
+  /// Processes sequence at range.
   ///
-  /// @param begin_position Begin position.
-  /// @param end_position End position.
+  /// @param begin_position Begin position in beats.
+  /// @param end_position End position in beats.
   void Process(double begin_position, double end_position) noexcept;
 
   /// Removes all notes.
   void RemoveAllNotes() noexcept;
 
-  /// Removes all notes in range.
+  /// Removes all notes at position.
+  ///
+  /// @param position Position.
+  void RemoveAllNotes(double position) noexcept;
+
+  /// Removes all notes at range.
   ///
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
@@ -162,26 +173,26 @@ class Sequence {
   void Stop() noexcept;
 
  private:
+  // Active note that is being performed.
+  struct ActiveNote {
+    // End position.
+    double end_position;
+
+    // Pitch.
+    double pitch;
+  };
+
   // Internal process helper function.
   void ProcessInternal(double begin_position, double end_position,
                        double position_offset) noexcept;
 
-  // Active note that is being performed.
-  struct ActiveNote {
-    // Note end position.
-    double end_position;
-
-    // Note pitch.
-    double pitch;
-  };
-
+  // Conductor.
   Conductor& conductor_;
 
+  // Transport.
   const Transport& transport_;
 
-  Instrument* instrument_;
-
-  // List of active notes.
+  // Map of active notes by note position.
   std::multimap<double, ActiveNote> active_notes_;
 
   // Begin offset in beats.
@@ -192,6 +203,9 @@ class Sequence {
 
   // End position in beats.
   double end_position_ = std::numeric_limits<double>::max();
+
+  // Instrument.
+  Instrument* instrument_ = nullptr;
 
   // Denotes whether sequence is looping or not.
   bool is_looping_ = false;
@@ -205,10 +219,10 @@ class Sequence {
   // Loop length in beats.
   double loop_length_ = 1.0;
 
-  // Sorted note by position map.
-  std::map<NotePositionIdPair, Note::Definition> notes_;
+  // Sorted map of note definitions by note position-identifier pair.
+  std::map<std::pair<double, Id>, Note::Definition> notes_;
 
-  // Note positions.
+  // Map of note positions by note identifier.
   std::unordered_map<Id, double> positions_;
 };
 

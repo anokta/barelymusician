@@ -25,21 +25,25 @@ namespace Barely {
     }
 
     /// Note pitch definition.
-    [StructLayout(LayoutKind.Explicit)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct NotePitch {
       /// Type.
-      [FieldOffset(0)]
       public NotePitchType type;
 
-      /// Absolute pitch.
-      [FieldOffset(4)]
-      public double absolutePitch;
-      /// Relative pitch.
-      [FieldOffset(4)]
-      public double relativePitch;
-      /// Scale index.
-      [FieldOffset(4)]
-      public int scaleIndex;
+      /// Value.
+      [StructLayout(LayoutKind.Explicit)]
+      public struct Value {
+        /// Absolute pitch.
+        [FieldOffset(0)]
+        public double absolutePitch;
+        /// Relative pitch.
+        [FieldOffset(0)]
+        public double relativePitch;
+        /// Scale index.
+        [FieldOffset(0)]
+        public int scaleIndex;
+      };
+      public Value value;
     }
 
     /// Note definition.
@@ -276,7 +280,7 @@ namespace Barely {
         definition.pitch.type = NotePitchType.AbsolutePitch;
         foreach (var sequenceNote in sequence.Notes) {
           definition.duration = sequenceNote.note.Duration;
-          definition.pitch.absolutePitch =
+          definition.pitch.value.absolutePitch =
               (double)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0;
           definition.intensity = sequenceNote.note.Intensity;
           BarelySequence_AddNote(Handle, sequence.Id, definition, sequenceNote.position, _int64Ptr);

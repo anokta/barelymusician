@@ -21,6 +21,7 @@ using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::NoteDefinition;
+using ::barely::NotePitch;
 using ::barely::OscillatorType;
 using ::barely::Sequence;
 using ::barely::SynthParameter;
@@ -76,7 +77,7 @@ void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
           get_position(midi_event.tick),
           NoteDefinition(
               get_position(midi_event.getTickDuration()),
-              NoteDefinition::Pitch::AbsolutePitch(
+              NotePitch::AbsolutePitch(
                   PitchFromMidiKeyNumber(midi_event.getKeyNumber())),
               static_cast<double>(midi_event.getVelocity()) / kMaxVelocity));
     }

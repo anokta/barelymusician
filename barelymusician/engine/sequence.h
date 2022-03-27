@@ -79,6 +79,11 @@ class Sequence {
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept;
 
+  /// Returns whether sequence is skipping adjustments or not.
+  ///
+  /// @return True if skipping, false otherwise.
+  [[nodiscard]] bool IsSkippingAdjustments() const noexcept;
+
   /// Processes sequence at given position range.
   ///
   /// @param begin_position Begin position.
@@ -148,7 +153,12 @@ class Sequence {
   /// @return True if success.
   bool SetNotePosition(Id id, double position) noexcept;
 
-  /// Stops sequencer.
+  /// Sets whether sequence should be skipping adjustments or not.
+  ///
+  /// @param is_skipping_adjustments True if skipping.
+  void SetSkippingAdjustments(bool is_skipping_adjustments) noexcept;
+
+  /// Stops playback.
   void Stop() noexcept;
 
  private:
@@ -184,7 +194,10 @@ class Sequence {
   double end_position_ = std::numeric_limits<double>::max();
 
   // Denotes whether sequence is looping or not.
-  bool loop_ = false;
+  bool is_looping_ = false;
+
+  // Denotes whether sequence is skipping adjustments or not.
+  bool is_skipping_adjustments_ = false;
 
   // Loop begin offset in beats.
   double loop_begin_offset_ = 0.0;

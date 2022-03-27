@@ -62,8 +62,8 @@ void Conductor::SetScale(std::vector<double> scale_pitches) noexcept {
 }
 
 Note Conductor::TransformNote(Note::Definition definition,
-                              bool bypass_adjustment) noexcept {
-  if (adjust_note_definition_callback_ && !bypass_adjustment) {
+                              bool skip_adjustment) noexcept {
+  if (adjust_note_definition_callback_ && !skip_adjustment) {
     adjust_note_definition_callback_(&definition);
   }
   return Note{definition.duration, GetNote(definition.pitch),

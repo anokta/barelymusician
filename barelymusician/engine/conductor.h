@@ -15,6 +15,8 @@ class Conductor {
   using AdjustNoteDefinitionCallback =
       barely::Musician::AdjustNoteDefinitionCallback;
 
+  // TODO(#98): Add `AdjustParameterAutomationDefinitionCallback` functionality.
+
   /// Adjust tempo callback alias.
   using AdjustTempoCallback = barely::Musician::AdjustTempoCallback;
 
@@ -58,10 +60,10 @@ class Conductor {
   /// Transforms note.
   ///
   /// @param definition Note definition.
-  /// @param bypass_adjustment True to bypass note adjustment.
+  /// @param skip_adjustment True to skip note adjustment.
   /// @return Note.
   [[nodiscard]] Note TransformNote(Note::Definition definition,
-                                   bool bypass_adjustment) noexcept;
+                                   bool skip_adjustment) noexcept;
 
   /// Transforms tempo.
   ///

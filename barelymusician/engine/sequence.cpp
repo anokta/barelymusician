@@ -41,7 +41,11 @@ double Sequence::GetLoopLength() const noexcept { return loop_length_; }
 
 bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
 
-bool Sequence::IsLooping() const noexcept { return loop_; }
+bool Sequence::IsLooping() const noexcept { return is_looping_; }
+
+bool Sequence::IsSkippingAdjustments() const noexcept {
+  return is_skipping_adjustments_;
+}
 
 void Sequence::Process(double begin_position, double end_position) noexcept {
   if (!instrument_) {
@@ -75,7 +79,7 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
   double position_offset = begin_position_ - begin_offset_;
   begin_position -= position_offset;
   end_position -= position_offset;
-  if (loop_) {
+  if (is_looping_) {
     if (loop_length_ <= 0.0) {
       return;
     }
@@ -171,7 +175,9 @@ void Sequence::SetLoopLength(double loop_length) noexcept {
   loop_length_ = std::max(loop_length, 0.0);
 }
 
-void Sequence::SetLooping(bool is_looping) noexcept { loop_ = is_looping; }
+void Sequence::SetLooping(bool is_looping) noexcept {
+  is_looping_ = is_looping;
+}
 
 bool Sequence::SetNoteDefinition(Id id, Note::Definition definition) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
@@ -198,6 +204,10 @@ bool Sequence::SetNotePosition(Id id, double position) noexcept {
   return false;
 }
 
+void Sequence::SetSkippingAdjustments(bool is_skipping_adjustments) noexcept {
+  is_skipping_adjustments_ = is_skipping_adjustments;
+}
+
 void Sequence::Stop() noexcept {
   if (!active_notes_.empty()) {
     if (instrument_) {
@@ -217,8 +227,8 @@ void Sequence::ProcessInternal(double begin_position, double end_position,
       notes_.lower_bound(NotePositionIdPair{end_position, kInvalid});
   for (auto it = begin; it != end; ++it) {
     const double position = it->first.first + position_offset;
-    // TODO: use bypass.
-    const auto note = conductor_.TransformNote(it->second, false);
+    const auto note =
+        conductor_.TransformNote(it->second, is_skipping_adjustments_);
     const double note_end_position =
         std::min(position + std::max(note.duration, 0.0), end_position_);
     // Perform note on.

@@ -809,6 +809,20 @@ BarelyStatus BarelySequence_IsLooping(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
+BarelyStatus BarelySequence_IsSkippingAdjustments(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    bool* out_is_skipping_adjustments) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (!out_is_skipping_adjustments) return BarelyStatus_kInvalidArgument;
+
+  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
+    *out_is_skipping_adjustments = sequence->first.IsSkippingAdjustments();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
+}
+
 BarelyStatus BarelySequence_RemoveAllNotes(BarelyMusicianHandle handle,
                                            BarelyId sequence_id) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -1034,6 +1048,19 @@ BarelyStatus BarelySequence_SetParameterAutomationPosition(
   }
 
   return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelySequence_SetSkippingAdjustments(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    bool is_skipping_adjustments) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+
+  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
+    sequence->first.SetSkippingAdjustments(is_skipping_adjustments);
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 }  // extern "C"

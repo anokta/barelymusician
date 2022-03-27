@@ -851,6 +851,16 @@ BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyMusicianHandle handle,
                                                     BarelyId sequence_id,
                                                     bool* out_is_looping);
 
+/// Gets whether sequence is skipping adjustments or not.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param out_is_skipping_adjustments Output true if skipping, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_IsSkippingAdjustments(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    bool* out_is_skipping_adjustments);
+
 /// Performs sequence at range.
 ///
 /// @param handle Musician handle.
@@ -1047,6 +1057,16 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetParameterAutomationDefinition(
 BARELY_EXPORT BarelyStatus BarelySequence_SetParameterAutomationPosition(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyId parameter_automation_id, double position);
+
+/// Sets whether sequence should be skipping adjustments or not.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param is_skipping_adjustments True if skipping, false otherwise.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelySequence_SetSkippingAdjustments(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    bool is_skipping_adjustments);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -1703,7 +1723,7 @@ class Sequence {
     return note_id;
   }
 
-  // TODO: add parameter automation functions.
+  // TODO(#98): Add parameter automation functions.
 
   /// Returns begin offset.
   ///
@@ -1783,6 +1803,17 @@ class Sequence {
     const auto status = BarelySequence_IsLooping(handle_, id_, &is_looping);
     assert(IsOk(static_cast<Status>(status)));
     return is_looping;
+  }
+
+  /// Returns whether sequence should be skipping adjustments or not.
+  ///
+  /// @return True if skipping, false otherwise.
+  [[nodiscard]] bool IsSkippingAdjustments() const {
+    bool is_skipping_adjustments = false;
+    const auto status = BarelySequence_IsSkippingAdjustments(
+        handle_, id_, &is_skipping_adjustments);
+    assert(IsOk(static_cast<Status>(status)));
+    return is_skipping_adjustments;
   }
 
   /// Removes all notes.
@@ -1882,6 +1913,15 @@ class Sequence {
   Status SetLooping(bool is_looping) {
     return static_cast<Status>(
         BarelySequence_SetLooping(handle_, id_, is_looping));
+  }
+
+  /// Sets whether sequence should be skipping adjustments or not.
+  ///
+  /// @param is_skipping_adjustments True if skipping, false otherwise.
+  /// @return Status.
+  Status SetSkippingAdjustments(bool is_skipping_adjustments) {
+    return static_cast<Status>(BarelySequence_SetSkippingAdjustments(
+        handle_, id_, is_skipping_adjustments));
   }
 
  private:

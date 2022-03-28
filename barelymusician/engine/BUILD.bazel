@@ -143,6 +143,20 @@ cc_test(
 )
 
 cc_test(
+    name = "sequence_test",
+    srcs = ["sequence_test.cpp"],
+    deps = [
+        ":conductor",
+        ":id",
+        ":instrument",
+        ":note",
+        ":sequence",
+        ":transport",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "transport_test",
     srcs = ["transport_test.cpp"],
     deps = [

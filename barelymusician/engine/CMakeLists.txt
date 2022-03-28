@@ -1,4 +1,15 @@
 add_library(
+  conductor
+  conductor.cpp
+  conductor.h
+)
+target_link_libraries(
+  conductor
+  note
+  include
+)
+
+add_library(
   data
   data.cpp
   data.h
@@ -71,6 +82,21 @@ target_link_libraries(
 )
 
 add_library(
+  sequence
+  sequence.cpp
+  sequence.h
+)
+target_link_libraries(
+  sequence
+  conductor
+  id
+  instrument
+  note
+  transport
+  find_or_null
+)
+
+add_library(
   transport
   transport.cpp
   transport.h
@@ -128,6 +154,23 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(parameter_test)
+
+add_executable(
+  sequence_test
+  sequence_test.cpp
+)
+target_link_libraries(
+  sequence_test
+  conductor
+  id
+  instrument
+  note
+  sequence
+  transport
+  gmock
+  gtest_main
+)
+gtest_discover_tests(sequence_test)
 
 add_executable(
   transport_test

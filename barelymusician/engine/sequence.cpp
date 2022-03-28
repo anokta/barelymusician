@@ -3,17 +3,19 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
-#include <optional>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
+#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
+#include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
 
-Sequence::Sequence(Conductor& conductor, const Transport& transport) noexcept
+Sequence::Sequence(const Conductor& conductor,
+                   const Transport& transport) noexcept
     : conductor_(conductor), transport_(transport) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -67,10 +69,10 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
   for (auto it = active_notes_.begin(); it != active_notes_.end();) {
     const auto& [note_begin_position, active_note] = *it;
     double note_end_position = active_note.end_position;
-    if (note_end_position < end_position) {
-      note_end_position = std::max(begin_position, note_end_position);
-    } else if (begin_position < note_begin_position) {
+    if (begin_position < note_begin_position) {
       note_end_position = begin_position;
+    } else if (note_end_position < end_position) {
+      note_end_position = std::max(begin_position, note_end_position);
     } else {
       ++it;
       continue;
@@ -83,6 +85,7 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
   if (notes_.empty()) {
     return;
   }
+  const double process_end_position = end_position;
   begin_position = std::max(begin_position, begin_position_);
   end_position = std::min(end_position, end_position_);
   if (begin_position >= end_position) {
@@ -108,7 +111,8 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
     if (double loop_end_position = loop_begin_offset_ + loop_length_;
         begin_position < loop_end_position) {
       loop_end_position = std::min(loop_end_position, end_position);
-      ProcessInternal(begin_position, loop_end_position, position_offset);
+      ProcessInternal(begin_position, loop_end_position, position_offset,
+                      process_end_position);
       begin_position = loop_end_position;
     }
     // Process the rest of the loop iterations.
@@ -118,11 +122,12 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
           loop_begin_offset_ +
           std::min(loop_length_, end_position - begin_position);
       ProcessInternal(loop_begin_offset_, loop_end_position,
-                      position_offset + begin_position);
+                      position_offset + begin_position, process_end_position);
       begin_position += loop_length_;
     }
   } else {
-    ProcessInternal(begin_position, end_position, position_offset);
+    ProcessInternal(begin_position, end_position, position_offset,
+                    process_end_position);
   }
 }
 
@@ -203,8 +208,7 @@ void Sequence::SetLooping(bool is_looping) noexcept {
 
 bool Sequence::SetNoteDefinition(Id id, Note::Definition definition) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
-    auto* note = FindOrNull(notes_, std::pair{*position, id});
-    *note = definition;
+    *FindOrNull(notes_, std::pair{*position, id}) = definition;
     return true;
   }
   return false;
@@ -241,23 +245,24 @@ void Sequence::Stop() noexcept {
 }
 
 void Sequence::ProcessInternal(double begin_position, double end_position,
-                               double position_offset) noexcept {
+                               double position_offset,
+                               double process_end_position) noexcept {
   const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalid});
   const auto end = notes_.lower_bound(std::pair{end_position, kInvalid});
   for (auto it = begin; it != end; ++it) {
-    const double position = it->first.first + position_offset;
+    const double note_begin_position = it->first.first + position_offset;
     const Note note =
         conductor_.TransformNote(it->second, is_skipping_adjustments_);
-    const double note_end_position =
-        std::min(position + std::max(note.duration, 0.0), end_position_);
+    const double note_end_position = std::min(
+        note_begin_position + std::max(note.duration, 0.0), end_position_);
     instrument_->StartNote(note.pitch, note.intensity,
-                           transport_.GetTimestamp(position));
-    if (note_end_position >= end_position) {
-      active_notes_.emplace(position,
-                            ActiveNote{note_end_position, note.pitch});
-    } else {
+                           transport_.GetTimestamp(note_begin_position));
+    if (note_end_position < process_end_position) {
       instrument_->StopNote(note.pitch,
                             transport_.GetTimestamp(note_end_position));
+    } else {
+      active_notes_.emplace(note_begin_position,
+                            ActiveNote{note_end_position, note.pitch});
     }
   }
 }

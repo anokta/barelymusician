@@ -63,13 +63,13 @@ class Conductor {
   /// @param skip_adjustment True to skip note adjustment.
   /// @return Note.
   [[nodiscard]] Note TransformNote(Note::Definition definition,
-                                   bool skip_adjustment) noexcept;
+                                   bool skip_adjustment) const noexcept;
 
   /// Transforms tempo.
   ///
   /// @param tempo Tempo in bpm.
   /// @return Tempo in bpm.
-  [[nodiscard]] double TransformTempo(double tempo) noexcept;
+  [[nodiscard]] double TransformTempo(double tempo) const noexcept;
 
  private:
   // Adjust note definition callback.

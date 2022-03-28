@@ -5,7 +5,6 @@
 #include <map>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
@@ -22,7 +21,7 @@ class Sequence {
   ///
   /// @param conductor Conductor.
   /// @param transport Transport.
-  Sequence(Conductor& conductor, const Transport& transport) noexcept;
+  Sequence(const Conductor& conductor, const Transport& transport) noexcept;
 
   /// Adds new note at position.
   ///
@@ -32,6 +31,8 @@ class Sequence {
   /// @return True if success.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool AddNote(Id id, Note::Definition definition, double position) noexcept;
+
+  // TODO(#98): Add `AddParameterAutomation` functionality.
 
   /// Returns begin offset.
   ///
@@ -72,7 +73,7 @@ class Sequence {
   /// Returns note position.
   ///
   /// @param id Note identifier.
-  /// @return Ponter to note position in beats.
+  /// @return Pointer to note position in beats.
   [[nodiscard]] const double* GetNotePosition(Id id) const noexcept;
 
   /// Returns whether sequence is empty or not.
@@ -169,11 +170,11 @@ class Sequence {
   /// @param is_skipping_adjustments True if skipping.
   void SetSkippingAdjustments(bool is_skipping_adjustments) noexcept;
 
-  /// Stops playback.
+  /// Stops sequence.
   void Stop() noexcept;
 
  private:
-  // Active note that is being performed.
+  // Active note that is being processed.
   struct ActiveNote {
     // End position.
     double end_position;
@@ -184,15 +185,16 @@ class Sequence {
 
   // Internal process helper function.
   void ProcessInternal(double begin_position, double end_position,
-                       double position_offset) noexcept;
+                       double position_offset,
+                       double process_end_position) noexcept;
 
   // Conductor.
-  Conductor& conductor_;
+  const Conductor& conductor_;
 
   // Transport.
   const Transport& transport_;
 
-  // Map of active notes by note position.
+  // Map of active notes by note positions.
   std::multimap<double, ActiveNote> active_notes_;
 
   // Begin offset in beats.
@@ -222,7 +224,7 @@ class Sequence {
   // Sorted map of note definitions by note position-identifier pair.
   std::map<std::pair<double, Id>, Note::Definition> notes_;
 
-  // Map of note positions by note identifier.
+  // Map of note positions by note identifiers.
   std::unordered_map<Id, double> positions_;
 };
 

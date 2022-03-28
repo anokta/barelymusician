@@ -62,7 +62,7 @@ void Conductor::SetScale(std::vector<double> scale_pitches) noexcept {
 }
 
 Note Conductor::TransformNote(Note::Definition definition,
-                              bool skip_adjustment) noexcept {
+                              bool skip_adjustment) const noexcept {
   if (adjust_note_definition_callback_ && !skip_adjustment) {
     adjust_note_definition_callback_(&definition);
   }
@@ -70,7 +70,7 @@ Note Conductor::TransformNote(Note::Definition definition,
               definition.intensity};
 }
 
-double Conductor::TransformTempo(double tempo) noexcept {
+double Conductor::TransformTempo(double tempo) const noexcept {
   if (adjust_tempo_callback_) {
     adjust_tempo_callback_(&tempo);
   }

@@ -107,6 +107,17 @@ target_link_libraries(
 )
 
 add_executable(
+  conductor_test
+  conductor_test.cpp
+)
+target_link_libraries(
+  conductor_test
+  conductor
+  gtest_main
+)
+gtest_discover_tests(conductor_test)
+
+add_executable(
   data_test
   data_test.cpp
 )

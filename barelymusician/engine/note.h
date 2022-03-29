@@ -17,6 +17,9 @@ struct Note {
   /// Pitch type.
   using PitchType = barely::NotePitchType;
 
+  /// Default comparators.
+  auto operator<=>(const Note& other) const noexcept = default;
+
   /// Duration.
   double duration;
 

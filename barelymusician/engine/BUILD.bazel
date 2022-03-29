@@ -105,6 +105,15 @@ cc_library(
 )
 
 cc_test(
+    name = "conductor_test",
+    srcs = ["conductor_test.cpp"],
+    deps = [
+        ":conductor",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "data_test",
     srcs = ["data_test.cpp"],
     deps = [

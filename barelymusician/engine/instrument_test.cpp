@@ -168,24 +168,6 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   }
 }
 
-// Tests that instrument processes events as expected.
-TEST(InstrumentTest, ProcessEvent) {
-  Instrument instrument(GetTestDefinition(), kFrameRate);
-
-  // Start note.
-  instrument.ProcessEvent(SetNoteOnEvent{-0.5, 0.25}, 0.0);
-  EXPECT_TRUE(instrument.IsNoteOn(-0.5));
-
-  // Stop note.
-  instrument.ProcessEvent(SetNoteOffEvent{-0.5}, 0.0);
-  EXPECT_FALSE(instrument.IsNoteOn(-0.5));
-
-  // Set parameter.
-  instrument.ProcessEvent(SetParameterEvent{0, 10.0, 0.0}, 0.0);
-  EXPECT_THAT(instrument.GetParameter(0),
-              AllOf(NotNull(), Pointee(Property(&Parameter::GetValue, 10.0))));
-}
-
 // Tests that instrument triggers note callbacks as expected.
 TEST(InstrumentTest, SetNoteCallbacks) {
   const double kPitch = 4.0;

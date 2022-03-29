@@ -105,28 +105,6 @@ void Instrument::Process(double* output, int num_output_channels,
   }
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::ProcessEvent(Event event, double timestamp) noexcept {
-  std::visit(EventVisitor{[&](SetDataEvent set_data_event) noexcept {
-                            event_queue_.Add(timestamp,
-                                             std::move(set_data_event));
-                          },
-                          [&](SetParameterEvent set_parameter_event) noexcept {
-                            SetParameter(set_parameter_event.index,
-                                         set_parameter_event.value,
-                                         set_parameter_event.slope, timestamp);
-                          },
-                          // NOLINTNEXTLINE(bugprone-exception-escape)
-                          [&](SetNoteOnEvent start_note_event) noexcept {
-                            StartNote(start_note_event.pitch,
-                                      start_note_event.intensity, timestamp);
-                          },
-                          [&](SetNoteOffEvent stop_note_event) noexcept {
-                            StopNote(stop_note_event.pitch, timestamp);
-                          }},
-             std::move(event));
-}
-
 void Instrument::ResetAllParameters(double timestamp) noexcept {
   for (int index = 0; index < static_cast<int>(parameters_.size()); ++index) {
     if (parameters_[index].ResetValue()) {

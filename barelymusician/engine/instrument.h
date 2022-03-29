@@ -6,7 +6,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/data.h"
-#include "barelymusician/engine/event.h"
 #include "barelymusician/engine/event_queue.h"
 #include "barelymusician/engine/parameter.h"
 
@@ -61,13 +60,6 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Process(double* output, int num_output_channels, int num_output_frames,
                double timestamp) noexcept;
-
-  /// Processes event at timestamp.
-  ///
-  /// @param event Instrument event.
-  /// @param timestamp Timestamp in seconds.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void ProcessEvent(Event event, double timestamp) noexcept;
 
   /// Resets all parameters to default value at timestamp.
   ///

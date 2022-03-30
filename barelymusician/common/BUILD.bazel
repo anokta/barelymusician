@@ -11,8 +11,6 @@ cc_library(
     name = "random",
     srcs = ["random.cpp"],
     hdrs = ["random.h"],
-    # TODO: temp workaround for testing.
-    visibility = ["//visibility:public"],
 )
 
 cc_test(

@@ -31,7 +31,7 @@ using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-// TODO: move random to public api.
+// TODO(#99): Move `Random` to public api.
 using ::barelyapi::Random;
 
 // System audio settings.

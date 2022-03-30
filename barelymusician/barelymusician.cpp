@@ -9,32 +9,9 @@
 #include <utility>
 #include <vector>
 
-#include "barelymusician/common/find_or_null.h"
-#include "barelymusician/engine/conductor.h"
-#include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/mutable_data.h"
-#include "barelymusician/engine/sequence.h"
-#include "barelymusician/engine/transport.h"
+#include "barelymusician/engine/engine.h"
 #include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
-
-namespace {
-
-using ::barelyapi::Conductor;
-using ::barelyapi::FindOrNull;
-using ::barelyapi::Instrument;
-using ::barelyapi::MutableData;
-using ::barelyapi::Note;
-using ::barelyapi::Sequence;
-using ::barelyapi::Transport;
-
-// Converts minutes from seconds.
-constexpr double kMinutesFromSeconds = 1.0 / 60.0;
-
-/// Instrument reference by identifier map.
-using InstrumentReferenceMap = std::unordered_map<BarelyId, Instrument*>;
-
-}  // namespace
 
 extern "C" {
 
@@ -49,71 +26,8 @@ struct BarelyMusician {
   BarelyMusician(BarelyMusician&& other) noexcept = delete;
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 
-  BarelyId CreateInstrument(BarelyInstrumentDefinition definition,
-                            int32_t frame_rate) noexcept {
-    const BarelyId instrument_id = ++id_counter;
-    instruments.emplace(instrument_id,
-                        std::make_unique<Instrument>(definition, frame_rate));
-    UpdateInstrumentMap();
-    return instrument_id;
-  }
-
-  Instrument* GetInstrument(BarelyId instrument_id) const noexcept {
-    if (auto it = instruments.find(instrument_id); it != instruments.end()) {
-      return it->second.get();
-    }
-    return nullptr;
-  }
-
-  void Stop() noexcept {
-    for (auto& [sequence_id, sequence] : sequences) {
-      sequence.first.Stop();
-    }
-    transport.Stop();
-    for (auto& [instrument_id, instrument] : instruments) {
-      instrument->StopAllNotes(transport.GetTimestamp());
-    }
-  }
-
-  void Update(double timestamp) noexcept {
-    transport.SetTempo(conductor.TransformTempo(tempo) * kMinutesFromSeconds);
-    transport.Update(
-        timestamp, [this](double begin_position, double end_position) noexcept {
-          for (auto& [sequence_id, sequence] : sequences) {
-            sequence.first.Process(begin_position, end_position);
-          }
-        });
-  }
-
-  void UpdateInstrumentMap() noexcept {
-    InstrumentReferenceMap new_instrument_refs;
-    new_instrument_refs.reserve(instruments.size());
-    for (const auto& [instrument_id, instrument] : instruments) {
-      new_instrument_refs.emplace(instrument_id, instrument.get());
-    }
-    instrument_refs.Update(std::move(new_instrument_refs));
-  }
-
-  // Conductor.
-  Conductor conductor;
-
-  // Monotonic identifier counter.
-  BarelyId id_counter = 0;
-
-  // Instrument by identifier map.
-  std::unordered_map<BarelyId, std::unique_ptr<Instrument>> instruments;
-
-  // Instrument reference by identifier map.
-  MutableData<InstrumentReferenceMap> instrument_refs;
-
-  // List of sequences.
-  std::unordered_map<BarelyId, std::pair<Sequence, BarelyId>> sequences;
-
-  // Tempo in bpm.
-  double tempo;
-
-  // Playback transport.
-  Transport transport;
+  // Musician engine.
+  barelyapi::Engine engine;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -129,7 +43,7 @@ BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id = handle->CreateInstrument(definition, frame_rate);
+  *out_instrument_id = handle->engine.CreateInstrument(definition, frame_rate);
   return BarelyStatus_kOk;
 }
 
@@ -142,11 +56,11 @@ BarelyStatus BarelyInstrument_CreateOfType(BarelyMusicianHandle handle,
 
   switch (type) {
     case BarelyInstrumentType_kSynth:
-      *out_instrument_id = handle->CreateInstrument(
+      *out_instrument_id = handle->engine.CreateInstrument(
           barelyapi::SynthInstrument::GetDefinition(), frame_rate);
       break;
     case BarelyInstrumentType_kPercussion:
-      *out_instrument_id = handle->CreateInstrument(
+      *out_instrument_id = handle->engine.CreateInstrument(
           barelyapi::PercussionInstrument::GetDefinition(), frame_rate);
       break;
     default:
@@ -160,17 +74,7 @@ BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto it = handle->instruments.find(instrument_id);
-      it != handle->instruments.end()) {
-    auto instrument = std::move(it->second);
-    for (auto& [sequence_id, sequence] : handle->sequences) {
-      if (sequence.second == instrument_id) {
-        sequence.first.SetInstrument(nullptr);
-      }
-    }
-    instrument->StopAllNotes(handle->transport.GetTimestamp());
-    handle->instruments.erase(it);
-    handle->UpdateInstrumentMap();
+  if (handle->engine.DestroyInstrument(instrument_id)) {
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -183,7 +87,7 @@ BarelyStatus BarelyInstrument_GetParameter(BarelyMusicianHandle handle,
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* instrument = handle->GetInstrument(instrument_id)) {
+  if (const auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (const auto* parameter = instrument->GetParameter(index)) {
       *out_value = parameter->GetValue();
       return BarelyStatus_kOk;
@@ -200,7 +104,7 @@ BarelyStatus BarelyInstrument_GetParamDefinition(
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_definition) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* instrument = handle->GetInstrument(instrument_id)) {
+  if (const auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (const auto* parameter = instrument->GetParameter(index)) {
       *out_definition = parameter->GetDefinition();
       return BarelyStatus_kOk;
@@ -217,7 +121,7 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle,
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_note_on) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* instrument = handle->GetInstrument(instrument_id)) {
+  if (const auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     *out_is_note_on = instrument->IsNoteOn(pitch);
     return BarelyStatus_kOk;
   }
@@ -232,11 +136,9 @@ BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  auto instrument_refs = handle->instrument_refs.GetScopedView();
-  if (const auto* instrument_ref =
-          FindOrNull(*instrument_refs, instrument_id)) {
-    (*instrument_ref)
-        ->Process(output, num_output_channels, num_output_frames, timestamp);
+  if (handle->engine.ProcessInstrument(instrument_id, output,
+                                       num_output_channels, num_output_frames,
+                                       timestamp)) {
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -247,8 +149,8 @@ BarelyStatus BarelyInstrument_ResetAllParameters(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
-    instrument->ResetAllParameters(handle->transport.GetTimestamp());
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    instrument->ResetAllParameters(handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -260,8 +162,8 @@ BarelyStatus BarelyInstrument_ResetParameter(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
-    if (instrument->ResetParameter(index, handle->transport.GetTimestamp())) {
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    if (instrument->ResetParameter(index, handle->engine.GetTimestamp())) {
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kInvalidArgument;
@@ -275,8 +177,8 @@ BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
-    instrument->SetData(definition, handle->transport.GetTimestamp());
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    instrument->SetData(definition, handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -288,7 +190,7 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (callback) {
       instrument->SetNoteOffCallback(
           [callback, user_data](double pitch, double timestamp) {
@@ -308,7 +210,7 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (callback) {
       instrument->SetNoteOnCallback([callback, user_data](double pitch,
                                                           double intensity,
@@ -329,9 +231,9 @@ BarelyStatus BarelyInstrument_SetParameter(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (instrument->SetParameter(index, value, 0.0,
-                                 handle->transport.GetTimestamp())) {
+                                 handle->engine.GetTimestamp())) {
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kInvalidArgument;
@@ -345,8 +247,8 @@ BarelyStatus BarelyInstrument_StartNote(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
-    instrument->StartNote(pitch, intensity, handle->transport.GetTimestamp());
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    instrument->StartNote(pitch, intensity, handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -357,8 +259,8 @@ BarelyStatus BarelyInstrument_StopAllNotes(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
-    instrument->StopAllNotes(handle->transport.GetTimestamp());
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    instrument->StopAllNotes(handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -369,8 +271,8 @@ BarelyStatus BarelyInstrument_StopNote(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* instrument = handle->GetInstrument(instrument_id)) {
-    instrument->StopNote(pitch, handle->transport.GetTimestamp());
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    instrument->StopNote(pitch, handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -386,7 +288,6 @@ BarelyStatus BarelyMusician_Create(BarelyMusicianHandle* out_handle) {
 BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->instrument_refs.Update({});
   delete handle;
   return BarelyStatus_kOk;
 }
@@ -397,7 +298,7 @@ BarelyStatus BarelyMusician_GetNote(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_pitch) return BarelyStatus_kInvalidArgument;
 
-  *out_pitch = handle->conductor.GetNote(definition);
+  *out_pitch = handle->engine.GetConductor().GetNote(definition);
   return BarelyStatus_kOk;
 }
 
@@ -406,7 +307,7 @@ BarelyStatus BarelyMusician_GetPosition(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  *out_position = handle->transport.GetPosition();
+  *out_position = handle->engine.GetTransport().GetPosition();
   return BarelyStatus_kOk;
 }
 
@@ -415,7 +316,7 @@ BarelyStatus BarelyMusician_GetRootNote(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_root_pitch) return BarelyStatus_kInvalidArgument;
 
-  *out_root_pitch = handle->conductor.GetRootNote();
+  *out_root_pitch = handle->engine.GetConductor().GetRootNote();
   return BarelyStatus_kOk;
 }
 
@@ -426,7 +327,7 @@ BarelyStatus BarelyMusician_GetScale(BarelyMusicianHandle handle,
   if (!out_scale_pitches) return BarelyStatus_kInvalidArgument;
   if (!out_num_scale_pitches) return BarelyStatus_kInvalidArgument;
 
-  const auto& scale_pitches = handle->conductor.GetScale();
+  const auto& scale_pitches = handle->engine.GetConductor().GetScale();
   *out_scale_pitches = scale_pitches.data();
   *out_num_scale_pitches = static_cast<int>(scale_pitches.size());
   return BarelyStatus_kOk;
@@ -437,7 +338,7 @@ BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_tempo) return BarelyStatus_kInvalidArgument;
 
-  *out_tempo = handle->tempo;
+  *out_tempo = handle->engine.GetPlaybackTempo();
   return BarelyStatus_kOk;
 }
 
@@ -446,7 +347,7 @@ BarelyStatus BarelyMusician_GetTimestamp(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
-  *out_timestamp = handle->transport.GetTimestamp();
+  *out_timestamp = handle->engine.GetTimestamp();
   return BarelyStatus_kOk;
 }
 
@@ -456,7 +357,7 @@ BarelyStatus BarelyMusician_GetTimestampAtPosition(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
-  *out_timestamp = handle->transport.GetTimestamp(position);
+  *out_timestamp = handle->engine.GetTransport().GetTimestamp(position);
   return BarelyStatus_kOk;
 }
 
@@ -465,7 +366,7 @@ BarelyStatus BarelyMusician_IsPlaying(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_is_playing) return BarelyStatus_kInvalidArgument;
 
-  *out_is_playing = handle->transport.IsPlaying();
+  *out_is_playing = handle->engine.GetTransport().IsPlaying();
   return BarelyStatus_kOk;
 }
 
@@ -475,12 +376,12 @@ BarelyStatus BarelyMusician_SetAdjustNoteDefinitionCallback(
   if (!handle) return BarelyStatus_kNotFound;
 
   if (callback) {
-    handle->conductor.SetAdjustNoteDefinitionCallback(
-        [callback, user_data](Note::Definition* definition) {
+    handle->engine.GetConductor().SetAdjustNoteDefinitionCallback(
+        [callback, user_data](barelyapi::Note::Definition* definition) {
           callback(definition, user_data);
         });
   } else {
-    handle->conductor.SetAdjustNoteDefinitionCallback(nullptr);
+    handle->engine.GetConductor().SetAdjustNoteDefinitionCallback(nullptr);
   }
   return BarelyStatus_kOk;
 }
@@ -502,10 +403,10 @@ BarelyStatus BarelyMusician_SetAdjustTempoCallback(
   if (!handle) return BarelyStatus_kNotFound;
 
   if (callback) {
-    handle->conductor.SetAdjustTempoCallback(
+    handle->engine.GetConductor().SetAdjustTempoCallback(
         [callback, user_data](double* tempo) { callback(tempo, user_data); });
   } else {
-    handle->conductor.SetAdjustTempoCallback(nullptr);
+    handle->engine.GetConductor().SetAdjustTempoCallback(nullptr);
   }
   return BarelyStatus_kOk;
 }
@@ -516,12 +417,12 @@ BarelyStatus BarelyMusician_SetBeatCallback(
   if (!handle) return BarelyStatus_kNotFound;
 
   if (callback) {
-    handle->transport.SetBeatCallback(
+    handle->engine.GetTransport().SetBeatCallback(
         [callback, user_data](double position, double timestamp) {
           callback(position, timestamp, user_data);
         });
   } else {
-    handle->transport.SetBeatCallback(nullptr);
+    handle->engine.GetTransport().SetBeatCallback(nullptr);
   }
   return BarelyStatus_kOk;
 }
@@ -530,7 +431,7 @@ BarelyStatus BarelyMusician_SetPosition(BarelyMusicianHandle handle,
                                         double position) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.SetPosition(position);
+  handle->engine.GetTransport().SetPosition(position);
   return BarelyStatus_kOk;
 }
 
@@ -538,16 +439,16 @@ BarelyStatus BarelyMusician_SetRootNote(BarelyMusicianHandle handle,
                                         double root_pitch) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->conductor.SetRootNote(root_pitch);
+  handle->engine.GetConductor().SetRootNote(root_pitch);
   return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyMusician_SetScale(BarelyMusicianHandle handle,
-                                     double* scale_pitches,
+                                     const double* scale_pitches,
                                      int32_t num_scale_pitches) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->conductor.SetScale(
+  handle->engine.GetConductor().SetScale(
       std::vector<double>(scale_pitches, scale_pitches + num_scale_pitches));
   return BarelyStatus_kOk;
 }
@@ -556,8 +457,7 @@ BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
                                      double tempo) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->tempo = tempo;
-  handle->transport.SetTempo(tempo * kMinutesFromSeconds);
+  handle->engine.SetPlaybackTempo(tempo);
   return BarelyStatus_kOk;
 }
 
@@ -565,21 +465,21 @@ BarelyStatus BarelyMusician_SetTimestamp(BarelyMusicianHandle handle,
                                          double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.SetTimestamp(timestamp);
+  handle->engine.GetTransport().SetTimestamp(timestamp);
   return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyMusician_Start(BarelyMusicianHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->transport.Start();
+  handle->engine.StartPlayback();
   return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyMusician_Stop(BarelyMusicianHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->Stop();
+  handle->engine.StopPlayback();
   return BarelyStatus_kOk;
 }
 
@@ -587,7 +487,7 @@ BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
                                    double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  handle->Update(timestamp);
+  handle->engine.Update(timestamp);
   return BarelyStatus_kOk;
 }
 
@@ -599,9 +499,9 @@ BarelyStatus BarelySequence_AddNote(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_note_id) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_note_id = ++handle->id_counter;
-    sequence->first.AddNote(*out_note_id, definition, position);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_note_id =
+        handle->engine.AddSequenceNote(sequence, definition, position);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -624,11 +524,7 @@ BarelyStatus BarelySequence_Create(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
 
-  *out_sequence_id = ++handle->id_counter;
-  handle->sequences.emplace(
-      *out_sequence_id,
-      std::pair{Sequence(handle->conductor, handle->transport),
-                BarelyId_kInvalid});
+  *out_sequence_id = handle->engine.CreateSequence();
   return BarelyStatus_kOk;
 }
 
@@ -637,10 +533,7 @@ BarelyStatus BarelySequence_Destroy(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (const auto sequence_it = handle->sequences.find(sequence_id);
-      sequence_it != handle->sequences.end()) {
-    sequence_it->second.first.Stop();
-    handle->sequences.erase(sequence_it);
+  if (handle->engine.DestroySequence(sequence_id)) {
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -653,8 +546,8 @@ BarelyStatus BarelySequence_GetBeginOffset(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_begin_offset) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_begin_offset = sequence->first.GetBeginOffset();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_begin_offset = sequence->GetBeginOffset();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -667,8 +560,8 @@ BarelyStatus BarelySequence_GetBeginPosition(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_begin_position) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_begin_position = sequence->first.GetBeginPosition();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_begin_position = sequence->GetBeginPosition();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -681,8 +574,8 @@ BarelyStatus BarelySequence_GetEndPosition(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_end_position) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_end_position = sequence->first.GetEndPosition();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_end_position = sequence->GetEndPosition();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -695,11 +588,9 @@ BarelyStatus BarelySequence_GetInstrument(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_instrument_id = sequence->second;
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
+  // TODO: This should ideally be able to return false when `kNotFound`.
+  *out_instrument_id = handle->engine.GetSequenceInstrumentId(sequence_id);
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelySequence_GetLoopBeginOffset(BarelyMusicianHandle handle,
@@ -709,8 +600,8 @@ BarelyStatus BarelySequence_GetLoopBeginOffset(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_loop_begin_offset) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_loop_begin_offset = sequence->first.GetLoopBeginOffset();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_loop_begin_offset = sequence->GetLoopBeginOffset();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -723,8 +614,8 @@ BarelyStatus BarelySequence_GetLoopLength(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_loop_length) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_loop_length = sequence->first.GetLoopLength();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_loop_length = sequence->GetLoopLength();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -739,8 +630,8 @@ BarelyStatus BarelySequence_GetNoteDefinition(
   }
   if (!out_definition) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    if (const auto* definition = sequence->first.GetNoteDefinition(note_id)) {
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (const auto* definition = sequence->GetNoteDefinition(note_id)) {
       *out_definition = *definition;
       return BarelyStatus_kOk;
     }
@@ -758,8 +649,8 @@ BarelyStatus BarelySequence_GetNotePosition(BarelyMusicianHandle handle,
   }
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    if (const auto* position = sequence->first.GetNotePosition(note_id)) {
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (const auto* position = sequence->GetNotePosition(note_id)) {
       *out_position = *position;
       return BarelyStatus_kOk;
     }
@@ -800,8 +691,8 @@ BarelyStatus BarelySequence_IsEmpty(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_empty) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_is_empty = sequence->first.IsEmpty();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_is_empty = sequence->IsEmpty();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -814,8 +705,8 @@ BarelyStatus BarelySequence_IsLooping(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_looping) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_is_looping = sequence->first.IsLooping();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_is_looping = sequence->IsLooping();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -828,8 +719,8 @@ BarelyStatus BarelySequence_IsSkippingAdjustments(
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_skipping_adjustments) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    *out_is_skipping_adjustments = sequence->first.IsSkippingAdjustments();
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    *out_is_skipping_adjustments = sequence->IsSkippingAdjustments();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -840,8 +731,8 @@ BarelyStatus BarelySequence_RemoveAllNotes(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.RemoveAllNotes();
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->RemoveAllNotes();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -852,8 +743,8 @@ BarelyStatus BarelySequence_RemoveAllNotesAtPosition(
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.RemoveAllNotes(position);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->RemoveAllNotes(position);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -866,8 +757,8 @@ BarelyStatus BarelySequence_RemoveAllNotesAtRange(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.RemoveAllNotes(begin_position, end_position);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->RemoveAllNotes(begin_position, end_position);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -907,8 +798,8 @@ BarelyStatus BarelySequence_RemoveNote(BarelyMusicianHandle handle,
     return BarelyStatus_kInvalidArgument;
   }
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    if (sequence->first.RemoveNote(note_id)) {
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (sequence->RemoveNote(note_id)) {
       return BarelyStatus_kOk;
     }
   }
@@ -933,8 +824,8 @@ BarelyStatus BarelySequence_SetBeginOffset(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetBeginOffset(begin_offset);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->SetBeginOffset(begin_offset);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -946,8 +837,8 @@ BarelyStatus BarelySequence_SetBeginPosition(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetBeginPosition(begin_position);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->SetBeginPosition(begin_position);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -959,8 +850,8 @@ BarelyStatus BarelySequence_SetEndPosition(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetEndPosition(end_position);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->SetEndPosition(end_position);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -972,9 +863,7 @@ BarelyStatus BarelySequence_SetInstrument(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetInstrument(handle->GetInstrument(instrument_id));
-    sequence->second = instrument_id;
+  if (handle->engine.SetSequenceInstrumentId(sequence_id, instrument_id)) {
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -986,8 +875,8 @@ BarelyStatus BarelySequence_SetLoopBeginOffset(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetLoopBeginOffset(loop_begin_offset);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->SetLoopBeginOffset(loop_begin_offset);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -999,8 +888,8 @@ BarelyStatus BarelySequence_SetLoopLength(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetLoopLength(loop_length);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->SetLoopLength(loop_length);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -1011,8 +900,8 @@ BarelyStatus BarelySequence_SetLooping(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetLooping(is_looping);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->SetLooping(is_looping);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -1027,8 +916,8 @@ BarelyStatus BarelySequence_SetNoteDefinition(BarelyMusicianHandle handle,
     return BarelyStatus_kInvalidArgument;
   }
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    if (sequence->first.SetNoteDefinition(note_id, definition)) {
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (sequence->SetNoteDefinition(note_id, definition)) {
       return BarelyStatus_kOk;
     }
   }
@@ -1043,8 +932,8 @@ BarelyStatus BarelySequence_SetNotePosition(BarelyMusicianHandle handle,
     return BarelyStatus_kInvalidArgument;
   }
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    if (sequence->first.SetNotePosition(note_id, position)) {
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (sequence->SetNotePosition(note_id, position)) {
       return BarelyStatus_kOk;
     }
   }
@@ -1082,8 +971,8 @@ BarelyStatus BarelySequence_SetSkippingAdjustments(
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequence = FindOrNull(handle->sequences, sequence_id)) {
-    sequence->first.SetSkippingAdjustments(is_skipping_adjustments);
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    sequence->SetSkippingAdjustments(is_skipping_adjustments);
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

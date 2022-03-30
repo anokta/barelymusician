@@ -22,6 +22,22 @@ cc_library(
 )
 
 cc_library(
+    name = "engine",
+    srcs = ["engine.cpp"],
+    hdrs = ["engine.h"],
+    deps = [
+        ":conductor",
+        ":id",
+        ":instrument",
+        ":mutable_data",
+        ":note",
+        ":sequence",
+        ":transport",
+        "//barelymusician/common:find_or_null",
+    ],
+)
+
+cc_library(
     name = "event",
     hdrs = ["event.h"],
     deps = [

@@ -648,7 +648,7 @@ BarelyMusician_SetRootNote(BarelyMusicianHandle handle, double root_pitch);
 /// @param num_scale_pitches Number of scale note pitches.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetScale(BarelyMusicianHandle handle,
-                                                   double* scale_pitches,
+                                                   const double* scale_pitches,
                                                    int32_t num_scale_pitches);
 
 /// Sets musician tempo.
@@ -1711,11 +1711,11 @@ class Sequence {
 
   /// Adds note at position.
   ///
-  /// @param position Note position.
   /// @param definition Note definition.
+  /// @param position Note position.
   /// @return Note reference.
   // TODO: refactor note api type.
-  BarelyId AddNote(double position, NoteDefinition definition) {
+  BarelyId AddNote(NoteDefinition definition, double position) {
     BarelyId note_id = BarelyId_kInvalid;
     const auto status =
         BarelySequence_AddNote(handle_, id_, definition, position, &note_id);
@@ -2059,6 +2059,34 @@ class Musician {
     return position;
   }
 
+  /// Returns root note.
+  ///
+  /// @return Root note pitch.
+  [[nodiscard]] double GetRootNote() const {
+    double root_pitch = 0.0;
+    if (handle_) {
+      const auto status = BarelyMusician_GetRootNote(handle_, &root_pitch);
+      assert(IsOk(static_cast<Status>(status)));
+    }
+    return root_pitch;
+  }
+
+  /// Returns scale.
+  ///
+  /// @return List of scale note pitches.
+  // TODO: Use span instead.
+  [[nodiscard]] std::vector<double> GetScale() const {
+    const double* scale_pitches = nullptr;
+    int num_scale_pitches = 0;
+    if (handle_) {
+      const auto status =
+          BarelyMusician_GetScale(handle_, &scale_pitches, &num_scale_pitches);
+      assert(IsOk(static_cast<Status>(status)));
+    }
+    return std::vector<double>(scale_pitches,
+                               scale_pitches + num_scale_pitches);
+  }
+
   /// Returns tempo.
   ///
   /// @return Tempo in bpm.
@@ -2163,6 +2191,22 @@ class Musician {
   /// @return Status.
   Status SetPosition(double position) {
     return static_cast<Status>(BarelyMusician_SetPosition(handle_, position));
+  }
+
+  /// Sets root note.
+  ///
+  /// @param root_pitch Root note pitch.
+  Status SetRootNote(double root_pitch) {
+    return static_cast<Status>(BarelyMusician_SetRootNote(handle_, root_pitch));
+  }
+
+  /// Sets scale.
+  ///
+  /// @param scale_pitches List of scale note pitches.
+  // TODO: Use span instead.
+  Status SetScale(const std::vector<double>& scale_pitches) {
+    return static_cast<Status>(BarelyMusician_SetScale(
+        handle_, scale_pitches.data(), static_cast<int>(scale_pitches.size())));
   }
 
   /// Sets tempo.

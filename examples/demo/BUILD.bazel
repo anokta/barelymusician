@@ -2,25 +2,22 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 package(default_visibility = ["//visibility:public"])
 
-# cc_binary(
-#     name = "engine_demo",
-#     srcs = ["engine_demo.cpp"],
-#     data = ["//examples/data:audio"],
-#     deps = [
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/common:random",
-#         "//examples/common:wav_file",
-#         "//examples/composition:note_duration",
-#         "//examples/composition:note_pitch",
-#         "//examples/instruments:percussion_instrument",
-#         "//examples/instruments:synth_instrument",
-#         "//platforms/api:barelymusician",
-#         "@bazel_tools//tools/cpp/runfiles",
-#     ],
-# )
+cc_binary(
+    name = "engine_demo",
+    srcs = ["engine_demo.cpp"],
+    data = ["//examples/data:audio"],
+    deps = [
+        "//barelymusician",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/common:wav_file",
+        "//examples/composition:note_duration",
+        "//examples/composition:note_pitch",
+        "@bazel_tools//tools/cpp/runfiles",
+    ],
+)
 
 cc_binary(
     name = "instrument_demo",

@@ -17,9 +17,6 @@ class Conductor {
 
   // TODO(#98): Add `AdjustParameterAutomationDefinitionCallback` functionality.
 
-  /// Adjust tempo callback alias.
-  using AdjustTempoCallback = barely::Musician::AdjustTempoCallback;
-
   /// Returns note.
   ///
   /// @param definition Note pitch definition.
@@ -42,11 +39,6 @@ class Conductor {
   void SetAdjustNoteDefinitionCallback(
       AdjustNoteDefinitionCallback callback) noexcept;
 
-  /// Sets adjust tempo callback.
-  ///
-  /// @param callback Adjust tempo callback.
-  void SetAdjustTempoCallback(AdjustTempoCallback callback) noexcept;
-
   /// Sets root note.
   ///
   /// @param root_pitch Root note pitch.
@@ -65,18 +57,9 @@ class Conductor {
   [[nodiscard]] Note TransformNote(Note::Definition definition,
                                    bool skip_adjustment) const noexcept;
 
-  /// Transforms tempo.
-  ///
-  /// @param tempo Tempo in bpm.
-  /// @return Tempo in bpm.
-  [[nodiscard]] double TransformTempo(double tempo) const noexcept;
-
  private:
   // Adjust note definition callback.
   AdjustNoteDefinitionCallback adjust_note_definition_callback_;
-
-  // Adjust tempo callback.
-  AdjustTempoCallback adjust_tempo_callback_;
 
   // Root note pitch.
   double root_pitch_ = 0.0;

@@ -130,11 +130,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
                               definition->intensity;
     }
   });
-  musician.SetAdjustTempoCallback([&](double* tempo) {
-    if (use_conductor) {
-      *tempo *= 1.25;
-    }
-  });
 
   bool reset_position = false;
   const auto beat_callback = [&](double /*position*/, double /*timestamp*/) {

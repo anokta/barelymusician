@@ -322,13 +322,6 @@ typedef void (*BarelyMusician_AdjustNoteDefinitionCallback)(
 typedef void (*BarelyMusician_AdjustParameterAutomationDefinitionCallback)(
     BarelyParameterAutomationDefinition* definition, void* user_data);
 
-/// Musician adjust tempo callback signature.
-///
-/// @param tempo Mutable tempo in bpm.
-/// @param user_data User data.
-typedef void (*BarelyMusician_AdjustTempoCallback)(double* tempo,
-                                                   void* user_data);
-
 /// Musician beat callback signature.
 ///
 /// @param position Beat position in beats.
@@ -603,16 +596,6 @@ BARELY_EXPORT BarelyStatus
 BarelyMusician_SetAdjustParameterAutomationDefinitionCallback(
     BarelyMusicianHandle handle,
     BarelyMusician_AdjustParameterAutomationDefinitionCallback callback,
-    void* user_data);
-
-/// Sets musician adjust tempo callback.
-///
-/// @param handle Musician handle.
-/// @param callback Adjust tempo callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustTempoCallback(
-    BarelyMusicianHandle handle, BarelyMusician_AdjustTempoCallback callback,
     void* user_data);
 
 /// Sets musician beat callback.
@@ -2001,8 +1984,6 @@ class Musician {
       : handle_(std::exchange(other.handle_, nullptr)) {
     SetAdjustNoteDefinitionCallback(
         std::exchange(other.adjust_note_definition_callback_, nullptr));
-    SetAdjustTempoCallback(
-        std::exchange(other.adjust_tempo_callback_, nullptr));
     SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
   }
 
@@ -2018,8 +1999,6 @@ class Musician {
       handle_ = std::exchange(other.handle_, nullptr);
       SetAdjustNoteDefinitionCallback(
           std::exchange(other.adjust_note_definition_callback_, nullptr));
-      SetAdjustTempoCallback(
-          std::exchange(other.adjust_tempo_callback_, nullptr));
       SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
     }
     return *this;
@@ -2161,23 +2140,6 @@ class Musician {
                                                           nullptr);
   }
 
-  /// Sets adjust tempo callback.
-  ///
-  /// @param callback Adjust tempo callback.
-  /// @return Status.
-  Status SetAdjustTempoCallback(AdjustTempoCallback callback) {
-    if (callback) {
-      adjust_tempo_callback_ = std::move(callback);
-      return BarelyMusician_SetAdjustTempoCallback(
-          handle_,
-          [](double* tempo, void* user_data) {
-            (*static_cast<AdjustTempoCallback*>(user_data))(tempo);
-          },
-          static_cast<void*>(&adjust_tempo_callback_));
-    }
-    return BarelyMusician_SetAdjustTempoCallback(handle_, nullptr, nullptr);
-  }
-
   /// Sets beat callback.
   ///
   /// @param callback Beat callback.
@@ -2259,9 +2221,6 @@ class Musician {
 
   // Adjust note definition callback.
   AdjustNoteDefinitionCallback adjust_note_definition_callback_;
-
-  // Adjust tempo callback.
-  AdjustTempoCallback adjust_tempo_callback_;
 
   // Beat callback.
   BeatCallback beat_callback_;

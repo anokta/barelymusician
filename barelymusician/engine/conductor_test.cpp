@@ -81,16 +81,5 @@ TEST(ConductorTest, TransformNoteDefinition) {
   EXPECT_EQ(conductor.TransformNote(kDefinition, true), kNote);
 }
 
-// Tests that conductor transforms tempo as expected.
-TEST(ConductorTest, TransformTempo) {
-  const double kTempo = 100.0;
-
-  Conductor conductor;
-  EXPECT_DOUBLE_EQ(conductor.TransformTempo(kTempo), kTempo);
-
-  conductor.SetAdjustTempoCallback([](double* tempo) { *tempo *= 5.0; });
-  EXPECT_DOUBLE_EQ(conductor.TransformTempo(kTempo), kTempo * 5.0);
-}
-
 }  // namespace
 }  // namespace barelyapi

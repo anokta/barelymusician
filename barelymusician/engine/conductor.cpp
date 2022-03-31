@@ -48,10 +48,6 @@ void Conductor::SetAdjustNoteDefinitionCallback(
   adjust_note_definition_callback_ = std::move(callback);
 }
 
-void Conductor::SetAdjustTempoCallback(AdjustTempoCallback callback) noexcept {
-  adjust_tempo_callback_ = std::move(callback);
-}
-
 void Conductor::SetRootNote(double root_pitch) noexcept {
   root_pitch_ = root_pitch;
 }
@@ -67,13 +63,6 @@ Note Conductor::TransformNote(Note::Definition definition,
   }
   return Note{definition.duration, GetNote(definition.pitch),
               definition.intensity};
-}
-
-double Conductor::TransformTempo(double tempo) const noexcept {
-  if (adjust_tempo_callback_) {
-    adjust_tempo_callback_(&tempo);
-  }
-  return tempo;
 }
 
 }  // namespace barelyapi

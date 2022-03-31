@@ -397,20 +397,6 @@ BarelyStatus BarelyMusician_SetAdjustParameterAutomationDefinitionCallback(
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyMusician_SetAdjustTempoCallback(
-    BarelyMusicianHandle handle, BarelyMusician_AdjustTempoCallback callback,
-    void* user_data) {
-  if (!handle) return BarelyStatus_kNotFound;
-
-  if (callback) {
-    handle->engine.GetConductor().SetAdjustTempoCallback(
-        [callback, user_data](double* tempo) { callback(tempo, user_data); });
-  } else {
-    handle->engine.GetConductor().SetAdjustTempoCallback(nullptr);
-  }
-  return BarelyStatus_kOk;
-}
-
 BarelyStatus BarelyMusician_SetBeatCallback(
     BarelyMusicianHandle handle, BarelyMusician_BeatCallback callback,
     void* user_data) {

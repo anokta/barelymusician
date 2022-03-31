@@ -122,7 +122,12 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
   return false;
 }
 
-void Engine::SetPlaybackTempo(double tempo) noexcept { tempo_ = tempo; }
+void Engine::SetPlaybackTempo(double tempo) noexcept {
+  if (tempo_ != tempo) {
+    tempo_ = tempo;
+    transport_.SetTempo(tempo_ * kMinutesFromSeconds);
+  }
+}
 
 bool Engine::SetSequenceInstrumentId(Id sequence_id,
                                      Id instrument_id) noexcept {
@@ -149,7 +154,6 @@ void Engine::StopPlayback() noexcept {
 }
 
 void Engine::Update(double timestamp) noexcept {
-  transport_.SetTempo(conductor_.TransformTempo(tempo_) * kMinutesFromSeconds);
   transport_.Update(
       timestamp, [this](double begin_position, double end_position) noexcept {
         for (auto& [sequence_id, sequence] : sequences_) {

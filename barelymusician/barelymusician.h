@@ -1085,52 +1085,79 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetSkippingAdjustments(
 namespace barely {
 
 /// Status.
-enum class Status : BarelyStatus {
-  /// Success.
-  kOk = BarelyStatus_kOk,
-  /// Invalid argument error.
-  kInvalidArgument = BarelyStatus_kInvalidArgument,
-  /// Not found error.
-  kNotFound = BarelyStatus_kNotFound,
-  /// Already exists error.
-  kAlreadyExists = BarelyStatus_kAlreadyExists,
-  /// Unimplemented error.
-  kUnimplemented = BarelyStatus_kUnimplemented,
-  /// Internal error.
-  kInternal = BarelyStatus_kInternal,
-  /// Unknown error.
-  kUnknown = BarelyStatus_kUnknown,
-};
+class Status {
+ public:
+  /// Enum values.
+  enum Enum : BarelyStatus {
+    /// Success.
+    kOk = BarelyStatus_kOk,
+    /// Invalid argument error.
+    kInvalidArgument = BarelyStatus_kInvalidArgument,
+    /// Not found error.
+    kNotFound = BarelyStatus_kNotFound,
+    /// Already exists error.
+    kAlreadyExists = BarelyStatus_kAlreadyExists,
+    /// Unimplemented error.
+    kUnimplemented = BarelyStatus_kUnimplemented,
+    /// Internal error.
+    kInternal = BarelyStatus_kInternal,
+    /// Unknown error.
+    kUnknown = BarelyStatus_kUnknown,
+  };
 
-/// Returns whether status is okay or not.
-///
-/// @param status Status.
-/// @return True if okay, false otherwise.
-inline bool IsOk(Status status) { return status == Status::kOk; }
+  /// Constructs new `Status`.
+  ///
+  /// @param status Status enum.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  Status(Enum status) : status_(status) {}
 
-/// Returns status string.
-///
-/// @param status Status.
-/// @return Status string.
-inline std::string ToString(Status status) {
-  switch (status) {
-    case Status::kOk:
-      return "Ok";
-    case Status::kInvalidArgument:
-      return "Invalid argument error";
-    case Status::kNotFound:
-      return "Not found error";
-    case Status::kAlreadyExists:
-      return "Already exists error";
-    case Status::kUnimplemented:
-      return "Unimplemented error";
-    case Status::kInternal:
-      return "Internal error";
-    case Status::kUnknown:
-    default:
-      return "Unknown error";
+  /// Constructs new `Status` from internal type.
+  ///
+  /// @param status Internal status enum.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  Status(BarelyStatus status) : status_(static_cast<Enum>(status)) {}
+
+  /// Returns enum value.
+  ///
+  /// @return Enum value.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  operator Enum() const { return status_; }
+
+  /// Enum comparators.
+  auto operator<=>(Enum status) const { return status_ <=> status; }
+
+  /// Returns whether status is okay or not.
+  ///
+  /// @return True if okay, false otherwise.
+  [[nodiscard]] bool IsOk() const { return status_ == kOk; }
+
+  /// Returns status string.
+  ///
+  /// @return Status string.
+  [[nodiscard]] std::string ToString() const {
+    switch (status_) {
+      case kOk:
+        return "Ok";
+      case kInvalidArgument:
+        return "Invalid argument error";
+      case kNotFound:
+        return "Not found error";
+      case kAlreadyExists:
+        return "Already exists error";
+      case kUnimplemented:
+        return "Unimplemented error";
+      case kInternal:
+        return "Internal error";
+      case kUnknown:
+      default:
+        return "Unknown error";
+    }
   }
-}
+
+ private:
+  // Enum value.
+  Enum status_;
+};
 
 /// Value or error status.
 template <typename ValueType>
@@ -1141,7 +1168,7 @@ class StatusOr {
   /// @param error_status Error status.
   // NOLINTNEXTLINE(google-explicit-constructor)
   StatusOr(Status error_status) : value_or_(error_status) {
-    assert(error_status != Status::kOk);
+    assert(!error_status.IsOk());
   }
 
   /// Constructs new `StatusOr` with a value.
@@ -1431,10 +1458,10 @@ class Instrument {
   /// Destroys `Instrument`.
   ~Instrument() {
     if (id_ != BarelyId_kInvalid) {
-      const auto status =
+      const Status status =
           BarelyInstrument_Destroy(std::exchange(handle_, nullptr),
                                    std::exchange(id_, BarelyId_kInvalid));
-      assert(IsOk(static_cast<Status>(status)));
+      assert(status.IsOk());
     }
   }
 
@@ -1458,8 +1485,8 @@ class Instrument {
   Instrument& operator=(Instrument&& other) noexcept {
     if (this != &other) {
       if (id_ != BarelyId_kInvalid) {
-        const auto status = BarelyInstrument_Destroy(handle_, id_);
-        assert(IsOk(static_cast<Status>(status)));
+        const Status status = BarelyInstrument_Destroy(handle_, id_);
+        assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
       id_ = std::exchange(other.id_, BarelyId_kInvalid);
@@ -1476,9 +1503,9 @@ class Instrument {
   template <typename IndexType, typename ValueType>
   [[nodiscard]] StatusOr<ValueType> GetParameter(IndexType index) const {
     double value = 0.0;
-    if (const auto status = static_cast<Status>(BarelyInstrument_GetParameter(
-            handle_, id_, static_cast<int>(index), &value));
-        !IsOk(status)) {
+    if (const Status status = BarelyInstrument_GetParameter(
+            handle_, id_, static_cast<int>(index), &value);
+        !status.IsOk()) {
       return status;
     }
     return static_cast<ValueType>(value);
@@ -1492,10 +1519,9 @@ class Instrument {
   [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
       IndexType index) const {
     BarelyParameterDefinition definition;
-    if (const auto status =
-            static_cast<Status>(BarelyInstrument_GetParameterDefinition(
-                handle_, id_, static_cast<int>(index), &definition));
-        !IsOk(status)) {
+    if (const Status status = BarelyInstrument_GetParameterDefinition(
+            handle_, id_, static_cast<int>(index), &definition);
+        !status.IsOk()) {
       return status;
     }
     return ParameterDefinition(definition);
@@ -1507,9 +1533,9 @@ class Instrument {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const {
     bool is_note_on = false;
-    const auto status =
+    const Status status =
         BarelyInstrument_IsNoteOn(handle_, id_, pitch, &is_note_on);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return is_note_on;
   }
 
@@ -1522,17 +1548,15 @@ class Instrument {
   /// @return Status.
   Status Process(double* output, int num_output_channels, int num_output_frames,
                  double timestamp) {
-    return static_cast<Status>(
-        BarelyInstrument_Process(handle_, id_, output, num_output_channels,
-                                 num_output_frames, timestamp));
+    return BarelyInstrument_Process(handle_, id_, output, num_output_channels,
+                                    num_output_frames, timestamp);
   }
 
   /// Resets all parameters.
   ///
   /// @return Status.
   Status ResetAllParameters() {
-    return static_cast<Status>(
-        BarelyInstrument_ResetAllParameters(handle_, id_));
+    return BarelyInstrument_ResetAllParameters(handle_, id_);
   }
 
   /// Resets parameter value.
@@ -1541,8 +1565,8 @@ class Instrument {
   /// @return Status.
   template <typename IndexType>
   Status ResetParameter(IndexType index) {
-    return static_cast<Status>(
-        BarelyInstrument_ResetParameter(handle_, id_, static_cast<int>(index)));
+    return BarelyInstrument_ResetParameter(handle_, id_,
+                                           static_cast<int>(index));
   }
 
   /// Sets data.
@@ -1551,14 +1575,14 @@ class Instrument {
   /// @return Status.
   template <typename DataType>
   Status SetData(DataType data) {
-    return static_cast<Status>(BarelyInstrument_SetData(
+    return BarelyInstrument_SetData(
         handle_, id_,
         {[](void* other_data, void** out_data) {
            *out_data = static_cast<void*>(
                new DataType(std::move(*static_cast<DataType*>(other_data))));
          },
          [](void* this_data) { delete static_cast<DataType*>(this_data); },
-         &data}));
+         &data});
   }
 
   /// Sets note off callback.
@@ -1568,15 +1592,14 @@ class Instrument {
   Status SetNoteOffCallback(NoteOffCallback callback) {
     if (callback) {
       note_off_callback_ = std::move(callback);
-      return static_cast<Status>(BarelyInstrument_SetNoteOffCallback(
+      return BarelyInstrument_SetNoteOffCallback(
           handle_, id_,
           [](double pitch, double timestamp, void* user_data) {
             (*static_cast<NoteOffCallback*>(user_data))(pitch, timestamp);
           },
-          static_cast<void*>(&note_off_callback_)));
+          static_cast<void*>(&note_off_callback_));
     }
-    return static_cast<Status>(
-        BarelyInstrument_SetNoteOffCallback(handle_, id_, nullptr, nullptr));
+    return BarelyInstrument_SetNoteOffCallback(handle_, id_, nullptr, nullptr);
   }
 
   /// Sets note on callback.
@@ -1586,17 +1609,16 @@ class Instrument {
   Status SetNoteOnCallback(NoteOnCallback callback) {
     if (callback) {
       note_on_callback_ = std::move(callback);
-      return static_cast<Status>(BarelyInstrument_SetNoteOnCallback(
+      return BarelyInstrument_SetNoteOnCallback(
           handle_, id_,
           [](double pitch, double intensity, double timestamp,
              void* user_data) {
             (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity,
                                                        timestamp);
           },
-          static_cast<void*>(&note_on_callback_)));
+          static_cast<void*>(&note_on_callback_));
     }
-    return static_cast<Status>(
-        BarelyInstrument_SetNoteOnCallback(handle_, id_, nullptr, nullptr));
+    return BarelyInstrument_SetNoteOnCallback(handle_, id_, nullptr, nullptr);
   }
 
   /// Sets parameter value.
@@ -1606,8 +1628,8 @@ class Instrument {
   /// @return Status.
   template <typename IndexType, typename ValueType>
   Status SetParameter(IndexType index, ValueType value) {
-    return static_cast<Status>(BarelyInstrument_SetParameter(
-        handle_, id_, static_cast<int>(index), static_cast<double>(value)));
+    return BarelyInstrument_SetParameter(handle_, id_, static_cast<int>(index),
+                                         static_cast<double>(value));
   }
 
   /// Starts note.
@@ -1616,23 +1638,20 @@ class Instrument {
   /// @param intensity Note intensity.
   /// @return Status.
   Status StartNote(double pitch, double intensity = 1.0) {
-    return static_cast<Status>(
-        BarelyInstrument_StartNote(handle_, id_, pitch, intensity));
+    return BarelyInstrument_StartNote(handle_, id_, pitch, intensity);
   }
 
   /// Stops all notes.
   ///
   /// @return Status.
-  Status StopAllNotes() {
-    return static_cast<Status>(BarelyInstrument_StopAllNotes(handle_, id_));
-  }
+  Status StopAllNotes() { return BarelyInstrument_StopAllNotes(handle_, id_); }
 
   /// Stops note.
   ///
   /// @param pitch Note pitch.
   /// @return Status.
   Status StopNote(double pitch) {
-    return static_cast<Status>(BarelyInstrument_StopNote(handle_, id_, pitch));
+    return BarelyInstrument_StopNote(handle_, id_, pitch);
   }
 
  private:
@@ -1643,18 +1662,18 @@ class Instrument {
   explicit Instrument(BarelyMusicianHandle handle,
                       InstrumentDefinition definition, int frame_rate)
       : handle_(handle) {
-    const auto status =
+    const Status status =
         BarelyInstrument_Create(handle_, definition, frame_rate, &id_);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
   }
 
   // Constructs new `Instrument` of `type`.
   explicit Instrument(BarelyMusicianHandle handle, InstrumentType type,
                       int frame_rate)
       : handle_(handle) {
-    const auto status = BarelyInstrument_CreateOfType(
+    const Status status = BarelyInstrument_CreateOfType(
         handle_, static_cast<BarelyInstrumentType>(type), frame_rate, &id_);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
   }
 
   // Internal musician handle.
@@ -1676,10 +1695,10 @@ class Sequence {
   /// Destroys `Sequence`.
   ~Sequence() {
     if (id_ != BarelyId_kInvalid) {
-      const auto status =
+      const Status status =
           BarelySequence_Destroy(std::exchange(handle_, nullptr),
                                  std::exchange(id_, BarelyId_kInvalid));
-      assert(IsOk(static_cast<Status>(status)));
+      assert(status.IsOk());
     }
   }
 
@@ -1700,8 +1719,8 @@ class Sequence {
   Sequence& operator=(Sequence&& other) noexcept {
     if (this != &other) {
       if (id_ != BarelyId_kInvalid) {
-        const auto status = BarelySequence_Destroy(handle_, id_);
-        assert(IsOk(static_cast<Status>(status)));
+        const Status status = BarelySequence_Destroy(handle_, id_);
+        assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
       id_ = std::exchange(other.id_, BarelyId_kInvalid);
@@ -1717,9 +1736,9 @@ class Sequence {
   // TODO: refactor note api type.
   BarelyId AddNote(NoteDefinition definition, double position) {
     BarelyId note_id = BarelyId_kInvalid;
-    const auto status =
+    const Status status =
         BarelySequence_AddNote(handle_, id_, definition, position, &note_id);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return note_id;
   }
 
@@ -1730,9 +1749,9 @@ class Sequence {
   /// @return Begin offset in beats.
   [[nodiscard]] double GetBeginOffset() const {
     double begin_offset = 0.0;
-    const auto status =
+    const Status status =
         BarelySequence_GetBeginOffset(handle_, id_, &begin_offset);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return begin_offset;
   }
 
@@ -1741,9 +1760,9 @@ class Sequence {
   /// @return Begin position in beats.
   [[nodiscard]] double GetBeginPosition() const {
     double begin_position = 0.0;
-    const auto status =
+    const Status status =
         BarelySequence_GetBeginPosition(handle_, id_, &begin_position);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return begin_position;
   }
 
@@ -1752,9 +1771,9 @@ class Sequence {
   /// @return End position in beats.
   [[nodiscard]] double GetEndPosition() const {
     double end_position = 0.0;
-    const auto status =
+    const Status status =
         BarelySequence_GetEndPosition(handle_, id_, &end_position);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return end_position;
   }
 
@@ -1768,9 +1787,9 @@ class Sequence {
   /// @return Loop begin offset in beats.
   [[nodiscard]] double GetLoopBeginOffset() const {
     double loop_begin_offset = 0.0;
-    const auto status =
+    const Status status =
         BarelySequence_GetLoopBeginOffset(handle_, id_, &loop_begin_offset);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return loop_begin_offset;
   }
 
@@ -1779,9 +1798,9 @@ class Sequence {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const {
     double loop_length = 0.0;
-    const auto status =
+    const Status status =
         BarelySequence_GetLoopLength(handle_, id_, &loop_length);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return loop_length;
   }
 
@@ -1790,8 +1809,8 @@ class Sequence {
   /// @return True if empty, false otherwise.
   [[nodiscard]] bool IsEmpty() const {
     bool is_empty = false;
-    const auto status = BarelySequence_IsEmpty(handle_, id_, &is_empty);
-    assert(IsOk(static_cast<Status>(status)));
+    const Status status = BarelySequence_IsEmpty(handle_, id_, &is_empty);
+    assert(status.IsOk());
     return is_empty;
   }
 
@@ -1800,8 +1819,8 @@ class Sequence {
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const {
     bool is_looping = false;
-    const auto status = BarelySequence_IsLooping(handle_, id_, &is_looping);
-    assert(IsOk(static_cast<Status>(status)));
+    const Status status = BarelySequence_IsLooping(handle_, id_, &is_looping);
+    assert(status.IsOk());
     return is_looping;
   }
 
@@ -1810,9 +1829,9 @@ class Sequence {
   /// @return True if skipping, false otherwise.
   [[nodiscard]] bool IsSkippingAdjustments() const {
     bool is_skipping_adjustments = false;
-    const auto status = BarelySequence_IsSkippingAdjustments(
+    const Status status = BarelySequence_IsSkippingAdjustments(
         handle_, id_, &is_skipping_adjustments);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return is_skipping_adjustments;
   }
 
@@ -1820,7 +1839,7 @@ class Sequence {
   ///
   /// @return Status.
   Status RemoveAllNotes() {
-    return static_cast<Status>(BarelySequence_RemoveAllNotes(handle_, id_));
+    return BarelySequence_RemoveAllNotes(handle_, id_);
   }
 
   /// Removes all notes at position.
@@ -1828,8 +1847,7 @@ class Sequence {
   /// @param position Position in beats.
   /// @return Status.
   Status RemoveAllNotes(double position) {
-    return static_cast<Status>(
-        BarelySequence_RemoveAllNotesAtPosition(handle_, id_, position));
+    return BarelySequence_RemoveAllNotesAtPosition(handle_, id_, position);
   }
 
   /// Removes all notes at range.
@@ -1838,8 +1856,8 @@ class Sequence {
   /// @param end_position End position in beats.
   /// @return Status.
   Status RemoveAllNotes(double begin_position, double end_position) {
-    return static_cast<Status>(BarelySequence_RemoveAllNotesAtRange(
-        handle_, id_, begin_position, end_position));
+    return BarelySequence_RemoveAllNotesAtRange(handle_, id_, begin_position,
+                                                end_position);
   }
 
   /// Removes note.
@@ -1848,7 +1866,7 @@ class Sequence {
   /// @return Status.
   // TODO: refactor note api type.
   Status RemoveNote(BarelyId note) {
-    return static_cast<Status>(BarelySequence_RemoveNote(handle_, id_, note));
+    return BarelySequence_RemoveNote(handle_, id_, note);
   }
 
   /// Sets begin offset.
@@ -1856,8 +1874,7 @@ class Sequence {
   /// @param begin_offset Begin offset in beats.
   /// @return Status.
   Status SetBeginOffset(double begin_offset) {
-    return static_cast<Status>(
-        BarelySequence_SetBeginOffset(handle_, id_, begin_offset));
+    return BarelySequence_SetBeginOffset(handle_, id_, begin_offset);
   }
 
   /// Sets begin position.
@@ -1865,8 +1882,7 @@ class Sequence {
   /// @param begin_position Begin position in beats.
   /// @return Status.
   Status SetBeginPosition(double begin_position) {
-    return static_cast<Status>(
-        BarelySequence_SetBeginPosition(handle_, id_, begin_position));
+    return BarelySequence_SetBeginPosition(handle_, id_, begin_position);
   }
 
   /// Sets end position.
@@ -1874,8 +1890,7 @@ class Sequence {
   /// @param end_position End position in beats.
   /// @return Status.
   Status SetEndPosition(double end_position) {
-    return static_cast<Status>(
-        BarelySequence_SetEndPosition(handle_, id_, end_position));
+    return BarelySequence_SetEndPosition(handle_, id_, end_position);
   }
 
   /// Sets instrument.
@@ -1884,8 +1899,8 @@ class Sequence {
   /// @return Status.
   Status SetInstrument(const Instrument* instrument) {
     instrument_ = instrument;
-    return static_cast<Status>(BarelySequence_SetInstrument(
-        handle_, id_, instrument_ ? instrument_->id_ : BarelyId_kInvalid));
+    return BarelySequence_SetInstrument(
+        handle_, id_, instrument_ ? instrument_->id_ : BarelyId_kInvalid);
   }
 
   /// Sets loop begin offset.
@@ -1893,8 +1908,7 @@ class Sequence {
   /// @param loop_begin_offset Loop begin offset in beats.
   /// @return Status.
   Status SetLoopBeginOffset(double loop_begin_offset) {
-    return static_cast<Status>(
-        BarelySequence_SetLoopBeginOffset(handle_, id_, loop_begin_offset));
+    return BarelySequence_SetLoopBeginOffset(handle_, id_, loop_begin_offset);
   }
 
   /// Sets loop length.
@@ -1902,8 +1916,7 @@ class Sequence {
   /// @param loop_length Loop length in beats.
   /// @return Status.
   Status SetLoopLength(double loop_length) {
-    return static_cast<Status>(
-        BarelySequence_SetLoopLength(handle_, id_, loop_length));
+    return BarelySequence_SetLoopLength(handle_, id_, loop_length);
   }
 
   /// Sets whether sequence should be looping or not.
@@ -1911,8 +1924,7 @@ class Sequence {
   /// @param is_looping True if looping, false otherwise.
   /// @return Status.
   Status SetLooping(bool is_looping) {
-    return static_cast<Status>(
-        BarelySequence_SetLooping(handle_, id_, is_looping));
+    return BarelySequence_SetLooping(handle_, id_, is_looping);
   }
 
   /// Sets whether sequence should be skipping adjustments or not.
@@ -1920,8 +1932,8 @@ class Sequence {
   /// @param is_skipping_adjustments True if skipping, false otherwise.
   /// @return Status.
   Status SetSkippingAdjustments(bool is_skipping_adjustments) {
-    return static_cast<Status>(BarelySequence_SetSkippingAdjustments(
-        handle_, id_, is_skipping_adjustments));
+    return BarelySequence_SetSkippingAdjustments(handle_, id_,
+                                                 is_skipping_adjustments);
   }
 
  private:
@@ -1929,8 +1941,8 @@ class Sequence {
 
   // Constructs new `Sequence`.
   explicit Sequence(BarelyMusicianHandle handle) : handle_(handle) {
-    const auto status = BarelySequence_Create(handle_, &id_);
-    assert(IsOk(static_cast<Status>(status)));
+    const Status status = BarelySequence_Create(handle_, &id_);
+    assert(status.IsOk());
   }
 
   // Internal musician handle.
@@ -1965,16 +1977,16 @@ class Musician {
 
   /// Constructs new `Musician`.
   Musician() {
-    const auto status = BarelyMusician_Create(&handle_);
-    assert(IsOk(static_cast<Status>(status)));
+    const Status status = BarelyMusician_Create(&handle_);
+    assert(status.IsOk());
   }
 
   /// Destroys `Musician`.
   ~Musician() {
     if (handle_) {
-      const auto status =
+      const Status status =
           BarelyMusician_Destroy(std::exchange(handle_, nullptr));
-      assert(IsOk(static_cast<Status>(status)));
+      assert(status.IsOk());
     }
   }
 
@@ -2000,8 +2012,8 @@ class Musician {
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
       if (handle_) {
-        const auto status = BarelyMusician_Destroy(handle_);
-        assert(IsOk(static_cast<Status>(status)));
+        const Status status = BarelyMusician_Destroy(handle_);
+        assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
       SetAdjustNoteDefinitionCallback(
@@ -2042,8 +2054,8 @@ class Musician {
   /// @return Note pitch.
   [[nodiscard]] double GetNote(NotePitchDefinition definition) const {
     double pitch = 0.0;
-    const auto status = BarelyMusician_GetNote(handle_, definition, &pitch);
-    assert(IsOk(static_cast<Status>(status)));
+    const Status status = BarelyMusician_GetNote(handle_, definition, &pitch);
+    assert(status.IsOk());
     return pitch;
   }
 
@@ -2053,8 +2065,8 @@ class Musician {
   [[nodiscard]] double GetPosition() const {
     double position = 0.0;
     if (handle_) {
-      const auto status = BarelyMusician_GetPosition(handle_, &position);
-      assert(IsOk(static_cast<Status>(status)));
+      const Status status = BarelyMusician_GetPosition(handle_, &position);
+      assert(status.IsOk());
     }
     return position;
   }
@@ -2065,8 +2077,8 @@ class Musician {
   [[nodiscard]] double GetRootNote() const {
     double root_pitch = 0.0;
     if (handle_) {
-      const auto status = BarelyMusician_GetRootNote(handle_, &root_pitch);
-      assert(IsOk(static_cast<Status>(status)));
+      const Status status = BarelyMusician_GetRootNote(handle_, &root_pitch);
+      assert(status.IsOk());
     }
     return root_pitch;
   }
@@ -2079,9 +2091,9 @@ class Musician {
     const double* scale_pitches = nullptr;
     int num_scale_pitches = 0;
     if (handle_) {
-      const auto status =
+      const Status status =
           BarelyMusician_GetScale(handle_, &scale_pitches, &num_scale_pitches);
-      assert(IsOk(static_cast<Status>(status)));
+      assert(status.IsOk());
     }
     return std::vector<double>(scale_pitches,
                                scale_pitches + num_scale_pitches);
@@ -2092,8 +2104,8 @@ class Musician {
   /// @return Tempo in bpm.
   [[nodiscard]] double GetTempo() const {
     double tempo = 0.0;
-    const auto status = BarelyMusician_GetTempo(handle_, &tempo);
-    assert(IsOk(static_cast<Status>(status)));
+    const Status status = BarelyMusician_GetTempo(handle_, &tempo);
+    assert(status.IsOk());
     return tempo;
   }
 
@@ -2102,8 +2114,8 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const {
     double timestamp = 0.0;
-    const auto status = BarelyMusician_GetTimestamp(handle_, &timestamp);
-    assert(IsOk(static_cast<Status>(status)));
+    const Status status = BarelyMusician_GetTimestamp(handle_, &timestamp);
+    assert(status.IsOk());
     return timestamp;
   }
 
@@ -2113,9 +2125,9 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestampAtPosition(double position) const {
     double timestamp = 0.0;
-    const auto status =
+    const Status status =
         BarelyMusician_GetTimestampAtPosition(handle_, position, &timestamp);
-    assert(IsOk(static_cast<Status>(status)));
+    assert(status.IsOk());
     return timestamp;
   }
 
@@ -2124,8 +2136,8 @@ class Musician {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const {
     bool is_playing = false;
-    const auto status = BarelyMusician_IsPlaying(handle_, &is_playing);
-    assert(status == BarelyStatus_kOk);
+    const Status status = BarelyMusician_IsPlaying(handle_, &is_playing);
+    assert(status.IsOk());
     return is_playing;
   }
 
@@ -2137,16 +2149,16 @@ class Musician {
       AdjustNoteDefinitionCallback callback) {
     if (callback) {
       adjust_note_definition_callback_ = std::move(callback);
-      return static_cast<Status>(BarelyMusician_SetAdjustNoteDefinitionCallback(
+      return BarelyMusician_SetAdjustNoteDefinitionCallback(
           handle_,
           [](BarelyNoteDefinition* definition, void* user_data) {
             (*static_cast<AdjustNoteDefinitionCallback*>(user_data))(
                 static_cast<NoteDefinition*>(definition));
           },
-          static_cast<void*>(&adjust_note_definition_callback_)));
+          static_cast<void*>(&adjust_note_definition_callback_));
     }
-    return static_cast<Status>(BarelyMusician_SetAdjustNoteDefinitionCallback(
-        handle_, nullptr, nullptr));
+    return BarelyMusician_SetAdjustNoteDefinitionCallback(handle_, nullptr,
+                                                          nullptr);
   }
 
   /// Sets adjust tempo callback.
@@ -2156,15 +2168,14 @@ class Musician {
   Status SetAdjustTempoCallback(AdjustTempoCallback callback) {
     if (callback) {
       adjust_tempo_callback_ = std::move(callback);
-      return static_cast<Status>(BarelyMusician_SetAdjustTempoCallback(
+      return BarelyMusician_SetAdjustTempoCallback(
           handle_,
           [](double* tempo, void* user_data) {
             (*static_cast<AdjustTempoCallback*>(user_data))(tempo);
           },
-          static_cast<void*>(&adjust_tempo_callback_)));
+          static_cast<void*>(&adjust_tempo_callback_));
     }
-    return static_cast<Status>(
-        BarelyMusician_SetAdjustTempoCallback(handle_, nullptr, nullptr));
+    return BarelyMusician_SetAdjustTempoCallback(handle_, nullptr, nullptr);
   }
 
   /// Sets beat callback.
@@ -2174,15 +2185,14 @@ class Musician {
   Status SetBeatCallback(BeatCallback callback) {
     if (callback) {
       beat_callback_ = std::move(callback);
-      return static_cast<Status>(BarelyMusician_SetBeatCallback(
+      return BarelyMusician_SetBeatCallback(
           handle_,
           [](double beat, double timestamp, void* user_data) {
             (*static_cast<BeatCallback*>(user_data))(beat, timestamp);
           },
-          static_cast<void*>(&beat_callback_)));
+          static_cast<void*>(&beat_callback_));
     }
-    return static_cast<Status>(
-        BarelyMusician_SetBeatCallback(handle_, nullptr, nullptr));
+    return BarelyMusician_SetBeatCallback(handle_, nullptr, nullptr);
   }
 
   /// Sets position.
@@ -2190,14 +2200,14 @@ class Musician {
   /// @param position Position in beats.
   /// @return Status.
   Status SetPosition(double position) {
-    return static_cast<Status>(BarelyMusician_SetPosition(handle_, position));
+    return BarelyMusician_SetPosition(handle_, position);
   }
 
   /// Sets root note.
   ///
   /// @param root_pitch Root note pitch.
   Status SetRootNote(double root_pitch) {
-    return static_cast<Status>(BarelyMusician_SetRootNote(handle_, root_pitch));
+    return BarelyMusician_SetRootNote(handle_, root_pitch);
   }
 
   /// Sets scale.
@@ -2205,8 +2215,8 @@ class Musician {
   /// @param scale_pitches List of scale note pitches.
   // TODO: Use span instead.
   Status SetScale(const std::vector<double>& scale_pitches) {
-    return static_cast<Status>(BarelyMusician_SetScale(
-        handle_, scale_pitches.data(), static_cast<int>(scale_pitches.size())));
+    return BarelyMusician_SetScale(handle_, scale_pitches.data(),
+                                   static_cast<int>(scale_pitches.size()));
   }
 
   /// Sets tempo.
@@ -2214,7 +2224,7 @@ class Musician {
   /// @param tempo Tempo in bpm.
   /// @return Status.
   Status SetTempo(double tempo) {
-    return static_cast<Status>(BarelyMusician_SetTempo(handle_, tempo));
+    return BarelyMusician_SetTempo(handle_, tempo);
   }
 
   /// Sets timestamp.
@@ -2222,25 +2232,25 @@ class Musician {
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status SetTimestamp(double timestamp) {
-    return static_cast<Status>(BarelyMusician_SetTimestamp(handle_, timestamp));
+    return BarelyMusician_SetTimestamp(handle_, timestamp);
   }
 
   /// Starts playback.
   ///
   /// @return Status.
-  Status Start() { return static_cast<Status>(BarelyMusician_Start(handle_)); }
+  Status Start() { return BarelyMusician_Start(handle_); }
 
   /// Stops playback.
   ///
   /// @return Status.
-  Status Stop() { return static_cast<Status>(BarelyMusician_Stop(handle_)); }
+  Status Stop() { return BarelyMusician_Stop(handle_); }
 
   /// Updates internal state at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status Update(double timestamp) {
-    return static_cast<Status>(BarelyMusician_Update(handle_, timestamp));
+    return BarelyMusician_Update(handle_, timestamp);
   }
 
  private:

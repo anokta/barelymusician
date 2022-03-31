@@ -235,7 +235,7 @@ int main(int /*argc*/, char* argv[]) {
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());
 
-  build_synth_instrument_fn(OscillatorType::kNoise, 0.02, 0.5, 0.025);
+  build_synth_instrument_fn(OscillatorType::kNoise, 0.0125, 0.5, 0.025);
   performers.emplace_back(musician.CreateSequence(),
                           chords_beat_composer_callback);
   performers.back().first.SetInstrument(&instruments.back());

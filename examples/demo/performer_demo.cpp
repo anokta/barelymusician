@@ -20,7 +20,6 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::InstrumentType;
-using ::barely::IsOk;
 using ::barely::Musician;
 using ::barely::NoteDefinition;
 using ::barely::NotePitchDefinition;
@@ -115,7 +114,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::vector<BarelyId> note_references;
   note_references.reserve(notes.size());
   for (const auto& [position, note] : notes) {
-    note_references.push_back(sequence.AddNote(position, note));
+    note_references.push_back(sequence.AddNote(note, position));
   }
 
   bool use_conductor = false;
@@ -179,11 +178,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
       // Toggle notes.
-      if (IsOk(sequence.RemoveNote(note_references[index - 1]))) {
+      if (sequence.RemoveNote(note_references[index - 1]).IsOk()) {
         ConsoleLog() << "Removed note " << index;
       } else {
         note_references[index - 1] =
-            sequence.AddNote(notes[index - 1].first, notes[index - 1].second);
+            sequence.AddNote(notes[index - 1].second, notes[index - 1].first);
         ConsoleLog() << "Added note " << index;
       }
       return;

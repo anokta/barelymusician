@@ -1,14 +1,16 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
   /// Class that wraps musician.
   public static class Musician {
-    /// Invalid id.
+    /// Invalid identifier.
     public const Int64 InvalidId = -1;
+
+    // Adjust note event.
+    public delegate void AdjustNoteEvent(ref NoteDefinition definition);
+    public static event AdjustNoteEvent OnAdjustNote;
 
     /// Beat event.
     public delegate void BeatEvent(double position);
@@ -26,7 +28,7 @@ namespace Barely {
 
     /// Note pitch definition.
     [StructLayout(LayoutKind.Sequential)]
-    public struct NotePitch {
+    public struct NotePitchDefinition {
       /// Type.
       public NotePitchType type;
 
@@ -53,7 +55,7 @@ namespace Barely {
       public double duration;
 
       /// Pitch.
-      public NotePitch pitch;
+      public NotePitchDefinition pitch;
 
       /// Intensity.
       public double intensity;
@@ -62,7 +64,7 @@ namespace Barely {
     /// Adds new instrument.
     ///
     /// @param instrument Instrument to add.
-    /// @return Instrument id.
+    /// @return Instrument identifier.
     public static Int64 AddInstrument(Instrument instrument) {
       Int64 instrumentId = InvalidId;
       Type instrumentType = instrument.GetType();
@@ -91,7 +93,7 @@ namespace Barely {
     /// Adds new sequence.
     ///
     /// @param sequence Sequence to add.
-    /// @return Sequence id.
+    /// @return Sequence identifier.
     public static Int64 AddSequence(Sequence sequence) {
       Int64 sequenceId = InvalidId;
       Status status = BarelySequence_Create(Handle, _int64Ptr);
@@ -339,6 +341,10 @@ namespace Barely {
 
     // Internal component to manage the native state.
     private class MusicianInternal : MonoBehaviour {
+      // Adjust note callback.
+      private delegate void AdjustNoteCallback(ref NoteDefinition definition);
+      private AdjustNoteCallback _adjustNoteCallback = null;
+
       // Beat callback.
       private delegate void BeatCallback(double position, double timestamp);
       private BeatCallback _beatCallback = null;
@@ -352,9 +358,14 @@ namespace Barely {
           return;
         }
         _handle = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
+        _adjustNoteCallback = delegate(ref NoteDefinition definition) {
+          OnAdjustNote?.Invoke(ref definition);
+        };
         _beatCallback = delegate(double position, double timestamp) {
           OnBeat?.Invoke(position);
         };
+        BarelyMusician_SetAdjustNoteCallback(
+            _handle, Marshal.GetFunctionPointerForDelegate(_adjustNoteCallback), IntPtr.Zero);
         BarelyMusician_SetBeatCallback(
             _handle, Marshal.GetFunctionPointerForDelegate(_beatCallback), IntPtr.Zero);
         var config = AudioSettings.GetConfiguration();
@@ -497,8 +508,13 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyMusician_IsPlaying")]
     private static extern Status BarelyMusician_IsPlaying(IntPtr handle, IntPtr isPlayingPtr);
 
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_SetAdjustNoteCallback")]
+    private static extern Status BarelyMusician_SetAdjustNoteCallback(IntPtr handle,
+                                                                      IntPtr callback,
+                                                                      IntPtr userData);
+
     [DllImport(pluginName, EntryPoint = "BarelyMusician_SetBeatCallback")]
-    private static extern Status BarelyMusician_SetBeatCallback(IntPtr handle, IntPtr beatCallback,
+    private static extern Status BarelyMusician_SetBeatCallback(IntPtr handle, IntPtr callback,
                                                                 IntPtr userData);
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_SetPosition")]

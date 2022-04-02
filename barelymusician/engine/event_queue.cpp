@@ -15,8 +15,7 @@ bool EventQueue::Add(double timestamp, Event event) noexcept {
   return true;
 }
 
-const std::pair<double, Event>* EventQueue::GetNext(
-    double end_timestamp) noexcept {
+std::pair<double, Event>* EventQueue::GetNext(double end_timestamp) noexcept {
   const int index = read_index_;
   if (index == write_index_ || events_[index].first >= end_timestamp) {
     return nullptr;

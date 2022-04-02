@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "barelymusician/dsp/sample_player.h"
@@ -12,26 +13,21 @@
 namespace barelyapi {
 
 struct PercussionPad {
-  explicit PercussionPad(std::vector<double> data, int frequency,
-                         int frame_rate)
-      : data(std::move(data)), voice(frame_rate) {
-    voice.generator().SetData(this->data.data(), frequency,
-                              static_cast<int>(this->data.size()));
-  }
   std::vector<double> data;
-  EnvelopedVoice<SamplePlayer> voice;
+  int frequency;
 };
 using PercussionPadMap = std::unordered_map<double, PercussionPad>;
 
 /// Simple percussion instrument.
 class PercussionInstrument : public GenericInstrument {
  public:
-  explicit PercussionInstrument(int /*sample_rate*/) noexcept {}
+  /// Constructs new `PercussionInstrument`.
+  explicit PercussionInstrument(int frame_rate) noexcept;
 
   /// Implements `GenericInstrument`.
   void Process(double* output, int num_channels,
                int num_frames) noexcept override;
-  void SetData(void* data) noexcept override;
+  void SetData(const void* data, int size) noexcept override;
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;
   void SetParameter(int index, double value, double slope) noexcept override;
@@ -40,7 +36,9 @@ class PercussionInstrument : public GenericInstrument {
   static Instrument::Definition GetDefinition() noexcept;
 
  private:
-  PercussionPadMap pads_;
+  int frame_rate_;
+  const PercussionPadMap* pads_;
+  std::unordered_map<double, EnvelopedVoice<SamplePlayer>> voices_;
 };
 
 }  // namespace barelyapi

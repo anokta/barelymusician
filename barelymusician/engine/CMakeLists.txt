@@ -10,22 +10,8 @@ target_link_libraries(
 )
 
 add_library(
-  data
-  data.cpp
-  data.h
-)
-target_link_libraries(
-  data
-  include
-)
-
-add_library(
   event INTERFACE
   event.h
-)
-target_link_libraries(
-  event INTERFACE
-  data
 )
 
 add_library(
@@ -54,7 +40,6 @@ add_library(
 )
 target_link_libraries(
   instrument
-  data
   event
   event_queue
   parameter
@@ -116,18 +101,6 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(conductor_test)
-
-add_executable(
-  data_test
-  data_test.cpp
-)
-target_link_libraries(
-  data_test
-  data
-  gmock
-  gtest_main
-)
-gtest_discover_tests(data_test)
 
 add_executable(
   event_queue_test

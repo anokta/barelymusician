@@ -64,30 +64,6 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 6,
 };
 
-/// Data definition move callback signature.
-///
-/// @param other_data Other data to move.
-/// @param out_data Output data.
-typedef void (*BarelyDataDefinition_MoveCallback)(void* other_data,
-                                                  void** out_data);
-
-/// Data definition destroy callback signature.
-///
-/// @param data Data to destroy.
-typedef void (*BarelyDataDefinition_DestroyCallback)(void* data);
-
-/// Data definition.
-typedef struct BarelyDataDefinition {
-  /// Move callback.
-  BarelyDataDefinition_MoveCallback move_callback;
-
-  /// Destroy callback.
-  BarelyDataDefinition_DestroyCallback destroy_callback;
-
-  /// Data.
-  void* data;
-} BarelyDataDefinition;
-
 /// Note pitch type enum alias.
 typedef int32_t BarelyNotePitchType;
 
@@ -176,8 +152,10 @@ typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
 ///
 /// @param state Pointer to instrument state.
 /// @param data Data.
+/// @param size Data size in bytes.
 typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
-                                                           void* data);
+                                                           const void* data,
+                                                           int32_t size);
 
 /// Instrument set note off callback signature.
 ///
@@ -427,11 +405,13 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param definition Data definition.
+/// @param data Data.
+/// @param size Data size in bytes.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_SetData(BarelyMusicianHandle handle, BarelyId instrument_id,
-                         BarelyDataDefinition definition);
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
+                                                    BarelyId instrument_id,
+                                                    const void* data,
+                                                    int32_t size);
 
 /// Sets instrument note off callback.
 ///
@@ -1061,6 +1041,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetSkippingAdjustments(
 #include <functional>
 #include <limits>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -1194,22 +1175,6 @@ class StatusOr {
  private:
   // Value or error status.
   std::variant<Status, ValueType> value_or_;
-};
-
-/// Data definition.
-struct DataDefinition : public BarelyDataDefinition {
-  /// Move callback signature.
-  using MoveCallback = BarelyDataDefinition_MoveCallback;
-
-  /// Destroy callback signature.
-  using DestroyCallback = BarelyDataDefinition_DestroyCallback;
-
-  /// Constructs new `DataDefinition` from internal type.
-  ///
-  /// @param definition Internal data definition.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  DataDefinition(BarelyDataDefinition definition)
-      : BarelyDataDefinition{definition} {}
 };
 
 /// Note pitch type.
@@ -1557,15 +1522,11 @@ class Instrument {
   /// @param data Data.
   /// @return Status.
   template <typename DataType>
-  Status SetData(DataType data) {
+  Status SetData(const DataType& data) {
+    static_assert(std::is_trivially_copyable<DataType>::value,
+                  "DataType is not trivially copyable");
     return BarelyInstrument_SetData(
-        handle_, id_,
-        {[](void* other_data, void** out_data) {
-           *out_data = static_cast<void*>(
-               new DataType(std::move(*static_cast<DataType*>(other_data))));
-         },
-         [](void* this_data) { delete static_cast<DataType*>(this_data); },
-         &data});
+        handle_, id_, static_cast<const void*>(&data), sizeof(decltype(data)));
   }
 
   /// Sets note off callback.

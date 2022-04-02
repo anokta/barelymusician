@@ -1,16 +1,16 @@
 #ifndef BARELYMUSICIAN_ENGINE_EVENT_H_
 #define BARELYMUSICIAN_ENGINE_EVENT_H_
 
+#include <cstddef>
 #include <variant>
-
-#include "barelymusician/engine/data.h"
+#include <vector>
 
 namespace barelyapi {
 
 /// Set data event.
 struct SetDataEvent {
   /// Data.
-  Data data;
+  std::vector<std::byte> data;
 };
 
 /// Set note off event.

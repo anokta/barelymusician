@@ -18,7 +18,7 @@ class SynthInstrument : public GenericInstrument {
   /// Implements `GenericInstrument`.
   void Process(double* output, int num_channels,
                int num_frames) noexcept override;
-  void SetData(void* /*data*/) noexcept override {}
+  void SetData(const void* /*data*/, int /*size*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;
   void SetParameter(int index, double value, double slope) noexcept override;

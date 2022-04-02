@@ -4,6 +4,7 @@
 #include <stdint.h>   // NOLINT(modernize-deprecated-headers)
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -172,13 +173,15 @@ BarelyStatus BarelyInstrument_ResetParameter(BarelyMusicianHandle handle,
 }
 
 BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
-                                      BarelyId instrument_id,
-                                      BarelyDataDefinition definition) {
+                                      BarelyId instrument_id, const void* data,
+                                      int32_t size) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    instrument->SetData(definition, handle->engine.GetTimestamp());
+    instrument->SetData({static_cast<const std::byte*>(data),
+                         static_cast<const std::byte*>(data) + size},
+                        handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

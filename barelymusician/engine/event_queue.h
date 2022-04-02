@@ -23,7 +23,7 @@ class EventQueue {
   ///
   /// @param end_timestamp End timestamp in seconds.
   /// @return Pointer to event if successful, nullptr otherwise.
-  const std::pair<double, Event>* GetNext(double end_timestamp) noexcept;
+  std::pair<double, Event>* GetNext(double end_timestamp) noexcept;
 
  private:
   // Maximum number of events.

@@ -25,7 +25,8 @@ class GenericInstrument {
   /// Sets data.
   ///
   /// @param data Data.
-  virtual void SetData(void* data) noexcept = 0;
+  /// @param size Data size in bytes.
+  virtual void SetData(const void* data, int size) noexcept = 0;
 
   /// Stops note.
   ///
@@ -63,9 +64,9 @@ Instrument::Definition GetInstrumentDefinition(
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->Process(output, num_channels, num_frames);
       },
-      [](void** state, void* data) noexcept {
+      [](void** state, const void* data, int size) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
-        instrument->SetData(data);
+        instrument->SetData(data, size);
       },
       [](void** state, double pitch) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);

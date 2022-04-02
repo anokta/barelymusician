@@ -4,7 +4,6 @@
 #include <utility>
 #include <variant>
 
-#include "barelymusician/engine/data.h"
 #include "barelymusician/engine/event.h"
 
 namespace barelyapi {
@@ -60,7 +59,7 @@ void Instrument::Process(double* output, int num_output_channels,
   int frame = 0;
   // Process *all* events before the end timestamp.
   const double end_timestamp = timestamp + GetSeconds(num_output_frames);
-  for (const auto* event = event_queue_.GetNext(end_timestamp); event;
+  for (auto* event = event_queue_.GetNext(end_timestamp); event;
        event = event_queue_.GetNext(end_timestamp)) {
     const int message_frame = GetFrames(event->first - timestamp);
     if (frame < message_frame) {
@@ -71,31 +70,33 @@ void Instrument::Process(double* output, int num_output_channels,
       frame = message_frame;
     }
     std::visit(
-        EventVisitor{
-            [this](const SetDataEvent& set_data_event) noexcept {
-              if (set_data_callback_) {
-                set_data_callback_(&state_, set_data_event.data.GetMutable());
-              }
-            },
-            [this](const SetNoteOffEvent& set_note_off_event) noexcept {
-              if (set_note_off_callback_) {
-                set_note_off_callback_(&state_, set_note_off_event.pitch);
-              }
-            },
-            [this](const SetNoteOnEvent& set_note_on_event) noexcept {
-              if (set_note_on_callback_) {
-                set_note_on_callback_(&state_, set_note_on_event.pitch,
-                                      set_note_on_event.intensity);
-              }
-            },
-            [this](const SetParameterEvent& set_parameter_event) noexcept {
-              if (set_parameter_callback_) {
-                set_parameter_callback_(
-                    &state_, set_parameter_event.index,
-                    set_parameter_event.value,
-                    GetSlopePerFrame(set_parameter_event.slope));
-              }
-            }},
+        EventVisitor{[this](SetDataEvent& set_data_event) noexcept {
+                       if (set_data_callback_) {
+                         data_.swap(set_data_event.data);
+                         set_data_callback_(&state_, data_.data(),
+                                            static_cast<int>(data_.size()));
+                       }
+                     },
+                     [this](SetNoteOffEvent& set_note_off_event) noexcept {
+                       if (set_note_off_callback_) {
+                         set_note_off_callback_(&state_,
+                                                set_note_off_event.pitch);
+                       }
+                     },
+                     [this](SetNoteOnEvent& set_note_on_event) noexcept {
+                       if (set_note_on_callback_) {
+                         set_note_on_callback_(&state_, set_note_on_event.pitch,
+                                               set_note_on_event.intensity);
+                       }
+                     },
+                     [this](SetParameterEvent& set_parameter_event) noexcept {
+                       if (set_parameter_callback_) {
+                         set_parameter_callback_(
+                             &state_, set_parameter_event.index,
+                             set_parameter_event.value,
+                             GetSlopePerFrame(set_parameter_event.slope));
+                       }
+                     }},
         event->second);
   }
   // Process the rest of the buffer.
@@ -127,14 +128,9 @@ bool Instrument::ResetParameter(int index, double timestamp) noexcept {
   return false;
 }
 
-void Instrument::SetData(Data::Definition definition,
+void Instrument::SetData(std::vector<std::byte> data,
                          double timestamp) noexcept {
-  void* new_data = nullptr;
-  if (definition.move_callback) {
-    definition.move_callback(definition.data, &new_data);
-  }
-  definition.data = new_data;
-  event_queue_.Add(timestamp, SetDataEvent{Data{definition}});
+  event_queue_.Add(timestamp, SetDataEvent{std::move(data)});
 }
 
 void Instrument::SetNoteOffCallback(NoteOffCallback callback) noexcept {

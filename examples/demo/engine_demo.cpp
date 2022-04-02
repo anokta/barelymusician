@@ -280,13 +280,12 @@ int main(int /*argc*/, char* argv[]) {
           const bool success = it.first->second.Load(path);
           assert(success);
         }
-        PercussionPadMap percussion_pads;
+        static PercussionPadMap percussion_pads;
         for (const auto& [pitch, file] : percussion_files) {
-          percussion_pads.insert(
-              {pitch, PercussionPad(file.GetData(), file.GetSampleRate(),
-                                    kFrameRate)});
+          percussion_pads.insert_or_assign(
+              pitch, PercussionPad{file.GetData(), file.GetSampleRate()});
         }
-        percussion.SetData(std::move(percussion_pads));
+        percussion.SetData(&percussion_pads);
       };
   set_percussion_pad_map_fn(
       {{barelyapi::kPitchKick, "basic_kick.wav"},

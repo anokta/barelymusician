@@ -36,7 +36,7 @@ Instrument::Definition GetTestDefinition() {
         std::fill_n(output, num_output_channels * num_output_frames,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** /*state*/, void* /*data*/) {},
+      [](void** /*state*/, const void* /*data*/, int /*size*/) {},
       [](void** state, double /*pitch*/) {
         *reinterpret_cast<double*>(*state) = 0.0;
       },

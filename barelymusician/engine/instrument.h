@@ -1,11 +1,11 @@
 #ifndef BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
+#include <cstddef>
 #include <unordered_set>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/data.h"
 #include "barelymusician/engine/event_queue.h"
 #include "barelymusician/engine/parameter.h"
 
@@ -75,9 +75,9 @@ class Instrument {
 
   /// Sets data at timestamp.
   ///
-  /// @param definition Data definition.
+  /// @param data Data.
   /// @param timestamp Timestamp in seconds.
-  void SetData(Data::Definition definition, double timestamp) noexcept;
+  void SetData(std::vector<std::byte> data, double timestamp) noexcept;
 
   /// Sets note off callback.
   ///
@@ -163,6 +163,9 @@ class Instrument {
 
   // State.
   void* state_ = nullptr;
+
+  // Data.
+  std::vector<std::byte> data_;
 
   // Event queue.
   EventQueue event_queue_;

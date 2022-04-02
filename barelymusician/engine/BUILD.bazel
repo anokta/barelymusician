@@ -13,15 +13,6 @@ cc_library(
 )
 
 cc_library(
-    name = "data",
-    srcs = ["data.cpp"],
-    hdrs = ["data.h"],
-    deps = [
-        "//barelymusician:include",
-    ],
-)
-
-cc_library(
     name = "engine",
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
@@ -40,9 +31,6 @@ cc_library(
 cc_library(
     name = "event",
     hdrs = ["event.h"],
-    deps = [
-        ":data",
-    ],
 )
 
 cc_library(
@@ -67,7 +55,6 @@ cc_library(
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],
     deps = [
-        ":data",
         ":event",
         ":event_queue",
         ":parameter",
@@ -125,15 +112,6 @@ cc_test(
     srcs = ["conductor_test.cpp"],
     deps = [
         ":conductor",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "data_test",
-    srcs = ["data_test.cpp"],
-    deps = [
-        ":data",
         "@googletest//:gtest_main",
     ],
 )

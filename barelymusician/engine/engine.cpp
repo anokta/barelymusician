@@ -22,30 +22,26 @@ constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 
 Engine::~Engine() { instrument_refs_.Update({}); }
 
-Id Engine::AddSequenceNote(Sequence* sequence, Note::Definition definition,
-                           double position) noexcept {
-  // TODO: Refactor this? Currently discards the return value of `AddNote`.
-  const Id note_id = ++id_counter_;
-  sequence->AddNote(note_id, definition, position);
-  return note_id;
+// NOLINTNEXTLINE(bugprone-exception-escape)
+bool Engine::CreateInstrument(Id instrument_id,
+                              Instrument::Definition definition,
+                              int frame_rate) noexcept {
+  if (instruments_
+          .emplace(instrument_id,
+                   std::make_unique<Instrument>(definition, frame_rate))
+          .second) {
+    UpdateInstrumentReferenceMap();
+    return true;
+  }
+  return false;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Id Engine::CreateInstrument(Instrument::Definition definition,
-                            int frame_rate) noexcept {
-  const Id instrument_id = ++id_counter_;
-  instruments_.emplace(instrument_id,
-                       std::make_unique<Instrument>(definition, frame_rate));
-  UpdateInstrumentReferenceMap();
-  return instrument_id;
-}
-
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Id Engine::CreateSequence() noexcept {
-  const Id sequence_id = ++id_counter_;
-  sequences_.emplace(sequence_id,
-                     std::pair{Sequence(conductor_, transport_), kInvalid});
-  return sequence_id;
+bool Engine::CreateSequence(Id sequence_id) noexcept {
+  return sequences_
+      .emplace(sequence_id,
+               std::pair{Sequence(conductor_, transport_), kInvalid})
+      .second;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

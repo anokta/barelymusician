@@ -30,29 +30,22 @@ class Engine {
   Engine(Engine&& other) noexcept = delete;
   Engine& operator=(Engine&& other) noexcept = delete;
 
-  /// Adds sequence note.
-  ///
-  /// @param sequence Pointer to sequence.
-  /// @param definition Note definition.
-  /// @return Note identifier if successful, `std::nullopt` otherwise.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  Id AddSequenceNote(Sequence* sequence, Note::Definition definition,
-                     double position) noexcept;
-
   /// Creates new instrument.
   ///
+  /// @param instrument_id Instrument identifier.
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hz.
-  /// @return Instrument identifier.
+  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Id CreateInstrument(Instrument::Definition definition,
-                      int frame_rate) noexcept;
+  bool CreateInstrument(Id instrument_id, Instrument::Definition definition,
+                        int frame_rate) noexcept;
 
   /// Creates new sequence.
   ///
-  /// @return Sequence identifier.
+  /// @param sequence_id Sequence identifier.
+  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Id CreateSequence() noexcept;
+  bool CreateSequence(Id sequence_id) noexcept;
 
   /// Destroys instrument.
   ///
@@ -152,9 +145,6 @@ class Engine {
 
   // Conductor.
   Conductor conductor_;
-
-  // Monotonic identifier counter.
-  Id id_counter_ = 0;
 
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;

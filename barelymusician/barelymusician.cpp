@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "barelymusician/engine/engine.h"
+#include "barelymusician/engine/id.h"
 #include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
 
@@ -30,6 +31,9 @@ struct BarelyMusician {
   // Musician engine.
   barelyapi::Engine engine;
 
+  // Monotonic identifier counter.
+  barelyapi::Id id_counter = 0;
+
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
   friend BARELY_EXPORT BarelyStatus
@@ -44,8 +48,12 @@ BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id = handle->engine.CreateInstrument(definition, frame_rate);
-  return BarelyStatus_kOk;
+  *out_instrument_id = ++handle->id_counter;
+  if (handle->engine.CreateInstrument(*out_instrument_id, definition,
+                                      frame_rate)) {
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kAlreadyExists;
 }
 
 BarelyStatus BarelyInstrument_CreateOfType(BarelyMusicianHandle handle,
@@ -55,19 +63,25 @@ BarelyStatus BarelyInstrument_CreateOfType(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
+  *out_instrument_id = ++handle->id_counter;
   switch (type) {
     case BarelyInstrumentType_kSynth:
-      *out_instrument_id = handle->engine.CreateInstrument(
-          barelyapi::SynthInstrument::GetDefinition(), frame_rate);
-      break;
+      if (handle->engine.CreateInstrument(
+              *out_instrument_id, barelyapi::SynthInstrument::GetDefinition(),
+              frame_rate)) {
+        return BarelyStatus_kOk;
+      }
+      return BarelyStatus_kAlreadyExists;
     case BarelyInstrumentType_kPercussion:
-      *out_instrument_id = handle->engine.CreateInstrument(
-          barelyapi::PercussionInstrument::GetDefinition(), frame_rate);
-      break;
+      if (handle->engine.CreateInstrument(
+              *out_instrument_id,
+              barelyapi::PercussionInstrument::GetDefinition(), frame_rate)) {
+        return BarelyStatus_kOk;
+      }
+      return BarelyStatus_kAlreadyExists;
     default:
       return BarelyStatus_kInvalidArgument;
   }
-  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
@@ -489,9 +503,11 @@ BarelyStatus BarelySequence_AddNote(BarelyMusicianHandle handle,
   if (!out_note_id) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    *out_note_id =
-        handle->engine.AddSequenceNote(sequence, definition, position);
-    return BarelyStatus_kOk;
+    *out_note_id = ++handle->id_counter;
+    if (sequence->AddNote(*out_note_id, definition, position)) {
+      return BarelyStatus_kOk;
+    }
+    return BarelyStatus_kAlreadyExists;
   }
   return BarelyStatus_kNotFound;
 }
@@ -499,10 +515,10 @@ BarelyStatus BarelySequence_AddNote(BarelyMusicianHandle handle,
 BarelyStatus BarelySequence_AddParameterAutomation(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyParameterAutomationDefinition definition, double position,
-    BarelyId* out_note_id) {
+    BarelyId* out_parameter_automation_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (!out_note_id) return BarelyStatus_kInvalidArgument;
+  if (!out_parameter_automation_id) return BarelyStatus_kInvalidArgument;
 
   definition, position;
   return BarelyStatus_kUnimplemented;
@@ -513,8 +529,11 @@ BarelyStatus BarelySequence_Create(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_sequence_id) return BarelyStatus_kInvalidArgument;
 
-  *out_sequence_id = handle->engine.CreateSequence();
-  return BarelyStatus_kOk;
+  *out_sequence_id = ++handle->id_counter;
+  if (handle->engine.CreateSequence(*out_sequence_id)) {
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kAlreadyExists;
 }
 
 BarelyStatus BarelySequence_Destroy(BarelyMusicianHandle handle,

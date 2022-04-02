@@ -7,61 +7,52 @@ namespace Barely {
   // Instrument.
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
-    /// Instrument id.
+    /// Instrument identifier.
     public Int64 Id { get; private set; } = Musician.InvalidId;
 
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
 
-    /// Note off event.
-    public delegate void NoteOffEvent(double pitch);
-    public event NoteOffEvent OnNoteOff;
-
-    /// Note on event.
-    public delegate void NoteOnEvent(double pitch, double intensity);
-    public event NoteOnEvent OnNoteOn;
-
-    // TODO(#85): Temp shortcut, note callbacks should be private.
-    // Note off callback.
+    /// Note off callback.
     public delegate void NoteOffCallback(double pitch, double timestamp);
-    public NoteOffCallback _noteOffCallback = null;
+    public event NoteOffCallback OnNoteOff;
+    private NoteOffCallback _noteOffCallback = null;
 
-    // Note on callback.
+    /// Note on callback.
     public delegate void NoteOnCallback(double pitch, double intensity, double timestamp);
-    public NoteOnCallback _noteOnCallback = null;
+    public event NoteOnCallback OnNoteOn;
+    private NoteOnCallback _noteOnCallback = null;
 
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
+      _noteOffCallback = delegate(double pitch, double timestamp) {
+        OnNoteOff?.Invoke(pitch, timestamp);
+      };
+      _noteOnCallback = delegate(double pitch, double intensity, double timestamp) {
+        OnNoteOn?.Invoke(pitch, intensity, timestamp);
+      };
     }
 
     protected virtual void OnDestroy() {
       Source = null;
+      _noteOffCallback = null;
+      _noteOnCallback = null;
     }
 
     protected virtual void OnEnable() {
-      if (Id == Musician.InvalidId) {
-        _noteOffCallback = delegate(double pitch, double timestamp) {
-          OnNoteOff?.Invoke(pitch);
-        };
-        _noteOnCallback = delegate(double pitch, double intensity, double timestamp) {
-          OnNoteOn?.Invoke(pitch, intensity);
-        };
-        Id = Musician.AddInstrument(this);
-      }
+      Id = Musician.AddInstrument(this, _noteOffCallback, _noteOnCallback);
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      if (Id != Musician.InvalidId) {
-        Musician.RemoveInstrument(this);
-        Id = Musician.InvalidId;
-      }
+      Musician.RemoveInstrument(this);
+      Id = Musician.InvalidId;
     }
 
     /// Resets all parameters to default value.
-    public bool ResetAllParameters() {
-      return Musician.ResetAllInstrumentParameters(this);
+    public void ResetAllParameters() {
+      Musician.ResetAllInstrumentParameters(this);
     }
 
     /// Resets parameter to default value.
@@ -85,22 +76,20 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    /// @return True if success, false otherwise.
-    public bool StartNote(double pitch, double intensity) {
-      return Musician.StartInstrumentNote(this, pitch, intensity);
+    public void StartNote(double pitch, double intensity) {
+      Musician.StartInstrumentNote(this, pitch, intensity);
     }
 
     /// Stops all notes.
-    public bool StopAllNotes() {
-      return Musician.StopAllInstrumentNotes(this);
+    public void StopAllNotes() {
+      Musician.StopAllInstrumentNotes(this);
     }
 
     /// Stops playing note.
     ///
     /// @param pitch Note pitch.
-    /// @return True if success, false otherwise.
-    public bool StopNote(double pitch) {
-      return Musician.StopInstrumentNote(this, pitch);
+    public void StopNote(double pitch) {
+      Musician.StopInstrumentNote(this, pitch);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

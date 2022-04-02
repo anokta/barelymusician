@@ -56,7 +56,7 @@ public class Metronome : MonoBehaviour {
     }
   }
 
-  private void OnBeat(double position) {
+  private void OnBeat(double position, double timestamp) {
     int bar = (int)(position) / numBeats;
     int beat = (int)(position) % numBeats;
     double pitch = (beat == 0.0) ? barPitch : beatPitch;

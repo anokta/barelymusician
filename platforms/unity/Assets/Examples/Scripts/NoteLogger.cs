@@ -18,11 +18,11 @@ public class NoteLogger : MonoBehaviour {
     instrument.OnNoteOn -= OnNoteOn;
   }
 
-  private void OnNoteOff(double pitch) {
+  private void OnNoteOff(double pitch, double timestamp) {
     Debug.Log(instrument.name + ": NoteOff(" + pitch + ")");
   }
 
-  private void OnNoteOn(double pitch, double intensity) {
+  private void OnNoteOn(double pitch, double intensity, double timestamp) {
     Debug.Log(instrument.name + ": NoteOn(" + pitch + ", " + intensity + ")");
   }
 }

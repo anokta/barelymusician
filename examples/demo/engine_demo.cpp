@@ -186,7 +186,7 @@ int main(int /*argc*/, char* argv[]) {
   // musician.SetScale(
   //     std::vector<double>(std::cbegin(barelyapi::kPitchMajorScale),
   //                         std::cend(barelyapi::kPitchMajorScale)));
-  musician.SetAdjustNoteDefinitionCallback([&](NoteDefinition* definition) {
+  musician.SetAdjustNoteCallback([&](NoteDefinition* definition) {
     definition->intensity *= random.DrawUniform(0.75, 1.0);
   });
 

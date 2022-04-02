@@ -286,18 +286,18 @@ typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 double timestamp,
                                                 void* user_data);
 
-/// Musician adjust note definition callback signature.
+/// Musician adjust note callback signature.
 ///
 /// @param definition Mutable note definition.
 /// @param user_data User data.
-typedef void (*BarelyMusician_AdjustNoteDefinitionCallback)(
+typedef void (*BarelyMusician_AdjustNoteCallback)(
     BarelyNoteDefinition* definition, void* user_data);
 
-/// Musician adjust parameter automation definition callback signature.
+/// Musician adjust parameter automation callback signature.
 ///
 /// @param definition Mutable parameter automation definition.
 /// @param user_data User data.
-typedef void (*BarelyMusician_AdjustParameterAutomationDefinitionCallback)(
+typedef void (*BarelyMusician_AdjustParameterAutomationCallback)(
     BarelyParameterAutomationDefinition* definition, void* user_data);
 
 /// Musician beat callback signature.
@@ -556,27 +556,25 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestampAtPosition(
 BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyMusicianHandle handle,
                                                     bool* out_is_playing);
 
-/// Sets musician adjust note definition callback.
+/// Sets musician adjust note callback.
 ///
 /// @param handle Musician handle.
-/// @param callback Adjust note definition callback.
+/// @param callback Adjust note callback.
 /// @param user_data User data.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustNoteDefinitionCallback(
-    BarelyMusicianHandle handle,
-    BarelyMusician_AdjustNoteDefinitionCallback callback, void* user_data);
-
-/// Sets musician adjust parameter automation definition callback.
-///
-/// @param handle Musician handle.
-/// @param callback Adjust parameter automation definition callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_SetAdjustParameterAutomationDefinitionCallback(
-    BarelyMusicianHandle handle,
-    BarelyMusician_AdjustParameterAutomationDefinitionCallback callback,
+BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustNoteCallback(
+    BarelyMusicianHandle handle, BarelyMusician_AdjustNoteCallback callback,
     void* user_data);
+
+/// Sets musician adjust parameter automation callback.
+///
+/// @param handle Musician handle.
+/// @param callback Adjust parameter automation callback.
+/// @param user_data User data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustParameterAutomationCallback(
+    BarelyMusicianHandle handle,
+    BarelyMusician_AdjustParameterAutomationCallback callback, void* user_data);
 
 /// Sets musician beat callback.
 ///
@@ -1902,16 +1900,10 @@ class Sequence {
 /// Musician.
 class Musician {
  public:
-  /// Adjust note definition callback signature.
+  /// Adjust note callback signature.
   ///
   /// @param definition Mutable note definition.
-  using AdjustNoteDefinitionCallback =
-      std::function<void(NoteDefinition* definition)>;
-
-  /// Adjust tempo callback signature.
-  ///
-  /// @param tempo Mutable tempo in bpm.
-  using AdjustTempoCallback = std::function<void(double* tempo)>;
+  using AdjustNoteCallback = std::function<void(NoteDefinition* definition)>;
 
   /// Beat callback signature.
   ///
@@ -1943,8 +1935,7 @@ class Musician {
   /// @param other Other musician.
   Musician(Musician&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)) {
-    SetAdjustNoteDefinitionCallback(
-        std::exchange(other.adjust_note_definition_callback_, nullptr));
+    SetAdjustNoteCallback(std::exchange(other.adjust_note_callback_, nullptr));
     SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
   }
 
@@ -1958,8 +1949,8 @@ class Musician {
         assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
-      SetAdjustNoteDefinitionCallback(
-          std::exchange(other.adjust_note_definition_callback_, nullptr));
+      SetAdjustNoteCallback(
+          std::exchange(other.adjust_note_callback_, nullptr));
       SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
     }
     return *this;
@@ -2081,24 +2072,22 @@ class Musician {
     return is_playing;
   }
 
-  /// Sets adjust note definition callback.
+  /// Sets adjust note callback.
   ///
-  /// @param callback Adjust note definition callback.
+  /// @param callback Adjust note callback.
   /// @return Status.
-  Status SetAdjustNoteDefinitionCallback(
-      AdjustNoteDefinitionCallback callback) {
+  Status SetAdjustNoteCallback(AdjustNoteCallback callback) {
     if (callback) {
-      adjust_note_definition_callback_ = std::move(callback);
-      return BarelyMusician_SetAdjustNoteDefinitionCallback(
+      adjust_note_callback_ = std::move(callback);
+      return BarelyMusician_SetAdjustNoteCallback(
           handle_,
           [](BarelyNoteDefinition* definition, void* user_data) {
-            (*static_cast<AdjustNoteDefinitionCallback*>(user_data))(
+            (*static_cast<AdjustNoteCallback*>(user_data))(
                 static_cast<NoteDefinition*>(definition));
           },
-          static_cast<void*>(&adjust_note_definition_callback_));
+          static_cast<void*>(&adjust_note_callback_));
     }
-    return BarelyMusician_SetAdjustNoteDefinitionCallback(handle_, nullptr,
-                                                          nullptr);
+    return BarelyMusician_SetAdjustNoteCallback(handle_, nullptr, nullptr);
   }
 
   /// Sets beat callback.
@@ -2180,8 +2169,8 @@ class Musician {
   // Internal handle.
   BarelyMusicianHandle handle_ = nullptr;
 
-  // Adjust note definition callback.
-  AdjustNoteDefinitionCallback adjust_note_definition_callback_;
+  // Adjust note callback.
+  AdjustNoteCallback adjust_note_callback_;
 
   // Beat callback.
   BeatCallback beat_callback_;

@@ -118,7 +118,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   bool use_conductor = false;
-  musician.SetAdjustNoteDefinitionCallback([&](NoteDefinition* definition) {
+  musician.SetAdjustNoteCallback([&](NoteDefinition* definition) {
     if (use_conductor) {
       definition->duration = 0.25 *
                              static_cast<double>(random.DrawUniform(1, 4)) *

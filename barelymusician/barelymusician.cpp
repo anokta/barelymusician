@@ -373,25 +373,25 @@ BarelyStatus BarelyMusician_IsPlaying(BarelyMusicianHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_SetAdjustNoteDefinitionCallback(
-    BarelyMusicianHandle handle,
-    BarelyMusician_AdjustNoteDefinitionCallback callback, void* user_data) {
+BarelyStatus BarelyMusician_SetAdjustNoteCallback(
+    BarelyMusicianHandle handle, BarelyMusician_AdjustNoteCallback callback,
+    void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
   if (callback) {
-    handle->engine.GetConductor().SetAdjustNoteDefinitionCallback(
+    handle->engine.GetConductor().SetAdjustNoteCallback(
         [callback, user_data](barelyapi::Note::Definition* definition) {
           callback(definition, user_data);
         });
   } else {
-    handle->engine.GetConductor().SetAdjustNoteDefinitionCallback(nullptr);
+    handle->engine.GetConductor().SetAdjustNoteCallback(nullptr);
   }
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_SetAdjustParameterAutomationDefinitionCallback(
+BarelyStatus BarelyMusician_SetAdjustParameterAutomationCallback(
     BarelyMusicianHandle handle,
-    BarelyMusician_AdjustParameterAutomationDefinitionCallback callback,
+    BarelyMusician_AdjustParameterAutomationCallback callback,
     void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 

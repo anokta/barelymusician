@@ -43,9 +43,8 @@ const std::vector<double>& Conductor::GetScale() const noexcept {
   return scale_pitches_;
 }
 
-void Conductor::SetAdjustNoteDefinitionCallback(
-    AdjustNoteDefinitionCallback callback) noexcept {
-  adjust_note_definition_callback_ = std::move(callback);
+void Conductor::SetAdjustNoteCallback(AdjustNoteCallback callback) noexcept {
+  adjust_note_callback_ = std::move(callback);
 }
 
 void Conductor::SetRootNote(double root_pitch) noexcept {
@@ -58,8 +57,8 @@ void Conductor::SetScale(std::vector<double> scale_pitches) noexcept {
 
 Note Conductor::TransformNote(Note::Definition definition,
                               bool skip_adjustment) const noexcept {
-  if (adjust_note_definition_callback_ && !skip_adjustment) {
-    adjust_note_definition_callback_(&definition);
+  if (adjust_note_callback_ && !skip_adjustment) {
+    adjust_note_callback_(&definition);
   }
   return Note{definition.duration, GetNote(definition.pitch),
               definition.intensity};

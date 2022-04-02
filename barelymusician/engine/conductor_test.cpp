@@ -60,8 +60,8 @@ TEST(ConductorTest, GetNote) {
   }
 }
 
-// Tests that conductor transforms note definition as expected.
-TEST(ConductorTest, TransformNoteDefinition) {
+// Tests that conductor transforms note as expected.
+TEST(ConductorTest, TransformNote) {
   const Note kNote = {4.0, -0.5, 1.0};
   const Note::Definition kDefinition = Note::Definition(
       kNote.duration, Note::PitchDefinition::AbsolutePitch(kNote.pitch),
@@ -71,7 +71,7 @@ TEST(ConductorTest, TransformNoteDefinition) {
   EXPECT_EQ(conductor.TransformNote(kDefinition, false), kNote);
   EXPECT_EQ(conductor.TransformNote(kDefinition, true), kNote);
 
-  conductor.SetAdjustNoteDefinitionCallback([](Note::Definition* definition) {
+  conductor.SetAdjustNoteCallback([](Note::Definition* definition) {
     definition->duration += 0.5;
     definition->pitch.absolute_pitch *= 2.0;
     definition->intensity = 0.1;

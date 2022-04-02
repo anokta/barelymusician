@@ -11,9 +11,8 @@ namespace barelyapi {
 /// Conductor that controls musical adjustments.
 class Conductor {
  public:
-  /// Adjust note definition callback alias.
-  using AdjustNoteDefinitionCallback =
-      barely::Musician::AdjustNoteDefinitionCallback;
+  /// Adjust note callback alias.
+  using AdjustNoteCallback = barely::Musician::AdjustNoteCallback;
 
   // TODO(#98): Add `AdjustParameterAutomationDefinitionCallback` functionality.
 
@@ -36,8 +35,7 @@ class Conductor {
   /// Sets adjust note definition callback.
   ///
   /// @param callback Adjust note definition callback.
-  void SetAdjustNoteDefinitionCallback(
-      AdjustNoteDefinitionCallback callback) noexcept;
+  void SetAdjustNoteCallback(AdjustNoteCallback callback) noexcept;
 
   /// Sets root note.
   ///
@@ -58,8 +56,8 @@ class Conductor {
                                    bool skip_adjustment) const noexcept;
 
  private:
-  // Adjust note definition callback.
-  AdjustNoteDefinitionCallback adjust_note_definition_callback_;
+  // Adjust note callback.
+  AdjustNoteCallback adjust_note_callback_;
 
   // Root note pitch.
   double root_pitch_ = 0.0;

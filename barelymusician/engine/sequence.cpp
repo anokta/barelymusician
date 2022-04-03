@@ -177,7 +177,7 @@ void Sequence::SetLoopBeginOffset(double loop_begin_offset) noexcept {
 
 void Sequence::SetLoopLength(double loop_length) noexcept {
   assert(loop_length >= 0.0);
-  loop_length_ = loop_length_;
+  loop_length_ = loop_length;
 }
 
 void Sequence::SetLooping(bool is_looping) noexcept {
@@ -226,7 +226,7 @@ void Sequence::Stop() noexcept {
 void Sequence::ProcessInternal(double begin_position, double end_position,
                                double position_offset,
                                double process_end_position) noexcept {
-  assert(begin_position >= 0.0 && begin_position <= end_position);
+  assert(begin_position <= end_position);
   assert(process_end_position >= 0.0);
   const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalid});
   const auto end = notes_.lower_bound(std::pair{end_position, kInvalid});

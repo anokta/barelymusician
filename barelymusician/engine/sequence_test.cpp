@@ -189,11 +189,11 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   // Create notes.
   for (int i = 0; i < 4; ++i) {
     EXPECT_TRUE(sequence.CreateNote(
-        static_cast<Id>(i),
+        static_cast<Id>(i + 1),
         Note::Definition(1.0, Note::PitchDefinition::AbsolutePitch(
                                   static_cast<double>(i + 1))),
         static_cast<double>(i)));
-    EXPECT_THAT(sequence.GetNotePosition(static_cast<Id>(i)),
+    EXPECT_THAT(sequence.GetNotePosition(static_cast<Id>(i + 1)),
                 AllOf(NotNull(), Pointee(static_cast<double>(i))));
   }
   EXPECT_FALSE(sequence.IsEmpty());
@@ -244,7 +244,7 @@ TEST(SequenceTest, ProcessMultipleNotes) {
 
   // Destroy all notes.
   for (int i = 0; i < 4; ++i) {
-    EXPECT_TRUE(sequence.DestroyNote(static_cast<Id>(i)));
+    EXPECT_TRUE(sequence.DestroyNote(static_cast<Id>(i + 1)));
   }
   EXPECT_TRUE(sequence.IsEmpty());
 

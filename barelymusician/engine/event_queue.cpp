@@ -1,10 +1,12 @@
 #include "barelymusician/engine/event_queue.h"
 
+#include <cassert>
 #include <utility>
 
 namespace barelyapi {
 
 bool EventQueue::Add(double timestamp, Event event) noexcept {
+  assert(timestamp >= 0.0);
   const int index = write_index_;
   const int next_index = (index + 1) % kMaxNumEvents;
   if (next_index == read_index_) {
@@ -16,6 +18,7 @@ bool EventQueue::Add(double timestamp, Event event) noexcept {
 }
 
 std::pair<double, Event>* EventQueue::GetNext(double end_timestamp) noexcept {
+  assert(end_timestamp >= 0.0);
   const int index = read_index_;
   if (index == write_index_ || events_[index].first >= end_timestamp) {
     return nullptr;

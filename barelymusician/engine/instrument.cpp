@@ -40,7 +40,8 @@ Instrument::~Instrument() noexcept {
 }
 
 const Parameter* Instrument::GetParameter(int index) const noexcept {
-  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+  assert(index >= 0);
+  if (index < static_cast<int>(parameters_.size())) {
     return &parameters_[index];
   }
   return nullptr;
@@ -107,6 +108,7 @@ void Instrument::Process(double* output, int num_output_channels,
 }
 
 void Instrument::ResetAllParameters(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   for (int index = 0; index < static_cast<int>(parameters_.size()); ++index) {
     if (parameters_[index].ResetValue()) {
       event_queue_.Add(
@@ -117,7 +119,9 @@ void Instrument::ResetAllParameters(double timestamp) noexcept {
 }
 
 bool Instrument::ResetParameter(int index, double timestamp) noexcept {
-  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+  assert(index >= 0);
+  assert(timestamp >= 0.0);
+  if (index < static_cast<int>(parameters_.size())) {
     if (parameters_[index].ResetValue()) {
       event_queue_.Add(
           timestamp,
@@ -130,6 +134,7 @@ bool Instrument::ResetParameter(int index, double timestamp) noexcept {
 
 void Instrument::SetData(std::vector<std::byte> data,
                          double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   event_queue_.Add(timestamp, SetDataEvent{std::move(data)});
 }
 
@@ -143,7 +148,9 @@ void Instrument::SetNoteOnCallback(NoteOnCallback callback) noexcept {
 
 bool Instrument::SetParameter(int index, double value, double slope,
                               double timestamp) noexcept {
-  if (index >= 0 && index < static_cast<int>(parameters_.size())) {
+  assert(index >= 0);
+  assert(timestamp >= 0.0);
+  if (index < static_cast<int>(parameters_.size())) {
     if (parameters_[index].SetValue(value)) {
       event_queue_.Add(
           timestamp,
@@ -157,6 +164,7 @@ bool Instrument::SetParameter(int index, double value, double slope,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::StartNote(double pitch, double intensity,
                            double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   if (pitches_.insert(pitch).second) {
     if (note_on_callback_) {
       note_on_callback_(pitch, intensity, timestamp);
@@ -166,6 +174,7 @@ void Instrument::StartNote(double pitch, double intensity,
 }
 
 void Instrument::StopAllNotes(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   for (const double pitch : std::exchange(pitches_, {})) {
     if (note_off_callback_) {
       note_off_callback_(pitch, timestamp);
@@ -175,6 +184,7 @@ void Instrument::StopAllNotes(double timestamp) noexcept {
 }
 
 void Instrument::StopNote(double pitch, double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   if (pitches_.erase(pitch) > 0) {
     if (note_off_callback_) {
       note_off_callback_(pitch, timestamp);

@@ -1183,7 +1183,7 @@ struct NoteDefinition : public BarelyNoteDefinition {
   /// @param intensity Note intensity.
   NoteDefinition(double duration, NotePitchDefinition pitch,
                  double intensity = 1.0)
-      : BarelyNoteDefinition{duration, pitch, intensity} {}
+      : NoteDefinition(BarelyNoteDefinition{duration, pitch, intensity}) {}
 
   /// Constructs new `NotePitchDefinition` with default values.
   NoteDefinition()
@@ -1208,7 +1208,8 @@ struct ParameterDefinition : public BarelyParameterDefinition {
       double default_value,
       double min_value = std::numeric_limits<double>::lowest(),
       double max_value = std::numeric_limits<double>::max())
-      : BarelyParameterDefinition{default_value, min_value, max_value} {}
+      : ParameterDefinition(
+            BarelyParameterDefinition{default_value, min_value, max_value}) {}
 
   /// Constructs new `ParameterDefinition` for a boolean value.
   ///
@@ -1233,7 +1234,9 @@ struct ParameterDefinition : public BarelyParameterDefinition {
   /// @param definition Internal parameter definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
   ParameterDefinition(BarelyParameterDefinition definition)
-      : BarelyParameterDefinition{definition} {}
+      : BarelyParameterDefinition{definition} {
+    assert(default_value >= min_value && default_value <= max_value);
+  }
 };
 
 /// Instrument definition.
@@ -1276,23 +1279,21 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       SetNoteOnCallback set_note_on_callback,
       SetParameterCallback set_parameter_callback = nullptr,
       const std::vector<ParameterDefinition>& parameter_definitions = {})
-      : BarelyInstrumentDefinition{
-            create_callback,
-            destroy_callback,
-            process_callback,
-            set_data_callback,
-            set_note_off_callback,
-            set_note_on_callback,
-            set_parameter_callback,
-            parameter_definitions.data(),
-            static_cast<int>(parameter_definitions.size())} {}
+      : InstrumentDefinition(
+            {create_callback, destroy_callback, process_callback,
+             set_data_callback, set_note_off_callback, set_note_on_callback,
+             set_parameter_callback, parameter_definitions.data(),
+             static_cast<int>(parameter_definitions.size())}) {}
 
   /// Constructs new `InstrumentDefinition` from internal type.
   ///
   /// @param definition Internal instrument definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
   InstrumentDefinition(BarelyInstrumentDefinition definition)
-      : BarelyInstrumentDefinition{definition} {}
+      : BarelyInstrumentDefinition{definition} {
+    assert(parameter_definitions || num_parameter_definitions == 0);
+    assert(num_parameter_definitions >= 0);
+  }
 };
 
 /// Oscillator type.

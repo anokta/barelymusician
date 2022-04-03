@@ -27,7 +27,7 @@ class Transport {
 
   /// Returns tempo.
   ///
-  /// @return Tempo in beats per second.
+  /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept;
 
   /// Returns current timestamp.
@@ -57,7 +57,7 @@ class Transport {
 
   /// Sets tempo.
   ///
-  /// @param tempo Tempo in beats per second.
+  /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept;
 
   /// Sets timestamp.
@@ -90,8 +90,8 @@ class Transport {
   // Position in beats.
   double position_ = 0.0;
 
-  // Tempo in beats per second.
-  double tempo_ = 1.0;
+  // Tempo in beats per minute.
+  double tempo_ = 120.0;
 
   // Timestamp in seconds.
   double timestamp_ = 0.0;

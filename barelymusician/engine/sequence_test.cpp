@@ -30,6 +30,7 @@ TEST(SequenceTest, ProcessSingleNote) {
 
   Conductor conductor;
   Transport transport;
+  transport.SetTempo(60.0);
 
   Sequence sequence(conductor, transport);
   EXPECT_THAT(sequence.GetInstrument(), IsNull());
@@ -163,6 +164,7 @@ TEST(SequenceTest, ProcessSingleNote) {
 TEST(SequenceTest, ProcessMultipleNotes) {
   Conductor conductor;
   Transport transport;
+  transport.SetTempo(60.0);
 
   Sequence sequence(conductor, transport);
   EXPECT_THAT(sequence.GetInstrument(), IsNull());

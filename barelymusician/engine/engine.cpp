@@ -13,13 +13,6 @@
 
 namespace barelyapi {
 
-namespace {
-
-// Converts seconds to minutes.
-constexpr double kMinutesFromSeconds = 1.0 / 60.0;
-
-}  // namespace
-
 Engine::~Engine() { instrument_refs_.Update({}); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -72,8 +65,6 @@ Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
   return nullptr;
 }
 
-double Engine::GetPlaybackTempo() const noexcept { return tempo_; }
-
 Sequence* Engine::GetSequence(Id sequence_id) noexcept {
   if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
     return &sequence->first;
@@ -87,10 +78,6 @@ Id Engine::GetSequenceInstrumentId(Id sequence_id) const noexcept {
   }
   // TODO: This should ideally return `kNotFound` at call site.
   return kInvalid;
-}
-
-double Engine::GetTimestamp() const noexcept {
-  return transport_.GetTimestamp();
 }
 
 Transport& Engine::GetTransport() noexcept { return transport_; }
@@ -118,13 +105,6 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
   return false;
 }
 
-void Engine::SetPlaybackTempo(double tempo) noexcept {
-  if (tempo_ != tempo) {
-    tempo_ = tempo;
-    transport_.SetTempo(tempo_ * kMinutesFromSeconds);
-  }
-}
-
 bool Engine::SetSequenceInstrumentId(Id sequence_id,
                                      Id instrument_id) noexcept {
   if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
@@ -140,9 +120,9 @@ bool Engine::SetSequenceInstrumentId(Id sequence_id,
   return false;
 }
 
-void Engine::StartPlayback() noexcept { transport_.Start(); }
+void Engine::Start() noexcept { transport_.Start(); }
 
-void Engine::StopPlayback() noexcept {
+void Engine::Stop() noexcept {
   for (auto& [sequence_id, sequence] : sequences_) {
     sequence.first.Stop();
   }

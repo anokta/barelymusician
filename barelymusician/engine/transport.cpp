@@ -1,9 +1,20 @@
 #include "barelymusician/engine/transport.h"
 
+#include <cassert>
 #include <cmath>
 #include <utility>
 
 namespace barelyapi {
+
+namespace {
+
+// Converts seconds to minutes.
+constexpr double kMinutesFromSeconds = 1.0 / 60.0;
+
+// Converts minutes to seconds.
+constexpr double kSecondsFromMinutes = 60.0;
+
+}  // namespace
 
 double Transport::GetPosition() const noexcept { return position_; }
 
@@ -12,7 +23,8 @@ double Transport::GetTempo() const noexcept { return tempo_; }
 double Transport::GetTimestamp() const noexcept { return timestamp_; }
 
 double Transport::GetTimestamp(double position) const noexcept {
-  return timestamp_ + (position - position_) / tempo_;
+  assert(tempo_ > 0.0);
+  return timestamp_ + (position - position_) * kSecondsFromMinutes / tempo_;
 }
 
 bool Transport::IsPlaying() const noexcept { return is_playing_; }
@@ -22,6 +34,7 @@ void Transport::SetBeatCallback(BeatCallback callback) noexcept {
 }
 
 void Transport::SetPosition(double position) noexcept {
+  assert(position >= 0.0);
   if (position_ != position) {
     position_ = position;
     next_beat_position_ = std::ceil(position_);
@@ -30,7 +43,7 @@ void Transport::SetPosition(double position) noexcept {
 }
 
 void Transport::SetTempo(double tempo) noexcept {
-  tempo = tempo > 0.0 ? tempo : 0.0;
+  assert(tempo >= 0.0);
   if (tempo_ != tempo) {
     tempo_ = tempo;
     next_beat_timestamp_ = GetTimestamp(next_beat_position_);
@@ -38,6 +51,7 @@ void Transport::SetTempo(double tempo) noexcept {
 }
 
 void Transport::SetTimestamp(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   if (timestamp_ != timestamp) {
     timestamp_ = timestamp;
     next_beat_timestamp_ = GetTimestamp(next_beat_position_);
@@ -53,6 +67,7 @@ void Transport::Stop() noexcept { is_playing_ = false; }
 
 void Transport::Update(double timestamp,
                        const UpdateCallback& callback) noexcept {
+  assert(timestamp >= 0.0);
   while (timestamp_ < timestamp) {
     if (!is_playing_ || tempo_ == 0.0) {
       timestamp_ = timestamp;
@@ -77,7 +92,7 @@ void Transport::Update(double timestamp,
       position_ = next_beat_position_;
       timestamp_ = next_beat_timestamp_;
     } else {
-      position_ += tempo_ * (timestamp - timestamp_);
+      position_ += tempo_ * (timestamp - timestamp_) * kMinutesFromSeconds;
       timestamp_ = timestamp;
     }
     if (callback) {

@@ -71,11 +71,6 @@ class Engine {
   /// @return Pointer to instrument.
   Instrument* GetInstrument(Id instrument_id) noexcept;
 
-  /// Returns playback tempo.
-  ///
-  /// @return Tempo in bpm.
-  double GetPlaybackTempo() const noexcept;
-
   /// Returns sequence.
   ///
   /// @param sequence_id Sequence identifier.
@@ -88,11 +83,6 @@ class Engine {
   /// @return Pointer to sequence.
   // TODO: Refactor this?
   Id GetSequenceInstrumentId(Id sequence_id) const noexcept;
-
-  /// Returns timestamp.
-  ///
-  /// @return Timestamp in seconds.
-  double GetTimestamp() const noexcept;
 
   /// Returns transport.
   ///
@@ -111,11 +101,6 @@ class Engine {
                          int num_output_channels, int num_output_frames,
                          double timestamp) noexcept;
 
-  /// Sets playback tempo.
-  ///
-  /// @param tempo Tempo in bpm.
-  void SetPlaybackTempo(double tempo) noexcept;
-
   /// Returns sequence.
   ///
   /// @param sequence_id Sequence identifier.
@@ -125,10 +110,10 @@ class Engine {
   bool SetSequenceInstrumentId(Id sequence_id, Id instrument_id) noexcept;
 
   /// Starts playback.
-  void StartPlayback() noexcept;
+  void Start() noexcept;
 
   /// Stops playback.
-  void StopPlayback() noexcept;
+  void Stop() noexcept;
 
   /// Updates internal state.
   ///
@@ -155,9 +140,6 @@ class Engine {
   // Map of sequences by identifiers.
   // TODO: is there a better way than pairing this id?
   std::unordered_map<Id, std::pair<Sequence, Id>> sequences_;
-
-  // Tempo in bpm.
-  double tempo_;
 
   // Transport.
   Transport transport_;

@@ -14,10 +14,10 @@ using ::testing::ElementsAre;
 
 // Tests that transport sets its tempo as expected.
 TEST(TransportTest, SetTempo) {
-  const double kTempo = 1.5;
+  const double kTempo = 150.0;
 
   Transport transport;
-  EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
+  EXPECT_DOUBLE_EQ(transport.GetTempo(), 120.0);
 
   transport.SetTempo(kTempo);
   EXPECT_DOUBLE_EQ(transport.GetTempo(), kTempo);
@@ -39,9 +39,10 @@ TEST(TransportTest, SetPosition) {
 // Tests that updating transport triggers beat callback as expected.
 TEST(TransportTest, SetBeatCallback) {
   Transport transport;
+  transport.SetTempo(60.0);
 
   EXPECT_FALSE(transport.IsPlaying());
-  EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
+  EXPECT_DOUBLE_EQ(transport.GetTempo(), 60.0);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 0.0);
 
@@ -51,7 +52,7 @@ TEST(TransportTest, SetBeatCallback) {
                                  std::vector<double>{position, timestamp});
     if (position == 2.0) {
       // Halve the playback tempo.
-      transport.SetTempo(0.5);
+      transport.SetTempo(30.0);
     } else if (position == 4.0) {
       // Jump to the fifth beat.
       transport.SetPosition(5.0);
@@ -68,7 +69,7 @@ TEST(TransportTest, SetBeatCallback) {
   EXPECT_TRUE(callback_values.empty());
 
   EXPECT_FALSE(transport.IsPlaying());
-  EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
+  EXPECT_DOUBLE_EQ(transport.GetTempo(), 60.0);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 10.0);
 
@@ -91,7 +92,7 @@ TEST(TransportTest, SetBeatCallback) {
           std::tuple("Update", std::vector<double>{6.0, 18.0, 7.0, 20.0})));
 
   EXPECT_TRUE(transport.IsPlaying());
-  EXPECT_DOUBLE_EQ(transport.GetTempo(), 0.5);
+  EXPECT_DOUBLE_EQ(transport.GetTempo(), 30.0);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 7.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 20.0);
 }
@@ -99,6 +100,8 @@ TEST(TransportTest, SetBeatCallback) {
 // Tests that transport updates its state as expected.
 TEST(TransportTest, Update) {
   Transport transport;
+  transport.SetTempo(60.0);
+
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 0.0);
 
@@ -119,7 +122,7 @@ TEST(TransportTest, Update) {
 
   transport.Start();
   EXPECT_TRUE(transport.IsPlaying());
-  EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.0);
+  EXPECT_DOUBLE_EQ(transport.GetTempo(), 60.0);
 
   transport.Update(2.0, update_callback);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 1.0);
@@ -141,8 +144,8 @@ TEST(TransportTest, Update) {
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(0.0), 1.0);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(2.0), 3.0);
 
-  transport.SetTempo(1.5);
-  EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.5);
+  transport.SetTempo(90.0);
+  EXPECT_DOUBLE_EQ(transport.GetTempo(), 90.0);
 
   transport.Update(3.0, update_callback);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 2.5);
@@ -156,7 +159,7 @@ TEST(TransportTest, Update) {
 
   transport.Stop();
   EXPECT_FALSE(transport.IsPlaying());
-  EXPECT_DOUBLE_EQ(transport.GetTempo(), 1.5);
+  EXPECT_DOUBLE_EQ(transport.GetTempo(), 90.0);
   EXPECT_DOUBLE_EQ(transport.GetPosition(), 2.5);
   EXPECT_DOUBLE_EQ(transport.GetTimestamp(), 3.0);
   EXPECT_DOUBLE_EQ(update_begin_position, 2.0);

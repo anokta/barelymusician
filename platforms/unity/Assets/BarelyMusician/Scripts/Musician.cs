@@ -282,7 +282,7 @@ namespace Barely {
                                    sequence.Instrument ? sequence.Instrument.Id : InvalidId);
 
       if (changed) {
-        BarelySequence_RemoveAllNotes(Handle, sequence.Id);
+        // BarelySequence_RemoveAllNotes(Handle, sequence.Id);
         NoteDefinition definition = new NoteDefinition {};
         definition.pitch.type = NotePitchType.AbsolutePitch;
         foreach (var sequenceNote in sequence.Notes) {
@@ -290,7 +290,7 @@ namespace Barely {
           definition.pitch.value.absolutePitch =
               (double)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0;
           definition.intensity = sequenceNote.note.Intensity;
-          BarelySequence_AddNote(Handle, sequence.Id, definition, sequenceNote.position, _int64Ptr);
+          BarelyNote_Create(Handle, sequence.Id, definition, sequenceNote.position, _int64Ptr);
         }
       }
     }
@@ -539,23 +539,19 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyMusician_Update")]
     private static extern Status BarelyMusician_Update(IntPtr handle, double timestamp);
 
-    [DllImport(pluginName, EntryPoint = "BarelySequence_AddNote")]
-    private static extern Status BarelySequence_AddNote(IntPtr handle, Int64 sequenceId,
-                                                        NoteDefinition definition, double position,
-                                                        IntPtr outNoteId);
+    [DllImport(pluginName, EntryPoint = "BarelyNote_Create")]
+    private static extern Status BarelyNote_Create(IntPtr handle, Int64 sequenceId,
+                                                   NoteDefinition definition, double position,
+                                                   IntPtr outNoteId);
+
+    [DllImport(pluginName, EntryPoint = "BarelyNote_Destroy")]
+    private static extern Status BarelyNote_Destroy(IntPtr handle, Int64 sequenceId, Int64 noteId);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_Create")]
     private static extern Status BarelySequence_Create(IntPtr handle, IntPtr outSequenceId);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_Destroy")]
     private static extern Status BarelySequence_Destroy(IntPtr handle, Int64 sequenceId);
-
-    [DllImport(pluginName, EntryPoint = "BarelySequence_RemoveAllNotes")]
-    private static extern Status BarelySequence_RemoveAllNotes(IntPtr handle, Int64 sequenceId);
-
-    [DllImport(pluginName, EntryPoint = "BarelySequence_RemoveNote")]
-    private static extern Status BarelySequence_RemoveNote(IntPtr handle, Int64 sequenceId,
-                                                           Int64 noteId);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_SetBeginOffset")]
     private static extern Status BarelySequence_SetBeginOffset(IntPtr handle, Int64 sequenceId,

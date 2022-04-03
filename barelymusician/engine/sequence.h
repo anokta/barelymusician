@@ -32,13 +32,13 @@ class Sequence {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool CreateNote(Id id, Note::Definition definition, double position) noexcept;
 
+  // TODO(#98): Add `ParameterAutomation` functionality.
+
   /// Destroys note.
   ///
   /// @param id Note identifier.
   /// @return True if success.
   bool DestroyNote(Id id) noexcept;
-
-  // TODO(#98): Add `AddParameterAutomation` functionality.
 
   /// Returns begin offset.
   ///

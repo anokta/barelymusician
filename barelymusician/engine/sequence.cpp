@@ -1,6 +1,7 @@
 #include "barelymusician/engine/sequence.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <map>
 #include <utility>
@@ -21,6 +22,8 @@ Sequence::Sequence(const Conductor& conductor,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Sequence::CreateNote(Id id, Note::Definition definition,
                           double position) noexcept {
+  assert(id > kInvalid);
+  assert(position >= 0.0);
   if (positions_.emplace(id, position).second) {
     notes_.emplace(std::pair{position, id}, definition);
     return true;
@@ -72,6 +75,7 @@ bool Sequence::IsSkippingAdjustments() const noexcept {
 }
 
 void Sequence::Process(double begin_position, double end_position) noexcept {
+  assert(begin_position >= 0.0 && begin_position <= end_position);
   if (!instrument_) {
     return;
   }
@@ -146,10 +150,12 @@ void Sequence::SetBeginOffset(double begin_offset) noexcept {
 }
 
 void Sequence::SetBeginPosition(double begin_position) noexcept {
+  assert(begin_position >= 0.0);
   begin_position_ = begin_position;
 }
 
 void Sequence::SetEndPosition(double end_position) noexcept {
+  assert(end_position >= 0.0);
   end_position_ = end_position;
 }
 
@@ -170,7 +176,8 @@ void Sequence::SetLoopBeginOffset(double loop_begin_offset) noexcept {
 }
 
 void Sequence::SetLoopLength(double loop_length) noexcept {
-  loop_length_ = std::max(loop_length, 0.0);
+  assert(loop_length >= 0.0);
+  loop_length_ = loop_length_;
 }
 
 void Sequence::SetLooping(bool is_looping) noexcept {
@@ -186,6 +193,7 @@ bool Sequence::SetNoteDefinition(Id id, Note::Definition definition) noexcept {
 }
 
 bool Sequence::SetNotePosition(Id id, double position) noexcept {
+  assert(position >= 0.0);
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     if (position_it->second != position) {
@@ -218,6 +226,8 @@ void Sequence::Stop() noexcept {
 void Sequence::ProcessInternal(double begin_position, double end_position,
                                double position_offset,
                                double process_end_position) noexcept {
+  assert(begin_position >= 0.0 && begin_position <= end_position);
+  assert(process_end_position >= 0.0);
   const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalid});
   const auto end = notes_.lower_bound(std::pair{end_position, kInvalid});
   for (auto it = begin; it != end; ++it) {

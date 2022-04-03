@@ -468,7 +468,7 @@ BarelyStatus BarelyMusician_SetScale(BarelyMusicianHandle handle,
   if (num_scale_pitches < 0) return BarelyStatus_kInvalidArgument;
 
   handle->engine.GetConductor().SetScale(
-      std::vector<double>(scale_pitches, scale_pitches + num_scale_pitches));
+      {scale_pitches, scale_pitches + num_scale_pitches});
   return BarelyStatus_kOk;
 }
 

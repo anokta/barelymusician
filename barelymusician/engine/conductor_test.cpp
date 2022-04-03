@@ -44,7 +44,9 @@ TEST(ConductorTest, GetNote) {
 
   // Set scale.
   conductor.SetScale(kScale);
-  EXPECT_EQ(conductor.GetScale(), kScale);
+  EXPECT_EQ(std::vector<double>(conductor.GetScale().begin(),
+                                conductor.GetScale().end()),
+            kScale);
 
   EXPECT_DOUBLE_EQ(
       conductor.GetNote(Note::PitchDefinition::AbsolutePitch(kPitch)), kPitch);

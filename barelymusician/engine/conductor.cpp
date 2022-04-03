@@ -2,6 +2,7 @@
 #include "barelymusician/engine/conductor.h"
 
 #include <cmath>
+#include <span>
 #include <utility>
 
 #include "barelymusician/engine/note.h"
@@ -11,7 +12,7 @@ namespace barelyapi {
 namespace {
 
 // Returns note pitch for a given `scale` and `index`.
-double GetPitch(const std::vector<double>& scale, int index) noexcept {
+double GetPitch(std::span<const double> scale, int index) noexcept {
   if (!scale.empty()) {
     const double scale_length = static_cast<double>(scale.size());
     const double octave_offset =
@@ -39,7 +40,7 @@ double Conductor::GetNote(Note::PitchDefinition definition) const noexcept {
 
 double Conductor::GetRootNote() const noexcept { return root_pitch_; }
 
-const std::vector<double>& Conductor::GetScale() const noexcept {
+std::span<const double> Conductor::GetScale() const noexcept {
   return scale_pitches_;
 }
 
@@ -51,8 +52,8 @@ void Conductor::SetRootNote(double root_pitch) noexcept {
   root_pitch_ = root_pitch;
 }
 
-void Conductor::SetScale(std::vector<double> scale_pitches) noexcept {
-  scale_pitches_ = std::move(scale_pitches);
+void Conductor::SetScale(std::span<const double> scale_pitches) noexcept {
+  scale_pitches_ = {scale_pitches.begin(), scale_pitches.end()};
 }
 
 Note Conductor::TransformNote(Note::Definition definition,

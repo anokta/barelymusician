@@ -986,6 +986,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetSkippingAdjustments(
 #include <cassert>
 #include <functional>
 #include <limits>
+#include <span>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -1393,6 +1394,9 @@ class Instrument {
   /// @return Parameter value, or error status.
   template <typename IndexType, typename ValueType>
   [[nodiscard]] StatusOr<ValueType> GetParameter(IndexType index) const {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
     double value = 0.0;
     if (const Status status = BarelyInstrument_GetParameter(
             handle_, id_, static_cast<int>(index), &value);
@@ -1409,6 +1413,9 @@ class Instrument {
   template <typename IndexType>
   [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
       IndexType index) const {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
     BarelyParameterDefinition definition;
     if (const Status status = BarelyInstrument_GetParameterDefinition(
             handle_, id_, static_cast<int>(index), &definition);
@@ -1456,6 +1463,9 @@ class Instrument {
   /// @return Status.
   template <typename IndexType>
   Status ResetParameter(IndexType index) {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
     return BarelyInstrument_ResetParameter(handle_, id_,
                                            static_cast<int>(index));
   }
@@ -1515,6 +1525,12 @@ class Instrument {
   /// @return Status.
   template <typename IndexType, typename ValueType>
   Status SetParameter(IndexType index, ValueType value) {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
     return BarelyInstrument_SetParameter(handle_, id_, static_cast<int>(index),
                                          static_cast<double>(value));
   }
@@ -1671,6 +1687,8 @@ class Note {
   BarelyId sequence_id_ = BarelyId_kInvalid;
 };
 
+// TODO(#98): Add `ParameterAutomation` class.
+
 /// Sequence.
 class Sequence {
  public:
@@ -1712,7 +1730,7 @@ class Sequence {
     return Note(handle_, id_, definition, position);
   }
 
-  // TODO(#98): Add parameter automation functions.
+  // TODO(#98): Add `CreateParameterAutomation` function.
 
   /// Returns begin offset.
   ///
@@ -2013,8 +2031,7 @@ class Musician {
   /// Returns scale.
   ///
   /// @return List of scale note pitches.
-  // TODO: Use span instead.
-  [[nodiscard]] std::vector<double> GetScale() const {
+  [[nodiscard]] std::span<const double> GetScale() const {
     const double* scale_pitches = nullptr;
     int num_scale_pitches = 0;
     if (handle_) {
@@ -2022,8 +2039,7 @@ class Musician {
           BarelyMusician_GetScale(handle_, &scale_pitches, &num_scale_pitches);
       assert(status.IsOk());
     }
-    return std::vector<double>(scale_pitches,
-                               scale_pitches + num_scale_pitches);
+    return {scale_pitches, scale_pitches + num_scale_pitches};
   }
 
   /// Returns tempo.
@@ -2121,8 +2137,7 @@ class Musician {
   /// Sets scale.
   ///
   /// @param scale_pitches List of scale note pitches.
-  // TODO: Use span instead.
-  Status SetScale(const std::vector<double>& scale_pitches) {
+  Status SetScale(std::span<const double> scale_pitches) {
     return BarelyMusician_SetScale(handle_, scale_pitches.data(),
                                    static_cast<int>(scale_pitches.size()));
   }

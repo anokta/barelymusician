@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 #define BARELYMUSICIAN_ENGINE_CONDUCTOR_H_
 
+#include <span>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -30,7 +31,7 @@ class Conductor {
   /// Returns scale.
   ///
   /// @return List of scale note pitches.
-  [[nodiscard]] const std::vector<double>& GetScale() const noexcept;
+  [[nodiscard]] std::span<const double> GetScale() const noexcept;
 
   /// Sets adjust note definition callback.
   ///
@@ -45,7 +46,7 @@ class Conductor {
   /// Sets scale.
   ///
   /// @param scale_pitches List of scale note pitches.
-  void SetScale(std::vector<double> scale_pitches) noexcept;
+  void SetScale(std::span<const double> scale_pitches) noexcept;
 
   /// Transforms note.
   ///

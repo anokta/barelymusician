@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 #include <thread>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <variant>
@@ -27,6 +28,7 @@ namespace {
 using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::Note;
 using ::barely::NoteDefinition;
 using ::barely::NotePitchDefinition;
 using ::barely::OscillatorType;
@@ -52,9 +54,9 @@ using ::bazel::tools::cpp::runfiles::Runfiles;
 // @param offset Position offset in beats.
 // @param engine Pointer to engine.
 // @param performer_id Sequence id.
-using BeatComposerCallback =
-    std::function<void(int bar, int beat, int num_beats, int harmonic,
-                       double offset, Sequence* sequence)>;
+using BeatComposerCallback = std::function<std::vector<Note>(
+    int bar, int beat, int num_beats, int harmonic, double offset,
+    Sequence* sequence)>;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -73,32 +75,39 @@ constexpr double kRootNote = barelyapi::kPitchD3;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
-void ComposeChord(const std::vector<double>& scale, double intensity,
-                  int harmonic, double offset, Sequence* sequence) {
+std::vector<Note> ComposeChord(const std::vector<double>& scale,
+                               double intensity, int harmonic, double offset,
+                               Sequence* sequence) {
+  std::vector<Note> notes;
   const auto add_chord_note = [&](int index) {
-    sequence->AddNote(
+    notes.push_back(std::move(sequence->CreateNote(
         NoteDefinition(
             1.0, NotePitchDefinition::RelativePitch(GetPitch(scale, index)),
             intensity),
-        offset);
+        offset)));
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
   add_chord_note(harmonic + 4);
   add_chord_note(harmonic + 7);
+  return notes;
 }
 
-void ComposeLine(double pitch_offset, const std::vector<double>& scale,
-                 double intensity, int bar, int beat, int num_beats,
-                 int harmonic, double offset, Sequence* sequence) {
+std::vector<Note> ComposeLine(double pitch_offset,
+                              const std::vector<double>& scale,
+                              double intensity, int bar, int beat,
+                              int num_beats, int harmonic, double offset,
+                              Sequence* sequence) {
+  std::vector<Note> notes;
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
-    sequence->AddNote(NoteDefinition(end_position - begin_position,
-                                     NotePitchDefinition::RelativePitch(
-                                         pitch_offset + GetPitch(scale, index)),
-                                     intensity),
-                      begin_position + offset);
+    notes.push_back(std::move(sequence->CreateNote(
+        NoteDefinition(end_position - begin_position,
+                       NotePitchDefinition::RelativePitch(
+                           pitch_offset + GetPitch(scale, index)),
+                       intensity),
+        begin_position + offset)));
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.33, harmonic);
@@ -116,19 +125,21 @@ void ComposeLine(double pitch_offset, const std::vector<double>& scale,
     add_note(0.75, 0.875, harmonic - 2 * note_offset);
     add_note(0.5, 0.75, harmonic + 2 * note_offset);
   }
+  return notes;
 }
 
-void ComposeDrums(int bar, int beat, int num_beats, Random* random,
-                  double offset, Sequence* sequence) {
+std::vector<Note> ComposeDrums(int bar, int beat, int num_beats, Random* random,
+                               double offset, Sequence* sequence) {
+  std::vector<Note> notes;
   const auto get_beat = [](int step) {
     return barelyapi::GetPosition(step, barelyapi::kNumSixteenthNotesPerBeat);
   };
   const auto add_note = [&](double begin_position, double end_position,
                             double pitch, double intensity) {
-    sequence->AddNote(
+    notes.push_back(std::move(sequence->CreateNote(
         NoteDefinition(end_position - begin_position,
                        NotePitchDefinition::AbsolutePitch(pitch), intensity),
-        begin_position + offset);
+        begin_position + offset)));
   };
 
   // Kick.
@@ -165,6 +176,7 @@ void ComposeDrums(int bar, int beat, int num_beats, Random* random,
   if (beat == 0 && bar % 4 == 0) {
     add_note(get_beat(0), get_beat(2), barelyapi::kPitchHihatOpen, 0.75);
   }
+  return notes;
 }
 
 }  // namespace
@@ -207,7 +219,8 @@ int main(int /*argc*/, char* argv[]) {
                                   std::cend(barelyapi::kPitchMajorScale));
 
   // Initialize performers.
-  std::vector<std::pair<Sequence, BeatComposerCallback>> performers;
+  std::vector<std::tuple<Sequence, BeatComposerCallback, std::vector<Note>>>
+      performers;
   std::vector<Instrument> instruments;
   std::vector<double> gains;
 
@@ -227,42 +240,42 @@ int main(int /*argc*/, char* argv[]) {
   const auto chords_beat_composer_callback =
       [&](int /*bar*/, int /*beat*/, int /*num_beats*/, int harmonic,
           double offset, Sequence* sequence) {
-        ComposeChord(scale, 0.5, harmonic, offset, sequence);
+        return ComposeChord(scale, 0.5, harmonic, offset, sequence);
       };
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.075, 0.125, 0.125);
   performers.emplace_back(musician.CreateSequence(),
-                          chords_beat_composer_callback);
-  performers.back().first.SetInstrument(&instruments.back());
+                          chords_beat_composer_callback, std::vector<Note>{});
+  std::get<0>(performers.back()).SetInstrument(&instruments.back());
 
   build_synth_instrument_fn(OscillatorType::kNoise, 0.0125, 0.5, 0.025);
   performers.emplace_back(musician.CreateSequence(),
-                          chords_beat_composer_callback);
-  performers.back().first.SetInstrument(&instruments.back());
+                          chords_beat_composer_callback, std::vector<Note>{});
+  std::get<0>(performers.back()).SetInstrument(&instruments.back());
 
   const auto line_beat_composer_callback = [&](int bar, int beat, int num_beats,
                                                int harmonic, double offset,
                                                Sequence* sequence) {
-    ComposeLine(-1.0, scale, 1.0, bar, beat, num_beats, harmonic, offset,
-                sequence);
+    return ComposeLine(-1.0, scale, 1.0, bar, beat, num_beats, harmonic, offset,
+                       sequence);
   };
 
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
   performers.emplace_back(musician.CreateSequence(),
-                          line_beat_composer_callback);
-  performers.back().first.SetInstrument(&instruments.back());
+                          line_beat_composer_callback, std::vector<Note>{});
+  std::get<0>(performers.back()).SetInstrument(&instruments.back());
 
   const auto line_2_beat_composer_callback =
       [&](int bar, int beat, int num_beats, int harmonic, double offset,
           Sequence* sequence) {
-        ComposeLine(0.0, scale, 1.0, bar, beat, num_beats, harmonic, offset,
-                    sequence);
+        return ComposeLine(0.0, scale, 1.0, bar, beat, num_beats, harmonic,
+                           offset, sequence);
       };
 
   build_synth_instrument_fn(OscillatorType::kSquare, 0.1, 0.05, 0.05);
   performers.emplace_back(musician.CreateSequence(),
-                          line_2_beat_composer_callback);
-  performers.back().first.SetInstrument(&instruments.back());
+                          line_2_beat_composer_callback, std::vector<Note>{});
+  std::get<0>(performers.back()).SetInstrument(&instruments.back());
 
   // Add percussion instrument.
   instruments.push_back(
@@ -295,12 +308,13 @@ int main(int /*argc*/, char* argv[]) {
   const auto percussion_beat_composer_callback =
       [&](int bar, int beat, int num_beats, int /*harmonic*/, double offset,
           Sequence* sequence) {
-        ComposeDrums(bar, beat, num_beats, &random, offset, sequence);
+        return ComposeDrums(bar, beat, num_beats, &random, offset, sequence);
       };
 
   performers.emplace_back(musician.CreateSequence(),
-                          percussion_beat_composer_callback);
-  performers.back().first.SetInstrument(&instruments.back());
+                          percussion_beat_composer_callback,
+                          std::vector<Note>{});
+  std::get<0>(performers.back()).SetInstrument(&instruments.back());
 
   // Bar callback.
   const auto bar_composer_callback = [&progression](int bar) -> int {
@@ -319,11 +333,11 @@ int main(int /*argc*/, char* argv[]) {
       harmonic = bar_composer_callback(bar);
     }
     // Update members.
-    for (auto& [sequence, beat_composer_callback] : performers) {
+    for (auto& [sequence, beat_composer_callback, notes] : performers) {
       // Compose next beat notes.
       if (beat_composer_callback) {
-        beat_composer_callback(bar, beat, kNumBeats, harmonic, position,
-                               &sequence);
+        notes = std::move(beat_composer_callback(bar, beat, kNumBeats, harmonic,
+                                                 position, &sequence));
       }
     }
   };

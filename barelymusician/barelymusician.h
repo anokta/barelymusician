@@ -648,7 +648,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Stop(BarelyMusicianHandle handle);
 BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
                                                  double timestamp);
 
-/// Adds sequence note at position.
+/// Creates new sequence note at position.
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
@@ -656,11 +656,69 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
 /// @param position Note position in beats.
 /// @param out_note_id Output note handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_AddNote(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyNoteDefinition definition, double position, BarelyId* out_note_id);
+BARELY_EXPORT BarelyStatus BarelyNote_Create(BarelyMusicianHandle handle,
+                                             BarelyId sequence_id,
+                                             BarelyNoteDefinition definition,
+                                             double position,
+                                             BarelyId* out_note_id);
 
-/// Adds sequence parameter automation at position.
+/// Destroys sequence note.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_Destroy(BarelyMusicianHandle handle,
+                                              BarelyId sequence_id,
+                                              BarelyId note_id);
+
+/// Gets sequence note definition.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_definition Output note definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_GetDefinition(
+    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
+    BarelyNoteDefinition* out_definition);
+
+/// Gets sequence note position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_position Output note position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_GetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId sequence_id,
+                                                  BarelyId note_id,
+                                                  double* out_position);
+
+/// Sets sequence note definition.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param definition Note definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyNote_SetDefinition(BarelyMusicianHandle handle, BarelyId sequence_id,
+                         BarelyId note_id, BarelyNoteDefinition definition);
+
+/// Sets sequence note position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param position Note position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_SetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId sequence_id,
+                                                  BarelyId note_id,
+                                                  double position);
+
+/// Creates new sequence parameter automation at position.
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
@@ -668,10 +726,66 @@ BARELY_EXPORT BarelyStatus BarelySequence_AddNote(
 /// @param position Parameter automation position in beats.
 /// @param out_parameter_automation_id Output parameter automation handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_AddParameterAutomation(
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_Create(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyParameterAutomationDefinition definition, double position,
     BarelyId* out_parameter_automation_id);
+
+/// Destroys sequence parameter automation.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_Destroy(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id);
+
+/// Gets sequence parameter automation definition.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param out_definition Output parameter automation definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetDefinition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id,
+    BarelyParameterAutomationDefinition* out_definition);
+
+/// Gets sequence parameter automation position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param out_position Output parameter automation position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, double* out_position);
+
+/// Sets sequence parameter automation definition.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param definition Parameter automation definition.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetDefinition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id,
+    BarelyParameterAutomationDefinition definition);
+
+/// Sets sequence parameter automation position.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param position Parameter automation position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, double position);
 
 /// Creates new sequence.
 ///
@@ -747,51 +861,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_GetLoopBeginOffset(
 BARELY_EXPORT BarelyStatus BarelySequence_GetLoopLength(
     BarelyMusicianHandle handle, BarelyId sequence_id, double* out_loop_length);
 
-/// Gets sequence note definition.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param out_definition Output note definition.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetNoteDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
-    BarelyNoteDefinition* out_definition);
-
-/// Gets sequence note position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param out_position Output note position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetNotePosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
-    double* out_position);
-
-/// Gets sequence parameter automation definition.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param out_definition Output parameter automation definition.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetParameterAutomationDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id,
-    BarelyParameterAutomationDefinition* out_definition);
-
-/// Gets sequence parameter automation position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param out_position Output parameter automation position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetParameterAutomationPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double* out_position);
-
 /// Gets whether sequence is empty or not.
 ///
 /// @param handle Musician handle.
@@ -833,82 +902,6 @@ BARELY_EXPORT BarelyStatus
 BarelySequence_Perform(BarelyMusicianHandle handle, BarelyId sequence_id,
                        BarelyMusicianHandle musician_handle,
                        double begin_position, double end_position);
-
-/// Removes all sequence notes.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotes(
-    BarelyMusicianHandle handle, BarelyId sequence_id);
-
-/// Removes sequence note at position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double position);
-
-/// Removes all sequence notes at range.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllNotesAtRange(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_position,
-    double end_position);
-
-/// Removes all sequence parameter automations.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllParameterAutomations(
-    BarelyMusicianHandle handle, BarelyId sequence_id);
-
-/// Removes all sequence parameter automations at position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_RemoveAllParameterAutomationsAtPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double position);
-
-/// Removes all sequence parameter automations at range.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveAllParameterAutomationsAtRange(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_position,
-    double end_position);
-
-/// Removes sequence note.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveNote(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id);
-
-/// Removes sequence parameter automation.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_RemoveParameterAutomation(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id);
 
 /// Sets sequence begin offset.
 ///
@@ -973,51 +966,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetLoopLength(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(
     BarelyMusicianHandle handle, BarelyId sequence_id, bool is_looping);
-
-/// Sets sequence note definition.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param definition Note definition.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetNoteDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
-    BarelyNoteDefinition definition);
-
-/// Sets sequence note position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param position Note position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetNotePosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
-    double position);
-
-/// Sets sequence parameter automation definition.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param definition Parameter automation definition.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetParameterAutomationDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id,
-    BarelyParameterAutomationDefinition definition);
-
-/// Sets sequence parameter automation position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param position Parameter automation position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetParameterAutomationPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double position);
 
 /// Sets whether sequence should be skipping adjustments or not.
 ///
@@ -1191,7 +1139,7 @@ struct NotePitchDefinition : public BarelyNotePitchDefinition {
   ///
   /// @param absolute_pitch Absolute pitch.
   /// @return Pitch.
-  static NotePitchDefinition AbsolutePitch(double absolute_pitch) {
+  static NotePitchDefinition AbsolutePitch(double absolute_pitch = 0.0) {
     return NotePitchDefinition({.type = static_cast<BarelyNotePitchType>(
                                     NotePitchType::kAbsolutePitch),
                                 .absolute_pitch = absolute_pitch});
@@ -1201,7 +1149,7 @@ struct NotePitchDefinition : public BarelyNotePitchDefinition {
   ///
   /// @param relative_pitch Relative pitch.
   /// @return Note pitch.
-  static NotePitchDefinition RelativePitch(double relative_pitch) {
+  static NotePitchDefinition RelativePitch(double relative_pitch = 0.0) {
     return NotePitchDefinition({.type = static_cast<BarelyNotePitchType>(
                                     NotePitchType::kRelativePitch),
                                 .relative_pitch = relative_pitch});
@@ -1211,7 +1159,7 @@ struct NotePitchDefinition : public BarelyNotePitchDefinition {
   ///
   /// @param scale_index Scale index.
   /// @return Note pitch.
-  static NotePitchDefinition ScaleIndex(int scale_index) {
+  static NotePitchDefinition ScaleIndex(int scale_index = 0.0) {
     return NotePitchDefinition(
         {.type = static_cast<BarelyNotePitchType>(NotePitchType::kScaleIndex),
          .scale_index = scale_index});
@@ -1235,6 +1183,10 @@ struct NoteDefinition : public BarelyNoteDefinition {
   NoteDefinition(double duration, NotePitchDefinition pitch,
                  double intensity = 1.0)
       : BarelyNoteDefinition{duration, pitch, intensity} {}
+
+  /// Constructs new `NotePitchDefinition` with default values.
+  NoteDefinition()
+      : NoteDefinition(0.0, NotePitchDefinition::AbsolutePitch()) {}
 
   /// Constructs new `NoteDefinition` from internal type.
   ///
@@ -1403,12 +1355,8 @@ class Instrument {
 
   /// Destroys `Instrument`.
   ~Instrument() {
-    if (id_ != BarelyId_kInvalid) {
-      const Status status =
-          BarelyInstrument_Destroy(std::exchange(handle_, nullptr),
-                                   std::exchange(id_, BarelyId_kInvalid));
-      assert(status.IsOk());
-    }
+    BarelyInstrument_Destroy(std::exchange(handle_, nullptr),
+                             std::exchange(id_, BarelyId_kInvalid));
   }
 
   /// Non-copyable.
@@ -1430,10 +1378,7 @@ class Instrument {
   /// @param other Other instrument.
   Instrument& operator=(Instrument&& other) noexcept {
     if (this != &other) {
-      if (id_ != BarelyId_kInvalid) {
-        const Status status = BarelyInstrument_Destroy(handle_, id_);
-        assert(status.IsOk());
-      }
+      BarelyInstrument_Destroy(handle_, id_);
       handle_ = std::exchange(other.handle_, nullptr);
       id_ = std::exchange(other.id_, BarelyId_kInvalid);
       SetNoteOffCallback(std::exchange(other.note_off_callback_, nullptr));
@@ -1631,17 +1576,108 @@ class Instrument {
   NoteOnCallback note_on_callback_;
 };
 
+/// Note.
+class Note {
+ public:
+  /// Destroys `Note`.
+  ~Note() {
+    BarelyNote_Destroy(std::exchange(handle_, nullptr),
+                       std::exchange(sequence_id_, BarelyId_kInvalid),
+                       std::exchange(id_, BarelyId_kInvalid));
+  }
+
+  /// Non-copyable.
+  Note(const Note& other) = delete;
+  Note& operator=(const Note& other) = delete;
+
+  /// Constructs new `Note` via move.
+  ///
+  /// @param other Other note.
+  Note(Note&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)),
+        id_(std::exchange(other.id_, BarelyId_kInvalid)),
+        sequence_id_(std::exchange(other.sequence_id_, BarelyId_kInvalid)) {}
+
+  /// Assigns `Note` via move.
+  ///
+  /// @param other Other note.
+  Note& operator=(Note&& other) noexcept {
+    if (this != &other) {
+      BarelyNote_Destroy(handle_, sequence_id_, id_);
+      handle_ = std::exchange(other.handle_, nullptr);
+      id_ = std::exchange(other.id_, BarelyId_kInvalid);
+      sequence_id_ = std::exchange(other.sequence_id_, BarelyId_kInvalid);
+    }
+    return *this;
+  }
+
+  /// Returns definition.
+  ///
+  /// @return Definition.
+  [[nodiscard]] NoteDefinition GetDefinition() const {
+    NoteDefinition definition;
+    const Status status =
+        BarelyNote_GetDefinition(handle_, sequence_id_, id_, &definition);
+    assert(status.IsOk());
+    return definition;
+  }
+
+  /// Returns position.
+  ///
+  /// @return Position in beats.
+  [[nodiscard]] double GetPosition() const {
+    double position = 0.0;
+    const Status status =
+        BarelyNote_GetPosition(handle_, sequence_id_, id_, &position);
+    assert(status.IsOk());
+    return position;
+  }
+
+  /// Sets definition.
+  ///
+  /// @param definition Definition.
+  /// @return Status.
+  Status SetDefinition(NoteDefinition definition) {
+    return BarelyNote_SetDefinition(handle_, sequence_id_, id_, definition);
+  }
+
+  /// Sets position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status SetPosition(double position) {
+    return BarelyNote_SetPosition(handle_, sequence_id_, id_, position);
+  }
+
+ private:
+  friend class Sequence;
+
+  // Constructs new `Note`.
+  explicit Note(BarelyMusicianHandle handle, BarelyId sequence_id,
+                NoteDefinition definition, double position)
+      : handle_(handle), sequence_id_(sequence_id) {
+    const Status status =
+        BarelyNote_Create(handle_, sequence_id, definition, position, &id_);
+    assert(status.IsOk());
+  }
+
+  // Internal musician handle.
+  BarelyMusicianHandle handle_ = nullptr;
+
+  // Identifier.
+  BarelyId id_ = BarelyId_kInvalid;
+
+  // Sequence identifier.
+  BarelyId sequence_id_ = BarelyId_kInvalid;
+};
+
 /// Sequence.
 class Sequence {
  public:
   /// Destroys `Sequence`.
   ~Sequence() {
-    if (id_ != BarelyId_kInvalid) {
-      const Status status =
-          BarelySequence_Destroy(std::exchange(handle_, nullptr),
-                                 std::exchange(id_, BarelyId_kInvalid));
-      assert(status.IsOk());
-    }
+    BarelySequence_Destroy(std::exchange(handle_, nullptr),
+                           std::exchange(id_, BarelyId_kInvalid));
   }
 
   /// Non-copyable.
@@ -1660,28 +1696,20 @@ class Sequence {
   /// @param other Other sequence.
   Sequence& operator=(Sequence&& other) noexcept {
     if (this != &other) {
-      if (id_ != BarelyId_kInvalid) {
-        const Status status = BarelySequence_Destroy(handle_, id_);
-        assert(status.IsOk());
-      }
+      BarelySequence_Destroy(handle_, id_);
       handle_ = std::exchange(other.handle_, nullptr);
       id_ = std::exchange(other.id_, BarelyId_kInvalid);
     }
     return *this;
   }
 
-  /// Adds note at position.
+  /// Creates note at position.
   ///
   /// @param definition Note definition.
   /// @param position Note position.
-  /// @return Note reference.
-  // TODO: refactor note api type.
-  BarelyId AddNote(NoteDefinition definition, double position) {
-    BarelyId note_id = BarelyId_kInvalid;
-    const Status status =
-        BarelySequence_AddNote(handle_, id_, definition, position, &note_id);
-    assert(status.IsOk());
-    return note_id;
+  /// @return Note.
+  [[nodiscard]] Note CreateNote(NoteDefinition definition, double position) {
+    return Note(handle_, id_, definition, position);
   }
 
   // TODO(#98): Add parameter automation functions.
@@ -1775,40 +1803,6 @@ class Sequence {
         handle_, id_, &is_skipping_adjustments);
     assert(status.IsOk());
     return is_skipping_adjustments;
-  }
-
-  /// Removes all notes.
-  ///
-  /// @return Status.
-  Status RemoveAllNotes() {
-    return BarelySequence_RemoveAllNotes(handle_, id_);
-  }
-
-  /// Removes all notes at position.
-  ///
-  /// @param position Position in beats.
-  /// @return Status.
-  Status RemoveAllNotes(double position) {
-    return BarelySequence_RemoveAllNotesAtPosition(handle_, id_, position);
-  }
-
-  /// Removes all notes at range.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @param end_position End position in beats.
-  /// @return Status.
-  Status RemoveAllNotes(double begin_position, double end_position) {
-    return BarelySequence_RemoveAllNotesAtRange(handle_, id_, begin_position,
-                                                end_position);
-  }
-
-  /// Removes note.
-  ///
-  /// @param note Note reference.
-  /// @return Status.
-  // TODO: refactor note api type.
-  Status RemoveNote(BarelyId note) {
-    return BarelySequence_RemoveNote(handle_, id_, note);
   }
 
   /// Sets begin offset.
@@ -1961,7 +1955,8 @@ class Musician {
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hz.
   /// @return Instrument.
-  Instrument CreateInstrument(InstrumentDefinition definition, int frame_rate) {
+  [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
+                                            int frame_rate) {
     return Instrument(handle_, definition, frame_rate);
   }
 
@@ -1970,14 +1965,15 @@ class Musician {
   /// @param type Instrument type.
   /// @param frame_rate Frame rate in hz.
   /// @return Instrument.
-  Instrument CreateInstrument(InstrumentType type, int frame_rate) {
+  [[nodiscard]] Instrument CreateInstrument(InstrumentType type,
+                                            int frame_rate) {
     return Instrument(handle_, type, frame_rate);
   }
 
   /// Creates new sequence.
   ///
   /// @return Sequence.
-  Sequence CreateSequence() { return Sequence(handle_); }
+  [[nodiscard]] Sequence CreateSequence() { return Sequence(handle_); }
 
   /// Returns note.
   ///

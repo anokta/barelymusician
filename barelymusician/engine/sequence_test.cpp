@@ -55,8 +55,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetInstrument(&instrument);
   EXPECT_THAT(sequence.GetInstrument(), &instrument);
 
-  // Add note.
-  EXPECT_TRUE(sequence.AddNote(kId, kDefinition, kPosition));
+  // Create note.
+  EXPECT_TRUE(sequence.CreateNote(kId, kDefinition, kPosition));
   EXPECT_THAT(
       sequence.GetNoteDefinition(kId),
       AllOf(NotNull(),
@@ -148,8 +148,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   note_on_timestamps.clear();
   note_off_timestamps.clear();
 
-  // Remove note.
-  EXPECT_TRUE(sequence.RemoveNote(kId));
+  // Destroy note.
+  EXPECT_TRUE(sequence.DestroyNote(kId));
   EXPECT_THAT(sequence.GetNoteDefinition(kId), IsNull());
   EXPECT_THAT(sequence.GetNotePosition(kId), IsNull());
   EXPECT_TRUE(sequence.IsEmpty());
@@ -184,13 +184,13 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   sequence.SetInstrument(&instrument);
   EXPECT_THAT(sequence.GetInstrument(), &instrument);
 
-  // Add notes.
+  // Create notes.
   for (int i = 0; i < 4; ++i) {
-    EXPECT_TRUE((sequence.AddNote(
+    EXPECT_TRUE(sequence.CreateNote(
         static_cast<Id>(i),
         Note::Definition(1.0, Note::PitchDefinition::AbsolutePitch(
                                   static_cast<double>(i + 1))),
-        static_cast<double>(i))));
+        static_cast<double>(i)));
     EXPECT_THAT(sequence.GetNotePosition(static_cast<Id>(i)),
                 AllOf(NotNull(), Pointee(static_cast<double>(i))));
   }
@@ -240,8 +240,10 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   note_ons.clear();
   note_offs.clear();
 
-  // Remove all notes.
-  sequence.RemoveAllNotes();
+  // Destroy all notes.
+  for (int i = 0; i < 4; ++i) {
+    EXPECT_TRUE(sequence.DestroyNote(static_cast<Id>(i)));
+  }
   EXPECT_TRUE(sequence.IsEmpty());
 
   sequence.Process(0.0, 10.0);

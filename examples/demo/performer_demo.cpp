@@ -4,6 +4,7 @@
 #include <cmath>
 #include <memory>
 #include <thread>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -21,6 +22,7 @@ namespace {
 using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::Note;
 using ::barely::NoteDefinition;
 using ::barely::NotePitchDefinition;
 using ::barely::OscillatorType;
@@ -90,18 +92,18 @@ int main(int /*argc*/, char* /*argv*/[]) {
     return NoteDefinition(duration, NotePitchDefinition::AbsolutePitch(pitch),
                           intensity);
   };
-  std::vector<std::pair<double, NoteDefinition>> notes;
-  notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));
-  notes.emplace_back(1.0, build_note(barelyapi::kPitchD4, 1.0));
-  notes.emplace_back(2.0, build_note(barelyapi::kPitchE4, 1.0));
-  notes.emplace_back(3.0, build_note(barelyapi::kPitchF4, 1.0));
-  notes.emplace_back(4.0, build_note(barelyapi::kPitchG4, 1.0));
-  notes.emplace_back(5.0, build_note(barelyapi::kPitchG4, 1.0 / 3.0));
-  notes.emplace_back(5.0 + 1.0 / 3.0,
-                     build_note(barelyapi::kPitchA5, 1.0 / 3.0));
-  notes.emplace_back(5.0 + 2.0 / 3.0,
-                     build_note(barelyapi::kPitchB5, 1.0 / 3.0));
-  notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
+  std::vector<std::pair<NoteDefinition, double>> score;
+  score.emplace_back(build_note(barelyapi::kPitchC4, 1.0), 0.0);
+  score.emplace_back(build_note(barelyapi::kPitchD4, 1.0), 1.0);
+  score.emplace_back(build_note(barelyapi::kPitchE4, 1.0), 2.0);
+  score.emplace_back(build_note(barelyapi::kPitchF4, 1.0), 3.0);
+  score.emplace_back(build_note(barelyapi::kPitchG4, 1.0), 4.0);
+  score.emplace_back(build_note(barelyapi::kPitchG4, 1.0 / 3.0), 5.0);
+  score.emplace_back(build_note(barelyapi::kPitchA5, 1.0 / 3.0),
+                     5.0 + 1.0 / 3.0);
+  score.emplace_back(build_note(barelyapi::kPitchB5, 1.0 / 3.0),
+                     5.0 + 2.0 / 3.0);
+  score.emplace_back(build_note(barelyapi::kPitchC5, 2.0), 6.0);
 
   Sequence sequence = musician.CreateSequence();
   sequence.SetInstrument(&performer);
@@ -111,10 +113,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   sequence.SetLooping(true);
   sequence.SetLoopBeginOffset(3.0);
   sequence.SetLoopLength(5.0);
-  std::vector<BarelyId> note_references;
-  note_references.reserve(notes.size());
-  for (const auto& [position, note] : notes) {
-    note_references.push_back(sequence.AddNote(note, position));
+  std::unordered_map<int, Note> notes;
+  notes.reserve(score.size());
+  int index = 0;
+  for (const auto& [note, position] : score) {
+    notes.emplace(index++, sequence.CreateNote(note, position));
   }
 
   bool use_conductor = false;
@@ -172,12 +175,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
-      // Toggle notes.
-      if (sequence.RemoveNote(note_references[index - 1]).IsOk()) {
+      // Toggle score.
+      if (notes.erase(index - 1) > 0) {
         ConsoleLog() << "Removed note " << index;
       } else {
-        note_references[index - 1] =
-            sequence.AddNote(notes[index - 1].second, notes[index - 1].first);
+        notes.emplace(index - 1, sequence.CreateNote(score[index - 1].first,
+                                                     score[index - 1].second));
         ConsoleLog() << "Added note " << index;
       }
       return;

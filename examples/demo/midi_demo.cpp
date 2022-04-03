@@ -3,6 +3,7 @@
 #include <chrono>
 #include <memory>
 #include <thread>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -20,6 +21,7 @@ namespace {
 using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::Note;
 using ::barely::NoteDefinition;
 using ::barely::NotePitchDefinition;
 using ::barely::OscillatorType;
@@ -64,24 +66,27 @@ int MidiKeyNumberFromPitch(double pitch) {
   return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
-// Adds the score to `performer_id` from the given `midi_events`.
-void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
-              Sequence* sequence) {
-  const auto get_position = [ticks_per_beat](int tick) -> double {
+// Builds the score for the given `midi_events`.
+std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
+                             int ticks_per_beat, Sequence* sequence) {
+  const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
+  std::vector<Note> notes;
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      sequence->AddNote(
-          NoteDefinition(
-              get_position(midi_event.getTickDuration()),
-              NotePitchDefinition::AbsolutePitch(
-                  PitchFromMidiKeyNumber(midi_event.getKeyNumber())),
-              static_cast<double>(midi_event.getVelocity()) / kMaxVelocity),
-          get_position(midi_event.tick));
+      NoteDefinition note;
+      note.duration = get_position_fn(midi_event.getTickDuration());
+      note.pitch = NotePitchDefinition::AbsolutePitch(
+          PitchFromMidiKeyNumber(midi_event.getKeyNumber()));
+      note.intensity =
+          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
+      const double position = get_position_fn(midi_event.tick);
+      notes.push_back(std::move(sequence->CreateNote(note, position)));
     }
   }
+  return notes;
 }
 
 }  // namespace
@@ -109,12 +114,12 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician;
   musician.SetTempo(kTempo);
 
-  std::vector<std::pair<Instrument, Sequence>> tracks;
+  std::vector<std::tuple<Instrument, Sequence, std::vector<Note>>> tracks;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     Sequence sequence = musician.CreateSequence();
-    AddScore(midi_file[i], ticks_per_quarter, &sequence);
-    if (sequence.IsEmpty()) {
+    auto notes = BuildScore(midi_file[i], ticks_per_quarter, &sequence);
+    if (notes.empty()) {
       ConsoleLog() << "Empty MIDI track: " << i;
       continue;
     }
@@ -138,8 +143,9 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetParameter(SynthParameter::kRelease,
                             kInstrumentEnvelopeRelease);
     instrument.SetParameter(SynthParameter::kNumVoices, kNumInstrumentVoices);
-    tracks.emplace_back(std::move(instrument), std::move(sequence));
-    tracks.back().second.SetInstrument(&tracks.back().first);
+    tracks.emplace_back(std::move(instrument), std::move(sequence),
+                        std::move(notes));
+    std::get<1>(tracks.back()).SetInstrument(&std::get<0>(tracks.back()));
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
@@ -147,7 +153,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<double> temp_buffer(kNumChannels * kNumFrames);
   const auto process_callback = [&](double* output) {
     std::fill_n(output, kNumChannels * kNumFrames, 0.0);
-    for (auto& [instrument, sequence] : tracks) {
+    for (auto& [instrument, sequence, notes] : tracks) {
       instrument.Process(temp_buffer.data(), kNumChannels, kNumFrames,
                          clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,

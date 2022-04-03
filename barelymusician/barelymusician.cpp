@@ -494,17 +494,17 @@ BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelySequence_AddNote(BarelyMusicianHandle handle,
-                                    BarelyId sequence_id,
-                                    BarelyNoteDefinition definition,
-                                    double position, BarelyId* out_note_id) {
+BarelyStatus BarelyNote_Create(BarelyMusicianHandle handle,
+                               BarelyId sequence_id,
+                               BarelyNoteDefinition definition, double position,
+                               BarelyId* out_note_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_note_id) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
     *out_note_id = ++handle->id_counter;
-    if (sequence->AddNote(*out_note_id, definition, position)) {
+    if (sequence->CreateNote(*out_note_id, definition, position)) {
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kAlreadyExists;
@@ -512,7 +512,117 @@ BarelyStatus BarelySequence_AddNote(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequence_AddParameterAutomation(
+BarelyStatus BarelyNote_Destroy(BarelyMusicianHandle handle,
+                                BarelyId sequence_id, BarelyId note_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (sequence->DestroyNote(note_id)) {
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyNote_GetDefinition(BarelyMusicianHandle handle,
+                                      BarelyId sequence_id, BarelyId note_id,
+                                      BarelyNoteDefinition* out_definition) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+  if (!out_definition) return BarelyStatus_kInvalidArgument;
+
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (const auto* definition = sequence->GetNoteDefinition(note_id)) {
+      *out_definition = *definition;
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyNote_GetPosition(BarelyMusicianHandle handle,
+                                    BarelyId sequence_id, BarelyId note_id,
+                                    double* out_position) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+  if (!out_position) return BarelyStatus_kInvalidArgument;
+
+  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (const auto* position = sequence->GetNotePosition(note_id)) {
+      *out_position = *position;
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyNote_SetDefinition(BarelyMusicianHandle handle,
+                                      BarelyId sequence_id, BarelyId note_id,
+                                      BarelyNoteDefinition definition) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (sequence->SetNoteDefinition(note_id, definition)) {
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyNote_SetPosition(BarelyMusicianHandle handle,
+                                    BarelyId sequence_id, BarelyId note_id,
+                                    double position) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (sequence->SetNotePosition(note_id, position)) {
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyParameterAutomation_SetDefinition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id,
+    BarelyParameterAutomationDefinition definition) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid ||
+      parameter_automation_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  definition;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyParameterAutomation_SetPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, double position) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid ||
+      parameter_automation_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  position;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyParameterAutomation_Create(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyParameterAutomationDefinition definition, double position,
     BarelyId* out_parameter_automation_id) {
@@ -521,6 +631,45 @@ BarelyStatus BarelySequence_AddParameterAutomation(
   if (!out_parameter_automation_id) return BarelyStatus_kInvalidArgument;
 
   definition, position;
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyParameterAutomation_Destroy(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid ||
+      parameter_automation_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyParameterAutomation_GetDefinition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id,
+    BarelyParameterAutomationDefinition* out_definition) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid ||
+      parameter_automation_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+  if (!out_definition) return BarelyStatus_kInvalidArgument;
+
+  return BarelyStatus_kUnimplemented;
+}
+
+BarelyStatus BarelyParameterAutomation_GetPosition(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, double* out_position) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid ||
+      parameter_automation_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+  if (!out_position) return BarelyStatus_kInvalidArgument;
+
   return BarelyStatus_kUnimplemented;
 }
 
@@ -629,70 +778,6 @@ BarelyStatus BarelySequence_GetLoopLength(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequence_GetNoteDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
-    BarelyNoteDefinition* out_definition) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-  if (!out_definition) return BarelyStatus_kInvalidArgument;
-
-  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    if (const auto* definition = sequence->GetNoteDefinition(note_id)) {
-      *out_definition = *definition;
-      return BarelyStatus_kOk;
-    }
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_GetNotePosition(BarelyMusicianHandle handle,
-                                            BarelyId sequence_id,
-                                            BarelyId note_id,
-                                            double* out_position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-  if (!out_position) return BarelyStatus_kInvalidArgument;
-
-  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    if (const auto* position = sequence->GetNotePosition(note_id)) {
-      *out_position = *position;
-      return BarelyStatus_kOk;
-    }
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_GetParameterAutomationDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id,
-    BarelyParameterAutomationDefinition* out_definition) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid ||
-      parameter_automation_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-  if (!out_definition) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequence_GetParameterAutomationPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double* out_position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid ||
-      parameter_automation_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-  if (!out_position) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
 BarelyStatus BarelySequence_IsEmpty(BarelyMusicianHandle handle,
                                     BarelyId sequence_id, bool* out_is_empty) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -732,98 +817,6 @@ BarelyStatus BarelySequence_IsSkippingAdjustments(
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_RemoveAllNotes(BarelyMusicianHandle handle,
-                                           BarelyId sequence_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    sequence->RemoveAllNotes();
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_RemoveAllNotesAtPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    sequence->RemoveAllNotes(position);
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_RemoveAllNotesAtRange(BarelyMusicianHandle handle,
-                                                  BarelyId sequence_id,
-                                                  double begin_position,
-                                                  double end_position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    sequence->RemoveAllNotes(begin_position, end_position);
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_RemoveAllParameterAutomations(
-    BarelyMusicianHandle handle, BarelyId sequence_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequence_RemoveAllParameterAutomationsAtPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double /*position*/) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequence_RemoveAllParameterAutomationsAtRange(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_position,
-    double end_position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#85): Implement.
-  begin_position, end_position;
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequence_RemoveNote(BarelyMusicianHandle handle,
-                                       BarelyId sequence_id, BarelyId note_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-
-  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    if (sequence->RemoveNote(note_id)) {
-      return BarelyStatus_kOk;
-    }
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_RemoveParameterAutomation(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid ||
-      parameter_automation_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-
-  return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelySequence_SetBeginOffset(BarelyMusicianHandle handle,
@@ -913,64 +906,6 @@ BarelyStatus BarelySequence_SetLooping(BarelyMusicianHandle handle,
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_SetNoteDefinition(BarelyMusicianHandle handle,
-                                              BarelyId sequence_id,
-                                              BarelyId note_id,
-                                              BarelyNoteDefinition definition) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-
-  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    if (sequence->SetNoteDefinition(note_id, definition)) {
-      return BarelyStatus_kOk;
-    }
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_SetNotePosition(BarelyMusicianHandle handle,
-                                            BarelyId sequence_id,
-                                            BarelyId note_id, double position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-
-  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    if (sequence->SetNotePosition(note_id, position)) {
-      return BarelyStatus_kOk;
-    }
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelySequence_SetParameterAutomationDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id,
-    BarelyParameterAutomationDefinition /*definition*/) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid ||
-      parameter_automation_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequence_SetParameterAutomationPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double /*position*/) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid ||
-      parameter_automation_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-
-  return BarelyStatus_kUnimplemented;
 }
 
 BarelyStatus BarelySequence_SetSkippingAdjustments(

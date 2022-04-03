@@ -23,14 +23,20 @@ class Sequence {
   /// @param transport Transport.
   Sequence(const Conductor& conductor, const Transport& transport) noexcept;
 
-  /// Adds new note at position.
+  /// Creates new note at position.
   ///
   /// @param id Note identifier.
   /// @param definition Note definition.
   /// @param position Note position in beats.
   /// @return True if success.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool AddNote(Id id, Note::Definition definition, double position) noexcept;
+  bool CreateNote(Id id, Note::Definition definition, double position) noexcept;
+
+  /// Destroys note.
+  ///
+  /// @param id Note identifier.
+  /// @return True if success.
+  bool DestroyNote(Id id) noexcept;
 
   // TODO(#98): Add `AddParameterAutomation` functionality.
 
@@ -96,26 +102,6 @@ class Sequence {
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
   void Process(double begin_position, double end_position) noexcept;
-
-  /// Removes all notes.
-  void RemoveAllNotes() noexcept;
-
-  /// Removes all notes at position.
-  ///
-  /// @param position Position.
-  void RemoveAllNotes(double position) noexcept;
-
-  /// Removes all notes at range.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @param end_position End position in beats.
-  void RemoveAllNotes(double begin_position, double end_position) noexcept;
-
-  /// Removes note.
-  ///
-  /// @param id Note identifier.
-  /// @return True if success.
-  bool RemoveNote(Id id) noexcept;
 
   /// Sets begin offset.
   ///

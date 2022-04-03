@@ -19,10 +19,20 @@ Sequence::Sequence(const Conductor& conductor,
     : conductor_(conductor), transport_(transport) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Sequence::AddNote(Id id, Note::Definition definition,
-                       double position) noexcept {
+bool Sequence::CreateNote(Id id, Note::Definition definition,
+                          double position) noexcept {
   if (positions_.emplace(id, position).second) {
     notes_.emplace(std::pair{position, id}, definition);
+    return true;
+  }
+  return false;
+}
+
+bool Sequence::DestroyNote(Id id) noexcept {
+  if (const auto position_it = positions_.find(id);
+      position_it != positions_.end()) {
+    notes_.erase(std::pair{position_it->second, id});
+    positions_.erase(position_it);
     return true;
   }
   return false;
@@ -129,45 +139,6 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
     ProcessInternal(begin_position, end_position, position_offset,
                     process_end_position);
   }
-}
-
-void Sequence::RemoveAllNotes() noexcept {
-  notes_.clear();
-  positions_.clear();
-}
-
-void Sequence::RemoveAllNotes(double position) noexcept {
-  const auto begin = notes_.lower_bound(std::pair{position, kInvalid});
-  auto it = begin;
-  for (; it != notes_.end(); ++it) {
-    if (it->first.first > position) {
-      break;
-    }
-    positions_.erase(it->first.second);
-  }
-  notes_.erase(begin, it);
-}
-
-void Sequence::RemoveAllNotes(double begin_position,
-                              double end_position) noexcept {
-  if (begin_position < end_position) {
-    const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalid});
-    const auto end = notes_.lower_bound(std::pair{end_position, kInvalid});
-    for (auto it = begin; it != end; ++it) {
-      positions_.erase(it->first.second);
-    }
-    notes_.erase(begin, end);
-  }
-}
-
-bool Sequence::RemoveNote(Id id) noexcept {
-  if (const auto position_it = positions_.find(id);
-      position_it != positions_.end()) {
-    notes_.erase(std::pair{position_it->second, id});
-    positions_.erase(position_it);
-    return true;
-  }
-  return false;
 }
 
 void Sequence::SetBeginOffset(double begin_offset) noexcept {

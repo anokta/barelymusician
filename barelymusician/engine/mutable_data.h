@@ -7,7 +7,7 @@
 
 namespace barelyapi {
 
-/// Mutable data.
+/// Mutable data with real-time safe view.
 template <typename DataType>
 class MutableData {
  public:

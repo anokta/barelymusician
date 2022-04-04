@@ -21,13 +21,13 @@ struct Note {
   auto operator<=>(const Note& other) const noexcept = default;
 
   /// Duration.
-  double duration;
+  double duration = 0.0;
 
   /// Pitch.
-  double pitch;
+  double pitch = 0.0;
 
   /// Intensity.
-  double intensity;
+  double intensity = 0.0;
 };
 
 }  // namespace barelyapi

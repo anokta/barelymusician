@@ -10,6 +10,23 @@ target_link_libraries(
 )
 
 add_library(
+  engine
+  engine.cpp
+  engine.h
+)
+target_link_libraries(
+  engine
+  conductor
+  id
+  instrument
+  mutable_data
+  note
+  sequence
+  transport
+  find_or_null
+)
+
+add_library(
   event INTERFACE
   event.h
 )
@@ -47,8 +64,12 @@ target_link_libraries(
 )
 
 add_library(
-  note
-  note.cpp
+  mutable_data INTERFACE
+  mutable_data.h
+)
+
+add_library(
+  note INTERFACE
   note.h
 )
 target_link_libraries(

@@ -1,11 +1,13 @@
 add_library(
   dsp_utils
   dsp_utils.cpp
+  dsp_utils.h
 )
 
 add_library(
   envelope
   envelope.cpp
+  envelope.h
 )
 target_link_libraries(
   envelope
@@ -14,15 +16,18 @@ target_link_libraries(
 
 add_library(
   filter INTERFACE
+  filter.h
 )
 
 add_library(
   generator INTERFACE
+  generator.h
 )
 
 add_library(
   one_pole_filter
   one_pole_filter.cpp
+  one_pole_filter.h
 )
 target_link_libraries(
   one_pole_filter
@@ -32,20 +37,25 @@ target_link_libraries(
 add_library(
   oscillator
   oscillator.cpp
+  oscillator.h
 )
 target_link_libraries(
   oscillator
   dsp_utils
   generator
+  include
+  random
 )
 
 add_library(
   polyphonic_voice INTERFACE
+  polyphonic_voice.h
 )
 
 add_library(
   sample_player
   sample_player.cpp
+  sample_player.h
 )
 target_link_libraries(
   sample_player
@@ -54,6 +64,7 @@ target_link_libraries(
 
 add_library(
   voice INTERFACE
+  voice.h
 )
 
 add_executable(

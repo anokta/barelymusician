@@ -415,12 +415,10 @@ BarelyStatus BarelyMusician_SetAdjustNoteCallback(
 
 BarelyStatus BarelyMusician_SetAdjustParameterAutomationCallback(
     BarelyMusicianHandle handle,
-    BarelyMusician_AdjustParameterAutomationCallback callback,
-    void* user_data) {
+    [[maybe_unused]] BarelyMusician_AdjustParameterAutomationCallback callback,
+    [[maybe_unused]] void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
-  callback;
-  user_data;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -615,14 +613,13 @@ BarelyStatus BarelyNote_SetPosition(BarelyMusicianHandle handle,
 BarelyStatus BarelyParameterAutomation_SetDefinition(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyId parameter_automation_id,
-    BarelyParameterAutomationDefinition definition) {
+    [[maybe_unused]] BarelyParameterAutomationDefinition definition) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid ||
       parameter_automation_id == BarelyId_kInvalid) {
     return BarelyStatus_kInvalidArgument;
   }
 
-  definition;
   return BarelyStatus_kUnimplemented;
 }
 
@@ -641,14 +638,13 @@ BarelyStatus BarelyParameterAutomation_SetPosition(
 
 BarelyStatus BarelyParameterAutomation_Create(
     BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyParameterAutomationDefinition definition, double position,
-    BarelyId* out_parameter_automation_id) {
+    [[maybe_unused]] BarelyParameterAutomationDefinition definition,
+    [[maybe_unused]] double position, BarelyId* out_parameter_automation_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (position < 0.0) return BarelyStatus_kInvalidArgument;
   if (!out_parameter_automation_id) return BarelyStatus_kInvalidArgument;
 
-  definition, position;
   return BarelyStatus_kUnimplemented;
 }
 

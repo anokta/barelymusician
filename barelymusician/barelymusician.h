@@ -984,6 +984,7 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetSkippingAdjustments(
 
 #ifdef __cplusplus
 #include <cassert>
+#include <compare>
 #include <functional>
 #include <limits>
 #include <span>

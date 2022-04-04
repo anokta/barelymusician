@@ -2,6 +2,7 @@
 #define EXAMPLES_COMMON_AUDIO_OUTPUT_H_
 
 #include <functional>
+#include <vector>
 
 #include "portaudio.h"
 

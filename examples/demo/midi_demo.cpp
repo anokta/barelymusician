@@ -83,7 +83,7 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
       note.intensity =
           static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
       const double position = get_position_fn(midi_event.tick);
-      notes.push_back(std::move(sequence->CreateNote(note, position)));
+      notes.push_back(sequence->CreateNote(note, position));
     }
   }
   return notes;

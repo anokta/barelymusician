@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_ENGINE_NOTE_H_
 #define BARELYMUSICIAN_ENGINE_NOTE_H_
 
+#include <compare>
+
 #include "barelymusician/barelymusician.h"
 
 namespace barelyapi {
@@ -16,6 +18,14 @@ struct Note {
 
   /// Pitch type.
   using PitchType = barely::NotePitchType;
+
+  /// Constructs new `Note`.
+  ///
+  /// @param duration Duration.
+  /// @param pitch Pitch.
+  /// @param intensity Intensity.
+  Note(double duration, double pitch, double intensity)
+      : duration(duration), pitch(pitch), intensity(intensity) {}
 
   /// Default comparators.
   auto operator<=>(const Note& other) const noexcept = default;

@@ -79,9 +79,9 @@ std::vector<Note> ComposeChord(double intensity, int harmonic, double offset,
                                Sequence* sequence) {
   std::vector<Note> notes;
   const auto add_chord_note = [&](int index) {
-    notes.push_back(std::move(sequence->CreateNote(
+    notes.push_back(sequence->CreateNote(
         NoteDefinition(1.0, NotePitchDefinition::ScaleIndex(index), intensity),
-        offset)));
+        offset));
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -96,11 +96,11 @@ std::vector<Note> ComposeLine(int scale_offset, double intensity, int bar,
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
-    notes.push_back(std::move(sequence->CreateNote(
+    notes.push_back(sequence->CreateNote(
         NoteDefinition(end_position - begin_position,
                        NotePitchDefinition::ScaleIndex(scale_offset + index),
                        intensity),
-        begin_position + offset)));
+        begin_position + offset));
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.33, harmonic);
@@ -129,10 +129,10 @@ std::vector<Note> ComposeDrums(int bar, int beat, int num_beats, Random* random,
   };
   const auto add_note = [&](double begin_position, double end_position,
                             double pitch, double intensity) {
-    notes.push_back(std::move(sequence->CreateNote(
+    notes.push_back(sequence->CreateNote(
         NoteDefinition(end_position - begin_position,
                        NotePitchDefinition::AbsolutePitch(pitch), intensity),
-        begin_position + offset)));
+        begin_position + offset));
   };
 
   // Kick.
@@ -325,8 +325,8 @@ int main(int /*argc*/, char* argv[]) {
     for (auto& [sequence, beat_composer_callback, notes] : performers) {
       // Compose next beat notes.
       if (beat_composer_callback) {
-        notes = std::move(beat_composer_callback(bar, beat, kNumBeats, harmonic,
-                                                 position, &sequence));
+        notes = beat_composer_callback(bar, beat, kNumBeats, harmonic, position,
+                                       &sequence);
       }
     }
   };

@@ -1,7 +1,6 @@
 
 #include "examples/common/audio_output.h"
 
-#include <algorithm>
 #include <cassert>
 #include <utility>
 

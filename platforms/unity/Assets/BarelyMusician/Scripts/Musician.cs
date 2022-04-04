@@ -9,57 +9,12 @@ namespace Barely {
     public const Int64 InvalidId = -1;
 
     // Adjust note callback.
-    public delegate void AdjustNoteCallback(ref NoteDefinition definition);
+    public delegate void AdjustNoteCallback(ref Note.Definition definition);
     public static event AdjustNoteCallback OnAdjustNote;
 
     /// Beat callback.
     public delegate void BeatCallback(double position, double timestamp);
     public static event BeatCallback OnBeat;
-
-    /// Note pitch types.
-    public enum NotePitchType {
-      /// Absolute pitch.
-      AbsolutePitch = 0,
-      /// Relative pitch with respect to root note.
-      RelativePitch = 1,
-      /// Scale index with respect to root note and scale.
-      ScaleIndex = 2,
-    }
-
-    /// Note pitch definition.
-    [StructLayout(LayoutKind.Sequential)]
-    public struct NotePitchDefinition {
-      /// Type.
-      public NotePitchType type;
-
-      /// Value.
-      [StructLayout(LayoutKind.Explicit)]
-      public struct Value {
-        /// Absolute pitch.
-        [FieldOffset(0)]
-        public double absolutePitch;
-        /// Relative pitch.
-        [FieldOffset(0)]
-        public double relativePitch;
-        /// Scale index.
-        [FieldOffset(0)]
-        public int scaleIndex;
-      };
-      public Value value;
-    }
-
-    /// Note definition.
-    [StructLayout(LayoutKind.Sequential)]
-    public struct NoteDefinition {
-      /// Duration.
-      public double duration;
-
-      /// Pitch.
-      public NotePitchDefinition pitch;
-
-      /// Intensity.
-      public double intensity;
-    }
 
     /// Adds new instrument.
     ///
@@ -92,6 +47,23 @@ namespace Barely {
                                            IntPtr.Zero);
       }
       return instrumentId;
+    }
+
+    /// Adds new sequence note.
+    ///
+    /// @param sequence Sequence.
+    /// @param definition Note definition.
+    /// @param position Note position.
+    /// @return Note identifier.
+    public static Int64 AddNote(Sequence sequence, Note.Definition definition, double position) {
+      Int64 noteId = InvalidId;
+      Status status = BarelyNote_Create(Handle, sequence.Id, definition, position, _int64Ptr);
+      if (IsOk(status)) {
+        noteId = Marshal.ReadInt64(_int64Ptr);
+      } else {
+        Debug.LogError("Failed to add sequence note to '" + sequence.name + "': " + status);
+      }
+      return noteId;
     }
 
     /// Adds new sequence.
@@ -185,6 +157,14 @@ namespace Barely {
       BarelyInstrument_Destroy(Handle, instrument.Id);
     }
 
+    /// Removes note.
+    ///
+    /// @param sequence Sequence.
+    /// @param note Note.
+    public static void RemoveNote(Sequence sequence, Note note) {
+      BarelyNote_Destroy(Handle, sequence.Id, note.Id);
+    }
+
     /// Removes sequence.
     ///
     /// @param sequence Sequence.
@@ -218,6 +198,24 @@ namespace Barely {
     public static bool SetInstrumentParameter(Instrument instrument, int index, double value) {
       return BarelyInstrument_SetParameter(Handle, instrument.Id, index, value) !=
              Status.InvalidArgument;
+    }
+
+    /// Sets note definition.
+    ///
+    /// @param sequence Sequence.
+    /// @param note Note.
+    /// @param definition Definition.
+    public static void SetNoteDefinition(Sequence sequence, Note note, Note.Definition definition) {
+      BarelyNote_SetDefinition(Handle, sequence.Id, note.Id, definition);
+    }
+
+    /// Sets note position.
+    ///
+    /// @param sequence Sequence.
+    /// @param note Note.
+    /// @param position Position.
+    public static void SetNotePosition(Sequence sequence, Note note, double position) {
+      BarelyNote_SetPosition(Handle, sequence.Id, note.Id, position);
     }
 
     /// Sets playback position.
@@ -277,20 +275,19 @@ namespace Barely {
       BarelySequence_SetLooping(Handle, sequence.Id, sequence.Loop);
       BarelySequence_SetLoopBeginOffset(Handle, sequence.Id, sequence.LoopBeginOffset);
       BarelySequence_SetLoopLength(Handle, sequence.Id, sequence.LoopLength);
-      // TODO(#85): Fix.
       BarelySequence_SetInstrument(Handle, sequence.Id,
                                    sequence.Instrument ? sequence.Instrument.Id : InvalidId);
 
       if (changed) {
-        // BarelySequence_RemoveAllNotes(Handle, sequence.Id);
-        NoteDefinition definition = new NoteDefinition {};
-        definition.pitch.type = NotePitchType.AbsolutePitch;
-        foreach (var sequenceNote in sequence.Notes) {
-          definition.duration = sequenceNote.note.Duration;
+        sequence.NativeNotes = new Note[sequence.Notes.Length];
+        Note.Definition definition = new Note.Definition {};
+        definition.pitch.type = Note.PitchType.AbsolutePitch;
+        for (int i = 0; i < sequence.NativeNotes.Length; ++i) {
+          definition.duration = sequence.Notes[i].note.Duration;
           definition.pitch.value.absolutePitch =
-              (double)(sequence.RootNote + sequenceNote.note.Pitch - 69) / 12.0;
-          definition.intensity = sequenceNote.note.Intensity;
-          BarelyNote_Create(Handle, sequence.Id, definition, sequenceNote.position, _int64Ptr);
+              (double)(sequence.RootNote + sequence.Notes[i].note.Pitch - 69) / 12.0;
+          definition.intensity = sequence.Notes[i].note.Intensity;
+          sequence.NativeNotes[i] = new Note(sequence, definition, sequence.Notes[i].position);
         }
       }
     }
@@ -361,7 +358,7 @@ namespace Barely {
           return;
         }
         _handle = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
-        _adjustNoteCallback = delegate(ref NoteDefinition definition) {
+        _adjustNoteCallback = delegate(ref Note.Definition definition) {
           OnAdjustNote?.Invoke(ref definition);
         };
         _beatCallback = delegate(double position, double timestamp) {
@@ -541,11 +538,19 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyNote_Create")]
     private static extern Status BarelyNote_Create(IntPtr handle, Int64 sequenceId,
-                                                   NoteDefinition definition, double position,
+                                                   Note.Definition definition, double position,
                                                    IntPtr outNoteId);
 
     [DllImport(pluginName, EntryPoint = "BarelyNote_Destroy")]
     private static extern Status BarelyNote_Destroy(IntPtr handle, Int64 sequenceId, Int64 noteId);
+
+    [DllImport(pluginName, EntryPoint = "BarelyNote_SetDefinition")]
+    private static extern Status BarelyNote_SetDefinition(IntPtr handle, Int64 sequenceId,
+                                                          Int64 noteId, Note.Definition definition);
+
+    [DllImport(pluginName, EntryPoint = "BarelyNote_SetPosition")]
+    private static extern Status BarelyNote_SetPosition(IntPtr handle, Int64 sequenceId,
+                                                        Int64 noteId, double position);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_Create")]
     private static extern Status BarelySequence_Create(IntPtr handle, IntPtr outSequenceId);

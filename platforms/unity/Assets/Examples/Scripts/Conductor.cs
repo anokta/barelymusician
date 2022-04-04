@@ -12,7 +12,7 @@ public class Conductor : MonoBehaviour {
     Musician.OnAdjustNote -= OnAdjustNote;
   }
 
-  private void OnAdjustNote(ref Musician.NoteDefinition definition) {
+  private void OnAdjustNote(ref Note.Definition definition) {
     definition.intensity *= 0.25 * (double)Random.Range(1, 4);
     definition.duration *= 0.25 * (double)Random.Range(1, 4);
   }

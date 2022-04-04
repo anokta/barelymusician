@@ -22,7 +22,7 @@ class Engine {
   Engine() = default;
 
   /// Destroys `Engine`.
-  ~Engine();
+  ~Engine() noexcept;
 
   // Non-copyable and non-movable.
   Engine(const Engine& other) = delete;
@@ -77,12 +77,11 @@ class Engine {
   /// @return Pointer to sequence.
   Sequence* GetSequence(Id sequence_id) noexcept;
 
-  /// Returns sequence.
+  /// Returns sequence instrument identifier.
   ///
   /// @param sequence_id Sequence identifier.
-  /// @return Pointer to sequence.
-  // TODO: Refactor this?
-  Id GetSequenceInstrumentId(Id sequence_id) const noexcept;
+  /// @return Pointer to sequence instrument identifier.
+  Id* GetSequenceInstrumentId(Id sequence_id) noexcept;
 
   /// Returns transport.
   ///
@@ -101,12 +100,11 @@ class Engine {
                          int num_output_channels, int num_output_frames,
                          double timestamp) noexcept;
 
-  /// Returns sequence.
+  /// Sets sequence instrument identifier.
   ///
   /// @param sequence_id Sequence identifier.
   /// @param instrument_id Instrument identifier.
   /// @return True if successful, false otherwise.
-  // TODO: Refactor this?
   bool SetSequenceInstrumentId(Id sequence_id, Id instrument_id) noexcept;
 
   /// Starts playback.
@@ -137,8 +135,7 @@ class Engine {
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
-  // Map of sequences by identifiers.
-  // TODO: is there a better way than pairing this id?
+  // Map of sequence-instrument identifier pairs by identifiers.
   std::unordered_map<Id, std::pair<Sequence, Id>> sequences_;
 
   // Transport.

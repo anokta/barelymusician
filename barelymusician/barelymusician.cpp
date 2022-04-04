@@ -3,15 +3,9 @@
 #include <stdbool.h>  // NOLINT(modernize-deprecated-headers)
 #include <stdint.h>   // NOLINT(modernize-deprecated-headers)
 
-#include <algorithm>
 #include <cstddef>
-#include <memory>
-#include <unordered_map>
-#include <utility>
-#include <vector>
 
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/engine/id.h"
 #include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
 
@@ -28,11 +22,11 @@ struct BarelyMusician {
   BarelyMusician(BarelyMusician&& other) noexcept = delete;
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 
-  // Musician engine.
+  // Engine.
   barelyapi::Engine engine;
 
   // Monotonic identifier counter.
-  barelyapi::Id id_counter = 0;
+  BarelyId id_counter = 0;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -154,9 +148,11 @@ BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
                                       double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (num_output_channels < 0 || num_output_frames < 0 || timestamp < 0) {
+  if ((!output && num_output_channels > 0 && num_output_frames) ||
+      num_output_channels < 0 || num_output_frames < 0) {
     return BarelyStatus_kInvalidArgument;
   }
+  if (timestamp < 0.0) return BarelyStatus_kInvalidArgument;
 
   if (handle->engine.ProcessInstrument(instrument_id, output,
                                        num_output_channels, num_output_frames,
@@ -359,7 +355,7 @@ BarelyStatus BarelyMusician_GetScale(BarelyMusicianHandle handle,
 
   const auto& scale_pitches = handle->engine.GetConductor().GetScale();
   *out_scale_pitches = scale_pitches.data();
-  *out_num_scale_pitches = static_cast<int>(scale_pitches.size());
+  *out_num_scale_pitches = static_cast<int32_t>(scale_pitches.size());
   return BarelyStatus_kOk;
 }
 
@@ -767,9 +763,12 @@ BarelyStatus BarelySequence_GetInstrument(BarelyMusicianHandle handle,
   if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  // TODO: This should ideally be able to return false when `kNotFound`.
-  *out_instrument_id = handle->engine.GetSequenceInstrumentId(sequence_id);
-  return BarelyStatus_kOk;
+  if (const auto* sequence_instrument_id =
+          handle->engine.GetSequenceInstrumentId(sequence_id)) {
+    *out_instrument_id = *sequence_instrument_id;
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequence_GetLoopBeginOffset(BarelyMusicianHandle handle,

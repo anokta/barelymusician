@@ -1,6 +1,7 @@
 
 #include "barelymusician/engine/engine.h"
 
+#include <cassert>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -13,12 +14,19 @@
 
 namespace barelyapi {
 
-Engine::~Engine() { instrument_refs_.Update({}); }
+Engine::~Engine() noexcept {
+  for (auto& [instrument_id, instrument] : instruments_) {
+    instrument->StopAllNotes(transport_.GetTimestamp());
+  }
+  instrument_refs_.Update({});
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Engine::CreateInstrument(Id instrument_id,
                               Instrument::Definition definition,
                               int frame_rate) noexcept {
+  assert(instrument_id > kInvalid);
+  assert(frame_rate >= 0);
   if (instruments_
           .emplace(instrument_id,
                    std::make_unique<Instrument>(definition, frame_rate))
@@ -31,6 +39,7 @@ bool Engine::CreateInstrument(Id instrument_id,
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Engine::CreateSequence(Id sequence_id) noexcept {
+  assert(sequence_id > kInvalid);
   return sequences_
       .emplace(sequence_id,
                std::pair{Sequence(conductor_, transport_), kInvalid})
@@ -56,6 +65,16 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
   return false;
 }
 
+bool Engine::DestroySequence(Id sequence_id) noexcept {
+  if (const auto sequence_it = sequences_.find(sequence_id);
+      sequence_it != sequences_.end()) {
+    sequence_it->second.first.Stop();
+    sequences_.erase(sequence_it);
+    return true;
+  }
+  return false;
+}
+
 Conductor& Engine::GetConductor() noexcept { return conductor_; }
 
 Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
@@ -72,29 +91,22 @@ Sequence* Engine::GetSequence(Id sequence_id) noexcept {
   return nullptr;
 }
 
-Id Engine::GetSequenceInstrumentId(Id sequence_id) const noexcept {
-  if (const auto* sequence = FindOrNull(sequences_, sequence_id)) {
-    return sequence->second;
+Id* Engine::GetSequenceInstrumentId(Id sequence_id) noexcept {
+  if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
+    return &sequence->second;
   }
-  // TODO: This should ideally return `kNotFound` at call site.
-  return kInvalid;
+  return nullptr;
 }
 
 Transport& Engine::GetTransport() noexcept { return transport_; }
 
-bool Engine::DestroySequence(Id sequence_id) noexcept {
-  if (const auto sequence_it = sequences_.find(sequence_id);
-      sequence_it != sequences_.end()) {
-    sequence_it->second.first.Stop();
-    sequences_.erase(sequence_it);
-    return true;
-  }
-  return false;
-}
-
 bool Engine::ProcessInstrument(Id instrument_id, double* output,
                                int num_output_channels, int num_output_frames,
                                double timestamp) noexcept {
+  assert(output || num_output_channels == 0 || num_output_frames == 0);
+  assert(num_output_channels >= 0);
+  assert(num_output_frames >= 0);
+  assert(timestamp >= 0.0);
   auto instrument_refs = instrument_refs_.GetScopedView();
   if (const auto* instrument_ref =
           FindOrNull(*instrument_refs, instrument_id)) {
@@ -108,13 +120,8 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
 bool Engine::SetSequenceInstrumentId(Id sequence_id,
                                      Id instrument_id) noexcept {
   if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
-    if (auto* instrument = GetInstrument(instrument_id)) {
-      sequence->first.SetInstrument(instrument);
-      sequence->second = instrument_id;
-    } else {
-      sequence->first.SetInstrument(nullptr);
-      sequence->second = kInvalid;
-    }
+    sequence->first.SetInstrument(GetInstrument(instrument_id));
+    sequence->second = instrument_id;
     return true;
   }
   return false;
@@ -130,6 +137,7 @@ void Engine::Stop() noexcept {
 }
 
 void Engine::Update(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
   transport_.Update(
       timestamp, [this](double begin_position, double end_position) noexcept {
         for (auto& [sequence_id, sequence] : sequences_) {

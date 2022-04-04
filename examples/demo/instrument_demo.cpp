@@ -5,52 +5,50 @@
 #include <optional>
 #include <thread>
 
+#include "barelymusician/barelymusician.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/synth_instrument.h"
-#include "platforms/api/barelymusician.h"
 
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::OscillatorType;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::OscillatorType;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 256;
 
 // Instrument settings.
-constexpr double kGain = 0.125;
-constexpr int kNumVoices = 16;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr double kEnvelopeAttack = 0.05;
-constexpr double kEnvelopeRelease = 0.125;
+constexpr double kGain = 0.125;
+constexpr double kAttack = 0.05;
+constexpr double kRelease = 0.125;
+constexpr int kNumVoices = 16;
 
 // Note settings.
-constexpr float kRootPitch = barelyapi::kPitchC3;
-constexpr float kNoteIntensity = 1.0f;
+constexpr double kRootPitch = barelyapi::kPitchC3;
 constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
-constexpr float kMaxOffsetOctaves = 3.0f;
+constexpr double kMaxOffsetOctaves = 3.0;
 
 // Returns the pitch for the given `key`.
-std::optional<float> PitchFromKey(const InputManager::Key& key) {
+std::optional<double> PitchFromKey(const InputManager::Key& key) {
   const auto* it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
                              std::toupper(key));
   if (it == std::cend(kOctaveKeys)) {
     return std::nullopt;
   }
-  const float distance =
-      static_cast<float>(std::distance(std::cbegin(kOctaveKeys), it));
+  const double distance =
+      static_cast<double>(std::distance(std::cbegin(kOctaveKeys), it));
   return kRootPitch + distance / barelyapi::kNumSemitones;
 }
 
@@ -63,32 +61,30 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
 
   Instrument instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  instrument.SetGain(kGain);
-  instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack,
-                          kEnvelopeAttack);
-  instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
-                          kEnvelopeRelease);
-  instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                          static_cast<double>(kOscillatorType));
-  instrument.SetParameter(SynthInstrumentParameter::kNumVoices,
-                          static_cast<double>(kNumVoices));
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
+  instrument.SetParameter(SynthParameter::kAttack, kAttack);
+  instrument.SetParameter(SynthParameter::kRelease, kRelease);
+  instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   instrument.SetNoteOnCallback(
-      [](float pitch, float intensity, double /*timestamp*/) {
+      [](double pitch, double intensity, double /*timestamp*/) {
         ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
       });
-  instrument.SetNoteOffCallback([](float pitch, double /*timestamp*/) {
+  instrument.SetNoteOffCallback([](double pitch, double /*timestamp*/) {
     ConsoleLog() << "NoteOff(" << pitch << ") ";
   });
 
   // Audio process callback.
-  audio_output.SetProcessCallback([&](float* output) {
-    instrument.Process(0.0, output, kNumChannels, kNumFrames);
+  audio_output.SetProcessCallback([&](double* output) {
+    instrument.Process(output, kNumChannels, kNumFrames, 0.0);
+    for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
+      output[i] *= kGain;
+    }
   });
 
   // Key down callback.
-  float offset_octaves = 0.0f;
+  double offset_octaves = 0.0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
     if (static_cast<int>(key) == 27) {
@@ -114,7 +110,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument.StartNote(offset_octaves + *pitch, kNoteIntensity);
+      instrument.StartNote(offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -130,11 +126,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(0.0);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

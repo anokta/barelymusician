@@ -2,42 +2,41 @@
 #include <chrono>
 #include <thread>
 
+#include "barelymusician/barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/synth_instrument.h"
-#include "platforms/api/barelymusician.h"
 
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::OscillatorType;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::OscillatorType;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
 constexpr double kLookahead = 0.1;
 
 // Metronome settings.
-constexpr int kNumVoices = 1;
-constexpr double kGain = 0.25;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
-constexpr double kAttack = 0.0f;
-constexpr double kRelease = 0.025f;
+constexpr double kGain = 0.25;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.025;
+constexpr int kNumVoices = 1;
 
-constexpr float kBarPitch = barelyapi::kPitchA4;
-constexpr float kBeatPitch = barelyapi::kPitchA3;
+constexpr double kBarPitch = barelyapi::kPitchA4;
+constexpr double kBeatPitch = barelyapi::kPitchA3;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 120.0;
@@ -49,37 +48,34 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  AudioClock audio_clock(kSampleRate);
+  AudioClock audio_clock(kFrameRate);
 
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
   // Create metronome instrument.
   Instrument metronome =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  metronome.SetGain(kGain);
-  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
-  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
-  metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                         static_cast<double>(kOscillatorType));
-  metronome.SetParameter(SynthInstrumentParameter::kNumVoices,
-                         static_cast<double>(kNumVoices));
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  metronome.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
+  metronome.SetParameter(SynthParameter::kAttack, kAttack);
+  metronome.SetParameter(SynthParameter::kRelease, kRelease);
+  metronome.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   // Beat callback.
   const auto beat_callback = [&](double position, double /*timestamp*/) {
     const int current_bar = static_cast<int>(position) / kNumBeats;
     const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const float pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    metronome.StartNote(pitch);
+    const double pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
+    metronome.StartNote(pitch, kGain);
     metronome.StopNote(pitch);
   };
   musician.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  const auto process_callback = [&](float* output) {
-    metronome.Process(audio_clock.GetTimestamp(), output, kNumChannels,
-                      kNumFrames);
+  const auto process_callback = [&](double* output) {
+    metronome.Process(output, kNumChannels, kNumFrames,
+                      audio_clock.GetTimestamp());
     audio_clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -129,7 +125,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
   musician.Start();
 
   while (!quit) {

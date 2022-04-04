@@ -12,9 +12,9 @@ AudioOutput::AudioOutput() noexcept { Pa_Initialize(); }
 
 AudioOutput::~AudioOutput() noexcept { Pa_Terminate(); }
 
-void AudioOutput::Start(int sample_rate, int num_channels,
+void AudioOutput::Start(int frame_rate, int num_channels,
                         int num_frames) noexcept {
-  assert(sample_rate >= 0);
+  assert(frame_rate >= 0);
   assert(num_channels >= 0);
   assert(num_frames >= 0);
   if (stream_) {
@@ -31,25 +31,27 @@ void AudioOutput::Start(int sample_rate, int num_channels,
       Pa_GetDeviceInfo(output_parameters.device)->defaultLowOutputLatency;
   output_parameters.hostApiSpecificStreamInfo = nullptr;
 
+  process_data_.buffer.resize(num_channels * num_frames);
   const auto callback =
       [](const void* /*input_buffer*/, void* output_buffer,
          unsigned long /*frames_per_buffer*/,  // NOLINT(google-runtime-int)
          const PaStreamCallbackTimeInfo* /*time_info*/,
          PaStreamCallbackFlags /*status_flags*/, void* user_data) noexcept {
         if (user_data) {
-          // Access the audio process callback via `user_data` (to avoid
-          // capturing `process_callback_`).
-          const auto& process_callback =
-              *reinterpret_cast<ProcessCallback*>(user_data);
-          if (process_callback) {
-            process_callback(reinterpret_cast<float*>(output_buffer));
+          // Access the audio process data via `user_data` to avoid capture.
+          auto& process_data = *static_cast<ProcessData*>(user_data);
+          if (process_data.callback) {
+            float* output = static_cast<float*>(output_buffer);
+            process_data.callback(process_data.buffer.data());
+            for (const double sample : process_data.buffer) {
+              *output++ = static_cast<float>(sample);
+            }
           }
         }
         return static_cast<int>(paContinue);
       };
-  Pa_OpenStream(&stream_, nullptr, &output_parameters, sample_rate, num_frames,
-                paClipOff, callback,
-                reinterpret_cast<void*>(&process_callback_));
+  Pa_OpenStream(&stream_, nullptr, &output_parameters, frame_rate, num_frames,
+                paClipOff, callback, static_cast<void*>(&process_data_));
   Pa_StartStream(stream_);
 }
 
@@ -63,7 +65,7 @@ void AudioOutput::Stop() noexcept {
 
 void AudioOutput::SetProcessCallback(
     ProcessCallback process_callback) noexcept {
-  process_callback_ = std::move(process_callback);
+  process_data_.callback = std::move(process_callback);
 }
 
 }  // namespace barely::examples

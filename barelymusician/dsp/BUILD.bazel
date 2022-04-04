@@ -1,0 +1,114 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//barelymusician:__subpackages__"])
+
+cc_library(
+    name = "dsp_utils",
+    srcs = ["dsp_utils.cpp"],
+    hdrs = ["dsp_utils.h"],
+)
+
+cc_library(
+    name = "envelope",
+    srcs = ["envelope.cpp"],
+    hdrs = ["envelope.h"],
+    deps = [
+        ":generator",
+    ],
+)
+
+cc_library(
+    name = "filter",
+    hdrs = ["filter.h"],
+)
+
+cc_library(
+    name = "generator",
+    hdrs = ["generator.h"],
+)
+
+cc_library(
+    name = "one_pole_filter",
+    srcs = ["one_pole_filter.cpp"],
+    hdrs = ["one_pole_filter.h"],
+    deps = [
+        ":filter",
+    ],
+)
+
+cc_library(
+    name = "oscillator",
+    srcs = ["oscillator.cpp"],
+    hdrs = ["oscillator.h"],
+    deps = [
+        ":dsp_utils",
+        ":generator",
+        "//barelymusician:include",
+        "//barelymusician/common:random",
+    ],
+)
+
+cc_library(
+    name = "polyphonic_voice",
+    hdrs = ["polyphonic_voice.h"],
+)
+
+cc_library(
+    name = "sample_player",
+    srcs = ["sample_player.cpp"],
+    hdrs = ["sample_player.h"],
+    deps = [
+        ":generator",
+    ],
+)
+
+cc_library(
+    name = "voice",
+    hdrs = ["voice.h"],
+)
+
+cc_test(
+    name = "dsp_utils_test",
+    srcs = ["dsp_utils_test.cpp"],
+    deps = [
+        ":dsp_utils",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "envelope_test",
+    srcs = ["envelope_test.cpp"],
+    deps = [
+        ":envelope",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "one_pole_filter_test",
+    srcs = ["one_pole_filter_test.cpp"],
+    deps = [
+        ":one_pole_filter",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "polyphonic_voice_test",
+    srcs = ["polyphonic_voice_test.cpp"],
+    deps = [
+        ":polyphonic_voice",
+        ":voice",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "sample_player_test",
+    srcs = ["sample_player_test.cpp"],
+    deps = [
+        ":sample_player",
+        "@googletest//:gtest_main",
+    ],
+)

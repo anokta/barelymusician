@@ -23,6 +23,12 @@ cc_library(
 )
 
 cc_library(
+    name = "gain_processor",
+    srcs = ["gain_processor.cpp"],
+    hdrs = ["gain_processor.h"],
+)
+
+cc_library(
     name = "input_manager",
     srcs = ["input_manager.cpp"],
     hdrs = ["input_manager.h"],
@@ -33,25 +39,10 @@ cc_library(
 )
 
 cc_library(
-    name = "random",
-    srcs = ["random.cpp"],
-    hdrs = ["random.h"],
-)
-
-cc_library(
     name = "wav_file",
     srcs = ["wav_file.cpp"],
     hdrs = ["wav_file.h"],
     deps = [
         "@dr_libs//:dr_wav",
-    ],
-)
-
-cc_test(
-    name = "random_test",
-    srcs = ["random_test.cpp"],
-    deps = [
-        ":random",
-        "@googletest//:gtest_main",
     ],
 )

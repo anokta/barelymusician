@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -7,124 +7,15 @@ cc_library(
     srcs = ["barelymusician.cpp"],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":barelymusician_headeronly",
-        ":event",
-        ":find_or_null",
-        ":instrument",
-        ":mutable_data",
-        ":parameter",
-        ":sequence",
-        ":transport",
+        ":include",
+        "//barelymusician/engine",
+        "//barelymusician/instruments:percussion_instrument",
+        "//barelymusician/instruments:synth_instrument",
     ],
     alwayslink = True,
 )
 
 cc_library(
-    name = "barelymusician_headeronly",
+    name = "include",
     hdrs = ["barelymusician.h"],
 )
-
-cc_library(
-    name = "event",
-    hdrs = ["event.h"],
-    deps = [
-        ":barelymusician_headeronly",
-    ],
-)
-
-cc_library(
-    name = "event_queue",
-    srcs = ["event_queue.cpp"],
-    hdrs = ["event_queue.h"],
-    deps = [
-        ":event",
-    ],
-)
-
-cc_library(
-    name = "find_or_null",
-    hdrs = ["find_or_null.h"],
-)
-
-cc_library(
-    name = "gain_processor",
-    srcs = ["gain_processor.cpp"],
-    hdrs = ["gain_processor.h"],
-)
-
-cc_library(
-    name = "instrument",
-    srcs = ["instrument.cpp"],
-    hdrs = ["instrument.h"],
-    deps = [
-        ":barelymusician_headeronly",
-        ":event",
-        ":event_queue",
-        ":gain_processor",
-        ":parameter",
-    ],
-)
-
-cc_library(
-    name = "mutable_data",
-    hdrs = ["mutable_data.h"],
-)
-
-cc_library(
-    name = "parameter",
-    srcs = ["parameter.cpp"],
-    hdrs = ["parameter.h"],
-    deps = [
-        ":barelymusician_headeronly",
-    ],
-)
-
-cc_library(
-    name = "sequence",
-    srcs = ["sequence.cpp"],
-    hdrs = ["sequence.h"],
-    deps = [
-        ":barelymusician_headeronly",
-        ":event",
-        ":find_or_null",
-    ],
-)
-
-cc_library(
-    name = "transport",
-    srcs = ["transport.cpp"],
-    hdrs = ["transport.h"],
-)
-
-cc_test(
-    name = "find_or_null_test",
-    srcs = ["find_or_null_test.cpp"],
-    deps = [
-        ":find_or_null",
-        "@googletest//:gtest_main",
-    ],
-)
-
-# TODO: Add unit tests for instrument.
-
-cc_test(
-    name = "parameter_test",
-    srcs = ["parameter_test.cpp"],
-    deps = [
-        ":parameter",
-        "@googletest//:gtest_main",
-    ],
-)
-
-# TODO: Add back sequence unit test.
-
-cc_test(
-    name = "transport_test",
-    srcs = ["transport_test.cpp"],
-    deps = [
-        ":transport",
-        "@googletest//:gtest_main",
-    ],
-)
-
-# TODO: Add unit tests (move old engine test back).

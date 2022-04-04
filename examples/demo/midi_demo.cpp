@@ -3,31 +3,34 @@
 #include <chrono>
 #include <memory>
 #include <thread>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include "MidiFile.h"
+#include "barelymusician/barelymusician.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/synth_instrument.h"
-#include "platforms/api/barelymusician.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 namespace {
 
 using ::barely::Instrument;
+using ::barely::InstrumentType;
 using ::barely::Musician;
+using ::barely::Note;
+using ::barely::NoteDefinition;
+using ::barely::NotePitchDefinition;
+using ::barely::OscillatorType;
 using ::barely::Sequence;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::OscillatorType;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -39,14 +42,14 @@ constexpr int kNumFrames = 512;
 constexpr double kLookahead = 0.1;
 
 // Instrument settings.
+constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
+constexpr double kInstrumentEnvelopeAttack = 0.0;
+constexpr double kInstrumentEnvelopeRelease = 0.2;
 constexpr int kNumInstrumentVoices = 16;
 constexpr double kInstrumentGain =
     1.0 / static_cast<double>(kNumInstrumentVoices);
-constexpr double kInstrumentEnvelopeAttack = 0.0f;
-constexpr double kInstrumentEnvelopeRelease = 0.2f;
-constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 
-constexpr float kMaxVelocity = 127.0f;
+constexpr double kMaxVelocity = 127.0;
 
 // Midi file name.
 constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
@@ -54,34 +57,36 @@ constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
 constexpr double kTempo = 132.0;
 
 // Returns the pitch for the given `midi_key_number`.
-float PitchFromMidiKeyNumber(int midi_key_number) {
-  return static_cast<float>(midi_key_number - 69) / barelyapi::kNumSemitones;
+double PitchFromMidiKeyNumber(int midi_key_number) {
+  return static_cast<double>(midi_key_number - 69) / barelyapi::kNumSemitones;
 }
 
 // Returns the MIDI key number for the given `pitch`.
-int MidiKeyNumberFromPitch(float pitch) {
+int MidiKeyNumberFromPitch(double pitch) {
   return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
-// Adds the score to `performer_id` from the given `midi_events`.
-void AddScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
-              Sequence* sequence) {
-  const auto get_position = [ticks_per_beat](int tick) -> double {
+// Builds the score for the given `midi_events`.
+std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
+                             int ticks_per_beat, Sequence* sequence) {
+  const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
+  std::vector<Note> notes;
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      BarelyNoteDefinition note;
-      note.pitch_definition.absolute_pitch =
-          PitchFromMidiKeyNumber(midi_event.getKeyNumber());
-      note.intensity_definition.intensity =
-          static_cast<float>(midi_event.getVelocity()) / kMaxVelocity;
-      note.duration_definition.duration =
-          get_position(midi_event.getTickDuration());
-      sequence->AddNote(get_position(midi_event.tick), note);
+      NoteDefinition note;
+      note.duration = get_position_fn(midi_event.getTickDuration());
+      note.pitch = NotePitchDefinition::AbsolutePitch(
+          PitchFromMidiKeyNumber(midi_event.getKeyNumber()));
+      note.intensity =
+          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
+      const double position = get_position_fn(midi_event.tick);
+      notes.push_back(sequence->CreateNote(note, position));
     }
   }
+  return notes;
 }
 
 }  // namespace
@@ -109,52 +114,52 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician;
   musician.SetTempo(kTempo);
 
-  std::vector<std::pair<Instrument, Sequence>> tracks;
+  std::vector<std::tuple<Instrument, Sequence, std::vector<Note>>> tracks;
   for (int i = 0; i < num_tracks; ++i) {
     // Build score.
     Sequence sequence = musician.CreateSequence();
-    AddScore(midi_file[i], ticks_per_quarter, &sequence);
-    if (sequence.IsEmpty()) {
+    auto notes = BuildScore(midi_file[i], ticks_per_quarter, &sequence);
+    if (notes.empty()) {
       ConsoleLog() << "Empty MIDI track: " << i;
       continue;
     }
     // Add instrument.
-    Instrument instrument = musician.CreateInstrument(
-        SynthInstrument::GetDefinition(), kSampleRate);
+    Instrument instrument =
+        musician.CreateInstrument(InstrumentType::kSynth, kSampleRate);
     const auto track_index = tracks.size();
-    instrument.SetNoteOnCallback([track_index](float pitch, float intensity,
+    instrument.SetNoteOnCallback([track_index](double pitch, double intensity,
                                                double /*timestamp*/) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn("
                    << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
     });
     instrument.SetNoteOffCallback(
-        [track_index](float pitch, double /*timestamp*/) {
+        [track_index](double pitch, double /*timestamp*/) {
           ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                        << MidiKeyNumberFromPitch(pitch) << ") ";
         });
-    instrument.SetGain(kInstrumentGain);
-    instrument.SetParameter(SynthInstrumentParameter::kEnvelopeAttack,
-                            kInstrumentEnvelopeAttack);
-    instrument.SetParameter(SynthInstrumentParameter::kEnvelopeRelease,
+    instrument.SetParameter(SynthParameter::kOscillatorType,
+                            kInstrumentOscillatorType);
+    instrument.SetParameter(SynthParameter::kAttack, kInstrumentEnvelopeAttack);
+    instrument.SetParameter(SynthParameter::kRelease,
                             kInstrumentEnvelopeRelease);
-    instrument.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                            static_cast<double>(kInstrumentOscillatorType));
-    instrument.SetParameter(SynthInstrumentParameter::kNumVoices,
-                            static_cast<double>(kNumInstrumentVoices));
-    tracks.emplace_back(std::move(instrument), std::move(sequence));
-    tracks.back().second.SetInstrument(&tracks.back().first);
+    instrument.SetParameter(SynthParameter::kNumVoices, kNumInstrumentVoices);
+    tracks.emplace_back(std::move(instrument), std::move(sequence),
+                        std::move(notes));
+    std::get<1>(tracks.back()).SetInstrument(&std::get<0>(tracks.back()));
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&](float* output) {
-    std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (auto& [instrument, sequence] : tracks) {
-      instrument.Process(clock.GetTimestamp(), temp_buffer.data(), kNumChannels,
-                         kNumFrames);
+  std::vector<double> temp_buffer(kNumChannels * kNumFrames);
+  const auto process_callback = [&](double* output) {
+    std::fill_n(output, kNumChannels * kNumFrames, 0.0);
+    for (auto& [instrument, sequence, notes] : tracks) {
+      instrument.Process(temp_buffer.data(), kNumChannels, kNumFrames,
+                         clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     std::plus<>());
+                     [](double sample, double output_sample) {
+                       return kInstrumentGain * sample + output_sample;
+                     });
     }
     clock.Update(kNumFrames);
   };

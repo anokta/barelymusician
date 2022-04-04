@@ -10,7 +10,7 @@ public class InstrumentController : MonoBehaviour {
 
   // Root note pitch.
   [Range(0.0f, 1.0f)]
-  public float rootPitch = 0.0f;
+  public double rootPitch = 0.0;
 
   // Octave offset.
   [Range(-3, 3)]
@@ -18,7 +18,7 @@ public class InstrumentController : MonoBehaviour {
 
   // Note intensity.
   [Range(0.0f, 1.0f)]
-  public float noteIntensity = 1.0f;
+  public double noteIntensity = 1.0;
 
   // Ordered keys of one octave.
   private KeyCode[] octaveKeys =
@@ -36,9 +36,9 @@ public class InstrumentController : MonoBehaviour {
     }
     // Adjust note intensity.
     if (Input.GetKeyDown(KeyCode.C)) {
-      noteIntensity = Mathf.Max(noteIntensity - 0.2f, 0.0f);
+      noteIntensity = (double)Mathf.Max((float)noteIntensity - 0.2f, 0.0f);
     } else if (Input.GetKeyDown(KeyCode.V)) {
-      noteIntensity = Mathf.Min(noteIntensity + 0.2f, 1.0f);
+      noteIntensity = (double)Mathf.Min((float)noteIntensity + 0.2f, 1.0f);
     }
     // Play notes.
     for (int i = 0; i < octaveKeys.Length; ++i) {
@@ -51,7 +51,7 @@ public class InstrumentController : MonoBehaviour {
   }
 
   // Returns the corresponding pitch for the given key.
-  private float GetPitchFromKeyIndex(int keyIndex) {
-    return rootPitch + octaveOffset + (float)keyIndex / 12.0f;
+  private double GetPitchFromKeyIndex(int keyIndex) {
+    return rootPitch + octaveOffset + (double)keyIndex / 12.0;
   }
 }

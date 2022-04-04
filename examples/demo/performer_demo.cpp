@@ -4,37 +4,39 @@
 #include <cmath>
 #include <memory>
 #include <thread>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
+#include "barelymusician/common/random.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
-#include "examples/common/random.h"
 #include "examples/composition/note_pitch.h"
-#include "examples/instruments/synth_instrument.h"
-#include "platforms/api/barelymusician.h"
 
 namespace {
 
 using ::barely::Instrument;
-using ::barely::IsOk;
+using ::barely::InstrumentType;
 using ::barely::Musician;
-using ::barely::NoteReference;
+using ::barely::Note;
+using ::barely::NoteDefinition;
+using ::barely::NotePitchDefinition;
+using ::barely::OscillatorType;
 using ::barely::Sequence;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::SynthInstrument;
-using ::barely::examples::SynthInstrumentParameter;
-using ::barelyapi::OscillatorType;
+// TODO(#99): Move `Random` to public api.
 using ::barelyapi::Random;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr int kNumChannels = 2;
 constexpr int kNumFrames = 1024;
 
@@ -43,14 +45,14 @@ constexpr double kLookahead = 0.1;
 // Instrument settings.
 constexpr double kGain = 0.2;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
-constexpr double kAttack = 0.0f;
-constexpr double kRelease = 0.1f;
+constexpr double kAttack = 0.0;
+constexpr double kRelease = 0.1;
 
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
 
 // Returns the MIDI key number for the given `pitch`.
-int MidiKeyNumberFromPitch(float pitch) {
+int MidiKeyNumberFromPitch(double pitch) {
   return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
 }
 
@@ -60,51 +62,48 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  AudioClock audio_clock(kSampleRate);
+  AudioClock audio_clock(kFrameRate);
+
+  Random random;
 
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
   Instrument performer =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  performer.SetGain(kGain);
-  performer.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
-  performer.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, kRelease);
-  performer.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                         static_cast<double>(kOscillatorType));
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  performer.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
+  performer.SetParameter(SynthParameter::kAttack, kAttack);
+  performer.SetParameter(SynthParameter::kRelease, kRelease);
   performer.SetNoteOnCallback(
-      [](float pitch, float intensity, double /*timestamp*/) {
+      [](double pitch, double intensity, double /*timestamp*/) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << ", "
                      << intensity << "}";
       });
 
   Instrument metronome =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate);
-  metronome.SetGain(0.5 * kGain);
-  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeAttack, kAttack);
-  metronome.SetParameter(SynthInstrumentParameter::kEnvelopeRelease, 0.025);
-  metronome.SetParameter(SynthInstrumentParameter::kOscillatorType,
-                         static_cast<double>(OscillatorType::kSquare));
+      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+  metronome.SetParameter(SynthParameter::kOscillatorType,
+                         OscillatorType::kSquare);
+  metronome.SetParameter(SynthParameter::kAttack, kAttack);
+  metronome.SetParameter(SynthParameter::kRelease, 0.025);
 
-  const auto build_note = [](float pitch, double duration,
-                             float intensity = 0.25f) {
-    return BarelyNoteDefinition{
-        .duration_definition = {.duration = duration},
-        .intensity_definition = {.intensity = intensity},
-        .pitch_definition = {.absolute_pitch = pitch}};
+  const auto build_note = [](double pitch, double duration,
+                             double intensity = 0.25) {
+    return NoteDefinition(duration, NotePitchDefinition::AbsolutePitch(pitch),
+                          intensity);
   };
-  std::vector<std::pair<double, BarelyNoteDefinition>> notes;
-  notes.emplace_back(0.0, build_note(barelyapi::kPitchC4, 1.0));
-  notes.emplace_back(1.0, build_note(barelyapi::kPitchD4, 1.0));
-  notes.emplace_back(2.0, build_note(barelyapi::kPitchE4, 1.0));
-  notes.emplace_back(3.0, build_note(barelyapi::kPitchF4, 1.0));
-  notes.emplace_back(4.0, build_note(barelyapi::kPitchG4, 1.0));
-  notes.emplace_back(5.0, build_note(barelyapi::kPitchG4, 1.0 / 3.0));
-  notes.emplace_back(5.0 + 1.0 / 3.0,
-                     build_note(barelyapi::kPitchA5, 1.0 / 3.0));
-  notes.emplace_back(5.0 + 2.0 / 3.0,
-                     build_note(barelyapi::kPitchB5, 1.0 / 3.0));
-  notes.emplace_back(6.0, build_note(barelyapi::kPitchC5, 2.0));
+  std::vector<std::pair<NoteDefinition, double>> score;
+  score.emplace_back(build_note(barelyapi::kPitchC4, 1.0), 0.0);
+  score.emplace_back(build_note(barelyapi::kPitchD4, 1.0), 1.0);
+  score.emplace_back(build_note(barelyapi::kPitchE4, 1.0), 2.0);
+  score.emplace_back(build_note(barelyapi::kPitchF4, 1.0), 3.0);
+  score.emplace_back(build_note(barelyapi::kPitchG4, 1.0), 4.0);
+  score.emplace_back(build_note(barelyapi::kPitchG4, 1.0 / 3.0), 5.0);
+  score.emplace_back(build_note(barelyapi::kPitchA5, 1.0 / 3.0),
+                     5.0 + 1.0 / 3.0);
+  score.emplace_back(build_note(barelyapi::kPitchB5, 1.0 / 3.0),
+                     5.0 + 2.0 / 3.0);
+  score.emplace_back(build_note(barelyapi::kPitchC5, 2.0), 6.0);
 
   Sequence sequence = musician.CreateSequence();
   sequence.SetInstrument(&performer);
@@ -114,12 +113,26 @@ int main(int /*argc*/, char* /*argv*/[]) {
   sequence.SetLooping(true);
   sequence.SetLoopBeginOffset(3.0);
   sequence.SetLoopLength(5.0);
-  std::vector<NoteReference> note_references;
-  for (const auto& [position, note] : notes) {
-    note_references.push_back(sequence.AddNote(position, note));
+  std::unordered_map<int, Note> notes;
+  notes.reserve(score.size());
+  int index = 0;
+  for (const auto& [note, position] : score) {
+    notes.emplace(index++, sequence.CreateNote(note, position));
   }
 
   bool use_conductor = false;
+  musician.SetAdjustNoteCallback([&](NoteDefinition* definition) {
+    if (use_conductor) {
+      definition->duration = 0.25 *
+                             static_cast<double>(random.DrawUniform(1, 4)) *
+                             definition->duration;
+      definition->pitch.absolute_pitch +=
+          static_cast<double>(random.DrawUniform(-1, 1));
+      definition->intensity = 0.5 *
+                              static_cast<double>(random.DrawUniform(1, 4)) *
+                              definition->intensity;
+    }
+  });
 
   bool reset_position = false;
   const auto beat_callback = [&](double /*position*/, double /*timestamp*/) {
@@ -134,14 +147,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetBeatCallback(beat_callback);
 
   // Audio process callback.
-  std::vector<float> temp_buffer(kNumChannels * kNumFrames);
-  const auto process_callback = [&](float* output) {
-    std::fill_n(output, kNumChannels * kNumFrames, 0.0f);
-    for (auto* instrument : {&metronome, &performer}) {
-      instrument->Process(audio_clock.GetTimestamp(), temp_buffer.data(),
-                          kNumChannels, kNumFrames);
+  std::vector<double> gains = {kGain, 0.5 * kGain};
+  std::vector<double> temp_buffer(kNumChannels * kNumFrames);
+  const auto process_callback = [&](double* output) {
+    std::fill_n(output, kNumChannels * kNumFrames, 0.0);
+    int i = 0;
+    for (auto* instrument : {&performer, &metronome}) {
+      const double gain = gains[i++];
+      instrument->Process(temp_buffer.data(), kNumChannels, kNumFrames,
+                          audio_clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     std::plus<>());
+                     [&](double sample, double output_sample) {
+                       return gain * sample + output_sample;
+                     });
     }
     audio_clock.Update(kNumFrames);
   };
@@ -157,12 +175,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
-      // Toggle notes.
-      if (IsOk(sequence.RemoveNote(note_references[index]))) {
+      // Toggle score.
+      if (notes.erase(index - 1) > 0) {
         ConsoleLog() << "Removed note " << index;
       } else {
-        note_references[index] =
-            sequence.AddNote(notes[index].first, notes[index].second);
+        notes.emplace(index - 1, sequence.CreateNote(score[index - 1].first,
+                                                     score[index - 1].second));
         ConsoleLog() << "Added note " << index;
       }
       return;
@@ -190,7 +208,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
       case 'C':
         use_conductor = !use_conductor;
-        // TODO: Add back conductor adjustment.
         ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':
@@ -218,7 +235,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
   musician.Start();
 
   while (!quit) {

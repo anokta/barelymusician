@@ -1,0 +1,51 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//barelymusician:__subpackages__"])
+
+cc_library(
+    name = "enveloped_voice",
+    hdrs = ["enveloped_voice.h"],
+    deps = [
+        "//barelymusician/dsp:envelope",
+        "//barelymusician/dsp:voice",
+    ],
+)
+
+cc_library(
+    name = "generic_instrument",
+    hdrs = ["generic_instrument.h"],
+    deps = [
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:parameter",
+    ],
+)
+
+cc_library(
+    name = "percussion_instrument",
+    srcs = ["percussion_instrument.cpp"],
+    hdrs = ["percussion_instrument.h"],
+    deps = [
+        ":enveloped_voice",
+        ":generic_instrument",
+        "//barelymusician:include",
+        "//barelymusician/dsp:sample_player",
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:parameter",
+    ],
+)
+
+cc_library(
+    name = "synth_instrument",
+    srcs = ["synth_instrument.cpp"],
+    hdrs = ["synth_instrument.h"],
+    deps = [
+        ":enveloped_voice",
+        ":generic_instrument",
+        "//barelymusician:include",
+        "//barelymusician/dsp:dsp_utils",
+        "//barelymusician/dsp:oscillator",
+        "//barelymusician/dsp:polyphonic_voice",
+        "//barelymusician/engine:instrument",
+        "//barelymusician/engine:parameter",
+    ],
+)

@@ -9,7 +9,7 @@
 
 namespace barely::examples {
 
-const std::vector<float>& WavFile::GetData() const noexcept { return data_; }
+const std::vector<double>& WavFile::GetData() const noexcept { return data_; }
 
 int WavFile::GetNumChannels() const noexcept { return num_channels_; }
 

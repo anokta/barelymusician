@@ -123,6 +123,49 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &243456370
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 243456372}
+  - component: {fileID: 243456371}
+  m_Layer: 0
+  m_Name: Conductor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &243456371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 243456370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fbd59afedfec7c4285ffeb523ade8c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &243456372
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 243456370}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &505738525
 GameObject:
   m_ObjectHideFlags: 0
@@ -391,11 +434,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  oscillatorType: 1
   attack: 0
   decay: 0
   sustain: 1
   release: 0.125
-  oscillatorType: 1
   numVoices: 8
 --- !u!82 &1298915920
 AudioSource:
@@ -629,11 +672,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  oscillatorType: 2
   attack: 0
   decay: 0
   sustain: 1
   release: 0.1
-  oscillatorType: 2
   numVoices: 8
 --- !u!82 &1714525514
 AudioSource:
@@ -834,11 +877,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  oscillatorType: 0
   attack: 0
   decay: 0
   sustain: 1
   release: 0.2
-  oscillatorType: 0
   numVoices: 16
 --- !u!82 &1737834381
 AudioSource:
@@ -1027,11 +1070,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  oscillatorType: 2
   attack: 0
   decay: 0
   sustain: 1
   release: 0.05
-  oscillatorType: 2
   numVoices: 1
 --- !u!82 &2098958023
 AudioSource:
@@ -1045,7 +1088,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.2
+  m_Volume: 0.1
   m_Pitch: 1
   Loop: 0
   Mute: 0

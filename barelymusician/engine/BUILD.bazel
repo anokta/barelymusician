@@ -1,0 +1,169 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//barelymusician:__subpackages__"])
+
+cc_library(
+    name = "conductor",
+    srcs = ["conductor.cpp"],
+    hdrs = ["conductor.h"],
+    deps = [
+        ":note",
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "engine",
+    srcs = ["engine.cpp"],
+    hdrs = ["engine.h"],
+    deps = [
+        ":conductor",
+        ":id",
+        ":instrument",
+        ":mutable_data",
+        ":note",
+        ":sequence",
+        ":transport",
+        "//barelymusician/common:find_or_null",
+    ],
+)
+
+cc_library(
+    name = "event",
+    hdrs = ["event.h"],
+)
+
+cc_library(
+    name = "event_queue",
+    srcs = ["event_queue.cpp"],
+    hdrs = ["event_queue.h"],
+    deps = [
+        ":event",
+    ],
+)
+
+cc_library(
+    name = "id",
+    hdrs = ["id.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "instrument",
+    srcs = ["instrument.cpp"],
+    hdrs = ["instrument.h"],
+    deps = [
+        ":event",
+        ":event_queue",
+        ":parameter",
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "mutable_data",
+    hdrs = ["mutable_data.h"],
+)
+
+cc_library(
+    name = "note",
+    hdrs = ["note.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "parameter",
+    srcs = ["parameter.cpp"],
+    hdrs = ["parameter.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "sequence",
+    srcs = ["sequence.cpp"],
+    hdrs = ["sequence.h"],
+    deps = [
+        ":conductor",
+        ":id",
+        ":instrument",
+        ":note",
+        ":transport",
+        "//barelymusician/common:find_or_null",
+    ],
+)
+
+cc_library(
+    name = "transport",
+    srcs = ["transport.cpp"],
+    hdrs = ["transport.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_test(
+    name = "conductor_test",
+    srcs = ["conductor_test.cpp"],
+    deps = [
+        ":conductor",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "event_queue_test",
+    srcs = ["event_queue_test.cpp"],
+    deps = [
+        ":event",
+        ":event_queue",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "instrument_test",
+    srcs = ["instrument_test.cpp"],
+    deps = [
+        ":instrument",
+        ":parameter",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "parameter_test",
+    srcs = ["parameter_test.cpp"],
+    deps = [
+        ":parameter",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "sequence_test",
+    srcs = ["sequence_test.cpp"],
+    deps = [
+        ":conductor",
+        ":id",
+        ":instrument",
+        ":note",
+        ":sequence",
+        ":transport",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "transport_test",
+    srcs = ["transport_test.cpp"],
+    deps = [
+        ":transport",
+        "@googletest//:gtest_main",
+    ],
+)

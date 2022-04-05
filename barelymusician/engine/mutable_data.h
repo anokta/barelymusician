@@ -39,7 +39,7 @@ class MutableData {
 
     // Member access operators.
     const DataType& operator*() const noexcept;
-    const DataType& operator->() const noexcept;
+    const DataType* operator->() const noexcept;
 
    private:
     // Pointer to data.
@@ -88,8 +88,8 @@ const DataType& MutableData<DataType>::ScopedView::operator*() const noexcept {
 }
 
 template <typename DataType>
-const DataType& MutableData<DataType>::ScopedView::operator->() const noexcept {
-  return *view_;
+const DataType* MutableData<DataType>::ScopedView::operator->() const noexcept {
+  return view_;
 }
 
 }  // namespace barelyapi

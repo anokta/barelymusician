@@ -150,6 +150,18 @@ target_link_libraries(
 gtest_discover_tests(instrument_test)
 
 add_executable(
+  mutable_data_test
+  mutable_data_test.cpp
+)
+target_link_libraries(
+  mutable_data_test
+  mutable_data
+  gmock
+  gtest_main
+)
+gtest_discover_tests(mutable_data_test)
+
+add_executable(
   parameter_test
   parameter_test.cpp
 )

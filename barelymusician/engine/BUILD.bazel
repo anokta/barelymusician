@@ -137,6 +137,15 @@ cc_test(
 )
 
 cc_test(
+    name = "mutable_data_test",
+    srcs = ["mutable_data_test.cpp"],
+    deps = [
+        ":mutable_data",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "parameter_test",
     srcs = ["parameter_test.cpp"],
     deps = [

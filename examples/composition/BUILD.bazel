@@ -10,7 +10,6 @@ cc_library(
 
 cc_library(
     name = "note_pitch",
-    srcs = ["note_pitch.cpp"],
     hdrs = ["note_pitch.h"],
 )
 
@@ -19,15 +18,6 @@ cc_test(
     srcs = ["note_duration_test.cpp"],
     deps = [
         ":note_duration",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "note_pitch_test",
-    srcs = ["note_pitch_test.cpp"],
-    deps = [
-        ":note_pitch",
         "@googletest//:gtest_main",
     ],
 )

@@ -5,8 +5,7 @@ add_library(
 )
 
 add_library(
-  note_pitch
-  note_pitch.cpp
+  note_pitch INTERFACE
   note_pitch.h
 )
 
@@ -20,14 +19,3 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(note_duration_test)
-
-add_executable(
-  note_pitch_test
-  note_pitch_test.cpp
-)
-target_link_libraries(
-  note_pitch_test
-  note_pitch
-  gtest_main
-)
-gtest_discover_tests(note_pitch_test)

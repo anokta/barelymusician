@@ -39,7 +39,6 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
-using ::barelyapi::GetPitch;
 using ::barelyapi::PercussionPad;
 using ::barelyapi::PercussionPadMap;
 using ::barelyapi::Random;

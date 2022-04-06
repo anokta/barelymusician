@@ -1,8 +1,6 @@
 #ifndef EXAMPLES_COMPOSITION_NOTE_PITCH_H_
 #define EXAMPLES_COMPOSITION_NOTE_PITCH_H_
 
-#include <vector>
-
 namespace barelyapi {
 
 /// Number of semitones in an octave (twelwe-tone equal temperament).
@@ -137,13 +135,6 @@ inline constexpr double kPitchKick = kPitchC3;
 inline constexpr double kPitchSnare = kPitchD3;
 inline constexpr double kPitchHihatClosed = kPitchE3;
 inline constexpr double kPitchHihatOpen = kPitchF3;
-
-/// Returns note pitch for a given scale and index.
-///
-/// @param scale Cumulative scale intervals of an octave in increasing order.
-/// @param index Scale index.
-/// @return Note pitch.
-double GetPitch(const std::vector<double>& scale, int index) noexcept;
 
 }  // namespace barelyapi
 

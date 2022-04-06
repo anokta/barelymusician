@@ -1,4 +1,6 @@
+add_subdirectory(algorithm)
 add_subdirectory(common)
+add_subdirectory(dsp)
 add_subdirectory(engine)
 add_subdirectory(instruments)
 

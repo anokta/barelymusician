@@ -124,6 +124,22 @@ target_link_libraries(
 gtest_discover_tests(conductor_test)
 
 add_executable(
+  engine_test
+  engine_test.cpp
+)
+target_link_libraries(
+  engine_test
+  engine
+  id
+  instrument
+  note
+  parameter
+  gmock
+  gtest_main
+)
+gtest_discover_tests(engine_test)
+
+add_executable(
   event_queue_test
   event_queue_test.cpp
 )

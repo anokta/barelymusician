@@ -44,6 +44,7 @@ constexpr double kTempoIncrement = 10.0;
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;

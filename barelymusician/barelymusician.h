@@ -891,18 +891,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_IsSkippingAdjustments(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     bool* out_is_skipping_adjustments);
 
-/// Performs sequence at range.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param musician_handle Musician handle.
-/// @param begin_position Begin position in beats.
-/// @param end_position End position in beats.
-BARELY_EXPORT BarelyStatus
-BarelySequence_Perform(BarelyMusicianHandle handle, BarelyId sequence_id,
-                       BarelyMusicianHandle musician_handle,
-                       double begin_position, double end_position);
-
 /// Sets sequence begin offset.
 ///
 /// @param handle Musician handle.

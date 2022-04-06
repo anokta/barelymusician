@@ -15,6 +15,7 @@ int WavFile::GetNumChannels() const noexcept { return num_channels_; }
 
 int WavFile::GetSampleRate() const noexcept { return sample_rate_; }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 bool WavFile::Load(const std::string& file_path) noexcept {
   // Read the file.
   unsigned int wav_num_channels;

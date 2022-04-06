@@ -33,6 +33,7 @@ void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   });
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void SynthInstrument::SetParameter(int index, double value,
                                    double /*slope*/) noexcept {
   switch (static_cast<SynthParameter>(index)) {

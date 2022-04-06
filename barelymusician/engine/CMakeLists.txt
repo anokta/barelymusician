@@ -73,7 +73,7 @@ add_library(
   note.h
 )
 target_link_libraries(
-  note
+  note INTERFACE
   include
 )
 

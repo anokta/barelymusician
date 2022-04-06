@@ -173,6 +173,7 @@ std::vector<Note> ComposeDrums(int bar, int beat, int num_beats, Random* random,
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
   assert(runfiles);

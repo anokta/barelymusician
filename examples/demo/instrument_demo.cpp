@@ -54,6 +54,7 @@ std::optional<double> PitchFromKey(const InputManager::Key& key) {
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;

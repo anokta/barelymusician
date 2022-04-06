@@ -45,10 +45,12 @@ class InputManager {
   void SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept;
 
   /// Updates the input manager to handle new input events.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update() noexcept;
 
  private:
   // Handles keyboard key down event.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void HandleKeyDown(const Key& key) noexcept;
 
   // Handles keyboard key up event.

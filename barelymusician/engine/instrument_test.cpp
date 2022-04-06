@@ -11,11 +11,8 @@
 namespace barelyapi {
 namespace {
 
-using ::testing::AllOf;
 using ::testing::IsNull;
 using ::testing::NotNull;
-using ::testing::Pointee;
-using ::testing::Property;
 
 constexpr int kFrameRate = 8000;
 constexpr int kNumChannels = 1;

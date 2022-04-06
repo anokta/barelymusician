@@ -53,6 +53,7 @@ Instrument::Definition GetInstrumentDefinition(
     const std::vector<Parameter::Definition>& parameter_definitions) noexcept {
   return Instrument::Definition(
       [](void** state, int frame_rate) noexcept {
+        // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
         *state = static_cast<void*>(new GenericInstrumentType(frame_rate));
       },
       [](void** state) noexcept {

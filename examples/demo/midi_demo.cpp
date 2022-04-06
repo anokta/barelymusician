@@ -91,6 +91,7 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
   assert(runfiles);

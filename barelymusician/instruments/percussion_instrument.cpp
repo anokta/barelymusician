@@ -26,6 +26,7 @@ void PercussionInstrument::Process(double* output, int num_channels,
   }
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void PercussionInstrument::SetData(const void* data, int /*size*/) noexcept {
   pads_ = *static_cast<const PercussionPadMap* const*>(data);
   if (pads_) {

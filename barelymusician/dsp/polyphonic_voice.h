@@ -31,6 +31,7 @@ class PolyphonicVoice {
   /// Resizes number of available voices that can be played simultaneously.
   ///
   /// @param num_voices Number of available voices.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Resize(int num_voices) noexcept;
 
   /// Starts new voice for the given `pitch`.

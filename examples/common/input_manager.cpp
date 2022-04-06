@@ -76,6 +76,7 @@ void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
   key_up_callback_ = std::move(key_up_callback);
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void InputManager::Update() noexcept {
 #if defined(_WIN32) || defined(__CYGWIN__)
   DWORD num_events = 0;
@@ -102,6 +103,7 @@ void InputManager::Update() noexcept {
 #endif  // defined(__APPLE__)
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void InputManager::HandleKeyDown(const Key& key) noexcept {
   if (pressed_keys_.insert(key).second && key_down_callback_) {
     key_down_callback_(key);

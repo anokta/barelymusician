@@ -28,6 +28,7 @@ class ContextFreeGrammar {
   /// @param start_symbol Initial symbol to start the sequence.
   /// @param random Random number generator.
   /// @return Generated symbol sequence.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   std::vector<SymbolType> GenerateSequence(const SymbolType& start_symbol,
                                            Random& random) const noexcept;
 
@@ -47,6 +48,7 @@ void ContextFreeGrammar<SymbolType>::AddRule(
   rules_[symbol] = std::move(substitutions);
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 template <typename SymbolType>
 std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
     const SymbolType& start_symbol, Random& random) const noexcept {

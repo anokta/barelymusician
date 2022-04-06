@@ -27,6 +27,7 @@ class PercussionInstrument : public GenericInstrument {
   /// Implements `GenericInstrument`.
   void Process(double* output, int num_channels,
                int num_frames) noexcept override;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetData(const void* data, int size) noexcept override;
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;

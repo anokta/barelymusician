@@ -3,7 +3,7 @@ add_library(
   enveloped_voice.h
 )
 target_link_libraries(
-  enveloped_voice
+  enveloped_voice INTERFACE
   envelope
   voice
 )
@@ -13,7 +13,7 @@ add_library(
   generic_instrument.h
 )
 target_link_libraries(
-  generic_instrument
+  generic_instrument INTERFACE
   instrument
   parameter
 )

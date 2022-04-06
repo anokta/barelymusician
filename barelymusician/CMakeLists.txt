@@ -1,3 +1,7 @@
+add_subdirectory(common)
+add_subdirectory(engine)
+add_subdirectory(instruments)
+
 add_library(
   barelymusician
   barelymusician.cpp

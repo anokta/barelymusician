@@ -38,7 +38,7 @@ namespace Barely {
     }
 
     protected virtual void OnEnable() {
-      Id = Musician.AddInstrument(this, _noteOffCallback, _noteOnCallback);
+      Id = Musician.AddInstrument(this, ref _noteOffCallback, ref _noteOnCallback);
       Source?.Play();
     }
 

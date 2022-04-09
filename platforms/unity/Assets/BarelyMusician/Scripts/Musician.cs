@@ -9,10 +9,15 @@ namespace Barely {
     public const Int64 InvalidId = -1;
 
     // Adjust note callback.
+    ///
+    /// @param definition Reference to mutable note definition.
     public delegate void AdjustNoteCallback(ref Note.Definition definition);
     public static event AdjustNoteCallback OnAdjustNote;
 
     /// Beat callback.
+    ///
+    /// @param position Beat position in beats.
+    /// @param timestamp Beat timestamp in seconds.
     public delegate void BeatCallback(double position, double timestamp);
     public static event BeatCallback OnBeat;
 
@@ -23,8 +28,8 @@ namespace Barely {
     /// @param noteOnCallback Reference to note on callback.
     /// @return Instrument identifier.
     public static Int64 AddInstrument(Instrument instrument,
-                                      Instrument.NoteOffCallback noteOffCallback,
-                                      Instrument.NoteOnCallback noteOnCallback) {
+                                      ref Instrument.NoteOffCallback noteOffCallback,
+                                      ref Instrument.NoteOnCallback noteOnCallback) {
       Int64 instrumentId = InvalidId;
       Type instrumentType = instrument.GetType();
       if (instrumentType == typeof(SynthInstrument)) {
@@ -445,6 +450,13 @@ namespace Barely {
     private const string pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
+    // TODO(#105): Add `Instrument.Definition` to support generic `BarelyInstrument_Create`.
+    // [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
+    // private static extern Status BarelyInstrument_Create(IntPtr handle,
+    //                                                      Instrument.Definition definition,
+    //                                                      Int32 frameRate, IntPtr
+    //                                                      outInstrumentId);
+
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_CreateOfType")]
     private static extern Status BarelyInstrument_CreateOfType(IntPtr handle, InstrumentType type,
                                                                Int32 frameRate,
@@ -452,6 +464,21 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_Destroy")]
     private static extern Status BarelyInstrument_Destroy(IntPtr handle, Int64 instrumentId);
+
+    [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetParameter")]
+    private static extern Status BarelyInstrument_GetParameter(IntPtr handle, Int64 instrumentId,
+                                                               Int32 index, IntPtr outValue);
+
+    // TODO(#105): Add `ParameterDefinition` to support `BarelyInstrument_GetParameterDefinition`.
+    // [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetParameterDefinition")]
+    // private static extern Status BarelyInstrument_GetParameterDefinition(IntPtr handle,
+    //                                                                      Int64 instrumentId,
+    //                                                                      Int32 index,
+    //                                                                      IntPtr outDefinition);
+
+    [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
+    private static extern Status BarelyInstrument_IsNoteOn(IntPtr handle, Int64 instrumentId,
+                                                           double pitch, IntPtr outIsNoteOn);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_Process")]
     private static extern Status BarelyInstrument_Process(IntPtr handle, Int64 instrumentId,
@@ -467,16 +494,20 @@ namespace Barely {
     private static extern Status BarelyInstrument_ResetParameter(IntPtr handle, Int64 instrumentId,
                                                                  Int32 index);
 
+    [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
+    private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
+                                                          [In] IntPtr data, Int32 size);
+
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffCallback")]
     private static extern Status BarelyInstrument_SetNoteOffCallback(IntPtr handle,
                                                                      Int64 instrumentId,
-                                                                     IntPtr noteOffCallback,
+                                                                     IntPtr callback,
                                                                      IntPtr userData);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnCallback")]
     private static extern Status BarelyInstrument_SetNoteOnCallback(IntPtr handle,
                                                                     Int64 instrumentId,
-                                                                    IntPtr noteOnCallback,
+                                                                    IntPtr callback,
                                                                     IntPtr userData);
 
     [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetParameter")]
@@ -500,19 +531,44 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
     private static extern Status BarelyMusician_Destroy(IntPtr handle);
 
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_GetNote")]
+    private static extern Status BarelyMusician_GetNote(IntPtr handle,
+                                                        Note.PitchDefinition definition,
+                                                        IntPtr outPitch);
+
     [DllImport(pluginName, EntryPoint = "BarelyMusician_GetPosition")]
-    private static extern Status BarelyMusician_GetPosition(IntPtr handle, IntPtr positionPtr);
+    private static extern Status BarelyMusician_GetPosition(IntPtr handle, IntPtr outPosition);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_GetRootNote")]
+    private static extern Status BarelyMusician_GetRootNote(IntPtr handle, IntPtr outRootPitch);
+
+    [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetScale")]
+    private static extern Status BarelyInstrument_GetScale(IntPtr handle, Int64 instrumentId,
+                                                           IntPtr outScalePitches,
+                                                           Int32 numScalePitches);
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
-    private static extern Status BarelyMusician_GetTempo(IntPtr handle, IntPtr tempoPtr);
+    private static extern Status BarelyMusician_GetTempo(IntPtr handle, IntPtr outTempo);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTimestamp")]
+    private static extern Status BarelyMusician_GetTimestamp(IntPtr handle, IntPtr outTimestamp);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTimestampAtPosition")]
+    private static extern Status BarelyMusician_GetTimestampAtPosition(IntPtr handle,
+                                                                       double position,
+                                                                       IntPtr outTimestamp);
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_IsPlaying")]
-    private static extern Status BarelyMusician_IsPlaying(IntPtr handle, IntPtr isPlayingPtr);
+    private static extern Status BarelyMusician_IsPlaying(IntPtr handle, IntPtr outIsPlaying);
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_SetAdjustNoteCallback")]
     private static extern Status BarelyMusician_SetAdjustNoteCallback(IntPtr handle,
                                                                       IntPtr callback,
                                                                       IntPtr userData);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_SetAdjustParameterAutomationCallback")]
+    private static extern Status BarelyMusician_SetAdjustParameterAutomationCallback(
+        IntPtr handle, IntPtr callback, IntPtr userData);
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_SetBeatCallback")]
     private static extern Status BarelyMusician_SetBeatCallback(IntPtr handle, IntPtr callback,
@@ -520,6 +576,13 @@ namespace Barely {
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_SetPosition")]
     private static extern Status BarelyMusician_SetPosition(IntPtr handle, double position);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_SetRootNote")]
+    private static extern Status BarelyMusician_SetRootNote(IntPtr handle, double rootPitch);
+
+    [DllImport(pluginName, EntryPoint = "BarelyMusician_SetScale")]
+    private static extern Status BarelyMusician_SetScale(IntPtr handle, [In] double[] scalePitches,
+                                                         Int32 numScalePitches);
 
     [DllImport(pluginName, EntryPoint = "BarelyMusician_SetTempo")]
     private static extern Status BarelyMusician_SetTempo(IntPtr handle, double tempo);
@@ -544,6 +607,14 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelyNote_Destroy")]
     private static extern Status BarelyNote_Destroy(IntPtr handle, Int64 sequenceId, Int64 noteId);
 
+    [DllImport(pluginName, EntryPoint = "BarelyNote_GetDefinition")]
+    private static extern Status BarelyNote_GetDefinition(IntPtr handle, Int64 sequenceId,
+                                                          Int64 noteId, IntPtr outDefinition);
+
+    [DllImport(pluginName, EntryPoint = "BarelyNote_GetPosition")]
+    private static extern Status BarelyNote_GetPosition(IntPtr handle, Int64 sequenceId,
+                                                        Int64 noteId, IntPtr outPosition);
+
     [DllImport(pluginName, EntryPoint = "BarelyNote_SetDefinition")]
     private static extern Status BarelyNote_SetDefinition(IntPtr handle, Int64 sequenceId,
                                                           Int64 noteId, Note.Definition definition);
@@ -552,11 +623,49 @@ namespace Barely {
     private static extern Status BarelyNote_SetPosition(IntPtr handle, Int64 sequenceId,
                                                         Int64 noteId, double position);
 
+    // TODO(#98): Add `ParameterAutomation` support.
+
     [DllImport(pluginName, EntryPoint = "BarelySequence_Create")]
     private static extern Status BarelySequence_Create(IntPtr handle, IntPtr outSequenceId);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_Destroy")]
     private static extern Status BarelySequence_Destroy(IntPtr handle, Int64 sequenceId);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_GetBeginOffset")]
+    private static extern Status BarelySequence_GetBeginOffset(IntPtr handle, Int64 sequenceId,
+                                                               IntPtr outBeginOffset);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_GetBeginPosition")]
+    private static extern Status BarelySequence_GetBeginPosition(IntPtr handle, Int64 sequenceId,
+                                                                 IntPtr outBeginPosition);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_GetEndPosition")]
+    private static extern Status BarelySequence_GetEndPosition(IntPtr handle, Int64 sequenceId,
+                                                               IntPtr outEndPosition);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_GetInstrument")]
+    private static extern Status BarelySequence_GetInstrument(IntPtr handle, Int64 sequenceId,
+                                                              IntPtr outInstrumentId);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_GetLoopBeginOffset")]
+    private static extern Status BarelySequence_GetLoopBeginOffset(IntPtr handle, Int64 sequenceId,
+                                                                   IntPtr outLoopBeginOffset);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_GetLoopLength")]
+    private static extern Status BarelySequence_GetLoopLength(IntPtr handle, Int64 sequenceId,
+                                                              IntPtr outLoopLength);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_IsEmpty")]
+    private static extern Status BarelySequence_IsEmpty(IntPtr handle, Int64 sequenceId,
+                                                        IntPtr outIsEmpty);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_IsLooping")]
+    private static extern Status BarelySequence_IsLooping(IntPtr handle, Int64 sequenceId,
+                                                          IntPtr outIsLooping);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_IsSkippingAdjustments")]
+    private static extern Status BarelySequence_IsSkippingAdjustments(
+        IntPtr handle, Int64 sequenceId, IntPtr outIsSkippingAdjustments);
 
     [DllImport(pluginName, EntryPoint = "BarelySequence_SetBeginOffset")]
     private static extern Status BarelySequence_SetBeginOffset(IntPtr handle, Int64 sequenceId,
@@ -585,5 +694,10 @@ namespace Barely {
     [DllImport(pluginName, EntryPoint = "BarelySequence_SetLooping")]
     private static extern Status BarelySequence_SetLooping(IntPtr handle, Int64 sequenceId,
                                                            bool isLooping);
+
+    [DllImport(pluginName, EntryPoint = "BarelySequence_SetSkippingAdjustments")]
+    private static extern Status BarelySequence_SetSkippingAdjustments(IntPtr handle,
+                                                                       Int64 sequenceId,
+                                                                       bool isSkippingAdjustments);
   }
 }

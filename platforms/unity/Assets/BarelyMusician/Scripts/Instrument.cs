@@ -6,7 +6,7 @@ namespace Barely {
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
     /// Instrument identifier.
-    public Int64 Id { get; private set; } = Musician.InvalidId;
+    public Int64 Id { get; private set; } = Musician.Api.InvalidId;
 
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
@@ -38,19 +38,19 @@ namespace Barely {
     }
 
     protected virtual void OnEnable() {
-      Id = Musician.AddInstrument(this, ref _noteOffCallback, ref _noteOnCallback);
+      Id = Musician.Api.Instrument_Create(this, ref _noteOffCallback, ref _noteOnCallback);
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      Musician.RemoveInstrument(this);
-      Id = Musician.InvalidId;
+      Musician.Api.Instrument_Destroy(this);
+      Id = Musician.Api.InvalidId;
     }
 
     /// Resets all parameters to default value.
     public void ResetAllParameters() {
-      Musician.ResetAllInstrumentParameters(this);
+      Musician.Api.Instrument_ResetAllParameters(this);
     }
 
     /// Resets parameter to default value.
@@ -58,7 +58,7 @@ namespace Barely {
     /// @param index Parameter index.
     /// @return True if success, false otherwise.
     public bool ResetParameter(int index) {
-      return Musician.ResetInstrumentParameter(this, index);
+      return Musician.Api.Instrument_ResetParameter(this, index);
     }
 
     /// Sets parameter value.
@@ -67,7 +67,7 @@ namespace Barely {
     /// @param value Parameter value.
     /// @return True if success, false otherwise.
     public bool SetParameter(int index, double value) {
-      return Musician.SetInstrumentParameter(this, index, value);
+      return Musician.Api.Instrument_SetParameter(this, index, value);
     }
 
     /// Starts playing note.
@@ -75,23 +75,23 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     public void StartNote(double pitch, double intensity) {
-      Musician.StartInstrumentNote(this, pitch, intensity);
+      Musician.Api.Instrument_StartNote(this, pitch, intensity);
     }
 
     /// Stops all notes.
     public void StopAllNotes() {
-      Musician.StopAllInstrumentNotes(this);
+      Musician.Api.Instrument_StopAllNotes(this);
     }
 
     /// Stops playing note.
     ///
     /// @param pitch Note pitch.
     public void StopNote(double pitch) {
-      Musician.StopInstrumentNote(this, pitch);
+      Musician.Api.Instrument_StopNote(this, pitch);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      Musician.ProcessInstrument(this, data, channels);
+      Musician.Api.Instrument_Process(this, data, channels);
     }
   }
 }

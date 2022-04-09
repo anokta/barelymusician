@@ -35,7 +35,7 @@ public class Metronome : MonoBehaviour {
   }
 
   void Update() {
-    Musician.SetPlaybackTempo(tempo);
+    Musician.SetTempo(tempo);
     if (Input.GetKeyDown(KeyCode.Space)) {
       if (Musician.IsPlaying()) {
         Musician.Pause();

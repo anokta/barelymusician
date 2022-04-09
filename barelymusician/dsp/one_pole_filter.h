@@ -32,11 +32,11 @@ class OnePoleFilter : public Filter {
   // Transfer function coefficient of the filter.
   double coefficient_ = 1.0;
 
-  // Filter type.
-  FilterType type_ = FilterType::kLowPass;
-
   // The last output sample.
   double output_ = 0.0;
+
+  // Filter type.
+  FilterType type_ = FilterType::kLowPass;
 };
 
 }  // namespace barelyapi

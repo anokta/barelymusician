@@ -39,28 +39,28 @@ class SamplePlayer : public Generator {
   void CalculateIncrementPerSample() noexcept;
 
   // Inverse sampling rate in seconds.
-  double sample_interval_;
+  double sample_interval_ = 0.0;
 
   // Sample data.
-  const double* data_;
+  const double* data_ = nullptr;
 
   // Sample data sampling rate in hz.
-  double frequency_;
+  double frequency_ = 0.0;
 
   // Sample data length in samples.
-  double length_;
-
-  // Denotes whether the playback is looping or not.
-  bool loop_;
+  double length_ = 0.0;
 
   // Playback speed.
-  double speed_;
+  double speed_ = 1.0;
 
   // Playback cursor.
-  double cursor_;
+  double cursor_ = 0.0;
 
   // Increment per sample.
-  double increment_;
+  double increment_ = 0.0;
+
+  // Denotes whether the playback is looping or not.
+  bool loop_ = false;
 };
 
 }  // namespace barelyapi

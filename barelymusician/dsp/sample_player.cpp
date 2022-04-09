@@ -7,14 +7,7 @@ namespace barelyapi {
 
 SamplePlayer::SamplePlayer(int sample_rate) noexcept
     : sample_interval_(
-          (sample_rate > 0) ? 1.0 / static_cast<double>(sample_rate) : 0.0),
-      data_(nullptr),
-      frequency_(0.0),
-      length_(0.0),
-      loop_(false),
-      speed_(1.0),
-      cursor_(0.0),
-      increment_(0.0) {}
+          (sample_rate > 0) ? 1.0 / static_cast<double>(sample_rate) : 0.0) {}
 
 double SamplePlayer::Next() noexcept {
   if (!data_ || cursor_ >= length_) {

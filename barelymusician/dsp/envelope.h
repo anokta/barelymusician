@@ -54,25 +54,25 @@ class Envelope : public Generator {
   enum class State { kAttack, kDecay, kSustain, kRelease, kIdle };
 
   // Inverse sampling rate in seconds.
-  double sample_interval_;
+  double sample_interval_ = 0.0;
 
   // Current ADSR values.
-  double attack_increment_;
-  double decay_increment_;
-  double sustain_;
-  double release_increment_;
-
-  // Current state.
-  State state_;
+  double attack_increment_ = 0.0;
+  double decay_increment_ = 0.0;
+  double sustain_ = 1.0;
+  double release_increment_ = 0.0;
 
   // Last output value.
-  double output_;
+  double output_ = 0.0;
 
   // Last output value on release.
-  double release_output_;
+  double release_output_ = 0.0;
 
   // Internal clock.
-  double phase_;
+  double phase_ = 0.0;
+
+  // Current state.
+  State state_ = State::kIdle;
 };
 
 }  // namespace barelyapi

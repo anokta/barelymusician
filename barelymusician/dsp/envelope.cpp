@@ -6,15 +6,7 @@ namespace barelyapi {
 
 Envelope::Envelope(int sample_rate) noexcept
     : sample_interval_(
-          (sample_rate > 0) ? 1.0 / static_cast<double>(sample_rate) : 0.0),
-      attack_increment_(0.0),
-      decay_increment_(0.0),
-      sustain_(1.0),
-      release_increment_(0.0),
-      state_(State::kIdle),
-      output_(0.0),
-      release_output_(0.0),
-      phase_(0.0) {}
+          (sample_rate > 0) ? 1.0 / static_cast<double>(sample_rate) : 0.0) {}
 
 double Envelope::Next() noexcept {
   if (state_ == State::kIdle) {

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Barely {
   /// Class that wraps musician.
   public static class Musician {
-    // Adjust note callback.
+    /// Adjust note callback.
     ///
     /// @param definition Reference to mutable note definition.
     public delegate void AdjustNoteCallback(ref Note.Definition definition);
@@ -14,63 +14,63 @@ namespace Barely {
     /// Beat callback.
     ///
     /// @param position Beat position in beats.
-    /// @param timestamp Beat timestamp in seconds.
-    public delegate void BeatCallback(double position, double timestamp);
+    /// @param timestamp Beat time in seconds.
+    public delegate void BeatCallback(double position, double dspTime);
     public static event BeatCallback OnBeat;
 
-    /// Returns position.
+    /// Returns playback position.
     ///
     /// @return Position in beats.
     public static double GetPosition() {
-      return Api.Musician_GetPosition();
+      return Native.Musician_GetPosition();
     }
 
-    /// Returns tempo.
+    /// Returns playback tempo.
     ///
     /// @return Tempo in bpm.
     public static double GetTempo() {
-      return Api.Musician_GetTempo();
+      return Native.Musician_GetTempo();
     }
 
     /// Returns whether musician is currently playing or not.
     ///
     /// @return True if playing, false otherwise.
     public static bool IsPlaying() {
-      return Api.Musician_IsPlaying();
+      return Native.Musician_IsPlaying();
     }
 
-    /// Sets position.
+    /// Sets playback position.
     ///
     /// @param position Position in beats.
     public static void SetPosition(double position) {
-      Api.Musician_SetPosition(position);
+      Native.Musician_SetPosition(position);
     }
 
-    /// Sets tempo.
+    /// Sets playback tempo.
     ///
     /// @param tempo Tempo in bpm.
     public static void SetTempo(double tempo) {
-      Api.Musician_SetTempo(tempo);
+      Native.Musician_SetTempo(tempo);
     }
 
     /// Pauses playback.
     public static void Pause() {
-      Api.Musician_Stop();
+      Native.Musician_Stop();
     }
 
     /// Starts playback.
     public static void Play() {
-      Api.Musician_Start();
+      Native.Musician_Start();
     }
 
     /// Stops playback.
     public static void Stop() {
-      Api.Musician_Stop();
-      Api.Musician_SetPosition(0.0);
+      Native.Musician_Stop();
+      Native.Musician_SetPosition(0.0);
     }
 
-    /// Class that wraps internal api.
-    public static class Api {
+    /// Class that wraps native api.
+    public static class Native {
       /// Invalid identifier.
       public const Int64 InvalidId = -1;
 
@@ -84,25 +84,27 @@ namespace Barely {
                                             ref Instrument.NoteOffCallback noteOffCallback,
                                             ref Instrument.NoteOnCallback noteOnCallback) {
         Int64 instrumentId = InvalidId;
-        Type instrumentType = instrument.GetType();
-        if (instrumentType == typeof(SynthInstrument)) {
-          Status status = BarelyInstrument_CreateOfType(Handle, InstrumentType.Synth,
-                                                        AudioSettings.outputSampleRate, _int64Ptr);
-          if (IsOk(status)) {
-            instrumentId = Marshal.ReadInt64(_int64Ptr);
-          } else {
-            Debug.LogError("Failed to add instrument '" + instrument.name + "': " + status);
-          }
-        } else {
-          Debug.LogError("Unsupported instrument type: " + instrumentType);
+        Int32 frameRate = AudioSettings.outputSampleRate;
+        Status status = Status.Unimplemented;
+        switch (instrument) {
+          case SynthInstrument synth:
+            status =
+                BarelyInstrument_CreateOfType(Handle, InstrumentType.Synth, frameRate, _int64Ptr);
+            break;
+          default:
+            Debug.LogError("Unsupported instrument type: " + instrument.GetType());
+            return InvalidId;
         }
-        if (instrumentId != InvalidId) {
+        if (IsOk(status)) {
+          instrumentId = Marshal.ReadInt64(_int64Ptr);
           BarelyInstrument_SetNoteOffCallback(
               _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOffCallback),
               IntPtr.Zero);
           BarelyInstrument_SetNoteOnCallback(_handle, instrumentId,
                                              Marshal.GetFunctionPointerForDelegate(noteOnCallback),
                                              IntPtr.Zero);
+        } else {
+          Debug.LogError("Failed to create instrument '" + instrument.name + "': " + status);
         }
         return instrumentId;
       }
@@ -111,25 +113,64 @@ namespace Barely {
       ///
       /// @param instrument Instrument.
       public static void Instrument_Destroy(Instrument instrument) {
-        BarelyInstrument_Destroy(Handle, instrument.Id);
+        Status status = BarelyInstrument_Destroy(Handle, instrument.Id);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to destroy instrument '" + instrument.name + "': " + status);
+        }
       }
 
-      /// Processes the next instrument buffer.
+      /// Returns instrument parameter value.
+      ///
+      /// @param instrument Instrument.
+      /// @param index Parameter index.
+      /// @return Parameter value.
+      public static double Instrument_GetParameter(Instrument instrument, int index) {
+        Status status = BarelyInstrument_GetParameter(Handle, instrument.Id, index, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get instrument parameter " + index + " for '" +
+                         instrument.name + "': " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns whether instrument note is playing or not.
+      ///
+      /// @param instrument Instrument.
+      /// @param pitch Note pitchk.
+      /// @return True if playing, false otherwise.
+      public static bool Instrument_IsNoteOn(Instrument instrument, double pitch) {
+        Status status = BarelyInstrument_IsNoteOn(Handle, instrument.Id, pitch, _booleanPtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Boolean>(_booleanPtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get instrument note " + pitch + " for '" + instrument.name +
+                         "': " + status);
+        }
+        return false;
+      }
+
+      /// Processes next instrument output buffer.
       ///
       /// @param instrument Instrument.
       /// @param output Output buffer.
       /// @param numOutputChannels Number of output channels.
       public static void Instrument_Process(Instrument instrument, float[] output,
                                             int numOutputChannels) {
-        if (IsOk(BarelyInstrument_Process(Handle, instrument.Id, _output, numOutputChannels,
-                                          output.Length / numOutputChannels,
-                                          AudioSettings.dspTime))) {
+        Status status =
+            BarelyInstrument_Process(Handle, instrument.Id, _output, numOutputChannels,
+                                     output.Length / numOutputChannels, AudioSettings.dspTime);
+        if (IsOk(status)) {
           for (int i = 0; i < output.Length; ++i) {
             output[i] = (float)_output[i];
           }
         } else {
+          if (_handle != IntPtr.Zero) {
+            Debug.LogError("Failed to process instrument '" + instrument.name + "': " + status);
+          }
           for (int i = 0; i < output.Length; ++i) {
-            output[i] = 0;
+            output[i] = 0.0f;
           }
         }
       }
@@ -138,17 +179,23 @@ namespace Barely {
       ///
       /// @param instrument Instrument.
       public static void Instrument_ResetAllParameters(Instrument instrument) {
-        BarelyInstrument_ResetAllParameters(Handle, instrument.Id);
+        Status status = BarelyInstrument_ResetAllParameters(Handle, instrument.Id);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to reset all instrument parameters for '" + instrument.name +
+                         "': " + status);
+        }
       }
 
       /// Resets instrument parameter to default value.
       ///
       /// @param instrument Instrument.
       /// @param index Parameter index.
-      /// @return True if success, false otherwise.
-      public static bool Instrument_ResetParameter(Instrument instrument, int index) {
-        return BarelyInstrument_ResetParameter(Handle, instrument.Id, index) !=
-               Status.InvalidArgument;
+      public static void Instrument_ResetParameter(Instrument instrument, int index) {
+        Status status = BarelyInstrument_ResetParameter(Handle, instrument.Id, index);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to reset instrument parameter " + index + " for '" +
+                         instrument.name + "': " + status);
+        }
       }
 
       /// Sets instrument parameter value.
@@ -156,10 +203,12 @@ namespace Barely {
       /// @param instrument Instrument.
       /// @param index Parameter index.
       /// @param value Parameter value.
-      /// @return True if success, false otherwise.
-      public static bool Instrument_SetParameter(Instrument instrument, int index, double value) {
-        return BarelyInstrument_SetParameter(Handle, instrument.Id, index, value) !=
-               Status.InvalidArgument;
+      public static void Instrument_SetParameter(Instrument instrument, int index, double value) {
+        Status status = BarelyInstrument_SetParameter(Handle, instrument.Id, index, value);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set instrument parameter " + index + " for '" +
+                         instrument.name + "': " + status);
+        }
       }
 
       /// Starts instrument note.
@@ -169,7 +218,11 @@ namespace Barely {
       /// @param intensity Note intensity.
       public static void Instrument_StartNote(Instrument instrument, double pitch,
                                               double intensity) {
-        BarelyInstrument_StartNote(Handle, instrument.Id, pitch, intensity);
+        Status status = BarelyInstrument_StartNote(Handle, instrument.Id, pitch, intensity);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to start instrument note " + pitch + " for '" + instrument.name +
+                         "': " + status);
+        }
       }
 
       /// Stops all instrument notes.
@@ -177,7 +230,11 @@ namespace Barely {
       /// @param instrument Instrument.
       /// @return True if success, false otherwise.
       public static void Instrument_StopAllNotes(Instrument instrument) {
-        BarelyInstrument_StopAllNotes(Handle, instrument.Id);
+        Status status = BarelyInstrument_StopAllNotes(Handle, instrument.Id);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop all instrument notes for '" + instrument.name +
+                         "': " + status);
+        }
       }
 
       /// Stops instrument note.
@@ -186,7 +243,11 @@ namespace Barely {
       /// @param pitch Note pitch.
       /// @return True if success, false otherwise.
       public static void Instrument_StopNote(Instrument instrument, double pitch) {
-        BarelyInstrument_StopNote(Handle, instrument.Id, pitch);
+        Status status = BarelyInstrument_StopNote(Handle, instrument.Id, pitch);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop instrument note " + pitch + " for '" + instrument.name +
+                         "': " + status);
+        }
       }
 
       /// Returns musician position.
@@ -196,8 +257,8 @@ namespace Barely {
         Status status = BarelyMusician_GetPosition(Handle, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else {
-          Debug.LogError("Failed to get playback position: " + status);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician position: " + status);
         }
         return 0.0;
       }
@@ -209,8 +270,8 @@ namespace Barely {
         Status status = BarelyMusician_GetTempo(Handle, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else {
-          Debug.LogError("Failed to get playback tempo: " + status);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician tempo: " + status);
         }
         return 0.0;
       }
@@ -222,8 +283,8 @@ namespace Barely {
         Status status = BarelyMusician_IsPlaying(Handle, _booleanPtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Boolean>(_booleanPtr);
-        } else {
-          Debug.LogError("Failed to get playback state: " + status);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician playback: " + status);
         }
         return false;
       }
@@ -232,24 +293,36 @@ namespace Barely {
       ///
       /// @param position Position in beats.
       public static void Musician_SetPosition(double position) {
-        BarelyMusician_SetPosition(Handle, position);
+        Status status = BarelyMusician_SetPosition(Handle, position);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set musician position: " + status);
+        }
       }
 
       /// Sets musician tempo.
       ///
       /// @param tempo Tempo in bpm.
       public static void Musician_SetTempo(double tempo) {
-        BarelyMusician_SetTempo(Handle, tempo);
+        Status status = BarelyMusician_SetTempo(Handle, tempo);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set musician tempo: " + status);
+        }
       }
 
       /// Starts musician playback.
       public static void Musician_Start() {
-        BarelyMusician_Start(Handle);
+        Status status = BarelyMusician_Start(Handle);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to start musician playback: " + status);
+        }
       }
 
       /// Stops musician playback.
       public static void Musician_Stop() {
-        BarelyMusician_Stop(Handle);
+        Status status = BarelyMusician_Stop(Handle);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop musician playback: " + status);
+        }
       }
 
       /// Creates new sequence note.
@@ -322,7 +395,7 @@ namespace Barely {
       /// Updates sequence.
       ///
       /// @param sequence Sequence.
-      /// TODO(#85): This is a POC implementation only.
+      // TODO(#85): This is a POC implementation only.
       public static void Sequence_Update(Sequence sequence, bool changed) {
         BarelySequence_SetBeginOffset(Handle, sequence.Id, sequence.BeginOffset);
         BarelySequence_SetBeginPosition(Handle, sequence.Id, sequence.BeginPosition);
@@ -349,9 +422,9 @@ namespace Barely {
 
       // Instrument type.
       private enum InstrumentType {
-        /// Synth instrument.
+        // Synth instrument.
         Synth = 0,
-        /// Percussion instrument.
+        // Percussion instrument.
         Percussion = 1,
       }
 
@@ -375,7 +448,7 @@ namespace Barely {
         Unknown = 7,
       }
 
-      // Returns whether given `status` is ok.
+      // Returns whether status is okay or not.
       private static bool IsOk(Status status) {
         return (status == Status.Ok);
       }
@@ -387,23 +460,11 @@ namespace Barely {
             return IntPtr.Zero;
           }
           if (_handle == IntPtr.Zero) {
-            if (_intPtrPtr == IntPtr.Zero) {
-              _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
-            }
             var state =
                 new GameObject() { hideFlags = HideFlags.HideAndDontSave }.AddComponent<State>();
             GameObject.DontDestroyOnLoad(state.gameObject);
-            if (_handle != IntPtr.Zero) {
-              _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
-              _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
-              _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
-            } else {
-              Debug.LogError("Could not initialize BarelyMusician.");
+            if (_handle == IntPtr.Zero) {
               GameObject.DestroyImmediate(state.gameObject);
-            }
-            if (_intPtrPtr != IntPtr.Zero) {
-              Marshal.FreeHGlobal(_intPtrPtr);
-              _intPtrPtr = IntPtr.Zero;
             }
           }
           return _handle;
@@ -442,10 +503,18 @@ namespace Barely {
       private class State : MonoBehaviour {
         private void Awake() {
           AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-          if (!IsOk(BarelyMusician_Create(_intPtrPtr))) {
+          _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
+          Status status = BarelyMusician_Create(_intPtrPtr);
+          if (!IsOk(status)) {
+            Debug.LogError("Failed to initialize BarelyMusician: " + status);
+            Marshal.FreeHGlobal(_intPtrPtr);
             return;
           }
+          _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
+          _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
+          _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
           _handle = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
+          Marshal.FreeHGlobal(_intPtrPtr);
           _adjustNoteCallback = delegate(ref Note.Definition definition) {
             OnAdjustNote?.Invoke(ref definition);
           };
@@ -465,16 +534,36 @@ namespace Barely {
           AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
-          Marshal.FreeHGlobal(_booleanPtr);
-          Marshal.FreeHGlobal(_doublePtr);
-          Marshal.FreeHGlobal(_int64Ptr);
-          Marshal.FreeHGlobal(_intPtrPtr);
+          if (_booleanPtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_booleanPtr);
+            _booleanPtr = IntPtr.Zero;
+          }
+          if (_doublePtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_doublePtr);
+            _doublePtr = IntPtr.Zero;
+          }
+          if (_int64Ptr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_int64Ptr);
+            _int64Ptr = IntPtr.Zero;
+          }
         }
 
         private void OnApplicationQuit() {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
+          if (_booleanPtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_booleanPtr);
+            _booleanPtr = IntPtr.Zero;
+          }
+          if (_doublePtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_doublePtr);
+            _doublePtr = IntPtr.Zero;
+          }
+          if (_int64Ptr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_int64Ptr);
+            _int64Ptr = IntPtr.Zero;
+          }
         }
 
         private void OnAudioConfigurationChanged(bool deviceWasChanged) {
@@ -545,6 +634,7 @@ namespace Barely {
       private static extern Status BarelyInstrument_ResetParameter(IntPtr handle,
                                                                    Int64 instrumentId, Int32 index);
 
+      // TODO(#105): Implement `Instrument.SetData` using this.
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
                                                             [In] IntPtr data, Int32 size);

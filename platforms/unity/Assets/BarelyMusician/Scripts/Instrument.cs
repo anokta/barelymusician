@@ -6,7 +6,7 @@ namespace Barely {
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
     /// Instrument identifier.
-    public Int64 Id { get; private set; } = Musician.Api.InvalidId;
+    public Int64 Id { get; private set; } = Musician.Native.InvalidId;
 
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
@@ -38,36 +38,50 @@ namespace Barely {
     }
 
     protected virtual void OnEnable() {
-      Id = Musician.Api.Instrument_Create(this, ref _noteOffCallback, ref _noteOnCallback);
+      Id = Musician.Native.Instrument_Create(this, ref _noteOffCallback, ref _noteOnCallback);
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      Musician.Api.Instrument_Destroy(this);
-      Id = Musician.Api.InvalidId;
+      Musician.Native.Instrument_Destroy(this);
+      Id = Musician.Native.InvalidId;
+    }
+
+    /// Returns parameter value.
+    ///
+    /// @param index Parameter index.
+    /// @return Parameter value.
+    public double GetParameter(int index) {
+      return Musician.Native.Instrument_GetParameter(this, index);
+    }
+
+    /// Returns whether note is playing or not.
+    ///
+    /// @param Note pitch.
+    /// @return True if playing, false otherwise.
+    public bool IsNoteOn(double pitch) {
+      return Musician.Native.Instrument_IsNoteOn(this, pitch);
     }
 
     /// Resets all parameters to default value.
     public void ResetAllParameters() {
-      Musician.Api.Instrument_ResetAllParameters(this);
+      Musician.Native.Instrument_ResetAllParameters(this);
     }
 
     /// Resets parameter to default value.
     ///
     /// @param index Parameter index.
-    /// @return True if success, false otherwise.
-    public bool ResetParameter(int index) {
-      return Musician.Api.Instrument_ResetParameter(this, index);
+    public void ResetParameter(int index) {
+      Musician.Native.Instrument_ResetParameter(this, index);
     }
 
     /// Sets parameter value.
     ///
     /// @param index Parameter index.
     /// @param value Parameter value.
-    /// @return True if success, false otherwise.
-    public bool SetParameter(int index, double value) {
-      return Musician.Api.Instrument_SetParameter(this, index, value);
+    public void SetParameter(int index, double value) {
+      Musician.Native.Instrument_SetParameter(this, index, value);
     }
 
     /// Starts playing note.
@@ -75,23 +89,23 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     public void StartNote(double pitch, double intensity) {
-      Musician.Api.Instrument_StartNote(this, pitch, intensity);
+      Musician.Native.Instrument_StartNote(this, pitch, intensity);
     }
 
     /// Stops all notes.
     public void StopAllNotes() {
-      Musician.Api.Instrument_StopAllNotes(this);
+      Musician.Native.Instrument_StopAllNotes(this);
     }
 
     /// Stops playing note.
     ///
     /// @param pitch Note pitch.
     public void StopNote(double pitch) {
-      Musician.Api.Instrument_StopNote(this, pitch);
+      Musician.Native.Instrument_StopNote(this, pitch);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      Musician.Api.Instrument_Process(this, data, channels);
+      Musician.Native.Instrument_Process(this, data, channels);
     }
   }
 }

@@ -5,7 +5,7 @@ namespace Barely {
   /// Sequence.
   public class Sequence : MonoBehaviour {
     /// Sequence id.
-    public Int64 Id { get; private set; } = Musician.Api.InvalidId;
+    public Int64 Id { get; private set; } = Musician.Native.InvalidId;
 
     /// Begin offset.
     public double BeginOffset = 0.0;
@@ -53,16 +53,16 @@ namespace Barely {
     private bool _changed = false;
 
     void OnEnable() {
-      if (Id == Musician.Api.InvalidId) {
-        Id = Musician.Api.Sequence_Create(this);
+      if (Id == Musician.Native.InvalidId) {
+        Id = Musician.Native.Sequence_Create(this);
         _changed = true;
       }
     }
 
     void OnDisable() {
-      if (Id != Musician.Api.InvalidId) {
-        Musician.Api.Sequence_Destroy(this);
-        Id = Musician.Api.InvalidId;
+      if (Id != Musician.Native.InvalidId) {
+        Musician.Native.Sequence_Destroy(this);
+        Id = Musician.Native.InvalidId;
       }
     }
 
@@ -71,7 +71,7 @@ namespace Barely {
     }
 
     void Update() {
-      Musician.Api.Sequence_Update(this, _changed);
+      Musician.Native.Sequence_Update(this, _changed);
       _changed = false;
     }
   }

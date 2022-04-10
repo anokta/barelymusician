@@ -52,24 +52,24 @@ namespace Barely {
     }
 
     /// Note identifier.
-    public Int64 Id { get; private set; } = Musician.Api.InvalidId;
+    public Int64 Id { get; private set; } = Musician.Native.InvalidId;
 
     /// Constructs new `Note`.
     public Note(Sequence sequence, Definition definition, double position) {
       _sequence = sequence;
-      Id = Musician.Api.Note_Create(sequence, definition, position);
+      Id = Musician.Native.Note_Create(sequence, definition, position);
     }
 
     ~Note() {
-      Musician.Api.Note_Destroy(_sequence, this);
+      Musician.Native.Note_Destroy(_sequence, this);
     }
 
     public void SetDefinition(Definition definition) {
-      Musician.Api.Note_SetDefinition(_sequence, this, definition);
+      Musician.Native.Note_SetDefinition(_sequence, this, definition);
     }
 
     public void SetPosition(double position) {
-      Musician.Api.Note_SetPosition(_sequence, this, position);
+      Musician.Native.Note_SetPosition(_sequence, this, position);
     }
 
     // Sequence.

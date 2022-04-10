@@ -28,14 +28,11 @@ namespace Barely {
     /// Instrument to perform.
     public Instrument Instrument = null;
 
-    [Range(0, 128)]
-    public int RootNote = 60;
-
     [System.Serializable]
     public class Note {
       // TODO(#85): Should be double, keeping int for POC sequencer replacement.
-      [Range(0, 128)]
-      public int Pitch = 60;
+      [Range(-24, 24)]
+      public int Pitch = 0;
       [Range(0.0f, 1.0f)]
       public double Intensity = 1.0;
       public double Duration = 1.0;

@@ -152,6 +152,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5fbd59afedfec7c4285ffeb523ade8c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bypassAdjustment: 1
+  rootPitch: -2
+  scaleType: 0
+  scalePitches:
+  - 0
+  - 0.16666666666666666
+  - 0.3333333333333333
+  - 0.4166666666666667
+  - 0.5833333333333334
+  - 0.75
+  - 0.9166666666666666
 --- !u!4 &243456372
 Transform:
   m_ObjectHideFlags: 0
@@ -435,7 +446,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   oscillatorType: 1
-  attack: 0
+  attack: 0.025
   decay: 0
   sustain: 1
   release: 0.125
@@ -569,53 +580,18 @@ MonoBehaviour:
   LoopBeginOffset: 0
   LoopLength: 4
   Instrument: {fileID: 1298915919}
-  RootNote: 48
   Notes:
-  - position: 0
+  - position: 3.33
     note:
-      Pitch: 0
-      Intensity: 0.75
-      Duration: 0.5
-  - position: 1
-    note:
-      Pitch: 6
+      Pitch: 4
       Intensity: 1
-      Duration: 0.5
-  - position: 2
-    note:
-      Pitch: 12
-      Intensity: 0.75
-      Duration: 0.5
-  - position: 0.5
-    note:
-      Pitch: 3
-      Intensity: 0.5
-      Duration: 0.25
-  - position: 1.5
-    note:
-      Pitch: 9
-      Intensity: 0.5
-      Duration: 0.25
-  - position: 2.33
-    note:
-      Pitch: 15
-      Intensity: 0.5
       Duration: 0.33
-  - position: 2.66
+  - position: 3.66
     note:
-      Pitch: 21
-      Intensity: 0.66
+      Pitch: 2
+      Intensity: 1
       Duration: 0.33
-  - position: 3.5
-    note:
-      Pitch: 30
-      Intensity: 0.75
-      Duration: 0.25
-  - position: 3.75
-    note:
-      Pitch: 24
-      Intensity: 0.5
-      Duration: 0.25
+  NativeNotes: []
 --- !u!114 &1298915923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -807,7 +783,6 @@ MonoBehaviour:
   LoopBeginOffset: 0
   LoopLength: 4
   Instrument: {fileID: 1714525513}
-  RootNote: 60
   Notes:
   - position: 0
     note:
@@ -816,19 +791,20 @@ MonoBehaviour:
       Duration: 0.5
   - position: 1
     note:
-      Pitch: 6
+      Pitch: 2
       Intensity: 0.75
       Duration: 0.5
   - position: 2
     note:
-      Pitch: 3
+      Pitch: 4
       Intensity: 0.75
       Duration: 0.5
   - position: 3
     note:
-      Pitch: 12
+      Pitch: 7
       Intensity: 1
       Duration: 0.5
+  NativeNotes: []
 --- !u!1 &1737834378
 GameObject:
   m_ObjectHideFlags: 0
@@ -1041,7 +1017,7 @@ MonoBehaviour:
   numBeats: 4
   barPitch: 1
   beatPitch: 0
-  intensity: 0.5
+  intensity: 1
   logToConsole: 1
   tick: 1
 --- !u!4 &2098958021

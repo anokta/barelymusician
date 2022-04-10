@@ -12,22 +12,29 @@ namespace Barely {
     public AudioSource Source { get; private set; } = null;
 
     /// Note off callback.
-    public delegate void NoteOffCallback(double pitch, double timestamp);
+    ///
+    /// @param pitch Note pitch.
+    /// @param dspTime Note off time in seconds.
+    public delegate void NoteOffCallback(double pitch, double dspTime);
     public event NoteOffCallback OnNoteOff;
     private NoteOffCallback _noteOffCallback = null;
 
     /// Note on callback.
-    public delegate void NoteOnCallback(double pitch, double intensity, double timestamp);
+    ///
+    /// @param pitch Note pitch.
+    /// @param intensity Note intensity.
+    /// @param dspTime Note on time in seconds.
+    public delegate void NoteOnCallback(double pitch, double intensity, double dspTime);
     public event NoteOnCallback OnNoteOn;
     private NoteOnCallback _noteOnCallback = null;
 
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
-      _noteOffCallback = delegate(double pitch, double timestamp) {
-        OnNoteOff?.Invoke(pitch, timestamp);
+      _noteOffCallback = delegate(double pitch, double dspTime) {
+        OnNoteOff?.Invoke(pitch, dspTime);
       };
-      _noteOnCallback = delegate(double pitch, double intensity, double timestamp) {
-        OnNoteOn?.Invoke(pitch, intensity, timestamp);
+      _noteOnCallback = delegate(double pitch, double intensity, double dspTime) {
+        OnNoteOn?.Invoke(pitch, intensity, dspTime);
       };
     }
 

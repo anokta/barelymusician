@@ -14,59 +14,77 @@ namespace Barely {
     /// Beat callback.
     ///
     /// @param position Beat position in beats.
-    /// @param timestamp Beat time in seconds.
+    /// @param dspTime Beat time in seconds.
     public delegate void BeatCallback(double position, double dspTime);
     public static event BeatCallback OnBeat;
 
-    /// Returns playback position.
-    ///
-    /// @return Position in beats.
-    public static double GetPosition() {
-      return Native.Musician_GetPosition();
-    }
+    /// Denotes whether musician is currently playing or not.
+    public static bool IsPlaying { get; private set; }
 
-    /// Returns playback tempo.
-    ///
-    /// @return Tempo in bpm.
-    public static double GetTempo() {
-      return Native.Musician_GetTempo();
+    /// Playback position in beats.
+    public static double Position {
+      get { return _position; }
+      set {
+        if (_position != value) {
+          Native.Musician_SetPosition(value);
+          _position = Native.Musician_GetPosition();
+        }
+      }
     }
+    private static double _position = 0.0;
 
-    /// Returns whether musician is currently playing or not.
-    ///
-    /// @return True if playing, false otherwise.
-    public static bool IsPlaying() {
-      return Native.Musician_IsPlaying();
+    /// Root note pitch.
+    public static double RootPitch {
+      get { return _rootPitch; }
+      set {
+        if (_rootPitch != value) {
+          Native.Musician_SetRootNote(value);
+          _rootPitch = Native.Musician_GetRootNote();
+        }
+      }
     }
+    private static double _rootPitch = 0.0;
 
-    /// Sets playback position.
-    ///
-    /// @param position Position in beats.
-    public static void SetPosition(double position) {
-      Native.Musician_SetPosition(position);
+    /// List of scale note pitches.
+    public static double[] ScalePitches {
+      get { return _scalePitches; }
+      set {
+        if (_scalePitches != value) {
+          Native.Musician_SetScale(value);
+          _scalePitches = Native.Musician_GetScale();
+        }
+      }
     }
+    private static double[] _scalePitches = null;
 
-    /// Sets playback tempo.
-    ///
-    /// @param tempo Tempo in bpm.
-    public static void SetTempo(double tempo) {
-      Native.Musician_SetTempo(tempo);
+    /// Playback tempo in bpm.
+    public static double Tempo {
+      get { return _tempo; }
+      set {
+        if (_tempo != value) {
+          Native.Musician_SetTempo(value);
+          _tempo = Native.Musician_GetTempo();
+        }
+      }
     }
+    private static double _tempo = 120.0;
 
     /// Pauses playback.
     public static void Pause() {
       Native.Musician_Stop();
+      IsPlaying = Native.Musician_IsPlaying();
     }
 
     /// Starts playback.
     public static void Play() {
       Native.Musician_Start();
+      IsPlaying = Native.Musician_IsPlaying();
     }
 
     /// Stops playback.
     public static void Stop() {
-      Native.Musician_Stop();
-      Native.Musician_SetPosition(0.0);
+      Pause();
+      Position = 0.0;
     }
 
     /// Class that wraps native api.
@@ -263,6 +281,32 @@ namespace Barely {
         return 0.0;
       }
 
+      /// Returns musician root note.
+      ///
+      /// @return Root note pitch.
+      public static double Musician_GetRootNote() {
+        Status status = BarelyMusician_GetRootNote(Handle, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician root note: " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns musician scale.
+      ///
+      /// @return List of scale note pitches.
+      public static double[] Musician_GetScale() {
+        Status status = BarelyMusician_GetScale(Handle, _intPtrPtr, _int32Ptr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<double[]>(_intPtrPtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician scale: " + status);
+        }
+        return null;
+      }
+
       /// Returns musician tempo.
       ///
       /// @return Tempo in bpm.
@@ -296,6 +340,26 @@ namespace Barely {
         Status status = BarelyMusician_SetPosition(Handle, position);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set musician position: " + status);
+        }
+      }
+
+      /// Sets musician root note.
+      ///
+      /// @param rootPitch Root note pitch.
+      public static void Musician_SetRootNote(double rootPitch) {
+        Status status = BarelyMusician_SetRootNote(Handle, rootPitch);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set musician root note: " + status);
+        }
+      }
+
+      /// Sets musician scale.
+      ///
+      /// @param scalePitches List of scale note pitches.
+      public static void Musician_SetScale(double[] scalePitches) {
+        Status status = BarelyMusician_SetScale(Handle, scalePitches, scalePitches.Length);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set musician scale: " + status);
         }
       }
 
@@ -409,11 +473,10 @@ namespace Barely {
         if (changed) {
           sequence.NativeNotes = new Note[sequence.Notes.Length];
           Note.Definition definition = new Note.Definition {};
-          definition.pitch.type = Note.PitchType.AbsolutePitch;
+          definition.pitch.type = Note.PitchType.ScaleIndex;
           for (int i = 0; i < sequence.NativeNotes.Length; ++i) {
             definition.duration = sequence.Notes[i].note.Duration;
-            definition.pitch.value.absolutePitch =
-                (double)(sequence.RootNote + sequence.Notes[i].note.Pitch - 69) / 12.0;
+            definition.pitch.value.scaleIndex = sequence.Notes[i].note.Pitch;
             definition.intensity = sequence.Notes[i].note.Intensity;
             sequence.NativeNotes[i] = new Note(sequence, definition, sequence.Notes[i].position);
           }
@@ -484,6 +547,9 @@ namespace Barely {
       // `Double` type pointer.
       private static IntPtr _doublePtr = IntPtr.Zero;
 
+      // `Int32` type pointer.
+      private static IntPtr _int32Ptr = IntPtr.Zero;
+
       // `Int64` type pointer.
       private static IntPtr _int64Ptr = IntPtr.Zero;
 
@@ -502,24 +568,19 @@ namespace Barely {
       // Component that manages internal state.
       private class State : MonoBehaviour {
         private void Awake() {
+          AllocatePtrs();
           AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-          _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
           Status status = BarelyMusician_Create(_intPtrPtr);
           if (!IsOk(status)) {
             Debug.LogError("Failed to initialize BarelyMusician: " + status);
-            Marshal.FreeHGlobal(_intPtrPtr);
             return;
           }
-          _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
-          _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
-          _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
           _handle = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
-          Marshal.FreeHGlobal(_intPtrPtr);
           _adjustNoteCallback = delegate(ref Note.Definition definition) {
             OnAdjustNote?.Invoke(ref definition);
           };
-          _beatCallback = delegate(double position, double timestamp) {
-            OnBeat?.Invoke(position, timestamp);
+          _beatCallback = delegate(double position, double dspTime) {
+            OnBeat?.Invoke(position, dspTime);
           };
           BarelyMusician_SetAdjustNoteCallback(
               _handle, Marshal.GetFunctionPointerForDelegate(_adjustNoteCallback), IntPtr.Zero);
@@ -534,36 +595,14 @@ namespace Barely {
           AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
-          if (_booleanPtr != IntPtr.Zero) {
-            Marshal.FreeHGlobal(_booleanPtr);
-            _booleanPtr = IntPtr.Zero;
-          }
-          if (_doublePtr != IntPtr.Zero) {
-            Marshal.FreeHGlobal(_doublePtr);
-            _doublePtr = IntPtr.Zero;
-          }
-          if (_int64Ptr != IntPtr.Zero) {
-            Marshal.FreeHGlobal(_int64Ptr);
-            _int64Ptr = IntPtr.Zero;
-          }
+          DeallocatePtrs();
         }
 
         private void OnApplicationQuit() {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
-          if (_booleanPtr != IntPtr.Zero) {
-            Marshal.FreeHGlobal(_booleanPtr);
-            _booleanPtr = IntPtr.Zero;
-          }
-          if (_doublePtr != IntPtr.Zero) {
-            Marshal.FreeHGlobal(_doublePtr);
-            _doublePtr = IntPtr.Zero;
-          }
-          if (_int64Ptr != IntPtr.Zero) {
-            Marshal.FreeHGlobal(_int64Ptr);
-            _int64Ptr = IntPtr.Zero;
-          }
+          DeallocatePtrs();
         }
 
         private void OnAudioConfigurationChanged(bool deviceWasChanged) {
@@ -580,6 +619,39 @@ namespace Barely {
         private void LateUpdate() {
           double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
           BarelyMusician_Update(_handle, AudioSettings.dspTime + lookahead);
+        }
+
+        // Allocates unmanaged memory for native calls.
+        private void AllocatePtrs() {
+          _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
+          _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
+          _int32Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int32>());
+          _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
+          _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
+        }
+
+        // Deallocates unmanaged memory for native calls.
+        private void DeallocatePtrs() {
+          if (_booleanPtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_booleanPtr);
+            _booleanPtr = IntPtr.Zero;
+          }
+          if (_doublePtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_doublePtr);
+            _doublePtr = IntPtr.Zero;
+          }
+          if (_int32Ptr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_int32Ptr);
+            _int32Ptr = IntPtr.Zero;
+          }
+          if (_int64Ptr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_int64Ptr);
+            _int64Ptr = IntPtr.Zero;
+          }
+          if (_intPtrPtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_intPtrPtr);
+            _intPtrPtr = IntPtr.Zero;
+          }
         }
       }
 
@@ -683,10 +755,9 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetRootNote")]
       private static extern Status BarelyMusician_GetRootNote(IntPtr handle, IntPtr outRootPitch);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetScale")]
-      private static extern Status BarelyInstrument_GetScale(IntPtr handle, Int64 instrumentId,
-                                                             IntPtr outScalePitches,
-                                                             Int32 numScalePitches);
+      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetScale")]
+      private static extern Status BarelyMusician_GetScale(IntPtr handle, IntPtr outScalePitches,
+                                                           IntPtr outNumScalePitches);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
       private static extern Status BarelyMusician_GetTempo(IntPtr handle, IntPtr outTempo);

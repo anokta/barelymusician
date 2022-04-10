@@ -35,9 +35,9 @@ public class Metronome : MonoBehaviour {
   }
 
   void Update() {
-    Musician.SetTempo(tempo);
+    Musician.Tempo = tempo;
     if (Input.GetKeyDown(KeyCode.Space)) {
-      if (Musician.IsPlaying()) {
+      if (Musician.IsPlaying) {
         Musician.Pause();
         if (logToConsole) {
           Debug.Log("Playback paused");
@@ -56,7 +56,7 @@ public class Metronome : MonoBehaviour {
     }
   }
 
-  private void OnBeat(double position, double timestamp) {
+  private void OnBeat(double position, double dspTime) {
     int bar = (int)(position) / numBeats;
     int beat = (int)(position) % numBeats;
     double pitch = (beat == 0.0) ? barPitch : beatPitch;

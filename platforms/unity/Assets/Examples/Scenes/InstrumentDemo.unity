@@ -578,15 +578,15 @@ MonoBehaviour:
   EndPosition: 1.7976931348623157e+308
   Loop: 1
   LoopBeginOffset: 0
-  LoopLength: 4
+  LoopLength: 8
   Instrument: {fileID: 1298915919}
   Notes:
-  - position: 3.33
+  - position: 7.33
     note:
       Pitch: 4
       Intensity: 1
       Duration: 0.33
-  - position: 3.66
+  - position: 7.66
     note:
       Pitch: 2
       Intensity: 1
@@ -666,7 +666,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.2
+  m_Volume: 0.25
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -1020,6 +1020,7 @@ MonoBehaviour:
   intensity: 1
   logToConsole: 1
   tick: 1
+  position: 0
 --- !u!4 &2098958021
 Transform:
   m_ObjectHideFlags: 0

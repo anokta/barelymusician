@@ -4,19 +4,19 @@ namespace Barely {
   /// Oscillator type.
   public enum OscillatorType {
     /// Sine wave.
-    Sine = 0,
+    [InspectorName("Sine")] SINE = 0,
     /// Sawtooth wave.
-    Saw = 1,
+    [InspectorName("Saw")] SAW = 1,
     /// Square wave.
-    Square = 2,
+    [InspectorName("Square")] SQUARE = 2,
     /// White noise.
-    Noise = 3,
+    [InspectorName("Noise")] NOISE = 3,
   }
 
   /// Simple polyphonic synth instrument.
   public class SynthInstrument : Instrument {
     /// Oscillator type.
-    public OscillatorType oscillatorType = OscillatorType.Sine;
+    public OscillatorType oscillatorType = OscillatorType.SINE;
 
     /// Envelope attack.
     public double attack = 0.05;

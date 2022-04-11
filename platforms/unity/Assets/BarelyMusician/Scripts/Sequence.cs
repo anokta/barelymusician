@@ -28,7 +28,7 @@ namespace Barely {
     /// Instrument to perform.
     public Instrument Instrument = null;
 
-    [System.Serializable]
+    [Serializable]
     public class Note {
       // TODO(#85): Should be double, keeping int for POC sequencer replacement.
       [Range(-24, 24)]
@@ -39,7 +39,7 @@ namespace Barely {
     }
 
     /// Notes to perform.
-    [System.Serializable]
+    [Serializable]
     public struct SequenceNote {
       public double position;
       public Note note;

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using Barely;
 
-public enum ScaleType {
-  Major,
-  NaturalMinor,
-  HarmonicMinor,
-  Custom,
-}
-
 public class Conductor : MonoBehaviour {
+  public enum ScaleType {
+    Major,
+    NaturalMinor,
+    HarmonicMinor,
+    Custom,
+  }
+
   public readonly double[] MajorScale =
       new double[] { 0.0, 2.0 / 12.0, 4.0 / 12.0, 5.0 / 12.0, 7.0 / 12.0, 9.0 / 12.0, 11.0 / 12.0 };
   public readonly double[] NaturalMinorScale =
@@ -59,7 +59,7 @@ public class Conductor : MonoBehaviour {
     Musician.ScalePitches = scalePitches;
   }
 
-  private void OnAdjustNote(ref Note.Definition definition) {
+  private void OnAdjustNote(ref NoteDefinition definition) {
     if (!bypassAdjustment) {
       definition.intensity *= 0.125 * (double)Random.Range(1, 8);
       definition.duration *= 0.125 * (double)Random.Range(1, 8);

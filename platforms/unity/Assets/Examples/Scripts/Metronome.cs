@@ -26,6 +26,10 @@ public class Metronome : MonoBehaviour {
 
   public bool tick = true;
 
+  [Min(0)]
+  public int position = 0;
+  private int _lastPosition = 0;
+
   void OnEnable() {
     Musician.OnBeat += OnBeat;
   }
@@ -35,6 +39,13 @@ public class Metronome : MonoBehaviour {
   }
 
   void Update() {
+    if (position != _lastPosition) {
+      Musician.Position = (double)position;
+    } else {
+      position = (int)Musician.Position;
+    }
+    _lastPosition = position;
+
     Musician.Tempo = tempo;
     if (Input.GetKeyDown(KeyCode.Space)) {
       if (Musician.IsPlaying) {

@@ -5,7 +5,7 @@ namespace Barely {
   // Instrument.
   [RequireComponent(typeof(AudioSource))]
   public class Instrument : MonoBehaviour {
-    /// Instrument identifier.
+    /// Identifier.
     public Int64 Id { get; private set; } = Musician.Native.InvalidId;
 
     /// Audio source.

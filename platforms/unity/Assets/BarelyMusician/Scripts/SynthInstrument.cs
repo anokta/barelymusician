@@ -19,9 +19,11 @@ namespace Barely {
     public OscillatorType oscillatorType = OscillatorType.SINE;
 
     /// Envelope attack.
+    [Min(0.0f)]
     public double attack = 0.05;
 
     /// Envelope decay.
+    [Min(0.0f)]
     public double decay = 0.0;
 
     /// Envelope sustain.
@@ -29,6 +31,7 @@ namespace Barely {
     public double sustain = 1.0;
 
     /// Envelope release.
+    [Min(0.0f)]
     public double release = 0.25;
 
     /// Number of voices.

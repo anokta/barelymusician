@@ -74,6 +74,14 @@ namespace Barely {
     }
     private static double _tempo = 120.0;
 
+    /// Returns note.
+    ///
+    /// @param definition Note pitch definition.
+    /// @return Note pitch.
+    public static double GetNote(NotePitchDefinition definition) {
+      return Musician.Native.Musician_GetNote(definition);
+    }
+
     /// Pauses playback.
     public static void Pause() {
       Native.Musician_Stop();
@@ -171,8 +179,8 @@ namespace Barely {
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Boolean>(_booleanPtr);
         } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument note " + pitch + " for '" + instrument.name +
-                         "': " + status);
+          Debug.LogError("Failed to get if instrument note pitch " + pitch + " is on for '" +
+                         instrument.name + "': " + status);
         }
         return false;
       }
@@ -276,6 +284,20 @@ namespace Barely {
         }
       }
 
+      /// Returns musician note.
+      ///
+      /// @param definition Note pitch definition.
+      /// @return Note pitch.
+      public static double Musician_GetNote(NotePitchDefinition definition) {
+        Status status = BarelyMusician_GetNote(Handle, definition, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician note: " + status);
+        }
+        return 0.0;
+      }
+
       /// Returns musician position.
       ///
       /// @return Position in beats.
@@ -336,7 +358,7 @@ namespace Barely {
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Boolean>(_booleanPtr);
         } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician playback: " + status);
+          Debug.LogError("Failed to get if musician is playing for : " + status);
         }
         return false;
       }
@@ -498,6 +520,195 @@ namespace Barely {
         BarelySequence_Destroy(Handle, sequence.Id);
       }
 
+      /// Returns sequence begin offset.
+      ///
+      /// @param sequence Sequence.
+      /// @return Begin offset in beats.
+      public static double Sequence_GetBeginOffset(Sequence sequence) {
+        Status status = BarelySequence_GetBeginOffset(Handle, sequence.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get sequence begin offset for '" + sequence.name +
+                         "': " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns sequence begin position.
+      ///
+      /// @param sequence Sequence.
+      /// @return Begin position in beats.
+      public static double Sequence_GetBeginPosition(Sequence sequence) {
+        Status status = BarelySequence_GetBeginPosition(Handle, sequence.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get sequence begin position for '" + sequence.name +
+                         "': " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns sequence end position.
+      ///
+      /// @param sequence Sequence.
+      /// @return End position in beats.
+      public static double Sequence_GetEndPosition(Sequence sequence) {
+        Status status = BarelySequence_GetEndPosition(Handle, sequence.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get sequence end position for '" + sequence.name +
+                         "': " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns sequence loop begin offset.
+      ///
+      /// @param sequence Sequence.
+      /// @return Loop begin offset in beats.
+      public static double Sequence_GetLoopBeginOffset(Sequence sequence) {
+        Status status = BarelySequence_GetLoopBeginOffset(Handle, sequence.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get sequence loop begin offset for '" + sequence.name +
+                         "': " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns sequence loop length.
+      ///
+      /// @param sequence Sequence.
+      /// @return Loop length in beats.
+      public static double Sequence_GetLoopLength(Sequence sequence) {
+        Status status = BarelySequence_GetLoopLength(Handle, sequence.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get sequence loop length for '" + sequence.name +
+                         "': " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns whether sequence is empty or not.
+      ///
+      /// @param sequence Sequence.
+      /// @return True if empty, false otherwise.
+      public static bool Sequence_IsEmpty(Sequence sequence) {
+        Status status = BarelySequence_IsEmpty(Handle, sequence.Id, _booleanPtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<bool>(_booleanPtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to if sequence is empty for '" + sequence.name + "': " + status);
+        }
+        return false;
+      }
+
+      /// Returns whether sequence is looping or not.
+      ///
+      /// @param sequence Sequence.
+      /// @return True if looping, false otherwise.
+      public static bool Sequence_IsLooping(Sequence sequence) {
+        Status status = BarelySequence_IsLooping(Handle, sequence.Id, _booleanPtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<bool>(_booleanPtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to if sequence is looping for '" + sequence.name + "': " + status);
+        }
+        return false;
+      }
+
+      /// Sets sequence begin offset.
+      ///
+      /// @param sequence Sequence.
+      /// @param beginOffset Begin offset in beats.
+      public static void Sequence_SetBeginOffset(Sequence sequence, double beginOffset) {
+        Status status = BarelySequence_SetBeginOffset(Handle, sequence.Id, beginOffset);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set sequence begin offset for '" + sequence.name +
+                         "': " + status);
+        }
+      }
+
+      /// Sets sequence begin position.
+      ///
+      /// @param sequence Sequence.
+      /// @param beginPosition Begin position in beats.
+      public static void Sequence_SetBeginPosition(Sequence sequence, double beginPosition) {
+        Status status = BarelySequence_SetBeginPosition(Handle, sequence.Id, beginPosition);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set sequence begin position for '" + sequence.name +
+                         "': " + status);
+        }
+      }
+
+      /// Sets sequence end position.
+      ///
+      /// @param sequence Sequence.
+      /// @param endPosition End position in beats.
+      public static void Sequence_SetEndPosition(Sequence sequence, double endPosition) {
+        Status status = BarelySequence_SetEndPosition(Handle, sequence.Id, endPosition);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set sequence end position for '" + sequence.name +
+                         "': " + status);
+        }
+      }
+
+      /// Sets sequence instrument.
+      ///
+      /// @param sequence Sequence.
+      /// @param instrument Instrument.
+      public static void Sequence_SetInstrument(Sequence sequence, Instrument instrument) {
+        Status status = BarelySequence_SetInstrument(Handle, sequence.Id,
+                                                     instrument ? instrument.Id : InvalidId);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set sequence instrument '" +
+                         (instrument ? instrument.name : null) + "' for '" + sequence.name +
+                         "': " + status);
+        }
+      }
+
+      /// Sets sequence loop begin offset.
+      ///
+      /// @param sequence Sequence.
+      /// @param loopBeginOffset Loop begin offset in beats.
+      public static void Sequence_SetLoopBeginOffset(Sequence sequence, double loopBeginOffset) {
+        Status status = BarelySequence_SetLoopBeginOffset(Handle, sequence.Id, loopBeginOffset);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set sequence loop begin offset for '" + sequence.name +
+                         "': " + status);
+        }
+      }
+
+      /// Sets sequence loop length.
+      ///
+      /// @param sequence Sequence.
+      /// @param loopLength Loop length in beats.
+      public static void Sequence_SetLoopLength(Sequence sequence, double loopLength) {
+        Status status = BarelySequence_SetLoopLength(Handle, sequence.Id, loopLength);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set sequence loop length for '" + sequence.name +
+                         "': " + status);
+        }
+      }
+
+      /// Sets whether sequence is looping or not.
+      ///
+      /// @param sequence Sequence.
+      /// @param isLooping True if looping, false otherwise.
+      public static void Sequence_SetLooping(Sequence sequence, bool isLooping) {
+        Status status = BarelySequence_SetLooping(Handle, sequence.Id, isLooping);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set if sequence is looping for '" + sequence.name +
+                         "': " + status);
+        }
+      }
+
       /// Updates sequence.
       ///
       /// @param sequence Sequence.
@@ -506,7 +717,7 @@ namespace Barely {
         BarelySequence_SetBeginOffset(Handle, sequence.Id, sequence.BeginOffset);
         BarelySequence_SetBeginPosition(Handle, sequence.Id, sequence.BeginPosition);
         BarelySequence_SetEndPosition(Handle, sequence.Id, sequence.EndPosition);
-        BarelySequence_SetLooping(Handle, sequence.Id, sequence.Loop);
+        BarelySequence_SetLooping(Handle, sequence.Id, sequence.IsLooping);
         BarelySequence_SetLoopBeginOffset(Handle, sequence.Id, sequence.LoopBeginOffset);
         BarelySequence_SetLoopLength(Handle, sequence.Id, sequence.LoopLength);
         BarelySequence_SetInstrument(Handle, sequence.Id,

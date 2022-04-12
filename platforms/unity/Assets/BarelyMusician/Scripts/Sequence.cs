@@ -2,30 +2,93 @@
 using UnityEngine;
 
 namespace Barely {
-  /// Sequence.
+  /// Class that wraps sequence.
   public class Sequence : MonoBehaviour {
-    /// Sequence id.
+    /// Identifier.
     public Int64 Id { get; private set; } = Musician.Native.InvalidId;
 
-    /// Begin offset.
-    public double BeginOffset = 0.0;
+    /// Begin offset in beats.
+    public double BeginOffset {
+      get { return _beginOffset; }
+      set {
+        if (_beginOffset != value) {
+          Musician.Native.Sequence_SetBeginOffset(this, value);
+          _beginOffset = Musician.Native.Sequence_GetBeginOffset(this);
+        }
+      }
+    }
+    [SerializeField]
+    private double _beginOffset = 0.0;
 
-    /// Optional begin position.
-    public double BeginPosition = 0.0;
+    /// Begin position in beats.
+    public double BeginPosition {
+      get { return _beginPosition; }
+      set {
+        if (_beginPosition != value) {
+          Musician.Native.Sequence_SetBeginPosition(this, value);
+          _beginPosition = Musician.Native.Sequence_GetBeginPosition(this);
+        }
+      }
+    }
+    [SerializeField]
+    [Min(0.0f)]
+    private double _beginPosition = 0.0;
 
-    /// Optional end position.
-    public double EndPosition = double.MaxValue;
+    /// End position in bets.
+    public double EndPosition {
+      get { return _endPosition; }
+      set {
+        if (_endPosition != value) {
+          Musician.Native.Sequence_SetEndPosition(this, value);
+          _endPosition = Musician.Native.Sequence_GetEndPosition(this);
+        }
+      }
+    }
+    [SerializeField]
+    private double _endPosition = double.MaxValue;
 
-    /// Denotes whether the sequence is looping or not.
-    public bool Loop = false;
+    /// Denotes whether sequence is looping or not.
+    public bool IsLooping {
+      get { return _isLooping; }
+      set {
+        if (_isLooping != value) {
+          Musician.Native.Sequence_SetLooping(this, value);
+          _isLooping = Musician.Native.Sequence_IsLooping(this);
+        }
+      }
+    }
+    [SerializeField]
+    private bool _isLooping = false;
 
-    /// Loop begin offset.
-    public double LoopBeginOffset = 0.0;
+    /// Loop begin offset in beats.
+    public double LoopBeginOffset {
+      get { return _loopBeginOffset; }
+      set {
+        if (_loopBeginOffset != value) {
+          Musician.Native.Sequence_SetLoopBeginOffset(this, value);
+          _loopBeginOffset = Musician.Native.Sequence_GetLoopBeginOffset(this);
+        }
+      }
+    }
+    [SerializeField]
+    private double _loopBeginOffset = 0.0;
 
-    /// Loop length.
-    public double LoopLength = 1.0;
+    /// Loop length in beats.
+    public double LoopLength {
+      get { return _loopLength; }
+      set {
+        if (_loopLength != value) {
+          Musician.Native.Sequence_SetLoopLength(this, value);
+          _loopLength = Musician.Native.Sequence_GetLoopLength(this);
+        }
+      }
+    }
+    [SerializeField]
+    [Min(0.0f)]
+    private double _loopLength = 1.0;
 
-    /// Instrument to perform.
+    /// Instrument.
+    // TODO(#105): Convert to property.
     public Instrument Instrument = null;
 
     [Serializable]

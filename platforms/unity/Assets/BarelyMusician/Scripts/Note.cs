@@ -48,6 +48,7 @@ namespace Barely {
     public NotePitchType Type { get; private set; }
 
     /// Value.
+    [Serializable]
     [StructLayout(LayoutKind.Explicit)]
     private struct Value {
       /// Absolute pitch.
@@ -60,6 +61,7 @@ namespace Barely {
       [FieldOffset(0)]
       public int ScaleIndex;
     };
+    [SerializeField]
     private Value _value;
   }
 
@@ -92,6 +94,7 @@ namespace Barely {
         }
       }
     }
+    [SerializeField]
     private NoteDefinition _definition = new NoteDefinition();
 
     /// Identifier.
@@ -109,6 +112,7 @@ namespace Barely {
         }
       }
     }
+    [SerializeField]
     private double _position = 0.0;
 
     /// Sequence.

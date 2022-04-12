@@ -573,12 +573,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8478c34e94f0ff449fc5bff3c8e1fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BeginOffset: 0
-  BeginPosition: 0
-  EndPosition: 1.7976931348623157e+308
-  Loop: 1
-  LoopBeginOffset: 0
-  LoopLength: 8
+  _beginOffset: 0
+  _beginPosition: 0
+  _endPosition: 1.7976931348623157e+308
+  _isLooping: 1
+  _loopBeginOffset: 0
+  _loopLength: 8
   Instrument: {fileID: 1298915919}
   Notes:
   - position: 7.33
@@ -776,12 +776,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8478c34e94f0ff449fc5bff3c8e1fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BeginOffset: 0
-  BeginPosition: 0
-  EndPosition: 1.7976931348623157e+308
-  Loop: 1
-  LoopBeginOffset: 0
-  LoopLength: 4
+  _beginOffset: 0
+  _beginPosition: 0
+  _endPosition: 1.7976931348623157e+308
+  _isLooping: 1
+  _loopBeginOffset: 0
+  _loopLength: 4
   Instrument: {fileID: 1714525513}
   Notes:
   - position: 0

@@ -212,9 +212,7 @@ TEST(EngineTest, PlaySequence) {
               AllOf(NotNull(), Pointee(kInstrumentId)));
 
   // Create note.
-  EXPECT_TRUE(sequence->IsEmpty());
-  sequence->CreateNote(kNoteId, kNoteDefinition, 1.0);
-  EXPECT_FALSE(sequence->IsEmpty());
+  EXPECT_TRUE(sequence->CreateNote(kNoteId, kNoteDefinition, 1.0));
 
   EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
 
@@ -246,12 +244,12 @@ TEST(EngineTest, PlaySequence) {
   EXPECT_TRUE(instrument->IsNoteOn(engine.GetConductor().GetRootNote()));
 
   // Destroy sequence, which should not affect the instrument.
-  engine.DestroySequence(kSequenceId);
+  EXPECT_TRUE(engine.DestroySequence(kSequenceId));
   EXPECT_THAT(engine.GetSequence(kSequenceId), IsNull());
   EXPECT_TRUE(instrument->IsNoteOn(engine.GetConductor().GetRootNote()));
 
   // Destroy instrument.
-  engine.DestroyInstrument(kInstrumentId);
+  EXPECT_TRUE(engine.DestroyInstrument(kInstrumentId));
   EXPECT_THAT(engine.GetInstrument(kInstrumentId), IsNull());
 }
 

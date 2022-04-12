@@ -66,8 +66,6 @@ const double* Sequence::GetNotePosition(Id id) const noexcept {
   return FindOrNull(positions_, id);
 }
 
-bool Sequence::IsEmpty() const noexcept { return notes_.empty(); }
-
 bool Sequence::IsLooping() const noexcept { return is_looping_; }
 
 bool Sequence::IsSkippingAdjustments() const noexcept {

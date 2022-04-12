@@ -861,16 +861,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_GetLoopBeginOffset(
 BARELY_EXPORT BarelyStatus BarelySequence_GetLoopLength(
     BarelyMusicianHandle handle, BarelyId sequence_id, double* out_loop_length);
 
-/// Gets whether sequence is empty or not.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_is_empty Output true if empty, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_IsEmpty(BarelyMusicianHandle handle,
-                                                  BarelyId sequence_id,
-                                                  bool* out_is_empty);
-
 /// Gets whether sequence is looping or not.
 ///
 /// @param handle Musician handle.
@@ -1780,16 +1770,6 @@ class Sequence {
         BarelySequence_GetLoopLength(handle_, id_, &loop_length);
     assert(status.IsOk());
     return loop_length;
-  }
-
-  /// Returns whether sequence is empty or not.
-  ///
-  /// @return True if empty, false otherwise.
-  [[nodiscard]] bool IsEmpty() const {
-    bool is_empty = false;
-    const Status status = BarelySequence_IsEmpty(handle_, id_, &is_empty);
-    assert(status.IsOk());
-    return is_empty;
   }
 
   /// Returns whether sequence should be looping or not.

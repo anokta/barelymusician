@@ -615,20 +615,6 @@ namespace Barely {
         return 0.0;
       }
 
-      /// Returns whether sequence is empty or not.
-      ///
-      /// @param sequence Sequence.
-      /// @return True if empty, false otherwise.
-      public static bool Sequence_IsEmpty(Sequence sequence) {
-        Status status = BarelySequence_IsEmpty(Handle, sequence.Id, _booleanPtr);
-        if (IsOk(status)) {
-          return Marshal.PtrToStructure<bool>(_booleanPtr);
-        } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to if sequence is empty for '" + sequence.name + "': " + status);
-        }
-        return false;
-      }
-
       /// Returns whether sequence is looping or not.
       ///
       /// @param sequence Sequence.
@@ -1156,10 +1142,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelySequence_GetLoopLength")]
       private static extern Status BarelySequence_GetLoopLength(IntPtr handle, Int64 sequenceId,
                                                                 IntPtr outLoopLength);
-
-      [DllImport(pluginName, EntryPoint = "BarelySequence_IsEmpty")]
-      private static extern Status BarelySequence_IsEmpty(IntPtr handle, Int64 sequenceId,
-                                                          IntPtr outIsEmpty);
 
       [DllImport(pluginName, EntryPoint = "BarelySequence_IsLooping")]
       private static extern Status BarelySequence_IsLooping(IntPtr handle, Int64 sequenceId,

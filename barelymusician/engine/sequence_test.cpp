@@ -36,7 +36,6 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_THAT(sequence.GetInstrument(), IsNull());
   EXPECT_THAT(sequence.GetNoteDefinition(kId), IsNull());
   EXPECT_THAT(sequence.GetNotePosition(kId), IsNull());
-  EXPECT_TRUE(sequence.IsEmpty());
 
   // Set instrument.
   std::vector<double> note_on_timestamps;
@@ -68,7 +67,6 @@ TEST(SequenceTest, ProcessSingleNote) {
                 Field(&Note::Definition::intensity, 1.0)))));
   EXPECT_THAT(sequence.GetNotePosition(kId),
               AllOf(NotNull(), Pointee(kPosition)));
-  EXPECT_FALSE(sequence.IsEmpty());
 
   // Process before the note position.
   sequence.Process(0.0, 1.0);
@@ -153,7 +151,6 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_TRUE(sequence.DestroyNote(kId));
   EXPECT_THAT(sequence.GetNoteDefinition(kId), IsNull());
   EXPECT_THAT(sequence.GetNotePosition(kId), IsNull());
-  EXPECT_TRUE(sequence.IsEmpty());
 
   sequence.Process(1.0, 11.0);
   EXPECT_TRUE(note_on_timestamps.empty());
@@ -168,7 +165,6 @@ TEST(SequenceTest, ProcessMultipleNotes) {
 
   Sequence sequence(conductor, transport);
   EXPECT_THAT(sequence.GetInstrument(), IsNull());
-  EXPECT_TRUE(sequence.IsEmpty());
 
   // Set instrument.
   std::vector<std::pair<double, double>> note_ons;
@@ -196,7 +192,6 @@ TEST(SequenceTest, ProcessMultipleNotes) {
     EXPECT_THAT(sequence.GetNotePosition(static_cast<Id>(i + 1)),
                 AllOf(NotNull(), Pointee(static_cast<double>(i))));
   }
-  EXPECT_FALSE(sequence.IsEmpty());
 
   // Process until the end of last note.
   sequence.Process(0.0, 4.0);
@@ -246,7 +241,6 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   for (int i = 0; i < 4; ++i) {
     EXPECT_TRUE(sequence.DestroyNote(static_cast<Id>(i + 1)));
   }
-  EXPECT_TRUE(sequence.IsEmpty());
 
   sequence.Process(0.0, 10.0);
   EXPECT_TRUE(note_ons.empty());

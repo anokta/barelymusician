@@ -82,11 +82,6 @@ class Sequence {
   /// @return Pointer to note position in beats.
   [[nodiscard]] const double* GetNotePosition(Id id) const noexcept;
 
-  /// Returns whether sequence is empty or not.
-  ///
-  /// @return True if empty, false otherwise.
-  [[nodiscard]] bool IsEmpty() const noexcept;
-
   /// Returns whether sequence is looping or not.
   ///
   /// @return True if looping, false otherwise.

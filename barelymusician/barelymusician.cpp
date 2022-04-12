@@ -795,19 +795,6 @@ BarelyStatus BarelySequence_GetLoopLength(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequence_IsEmpty(BarelyMusicianHandle handle,
-                                    BarelyId sequence_id, bool* out_is_empty) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequence_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (!out_is_empty) return BarelyStatus_kInvalidArgument;
-
-  if (const auto* sequence = handle->engine.GetSequence(sequence_id)) {
-    *out_is_empty = sequence->IsEmpty();
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
 BarelyStatus BarelySequence_IsLooping(BarelyMusicianHandle handle,
                                       BarelyId sequence_id,
                                       bool* out_is_looping) {

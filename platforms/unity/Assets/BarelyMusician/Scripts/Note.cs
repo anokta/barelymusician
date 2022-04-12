@@ -132,8 +132,10 @@ namespace Barely {
 
     /// Destroys native note.
     public void Destroy() {
-      Musician.Native.Note_Destroy(this);
-      Id = Musician.Native.InvalidId;
+      if (Sequence.Id != Musician.Native.InvalidId && Id != Musician.Native.InvalidId) {
+        Musician.Native.Note_Destroy(this);
+        Id = Musician.Native.InvalidId;
+      }
       Sequence = null;
     }
   }

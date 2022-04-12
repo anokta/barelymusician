@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Barely {
@@ -28,6 +29,9 @@ namespace Barely {
     public event NoteOnCallback OnNoteOn;
     private NoteOnCallback _noteOnCallback = null;
 
+    // List of sequences.
+    private List<Sequence> _sequences = null;
+
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
       _noteOffCallback = delegate(double pitch, double dspTime) {
@@ -36,16 +40,25 @@ namespace Barely {
       _noteOnCallback = delegate(double pitch, double intensity, double dspTime) {
         OnNoteOn?.Invoke(pitch, intensity, dspTime);
       };
+      _sequences = new List<Sequence>();
     }
 
     protected virtual void OnDestroy() {
       Source = null;
       _noteOffCallback = null;
       _noteOnCallback = null;
+      _sequences = null;
     }
 
     protected virtual void OnEnable() {
       Id = Musician.Native.Instrument_Create(this, ref _noteOffCallback, ref _noteOnCallback);
+      GetComponents<Sequence>(_sequences);
+      for (int i = 0; i < _sequences.Count; ++i) {
+        var sequence = _sequences[i];
+        if (sequence.Id != Musician.Native.InvalidId && sequence.Instrument == this) {
+          Musician.Native.Sequence_SetInstrument(sequence, this);
+        }
+      }
       Source?.Play();
     }
 

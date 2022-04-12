@@ -88,8 +88,17 @@ namespace Barely {
     private double _loopLength = 1.0;
 
     /// Instrument.
-    // TODO(#105): Convert to property.
-    public Instrument Instrument = null;
+    public Instrument Instrument {
+      get { return _instrument; }
+      set {
+        if (_instrument != value) {
+          Musician.Native.Sequence_SetInstrument(this, value);
+          _instrument = Musician.Native.Sequence_GetInstrument(this, value);
+        }
+      }
+    }
+    [SerializeField]
+    private Instrument _instrument = null;
 
     [Serializable]
     public class Note {
@@ -117,9 +126,19 @@ namespace Barely {
         Id = Musician.Native.Sequence_Create(this);
         _changed = true;
       }
+      if (NativeNotes != null) {
+        for (int i = 0; i < NativeNotes.Length; ++i) {
+          NativeNotes[i].Create(this);
+        }
+      }
     }
 
     void OnDisable() {
+      if (NativeNotes != null) {
+        for (int i = 0; i < NativeNotes.Length; ++i) {
+          NativeNotes[i].Destroy();
+        }
+      }
       if (Id != Musician.Native.InvalidId) {
         Musician.Native.Sequence_Destroy(this);
         Id = Musician.Native.InvalidId;

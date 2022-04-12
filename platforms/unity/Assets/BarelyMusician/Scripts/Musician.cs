@@ -565,6 +565,26 @@ namespace Barely {
         return 0.0;
       }
 
+      /// Returns sequence instrument.
+      ///
+      /// @param sequence Sequence.
+      /// @return expected Expected instrument to avoid extra lookup.
+      public static Instrument Sequence_GetInstrument(Sequence sequence, Instrument expected) {
+        Status status = BarelySequence_GetInstrument(Handle, sequence.Id, _int64Ptr);
+        if (IsOk(status)) {
+          Int64 instrumentId = Marshal.PtrToStructure<Int64>(_int64Ptr);
+          if ((expected == null && instrumentId == Native.InvalidId) ||
+              instrumentId == expected.Id) {
+            return expected;
+          }
+        }
+        if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get sequence instrument for '" + sequence.name +
+                         "': " + status);
+        }
+        return null;
+      }
+
       /// Returns sequence loop begin offset.
       ///
       /// @param sequence Sequence.

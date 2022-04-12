@@ -579,7 +579,7 @@ MonoBehaviour:
   _isLooping: 1
   _loopBeginOffset: 0
   _loopLength: 8
-  Instrument: {fileID: 1298915919}
+  _instrument: {fileID: 1298915919}
   Notes:
   - position: 7.33
     note:
@@ -782,7 +782,7 @@ MonoBehaviour:
   _isLooping: 1
   _loopBeginOffset: 0
   _loopLength: 4
-  Instrument: {fileID: 1714525513}
+  _instrument: {fileID: 1714525513}
   Notes:
   - position: 0
     note:

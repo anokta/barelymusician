@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using Barely;
 
@@ -29,6 +28,10 @@ public class Metronome : MonoBehaviour {
   [Min(0)]
   public int position = 0;
   private int _lastPosition = 0;
+
+  [Serializable]
+  public class BeatEvent : UnityEngine.Events.UnityEvent<float> {}
+  public BeatEvent Beat;
 
   void OnEnable() {
     Musician.OnBeat += OnBeat;
@@ -78,5 +81,6 @@ public class Metronome : MonoBehaviour {
     if (logToConsole) {
       Debug.Log("Tick " + bar + "." + beat);
     }
+    Beat?.Invoke((float)position);
   }
 }

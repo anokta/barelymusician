@@ -445,6 +445,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NoteOff:
+    m_PersistentCalls:
+      m_Calls: []
+  NoteOn:
+    m_PersistentCalls:
+      m_Calls: []
   oscillatorType: 2
   attack: 0.02500000037252903
   decay: 0
@@ -677,6 +683,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NoteOff:
+    m_PersistentCalls:
+      m_Calls: []
+  NoteOn:
+    m_PersistentCalls:
+      m_Calls: []
   oscillatorType: 1
   attack: 0
   decay: 0
@@ -881,6 +893,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NoteOff:
+    m_PersistentCalls:
+      m_Calls: []
+  NoteOn:
+    m_PersistentCalls:
+      m_Calls: []
   oscillatorType: 0
   attack: 0
   decay: 0
@@ -1049,6 +1067,9 @@ MonoBehaviour:
   logToConsole: 1
   tick: 1
   position: 0
+  Beat:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &2098958021
 Transform:
   m_ObjectHideFlags: 0
@@ -1075,6 +1096,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  NoteOff:
+    m_PersistentCalls:
+      m_Calls: []
+  NoteOn:
+    m_PersistentCalls:
+      m_Calls: []
   oscillatorType: 2
   attack: 0
   decay: 0

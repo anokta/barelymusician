@@ -20,6 +20,10 @@ namespace Barely {
     public event NoteOffCallback OnNoteOff;
     private NoteOffCallback _noteOffCallback = null;
 
+    [Serializable]
+    public class NoteOffEvent : UnityEngine.Events.UnityEvent<float> {}
+    public NoteOffEvent NoteOff;
+
     /// Note on callback.
     ///
     /// @param pitch Note pitch.
@@ -29,6 +33,10 @@ namespace Barely {
     public event NoteOnCallback OnNoteOn;
     private NoteOnCallback _noteOnCallback = null;
 
+    [Serializable]
+    public class NoteOnEvent : UnityEngine.Events.UnityEvent<float, float> {}
+    public NoteOnEvent NoteOn;
+
     // List of sequences.
     private List<Sequence> _sequences = null;
 
@@ -36,9 +44,11 @@ namespace Barely {
       Source = GetComponent<AudioSource>();
       _noteOffCallback = delegate(double pitch, double dspTime) {
         OnNoteOff?.Invoke(pitch, dspTime);
+        NoteOff?.Invoke((float)pitch);
       };
       _noteOnCallback = delegate(double pitch, double intensity, double dspTime) {
         OnNoteOn?.Invoke(pitch, intensity, dspTime);
+        NoteOn?.Invoke((float)pitch, (float)intensity);
       };
       _sequences = new List<Sequence>();
     }

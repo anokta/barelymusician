@@ -45,6 +45,7 @@ namespace Barely {
       }
     }
     [SerializeField]
+    [Min(0.0f)]
     private double _endPosition = double.MaxValue;
 
     /// Denotes whether sequence is looping or not.
@@ -100,58 +101,59 @@ namespace Barely {
     [SerializeField]
     private Instrument _instrument = null;
 
-    [Serializable]
-    public class Note {
-      // TODO(#85): Should be double, keeping int for POC sequencer replacement.
-      [Range(-24, 24)]
-      public int Pitch = 0;
-      [Range(0.0f, 1.0f)]
-      public double Intensity = 1.0;
-      public double Duration = 1.0;
-    }
-
-    /// Notes to perform.
-    [Serializable]
-    public struct SequenceNote {
-      public double position;
-      public Note note;
-    }
-    public SequenceNote[] Notes = null;
-    public Barely.Note[] NativeNotes = null;
-
-    private bool _changed = false;
-
-    void OnEnable() {
-      if (Id == Musician.Native.InvalidId) {
-        Id = Musician.Native.Sequence_Create(this);
-        _changed = true;
+    /// List of notes.
+    public Note[] Notes {
+      get { return _notes; }
+      set {
+        if (_notes != value) {
+          if (_notes != null && Id != Musician.Native.InvalidId) {
+            for (int i = 0; i < _notes.Length; ++i) {
+              _notes[i].Destroy();
+            }
+          }
+          _notes = value;
+          if (_notes != null && Id != Musician.Native.InvalidId) {
+            for (int i = 0; i < _notes.Length; ++i) {
+              _notes[i].Create(this);
+            }
+          }
+        }
       }
-      if (NativeNotes != null) {
-        for (int i = 0; i < NativeNotes.Length; ++i) {
-          NativeNotes[i].Create(this);
+    }
+    [SerializeField]
+    private Note[] _notes = null;
+
+    private void OnEnable() {
+      Id = Musician.Native.Sequence_Create(this);
+      Musician.Native.Sequence_SetBeginOffset(this, _beginOffset);
+      _beginOffset = Musician.Native.Sequence_GetBeginOffset(this);
+      Musician.Native.Sequence_SetBeginPosition(this, _beginPosition);
+      _beginPosition = Musician.Native.Sequence_GetBeginPosition(this);
+      Musician.Native.Sequence_SetEndPosition(this, _endPosition);
+      _endPosition = Musician.Native.Sequence_GetEndPosition(this);
+      Musician.Native.Sequence_SetLooping(this, _isLooping);
+      _isLooping = Musician.Native.Sequence_IsLooping(this);
+      Musician.Native.Sequence_SetLoopBeginOffset(this, _loopBeginOffset);
+      _loopBeginOffset = Musician.Native.Sequence_GetLoopBeginOffset(this);
+      Musician.Native.Sequence_SetLoopLength(this, _loopLength);
+      _loopLength = Musician.Native.Sequence_GetLoopLength(this);
+      Musician.Native.Sequence_SetInstrument(this, _instrument);
+      _instrument = Musician.Native.Sequence_GetInstrument(this, _instrument);
+      if (_notes != null) {
+        for (int i = 0; i < _notes.Length; ++i) {
+          _notes[i].Create(this);
         }
       }
     }
 
-    void OnDisable() {
-      if (NativeNotes != null) {
-        for (int i = 0; i < NativeNotes.Length; ++i) {
-          NativeNotes[i].Destroy();
+    private void OnDisable() {
+      if (_notes != null) {
+        for (int i = 0; i < _notes.Length; ++i) {
+          _notes[i].Destroy();
         }
       }
-      if (Id != Musician.Native.InvalidId) {
-        Musician.Native.Sequence_Destroy(this);
-        Id = Musician.Native.InvalidId;
-      }
-    }
-
-    void OnValidate() {
-      _changed = true;
-    }
-
-    void Update() {
-      Musician.Native.Sequence_Update(this, _changed);
-      _changed = false;
+      Musician.Native.Sequence_Destroy(this);
+      Id = Musician.Native.InvalidId;
     }
   }
 }

@@ -21,7 +21,7 @@ namespace Barely {
     public double AbsolutePitch {
       get { return (Type == NotePitchType.ABSOLUTE_PITCH) ? _value.AbsolutePitch : 0.0; }
       set {
-        Type = NotePitchType.ABSOLUTE_PITCH;
+        _type = NotePitchType.ABSOLUTE_PITCH;
         _value.AbsolutePitch = value;
       }
     }
@@ -30,7 +30,7 @@ namespace Barely {
     public double RelativePitch {
       get { return (Type == NotePitchType.RELATIVE_PITCH) ? _value.RelativePitch : 0.0; }
       set {
-        Type = NotePitchType.RELATIVE_PITCH;
+        _type = NotePitchType.RELATIVE_PITCH;
         _value.RelativePitch = value;
       }
     }
@@ -39,13 +39,17 @@ namespace Barely {
     public int ScaleIndex {
       get { return (Type == NotePitchType.SCALE_INDEX) ? _value.ScaleIndex : 0; }
       set {
-        Type = NotePitchType.SCALE_INDEX;
+        _type = NotePitchType.SCALE_INDEX;
         _value.ScaleIndex = value;
       }
     }
 
     /// Type.
-    public NotePitchType Type { get; private set; }
+    public NotePitchType Type {
+      get { return _type; }
+    }
+    [SerializeField]
+    private NotePitchType _type;
 
     /// Value.
     [Serializable]
@@ -70,13 +74,15 @@ namespace Barely {
   [StructLayout(LayoutKind.Sequential)]
   public struct NoteDefinition {
     /// Duration.
-    public double duration;
+    [Min(0.0f)]
+    public double Duration;
 
     /// Pitch.
-    public NotePitchDefinition pitch;
+    public NotePitchDefinition Pitch;
 
     /// Intensity.
-    public double intensity;
+    [Range(0.0f, 1.0f)]
+    public double Intensity;
   }
 
   /// Class that wraps note.
@@ -86,9 +92,7 @@ namespace Barely {
     public NoteDefinition Definition {
       get { return _definition; }
       set {
-        if (Id == Musician.Native.InvalidId) {
-          _definition = value;
-        } else if (!_definition.Equals(value)) {
+        if (!_definition.Equals(value)) {
           Musician.Native.Note_SetDefinition(this, value);
           _definition = Musician.Native.Note_GetDefinition(this);
         }
@@ -104,9 +108,7 @@ namespace Barely {
     public double Position {
       get { return _position; }
       set {
-        if (Id == Musician.Native.InvalidId) {
-          _position = value;
-        } else if (_position != value) {
+        if (_position != value) {
           Musician.Native.Note_SetPosition(this, value);
           _position = Musician.Native.Note_GetPosition(this);
         }
@@ -118,10 +120,6 @@ namespace Barely {
     /// Sequence.
     public Sequence Sequence { get; private set; }
 
-    ~Note() {
-      Destroy();
-    }
-
     /// Creates native note.
     ///
     /// @param sequence Sequence.
@@ -132,10 +130,8 @@ namespace Barely {
 
     /// Destroys native note.
     public void Destroy() {
-      if (Sequence.Id != Musician.Native.InvalidId && Id != Musician.Native.InvalidId) {
-        Musician.Native.Note_Destroy(this);
-        Id = Musician.Native.InvalidId;
-      }
+      Musician.Native.Note_Destroy(this);
+      Id = Musician.Native.InvalidId;
       Sequence = null;
     }
   }

@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bypassAdjustment: 1
-  rootPitch: -2
+  rootPitch: -1
   scaleType: 0
   scalePitches:
   - 0
@@ -445,11 +445,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oscillatorType: 1
-  attack: 0.025
+  oscillatorType: 2
+  attack: 0.02500000037252903
   decay: 0
   sustain: 1
-  release: 0.125
+  release: 0.07500000298023224
   numVoices: 8
 --- !u!82 &1298915920
 AudioSource:
@@ -463,7 +463,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.2
+  m_Volume: 0.15
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -578,20 +578,49 @@ MonoBehaviour:
   _endPosition: 1.7976931348623157e+308
   _isLooping: 1
   _loopBeginOffset: 0
-  _loopLength: 8
+  _loopLength: 4
   _instrument: {fileID: 1298915919}
-  Notes:
-  - position: 7.33
-    note:
-      Pitch: 4
+  _notes:
+  - _definition:
+      Duration: 0.5
+      Pitch:
+        _type: 2
+        _value:
+          AbsolutePitch: 0
+          RelativePitch: 0
+          ScaleIndex: 0
       Intensity: 1
-      Duration: 0.33
-  - position: 7.66
-    note:
-      Pitch: 2
+    _position: 0
+  - _definition:
+      Duration: 0.5
+      Pitch:
+        _type: 2
+        _value:
+          AbsolutePitch: 1e-323
+          RelativePitch: 1e-323
+          ScaleIndex: 2
       Intensity: 1
-      Duration: 0.33
-  NativeNotes: []
+    _position: 1
+  - _definition:
+      Duration: 0.5
+      Pitch:
+        _type: 2
+        _value:
+          AbsolutePitch: 2e-323
+          RelativePitch: 2e-323
+          ScaleIndex: 4
+      Intensity: 1
+    _position: 2
+  - _definition:
+      Duration: 0.5
+      Pitch:
+        _type: 2
+        _value:
+          AbsolutePitch: 3.5e-323
+          RelativePitch: 3.5e-323
+          ScaleIndex: 7
+      Intensity: 1
+    _position: 3
 --- !u!114 &1298915923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -648,11 +677,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oscillatorType: 2
+  oscillatorType: 1
   attack: 0
   decay: 0
   sustain: 1
-  release: 0.1
+  release: 0.125
   numVoices: 8
 --- !u!82 &1714525514
 AudioSource:
@@ -781,30 +810,29 @@ MonoBehaviour:
   _endPosition: 1.7976931348623157e+308
   _isLooping: 1
   _loopBeginOffset: 0
-  _loopLength: 4
+  _loopLength: 8
   _instrument: {fileID: 1714525513}
-  Notes:
-  - position: 0
-    note:
-      Pitch: 0
+  _notes:
+  - _definition:
+      Duration: 0.3333333432674408
+      Pitch:
+        _type: 0
+        _value:
+          AbsolutePitch: 1e-323
+          RelativePitch: 1e-323
+          ScaleIndex: 2
       Intensity: 0.75
-      Duration: 0.5
-  - position: 1
-    note:
-      Pitch: 2
+    _position: 7.33333333333333
+  - _definition:
+      Duration: 0.3333333432674408
+      Pitch:
+        _type: 2
+        _value:
+          AbsolutePitch: 2e-323
+          RelativePitch: 2e-323
+          ScaleIndex: 4
       Intensity: 0.75
-      Duration: 0.5
-  - position: 2
-    note:
-      Pitch: 4
-      Intensity: 0.75
-      Duration: 0.5
-  - position: 3
-    note:
-      Pitch: 7
-      Intensity: 1
-      Duration: 0.5
-  NativeNotes: []
+    _position: 7.66666666666667
 --- !u!1 &1737834378
 GameObject:
   m_ObjectHideFlags: 0

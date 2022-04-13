@@ -61,8 +61,8 @@ public class Conductor : MonoBehaviour {
 
   private void OnAdjustNote(ref NoteDefinition definition) {
     if (!bypassAdjustment) {
-      definition.intensity *= 0.125 * (double)Random.Range(1, 8);
-      definition.duration *= 0.125 * (double)Random.Range(1, 8);
+      definition.Intensity *= 0.125 * (double)Random.Range(1, 8);
+      definition.Duration *= 0.125 * (double)Random.Range(1, 8);
     }
   }
 }

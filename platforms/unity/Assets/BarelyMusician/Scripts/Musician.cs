@@ -715,40 +715,6 @@ namespace Barely {
         }
       }
 
-      /// Updates sequence.
-      ///
-      /// @param sequence Sequence.
-      // TODO(#85): This is a POC implementation only.
-      public static void Sequence_Update(Sequence sequence, bool changed) {
-        BarelySequence_SetBeginOffset(Handle, sequence.Id, sequence.BeginOffset);
-        BarelySequence_SetBeginPosition(Handle, sequence.Id, sequence.BeginPosition);
-        BarelySequence_SetEndPosition(Handle, sequence.Id, sequence.EndPosition);
-        BarelySequence_SetLooping(Handle, sequence.Id, sequence.IsLooping);
-        BarelySequence_SetLoopBeginOffset(Handle, sequence.Id, sequence.LoopBeginOffset);
-        BarelySequence_SetLoopLength(Handle, sequence.Id, sequence.LoopLength);
-        BarelySequence_SetInstrument(Handle, sequence.Id,
-                                     sequence.Instrument ? sequence.Instrument.Id : InvalidId);
-
-        if (changed) {
-          if (sequence.NativeNotes != null) {
-            for (int i = 0; i < sequence.NativeNotes.Length; ++i) {
-              sequence.NativeNotes[i].Destroy();
-            }
-          }
-          sequence.NativeNotes = new Note[sequence.Notes.Length];
-          NoteDefinition definition = new NoteDefinition {};
-          for (int i = 0; i < sequence.NativeNotes.Length; ++i) {
-            definition.duration = sequence.Notes[i].note.Duration;
-            definition.pitch.ScaleIndex = sequence.Notes[i].note.Pitch;
-            definition.intensity = sequence.Notes[i].note.Intensity;
-            sequence.NativeNotes[i] = new Note();
-            sequence.NativeNotes[i].Definition = definition;
-            sequence.NativeNotes[i].Position = sequence.Notes[i].position;
-            sequence.NativeNotes[i].Create(sequence);
-          }
-        }
-      }
-
       // Instrument type.
       private enum InstrumentType {
         // Synth instrument.

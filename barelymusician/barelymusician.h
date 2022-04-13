@@ -1462,6 +1462,15 @@ class Instrument {
         handle_, id_, static_cast<const void*>(&data), sizeof(decltype(data)));
   }
 
+  /// Sets data.
+  ///
+  /// @param data Data.
+  /// @param size Data size.
+  /// @return Status.
+  Status SetData(const void* data, int size) {
+    return BarelyInstrument_SetData(handle_, id_, data, size);
+  }
+
   /// Sets note off callback.
   ///
   /// @param callback Note off callback.

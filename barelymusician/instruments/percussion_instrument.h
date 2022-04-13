@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 
+#include <array>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -12,12 +13,6 @@
 
 namespace barelyapi {
 
-struct PercussionPad {
-  std::vector<double> data;
-  int frequency;
-};
-using PercussionPadMap = std::unordered_map<double, PercussionPad>;
-
 /// Simple percussion instrument.
 class PercussionInstrument : public GenericInstrument {
  public:
@@ -27,7 +22,6 @@ class PercussionInstrument : public GenericInstrument {
   /// Implements `GenericInstrument`.
   void Process(double* output, int num_channels,
                int num_frames) noexcept override;
-  // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetData(const void* data, int size) noexcept override;
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;
@@ -37,9 +31,14 @@ class PercussionInstrument : public GenericInstrument {
   static Instrument::Definition GetDefinition() noexcept;
 
  private:
-  int frame_rate_;
-  const PercussionPadMap* pads_;
-  std::unordered_map<double, EnvelopedVoice<SamplePlayer>> voices_;
+  static constexpr int kNumPads = 4;
+  struct Pad {
+    explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
+
+    double pitch = 0.0;
+    EnvelopedVoice<SamplePlayer> voice;
+  };
+  std::array<Pad, kNumPads> pads_;
 };
 
 }  // namespace barelyapi

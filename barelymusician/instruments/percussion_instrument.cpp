@@ -1,5 +1,6 @@
 #include "barelymusician/instruments/percussion_instrument.h"
 
+#include <cstddef>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -11,14 +12,15 @@ namespace barelyapi {
 using ::barely::PercussionParameter;
 
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
-    : frame_rate_(frame_rate) {}
+    : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),
+            Pad(frame_rate)} {}
 
 void PercussionInstrument::Process(double* output, int num_channels,
                                    int num_frames) noexcept {
   for (int frame = 0; frame < num_frames; ++frame) {
     double mono_sample = 0.0;
-    for (auto& [pitch, voice] : voices_) {
-      mono_sample += voice.Next(0);
+    for (auto& pad : pads_) {
+      mono_sample += pad.voice.Next(0);
     }
     for (int channel = 0; channel < num_channels; ++channel) {
       output[num_channels * frame + channel] = mono_sample;
@@ -26,32 +28,43 @@ void PercussionInstrument::Process(double* output, int num_channels,
   }
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 void PercussionInstrument::SetData(const void* data, int /*size*/) noexcept {
-  pads_ = *static_cast<const PercussionPadMap* const*>(data);
-  if (pads_) {
-    // TODO(#44): Temporary workaround, should be preallocated.
-    voices_.clear();
-    voices_.reserve(pads_->size());
-    for (const auto& [pitch, pad] : *pads_) {
-      auto [it, success] =
-          voices_.emplace(pitch, EnvelopedVoice<SamplePlayer>(frame_rate_));
-      it->second.generator().SetData(pad.data.data(), pad.frequency,
-                                     static_cast<int>(pad.data.size()));
+  for (int i = 0; i < kNumPads; ++i) {
+    if (data) {
+      // Pad data is sequentially aligned by pitch, frequency, length and data.
+      const double pitch = *reinterpret_cast<const double*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(double);
+      const int frequency = *reinterpret_cast<const int*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(int);
+      const int length = *reinterpret_cast<const int*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(int);
+      const double* voice_data = reinterpret_cast<const double*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(double) * length;
+      pads_[i].pitch = pitch;
+      pads_[i].voice.generator().SetData(voice_data, frequency, length);
+    } else {
+      pads_[i].pitch = 0.0;
+      pads_[i].voice.generator().SetData(nullptr, 0, 0);
     }
   }
 }
 
 void PercussionInstrument::SetNoteOff(double pitch) noexcept {
-  if (const auto it = voices_.find(pitch); it != voices_.end()) {
-    it->second.Stop();
+  for (auto& pad : pads_) {
+    if (pad.pitch == pitch) {
+      pad.voice.Stop();
+      break;
+    }
   }
 }
 
 void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
-  if (const auto it = voices_.find(pitch); it != voices_.end()) {
-    it->second.set_gain(intensity);
-    it->second.Start();
+  for (auto& pad : pads_) {
+    if (pad.pitch == pitch) {
+      pad.voice.set_gain(intensity);
+      pad.voice.Start();
+      break;
+    }
   }
 }
 
@@ -59,8 +72,8 @@ void PercussionInstrument::SetParameter(int index, double value,
                                         double /*slope*/) noexcept {
   switch (static_cast<PercussionParameter>(index)) {
     case PercussionParameter::kRelease:
-      for (auto& [pitch, voice] : voices_) {
-        voice.envelope().SetRelease(static_cast<double>(value));
+      for (auto& pad : pads_) {
+        pad.voice.envelope().SetRelease(static_cast<double>(value));
       }
       break;
   }

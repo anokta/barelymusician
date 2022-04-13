@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cctype>
 #include <chrono>
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <thread>
@@ -39,8 +40,6 @@ using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
-using ::barelyapi::PercussionPad;
-using ::barelyapi::PercussionPadMap;
 using ::barelyapi::Random;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 
@@ -282,12 +281,28 @@ int main(int /*argc*/, char* argv[]) {
           const bool success = it.first->second.Load(path);
           assert(success);
         }
-        static PercussionPadMap percussion_pads;
+        std::vector<std::byte> data;
         for (const auto& [pitch, file] : percussion_files) {
-          percussion_pads.insert_or_assign(
-              pitch, PercussionPad{file.GetData(), file.GetSampleRate()});
+          const int size = static_cast<int>(data.size());
+          const int frequency = file.GetSampleRate();
+          const int length = static_cast<int>(file.GetData().size());
+          const double* voice_data = file.GetData().data();
+          data.resize(size + sizeof(double) + sizeof(int) + sizeof(int) +
+                      sizeof(double) * length);
+          std::byte* back = &data[size];
+          std::memcpy(back, reinterpret_cast<const void*>(&pitch),
+                      sizeof(double));
+          back += sizeof(double);
+          std::memcpy(back, reinterpret_cast<const void*>(&frequency),
+                      sizeof(int));
+          back += sizeof(int);
+          std::memcpy(back, reinterpret_cast<const void*>(&length),
+                      sizeof(int));
+          back += sizeof(int);
+          std::memcpy(back, reinterpret_cast<const void*>(voice_data),
+                      sizeof(double) * length);
         }
-        percussion.SetData(&percussion_pads);
+        percussion.SetData(data.data(), static_cast<int>(data.size()));
       };
   set_percussion_pad_map_fn(
       {{barelyapi::kPitchKick, "basic_kick.wav"},

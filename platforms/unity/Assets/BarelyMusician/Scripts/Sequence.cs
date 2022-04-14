@@ -48,6 +48,19 @@ namespace Barely {
     [Min(0.0f)]
     private double _endPosition = double.MaxValue;
 
+    /// Instrument.
+    public Instrument Instrument {
+      get { return _instrument; }
+      set {
+        if (_instrument != value) {
+          Musician.Native.Sequence_SetInstrument(this, value);
+          _instrument = Musician.Native.Sequence_GetInstrument(this, value);
+        }
+      }
+    }
+    [SerializeField]
+    private Instrument _instrument = null;
+
     /// Denotes whether sequence is looping or not.
     public bool IsLooping {
       get { return _isLooping; }
@@ -87,19 +100,6 @@ namespace Barely {
     [SerializeField]
     [Min(0.0f)]
     private double _loopLength = 1.0;
-
-    /// Instrument.
-    public Instrument Instrument {
-      get { return _instrument; }
-      set {
-        if (_instrument != value) {
-          Musician.Native.Sequence_SetInstrument(this, value);
-          _instrument = Musician.Native.Sequence_GetInstrument(this, value);
-        }
-      }
-    }
-    [SerializeField]
-    private Instrument _instrument = null;
 
     /// List of notes.
     public Note[] Notes {

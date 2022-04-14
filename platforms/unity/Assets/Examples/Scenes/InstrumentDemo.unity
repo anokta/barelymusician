@@ -582,10 +582,10 @@ MonoBehaviour:
   _beginOffset: 0
   _beginPosition: 0
   _endPosition: 1.7976931348623157e+308
+  _instrument: {fileID: 1298915919}
   _isLooping: 1
   _loopBeginOffset: 0
   _loopLength: 4
-  _instrument: {fileID: 1298915919}
   _notes:
   - _definition:
       Duration: 0.5
@@ -820,10 +820,10 @@ MonoBehaviour:
   _beginOffset: 0
   _beginPosition: 0
   _endPosition: 1.7976931348623157e+308
+  _instrument: {fileID: 1714525513}
   _isLooping: 1
   _loopBeginOffset: 0
   _loopLength: 8
-  _instrument: {fileID: 1714525513}
   _notes:
   - _definition:
       Duration: 0.3333333432674408

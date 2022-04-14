@@ -115,6 +115,7 @@ namespace Barely {
       }
     }
     [SerializeField]
+    [Min(0.0f)]
     private double _position = 0.0;
 
     /// Sequence.

@@ -23,7 +23,7 @@ public class Metronome : MonoBehaviour {
 
   public bool logToConsole = true;
 
-  public bool tick = true;
+  public bool tick = false;
 
   [Min(0)]
   public int position = 0;

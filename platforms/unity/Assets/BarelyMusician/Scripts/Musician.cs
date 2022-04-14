@@ -95,6 +95,13 @@ namespace Barely {
       IsPlaying = Native.Musician_IsPlaying();
     }
 
+    /// Starts playback at time.
+    ///
+    /// @param dspTime Time in seconds.
+    public static void PlayScheduled(double dspTime) {
+      Native.Musician_Start(dspTime);
+    }
+
     /// Stops playback.
     public static void Stop() {
       Native.Musician_Stop();
@@ -405,14 +412,23 @@ namespace Barely {
 
       /// Starts musician playback.
       public static void Musician_Start() {
+        _playbackStartTime = null;
         Status status = BarelyMusician_Start(Handle);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to start musician playback: " + status);
         }
       }
 
+      /// Starts musician playback at time.
+      ///
+      /// @param dspTime Time in seconds.
+      public static void Musician_Start(double dspTime) {
+        _playbackStartTime = dspTime;
+      }
+
       /// Stops musician playback.
       public static void Musician_Stop() {
+        _playbackStartTime = null;
         Status status = BarelyMusician_Stop(Handle);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to stop musician playback: " + status);
@@ -798,6 +814,9 @@ namespace Barely {
       // Internal output buffer.
       private static double[] _output = null;
 
+      // Optional playback start time in seconds.
+      private static double? _playbackStartTime = null;
+
       // Component that manages internal state.
       private class State : MonoBehaviour {
         private void Awake() {
@@ -851,7 +870,18 @@ namespace Barely {
 
         private void LateUpdate() {
           double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
-          BarelyMusician_Update(_handle, AudioSettings.dspTime + lookahead);
+          double dspTime = AudioSettings.dspTime + lookahead;
+          if (_playbackStartTime < dspTime) {
+            BarelyMusician_GetTimestamp(_handle, _doublePtr);
+            if (_playbackStartTime < Marshal.PtrToStructure<double>(_doublePtr)) {
+              Debug.LogWarning("Musician playback was scheduled behind the current time");
+              BarelyMusician_SetTimestamp(_handle, _playbackStartTime.Value);
+            } else {
+              BarelyMusician_Update(_handle, _playbackStartTime.Value);
+            }
+            Play();
+          }
+          BarelyMusician_Update(_handle, dspTime);
         }
 
         // Allocates unmanaged memory for native calls.

@@ -1411,7 +1411,7 @@ class Instrument {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const {
     bool is_note_on = false;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelyInstrument_IsNoteOn(handle_, id_, pitch, &is_note_on);
     assert(status.IsOk());
     return is_note_on;
@@ -1554,7 +1554,7 @@ class Instrument {
   explicit Instrument(BarelyMusicianHandle handle,
                       InstrumentDefinition definition, int frame_rate)
       : handle_(handle) {
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelyInstrument_Create(handle_, definition, frame_rate, &id_);
     assert(status.IsOk());
   }
@@ -1563,7 +1563,7 @@ class Instrument {
   explicit Instrument(BarelyMusicianHandle handle, InstrumentType type,
                       int frame_rate)
       : handle_(handle) {
-    const Status status = BarelyInstrument_CreateOfType(
+    [[maybe_unused]] const Status status = BarelyInstrument_CreateOfType(
         handle_, static_cast<BarelyInstrumentType>(type), frame_rate, &id_);
     assert(status.IsOk());
   }
@@ -1621,7 +1621,7 @@ class Note {
   /// @return Definition.
   [[nodiscard]] NoteDefinition GetDefinition() const {
     NoteDefinition definition;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelyNote_GetDefinition(handle_, sequence_id_, id_, &definition);
     assert(status.IsOk());
     return definition;
@@ -1632,7 +1632,7 @@ class Note {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const {
     double position = 0.0;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelyNote_GetPosition(handle_, sequence_id_, id_, &position);
     assert(status.IsOk());
     return position;
@@ -1661,7 +1661,7 @@ class Note {
   explicit Note(BarelyMusicianHandle handle, BarelyId sequence_id,
                 NoteDefinition definition, double position)
       : handle_(handle), sequence_id_(sequence_id) {
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelyNote_Create(handle_, sequence_id, definition, position, &id_);
     assert(status.IsOk());
   }
@@ -1726,7 +1726,7 @@ class Sequence {
   /// @return Begin offset in beats.
   [[nodiscard]] double GetBeginOffset() const {
     double begin_offset = 0.0;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelySequence_GetBeginOffset(handle_, id_, &begin_offset);
     assert(status.IsOk());
     return begin_offset;
@@ -1737,7 +1737,7 @@ class Sequence {
   /// @return Begin position in beats.
   [[nodiscard]] double GetBeginPosition() const {
     double begin_position = 0.0;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelySequence_GetBeginPosition(handle_, id_, &begin_position);
     assert(status.IsOk());
     return begin_position;
@@ -1748,7 +1748,7 @@ class Sequence {
   /// @return End position in beats.
   [[nodiscard]] double GetEndPosition() const {
     double end_position = 0.0;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelySequence_GetEndPosition(handle_, id_, &end_position);
     assert(status.IsOk());
     return end_position;
@@ -1764,7 +1764,7 @@ class Sequence {
   /// @return Loop begin offset in beats.
   [[nodiscard]] double GetLoopBeginOffset() const {
     double loop_begin_offset = 0.0;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelySequence_GetLoopBeginOffset(handle_, id_, &loop_begin_offset);
     assert(status.IsOk());
     return loop_begin_offset;
@@ -1775,7 +1775,7 @@ class Sequence {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const {
     double loop_length = 0.0;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelySequence_GetLoopLength(handle_, id_, &loop_length);
     assert(status.IsOk());
     return loop_length;
@@ -1786,7 +1786,8 @@ class Sequence {
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const {
     bool is_looping = false;
-    const Status status = BarelySequence_IsLooping(handle_, id_, &is_looping);
+    [[maybe_unused]] const Status status =
+        BarelySequence_IsLooping(handle_, id_, &is_looping);
     assert(status.IsOk());
     return is_looping;
   }
@@ -1796,7 +1797,7 @@ class Sequence {
   /// @return True if skipping, false otherwise.
   [[nodiscard]] bool IsSkippingAdjustments() const {
     bool is_skipping_adjustments = false;
-    const Status status = BarelySequence_IsSkippingAdjustments(
+    [[maybe_unused]] const Status status = BarelySequence_IsSkippingAdjustments(
         handle_, id_, &is_skipping_adjustments);
     assert(status.IsOk());
     return is_skipping_adjustments;
@@ -1876,7 +1877,7 @@ class Sequence {
 
   // Constructs new `Sequence`.
   explicit Sequence(BarelyMusicianHandle handle) : handle_(handle) {
-    const Status status = BarelySequence_Create(handle_, &id_);
+    [[maybe_unused]] const Status status = BarelySequence_Create(handle_, &id_);
     assert(status.IsOk());
   }
 
@@ -1906,14 +1907,14 @@ class Musician {
 
   /// Constructs new `Musician`.
   Musician() {
-    const Status status = BarelyMusician_Create(&handle_);
+    [[maybe_unused]] const Status status = BarelyMusician_Create(&handle_);
     assert(status.IsOk());
   }
 
   /// Destroys `Musician`.
   ~Musician() {
     if (handle_) {
-      const Status status =
+      [[maybe_unused]] const Status status =
           BarelyMusician_Destroy(std::exchange(handle_, nullptr));
       assert(status.IsOk());
     }
@@ -1938,7 +1939,7 @@ class Musician {
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
       if (handle_) {
-        const Status status = BarelyMusician_Destroy(handle_);
+        [[maybe_unused]] const Status status = BarelyMusician_Destroy(handle_);
         assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
@@ -1980,7 +1981,8 @@ class Musician {
   /// @return Note pitch.
   [[nodiscard]] double GetNote(NotePitchDefinition definition) const {
     double pitch = 0.0;
-    const Status status = BarelyMusician_GetNote(handle_, definition, &pitch);
+    [[maybe_unused]] const Status status =
+        BarelyMusician_GetNote(handle_, definition, &pitch);
     assert(status.IsOk());
     return pitch;
   }
@@ -1991,7 +1993,8 @@ class Musician {
   [[nodiscard]] double GetPosition() const {
     double position = 0.0;
     if (handle_) {
-      const Status status = BarelyMusician_GetPosition(handle_, &position);
+      [[maybe_unused]] const Status status =
+          BarelyMusician_GetPosition(handle_, &position);
       assert(status.IsOk());
     }
     return position;
@@ -2003,7 +2006,8 @@ class Musician {
   [[nodiscard]] double GetRootNote() const {
     double root_pitch = 0.0;
     if (handle_) {
-      const Status status = BarelyMusician_GetRootNote(handle_, &root_pitch);
+      [[maybe_unused]] const Status status =
+          BarelyMusician_GetRootNote(handle_, &root_pitch);
       assert(status.IsOk());
     }
     return root_pitch;
@@ -2016,7 +2020,7 @@ class Musician {
     const double* scale_pitches = nullptr;
     int num_scale_pitches = 0;
     if (handle_) {
-      const Status status =
+      [[maybe_unused]] const Status status =
           BarelyMusician_GetScale(handle_, &scale_pitches, &num_scale_pitches);
       assert(status.IsOk());
     }
@@ -2028,7 +2032,8 @@ class Musician {
   /// @return Tempo in bpm.
   [[nodiscard]] double GetTempo() const {
     double tempo = 0.0;
-    const Status status = BarelyMusician_GetTempo(handle_, &tempo);
+    [[maybe_unused]] const Status status =
+        BarelyMusician_GetTempo(handle_, &tempo);
     assert(status.IsOk());
     return tempo;
   }
@@ -2038,7 +2043,8 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const {
     double timestamp = 0.0;
-    const Status status = BarelyMusician_GetTimestamp(handle_, &timestamp);
+    [[maybe_unused]] const Status status =
+        BarelyMusician_GetTimestamp(handle_, &timestamp);
     assert(status.IsOk());
     return timestamp;
   }
@@ -2049,7 +2055,7 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestampAtPosition(double position) const {
     double timestamp = 0.0;
-    const Status status =
+    [[maybe_unused]] const Status status =
         BarelyMusician_GetTimestampAtPosition(handle_, position, &timestamp);
     assert(status.IsOk());
     return timestamp;
@@ -2060,7 +2066,8 @@ class Musician {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const {
     bool is_playing = false;
-    const Status status = BarelyMusician_IsPlaying(handle_, &is_playing);
+    [[maybe_unused]] const Status status =
+        BarelyMusician_IsPlaying(handle_, &is_playing);
     assert(status.IsOk());
     return is_playing;
   }

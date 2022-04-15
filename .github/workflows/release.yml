@@ -1,0 +1,31 @@
+name: release
+
+on: workflow_dispatch
+
+# TODO(#94): Create a tagged release with `unitypackage` and native libraries.
+jobs:
+  unity:
+    name: unity on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: install
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update && sudo apt-get install -y libasound-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+      - name: build
+        run: bazel build -c opt //platforms/unity:all
+      - uses: actions/upload-artifact@v3
+        with:
+          name: unity-${{ matrix.os }}-${{ github.sha }}
+          path: |
+            bazel-bin/platforms/unity/libunity_linux.so
+            bazel-bin/platforms/unity/unity_osx.dylib
+            bazel-bin/platforms/unity/unity_windows.dll

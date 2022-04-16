@@ -16,35 +16,35 @@ namespace Barely {
   /// Simple polyphonic synth instrument.
   public class SynthInstrument : Instrument {
     /// Oscillator type.
-    public OscillatorType oscillatorType = OscillatorType.SINE;
+    public OscillatorType OscillatorType = OscillatorType.SINE;
 
     /// Envelope attack.
     [Min(0.0f)]
-    public double attack = 0.05;
+    public double Attack = 0.05;
 
     /// Envelope decay.
     [Min(0.0f)]
-    public double decay = 0.0;
+    public double Decay = 0.0;
 
     /// Envelope sustain.
     [Range(0.0f, 1.0f)]
-    public double sustain = 1.0;
+    public double Sustain = 1.0;
 
     /// Envelope release.
     [Min(0.0f)]
-    public double release = 0.25;
+    public double Release = 0.25;
 
     /// Number of voices.
     [Range(1, 32)]
-    public int numVoices = 8;
+    public int NumVoices = 8;
 
     private void Update() {
-      SetParameter(0, (double)oscillatorType);
-      SetParameter(1, attack);
-      SetParameter(2, decay);
-      SetParameter(3, sustain);
-      SetParameter(4, release);
-      SetParameter(5, (double)numVoices);
+      SetParameter(0, (double)OscillatorType);
+      SetParameter(1, Attack);
+      SetParameter(2, Decay);
+      SetParameter(3, Sustain);
+      SetParameter(4, Release);
+      SetParameter(5, (double)NumVoices);
     }
   }
 }

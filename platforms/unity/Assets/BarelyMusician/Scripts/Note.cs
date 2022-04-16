@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// Note pitch types.
+  /// Note pitch type.
   public enum NotePitchType {
     /// Absolute pitch.
     [InspectorName("Absolute Pitch")] ABSOLUTE_PITCH = 0,
@@ -13,60 +13,30 @@ namespace Barely {
     [InspectorName("Scale Index")] SCALE_INDEX = 2,
   }
 
+  /// Note pitch value.
+  [Serializable]
+  [StructLayout(LayoutKind.Explicit)]
+  public struct NotePitchValue {
+    /// Absolute pitch.
+    [FieldOffset(0)]
+    public double AbsolutePitch;
+    /// Relative pitch.
+    [FieldOffset(0)]
+    public double RelativePitch;
+    /// Scale index.
+    [FieldOffset(0)]
+    public int ScaleIndex;
+  };
+
   /// Note pitch definition.
   [Serializable]
   [StructLayout(LayoutKind.Sequential)]
   public struct NotePitchDefinition {
-    /// Absolute pitch.
-    public double AbsolutePitch {
-      get { return (Type == NotePitchType.ABSOLUTE_PITCH) ? _value.AbsolutePitch : 0.0; }
-      set {
-        _type = NotePitchType.ABSOLUTE_PITCH;
-        _value.AbsolutePitch = value;
-      }
-    }
-
-    /// Relative pitch.
-    public double RelativePitch {
-      get { return (Type == NotePitchType.RELATIVE_PITCH) ? _value.RelativePitch : 0.0; }
-      set {
-        _type = NotePitchType.RELATIVE_PITCH;
-        _value.RelativePitch = value;
-      }
-    }
-
-    /// Scale index.
-    public int ScaleIndex {
-      get { return (Type == NotePitchType.SCALE_INDEX) ? _value.ScaleIndex : 0; }
-      set {
-        _type = NotePitchType.SCALE_INDEX;
-        _value.ScaleIndex = value;
-      }
-    }
-
     /// Type.
-    public NotePitchType Type {
-      get { return _type; }
-    }
-    [SerializeField]
-    private NotePitchType _type;
+    public NotePitchType Type;
 
     /// Value.
-    [Serializable]
-    [StructLayout(LayoutKind.Explicit)]
-    private struct Value {
-      /// Absolute pitch.
-      [FieldOffset(0)]
-      public double AbsolutePitch;
-      /// Relative pitch.
-      [FieldOffset(0)]
-      public double RelativePitch;
-      /// Scale index.
-      [FieldOffset(0)]
-      public int ScaleIndex;
-    };
-    [SerializeField]
-    private Value _value;
+    public NotePitchValue Value;
   }
 
   /// Note definition.
@@ -89,34 +59,16 @@ namespace Barely {
   [Serializable]
   public class Note {
     /// Definition.
-    public NoteDefinition Definition {
-      get { return _definition; }
-      set {
-        if (!_definition.Equals(value)) {
-          Musician.Native.Note_SetDefinition(this, value);
-          _definition = Musician.Native.Note_GetDefinition(this);
-        }
-      }
-    }
-    [SerializeField]
-    private NoteDefinition _definition = new NoteDefinition();
+    public NoteDefinition Definition = default(NoteDefinition);
+    private NoteDefinition _definition = default(NoteDefinition);
+
+    /// Position in beats.
+    [Min(0.0f)]
+    public double Position = 0.0;
+    private double _position = 0.0;
 
     /// Identifier.
     public Int64 Id { get; private set; } = Musician.Native.InvalidId;
-
-    /// Position in beats.
-    public double Position {
-      get { return _position; }
-      set {
-        if (_position != value) {
-          Musician.Native.Note_SetPosition(this, value);
-          _position = Musician.Native.Note_GetPosition(this);
-        }
-      }
-    }
-    [SerializeField]
-    [Min(0.0f)]
-    private double _position = 0.0;
 
     /// Sequence.
     public Sequence Sequence { get; private set; }
@@ -127,6 +79,8 @@ namespace Barely {
     public void Create(Sequence sequence) {
       Sequence = sequence;
       Id = Musician.Native.Note_Create(this);
+      _definition = Definition;
+      _position = Position;
     }
 
     /// Destroys native note.
@@ -134,6 +88,18 @@ namespace Barely {
       Musician.Native.Note_Destroy(this);
       Id = Musician.Native.InvalidId;
       Sequence = null;
+    }
+
+    /// Updates native note.
+    public void Update() {
+      if (!_definition.Equals(Definition)) {
+        Musician.Native.Note_SetDefinition(this);
+        _definition = Definition;
+      }
+      if (_position != Position) {
+        Musician.Native.Note_SetPosition(this);
+        _position = Position;
+      }
     }
   }
 }

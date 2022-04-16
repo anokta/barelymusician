@@ -66,7 +66,7 @@ namespace Barely {
       for (int i = 0; i < _sequences.Count; ++i) {
         var sequence = _sequences[i];
         if (sequence.Id != Musician.Native.InvalidId && sequence.Instrument == this) {
-          Musician.Native.Sequence_SetInstrument(sequence, this);
+          Musician.Native.Sequence_SetInstrument(sequence);
         }
       }
       Source?.Play();

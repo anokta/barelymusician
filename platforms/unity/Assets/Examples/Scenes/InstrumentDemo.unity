@@ -451,12 +451,12 @@ MonoBehaviour:
   NoteOn:
     m_PersistentCalls:
       m_Calls: []
-  oscillatorType: 2
-  attack: 0.02500000037252903
-  decay: 0
-  sustain: 1
-  release: 0.07500000298023224
-  numVoices: 8
+  OscillatorType: 1
+  Attack: 0.05
+  Decay: 0
+  Sustain: 1
+  Release: 0.125
+  NumVoices: 8
 --- !u!82 &1298915920
 AudioSource:
   m_ObjectHideFlags: 0
@@ -579,54 +579,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8478c34e94f0ff449fc5bff3c8e1fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _beginOffset: 0
-  _beginPosition: 0
-  _endPosition: 1.7976931348623157e+308
-  _instrument: {fileID: 1298915919}
-  _isLooping: 1
-  _loopBeginOffset: 0
-  _loopLength: 4
-  _notes:
-  - _definition:
+  BeginOffset: 0
+  BeginPosition: 0
+  EndPosition: 1.7976931348623157e+308
+  Instrument: {fileID: 1298915919}
+  IsLooping: 1
+  LoopBeginOffset: 0
+  LoopLength: 4
+  Notes:
+  - Definition:
       Duration: 0.5
       Pitch:
-        _type: 2
-        _value:
+        Type: 2
+        Value:
           AbsolutePitch: 0
           RelativePitch: 0
           ScaleIndex: 0
       Intensity: 1
-    _position: 0
-  - _definition:
+    Position: 0
+  - Definition:
       Duration: 0.5
       Pitch:
-        _type: 2
-        _value:
+        Type: 2
+        Value:
           AbsolutePitch: 1e-323
           RelativePitch: 1e-323
           ScaleIndex: 2
       Intensity: 1
-    _position: 1
-  - _definition:
+    Position: 1
+  - Definition:
       Duration: 0.5
       Pitch:
-        _type: 2
-        _value:
+        Type: 2
+        Value:
           AbsolutePitch: 2e-323
           RelativePitch: 2e-323
           ScaleIndex: 4
       Intensity: 1
-    _position: 2
-  - _definition:
+    Position: 2
+  - Definition:
       Duration: 0.5
       Pitch:
-        _type: 2
-        _value:
+        Type: 2
+        Value:
           AbsolutePitch: 3.5e-323
           RelativePitch: 3.5e-323
           ScaleIndex: 7
       Intensity: 1
-    _position: 3
+    Position: 3
 --- !u!114 &1298915923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -689,12 +689,12 @@ MonoBehaviour:
   NoteOn:
     m_PersistentCalls:
       m_Calls: []
-  oscillatorType: 1
-  attack: 0
-  decay: 0
-  sustain: 1
-  release: 0.125
-  numVoices: 8
+  OscillatorType: 1
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 0.125
+  NumVoices: 8
 --- !u!82 &1714525514
 AudioSource:
   m_ObjectHideFlags: 0
@@ -817,34 +817,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8478c34e94f0ff449fc5bff3c8e1fe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _beginOffset: 0
-  _beginPosition: 0
-  _endPosition: 1.7976931348623157e+308
-  _instrument: {fileID: 1714525513}
-  _isLooping: 1
-  _loopBeginOffset: 0
-  _loopLength: 8
-  _notes:
-  - _definition:
+  BeginOffset: 0
+  BeginPosition: 0
+  EndPosition: 1.7976931348623157e+308
+  Instrument: {fileID: 1714525513}
+  IsLooping: 1
+  LoopBeginOffset: 0
+  LoopLength: 8
+  Notes:
+  - Definition:
       Duration: 0.3333333432674408
       Pitch:
-        _type: 0
-        _value:
-          AbsolutePitch: 1e-323
-          RelativePitch: 1e-323
-          ScaleIndex: 2
-      Intensity: 0.75
-    _position: 7.33333333333333
-  - _definition:
-      Duration: 0.3333333432674408
-      Pitch:
-        _type: 2
-        _value:
+        Type: 2
+        Value:
           AbsolutePitch: 2e-323
           RelativePitch: 2e-323
           ScaleIndex: 4
       Intensity: 0.75
-    _position: 7.66666666666667
+    Position: 7.333333492279053
+  - Definition:
+      Duration: 0.3333333432674408
+      Pitch:
+        Type: 0
+        Value:
+          AbsolutePitch: 3e-323
+          RelativePitch: 3e-323
+          ScaleIndex: 6
+      Intensity: 1
+    Position: 7.666666507720947
 --- !u!1 &1737834378
 GameObject:
   m_ObjectHideFlags: 0
@@ -899,12 +899,12 @@ MonoBehaviour:
   NoteOn:
     m_PersistentCalls:
       m_Calls: []
-  oscillatorType: 0
-  attack: 0
-  decay: 0
-  sustain: 1
-  release: 0.2
-  numVoices: 16
+  OscillatorType: 0
+  Attack: 0.05
+  Decay: 0
+  Sustain: 1
+  Release: 0.25
+  NumVoices: 8
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1102,12 +1102,12 @@ MonoBehaviour:
   NoteOn:
     m_PersistentCalls:
       m_Calls: []
-  oscillatorType: 2
-  attack: 0
-  decay: 0
-  sustain: 1
-  release: 0.05
-  numVoices: 1
+  OscillatorType: 2
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 0.05000000074505806
+  NumVoices: 1
 --- !u!82 &2098958023
 AudioSource:
   m_ObjectHideFlags: 0

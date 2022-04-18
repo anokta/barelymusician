@@ -1,11 +1,84 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
+  /// Parameter definition.
+  [Serializable]
+  [StructLayout(LayoutKind.Sequential)]
+  public struct ParameterDefinition {
+    /// Default value.
+    double defaultValue;
+
+    /// Minimum value.
+    double minValue;
+
+    /// Maximum value.
+    double maxValue;
+  }
+
+  // Instrument definition.
+  [Serializable]
+  [StructLayout(LayoutKind.Sequential)]
+  public struct InstrumentDefinition {
+    // TODO(#105): Need to pass the array size for Marshal `SizeParamIndex`.
+    public delegate void ProcessCallback(IntPtr state,
+                                         [MarshalAs(UnmanagedType.LPArray,
+                                                    SizeParamIndex = 3)] double[] output,
+                                         Int32 numOutputChannels, Int32 numOutputFrames);
+    public delegate void SetDataCallback(IntPtr state, byte[] data, Int32 size);
+    public delegate void SetNoteOffCallback(IntPtr state, double pitch);
+    public delegate void SetNoteOnCallback(IntPtr state, double pitch, double intensity);
+    public delegate void SetParameterCallback(IntPtr state, Int32 index, double value);
+
+    public InstrumentDefinition(ProcessCallback processCallback, SetDataCallback setDataCallback,
+                                SetNoteOffCallback setNoteOffCallback,
+                                SetNoteOnCallback setNoteOnCallback,
+                                SetParameterCallback setParameterCallback,
+                                ParameterDefinition[] parameterDefinitions) {
+      _createCallback = IntPtr.Zero;
+      _destroyCallback = IntPtr.Zero;
+      _processCallback = Marshal.GetFunctionPointerForDelegate(processCallback);
+      _setDataCallback = Marshal.GetFunctionPointerForDelegate(setDataCallback);
+      _setNoteOffCallback = Marshal.GetFunctionPointerForDelegate(setNoteOffCallback);
+      _setNoteOnCallback = Marshal.GetFunctionPointerForDelegate(setNoteOnCallback);
+      _setParameterCallback = Marshal.GetFunctionPointerForDelegate(setParameterCallback);
+      _parameterDefinitions = parameterDefinitions;
+      _numParameterDefinitions = (parameterDefinitions != null) ? parameterDefinitions.Length : 0;
+    }
+
+    // Create callback.
+    private IntPtr _createCallback;
+
+    // Destroy callback.
+    private IntPtr _destroyCallback;
+
+    // Process callback.
+    private IntPtr _processCallback;
+
+    // Set data callback.
+    private IntPtr _setDataCallback;
+
+    // Set note off callback.
+    private IntPtr _setNoteOffCallback;
+
+    // Set note on callback.
+    private IntPtr _setNoteOnCallback;
+
+    // Set parameter callback.
+    private IntPtr _setParameterCallback;
+
+    // List of parameter definitions.
+    private ParameterDefinition[] _parameterDefinitions;
+
+    // Number of parameter definitions.
+    private Int32 _numParameterDefinitions;
+  }
+
   // Instrument.
   [RequireComponent(typeof(AudioSource))]
-  public class Instrument : MonoBehaviour {
+  public abstract class Instrument : MonoBehaviour {
     /// Identifier.
     public Int64 Id { get; private set; } = Musician.Native.InvalidId;
 
@@ -21,7 +94,7 @@ namespace Barely {
     private NoteOffCallback _noteOffCallback = null;
 
     [Serializable]
-    public class NoteOffEvent : UnityEngine.Events.UnityEvent<float> {}
+    public class NoteOffEvent : UnityEngine.Events.UnityEvent<double> {}
     public NoteOffEvent NoteOff;
 
     /// Note on callback.
@@ -34,7 +107,7 @@ namespace Barely {
     private NoteOnCallback _noteOnCallback = null;
 
     [Serializable]
-    public class NoteOnEvent : UnityEngine.Events.UnityEvent<float, float> {}
+    public class NoteOnEvent : UnityEngine.Events.UnityEvent<double, double> {}
     public NoteOnEvent NoteOn;
 
     // List of sequences.
@@ -84,6 +157,14 @@ namespace Barely {
     /// @return Parameter value.
     public double GetParameter(int index) {
       return Musician.Native.Instrument_GetParameter(this, index);
+    }
+
+    /// Returns parameter definition.
+    ///
+    /// @param index Parameter index.
+    /// @return Parameter definition.
+    public ParameterDefinition GetParameterDefinition(int index) {
+      return Musician.Native.Instrument_GetParameterDefinition(this, index);
     }
 
     /// Returns whether note is playing or not.

@@ -132,6 +132,9 @@ namespace Barely {
             status =
                 BarelyInstrument_CreateOfType(Handle, InstrumentType.SYNTH, frameRate, _int64Ptr);
             break;
+          case CustomInstrument custom:
+            status = BarelyInstrument_Create(Handle, custom.Definition, frameRate, _int64Ptr);
+            break;
           default:
             Debug.LogError("Unsupported instrument type: " + instrument.GetType());
             return InvalidId;
@@ -170,10 +173,28 @@ namespace Barely {
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
         } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument parameter " + index + " for '" +
+          Debug.LogError("Failed to get instrument parameter " + index + " value for '" +
                          instrument.name + "': " + status);
         }
         return 0.0;
+      }
+
+      /// Returns instrument parameter definition.
+      ///
+      /// @param instrument Instrument.
+      /// @param index Parameter index.
+      /// @return Parameter definition.
+      public static ParameterDefinition Instrument_GetParameterDefinition(Instrument instrument,
+                                                                          int index) {
+        Status status = BarelyInstrument_GetParameterDefinition(Handle, instrument.Id, index,
+                                                                _parameterDefinitionPtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<ParameterDefinition>(_parameterDefinitionPtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get instrument parameter " + index + " definition for '" +
+                         instrument.name + "': " + status);
+        }
+        return new ParameterDefinition();
       }
 
       /// Returns whether instrument note is playing or not.
@@ -247,8 +268,8 @@ namespace Barely {
       public static void Instrument_SetParameter(Instrument instrument, int index, double value) {
         Status status = BarelyInstrument_SetParameter(Handle, instrument.Id, index, value);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument parameter " + index + " for '" +
-                         instrument.name + "': " + status);
+          Debug.LogError("Failed to set instrument parameter " + index + " value to " + value +
+                         " for '" + instrument.name + "': " + status);
         }
       }
 
@@ -662,6 +683,9 @@ namespace Barely {
       // `NoteDefinition` type pointer.
       private static IntPtr _noteDefinitionPtr = IntPtr.Zero;
 
+      // `ParameterDefinition` type pointer.
+      private static IntPtr _parameterDefinitionPtr = IntPtr.Zero;
+
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
@@ -749,6 +773,7 @@ namespace Barely {
           _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
           _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
           _noteDefinitionPtr = Marshal.AllocHGlobal(Marshal.SizeOf<NoteDefinition>());
+          _parameterDefinitionPtr = Marshal.AllocHGlobal(Marshal.SizeOf<ParameterDefinition>());
         }
 
         // Deallocates unmanaged memory for native calls.
@@ -777,6 +802,10 @@ namespace Barely {
             Marshal.FreeHGlobal(_noteDefinitionPtr);
             _noteDefinitionPtr = IntPtr.Zero;
           }
+          if (_parameterDefinitionPtr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_parameterDefinitionPtr);
+            _parameterDefinitionPtr = IntPtr.Zero;
+          }
         }
       }
 
@@ -786,12 +815,10 @@ namespace Barely {
       private const string pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
 
-      // TODO(#105): Add `Instrument.Definition` to support generic `BarelyInstrument_Create`.
-      // [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
-      // private static extern Status BarelyInstrument_Create(IntPtr handle,
-      //                                                      Instrument.Definition definition,
-      //                                                      Int32 frameRate, IntPtr
-      //                                                      outInstrumentId);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
+      private static extern Status BarelyInstrument_Create(IntPtr handle,
+                                                           InstrumentDefinition definition,
+                                                           Int32 frameRate, IntPtr outInstrumentId);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_CreateOfType")]
       private static extern Status BarelyInstrument_CreateOfType(IntPtr handle, InstrumentType type,
@@ -805,12 +832,11 @@ namespace Barely {
       private static extern Status BarelyInstrument_GetParameter(IntPtr handle, Int64 instrumentId,
                                                                  Int32 index, IntPtr outValue);
 
-      // TODO(#105): Add `ParameterDefinition` to support `BarelyInstrument_GetParameterDefinition`.
-      // [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetParameterDefinition")]
-      // private static extern Status BarelyInstrument_GetParameterDefinition(IntPtr handle,
-      //                                                                      Int64 instrumentId,
-      //                                                                      Int32 index,
-      //                                                                      IntPtr outDefinition);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetParameterDefinition")]
+      private static extern Status BarelyInstrument_GetParameterDefinition(IntPtr handle,
+                                                                           Int64 instrumentId,
+                                                                           Int32 index,
+                                                                           IntPtr outDefinition);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern Status BarelyInstrument_IsNoteOn(IntPtr handle, Int64 instrumentId,

@@ -30,7 +30,7 @@ public class Metronome : MonoBehaviour {
   private int _lastPosition = 0;
 
   [Serializable]
-  public class BeatEvent : UnityEngine.Events.UnityEvent<float> {}
+  public class BeatEvent : UnityEngine.Events.UnityEvent<double> {}
   public BeatEvent Beat;
 
   void OnEnable() {

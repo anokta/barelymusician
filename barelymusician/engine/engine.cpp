@@ -5,7 +5,6 @@
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
@@ -41,8 +40,7 @@ bool Engine::CreateInstrument(Id instrument_id,
 bool Engine::CreateSequence(Id sequence_id) noexcept {
   assert(sequence_id > kInvalid);
   return sequences_
-      .emplace(sequence_id,
-               std::pair{Sequence(conductor_, transport_), kInvalid})
+      .emplace(sequence_id, std::pair{Sequence(transport_), kInvalid})
       .second;
 }
 
@@ -74,8 +72,6 @@ bool Engine::DestroySequence(Id sequence_id) noexcept {
   }
   return false;
 }
-
-Conductor& Engine::GetConductor() noexcept { return conductor_; }
 
 Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
   if (auto* instrument = FindOrNull(instruments_, instrument_id)) {

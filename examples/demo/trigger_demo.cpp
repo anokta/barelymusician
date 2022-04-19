@@ -23,9 +23,6 @@ using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::Note;
-using ::barely::NoteDefinition;
-using ::barely::NotePitchDefinition;
-using ::barely::NotePitchType;
 using ::barely::OscillatorType;
 using ::barely::Sequence;
 using ::barely::SynthParameter;
@@ -69,8 +66,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Random random;
 
   Musician musician;
-  musician.SetRootNote(barelyapi::kPitchD3);
-  musician.SetScale(barelyapi::kPitchMajorScale);
   musician.SetTempo(kInitialTempo);
 
   Instrument metronome =
@@ -99,9 +94,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto create_note_fn = [&](int scale_index, double position,
                                   double duration, double intensity = 1.0) {
     return sequence.CreateNote(
-        NoteDefinition(duration, NotePitchDefinition::ScaleIndex(scale_index),
-                       intensity),
-        position);
+        position, duration,
+        barelyapi::kPitchD3 +
+            barelyapi::GetPitch(barelyapi::kPitchMajorScale, scale_index),
+        intensity);
   };
 
   // Trigger 1.
@@ -125,23 +121,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
   notes.push_back(create_note_fn(8, 5.0, 2.0));
-
-  bool use_conductor = false;
-  musician.SetAdjustNoteCallback([&](NoteDefinition* definition) {
-    if (use_conductor) {
-      if (static_cast<NotePitchType>(definition->pitch.type) ==
-          NotePitchType::kScaleIndex) {
-        definition->duration = 0.25 *
-                               static_cast<double>(random.DrawUniform(1, 4)) *
-                               definition->duration;
-        const int offset = static_cast<int>(musician.GetScale().size()) / 2;
-        definition->pitch.scale_index += random.DrawUniform(-offset, offset);
-        definition->intensity = 0.5 *
-                                static_cast<double>(random.DrawUniform(1, 4)) *
-                                definition->intensity;
-      }
-    }
-  });
 
   bool enable_metronome = false;
   const auto beat_callback = [&](double position, double /*timestamp*/) {
@@ -212,10 +191,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
           sequence.SetLooping(true);
           ConsoleLog() << "Loop turned on";
         }
-        return;
-      case 'C':
-        use_conductor = !use_conductor;
-        ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'M':
         enable_metronome = !enable_metronome;

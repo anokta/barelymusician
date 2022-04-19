@@ -4,9 +4,9 @@
 #include <cmath>
 #include <memory>
 #include <thread>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -23,8 +23,6 @@ using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::Note;
-using ::barely::NoteDefinition;
-using ::barely::NotePitchDefinition;
 using ::barely::OscillatorType;
 using ::barely::Sequence;
 using ::barely::SynthParameter;
@@ -50,6 +48,8 @@ constexpr double kRelease = 0.1;
 
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
+
+constexpr double kIntensity = 0.25;
 
 // Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
@@ -88,23 +88,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   metronome.SetParameter(SynthParameter::kAttack, kAttack);
   metronome.SetParameter(SynthParameter::kRelease, 0.025);
 
-  const auto build_note = [](double pitch, double duration,
-                             double intensity = 0.25) {
-    return NoteDefinition(duration, NotePitchDefinition::AbsolutePitch(pitch),
-                          intensity);
-  };
-  std::vector<std::pair<NoteDefinition, double>> score;
-  score.emplace_back(build_note(barelyapi::kPitchC4, 1.0), 0.0);
-  score.emplace_back(build_note(barelyapi::kPitchD4, 1.0), 1.0);
-  score.emplace_back(build_note(barelyapi::kPitchE4, 1.0), 2.0);
-  score.emplace_back(build_note(barelyapi::kPitchF4, 1.0), 3.0);
-  score.emplace_back(build_note(barelyapi::kPitchG4, 1.0), 4.0);
-  score.emplace_back(build_note(barelyapi::kPitchG4, 1.0 / 3.0), 5.0);
-  score.emplace_back(build_note(barelyapi::kPitchA5, 1.0 / 3.0),
-                     5.0 + 1.0 / 3.0);
-  score.emplace_back(build_note(barelyapi::kPitchB5, 1.0 / 3.0),
-                     5.0 + 2.0 / 3.0);
-  score.emplace_back(build_note(barelyapi::kPitchC5, 2.0), 6.0);
+  std::vector<std::tuple<double, double, double>> score;
+  score.emplace_back(0.0, 1.0, barelyapi::kPitchC4);
+  score.emplace_back(1.0, 1.0, barelyapi::kPitchD4);
+  score.emplace_back(2.0, 1.0, barelyapi::kPitchE4);
+  score.emplace_back(3.0, 1.0, barelyapi::kPitchF4);
+  score.emplace_back(4.0, 1.0, barelyapi::kPitchG4);
+  score.emplace_back(5.0, 1.0 / 3.0, barelyapi::kPitchG4);
+  score.emplace_back(5.0 + 1.0 / 3.0, 1.0 / 3.0, barelyapi::kPitchA5);
+  score.emplace_back(5.0 + 2.0 / 3.0, 1.0 / 3.0, barelyapi::kPitchB5);
+  score.emplace_back(6.0, 2.0, barelyapi::kPitchC5);
 
   Sequence sequence = musician.CreateSequence();
   sequence.SetInstrument(&performer);
@@ -117,23 +110,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Note> notes;
   notes.reserve(score.size());
   int index = 0;
-  for (const auto& [note, position] : score) {
-    notes.emplace(index++, sequence.CreateNote(note, position));
+  for (const auto& [position, duration, pitch] : score) {
+    notes.emplace(index++,
+                  sequence.CreateNote(position, duration, pitch, kIntensity));
   }
-
-  bool use_conductor = false;
-  musician.SetAdjustNoteCallback([&](NoteDefinition* definition) {
-    if (use_conductor) {
-      definition->duration = 0.25 *
-                             static_cast<double>(random.DrawUniform(1, 4)) *
-                             definition->duration;
-      definition->pitch.absolute_pitch +=
-          static_cast<double>(random.DrawUniform(-1, 1));
-      definition->intensity = 0.5 *
-                              static_cast<double>(random.DrawUniform(1, 4)) *
-                              definition->intensity;
-    }
-  });
 
   bool reset_position = false;
   const auto beat_callback = [&](double /*position*/, double /*timestamp*/) {
@@ -180,8 +160,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
       if (notes.erase(index - 1) > 0) {
         ConsoleLog() << "Removed note " << index;
       } else {
-        notes.emplace(index - 1, sequence.CreateNote(score[index - 1].first,
-                                                     score[index - 1].second));
+        const auto& note = score[index - 1];
+        notes.emplace(index - 1,
+                      sequence.CreateNote(std::get<0>(note), std::get<1>(note),
+                                          std::get<2>(note), kIntensity));
         ConsoleLog() << "Added note " << index;
       }
       return;
@@ -206,10 +188,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
           sequence.SetLooping(true);
           ConsoleLog() << "Loop turned on";
         }
-        return;
-      case 'C':
-        use_conductor = !use_conductor;
-        ConsoleLog() << "Conductor turned " << (use_conductor ? "on" : "off");
         return;
       case 'P':
         reset_position = true;

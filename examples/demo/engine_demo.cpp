@@ -31,8 +31,6 @@ using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::Note;
-using ::barely::NoteDefinition;
-using ::barely::NotePitchDefinition;
 using ::barely::OscillatorType;
 using ::barely::Sequence;
 using ::barely::SynthParameter;
@@ -79,8 +77,9 @@ std::vector<Note> ComposeChord(double intensity, int harmonic, double offset,
   std::vector<Note> notes;
   const auto add_chord_note = [&](int index) {
     notes.push_back(sequence->CreateNote(
-        NoteDefinition(1.0, NotePitchDefinition::ScaleIndex(index), intensity),
-        offset));
+        offset, 1.0,
+        kRootNote + barelyapi::GetPitch(barelyapi::kPitchMajorScale, index),
+        intensity));
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -88,7 +87,7 @@ std::vector<Note> ComposeChord(double intensity, int harmonic, double offset,
   return notes;
 }
 
-std::vector<Note> ComposeLine(int scale_offset, double intensity, int bar,
+std::vector<Note> ComposeLine(double octave_offset, double intensity, int bar,
                               int beat, int num_beats, int harmonic,
                               double offset, Sequence* sequence) {
   std::vector<Note> notes;
@@ -96,10 +95,10 @@ std::vector<Note> ComposeLine(int scale_offset, double intensity, int bar,
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
     notes.push_back(sequence->CreateNote(
-        NoteDefinition(end_position - begin_position,
-                       NotePitchDefinition::ScaleIndex(scale_offset + index),
-                       intensity),
-        begin_position + offset));
+        begin_position + offset, end_position - begin_position,
+        kRootNote + octave_offset +
+            barelyapi::GetPitch(barelyapi::kPitchMajorScale, index),
+        intensity));
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.33, harmonic);
@@ -128,10 +127,9 @@ std::vector<Note> ComposeDrums(int bar, int beat, int num_beats, Random* random,
   };
   const auto add_note = [&](double begin_position, double end_position,
                             double pitch, double intensity) {
-    notes.push_back(sequence->CreateNote(
-        NoteDefinition(end_position - begin_position,
-                       NotePitchDefinition::AbsolutePitch(pitch), intensity),
-        begin_position + offset));
+    notes.push_back(sequence->CreateNote(begin_position + offset,
+                                         end_position - begin_position, pitch,
+                                         intensity));
   };
 
   // Kick.
@@ -187,11 +185,6 @@ int main(int /*argc*/, char* argv[]) {
 
   Musician musician;
   musician.SetTempo(kTempo);
-  musician.SetRootNote(kRootNote);
-  musician.SetScale(barelyapi::kPitchMajorScale);
-  musician.SetAdjustNoteCallback([&](NoteDefinition* definition) {
-    definition->intensity *= random.DrawUniform(0.75, 1.0);
-  });
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](auto index, Instrument* instrument) {
@@ -245,8 +238,8 @@ int main(int /*argc*/, char* argv[]) {
   const auto line_beat_composer_callback = [&](int bar, int beat, int num_beats,
                                                int harmonic, double offset,
                                                Sequence* sequence) {
-    return ComposeLine(-static_cast<int>(musician.GetScale().size()), 1.0, bar,
-                       beat, num_beats, harmonic, offset, sequence);
+    return ComposeLine(-1.0, 1.0, bar, beat, num_beats, harmonic, offset,
+                       sequence);
   };
 
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
@@ -409,12 +402,6 @@ int main(int /*argc*/, char* argv[]) {
              {barelyapi::kPitchSnare, "basic_hihat_open.wav"},
              {barelyapi::kPitchHihatClosed, "basic_hihat_closed.wav"},
              {barelyapi::kPitchHihatOpen, "basic_hihat_open.wav"}});
-        break;
-      case 'M':
-        musician.SetScale(barelyapi::kPitchMajorScale);
-        break;
-      case 'N':
-        musician.SetScale(barelyapi::kPitchNaturalMinorScale);
         break;
     }
   };

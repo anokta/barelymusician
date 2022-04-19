@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
@@ -19,26 +18,28 @@ class Sequence {
  public:
   /// Constructs new `Sequence`.
   ///
-  /// @param conductor Conductor.
   /// @param transport Transport.
-  Sequence(const Conductor& conductor, const Transport& transport) noexcept;
+  explicit Sequence(const Transport& transport) noexcept;
 
   /// Creates new note at position.
   ///
-  /// @param id Note identifier.
-  /// @param definition Note definition.
+  /// @param note_id Note identifier.
   /// @param position Note position in beats.
+  /// @param duration Note duration in beats.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
   /// @return True if success.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateNote(Id id, Note::Definition definition, double position) noexcept;
+  bool CreateNote(Id note_id, double position, double duration, double pitch,
+                  double intensity) noexcept;
 
   // TODO(#98): Add `ParameterAutomation` functionality.
 
   /// Destroys note.
   ///
-  /// @param id Note identifier.
+  /// @param note_id Note identifier.
   /// @return True if success.
-  bool DestroyNote(Id id) noexcept;
+  bool DestroyNote(Id note_id) noexcept;
 
   /// Returns begin offset.
   ///
@@ -70,27 +71,22 @@ class Sequence {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept;
 
-  /// Returns note definition.
+  /// Returns note.
   ///
-  /// @param id Note identifier.
-  /// @return Pointer to note definition.
-  [[nodiscard]] const Note::Definition* GetNoteDefinition(Id id) const noexcept;
+  /// @param note_id Note identifier.
+  /// @return Pointer to note.
+  [[nodiscard]] const Note* GetNote(Id note_id) const noexcept;
 
   /// Returns note position.
   ///
-  /// @param id Note identifier.
+  /// @param note_id Note identifier.
   /// @return Pointer to note position in beats.
-  [[nodiscard]] const double* GetNotePosition(Id id) const noexcept;
+  [[nodiscard]] const double* GetNotePosition(Id note_id) const noexcept;
 
   /// Returns whether sequence is looping or not.
   ///
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept;
-
-  /// Returns whether sequence is skipping adjustments or not.
-  ///
-  /// @return True if skipping, false otherwise.
-  [[nodiscard]] bool IsSkippingAdjustments() const noexcept;
 
   /// Processes sequence at range.
   ///
@@ -133,23 +129,33 @@ class Sequence {
   /// @param is_looping True if looping.
   void SetLooping(bool is_looping) noexcept;
 
-  /// Sets note.
+  /// Sets note duration.
   ///
-  /// @param id Note identifier.
-  /// @param definition Note definition.
+  /// @param note_id Note identifier.
+  /// @param duration Note duration in beats.
   /// @return True if success.
-  bool SetNoteDefinition(Id id, Note::Definition definition) noexcept;
+  bool SetNoteDuration(Id note_id, double duration) noexcept;
+
+  /// Sets note intensity.
+  ///
+  /// @param note_id Note identifier.
+  /// @param intensity Note intensity.
+  /// @return True if success.
+  bool SetNoteIntensity(Id note_id, double intensity) noexcept;
+
+  /// Sets note pitch.
+  ///
+  /// @param note_id Note identifier.
+  /// @param pitch Note pitch.
+  /// @return True if success.
+  bool SetNotePitch(Id note_id, double pitch) noexcept;
 
   /// Sets note position.
   ///
-  /// @param id Note identifier.
+  /// @param note_id Note identifier.
+  /// @param position Note position in beats.
   /// @return True if success.
-  bool SetNotePosition(Id id, double position) noexcept;
-
-  /// Sets whether sequence should be skipping adjustments or not.
-  ///
-  /// @param is_skipping_adjustments True if skipping.
-  void SetSkippingAdjustments(bool is_skipping_adjustments) noexcept;
+  bool SetNotePosition(Id note_id, double position) noexcept;
 
   /// Stops sequence.
   void Stop() noexcept;
@@ -168,9 +174,6 @@ class Sequence {
   void ProcessInternal(double begin_position, double end_position,
                        double position_offset,
                        double process_end_position) noexcept;
-
-  // Conductor.
-  const Conductor& conductor_;
 
   // Transport.
   const Transport& transport_;
@@ -203,7 +206,7 @@ class Sequence {
   double loop_length_ = 1.0;
 
   // Sorted map of note definitions by note position-identifier pair.
-  std::map<std::pair<double, Id>, Note::Definition> notes_;
+  std::map<std::pair<double, Id>, Note> notes_;
 
   // Map of note positions by note identifiers.
   std::unordered_map<Id, double> positions_;

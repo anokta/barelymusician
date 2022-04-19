@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
@@ -59,11 +58,6 @@ class Engine {
   /// @param sequence_id Sequence identifier.
   /// @return True if successful, false otherwise.
   bool DestroySequence(Id sequence_id) noexcept;
-
-  /// Returns conductor.
-  ///
-  /// @return Conductor.
-  Conductor& GetConductor() noexcept;
 
   /// Returns instrument.
   ///
@@ -125,9 +119,6 @@ class Engine {
   // Updates instrument reference map.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateInstrumentReferenceMap() noexcept;
-
-  // Conductor.
-  Conductor conductor_;
 
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;

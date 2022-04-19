@@ -3,30 +3,10 @@
 
 #include <compare>
 
-#include "barelymusician/barelymusician.h"
-
 namespace barelyapi {
 
 /// Class that wraps note.
 struct Note {
- public:
-  /// Definition alias.
-  using Definition = barely::NoteDefinition;
-
-  /// Pitch definition alias.
-  using PitchDefinition = barely::NotePitchDefinition;
-
-  /// Pitch type.
-  using PitchType = barely::NotePitchType;
-
-  /// Constructs new `Note`.
-  ///
-  /// @param duration Duration.
-  /// @param pitch Pitch.
-  /// @param intensity Intensity.
-  Note(double duration, double pitch, double intensity)
-      : duration(duration), pitch(pitch), intensity(intensity) {}
-
   /// Default comparators.
   auto operator<=>(const Note& other) const noexcept = default;
 

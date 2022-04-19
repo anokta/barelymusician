@@ -3,21 +3,10 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//barelymusician:__subpackages__"])
 
 cc_library(
-    name = "conductor",
-    srcs = ["conductor.cpp"],
-    hdrs = ["conductor.h"],
-    deps = [
-        ":note",
-        "//barelymusician:include",
-    ],
-)
-
-cc_library(
     name = "engine",
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
     deps = [
-        ":conductor",
         ":id",
         ":instrument",
         ":mutable_data",
@@ -89,7 +78,6 @@ cc_library(
     srcs = ["sequence.cpp"],
     hdrs = ["sequence.h"],
     deps = [
-        ":conductor",
         ":id",
         ":instrument",
         ":note",
@@ -104,15 +92,6 @@ cc_library(
     hdrs = ["transport.h"],
     deps = [
         "//barelymusician:include",
-    ],
-)
-
-cc_test(
-    name = "conductor_test",
-    srcs = ["conductor_test.cpp"],
-    deps = [
-        ":conductor",
-        "@googletest//:gtest_main",
     ],
 )
 
@@ -171,7 +150,6 @@ cc_test(
     name = "sequence_test",
     srcs = ["sequence_test.cpp"],
     deps = [
-        ":conductor",
         ":id",
         ":instrument",
         ":note",

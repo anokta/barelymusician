@@ -1,22 +1,10 @@
 add_library(
-  conductor
-  conductor.cpp
-  conductor.h
-)
-target_link_libraries(
-  conductor
-  note
-  include
-)
-
-add_library(
   engine
   engine.cpp
   engine.h
 )
 target_link_libraries(
   engine
-  conductor
   id
   instrument
   mutable_data
@@ -94,7 +82,6 @@ add_library(
 )
 target_link_libraries(
   sequence
-  conductor
   id
   instrument
   note
@@ -111,17 +98,6 @@ target_link_libraries(
   transport
   include
 )
-
-add_executable(
-  conductor_test
-  conductor_test.cpp
-)
-target_link_libraries(
-  conductor_test
-  conductor
-  gtest_main
-)
-gtest_discover_tests(conductor_test)
 
 add_executable(
   engine_test
@@ -194,7 +170,6 @@ add_executable(
 )
 target_link_libraries(
   sequence_test
-  conductor
   id
   instrument
   note

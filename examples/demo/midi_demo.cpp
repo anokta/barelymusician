@@ -22,8 +22,6 @@ using ::barely::Instrument;
 using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::Note;
-using ::barely::NoteDefinition;
-using ::barely::NotePitchDefinition;
 using ::barely::OscillatorType;
 using ::barely::Sequence;
 using ::barely::SynthParameter;
@@ -76,14 +74,13 @@ std::vector<Note> BuildScore(const smf::MidiEventList& midi_events,
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
     if (midi_event.isNoteOn()) {
-      NoteDefinition note;
-      note.duration = get_position_fn(midi_event.getTickDuration());
-      note.pitch = NotePitchDefinition::AbsolutePitch(
-          PitchFromMidiKeyNumber(midi_event.getKeyNumber()));
-      note.intensity =
-          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
       const double position = get_position_fn(midi_event.tick);
-      notes.push_back(sequence->CreateNote(note, position));
+      const double duration = get_position_fn(midi_event.getTickDuration());
+      const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
+      const double intensity =
+          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
+      notes.push_back(
+          sequence->CreateNote(position, duration, pitch, intensity));
     }
   }
   return notes;

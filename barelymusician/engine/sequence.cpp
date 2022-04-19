@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
@@ -15,26 +14,26 @@
 
 namespace barelyapi {
 
-Sequence::Sequence(const Conductor& conductor,
-                   const Transport& transport) noexcept
-    : conductor_(conductor), transport_(transport) {}
+Sequence::Sequence(const Transport& transport) noexcept
+    : transport_(transport) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Sequence::CreateNote(Id id, Note::Definition definition,
-                          double position) noexcept {
-  assert(id > kInvalid);
+bool Sequence::CreateNote(Id note_id, double position, double duration,
+                          double pitch, double intensity) noexcept {
+  assert(note_id > kInvalid);
   assert(position >= 0.0);
-  if (positions_.emplace(id, position).second) {
-    notes_.emplace(std::pair{position, id}, definition);
+  if (positions_.emplace(note_id, position).second) {
+    notes_.emplace(std::pair{position, note_id},
+                   Note{duration, pitch, intensity});
     return true;
   }
   return false;
 }
 
-bool Sequence::DestroyNote(Id id) noexcept {
-  if (const auto position_it = positions_.find(id);
+bool Sequence::DestroyNote(Id note_id) noexcept {
+  if (const auto position_it = positions_.find(note_id);
       position_it != positions_.end()) {
-    notes_.erase(std::pair{position_it->second, id});
+    notes_.erase(std::pair{position_it->second, note_id});
     positions_.erase(position_it);
     return true;
   }
@@ -55,22 +54,18 @@ double Sequence::GetLoopBeginOffset() const noexcept {
 
 double Sequence::GetLoopLength() const noexcept { return loop_length_; }
 
-const Note::Definition* Sequence::GetNoteDefinition(Id id) const noexcept {
-  if (const auto* position = FindOrNull(positions_, id)) {
-    return FindOrNull(notes_, std::pair{*position, id});
+const Note* Sequence::GetNote(Id note_id) const noexcept {
+  if (const auto* position = FindOrNull(positions_, note_id)) {
+    return FindOrNull(notes_, std::pair{*position, note_id});
   }
   return nullptr;
 }
 
-const double* Sequence::GetNotePosition(Id id) const noexcept {
-  return FindOrNull(positions_, id);
+const double* Sequence::GetNotePosition(Id note_id) const noexcept {
+  return FindOrNull(positions_, note_id);
 }
 
 bool Sequence::IsLooping() const noexcept { return is_looping_; }
-
-bool Sequence::IsSkippingAdjustments() const noexcept {
-  return is_skipping_adjustments_;
-}
 
 void Sequence::Process(double begin_position, double end_position) noexcept {
   assert(begin_position >= 0.0 && begin_position <= end_position);
@@ -182,20 +177,36 @@ void Sequence::SetLooping(bool is_looping) noexcept {
   is_looping_ = is_looping;
 }
 
-bool Sequence::SetNoteDefinition(Id id, Note::Definition definition) noexcept {
-  if (const auto* position = FindOrNull(positions_, id)) {
-    *FindOrNull(notes_, std::pair{*position, id}) = definition;
+bool Sequence::SetNoteDuration(Id note_id, double duration) noexcept {
+  if (const auto* position = FindOrNull(positions_, note_id)) {
+    FindOrNull(notes_, std::pair{*position, note_id})->duration = duration;
     return true;
   }
   return false;
 }
 
-bool Sequence::SetNotePosition(Id id, double position) noexcept {
+bool Sequence::SetNoteIntensity(Id note_id, double intensity) noexcept {
+  if (const auto* position = FindOrNull(positions_, note_id)) {
+    FindOrNull(notes_, std::pair{*position, note_id})->intensity = intensity;
+    return true;
+  }
+  return false;
+}
+
+bool Sequence::SetNotePitch(Id note_id, double pitch) noexcept {
+  if (const auto* position = FindOrNull(positions_, note_id)) {
+    FindOrNull(notes_, std::pair{*position, note_id})->pitch = pitch;
+    return true;
+  }
+  return false;
+}
+
+bool Sequence::SetNotePosition(Id note_id, double position) noexcept {
   assert(position >= 0.0);
-  if (const auto position_it = positions_.find(id);
+  if (const auto position_it = positions_.find(note_id);
       position_it != positions_.end()) {
     if (position_it->second != position) {
-      const auto note_it = notes_.find(std::pair{position_it->second, id});
+      const auto note_it = notes_.find(std::pair{position_it->second, note_id});
       auto note_node = notes_.extract(note_it);
       note_node.key().first = position;
       notes_.insert(std::move(note_node));
@@ -204,10 +215,6 @@ bool Sequence::SetNotePosition(Id id, double position) noexcept {
     return true;
   }
   return false;
-}
-
-void Sequence::SetSkippingAdjustments(bool is_skipping_adjustments) noexcept {
-  is_skipping_adjustments_ = is_skipping_adjustments;
 }
 
 void Sequence::Stop() noexcept {
@@ -230,8 +237,7 @@ void Sequence::ProcessInternal(double begin_position, double end_position,
   const auto end = notes_.lower_bound(std::pair{end_position, kInvalid});
   for (auto it = begin; it != end; ++it) {
     const double note_begin_position = it->first.first + position_offset;
-    const Note note =
-        conductor_.TransformNote(it->second, is_skipping_adjustments_);
+    const Note& note = it->second;
     const double note_end_position = std::min(
         note_begin_position + std::max(note.duration, 0.0), end_position_);
     instrument_->StartNote(note.pitch, note.intensity,

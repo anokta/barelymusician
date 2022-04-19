@@ -64,56 +64,6 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 6,
 };
 
-/// Note pitch type enum alias.
-typedef int32_t BarelyNotePitchType;
-
-/// Note pitch type enum values.
-enum BarelyNotePitchType_Values {
-  /// Absolute pitch.
-  BarelyNotePitchType_kAbsolutePitch = 0,
-  /// Relative pitch with respect to root note.
-  BarelyNotePitchType_kRelativePitch = 1,
-  /// Scale index with respect to root note and scale.
-  BarelyNotePitchType_kScaleIndex = 2,
-};
-
-/// Note pitch definition.
-typedef struct BarelyNotePitchDefinition {
-  /// Type.
-  BarelyNotePitchType type;
-
-  /// Value.
-  union {
-    /// Absolute pitch.
-    double absolute_pitch;
-    /// Relative pitch.
-    double relative_pitch;
-    /// Scale index.
-    int32_t scale_index;
-  };
-} BarelyNotePitchDefinition;
-
-/// Note definition.
-typedef struct BarelyNoteDefinition {
-  /// Duration.
-  double duration;
-
-  /// Pitch.
-  BarelyNotePitchDefinition pitch;
-
-  /// Intensity.
-  double intensity;
-} BarelyNoteDefinition;
-
-/// Parameter automation definition.
-typedef struct BarelyParameterAutomationDefinition {
-  /// Index.
-  int32_t index;
-
-  /// Value.
-  double value;
-} BarelyParameterAutomationDefinition;
-
 /// Parameter definition.
 typedef struct BarelyParameterDefinition {
   /// Default value.
@@ -285,20 +235,6 @@ typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, double timestamp,
 typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 double timestamp,
                                                 void* user_data);
-
-/// Musician adjust note callback signature.
-///
-/// @param definition Mutable note definition.
-/// @param user_data User data.
-typedef void (*BarelyMusician_AdjustNoteCallback)(
-    BarelyNoteDefinition* definition, void* user_data);
-
-/// Musician adjust parameter automation callback signature.
-///
-/// @param definition Mutable parameter automation definition.
-/// @param user_data User data.
-typedef void (*BarelyMusician_AdjustParameterAutomationCallback)(
-    BarelyParameterAutomationDefinition* definition, void* user_data);
 
 /// Musician beat callback signature.
 ///
@@ -487,16 +423,6 @@ BarelyMusician_Create(BarelyMusicianHandle* out_handle);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
 
-/// Gets musician note.
-///
-/// @param handle Musician handle.
-/// @param definition Note pitch definition.
-/// @param out_pitch Output note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_GetNote(BarelyMusicianHandle handle,
-                       BarelyNotePitchDefinition definition, double* out_pitch);
-
 /// Gets musician position.
 ///
 /// @param handle Musician handle.
@@ -504,24 +430,6 @@ BarelyMusician_GetNote(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyMusician_GetPosition(BarelyMusicianHandle handle, double* out_position);
-
-/// Gets musician root note.
-///
-/// @param handle Musician handle.
-/// @param out_root_pitch Output root note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_GetRootNote(BarelyMusicianHandle handle, double* out_root_pitch);
-
-/// Gets musician scale.
-///
-/// @param handle Musician handle.
-/// @param out_scale_pitches Output list of scale note pitches.
-/// @param out_num_scale_pitches Output number of scale note pitches.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetScale(
-    BarelyMusicianHandle handle, const double** out_scale_pitches,
-    int32_t* out_num_scale_pitches);
 
 /// Gets musician tempo.
 ///
@@ -556,26 +464,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestampAtPosition(
 BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyMusicianHandle handle,
                                                     bool* out_is_playing);
 
-/// Sets musician adjust note callback.
-///
-/// @param handle Musician handle.
-/// @param callback Adjust note callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustNoteCallback(
-    BarelyMusicianHandle handle, BarelyMusician_AdjustNoteCallback callback,
-    void* user_data);
-
-/// Sets musician adjust parameter automation callback.
-///
-/// @param handle Musician handle.
-/// @param callback Adjust parameter automation callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetAdjustParameterAutomationCallback(
-    BarelyMusicianHandle handle,
-    BarelyMusician_AdjustParameterAutomationCallback callback, void* user_data);
-
 /// Sets musician beat callback.
 ///
 /// @param handle Musician handle.
@@ -593,24 +481,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_SetBeatCallback(
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyMusician_SetPosition(BarelyMusicianHandle handle, double position);
-
-/// Sets musician root note.
-///
-/// @param handle Musician handle.
-/// @param root_pitch Root note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_SetRootNote(BarelyMusicianHandle handle, double root_pitch);
-
-/// Sets musician scale.
-///
-/// @param handle Musician handle.
-/// @param scale_pitches List of scale note pitches.
-/// @param num_scale_pitches Number of scale note pitches.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetScale(BarelyMusicianHandle handle,
-                                                   const double* scale_pitches,
-                                                   int32_t num_scale_pitches);
 
 /// Sets musician tempo.
 ///
@@ -652,14 +522,16 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param definition Note definition.
 /// @param position Note position in beats.
+/// @param duration Note duration in beats.
+/// @param pitch Note pitch in beats.
+/// @param intensity Note intensity in beats.
 /// @param out_note_id Output note handle.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyNote_Create(BarelyMusicianHandle handle,
                                              BarelyId sequence_id,
-                                             BarelyNoteDefinition definition,
-                                             double position,
+                                             double position, double duration,
+                                             double pitch, double intensity,
                                              BarelyId* out_note_id);
 
 /// Destroys sequence note.
@@ -672,16 +544,41 @@ BARELY_EXPORT BarelyStatus BarelyNote_Destroy(BarelyMusicianHandle handle,
                                               BarelyId sequence_id,
                                               BarelyId note_id);
 
-/// Gets sequence note definition.
+/// Gets sequence note duration.
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
-/// @param out_definition Output note definition.
+/// @param out_duration Output note duration in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_GetDefinition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId note_id,
-    BarelyNoteDefinition* out_definition);
+BARELY_EXPORT BarelyStatus BarelyNote_GetDuration(BarelyMusicianHandle handle,
+                                                  BarelyId sequence_id,
+                                                  BarelyId note_id,
+                                                  double* out_duration);
+
+/// Gets sequence note intensity.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_intensity Output note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_GetIntensity(BarelyMusicianHandle handle,
+                                                   BarelyId sequence_id,
+                                                   BarelyId note_id,
+                                                   double* out_intensity);
+
+/// Gets sequence note pitch.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param out_pitch Output note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_GetPitch(BarelyMusicianHandle handle,
+                                               BarelyId sequence_id,
+                                               BarelyId note_id,
+                                               double* out_pitch);
 
 /// Gets sequence note position.
 ///
@@ -695,16 +592,40 @@ BARELY_EXPORT BarelyStatus BarelyNote_GetPosition(BarelyMusicianHandle handle,
                                                   BarelyId note_id,
                                                   double* out_position);
 
-/// Sets sequence note definition.
+/// Sets sequence note duration.
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param note_id Note identifier.
-/// @param definition Note definition.
+/// @param duration Note duration in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyNote_SetDefinition(BarelyMusicianHandle handle, BarelyId sequence_id,
-                         BarelyId note_id, BarelyNoteDefinition definition);
+BARELY_EXPORT BarelyStatus BarelyNote_SetDuration(BarelyMusicianHandle handle,
+                                                  BarelyId sequence_id,
+                                                  BarelyId note_id,
+                                                  double duration);
+
+/// Sets sequence note intensity.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param intensity Note intensity.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_SetIntensity(BarelyMusicianHandle handle,
+                                                   BarelyId sequence_id,
+                                                   BarelyId note_id,
+                                                   double intensity);
+
+/// Sets sequence note pitch.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param note_id Note identifier.
+/// @param pitch Note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyNote_SetPitch(BarelyMusicianHandle handle,
+                                               BarelyId sequence_id,
+                                               BarelyId note_id, double pitch);
 
 /// Sets sequence note position.
 ///
@@ -722,14 +643,14 @@ BARELY_EXPORT BarelyStatus BarelyNote_SetPosition(BarelyMusicianHandle handle,
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
-/// @param definition Parameter automation definition.
 /// @param position Parameter automation position in beats.
+/// @param index Parameter automation index.
+/// @param value Parameter automation value.
 /// @param out_parameter_automation_id Output parameter automation handle.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyParameterAutomation_Create(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyParameterAutomationDefinition definition, double position,
-    BarelyId* out_parameter_automation_id);
+    BarelyMusicianHandle handle, BarelyId sequence_id, double position,
+    int32_t index, double value, BarelyId* out_parameter_automation_id);
 
 /// Destroys sequence parameter automation.
 ///
@@ -741,17 +662,16 @@ BARELY_EXPORT BarelyStatus BarelyParameterAutomation_Destroy(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyId parameter_automation_id);
 
-/// Gets sequence parameter automation definition.
+/// Gets sequence parameter automation index.
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param parameter_automation_id Parameter automation identifier.
-/// @param out_definition Output parameter automation definition.
+/// @param out_index Output parameter automation index.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetDefinition(
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetIndex(
     BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id,
-    BarelyParameterAutomationDefinition* out_definition);
+    BarelyId parameter_automation_id, int32_t* out_index);
 
 /// Gets sequence parameter automation position.
 ///
@@ -764,17 +684,27 @@ BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetPosition(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyId parameter_automation_id, double* out_position);
 
-/// Sets sequence parameter automation definition.
+/// Gets sequence parameter automation value.
 ///
 /// @param handle Musician handle.
 /// @param sequence_id Sequence identifier.
 /// @param parameter_automation_id Parameter automation identifier.
-/// @param definition Parameter automation definition.
+/// @param out_value Output parameter automation value.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetDefinition(
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetValue(
     BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id,
-    BarelyParameterAutomationDefinition definition);
+    BarelyId parameter_automation_id, double* out_value);
+
+/// Sets sequence parameter automation index.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param index Parameter automation index.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetIndex(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, int32_t index);
 
 /// Sets sequence parameter automation position.
 ///
@@ -786,6 +716,17 @@ BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetDefinition(
 BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetPosition(
     BarelyMusicianHandle handle, BarelyId sequence_id,
     BarelyId parameter_automation_id, double position);
+
+/// Sets sequence parameter automation value.
+///
+/// @param handle Musician handle.
+/// @param sequence_id Sequence identifier.
+/// @param parameter_automation_id Parameter automation identifier.
+/// @param value Parameter automation value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetValue(
+    BarelyMusicianHandle handle, BarelyId sequence_id,
+    BarelyId parameter_automation_id, double value);
 
 /// Creates new sequence.
 ///
@@ -871,16 +812,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyMusicianHandle handle,
                                                     BarelyId sequence_id,
                                                     bool* out_is_looping);
 
-/// Gets whether sequence is skipping adjustments or not.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_is_skipping_adjustments Output true if skipping, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_IsSkippingAdjustments(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    bool* out_is_skipping_adjustments);
-
 /// Sets sequence begin offset.
 ///
 /// @param handle Musician handle.
@@ -945,16 +876,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetLoopLength(
 BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(
     BarelyMusicianHandle handle, BarelyId sequence_id, bool is_looping);
 
-/// Sets whether sequence should be skipping adjustments or not.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param is_skipping_adjustments True if skipping, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetSkippingAdjustments(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    bool is_skipping_adjustments);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
@@ -965,7 +886,6 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetSkippingAdjustments(
 #include <compare>
 #include <functional>
 #include <limits>
-#include <span>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -1101,79 +1021,6 @@ class StatusOr {
  private:
   // Value or error status.
   std::variant<Status, ValueType> value_or_;
-};
-
-/// Note pitch type.
-enum class NotePitchType : BarelyNotePitchType {
-  /// Absolute pitch.
-  kAbsolutePitch = BarelyNotePitchType_kAbsolutePitch,
-  /// Relative pitch with respect to root note.
-  kRelativePitch = BarelyNotePitchType_kRelativePitch,
-  /// Scale index with respect to root note and scale.
-  kScaleIndex = BarelyNotePitchType_kScaleIndex,
-};
-
-// Note pitch definition.
-struct NotePitchDefinition : public BarelyNotePitchDefinition {
-  /// Returns new `NotePitch` with absolute pitch.
-  ///
-  /// @param absolute_pitch Absolute pitch.
-  /// @return Pitch.
-  static NotePitchDefinition AbsolutePitch(double absolute_pitch = 0.0) {
-    return NotePitchDefinition({.type = static_cast<BarelyNotePitchType>(
-                                    NotePitchType::kAbsolutePitch),
-                                .absolute_pitch = absolute_pitch});
-  }
-
-  /// Returns new `NotePitch` with relative pitch.
-  ///
-  /// @param relative_pitch Relative pitch.
-  /// @return Note pitch.
-  static NotePitchDefinition RelativePitch(double relative_pitch = 0.0) {
-    return NotePitchDefinition({.type = static_cast<BarelyNotePitchType>(
-                                    NotePitchType::kRelativePitch),
-                                .relative_pitch = relative_pitch});
-  }
-
-  /// Returns new `NotePitch` with scale index.
-  ///
-  /// @param scale_index Scale index.
-  /// @return Note pitch.
-  static NotePitchDefinition ScaleIndex(int scale_index = 0.0) {
-    return NotePitchDefinition(
-        {.type = static_cast<BarelyNotePitchType>(NotePitchType::kScaleIndex),
-         .scale_index = scale_index});
-  }
-
-  /// Constructs new `NotePitchDefinition` from internal type.
-  ///
-  /// @param definition Internal note pitch definition.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  NotePitchDefinition(BarelyNotePitchDefinition definition)
-      : BarelyNotePitchDefinition{definition} {}
-};
-
-/// Note definition.
-struct NoteDefinition : public BarelyNoteDefinition {
-  /// Constructs new `NoteDefinition`.
-  ///
-  /// @param duration Note duration.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  NoteDefinition(double duration, NotePitchDefinition pitch,
-                 double intensity = 1.0)
-      : NoteDefinition(BarelyNoteDefinition{duration, pitch, intensity}) {}
-
-  /// Constructs new `NotePitchDefinition` with default values.
-  NoteDefinition()
-      : NoteDefinition(0.0, NotePitchDefinition::AbsolutePitch()) {}
-
-  /// Constructs new `NoteDefinition` from internal type.
-  ///
-  /// @param definition Internal note definition.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  NoteDefinition(BarelyNoteDefinition definition)
-      : BarelyNoteDefinition{definition} {}
 };
 
 /// Parameter definition.
@@ -1616,15 +1463,37 @@ class Note {
     return *this;
   }
 
-  /// Returns definition.
+  /// Returns duration.
   ///
-  /// @return Definition.
-  [[nodiscard]] NoteDefinition GetDefinition() const {
-    NoteDefinition definition;
+  /// @return Duration in beats.
+  [[nodiscard]] double GetDuration() const {
+    double duration = 0.0;
     [[maybe_unused]] const Status status =
-        BarelyNote_GetDefinition(handle_, sequence_id_, id_, &definition);
+        BarelyNote_GetDuration(handle_, sequence_id_, id_, &duration);
     assert(status.IsOk());
-    return definition;
+    return duration;
+  }
+
+  /// Returns intensity.
+  ///
+  /// @return Intensity.
+  [[nodiscard]] double GetIntensity() const {
+    double intensity = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyNote_GetIntensity(handle_, sequence_id_, id_, &intensity);
+    assert(status.IsOk());
+    return intensity;
+  }
+
+  /// Returns pitch.
+  ///
+  /// @return Pitch.
+  [[nodiscard]] double GetPitch() const {
+    double pitch = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyNote_GetPitch(handle_, sequence_id_, id_, &pitch);
+    assert(status.IsOk());
+    return pitch;
   }
 
   /// Returns position.
@@ -1638,14 +1507,29 @@ class Note {
     return position;
   }
 
-  /// Sets definition.
+  /// Sets duration.
   ///
-  /// @param definition Definition.
+  /// @param duration Duration in beats.
   /// @return Status.
-  Status SetDefinition(NoteDefinition definition) {
-    return BarelyNote_SetDefinition(handle_, sequence_id_, id_, definition);
+  Status SetDuration(double duration) {
+    return BarelyNote_SetDuration(handle_, sequence_id_, id_, duration);
   }
 
+  /// Sets intensity.
+  ///
+  /// @param intensity Intensity.
+  /// @return Status.
+  Status SetIntensity(double intensity) {
+    return BarelyNote_SetIntensity(handle_, sequence_id_, id_, intensity);
+  }
+
+  /// Sets pitch.
+  ///
+  /// @param pitch Pitch.
+  /// @return Status.
+  Status SetPitch(double pitch) {
+    return BarelyNote_SetPitch(handle_, sequence_id_, id_, pitch);
+  }
   /// Sets position.
   ///
   /// @param position Position in beats.
@@ -1659,10 +1543,11 @@ class Note {
 
   // Constructs new `Note`.
   explicit Note(BarelyMusicianHandle handle, BarelyId sequence_id,
-                NoteDefinition definition, double position)
+                double position, double duration, double pitch,
+                double intensity)
       : handle_(handle), sequence_id_(sequence_id) {
-    [[maybe_unused]] const Status status =
-        BarelyNote_Create(handle_, sequence_id, definition, position, &id_);
+    [[maybe_unused]] const Status status = BarelyNote_Create(
+        handle_, sequence_id, position, duration, pitch, intensity, &id_);
     assert(status.IsOk());
   }
 
@@ -1681,6 +1566,20 @@ class Note {
 /// Sequence.
 class Sequence {
  public:
+  /// Note off callback signature.
+  ///
+  /// @param pitch Note pitch.
+  /// @param position Note position in beats.
+  using NoteOffCallback = std::function<void(double pitch, double position)>;
+
+  /// Note on callback signature.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @param position Note position in beats.
+  using NoteOnCallback =
+      std::function<void(double pitch, double intensity, double position)>;
+
   /// Destroys `Sequence`.
   ~Sequence() {
     BarelySequence_Destroy(std::exchange(handle_, nullptr),
@@ -1712,11 +1611,14 @@ class Sequence {
 
   /// Creates note at position.
   ///
-  /// @param definition Note definition.
   /// @param position Note position.
+  /// @param duration Note duration.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
   /// @return Note.
-  [[nodiscard]] Note CreateNote(NoteDefinition definition, double position) {
-    return Note(handle_, id_, definition, position);
+  [[nodiscard]] Note CreateNote(double position, double duration, double pitch,
+                                double intensity = 1.0) {
+    return Note(handle_, id_, position, duration, pitch, intensity);
   }
 
   // TODO(#98): Add `CreateParameterAutomation` function.
@@ -1792,17 +1694,6 @@ class Sequence {
     return is_looping;
   }
 
-  /// Returns whether sequence should be skipping adjustments or not.
-  ///
-  /// @return True if skipping, false otherwise.
-  [[nodiscard]] bool IsSkippingAdjustments() const {
-    bool is_skipping_adjustments = false;
-    [[maybe_unused]] const Status status = BarelySequence_IsSkippingAdjustments(
-        handle_, id_, &is_skipping_adjustments);
-    assert(status.IsOk());
-    return is_skipping_adjustments;
-  }
-
   /// Sets begin offset.
   ///
   /// @param begin_offset Begin offset in beats.
@@ -1863,15 +1754,6 @@ class Sequence {
     return BarelySequence_SetLooping(handle_, id_, is_looping);
   }
 
-  /// Sets whether sequence should be skipping adjustments or not.
-  ///
-  /// @param is_skipping_adjustments True if skipping, false otherwise.
-  /// @return Status.
-  Status SetSkippingAdjustments(bool is_skipping_adjustments) {
-    return BarelySequence_SetSkippingAdjustments(handle_, id_,
-                                                 is_skipping_adjustments);
-  }
-
  private:
   friend class Musician;
 
@@ -1894,11 +1776,6 @@ class Sequence {
 /// Musician.
 class Musician {
  public:
-  /// Adjust note callback signature.
-  ///
-  /// @param definition Mutable note definition.
-  using AdjustNoteCallback = std::function<void(NoteDefinition* definition)>;
-
   /// Beat callback signature.
   ///
   /// @param position Beat position in beats.
@@ -1929,7 +1806,6 @@ class Musician {
   /// @param other Other musician.
   Musician(Musician&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)) {
-    SetAdjustNoteCallback(std::exchange(other.adjust_note_callback_, nullptr));
     SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
   }
 
@@ -1943,8 +1819,6 @@ class Musician {
         assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
-      SetAdjustNoteCallback(
-          std::exchange(other.adjust_note_callback_, nullptr));
       SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
     }
     return *this;
@@ -1975,18 +1849,6 @@ class Musician {
   /// @return Sequence.
   [[nodiscard]] Sequence CreateSequence() { return Sequence(handle_); }
 
-  /// Returns note.
-  ///
-  /// @param definition Note pitch definition.
-  /// @return Note pitch.
-  [[nodiscard]] double GetNote(NotePitchDefinition definition) const {
-    double pitch = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyMusician_GetNote(handle_, definition, &pitch);
-    assert(status.IsOk());
-    return pitch;
-  }
-
   /// Returns position.
   ///
   /// @return Position in beats.
@@ -1998,33 +1860,6 @@ class Musician {
       assert(status.IsOk());
     }
     return position;
-  }
-
-  /// Returns root note.
-  ///
-  /// @return Root note pitch.
-  [[nodiscard]] double GetRootNote() const {
-    double root_pitch = 0.0;
-    if (handle_) {
-      [[maybe_unused]] const Status status =
-          BarelyMusician_GetRootNote(handle_, &root_pitch);
-      assert(status.IsOk());
-    }
-    return root_pitch;
-  }
-
-  /// Returns scale.
-  ///
-  /// @return List of scale note pitches.
-  [[nodiscard]] std::span<const double> GetScale() const {
-    const double* scale_pitches = nullptr;
-    int num_scale_pitches = 0;
-    if (handle_) {
-      [[maybe_unused]] const Status status =
-          BarelyMusician_GetScale(handle_, &scale_pitches, &num_scale_pitches);
-      assert(status.IsOk());
-    }
-    return {scale_pitches, scale_pitches + num_scale_pitches};
   }
 
   /// Returns tempo.
@@ -2072,24 +1907,6 @@ class Musician {
     return is_playing;
   }
 
-  /// Sets adjust note callback.
-  ///
-  /// @param callback Adjust note callback.
-  /// @return Status.
-  Status SetAdjustNoteCallback(AdjustNoteCallback callback) {
-    if (callback) {
-      adjust_note_callback_ = std::move(callback);
-      return BarelyMusician_SetAdjustNoteCallback(
-          handle_,
-          [](BarelyNoteDefinition* definition, void* user_data) {
-            (*static_cast<AdjustNoteCallback*>(user_data))(
-                static_cast<NoteDefinition*>(definition));
-          },
-          static_cast<void*>(&adjust_note_callback_));
-    }
-    return BarelyMusician_SetAdjustNoteCallback(handle_, nullptr, nullptr);
-  }
-
   /// Sets beat callback.
   ///
   /// @param callback Beat callback.
@@ -2113,21 +1930,6 @@ class Musician {
   /// @return Status.
   Status SetPosition(double position) {
     return BarelyMusician_SetPosition(handle_, position);
-  }
-
-  /// Sets root note.
-  ///
-  /// @param root_pitch Root note pitch.
-  Status SetRootNote(double root_pitch) {
-    return BarelyMusician_SetRootNote(handle_, root_pitch);
-  }
-
-  /// Sets scale.
-  ///
-  /// @param scale_pitches List of scale note pitches.
-  Status SetScale(std::span<const double> scale_pitches) {
-    return BarelyMusician_SetScale(handle_, scale_pitches.data(),
-                                   static_cast<int>(scale_pitches.size()));
   }
 
   /// Sets tempo.
@@ -2167,9 +1969,6 @@ class Musician {
  private:
   // Internal handle.
   BarelyMusicianHandle handle_ = nullptr;
-
-  // Adjust note callback.
-  AdjustNoteCallback adjust_note_callback_;
 
   // Beat callback.
   BeatCallback beat_callback_;

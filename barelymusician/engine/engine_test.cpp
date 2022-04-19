@@ -183,17 +183,11 @@ TEST(EngineTest, PlaySequence) {
   const Id kSequenceId = 2;
   const Id kNoteId = 3;
 
-  const Note::Definition kNoteDefinition = {
-      5.0, Note::PitchDefinition::RelativePitch(1.0)};
   const double kRootNote = 0.5;
 
   Engine engine;
   EXPECT_THAT(engine.GetInstrument(kInstrumentId), IsNull());
   EXPECT_THAT(engine.GetSequence(kSequenceId), IsNull());
-
-  // Set root note.
-  engine.GetConductor().SetRootNote(kRootNote);
-  EXPECT_DOUBLE_EQ(engine.GetConductor().GetRootNote(), kRootNote);
 
   // Create instrument.
   EXPECT_TRUE(engine.CreateInstrument(
@@ -212,7 +206,7 @@ TEST(EngineTest, PlaySequence) {
               AllOf(NotNull(), Pointee(kInstrumentId)));
 
   // Create note.
-  EXPECT_TRUE(sequence->CreateNote(kNoteId, kNoteDefinition, 1.0));
+  EXPECT_TRUE(sequence->CreateNote(kNoteId, 1.0, 5.0, kRootNote + 1.0, 1.0));
 
   EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
 
@@ -235,18 +229,18 @@ TEST(EngineTest, PlaySequence) {
   EXPECT_TRUE(instrument->IsNoteOn(kRootNote + 1.0));
 
   // Start another note manually.
-  instrument->StartNote(engine.GetConductor().GetRootNote(), 1.0, 1.5);
-  EXPECT_TRUE(instrument->IsNoteOn(engine.GetConductor().GetRootNote()));
+  instrument->StartNote(kRootNote, 1.0, 1.5);
+  EXPECT_TRUE(instrument->IsNoteOn(kRootNote));
 
   // Stop playback, which should only stop the sequence note.
   engine.Stop();
   EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
-  EXPECT_TRUE(instrument->IsNoteOn(engine.GetConductor().GetRootNote()));
+  EXPECT_TRUE(instrument->IsNoteOn(kRootNote));
 
   // Destroy sequence, which should not affect the instrument.
   EXPECT_TRUE(engine.DestroySequence(kSequenceId));
   EXPECT_THAT(engine.GetSequence(kSequenceId), IsNull());
-  EXPECT_TRUE(instrument->IsNoteOn(engine.GetConductor().GetRootNote()));
+  EXPECT_TRUE(instrument->IsNoteOn(kRootNote));
 
   // Destroy instrument.
   EXPECT_TRUE(engine.DestroyInstrument(kInstrumentId));

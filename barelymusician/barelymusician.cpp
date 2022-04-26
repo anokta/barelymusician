@@ -442,8 +442,8 @@ BarelyStatus BarelyNote_Create(BarelyMusicianHandle handle,
 
   if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
     *out_note_id = ++handle->id_counter;
-    if (sequence->CreateNote(*out_note_id, position, duration, pitch,
-                             intensity)) {
+    if (sequence->CreateNote(*out_note_id, position,
+                             {duration, pitch, intensity})) {
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kAlreadyExists;

@@ -18,13 +18,11 @@ Sequence::Sequence(const Transport& transport) noexcept
     : transport_(transport) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Sequence::CreateNote(Id note_id, double position, double duration,
-                          double pitch, double intensity) noexcept {
+bool Sequence::CreateNote(Id note_id, double position, Note note) noexcept {
   assert(note_id > kInvalid);
   assert(position >= 0.0);
   if (positions_.emplace(note_id, position).second) {
-    notes_.emplace(std::pair{position, note_id},
-                   Note{duration, pitch, intensity});
+    notes_.emplace(std::pair{position, note_id}, note);
     return true;
   }
   return false;

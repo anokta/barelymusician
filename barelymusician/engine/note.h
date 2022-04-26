@@ -17,7 +17,7 @@ struct Note {
   double pitch = 0.0;
 
   /// Intensity.
-  double intensity = 0.0;
+  double intensity = 1.0;
 };
 
 }  // namespace barelyapi

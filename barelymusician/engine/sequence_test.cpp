@@ -14,7 +14,6 @@ namespace {
 
 using ::testing::AllOf;
 using ::testing::ElementsAre;
-using ::testing::Field;
 using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::Pair;
@@ -23,9 +22,7 @@ using ::testing::Pointee;
 // Tests that sequence processes a single note as expected.
 TEST(SequenceTest, ProcessSingleNote) {
   const Id kId = 1;
-  const double kDuration = 1.0;
-  const double kIntensity = 0.25;
-  const double kPitch = 10.0;
+  const Note kNote = {1.0, 10.0, 0.25};
   const double kPosition = 5.0;
 
   Transport transport;
@@ -42,12 +39,12 @@ TEST(SequenceTest, ProcessSingleNote) {
   Instrument instrument(Instrument::Definition({}), 1);
   instrument.SetNoteOnCallback(
       [&](double pitch, double intensity, double timestamp) {
-        EXPECT_DOUBLE_EQ(pitch, kPitch);
-        EXPECT_DOUBLE_EQ(intensity, kIntensity);
+        EXPECT_DOUBLE_EQ(pitch, kNote.pitch);
+        EXPECT_DOUBLE_EQ(intensity, kNote.intensity);
         note_on_timestamps.push_back(timestamp);
       });
   instrument.SetNoteOffCallback([&](double pitch, double timestamp) {
-    EXPECT_DOUBLE_EQ(pitch, kPitch);
+    EXPECT_DOUBLE_EQ(pitch, kNote.pitch);
     note_off_timestamps.push_back(timestamp);
   });
 
@@ -55,10 +52,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_THAT(sequence.GetInstrument(), &instrument);
 
   // Create note.
-  EXPECT_TRUE(
-      sequence.CreateNote(kId, kPosition, kDuration, kPitch, kIntensity));
-  EXPECT_THAT(sequence.GetNote(kId),
-              AllOf(NotNull(), Pointee(Note{kDuration, kPitch, kIntensity})));
+  EXPECT_TRUE(sequence.CreateNote(kId, kPosition, kNote));
+  EXPECT_THAT(sequence.GetNote(kId), AllOf(NotNull(), Pointee(kNote)));
   EXPECT_THAT(sequence.GetNotePosition(kId),
               AllOf(NotNull(), Pointee(kPosition)));
 
@@ -178,11 +173,9 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   // Create notes.
   for (int i = 0; i < 4; ++i) {
     const Id note_id = i + 1;
-    EXPECT_TRUE(sequence.CreateNote(note_id, static_cast<double>(i), 1.0,
-                                    static_cast<double>(i + 1), 1.0));
-    EXPECT_THAT(
-        sequence.GetNote(note_id),
-        AllOf(NotNull(), Pointee(Note{1.0, static_cast<double>(i + 1), 1.0})));
+    const Note note = {1.0, static_cast<double>(i + 1), 1.0};
+    EXPECT_TRUE(sequence.CreateNote(note_id, static_cast<double>(i), note));
+    EXPECT_THAT(sequence.GetNote(note_id), AllOf(NotNull(), Pointee(note)));
     EXPECT_THAT(sequence.GetNotePosition(note_id),
                 AllOf(NotNull(), Pointee(static_cast<double>(i))));
   }

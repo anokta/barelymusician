@@ -25,13 +25,10 @@ class Sequence {
   ///
   /// @param note_id Note identifier.
   /// @param position Note position in beats.
-  /// @param duration Note duration in beats.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
+  /// @param note Note.
   /// @return True if success.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateNote(Id note_id, double position, double duration, double pitch,
-                  double intensity) noexcept;
+  bool CreateNote(Id note_id, double position, Note note) noexcept;
 
   // TODO(#98): Add `ParameterAutomation` functionality.
 

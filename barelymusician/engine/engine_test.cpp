@@ -206,7 +206,7 @@ TEST(EngineTest, PlaySequence) {
               AllOf(NotNull(), Pointee(kInstrumentId)));
 
   // Create note.
-  EXPECT_TRUE(sequence->CreateNote(kNoteId, 1.0, 5.0, kRootNote + 1.0, 1.0));
+  EXPECT_TRUE(sequence->CreateNote(kNoteId, 1.0, {5.0, kRootNote + 1.0, 1.0}));
 
   EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
 

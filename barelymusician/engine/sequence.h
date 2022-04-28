@@ -71,6 +71,12 @@ class Sequence {
   /// Returns note.
   ///
   /// @param note_id Note identifier.
+  /// @return Pointer to mutable note.
+  [[nodiscard]] Note* GetNote(Id note_id) noexcept;
+
+  /// Returns note.
+  ///
+  /// @param note_id Note identifier.
   /// @return Pointer to note.
   [[nodiscard]] const Note* GetNote(Id note_id) const noexcept;
 
@@ -125,27 +131,6 @@ class Sequence {
   ///
   /// @param is_looping True if looping.
   void SetLooping(bool is_looping) noexcept;
-
-  /// Sets note duration.
-  ///
-  /// @param note_id Note identifier.
-  /// @param duration Note duration in beats.
-  /// @return True if success.
-  bool SetNoteDuration(Id note_id, double duration) noexcept;
-
-  /// Sets note intensity.
-  ///
-  /// @param note_id Note identifier.
-  /// @param intensity Note intensity.
-  /// @return True if success.
-  bool SetNoteIntensity(Id note_id, double intensity) noexcept;
-
-  /// Sets note pitch.
-  ///
-  /// @param note_id Note identifier.
-  /// @param pitch Note pitch.
-  /// @return True if success.
-  bool SetNotePitch(Id note_id, double pitch) noexcept;
 
   /// Sets note position.
   ///

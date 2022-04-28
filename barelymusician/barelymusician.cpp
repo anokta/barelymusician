@@ -538,6 +538,58 @@ BarelyStatus BarelyNote_GetPosition(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
+BarelyStatus BarelyNote_SetDuration(BarelyMusicianHandle handle,
+                                    BarelyId sequence_id, BarelyId note_id,
+                                    double duration) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+  if (duration < 0.0) return BarelyStatus_kInvalidArgument;
+
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (auto* note = sequence->GetNote(note_id)) {
+      note->duration = duration;
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyNote_SetIntensity(BarelyMusicianHandle handle,
+                                     BarelyId sequence_id, BarelyId note_id,
+                                     double intensity) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (auto* note = sequence->GetNote(note_id)) {
+      note->intensity = intensity;
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyNote_SetPitch(BarelyMusicianHandle handle,
+                                 BarelyId sequence_id, BarelyId note_id,
+                                 double pitch) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequence_id == BarelyId_kInvalid || note_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequence = handle->engine.GetSequence(sequence_id)) {
+    if (auto* note = sequence->GetNote(note_id)) {
+      note->pitch = pitch;
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
 BarelyStatus BarelyNote_SetPosition(BarelyMusicianHandle handle,
                                     BarelyId sequence_id, BarelyId note_id,
                                     double position) {

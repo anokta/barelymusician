@@ -52,6 +52,13 @@ double Sequence::GetLoopBeginOffset() const noexcept {
 
 double Sequence::GetLoopLength() const noexcept { return loop_length_; }
 
+Note* Sequence::GetNote(Id note_id) noexcept {
+  if (const auto* position = FindOrNull(positions_, note_id)) {
+    return FindOrNull(notes_, std::pair{*position, note_id});
+  }
+  return nullptr;
+}
+
 const Note* Sequence::GetNote(Id note_id) const noexcept {
   if (const auto* position = FindOrNull(positions_, note_id)) {
     return FindOrNull(notes_, std::pair{*position, note_id});
@@ -173,30 +180,6 @@ void Sequence::SetLoopLength(double loop_length) noexcept {
 
 void Sequence::SetLooping(bool is_looping) noexcept {
   is_looping_ = is_looping;
-}
-
-bool Sequence::SetNoteDuration(Id note_id, double duration) noexcept {
-  if (const auto* position = FindOrNull(positions_, note_id)) {
-    FindOrNull(notes_, std::pair{*position, note_id})->duration = duration;
-    return true;
-  }
-  return false;
-}
-
-bool Sequence::SetNoteIntensity(Id note_id, double intensity) noexcept {
-  if (const auto* position = FindOrNull(positions_, note_id)) {
-    FindOrNull(notes_, std::pair{*position, note_id})->intensity = intensity;
-    return true;
-  }
-  return false;
-}
-
-bool Sequence::SetNotePitch(Id note_id, double pitch) noexcept {
-  if (const auto* position = FindOrNull(positions_, note_id)) {
-    FindOrNull(notes_, std::pair{*position, note_id})->pitch = pitch;
-    return true;
-  }
-  return false;
 }
 
 bool Sequence::SetNotePosition(Id note_id, double position) noexcept {

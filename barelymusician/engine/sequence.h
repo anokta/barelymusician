@@ -6,10 +6,10 @@
 #include <unordered_map>
 #include <utility>
 
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
-#include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
 
@@ -18,8 +18,8 @@ class Sequence {
  public:
   /// Constructs new `Sequence`.
   ///
-  /// @param transport Transport.
-  explicit Sequence(const Transport& transport) noexcept;
+  /// @param clock Clock.
+  explicit Sequence(const Clock& clock) noexcept;
 
   /// Creates new note at position.
   ///
@@ -95,7 +95,8 @@ class Sequence {
   ///
   /// @param begin_position Begin position in beats.
   /// @param end_position End position in beats.
-  void Process(double begin_position, double end_position) noexcept;
+  void Process(double begin_position, double end_position,
+               const std::function<double(double)>& get_timestamp_fn) noexcept;
 
   /// Sets begin offset.
   ///
@@ -153,12 +154,13 @@ class Sequence {
   };
 
   // Internal process helper function.
-  void ProcessInternal(double begin_position, double end_position,
-                       double position_offset,
-                       double process_end_position) noexcept;
+  void ProcessInternal(
+      double begin_position, double end_position, double position_offset,
+      double process_end_position,
+      const std::function<double(double)>& get_timestamp_fn) noexcept;
 
-  // Transport.
-  const Transport& transport_;
+  // Clock.
+  const Clock& clock_;
 
   // Map of active notes by note positions.
   std::multimap<double, ActiveNote> active_notes_;

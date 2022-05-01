@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
@@ -59,6 +60,11 @@ class Engine {
   /// @return True if successful, false otherwise.
   bool DestroySequence(Id sequence_id) noexcept;
 
+  /// Returns clock.
+  ///
+  /// @return Clock.
+  Clock& GetClock() noexcept;
+
   /// Returns instrument.
   ///
   /// @param instrument_id Instrument identifier.
@@ -94,6 +100,10 @@ class Engine {
                          int num_output_channels, int num_output_frames,
                          double timestamp) noexcept;
 
+  void SetBeatCallback(std::function<void(double, double)> callback) noexcept {
+    beat_callback_ = std::move(callback);
+  }
+
   /// Sets sequence instrument identifier.
   ///
   /// @param sequence_id Sequence identifier.
@@ -119,6 +129,11 @@ class Engine {
   // Updates instrument reference map.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateInstrumentReferenceMap() noexcept;
+
+  std::function<void(double, double)> beat_callback_;
+
+  // Clock.
+  Clock clock_;
 
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;

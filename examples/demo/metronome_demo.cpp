@@ -63,13 +63,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   metronome.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   // Beat callback.
-  const auto beat_callback = [&](double position, double /*timestamp*/) {
+  const auto beat_callback = [&](double position, double timestamp) {
     const int current_bar = static_cast<int>(position) / kNumBeats;
     const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << current_bar << "." << current_beat;
     const double pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    metronome.StartNote(pitch, kGain);
-    metronome.StopNote(pitch);
+    metronome.StartNoteAt(timestamp, pitch, kGain);
+    metronome.StopNoteAt(timestamp, pitch);
   };
   musician.SetBeatCallback(beat_callback);
 

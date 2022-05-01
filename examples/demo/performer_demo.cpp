@@ -116,9 +116,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   }
 
   bool reset_position = false;
-  const auto beat_callback = [&](double /*position*/, double /*timestamp*/) {
-    metronome.StartNote(barelyapi::kPitchC3, 1.0);
-    metronome.StopNote(barelyapi::kPitchC3);
+  const auto beat_callback = [&](double /*position*/, double timestamp) {
+    metronome.StartNoteAt(timestamp, barelyapi::kPitchC3, 1.0);
+    metronome.StopNoteAt(timestamp, barelyapi::kPitchC3);
     if (reset_position) {
       reset_position = false;
       musician.SetPosition(0.0);

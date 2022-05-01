@@ -211,8 +211,8 @@ TEST(EngineTest, PlaySequence) {
   EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
 
   // Start playback with one beat per second tempo.
-  engine.GetTransport().SetTempo(60.0);
-  EXPECT_DOUBLE_EQ(engine.GetTransport().GetTempo(), 60.0);
+  engine.GetClock().SetTempo(60.0);
+  EXPECT_DOUBLE_EQ(engine.GetClock().GetTempo(), 60.0);
 
   EXPECT_FALSE(engine.GetTransport().IsPlaying());
   engine.Start();

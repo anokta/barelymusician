@@ -7,15 +7,14 @@
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
-#include "barelymusician/engine/transport.h"
 
 namespace barelyapi {
 
-Sequence::Sequence(const Transport& transport) noexcept
-    : transport_(transport) {}
+Sequence::Sequence(const Clock& clock) noexcept : clock_(clock) {}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Sequence::CreateNote(Id note_id, double position, Note note) noexcept {
@@ -72,7 +71,9 @@ const double* Sequence::GetNotePosition(Id note_id) const noexcept {
 
 bool Sequence::IsLooping() const noexcept { return is_looping_; }
 
-void Sequence::Process(double begin_position, double end_position) noexcept {
+void Sequence::Process(
+    double begin_position, double end_position,
+    const std::function<double(double)>& get_timestamp_fn) noexcept {
   assert(begin_position >= 0.0 && begin_position <= end_position);
   if (!instrument_) {
     return;
@@ -90,7 +91,7 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
       continue;
     }
     instrument_->StopNote(active_note.pitch,
-                          transport_.GetTimestamp(note_end_position));
+                          get_timestamp_fn(note_end_position));
     it = active_notes_.erase(it);
   }
   // Process sequence notes.
@@ -124,7 +125,7 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
         begin_position < loop_end_position) {
       loop_end_position = std::min(loop_end_position, end_position);
       ProcessInternal(begin_position, loop_end_position, position_offset,
-                      process_end_position);
+                      process_end_position, get_timestamp_fn);
       begin_position = loop_end_position;
     }
     // Process the rest of the loop iterations.
@@ -134,12 +135,13 @@ void Sequence::Process(double begin_position, double end_position) noexcept {
           loop_begin_offset_ +
           std::min(loop_length_, end_position - begin_position);
       ProcessInternal(loop_begin_offset_, loop_end_position,
-                      position_offset + begin_position, process_end_position);
+                      position_offset + begin_position, process_end_position,
+                      get_timestamp_fn);
       begin_position += loop_length_;
     }
   } else {
     ProcessInternal(begin_position, end_position, position_offset,
-                    process_end_position);
+                    process_end_position, get_timestamp_fn);
   }
 }
 
@@ -161,7 +163,7 @@ void Sequence::SetInstrument(Instrument* instrument) noexcept {
   if (instrument_ != instrument) {
     if (instrument_ && !active_notes_.empty()) {
       for (const auto& [position, active_note] : active_notes_) {
-        instrument_->StopNote(active_note.pitch, transport_.GetTimestamp());
+        instrument_->StopNote(active_note.pitch, clock_.GetTimestamp());
       }
     }
     active_notes_.clear();
@@ -202,16 +204,17 @@ void Sequence::Stop() noexcept {
   if (!active_notes_.empty()) {
     if (instrument_) {
       for (const auto& [position, active_note] : active_notes_) {
-        instrument_->StopNote(active_note.pitch, transport_.GetTimestamp());
+        instrument_->StopNote(active_note.pitch, clock_.GetTimestamp());
       }
     }
     active_notes_.clear();
   }
 }
 
-void Sequence::ProcessInternal(double begin_position, double end_position,
-                               double position_offset,
-                               double process_end_position) noexcept {
+void Sequence::ProcessInternal(
+    double begin_position, double end_position, double position_offset,
+    double process_end_position,
+    const std::function<double(double)>& get_timestamp_fn) noexcept {
   assert(begin_position <= end_position);
   assert(process_end_position >= 0.0);
   const auto begin = notes_.lower_bound(std::pair{begin_position, kInvalid});
@@ -222,10 +225,9 @@ void Sequence::ProcessInternal(double begin_position, double end_position,
     const double note_end_position = std::min(
         note_begin_position + std::max(note.duration, 0.0), end_position_);
     instrument_->StartNote(note.pitch, note.intensity,
-                           transport_.GetTimestamp(note_begin_position));
+                           get_timestamp_fn(note_begin_position));
     if (note_end_position < process_end_position) {
-      instrument_->StopNote(note.pitch,
-                            transport_.GetTimestamp(note_end_position));
+      instrument_->StopNote(note.pitch, get_timestamp_fn(note_end_position));
     } else {
       active_notes_.emplace(note_begin_position,
                             ActiveNote{note_end_position, note.pitch});

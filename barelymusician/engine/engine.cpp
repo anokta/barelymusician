@@ -15,7 +15,7 @@ namespace barelyapi {
 
 Engine::~Engine() noexcept {
   for (auto& [instrument_id, instrument] : instruments_) {
-    instrument->StopAllNotes(transport_.GetTimestamp());
+    instrument->StopAllNotes(clock_.GetTimestamp());
   }
   instrument_refs_.Update({});
 }
@@ -39,8 +39,7 @@ bool Engine::CreateInstrument(Id instrument_id,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Engine::CreateSequence(Id sequence_id) noexcept {
   assert(sequence_id > kInvalid);
-  return sequences_
-      .emplace(sequence_id, std::pair{Sequence(transport_), kInvalid})
+  return sequences_.emplace(sequence_id, std::pair{Sequence(clock_), kInvalid})
       .second;
 }
 
@@ -55,7 +54,7 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
         sequence.second = kInvalid;
       }
     }
-    instrument->StopAllNotes(transport_.GetTimestamp());
+    instrument->StopAllNotes(clock_.GetTimestamp());
     instruments_.erase(it);
     UpdateInstrumentReferenceMap();
     return true;
@@ -72,6 +71,8 @@ bool Engine::DestroySequence(Id sequence_id) noexcept {
   }
   return false;
 }
+
+Clock& Engine::GetClock() noexcept { return clock_; }
 
 Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
   if (auto* instrument = FindOrNull(instruments_, instrument_id)) {
@@ -134,12 +135,31 @@ void Engine::Stop() noexcept {
 
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
-  transport_.Update(
-      timestamp, [this](double begin_position, double end_position) noexcept {
-        for (auto& [sequence_id, sequence] : sequences_) {
-          sequence.first.Process(begin_position, end_position);
-        }
-      });
+  const double begin_timestamp = clock_.GetTimestamp();
+  if (timestamp <= begin_timestamp) return;
+  const double duration = clock_.GetDuration(timestamp);
+  clock_.SetTimestamp(timestamp);
+  if (duration > 0) {
+    const double seconds_from_beats = (timestamp - begin_timestamp) / duration;
+    double transport_begin_timestamp = begin_timestamp;
+    transport_.SetBeatCallback([&](double position) {
+      if (beat_callback_) {
+        beat_callback_(position, transport_begin_timestamp);
+      }
+    });
+    transport_.Update(
+        duration, [&](double begin_position, double end_position) noexcept {
+          for (auto& [sequence_id, sequence] : sequences_) {
+            sequence.first.Process(
+                begin_position, end_position, [&](double position) {
+                  return transport_begin_timestamp +
+                         (position - begin_position) * seconds_from_beats;
+                });
+          }
+          transport_begin_timestamp +=
+              (end_position - begin_position) * seconds_from_beats;
+        });
+  }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

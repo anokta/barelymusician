@@ -393,6 +393,18 @@ BARELY_EXPORT BarelyStatus
 BarelyInstrument_StartNote(BarelyMusicianHandle handle, BarelyId instrument_id,
                            double pitch, double intensity);
 
+/// Starts instrument note at timestamp.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+/// @param timestamp Timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_StartNoteAt(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch,
+    double intensity, double timestamp);
+
 /// Stops all instrument notes.
 ///
 /// @param handle Musician handle.
@@ -409,6 +421,17 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopAllNotes(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
     BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
+
+/// Stops instrument note at timestamp.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param pitch Note pitch.
+/// @param timestamp Timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_StopNoteAt(BarelyMusicianHandle handle, BarelyId instrument_id,
+                            double pitch, double timestamp);
 
 /// Creates new musician.
 ///
@@ -446,15 +469,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
-
-/// Gets musician timestamp at position.
-///
-/// @param handle Musician handle.
-/// @param position Position in beats.
-/// @param out_timestamp Output timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestampAtPosition(
-    BarelyMusicianHandle handle, double position, double* out_timestamp);
 
 /// Gets whether musician is playing or not.
 ///
@@ -1380,6 +1394,17 @@ class Instrument {
     return BarelyInstrument_StartNote(handle_, id_, pitch, intensity);
   }
 
+  /// Starts note at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  /// @return Status.
+  Status StartNoteAt(double timestamp, double pitch, double intensity = 1.0) {
+    return BarelyInstrument_StartNoteAt(handle_, id_, pitch, intensity,
+                                        timestamp);
+  }
+
   /// Stops all notes.
   ///
   /// @return Status.
@@ -1391,6 +1416,14 @@ class Instrument {
   /// @return Status.
   Status StopNote(double pitch) {
     return BarelyInstrument_StopNote(handle_, id_, pitch);
+  }
+
+  /// Stops note at timestamp.
+  ///
+  /// @param pitch Note pitch.
+  /// @return Status.
+  Status StopNoteAt(double timestamp, double pitch) {
+    return BarelyInstrument_StopNoteAt(handle_, id_, pitch, timestamp);
   }
 
  private:
@@ -1880,18 +1913,6 @@ class Musician {
     double timestamp = 0.0;
     [[maybe_unused]] const Status status =
         BarelyMusician_GetTimestamp(handle_, &timestamp);
-    assert(status.IsOk());
-    return timestamp;
-  }
-
-  /// Returns timestamp at position.
-  ///
-  /// @param position Position in beats.
-  /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestampAtPosition(double position) const {
-    double timestamp = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyMusician_GetTimestampAtPosition(handle_, position, &timestamp);
     assert(status.IsOk());
     return timestamp;
   }

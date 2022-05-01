@@ -1,10 +1,17 @@
 add_library(
+  clock
+  clock.cpp
+  clock.h
+)
+
+add_library(
   engine
   engine.cpp
   engine.h
 )
 target_link_libraries(
   engine
+  clock
   id
   instrument
   mutable_data
@@ -82,10 +89,10 @@ add_library(
 )
 target_link_libraries(
   sequence
+  clock
   id
   instrument
   note
-  transport
   find_or_null
 )
 
@@ -98,6 +105,18 @@ target_link_libraries(
   transport
   include
 )
+
+add_executable(
+  clock_test
+  clock_test.cpp
+)
+target_link_libraries(
+  clock_test
+  clock
+  gmock
+  gtest_main
+)
+gtest_discover_tests(clock_test)
 
 add_executable(
   engine_test

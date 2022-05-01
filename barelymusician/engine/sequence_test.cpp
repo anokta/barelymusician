@@ -2,10 +2,10 @@
 
 #include <vector>
 
+#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
-#include "barelymusician/engine/transport.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -25,10 +25,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   const Note kNote = {1.0, 10.0, 0.25};
   const double kPosition = 5.0;
 
-  Transport transport;
-  transport.SetTempo(60.0);
-
-  Sequence sequence(transport);
+  Clock clock;
+  Sequence sequence(clock);
   EXPECT_THAT(sequence.GetInstrument(), IsNull());
   EXPECT_THAT(sequence.GetNote(kId), IsNull());
   EXPECT_THAT(sequence.GetNotePosition(kId), IsNull());
@@ -57,36 +55,38 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_THAT(sequence.GetNotePosition(kId),
               AllOf(NotNull(), Pointee(kPosition)));
 
+  const auto get_timestamp_fn = [](double position) { return position; };
+
   // Process before the note position.
-  sequence.Process(0.0, 1.0);
+  sequence.Process(0.0, 1.0, get_timestamp_fn);
   EXPECT_TRUE(note_on_timestamps.empty());
   EXPECT_TRUE(note_off_timestamps.empty());
   note_on_timestamps.clear();
   note_off_timestamps.clear();
 
   // Process just before the note position.
-  sequence.Process(4.0, 5.0);
+  sequence.Process(4.0, 5.0, get_timestamp_fn);
   EXPECT_TRUE(note_on_timestamps.empty());
   EXPECT_TRUE(note_off_timestamps.empty());
   note_on_timestamps.clear();
   note_off_timestamps.clear();
 
   // Process starting with the note position.
-  sequence.Process(5.0, 6.0);
+  sequence.Process(5.0, 6.0, get_timestamp_fn);
   EXPECT_THAT(note_on_timestamps, ElementsAre(5.0));
   EXPECT_TRUE(note_off_timestamps.empty());
   note_on_timestamps.clear();
   note_off_timestamps.clear();
 
   // Process overlapping the note position.
-  sequence.Process(4.75, 5.5);
+  sequence.Process(4.75, 5.5, get_timestamp_fn);
   EXPECT_THAT(note_on_timestamps, ElementsAre(5.0));
   EXPECT_THAT(note_off_timestamps, ElementsAre(4.75));
   note_on_timestamps.clear();
   note_off_timestamps.clear();
 
   // Process just after the note position.
-  sequence.Process(6.0, 7.0);
+  sequence.Process(6.0, 7.0, get_timestamp_fn);
   EXPECT_TRUE(note_on_timestamps.empty());
   EXPECT_THAT(note_off_timestamps, ElementsAre(6.0));
   note_on_timestamps.clear();
@@ -96,7 +96,7 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetBeginPosition(1.5);
   EXPECT_DOUBLE_EQ(sequence.GetBeginPosition(), 1.5);
 
-  sequence.Process(6.0, 7.0);
+  sequence.Process(6.0, 7.0, get_timestamp_fn);
   EXPECT_THAT(note_on_timestamps, ElementsAre(6.5));
   EXPECT_TRUE(note_off_timestamps.empty());
   note_on_timestamps.clear();
@@ -106,7 +106,7 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetBeginOffset(4.0);
   EXPECT_DOUBLE_EQ(sequence.GetBeginOffset(), 4.0);
 
-  sequence.Process(2.0, 3.0);
+  sequence.Process(2.0, 3.0, get_timestamp_fn);
   EXPECT_THAT(note_on_timestamps, ElementsAre(2.5));
   EXPECT_THAT(note_off_timestamps, ElementsAre(2.0));
   note_on_timestamps.clear();
@@ -116,7 +116,7 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetLooping(true);
   EXPECT_TRUE(sequence.IsLooping());
 
-  sequence.Process(1.0, 11.0);
+  sequence.Process(1.0, 11.0, get_timestamp_fn);
   EXPECT_TRUE(note_on_timestamps.empty());
   EXPECT_THAT(note_off_timestamps, ElementsAre(1.0));
   note_on_timestamps.clear();
@@ -130,7 +130,7 @@ TEST(SequenceTest, ProcessSingleNote) {
   sequence.SetEndPosition(11.0);
   EXPECT_DOUBLE_EQ(sequence.GetEndPosition(), 11.0);
 
-  sequence.Process(1.5, 11.5);
+  sequence.Process(1.5, 11.5, get_timestamp_fn);
   EXPECT_THAT(note_on_timestamps, ElementsAre(2.5, 6.5, 10.5));
   EXPECT_THAT(note_off_timestamps, ElementsAre(3.5, 7.5, 11.0));
   note_on_timestamps.clear();
@@ -141,17 +141,15 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_THAT(sequence.GetNote(kId), IsNull());
   EXPECT_THAT(sequence.GetNotePosition(kId), IsNull());
 
-  sequence.Process(1.0, 11.0);
+  sequence.Process(1.0, 11.0, get_timestamp_fn);
   EXPECT_TRUE(note_on_timestamps.empty());
   EXPECT_TRUE(note_off_timestamps.empty());
 }
 
 // Tests that sequence processes multiple notes as expected.
 TEST(SequenceTest, ProcessMultipleNotes) {
-  Transport transport;
-  transport.SetTempo(60.0);
-
-  Sequence sequence(transport);
+  Clock clock;
+  Sequence sequence(clock);
   EXPECT_THAT(sequence.GetInstrument(), IsNull());
 
   // Set instrument.
@@ -180,8 +178,10 @@ TEST(SequenceTest, ProcessMultipleNotes) {
                 AllOf(NotNull(), Pointee(static_cast<double>(i))));
   }
 
+  const auto get_timestamp_fn = [](double position) { return position; };
+
   // Process until the end of last note.
-  sequence.Process(0.0, 4.0);
+  sequence.Process(0.0, 4.0, get_timestamp_fn);
   EXPECT_THAT(note_ons, ElementsAre(Pair(1.0, 0.0), Pair(2.0, 1.0),
                                     Pair(3.0, 2.0), Pair(4.0, 3.0)));
   EXPECT_THAT(note_offs,
@@ -210,7 +210,7 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   sequence.SetEndPosition(9.5);
   EXPECT_DOUBLE_EQ(sequence.GetEndPosition(), 9.5);
 
-  sequence.Process(0.0, 10.0);
+  sequence.Process(0.0, 10.0, get_timestamp_fn);
   EXPECT_THAT(note_ons,
               ElementsAre(Pair(2.0, 0.0), Pair(3.0, 1.0), Pair(4.0, 2.0),
                           Pair(3.0, 3.0), Pair(4.0, 4.0), Pair(3.0, 5.0),
@@ -229,7 +229,7 @@ TEST(SequenceTest, ProcessMultipleNotes) {
     EXPECT_TRUE(sequence.DestroyNote(static_cast<Id>(i + 1)));
   }
 
-  sequence.Process(0.0, 10.0);
+  sequence.Process(0.0, 10.0, get_timestamp_fn);
   EXPECT_TRUE(note_ons.empty());
   EXPECT_TRUE(note_offs.empty());
 }

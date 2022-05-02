@@ -3,18 +3,26 @@
 
 #include <random>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/dsp/generator.h"
 
 namespace barelyapi {
 
+/// Oscillator type.
+enum class OscillatorType {
+  /// Sine wave.
+  kSine = 0,
+  /// Sawtooth wave.
+  kSaw = 1,
+  /// Square wave.
+  kSquare = 2,
+  /// White noise.
+  kNoise = 3,
+};
+
 /// Simple oscillator that generates output samples of basic waveforms.
 class Oscillator : public Generator {
  public:
-  /// Type alias.
-  using Type = barely::OscillatorType;
-
   /// Constructs new `Oscillator`.
   ///
   /// @param sample_rate Sampling rate in hz.
@@ -32,14 +40,14 @@ class Oscillator : public Generator {
   /// Sets the type of the oscillator.
   ///
   /// @param type Oscillator type.
-  void SetType(Type type) noexcept;
+  void SetType(OscillatorType type) noexcept;
 
  private:
   // Inverse sampling rate in seconds.
   double sample_interval_ = 0.0;
 
   // Oscillator type.
-  Type type_ = Type::kNoise;
+  OscillatorType type_ = OscillatorType::kNoise;
 
   // Increment per sample.
   double increment_ = 0.0;

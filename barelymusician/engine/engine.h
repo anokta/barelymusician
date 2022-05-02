@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
+#include <map>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -100,6 +101,15 @@ class Engine {
                          int num_output_channels, int num_output_frames,
                          double timestamp) noexcept;
 
+  /// Schedules instrument event at timestamp.
+  ///
+  /// @param instrument_id Instrument identifier.
+  /// @param event Instrument event.
+  /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void ScheduleInstrumentEvent(Id instrument_id, Event event,
+                               double timestamp) noexcept;
+
   void SetBeatCallback(std::function<void(double, double)> callback) noexcept {
     beat_callback_ = std::move(callback);
   }
@@ -120,11 +130,20 @@ class Engine {
   /// Updates internal state.
   ///
   /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
  private:
+  // Instrument identifier-event pair.
+  using InstrumentIdEventPair = std::pair<Id, Event>;
+
   // Instrument reference by identifier map.
   using InstrumentReferenceMap = std::unordered_map<Id, Instrument*>;
+
+  // Processes instrument `event` at `timestamp`.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void ProcessInstrumentEvent(Id instrument_id, Event& event,
+                              double timestamp) noexcept;
 
   // Updates instrument reference map.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -137,6 +156,9 @@ class Engine {
 
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;
+
+  // Scheduled instrument identifier-event pairs by their timestamps.
+  std::multimap<double, InstrumentIdEventPair> instrument_events_;
 
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;

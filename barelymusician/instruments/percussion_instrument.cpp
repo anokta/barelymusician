@@ -3,13 +3,10 @@
 #include <cstddef>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/parameter.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
 namespace barelyapi {
-
-using ::barely::PercussionParameter;
 
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),

@@ -16,6 +16,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/instruments/percussion_instrument.h"
+#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -28,18 +29,19 @@
 namespace {
 
 using ::barely::Instrument;
-using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::Note;
-using ::barely::OscillatorType;
 using ::barely::Sequence;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
+using ::barelyapi::OscillatorType;
+using ::barelyapi::PercussionInstrument;
 using ::barelyapi::Random;
+using ::barelyapi::SynthInstrument;
+using ::barelyapi::SynthParameter;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 
 // Beat composer callback signature.
@@ -208,8 +210,8 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
-    instruments.push_back(
-        musician.CreateInstrument(InstrumentType::kSynth, kFrameRate));
+    instruments.push_back(musician.CreateInstrument(
+        SynthInstrument::GetDefinition(), kFrameRate));
     auto& instrument = instruments.back();
     gains.push_back(gain);
     instrument.SetParameter(SynthParameter::kOscillatorType, type);
@@ -260,8 +262,8 @@ int main(int /*argc*/, char* argv[]) {
   std::get<0>(performers.back()).SetInstrument(&instruments.back());
 
   // Add percussion instrument.
-  instruments.push_back(
-      musician.CreateInstrument(InstrumentType::kPercussion, kFrameRate));
+  instruments.push_back(musician.CreateInstrument(
+      PercussionInstrument::GetDefinition(), kFrameRate));
   gains.push_back(0.2);
   set_note_callbacks_fn(instruments.size(), &instruments.back());
   auto& percussion = instruments.back();

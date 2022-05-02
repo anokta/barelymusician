@@ -164,60 +164,6 @@ typedef struct BarelyInstrumentDefinition {
   int32_t num_parameter_definitions;
 } BarelyInstrumentDefinition;
 
-/// Instrument type enum alias.
-typedef int32_t BarelyInstrumentType;
-
-/// Instrument type enum values.
-enum BarelyInstrumentType_Values {
-  /// Synth instrument.
-  BarelyInstrumentType_kSynth = 0,
-  /// Percussion instrument.
-  BarelyInstrumentType_kPercussion = 1,
-};
-
-/// Oscillator type enum alias.
-typedef int32_t BarelyOscillatorType;
-
-/// Oscillator type enum values.
-enum BarelyOscillatorType_Values {
-  /// Sine wave.
-  BarelyOscillatorType_kSine = 0,
-  /// Sawtooth wave.
-  BarelyOscillatorType_kSaw = 1,
-  /// Square wave.
-  BarelyOscillatorType_kSquare = 2,
-  /// White noise.
-  BarelyOscillatorType_kNoise = 3,
-};
-
-/// Synth instrument parameter enum alias.
-typedef int32_t BarelySynthParameter;
-
-/// Synth instrument parameter enum values.
-enum BarelySynthParameter_Values {
-  /// Oscillator type.
-  BarelySynthParameter_kOscillatorType = 0,
-  /// Envelope attack.
-  BarelySynthParameter_kAttack = 1,
-  /// Envelope decay.
-  BarelySynthParameter_kDecay = 2,
-  /// Envelope sustain.
-  BarelySynthParameter_kSustain = 3,
-  /// Envelope release.
-  BarelySynthParameter_kRelease = 4,
-  /// Number of voices
-  BarelySynthParameter_kNumVoices = 5,
-};
-
-/// Percussion instrument parameter enum alias.
-typedef int32_t BarelyPercussionParameter;
-
-/// Percussion instrument parameter enum values.
-enum BarelyPercussionParameter_Values {
-  /// Pad envelope release.
-  BarelyPercussionParameter_kRelease = 0,
-};
-
 /// Instrument note off callback signature.
 ///
 /// @param pitch Note pitch.
@@ -254,17 +200,6 @@ typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
 BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
     BarelyMusicianHandle handle, BarelyInstrumentDefinition definition,
     int32_t frame_rate, BarelyId* out_instrument_id);
-
-/// Creates new instrument of type.
-///
-/// @param handle Musician handle.
-/// @param type Instrument type.
-/// @param frame_rate Frame rate in hz.
-/// @param out_instrument_id Output instrument identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_CreateOfType(
-    BarelyMusicianHandle handle, BarelyInstrumentType type, int32_t frame_rate,
-    BarelyId* out_instrument_id);
 
 /// Destroys instrument.
 ///
@@ -1136,48 +1071,6 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   }
 };
 
-/// Oscillator type.
-enum class OscillatorType : BarelyOscillatorType {
-  /// Sine wave.
-  kSine = BarelyOscillatorType_kSine,
-  /// Sawtooth wave.
-  kSaw = BarelyOscillatorType_kSaw,
-  /// Square wave.
-  kSquare = BarelyOscillatorType_kSquare,
-  /// White noise.
-  kNoise = BarelyOscillatorType_kNoise,
-};
-
-/// Instrument type.
-enum class InstrumentType : BarelyInstrumentType {
-  /// Synth instrument.
-  kSynth = BarelyInstrumentType_kSynth,
-  /// Percussion instrument.
-  kPercussion = BarelyInstrumentType_kPercussion,
-};
-
-/// Synth parameter.
-enum class SynthParameter : BarelySynthParameter {
-  /// Oscillator type.
-  kOscillatorType = BarelySynthParameter_kOscillatorType,
-  /// Envelope attack.
-  kAttack = BarelySynthParameter_kAttack,
-  /// Envelope decay.
-  kDecay = BarelySynthParameter_kDecay,
-  /// Envelope sustain.
-  kSustain = BarelySynthParameter_kSustain,
-  /// Envelope release.
-  kRelease = BarelySynthParameter_kRelease,
-  /// Number of voices
-  kNumVoices = BarelySynthParameter_kNumVoices,
-};
-
-/// Percussion parameter.
-enum class PercussionParameter : BarelyPercussionParameter {
-  /// Pad envelope release.
-  kRelease = BarelyPercussionParameter_kRelease,
-};
-
 /// Instrument.
 class Instrument {
  public:
@@ -1436,15 +1329,6 @@ class Instrument {
       : handle_(handle) {
     [[maybe_unused]] const Status status =
         BarelyInstrument_Create(handle_, definition, frame_rate, &id_);
-    assert(status.IsOk());
-  }
-
-  // Constructs new `Instrument` of `type`.
-  explicit Instrument(BarelyMusicianHandle handle, InstrumentType type,
-                      int frame_rate)
-      : handle_(handle) {
-    [[maybe_unused]] const Status status = BarelyInstrument_CreateOfType(
-        handle_, static_cast<BarelyInstrumentType>(type), frame_rate, &id_);
     assert(status.IsOk());
   }
 
@@ -1865,16 +1749,6 @@ class Musician {
   [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
                                             int frame_rate) {
     return Instrument(handle_, definition, frame_rate);
-  }
-
-  /// Creates new instrument of type.
-  ///
-  /// @param type Instrument type.
-  /// @param frame_rate Frame rate in hz.
-  /// @return Instrument.
-  [[nodiscard]] Instrument CreateInstrument(InstrumentType type,
-                                            int frame_rate) {
-    return Instrument(handle_, type, frame_rate);
   }
 
   /// Creates new sequence.

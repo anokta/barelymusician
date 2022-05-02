@@ -13,6 +13,12 @@
 
 namespace barelyapi {
 
+/// Percussion parameter.
+enum class PercussionParameter : int {
+  /// Pad envelope release.
+  kRelease = 0,
+};
+
 /// Simple percussion instrument.
 class PercussionInstrument : public GenericInstrument {
  public:

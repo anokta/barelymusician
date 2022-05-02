@@ -3,6 +3,7 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -12,14 +13,14 @@
 namespace {
 
 using ::barely::Instrument;
-using ::barely::InstrumentType;
 using ::barely::Musician;
-using ::barely::OscillatorType;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+using ::barelyapi::OscillatorType;
+using ::barelyapi::SynthInstrument;
+using ::barelyapi::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -56,7 +57,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Create metronome instrument.
   Instrument metronome =
-      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   metronome.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   metronome.SetParameter(SynthParameter::kAttack, kAttack);
   metronome.SetParameter(SynthParameter::kRelease, kRelease);

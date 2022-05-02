@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-package(default_visibility = ["//barelymusician:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "enveloped_voice",
@@ -27,7 +27,6 @@ cc_library(
     deps = [
         ":enveloped_voice",
         ":generic_instrument",
-        "//barelymusician:include",
         "//barelymusician/dsp:sample_player",
         "//barelymusician/engine:instrument",
         "//barelymusician/engine:parameter",
@@ -41,7 +40,6 @@ cc_library(
     deps = [
         ":enveloped_voice",
         ":generic_instrument",
-        "//barelymusician:include",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",

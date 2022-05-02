@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <utility>
+#include <variant>
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/engine/id.h"
@@ -114,6 +115,17 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
   return false;
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Engine::ScheduleInstrumentEvent(Id instrument_id, Event event,
+                                     double timestamp) noexcept {
+  if (timestamp > clock_.GetTimestamp()) {
+    instrument_events_.emplace(timestamp,
+                               std::pair{instrument_id, std::move(event)});
+  } else {
+    ProcessInstrumentEvent(instrument_id, event, clock_.GetTimestamp());
+  }
+}
+
 bool Engine::SetSequenceInstrumentId(Id sequence_id,
                                      Id instrument_id) noexcept {
   if (auto* sequence = FindOrNull(sequences_, sequence_id)) {
@@ -133,18 +145,20 @@ void Engine::Stop() noexcept {
   transport_.Stop();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
-  const double begin_timestamp = clock_.GetTimestamp();
-  if (timestamp <= begin_timestamp) return;
-  const double duration = clock_.GetDuration(timestamp);
+  if (timestamp <= clock_.GetTimestamp()) return;
+  Clock clock = clock_;
   clock_.SetTimestamp(timestamp);
+  const double duration = clock.GetDuration(timestamp);
   if (duration > 0) {
-    const double seconds_from_beats = (timestamp - begin_timestamp) / duration;
-    double transport_begin_timestamp = begin_timestamp;
+    // TODO: This won't work if `SetPosition` is called during `Update`.
+    const double transport_position = transport_.GetPosition();
     transport_.SetBeatCallback([&](double position) {
       if (beat_callback_) {
-        beat_callback_(position, transport_begin_timestamp);
+        beat_callback_(position,
+                       clock.GetTimestamp(position - transport_position));
       }
     });
     transport_.Update(
@@ -152,13 +166,41 @@ void Engine::Update(double timestamp) noexcept {
           for (auto& [sequence_id, sequence] : sequences_) {
             sequence.first.Process(
                 begin_position, end_position, [&](double position) {
-                  return transport_begin_timestamp +
-                         (position - begin_position) * seconds_from_beats;
+                  return clock.GetTimestamp(position - transport_position);
                 });
           }
-          transport_begin_timestamp +=
-              (end_position - begin_position) * seconds_from_beats;
         });
+  }
+  const auto begin = instrument_events_.begin();
+  const auto end = instrument_events_.lower_bound(timestamp);
+  for (auto it = begin; begin != end; ++it) {
+    ProcessInstrumentEvent(it->second.first, it->second.second, it->first);
+  }
+  instrument_events_.erase(begin, end);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Engine::ProcessInstrumentEvent(Id instrument_id, Event& event,
+                                    double timestamp) noexcept {
+  if (auto* instrument = GetInstrument(instrument_id)) {
+    std::visit(
+        EventVisitor{
+            [&](SetDataEvent& set_data_event) noexcept {
+              instrument->SetData(std::move(set_data_event.data), timestamp);
+            },
+            [&](SetNoteOffEvent& set_note_off_event) noexcept {
+              instrument->StopNote(set_note_off_event.pitch, timestamp);
+            },
+            [&](SetNoteOnEvent& set_note_on_event) noexcept {
+              instrument->StartNote(set_note_on_event.pitch,
+                                    set_note_on_event.intensity, timestamp);
+            },
+            [&](SetParameterEvent& set_parameter_event) noexcept {
+              instrument->SetParameter(set_parameter_event.index,
+                                       set_parameter_event.value,
+                                       set_parameter_event.slope, timestamp);
+            }},
+        event);
   }
 }
 

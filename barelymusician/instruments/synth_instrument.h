@@ -9,6 +9,22 @@
 
 namespace barelyapi {
 
+/// Synth parameter.
+enum class SynthParameter : int {
+  /// Oscillator type.
+  kOscillatorType = 0,
+  /// Envelope attack.
+  kAttack = 1,
+  /// Envelope decay.
+  kDecay = 2,
+  /// Envelope sustain.
+  kSustain = 3,
+  /// Envelope release.
+  kRelease = 4,
+  /// Number of voices
+  kNumVoices = 5,
+};
+
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public GenericInstrument {
  public:

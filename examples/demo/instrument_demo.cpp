@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
@@ -14,13 +15,13 @@
 namespace {
 
 using ::barely::Instrument;
-using ::barely::InstrumentType;
 using ::barely::Musician;
-using ::barely::OscillatorType;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+using ::barelyapi::OscillatorType;
+using ::barelyapi::SynthInstrument;
+using ::barelyapi::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -62,7 +63,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
 
   Instrument instrument =
-      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);

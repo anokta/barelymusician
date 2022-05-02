@@ -27,7 +27,6 @@ target_link_libraries(
   percussion_instrument
   enveloped_voice
   generic_instrument
-  include
   sample_player
   instrument
   parameter
@@ -42,7 +41,6 @@ target_link_libraries(
   synth_instrument
   enveloped_voice
   generic_instrument
-  include
   dsp_utils
   oscillator
   polyphonic_voice

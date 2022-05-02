@@ -9,6 +9,7 @@
 
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -19,16 +20,16 @@
 namespace {
 
 using ::barely::Instrument;
-using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::Note;
-using ::barely::OscillatorType;
 using ::barely::Sequence;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+using ::barelyapi::OscillatorType;
+using ::barelyapi::SynthInstrument;
+using ::barelyapi::SynthParameter;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -122,8 +123,8 @@ int main(int /*argc*/, char* argv[]) {
       continue;
     }
     // Add instrument.
-    Instrument instrument =
-        musician.CreateInstrument(InstrumentType::kSynth, kSampleRate);
+    Instrument instrument = musician.CreateInstrument(
+        SynthInstrument::GetDefinition(), kSampleRate);
     const auto track_index = tracks.size();
     instrument.SetNoteOnCallback([track_index](double pitch, double intensity,
                                                double /*timestamp*/) {

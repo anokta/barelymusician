@@ -22,6 +22,12 @@ class Clock {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
+  /// Returns timestamp after duration.
+  ///
+  /// @param duration Duration in beats.
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp(double duration) const noexcept;
+
   /// Sets tempo.
   ///
   /// @param tempo Tempo in beats per minute.

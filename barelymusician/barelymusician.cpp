@@ -51,35 +51,6 @@ BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
   return BarelyStatus_kAlreadyExists;
 }
 
-BarelyStatus BarelyInstrument_CreateOfType(BarelyMusicianHandle handle,
-                                           BarelyInstrumentType type,
-                                           int32_t frame_rate,
-                                           BarelyId* out_instrument_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (frame_rate < 0) return BarelyStatus_kInvalidArgument;
-  if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
-
-  *out_instrument_id = ++handle->id_counter;
-  switch (type) {
-    case BarelyInstrumentType_kSynth:
-      if (handle->engine.CreateInstrument(
-              *out_instrument_id, barelyapi::SynthInstrument::GetDefinition(),
-              frame_rate)) {
-        return BarelyStatus_kOk;
-      }
-      return BarelyStatus_kAlreadyExists;
-    case BarelyInstrumentType_kPercussion:
-      if (handle->engine.CreateInstrument(
-              *out_instrument_id,
-              barelyapi::PercussionInstrument::GetDefinition(), frame_rate)) {
-        return BarelyStatus_kOk;
-      }
-      return BarelyStatus_kAlreadyExists;
-    default:
-      return BarelyStatus_kInvalidArgument;
-  }
-}
-
 BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
                                       BarelyId instrument_id) {
   if (!handle) return BarelyStatus_kNotFound;

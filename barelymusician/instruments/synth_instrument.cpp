@@ -2,14 +2,11 @@
 
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/enveloped_voice.h"
 
 namespace barelyapi {
-
-using ::barely::SynthParameter;
 
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
     : voice_(SynthVoice(sample_rate)) {}
@@ -40,7 +37,7 @@ void SynthInstrument::SetParameter(int index, double value,
     case SynthParameter::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
-            static_cast<Oscillator::Type>(static_cast<int>(value)));
+            static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
     case SynthParameter::kAttack:
@@ -80,8 +77,8 @@ Instrument::Definition SynthInstrument::GetDefinition() noexcept {
       // Release.
       Parameter::Definition{0.25, 0.0, 60.0},
       // Oscillator type.
-      Parameter::Definition{static_cast<double>(Oscillator::Type::kSine), 0.0,
-                            static_cast<double>(Oscillator::Type::kNoise)},
+      Parameter::Definition{static_cast<double>(OscillatorType::kSine), 0.0,
+                            static_cast<double>(OscillatorType::kNoise)},
       // Number of voices.
       Parameter::Definition{8, 1, 64},
   };

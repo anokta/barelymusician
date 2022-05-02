@@ -41,8 +41,14 @@ void Transport::Update(double duration,
     }
     // Update position.
     const double begin_position = position_;
-    position_ = std::min(position_ + duration, next_beat_position_);
-    duration -= position_ - begin_position;
+    const double end_position = position_ + duration;
+    if (end_position > next_beat_position_) {
+      position_ = next_beat_position_;
+      duration -= next_beat_position_ - begin_position;
+    } else {
+      position_ = end_position;
+      duration = 0.0;
+    }
     if (callback) {
       callback(begin_position, position_);
     }

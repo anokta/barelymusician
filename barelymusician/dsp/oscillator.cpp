@@ -14,16 +14,16 @@ double Oscillator::Next() noexcept {
   double output = 0.0;
   // Generate the next sample.
   switch (type_) {
-    case Type::kSine:
+    case OscillatorType::kSine:
       output = std::sin(phase_ * kTwoPi);
       break;
-    case Type::kSaw:
+    case OscillatorType::kSaw:
       output = 2.0 * phase_ - 1.0;
       break;
-    case Type::kSquare:
+    case OscillatorType::kSquare:
       output = (phase_ < 0.5) ? -1.0 : 1.0;
       break;
-    case Type::kNoise:
+    case OscillatorType::kNoise:
     default:
       output = random_.DrawUniform(-1.0, 1.0);
       break;
@@ -42,6 +42,6 @@ void Oscillator::SetFrequency(double frequency) noexcept {
   increment_ = frequency * sample_interval_;
 }
 
-void Oscillator::SetType(Type type) noexcept { type_ = type; }
+void Oscillator::SetType(OscillatorType type) noexcept { type_ = type; }
 
 }  // namespace barelyapi

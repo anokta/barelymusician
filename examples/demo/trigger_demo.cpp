@@ -11,6 +11,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
+#include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -20,18 +21,17 @@
 namespace {
 
 using ::barely::Instrument;
-using ::barely::InstrumentType;
 using ::barely::Musician;
 using ::barely::Note;
-using ::barely::OscillatorType;
 using ::barely::Sequence;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-// TODO(#99): Move `Random` to public api.
+using ::barelyapi::OscillatorType;
 using ::barelyapi::Random;
+using ::barelyapi::SynthInstrument;
+using ::barelyapi::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -69,14 +69,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetTempo(kInitialTempo);
 
   Instrument metronome =
-      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   metronome.SetParameter(SynthParameter::kOscillatorType,
                          OscillatorType::kSquare);
   metronome.SetParameter(SynthParameter::kAttack, kAttack);
   metronome.SetParameter(SynthParameter::kRelease, 0.025);
 
   Instrument synth =
-      musician.CreateInstrument(InstrumentType::kSynth, kFrameRate);
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   synth.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   synth.SetParameter(SynthParameter::kAttack, kAttack);
   synth.SetParameter(SynthParameter::kRelease, kRelease);

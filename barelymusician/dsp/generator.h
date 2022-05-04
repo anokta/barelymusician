@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_GENERATOR_H_
 #define BARELYMUSICIAN_DSP_GENERATOR_H_
 
-namespace barelyapi {
+namespace barely {
 
 /// Unit generator interface that produces per sample PCM output.
 class Generator {
@@ -18,6 +18,6 @@ class Generator {
   virtual void Reset() noexcept = 0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_GENERATOR_H_

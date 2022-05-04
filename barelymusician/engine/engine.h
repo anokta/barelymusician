@@ -14,7 +14,7 @@
 #include "barelymusician/engine/sequence.h"
 #include "barelymusician/engine/transport.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Musician engine.
 class Engine {
@@ -170,6 +170,6 @@ class Engine {
   Transport transport_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_

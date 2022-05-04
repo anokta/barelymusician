@@ -7,7 +7,7 @@
 
 #include "barelymusician/engine/event.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Single-consumer single-producer event queue.
 class EventQueue {
@@ -39,6 +39,6 @@ class EventQueue {
   std::atomic<int> write_index_ = 0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_EVENT_QUEUE_H_

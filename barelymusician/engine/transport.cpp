@@ -4,7 +4,7 @@
 #include <cmath>
 #include <utility>
 
-namespace barelyapi {
+namespace barely::internal {
 
 double Transport::GetPosition() const noexcept { return position_; }
 
@@ -55,4 +55,4 @@ void Transport::Update(double duration,
   }
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal

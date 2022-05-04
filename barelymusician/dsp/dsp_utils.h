@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
-namespace barelyapi {
+namespace barely {
 
 /// PI.
 inline constexpr double kPi = 3.14159265358979323846;
@@ -35,6 +35,6 @@ double GetFilterCoefficient(int sample_rate, double cuttoff_frequency) noexcept;
 /// @return Frequency in hz.
 double GetFrequency(double pitch) noexcept;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_DSP_UTILS_H_

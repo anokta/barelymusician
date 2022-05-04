@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cmath>
 
-namespace barelyapi {
+namespace barely {
 
 namespace {
 
@@ -28,4 +28,4 @@ double QuantizePosition(double position, double resolution,
   return Lerp(position, resolution * std::round(position / resolution), amount);
 }
 
-}  // namespace barelyapi
+}  // namespace barely

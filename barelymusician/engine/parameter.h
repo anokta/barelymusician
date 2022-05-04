@@ -3,7 +3,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Class that wraps parameter.
 class Parameter {
@@ -45,6 +45,6 @@ class Parameter {
   double value_ = 0.0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_PARAMETER_H_

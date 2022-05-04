@@ -6,8 +6,6 @@
 #include <cstddef>
 
 #include "barelymusician/engine/engine.h"
-#include "barelymusician/instruments/percussion_instrument.h"
-#include "barelymusician/instruments/synth_instrument.h"
 
 extern "C" {
 
@@ -23,7 +21,7 @@ struct BarelyMusician {
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 
   // Engine.
-  barelyapi::Engine engine;
+  barely::internal::Engine engine;
 
   // Monotonic identifier counter.
   BarelyId id_counter = 0;

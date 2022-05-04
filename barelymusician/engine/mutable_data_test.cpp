@@ -7,7 +7,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely::internal {
 namespace {
 
 using ::testing::ElementsAre;
@@ -44,4 +44,4 @@ TEST(MutableDataTest, ComplexData) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely::internal

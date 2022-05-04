@@ -6,7 +6,7 @@
 
 #include "barelymusician/engine/event.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
@@ -209,4 +209,4 @@ double Instrument::GetSlopePerFrame(double slope) const noexcept {
   return frame_rate_ > 0 ? slope / static_cast<double>(frame_rate_) : 0.0;
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal

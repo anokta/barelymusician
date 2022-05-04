@@ -3,7 +3,7 @@
 
 #include <compare>
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Class that wraps note.
 struct Note {
@@ -20,6 +20,6 @@ struct Note {
   double intensity = 1.0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_NOTE_H_

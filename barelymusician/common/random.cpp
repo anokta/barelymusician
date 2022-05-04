@@ -3,7 +3,7 @@
 #include <cassert>
 #include <random>
 
-namespace barelyapi {
+namespace barely {
 
 Random::Random(int seed) noexcept : engine_(static_cast<unsigned int>(seed)) {}
 
@@ -30,4 +30,4 @@ void Random::Reset(int seed) noexcept {
   engine_.seed(static_cast<unsigned int>(seed));
 }
 
-}  // namespace barelyapi
+}  // namespace barely

@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_VOICE_H_
 #define BARELYMUSICIAN_DSP_VOICE_H_
 
-namespace barelyapi {
+namespace barely {
 
 /// Instrument voice interface.
 class Voice {
@@ -27,6 +27,6 @@ class Voice {
   virtual void Stop() noexcept = 0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // EXAMPLES_VOICE_VOICE_H_

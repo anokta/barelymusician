@@ -14,13 +14,13 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Musician;
+using ::barely::OscillatorType;
+using ::barely::SynthInstrument;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barelyapi::OscillatorType;
-using ::barelyapi::SynthInstrument;
-using ::barelyapi::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -36,8 +36,8 @@ constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.025;
 constexpr int kNumVoices = 1;
 
-constexpr double kBarPitch = barelyapi::kPitchA4;
-constexpr double kBeatPitch = barelyapi::kPitchA3;
+constexpr double kBarPitch = barely::kPitchA4;
+constexpr double kBeatPitch = barely::kPitchA3;
 
 constexpr int kNumBeats = 4;
 constexpr double kInitialTempo = 120.0;

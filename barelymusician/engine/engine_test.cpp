@@ -10,7 +10,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely::internal {
 namespace {
 
 using ::testing::AllOf;
@@ -275,4 +275,4 @@ TEST(EngineTest, StartStopPlayback) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely::internal

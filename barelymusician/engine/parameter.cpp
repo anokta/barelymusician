@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace barelyapi {
+namespace barely::internal {
 
 Parameter::Parameter(Definition definition) noexcept
     : definition_(definition), value_(definition_.default_value) {}
@@ -31,4 +31,4 @@ bool Parameter::SetValue(double value) noexcept {
   return false;
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal

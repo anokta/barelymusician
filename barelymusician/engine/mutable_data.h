@@ -5,7 +5,7 @@
 #include <memory>
 #include <utility>
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Mutable data with real-time safe view.
 template <typename DataType>
@@ -92,6 +92,6 @@ const DataType* MutableData<DataType>::ScopedView::operator->() const noexcept {
   return view_;
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_MUTABLE_DATA_H_

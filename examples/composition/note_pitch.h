@@ -3,7 +3,7 @@
 
 #include <span>
 
-namespace barelyapi {
+namespace barely {
 
 /// Number of semitones in an octave (twelwe-tone equal temperament).
 inline constexpr double kNumSemitones = 12.0;
@@ -145,6 +145,6 @@ inline constexpr double kPitchHihatOpen = kPitchF3;
 /// @return Note pitch.
 double GetPitch(std::span<const double> scale, int index) noexcept;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // EXAMPLES_COMPOSITION_NOTE_PITCH_H_

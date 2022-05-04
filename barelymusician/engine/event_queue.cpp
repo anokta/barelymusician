@@ -3,7 +3,7 @@
 #include <cassert>
 #include <utility>
 
-namespace barelyapi {
+namespace barely::internal {
 
 bool EventQueue::Add(double timestamp, Event event) noexcept {
   assert(timestamp >= 0.0);
@@ -27,4 +27,4 @@ std::pair<double, Event>* EventQueue::GetNext(double end_timestamp) noexcept {
   return &events_[index];
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal

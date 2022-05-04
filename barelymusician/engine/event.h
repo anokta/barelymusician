@@ -5,7 +5,7 @@
 #include <variant>
 #include <vector>
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Set data event.
 struct SetDataEvent {
@@ -52,6 +52,6 @@ struct EventVisitor : EventTypes... {
 template <class... EventTypes>
 EventVisitor(EventTypes...) -> EventVisitor<EventTypes...>;
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_EVENT_H_

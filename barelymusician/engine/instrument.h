@@ -9,7 +9,7 @@
 #include "barelymusician/engine/event_queue.h"
 #include "barelymusician/engine/parameter.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Class that wraps instrument.
 class Instrument {
@@ -171,6 +171,6 @@ class Instrument {
   EventQueue event_queue_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

@@ -3,10 +3,11 @@
 #include <cstddef>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/parameter.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
-namespace barelyapi {
+namespace barely {
 
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),
@@ -76,12 +77,12 @@ void PercussionInstrument::SetParameter(int index, double value,
   }
 }
 
-Instrument::Definition PercussionInstrument::GetDefinition() noexcept {
-  static const std::vector<Parameter::Definition> parameter_definitions = {
+InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
+  static const std::vector<ParameterDefinition> parameter_definitions = {
       // Pad release.
-      Parameter::Definition{0.1, 0.0, 60.0},
+      ParameterDefinition{0.1, 0.0, 60.0},
   };
   return GetInstrumentDefinition<PercussionInstrument>(parameter_definitions);
 }
 
-}  // namespace barelyapi
+}  // namespace barely

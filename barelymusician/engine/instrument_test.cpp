@@ -8,7 +8,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely::internal {
 namespace {
 
 using ::testing::IsNull;
@@ -251,4 +251,4 @@ TEST(InstrumentTest, StopAllNotes) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely::internal

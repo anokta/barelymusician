@@ -5,7 +5,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Transport that controls playback.
 class Transport {
@@ -68,6 +68,6 @@ class Transport {
   BeatCallback beat_callback_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_TRANSPORT_H_

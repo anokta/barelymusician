@@ -1,13 +1,13 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
-#include "barelymusician/engine/instrument.h"
 #include "barelymusician/instruments/enveloped_voice.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Synth parameter.
 enum class SynthParameter : int {
@@ -41,13 +41,13 @@ class SynthInstrument : public GenericInstrument {
   void SetParameter(int index, double value, double slope) noexcept override;
 
   /// Returns instrument definition.
-  static Instrument::Definition GetDefinition() noexcept;
+  static InstrumentDefinition GetDefinition() noexcept;
 
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;
   PolyphonicVoice<SynthVoice> voice_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_

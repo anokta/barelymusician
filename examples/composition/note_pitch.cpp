@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace barelyapi {
+namespace barely {
 
 double GetPitch(std::span<const double> scale, int index) noexcept {
   if (!scale.empty()) {
@@ -16,4 +16,4 @@ double GetPitch(std::span<const double> scale, int index) noexcept {
   return 0.0;
 }
 
-}  // namespace barelyapi
+}  // namespace barely

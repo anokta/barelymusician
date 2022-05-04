@@ -1,7 +1,7 @@
 #ifndef EXAMPLES_COMPOSITION_NOTE_DURATION_H_
 #define EXAMPLES_COMPOSITION_NOTE_DURATION_H_
 
-namespace barelyapi {
+namespace barely {
 
 /// Common note values in relation to quarter note beat duration.
 inline constexpr int kNumQuarterNotesPerBeat = 1;
@@ -28,6 +28,6 @@ double GetPosition(int step, int num_steps) noexcept;
 double QuantizePosition(double position, double resolution,
                         double amount = 1.0) noexcept;
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // EXAMPLES_COMPOSITION_NOTE_DURATION_H_

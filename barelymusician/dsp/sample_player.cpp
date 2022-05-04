@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace barelyapi {
+namespace barely {
 
 SamplePlayer::SamplePlayer(int sample_rate) noexcept
     : sample_interval_(
@@ -46,4 +46,4 @@ void SamplePlayer::CalculateIncrementPerSample() noexcept {
   increment_ = speed_ * frequency_ * sample_interval_;
 }
 
-}  // namespace barelyapi
+}  // namespace barely

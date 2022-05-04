@@ -3,7 +3,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely::internal {
 namespace {
 
 // Tests that clock returns duration as expected.
@@ -64,4 +64,4 @@ TEST(ClockTest, SetTimestamp) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely::internal

@@ -84,6 +84,7 @@ cc_binary(
     srcs = ["trigger_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:console_log",

@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-namespace barelyapi {
+namespace barely {
 
 namespace {
 
@@ -44,4 +44,4 @@ double GetFrequency(double pitch) noexcept {
   return kFrequencyA4 * std::pow(2.0, pitch);
 }
 
-}  // namespace barelyapi
+}  // namespace barely

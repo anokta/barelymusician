@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely::internal {
 namespace {
 
 // Tests that parameter returns its definition as expected.
@@ -54,4 +54,4 @@ TEST(ParameterTest, SetValue) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely::internal

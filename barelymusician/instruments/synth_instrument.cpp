@@ -2,11 +2,12 @@
 
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/enveloped_voice.h"
 
-namespace barelyapi {
+namespace barely {
 
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
     : voice_(SynthVoice(sample_rate)) {}
@@ -66,23 +67,23 @@ void SynthInstrument::SetParameter(int index, double value,
   }
 }
 
-Instrument::Definition SynthInstrument::GetDefinition() noexcept {
-  static const std::vector<Parameter::Definition> parameter_definitions = {
+InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
+  static const std::vector<ParameterDefinition> parameter_definitions = {
       // Attack.
-      Parameter::Definition{0.05, 0.0, 60.0},
+      ParameterDefinition{0.05, 0.0, 60.0},
       // Decay.
-      Parameter::Definition{0.0, 0.0, 60.0},
+      ParameterDefinition{0.0, 0.0, 60.0},
       // Sustain.
-      Parameter::Definition{1.0, 0.0, 1.0},
+      ParameterDefinition{1.0, 0.0, 1.0},
       // Release.
-      Parameter::Definition{0.25, 0.0, 60.0},
+      ParameterDefinition{0.25, 0.0, 60.0},
       // Oscillator type.
-      Parameter::Definition{static_cast<double>(OscillatorType::kSine), 0.0,
-                            static_cast<double>(OscillatorType::kNoise)},
+      ParameterDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
+                          static_cast<double>(OscillatorType::kNoise)},
       // Number of voices.
-      Parameter::Definition{8, 1, 64},
+      ParameterDefinition{8, 1, 64},
   };
   return GetInstrumentDefinition<SynthInstrument>(parameter_definitions);
 }
 
-}  // namespace barelyapi
+}  // namespace barely

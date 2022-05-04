@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_ENGINE_CLOCK_H_
 #define BARELYMUSICIAN_ENGINE_CLOCK_H_
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Beat clock that controls playback.
 class Clock {
@@ -46,6 +46,6 @@ class Clock {
   double timestamp_ = 0.0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_CLOCK_H_

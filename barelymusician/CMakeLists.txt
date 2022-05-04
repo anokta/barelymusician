@@ -16,8 +16,6 @@ target_link_libraries(
   barelymusician
   include
   engine
-  percussion_instrument
-  synth_instrument
 )
 
 add_library(

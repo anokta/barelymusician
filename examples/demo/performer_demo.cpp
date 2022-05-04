@@ -23,16 +23,15 @@ namespace {
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::Note;
+using ::barely::OscillatorType;
+using ::barely::Random;
 using ::barely::Sequence;
+using ::barely::SynthInstrument;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barelyapi::OscillatorType;
-using ::barelyapi::SynthInstrument;
-using ::barelyapi::SynthParameter;
-// TODO(#99): Move `Random` to public api.
-using ::barelyapi::Random;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -54,7 +53,7 @@ constexpr double kIntensity = 0.25;
 
 // Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
-  return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
+  return static_cast<int>(barely::kNumSemitones * pitch) + 69;
 }
 
 }  // namespace
@@ -90,15 +89,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   metronome.SetParameter(SynthParameter::kRelease, 0.025);
 
   std::vector<std::tuple<double, double, double>> score;
-  score.emplace_back(0.0, 1.0, barelyapi::kPitchC4);
-  score.emplace_back(1.0, 1.0, barelyapi::kPitchD4);
-  score.emplace_back(2.0, 1.0, barelyapi::kPitchE4);
-  score.emplace_back(3.0, 1.0, barelyapi::kPitchF4);
-  score.emplace_back(4.0, 1.0, barelyapi::kPitchG4);
-  score.emplace_back(5.0, 1.0 / 3.0, barelyapi::kPitchG4);
-  score.emplace_back(5.0 + 1.0 / 3.0, 1.0 / 3.0, barelyapi::kPitchA5);
-  score.emplace_back(5.0 + 2.0 / 3.0, 1.0 / 3.0, barelyapi::kPitchB5);
-  score.emplace_back(6.0, 2.0, barelyapi::kPitchC5);
+  score.emplace_back(0.0, 1.0, barely::kPitchC4);
+  score.emplace_back(1.0, 1.0, barely::kPitchD4);
+  score.emplace_back(2.0, 1.0, barely::kPitchE4);
+  score.emplace_back(3.0, 1.0, barely::kPitchF4);
+  score.emplace_back(4.0, 1.0, barely::kPitchG4);
+  score.emplace_back(5.0, 1.0 / 3.0, barely::kPitchG4);
+  score.emplace_back(5.0 + 1.0 / 3.0, 1.0 / 3.0, barely::kPitchA5);
+  score.emplace_back(5.0 + 2.0 / 3.0, 1.0 / 3.0, barely::kPitchB5);
+  score.emplace_back(6.0, 2.0, barely::kPitchC5);
 
   Sequence sequence = musician.CreateSequence();
   sequence.SetInstrument(&performer);
@@ -118,8 +117,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   bool reset_position = false;
   const auto beat_callback = [&](double /*position*/, double timestamp) {
-    metronome.StartNoteAt(timestamp, barelyapi::kPitchC3, 1.0);
-    metronome.StopNoteAt(timestamp, barelyapi::kPitchC3);
+    metronome.StartNoteAt(timestamp, barely::kPitchC3, 1.0);
+    metronome.StopNoteAt(timestamp, barely::kPitchC3);
     if (reset_position) {
       reset_position = false;
       musician.SetPosition(0.0);

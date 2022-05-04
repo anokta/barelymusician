@@ -11,7 +11,7 @@
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Class that wraps sequence.
 class Sequence {
@@ -196,6 +196,6 @@ class Sequence {
   std::unordered_map<Id, double> positions_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_SEQUENCE_H_

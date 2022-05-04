@@ -12,7 +12,7 @@
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/note.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 Sequence::Sequence(const Clock& clock) noexcept : clock_(clock) {}
 
@@ -235,4 +235,4 @@ void Sequence::ProcessInternal(
   }
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal

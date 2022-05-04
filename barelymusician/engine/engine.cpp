@@ -12,7 +12,7 @@
 #include "barelymusician/engine/sequence.h"
 #include "barelymusician/engine/transport.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 Engine::~Engine() noexcept {
   for (auto& [instrument_id, instrument] : instruments_) {
@@ -214,4 +214,4 @@ void Engine::UpdateInstrumentReferenceMap() noexcept {
   instrument_refs_.Update(std::move(new_instrument_refs));
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal

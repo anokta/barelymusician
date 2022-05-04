@@ -16,12 +16,12 @@ namespace {
 
 using ::barely::Instrument;
 using ::barely::Musician;
+using ::barely::OscillatorType;
+using ::barely::SynthInstrument;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barelyapi::OscillatorType;
-using ::barelyapi::SynthInstrument;
-using ::barelyapi::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -36,7 +36,7 @@ constexpr double kRelease = 0.125;
 constexpr int kNumVoices = 16;
 
 // Note settings.
-constexpr double kRootPitch = barelyapi::kPitchC3;
+constexpr double kRootPitch = barely::kPitchC3;
 constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr double kMaxOffsetOctaves = 3.0;
@@ -50,7 +50,7 @@ std::optional<double> PitchFromKey(const InputManager::Key& key) {
   }
   const double distance =
       static_cast<double>(std::distance(std::cbegin(kOctaveKeys), it));
-  return kRootPitch + distance / barelyapi::kNumSemitones;
+  return kRootPitch + distance / barely::kNumSemitones;
 }
 
 }  // namespace

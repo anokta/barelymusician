@@ -4,7 +4,7 @@
 #include <cmath>
 #include <utility>
 
-namespace barelyapi {
+namespace barely::internal {
 
 namespace {
 
@@ -41,4 +41,4 @@ void Clock::SetTimestamp(double timestamp) noexcept {
   timestamp_ = timestamp;
 }
 
-}  // namespace barelyapi
+}  // namespace barely::internal

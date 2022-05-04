@@ -4,11 +4,11 @@
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/voice.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Simple enveloped voice template.
 template <class GeneratorType>
-class EnvelopedVoice : public barelyapi::Voice {
+class EnvelopedVoice : public Voice {
  public:
   /// Constructs new `EnvelopedVoice` with the given `sample_rate`.
   ///
@@ -22,10 +22,8 @@ class EnvelopedVoice : public barelyapi::Voice {
   void Stop() noexcept override;
 
   /// Inline getter/setter functions.
-  [[nodiscard]] const barelyapi::Envelope& envelope() const noexcept {
-    return envelope_;
-  }
-  [[nodiscard]] barelyapi::Envelope& envelope() noexcept { return envelope_; }
+  [[nodiscard]] const Envelope& envelope() const noexcept { return envelope_; }
+  [[nodiscard]] Envelope& envelope() noexcept { return envelope_; }
 
   [[nodiscard]] const GeneratorType& generator() const noexcept {
     return generator_;
@@ -37,7 +35,7 @@ class EnvelopedVoice : public barelyapi::Voice {
 
  private:
   // Voice envelope.
-  barelyapi::Envelope envelope_;
+  Envelope envelope_;
 
   // Voice unit generator.
   GeneratorType generator_;
@@ -80,6 +78,6 @@ void EnvelopedVoice<GeneratorType>::Stop() noexcept {
   envelope_.Stop();
 }
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_

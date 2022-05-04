@@ -6,7 +6,7 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Generic instrument interface.
 class GenericInstrument {
@@ -49,9 +49,9 @@ class GenericInstrument {
 
 /// Returns instrument definition for `GenericInstrumentType`.
 template <typename GenericInstrumentType>
-Instrument::Definition GetInstrumentDefinition(
-    const std::vector<Parameter::Definition>& parameter_definitions) noexcept {
-  return Instrument::Definition(
+InstrumentDefinition GetInstrumentDefinition(
+    const std::vector<ParameterDefinition>& parameter_definitions) noexcept {
+  return InstrumentDefinition(
       [](void** state, int frame_rate) noexcept {
         // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
         *state = static_cast<void*>(new GenericInstrumentType(frame_rate));
@@ -84,6 +84,6 @@ Instrument::Definition GetInstrumentDefinition(
       parameter_definitions);
 }
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_GENERIC_INSTRUMENT_H_

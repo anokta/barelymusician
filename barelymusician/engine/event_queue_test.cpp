@@ -12,7 +12,7 @@ using ::testing::Pair;
 using ::testing::Pointee;
 using ::testing::VariantWith;
 
-namespace barelyapi {
+namespace barely::internal {
 namespace {
 
 // Tests that adding a single event is queued as expected.
@@ -56,4 +56,4 @@ TEST(EventQueueTest, AddMultipleEvents) {
 // TODO(#97): Add more tests with concurrency.
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely::internal

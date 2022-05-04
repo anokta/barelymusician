@@ -4,7 +4,7 @@
 
 #include "barelymusician/dsp/dsp_utils.h"
 
-namespace barelyapi {
+namespace barely {
 
 Oscillator::Oscillator(int sample_rate) noexcept
     : sample_interval_(sample_rate > 0 ? 1.0 / static_cast<double>(sample_rate)
@@ -44,4 +44,4 @@ void Oscillator::SetFrequency(double frequency) noexcept {
 
 void Oscillator::SetType(OscillatorType type) noexcept { type_ = type; }
 
-}  // namespace barelyapi
+}  // namespace barely

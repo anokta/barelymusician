@@ -6,7 +6,7 @@
 #include "barelymusician/common/random.h"
 #include "barelymusician/dsp/generator.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Oscillator type.
 enum class OscillatorType {
@@ -59,6 +59,6 @@ class Oscillator : public Generator {
   Random random_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_OSCILLATOR_H_

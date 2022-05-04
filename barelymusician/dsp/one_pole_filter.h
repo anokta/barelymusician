@@ -3,7 +3,7 @@
 
 #include "barelymusician/dsp/filter.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// One-pole filter type.
 enum class FilterType {
@@ -39,6 +39,6 @@ class OnePoleFilter : public Filter {
   FilterType type_ = FilterType::kLowPass;
 };
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_

@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Sampling rate.
@@ -81,4 +81,4 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

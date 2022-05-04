@@ -23,15 +23,15 @@ namespace {
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::Note;
+using ::barely::OscillatorType;
+using ::barely::Random;
 using ::barely::Sequence;
+using ::barely::SynthInstrument;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barelyapi::OscillatorType;
-using ::barelyapi::Random;
-using ::barelyapi::SynthInstrument;
-using ::barelyapi::SynthParameter;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -51,7 +51,7 @@ constexpr double kTempoIncrement = 10.0;
 
 // Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
-  return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
+  return static_cast<int>(barely::kNumSemitones * pitch) + 69;
 }
 
 }  // namespace
@@ -95,8 +95,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                   double duration, double intensity = 1.0) {
     return sequence.CreateNote(
         position, duration,
-        barelyapi::kPitchD3 +
-            barelyapi::GetPitch(barelyapi::kPitchMajorScale, scale_index),
+        barely::kPitchD3 +
+            barely::GetPitch(barely::kPitchMajorScale, scale_index),
         intensity);
   };
 
@@ -128,8 +128,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
       musician.Stop();
     }
     if (enable_metronome) {
-      metronome.StartNote(barelyapi::kPitchC3, 1.0);
-      metronome.StopNote(barelyapi::kPitchC3);
+      metronome.StartNote(barely::kPitchC3, 1.0);
+      metronome.StopNote(barely::kPitchC3);
       ConsoleLog() << "Beat: " << musician.GetPosition();
     }
   };

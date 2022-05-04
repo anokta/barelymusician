@@ -22,14 +22,14 @@ namespace {
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::Note;
+using ::barely::OscillatorType;
 using ::barely::Sequence;
+using ::barely::SynthInstrument;
+using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barelyapi::OscillatorType;
-using ::barelyapi::SynthInstrument;
-using ::barelyapi::SynthParameter;
 using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
@@ -57,12 +57,12 @@ constexpr double kTempo = 132.0;
 
 // Returns the pitch for the given `midi_key_number`.
 double PitchFromMidiKeyNumber(int midi_key_number) {
-  return static_cast<double>(midi_key_number - 69) / barelyapi::kNumSemitones;
+  return static_cast<double>(midi_key_number - 69) / barely::kNumSemitones;
 }
 
 // Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
-  return static_cast<int>(barelyapi::kNumSemitones * pitch) + 69;
+  return static_cast<int>(barely::kNumSemitones * pitch) + 69;
 }
 
 // Builds the score for the given `midi_events`.

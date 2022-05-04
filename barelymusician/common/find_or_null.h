@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_COMMON_FIND_OR_NULL_H_
 #define BARELYMUSICIAN_COMMON_FIND_OR_NULL_H_
 
-namespace barelyapi {
+namespace barely {
 
 /// Returns a map value by key.
 ///
@@ -37,6 +37,6 @@ ValueType* FindOrNull(MapType& map, const KeyType& key) noexcept {
   return nullptr;
 }
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_COMMON_FIND_OR_NULL_H_

@@ -36,7 +36,7 @@ struct SetParameterEvent {
   /// Value.
   double value;
 
-  /// Slope in value per second.
+  /// Slope in value change per second.
   double slope;
 };
 

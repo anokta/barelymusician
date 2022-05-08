@@ -1,18 +1,13 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
-#include <map>
 #include <memory>
 #include <unordered_map>
-#include <utility>
 
 #include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
-#include "barelymusician/engine/note.h"
-#include "barelymusician/engine/sequence.h"
-#include "barelymusician/engine/transport.h"
 
 namespace barely::internal {
 
@@ -41,25 +36,12 @@ class Engine {
   bool CreateInstrument(Id instrument_id, Instrument::Definition definition,
                         int frame_rate) noexcept;
 
-  /// Creates new sequence.
-  ///
-  /// @param sequence_id Sequence identifier.
-  /// @return True if successful, false otherwise.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateSequence(Id sequence_id) noexcept;
-
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument identifier.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool DestroyInstrument(Id instrument_id) noexcept;
-
-  /// Destroys sequence.
-  ///
-  /// @param sequence_id Sequence identifier.
-  /// @return True if successful, false otherwise.
-  bool DestroySequence(Id sequence_id) noexcept;
 
   /// Returns clock.
   ///
@@ -72,22 +54,10 @@ class Engine {
   /// @return Pointer to instrument.
   Instrument* GetInstrument(Id instrument_id) noexcept;
 
-  /// Returns sequence.
+  /// Returns timestamp.
   ///
-  /// @param sequence_id Sequence identifier.
-  /// @return Pointer to sequence.
-  Sequence* GetSequence(Id sequence_id) noexcept;
-
-  /// Returns sequence instrument identifier.
-  ///
-  /// @param sequence_id Sequence identifier.
-  /// @return Pointer to sequence instrument identifier.
-  Id* GetSequenceInstrumentId(Id sequence_id) noexcept;
-
-  /// Returns transport.
-  ///
-  /// @return Transport.
-  Transport& GetTransport() noexcept;
+  /// @return Timestamp in seconds.
+  double GetTimestamp() const noexcept;
 
   /// Processes instrument at timestamp.
   ///
@@ -101,55 +71,19 @@ class Engine {
                          int num_output_channels, int num_output_frames,
                          double timestamp) noexcept;
 
-  /// Schedules instrument event at timestamp.
-  ///
-  /// @param instrument_id Instrument identifier.
-  /// @param event Instrument event.
-  /// @param timestamp Timestamp in seconds.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void ScheduleInstrumentEvent(Id instrument_id, Event event,
-                               double timestamp) noexcept;
-
-  void SetBeatCallback(std::function<void(double, double)> callback) noexcept {
-    beat_callback_ = std::move(callback);
-  }
-
-  /// Sets sequence instrument identifier.
-  ///
-  /// @param sequence_id Sequence identifier.
-  /// @param instrument_id Instrument identifier.
-  /// @return True if successful, false otherwise.
-  bool SetSequenceInstrumentId(Id sequence_id, Id instrument_id) noexcept;
-
-  /// Starts playback.
-  void Start() noexcept;
-
-  /// Stops playback.
-  void Stop() noexcept;
-
-  /// Updates internal state.
+  /// Updates engine at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
  private:
-  // Instrument identifier-event pair.
-  using InstrumentIdEventPair = std::pair<Id, Event>;
-
   // Instrument reference by identifier map.
   using InstrumentReferenceMap = std::unordered_map<Id, Instrument*>;
-
-  // Processes instrument `event` at `timestamp`.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void ProcessInstrumentEvent(Id instrument_id, Event& event,
-                              double timestamp) noexcept;
 
   // Updates instrument reference map.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateInstrumentReferenceMap() noexcept;
-
-  std::function<void(double, double)> beat_callback_;
 
   // Clock.
   Clock clock_;
@@ -157,17 +91,11 @@ class Engine {
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;
 
-  // Scheduled instrument identifier-event pairs by their timestamps.
-  std::multimap<double, InstrumentIdEventPair> instrument_events_;
-
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
-  // Map of sequence-instrument identifier pairs by identifiers.
-  std::unordered_map<Id, std::pair<Sequence, Id>> sequences_;
-
-  // Transport.
-  Transport transport_;
+  // Timestamp in seconds.
+  double timestamp_;
 };
 
 }  // namespace barely::internal

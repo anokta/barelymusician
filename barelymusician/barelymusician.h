@@ -92,8 +92,8 @@ typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 ///
 /// @param state Pointer to instrument state.
 /// @param output Output buffer.
-/// @param num_output_channels Number of channels.
-/// @param num_output_frames Number of frames.
+/// @param num_output_channels Number of output channels.
+/// @param num_output_frames Number of output frames.
 typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
     void** state, double* output, int32_t num_output_channels,
     int32_t num_output_frames);
@@ -101,7 +101,7 @@ typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
 /// Instrument set data callback signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param data Data.
+/// @param data Pointer to data.
 /// @param size Data size in bytes.
 typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
                                                            const void* data,
@@ -168,7 +168,7 @@ typedef struct BarelyInstrumentDefinition {
 ///
 /// @param pitch Note pitch.
 /// @param timestamp Note timestamp in seconds.
-/// @param user_data User data.
+/// @param user_data Pointer to user data.
 typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, double timestamp,
                                                  void* user_data);
 
@@ -177,18 +177,10 @@ typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, double timestamp,
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @param timestamp Note timestamp in seconds.
-/// @param user_data User data.
+/// @param user_data Pointer to user data.
 typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 double timestamp,
                                                 void* user_data);
-
-/// Musician beat callback signature.
-///
-/// @param position Beat position in beats.
-/// @param timestamp Beat timestamp in seconds.
-/// @param user_data User data.
-typedef void (*BarelyMusician_BeatCallback)(double position, double timestamp,
-                                            void* user_data);
 
 /// Creates new instrument.
 ///
@@ -231,12 +223,12 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
     BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
     BarelyParameterDefinition* out_definition);
 
-/// Gets whether instrument note is active or not.
+/// Gets whether instrument note is playing or not.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
-/// @param out_is_note_on Output true if active, false otherwise.
+/// @param out_is_note_on Output true if playing, false otherwise.
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle, BarelyId instrument_id,
@@ -276,7 +268,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param data Data.
+/// @param data Pointer to data.
 /// @param size Data size in bytes.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
@@ -289,7 +281,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param callback Note off callback.
-/// @param user_data User data.
+/// @param user_data Pointer to user data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
@@ -300,7 +292,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param callback Note on callback.
-/// @param user_data User data.
+/// @param user_data Pointer to user data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
@@ -312,10 +304,11 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @param value Parameter value.
+/// @param slope Parameter slope in value change per second.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
     BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
-    double value);
+    double value, double slope);
 
 /// Starts instrument note.
 ///
@@ -327,18 +320,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_StartNote(BarelyMusicianHandle handle, BarelyId instrument_id,
                            double pitch, double intensity);
-
-/// Starts instrument note at timestamp.
-///
-/// @param handle Musician handle.
-/// @param instrument_id Instrument identifier.
-/// @param pitch Note pitch.
-/// @param intensity Note intensity.
-/// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_StartNoteAt(
-    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch,
-    double intensity, double timestamp);
 
 /// Stops all instrument notes.
 ///
@@ -357,17 +338,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopAllNotes(
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
     BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
 
-/// Stops instrument note at timestamp.
-///
-/// @param handle Musician handle.
-/// @param instrument_id Instrument identifier.
-/// @param pitch Note pitch.
-/// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_StopNoteAt(BarelyMusicianHandle handle, BarelyId instrument_id,
-                            double pitch, double timestamp);
-
 /// Creates new musician.
 ///
 /// @param out_handle Output musician handle.
@@ -381,13 +351,24 @@ BarelyMusician_Create(BarelyMusicianHandle* out_handle);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
 
-/// Gets musician position.
+/// Gets musician beats from seconds.
 ///
 /// @param handle Musician handle.
-/// @param out_position Output position in beats.
+/// @param seconds Number of seconds.
+/// @param out_beats Output number of beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_GetPosition(BarelyMusicianHandle handle, double* out_position);
+BARELY_EXPORT BarelyStatus BarelyMusician_GetBeats(BarelyMusicianHandle handle,
+                                                   double seconds,
+                                                   double* out_beats);
+
+/// Gets musician seconds from beats.
+///
+/// @param handle Musician handle.
+/// @param beats Number of beats.
+/// @param out_seconds Output number of seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetSeconds(
+    BarelyMusicianHandle handle, double beats, double* out_seconds);
 
 /// Gets musician tempo.
 ///
@@ -405,32 +386,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus
 BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
 
-/// Gets whether musician is playing or not.
-///
-/// @param handle Musician handle.
-/// @param out_is_playing Output true if playing, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_IsPlaying(BarelyMusicianHandle handle,
-                                                    bool* out_is_playing);
-
-/// Sets musician beat callback.
-///
-/// @param handle Musician handle.
-/// @param callback Beat callback.
-/// @param user_data User data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetBeatCallback(
-    BarelyMusicianHandle handle, BarelyMusician_BeatCallback callback,
-    void* user_data);
-
-/// Sets musician position.
-///
-/// @param handle Musician handle.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_SetPosition(BarelyMusicianHandle handle, double position);
-
 /// Sets musician tempo.
 ///
 /// @param handle Musician handle.
@@ -439,26 +394,6 @@ BarelyMusician_SetPosition(BarelyMusicianHandle handle, double position);
 BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
                                                    double tempo);
 
-/// Sets musician timestamp.
-///
-/// @param handle Musician handle.
-/// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_SetTimestamp(BarelyMusicianHandle handle, double timestamp);
-
-/// Starts musician playback.
-///
-/// @param handle Musician handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Start(BarelyMusicianHandle handle);
-
-/// Stops musician playback.
-///
-/// @param handle Musician handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Stop(BarelyMusicianHandle handle);
-
 /// Updates musician at timestamp.
 ///
 /// @param handle Musician handle.
@@ -466,364 +401,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Stop(BarelyMusicianHandle handle);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
                                                  double timestamp);
-
-/// Creates new sequence note at position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param position Note position in beats.
-/// @param duration Note duration in beats.
-/// @param pitch Note pitch in beats.
-/// @param intensity Note intensity in beats.
-/// @param out_note_id Output note handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_Create(BarelyMusicianHandle handle,
-                                             BarelyId sequence_id,
-                                             double position, double duration,
-                                             double pitch, double intensity,
-                                             BarelyId* out_note_id);
-
-/// Destroys sequence note.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_Destroy(BarelyMusicianHandle handle,
-                                              BarelyId sequence_id,
-                                              BarelyId note_id);
-
-/// Gets sequence note duration.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param out_duration Output note duration in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_GetDuration(BarelyMusicianHandle handle,
-                                                  BarelyId sequence_id,
-                                                  BarelyId note_id,
-                                                  double* out_duration);
-
-/// Gets sequence note intensity.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param out_intensity Output note intensity.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_GetIntensity(BarelyMusicianHandle handle,
-                                                   BarelyId sequence_id,
-                                                   BarelyId note_id,
-                                                   double* out_intensity);
-
-/// Gets sequence note pitch.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param out_pitch Output note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_GetPitch(BarelyMusicianHandle handle,
-                                               BarelyId sequence_id,
-                                               BarelyId note_id,
-                                               double* out_pitch);
-
-/// Gets sequence note position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param out_position Output note position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_GetPosition(BarelyMusicianHandle handle,
-                                                  BarelyId sequence_id,
-                                                  BarelyId note_id,
-                                                  double* out_position);
-
-/// Sets sequence note duration.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param duration Note duration in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_SetDuration(BarelyMusicianHandle handle,
-                                                  BarelyId sequence_id,
-                                                  BarelyId note_id,
-                                                  double duration);
-
-/// Sets sequence note intensity.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param intensity Note intensity.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_SetIntensity(BarelyMusicianHandle handle,
-                                                   BarelyId sequence_id,
-                                                   BarelyId note_id,
-                                                   double intensity);
-
-/// Sets sequence note pitch.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param pitch Note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_SetPitch(BarelyMusicianHandle handle,
-                                               BarelyId sequence_id,
-                                               BarelyId note_id, double pitch);
-
-/// Sets sequence note position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param note_id Note identifier.
-/// @param position Note position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyNote_SetPosition(BarelyMusicianHandle handle,
-                                                  BarelyId sequence_id,
-                                                  BarelyId note_id,
-                                                  double position);
-
-/// Creates new sequence parameter automation at position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param position Parameter automation position in beats.
-/// @param index Parameter automation index.
-/// @param value Parameter automation value.
-/// @param out_parameter_automation_id Output parameter automation handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_Create(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double position,
-    int32_t index, double value, BarelyId* out_parameter_automation_id);
-
-/// Destroys sequence parameter automation.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_Destroy(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id);
-
-/// Gets sequence parameter automation index.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param out_index Output parameter automation index.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetIndex(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, int32_t* out_index);
-
-/// Gets sequence parameter automation position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param out_position Output parameter automation position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double* out_position);
-
-/// Gets sequence parameter automation value.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param out_value Output parameter automation value.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_GetValue(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double* out_value);
-
-/// Sets sequence parameter automation index.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param index Parameter automation index.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetIndex(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, int32_t index);
-
-/// Sets sequence parameter automation position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param position Parameter automation position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double position);
-
-/// Sets sequence parameter automation value.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param parameter_automation_id Parameter automation identifier.
-/// @param value Parameter automation value.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyParameterAutomation_SetValue(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    BarelyId parameter_automation_id, double value);
-
-/// Creates new sequence.
-///
-/// @param out_sequence_id Output sequence identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_Create(BarelyMusicianHandle handle,
-                                                 BarelyId* out_sequence_id);
-
-/// Destroys sequence.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_Destroy(BarelyMusicianHandle handle,
-                                                  BarelyId sequence_id);
-
-/// Gets sequence begin offset in beats.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_begin_offset Output begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_GetBeginOffset(BarelyMusicianHandle handle, BarelyId sequence_id,
-                              double* out_begin_offset);
-
-/// Gets sequence begin position in beats.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_begin_position Output begin position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetBeginPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    double* out_begin_position);
-
-/// Gets sequence end position in beats.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_end_position Output end position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_GetEndPosition(BarelyMusicianHandle handle, BarelyId sequence_id,
-                              double* out_end_position);
-
-/// Gets sequence instrument.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_instrument_id Output instrument identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequence_GetInstrument(BarelyMusicianHandle handle, BarelyId sequence_id,
-                             BarelyId* out_instrument_id);
-
-/// Gets sequence loop begin offset.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_loop_begin_offset Output loop begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetLoopBeginOffset(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    double* out_loop_begin_offset);
-
-/// Gets sequence loop length.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_loop_length Output loop length.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_GetLoopLength(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double* out_loop_length);
-
-/// Gets whether sequence is looping or not.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param out_is_looping Output true if looping, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_IsLooping(BarelyMusicianHandle handle,
-                                                    BarelyId sequence_id,
-                                                    bool* out_is_looping);
-
-/// Sets sequence begin offset.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param begin_offset Begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetBeginOffset(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_offset);
-
-/// Sets sequence begin position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param begin_position Begin position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetBeginPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double begin_position);
-
-/// Sets sequence end position.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param end_position End position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetEndPosition(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double end_position);
-
-/// Sets sequence instrument.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param instrument_id Instrument identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetInstrument(
-    BarelyMusicianHandle handle, BarelyId sequence_id, BarelyId instrument_id);
-
-/// Sets sequence loop begin offset.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param loop_begin_offset Loop begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetLoopBeginOffset(
-    BarelyMusicianHandle handle, BarelyId sequence_id,
-    double loop_begin_offset);
-
-/// Sets sequence loop length.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param loop_length Loop length in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetLoopLength(
-    BarelyMusicianHandle handle, BarelyId sequence_id, double loop_length);
-
-/// Sets whether sequence should be looping or not.
-///
-/// @param handle Musician handle.
-/// @param sequence_id Sequence identifier.
-/// @param is_looping True if looping, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(
-    BarelyMusicianHandle handle, BarelyId sequence_id, bool is_looping);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -835,11 +412,11 @@ BARELY_EXPORT BarelyStatus BarelySequence_SetLooping(
 #include <compare>
 #include <functional>
 #include <limits>
+#include <span>
 #include <string>
 #include <type_traits>
 #include <utility>
 #include <variant>
-#include <vector>
 
 namespace barely {
 
@@ -1053,7 +630,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       SetNoteOffCallback set_note_off_callback,
       SetNoteOnCallback set_note_on_callback,
       SetParameterCallback set_parameter_callback = nullptr,
-      const std::vector<ParameterDefinition>& parameter_definitions = {})
+      std::span<const ParameterDefinition> parameter_definitions = {})
       : InstrumentDefinition(
             {create_callback, destroy_callback, process_callback,
              set_data_callback, set_note_off_callback, set_note_on_callback,
@@ -1218,8 +795,8 @@ class Instrument {
 
   /// Sets data.
   ///
-  /// @param data Data.
-  /// @param size Data size.
+  /// @param data Pointer to data.
+  /// @param size Data size in bytes.
   /// @return Status.
   Status SetData(const void* data, int size) {
     return BarelyInstrument_SetData(handle_, id_, data, size);
@@ -1265,9 +842,10 @@ class Instrument {
   ///
   /// @param index Parameter index.
   /// @param value Parameter value.
+  /// @param value Parameter slope in value change per second.
   /// @return Status.
   template <typename IndexType, typename ValueType>
-  Status SetParameter(IndexType index, ValueType value) {
+  Status SetParameter(IndexType index, ValueType value, double slope = 0.0) {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
@@ -1275,7 +853,7 @@ class Instrument {
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
     return BarelyInstrument_SetParameter(handle_, id_, static_cast<int>(index),
-                                         static_cast<double>(value));
+                                         static_cast<double>(value), slope);
   }
 
   /// Starts note.
@@ -1285,17 +863,6 @@ class Instrument {
   /// @return Status.
   Status StartNote(double pitch, double intensity = 1.0) {
     return BarelyInstrument_StartNote(handle_, id_, pitch, intensity);
-  }
-
-  /// Starts note at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @return Status.
-  Status StartNoteAt(double timestamp, double pitch, double intensity = 1.0) {
-    return BarelyInstrument_StartNoteAt(handle_, id_, pitch, intensity,
-                                        timestamp);
   }
 
   /// Stops all notes.
@@ -1311,17 +878,8 @@ class Instrument {
     return BarelyInstrument_StopNote(handle_, id_, pitch);
   }
 
-  /// Stops note at timestamp.
-  ///
-  /// @param pitch Note pitch.
-  /// @return Status.
-  Status StopNoteAt(double timestamp, double pitch) {
-    return BarelyInstrument_StopNoteAt(handle_, id_, pitch, timestamp);
-  }
-
  private:
   friend class Musician;
-  friend class Sequence;
 
   // Constructs new `Instrument`.
   explicit Instrument(BarelyMusicianHandle handle,
@@ -1345,360 +903,9 @@ class Instrument {
   NoteOnCallback note_on_callback_;
 };
 
-/// Note.
-class Note {
- public:
-  /// Destroys `Note`.
-  ~Note() {
-    BarelyNote_Destroy(std::exchange(handle_, nullptr),
-                       std::exchange(sequence_id_, BarelyId_kInvalid),
-                       std::exchange(id_, BarelyId_kInvalid));
-  }
-
-  /// Non-copyable.
-  Note(const Note& other) = delete;
-  Note& operator=(const Note& other) = delete;
-
-  /// Constructs new `Note` via move.
-  ///
-  /// @param other Other note.
-  Note(Note&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)),
-        id_(std::exchange(other.id_, BarelyId_kInvalid)),
-        sequence_id_(std::exchange(other.sequence_id_, BarelyId_kInvalid)) {}
-
-  /// Assigns `Note` via move.
-  ///
-  /// @param other Other note.
-  Note& operator=(Note&& other) noexcept {
-    if (this != &other) {
-      BarelyNote_Destroy(handle_, sequence_id_, id_);
-      handle_ = std::exchange(other.handle_, nullptr);
-      id_ = std::exchange(other.id_, BarelyId_kInvalid);
-      sequence_id_ = std::exchange(other.sequence_id_, BarelyId_kInvalid);
-    }
-    return *this;
-  }
-
-  /// Returns duration.
-  ///
-  /// @return Duration in beats.
-  [[nodiscard]] double GetDuration() const {
-    double duration = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyNote_GetDuration(handle_, sequence_id_, id_, &duration);
-    assert(status.IsOk());
-    return duration;
-  }
-
-  /// Returns intensity.
-  ///
-  /// @return Intensity.
-  [[nodiscard]] double GetIntensity() const {
-    double intensity = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyNote_GetIntensity(handle_, sequence_id_, id_, &intensity);
-    assert(status.IsOk());
-    return intensity;
-  }
-
-  /// Returns pitch.
-  ///
-  /// @return Pitch.
-  [[nodiscard]] double GetPitch() const {
-    double pitch = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyNote_GetPitch(handle_, sequence_id_, id_, &pitch);
-    assert(status.IsOk());
-    return pitch;
-  }
-
-  /// Returns position.
-  ///
-  /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const {
-    double position = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyNote_GetPosition(handle_, sequence_id_, id_, &position);
-    assert(status.IsOk());
-    return position;
-  }
-
-  /// Sets duration.
-  ///
-  /// @param duration Duration in beats.
-  /// @return Status.
-  Status SetDuration(double duration) {
-    return BarelyNote_SetDuration(handle_, sequence_id_, id_, duration);
-  }
-
-  /// Sets intensity.
-  ///
-  /// @param intensity Intensity.
-  /// @return Status.
-  Status SetIntensity(double intensity) {
-    return BarelyNote_SetIntensity(handle_, sequence_id_, id_, intensity);
-  }
-
-  /// Sets pitch.
-  ///
-  /// @param pitch Pitch.
-  /// @return Status.
-  Status SetPitch(double pitch) {
-    return BarelyNote_SetPitch(handle_, sequence_id_, id_, pitch);
-  }
-  /// Sets position.
-  ///
-  /// @param position Position in beats.
-  /// @return Status.
-  Status SetPosition(double position) {
-    return BarelyNote_SetPosition(handle_, sequence_id_, id_, position);
-  }
-
- private:
-  friend class Sequence;
-
-  // Constructs new `Note`.
-  explicit Note(BarelyMusicianHandle handle, BarelyId sequence_id,
-                double position, double duration, double pitch,
-                double intensity)
-      : handle_(handle), sequence_id_(sequence_id) {
-    [[maybe_unused]] const Status status = BarelyNote_Create(
-        handle_, sequence_id, position, duration, pitch, intensity, &id_);
-    assert(status.IsOk());
-  }
-
-  // Internal musician handle.
-  BarelyMusicianHandle handle_ = nullptr;
-
-  // Identifier.
-  BarelyId id_ = BarelyId_kInvalid;
-
-  // Sequence identifier.
-  BarelyId sequence_id_ = BarelyId_kInvalid;
-};
-
-// TODO(#98): Add `ParameterAutomation` class.
-
-/// Sequence.
-class Sequence {
- public:
-  /// Note off callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param position Note position in beats.
-  using NoteOffCallback = std::function<void(double pitch, double position)>;
-
-  /// Note on callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @param position Note position in beats.
-  using NoteOnCallback =
-      std::function<void(double pitch, double intensity, double position)>;
-
-  /// Destroys `Sequence`.
-  ~Sequence() {
-    BarelySequence_Destroy(std::exchange(handle_, nullptr),
-                           std::exchange(id_, BarelyId_kInvalid));
-  }
-
-  /// Non-copyable.
-  Sequence(const Sequence& other) = delete;
-  Sequence& operator=(const Sequence& other) = delete;
-
-  /// Constructs new `Sequence` via move.
-  ///
-  /// @param other Other sequence.
-  Sequence(Sequence&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)),
-        id_(std::exchange(other.id_, BarelyId_kInvalid)) {}
-
-  /// Assigns `Sequence` via move.
-  ///
-  /// @param other Other sequence.
-  Sequence& operator=(Sequence&& other) noexcept {
-    if (this != &other) {
-      BarelySequence_Destroy(handle_, id_);
-      handle_ = std::exchange(other.handle_, nullptr);
-      id_ = std::exchange(other.id_, BarelyId_kInvalid);
-    }
-    return *this;
-  }
-
-  /// Creates note at position.
-  ///
-  /// @param position Note position.
-  /// @param duration Note duration.
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @return Note.
-  [[nodiscard]] Note CreateNote(double position, double duration, double pitch,
-                                double intensity = 1.0) {
-    return Note(handle_, id_, position, duration, pitch, intensity);
-  }
-
-  // TODO(#98): Add `CreateParameterAutomation` function.
-
-  /// Returns begin offset.
-  ///
-  /// @return Begin offset in beats.
-  [[nodiscard]] double GetBeginOffset() const {
-    double begin_offset = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelySequence_GetBeginOffset(handle_, id_, &begin_offset);
-    assert(status.IsOk());
-    return begin_offset;
-  }
-
-  /// Returns begin position.
-  ///
-  /// @return Begin position in beats.
-  [[nodiscard]] double GetBeginPosition() const {
-    double begin_position = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelySequence_GetBeginPosition(handle_, id_, &begin_position);
-    assert(status.IsOk());
-    return begin_position;
-  }
-
-  /// Returns end position.
-  ///
-  /// @return End position in beats.
-  [[nodiscard]] double GetEndPosition() const {
-    double end_position = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelySequence_GetEndPosition(handle_, id_, &end_position);
-    assert(status.IsOk());
-    return end_position;
-  }
-
-  /// Returns instrument.
-  ///
-  /// @return Pointer to instrument, or nullptr.
-  [[nodiscard]] const Instrument* GetInstrument() const { return instrument_; }
-
-  /// Returns loop begin offset.
-  ///
-  /// @return Loop begin offset in beats.
-  [[nodiscard]] double GetLoopBeginOffset() const {
-    double loop_begin_offset = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelySequence_GetLoopBeginOffset(handle_, id_, &loop_begin_offset);
-    assert(status.IsOk());
-    return loop_begin_offset;
-  }
-
-  /// Returns loop length.
-  ///
-  /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const {
-    double loop_length = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelySequence_GetLoopLength(handle_, id_, &loop_length);
-    assert(status.IsOk());
-    return loop_length;
-  }
-
-  /// Returns whether sequence should be looping or not.
-  ///
-  /// @return True if looping, false otherwise.
-  [[nodiscard]] bool IsLooping() const {
-    bool is_looping = false;
-    [[maybe_unused]] const Status status =
-        BarelySequence_IsLooping(handle_, id_, &is_looping);
-    assert(status.IsOk());
-    return is_looping;
-  }
-
-  /// Sets begin offset.
-  ///
-  /// @param begin_offset Begin offset in beats.
-  /// @return Status.
-  Status SetBeginOffset(double begin_offset) {
-    return BarelySequence_SetBeginOffset(handle_, id_, begin_offset);
-  }
-
-  /// Sets begin position.
-  ///
-  /// @param begin_position Begin position in beats.
-  /// @return Status.
-  Status SetBeginPosition(double begin_position) {
-    return BarelySequence_SetBeginPosition(handle_, id_, begin_position);
-  }
-
-  /// Sets end position.
-  ///
-  /// @param end_position End position in beats.
-  /// @return Status.
-  Status SetEndPosition(double end_position) {
-    return BarelySequence_SetEndPosition(handle_, id_, end_position);
-  }
-
-  /// Sets instrument.
-  ///
-  /// @param instrument Pointer to instrument, or nullptr.
-  /// @return Status.
-  Status SetInstrument(const Instrument* instrument) {
-    instrument_ = instrument;
-    return BarelySequence_SetInstrument(
-        handle_, id_,
-        instrument_ ? instrument_->id_
-                    : static_cast<BarelyId>(BarelyId_kInvalid));
-  }
-
-  /// Sets loop begin offset.
-  ///
-  /// @param loop_begin_offset Loop begin offset in beats.
-  /// @return Status.
-  Status SetLoopBeginOffset(double loop_begin_offset) {
-    return BarelySequence_SetLoopBeginOffset(handle_, id_, loop_begin_offset);
-  }
-
-  /// Sets loop length.
-  ///
-  /// @param loop_length Loop length in beats.
-  /// @return Status.
-  Status SetLoopLength(double loop_length) {
-    return BarelySequence_SetLoopLength(handle_, id_, loop_length);
-  }
-
-  /// Sets whether sequence should be looping or not.
-  ///
-  /// @param is_looping True if looping, false otherwise.
-  /// @return Status.
-  Status SetLooping(bool is_looping) {
-    return BarelySequence_SetLooping(handle_, id_, is_looping);
-  }
-
- private:
-  friend class Musician;
-
-  // Constructs new `Sequence`.
-  explicit Sequence(BarelyMusicianHandle handle) : handle_(handle) {
-    [[maybe_unused]] const Status status = BarelySequence_Create(handle_, &id_);
-    assert(status.IsOk());
-  }
-
-  // Internal musician handle.
-  BarelyMusicianHandle handle_ = nullptr;
-
-  // Identifier.
-  BarelyId id_ = BarelyId_kInvalid;
-
-  // Instrument.
-  const Instrument* instrument_ = nullptr;
-};
-
 /// Musician.
 class Musician {
  public:
-  /// Beat callback signature.
-  ///
-  /// @param position Beat position in beats.
-  /// @param timestamp Beat timestamp in seconds.
-  using BeatCallback = std::function<void(double position, double timestamp)>;
-
   /// Constructs new `Musician`.
   Musician() {
     [[maybe_unused]] const Status status = BarelyMusician_Create(&handle_);
@@ -1722,9 +929,7 @@ class Musician {
   ///
   /// @param other Other musician.
   Musician(Musician&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {
-    SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
-  }
+      : handle_(std::exchange(other.handle_, nullptr)) {}
 
   /// Assigns `Musician` via move.
   ///
@@ -1736,7 +941,6 @@ class Musician {
         assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
-      SetBeatCallback(std::exchange(other.beat_callback_, nullptr));
     }
     return *this;
   }
@@ -1751,22 +955,28 @@ class Musician {
     return Instrument(handle_, definition, frame_rate);
   }
 
-  /// Creates new sequence.
+  /// Returns beats from seconds.
   ///
-  /// @return Sequence.
-  [[nodiscard]] Sequence CreateSequence() { return Sequence(handle_); }
+  /// @param seconds Number of seconds.
+  /// @return Number of beats.
+  [[nodiscard]] double GetBeats(double seconds) const {
+    double beats = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyMusician_GetBeats(handle_, seconds, &beats);
+    assert(status.IsOk());
+    return beats;
+  }
 
-  /// Returns position.
+  /// Returns seconds from beats.
   ///
-  /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const {
-    double position = 0.0;
-    if (handle_) {
-      [[maybe_unused]] const Status status =
-          BarelyMusician_GetPosition(handle_, &position);
-      assert(status.IsOk());
-    }
-    return position;
+  /// @param beats Number of beats.
+  /// @return Number of seconds.
+  [[nodiscard]] double GetSeconds(double beats) const {
+    double seconds = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyMusician_GetSeconds(handle_, beats, &seconds);
+    assert(status.IsOk());
+    return seconds;
   }
 
   /// Returns tempo.
@@ -1791,42 +1001,6 @@ class Musician {
     return timestamp;
   }
 
-  /// Returns whether musician is playing or not.
-  ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const {
-    bool is_playing = false;
-    [[maybe_unused]] const Status status =
-        BarelyMusician_IsPlaying(handle_, &is_playing);
-    assert(status.IsOk());
-    return is_playing;
-  }
-
-  /// Sets beat callback.
-  ///
-  /// @param callback Beat callback.
-  /// @return Status.
-  Status SetBeatCallback(BeatCallback callback) {
-    if (callback) {
-      beat_callback_ = std::move(callback);
-      return BarelyMusician_SetBeatCallback(
-          handle_,
-          [](double beat, double timestamp, void* user_data) {
-            (*static_cast<BeatCallback*>(user_data))(beat, timestamp);
-          },
-          static_cast<void*>(&beat_callback_));
-    }
-    return BarelyMusician_SetBeatCallback(handle_, nullptr, nullptr);
-  }
-
-  /// Sets position.
-  ///
-  /// @param position Position in beats.
-  /// @return Status.
-  Status SetPosition(double position) {
-    return BarelyMusician_SetPosition(handle_, position);
-  }
-
   /// Sets tempo.
   ///
   /// @param tempo Tempo in bpm.
@@ -1834,24 +1008,6 @@ class Musician {
   Status SetTempo(double tempo) {
     return BarelyMusician_SetTempo(handle_, tempo);
   }
-
-  /// Sets timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  /// @return Status.
-  Status SetTimestamp(double timestamp) {
-    return BarelyMusician_SetTimestamp(handle_, timestamp);
-  }
-
-  /// Starts playback.
-  ///
-  /// @return Status.
-  Status Start() { return BarelyMusician_Start(handle_); }
-
-  /// Stops playback.
-  ///
-  /// @return Status.
-  Status Stop() { return BarelyMusician_Stop(handle_); }
 
   /// Updates internal state at timestamp.
   ///
@@ -1864,9 +1020,6 @@ class Musician {
  private:
   // Internal handle.
   BarelyMusicianHandle handle_ = nullptr;
-
-  // Beat callback.
-  BeatCallback beat_callback_;
 };
 
 }  // namespace barely

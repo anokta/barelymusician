@@ -110,6 +110,7 @@ class Instrument {
   /// Stops all notes at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void StopAllNotes(double timestamp) noexcept;
 
   /// Stops note at timestamp.

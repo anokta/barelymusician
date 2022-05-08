@@ -41,18 +41,15 @@ class EnvelopedVoice : public Voice {
   GeneratorType generator_;
 
   // Voice gain.
-  double gain_;
+  double gain_ = 0.0;
 
   // Last output.
-  double output_;
+  double output_ = 0.0;
 };
 
 template <class GeneratorType>
 EnvelopedVoice<GeneratorType>::EnvelopedVoice(int sample_rate) noexcept
-    : envelope_(sample_rate),
-      generator_(sample_rate),
-      gain_(0.0),
-      output_(0.0) {}
+    : envelope_(sample_rate), generator_(sample_rate) {}
 
 template <class GeneratorType>
 double EnvelopedVoice<GeneratorType>::Next(int channel) noexcept {

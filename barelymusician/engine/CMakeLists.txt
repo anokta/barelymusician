@@ -15,9 +15,6 @@ target_link_libraries(
   id
   instrument
   mutable_data
-  note
-  sequence
-  transport
   find_or_null
 )
 

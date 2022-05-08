@@ -173,6 +173,7 @@ void Instrument::StartNote(double pitch, double intensity,
   }
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::StopAllNotes(double timestamp) noexcept {
   assert(timestamp >= 0.0);
   for (const double pitch : std::exchange(pitches_, {})) {

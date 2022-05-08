@@ -17,9 +17,6 @@ cc_library(
         ":id",
         ":instrument",
         ":mutable_data",
-        ":note",
-        ":sequence",
-        ":transport",
         "//barelymusician/common:find_or_null",
     ],
 )

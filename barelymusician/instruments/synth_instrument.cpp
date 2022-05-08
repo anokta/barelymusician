@@ -48,7 +48,7 @@ void SynthInstrument::SetParameter(int index, double value,
       break;
     case SynthParameter::kDecay:
       voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetRelease(value);
+        voice->envelope().SetDecay(value);
       });
       break;
     case SynthParameter::kSustain:

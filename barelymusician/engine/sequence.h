@@ -180,9 +180,6 @@ class Sequence {
   // Denotes whether sequence is looping or not.
   bool is_looping_ = false;
 
-  // Denotes whether sequence is skipping adjustments or not.
-  bool is_skipping_adjustments_ = false;
-
   // Loop begin offset in beats.
   double loop_begin_offset_ = 0.0;
 

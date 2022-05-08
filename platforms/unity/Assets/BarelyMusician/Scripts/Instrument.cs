@@ -110,9 +110,6 @@ namespace Barely {
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<double, double> {}
     public NoteOnEvent NoteOn;
 
-    // List of sequences.
-    private List<Sequence> _sequences = null;
-
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
       _noteOffCallback = delegate(double pitch, double dspTime) {
@@ -123,25 +120,16 @@ namespace Barely {
         OnNoteOn?.Invoke(pitch, intensity, dspTime);
         NoteOn?.Invoke((float)pitch, (float)intensity);
       };
-      _sequences = new List<Sequence>();
     }
 
     protected virtual void OnDestroy() {
       Source = null;
       _noteOffCallback = null;
       _noteOnCallback = null;
-      _sequences = null;
     }
 
     protected virtual void OnEnable() {
       Id = Musician.Native.Instrument_Create(this, ref _noteOffCallback, ref _noteOnCallback);
-      GetComponents<Sequence>(_sequences);
-      for (int i = 0; i < _sequences.Count; ++i) {
-        var sequence = _sequences[i];
-        if (sequence.Id != Musician.Native.InvalidId && sequence.Instrument == this) {
-          Musician.Native.Sequence_SetInstrument(sequence);
-        }
-      }
       Source?.Play();
     }
 
@@ -191,15 +179,16 @@ namespace Barely {
     ///
     /// @param index Parameter index.
     /// @param value Parameter value.
-    public void SetParameter(int index, double value) {
-      Musician.Native.Instrument_SetParameter(this, index, value);
+    /// @param value Parameter slope in value change per second.
+    public void SetParameter(int index, double value, double slope = 0.0) {
+      Musician.Native.Instrument_SetParameter(this, index, value, slope);
     }
 
     /// Starts playing note.
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void StartNote(double pitch, double intensity) {
+    public void StartNote(double pitch, double intensity = 1.0) {
       Musician.Native.Instrument_StartNote(this, pitch, intensity);
     }
 

@@ -18,6 +18,27 @@ namespace Barely {
     }
     private static double _tempo = 120.0;
 
+    /// Timestamp in seconds.
+    public static double Timestamp {
+      get { return Native.Musician_GetTimestamp(); }
+    }
+
+    /// Returns beats from seconds.
+    ///
+    /// @param seconds Number of seconds.
+    /// @return Number of beats.
+    public static double GetBeats(double seconds) {
+      return Native.Musician_GetBeats(seconds);
+    }
+
+    /// Returns seconds from beats.
+    ///
+    /// @param beats Number of beats.
+    /// @return Number of seconds.
+    public static double GetSeconds(double beats) {
+      return Native.Musician_GetSeconds(beats);
+    }
+
     /// Class that wraps native api.
     public static class Native {
       /// Invalid identifier.
@@ -202,6 +223,47 @@ namespace Barely {
         }
       }
 
+      /// Returns musician beats from seconds.
+      ///
+      /// @param seconds Number of seconds.
+      /// @return Number of beats.
+      public static double Musician_GetBeats(double seconds) {
+        Status status = BarelyMusician_GetBeats(Handle, seconds, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician beats from seconds: " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns musician seconds from beats.
+      ///
+      /// @param beats Number of beats.
+      /// @return Number of seconds.
+      public static double Musician_GetSeconds(double beats) {
+        Status status = BarelyMusician_GetSeconds(Handle, beats, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician seconds from beats: " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns musician timestamp.
+      ///
+      /// @return Timestamp in seconds.
+      public static double Musician_GetTimestamp() {
+        Status status = BarelyMusician_GetTimestamp(Handle, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get musician timestamp: " + status);
+        }
+        return 0.0;
+      }
+
       /// Sets musician tempo.
       ///
       /// @param tempo Tempo in bpm.
@@ -288,40 +350,29 @@ namespace Barely {
         private void Awake() {
           AllocatePtrs();
           AudioSettings.OnAudioConfigurationChanged += OnAudioConfigurationChanged;
-          Status status = BarelyMusician_Create(_intPtrPtr);
-          if (!IsOk(status)) {
-            Debug.LogError("Failed to initialize BarelyMusician: " + status);
-            return;
-          }
-          _handle = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
-          var config = AudioSettings.GetConfiguration();
-          _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
-          _output = new double[config.dspBufferSize * (int)config.speakerMode];
+          Initialize();
         }
 
         private void OnDestroy() {
           AudioSettings.OnAudioConfigurationChanged -= OnAudioConfigurationChanged;
-          BarelyMusician_Destroy(_handle);
-          _handle = IntPtr.Zero;
+          Shutdown();
           DeallocatePtrs();
         }
 
         private void OnApplicationQuit() {
-          _isShuttingDown = true;
-          BarelyMusician_Destroy(_handle);
-          _handle = IntPtr.Zero;
+          Shutdown();
           DeallocatePtrs();
         }
 
         private void OnAudioConfigurationChanged(bool deviceWasChanged) {
-          var config = AudioSettings.GetConfiguration();
-          _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
-          _output = new double[config.dspBufferSize * (int)config.speakerMode];
-          // TODO: Handle reset.
-          // BarelyMusician_SetTimestamp(_handle, AudioSettings.dspTime);
-          foreach (var instrument in FindObjectsOfType<Instrument>()) {
-            instrument.enabled = false;
-            instrument.enabled = true;
+          Shutdown();
+          var instruments = FindObjectsOfType<Instrument>();
+          for (int i = 0; i < instruments.Length; ++i) {
+            instruments[i].enabled = false;
+          }
+          Initialize();
+          for (int i = 0; i < instruments.Length; ++i) {
+            instruments[i].enabled = true;
           }
         }
 
@@ -357,6 +408,29 @@ namespace Barely {
             Marshal.FreeHGlobal(_intPtrPtr);
             _intPtrPtr = IntPtr.Zero;
           }
+        }
+
+        // Initializes the native state.
+        private void Initialize() {
+          _isShuttingDown = false;
+          Status status = BarelyMusician_Create(_intPtrPtr);
+          if (!IsOk(status)) {
+            Debug.LogError("Failed to initialize BarelyMusician: " + status);
+            return;
+          }
+          _handle = Marshal.PtrToStructure<IntPtr>(_intPtrPtr);
+          BarelyMusician_SetTempo(_handle, _tempo);
+          var config = AudioSettings.GetConfiguration();
+          _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
+          _output = new double[config.dspBufferSize * (int)config.speakerMode];
+          BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
+        }
+
+        // Shuts down the native state.
+        private void Shutdown() {
+          _isShuttingDown = true;
+          BarelyMusician_Destroy(_handle);
+          _handle = IntPtr.Zero;
         }
       }
 

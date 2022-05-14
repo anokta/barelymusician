@@ -8,10 +8,12 @@ public class InstrumentDemo : MonoBehaviour {
   public Texture2D pixel = null;
 
   private const int N = 4;
+  private Dictionary<double, Vector2> _activePitches = null;
   private float[,] _alphas = null;
   private float[,] _targetAlphas = null;
 
   private void OnEnable() {
+    _activePitches = new Dictionary<double, Vector2>();
     _alphas = new float[N, N];
     _targetAlphas = new float[N, N];
     controller.instrument.OnNoteOff += OnNoteOff;
@@ -41,16 +43,18 @@ public class InstrumentDemo : MonoBehaviour {
   }
 
   private void OnNoteOff(double pitch, double dspTime) {
-    int i = (int)((pitch - controller.octaveOffset - controller.rootPitch) * 12.0);
-    int y = i / 4;
-    int x = i - 4 * y;
-    _targetAlphas[x, N - 1 - y] = 0.0f;
+    Vector2 value = Vector2.zero;
+    if (_activePitches.TryGetValue(pitch, out value)) {
+      _targetAlphas[(int)value.x, (int)value.y] = 0.0f;
+      _activePitches.Remove(pitch);
+    }
   }
 
   private void OnNoteOn(double pitch, double intensity, double dspTime) {
-    int i = (int)(pitch * 12.0);
+    int i = (int)((pitch - controller.octaveOffset - controller.rootPitch) * 12.0);
     int y = i / 4;
     int x = i - 4 * y;
     _targetAlphas[x, N - 1 - y] = 1.0f;
+    _activePitches.Add(pitch, new Vector2(x, N - 1 - y));
   }
 }

@@ -77,7 +77,9 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
-  timestamp_ = timestamp;
+  if (timestamp_ < timestamp) {
+    timestamp_ = timestamp;
+  }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

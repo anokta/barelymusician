@@ -1,6 +1,7 @@
 #include "barelymusician/engine/clock.h"
 
 #include <cassert>
+#include <limits>
 
 namespace barely::internal {
 
@@ -19,14 +20,16 @@ double Clock::GetBeats(double seconds) const noexcept {
 }
 
 double Clock::GetSeconds(double beats) const noexcept {
-  assert(tempo_ > 0.0);
-  return beats * kSecondsFromMinutes / tempo_;
+  return (tempo_ > 0.0)  ? beats * kSecondsFromMinutes / tempo_
+         : (beats > 0.0) ? std::numeric_limits<double>::max()
+         : (beats < 0.0) ? std::numeric_limits<double>::lowest()
+                         : 0.0;
 }
 
 double Clock::GetTempo() const noexcept { return tempo_; }
 
 void Clock::SetTempo(double tempo) noexcept {
-  assert(tempo >= 0.0);
+  assert(tempo_ >= 0.0);
   tempo_ = tempo;
 }
 

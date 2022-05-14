@@ -212,17 +212,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(
     BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
     double* out_value);
 
-/// Gets instrument parameter definition.
-///
-/// @param handle Musician handle.
-/// @param instrument_id Instrument identifier.
-/// @param index Parameter index.
-/// @param out_definition Output parameter definition.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameterDefinition(
-    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
-    BarelyParameterDefinition* out_definition);
-
 /// Gets whether instrument note is playing or not.
 ///
 /// @param handle Musician handle.
@@ -715,25 +704,6 @@ class Instrument {
       return status;
     }
     return static_cast<ValueType>(value);
-  }
-
-  /// Returns parameter definition.
-  ///
-  /// @param index Parameter index.
-  /// @return Parameter definition, or error status.
-  template <typename IndexType>
-  [[nodiscard]] StatusOr<ParameterDefinition> GetParameterDefinition(
-      IndexType index) const {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    BarelyParameterDefinition definition;
-    if (const Status status = BarelyInstrument_GetParameterDefinition(
-            handle_, id_, static_cast<int>(index), &definition);
-        !status.IsOk()) {
-      return status;
-    }
-    return ParameterDefinition(definition);
   }
 
   /// Returns whether note is active or not.

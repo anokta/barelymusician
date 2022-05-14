@@ -78,24 +78,6 @@ BarelyStatus BarelyInstrument_GetParameter(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_GetParamDefinition(
-    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
-    BarelyParameterDefinition* out_definition) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (index < 0) return BarelyStatus_kInvalidArgument;
-  if (!out_definition) return BarelyStatus_kInvalidArgument;
-
-  if (const auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    if (const auto* parameter = instrument->GetParameter(index)) {
-      *out_definition = parameter->GetDefinition();
-      return BarelyStatus_kOk;
-    }
-    return BarelyStatus_kInvalidArgument;
-  }
-  return BarelyStatus_kNotFound;
-}
-
 BarelyStatus BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle,
                                        BarelyId instrument_id, double pitch,
                                        bool* out_is_note_on) {

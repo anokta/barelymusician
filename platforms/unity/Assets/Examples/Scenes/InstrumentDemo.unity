@@ -433,7 +433,7 @@ MonoBehaviour:
   Decay: 0
   Sustain: 1
   Release: 0.25
-  NumVoices: 8
+  NumVoices: 16
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0
@@ -446,7 +446,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.25
+  m_Volume: 0.125
   m_Pitch: 1
   Loop: 0
   Mute: 0

@@ -147,14 +147,6 @@ namespace Barely {
       return Musician.Native.Instrument_GetParameter(this, index);
     }
 
-    /// Returns parameter definition.
-    ///
-    /// @param index Parameter index.
-    /// @return Parameter definition.
-    public ParameterDefinition GetParameterDefinition(int index) {
-      return Musician.Native.Instrument_GetParameterDefinition(this, index);
-    }
-
     /// Returns whether note is playing or not.
     ///
     /// @param Note pitch.

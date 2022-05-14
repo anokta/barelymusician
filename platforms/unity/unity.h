@@ -30,6 +30,26 @@ BARELY_EXPORT BarelyStatus BarelyUnityInstrument_Create(
     BarelyMusicianHandle handle, BarelyUnityInstrumentType type,
     int32_t frame_rate, BarelyId* out_instrument_id);
 
+/// Sets Unity instrument note off callback.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param callback Note off callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyUnityInstrument_SetNoteOffCallback(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyInstrument_NoteOffCallback callback);
+
+/// Sets Unity instrument note on callback.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param callback Note on callback.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyUnityInstrument_SetNoteOnCallback(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyInstrument_NoteOnCallback callback);
+
 }  // extern "C"
 // NOLINTEND
 

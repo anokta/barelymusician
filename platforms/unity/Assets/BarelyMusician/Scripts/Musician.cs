@@ -9,9 +9,10 @@ namespace Barely {
     public static double Tempo {
       get { return _tempo; }
       set {
+        value = Math.Max(value, 0.0);
         if (_tempo != value) {
           Native.Musician_SetTempo(value);
-          _tempo = Native.Musician_GetTempo();
+          _tempo = value;
         }
       }
     }
@@ -48,12 +49,10 @@ namespace Barely {
         }
         if (IsOk(status)) {
           instrumentId = Marshal.ReadInt64(_int64Ptr);
-          BarelyInstrument_SetNoteOffCallback(
-              _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOffCallback),
-              IntPtr.Zero);
-          BarelyInstrument_SetNoteOnCallback(_handle, instrumentId,
-                                             Marshal.GetFunctionPointerForDelegate(noteOnCallback),
-                                             IntPtr.Zero);
+          BarelyUnityInstrument_SetNoteOffCallback(
+              _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOffCallback));
+          BarelyUnityInstrument_SetNoteOnCallback(
+              _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOnCallback));
         } else if (_handle != IntPtr.Zero) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "': " + status);
         }
@@ -84,24 +83,6 @@ namespace Barely {
                          instrument.name + "': " + status);
         }
         return 0.0;
-      }
-
-      /// Returns instrument parameter definition.
-      ///
-      /// @param instrument Instrument.
-      /// @param index Parameter index.
-      /// @return Parameter definition.
-      public static ParameterDefinition Instrument_GetParameterDefinition(Instrument instrument,
-                                                                          int index) {
-        Status status = BarelyInstrument_GetParameterDefinition(Handle, instrument.Id, index,
-                                                                _parameterDefinitionPtr);
-        if (IsOk(status)) {
-          return Marshal.PtrToStructure<ParameterDefinition>(_parameterDefinitionPtr);
-        } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument parameter " + index + " definition for '" +
-                         instrument.name + "': " + status);
-        }
-        return new ParameterDefinition();
       }
 
       /// Returns whether instrument note is playing or not.
@@ -221,19 +202,6 @@ namespace Barely {
         }
       }
 
-      /// Returns musician tempo.
-      ///
-      /// @return Tempo in bpm.
-      public static double Musician_GetTempo() {
-        Status status = BarelyMusician_GetTempo(Handle, _doublePtr);
-        if (IsOk(status)) {
-          return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician tempo: " + status);
-        }
-        return 0.0;
-      }
-
       /// Sets musician tempo.
       ///
       /// @param tempo Tempo in bpm.
@@ -306,9 +274,6 @@ namespace Barely {
       // `IntPtr` type pointer.
       private static IntPtr _intPtrPtr = IntPtr.Zero;
 
-      // `ParameterDefinition` type pointer.
-      private static IntPtr _parameterDefinitionPtr = IntPtr.Zero;
-
       // Denotes if the system is shutting down to avoid re-initialization.
       private static bool _isShuttingDown = false;
 
@@ -372,7 +337,6 @@ namespace Barely {
           _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
           _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
           _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
-          _parameterDefinitionPtr = Marshal.AllocHGlobal(Marshal.SizeOf<ParameterDefinition>());
         }
 
         // Deallocates unmanaged memory for native calls.
@@ -392,10 +356,6 @@ namespace Barely {
           if (_intPtrPtr != IntPtr.Zero) {
             Marshal.FreeHGlobal(_intPtrPtr);
             _intPtrPtr = IntPtr.Zero;
-          }
-          if (_parameterDefinitionPtr != IntPtr.Zero) {
-            Marshal.FreeHGlobal(_parameterDefinitionPtr);
-            _parameterDefinitionPtr = IntPtr.Zero;
           }
         }
       }
@@ -417,12 +377,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetParameter")]
       private static extern Status BarelyInstrument_GetParameter(IntPtr handle, Int64 instrumentId,
                                                                  Int32 index, IntPtr outValue);
-
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetParameterDefinition")]
-      private static extern Status BarelyInstrument_GetParameterDefinition(IntPtr handle,
-                                                                           Int64 instrumentId,
-                                                                           Int32 index,
-                                                                           IntPtr outDefinition);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern Status BarelyInstrument_IsNoteOn(IntPtr handle, Int64 instrumentId,
@@ -448,17 +402,15 @@ namespace Barely {
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
                                                             [In] IntPtr data, Int32 size);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffCallback")]
-      private static extern Status BarelyInstrument_SetNoteOffCallback(IntPtr handle,
-                                                                       Int64 instrumentId,
-                                                                       IntPtr callback,
-                                                                       IntPtr userData);
+      [DllImport(pluginName, EntryPoint = "BarelyUnityInstrument_SetNoteOffCallback")]
+      private static extern Status BarelyUnityInstrument_SetNoteOffCallback(IntPtr handle,
+                                                                            Int64 instrumentId,
+                                                                            IntPtr callback);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnCallback")]
-      private static extern Status BarelyInstrument_SetNoteOnCallback(IntPtr handle,
-                                                                      Int64 instrumentId,
-                                                                      IntPtr callback,
-                                                                      IntPtr userData);
+      [DllImport(pluginName, EntryPoint = "BarelyUnityInstrument_SetNoteOnCallback")]
+      private static extern Status BarelyUnityInstrument_SetNoteOnCallback(IntPtr handle,
+                                                                           Int64 instrumentId,
+                                                                           IntPtr callback);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetParameter")]
       private static extern Status BarelyInstrument_SetParameter(IntPtr handle, Int64 instrumentId,
@@ -489,9 +441,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetSeconds")]
       private static extern Status BarelyMusician_GetSeconds(IntPtr handle, double beats,
                                                              IntPtr outSeconds);
-
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTempo")]
-      private static extern Status BarelyMusician_GetTempo(IntPtr handle, IntPtr outTempo);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTimestamp")]
       private static extern Status BarelyMusician_GetTimestamp(IntPtr handle, IntPtr outTimestamp);

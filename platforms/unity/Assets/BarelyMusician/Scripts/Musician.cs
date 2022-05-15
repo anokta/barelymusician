@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -37,6 +39,14 @@ namespace Barely {
     /// @return Number of seconds.
     public static double GetSeconds(double beats) {
       return Native.Musician_GetSeconds(beats);
+    }
+
+    /// Schedules task at time.
+    ///
+    /// @param dspTime Time in seconds.
+    /// @param task Task.
+    public static void ScheduleTask(double dspTime, Action task) {
+      Native.Musician_ScheduleTask(dspTime, task);
     }
 
     /// Class that wraps native api.
@@ -264,6 +274,23 @@ namespace Barely {
         return 0.0;
       }
 
+      /// Schedules musician task at timestamp.
+      ///
+      /// @param timestamp Timestamp in seconds.
+      /// @param task Task.
+      public static void Musician_ScheduleTask(double timestamp, Action task) {
+        if (timestamp <= Musician_GetTimestamp()) {
+          task?.Invoke();
+          return;
+        }
+        List<Action> tasks = null;
+        if (_tasks != null && !_tasks.TryGetValue(timestamp, out tasks)) {
+          tasks = new List<Action>();
+          _tasks.Add(timestamp, tasks);
+        }
+        tasks?.Add(task);
+      }
+
       /// Sets musician tempo.
       ///
       /// @param tempo Tempo in bpm.
@@ -345,6 +372,9 @@ namespace Barely {
       // Internal output buffer.
       private static double[] _output = null;
 
+      // Map of scheduled tasks by their timestamps.
+      private static Dictionary<double, List<Action>> _tasks = null;
+
       // Component that manages internal state.
       private class State : MonoBehaviour {
         private void Awake() {
@@ -379,6 +409,18 @@ namespace Barely {
         private void LateUpdate() {
           double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
           double dspTime = AudioSettings.dspTime + lookahead;
+          while (_tasks.Count > 0) {
+            double timestamp = _tasks.ElementAt(0).Key;
+            if (timestamp >= dspTime) {
+              break;
+            }
+            BarelyMusician_Update(_handle, timestamp);
+            var tasks = _tasks.ElementAt(0).Value;
+            for (int i = 0; i < tasks.Count; ++i) {
+              tasks[i]?.Invoke();
+            }
+            _tasks.Remove(timestamp);
+          }
           BarelyMusician_Update(_handle, dspTime);
         }
 
@@ -423,6 +465,7 @@ namespace Barely {
           var config = AudioSettings.GetConfiguration();
           _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
           _output = new double[config.dspBufferSize * (int)config.speakerMode];
+          _tasks = new Dictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
         }
 
@@ -431,6 +474,7 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
+          _tasks = null;
         }
       }
 

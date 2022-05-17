@@ -314,8 +314,10 @@ namespace Barely {
       private enum InstrumentType {
         // Percussion instrument.
         PERCUSSION = 0,
+        // Sampler instrument.
+        SAMPLER = 1,
         // Synth instrument.
-        SYNTH = 1,
+        SYNTH = 2,
       }
 
       // Status codes.

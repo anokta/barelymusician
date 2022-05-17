@@ -14,8 +14,7 @@ add_library(
 )
 target_link_libraries(
   generic_instrument INTERFACE
-  instrument
-  parameter
+  barelymusician
 )
 
 add_library(
@@ -27,9 +26,22 @@ target_link_libraries(
   percussion_instrument
   enveloped_voice
   generic_instrument
+  barelymusician
   sample_player
-  instrument
-  parameter
+)
+
+add_library(
+  sampler_instrument
+  sampler_instrument.cpp
+  sampler_instrument.h
+)
+target_link_libraries(
+  sampler_instrument
+  enveloped_voice
+  generic_instrument
+  barelymusician
+  polyphonic_voice
+  sample_player
 )
 
 add_library(
@@ -41,9 +53,8 @@ target_link_libraries(
   synth_instrument
   enveloped_voice
   generic_instrument
+  barelymusician
   dsp_utils
   oscillator
   polyphonic_voice
-  instrument
-  parameter
 )

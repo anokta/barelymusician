@@ -15,8 +15,10 @@ typedef int32_t BarelyUnityInstrumentType;
 enum BarelyUnityInstrumentType_Values {
   // Percussion instrumnet.
   BarelyUnityInstrumentType_kPercussion = 0,
+  // Sampler instrument.
+  BarelyUnityInstrumentType_kSampler = 1,
   // Synth instrument.
-  BarelyUnityInstrumentType_kSynth = 1,
+  BarelyUnityInstrumentType_kSynth = 2,
 };
 
 /// Creates new Unity instrument.

@@ -32,6 +32,19 @@ cc_library(
 )
 
 cc_library(
+    name = "sampler_instrument",
+    srcs = ["sampler_instrument.cpp"],
+    hdrs = ["sampler_instrument.h"],
+    deps = [
+        ":enveloped_voice",
+        ":generic_instrument",
+        "//barelymusician",
+        "//barelymusician/dsp:polyphonic_voice",
+        "//barelymusician/dsp:sample_player",
+    ],
+)
+
+cc_library(
     name = "synth_instrument",
     srcs = ["synth_instrument.cpp"],
     hdrs = ["synth_instrument.h"],

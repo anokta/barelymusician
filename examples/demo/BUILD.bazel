@@ -80,6 +80,22 @@ cc_binary(
 )
 
 cc_binary(
+    name = "sampler_demo",
+    srcs = ["sampler_demo.cpp"],
+    data = ["//examples/data:audio"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/instruments:sampler_instrument",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/common:wav_file",
+        "//examples/composition:note_pitch",
+        "@bazel_tools//tools/cpp/runfiles",
+    ],
+)
+
+cc_binary(
     name = "trigger_demo",
     srcs = ["trigger_demo.cpp"],
     deps = [

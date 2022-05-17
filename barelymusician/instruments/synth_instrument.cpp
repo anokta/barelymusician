@@ -69,6 +69,9 @@ void SynthInstrument::SetParameter(int index, double value,
 
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   static const std::vector<ParameterDefinition> parameter_definitions = {
+      // Oscillator type.
+      ParameterDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
+                          static_cast<double>(OscillatorType::kNoise)},
       // Attack.
       ParameterDefinition{0.05, 0.0, 60.0},
       // Decay.
@@ -77,9 +80,6 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
       ParameterDefinition{1.0, 0.0, 1.0},
       // Release.
       ParameterDefinition{0.25, 0.0, 60.0},
-      // Oscillator type.
-      ParameterDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
-                          static_cast<double>(OscillatorType::kNoise)},
       // Number of voices.
       ParameterDefinition{8, 1, 64},
   };

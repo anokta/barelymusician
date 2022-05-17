@@ -2,6 +2,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/instruments/percussion_instrument.h"
+#include "barelymusician/instruments/sampler_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
 
 extern "C" {
@@ -15,6 +16,10 @@ BarelyStatus BarelyUnityInstrument_Create(BarelyMusicianHandle handle,
       return BarelyInstrument_Create(
           handle, barely::PercussionInstrument::GetDefinition(), frame_rate,
           out_instrument_id);
+    case BarelyUnityInstrumentType_kSampler:
+      return BarelyInstrument_Create(handle,
+                                     barely::SamplerInstrument::GetDefinition(),
+                                     frame_rate, out_instrument_id);
     case BarelyUnityInstrumentType_kSynth:
       return BarelyInstrument_Create(handle,
                                      barely::SynthInstrument::GetDefinition(),

@@ -67,6 +67,7 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
   auto instrument_refs = instrument_refs_.GetScopedView();
   if (const auto* instrument_ref =
           FindOrNull(*instrument_refs, instrument_id)) {
+    assert(*instrument_ref);
     (*instrument_ref)
         ->Process(output, num_output_channels, num_output_frames, timestamp);
     return true;

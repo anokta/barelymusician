@@ -80,8 +80,10 @@ typedef struct BarelyParameterDefinition {
 ///
 /// @param state Pointer to instrument state.
 /// @param frame_rate Frame rate in hz.
+/// @param user_data Pointer to user data.
 typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state,
-                                                          int32_t frame_rate);
+                                                          int32_t frame_rate,
+                                                          void* user_data);
 
 /// Instrument destroy callback signature.
 ///
@@ -162,6 +164,9 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Number of parameter definitions.
   int32_t num_parameter_definitions;
+
+  /// Pointer to user data.
+  void* user_data;
 } BarelyInstrumentDefinition;
 
 /// Instrument note off callback signature.
@@ -613,18 +618,20 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// @param set_note_on_callback Set note on callback.
   /// @param set_parameter_callback Set parameter callback.
   /// @param parameter_definitions List of parameter definitions.
+  /// @param user_data Pointer to user data.
   InstrumentDefinition(
       CreateCallback create_callback, DestroyCallback destroy_callback,
       ProcessCallback process_callback, SetDataCallback set_data_callback,
       SetNoteOffCallback set_note_off_callback,
       SetNoteOnCallback set_note_on_callback,
       SetParameterCallback set_parameter_callback = nullptr,
-      std::span<const ParameterDefinition> parameter_definitions = {})
+      std::span<const ParameterDefinition> parameter_definitions = {},
+      void* user_data = nullptr)
       : InstrumentDefinition(
             {create_callback, destroy_callback, process_callback,
              set_data_callback, set_note_off_callback, set_note_on_callback,
              set_parameter_callback, parameter_definitions.data(),
-             static_cast<int>(parameter_definitions.size())}) {}
+             static_cast<int>(parameter_definitions.size()), user_data}) {}
 
   /// Constructs new `InstrumentDefinition` from internal type.
   ///

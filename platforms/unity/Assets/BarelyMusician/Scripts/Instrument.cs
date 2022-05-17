@@ -1,81 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// Parameter definition.
-  [Serializable]
-  [StructLayout(LayoutKind.Sequential)]
-  public struct ParameterDefinition {
-    /// Default value.
-    double defaultValue;
-
-    /// Minimum value.
-    double minValue;
-
-    /// Maximum value.
-    double maxValue;
-  }
-
-  // Instrument definition.
-  [Serializable]
-  [StructLayout(LayoutKind.Sequential)]
-  public struct InstrumentDefinition {
-    // TODO(#105): Need to pass the array size for Marshal `SizeParamIndex`.
-    public delegate void ProcessCallback(IntPtr state,
-                                         [MarshalAs(UnmanagedType.LPArray,
-                                                    SizeParamIndex = 3)] double[] output,
-                                         Int32 numOutputChannels, Int32 numOutputFrames);
-    public delegate void SetDataCallback(IntPtr state, byte[] data, Int32 size);
-    public delegate void SetNoteOffCallback(IntPtr state, double pitch);
-    public delegate void SetNoteOnCallback(IntPtr state, double pitch, double intensity);
-    public delegate void SetParameterCallback(IntPtr state, Int32 index, double value);
-
-    public InstrumentDefinition(ProcessCallback processCallback, SetDataCallback setDataCallback,
-                                SetNoteOffCallback setNoteOffCallback,
-                                SetNoteOnCallback setNoteOnCallback,
-                                SetParameterCallback setParameterCallback,
-                                ParameterDefinition[] parameterDefinitions) {
-      _createCallback = IntPtr.Zero;
-      _destroyCallback = IntPtr.Zero;
-      _processCallback = Marshal.GetFunctionPointerForDelegate(processCallback);
-      _setDataCallback = Marshal.GetFunctionPointerForDelegate(setDataCallback);
-      _setNoteOffCallback = Marshal.GetFunctionPointerForDelegate(setNoteOffCallback);
-      _setNoteOnCallback = Marshal.GetFunctionPointerForDelegate(setNoteOnCallback);
-      _setParameterCallback = Marshal.GetFunctionPointerForDelegate(setParameterCallback);
-      _parameterDefinitions = parameterDefinitions;
-      _numParameterDefinitions = (parameterDefinitions != null) ? parameterDefinitions.Length : 0;
-    }
-
-    // Create callback.
-    private IntPtr _createCallback;
-
-    // Destroy callback.
-    private IntPtr _destroyCallback;
-
-    // Process callback.
-    private IntPtr _processCallback;
-
-    // Set data callback.
-    private IntPtr _setDataCallback;
-
-    // Set note off callback.
-    private IntPtr _setNoteOffCallback;
-
-    // Set note on callback.
-    private IntPtr _setNoteOnCallback;
-
-    // Set parameter callback.
-    private IntPtr _setParameterCallback;
-
-    // List of parameter definitions.
-    private ParameterDefinition[] _parameterDefinitions;
-
-    // Number of parameter definitions.
-    private Int32 _numParameterDefinitions;
-  }
-
   // Instrument.
   [RequireComponent(typeof(AudioSource))]
   public abstract class Instrument : MonoBehaviour {
@@ -129,7 +55,7 @@ namespace Barely {
     }
 
     protected virtual void OnEnable() {
-      Id = Musician.Native.Instrument_Create(this, ref _noteOffCallback, ref _noteOnCallback);
+      Id = Musician.Native.Instrument_Create(this, _noteOffCallback, _noteOnCallback);
       Source?.Play();
     }
 
@@ -165,6 +91,13 @@ namespace Barely {
     /// @param index Parameter index.
     public void ResetParameter(int index) {
       Musician.Native.Instrument_ResetParameter(this, index);
+    }
+
+    /// Sets data.
+    ///
+    /// @param data Data.
+    public void SetData(byte[] data) {
+      Musician.Native.Instrument_SetData(this, data);
     }
 
     /// Sets parameter value.

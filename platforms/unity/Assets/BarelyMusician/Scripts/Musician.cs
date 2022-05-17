@@ -61,8 +61,8 @@ namespace Barely {
       /// @param noteOnCallback Reference to note on callback.
       /// @return Instrument identifier.
       public static Int64 Instrument_Create(Instrument instrument,
-                                            ref Instrument.NoteOffCallback noteOffCallback,
-                                            ref Instrument.NoteOnCallback noteOnCallback) {
+                                            Instrument.NoteOffCallback noteOffCallback,
+                                            Instrument.NoteOnCallback noteOnCallback) {
         Int64 instrumentId = InvalidId;
         Int32 frameRate = AudioSettings.outputSampleRate;
         Status status = Status.UNIMPLEMENTED;
@@ -70,9 +70,6 @@ namespace Barely {
           case SynthInstrument synth:
             status =
                 BarelyUnityInstrument_Create(Handle, InstrumentType.SYNTH, frameRate, _int64Ptr);
-            break;
-          case CustomInstrument custom:
-            // status = BarelyInstrument_Create(Handle, custom.Definition, frameRate, _int64Ptr);
             break;
           default:
             Debug.LogError("Unsupported instrument type: " + instrument.GetType());
@@ -176,6 +173,18 @@ namespace Barely {
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to reset instrument parameter " + index + " for '" +
                          instrument.name + "': " + status);
+        }
+      }
+
+      /// Sets instrument data.
+      ///
+      /// @param instrument Instrument.
+      /// @param data Data.
+      public static void Instrument_SetData(Instrument instrument, byte[] data) {
+        Status status = BarelyInstrument_SetData(Handle, instrument.Id, data, data.Length);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set instrument data to " + data + " for '" + instrument.name +
+                         "': " + status);
         }
       }
 
@@ -515,10 +524,9 @@ namespace Barely {
       private static extern Status BarelyInstrument_ResetParameter(IntPtr handle,
                                                                    Int64 instrumentId, Int32 index);
 
-      // TODO(#105): Implement `Instrument.SetData` using this.
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
-                                                            [In] IntPtr data, Int32 size);
+                                                            [In] byte[] data, Int32 size);
 
       [DllImport(pluginName, EntryPoint = "BarelyUnityInstrument_SetNoteOffCallback")]
       private static extern Status BarelyUnityInstrument_SetNoteOffCallback(IntPtr handle,

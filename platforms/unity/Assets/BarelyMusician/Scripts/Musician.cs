@@ -67,6 +67,10 @@ namespace Barely {
         Int32 frameRate = AudioSettings.outputSampleRate;
         Status status = Status.UNIMPLEMENTED;
         switch (instrument) {
+          case SamplerInstrument sampler:
+            status =
+                BarelyUnityInstrument_Create(Handle, InstrumentType.SAMPLER, frameRate, _int64Ptr);
+            break;
           case SynthInstrument synth:
             status =
                 BarelyUnityInstrument_Create(Handle, InstrumentType.SYNTH, frameRate, _int64Ptr);

@@ -9,12 +9,12 @@
 
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
-#include "examples/composition/note_pitch.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 namespace {

@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_COMPOSITION_NOTE_PITCH_H_
-#define EXAMPLES_COMPOSITION_NOTE_PITCH_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
+#define BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
 
 #include <span>
 
@@ -147,4 +147,4 @@ double GetPitch(std::span<const double> scale, int index) noexcept;
 
 }  // namespace barely
 
-#endif  // EXAMPLES_COMPOSITION_NOTE_PITCH_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_

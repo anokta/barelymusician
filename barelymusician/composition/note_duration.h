@@ -1,5 +1,5 @@
-#ifndef EXAMPLES_COMPOSITION_NOTE_DURATION_H_
-#define EXAMPLES_COMPOSITION_NOTE_DURATION_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_DURATION_H_
+#define BARELYMUSICIAN_COMPOSITION_NOTE_DURATION_H_
 
 namespace barely {
 
@@ -30,4 +30,4 @@ double QuantizePosition(double position, double resolution,
 
 }  // namespace barely
 
-#endif  // EXAMPLES_COMPOSITION_NOTE_DURATION_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_DURATION_H_

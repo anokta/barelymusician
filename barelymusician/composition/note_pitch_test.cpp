@@ -1,5 +1,4 @@
-
-#include "examples/composition/note_pitch.h"
+#include "barelymusician/composition/note_pitch.h"
 
 #include <iterator>
 #include <vector>

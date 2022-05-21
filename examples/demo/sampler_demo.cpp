@@ -6,12 +6,12 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/instruments/sampler_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"
-#include "examples/composition/note_pitch.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 namespace {

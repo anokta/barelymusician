@@ -20,6 +20,12 @@ add_library(
 )
 
 add_library(
+  gain_processor
+  gain_processor.cpp
+  gain_processor.h
+)
+
+add_library(
   generator INTERFACE
   generator.h
 )
@@ -87,6 +93,17 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(envelope_test)
+
+add_executable(
+  gain_processor_test
+  gain_processor_test.cpp
+)
+target_link_libraries(
+  gain_processor_test
+  gain_processor
+  gtest_main
+)
+gtest_discover_tests(gain_processor_test)
 
 add_executable(
   one_pole_filter_test

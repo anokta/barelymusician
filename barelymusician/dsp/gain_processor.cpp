@@ -1,9 +1,9 @@
-#include "examples/common/gain_processor.h"
+#include "barelymusician/dsp/gain_processor.h"
 
 #include <algorithm>
 #include <cmath>
 
-namespace barely::examples {
+namespace barely {
 
 namespace {
 
@@ -48,8 +48,8 @@ double ApplyLinearRamp(double gain, double target_gain, int num_ramp_frames,
 
 }  // namespace
 
-GainProcessor::GainProcessor(int sample_rate) noexcept
-    : num_unity_ramp_frames_(static_cast<double>(sample_rate) *
+GainProcessor::GainProcessor(int frame_rate) noexcept
+    : num_unity_ramp_frames_(static_cast<double>(frame_rate) *
                              kUnityRampDurationSeconds) {}
 
 void GainProcessor::Process(double* buffer, int num_channels,
@@ -78,4 +78,4 @@ void GainProcessor::Process(double* buffer, int num_channels,
 
 void GainProcessor::SetGain(double gain) noexcept { target_gain_ = gain; }
 
-}  // namespace barely::examples
+}  // namespace barely

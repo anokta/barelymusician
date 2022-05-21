@@ -1,15 +1,15 @@
-#ifndef EXAMPLES_COMMON_GAIN_PROCESSOR_H_
-#define EXAMPLES_COMMON_GAIN_PROCESSOR_H_
+#ifndef BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_
+#define BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_
 
-namespace barely::examples {
+namespace barely {
 
 /// Gain processor with a linear ramp.
 class GainProcessor {
  public:
   /// Constructs new `GainProcessor`.
   ///
-  /// @param sample_rate Sampling rate in hz.
-  explicit GainProcessor(int sample_rate) noexcept;
+  /// @param frame_rate Frame rate in hz.
+  explicit GainProcessor(int frame_rate) noexcept;
 
   /// Processes next buffer.
   ///
@@ -37,6 +37,6 @@ class GainProcessor {
   double target_gain_ = 1.0;
 };
 
-}  // namespace barely::examples
+}  // namespace barely
 
-#endif  // EXAMPLES_COMMON_GAIN_PROCESSOR_H_
+#endif  // BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_

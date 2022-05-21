@@ -7,6 +7,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -14,6 +15,7 @@
 
 namespace {
 
+using ::barely::GainProcessor;
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
@@ -77,12 +79,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << "NoteOff(" << pitch << ") ";
   });
 
+  GainProcessor gain(kFrameRate);
+  gain.SetGain(kGain);
+
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
     instrument.Process(output, kNumChannels, kNumFrames, 0.0);
-    for (int i = 0; i < kNumChannels * kNumFrames; ++i) {
-      output[i] *= kGain;
-    }
+    gain.Process(output, kNumChannels, kNumFrames);
   });
 
   // Key down callback.

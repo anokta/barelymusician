@@ -52,7 +52,7 @@ template <typename GenericInstrumentType>
 InstrumentDefinition GetInstrumentDefinition(
     const std::vector<ParameterDefinition>& parameter_definitions) noexcept {
   return InstrumentDefinition(
-      [](void** state, int frame_rate, void* /*user_data*/) noexcept {
+      [](void** state, int frame_rate) noexcept {
         // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
         *state = static_cast<void*>(new GenericInstrumentType(frame_rate));
       },

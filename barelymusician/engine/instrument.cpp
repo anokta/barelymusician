@@ -23,7 +23,7 @@ Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
     parameters_.emplace_back(definition.parameter_definitions[index]);
   }
   if (definition.create_callback) {
-    definition.create_callback(&state_, frame_rate, definition.user_data);
+    definition.create_callback(&state_, frame_rate);
   }
   if (set_parameter_callback_) {
     for (int index = 0; index < definition.num_parameter_definitions; ++index) {

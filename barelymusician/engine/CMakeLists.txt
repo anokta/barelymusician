@@ -19,21 +19,6 @@ target_link_libraries(
 )
 
 add_library(
-  event INTERFACE
-  event.h
-)
-
-add_library(
-  event_queue
-  event_queue.cpp
-  event_queue.h
-)
-target_link_libraries(
-  event_queue
-  event
-)
-
-add_library(
   id INTERFACE
   id.h
 )
@@ -49,10 +34,25 @@ add_library(
 )
 target_link_libraries(
   instrument
-  event
-  event_queue
+  message
+  message_queue
   parameter
   include
+)
+
+add_library(
+  message INTERFACE
+  message.h
+)
+
+add_library(
+  message_queue
+  message_queue.cpp
+  message_queue.h
+)
+target_link_libraries(
+  message_queue
+  message
 )
 
 add_library(
@@ -132,19 +132,6 @@ target_link_libraries(
 gtest_discover_tests(engine_test)
 
 add_executable(
-  event_queue_test
-  event_queue_test.cpp
-)
-target_link_libraries(
-  event_queue_test
-  event
-  event_queue
-  gmock
-  gtest_main
-)
-gtest_discover_tests(event_queue_test)
-
-add_executable(
   instrument_test
   instrument_test.cpp
 )
@@ -156,6 +143,19 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(instrument_test)
+
+add_executable(
+  message_queue_test
+  message_queue_test.cpp
+)
+target_link_libraries(
+  message_queue_test
+  message
+  message_queue
+  gmock
+  gtest_main
+)
+gtest_discover_tests(message_queue_test)
 
 add_executable(
   mutable_data_test

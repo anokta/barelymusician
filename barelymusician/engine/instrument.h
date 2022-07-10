@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/event_queue.h"
+#include "barelymusician/engine/message_queue.h"
 #include "barelymusician/engine/parameter.h"
 
 namespace barely::internal {
@@ -168,8 +168,8 @@ class Instrument {
   // Data.
   std::vector<std::byte> data_;
 
-  // Event queue.
-  EventQueue event_queue_;
+  // Message queue.
+  MessageQueue message_queue_;
 };
 
 }  // namespace barely::internal

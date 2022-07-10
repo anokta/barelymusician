@@ -22,20 +22,6 @@ cc_library(
 )
 
 cc_library(
-    name = "event",
-    hdrs = ["event.h"],
-)
-
-cc_library(
-    name = "event_queue",
-    srcs = ["event_queue.cpp"],
-    hdrs = ["event_queue.h"],
-    deps = [
-        ":event",
-    ],
-)
-
-cc_library(
     name = "id",
     hdrs = ["id.h"],
     deps = [
@@ -48,10 +34,24 @@ cc_library(
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],
     deps = [
-        ":event",
-        ":event_queue",
+        ":message",
+        ":message_queue",
         ":parameter",
         "//barelymusician:include",
+    ],
+)
+
+cc_library(
+    name = "message",
+    hdrs = ["message.h"],
+)
+
+cc_library(
+    name = "message_queue",
+    srcs = ["message_queue.cpp"],
+    hdrs = ["message_queue.h"],
+    deps = [
+        ":message",
     ],
 )
 
@@ -124,21 +124,21 @@ cc_test(
 # )
 
 cc_test(
-    name = "event_queue_test",
-    srcs = ["event_queue_test.cpp"],
-    deps = [
-        ":event",
-        ":event_queue",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "instrument_test",
     srcs = ["instrument_test.cpp"],
     deps = [
         ":instrument",
         ":parameter",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "message_queue_test",
+    srcs = ["message_queue_test.cpp"],
+    deps = [
+        ":message",
+        ":message_queue",
         "@googletest//:gtest_main",
     ],
 )

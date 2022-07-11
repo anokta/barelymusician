@@ -3,17 +3,10 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//barelymusician:__subpackages__"])
 
 cc_library(
-    name = "clock",
-    srcs = ["clock.cpp"],
-    hdrs = ["clock.h"],
-)
-
-cc_library(
     name = "engine",
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
     deps = [
-        ":clock",
         ":id",
         ":instrument",
         ":mutable_data",
@@ -83,7 +76,6 @@ cc_library(
 #     srcs = ["sequence.cpp"],
 #     hdrs = ["sequence.h"],
 #     deps = [
-#         ":clock",
 #         ":id",
 #         ":instrument",
 #         ":note",
@@ -97,15 +89,6 @@ cc_library(
     hdrs = ["transport.h"],
     deps = [
         "//barelymusician:include",
-    ],
-)
-
-cc_test(
-    name = "clock_test",
-    srcs = ["clock_test.cpp"],
-    deps = [
-        ":clock",
-        "@googletest//:gtest_main",
     ],
 )
 

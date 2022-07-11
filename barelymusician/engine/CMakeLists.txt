@@ -1,17 +1,10 @@
 add_library(
-  clock
-  clock.cpp
-  clock.h
-)
-
-add_library(
   engine
   engine.cpp
   engine.h
 )
 target_link_libraries(
   engine
-  clock
   id
   instrument
   mutable_data
@@ -80,20 +73,6 @@ target_link_libraries(
 )
 
 add_library(
-  sequence
-  sequence.cpp
-  sequence.h
-)
-target_link_libraries(
-  sequence
-  clock
-  id
-  instrument
-  note
-  find_or_null
-)
-
-add_library(
   transport
   transport.cpp
   transport.h
@@ -102,18 +81,6 @@ target_link_libraries(
   transport
   include
 )
-
-add_executable(
-  clock_test
-  clock_test.cpp
-)
-target_link_libraries(
-  clock_test
-  clock
-  gmock
-  gtest_main
-)
-gtest_discover_tests(clock_test)
 
 add_executable(
   engine_test
@@ -179,22 +146,6 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(parameter_test)
-
-add_executable(
-  sequence_test
-  sequence_test.cpp
-)
-target_link_libraries(
-  sequence_test
-  id
-  instrument
-  note
-  sequence
-  transport
-  gmock
-  gtest_main
-)
-gtest_discover_tests(sequence_test)
 
 add_executable(
   transport_test

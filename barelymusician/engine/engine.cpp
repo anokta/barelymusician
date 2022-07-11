@@ -2,6 +2,7 @@
 #include "barelymusician/engine/engine.h"
 
 #include <cassert>
+#include <limits>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -9,6 +10,16 @@
 #include "barelymusician/engine/instrument.h"
 
 namespace barely::internal {
+
+namespace {
+
+// Converts seconds to minutes.
+constexpr double kMinutesFromSeconds = 1.0 / 60.0;
+
+// Converts minutes to seconds.
+constexpr double kSecondsFromMinutes = 60.0;
+
+}  // namespace
 
 Engine::~Engine() noexcept {
   for (auto& [instrument_id, instrument] : instruments_) {
@@ -46,13 +57,29 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
   return false;
 }
 
-Clock& Engine::GetClock() noexcept { return clock_; }
+double Engine::GetBeats(double seconds) const noexcept {
+  return tempo_ * seconds * kMinutesFromSeconds;
+}
 
 Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
   if (auto* instrument = FindOrNull(instruments_, instrument_id)) {
     return instrument->get();
   }
   return nullptr;
+}
+
+double Engine::GetSeconds(double beats) const noexcept {
+  return (tempo_ > 0.0)  ? beats * kSecondsFromMinutes / tempo_
+         : (beats > 0.0) ? std::numeric_limits<double>::max()
+         : (beats < 0.0) ? std::numeric_limits<double>::lowest()
+                         : 0.0;
+}
+
+double Engine::GetTempo() const noexcept { return tempo_; }
+
+void Engine::SetTempo(double tempo) noexcept {
+  assert(tempo_ >= 0.0);
+  tempo_ = tempo;
 }
 
 double Engine::GetTimestamp() const noexcept { return timestamp_; }

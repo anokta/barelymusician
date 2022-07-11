@@ -4,7 +4,6 @@
 #include <memory>
 #include <unordered_map>
 
-#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
@@ -43,16 +42,28 @@ class Engine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool DestroyInstrument(Id instrument_id) noexcept;
 
-  /// Returns clock.
+  /// Returns beats from seconds.
   ///
-  /// @return Clock.
-  Clock& GetClock() noexcept;
+  /// @param seconds Number of seconds.
+  /// @return Number of beats.
+  [[nodiscard]] double GetBeats(double seconds) const noexcept;
 
   /// Returns instrument.
   ///
   /// @param instrument_id Instrument identifier.
   /// @return Pointer to instrument.
-  Instrument* GetInstrument(Id instrument_id) noexcept;
+  [[nodiscard]] Instrument* GetInstrument(Id instrument_id) noexcept;
+
+  /// Returns seconds from beats.
+  ///
+  /// @param beats Number of beats.
+  /// @return Number of seconds.
+  [[nodiscard]] double GetSeconds(double beats) const noexcept;
+
+  /// Returns tempo.
+  ///
+  /// @return Tempo in beats per minute.
+  [[nodiscard]] double GetTempo() const noexcept;
 
   /// Returns timestamp.
   ///
@@ -71,6 +82,11 @@ class Engine {
                          int num_output_channels, int num_output_frames,
                          double timestamp) noexcept;
 
+  /// Sets tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept;
+
   /// Updates engine at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
@@ -85,17 +101,17 @@ class Engine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateInstrumentReferenceMap() noexcept;
 
-  // Clock.
-  Clock clock_;
-
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;
 
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
+  // Tempo in beats per minute.
+  double tempo_ = 120.0;
+
   // Timestamp in seconds.
-  double timestamp_;
+  double timestamp_ = 0.0;
 };
 
 }  // namespace barely::internal

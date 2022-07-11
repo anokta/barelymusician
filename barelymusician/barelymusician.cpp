@@ -271,7 +271,7 @@ BarelyStatus BarelyMusician_GetBeats(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_beats) return BarelyStatus_kInvalidArgument;
 
-  *out_beats = handle->engine.GetClock().GetBeats(seconds);
+  *out_beats = handle->engine.GetBeats(seconds);
   return BarelyStatus_kOk;
 }
 
@@ -280,7 +280,7 @@ BarelyStatus BarelyMusician_GetSeconds(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_seconds) return BarelyStatus_kInvalidArgument;
 
-  *out_seconds = handle->engine.GetClock().GetSeconds(beats);
+  *out_seconds = handle->engine.GetSeconds(beats);
   return BarelyStatus_kOk;
 }
 
@@ -289,7 +289,7 @@ BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_tempo) return BarelyStatus_kInvalidArgument;
 
-  *out_tempo = handle->engine.GetClock().GetTempo();
+  *out_tempo = handle->engine.GetTempo();
   return BarelyStatus_kOk;
 }
 
@@ -307,7 +307,7 @@ BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (tempo < 0.0) return BarelyStatus_kInvalidArgument;
 
-  handle->engine.GetClock().SetTempo(tempo);
+  handle->engine.SetTempo(tempo);
   return BarelyStatus_kOk;
 }
 
@@ -410,22 +410,12 @@ BarelyStatus BarelySequencer_Destroy(BarelyMusicianHandle handle,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelySequencer_GetBeginOffset(BarelyMusicianHandle handle,
-                                            BarelyId sequencer_id,
-                                            double* out_begin_offset) {
+BarelyStatus BarelySequencer_GetLoopBeginPosition(
+    BarelyMusicianHandle handle, BarelyId sequencer_id,
+    double* out_loop_begin_position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (!out_begin_offset) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencer_GetLoopBeginOffset(BarelyMusicianHandle handle,
-                                                BarelyId sequencer_id,
-                                                double* out_loop_begin_offset) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (!out_loop_begin_offset) return BarelyStatus_kInvalidArgument;
+  if (!out_loop_begin_position) return BarelyStatus_kInvalidArgument;
 
   return BarelyStatus_kUnimplemented;
 }
@@ -470,18 +460,9 @@ BarelyStatus BarelySequencer_IsPlaying(BarelyMusicianHandle handle,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelySequencer_SetBeginOffset(
+BarelyStatus BarelySequencer_SetLoopBeginPosition(
     BarelyMusicianHandle handle, BarelyId sequencer_id,
-    [[maybe_unused]] double begin_offset) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencer_SetLoopBeginOffset(
-    BarelyMusicianHandle handle, BarelyId sequencer_id,
-    [[maybe_unused]] double loop_begin_offset) {
+    [[maybe_unused]] double loop_begin_position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 

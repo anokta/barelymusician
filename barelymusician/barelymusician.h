@@ -418,25 +418,15 @@ BARELY_EXPORT BarelyStatus BarelySequencer_Create(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus BarelySequencer_Destroy(BarelyMusicianHandle handle,
                                                    BarelyId sequencer_id);
 
-/// Gets sequencer begin offset in beats.
+/// Gets sequencer loop begin position.
 ///
 /// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
-/// @param out_begin_offset Output begin offset in beats.
+/// @param out_loop_begin_position Output loop begin position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelySequencer_GetBeginOffset(BarelyMusicianHandle handle,
-                               BarelyId sequencer_id, double* out_begin_offset);
-
-/// Gets sequencer loop begin offset.
-///
-/// @param handle Musician handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param out_loop_begin_offset Output loop begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_GetLoopBeginOffset(
+BARELY_EXPORT BarelyStatus BarelySequencer_GetLoopBeginPosition(
     BarelyMusicianHandle handle, BarelyId sequencer_id,
-    double* out_loop_begin_offset);
+    double* out_loop_begin_position);
 
 /// Gets sequencer loop length.
 ///
@@ -475,24 +465,15 @@ BARELY_EXPORT BarelyStatus BarelySequencer_IsLooping(
 BARELY_EXPORT BarelyStatus BarelySequencer_IsPlaying(
     BarelyMusicianHandle handle, BarelyId sequencer_id, bool* out_is_playing);
 
-/// Sets sequencer begin offset.
+/// Sets sequencer loop begin position.
 ///
 /// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
-/// @param begin_offset Begin offset in beats.
+/// @param loop_begin_position Loop begin position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_SetBeginOffset(
-    BarelyMusicianHandle handle, BarelyId sequencer_id, double begin_offset);
-
-/// Sets sequencer loop begin offset.
-///
-/// @param handle Musician handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param loop_begin_offset Loop begin offset in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_SetLoopBeginOffset(
+BARELY_EXPORT BarelyStatus BarelySequencer_SetLoopBeginPosition(
     BarelyMusicianHandle handle, BarelyId sequencer_id,
-    double loop_begin_offset);
+    double loop_begin_position);
 
 /// Sets sequencer loop length.
 ///
@@ -1238,28 +1219,15 @@ class Sequencer {
     return SequencerEvent(handle_, id_, position, callback);
   }
 
-  /// Returns begin offset.
+  /// Returns loop begin position.
   ///
-  /// @return Begin offset in beats.
-  [[nodiscard]] double GetBeginOffset() const {
-    double begin_offset = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelySequencer_GetBeginOffset(handle_, id_, &begin_offset);
+  /// @return Loop begin position in beats.
+  [[nodiscard]] double GetLoopBeginPosition() const {
+    double loop_begin_position = 0.0;
+    [[maybe_unused]] const Status status = BarelySequencer_GetLoopBeginPosition(
+        handle_, id_, &loop_begin_position);
     assert(status.IsOk());
-    return begin_offset;
-  }
-
-  // TODO(#85): Implement `GetEventCallback` and `GetEventPosition`.
-
-  /// Returns loop begin offset.
-  ///
-  /// @return Loop begin offset in beats.
-  [[nodiscard]] double GetLoopBeginOffset() const {
-    double loop_begin_offset = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelySequencer_GetLoopBeginOffset(handle_, id_, &loop_begin_offset);
-    assert(status.IsOk());
-    return loop_begin_offset;
+    return loop_begin_position;
   }
 
   /// Returns loop length.
@@ -1306,24 +1274,13 @@ class Sequencer {
     return is_playing;
   }
 
-  // TODO(#85): Implement `RemoveEvent`.
-
-  /// Sets begin offset.
+  /// Sets loop begin position.
   ///
-  /// @param begin_offset Begin offset in beats.
+  /// @param loop_begin_position Loop begin position in beats.
   /// @return Status.
-  Status SetBeginOffset(double begin_offset) {
-    return BarelySequencer_SetBeginOffset(handle_, id_, begin_offset);
-  }
-
-  // TODO(#85): Implement `SetEventCallback` and `SetEventPosition`.
-
-  /// Sets loop begin offset.
-  ///
-  /// @param loop_begin_offset Loop begin offset in beats.
-  /// @return Status.
-  Status SetLoopBeginOffset(double loop_begin_offset) {
-    return BarelySequencer_SetLoopBeginOffset(handle_, id_, loop_begin_offset);
+  Status SetLoopBeginPosition(double loop_begin_position) {
+    return BarelySequencer_SetLoopBeginPosition(handle_, id_,
+                                                loop_begin_position);
   }
 
   /// Sets loop length.

@@ -211,8 +211,8 @@ TEST(EngineTest, PlaySequence) {
   EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
 
   // Start playback with one beat per second tempo.
-  engine.GetClock().SetTempo(60.0);
-  EXPECT_DOUBLE_EQ(engine.GetClock().GetTempo(), 60.0);
+  engine.SetTempo(60.0);
+  EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
 
   EXPECT_FALSE(engine.GetTransport().IsPlaying());
   engine.Start();
@@ -245,6 +245,134 @@ TEST(EngineTest, PlaySequence) {
   // Destroy instrument.
   EXPECT_TRUE(engine.DestroyInstrument(kInstrumentId));
   EXPECT_THAT(engine.GetInstrument(kInstrumentId), IsNull());
+}
+
+// Tests that engine returns beats and seconds as expected.
+TEST(EngineTest, GetBeatsSeconds) {
+  Engine engine;
+  EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(0.0)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(0.0)), 0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(1.0), 2.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(1.0)), 1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(1.0), 0.5);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(1.0)), 1.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(-1.0), -2.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(-1.0)), -1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(-1.0), -0.5);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(-1.0)), -1.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(2.5), 5.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(2.5)), 2.5);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(2.5), 1.25);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(2.5)), 2.5);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(10.0), 20.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(10.0)), 10.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(10.0), 5.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(10.0)), 10.0);
+
+  // Increase tempo.
+  engine.SetTempo(150.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(0.0)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(0.0)), 0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(1.0), 2.5);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(1.0)), 1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(1.0), 0.4);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(1.0)), 1.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(-1.0), -2.5);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(-1.0)), -1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(-1.0), -0.4);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(-1.0)), -1.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(2.5), 6.25);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(2.5)), 2.5);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(2.5), 1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(2.5)), 2.5);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(10.0), 25.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(10.0)), 10.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(10.0), 4.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(10.0)), 10.0);
+
+  // Decrease tempo.
+  engine.SetTempo(60.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(0.0)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(0.0)), 0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(1.0), 1.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(1.0)), 1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(1.0), 1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(1.0)), 1.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(-1.0), -1.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(-1.0)), -1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(-1.0), -1.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(-1.0)), -1.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(2.5), 2.5);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(2.5)), 2.5);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(2.5), 2.5);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(2.5)), 2.5);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(10.0), 10.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(10.0)), 10.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(10.0), 10.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(10.0)), 10.0);
+
+  // Set tempo to zero.
+  engine.SetTempo(0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(0.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(0.0)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(0.0)), 0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(1.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(1.0)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(1.0), std::numeric_limits<double>::max());
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(1.0)), 0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(-1.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(-1.0)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(-1.0),
+                   std::numeric_limits<double>::lowest());
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(-1.0)), 0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(2.5), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(2.5)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(2.5), std::numeric_limits<double>::max());
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(2.5)), 0.0);
+
+  EXPECT_DOUBLE_EQ(engine.GetBeats(10.0), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetBeats(engine.GetSeconds(10.0)), 0.0);
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(10.0), std::numeric_limits<double>::max());
+  EXPECT_DOUBLE_EQ(engine.GetSeconds(engine.GetBeats(10.0)), 0.0);
+}
+
+// Tests that engine sets its tempo as expected.
+TEST(EngineTest, SetTempo) {
+  Engine engine;
+  EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
+
+  engine.SetTempo(200.0);
+  EXPECT_DOUBLE_EQ(engine.GetTempo(), 200.0);
+
+  engine.SetTempo(0.0);
+  EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
 }
 
 // Tests that engine starts and stops playback as expected.

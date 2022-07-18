@@ -54,14 +54,6 @@ cc_library(
 )
 
 cc_library(
-    name = "note",
-    hdrs = ["note.h"],
-    deps = [
-        "//barelymusician:include",
-    ],
-)
-
-cc_library(
     name = "parameter",
     srcs = ["parameter.cpp"],
     hdrs = ["parameter.h"],
@@ -70,18 +62,15 @@ cc_library(
     ],
 )
 
-# TODO(#85): Refactor to conform `Sequencer`.
-# cc_library(
-#     name = "sequence",
-#     srcs = ["sequence.cpp"],
-#     hdrs = ["sequence.h"],
-#     deps = [
-#         ":id",
-#         ":instrument",
-#         ":note",
-#         "//barelymusician/common:find_or_null",
-#     ],
-# )
+cc_library(
+    name = "sequencer",
+    srcs = ["sequencer.cpp"],
+    hdrs = ["sequencer.h"],
+    deps = [
+        ":id",
+        "//barelymusician/common:find_or_null",
+    ],
+)
 
 cc_library(
     name = "transport",
@@ -100,7 +89,6 @@ cc_library(
 #         ":engine",
 #         ":id",
 #         ":instrument",
-#         ":note",
 #         ":parameter",
 #         "@googletest//:gtest_main",
 #     ],
@@ -144,19 +132,7 @@ cc_test(
     ],
 )
 
-# TODO(#85): Refactor to conform `Sequencer`.
-# cc_test(
-#     name = "sequence_test",
-#     srcs = ["sequence_test.cpp"],
-#     deps = [
-#         ":id",
-#         ":instrument",
-#         ":note",
-#         ":sequence",
-#         ":transport",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+# TODO(#85): Add `sequencer_test`.
 
 cc_test(
     name = "transport_test",

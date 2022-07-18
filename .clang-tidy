@@ -26,8 +26,10 @@ Checks: >
 CheckOptions:
   - key: bugprone-easily-swappable-parameters.ModelImplicitConversions
     value: '0'
+  - key: readability-identifier-length.IgnoredParameterNames
+    value: '(id|it)'
   - key: readability-identifier-length.IgnoredVariableNames
-    value: 'it'
+    value: '(id|it)'
   - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
     value: '1'
   - key: readability-braces-around-statements.ShortStatementLines

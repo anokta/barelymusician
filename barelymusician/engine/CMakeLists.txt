@@ -54,15 +54,6 @@ add_library(
 )
 
 add_library(
-  note INTERFACE
-  note.h
-)
-target_link_libraries(
-  note INTERFACE
-  include
-)
-
-add_library(
   parameter
   parameter.cpp
   parameter.h
@@ -70,6 +61,17 @@ add_library(
 target_link_libraries(
   parameter
   include
+)
+
+add_library(
+  sequencer
+  sequencer.cpp
+  sequencer.h
+)
+target_link_libraries(
+  sequencer
+  id
+  find_or_null
 )
 
 add_library(
@@ -91,7 +93,6 @@ target_link_libraries(
   engine
   id
   instrument
-  note
   parameter
   gmock
   gtest_main

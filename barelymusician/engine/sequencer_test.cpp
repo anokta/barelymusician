@@ -1,11 +1,9 @@
-#include "barelymusician/engine/sequence.h"
+#include "barelymusician/engine/sequencer.h"
 
+#include <limits>
 #include <vector>
 
-#include "barelymusician/engine/clock.h"
 #include "barelymusician/engine/id.h"
-#include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/note.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -19,8 +17,8 @@ using ::testing::NotNull;
 using ::testing::Pair;
 using ::testing::Pointee;
 
-// Tests that sequence processes a single note as expected.
-TEST(SequenceTest, ProcessSingleNote) {
+// Tests that sequencer triggers a single note as expected.
+TEST(SequencerTest, ProcessSingleNote) {
   const Id kId = 1;
   const Note kNote = {1.0, 10.0, 0.25};
   const double kPosition = 5.0;
@@ -146,8 +144,8 @@ TEST(SequenceTest, ProcessSingleNote) {
   EXPECT_TRUE(note_off_timestamps.empty());
 }
 
-// Tests that sequence processes multiple notes as expected.
-TEST(SequenceTest, ProcessMultipleNotes) {
+// Tests that sequencer triggers multiple notes as expected.
+TEST(SequencerTest, ProcessMultipleNotes) {
   Clock clock;
   Sequence sequence(clock);
   EXPECT_THAT(sequence.GetInstrument(), IsNull());
@@ -232,6 +230,107 @@ TEST(SequenceTest, ProcessMultipleNotes) {
   sequence.Process(0.0, 10.0, get_timestamp_fn);
   EXPECT_TRUE(note_ons.empty());
   EXPECT_TRUE(note_offs.empty());
+}
+
+// Tests that sequencer triggers a single event as expected.
+TEST(SequencerTest, TriggerSingleEvent) {
+  Sequencer sequencer;
+
+  EXPECT_FALSE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.0);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(),
+                   std::numeric_limits<double>::max());
+
+  // Add event.
+  int num_event_triggers = 0;
+  sequencer.AddEvent(Id{1}, 0.1, [&](double position) {
+    EXPECT_DOUBLE_EQ(position, 0.1);
+    ++num_event_triggers;
+  });
+  EXPECT_FALSE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.0);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(),
+                   std::numeric_limits<double>::max());
+  EXPECT_EQ(num_event_triggers, 0);
+
+  // Start playback.
+  sequencer.Start();
+  EXPECT_TRUE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.0);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.1);
+  EXPECT_EQ(num_event_triggers, 0);
+
+  // Trigger event.
+  sequencer.Update(0.1);
+  EXPECT_TRUE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.1);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.0);
+  EXPECT_EQ(num_event_triggers, 0);
+
+  sequencer.TriggerAllEventsAtCurrentPosition();
+  EXPECT_TRUE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.1);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(),
+                   std::numeric_limits<double>::max());
+  EXPECT_EQ(num_event_triggers, 1);
+
+  // Set looping on.
+  sequencer.SetLooping(true);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 1.0);
+
+  // Trigger next event with a loop back.
+  sequencer.Update(1.0);
+  EXPECT_TRUE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.1);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.0);
+  EXPECT_EQ(num_event_triggers, 1);
+
+  sequencer.TriggerAllEventsAtCurrentPosition();
+  EXPECT_TRUE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.1);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 1.0);
+  EXPECT_EQ(num_event_triggers, 2);
+
+  // Stop playback.
+  EXPECT_FALSE(sequencer.IsPlaying());
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.1);
+  EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(),
+                   std::numeric_limits<double>::max());
+  EXPECT_EQ(num_event_triggers, 2);
+}
+
+// Tests that sequencer sets its current position as expected.
+TEST(SequencerTest, SetPosition) {
+  Sequencer sequencer;
+  EXPECT_EQ(sequencer.GetPosition(), 0.0);
+
+  sequencer.SetPosition(2.75);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 2.75);
+
+  sequencer.SetPosition(1.10);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 1.10);
+
+  // Set looping on which should wrap the current position back.
+  sequencer.SetLooping(true);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.10);
+
+  sequencer.SetPosition(3.5);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.5);
+
+  // Set loop begin position.
+  sequencer.SetLoopBeginPosition(0.75);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.75);
+
+  // Set loop length.
+  sequencer.SetLoopLength(2.0);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.75);
+
+  sequencer.SetPosition(4.0f);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 1.0);
+
+  // Resetting position before the loop should still be okay.
+  sequencer.SetPosition(0.25);
+  EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
 }
 
 }  // namespace

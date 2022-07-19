@@ -3,10 +3,12 @@
 
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
+#include "barelymusician/engine/sequencer.h"
 
 namespace barely::internal {
 
@@ -35,12 +37,27 @@ class Engine {
   bool CreateInstrument(Id instrument_id, Instrument::Definition definition,
                         int frame_rate) noexcept;
 
+  /// Creates new sequencer.
+  ///
+  /// @param sequencer_id Sequencer identifier.
+  /// @param priority Sequencer priority.
+  /// @return True if successful, false otherwise.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  bool CreateSequencer(Id sequencer_id, int priority) noexcept;
+
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument identifier.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool DestroyInstrument(Id instrument_id) noexcept;
+
+  /// Destroys sequencer.
+  ///
+  /// @param sequencer_id Sequencer identifier.
+  /// @return True if successful, false otherwise.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  bool DestroySequencer(Id sequencer_id) noexcept;
 
   /// Returns beats from seconds.
   ///
@@ -53,6 +70,12 @@ class Engine {
   /// @param instrument_id Instrument identifier.
   /// @return Pointer to instrument.
   [[nodiscard]] Instrument* GetInstrument(Id instrument_id) noexcept;
+
+  /// Returns sequencer.
+  ///
+  /// @param sequencer_id Sequencer identifier.
+  /// @return Pointer to sequencer.
+  [[nodiscard]] Sequencer* GetSequencer(Id sequencer_id) noexcept;
 
   /// Returns seconds from beats.
   ///
@@ -106,6 +129,12 @@ class Engine {
 
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;
+
+  // Map of sequencers by sequencer priority-identifier pairs.
+  std::map<std::pair<int, Id>, Sequencer> sequencers_;
+
+  // Map of sequencer priority-reference pairs by sequencer identifiers.
+  std::unordered_map<Id, std::pair<int, Sequencer*>> sequencer_refs_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

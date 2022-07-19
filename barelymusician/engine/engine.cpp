@@ -8,6 +8,7 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/sequencer.h"
 
 namespace barely::internal {
 
@@ -45,6 +46,18 @@ bool Engine::CreateInstrument(Id instrument_id,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
+bool Engine::CreateSequencer(Id sequencer_id, int priority) noexcept {
+  assert(sequencer_id > kInvalid);
+  if (const auto [it, success] =
+          sequencers_.emplace(std::pair{priority, sequencer_id}, Sequencer{});
+      success) {
+    sequencer_refs_.emplace(sequencer_id, std::pair{priority, &it->second});
+    return true;
+  }
+  return false;
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
 bool Engine::DestroyInstrument(Id instrument_id) noexcept {
   if (const auto it = instruments_.find(instrument_id);
       it != instruments_.end()) {
@@ -57,6 +70,17 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
   return false;
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
+bool Engine::DestroySequencer(Id sequencer_id) noexcept {
+  if (const auto it = sequencer_refs_.find(sequencer_id);
+      it != sequencer_refs_.end()) {
+    sequencers_.erase(std::pair{it->second.first, sequencer_id});
+    sequencer_refs_.erase(it);
+    return true;
+  }
+  return false;
+}
+
 double Engine::GetBeats(double seconds) const noexcept {
   return tempo_ * seconds * kMinutesFromSeconds;
 }
@@ -64,6 +88,13 @@ double Engine::GetBeats(double seconds) const noexcept {
 Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
   if (auto* instrument = FindOrNull(instruments_, instrument_id)) {
     return instrument->get();
+  }
+  return nullptr;
+}
+
+Sequencer* Engine::GetSequencer(Id sequencer_id) noexcept {
+  if (auto* sequencer_ref = FindOrNull(sequencer_refs_, sequencer_id)) {
+    return sequencer_ref->second;
   }
   return nullptr;
 }
@@ -105,8 +136,30 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
-  if (timestamp_ < timestamp) {
-    timestamp_ = timestamp;
+  while (timestamp_ < timestamp) {
+    double update_duration = GetBeats(timestamp - timestamp_);
+    bool has_events_to_trigger = false;
+    for (const auto& [priority_id_pair, sequencer] : sequencers_) {
+      if (const double duration = sequencer.GetDurationToNextEvent();
+          duration < update_duration) {
+        update_duration = duration;
+        has_events_to_trigger = true;
+      }
+    }
+    if (has_events_to_trigger) {
+      timestamp_ += GetSeconds(update_duration);
+      for (auto& [priority_id_pair, sequencer] : sequencers_) {
+        sequencer.Update(update_duration);
+        if (sequencer.GetDurationToNextEvent() <= update_duration) {
+          sequencer.TriggerAllEventsAtCurrentPosition();
+        }
+      }
+    } else {
+      for (auto& [priority_id_pair, sequencer] : sequencers_) {
+        sequencer.Update(update_duration);
+      }
+      timestamp_ = timestamp;
+    }
   }
 }
 

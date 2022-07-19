@@ -15,6 +15,7 @@ namespace {
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::Sequencer;
 using ::barely::SynthInstrument;
 using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
@@ -63,16 +64,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
   metronome.SetParameter(SynthParameter::kRelease, kRelease);
   metronome.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
-  // Beat callback.
-  const auto beat_callback = [&](double position, double timestamp) {
+  // Add beat event.
+  Sequencer sequencer = musician.CreateSequencer();
+  sequencer.SetLooping(true);
+  int beat = 0;
+  const auto beat_callback = [&]([[maybe_unused]] double position) {
     const int current_bar = static_cast<int>(position) / kNumBeats;
     const int current_beat = static_cast<int>(position) % kNumBeats;
-    ConsoleLog() << "Tick " << current_bar << "." << current_beat;
-    const double pitch = (current_beat == 0) ? kBarPitch : kBeatPitch;
-    metronome.StartNoteAt(timestamp, pitch, kGain);
-    metronome.StopNoteAt(timestamp, pitch);
+    ConsoleLog() << "Tick " << (beat / kNumBeats) << "." << (beat % kNumBeats);
+    const double pitch = (beat % kNumBeats == 0) ? kBarPitch : kBeatPitch;
+    metronome.StartNote(pitch, kGain);
+    metronome.StopNote(pitch);
+    ++beat;
   };
-  musician.SetBeatCallback(beat_callback);
+  sequencer.AddEvent(0.0, beat_callback);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
@@ -94,11 +99,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (musician.IsPlaying()) {
-          musician.Stop();
+        if (sequencer.IsPlaying()) {
+          sequencer.Stop();
           ConsoleLog() << "Stopped playback";
         } else {
-          musician.Start();
+          sequencer.Start();
           ConsoleLog() << "Started playback";
         }
         return;
@@ -128,7 +133,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
-  musician.Start();
+  sequencer.Start();
 
   while (!quit) {
     input_manager.Update();
@@ -138,7 +143,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  musician.Stop();
+  sequencer.Stop();
   audio_output.Stop();
 
   return 0;

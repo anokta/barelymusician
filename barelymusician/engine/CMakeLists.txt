@@ -8,6 +8,7 @@ target_link_libraries(
   id
   instrument
   mutable_data
+  sequencer
   find_or_null
 )
 
@@ -74,16 +75,6 @@ target_link_libraries(
   find_or_null
 )
 
-add_library(
-  transport
-  transport.cpp
-  transport.h
-)
-target_link_libraries(
-  transport
-  include
-)
-
 add_executable(
   engine_test
   engine_test.cpp
@@ -148,14 +139,14 @@ target_link_libraries(
 )
 gtest_discover_tests(parameter_test)
 
-add_executable(
-  transport_test
-  transport_test.cpp
+add_library(
+  sequencer_test
+  sequencer_test.cpp
 )
 target_link_libraries(
-  transport_test
-  transport
+  sequencer_test
+  id
+  sequencer
   gmock
   gtest_main
 )
-gtest_discover_tests(transport_test)

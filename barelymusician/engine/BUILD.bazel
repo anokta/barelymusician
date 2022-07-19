@@ -10,6 +10,7 @@ cc_library(
         ":id",
         ":instrument",
         ":mutable_data",
+        ":sequencer",
         "//barelymusician/common:find_or_null",
     ],
 )
@@ -68,20 +69,12 @@ cc_library(
     hdrs = ["sequencer.h"],
     deps = [
         ":id",
+        "//barelymusician:include",
         "//barelymusician/common:find_or_null",
     ],
 )
 
-cc_library(
-    name = "transport",
-    srcs = ["transport.cpp"],
-    hdrs = ["transport.h"],
-    deps = [
-        "//barelymusician:include",
-    ],
-)
-
-# TODO(#85): Re-enable after `Sequencer` is added to capi.
+# TODO(#85): Re-enable after `Sequencer` is fully added to capi.
 # cc_test(
 #     name = "engine_test",
 #     srcs = ["engine_test.cpp"],
@@ -132,13 +125,12 @@ cc_test(
     ],
 )
 
-# TODO(#85): Add `sequencer_test`.
-
-cc_test(
-    name = "transport_test",
-    srcs = ["transport_test.cpp"],
-    deps = [
-        ":transport",
-        "@googletest//:gtest_main",
-    ],
-)
+# TODO(#107): These tests might require fixed-point for stability.
+# cc_test(
+#     name = "sequencer_test",
+#     srcs = ["sequencer_test.cpp"],
+#     deps = [
+#         ":sequencer",
+#         "@googletest//:gtest_main",
+#     ],
+# )

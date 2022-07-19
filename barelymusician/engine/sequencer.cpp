@@ -19,33 +19,35 @@ bool Sequencer::AddEvent(Id id, double position,
   assert(callback);
   if (positions_.emplace(id, position).second) {
     callbacks_.emplace(std::pair{position, id}, std::move(callback));
-    next_callback_ = std::nullopt;
     return true;
   }
   return false;
 }
 
 double Sequencer::GetDurationToNextEvent() const noexcept {
-  double next_event_position = std::numeric_limits<double>::max();
-
+  double next_position = std::numeric_limits<double>::max();
+  if (!is_playing_ ||
+      (last_triggered_position_ && *last_triggered_position_ == position_)) {
+    return next_position;
+  }
   // Check next events.
   if (const auto next_callback = GetNextEventCallback();
       next_callback != callbacks_.end()) {
-    next_event_position = next_callback->first.first;
-    if (is_looping_ && next_event_position < position_) {
-      next_event_position += loop_length_;
+    next_position = next_callback->first.first;
+    if (is_looping_ && next_position < position_) {
+      next_position += loop_length_;
     }
   }
   // Check one-off events.
   if (!one_off_callbacks_.empty() &&
-      one_off_callbacks_.begin()->first < next_event_position) {
-    next_event_position = one_off_callbacks_.begin()->first;
+      one_off_callbacks_.begin()->first < next_position) {
+    next_position = one_off_callbacks_.begin()->first;
   }
 
-  if (next_event_position < std::numeric_limits<double>::max()) {
-    return next_event_position - position_;
+  if (next_position < std::numeric_limits<double>::max()) {
+    return next_position - position_;
   }
-  return next_event_position;
+  return next_position;
 }
 
 const Sequencer::EventCallback* Sequencer::GetEventCallback(
@@ -75,8 +77,6 @@ bool Sequencer::IsPlaying() const noexcept { return is_playing_; }
 bool Sequencer::RemoveEvent(Id id) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
-    next_callback_ = std::nullopt;
-
     callbacks_.erase(std::pair{position_it->second, id});
     positions_.erase(position_it);
     return true;
@@ -107,8 +107,6 @@ bool Sequencer::SetEventPosition(Id id, double position) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     if (position_it->second != position) {
-      next_callback_ = std::nullopt;
-
       const auto it = callbacks_.find(std::pair{position_it->second, id});
       auto node = callbacks_.extract(it);
       node.key().first = position;
@@ -122,37 +120,36 @@ bool Sequencer::SetEventPosition(Id id, double position) noexcept {
 
 void Sequencer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) return;
-  next_callback_ = std::nullopt;
-
   loop_begin_position_ = std::min(loop_begin_position, loop_length_);
+  if (is_looping_) {
+    position_ = loop_begin_position_ +
+                std::fmod(position_ - loop_begin_position_, loop_length_);
+  }
 }
 
 void Sequencer::SetLoopLength(double loop_length) noexcept {
   assert(loop_length >= 0.0);
   if (loop_length_ == loop_length) return;
-  next_callback_ = std::nullopt;
-
   loop_length_ = loop_length;
   if (is_looping_) {
-    position_ = std::fmod(position_, loop_length_);
+    position_ = loop_begin_position_ +
+                std::fmod(position_ - loop_begin_position_, loop_length_);
   }
 }
 
 void Sequencer::SetLooping(bool is_looping) noexcept {
   if (is_looping_ == is_looping) return;
-  next_callback_ = std::nullopt;
-
   is_looping_ = is_looping;
   if (is_looping_) {
-    position_ = std::fmod(position_, loop_length_);
+    position_ = loop_begin_position_ +
+                std::fmod(position_ - loop_begin_position_, loop_length_);
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Sequencer::SetPosition(double position) noexcept {
   if (position_ == position) return;
-  next_callback_ = std::nullopt;
-
+  last_triggered_position_ = std::nullopt;
   one_off_callbacks_.erase(one_off_callbacks_.begin(),
                            one_off_callbacks_.find(position));
   if (is_looping_ && position - loop_begin_position_ >= loop_length_) {
@@ -189,30 +186,30 @@ void Sequencer::TriggerAllEventsAtCurrentPosition() noexcept {
     one_off_callbacks_.erase(one_off_callbacks_.begin(), it);
   }
   // Trigger next events.
-  auto& callback = GetNextEventCallback();
+  auto callback = GetNextEventCallback();
   while (callback != callbacks_.end() && callback->first.first <= position_) {
     callback->second(position_);
     ++callback;
   }
+  last_triggered_position_ = position_;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Sequencer::Update(double duration) noexcept {
-  assert(duration >= 0.0 && duration <= GetDurationToNextEvent());
-  SetPosition(position_ + duration);
+  if (is_playing_) {
+    assert(duration >= 0.0 && duration <= GetDurationToNextEvent());
+    SetPosition(position_ + duration);
+  }
 }
 
-std::map<std::pair<double, Id>, Sequencer::EventCallback>::const_iterator&
+std::map<std::pair<double, Id>, Sequencer::EventCallback>::const_iterator
 Sequencer::GetNextEventCallback() const noexcept {
-  if (!next_callback_) {
-    auto it = callbacks_.lower_bound(std::pair{position_, kInvalid});
-    if (it == callbacks_.end() && is_looping_) {
-      // Loop back to `loop_begin_position_`.
-      it = callbacks_.lower_bound(std::pair{loop_begin_position_, kInvalid});
-    }
-    *next_callback_ = it;
+  auto it = callbacks_.lower_bound(std::pair{position_, kInvalid});
+  if (it == callbacks_.end() && is_looping_) {
+    // Loop back to `loop_begin_position_`.
+    it = callbacks_.lower_bound(std::pair{loop_begin_position_, kInvalid});
   }
-  return *next_callback_;
+  return it;
 }
 
 }  // namespace barely::internal

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/id.h"
 
 namespace barely::internal {
@@ -14,10 +15,8 @@ namespace barely::internal {
 /// Class that wraps sequencer.
 class Sequencer {
  public:
-  /// Event callback signature.
-  ///
-  /// @param position Position in beats.
-  using EventCallback = std::function<void(double position)>;
+  /// Event callback alias.
+  using EventCallback = barely::Sequencer::EventCallback;
 
   /// Adds new event at position.
   ///
@@ -133,7 +132,7 @@ class Sequencer {
 
  private:
   // Returns next event callback.
-  std::map<std::pair<double, Id>, EventCallback>::const_iterator&
+  std::map<std::pair<double, Id>, EventCallback>::const_iterator
   GetNextEventCallback() const noexcept;
 
   // Denotes whether sequencer is looping or not.
@@ -160,10 +159,8 @@ class Sequencer {
   // Sorted map of one-off event callbacks by event delays.
   std::multimap<double, EventCallback> one_off_callbacks_;
 
-  // Next event callback (cached).
-  mutable std::optional<
-      std::map<std::pair<double, Id>, EventCallback>::const_iterator>
-      next_callback_;
+  // Last triggered position.
+  std::optional<double> last_triggered_position_;
 };
 
 }  // namespace barely::internal

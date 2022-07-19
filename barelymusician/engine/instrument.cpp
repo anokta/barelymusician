@@ -166,7 +166,7 @@ void Instrument::StartNote(double pitch, double intensity,
   assert(timestamp >= 0.0);
   if (pitches_.insert(pitch).second) {
     if (note_on_callback_) {
-      note_on_callback_(pitch, intensity, timestamp);
+      note_on_callback_(pitch, intensity);
     }
     message_queue_.Add(timestamp, NoteOnMessage{pitch, intensity});
   }
@@ -177,7 +177,7 @@ void Instrument::StopAllNotes(double timestamp) noexcept {
   assert(timestamp >= 0.0);
   for (const double pitch : std::exchange(pitches_, {})) {
     if (note_off_callback_) {
-      note_off_callback_(pitch, timestamp);
+      note_off_callback_(pitch);
     }
     message_queue_.Add(timestamp, NoteOffMessage{pitch});
   }
@@ -187,7 +187,7 @@ void Instrument::StopNote(double pitch, double timestamp) noexcept {
   assert(timestamp >= 0.0);
   if (pitches_.erase(pitch) > 0) {
     if (note_off_callback_) {
-      note_off_callback_(pitch, timestamp);
+      note_off_callback_(pitch);
     }
     message_queue_.Add(timestamp, NoteOffMessage{pitch});
   }

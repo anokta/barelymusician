@@ -175,57 +175,47 @@ TEST(InstrumentTest, SetNoteCallbacks) {
   // Trigger note on callback.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  double note_on_timestamp = 0.0;
-  instrument.SetNoteOnCallback(
-      [&](double pitch, double intensity, double timestamp) {
-        note_on_pitch = pitch;
-        note_on_intensity = intensity;
-        note_on_timestamp = timestamp;
-      });
-  EXPECT_NE(note_on_pitch, kPitch);
-  EXPECT_NE(note_on_intensity, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 0.0);
+  instrument.SetNoteOnCallback([&](double pitch, double intensity) {
+    note_on_pitch = pitch;
+    note_on_intensity = intensity;
+  });
+  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
+  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   instrument.StartNote(kPitch, kIntensity, 10.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
 
   // This should not trigger the callback since the note is already on.
+  note_on_pitch = 0.0;
+  note_on_intensity = 0.0;
   instrument.StartNote(kPitch, kIntensity, 15.0);
-  EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 10.0);
+  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
+  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   // Trigger note on callback again with another note.
+  note_on_pitch = 0.0;
+  note_on_intensity = 0.0;
   instrument.StartNote(kPitch + 2.0, kIntensity, 15.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch + 2.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 15.0);
 
   // Trigger note off callback.
   double note_off_pitch = 0.0;
-  double note_off_timestamp = 0.0;
-  instrument.SetNoteOffCallback([&](double pitch, double timestamp) {
-    note_off_pitch = pitch;
-    note_off_timestamp = timestamp;
-  });
-  EXPECT_NE(note_off_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 0.0);
+  instrument.SetNoteOffCallback([&](double pitch) { note_off_pitch = pitch; });
+  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   instrument.StopNote(kPitch, 20.0);
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
 
   // This should not trigger the callback since the note is already off.
+  note_off_pitch = 0.0;
   instrument.StopNote(kPitch, 25.0);
-  EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 20.0);
+  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Finally, trigger the note off callback with the remaining note.
   instrument.StopAllNotes(25.0);
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch + 2.0);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 25.0);
 }
 
 // Tests that instrument stops all notes as expected.

@@ -36,19 +36,19 @@ cc_binary(
     ],
 )
 
-# cc_binary(
-#     name = "metronome_demo",
-#     srcs = ["metronome_demo.cpp"],
-#     deps = [
-#         "//barelymusician",
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/instruments:synth_instrument",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#     ],
-# )
+cc_binary(
+    name = "metronome_demo",
+    srcs = ["metronome_demo.cpp"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/composition:note_pitch",
+        "//barelymusician/instruments:synth_instrument",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+    ],
+)
 
 # cc_binary(
 #     name = "midi_demo",

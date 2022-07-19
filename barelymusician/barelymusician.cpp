@@ -165,9 +165,7 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (callback) {
       instrument->SetNoteOffCallback(
-          [callback, user_data](double pitch, double timestamp) {
-            callback(pitch, timestamp, user_data);
-          });
+          [callback, user_data](double pitch) { callback(pitch, user_data); });
     } else {
       instrument->SetNoteOffCallback(nullptr);
     }
@@ -184,11 +182,10 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (callback) {
-      instrument->SetNoteOnCallback([callback, user_data](double pitch,
-                                                          double intensity,
-                                                          double timestamp) {
-        callback(pitch, intensity, timestamp, user_data);
-      });
+      instrument->SetNoteOnCallback(
+          [callback, user_data](double pitch, double intensity) {
+            callback(pitch, intensity, user_data);
+          });
     } else {
       instrument->SetNoteOnCallback(nullptr);
     }
@@ -320,42 +317,54 @@ BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelySequencerEvent_Create(
-    BarelyMusicianHandle handle, BarelyId sequencer_id, double position,
-    [[maybe_unused]] BarelySequencerEvent_Callback callback,
-    BarelyId* out_event_id) {
+BarelyStatus BarelySequencer_AddEvent(BarelyMusicianHandle handle,
+                                      BarelyId sequencer_id, double position,
+                                      BarelySequencer_EventCallback callback,
+                                      void* user_data, BarelyId* out_event_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (position < 0.0) return BarelyStatus_kInvalidArgument;
+  // TODO: this probably is not good since it can be set to valid after adding?
+  if (!callback) return BarelyStatus_kInvalidArgument;
   if (!out_event_id) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencerEvent_Destroy(BarelyMusicianHandle handle,
-                                          BarelyId sequencer_id,
-                                          BarelyId event_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    *out_event_id = ++handle->id_counter;
+    if (sequencer->AddEvent(*out_event_id, position,
+                            [callback, user_data](double position) {
+                              callback(position, user_data);
+                            })) {
+      return BarelyStatus_kOk;
+    }
+    return BarelyStatus_kAlreadyExists;
   }
-
-  return BarelyStatus_kUnimplemented;
+  return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencerEvent_GetCallback(
-    BarelyMusicianHandle handle, BarelyId sequencer_id, BarelyId event_id,
-    BarelySequencerEvent_Callback* out_callback) {
+BarelyStatus BarelySequencer_Create(BarelyMusicianHandle handle,
+                                    int32_t priority,
+                                    BarelyId* out_sequencer_id) {
   if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-  if (!out_callback) return BarelyStatus_kInvalidArgument;
+  if (!out_sequencer_id) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  *out_sequencer_id = ++handle->id_counter;
+  if (handle->engine.CreateSequencer(*out_sequencer_id, priority)) {
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kAlreadyExists;
 }
 
-BarelyStatus BarelySequencerEvent_GetPosition(BarelyMusicianHandle handle,
+BarelyStatus BarelySequencer_Destroy(BarelyMusicianHandle handle,
+                                     BarelyId sequencer_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+
+  if (handle->engine.DestroySequencer(sequencer_id)) {
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelySequencer_GetEventPosition(BarelyMusicianHandle handle,
                                               BarelyId sequencer_id,
                                               BarelyId event_id,
                                               double* out_position) {
@@ -365,49 +374,13 @@ BarelyStatus BarelySequencerEvent_GetPosition(BarelyMusicianHandle handle,
   }
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencerEvent_SetCallback(
-    BarelyMusicianHandle handle, BarelyId sequencer_id, BarelyId event_id,
-    [[maybe_unused]] BarelySequencerEvent_Callback callback) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    if (const auto* position = sequencer->GetEventPosition(event_id)) {
+      *out_position = *position;
+      return BarelyStatus_kOk;
+    }
   }
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencerEvent_SetPosition(BarelyMusicianHandle handle,
-                                              BarelyId sequencer_id,
-                                              BarelyId event_id,
-                                              double position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
-    return BarelyStatus_kInvalidArgument;
-  }
-  if (position < 0.0) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencer_Create(BarelyMusicianHandle handle,
-                                    [[maybe_unused]] int32_t priority,
-                                    [[maybe_unused]] void* user_data,
-                                    BarelyId* out_sequencer_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_sequencer_id) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencer_Destroy(BarelyMusicianHandle handle,
-                                     BarelyId sequencer_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_GetLoopBeginPosition(
@@ -417,7 +390,11 @@ BarelyStatus BarelySequencer_GetLoopBeginPosition(
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_loop_begin_position) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    *out_loop_begin_position = sequencer->GetLoopBeginPosition();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_GetLoopLength(BarelyMusicianHandle handle,
@@ -427,7 +404,11 @@ BarelyStatus BarelySequencer_GetLoopLength(BarelyMusicianHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_loop_length) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    *out_loop_length = sequencer->GetLoopLength();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_GetPosition(BarelyMusicianHandle handle,
@@ -437,7 +418,11 @@ BarelyStatus BarelySequencer_GetPosition(BarelyMusicianHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    *out_position = sequencer->GetPosition();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_IsLooping(BarelyMusicianHandle handle,
@@ -447,7 +432,11 @@ BarelyStatus BarelySequencer_IsLooping(BarelyMusicianHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_looping) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    *out_is_looping = sequencer->IsLooping();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_IsPlaying(BarelyMusicianHandle handle,
@@ -457,43 +446,135 @@ BarelyStatus BarelySequencer_IsPlaying(BarelyMusicianHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_playing) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    *out_is_playing = sequencer->IsPlaying();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_SetLoopBeginPosition(
-    BarelyMusicianHandle handle, BarelyId sequencer_id,
-    [[maybe_unused]] double loop_begin_position) {
+BarelyStatus BarelySequencer_RemoveEvent(BarelyMusicianHandle handle,
+                                         BarelyId sequencer_id,
+                                         BarelyId event_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    if (sequencer->RemoveEvent(event_id)) {
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelySequencer_ScheduleOneOffEvent(
+    BarelyMusicianHandle handle, BarelyId sequencer_id, double position,
+    BarelySequencer_EventCallback callback, void* user_data) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (!callback) return BarelyStatus_kInvalidArgument;
+
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    if (sequencer->ScheduleOneOffEvent(position,
+                                       [callback, user_data](double position) {
+                                         callback(position, user_data);
+                                       })) {
+      return BarelyStatus_kOk;
+    }
+    return BarelyStatus_kInvalidArgument;
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelySequencer_SetEventCallback(
+    BarelyMusicianHandle handle, BarelyId sequencer_id, BarelyId event_id,
+    BarelySequencer_EventCallback callback, void* user_data) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    if (sequencer->SetEventCallback(event_id,
+                                    [callback, user_data](double position) {
+                                      callback(position, user_data);
+                                    })) {
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelySequencer_SetEventPosition(BarelyMusicianHandle handle,
+                                              BarelyId sequencer_id,
+                                              BarelyId event_id,
+                                              double position) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
+    return BarelyStatus_kInvalidArgument;
+  }
+
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    if (sequencer->SetEventPosition(event_id, position)) {
+      return BarelyStatus_kOk;
+    }
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelySequencer_SetLoopBeginPosition(BarelyMusicianHandle handle,
+                                                  BarelyId sequencer_id,
+                                                  double loop_begin_position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    sequencer->SetLoopBeginPosition(loop_begin_position);
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_SetLoopLength(
-    BarelyMusicianHandle handle, BarelyId sequencer_id,
-    [[maybe_unused]] double loop_length) {
+BarelyStatus BarelySequencer_SetLoopLength(BarelyMusicianHandle handle,
+                                           BarelyId sequencer_id,
+                                           double loop_length) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (loop_length < 0.0) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    sequencer->SetLoopLength(loop_length);
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_SetLooping(BarelyMusicianHandle handle,
                                         BarelyId sequencer_id,
-                                        [[maybe_unused]] bool is_looping) {
+                                        bool is_looping) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    sequencer->SetLooping(is_looping);
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_SetPosition(BarelyMusicianHandle handle,
                                          BarelyId sequencer_id,
-                                         [[maybe_unused]] double position) {
+                                         double position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    sequencer->SetPosition(position);
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_Start(BarelyMusicianHandle handle,
@@ -501,7 +582,11 @@ BarelyStatus BarelySequencer_Start(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    sequencer->Start();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_Stop(BarelyMusicianHandle handle,
@@ -509,17 +594,11 @@ BarelyStatus BarelySequencer_Stop(BarelyMusicianHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  return BarelyStatus_kUnimplemented;
-}
-
-BarelyStatus BarelySequencer_TriggerOneOffEvent(
-    BarelyMusicianHandle handle, BarelyId sequencer_id, double delay,
-    [[maybe_unused]] BarelySequencerEvent_Callback callback) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (delay <= 0.0) return BarelyStatus_kInvalidArgument;
-
-  return BarelyStatus_kUnimplemented;
+  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+    sequencer->Stop();
+    return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
 }
 
 }  // extern "C"

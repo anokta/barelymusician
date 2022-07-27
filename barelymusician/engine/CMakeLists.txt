@@ -5,11 +5,18 @@ add_library(
 )
 target_link_libraries(
   engine
+  fixed
   id
   instrument
   mutable_data
   sequencer
   find_or_null
+)
+
+add_library(
+  fixed
+  fixed.cpp
+  fixed.h
 )
 
 add_library(
@@ -71,6 +78,7 @@ add_library(
 )
 target_link_libraries(
   sequencer
+  fixed
   id
   find_or_null
 )

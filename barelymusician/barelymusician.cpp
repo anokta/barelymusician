@@ -329,7 +329,7 @@ BarelyStatus BarelySequencer_AddEvent(BarelyMusicianHandle handle,
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
     *out_event_id = ++handle->id_counter;
-    if (sequencer->AddEvent(*out_event_id, position,
+    if (sequencer->AddEvent(*out_event_id, barely::internal::Fixed(position),
                             [callback, user_data](double position) {
                               callback(position, user_data);
                             })) {
@@ -376,7 +376,7 @@ BarelyStatus BarelySequencer_GetEventPosition(BarelyMusicianHandle handle,
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
     if (const auto* position = sequencer->GetEventPosition(event_id)) {
-      *out_position = *position;
+      *out_position = position->ToDouble();
       return BarelyStatus_kOk;
     }
   }
@@ -391,7 +391,7 @@ BarelyStatus BarelySequencer_GetLoopBeginPosition(
   if (!out_loop_begin_position) return BarelyStatus_kInvalidArgument;
 
   if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_loop_begin_position = sequencer->GetLoopBeginPosition();
+    *out_loop_begin_position = sequencer->GetLoopBeginPosition().ToDouble();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -405,7 +405,7 @@ BarelyStatus BarelySequencer_GetLoopLength(BarelyMusicianHandle handle,
   if (!out_loop_length) return BarelyStatus_kInvalidArgument;
 
   if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_loop_length = sequencer->GetLoopLength();
+    *out_loop_length = sequencer->GetLoopLength().ToDouble();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -419,7 +419,7 @@ BarelyStatus BarelySequencer_GetPosition(BarelyMusicianHandle handle,
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
   if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_position = sequencer->GetPosition();
+    *out_position = sequencer->GetPosition().ToDouble();
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -477,7 +477,7 @@ BarelyStatus BarelySequencer_ScheduleOneOffEvent(
   if (!callback) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    if (sequencer->ScheduleOneOffEvent(position,
+    if (sequencer->ScheduleOneOffEvent(barely::internal::Fixed(position),
                                        [callback, user_data](double position) {
                                          callback(position, user_data);
                                        })) {
@@ -517,7 +517,8 @@ BarelyStatus BarelySequencer_SetEventPosition(BarelyMusicianHandle handle,
   }
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    if (sequencer->SetEventPosition(event_id, position)) {
+    if (sequencer->SetEventPosition(event_id,
+                                    barely::internal::Fixed(position))) {
       return BarelyStatus_kOk;
     }
   }
@@ -531,7 +532,8 @@ BarelyStatus BarelySequencer_SetLoopBeginPosition(BarelyMusicianHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->SetLoopBeginPosition(loop_begin_position);
+    sequencer->SetLoopBeginPosition(
+        barely::internal::Fixed(loop_begin_position));
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -545,7 +547,7 @@ BarelyStatus BarelySequencer_SetLoopLength(BarelyMusicianHandle handle,
   if (loop_length < 0.0) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->SetLoopLength(loop_length);
+    sequencer->SetLoopLength(barely::internal::Fixed(loop_length));
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
@@ -571,7 +573,7 @@ BarelyStatus BarelySequencer_SetPosition(BarelyMusicianHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->SetPosition(position);
+    sequencer->SetPosition(barely::internal::Fixed(position));
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

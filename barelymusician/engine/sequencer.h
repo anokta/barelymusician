@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/engine/fixed.h"
 #include "barelymusician/engine/id.h"
 
 namespace barely::internal {
@@ -25,12 +26,12 @@ class Sequencer {
   /// @param callback Event callback.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool AddEvent(Id id, double position, EventCallback callback) noexcept;
+  bool AddEvent(Id id, Fixed position, EventCallback callback) noexcept;
 
   /// Returns duration to next event.
   ///
   /// @return Duration in beats.
-  [[nodiscard]] double GetDurationToNextEvent() const noexcept;
+  [[nodiscard]] Fixed GetDurationToNextEvent() const noexcept;
 
   /// Returns event callback.
   ///
@@ -42,22 +43,22 @@ class Sequencer {
   ///
   /// @param id Event identifier.
   /// @return Pointer to event position.
-  [[nodiscard]] const double* GetEventPosition(Id id) const noexcept;
+  [[nodiscard]] const Fixed* GetEventPosition(Id id) const noexcept;
 
   /// Returns loop begin position.
   ///
   /// @return Loop begin position in beats.
-  [[nodiscard]] double GetLoopBeginPosition() const noexcept;
+  [[nodiscard]] Fixed GetLoopBeginPosition() const noexcept;
 
   /// Returns loop length.
   ///
   /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const noexcept;
+  [[nodiscard]] Fixed GetLoopLength() const noexcept;
 
   /// Returns position.
   ///
   /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept;
+  [[nodiscard]] Fixed GetPosition() const noexcept;
 
   /// Returns whether sequencer is looping or not.
   ///
@@ -80,7 +81,7 @@ class Sequencer {
   /// @param position Position in beats.
   /// @param callback Event callback.
   /// @return True if successful, false otherwise.
-  bool ScheduleOneOffEvent(double position, EventCallback callback) noexcept;
+  bool ScheduleOneOffEvent(Fixed position, EventCallback callback) noexcept;
 
   /// Sets event callback.
   ///
@@ -92,17 +93,17 @@ class Sequencer {
   ///
   /// @param id Event identifier.
   /// @param position Event position.
-  bool SetEventPosition(Id id, double position) noexcept;
+  bool SetEventPosition(Id id, Fixed position) noexcept;
 
   /// Sets loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
-  void SetLoopBeginPosition(double loop_begin_position) noexcept;
+  void SetLoopBeginPosition(Fixed loop_begin_position) noexcept;
 
   /// Sets loop length.
   ///
   /// @param loop_length Loop length in beats.
-  void SetLoopLength(double loop_length) noexcept;
+  void SetLoopLength(Fixed loop_length) noexcept;
 
   /// Sets whether sequencer should be looping or not.
   ///
@@ -113,7 +114,7 @@ class Sequencer {
   ///
   /// @param position Position in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetPosition(double position) noexcept;
+  void SetPosition(Fixed position) noexcept;
 
   /// Stops sequencer.
   void Start() noexcept;
@@ -128,11 +129,11 @@ class Sequencer {
   ///
   /// @param duration Duration in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(double duration) noexcept;
+  void Update(Fixed duration) noexcept;
 
  private:
   // Returns next event callback.
-  std::map<std::pair<double, Id>, EventCallback>::const_iterator
+  std::map<std::pair<Fixed, Id>, EventCallback>::const_iterator
   GetNextEventCallback() const noexcept;
 
   // Denotes whether sequencer is looping or not.
@@ -142,25 +143,25 @@ class Sequencer {
   bool is_playing_ = false;
 
   // Loop begin position in beats.
-  double loop_begin_position_ = 0.0;
+  Fixed loop_begin_position_ = Fixed(0);
 
   // Loop length in beats.
-  double loop_length_ = 1.0;
+  Fixed loop_length_ = Fixed(1);
 
   // Position in beats.
-  double position_ = 0.0;
+  Fixed position_ = Fixed(0);
 
   // Sorted map of event callbacks by event position-identifier pairs.
-  std::map<std::pair<double, Id>, EventCallback> callbacks_;
+  std::map<std::pair<Fixed, Id>, EventCallback> callbacks_;
 
   // Map of event positions by event identifiers.
-  std::unordered_map<Id, double> positions_;
+  std::unordered_map<Id, Fixed> positions_;
 
   // Sorted map of one-off event callbacks by event delays.
-  std::multimap<double, EventCallback> one_off_callbacks_;
+  std::multimap<Fixed, EventCallback> one_off_callbacks_;
 
   // Last triggered position.
-  std::optional<double> last_triggered_position_;
+  std::optional<Fixed> last_triggered_position_;
 };
 
 }  // namespace barely::internal

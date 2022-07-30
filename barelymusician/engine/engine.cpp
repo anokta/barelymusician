@@ -6,7 +6,6 @@
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/engine/fixed.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/sequencer.h"
@@ -137,31 +136,22 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
-  const Fixed target_position = Fixed(GetBeats(timestamp));
-  Fixed position = Fixed(GetBeats(timestamp_));
-  while (position < target_position) {
-    Fixed update_duration = target_position - position;
+  while (timestamp_ < timestamp) {
+    double update_duration = GetBeats(timestamp - timestamp_);
     bool has_events_to_trigger = false;
     for (const auto& [priority_id_pair, sequencer] : sequencers_) {
-      if (const Fixed duration = sequencer.GetDurationToNextEvent();
+      if (const double duration = sequencer.GetDurationToNextEvent();
           duration < update_duration) {
         update_duration = duration;
         has_events_to_trigger = true;
       }
     }
 
-    position += update_duration;
-    timestamp_ = GetSeconds(position.ToDouble());
-    if (has_events_to_trigger) {
-      for (auto& [priority_id_pair, sequencer] : sequencers_) {
-        sequencer.Update(update_duration);
-        if (sequencer.GetDurationToNextEvent() == Fixed(0)) {
-          sequencer.TriggerAllEventsAtCurrentPosition();
-        }
-      }
-    } else {
-      for (auto& [priority_id_pair, sequencer] : sequencers_) {
-        sequencer.Update(update_duration);
+    timestamp_ += GetSeconds(update_duration);
+    for (auto& [priority_id_pair, sequencer] : sequencers_) {
+      sequencer.Update(update_duration);
+      if (has_events_to_trigger && sequencer.GetDurationToNextEvent() <= 0.0) {
+        sequencer.TriggerAllEventsAtCurrentPosition();
       }
     }
   }

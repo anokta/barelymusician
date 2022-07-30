@@ -7,19 +7,12 @@ cc_library(
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
     deps = [
-        ":fixed",
         ":id",
         ":instrument",
         ":mutable_data",
         ":sequencer",
         "//barelymusician/common:find_or_null",
     ],
-)
-
-cc_library(
-    name = "fixed",
-    srcs = ["fixed.cpp"],
-    hdrs = ["fixed.h"],
 )
 
 cc_library(
@@ -75,7 +68,6 @@ cc_library(
     srcs = ["sequencer.cpp"],
     hdrs = ["sequencer.h"],
     deps = [
-        ":fixed",
         ":id",
         "//barelymusician:include",
         "//barelymusician/common:find_or_null",

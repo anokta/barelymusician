@@ -47,7 +47,7 @@ constexpr double kTempoIncrement = 10.0;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-int main(int /*argc*/, char* /*argv*/[]) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
@@ -69,8 +69,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   sequencer.SetLooping(true);
   int beat = 0;
   const auto beat_callback = [&]([[maybe_unused]] double position) {
-    const int current_bar = static_cast<int>(position) / kNumBeats;
-    const int current_beat = static_cast<int>(position) % kNumBeats;
     ConsoleLog() << "Tick " << (beat / kNumBeats) << "." << (beat % kNumBeats);
     const double pitch = (beat % kNumBeats == 0) ? kBarPitch : kBeatPitch;
     metronome.StartNote(pitch, kGain);

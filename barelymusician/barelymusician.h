@@ -1087,17 +1087,8 @@ class Sequencer {
     /// @param callback Callback.
     /// @return Status.
     Status SetCallback(EventCallback callback) {
-      if (callback) {
-        // TODO(#105): These functions are not yet verified.
-        return BarelySequencer_SetEventCallback(
-            handle_, sequencer_id_, id_,
-            [](double position, void* user_data) {
-              (*static_cast<EventCallback*>(user_data))(position);
-            },
-            nullptr);
-      }
-      return BarelySequencer_SetEventCallback(handle_, sequencer_id_, id_,
-                                              nullptr, nullptr);
+      // TODO(#105): These functions are not yet verified.
+      *callback_wrapper_ptr_ = std::move(callback);
     }
 
     /// Sets position.
@@ -1167,27 +1158,22 @@ class Sequencer {
   ///
   /// @param position Event position in beats.
   /// @param callback Event callback.
-  /// @return Event reference, or error status.
-  StatusOr<EventReference> AddEvent(double position, EventCallback callback) {
-    if (callback) {
-      auto event_callback_wrapper =
-          std::make_unique<EventCallback>(std::move(callback));
-      EventCallback* event_callback_wrapper_ptr = event_callback_wrapper.get();
-      const auto [it, success] = event_callback_wrappers_.emplace(
-          event_callback_wrapper_ptr, std::move(event_callback_wrapper));
-      BarelyId event_id = BarelyId_kInvalid;
-      if (const Status status = BarelySequencer_AddEvent(
-              handle_, id_, position,
-              [](double event_position, void* user_data) {
-                (*static_cast<EventCallback*>(user_data))(event_position);
-              },
-              static_cast<void*>(event_callback_wrapper_ptr), &event_id);
-          !status.IsOk()) {
-        return status;
-      }
-      return EventReference(handle_, id_, event_id, event_callback_wrapper_ptr);
-    }
-    return {Status::kInvalidArgument};
+  /// @return Event reference.
+  EventReference AddEvent(double position, EventCallback callback) {
+    auto event_callback_wrapper =
+        std::make_unique<EventCallback>(std::move(callback));
+    EventCallback* event_callback_wrapper_ptr = event_callback_wrapper.get();
+    const auto [it, success] = event_callback_wrappers_.emplace(
+        event_callback_wrapper_ptr, std::move(event_callback_wrapper));
+    BarelyId event_id = BarelyId_kInvalid;
+    [[maybe_unused]] const Status status = BarelySequencer_AddEvent(
+        handle_, id_, position,
+        [](double event_position, void* user_data) {
+          (*static_cast<EventCallback*>(user_data))(event_position);
+        },
+        static_cast<void*>(event_callback_wrapper_ptr), &event_id);
+    assert(status.IsOk());
+    return EventReference(handle_, id_, event_id, event_callback_wrapper_ptr);
   }
 
   /// Returns loop begin position.
@@ -1251,6 +1237,7 @@ class Sequencer {
   /// @return Status.
   Status RemoveEvent(EventReference event_reference) {
     event_callback_wrappers_.erase(event_reference.callback_wrapper_ptr_);
+    return BarelySequencer_RemoveEvent(handle_, id_, event_reference.id_);
   }
 
   /// Schedules one-off event at position.
@@ -1259,24 +1246,21 @@ class Sequencer {
   /// @param callback Event callback.
   /// @return Status.
   Status ScheduleOneOffEvent(double position, EventCallback callback) {
-    if (callback) {
-      auto event_callback_wrapper = std::make_unique<EventCallback>();
-      EventCallback* event_callback_wrapper_ptr = event_callback_wrapper.get();
-      const auto [it, success] = event_callback_wrappers_.emplace(
-          event_callback_wrapper_ptr, std::move(event_callback_wrapper));
-      *it->second = [this, callback = std::move(callback),
-                     event_callback_wrapper_ptr](double event_position) {
-        callback(event_position);
-        event_callback_wrappers_.erase(event_callback_wrapper_ptr);
-      };
-      return BarelySequencer_ScheduleOneOffEvent(
-          handle_, id_, position,
-          [](double event_position, void* user_data) {
-            (*static_cast<EventCallback*>(user_data))(event_position);
-          },
-          static_cast<void*>(event_callback_wrapper_ptr));
-    }
-    return Status::kInvalidArgument;
+    auto event_callback_wrapper = std::make_unique<EventCallback>();
+    EventCallback* event_callback_wrapper_ptr = event_callback_wrapper.get();
+    const auto [it, success] = event_callback_wrappers_.emplace(
+        event_callback_wrapper_ptr, std::move(event_callback_wrapper));
+    *it->second = [this, event_callback = std::move(callback),
+                   event_callback_wrapper_ptr](double event_position) {
+      event_callback(event_position);
+      event_callback_wrappers_.erase(event_callback_wrapper_ptr);
+    };
+    return BarelySequencer_ScheduleOneOffEvent(
+        handle_, id_, position,
+        [](double event_position, void* user_data) {
+          (*static_cast<EventCallback*>(user_data))(event_position);
+        },
+        static_cast<void*>(event_callback_wrapper_ptr));
   }
 
   /// Sets loop begin position.

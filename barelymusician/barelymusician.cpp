@@ -323,8 +323,6 @@ BarelyStatus BarelySequencer_AddEvent(BarelyMusicianHandle handle,
                                       void* user_data, BarelyId* out_event_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  // TODO: this probably is not good since it can be set to valid after adding?
-  if (!callback) return BarelyStatus_kInvalidArgument;
   if (!out_event_id) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
@@ -474,7 +472,6 @@ BarelyStatus BarelySequencer_ScheduleOneOffEvent(
     BarelySequencer_EventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (!callback) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
     if (sequencer->ScheduleOneOffEvent(position,

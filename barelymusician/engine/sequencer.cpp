@@ -15,7 +15,6 @@ namespace barely::internal {
 bool Sequencer::AddEvent(Id id, double position,
                          EventCallback callback) noexcept {
   assert(id > kInvalid);
-  assert(callback);
   if (positions_.emplace(id, position).second) {
     callbacks_.emplace(std::pair{position, id}, std::move(callback));
     return true;
@@ -87,7 +86,6 @@ bool Sequencer::RemoveEvent(Id id) noexcept {
 
 bool Sequencer::ScheduleOneOffEvent(double position,
                                     EventCallback callback) noexcept {
-  assert(callback);
   if (is_playing_ && position >= position_) {
     one_off_callbacks_.emplace(position, std::move(callback));
     return true;
@@ -96,7 +94,6 @@ bool Sequencer::ScheduleOneOffEvent(double position,
 }
 
 bool Sequencer::SetEventCallback(Id id, EventCallback callback) noexcept {
-  assert(callback);
   if (const auto* position = FindOrNull(positions_, id)) {
     *FindOrNull(callbacks_, std::pair{*position, id}) = std::move(callback);
     return true;
@@ -152,7 +149,7 @@ void Sequencer::SetPosition(double position) noexcept {
   if (position_ == position) return;
   last_triggered_position_ = std::nullopt;
   one_off_callbacks_.erase(one_off_callbacks_.begin(),
-                           one_off_callbacks_.find(position));
+                           one_off_callbacks_.lower_bound(position));
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_callbacks_.empty()) {
       // Reset all remaining one-off callbacks back to `loop_begin_position_`.
@@ -181,7 +178,9 @@ void Sequencer::TriggerAllEventsAtCurrentPosition() noexcept {
   if (!one_off_callbacks_.empty()) {
     auto it = one_off_callbacks_.begin();
     while (it != one_off_callbacks_.end() && it->first <= position_) {
-      it->second(position_);
+      if (it->second) {
+        it->second(position_);
+      }
       ++it;
     }
     one_off_callbacks_.erase(one_off_callbacks_.begin(), it);
@@ -189,10 +188,12 @@ void Sequencer::TriggerAllEventsAtCurrentPosition() noexcept {
   // Trigger next events.
   auto callback = GetNextEventCallback();
   while (callback != callbacks_.end() && callback->first.first <= position_) {
-    callback->second(position_);
+    if (callback->second) {
+      callback->second(position_);
+    }
+    last_triggered_position_ = callback->first.first;
     ++callback;
   }
-  last_triggered_position_ = position_;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

@@ -51,8 +51,39 @@ cc_binary(
 )
 
 cc_binary(
+    name = "sampler_demo",
+    srcs = ["sampler_demo.cpp"],
+    data = ["//examples/data:audio"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/composition:note_pitch",
+        "//barelymusician/dsp:gain_processor",
+        "//barelymusician/instruments:sampler_instrument",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/common:wav_file",
+        "@bazel_tools//tools/cpp/runfiles",
+    ],
+)
+
+cc_binary(
     name = "sequencer_demo",
     srcs = ["sequencer_demo.cpp"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/composition:note_pitch",
+        "//barelymusician/instruments:synth_instrument",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+    ],
+)
+
+cc_binary(
+    name = "trigger_demo",
+    srcs = ["trigger_demo.cpp"],
     deps = [
         "//barelymusician",
         "//barelymusician/composition:note_pitch",
@@ -78,36 +109,5 @@ cc_binary(
 #         "//examples/common:input_manager",
 #         "@bazel_tools//tools/cpp/runfiles",
 #         "@midifile",
-#     ],
-# )
-
-# cc_binary(
-#     name = "sampler_demo",
-#     srcs = ["sampler_demo.cpp"],
-#     data = ["//examples/data:audio"],
-#     deps = [
-#         "//barelymusician",
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/dsp:gain_processor",
-#         "//barelymusician/instruments:sampler_instrument",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/common:wav_file",
-#         "@bazel_tools//tools/cpp/runfiles",
-#     ],
-# )
-
-# cc_binary(
-#     name = "trigger_demo",
-#     srcs = ["trigger_demo.cpp"],
-#     deps = [
-#         "//barelymusician",
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/instruments:synth_instrument",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
 #     ],
 # )

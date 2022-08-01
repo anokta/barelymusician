@@ -79,8 +79,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   const auto play_note_fn = [&](double duration,
                                 double pitch) -> Sequencer::EventCallback {
-    return [&instrument, &sequencer, pitch,
-            duration]([[maybe_unused]] double position) {
+    return [&instrument, &sequencer, pitch, duration](double position) {
       instrument.StartNote(pitch, kGain);
       sequencer.ScheduleOneOffEvent(
           position + duration,
@@ -111,9 +110,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
-    audio_clock.Update(kNumFrames);
     instrument.Process(output, kNumChannels, kNumFrames,
                        audio_clock.GetTimestamp());
+    audio_clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
 

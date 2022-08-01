@@ -85,13 +85,11 @@ int main(int /*argc*/, char* argv[]) {
       sample_file.GetData().data(),
       static_cast<int>(sample_file.GetData().size() * sizeof(double)));
 
-  instrument.SetNoteOnCallback(
-      [](double pitch, double intensity, double /*timestamp*/) {
-        ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-      });
-  instrument.SetNoteOffCallback([](double pitch, double /*timestamp*/) {
-    ConsoleLog() << "NoteOff(" << pitch << ") ";
+  instrument.SetNoteOnCallback([](double pitch, double intensity) {
+    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
   });
+  instrument.SetNoteOffCallback(
+      [](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   GainProcessor gain(kFrameRate);
   gain.SetGain(kGain);

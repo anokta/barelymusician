@@ -207,6 +207,12 @@ void Sequencer::Update(double duration) noexcept {
 std::map<std::pair<double, Id>, Sequencer::EventCallback>::const_iterator
 Sequencer::GetNextEventCallback() const noexcept {
   auto it = callbacks_.lower_bound(std::pair{position_, kInvalid});
+  if (last_triggered_position_) {
+    while (it != callbacks_.end() &&
+           it->first.first == *last_triggered_position_) {
+      ++it;
+    }
+  }
   if (it == callbacks_.end() && is_looping_) {
     // Loop back to `loop_begin_position_`.
     it = callbacks_.lower_bound(std::pair{loop_begin_position_, kInvalid});

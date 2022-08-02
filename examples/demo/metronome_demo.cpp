@@ -5,6 +5,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/instruments/synth_instrument.h"
+#include "barelymusician/sequencers/metronome.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -13,9 +14,9 @@
 namespace {
 
 using ::barely::Instrument;
+using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Sequencer;
 using ::barely::SynthInstrument;
 using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
@@ -57,30 +58,27 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create metronome instrument.
-  Instrument metronome =
+  Instrument instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
-  metronome.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
-  metronome.SetParameter(SynthParameter::kAttack, kAttack);
-  metronome.SetParameter(SynthParameter::kRelease, kRelease);
-  metronome.SetParameter(SynthParameter::kNumVoices, kNumVoices);
+  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
+  instrument.SetParameter(SynthParameter::kAttack, kAttack);
+  instrument.SetParameter(SynthParameter::kRelease, kRelease);
+  instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   // Add beat event.
-  Sequencer sequencer = musician.CreateSequencer();
-  sequencer.SetLooping(true);
-  int beat = 0;
-  const auto beat_callback = [&]([[maybe_unused]] double position) {
+  Metronome metronome(musician);
+  metronome.SetBeatCallback([&](int beat) {
     ConsoleLog() << "Tick " << (beat / kNumBeats) << "." << (beat % kNumBeats);
     const double pitch = (beat % kNumBeats == 0) ? kBarPitch : kBeatPitch;
-    metronome.StartNote(pitch, kGain);
-    metronome.StopNote(pitch);
+    instrument.StartNote(pitch, kGain);
+    instrument.StopNote(pitch);
     ++beat;
-  };
-  sequencer.AddEvent(0.0, beat_callback);
+  });
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
-    metronome.Process(output, kNumChannels, kNumFrames,
-                      audio_clock.GetTimestamp());
+    instrument.Process(output, kNumChannels, kNumFrames,
+                       audio_clock.GetTimestamp());
     audio_clock.Update(kNumFrames);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -97,13 +95,17 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (sequencer.IsPlaying()) {
-          sequencer.Stop();
+        if (metronome.IsPlaying()) {
+          metronome.Stop();
           ConsoleLog() << "Stopped playback";
         } else {
-          sequencer.Start();
+          metronome.Start();
           ConsoleLog() << "Started playback";
         }
+        return;
+      case '\r':
+        metronome.Reset();
+        ConsoleLog() << "Reset playback";
         return;
       case '-':
         tempo -= kTempoIncrement;
@@ -131,7 +133,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
-  sequencer.Start();
+  metronome.Start();
 
   while (!quit) {
     input_manager.Update();
@@ -141,7 +143,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  sequencer.Stop();
+  metronome.Stop();
   audio_output.Stop();
 
   return 0;

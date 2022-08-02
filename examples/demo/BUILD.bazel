@@ -43,6 +43,7 @@ cc_binary(
         "//barelymusician",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/instruments:synth_instrument",
+        "//barelymusician/sequencers:metronome",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:console_log",

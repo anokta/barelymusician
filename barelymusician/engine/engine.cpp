@@ -150,8 +150,14 @@ void Engine::Update(double timestamp) noexcept {
     timestamp_ += GetSeconds(update_duration);
     for (auto& [priority_id_pair, sequencer] : sequencers_) {
       sequencer.Update(update_duration);
-      if (has_events_to_trigger && sequencer.GetDurationToNextEvent() <= 0.0) {
-        sequencer.TriggerAllEventsAtCurrentPosition();
+    }
+
+    if (has_events_to_trigger) {
+      for (auto& [priority_id_pair, sequencer] : sequencers_) {
+        if (update_duration + sequencer.GetDurationToNextEvent() <=
+            sequencer.GetPosition()) {
+          sequencer.TriggerAllEventsAtCurrentPosition();
+        }
       }
     }
   }

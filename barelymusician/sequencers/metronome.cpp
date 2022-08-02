@@ -4,9 +4,16 @@
 
 namespace barely {
 
+namespace {
+
+// Default metronome priority.
+constexpr int kPriority = -1;
+
+}  // namespace
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Metronome::Metronome(Musician& musician) noexcept
-    : sequencer_(musician.CreateSequencer()) {
+    : sequencer_(musician.CreateSequencer(kPriority)) {
   sequencer_.SetLooping(true);
   sequencer_.SetLoopLength(1.0);
   sequencer_.AddEvent(0.0, [this]([[maybe_unused]] double position) {

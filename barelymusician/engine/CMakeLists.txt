@@ -147,6 +147,5 @@ target_link_libraries(
   sequencer_test
   id
   sequencer
-  gmock
   gtest_main
 )

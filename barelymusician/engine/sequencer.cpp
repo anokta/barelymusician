@@ -34,7 +34,7 @@ double Sequencer::GetDurationToNextEvent() const noexcept {
     next_position = next_callback->first.first;
     if (is_looping_ && (next_position < position_ ||
                         (last_triggered_position_ &&
-                         *last_triggered_position_ == position_))) {
+                         *last_triggered_position_ == next_position))) {
       next_position += loop_length_;
     }
   }

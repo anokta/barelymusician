@@ -74,18 +74,17 @@ cc_library(
     ],
 )
 
-# TODO(#85): Re-enable after `Sequencer` is fully added to capi.
-# cc_test(
-#     name = "engine_test",
-#     srcs = ["engine_test.cpp"],
-#     deps = [
-#         ":engine",
-#         ":id",
-#         ":instrument",
-#         ":parameter",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "engine_test",
+    srcs = ["engine_test.cpp"],
+    deps = [
+        ":engine",
+        ":id",
+        ":instrument",
+        ":parameter",
+        "@googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "instrument_test",
@@ -125,12 +124,11 @@ cc_test(
     ],
 )
 
-# TODO(#107): These tests might require fixed-point for stability.
-# cc_test(
-#     name = "sequencer_test",
-#     srcs = ["sequencer_test.cpp"],
-#     deps = [
-#         ":sequencer",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "sequencer_test",
+    srcs = ["sequencer_test.cpp"],
+    deps = [
+        ":sequencer",
+        "@googletest//:gtest_main",
+    ],
+)

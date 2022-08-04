@@ -39,7 +39,7 @@ constexpr int kNumFrames = 512;
 constexpr double kLookahead = 0.05;
 
 // Instrument settings.
-constexpr double kGain = 0.2;
+constexpr double kGain = 0.1;
 constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.1;

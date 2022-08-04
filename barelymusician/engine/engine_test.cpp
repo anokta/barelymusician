@@ -5,8 +5,8 @@
 
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/note.h"
 #include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/sequencer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -83,25 +83,16 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   // Set note callbacks.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  double note_on_timestamp = 0.0;
-  instrument->SetNoteOnCallback(
-      [&](double pitch, double intensity, double timestamp) {
-        note_on_pitch = pitch;
-        note_on_intensity = intensity;
-        note_on_timestamp = timestamp;
-      });
-  EXPECT_NE(note_on_pitch, kPitch);
-  EXPECT_NE(note_on_intensity, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 0.0);
+  instrument->SetNoteOnCallback([&](double pitch, double intensity) {
+    note_on_pitch = pitch;
+    note_on_intensity = intensity;
+  });
+  EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
+  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   double note_off_pitch = 0.0;
-  double note_off_timestamp = 0.0;
-  instrument->SetNoteOffCallback([&](double pitch, double timestamp) {
-    note_off_pitch = pitch;
-    note_off_timestamp = timestamp;
-  });
-  EXPECT_NE(note_off_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 0.0);
+  instrument->SetNoteOffCallback([&](double pitch) { note_off_pitch = pitch; });
+  EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Start note.
   instrument->StartNote(kPitch, kIntensity, 0.0);
@@ -109,7 +100,6 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
 
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
-  EXPECT_DOUBLE_EQ(note_on_timestamp, 0.0);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(engine.ProcessInstrument(kId, buffer.data(), kNumChannels,
@@ -125,11 +115,10 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   engine.Update(5.0);
 
   // Destroy instrument, which should also trigger note off callback.
+  note_off_pitch = 0.0;
   EXPECT_TRUE(engine.DestroyInstrument(kId));
   EXPECT_THAT(engine.GetInstrument(kId), IsNull());
-
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_off_timestamp, 5.0);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_FALSE(engine.ProcessInstrument(kId, buffer.data(), kNumChannels,
@@ -156,9 +145,8 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
           instrument_id, GetTestInstrumentDefinition(), kFrameRate));
       EXPECT_THAT(engine.GetInstrument(instrument_id), NotNull());
       engine.GetInstrument(instrument_id)
-          ->SetNoteOffCallback([&](double pitch, double /*timestamp*/) {
-            note_off_pitches.push_back(pitch);
-          });
+          ->SetNoteOffCallback(
+              [&](double pitch) { note_off_pitches.push_back(pitch); });
     }
 
     // Start multiple notes, then immediately stop some of them.
@@ -177,75 +165,55 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
               UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
 }
 
-// Tests that engine plays sequence as expected.
-TEST(EngineTest, PlaySequence) {
-  const Id kInstrumentId = 1;
-  const Id kSequenceId = 2;
-  const Id kNoteId = 3;
-
-  const double kRootNote = 0.5;
+// Tests that single sequencer is created and destroyed as expected.
+TEST(EngineTest, CreateDestroySingleSequencer) {
+  const Id kSequencerId = 1;
+  const Id kEventId = 2;
+  const int kPriority = 0;
 
   Engine engine;
-  EXPECT_THAT(engine.GetInstrument(kInstrumentId), IsNull());
-  EXPECT_THAT(engine.GetSequence(kSequenceId), IsNull());
+  EXPECT_THAT(engine.GetSequencer(kSequencerId), IsNull());
 
-  // Create instrument.
-  EXPECT_TRUE(engine.CreateInstrument(
-      kInstrumentId, GetTestInstrumentDefinition(), kFrameRate));
-  auto* instrument = engine.GetInstrument(kInstrumentId);
-  EXPECT_THAT(instrument, NotNull());
+  // Create sequencer.
+  EXPECT_TRUE(engine.CreateSequencer(kSequencerId, kPriority));
+  auto* sequencer = engine.GetSequencer(kSequencerId);
+  EXPECT_THAT(sequencer, NotNull());
 
-  // Create sequence.
-  EXPECT_TRUE(engine.CreateSequence(kSequenceId));
-  auto* sequence = engine.GetSequence(kSequenceId);
-  EXPECT_THAT(sequence, NotNull());
-
-  // Set sequence instrument.
-  EXPECT_TRUE(engine.SetSequenceInstrumentId(kSequenceId, kInstrumentId));
-  EXPECT_THAT(engine.GetSequenceInstrumentId(kSequenceId),
-              AllOf(NotNull(), Pointee(kInstrumentId)));
-
-  // Create note.
-  EXPECT_TRUE(sequence->CreateNote(kNoteId, 1.0, {5.0, kRootNote + 1.0, 1.0}));
-
-  EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
+  // Add event.
+  double event_position = 0.0;
+  EXPECT_TRUE(sequencer->AddEvent(
+      kEventId, 1.0, [&](double position) { event_position = position; }));
+  EXPECT_DOUBLE_EQ(event_position, 0.0);
 
   // Start playback with one beat per second tempo.
   engine.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
 
-  EXPECT_FALSE(engine.GetTransport().IsPlaying());
-  engine.Start();
-  EXPECT_TRUE(engine.GetTransport().IsPlaying());
+  EXPECT_FALSE(sequencer->IsPlaying());
+  sequencer->Start();
+  EXPECT_TRUE(sequencer->IsPlaying());
 
-  // Update timestamp just before the start position of the note.
+  // Update timestamp just before the event, which should not be triggered yet.
+  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(), 1.0);
   engine.Update(1.0);
-  EXPECT_DOUBLE_EQ(engine.GetTransport().GetPosition(), 1.0);
-  EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
+  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(), 0.0);
+  EXPECT_DOUBLE_EQ(sequencer->GetPosition(), 1.0);
+  EXPECT_DOUBLE_EQ(event_position, 0.0);
 
-  // Update timestamp past the start position, but before the note ends.
+  // Update timestamp past the event, which should be triggered now.
+  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(), 0.0);
   engine.Update(1.5);
-  EXPECT_DOUBLE_EQ(engine.GetTransport().GetPosition(), 1.5);
-  EXPECT_TRUE(instrument->IsNoteOn(kRootNote + 1.0));
+  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(),
+                   std::numeric_limits<double>::max());
+  EXPECT_DOUBLE_EQ(sequencer->GetPosition(), 1.5);
+  EXPECT_DOUBLE_EQ(event_position, 1.0);
 
-  // Start another note manually.
-  instrument->StartNote(kRootNote, 1.0, 1.5);
-  EXPECT_TRUE(instrument->IsNoteOn(kRootNote));
-
-  // Stop playback, which should only stop the sequence note.
-  engine.Stop();
-  EXPECT_FALSE(instrument->IsNoteOn(kRootNote + 1.0));
-  EXPECT_TRUE(instrument->IsNoteOn(kRootNote));
-
-  // Destroy sequence, which should not affect the instrument.
-  EXPECT_TRUE(engine.DestroySequence(kSequenceId));
-  EXPECT_THAT(engine.GetSequence(kSequenceId), IsNull());
-  EXPECT_TRUE(instrument->IsNoteOn(kRootNote));
-
-  // Destroy instrument.
-  EXPECT_TRUE(engine.DestroyInstrument(kInstrumentId));
-  EXPECT_THAT(engine.GetInstrument(kInstrumentId), IsNull());
+  // Destroy sequencer.
+  EXPECT_TRUE(engine.DestroySequencer(kSequencerId));
+  EXPECT_THAT(engine.GetSequencer(kSequencerId), IsNull());
 }
+
+// TODO(#108): Add `CreateDestroyMultipleSequencers` using differing priorities.
 
 // Tests that engine returns beats and seconds as expected.
 TEST(EngineTest, GetBeatsSeconds) {
@@ -373,33 +341,6 @@ TEST(EngineTest, SetTempo) {
 
   engine.SetTempo(0.0);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
-}
-
-// Tests that engine starts and stops playback as expected.
-TEST(EngineTest, StartStopPlayback) {
-  Engine engine;
-  EXPECT_EQ(engine.GetTransport().GetPosition(), 0.0);
-  EXPECT_FALSE(engine.GetTransport().IsPlaying());
-
-  engine.Update(10.0);
-  EXPECT_EQ(engine.GetTransport().GetPosition(), 0.0);
-  EXPECT_FALSE(engine.GetTransport().IsPlaying());
-
-  engine.Start();
-  EXPECT_EQ(engine.GetTransport().GetPosition(), 0.0);
-  EXPECT_TRUE(engine.GetTransport().IsPlaying());
-
-  engine.Update(20.0);
-  EXPECT_EQ(engine.GetTransport().GetPosition(), 20.0);
-  EXPECT_TRUE(engine.GetTransport().IsPlaying());
-
-  engine.Stop();
-  EXPECT_EQ(engine.GetTransport().GetPosition(), 20.0);
-  EXPECT_FALSE(engine.GetTransport().IsPlaying());
-
-  engine.Update(30.0);
-  EXPECT_EQ(engine.GetTransport().GetPosition(), 20.0);
-  EXPECT_FALSE(engine.GetTransport().IsPlaying());
 }
 
 }  // namespace

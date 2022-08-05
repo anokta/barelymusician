@@ -64,18 +64,6 @@ enum BarelyStatus_Values {
   BarelyStatus_kUnknown = 6,
 };
 
-/// Parameter definition.
-typedef struct BarelyParameterDefinition {
-  /// Default value.
-  double default_value;
-
-  /// Minimum value.
-  double min_value;
-
-  /// Maximum value.
-  double max_value;
-} BarelyParameterDefinition;
-
 /// Instrument create callback signature.
 ///
 /// @param state Pointer to instrument state.
@@ -133,6 +121,18 @@ typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
                                                                 int32_t index,
                                                                 double value,
                                                                 double slope);
+
+/// Parameter definition.
+typedef struct BarelyParameterDefinition {
+  /// Default value.
+  double default_value;
+
+  /// Minimum value.
+  double min_value;
+
+  /// Maximum value.
+  double max_value;
+} BarelyParameterDefinition;
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -589,6 +589,7 @@ BARELY_EXPORT BarelyStatus BarelySequencer_Stop(BarelyMusicianHandle handle,
 #include <compare>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <span>
 #include <string>
 #include <type_traits>
@@ -1067,18 +1068,18 @@ class Sequencer {
   using EventCallback = std::function<void(double position)>;
 
   /// Event reference.
-  // TODO(#105): update these functions to make sure they would still work when
-  // reference is gone.
   class EventReference {
    public:
     /// Returns position.
     ///
-    /// @return Position in beats.
-    [[nodiscard]] double GetPosition() const {
+    /// @return Position in beats, or error status.
+    [[nodiscard]] StatusOr<double> GetPosition() const {
       double position = 0.0;
-      [[maybe_unused]] const Status status = BarelySequencer_GetEventPosition(
-          handle_, sequencer_id_, id_, &position);
-      assert(status.IsOk());
+      if (const Status status = BarelySequencer_GetEventPosition(
+              handle_, sequencer_id_, id_, &position);
+          !status.IsOk()) {
+        return status;
+      }
       return position;
     }
 
@@ -1087,8 +1088,13 @@ class Sequencer {
     /// @param callback Callback.
     /// @return Status.
     Status SetCallback(EventCallback callback) {
-      // TODO(#105): These functions are not yet verified.
       *callback_wrapper_ptr_ = std::move(callback);
+      return BarelySequencer_SetEventCallback(
+          handle_, sequencer_id_, id_,
+          [](double position, void* user_data) {
+            (*static_cast<EventCallback*>(user_data))(position);
+          },
+          static_cast<void*>(callback_wrapper_ptr_));
     }
 
     /// Sets position.

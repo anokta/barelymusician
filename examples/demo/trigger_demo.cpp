@@ -85,13 +85,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
     const double pitch =
         barely::kPitchD3 +
         barely::GetPitch(barely::kPitchMajorScale, scale_index);
-    return [&instrument, &sequencer, duration, pitch](double position) {
+    return [&instrument, &sequencer, duration, pitch]() {
       instrument.StartNote(pitch, kGain);
       sequencer.ScheduleOneOffEvent(
-          position + duration,
-          [&instrument, pitch]([[maybe_unused]] double position) {
-            instrument.StopNote(pitch);
-          });
+          sequencer.GetPosition() + duration,
+          [&instrument, pitch]() { instrument.StopNote(pitch); });
     };
   };
 

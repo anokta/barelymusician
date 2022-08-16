@@ -86,7 +86,7 @@ bool Sequencer::RemoveEvent(Id id) noexcept {
 
 bool Sequencer::ScheduleOneOffEvent(double position,
                                     EventCallback callback) noexcept {
-  if (is_playing_ && position >= position_) {
+  if (position >= position_ && callback) {
     one_off_callbacks_.emplace(position, std::move(callback));
     return true;
   }
@@ -168,19 +168,14 @@ void Sequencer::SetPosition(double position) noexcept {
 
 void Sequencer::Start() noexcept { is_playing_ = true; }
 
-void Sequencer::Stop() noexcept {
-  one_off_callbacks_.clear();
-  is_playing_ = false;
-}
+void Sequencer::Stop() noexcept { is_playing_ = false; }
 
 void Sequencer::TriggerAllEventsAtCurrentPosition() noexcept {
   // Trigger one-off events.
   if (!one_off_callbacks_.empty()) {
     auto it = one_off_callbacks_.begin();
     while (it != one_off_callbacks_.end() && it->first <= position_) {
-      if (it->second) {
-        it->second(position_);
-      }
+      it->second();
       ++it;
     }
     one_off_callbacks_.erase(one_off_callbacks_.begin(), it);
@@ -189,7 +184,7 @@ void Sequencer::TriggerAllEventsAtCurrentPosition() noexcept {
   auto callback = GetNextEventCallback();
   while (callback != callbacks_.end() && callback->first.first <= position_) {
     if (callback->second) {
-      callback->second(position_);
+      callback->second();
     }
     last_triggered_position_ = callback->first.first;
     ++callback;

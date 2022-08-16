@@ -69,18 +69,6 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
-  const auto play_note_fn = [&](double duration, double pitch,
-                                double intensity) -> Sequencer::EventCallback {
-    return
-        [&instrument, &sequencer, pitch, duration, intensity](double position) {
-          instrument.StartNote(pitch, intensity);
-          sequencer.ScheduleOneOffEvent(
-              position + duration,
-              [&instrument, pitch]([[maybe_unused]] double position) {
-                instrument.StopNote(pitch);
-              });
-        };
-  };
   bool has_notes = false;
   for (int i = 0; i < midi_events.size(); ++i) {
     const auto& midi_event = midi_events[i];
@@ -90,7 +78,13 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       const double intensity =
           static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
-      sequencer.AddEvent(position, play_note_fn(duration, pitch, intensity));
+      const auto status = sequencer.ScheduleOneOffEvent(
+          position, [&instrument, pitch, intensity]() {
+            instrument.StartNote(pitch, intensity);
+          });
+      sequencer.ScheduleOneOffEvent(
+          position + duration,
+          [&instrument, pitch]() { instrument.StopNote(pitch); });
       has_notes = true;
     }
   }

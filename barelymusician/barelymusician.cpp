@@ -328,9 +328,7 @@ BarelyStatus BarelySequencer_AddEvent(BarelyMusicianHandle handle,
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
     *out_event_id = ++handle->id_counter;
     if (sequencer->AddEvent(*out_event_id, position,
-                            [callback, user_data](double position) {
-                              callback(position, user_data);
-                            })) {
+                            [callback, user_data]() { callback(user_data); })) {
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kAlreadyExists;
@@ -474,10 +472,8 @@ BarelyStatus BarelySequencer_ScheduleOneOffEvent(
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    if (sequencer->ScheduleOneOffEvent(position,
-                                       [callback, user_data](double position) {
-                                         callback(position, user_data);
-                                       })) {
+    if (sequencer->ScheduleOneOffEvent(
+            position, [callback, user_data]() { callback(user_data); })) {
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kInvalidArgument;
@@ -494,10 +490,8 @@ BarelyStatus BarelySequencer_SetEventCallback(
   }
 
   if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    if (sequencer->SetEventCallback(event_id,
-                                    [callback, user_data](double position) {
-                                      callback(position, user_data);
-                                    })) {
+    if (sequencer->SetEventCallback(
+            event_id, [callback, user_data]() { callback(user_data); })) {
       return BarelyStatus_kOk;
     }
   }

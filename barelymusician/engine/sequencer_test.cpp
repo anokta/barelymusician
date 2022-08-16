@@ -21,7 +21,8 @@ TEST(SequencerTest, TriggerMultipleEvents) {
   // Add events.
   std::vector<double> positions;
   for (int i = 1; i <= 4; ++i) {
-    sequencer.AddEvent(Id{i}, static_cast<double>(i), [&, i](double position) {
+    sequencer.AddEvent(Id{i}, static_cast<double>(i), [&, i]() {
+      const double position = sequencer.GetPosition();
       EXPECT_DOUBLE_EQ(position, static_cast<double>(i));
       positions.push_back(position);
     });
@@ -70,8 +71,8 @@ TEST(SequencerTest, TriggerSingleEvent) {
 
   // Add event.
   int num_event_triggers = 0;
-  EXPECT_TRUE(sequencer.AddEvent(Id{1}, 0.25, [&](double position) {
-    EXPECT_DOUBLE_EQ(position, 0.25);
+  EXPECT_TRUE(sequencer.AddEvent(Id{1}, 0.25, [&]() {
+    EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
     ++num_event_triggers;
   }));
   EXPECT_FALSE(sequencer.IsPlaying());
@@ -120,8 +121,8 @@ TEST(SequencerTest, TriggerSingleEvent) {
 
   // Update event position and callback.
   EXPECT_TRUE(sequencer.SetEventPosition(Id{1}, 0.75));
-  EXPECT_TRUE(sequencer.SetEventCallback(Id{1}, [&](double position) {
-    EXPECT_DOUBLE_EQ(position, 0.75);
+  EXPECT_TRUE(sequencer.SetEventCallback(Id{1}, [&]() {
+    EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.75);
     --num_event_triggers;
   }));
   EXPECT_TRUE(sequencer.IsPlaying());

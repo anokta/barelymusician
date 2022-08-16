@@ -182,7 +182,7 @@ TEST(EngineTest, CreateDestroySingleSequencer) {
   // Add event.
   double event_position = 0.0;
   EXPECT_TRUE(sequencer->AddEvent(
-      kEventId, 1.0, [&](double position) { event_position = position; }));
+      kEventId, 1.0, [&]() { event_position = sequencer->GetPosition(); }));
   EXPECT_DOUBLE_EQ(event_position, 0.0);
 
   // Start playback with one beat per second tempo.

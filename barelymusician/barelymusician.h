@@ -179,10 +179,9 @@ typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 void* user_data);
 
 /// Sequencer event callback signature.
-//
-/// @param position Event position in beats.
+///
 /// @param user_data Pointer to user data.
-typedef void (*BarelySequencer_EventCallback)(double position, void* user_data);
+typedef void (*BarelySequencer_EventCallback)(void* user_data);
 
 /// Creates new instrument.
 ///
@@ -1063,9 +1062,7 @@ class Instrument {
 class Sequencer {
  public:
   /// Event callback signature.
-  ///
-  /// @param position Event position in beats.
-  using EventCallback = std::function<void(double position)>;
+  using EventCallback = std::function<void()>;
 
   /// Event reference.
   class EventReference {
@@ -1091,9 +1088,7 @@ class Sequencer {
       *callback_wrapper_ptr_ = std::move(callback);
       return BarelySequencer_SetEventCallback(
           handle_, sequencer_id_, id_,
-          [](double position, void* user_data) {
-            (*static_cast<EventCallback*>(user_data))(position);
-          },
+          [](void* user_data) { (*static_cast<EventCallback*>(user_data))(); },
           static_cast<void*>(callback_wrapper_ptr_));
     }
 
@@ -1174,9 +1169,7 @@ class Sequencer {
     BarelyId event_id = BarelyId_kInvalid;
     [[maybe_unused]] const Status status = BarelySequencer_AddEvent(
         handle_, id_, position,
-        [](double event_position, void* user_data) {
-          (*static_cast<EventCallback*>(user_data))(event_position);
-        },
+        [](void* user_data) { (*static_cast<EventCallback*>(user_data))(); },
         static_cast<void*>(event_callback_wrapper_ptr), &event_id);
     assert(status.IsOk());
     return EventReference(handle_, id_, event_id, event_callback_wrapper_ptr);
@@ -1257,15 +1250,13 @@ class Sequencer {
     const auto [it, success] = event_callback_wrappers_.emplace(
         event_callback_wrapper_ptr, std::move(event_callback_wrapper));
     *it->second = [this, event_callback = std::move(callback),
-                   event_callback_wrapper_ptr](double event_position) {
-      event_callback(event_position);
+                   event_callback_wrapper_ptr]() {
+      event_callback();
       event_callback_wrappers_.erase(event_callback_wrapper_ptr);
     };
     return BarelySequencer_ScheduleOneOffEvent(
         handle_, id_, position,
-        [](double event_position, void* user_data) {
-          (*static_cast<EventCallback*>(user_data))(event_position);
-        },
+        [](void* user_data) { (*static_cast<EventCallback*>(user_data))(); },
         static_cast<void*>(event_callback_wrapper_ptr));
   }
 

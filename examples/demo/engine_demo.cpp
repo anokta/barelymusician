@@ -76,29 +76,24 @@ constexpr double kRootNote = barely::kPitchD3;
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
 
-// Returns sequencer event callback that plays an instrument note.
-Sequencer::EventCallback GetPlayNoteFn(double duration, double pitch,
-                                       double intensity, Instrument& instrument,
-                                       Sequencer& sequencer) {
-  return
-      [duration, pitch, intensity, &instrument, &sequencer](double position) {
-        instrument.StartNote(pitch, intensity);
-        sequencer.ScheduleOneOffEvent(
-            position + duration,
-            [&instrument, pitch]([[maybe_unused]] double position) {
-              instrument.StopNote(pitch);
-            });
-      };
+// Schedules sequencer to play an instrument note.
+void ScheduleNote(double position, double duration, double pitch,
+                  double intensity, Instrument& instrument,
+                  Sequencer& sequencer) {
+  sequencer.ScheduleOneOffEvent(position, [pitch, intensity, &instrument]() {
+    instrument.StartNote(pitch, intensity);
+  });
+  sequencer.ScheduleOneOffEvent(position + duration, [pitch, &instrument]() {
+    instrument.StopNote(pitch);
+  });
 }
 
 void ComposeChord(double intensity, int harmonic, double offset,
                   Instrument& instrument, Sequencer& sequencer) {
   const auto add_chord_note = [&](int index) {
-    sequencer.AddEvent(
-        offset,
-        GetPlayNoteFn(
-            1.0, kRootNote + barely::GetPitch(barely::kPitchMajorScale, index),
-            intensity, instrument, sequencer));
+    ScheduleNote(offset, 1.0,
+                 kRootNote + barely::GetPitch(barely::kPitchMajorScale, index),
+                 intensity, instrument, sequencer);
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -111,12 +106,10 @@ void ComposeLine(double octave_offset, double intensity, int bar, int beat,
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
-    sequencer.AddEvent(
-        begin_position + offset,
-        GetPlayNoteFn(end_position - begin_position,
-                      kRootNote + octave_offset +
-                          barely::GetPitch(barely::kPitchMajorScale, index),
-                      intensity, instrument, sequencer));
+    ScheduleNote(begin_position + offset, end_position - begin_position,
+                 kRootNote + octave_offset +
+                     barely::GetPitch(barely::kPitchMajorScale, index),
+                 intensity, instrument, sequencer);
   };
   if (beat % 2 == 1) {
     add_note(0.0, 0.33, harmonic);
@@ -143,9 +136,8 @@ void ComposeDrums(int bar, int beat, int num_beats, Random& random,
   };
   const auto add_note = [&](double begin_position, double end_position,
                             double pitch, double intensity) {
-    sequencer.AddEvent(begin_position + offset,
-                       GetPlayNoteFn(end_position - begin_position, pitch,
-                                     intensity, instrument, sequencer));
+    ScheduleNote(begin_position + offset, end_position - begin_position, pitch,
+                 intensity, instrument, sequencer);
   };
 
   // Kick.

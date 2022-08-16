@@ -16,7 +16,7 @@ Metronome::Metronome(Musician& musician) noexcept
     : sequencer_(musician.CreateSequencer(kPriority)) {
   sequencer_.SetLooping(true);
   sequencer_.SetLoopLength(1.0);
-  sequencer_.AddEvent(0.0, [this]([[maybe_unused]] double position) {
+  sequencer_.AddEvent(0.0, [this]() {
     if (callback_) {
       callback_(beat_);
     }

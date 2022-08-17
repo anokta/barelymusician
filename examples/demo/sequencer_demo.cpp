@@ -18,8 +18,8 @@
 
 namespace {
 
+using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Sequencer;
 using ::barely::SynthInstrument;
@@ -59,11 +59,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
-  musician.SetTempo(kInitialTempo);
+  Engine engine;
+  engine.SetTempo(kInitialTempo);
 
   Instrument instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+      engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
@@ -72,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
       });
 
-  Sequencer sequencer = musician.CreateSequencer();
+  Sequencer sequencer = engine.CreateSequencer();
   sequencer.SetLooping(true);
   sequencer.SetLoopBeginPosition(3.0);
   sequencer.SetLoopLength(5.0);
@@ -137,7 +137,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (sequencer.IsPlaying()) {
@@ -174,8 +174,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
+    engine.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
@@ -186,7 +186,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

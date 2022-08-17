@@ -29,9 +29,9 @@
 
 namespace {
 
+using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::Metronome;
-using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::PercussionInstrument;
 using ::barely::Random;
@@ -190,8 +190,8 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kFrameRate);
 
-  Musician musician;
-  musician.SetTempo(kTempo);
+  Engine engine;
+  engine.SetTempo(kTempo);
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](auto index, Instrument* instrument) {
@@ -213,8 +213,8 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
-    instruments.push_back(musician.CreateInstrument(
-        SynthInstrument::GetDefinition(), kFrameRate));
+    instruments.push_back(
+        engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate));
     auto& instrument = instruments.back();
     gains.push_back(gain);
     instrument.SetParameter(SynthParameter::kOscillatorType, type);
@@ -231,12 +231,12 @@ int main(int /*argc*/, char* argv[]) {
       };
 
   build_synth_instrument_fn(OscillatorType::kSine, 0.075, 0.125, 0.125);
-  performers.emplace_back(musician.CreateSequencer(),
+  performers.emplace_back(engine.CreateSequencer(),
                           chords_beat_composer_callback,
                           instruments.size() - 1);
 
   build_synth_instrument_fn(OscillatorType::kNoise, 0.0125, 0.5, 0.025);
-  performers.emplace_back(musician.CreateSequencer(),
+  performers.emplace_back(engine.CreateSequencer(),
                           chords_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -248,8 +248,8 @@ int main(int /*argc*/, char* argv[]) {
       };
 
   build_synth_instrument_fn(OscillatorType::kSaw, 0.1, 0.0025, 0.125);
-  performers.emplace_back(musician.CreateSequencer(),
-                          line_beat_composer_callback, instruments.size() - 1);
+  performers.emplace_back(engine.CreateSequencer(), line_beat_composer_callback,
+                          instruments.size() - 1);
 
   const auto line_2_beat_composer_callback =
       [&](int bar, int beat, int num_beats, int harmonic, double offset,
@@ -259,12 +259,12 @@ int main(int /*argc*/, char* argv[]) {
       };
 
   build_synth_instrument_fn(OscillatorType::kSquare, 0.1, 0.05, 0.05);
-  performers.emplace_back(musician.CreateSequencer(),
+  performers.emplace_back(engine.CreateSequencer(),
                           line_2_beat_composer_callback,
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.push_back(musician.CreateInstrument(
+  instruments.push_back(engine.CreateInstrument(
       PercussionInstrument::GetDefinition(), kFrameRate));
   gains.push_back(0.2);
   set_note_callbacks_fn(instruments.size(), &instruments.back());
@@ -314,7 +314,7 @@ int main(int /*argc*/, char* argv[]) {
                             sequencer);
       };
 
-  performers.emplace_back(musician.CreateSequencer(),
+  performers.emplace_back(engine.CreateSequencer(),
                           percussion_beat_composer_callback,
                           instruments.size() - 1);
 
@@ -345,7 +345,7 @@ int main(int /*argc*/, char* argv[]) {
     }
   };
 
-  Metronome metronome(musician);
+  Metronome metronome(engine);
   metronome.SetBeatCallback(beat_callback);
 
   // Audio process callback.
@@ -394,15 +394,15 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        musician.SetTempo(random.DrawUniform(0.5, 0.75) * musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
+        engine.SetTempo(random.DrawUniform(0.5, 0.75) * engine.GetTempo());
+        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case '2':
-        musician.SetTempo(random.DrawUniform(1.5, 2.0) * musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
+        engine.SetTempo(random.DrawUniform(1.5, 2.0) * engine.GetTempo());
+        ConsoleLog() << "Tempo changed to " << engine.GetTempo();
         break;
       case 'R':
-        musician.SetTempo(kTempo);
+        engine.SetTempo(kTempo);
         ConsoleLog() << "Tempo reset to " << kTempo;
         break;
       case 'D':
@@ -433,7 +433,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(clock.GetTimestamp() + kLookahead);
+    engine.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

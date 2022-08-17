@@ -17,9 +17,9 @@ class Metronome {
 
   /// Creates new `Metronome`.
   ///
-  /// @param musician Musician.
+  /// @param engine Engine.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Metronome(Musician& musician) noexcept;
+  explicit Metronome(Engine& engine) noexcept;
 
   /// Returns whether metronome is playing or not.
   ///

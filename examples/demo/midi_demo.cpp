@@ -18,8 +18,8 @@
 
 namespace {
 
+using ::barely::Engine;
 using ::barely::Instrument;
-using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Sequencer;
 using ::barely::SynthInstrument;
@@ -114,15 +114,15 @@ int main(int /*argc*/, char* argv[]) {
 
   AudioClock clock(kSampleRate);
 
-  Musician musician;
-  musician.SetTempo(kTempo);
+  Engine engine;
+  engine.SetTempo(kTempo);
 
   std::vector<std::pair<Instrument, Sequencer>> tracks;
   tracks.reserve(num_tracks);
   for (int i = 0; i < num_tracks; ++i) {
-    tracks.emplace_back(musician.CreateInstrument(
-                            SynthInstrument::GetDefinition(), kSampleRate),
-                        musician.CreateSequencer());
+    tracks.emplace_back(
+        engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate),
+        engine.CreateSequencer());
     Instrument& instrument = tracks.back().first;
     Sequencer& sequencer = tracks.back().second;
     // Build score.
@@ -186,7 +186,7 @@ int main(int /*argc*/, char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(clock.GetTimestamp() + kLookahead);
+    engine.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

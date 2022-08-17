@@ -13,9 +13,9 @@
 
 namespace {
 
+using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::Metronome;
-using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthInstrument;
 using ::barely::SynthParameter;
@@ -54,19 +54,19 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Musician musician;
-  musician.SetTempo(kInitialTempo);
+  Engine engine;
+  engine.SetTempo(kInitialTempo);
 
   // Create metronome instrument.
   Instrument instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+      engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
   instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);
 
   // Add beat event.
-  Metronome metronome(musician);
+  Metronome metronome(engine);
   metronome.SetBeatCallback([&](int beat) {
     ConsoleLog() << "Tick " << (beat / kNumBeats) << "." << (beat % kNumBeats);
     const double pitch = (beat % kNumBeats == 0) ? kBarPitch : kBeatPitch;
@@ -92,7 +92,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (metronome.IsPlaying()) {
@@ -125,8 +125,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       default:
         return;
     }
-    musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
+    engine.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
@@ -137,7 +137,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    musician.Update(audio_clock.GetTimestamp() + kLookahead);
+    engine.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

@@ -15,9 +15,9 @@
 
 namespace {
 
+using ::barely::Engine;
 using ::barely::GainProcessor;
 using ::barely::Instrument;
-using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthInstrument;
 using ::barely::SynthParameter;
@@ -62,10 +62,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Musician musician;
+  Engine engine;
 
   Instrument instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+      engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);

@@ -23,33 +23,33 @@ enum BarelyUnityInstrumentType_Values {
 
 /// Creates new Unity instrument.
 ///
-/// @param handle Musician handle.
+/// @param handle Engine handle.
 /// @param type Unity instrument type.
 /// @param frame_rate Frame rate in hz.
 /// @param out_instrument_id Output instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyUnityInstrument_Create(
-    BarelyMusicianHandle handle, BarelyUnityInstrumentType type,
+    BarelyEngineHandle handle, BarelyUnityInstrumentType type,
     int32_t frame_rate, BarelyId* out_instrument_id);
 
 /// Sets Unity instrument note off callback.
 ///
-/// @param handle Musician handle.
+/// @param handle Engine handle.
 /// @param instrument_id Instrument identifier.
 /// @param callback Note off callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyUnityInstrument_SetNoteOffCallback(
-    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyEngineHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOffCallback callback);
 
 /// Sets Unity instrument note on callback.
 ///
-/// @param handle Musician handle.
+/// @param handle Engine handle.
 /// @param instrument_id Instrument identifier.
 /// @param callback Note on callback.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyUnityInstrument_SetNoteOnCallback(
-    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyEngineHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOnCallback callback);
 
 }  // extern "C"

@@ -12,8 +12,8 @@ constexpr int kPriority = -1;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Metronome::Metronome(Musician& musician) noexcept
-    : sequencer_(musician.CreateSequencer(kPriority)) {
+Metronome::Metronome(Engine& engine) noexcept
+    : sequencer_(engine.CreateSequencer(kPriority)) {
   sequencer_.SetLooping(true);
   sequencer_.SetLoopLength(1.0);
   sequencer_.AddEvent(0.0, [this]() {

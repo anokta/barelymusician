@@ -14,28 +14,30 @@ namespace barely::internal {
 /// Class that wraps sequencer.
 class Sequencer {
  public:
-  /// Event callback alias.
-  using EventCallback = barely::Sequencer::EventCallback;
+  /// Event definition alias.
+  using EventDefinition = barely::EventDefinition;
 
-  /// Adds new event at position.
+  /// Creates new event at position.
   ///
   /// @param id Event identifier.
+  /// @param definition Event definition.
   /// @param position Event position.
-  /// @param callback Event callback.
+  /// @param is_one_off True if event is one-off, false otherwise.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool AddEvent(Id id, double position, EventCallback callback) noexcept;
+  bool CreateEvent(Id id, EventDefinition definition, double position,
+                   bool is_one_off) noexcept;
+
+  /// Destroys event.
+  ///
+  /// @param id Event identifier.
+  /// @return True if successful, false otherwise.
+  bool DestroyEvent(Id id) noexcept;
 
   /// Returns duration to next event.
   ///
   /// @return Duration in beats.
   [[nodiscard]] double GetDurationToNextEvent() const noexcept;
-
-  /// Returns event callback.
-  ///
-  /// @param id Event identifier.
-  /// @return Pointer to event callback.
-  [[nodiscard]] const EventCallback* GetEventCallback(Id id) const noexcept;
 
   /// Returns event position.
   ///
@@ -67,25 +69,6 @@ class Sequencer {
   ///
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
-
-  /// Adds new event at position.
-  ///
-  /// @param id Event identifier.
-  /// @return True if successful, false otherwise.
-  bool RemoveEvent(Id id) noexcept;
-
-  /// Schedules one-off event at position.
-  ///
-  /// @param position Position in beats.
-  /// @param callback Event callback.
-  /// @return True if successful, false otherwise.
-  bool ScheduleOneOffEvent(double position, EventCallback callback) noexcept;
-
-  /// Sets event callback.
-  ///
-  /// @param id Event identifier.
-  /// @param callback Event callback.
-  bool SetEventCallback(Id id, EventCallback callback) noexcept;
 
   /// Sets event position.
   ///

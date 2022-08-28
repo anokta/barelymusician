@@ -43,6 +43,44 @@ enum BarelyId_Values {
   BarelyId_kInvalid = 0,
 };
 
+/// Status enum alias.
+typedef int32_t BarelyStatus;
+
+/// Status enum values.
+enum BarelyStatus_Values {
+  /// Success.
+  BarelyStatus_kOk = 0,
+  /// Invalid argument error.
+  BarelyStatus_kInvalidArgument = 1,
+  /// Not found error.
+  BarelyStatus_kNotFound = 2,
+  /// Already exists error.
+  BarelyStatus_kAlreadyExists = 3,
+  /// Unimplemented error.
+  BarelyStatus_kUnimplemented = 4,
+  /// Internal error.
+  BarelyStatus_kInternal = 5,
+  /// Unknown error.
+  BarelyStatus_kUnknown = 6,
+};
+
+/// Event definition create callback signature.
+///
+/// @param state Pointer to event state.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyEventDefinition_CreateCallback)(void** state,
+                                                     void* user_data);
+
+/// Event definition destroy callback signature.
+///
+/// @param state Pointer to event state.
+typedef void (*BarelyEventDefinition_DestroyCallback)(void** state);
+
+/// Event definition process callback signature.
+///
+/// @param state Pointer to event state.
+typedef void (*BarelyEventDefinition_ProcessCallback)(void** state);
+
 /// Instrument note off callback signature.
 ///
 /// @param pitch Note pitch.
@@ -57,24 +95,19 @@ typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, void* user_data);
 typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
                                                 void* user_data);
 
-/// Sequencer event callback signature.
-///
-/// @param user_data Pointer to user data.
-typedef void (*BarelySequencer_EventCallback)(void* user_data);
-
-/// Instrument create callback signature.
+/// Instrument definition create callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param frame_rate Frame rate in hz.
 typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state,
                                                           int32_t frame_rate);
 
-/// Instrument destroy callback signature.
+/// Instrument definition destroy callback signature.
 ///
 /// @param state Pointer to instrument state.
 typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 
-/// Instrument process callback signature.
+/// Instrument definition process callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param output Output buffer.
@@ -84,7 +117,7 @@ typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
     void** state, double* output, int32_t num_output_channels,
     int32_t num_output_frames);
 
-/// Instrument set data callback signature.
+/// Instrument definition set data callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param data Pointer to data.
@@ -93,14 +126,14 @@ typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
                                                            const void* data,
                                                            int32_t size);
 
-/// Instrument set note off callback signature.
+/// Instrument definition set note off callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
 typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
                                                               double pitch);
 
-/// Instrument set note on callback signature.
+/// Instrument definition set note on callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
@@ -109,7 +142,7 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
                                                              double pitch,
                                                              double intensity);
 
-/// Instrument set parameter callback signature.
+/// Instrument definition set parameter callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param index Parameter index.
@@ -119,6 +152,21 @@ typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
                                                                 int32_t index,
                                                                 double value,
                                                                 double slope);
+
+/// Event definition.
+typedef struct BarelyEventDefinition {
+  /// Create callback.
+  BarelyEventDefinition_CreateCallback create_callback;
+
+  /// Destroy callback.
+  BarelyEventDefinition_DestroyCallback destroy_callback;
+
+  /// Process callback.
+  BarelyEventDefinition_ProcessCallback process_callback;
+
+  /// Pointer to user data.
+  void* user_data;
+} BarelyEventDefinition;
 
 /// Parameter definition.
 typedef struct BarelyParameterDefinition {
@@ -161,27 +209,6 @@ typedef struct BarelyInstrumentDefinition {
   /// Number of parameter definitions.
   int32_t num_parameter_definitions;
 } BarelyInstrumentDefinition;
-
-/// Status enum alias.
-typedef int32_t BarelyStatus;
-
-/// Status enum values.
-enum BarelyStatus_Values {
-  /// Success.
-  BarelyStatus_kOk = 0,
-  /// Invalid argument error.
-  BarelyStatus_kInvalidArgument = 1,
-  /// Not found error.
-  BarelyStatus_kNotFound = 2,
-  /// Already exists error.
-  BarelyStatus_kAlreadyExists = 3,
-  /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 4,
-  /// Internal error.
-  BarelyStatus_kInternal = 5,
-  /// Unknown error.
-  BarelyStatus_kUnknown = 6,
-};
 
 /// Creates new engine.
 ///
@@ -244,6 +271,55 @@ BARELY_EXPORT BarelyStatus BarelyEngine_SetTempo(BarelyEngineHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyEngine_Update(BarelyEngineHandle handle,
                                                double timestamp);
+
+/// Creates event.
+///
+/// @param handle Engine handle.
+/// @param sequencer_id Sequencer identifier.
+/// @param definition Event definition.
+/// @param position Event position.
+/// @param is_one_off True if event is one-off, false otherwise.
+/// @param out_event_id Output event identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEvent_Create(BarelyEngineHandle handle,
+                                              BarelyId sequencer_id,
+                                              BarelyEventDefinition definition,
+                                              double position, bool is_one_off,
+                                              BarelyId* out_event_id);
+
+/// Destroys event.
+///
+/// @param handle Engine handle.
+/// @param sequencer_id Sequencer identifier.
+/// @param event_id Event identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEvent_Destroy(BarelyEngineHandle handle,
+                                               BarelyId sequencer_id,
+                                               BarelyId event_id);
+
+/// Gets event position.
+///
+/// @param handle Engine handle.
+/// @param sequencer_id Sequencer identifier.
+/// @param event_id Event identifier.
+/// @param out_position Output position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEvent_GetPosition(BarelyEngineHandle handle,
+                                                   BarelyId sequencer_id,
+                                                   BarelyId event_id,
+                                                   double* out_position);
+
+/// Sets event position.
+///
+/// @param handle Engine handle.
+/// @param sequencer_id Sequencer identifier.
+/// @param event_id Event identifier.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEvent_SetPosition(BarelyEngineHandle handle,
+                                                   BarelyId sequencer_id,
+                                                   BarelyId event_id,
+                                                   double position);
 
 /// Creates new instrument.
 ///
@@ -393,20 +469,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyEngineHandle handle,
                                                      BarelyId instrument_id,
                                                      double pitch);
 
-/// Adds sequencer event.
-///
-/// @param handle Engine handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param position Event position in beats.
-/// @param callback Event callback.
-/// @param user_data Pointer to event user data.
-/// @param out_event_id Output event identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_AddEvent(
-    BarelyEngineHandle handle, BarelyId sequencer_id, double position,
-    BarelySequencer_EventCallback callback, void* user_data,
-    BarelyId* out_event_id);
-
 /// Creates new sequencer.
 ///
 /// @param priority Sequencer priority for when executing events.
@@ -423,17 +485,6 @@ BARELY_EXPORT BarelyStatus BarelySequencer_Create(BarelyEngineHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequencer_Destroy(BarelyEngineHandle handle,
                                                    BarelyId sequencer_id);
-
-/// Gets sequencer event position.
-///
-/// @param handle Engine handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param event_id Event identifier.
-/// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_GetEventPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id, BarelyId event_id,
-    double* out_position);
 
 /// Gets sequencer loop begin position.
 ///
@@ -482,50 +533,6 @@ BARELY_EXPORT BarelyStatus BarelySequencer_IsLooping(BarelyEngineHandle handle,
 BARELY_EXPORT BarelyStatus BarelySequencer_IsPlaying(BarelyEngineHandle handle,
                                                      BarelyId sequencer_id,
                                                      bool* out_is_playing);
-
-/// Removes sequencer event.
-///
-/// @param handle Engine handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param event_id Event identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_RemoveEvent(
-    BarelyEngineHandle handle, BarelyId sequencer_id, BarelyId event_id);
-
-/// Schedules one-off sequencer event at position.
-///
-/// @param handle Engine handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param position Position in beats.
-/// @param callback Event callback.
-/// @param user_data Pointer to event user data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_ScheduleOneOffEvent(
-    BarelyEngineHandle handle, BarelyId sequencer_id, double position,
-    BarelySequencer_EventCallback callback, void* user_data);
-
-/// Sets sequencer event callback.
-///
-/// @param handle Engine handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param event_id Event identifier.
-/// @param callback Event callback.
-/// @param user_data Pointer to event user data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_SetEventCallback(
-    BarelyEngineHandle handle, BarelyId sequencer_id, BarelyId event_id,
-    BarelySequencer_EventCallback callback, void* user_data);
-
-/// Sets sequencer event position.
-///
-/// @param handle Engine handle.
-/// @param sequencer_id Sequencer identifier.
-/// @param event_id Event identifier.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_SetEventPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id, BarelyId event_id,
-    double position);
 
 /// Sets sequencer loop begin position.
 ///
@@ -595,7 +602,6 @@ BARELY_EXPORT BarelyStatus BarelySequencer_Stop(BarelyEngineHandle handle,
 #include <span>
 #include <string>
 #include <type_traits>
-#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -730,6 +736,41 @@ class StatusOr {
   std::variant<Status, ValueType> value_or_;
 };
 
+/// Event callback.
+using EventCallback = std::function<void()>;
+
+/// Event definition.
+struct EventDefinition : public BarelyEventDefinition {
+  /// Create callback signature.
+  using CreateCallback = BarelyEventDefinition_CreateCallback;
+
+  /// Destroy callback signature.
+  using DestroyCallback = BarelyEventDefinition_DestroyCallback;
+
+  /// Process callback signature.
+  using ProcessCallback = BarelyEventDefinition_ProcessCallback;
+
+  /// Constructs new `EventDefinition`.
+  ///
+  /// @param create_callback Create callback.
+  /// @param destroy_callback Destroy callback.
+  /// @param process_callback Process callback.
+  /// @param user_data Pointer to user data.
+  explicit EventDefinition(CreateCallback create_callback,
+                           DestroyCallback destroy_callback,
+                           ProcessCallback process_callback,
+                           void* user_data = nullptr)
+      : EventDefinition(
+            {create_callback, destroy_callback, process_callback, user_data}) {}
+
+  /// Constructs new `EventDefinition` from internal type.
+  ///
+  /// @param definition Internal event definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  EventDefinition(BarelyEventDefinition definition)
+      : BarelyEventDefinition{definition} {}
+};
+
 /// Parameter definition.
 struct ParameterDefinition : public BarelyParameterDefinition {
   /// Constructs new `ParameterDefinition`.
@@ -805,8 +846,7 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// @param set_note_on_callback Set note on callback.
   /// @param set_parameter_callback Set parameter callback.
   /// @param parameter_definitions List of parameter definitions.
-  /// @param user_data Pointer to user data.
-  InstrumentDefinition(
+  explicit InstrumentDefinition(
       CreateCallback create_callback, DestroyCallback destroy_callback,
       ProcessCallback process_callback, SetDataCallback set_data_callback,
       SetNoteOffCallback set_note_off_callback,
@@ -828,6 +868,48 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
     assert(parameter_definitions || num_parameter_definitions == 0);
     assert(num_parameter_definitions >= 0);
   }
+};
+
+/// Event reference.
+class EventReference {
+ public:
+  /// Returns position.
+  ///
+  /// @return Position in beats, or error status.
+  [[nodiscard]] StatusOr<double> GetPosition() const {
+    double position = 0.0;
+    if (const Status status =
+            BarelyEvent_GetPosition(handle_, sequencer_id_, id_, &position);
+        !status.IsOk()) {
+      return status;
+    }
+    return position;
+  }
+
+  /// Sets position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status SetPosition(double position) {
+    return BarelyEvent_SetPosition(handle_, sequencer_id_, id_, position);
+  }
+
+ private:
+  friend class Sequencer;
+
+  // Constructs new `EventReference`.
+  explicit EventReference(BarelyEngineHandle handle, BarelyId sequencer_id,
+                          BarelyId id)
+      : handle_(handle), sequencer_id_(sequencer_id), id_(id) {}
+
+  // Internal engine handle.
+  BarelyEngineHandle handle_ = nullptr;
+
+  // Sequencer identifier.
+  BarelyId sequencer_id_ = BarelyId_kInvalid;
+
+  // Identifier.
+  BarelyId id_ = BarelyId_kInvalid;
 };
 
 /// Instrument.
@@ -1064,70 +1146,6 @@ class Instrument {
 /// Sequencer.
 class Sequencer {
  public:
-  /// Event callback signature.
-  using EventCallback = std::function<void()>;
-
-  /// Event reference.
-  class EventReference {
-   public:
-    /// Returns position.
-    ///
-    /// @return Position in beats, or error status.
-    [[nodiscard]] StatusOr<double> GetPosition() const {
-      double position = 0.0;
-      if (const Status status = BarelySequencer_GetEventPosition(
-              handle_, sequencer_id_, id_, &position);
-          !status.IsOk()) {
-        return status;
-      }
-      return position;
-    }
-
-    /// Sets callback.
-    ///
-    /// @param callback Callback.
-    /// @return Status.
-    Status SetCallback(EventCallback callback) {
-      *callback_wrapper_ptr_ = std::move(callback);
-      return BarelySequencer_SetEventCallback(
-          handle_, sequencer_id_, id_,
-          [](void* user_data) { (*static_cast<EventCallback*>(user_data))(); },
-          static_cast<void*>(callback_wrapper_ptr_));
-    }
-
-    /// Sets position.
-    ///
-    /// @param position Position in beats.
-    /// @return Status.
-    Status SetPosition(double position) {
-      return BarelySequencer_SetEventPosition(handle_, sequencer_id_, id_,
-                                              position);
-    }
-
-   private:
-    friend class Sequencer;
-
-    // Constructs new `EventReference`.
-    explicit EventReference(BarelyEngineHandle handle, BarelyId sequencer_id,
-                            BarelyId id, EventCallback* callback_wrapper_ptr)
-        : handle_(handle),
-          sequencer_id_(sequencer_id),
-          id_(id),
-          callback_wrapper_ptr_(callback_wrapper_ptr) {}
-
-    // Internal engine handle.
-    BarelyEngineHandle handle_ = nullptr;
-
-    // Sequencer identifier.
-    BarelyId sequencer_id_ = BarelyId_kInvalid;
-
-    // Identifier.
-    BarelyId id_ = BarelyId_kInvalid;
-
-    // Pointer to callback wrapper.
-    EventCallback* callback_wrapper_ptr_ = nullptr;
-  };
-
   /// Destroys `Sequencer`.
   ~Sequencer() {
     BarelySequencer_Destroy(std::exchange(handle_, nullptr),
@@ -1158,24 +1176,52 @@ class Sequencer {
     return *this;
   }
 
-  /// Adds event.
+  /// Creates event.
   ///
+  /// @param definition Event definition.
   /// @param position Event position in beats.
-  /// @param callback Event callback.
+  /// @param is_one_off True if one-off event, false otherwise.
   /// @return Event reference.
-  EventReference AddEvent(double position, EventCallback callback) {
-    auto event_callback_wrapper =
-        std::make_unique<EventCallback>(std::move(callback));
-    EventCallback* event_callback_wrapper_ptr = event_callback_wrapper.get();
-    const auto [it, success] = event_callback_wrappers_.emplace(
-        event_callback_wrapper_ptr, std::move(event_callback_wrapper));
+  EventReference CreateEvent(EventDefinition definition, double position,
+                             bool is_one_off = false) {
     BarelyId event_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelySequencer_AddEvent(
-        handle_, id_, position,
-        [](void* user_data) { (*static_cast<EventCallback*>(user_data))(); },
-        static_cast<void*>(event_callback_wrapper_ptr), &event_id);
+    [[maybe_unused]] const Status status = BarelyEvent_Create(
+        handle_, id_, definition, position, is_one_off, &event_id);
     assert(status.IsOk());
-    return EventReference(handle_, id_, event_id, event_callback_wrapper_ptr);
+    return EventReference(handle_, id_, event_id);
+  }
+
+  /// Creates event with callback.
+  ///
+  /// @param callback Event callback.
+  /// @param position Event position in beats.
+  /// @param is_one_off True if one-off event, false otherwise.
+  /// @return Event reference.
+  EventReference CreateEvent(EventCallback callback, double position,
+                             bool is_one_off = false) {
+    return CreateEvent(
+        EventDefinition(
+            [](void** state, void* user_data) {
+              *state = new EventCallback(
+                  std::move(*static_cast<EventCallback*>(user_data)));
+            },
+            [](void** state) { delete static_cast<EventCallback*>(*state); },
+            [](void** state) {
+              if (const auto& callback = *static_cast<EventCallback*>(*state);
+                  callback) {
+                callback();
+              }
+            },
+            static_cast<void*>(&callback)),
+        position, is_one_off);
+  }
+
+  /// Destroys event.
+  ///
+  /// @param event_reference Event reference.
+  /// @return Status.
+  Status DestroyEvent(EventReference event_reference) {
+    return BarelyEvent_Destroy(handle_, id_, event_reference.id_);
   }
 
   /// Returns loop begin position.
@@ -1231,36 +1277,6 @@ class Sequencer {
         BarelySequencer_IsPlaying(handle_, id_, &is_playing);
     assert(status.IsOk());
     return is_playing;
-  }
-
-  /// Removes event.
-  ///
-  /// @param event_reference Event reference.
-  /// @return Status.
-  Status RemoveEvent(EventReference event_reference) {
-    event_callback_wrappers_.erase(event_reference.callback_wrapper_ptr_);
-    return BarelySequencer_RemoveEvent(handle_, id_, event_reference.id_);
-  }
-
-  /// Schedules one-off event at position.
-  ///
-  /// @param position Position in beats.
-  /// @param callback Event callback.
-  /// @return Status.
-  Status ScheduleOneOffEvent(double position, EventCallback callback) {
-    auto event_callback_wrapper = std::make_unique<EventCallback>();
-    EventCallback* event_callback_wrapper_ptr = event_callback_wrapper.get();
-    const auto [it, success] = event_callback_wrappers_.emplace(
-        event_callback_wrapper_ptr, std::move(event_callback_wrapper));
-    *it->second = [this, event_callback = std::move(callback),
-                   event_callback_wrapper_ptr]() {
-      event_callback();
-      event_callback_wrappers_.erase(event_callback_wrapper_ptr);
-    };
-    return BarelySequencer_ScheduleOneOffEvent(
-        handle_, id_, position,
-        [](void* user_data) { (*static_cast<EventCallback*>(user_data))(); },
-        static_cast<void*>(event_callback_wrapper_ptr));
   }
 
   /// Sets loop begin position.
@@ -1322,10 +1338,6 @@ class Sequencer {
 
   // Identifier.
   BarelyId id_ = BarelyId_kInvalid;
-
-  // Map of event callback wrappers by their raw pointers.
-  std::unordered_map<EventCallback*, std::unique_ptr<EventCallback>>
-      event_callback_wrappers_;
 };
 
 /// Engine.

@@ -13,6 +13,16 @@ target_link_libraries(
 )
 
 add_library(
+  event
+  event.cpp
+  event.h
+)
+target_link_libraries(
+  event
+  include
+)
+
+add_library(
   id INTERFACE
   id.h
 )

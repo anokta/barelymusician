@@ -760,8 +760,8 @@ struct EventDefinition : public BarelyEventDefinition {
                            DestroyCallback destroy_callback,
                            ProcessCallback process_callback,
                            void* user_data = nullptr)
-      : EventDefinition(
-            {create_callback, destroy_callback, process_callback, user_data}) {}
+      : EventDefinition(BarelyEventDefinition{create_callback, destroy_callback,
+                                              process_callback, user_data}) {}
 
   /// Constructs new `EventDefinition` from internal type.
   ///

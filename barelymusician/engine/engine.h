@@ -8,9 +8,12 @@
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
-#include "barelymusician/engine/sequencer.h"
+// #include "barelymusician/engine/sequencer.h"
 
 namespace barely::internal {
+
+// TODO(#109): Remove after API cleanup.
+class Sequencer;
 
 /// Musician engine.
 class Engine {
@@ -130,11 +133,11 @@ class Engine {
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
-  // Map of sequencers by sequencer priority-identifier pairs.
-  std::map<std::pair<int, Id>, Sequencer> sequencers_;
-
-  // Map of sequencer priority-reference pairs by sequencer identifiers.
-  std::unordered_map<Id, std::pair<int, Sequencer*>> sequencer_refs_;
+  // TODO(#109): Reenable after API cleanup.
+  // // Map of sequencers by sequencer priority-identifier pairs.
+  // std::map<std::pair<int, Id>, Sequencer> sequencers_;
+  // // Map of sequencer priority-reference pairs by sequencer identifiers.
+  // std::unordered_map<Id, std::pair<int, Sequencer*>> sequencer_refs_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

@@ -2,11 +2,12 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
-    name = "metronome",
-    srcs = ["metronome.cpp"],
-    hdrs = ["metronome.h"],
-    deps = [
-        "//barelymusician",
-    ],
-)
+# TODO(#109): Reenable after API cleanup.
+# cc_library(
+#     name = "metronome",
+#     srcs = ["metronome.cpp"],
+#     hdrs = ["metronome.h"],
+#     deps = [
+#         "//barelymusician",
+#     ],
+# )

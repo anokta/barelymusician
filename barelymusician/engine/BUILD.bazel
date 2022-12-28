@@ -10,7 +10,8 @@ cc_library(
         ":id",
         ":instrument",
         ":mutable_data",
-        ":sequencer",
+        # TODO(#109): Reenable after API cleanup.
+        # ":sequencer",
         "//barelymusician/common:find_or_null",
     ],
 )
@@ -72,28 +73,30 @@ cc_library(
     ],
 )
 
-cc_library(
-    name = "sequencer",
-    srcs = ["sequencer.cpp"],
-    hdrs = ["sequencer.h"],
-    deps = [
-        ":id",
-        "//barelymusician:include",
-        "//barelymusician/common:find_or_null",
-    ],
-)
+# TODO(#109): Reenable after API cleanup.
+# cc_library(
+#     name = "sequencer",
+#     srcs = ["sequencer.cpp"],
+#     hdrs = ["sequencer.h"],
+#     deps = [
+#         ":id",
+#         "//barelymusician:include",
+#         "//barelymusician/common:find_or_null",
+#     ],
+# )
 
-cc_test(
-    name = "engine_test",
-    srcs = ["engine_test.cpp"],
-    deps = [
-        ":engine",
-        ":id",
-        ":instrument",
-        ":parameter",
-        "@googletest//:gtest_main",
-    ],
-)
+# TODO(#109): Reenable after API cleanup.
+# cc_test(
+#     name = "engine_test",
+#     srcs = ["engine_test.cpp"],
+#     deps = [
+#         ":engine",
+#         ":id",
+#         ":instrument",
+#         ":parameter",
+#         "@googletest//:gtest_main",
+#     ],
+# )
 
 cc_test(
     name = "instrument_test",
@@ -133,11 +136,12 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "sequencer_test",
-    srcs = ["sequencer_test.cpp"],
-    deps = [
-        ":sequencer",
-        "@googletest//:gtest_main",
-    ],
-)
+# TODO(#109): Reenable after API cleanup.
+# cc_test(
+#     name = "sequencer_test",
+#     srcs = ["sequencer_test.cpp"],
+#     deps = [
+#         ":sequencer",
+#         "@googletest//:gtest_main",
+#     ],
+# )

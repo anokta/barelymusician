@@ -110,14 +110,15 @@ BarelyStatus BarelyEvent_Create(
   if (position < 0.0) return BarelyStatus_kInvalidArgument;
   if (!out_event_id) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_event_id = ++handle->id_counter;
-    if (sequencer->CreateEvent(*out_event_id, definition, position,
-                               is_one_off)) {
-      return BarelyStatus_kOk;
-    }
-    return BarelyStatus_kAlreadyExists;
-  }
+  // TODO(#109): Reenable after API cleanup.
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   *out_event_id = ++handle->id_counter;
+  //   if (sequencer->CreateEvent(*out_event_id, definition, position,
+  //                              is_one_off)) {
+  //     return BarelyStatus_kOk;
+  //   }
+  //   return BarelyStatus_kAlreadyExists;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -128,11 +129,12 @@ BarelyStatus BarelyEvent_Destroy(BarelyEngineHandle handle,
     return BarelyStatus_kInvalidArgument;
   }
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    if (sequencer->DestroyEvent(event_id)) {
-      return BarelyStatus_kOk;
-    }
-  }
+  // TODO(#109): Reenable after API cleanup.
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   if (sequencer->DestroyEvent(event_id)) {
+  //     return BarelyStatus_kOk;
+  //   }
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -145,28 +147,30 @@ BarelyStatus BarelyEvent_GetPosition(BarelyEngineHandle handle,
   }
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    if (const auto* position = sequencer->GetEventPosition(event_id)) {
-      *out_position = *position;
-      return BarelyStatus_kOk;
-    }
-  }
+  // TODO(#109): Reenable after API cleanup.
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   if (const auto* position = sequencer->GetEventPosition(event_id)) {
+  //     *out_position = *position;
+  //     return BarelyStatus_kOk;
+  //   }
+  // }
   return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelyEvent_SetPosition(BarelyEngineHandle handle,
                                      BarelyId sequencer_id, BarelyId event_id,
-                                     double position) {
+                                     [[maybe_unused]] double position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
     return BarelyStatus_kInvalidArgument;
   }
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    if (sequencer->SetEventPosition(event_id, position)) {
-      return BarelyStatus_kOk;
-    }
-  }
+  // TODO(#109): Reenable after API cleanup.
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   if (sequencer->SetEventPosition(event_id, position)) {
+  //     return BarelyStatus_kOk;
+  //   }
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -416,10 +420,10 @@ BarelyStatus BarelySequencer_GetLoopBeginPosition(
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_loop_begin_position) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_loop_begin_position = sequencer->GetLoopBeginPosition();
-    return BarelyStatus_kOk;
-  }
+  // if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   *out_loop_begin_position = sequencer->GetLoopBeginPosition();
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -430,10 +434,10 @@ BarelyStatus BarelySequencer_GetLoopLength(BarelyEngineHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_loop_length) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_loop_length = sequencer->GetLoopLength();
-    return BarelyStatus_kOk;
-  }
+  // if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   *out_loop_length = sequencer->GetLoopLength();
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -444,10 +448,10 @@ BarelyStatus BarelySequencer_GetPosition(BarelyEngineHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_position = sequencer->GetPosition();
-    return BarelyStatus_kOk;
-  }
+  // if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   *out_position = sequencer->GetPosition();
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -458,10 +462,10 @@ BarelyStatus BarelySequencer_IsLooping(BarelyEngineHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_looping) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_is_looping = sequencer->IsLooping();
-    return BarelyStatus_kOk;
-  }
+  // if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   *out_is_looping = sequencer->IsLooping();
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -472,23 +476,23 @@ BarelyStatus BarelySequencer_IsPlaying(BarelyEngineHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (!out_is_playing) return BarelyStatus_kInvalidArgument;
 
-  if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    *out_is_playing = sequencer->IsPlaying();
-    return BarelyStatus_kOk;
-  }
+  // if (const auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   *out_is_playing = sequencer->IsPlaying();
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_SetLoopBeginPosition(BarelyEngineHandle handle,
-                                                  BarelyId sequencer_id,
-                                                  double loop_begin_position) {
+BarelyStatus BarelySequencer_SetLoopBeginPosition(
+    BarelyEngineHandle handle, BarelyId sequencer_id,
+    [[maybe_unused]] double loop_begin_position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->SetLoopBeginPosition(loop_begin_position);
-    return BarelyStatus_kOk;
-  }
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   sequencer->SetLoopBeginPosition(loop_begin_position);
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -499,36 +503,36 @@ BarelyStatus BarelySequencer_SetLoopLength(BarelyEngineHandle handle,
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (loop_length < 0.0) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->SetLoopLength(loop_length);
-    return BarelyStatus_kOk;
-  }
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   sequencer->SetLoopLength(loop_length);
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_SetLooping(BarelyEngineHandle handle,
                                         BarelyId sequencer_id,
-                                        bool is_looping) {
+                                        [[maybe_unused]] bool is_looping) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->SetLooping(is_looping);
-    return BarelyStatus_kOk;
-  }
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   sequencer->SetLooping(is_looping);
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelySequencer_SetPosition(BarelyEngineHandle handle,
                                          BarelyId sequencer_id,
-                                         double position) {
+                                         [[maybe_unused]] double position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->SetPosition(position);
-    return BarelyStatus_kOk;
-  }
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   sequencer->SetPosition(position);
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -537,10 +541,10 @@ BarelyStatus BarelySequencer_Start(BarelyEngineHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->Start();
-    return BarelyStatus_kOk;
-  }
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   sequencer->Start();
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 
@@ -549,10 +553,10 @@ BarelyStatus BarelySequencer_Stop(BarelyEngineHandle handle,
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
-  if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
-    sequencer->Stop();
-    return BarelyStatus_kOk;
-  }
+  // if (auto* sequencer = handle->engine.GetSequencer(sequencer_id)) {
+  //   sequencer->Stop();
+  //   return BarelyStatus_kOk;
+  // }
   return BarelyStatus_kNotFound;
 }
 

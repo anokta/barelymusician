@@ -332,14 +332,10 @@ namespace Barely {
         INVALID_ARGUMENT = 1,
         // Not found error.
         NOT_FOUND = 2,
-        // Already exists error.
-        ALREADY_EXISTS = 3,
         // Unimplemented error.
-        UNIMPLEMENTED = 4,
+        UNIMPLEMENTED = 3,
         // Internal error.
-        INTERNAL = 5,
-        // Unknown error.
-        UNKNOWN = 6,
+        INTERNAL = 4,
       }
 
       // Returns whether status is okay or not.

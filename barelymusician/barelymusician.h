@@ -54,14 +54,10 @@ enum BarelyStatus_Values {
   BarelyStatus_kInvalidArgument = 1,
   /// Not found error.
   BarelyStatus_kNotFound = 2,
-  /// Already exists error.
-  BarelyStatus_kAlreadyExists = 3,
   /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 4,
+  BarelyStatus_kUnimplemented = 3,
   /// Internal error.
-  BarelyStatus_kInternal = 5,
-  /// Unknown error.
-  BarelyStatus_kUnknown = 6,
+  BarelyStatus_kInternal = 4,
 };
 
 /// Event definition create callback signature.
@@ -618,14 +614,10 @@ class Status {
     kInvalidArgument = BarelyStatus_kInvalidArgument,
     /// Not found error.
     kNotFound = BarelyStatus_kNotFound,
-    /// Already exists error.
-    kAlreadyExists = BarelyStatus_kAlreadyExists,
     /// Unimplemented error.
     kUnimplemented = BarelyStatus_kUnimplemented,
     /// Internal error.
     kInternal = BarelyStatus_kInternal,
-    /// Unknown error.
-    kUnknown = BarelyStatus_kUnknown,
   };
 
   /// Constructs new `Status`.
@@ -665,13 +657,10 @@ class Status {
         return "Invalid argument error";
       case kNotFound:
         return "Not found error";
-      case kAlreadyExists:
-        return "Already exists error";
       case kUnimplemented:
         return "Unimplemented error";
       case kInternal:
         return "Internal error";
-      case kUnknown:
       default:
         return "Unknown error";
     }

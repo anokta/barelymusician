@@ -117,7 +117,7 @@ BarelyStatus BarelyEvent_Create(
   //                              is_one_off)) {
   //     return BarelyStatus_kOk;
   //   }
-  //   return BarelyStatus_kAlreadyExists;
+  //   return BarelyStatus_kInternal;
   // }
   return BarelyStatus_kNotFound;
 }
@@ -187,7 +187,7 @@ BarelyStatus BarelyInstrument_Create(BarelyEngineHandle handle,
                                       frame_rate)) {
     return BarelyStatus_kOk;
   }
-  return BarelyStatus_kAlreadyExists;
+  return BarelyStatus_kInternal;
 }
 
 BarelyStatus BarelyInstrument_Destroy(BarelyEngineHandle handle,
@@ -399,7 +399,7 @@ BarelyStatus BarelySequencer_Create(BarelyEngineHandle handle, int32_t priority,
   if (handle->engine.CreateSequencer(*out_sequencer_id, priority)) {
     return BarelyStatus_kOk;
   }
-  return BarelyStatus_kAlreadyExists;
+  return BarelyStatus_kInternal;
 }
 
 BarelyStatus BarelySequencer_Destroy(BarelyEngineHandle handle,

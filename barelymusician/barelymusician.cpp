@@ -47,26 +47,6 @@ BarelyStatus BarelyEngine_Destroy(BarelyEngineHandle handle) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyEngine_GetBeatsFromSeconds(BarelyEngineHandle handle,
-                                              double seconds,
-                                              double* out_beats) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_beats) return BarelyStatus_kInvalidArgument;
-
-  *out_beats = handle->engine.GetBeats(seconds);
-  return BarelyStatus_kOk;
-}
-
-BarelyStatus BarelyEngine_GetSecondsFromBeats(BarelyEngineHandle handle,
-                                              double beats,
-                                              double* out_seconds) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_seconds) return BarelyStatus_kInvalidArgument;
-
-  *out_seconds = handle->engine.GetSeconds(beats);
-  return BarelyStatus_kOk;
-}
-
 BarelyStatus BarelyEngine_GetTempo(BarelyEngineHandle handle,
                                    double* out_tempo) {
   if (!handle) return BarelyStatus_kNotFound;

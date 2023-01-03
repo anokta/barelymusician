@@ -218,24 +218,6 @@ BARELY_EXPORT BarelyStatus BarelyEngine_Create(BarelyEngineHandle* out_handle);
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyEngine_Destroy(BarelyEngineHandle handle);
 
-/// Gets engine beats from seconds.
-///
-/// @param handle Engine handle.
-/// @param seconds Number of seconds.
-/// @param out_beats Output number of beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_GetBeatsFromSeconds(
-    BarelyEngineHandle handle, double seconds, double* out_beats);
-
-/// Gets engine seconds from beats.
-///
-/// @param handle Engine handle.
-/// @param beats Number of beats.
-/// @param out_seconds Output number of seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_GetSecondsFromBeats(
-    BarelyEngineHandle handle, double beats, double* out_seconds);
-
 /// Gets engine tempo.
 ///
 /// @param handle Engine handle.
@@ -1388,30 +1370,6 @@ class Engine {
   /// @return Sequencer.
   [[nodiscard]] Sequencer CreateSequencer(int priority = 0) {
     return Sequencer(handle_, priority);
-  }
-
-  /// Returns beats from seconds.
-  ///
-  /// @param seconds Number of seconds.
-  /// @return Number of beats.
-  [[nodiscard]] double GetBeatsFromSeconds(double seconds) const {
-    double beats = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyEngine_GetBeatsFromSeconds(handle_, seconds, &beats);
-    assert(status.IsOk());
-    return beats;
-  }
-
-  /// Returns seconds from beats.
-  ///
-  /// @param beats Number of beats.
-  /// @return Number of seconds.
-  [[nodiscard]] double GetSecondsFromBeats(double beats) const {
-    double seconds = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyEngine_GetSecondsFromBeats(handle_, beats, &seconds);
-    assert(status.IsOk());
-    return seconds;
   }
 
   /// Returns tempo.

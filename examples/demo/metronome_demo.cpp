@@ -26,8 +26,8 @@ using ::barely::examples::InputManager;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
-constexpr int kNumChannels = 2;
-constexpr int kNumFrames = 1024;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 1024;
 
 constexpr double kLookahead = 0.1;
 
@@ -36,12 +36,12 @@ constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;
 constexpr double kGain = 0.25;
 constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.025;
-constexpr int kNumVoices = 1;
+constexpr int kVoiceCount = 1;
 
 constexpr double kBarPitch = barely::kPitchA4;
 constexpr double kBeatPitch = barely::kPitchA3;
 
-constexpr int kNumBeats = 4;
+constexpr int kBeatCount = 4;
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
 
@@ -63,13 +63,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
   instrument.SetParameter(SynthParameter::kAttack, kAttack);
   instrument.SetParameter(SynthParameter::kRelease, kRelease);
-  instrument.SetParameter(SynthParameter::kNumVoices, kNumVoices);
+  instrument.SetParameter(SynthParameter::kVoiceCount, kVoiceCount);
 
   // Add beat event.
   Metronome metronome(engine);
   metronome.SetBeatCallback([&](int beat) {
-    ConsoleLog() << "Tick " << (beat / kNumBeats) << "." << (beat % kNumBeats);
-    const double pitch = (beat % kNumBeats == 0) ? kBarPitch : kBeatPitch;
+    ConsoleLog() << "Tick " << (beat / kBeatCount) << "."
+                 << (beat % kBeatCount);
+    const double pitch = (beat % kBeatCount == 0) ? kBarPitch : kBeatPitch;
     instrument.StartNote(pitch, kGain);
     instrument.StopNote(pitch);
     ++beat;
@@ -77,9 +78,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
-    instrument.Process(output, kNumChannels, kNumFrames,
+    instrument.Process(output, kChannelCount, kFrameCount,
                        audio_clock.GetTimestamp());
-    audio_clock.Update(kNumFrames);
+    audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -132,7 +133,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
+  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
   metronome.Start();
 
   while (!quit) {

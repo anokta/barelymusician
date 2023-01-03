@@ -13,21 +13,21 @@ PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),
             Pad(frame_rate)} {}
 
-void PercussionInstrument::Process(double* output, int num_channels,
-                                   int num_frames) noexcept {
-  for (int frame = 0; frame < num_frames; ++frame) {
+void PercussionInstrument::Process(double* output_samples, int channel_count,
+                                   int frame_count) noexcept {
+  for (int frame = 0; frame < frame_count; ++frame) {
     double mono_sample = 0.0;
     for (auto& pad : pads_) {
       mono_sample += pad.voice.Next(0);
     }
-    for (int channel = 0; channel < num_channels; ++channel) {
-      output[num_channels * frame + channel] = mono_sample;
+    for (int channel = 0; channel < channel_count; ++channel) {
+      output_samples[channel_count * frame + channel] = mono_sample;
     }
   }
 }
 
 void PercussionInstrument::SetData(const void* data, int /*size*/) noexcept {
-  for (int i = 0; i < kNumPads; ++i) {
+  for (int i = 0; i < kPadCount; ++i) {
     if (data) {
       // Pad data is sequentially aligned by pitch, frequency, length and data.
       const double pitch = *reinterpret_cast<const double*>(data);

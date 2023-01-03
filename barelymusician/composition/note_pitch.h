@@ -6,21 +6,21 @@
 namespace barely {
 
 /// Number of semitones in an octave (twelwe-tone equal temperament).
-inline constexpr double kNumSemitones = 12.0;
+inline constexpr double kSemitoneCount = 12.0;
 
 /// Semitone pitch intervals of an octave.
 inline constexpr double kPitchSemitones[12] = {0.0,
-                                               1.0 / kNumSemitones,
-                                               2.0 / kNumSemitones,
-                                               3.0 / kNumSemitones,
-                                               4.0 / kNumSemitones,
-                                               5.0 / kNumSemitones,
-                                               6.0 / kNumSemitones,
-                                               7.0 / kNumSemitones,
-                                               8.0 / kNumSemitones,
-                                               9.0 / kNumSemitones,
-                                               10.0 / kNumSemitones,
-                                               11.0 / kNumSemitones};
+                                               1.0 / kSemitoneCount,
+                                               2.0 / kSemitoneCount,
+                                               3.0 / kSemitoneCount,
+                                               4.0 / kSemitoneCount,
+                                               5.0 / kSemitoneCount,
+                                               6.0 / kSemitoneCount,
+                                               7.0 / kSemitoneCount,
+                                               8.0 / kSemitoneCount,
+                                               9.0 / kSemitoneCount,
+                                               10.0 / kSemitoneCount,
+                                               11.0 / kSemitoneCount};
 
 /// Common musical scales.
 inline constexpr double kPitchMajorScale[7] = {

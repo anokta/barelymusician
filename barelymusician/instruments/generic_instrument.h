@@ -16,11 +16,11 @@ class GenericInstrument {
 
   /// Processes the next output buffer.
   ///
-  /// @param output Output buffer.
-  /// @param num_channels Number of output channels.
-  /// @param num_frames Number of output frames.
-  virtual void Process(double* output, int num_channels,
-                       int num_frames) noexcept = 0;
+  /// @param output_samples Output samples.
+  /// @param channel_count Number of output channels.
+  /// @param frame_count Number of output frames.
+  virtual void Process(double* output_samples, int channel_count,
+                       int frame_count) noexcept = 0;
 
   /// Sets data.
   ///
@@ -60,10 +60,11 @@ InstrumentDefinition GetInstrumentDefinition(
         delete static_cast<GenericInstrumentType*>(*state);
         *state = nullptr;
       },
-      [](void** state, double* output, int num_output_channels,
-         int num_output_frames) noexcept {
+      [](void** state, double* output_samples, int output_channel_count,
+         int output_frame_count) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
-        instrument->Process(output, num_output_channels, num_output_frames);
+        instrument->Process(output_samples, output_channel_count,
+                            output_frame_count);
       },
       [](void** state, const void* data, int size) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);

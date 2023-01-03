@@ -26,8 +26,8 @@ class PercussionInstrument : public GenericInstrument {
   explicit PercussionInstrument(int frame_rate) noexcept;
 
   /// Implements `GenericInstrument`.
-  void Process(double* output, int num_channels,
-               int num_frames) noexcept override;
+  void Process(double* output_samples, int channel_count,
+               int frame_count) noexcept override;
   void SetData(const void* data, int size) noexcept override;
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;
@@ -37,14 +37,14 @@ class PercussionInstrument : public GenericInstrument {
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
-  static constexpr int kNumPads = 4;
+  static constexpr int kPadCount = 4;
   struct Pad {
     explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
 
     double pitch = 0.0;
     EnvelopedVoice<SamplePlayer> voice;
   };
-  std::array<Pad, kNumPads> pads_;
+  std::array<Pad, kPadCount> pads_;
 };
 
 }  // namespace barely

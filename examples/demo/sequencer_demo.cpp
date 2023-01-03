@@ -31,8 +31,8 @@ using ::barely::examples::InputManager;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
-constexpr int kNumChannels = 2;
-constexpr int kNumFrames = 1024;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 1024;
 
 constexpr double kLookahead = 0.1;
 
@@ -47,7 +47,7 @@ constexpr double kTempoIncrement = 10.0;
 
 // Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
-  return static_cast<int>(barely::kNumSemitones * pitch) + 69;
+  return static_cast<int>(barely::kSemitoneCount * pitch) + 69;
 }
 
 }  // namespace
@@ -108,9 +108,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
-    instrument.Process(output, kNumChannels, kNumFrames,
+    instrument.Process(output, kChannelCount, kFrameCount,
                        audio_clock.GetTimestamp());
-    audio_clock.Update(kNumFrames);
+    audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -181,7 +181,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
+  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
   sequencer.Start();
 
   while (!quit) {

@@ -12,13 +12,13 @@ double Lerp(double a, double b, double t) { return a + t * (b - a); }
 
 }  // namespace
 
-double GetPosition(int step, int num_steps) noexcept {
+double GetPosition(int step, int step_count) noexcept {
   assert(step >= 0);
-  assert(num_steps > 0);
-  const double num_beats = static_cast<double>(
-      step / num_steps);  // NOLINT(bugprone-integer-division)
-  return num_beats +
-         static_cast<double>(step % num_steps) / static_cast<double>(num_steps);
+  assert(step_count > 0);
+  // NOLINTNEXTLINE(bugprone-integer-division)
+  const double beat_count = static_cast<double>(step / step_count);
+  return beat_count + static_cast<double>(step % step_count) /
+                          static_cast<double>(step_count);
 }
 
 double QuantizePosition(double position, double resolution,

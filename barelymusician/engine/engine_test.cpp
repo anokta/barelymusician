@@ -21,8 +21,8 @@ using ::testing::Pointee;
 using ::testing::UnorderedElementsAre;
 
 constexpr int kFrameRate = 48000;
-constexpr int kNumChannels = 2;
-constexpr int kNumFrames = 8;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 8;
 
 // Returns test instrument definition that produces constant output that is set.
 Instrument::Definition GetTestInstrumentDefinition() {
@@ -34,9 +34,9 @@ Instrument::Definition GetTestInstrumentDefinition() {
         *state = reinterpret_cast<void*>(new double{0.0});
       },
       [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output, int num_output_channels,
-         int num_output_frames) {
-        std::fill_n(output, num_output_channels * num_output_frames,
+      [](void** state, double* output_samples, int output_channel_count,
+         int output_frame_count) {
+        std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
       [](void** /*state*/, const void* /*data*/, int /*size*/) {},
@@ -60,7 +60,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   const double kIntensity = 0.75;
 
   Engine engine;
-  std::vector<double> buffer(kNumChannels * kNumFrames);
+  std::vector<double> buffer(kChannelCount * kFrameCount);
   EXPECT_THAT(engine.GetInstrument(kId), IsNull());
 
   // Create instrument.
@@ -68,11 +68,11 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
       engine.CreateInstrument(kId, GetTestInstrumentDefinition(), kFrameRate));
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(engine.ProcessInstrument(kId, buffer.data(), kNumChannels,
-                                       kNumFrames, 0.0));
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kNumChannels * frame + channel], 0.0);
+  EXPECT_TRUE(engine.ProcessInstrument(kId, buffer.data(), kChannelCount,
+                                       kFrameCount, 0.0));
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
 
@@ -102,11 +102,11 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(engine.ProcessInstrument(kId, buffer.data(), kNumChannels,
-                                       kNumFrames, 0.0));
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kNumChannels * frame + channel],
+  EXPECT_TRUE(engine.ProcessInstrument(kId, buffer.data(), kChannelCount,
+                                       kFrameCount, 0.0));
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
                        kPitch * kIntensity);
     }
   }
@@ -121,11 +121,11 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_FALSE(engine.ProcessInstrument(kId, buffer.data(), kNumChannels,
-                                        kNumFrames, 0.0));
-  for (int frame = 0; frame < kNumFrames; ++frame) {
-    for (int channel = 0; channel < kNumChannels; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kNumChannels * frame + channel], 0.0);
+  EXPECT_FALSE(engine.ProcessInstrument(kId, buffer.data(), kChannelCount,
+                                        kFrameCount, 0.0));
+  for (int frame = 0; frame < kFrameCount; ++frame) {
+    for (int channel = 0; channel < kChannelCount; ++channel) {
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
 }

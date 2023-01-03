@@ -79,15 +79,15 @@ void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InputManager::Update() noexcept {
 #if defined(_WIN32) || defined(__CYGWIN__)
-  DWORD num_events = 0;
-  if (!GetNumberOfConsoleInputEvents(std_input_handle_, &num_events) ||
-      num_events == 0) {
+  DWORD event_count = 0;
+  if (!GetNumberOfConsoleInputEvents(std_input_handle_, &event_count) ||
+      event_count == 0) {
     return;
   }
-  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &num_events)) {
+  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &event_count)) {
     return;
   }
-  for (DWORD i = 0; i < num_events; ++i) {
+  for (DWORD i = 0; i < event_count; ++i) {
     if (input_buffer_[i].EventType == KEY_EVENT) {
       const auto& key_event = input_buffer_[i].Event.KeyEvent;
       const Key& key = key_event.uChar.AsciiChar;

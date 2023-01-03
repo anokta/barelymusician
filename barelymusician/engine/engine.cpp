@@ -119,19 +119,21 @@ void Engine::SetTempo(double tempo) noexcept {
 
 double Engine::GetTimestamp() const noexcept { return timestamp_; }
 
-bool Engine::ProcessInstrument(Id instrument_id, double* output,
-                               int num_output_channels, int num_output_frames,
+bool Engine::ProcessInstrument(Id instrument_id, double* output_samples,
+                               int output_channel_count, int output_frame_count,
                                double timestamp) noexcept {
-  assert(output || num_output_channels == 0 || num_output_frames == 0);
-  assert(num_output_channels >= 0);
-  assert(num_output_frames >= 0);
+  assert(output_samples || output_channel_count == 0 ||
+         output_frame_count == 0);
+  assert(output_channel_count >= 0);
+  assert(output_frame_count >= 0);
   assert(timestamp >= 0.0);
   auto instrument_refs = instrument_refs_.GetScopedView();
   if (const auto* instrument_ref =
           FindOrNull(*instrument_refs, instrument_id)) {
     assert(*instrument_ref);
     (*instrument_ref)
-        ->Process(output, num_output_channels, num_output_frames, timestamp);
+        ->Process(output_samples, output_channel_count, output_frame_count,
+                  timestamp);
     return true;
   }
   return false;

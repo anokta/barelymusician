@@ -18,12 +18,12 @@ class AudioClock {
 
   /// Updates the clock.
   ///
-  /// @param num_frames Number of frames to iterate.
-  void Update(int num_frames) noexcept;
+  /// @param frame_count Number of frames to iterate.
+  void Update(int frame_count) noexcept;
 
  private:
-  // Sampling rate in hz.
-  const int sample_rate_;
+  // Frame rate in hz.
+  const int frame_rate_;
 
   // Monothonic timestamp in seconds.
   std::atomic<double> timestamp_;

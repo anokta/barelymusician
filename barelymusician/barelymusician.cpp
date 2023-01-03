@@ -234,19 +234,20 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyEngineHandle handle,
 }
 
 BarelyStatus BarelyInstrument_Process(BarelyEngineHandle handle,
-                                      BarelyId instrument_id, double* output,
-                                      int32_t num_output_channels,
-                                      int32_t num_output_frames,
+                                      BarelyId instrument_id,
+                                      double* output_samples,
+                                      int32_t output_channel_count,
+                                      int32_t output_frame_count,
                                       double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if ((!output && num_output_channels > 0 && num_output_frames) ||
-      num_output_channels < 0 || num_output_frames < 0 || timestamp < 0.0) {
+  if ((!output_samples && output_channel_count > 0 && output_frame_count) ||
+      output_channel_count < 0 || output_frame_count < 0 || timestamp < 0.0) {
     return BarelyStatus_kInvalidArgument;
   }
 
-  if (handle->engine.ProcessInstrument(instrument_id, output,
-                                       num_output_channels, num_output_frames,
+  if (handle->engine.ProcessInstrument(instrument_id, output_samples,
+                                       output_channel_count, output_frame_count,
                                        timestamp)) {
     return BarelyStatus_kOk;
   }

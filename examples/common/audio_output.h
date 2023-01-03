@@ -31,10 +31,10 @@ class AudioOutput {
   /// Starts audio processing routine with the given configuration.
   ///
   /// @param frame_rate Frame rate in hz.
-  /// @param num_channels Number of output channels.
-  /// @param num_frames Number of output frames per buffer.
+  /// @param channel_count Number of output channels.
+  /// @param frame_count Number of output frames per buffer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Start(int frame_rate, int num_channels, int num_frames) noexcept;
+  void Start(int frame_rate, int channel_count, int frame_count) noexcept;
 
   /// Stops the audio processing routine.
   void Stop() noexcept;

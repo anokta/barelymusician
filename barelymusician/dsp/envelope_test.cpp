@@ -33,10 +33,10 @@ TEST(EnvelopeTest, ProcessDefault) {
 // Tests that the envelope generates the expected output samples consistently
 // over multiple samples.
 TEST(EnvelopeTest, ProcessMultiSamples) {
-  const int kNumAttackSamples = static_cast<int>(kSampleRate * kAttack);
-  const int kNumDecaySamples = static_cast<int>(kSampleRate * kDecay);
-  const int kNumSamplesForSustain = kNumAttackSamples + kNumDecaySamples;
-  const int kNumReleaseSamples = static_cast<int>(kSampleRate * kRelease);
+  const int kAttackSampleCount = static_cast<int>(kSampleRate * kAttack);
+  const int kDecaySampleCount = static_cast<int>(kSampleRate * kDecay);
+  const int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
+  const int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
 
   Envelope envelope(kSampleRate);
   envelope.SetAttack(kAttack);
@@ -48,16 +48,16 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   double expected_sample = 0.0;
 
   envelope.Start();
-  for (int i = 0; i < kNumSamplesForSustain + kSampleRate; ++i) {
-    if (i < kNumAttackSamples) {
+  for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
+    if (i < kAttackSampleCount) {
       // Attack.
       expected_sample =
-          static_cast<double>(i) / static_cast<double>(kNumAttackSamples);
-    } else if (i < kNumSamplesForSustain) {
+          static_cast<double>(i) / static_cast<double>(kAttackSampleCount);
+    } else if (i < kSustainSampleCount) {
       // Decay.
       expected_sample = 1.0 - kSustain *
-                                  static_cast<double>(i - kNumAttackSamples) /
-                                  static_cast<double>(kNumDecaySamples);
+                                  static_cast<double>(i - kAttackSampleCount) /
+                                  static_cast<double>(kDecaySampleCount);
     } else {
       // Sustain.
       expected_sample = kSustain;
@@ -66,11 +66,11 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   }
 
   envelope.Stop();
-  for (int i = 0; i < kNumReleaseSamples + kSampleRate; ++i) {
-    if (i < kNumReleaseSamples) {
+  for (int i = 0; i < kReleaseSampleCount + kSampleRate; ++i) {
+    if (i < kReleaseSampleCount) {
       // Release.
       expected_sample = (1.0 - static_cast<double>(i) /
-                                   static_cast<double>(kNumReleaseSamples)) *
+                                   static_cast<double>(kReleaseSampleCount)) *
                         kSustain;
     } else {
       // Idle.

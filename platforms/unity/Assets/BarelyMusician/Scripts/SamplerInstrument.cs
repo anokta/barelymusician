@@ -31,15 +31,15 @@ namespace Barely {
 
     /// Number of voices.
     [Range(1, 32)]
-    public int NumVoices = 8;
+    public int VoiceCount = 8;
 
     // Current sample.
     private AudioClip _sample = null;
 
     // TODO(#105): Update `GetData` to support different sample frequencies.
     private const int SampleFrequency = 48000;
-    private const int MaxNumSamples = 10 * SampleFrequency;
-    private float[] _sampleData = new float[MaxNumSamples];
+    private const int MaxSampleCount = 10 * SampleFrequency;
+    private float[] _sampleData = new float[MaxSampleCount];
 
     private byte[] GetSampleData() {
       if (_sample.samples == 0 || _sample.channels != 1) {
@@ -47,7 +47,7 @@ namespace Barely {
       }
       _sample.GetData(_sampleData, 0);
 
-      int length = Mathf.Min(_sample.samples, MaxNumSamples);
+      int length = Mathf.Min(_sample.samples, MaxSampleCount);
       byte[] sampleDataBytes = new byte[sizeof(double) * length];
       for (int i = 0; i < length; ++i) {
         byte[] bytes = BitConverter.GetBytes((double)_sampleData[i]);
@@ -69,7 +69,7 @@ namespace Barely {
       SetParameter(3, Decay);
       SetParameter(4, Sustain);
       SetParameter(5, Release);
-      SetParameter(6, (double)NumVoices);
+      SetParameter(6, (double)VoiceCount);
     }
   }
 }

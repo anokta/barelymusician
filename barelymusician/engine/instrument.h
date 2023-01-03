@@ -51,15 +51,15 @@ class Instrument {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
 
-  /// Processes next output buffer.
+  /// Processes output samples at timestamp.
   ///
-  /// @param output Output buffer.
-  /// @param num_output_channels Number of output channels.
-  /// @param num_output_frames Number of output frames.
+  /// @param output_samples Output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(double* output, int num_output_channels, int num_output_frames,
-               double timestamp) noexcept;
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count, double timestamp) noexcept;
 
   /// Resets all parameters to default value at timestamp.
   ///

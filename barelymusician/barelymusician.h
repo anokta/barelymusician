@@ -106,12 +106,12 @@ typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 /// Instrument definition process callback signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param output Output buffer.
-/// @param num_output_channels Number of output channels.
-/// @param num_output_frames Number of output frames.
+/// @param output_samples Output samples.
+/// @param output_channel_count Number of output channels.
+/// @param output_frame_count Number of output frames.
 typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
-    void** state, double* output, int32_t num_output_channels,
-    int32_t num_output_frames);
+    void** state, double* output_samples, int32_t output_channel_count,
+    int32_t output_frame_count);
 
 /// Instrument definition set data callback signature.
 ///
@@ -203,7 +203,7 @@ typedef struct BarelyInstrumentDefinition {
   const BarelyParameterDefinition* parameter_definitions;
 
   /// Number of parameter definitions.
-  int32_t num_parameter_definitions;
+  int32_t parameter_definition_count;
 } BarelyInstrumentDefinition;
 
 /// Creates new engine.
@@ -363,14 +363,14 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(BarelyEngineHandle handle,
 ///
 /// @param handle Engine handle.
 /// @param instrument_id Instrument identifier.
-/// @param output Output buffer.
-/// @param num_output_channels Number of output channels.
-/// @param num_output_frames Number of output frames.
+/// @param output_samples Output samples.
+/// @param output_channel_count Number of output channels.
+/// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
-    BarelyEngineHandle handle, BarelyId instrument_id, double* output,
-    int32_t num_output_channels, int32_t num_output_frames, double timestamp);
+    BarelyEngineHandle handle, BarelyId instrument_id, double* output_samples,
+    int32_t output_channel_count, int32_t output_frame_count, double timestamp);
 
 /// Resets all instrument parameters to default value.
 ///
@@ -854,8 +854,8 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   InstrumentDefinition(BarelyInstrumentDefinition definition)
       : BarelyInstrumentDefinition{definition} {
-    assert(parameter_definitions || num_parameter_definitions == 0);
-    assert(num_parameter_definitions >= 0);
+    assert(parameter_definitions || parameter_definition_count == 0);
+    assert(parameter_definition_count >= 0);
   }
 };
 
@@ -979,17 +979,18 @@ class Instrument {
     return is_note_on;
   }
 
-  /// Processes output buffer at timestamp.
+  /// Processes output samples at timestamp.
   ///
-  /// @param output Output buffer.
-  /// @param num_output_channels Number of output channels.
-  /// @param num_output_frames Number of output frames.
+  /// @param output_samples Output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status Process(double* output, int num_output_channels, int num_output_frames,
-                 double timestamp) {
-    return BarelyInstrument_Process(handle_, id_, output, num_output_channels,
-                                    num_output_frames, timestamp);
+  Status Process(double* output_samples, int output_channel_count,
+                 int output_frame_count, double timestamp) {
+    return BarelyInstrument_Process(handle_, id_, output_samples,
+                                    output_channel_count, output_frame_count,
+                                    timestamp);
   }
 
   /// Resets all parameters.

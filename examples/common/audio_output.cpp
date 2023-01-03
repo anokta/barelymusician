@@ -13,11 +13,11 @@ AudioOutput::AudioOutput() noexcept { Pa_Initialize(); }
 AudioOutput::~AudioOutput() noexcept { Pa_Terminate(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void AudioOutput::Start(int frame_rate, int num_channels,
-                        int num_frames) noexcept {
+void AudioOutput::Start(int frame_rate, int channel_count,
+                        int frame_count) noexcept {
   assert(frame_rate >= 0);
-  assert(num_channels >= 0);
-  assert(num_frames >= 0);
+  assert(channel_count >= 0);
+  assert(frame_count >= 0);
   if (stream_) {
     // Stop the existing `stream_` first.
     Stop();
@@ -26,13 +26,13 @@ void AudioOutput::Start(int frame_rate, int num_channels,
   PaStreamParameters output_parameters;
   output_parameters.device = Pa_GetDefaultOutputDevice();
   assert(output_parameters.device != paNoDevice);
-  output_parameters.channelCount = num_channels;
+  output_parameters.channelCount = channel_count;
   output_parameters.sampleFormat = paFloat32;
   output_parameters.suggestedLatency =
       Pa_GetDeviceInfo(output_parameters.device)->defaultLowOutputLatency;
   output_parameters.hostApiSpecificStreamInfo = nullptr;
 
-  process_data_.buffer.resize(num_channels * num_frames);
+  process_data_.buffer.resize(channel_count * frame_count);
   const auto callback =
       [](const void* /*input_buffer*/, void* output_buffer,
          unsigned long /*frames_per_buffer*/,  // NOLINT(google-runtime-int)
@@ -51,7 +51,7 @@ void AudioOutput::Start(int frame_rate, int num_channels,
         }
         return static_cast<int>(paContinue);
       };
-  Pa_OpenStream(&stream_, nullptr, &output_parameters, frame_rate, num_frames,
+  Pa_OpenStream(&stream_, nullptr, &output_parameters, frame_rate, frame_count,
                 paClipOff, callback, static_cast<void*>(&process_data_));
   Pa_StartStream(stream_);
 }

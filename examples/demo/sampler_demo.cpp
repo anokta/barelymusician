@@ -30,8 +30,8 @@ using ::bazel::tools::cpp::runfiles::Runfiles;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
-constexpr int kNumChannels = 2;
-constexpr int kNumFrames = 256;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 256;
 
 // Instrument settings.
 constexpr char kSamplePath[] = "barelymusician/examples/data/audio/sample.wav";
@@ -39,7 +39,7 @@ constexpr bool kLoop = true;
 constexpr double kGain = 0.25;
 constexpr double kAttack = 0.0125;
 constexpr double kRelease = 0.125;
-constexpr int kNumVoices = 16;
+constexpr int kVoiceCount = 16;
 
 // Note settings.
 constexpr double kRootPitch = barely::kPitchC3;
@@ -56,7 +56,7 @@ std::optional<double> PitchFromKey(const InputManager::Key& key) {
   }
   const double distance =
       static_cast<double>(std::distance(std::cbegin(kOctaveKeys), it));
-  return kRootPitch + distance / barely::kNumSemitones;
+  return kRootPitch + distance / barely::kSemitoneCount;
 }
 
 }  // namespace
@@ -80,7 +80,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetParameter(SamplerParameter::kLoop, kLoop);
   instrument.SetParameter(SamplerParameter::kAttack, kAttack);
   instrument.SetParameter(SamplerParameter::kRelease, kRelease);
-  instrument.SetParameter(SamplerParameter::kNumVoices, kNumVoices);
+  instrument.SetParameter(SamplerParameter::kVoiceCount, kVoiceCount);
   instrument.SetData(
       sample_file.GetData().data(),
       static_cast<int>(sample_file.GetData().size() * sizeof(double)));
@@ -96,8 +96,8 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kNumChannels, kNumFrames, 0.0);
-    gain.Process(output, kNumChannels, kNumFrames);
+    instrument.Process(output, kChannelCount, kFrameCount, 0.0);
+    gain.Process(output, kChannelCount, kFrameCount);
   });
 
   // Key down callback.
@@ -143,7 +143,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kFrameRate, kNumChannels, kNumFrames);
+  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
 
   while (!quit) {
     input_manager.Update();

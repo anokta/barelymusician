@@ -33,8 +33,8 @@ using ::smf::MidiFile;
 
 // System audio settings.
 constexpr int kSampleRate = 48000;
-constexpr int kNumChannels = 2;
-constexpr int kNumFrames = 512;
+constexpr int kChannelCount = 2;
+constexpr int kFrameCount = 512;
 
 constexpr double kLookahead = 0.1;
 
@@ -42,9 +42,9 @@ constexpr double kLookahead = 0.1;
 constexpr OscillatorType kInstrumentOscillatorType = OscillatorType::kSquare;
 constexpr double kInstrumentEnvelopeAttack = 0.0;
 constexpr double kInstrumentEnvelopeRelease = 0.2;
-constexpr int kNumInstrumentVoices = 16;
+constexpr int kInstrumentVoiceCount = 16;
 constexpr double kInstrumentGain =
-    1.0 / static_cast<double>(kNumInstrumentVoices);
+    1.0 / static_cast<double>(kInstrumentVoiceCount);
 
 constexpr double kMaxVelocity = 127.0;
 
@@ -55,12 +55,12 @@ constexpr double kTempo = 132.0;
 
 // Returns the pitch for the given `midi_key_number`.
 double PitchFromMidiKeyNumber(int midi_key_number) {
-  return static_cast<double>(midi_key_number - 69) / barely::kNumSemitones;
+  return static_cast<double>(midi_key_number - 69) / barely::kSemitoneCount;
 }
 
 // Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
-  return static_cast<int>(barely::kNumSemitones * pitch) + 69;
+  return static_cast<int>(barely::kSemitoneCount * pitch) + 69;
 }
 
 // Builds the score for the given `midi_events`.
@@ -107,10 +107,10 @@ int main(int /*argc*/, char* argv[]) {
   assert(midi_file.isAbsoluteTicks());
   midi_file.linkNotePairs();
 
-  const int num_tracks = midi_file.getTrackCount();
+  const int track_count = midi_file.getTrackCount();
   const int ticks_per_quarter = midi_file.getTPQ();
   ConsoleLog() << "Initializing " << kMidiFileName << " for MIDI playback ("
-               << num_tracks << " tracks, " << ticks_per_quarter << " TPQ)";
+               << track_count << " tracks, " << ticks_per_quarter << " TPQ)";
 
   AudioClock clock(kSampleRate);
 
@@ -118,8 +118,8 @@ int main(int /*argc*/, char* argv[]) {
   engine.SetTempo(kTempo);
 
   std::vector<std::pair<Instrument, Sequencer>> tracks;
-  tracks.reserve(num_tracks);
-  for (int i = 0; i < num_tracks; ++i) {
+  tracks.reserve(track_count);
+  for (int i = 0; i < track_count; ++i) {
     tracks.emplace_back(
         engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate),
         engine.CreateSequencer());
@@ -146,23 +146,23 @@ int main(int /*argc*/, char* argv[]) {
     instrument.SetParameter(SynthParameter::kAttack, kInstrumentEnvelopeAttack);
     instrument.SetParameter(SynthParameter::kRelease,
                             kInstrumentEnvelopeRelease);
-    instrument.SetParameter(SynthParameter::kNumVoices, kNumInstrumentVoices);
+    instrument.SetParameter(SynthParameter::kVoiceCount, kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<double> temp_buffer(kNumChannels * kNumFrames);
+  std::vector<double> temp_buffer(kChannelCount * kFrameCount);
   const auto process_callback = [&](double* output) {
-    std::fill_n(output, kNumChannels * kNumFrames, 0.0);
+    std::fill_n(output, kChannelCount * kFrameCount, 0.0);
     for (auto& [instrument, sequencer] : tracks) {
-      instrument.Process(temp_buffer.data(), kNumChannels, kNumFrames,
+      instrument.Process(temp_buffer.data(), kChannelCount, kFrameCount,
                          clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      [](double sample, double output_sample) {
                        return kInstrumentGain * sample + output_sample;
                      });
     }
-    clock.Update(kNumFrames);
+    clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
 
@@ -179,7 +179,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kSampleRate, kNumChannels, kNumFrames);
+  audio_output.Start(kSampleRate, kChannelCount, kFrameCount);
   for (auto& [instrument, sequencer] : tracks) {
     sequencer.Start();
   }

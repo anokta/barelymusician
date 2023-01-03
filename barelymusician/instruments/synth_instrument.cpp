@@ -12,12 +12,12 @@ namespace barely {
 SynthInstrument::SynthInstrument(int sample_rate) noexcept
     : voice_(SynthVoice(sample_rate)) {}
 
-void SynthInstrument::Process(double* output, int num_channels,
-                              int num_frames) noexcept {
-  for (int frame = 0; frame < num_frames; ++frame) {
+void SynthInstrument::Process(double* output_samples, int channel_count,
+                              int frame_count) noexcept {
+  for (int frame = 0; frame < frame_count; ++frame) {
     const double mono_sample = voice_.Next(0);
-    for (int channel = 0; channel < num_channels; ++channel) {
-      output[num_channels * frame + channel] = mono_sample;
+    for (int channel = 0; channel < channel_count; ++channel) {
+      output_samples[channel_count * frame + channel] = mono_sample;
     }
   }
 }
@@ -61,7 +61,7 @@ void SynthInstrument::SetParameter(int index, double value,
         voice->envelope().SetRelease(value);
       });
       break;
-    case SynthParameter::kNumVoices:
+    case SynthParameter::kVoiceCount:
       voice_.Resize(static_cast<int>(value));
       break;
   }

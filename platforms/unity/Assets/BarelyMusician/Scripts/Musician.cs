@@ -136,23 +136,23 @@ namespace Barely {
       /// Processes next instrument output buffer.
       ///
       /// @param instrument Instrument.
-      /// @param output Output buffer.
-      /// @param numOutputChannels Number of output channels.
-      public static void Instrument_Process(Instrument instrument, float[] output,
-                                            int numOutputChannels) {
-        Status status =
-            BarelyInstrument_Process(Handle, instrument.Id, _output, numOutputChannels,
-                                     output.Length / numOutputChannels, AudioSettings.dspTime);
+      /// @param outputSamples Output samples.
+      /// @param outputChannelCount Number of output channels.
+      public static void Instrument_Process(Instrument instrument, float[] outputSamples,
+                                            int outputChannelCount) {
+        Status status = BarelyInstrument_Process(
+            Handle, instrument.Id, _outputSamples, outputChannelCount,
+            outputSamples.Length / outputChannelCount, AudioSettings.dspTime);
         if (IsOk(status)) {
-          for (int i = 0; i < output.Length; ++i) {
-            output[i] = (float)_output[i];
+          for (int i = 0; i < outputSamples.Length; ++i) {
+            outputSamples[i] = (float)_outputSamples[i];
           }
         } else {
           if (_handle != IntPtr.Zero) {
             Debug.LogError("Failed to process instrument '" + instrument.name + "': " + status);
           }
-          for (int i = 0; i < output.Length; ++i) {
-            output[i] = 0.0f;
+          for (int i = 0; i < outputSamples.Length; ++i) {
+            outputSamples[i] = 0.0f;
           }
         }
       }
@@ -380,8 +380,8 @@ namespace Barely {
       // Latency in seconds.
       private static double _latency = 0.0;
 
-      // Internal output buffer.
-      private static double[] _output = null;
+      // Internal output samples.
+      private static double[] _outputSamples = null;
 
       // Map of scheduled tasks by their timestamps.
       private static Dictionary<double, List<Action>> _tasks = null;
@@ -475,7 +475,7 @@ namespace Barely {
           BarelyMusician_SetTempo(_handle, _tempo);
           var config = AudioSettings.GetConfiguration();
           _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
-          _output = new double[config.dspBufferSize * (int)config.speakerMode];
+          _outputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
           _tasks = new Dictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
         }
@@ -513,9 +513,9 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Process")]
       private static extern Status BarelyInstrument_Process(IntPtr handle, Int64 instrumentId,
-                                                            [In, Out] double[] output,
-                                                            Int32 numOutputChannels,
-                                                            Int32 numOutputFrames,
+                                                            [In, Out] double[] outputSamples,
+                                                            Int32 outputChannelCount,
+                                                            Int32 outputFrameCount,
                                                             double timestamp);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllParameters")]

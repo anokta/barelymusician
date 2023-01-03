@@ -30,9 +30,9 @@ class PolyphonicVoice {
 
   /// Resizes number of available voices that can be played simultaneously.
   ///
-  /// @param num_voices Number of available voices.
+  /// @param voice_count Number of available voices.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Resize(int num_voices) noexcept;
+  void Resize(int voice_count) noexcept;
 
   /// Starts new voice for the given `pitch`.
   ///
@@ -82,23 +82,23 @@ double PolyphonicVoice<VoiceType>::Next(int channel) noexcept {
 }
 
 template <class VoiceType>
-void PolyphonicVoice<VoiceType>::Resize(int num_voices) noexcept {
-  assert(num_voices >= 0);
-  voices_.resize(num_voices, base_voice_);
-  voice_states_.resize(num_voices, {0.0, 0});
+void PolyphonicVoice<VoiceType>::Resize(int voice_count) noexcept {
+  assert(voice_count >= 0);
+  voices_.resize(voice_count, base_voice_);
+  voice_states_.resize(voice_count, {0.0, 0});
 }
 
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Start(
     double pitch, const VoiceCallback& init_voice) noexcept {
-  const int num_voices = static_cast<int>(voices_.size());
-  if (num_voices == 0) {
+  const int voice_count = static_cast<int>(voices_.size());
+  if (voice_count == 0) {
     // No voices available.
     return;
   }
 
   int voice_index = 0;
-  for (int i = 0; i < num_voices; ++i) {
+  for (int i = 0; i < voice_count; ++i) {
     if (voices_[i].IsActive()) {
       // Increment timestamp.
       ++voice_states_[i].second;
@@ -108,7 +108,7 @@ void PolyphonicVoice<VoiceType>::Start(
       }
     }
   }
-  for (int i = 0; i < num_voices; ++i) {
+  for (int i = 0; i < voice_count; ++i) {
     if (!voices_[i].IsActive()) {
       // Acquire a free voice.
       voice_index = i;
@@ -127,8 +127,8 @@ void PolyphonicVoice<VoiceType>::Start(
 template <class VoiceType>
 void PolyphonicVoice<VoiceType>::Stop(
     double pitch, const VoiceCallback& shutdown_voice) noexcept {
-  const int num_voices = static_cast<int>(voices_.size());
-  for (int i = 0; i < num_voices; ++i) {
+  const int voice_count = static_cast<int>(voices_.size());
+  for (int i = 0; i < voice_count; ++i) {
     if (voice_states_[i].first == pitch && voices_[i].IsActive()) {
       VoiceType* voice = &voices_[i];
       if (shutdown_voice) {

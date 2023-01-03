@@ -18,15 +18,16 @@ Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
       set_parameter_callback_(definition.set_parameter_callback),
       frame_rate_(frame_rate) {
   assert(frame_rate >= 0);
-  parameters_.reserve(definition.num_parameter_definitions);
-  for (int index = 0; index < definition.num_parameter_definitions; ++index) {
+  parameters_.reserve(definition.parameter_definition_count);
+  for (int index = 0; index < definition.parameter_definition_count; ++index) {
     parameters_.emplace_back(definition.parameter_definitions[index]);
   }
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
   if (set_parameter_callback_) {
-    for (int index = 0; index < definition.num_parameter_definitions; ++index) {
+    for (int index = 0; index < definition.parameter_definition_count;
+         ++index) {
       set_parameter_callback_(&state_, index, parameters_[index].GetValue(),
                               0.0);
     }
@@ -52,21 +53,23 @@ bool Instrument::IsNoteOn(double pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::Process(double* output, int num_output_channels,
-                         int num_output_frames, double timestamp) noexcept {
-  assert(output || num_output_channels == 0 || num_output_frames == 0);
-  assert(num_output_channels >= 0);
-  assert(num_output_frames >= 0);
+void Instrument::Process(double* output_samples, int output_channel_count,
+                         int output_frame_count, double timestamp) noexcept {
+  assert(output_samples || output_channel_count == 0 ||
+         output_frame_count == 0);
+  assert(output_channel_count >= 0);
+  assert(output_frame_count >= 0);
   int frame = 0;
   // Process *all* messages before the end timestamp.
-  const double end_timestamp = timestamp + GetSeconds(num_output_frames);
+  const double end_timestamp = timestamp + GetSeconds(output_frame_count);
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
     const int message_frame = GetFrames(message->first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
-        process_callback_(&state_, &output[num_output_channels * frame],
-                          num_output_channels, message_frame - frame);
+        process_callback_(&state_,
+                          &output_samples[output_channel_count * frame],
+                          output_channel_count, message_frame - frame);
       }
       frame = message_frame;
     }
@@ -100,9 +103,9 @@ void Instrument::Process(double* output, int num_output_channels,
                message->second);
   }
   // Process the rest of the buffer.
-  if (frame < num_output_frames && process_callback_) {
-    process_callback_(&state_, &output[num_output_channels * frame],
-                      num_output_channels, num_output_frames - frame);
+  if (frame < output_frame_count && process_callback_) {
+    process_callback_(&state_, &output_samples[output_channel_count * frame],
+                      output_channel_count, output_frame_count - frame);
   }
 }
 

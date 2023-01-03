@@ -36,7 +36,7 @@ namespace Barely {
 
     /// Number of voices.
     [Range(1, 32)]
-    public int NumVoices = 8;
+    public int VoiceCount = 8;
 
     private void Update() {
       SetParameter(0, (double)OscillatorType);
@@ -44,7 +44,7 @@ namespace Barely {
       SetParameter(2, Decay);
       SetParameter(3, Sustain);
       SetParameter(4, Release);
-      SetParameter(5, (double)NumVoices);
+      SetParameter(5, (double)VoiceCount);
     }
   }
 }

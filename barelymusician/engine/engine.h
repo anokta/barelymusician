@@ -99,13 +99,13 @@ class Engine {
   /// Processes instrument at timestamp.
   ///
   /// @param instrument_id Instrument identifier.
-  /// @param output Output buffer.
-  /// @param num_output_channels Number of output channels.
-  /// @param num_output_frames Number of output frames.
+  /// @param output_samples Output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool ProcessInstrument(Id instrument_id, double* output,
-                         int num_output_channels, int num_output_frames,
+  bool ProcessInstrument(Id instrument_id, double* output_samples,
+                         int output_channel_count, int output_frame_count,
                          double timestamp) noexcept;
 
   /// Sets tempo.

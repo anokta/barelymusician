@@ -22,7 +22,7 @@ enum class SynthParameter : int {
   /// Envelope release.
   kRelease = 4,
   /// Number of voices
-  kNumVoices = 5,
+  kVoiceCount = 5,
 };
 
 /// Simple polyphonic synth instrument.
@@ -32,8 +32,8 @@ class SynthInstrument : public GenericInstrument {
   explicit SynthInstrument(int sample_rate) noexcept;
 
   /// Implements `GenericInstrument`.
-  void Process(double* output, int num_channels,
-               int num_frames) noexcept override;
+  void Process(double* output_samples, int channel_count,
+               int frame_count) noexcept override;
   void SetData(const void* /*data*/, int /*size*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;

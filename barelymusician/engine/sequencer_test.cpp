@@ -70,37 +70,37 @@ TEST(SequencerTest, TriggerSingleEvent) {
                    std::numeric_limits<double>::max());
 
   // Add event.
-  int num_event_triggers = 0;
+  int event_trigger_count = 0;
   EXPECT_TRUE(sequencer.AddEvent(Id{1}, 0.25, [&]() {
     EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
-    ++num_event_triggers;
+    ++event_trigger_count;
   }));
   EXPECT_FALSE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(),
                    std::numeric_limits<double>::max());
-  EXPECT_EQ(num_event_triggers, 0);
+  EXPECT_EQ(event_trigger_count, 0);
 
   // Start playback.
   sequencer.Start();
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.25);
-  EXPECT_EQ(num_event_triggers, 0);
+  EXPECT_EQ(event_trigger_count, 0);
 
   // Trigger event.
   sequencer.Update(0.25);
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.0);
-  EXPECT_EQ(num_event_triggers, 0);
+  EXPECT_EQ(event_trigger_count, 0);
 
   sequencer.TriggerAllEventsAtCurrentPosition();
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(),
                    std::numeric_limits<double>::max());
-  EXPECT_EQ(num_event_triggers, 1);
+  EXPECT_EQ(event_trigger_count, 1);
 
   // Set looping on.
   sequencer.SetLooping(true);
@@ -111,37 +111,37 @@ TEST(SequencerTest, TriggerSingleEvent) {
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.0);
-  EXPECT_EQ(num_event_triggers, 1);
+  EXPECT_EQ(event_trigger_count, 1);
 
   sequencer.TriggerAllEventsAtCurrentPosition();
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 1.0);
-  EXPECT_EQ(num_event_triggers, 2);
+  EXPECT_EQ(event_trigger_count, 2);
 
   // Update event position and callback.
   EXPECT_TRUE(sequencer.SetEventPosition(Id{1}, 0.75));
   EXPECT_TRUE(sequencer.SetEventCallback(Id{1}, [&]() {
     EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.75);
-    --num_event_triggers;
+    --event_trigger_count;
   }));
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.25);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.5);
-  EXPECT_EQ(num_event_triggers, 2);
+  EXPECT_EQ(event_trigger_count, 2);
 
   // Trigger event with the updated position and callback.
   sequencer.Update(0.5);
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.75);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 0.0);
-  EXPECT_EQ(num_event_triggers, 2);
+  EXPECT_EQ(event_trigger_count, 2);
 
   sequencer.TriggerAllEventsAtCurrentPosition();
   EXPECT_TRUE(sequencer.IsPlaying());
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.75);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(), 1.0);
-  EXPECT_EQ(num_event_triggers, 1);
+  EXPECT_EQ(event_trigger_count, 1);
 
   // Stop playback.
   sequencer.Stop();
@@ -149,7 +149,7 @@ TEST(SequencerTest, TriggerSingleEvent) {
   EXPECT_DOUBLE_EQ(sequencer.GetPosition(), 0.75);
   EXPECT_DOUBLE_EQ(sequencer.GetDurationToNextEvent(),
                    std::numeric_limits<double>::max());
-  EXPECT_EQ(num_event_triggers, 1);
+  EXPECT_EQ(event_trigger_count, 1);
 }
 
 // TODO(#108): Add `TriggerOneOffEvents` test (at minimum).

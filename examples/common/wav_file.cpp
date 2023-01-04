@@ -13,7 +13,7 @@ const std::vector<double>& WavFile::GetData() const noexcept { return data_; }
 
 int WavFile::GetChannelCount() const noexcept { return channel_count_; }
 
-int WavFile::GetFrameRate() const noexcept { return sample_rate_; }
+int WavFile::GetFrameRate() const noexcept { return frame_rate_; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool WavFile::Load(const std::string& file_path) noexcept {

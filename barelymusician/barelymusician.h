@@ -159,9 +159,6 @@ typedef struct BarelyEventDefinition {
 
   /// Process callback.
   BarelyEventDefinition_ProcessCallback process_callback;
-
-  /// Pointer to user data.
-  void* user_data;
 } BarelyEventDefinition;
 
 /// Parameter definition.
@@ -263,6 +260,7 @@ BARELY_EXPORT BarelyStatus BarelyEvent_Create(BarelyEngineHandle handle,
                                               BarelyId sequencer_id,
                                               BarelyEventDefinition definition,
                                               double position, bool is_one_off,
+                                              void* user_data,
                                               BarelyId* out_event_id);
 
 /// Destroys event.
@@ -726,13 +724,11 @@ struct EventDefinition : public BarelyEventDefinition {
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  /// @param user_data Pointer to user data.
   explicit EventDefinition(CreateCallback create_callback,
                            DestroyCallback destroy_callback,
-                           ProcessCallback process_callback,
-                           void* user_data = nullptr)
+                           ProcessCallback process_callback)
       : EventDefinition(BarelyEventDefinition{create_callback, destroy_callback,
-                                              process_callback, user_data}) {}
+                                              process_callback}) {}
 
   /// Constructs new `EventDefinition` from internal type.
   ///
@@ -1153,12 +1149,14 @@ class Sequencer {
   /// @param definition Event definition.
   /// @param position Event position in beats.
   /// @param is_one_off True if one-off event, false otherwise.
+  /// @param user_data Pointer to user data.
   /// @return Event reference.
   EventReference CreateEvent(EventDefinition definition, double position,
-                             bool is_one_off = false) {
+                             bool is_one_off = false,
+                             void* user_data = nullptr) {
     BarelyId event_id = BarelyId_kInvalid;
     [[maybe_unused]] const Status status = BarelyEvent_Create(
-        handle_, id_, definition, position, is_one_off, &event_id);
+        handle_, id_, definition, position, is_one_off, user_data, &event_id);
     assert(status.IsOk());
     return EventReference(handle_, id_, event_id);
   }
@@ -1183,9 +1181,8 @@ class Sequencer {
                   callback) {
                 callback();
               }
-            },
-            static_cast<void*>(&callback)),
-        position, is_one_off);
+            }),
+        position, is_one_off, static_cast<void*>(&callback));
   }
 
   /// Destroys event.

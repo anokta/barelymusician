@@ -84,7 +84,8 @@ BarelyStatus BarelyEngine_Update(BarelyEngineHandle handle, double timestamp) {
 BarelyStatus BarelyEvent_Create(
     BarelyEngineHandle handle, BarelyId sequencer_id,
     [[maybe_unused]] BarelyEventDefinition definition, double position,
-    [[maybe_unused]] bool is_one_off, BarelyId* out_event_id) {
+    [[maybe_unused]] bool is_one_off, [[maybe_unused]] void* user_data,
+    BarelyId* out_event_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (position < 0.0) return BarelyStatus_kInvalidArgument;

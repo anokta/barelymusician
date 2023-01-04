@@ -2,11 +2,11 @@
 
 namespace barely::internal {
 
-Event::Event(const Definition& definition) noexcept
+Event::Event(const Definition& definition, void* user_data) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback) {
   if (definition.create_callback) {
-    definition.create_callback(&state_, definition.user_data);
+    definition.create_callback(&state_, user_data);
   }
 }
 

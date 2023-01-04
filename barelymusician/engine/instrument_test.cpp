@@ -30,8 +30,8 @@ Instrument::Definition GetTestDefinition() {
       [](void** state) { delete static_cast<double*>(*state); },
       [](void** state, double* output_samples, int output_channel_count,
          int output_frame_count) {
-        n std::fill_n(output_samples, output_channel_count * output_frame_count,
-                      *reinterpret_cast<double*>(*state));
+        std::fill_n(output_samples, output_channel_count * output_frame_count,
+                    *reinterpret_cast<double*>(*state));
       },
       [](void** /*state*/, const void* /*data*/, int /*size*/) {},
       [](void** state, double /*pitch*/) {

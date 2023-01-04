@@ -14,7 +14,8 @@ class Event {
   /// Constructs new `Event`.
   ///
   /// @param definition Event definition.
-  explicit Event(const Definition& definition) noexcept;
+  explicit Event(const Definition& definition,
+                 void* user_data = nullptr) noexcept;
 
   /// Destroys `Event`.
   ~Event() noexcept;

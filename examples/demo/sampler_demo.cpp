@@ -17,9 +17,9 @@
 
 namespace {
 
-using ::barely::Engine;
 using ::barely::GainProcessor;
 using ::barely::Instrument;
+using ::barely::Musician;
 using ::barely::SamplerInstrument;
 using ::barely::SamplerParameter;
 using ::barely::examples::AudioOutput;
@@ -72,10 +72,10 @@ int main(int /*argc*/, char* argv[]) {
   AudioOutput audio_output;
   InputManager input_manager;
 
-  Engine engine;
+  Musician musician;
 
   Instrument instrument =
-      engine.CreateInstrument(SamplerInstrument::GetDefinition(), kFrameRate);
+      musician.CreateInstrument(SamplerInstrument::GetDefinition(), kFrameRate);
   instrument.SetParameter(SamplerParameter::kRootPitch, kRootPitch);
   instrument.SetParameter(SamplerParameter::kLoop, kLoop);
   instrument.SetParameter(SamplerParameter::kAttack, kAttack);

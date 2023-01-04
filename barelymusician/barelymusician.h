@@ -31,8 +31,8 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Engine handle.
-typedef struct BarelyEngine* BarelyEngineHandle;
+/// Musician handle.
+typedef struct BarelyMusician* BarelyMusicianHandle;
 
 /// Identifier alias.
 typedef int64_t BarelyId;
@@ -207,56 +207,57 @@ typedef struct BarelyInstrumentDefinition {
 ///
 /// @param out_handle Output engine handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_Create(BarelyEngineHandle* out_handle);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_Create(BarelyMusicianHandle* out_handle);
 
 /// Destroys engine.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_Destroy(BarelyEngineHandle handle);
+BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
 
 /// Gets engine tempo.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param out_tempo Output tempo in bpm.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_GetTempo(BarelyEngineHandle handle,
-                                                 double* out_tempo);
+BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
+                                                   double* out_tempo);
 
 /// Gets engine timestamp.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param out_timestamp Output timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_GetTimestamp(BarelyEngineHandle handle,
-                                                     double* out_timestamp);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
 
 /// Sets engine tempo.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param tempo Tempo in bpm.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_SetTempo(BarelyEngineHandle handle,
-                                                 double tempo);
+BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
+                                                   double tempo);
 
 /// Updates engine at timestamp.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param timestamp Timestamp in seconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEngine_Update(BarelyEngineHandle handle,
-                                               double timestamp);
+BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
+                                                 double timestamp);
 
 /// Creates event.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param definition Event definition.
 /// @param position Event position.
 /// @param is_one_off True if event is one-off, false otherwise.
 /// @param out_event_id Output event identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_Create(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelyEvent_Create(BarelyMusicianHandle handle,
                                               BarelyId sequencer_id,
                                               BarelyEventDefinition definition,
                                               double position, bool is_one_off,
@@ -265,83 +266,82 @@ BARELY_EXPORT BarelyStatus BarelyEvent_Create(BarelyEngineHandle handle,
 
 /// Destroys event.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param event_id Event identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_Destroy(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelyEvent_Destroy(BarelyMusicianHandle handle,
                                                BarelyId sequencer_id,
                                                BarelyId event_id);
 
 /// Gets event position.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param event_id Event identifier.
 /// @param out_position Output position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_GetPosition(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelyEvent_GetPosition(BarelyMusicianHandle handle,
                                                    BarelyId sequencer_id,
                                                    BarelyId event_id,
                                                    double* out_position);
 
 /// Sets event position.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param event_id Event identifier.
 /// @param position Position in beats.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_SetPosition(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelyEvent_SetPosition(BarelyMusicianHandle handle,
                                                    BarelyId sequencer_id,
                                                    BarelyId event_id,
                                                    double position);
 
 /// Creates new instrument.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param definition Instrument definition.
 /// @param frame_rate Frame rate in hz.
 /// @param out_instrument_id Output instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
-    BarelyEngineHandle handle, BarelyInstrumentDefinition definition,
+    BarelyMusicianHandle handle, BarelyInstrumentDefinition definition,
     int32_t frame_rate, BarelyId* out_instrument_id);
 
 /// Destroys instrument.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
                                                     BarelyId instrument_id);
 
 /// Gets instrument parameter value.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @param out_value Output parameter value.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_GetParameter(BarelyEngineHandle handle, BarelyId instrument_id,
-                              int32_t index, double* out_value);
+BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
+    double* out_value);
 
 /// Gets whether instrument note is playing or not.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if playing, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(BarelyEngineHandle handle,
-                                                     BarelyId instrument_id,
-                                                     double pitch,
-                                                     bool* out_is_note_on);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle, BarelyId instrument_id,
+                          double pitch, bool* out_is_note_on);
 
 /// Processes instrument output buffer at timestamp.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param output_samples Output samples.
 /// @param output_channel_count Number of output channels.
@@ -349,219 +349,215 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(BarelyEngineHandle handle,
 /// @param timestamp Timestamp in seconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
-    BarelyEngineHandle handle, BarelyId instrument_id, double* output_samples,
+    BarelyMusicianHandle handle, BarelyId instrument_id, double* output_samples,
     int32_t output_channel_count, int32_t output_frame_count, double timestamp);
 
 /// Resets all instrument parameters to default value.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllParameters(
-    BarelyEngineHandle handle, BarelyId instrument_id);
+    BarelyMusicianHandle handle, BarelyId instrument_id);
 
 /// Resets instrument parameter to default value.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
-    BarelyEngineHandle handle, BarelyId instrument_id, int32_t index);
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index);
 
 /// Sets instrument data.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param data Pointer to data.
 /// @param size Data size in bytes.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
                                                     BarelyId instrument_id,
                                                     const void* data,
                                                     int32_t size);
 
 /// Sets instrument note off callback.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param callback Note off callback.
 /// @param user_data Pointer to user data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
-    BarelyEngineHandle handle, BarelyId instrument_id,
+    BarelyMusicianHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOffCallback callback, void* user_data);
 
 /// Sets instrument note on callback.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param callback Note on callback.
 /// @param user_data Pointer to user data.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
-    BarelyEngineHandle handle, BarelyId instrument_id,
+    BarelyMusicianHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOnCallback callback, void* user_data);
 
 /// Sets instrument parameter value.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param index Parameter index.
 /// @param value Parameter value.
 /// @param slope Parameter slope in value change per second.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_SetParameter(BarelyEngineHandle handle, BarelyId instrument_id,
-                              int32_t index, double value, double slope);
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
+    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
+    double value, double slope);
 
 /// Starts instrument note.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_StartNote(BarelyEngineHandle handle,
-                                                      BarelyId instrument_id,
-                                                      double pitch,
-                                                      double intensity);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_StartNote(BarelyMusicianHandle handle, BarelyId instrument_id,
+                           double pitch, double intensity);
 
 /// Stops all instrument notes.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopAllNotes(
-    BarelyEngineHandle handle, BarelyId instrument_id);
+    BarelyMusicianHandle handle, BarelyId instrument_id);
 
 /// Stops instrument note.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(BarelyEngineHandle handle,
-                                                     BarelyId instrument_id,
-                                                     double pitch);
+BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
 
 /// Creates new sequencer.
 ///
 /// @param priority Sequencer priority for when executing events.
 /// @param out_sequencer_id Output sequencer identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_Create(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelySequencer_Create(BarelyMusicianHandle handle,
                                                   int32_t priority,
                                                   BarelyId* out_sequencer_id);
 
 /// Destroys sequencer.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_Destroy(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelySequencer_Destroy(BarelyMusicianHandle handle,
                                                    BarelyId sequencer_id);
 
 /// Gets sequencer loop begin position.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param out_loop_begin_position Output loop begin position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequencer_GetLoopBeginPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id,
+    BarelyMusicianHandle handle, BarelyId sequencer_id,
     double* out_loop_begin_position);
 
 /// Gets sequencer loop length.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param out_loop_length Output loop length.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_GetLoopLength(
-    BarelyEngineHandle handle, BarelyId sequencer_id, double* out_loop_length);
+BARELY_EXPORT BarelyStatus
+BarelySequencer_GetLoopLength(BarelyMusicianHandle handle,
+                              BarelyId sequencer_id, double* out_loop_length);
 
 /// Gets sequencer position.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param out_position Output position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequencer_GetPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id, double* out_position);
+    BarelyMusicianHandle handle, BarelyId sequencer_id, double* out_position);
 
 /// Gets whether sequencer is looping or not.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param out_is_looping Output true if looping, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_IsLooping(BarelyEngineHandle handle,
-                                                     BarelyId sequencer_id,
-                                                     bool* out_is_looping);
+BARELY_EXPORT BarelyStatus BarelySequencer_IsLooping(
+    BarelyMusicianHandle handle, BarelyId sequencer_id, bool* out_is_looping);
 
 /// Gets whether sequencer is playing or not.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param out_is_playing Output true if playing, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_IsPlaying(BarelyEngineHandle handle,
-                                                     BarelyId sequencer_id,
-                                                     bool* out_is_playing);
+BARELY_EXPORT BarelyStatus BarelySequencer_IsPlaying(
+    BarelyMusicianHandle handle, BarelyId sequencer_id, bool* out_is_playing);
 
 /// Sets sequencer loop begin position.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param loop_begin_position Loop begin position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequencer_SetLoopBeginPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id,
+    BarelyMusicianHandle handle, BarelyId sequencer_id,
     double loop_begin_position);
 
 /// Sets sequencer loop length.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param loop_length Loop length in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequencer_SetLoopLength(
-    BarelyEngineHandle handle, BarelyId sequencer_id, double loop_length);
+    BarelyMusicianHandle handle, BarelyId sequencer_id, double loop_length);
 
 /// Sets whether sequencer should be looping or not.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param is_looping True if looping, false otherwise.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_SetLooping(BarelyEngineHandle handle,
-                                                      BarelyId sequencer_id,
-                                                      bool is_looping);
+BARELY_EXPORT BarelyStatus BarelySequencer_SetLooping(
+    BarelyMusicianHandle handle, BarelyId sequencer_id, bool is_looping);
 
 /// Sets sequencer position.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @param position Position in beats.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelySequencer_SetPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id, double position);
+    BarelyMusicianHandle handle, BarelyId sequencer_id, double position);
 
 /// Starts sequencer.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_Start(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelySequencer_Start(BarelyMusicianHandle handle,
                                                  BarelyId sequencer_id);
 
 /// Stops sequencer.
 ///
-/// @param handle Engine handle.
+/// @param handle Musician handle.
 /// @param sequencer_id Sequencer identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelySequencer_Stop(BarelyEngineHandle handle,
+BARELY_EXPORT BarelyStatus BarelySequencer_Stop(BarelyMusicianHandle handle,
                                                 BarelyId sequencer_id);
 
 #ifdef __cplusplus
@@ -865,12 +861,12 @@ class EventReference {
   friend class Sequencer;
 
   // Constructs new `EventReference`.
-  explicit EventReference(BarelyEngineHandle handle, BarelyId sequencer_id,
+  explicit EventReference(BarelyMusicianHandle handle, BarelyId sequencer_id,
                           BarelyId id)
       : handle_(handle), sequencer_id_(sequencer_id), id_(id) {}
 
   // Internal engine handle.
-  BarelyEngineHandle handle_ = nullptr;
+  BarelyMusicianHandle handle_ = nullptr;
 
   // Sequencer identifier.
   BarelyId sequencer_id_ = BarelyId_kInvalid;
@@ -1087,10 +1083,10 @@ class Instrument {
   }
 
  private:
-  friend class Engine;
+  friend class Musician;
 
   // Constructs new `Instrument`.
-  explicit Instrument(BarelyEngineHandle handle,
+  explicit Instrument(BarelyMusicianHandle handle,
                       InstrumentDefinition definition, int frame_rate)
       : handle_(handle) {
     [[maybe_unused]] const Status status =
@@ -1099,7 +1095,7 @@ class Instrument {
   }
 
   // Internal engine handle.
-  BarelyEngineHandle handle_ = nullptr;
+  BarelyMusicianHandle handle_ = nullptr;
 
   // Identifier.
   BarelyId id_ = BarelyId_kInvalid;
@@ -1292,10 +1288,10 @@ class Sequencer {
   Status Stop() { return BarelySequencer_Stop(handle_, id_); }
 
  private:
-  friend class Engine;
+  friend class Musician;
 
   // Constructs new `Sequencer`.
-  explicit Sequencer(BarelyEngineHandle handle, int priority)
+  explicit Sequencer(BarelyMusicianHandle handle, int priority)
       : handle_(handle) {
     [[maybe_unused]] const Status status =
         BarelySequencer_Create(handle_, priority, &id_);
@@ -1303,47 +1299,47 @@ class Sequencer {
   }
 
   // Internal engine handle.
-  BarelyEngineHandle handle_ = nullptr;
+  BarelyMusicianHandle handle_ = nullptr;
 
   // Identifier.
   BarelyId id_ = BarelyId_kInvalid;
 };
 
-/// Engine.
-class Engine {
+/// Musician.
+class Musician {
  public:
-  /// Constructs new `Engine`.
-  Engine() {
-    [[maybe_unused]] const Status status = BarelyEngine_Create(&handle_);
+  /// Constructs new `Musician`.
+  Musician() {
+    [[maybe_unused]] const Status status = BarelyMusician_Create(&handle_);
     assert(status.IsOk());
   }
 
-  /// Destroys `Engine`.
-  ~Engine() {
+  /// Destroys `Musician`.
+  ~Musician() {
     if (handle_) {
       [[maybe_unused]] const Status status =
-          BarelyEngine_Destroy(std::exchange(handle_, nullptr));
+          BarelyMusician_Destroy(std::exchange(handle_, nullptr));
       assert(status.IsOk());
     }
   }
 
   /// Non-copyable.
-  Engine(const Engine& other) = delete;
-  Engine& operator=(const Engine& other) = delete;
+  Musician(const Musician& other) = delete;
+  Musician& operator=(const Musician& other) = delete;
 
-  /// Constructs new `Engine` via move.
+  /// Constructs new `Musician` via move.
   ///
   /// @param other Other engine.
-  Engine(Engine&& other) noexcept
+  Musician(Musician&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)) {}
 
-  /// Assigns `Engine` via move.
+  /// Assigns `Musician` via move.
   ///
   /// @param other Other engine.
-  Engine& operator=(Engine&& other) noexcept {
+  Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
       if (handle_) {
-        [[maybe_unused]] const Status status = BarelyEngine_Destroy(handle_);
+        [[maybe_unused]] const Status status = BarelyMusician_Destroy(handle_);
         assert(status.IsOk());
       }
       handle_ = std::exchange(other.handle_, nullptr);
@@ -1375,7 +1371,7 @@ class Engine {
   [[nodiscard]] double GetTempo() const {
     double tempo = 0.0;
     [[maybe_unused]] const Status status =
-        BarelyEngine_GetTempo(handle_, &tempo);
+        BarelyMusician_GetTempo(handle_, &tempo);
     assert(status.IsOk());
     return tempo;
   }
@@ -1386,7 +1382,7 @@ class Engine {
   [[nodiscard]] double GetTimestamp() const {
     double timestamp = 0.0;
     [[maybe_unused]] const Status status =
-        BarelyEngine_GetTimestamp(handle_, &timestamp);
+        BarelyMusician_GetTimestamp(handle_, &timestamp);
     assert(status.IsOk());
     return timestamp;
   }
@@ -1396,7 +1392,7 @@ class Engine {
   /// @param tempo Tempo in bpm.
   /// @return Status.
   Status SetTempo(double tempo) {
-    return BarelyEngine_SetTempo(handle_, tempo);
+    return BarelyMusician_SetTempo(handle_, tempo);
   }
 
   /// Updates internal state at timestamp.
@@ -1404,12 +1400,12 @@ class Engine {
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status Update(double timestamp) {
-    return BarelyEngine_Update(handle_, timestamp);
+    return BarelyMusician_Update(handle_, timestamp);
   }
 
  private:
   // Internal handle.
-  BarelyEngineHandle handle_ = nullptr;
+  BarelyMusicianHandle handle_ = nullptr;
 };
 
 }  // namespace barely

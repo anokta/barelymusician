@@ -10,15 +10,15 @@
 extern "C" {
 
 /// Engine.
-struct BarelyEngine {
+struct BarelyMusician {
   // Default constructor.
-  BarelyEngine() = default;
+  BarelyMusician() = default;
 
   // Non-copyable and non-movable.
-  BarelyEngine(const BarelyEngine& other) = delete;
-  BarelyEngine& operator=(const BarelyEngine& other) = delete;
-  BarelyEngine(BarelyEngine&& other) noexcept = delete;
-  BarelyEngine& operator=(BarelyEngine&& other) noexcept = delete;
+  BarelyMusician(const BarelyMusician& other) = delete;
+  BarelyMusician& operator=(const BarelyMusician& other) = delete;
+  BarelyMusician(BarelyMusician&& other) noexcept = delete;
+  BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 
   // Internal engine.
   barely::internal::Engine engine;
@@ -29,26 +29,26 @@ struct BarelyEngine {
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
   friend BARELY_EXPORT BarelyStatus
-  BarelyEngine_Destroy(BarelyEngineHandle handle);
-  ~BarelyEngine() = default;
+  BarelyMusician_Destroy(BarelyMusicianHandle handle);
+  ~BarelyMusician() = default;
 };
 
-BarelyStatus BarelyEngine_Create(BarelyEngineHandle* out_handle) {
+BarelyStatus BarelyMusician_Create(BarelyMusicianHandle* out_handle) {
   if (!out_handle) return BarelyStatus_kInvalidArgument;
 
-  *out_handle = new BarelyEngine();
+  *out_handle = new BarelyMusician();
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyEngine_Destroy(BarelyEngineHandle handle) {
+BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
   delete handle;
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyEngine_GetTempo(BarelyEngineHandle handle,
-                                   double* out_tempo) {
+BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
+                                     double* out_tempo) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_tempo) return BarelyStatus_kInvalidArgument;
 
@@ -56,8 +56,8 @@ BarelyStatus BarelyEngine_GetTempo(BarelyEngineHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyEngine_GetTimestamp(BarelyEngineHandle handle,
-                                       double* out_timestamp) {
+BarelyStatus BarelyMusician_GetTimestamp(BarelyMusicianHandle handle,
+                                         double* out_timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
@@ -65,7 +65,8 @@ BarelyStatus BarelyEngine_GetTimestamp(BarelyEngineHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyEngine_SetTempo(BarelyEngineHandle handle, double tempo) {
+BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
+                                     double tempo) {
   if (!handle) return BarelyStatus_kNotFound;
   if (tempo < 0.0) return BarelyStatus_kInvalidArgument;
 
@@ -73,7 +74,8 @@ BarelyStatus BarelyEngine_SetTempo(BarelyEngineHandle handle, double tempo) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyEngine_Update(BarelyEngineHandle handle, double timestamp) {
+BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
+                                   double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
   if (timestamp < 0.0) return BarelyStatus_kInvalidArgument;
 
@@ -82,7 +84,7 @@ BarelyStatus BarelyEngine_Update(BarelyEngineHandle handle, double timestamp) {
 }
 
 BarelyStatus BarelyEvent_Create(
-    BarelyEngineHandle handle, BarelyId sequencer_id,
+    BarelyMusicianHandle handle, BarelyId sequencer_id,
     [[maybe_unused]] BarelyEventDefinition definition, double position,
     [[maybe_unused]] bool is_one_off, [[maybe_unused]] void* user_data,
     BarelyId* out_event_id) {
@@ -103,7 +105,7 @@ BarelyStatus BarelyEvent_Create(
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyEvent_Destroy(BarelyEngineHandle handle,
+BarelyStatus BarelyEvent_Destroy(BarelyMusicianHandle handle,
                                  BarelyId sequencer_id, BarelyId event_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
@@ -119,7 +121,7 @@ BarelyStatus BarelyEvent_Destroy(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyEvent_GetPosition(BarelyEngineHandle handle,
+BarelyStatus BarelyEvent_GetPosition(BarelyMusicianHandle handle,
                                      BarelyId sequencer_id, BarelyId event_id,
                                      double* out_position) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -138,7 +140,7 @@ BarelyStatus BarelyEvent_GetPosition(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyEvent_SetPosition(BarelyEngineHandle handle,
+BarelyStatus BarelyEvent_SetPosition(BarelyMusicianHandle handle,
                                      BarelyId sequencer_id, BarelyId event_id,
                                      [[maybe_unused]] double position) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -155,7 +157,7 @@ BarelyStatus BarelyEvent_SetPosition(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_Create(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
                                      BarelyInstrumentDefinition definition,
                                      int32_t frame_rate,
                                      BarelyId* out_instrument_id) {
@@ -171,7 +173,7 @@ BarelyStatus BarelyInstrument_Create(BarelyEngineHandle handle,
   return BarelyStatus_kInternal;
 }
 
-BarelyStatus BarelyInstrument_Destroy(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
                                       BarelyId instrument_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -182,7 +184,7 @@ BarelyStatus BarelyInstrument_Destroy(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_GetParameter(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_GetParameter(BarelyMusicianHandle handle,
                                            BarelyId instrument_id,
                                            int32_t index, double* out_value) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -200,7 +202,7 @@ BarelyStatus BarelyInstrument_GetParameter(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_IsNoteOn(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle,
                                        BarelyId instrument_id, double pitch,
                                        bool* out_is_note_on) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -214,7 +216,7 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_Process(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
                                       BarelyId instrument_id,
                                       double* output_samples,
                                       int32_t output_channel_count,
@@ -235,7 +237,7 @@ BarelyStatus BarelyInstrument_Process(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_ResetAllParameters(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_ResetAllParameters(BarelyMusicianHandle handle,
                                                  BarelyId instrument_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -247,7 +249,7 @@ BarelyStatus BarelyInstrument_ResetAllParameters(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_ResetParameter(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_ResetParameter(BarelyMusicianHandle handle,
                                              BarelyId instrument_id,
                                              int32_t index) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -263,7 +265,7 @@ BarelyStatus BarelyInstrument_ResetParameter(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_SetData(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
                                       BarelyId instrument_id, const void* data,
                                       int32_t size) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -280,7 +282,7 @@ BarelyStatus BarelyInstrument_SetData(BarelyEngineHandle handle,
 }
 
 BarelyStatus BarelyInstrument_SetNoteOffCallback(
-    BarelyEngineHandle handle, BarelyId instrument_id,
+    BarelyMusicianHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOffCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -298,7 +300,7 @@ BarelyStatus BarelyInstrument_SetNoteOffCallback(
 }
 
 BarelyStatus BarelyInstrument_SetNoteOnCallback(
-    BarelyEngineHandle handle, BarelyId instrument_id,
+    BarelyMusicianHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOnCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -317,7 +319,7 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_SetParameter(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_SetParameter(BarelyMusicianHandle handle,
                                            BarelyId instrument_id,
                                            int32_t index, double value,
                                            double slope) {
@@ -335,7 +337,7 @@ BarelyStatus BarelyInstrument_SetParameter(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_StartNote(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_StartNote(BarelyMusicianHandle handle,
                                         BarelyId instrument_id, double pitch,
                                         double intensity) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -348,7 +350,7 @@ BarelyStatus BarelyInstrument_StartNote(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_StopAllNotes(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_StopAllNotes(BarelyMusicianHandle handle,
                                            BarelyId instrument_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -360,7 +362,7 @@ BarelyStatus BarelyInstrument_StopAllNotes(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_StopNote(BarelyEngineHandle handle,
+BarelyStatus BarelyInstrument_StopNote(BarelyMusicianHandle handle,
                                        BarelyId instrument_id, double pitch) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -372,7 +374,8 @@ BarelyStatus BarelyInstrument_StopNote(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_Create(BarelyEngineHandle handle, int32_t priority,
+BarelyStatus BarelySequencer_Create(BarelyMusicianHandle handle,
+                                    int32_t priority,
                                     BarelyId* out_sequencer_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_sequencer_id) return BarelyStatus_kInvalidArgument;
@@ -384,7 +387,7 @@ BarelyStatus BarelySequencer_Create(BarelyEngineHandle handle, int32_t priority,
   return BarelyStatus_kInternal;
 }
 
-BarelyStatus BarelySequencer_Destroy(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_Destroy(BarelyMusicianHandle handle,
                                      BarelyId sequencer_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -396,7 +399,7 @@ BarelyStatus BarelySequencer_Destroy(BarelyEngineHandle handle,
 }
 
 BarelyStatus BarelySequencer_GetLoopBeginPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id,
+    BarelyMusicianHandle handle, BarelyId sequencer_id,
     double* out_loop_begin_position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -409,7 +412,7 @@ BarelyStatus BarelySequencer_GetLoopBeginPosition(
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_GetLoopLength(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_GetLoopLength(BarelyMusicianHandle handle,
                                            BarelyId sequencer_id,
                                            double* out_loop_length) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -423,7 +426,7 @@ BarelyStatus BarelySequencer_GetLoopLength(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_GetPosition(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_GetPosition(BarelyMusicianHandle handle,
                                          BarelyId sequencer_id,
                                          double* out_position) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -437,7 +440,7 @@ BarelyStatus BarelySequencer_GetPosition(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_IsLooping(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_IsLooping(BarelyMusicianHandle handle,
                                        BarelyId sequencer_id,
                                        bool* out_is_looping) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -451,7 +454,7 @@ BarelyStatus BarelySequencer_IsLooping(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_IsPlaying(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_IsPlaying(BarelyMusicianHandle handle,
                                        BarelyId sequencer_id,
                                        bool* out_is_playing) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -466,7 +469,7 @@ BarelyStatus BarelySequencer_IsPlaying(BarelyEngineHandle handle,
 }
 
 BarelyStatus BarelySequencer_SetLoopBeginPosition(
-    BarelyEngineHandle handle, BarelyId sequencer_id,
+    BarelyMusicianHandle handle, BarelyId sequencer_id,
     [[maybe_unused]] double loop_begin_position) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -478,7 +481,7 @@ BarelyStatus BarelySequencer_SetLoopBeginPosition(
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_SetLoopLength(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_SetLoopLength(BarelyMusicianHandle handle,
                                            BarelyId sequencer_id,
                                            double loop_length) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -492,7 +495,7 @@ BarelyStatus BarelySequencer_SetLoopLength(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_SetLooping(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_SetLooping(BarelyMusicianHandle handle,
                                         BarelyId sequencer_id,
                                         [[maybe_unused]] bool is_looping) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -505,7 +508,7 @@ BarelyStatus BarelySequencer_SetLooping(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_SetPosition(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_SetPosition(BarelyMusicianHandle handle,
                                          BarelyId sequencer_id,
                                          [[maybe_unused]] double position) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -518,7 +521,7 @@ BarelyStatus BarelySequencer_SetPosition(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_Start(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_Start(BarelyMusicianHandle handle,
                                    BarelyId sequencer_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
@@ -530,7 +533,7 @@ BarelyStatus BarelySequencer_Start(BarelyEngineHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelySequencer_Stop(BarelyEngineHandle handle,
+BarelyStatus BarelySequencer_Stop(BarelyMusicianHandle handle,
                                   BarelyId sequencer_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (sequencer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;

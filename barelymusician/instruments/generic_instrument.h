@@ -24,7 +24,7 @@ class GenericInstrument {
 
   /// Sets control value.
   ///
-  /// @param id Control index.
+  /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
   virtual void SetControl(int index, double value,
@@ -35,6 +35,15 @@ class GenericInstrument {
   /// @param data Data.
   /// @param size Data size in bytes.
   virtual void SetData(const void* data, int size) noexcept = 0;
+
+  /// Sets note control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param slope_per_frame Control slope in value change per frame.
+  virtual void SetNoteControl(double pitch, int index, double value,
+                              double slope_per_frame) noexcept = 0;
 
   /// Stops note.
   ///
@@ -50,7 +59,8 @@ class GenericInstrument {
 /// Returns instrument definition for `GenericInstrumentType`.
 template <typename GenericInstrumentType>
 InstrumentDefinition GetInstrumentDefinition(
-    const std::vector<ControlDefinition>& control_definitions) noexcept {
+    const std::vector<ControlDefinition>& control_definitions,
+    const std::vector<ControlDefinition>& note_control_definitions) noexcept {
   return InstrumentDefinition(
       [](void** state, int frame_rate) noexcept {
         // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
@@ -74,6 +84,11 @@ InstrumentDefinition GetInstrumentDefinition(
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetData(data, size);
       },
+      [](void** state, double pitch, int index, double value,
+         double slope_per_frame) {
+        auto* instrument = static_cast<GenericInstrumentType*>(*state);
+        instrument->SetNoteControl(pitch, index, value, slope_per_frame);
+      },
       [](void** state, double pitch) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetNoteOff(pitch);
@@ -82,7 +97,7 @@ InstrumentDefinition GetInstrumentDefinition(
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetNoteOn(pitch);
       },
-      control_definitions);
+      control_definitions, note_control_definitions);
 }
 
 }  // namespace barely

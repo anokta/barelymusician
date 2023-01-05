@@ -89,6 +89,17 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void SetData(std::vector<std::byte> data, double timestamp) noexcept;
 
+  /// Sets note control value at timestamp.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Note control index.
+  /// @param value Note control value.
+  /// @param slope_per_second Note control slope in value change per second.
+  /// @param timestamp Timestamp in seconds.
+  /// @return True if successful, false otherwise.
+  bool SetNoteControl(double pitch, int index, double value,
+                      double slope_per_second, double timestamp) noexcept;
+
   /// Sets note off callback.
   ///
   /// @param callback Note off callback.
@@ -137,6 +148,9 @@ class Instrument {
   // List of controls.
   std::vector<Control> controls_;
 
+  // List of note controls.
+  std::vector<Control> note_controls_;
+
   // List of active note pitches.
   std::unordered_set<double> pitches_;
 
@@ -151,6 +165,9 @@ class Instrument {
 
   // Set data callback.
   Definition::SetDataCallback set_data_callback_;
+
+  // Set note control callback.
+  Definition::SetNoteControlCallback set_note_control_callback_;
 
   // Set note off callback.
   Definition::SetNoteOffCallback set_note_off_callback_;

@@ -76,7 +76,7 @@ void SamplerInstrument::SetNoteOn(double pitch) noexcept {
   voice_.Start(pitch, [speed](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
     // TODO(#75): Use note controls instead.
-    // voice->set_gain(intensity);
+    voice->set_gain(1.0);
   });
 }
 
@@ -97,7 +97,7 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
       // Number of voices.
       ControlDefinition{8, 1, 64},
   };
-  return GetInstrumentDefinition<SamplerInstrument>(control_definitions);
+  return GetInstrumentDefinition<SamplerInstrument>(control_definitions, {});
 }
 
 }  // namespace barely

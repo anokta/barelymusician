@@ -71,7 +71,7 @@ void PercussionInstrument::SetNoteOn(double pitch) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
       // TODO(#75): Use note controls instead.
-      // pad.voice.set_gain(intensity);
+      pad.voice.set_gain(1.0);
       pad.voice.Start();
       break;
     }
@@ -83,7 +83,7 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
       // Pad release.
       ControlDefinition{0.1, 0.0, 60.0},
   };
-  return GetInstrumentDefinition<PercussionInstrument>(control_definitions);
+  return GetInstrumentDefinition<PercussionInstrument>(control_definitions, {});
 }
 
 }  // namespace barely

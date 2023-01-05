@@ -14,6 +14,7 @@ Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
       set_data_callback_(definition.set_data_callback),
+      set_note_control_callback_(definition.set_note_control_callback),
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
       frame_rate_(frame_rate) {
@@ -29,6 +30,11 @@ Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
     for (int index = 0; index < definition.control_definition_count; ++index) {
       set_control_callback_(&state_, index, controls_[index].GetValue(), 0.0);
     }
+  }
+  note_controls_.reserve(definition.note_control_definition_count);
+  for (int index = 0; index < definition.note_control_definition_count;
+       ++index) {
+    note_controls_.emplace_back(definition.note_control_definitions[index]);
   }
 }
 
@@ -71,33 +77,41 @@ void Instrument::Process(double* output_samples, int output_channel_count,
       }
       frame = message_frame;
     }
-    std::visit(MessageVisitor{
-                   [this](ControlMessage& control_message) noexcept {
-                     if (set_control_callback_) {
-                       set_control_callback_(
-                           &state_, control_message.index,
-                           control_message.value,
-                           GetSlopePerFrame(control_message.slope_per_second));
-                     }
-                   },
-                   [this](DataMessage& data_message) noexcept {
-                     if (set_data_callback_) {
-                       data_.swap(data_message.data);
-                       set_data_callback_(&state_, data_.data(),
-                                          static_cast<int>(data_.size()));
-                     }
-                   },
-                   [this](NoteOffMessage& note_off_message) noexcept {
-                     if (set_note_off_callback_) {
-                       set_note_off_callback_(&state_, note_off_message.pitch);
-                     }
-                   },
-                   [this](NoteOnMessage& note_on_message) noexcept {
-                     if (set_note_on_callback_) {
-                       set_note_on_callback_(&state_, note_on_message.pitch);
-                     }
-                   }},
-               message->second);
+    std::visit(
+        MessageVisitor{
+            [this](ControlMessage& control_message) noexcept {
+              if (set_control_callback_) {
+                set_control_callback_(
+                    &state_, control_message.index, control_message.value,
+                    GetSlopePerFrame(control_message.slope_per_second));
+              }
+            },
+            [this](DataMessage& data_message) noexcept {
+              if (set_data_callback_) {
+                data_.swap(data_message.data);
+                set_data_callback_(&state_, data_.data(),
+                                   static_cast<int>(data_.size()));
+              }
+            },
+            [this](NoteControlMessage& note_control_message) noexcept {
+              if (set_note_control_callback_) {
+                set_note_control_callback_(
+                    &state_, note_control_message.pitch,
+                    note_control_message.index, note_control_message.value,
+                    GetSlopePerFrame(note_control_message.slope_per_second));
+              }
+            },
+            [this](NoteOffMessage& note_off_message) noexcept {
+              if (set_note_off_callback_) {
+                set_note_off_callback_(&state_, note_off_message.pitch);
+              }
+            },
+            [this](NoteOnMessage& note_on_message) noexcept {
+              if (set_note_on_callback_) {
+                set_note_on_callback_(&state_, note_on_message.pitch);
+              }
+            }},
+        message->second);
   }
   // Process the rest of the buffer.
   if (frame < output_frame_count && process_callback_) {
@@ -148,6 +162,16 @@ void Instrument::SetData(std::vector<std::byte> data,
                          double timestamp) noexcept {
   assert(timestamp >= 0.0);
   message_queue_.Add(timestamp, DataMessage{std::move(data)});
+}
+
+bool Instrument::SetNoteControl([[maybe_unused]] double pitch, int index,
+                                [[maybe_unused]] double value,
+                                [[maybe_unused]] double slope_per_second,
+                                double timestamp) noexcept {
+  assert(index >= 0);
+  assert(timestamp >= 0.0);
+  // TODO(#75): Implement note control support.
+  return false;
 }
 
 void Instrument::SetNoteOffCallback(NoteOffCallback callback) noexcept {

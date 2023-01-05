@@ -31,6 +31,8 @@ class PercussionInstrument : public GenericInstrument {
   void SetControl(int index, double value,
                   double slope_per_frame) noexcept override;
   void SetData(const void* data, int size) noexcept override;
+  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+                      double /*slope_per_frame*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch) noexcept override;
 

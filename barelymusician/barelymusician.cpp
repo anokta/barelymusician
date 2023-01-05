@@ -251,6 +251,19 @@ BarelyStatus BarelyInstrument_ResetAllControls(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
+BarelyStatus BarelyInstrument_ResetAllNoteControls(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    [[maybe_unused]] double pitch) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    // TODO(#75): Implement note control support.
+    return BarelyStatus_kUnimplemented;
+  }
+  return BarelyStatus_kNotFound;
+}
+
 BarelyStatus BarelyInstrument_ResetControl(BarelyMusicianHandle handle,
                                            BarelyId instrument_id,
                                            int32_t index) {
@@ -263,6 +276,21 @@ BarelyStatus BarelyInstrument_ResetControl(BarelyMusicianHandle handle,
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kInvalidArgument;
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyInstrument_ResetNoteControl(BarelyMusicianHandle handle,
+                                               BarelyId instrument_id,
+                                               [[maybe_unused]] double pitch,
+                                               int32_t index) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (index < 0) return BarelyStatus_kInvalidArgument;
+
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    // TODO(#75): Implement note control support.
+    return BarelyStatus_kUnimplemented;
   }
   return BarelyStatus_kNotFound;
 }
@@ -296,6 +324,21 @@ BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
                          static_cast<const std::byte*>(data) + size},
                         handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyInstrument_SetNoteControl(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    [[maybe_unused]] double pitch, int32_t index, [[maybe_unused]] double value,
+    [[maybe_unused]] double slope_per_beat) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (index < 0) return BarelyStatus_kInvalidArgument;
+
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    // TODO(#75): Implement note control support.
+    return BarelyStatus_kUnimplemented;
   }
   return BarelyStatus_kNotFound;
 }

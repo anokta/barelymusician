@@ -64,7 +64,7 @@ void SynthInstrument::SetNoteOn(double pitch) noexcept {
   voice_.Start(pitch, [pitch](SynthVoice* voice) {
     voice->generator().SetFrequency(GetFrequency(pitch));
     // TODO(#75): Use note controls instead.
-    // voice->set_gain(intensity);
+    voice->set_gain(1.0);
   });
 }
 
@@ -84,7 +84,7 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
       // Number of voices.
       ControlDefinition{8, 1, 64},
   };
-  return GetInstrumentDefinition<SynthInstrument>(control_definitions);
+  return GetInstrumentDefinition<SynthInstrument>(control_definitions, {});
 }
 
 }  // namespace barely

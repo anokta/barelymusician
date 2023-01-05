@@ -25,6 +25,21 @@ struct DataMessage {
   std::vector<std::byte> data;
 };
 
+/// Note control message.
+struct NoteControlMessage {
+  /// Pitch.
+  double pitch;
+
+  /// Index.
+  int index;
+
+  /// Value.
+  double value;
+
+  /// Slope in value change per second.
+  double slope_per_second;
+};
+
 /// Note off message.
 struct NoteOffMessage {
   /// Pitch.

@@ -31,8 +31,17 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Musician handle.
-typedef struct BarelyMusician* BarelyMusicianHandle;
+/// Control definition.
+typedef struct BarelyControlDefinition {
+  /// Default value.
+  double default_value;
+
+  /// Minimum value.
+  double min_value;
+
+  /// Maximum value.
+  double max_value;
+} BarelyControlDefinition;
 
 /// Identifier alias.
 typedef int64_t BarelyId;
@@ -43,22 +52,24 @@ enum BarelyId_Values {
   BarelyId_kInvalid = 0,
 };
 
-/// Status enum alias.
-typedef int32_t BarelyStatus;
+/// Instrument control callback signature.
+///
+/// @param index Control index.
+/// @param value Control value.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyInstrument_ControlCallback)(int32_t index, double value,
+                                                 void* user_data);
 
-/// Status enum values.
-enum BarelyStatus_Values {
-  /// Success.
-  BarelyStatus_kOk = 0,
-  /// Invalid argument error.
-  BarelyStatus_kInvalidArgument = 1,
-  /// Not found error.
-  BarelyStatus_kNotFound = 2,
-  /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 3,
-  /// Internal error.
-  BarelyStatus_kInternal = 4,
-};
+/// Instrument note control callback signature.
+///
+/// @param pitch Note pitch.
+/// @param index Control index.
+/// @param value Control value.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyInstrument_NoteControlCallback)(double pitch,
+                                                     int32_t index,
+                                                     double value,
+                                                     void* user_data);
 
 /// Instrument note off callback signature.
 ///
@@ -112,6 +123,17 @@ typedef void (*BarelyInstrumentDefinition_SetDataCallback)(void** state,
                                                            const void* data,
                                                            int32_t size);
 
+/// Instrument definition set note control callback signature.
+///
+/// @param state Pointer to instrument state.
+/// @param pitch Note pitch.
+/// @param index Note control index.
+/// @param value Note control value.
+/// @param slope_per_frame Note control slope in value change per frame.
+typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(
+    void** state, double pitch, int32_t index, double value,
+    double slope_per_frame);
+
 /// Instrument definition set note off callback signature.
 ///
 /// @param state Pointer to instrument state.
@@ -125,35 +147,6 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
 /// @param pitch Note pitch.
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
                                                              double pitch);
-
-/// Task definition create callback signature.
-///
-/// @param state Pointer to task state.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyTaskDefinition_CreateCallback)(void** state,
-                                                    void* user_data);
-
-/// Task definition destroy callback signature.
-///
-/// @param state Pointer to task state.
-typedef void (*BarelyTaskDefinition_DestroyCallback)(void** state);
-
-/// Task definition process callback signature.
-///
-/// @param state Pointer to task state.
-typedef void (*BarelyTaskDefinition_ProcessCallback)(void** state);
-
-/// Control definition.
-typedef struct BarelyControlDefinition {
-  /// Default value.
-  double default_value;
-
-  /// Minimum value.
-  double min_value;
-
-  /// Maximum value.
-  double max_value;
-} BarelyControlDefinition;
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -172,6 +165,9 @@ typedef struct BarelyInstrumentDefinition {
   /// Set data callback.
   BarelyInstrumentDefinition_SetDataCallback set_data_callback;
 
+  /// Set note control callback.
+  BarelyInstrumentDefinition_SetNoteControlCallback set_note_control_callback;
+
   /// Set note off callback.
   BarelyInstrumentDefinition_SetNoteOffCallback set_note_off_callback;
 
@@ -183,7 +179,50 @@ typedef struct BarelyInstrumentDefinition {
 
   /// Number of control definitions.
   int32_t control_definition_count;
+
+  /// List of note control definitions.
+  const BarelyControlDefinition* note_control_definitions;
+
+  /// Number of note control definitions.
+  int32_t note_control_definition_count;
 } BarelyInstrumentDefinition;
+
+/// Musician handle.
+typedef struct BarelyMusician* BarelyMusicianHandle;
+
+/// Status enum alias.
+typedef int32_t BarelyStatus;
+
+/// Status enum values.
+enum BarelyStatus_Values {
+  /// Success.
+  BarelyStatus_kOk = 0,
+  /// Invalid argument error.
+  BarelyStatus_kInvalidArgument = 1,
+  /// Not found error.
+  BarelyStatus_kNotFound = 2,
+  /// Unimplemented error.
+  BarelyStatus_kUnimplemented = 3,
+  /// Internal error.
+  BarelyStatus_kInternal = 4,
+};
+
+/// Task definition create callback signature.
+///
+/// @param state Pointer to task state.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyTaskDefinition_CreateCallback)(void** state,
+                                                    void* user_data);
+
+/// Task definition destroy callback signature.
+///
+/// @param state Pointer to task state.
+typedef void (*BarelyTaskDefinition_DestroyCallback)(void** state);
+
+/// Task definition process callback signature.
+///
+/// @param state Pointer to task state.
+typedef void (*BarelyTaskDefinition_ProcessCallback)(void** state);
 
 /// Task definition.
 typedef struct BarelyTaskDefinition {
@@ -196,51 +235,6 @@ typedef struct BarelyTaskDefinition {
   /// Process callback.
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
-
-/// Creates new engine.
-///
-/// @param out_handle Output engine handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_Create(BarelyMusicianHandle* out_handle);
-
-/// Destroys engine.
-///
-/// @param handle Musician handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
-
-/// Gets engine tempo.
-///
-/// @param handle Musician handle.
-/// @param out_tempo Output tempo in bpm.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
-                                                   double* out_tempo);
-
-/// Gets engine timestamp.
-///
-/// @param handle Musician handle.
-/// @param out_timestamp Output timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
-
-/// Sets engine tempo.
-///
-/// @param handle Musician handle.
-/// @param tempo Tempo in bpm.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
-                                                   double tempo);
-
-/// Updates engine at timestamp.
-///
-/// @param handle Musician handle.
-/// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
-                                                 double timestamp);
 
 /// Creates new instrument.
 ///
@@ -271,6 +265,18 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus
 BarelyInstrument_GetControl(BarelyMusicianHandle handle, BarelyId instrument_id,
                             int32_t index, double* out_value);
+
+/// Gets instrument note control value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param pitch Note pitch.
+/// @param index Control index.
+/// @param out_value Output control value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_GetNoteControl(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch,
+    int32_t index, double* out_value);
 
 /// Gets whether instrument note is playing or not.
 ///
@@ -304,6 +310,15 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllControls(
     BarelyMusicianHandle handle, BarelyId instrument_id);
 
+/// Resets all instrument note controls to default value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param pitch Note pitch.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllNoteControls(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
+
 /// Resets instrument control to default value.
 ///
 /// @param handle Musician handle.
@@ -312,6 +327,17 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllControls(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetControl(
     BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index);
+
+/// Resets instrument note control to default value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param pitch Note pitch.
+/// @param index Control index.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_ResetNoteControl(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch,
+    int32_t index);
 
 /// Sets instrument control value.
 ///
@@ -337,6 +363,19 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
                                                     const void* data,
                                                     int32_t size);
 
+/// Sets instrument note control value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param pitch Note pitch.
+/// @param index Control index.
+/// @param value Control value.
+/// @param slope_per_beat Control slope in value change per beat.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControl(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch,
+    int32_t index, double value, double slope_per_beat);
+
 /// Sets instrument note off callback.
 ///
 /// @param handle Musician handle.
@@ -347,7 +386,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOffCallback callback, void* user_data);
-
 /// Sets instrument note on callback.
 ///
 /// @param handle Musician handle.
@@ -384,6 +422,51 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopAllNotes(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
     BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
+
+/// Creates new musician.
+///
+/// @param out_handle Output musician handle.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyMusician_Create(BarelyMusicianHandle* out_handle);
+
+/// Destroys musician.
+///
+/// @param handle Musician handle.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
+
+/// Gets musician tempo.
+///
+/// @param handle Musician handle.
+/// @param out_tempo Output tempo in bpm.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
+                                                   double* out_tempo);
+
+/// Gets musician timestamp.
+///
+/// @param handle Musician handle.
+/// @param out_timestamp Output timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
+
+/// Sets musician tempo.
+///
+/// @param handle Musician handle.
+/// @param tempo Tempo in bpm.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
+                                                   double tempo);
+
+/// Updates musician at timestamp.
+///
+/// @param handle Musician handle.
+/// @param timestamp Timestamp in seconds.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
+                                                 double timestamp);
 
 /// Creates new performer.
 ///
@@ -785,6 +868,10 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Set data callback signature.
   using SetDataCallback = BarelyInstrumentDefinition_SetDataCallback;
 
+  /// Set note control callback signature
+  using SetNoteControlCallback =
+      BarelyInstrumentDefinition_SetNoteControlCallback;
+
   /// Set note off callback signature
   using SetNoteOffCallback = BarelyInstrumentDefinition_SetNoteOffCallback;
 
@@ -801,18 +888,24 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// @param set_note_off_callback Set note off callback.
   /// @param set_note_on_callback Set note on callback.
   /// @param control_definitions List of control definitions.
+  /// @param control_definitions List of note control definitions.
   explicit InstrumentDefinition(
       CreateCallback create_callback, DestroyCallback destroy_callback,
       ProcessCallback process_callback, SetControlCallback set_control_callback,
       SetDataCallback set_data_callback,
+      SetNoteControlCallback set_note_control_callback,
       SetNoteOffCallback set_note_off_callback,
       SetNoteOnCallback set_note_on_callback,
-      std::span<const ControlDefinition> control_definitions)
-      : InstrumentDefinition({create_callback, destroy_callback,
-                              process_callback, set_control_callback,
-                              set_data_callback, set_note_off_callback,
-                              set_note_on_callback, control_definitions.data(),
-                              static_cast<int>(control_definitions.size())}) {}
+      std::span<const ControlDefinition> control_definitions,
+      std::span<const ControlDefinition> note_control_definitions)
+      : InstrumentDefinition(
+            {create_callback, destroy_callback, process_callback,
+             set_control_callback, set_data_callback, set_note_control_callback,
+             set_note_off_callback, set_note_on_callback,
+             control_definitions.data(),
+             static_cast<int>(control_definitions.size()),
+             note_control_definitions.data(),
+             static_cast<int>(note_control_definitions.size())}) {}
 
   /// Constructs new `InstrumentDefinition` from internal type.
   ///
@@ -822,6 +915,8 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       : BarelyInstrumentDefinition{definition} {
     assert(control_definitions || control_definition_count == 0);
     assert(control_definition_count >= 0);
+    assert(note_control_definitions || note_control_definition_count == 0);
+    assert(note_control_definition_count >= 0);
   }
 };
 
@@ -857,7 +952,7 @@ class TaskReference {
                          BarelyId id)
       : handle_(handle), performer_id_(performer_id), id_(id) {}
 
-  // Internal engine handle.
+  // Internal musician handle.
   BarelyMusicianHandle handle_ = nullptr;
 
   // Performer identifier.
@@ -965,6 +1060,14 @@ class Instrument {
     return BarelyInstrument_ResetAllControls(handle_, id_);
   }
 
+  /// Resets all controls.
+  ///
+  /// @param pitch Note pitch
+  /// @return Status.
+  Status ResetAllNoteControls(double pitch) {
+    return BarelyInstrument_ResetAllNoteControls(handle_, id_, pitch);
+  }
+
   /// Resets control value.
   ///
   /// @param index Control index.
@@ -977,14 +1080,29 @@ class Instrument {
     return BarelyInstrument_ResetControl(handle_, id_, static_cast<int>(index));
   }
 
+  /// Resets note control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Note control index.
+  /// @return Status.
+  template <typename IndexType>
+  Status ResetNoteControl(double pitch, IndexType index) {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    return BarelyInstrument_ResetNoteControl(handle_, id_, pitch,
+                                             static_cast<int>(index));
+  }
+
   /// Sets control value.
   ///
   /// @param index Control index.
   /// @param value Control value.
-  /// @param value Control slope in value change per second.
+  /// @param slope_per_beat Control slope in value change per beat.
   /// @return Status.
   template <typename IndexType, typename ValueType>
-  Status SetControl(IndexType index, ValueType value, double slope = 0.0) {
+  Status SetControl(IndexType index, ValueType value,
+                    double slope_per_beat = 0.0) {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
@@ -992,7 +1110,8 @@ class Instrument {
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
     return BarelyInstrument_SetControl(handle_, id_, static_cast<int>(index),
-                                       static_cast<double>(value), slope);
+                                       static_cast<double>(value),
+                                       slope_per_beat);
   }
 
   /// Sets data.
@@ -1014,6 +1133,27 @@ class Instrument {
   /// @return Status.
   Status SetData(const void* data, int size) {
     return BarelyInstrument_SetData(handle_, id_, data, size);
+  }
+
+  /// Sets note control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Note control index.
+  /// @param value Note control value.
+  /// @param slope_per_beat Note control slope in value change per beat.
+  /// @return Status.
+  template <typename IndexType, typename ValueType>
+  Status SetNoteControl(double pitch, IndexType index, ValueType value,
+                        double slope_per_beat = 0.0) {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
+    return BarelyInstrument_SetNoteControl(
+        handle_, id_, pitch, static_cast<int>(index),
+        static_cast<double>(value), slope_per_beat);
   }
 
   /// Sets note off callback.
@@ -1083,7 +1223,7 @@ class Instrument {
     assert(status.IsOk());
   }
 
-  // Internal engine handle.
+  // Internal musician handle.
   BarelyMusicianHandle handle_ = nullptr;
 
   // Identifier.
@@ -1286,7 +1426,7 @@ class Performer {
     assert(status.IsOk());
   }
 
-  // Internal engine handle.
+  // Internal musician handle.
   BarelyMusicianHandle handle_ = nullptr;
 
   // Identifier.
@@ -1317,13 +1457,13 @@ class Musician {
 
   /// Constructs new `Musician` via move.
   ///
-  /// @param other Other engine.
+  /// @param other Other musician.
   Musician(Musician&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)) {}
 
   /// Assigns `Musician` via move.
   ///
-  /// @param other Other engine.
+  /// @param other Other musician.
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
       if (handle_) {

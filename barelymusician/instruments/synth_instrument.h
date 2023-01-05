@@ -36,7 +36,7 @@ class SynthInstrument : public GenericInstrument {
                int frame_count) noexcept override;
   void SetData(const void* /*data*/, int /*size*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
-  void SetNoteOn(double pitch, double intensity) noexcept override;
+  void SetNoteOn(double pitch) noexcept override;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetParameter(int index, double value, double slope) noexcept override;
 

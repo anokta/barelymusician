@@ -308,9 +308,7 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (callback) {
       instrument->SetNoteOnCallback(
-          [callback, user_data](double pitch, double intensity) {
-            callback(pitch, intensity, user_data);
-          });
+          [callback, user_data](double pitch) { callback(pitch, user_data); });
     } else {
       instrument->SetNoteOnCallback(nullptr);
     }
@@ -338,13 +336,12 @@ BarelyStatus BarelyInstrument_SetParameter(BarelyMusicianHandle handle,
 }
 
 BarelyStatus BarelyInstrument_StartNote(BarelyMusicianHandle handle,
-                                        BarelyId instrument_id, double pitch,
-                                        double intensity) {
+                                        BarelyId instrument_id, double pitch) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    instrument->StartNote(pitch, intensity, handle->engine.GetTimestamp());
+    instrument->StartNote(pitch, handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;

@@ -86,10 +86,8 @@ typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, void* user_data);
 /// Instrument note on callback signature.
 ///
 /// @param pitch Note pitch.
-/// @param intensity Note intensity.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, double intensity,
-                                                void* user_data);
+typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, void* user_data);
 
 /// Instrument definition create callback signature.
 ///
@@ -133,10 +131,8 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-/// @param intensity Note intensity.
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
-                                                             double pitch,
-                                                             double intensity);
+                                                             double pitch);
 
 /// Instrument definition set parameter callback signature.
 ///
@@ -420,11 +416,9 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
-/// @param intensity Note intensity.
 /// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_StartNote(BarelyMusicianHandle handle, BarelyId instrument_id,
-                           double pitch, double intensity);
+BARELY_EXPORT BarelyStatus BarelyInstrument_StartNote(
+    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
 
 /// Stops all instrument notes.
 ///
@@ -886,8 +880,7 @@ class Instrument {
   /// Note on callback signature.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  using NoteOnCallback = std::function<void(double pitch, double intensity)>;
+  using NoteOnCallback = std::function<void(double pitch)>;
 
   /// Destroys `Instrument`.
   ~Instrument() {
@@ -1034,8 +1027,8 @@ class Instrument {
       note_on_callback_ = std::move(callback);
       return BarelyInstrument_SetNoteOnCallback(
           handle_, id_,
-          [](double pitch, double intensity, void* user_data) {
-            (*static_cast<NoteOnCallback*>(user_data))(pitch, intensity);
+          [](double pitch, void* user_data) {
+            (*static_cast<NoteOnCallback*>(user_data))(pitch);
           },
           static_cast<void*>(&note_on_callback_));
     }
@@ -1063,10 +1056,9 @@ class Instrument {
   /// Starts note.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
   /// @return Status.
-  Status StartNote(double pitch, double intensity = 1.0) {
-    return BarelyInstrument_StartNote(handle_, id_, pitch, intensity);
+  Status StartNote(double pitch) {
+    return BarelyInstrument_StartNote(handle_, id_, pitch);
   }
 
   /// Stops all notes.

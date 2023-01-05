@@ -88,8 +88,7 @@ void Instrument::Process(double* output_samples, int output_channel_count,
                    },
                    [this](NoteOnMessage& note_on_message) noexcept {
                      if (set_note_on_callback_) {
-                       set_note_on_callback_(&state_, note_on_message.pitch,
-                                             note_on_message.intensity);
+                       set_note_on_callback_(&state_, note_on_message.pitch);
                      }
                    },
                    [this](ParameterMessage& parameter_message) noexcept {
@@ -164,14 +163,13 @@ bool Instrument::SetParameter(int index, double value, double slope,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::StartNote(double pitch, double intensity,
-                           double timestamp) noexcept {
+void Instrument::StartNote(double pitch, double timestamp) noexcept {
   assert(timestamp >= 0.0);
   if (pitches_.insert(pitch).second) {
     if (note_on_callback_) {
-      note_on_callback_(pitch, intensity);
+      note_on_callback_(pitch);
     }
-    message_queue_.Add(timestamp, NoteOnMessage{pitch, intensity});
+    message_queue_.Add(timestamp, NoteOnMessage{pitch});
   }
 }
 

@@ -37,8 +37,8 @@ Instrument::Definition GetTestDefinition() {
       [](void** state, double /*pitch*/) {
         *reinterpret_cast<double*>(*state) = 0.0;
       },
-      [](void** state, double pitch, double intensity) {
-        *reinterpret_cast<double*>(*state) = pitch * intensity;
+      [](void** state, double pitch) {
+        *reinterpret_cast<double*>(*state) = pitch;
       },
       [](void** state, int index, double value, double /*slope*/) {
         *reinterpret_cast<double*>(*state) =
@@ -80,7 +80,6 @@ TEST(InstrumentTest, GetParameter) {
 // Tests that instrument plays a single note as expected.
 TEST(InstrumentTest, PlaySingleNote) {
   const double kPitch = 32.0;
-  const double kIntensity = 0.5;
   const double kTimestamp = 20.0;
 
   Instrument instrument(GetTestDefinition(), kFrameRate);
@@ -98,15 +97,14 @@ TEST(InstrumentTest, PlaySingleNote) {
   }
 
   // Start note.
-  instrument.StartNote(kPitch, kIntensity, kTimestamp);
+  instrument.StartNote(kPitch, kTimestamp);
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp);
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-                       kPitch * kIntensity);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch);
     }
   }
 
@@ -125,8 +123,6 @@ TEST(InstrumentTest, PlaySingleNote) {
 
 // Tests that instrument plays multiple notes as expected.
 TEST(InstrumentTest, PlayMultipleNotes) {
-  const double kIntensity = 1.0;
-
   Instrument instrument(GetTestDefinition(), 1);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
@@ -141,17 +137,16 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Start new note per each frame in the buffer.
   for (int i = 0; i < kFrameCount; ++i) {
-    instrument.StartNote(static_cast<double>(i), kIntensity,
-                         static_cast<double>(i));
+    instrument.StartNote(static_cast<double>(i), static_cast<double>(i));
     instrument.StopNote(static_cast<double>(i), static_cast<double>(i + 1));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {
-    const double expected = static_cast<double>(frame) * kIntensity;
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], expected);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
+                       static_cast<double>(frame));
     }
   }
 
@@ -168,37 +163,26 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 // Tests that instrument triggers note callbacks as expected.
 TEST(InstrumentTest, SetNoteCallbacks) {
   const double kPitch = 4.0;
-  const double kIntensity = 0.25;
 
   Instrument instrument(GetTestDefinition(), 1);
 
   // Trigger note on callback.
   double note_on_pitch = 0.0;
-  double note_on_intensity = 0.0;
-  instrument.SetNoteOnCallback([&](double pitch, double intensity) {
-    note_on_pitch = pitch;
-    note_on_intensity = intensity;
-  });
+  instrument.SetNoteOnCallback([&](double pitch) { note_on_pitch = pitch; });
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
-  instrument.StartNote(kPitch, kIntensity, 10.0);
+  instrument.StartNote(kPitch, 10.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   // This should not trigger the callback since the note is already on.
   note_on_pitch = 0.0;
-  note_on_intensity = 0.0;
-  instrument.StartNote(kPitch, kIntensity, 15.0);
+  instrument.StartNote(kPitch, 15.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   // Trigger note on callback again with another note.
   note_on_pitch = 0.0;
-  note_on_intensity = 0.0;
-  instrument.StartNote(kPitch + 2.0, kIntensity, 15.0);
+  instrument.StartNote(kPitch + 2.0, 15.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch + 2.0);
-  EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   // Trigger note off callback.
   double note_off_pitch = 0.0;
@@ -229,8 +213,8 @@ TEST(InstrumentTest, StopAllNotes) {
 
   // Start multiple notes.
   for (const double pitch : kPitches) {
-    instrument.StartNote(pitch, 1.0, 0.0);
-    EXPECT_TRUE(instrument.IsNoteOn(1.0));
+    instrument.StartNote(pitch, 0.0);
+    EXPECT_TRUE(instrument.IsNoteOn(pitch));
   }
 
   // Stop all notes.

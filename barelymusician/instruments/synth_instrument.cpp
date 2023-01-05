@@ -24,10 +24,11 @@ void SynthInstrument::Process(double* output_samples, int channel_count,
 
 void SynthInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
 
-void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
-  voice_.Start(pitch, [pitch, intensity](SynthVoice* voice) {
+void SynthInstrument::SetNoteOn(double pitch) noexcept {
+  voice_.Start(pitch, [pitch](SynthVoice* voice) {
     voice->generator().SetFrequency(GetFrequency(pitch));
-    voice->set_gain(intensity);
+    // TODO(#75): Use note parameters instead.
+    // voice->set_gain(intensity);
   });
 }
 

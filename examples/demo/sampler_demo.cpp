@@ -85,9 +85,8 @@ int main(int /*argc*/, char* argv[]) {
       sample_file.GetData().data(),
       static_cast<int>(sample_file.GetData().size() * sizeof(double)));
 
-  instrument.SetNoteOnCallback([](double pitch, double intensity) {
-    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
-  });
+  instrument.SetNoteOnCallback(
+      [](double pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
   instrument.SetNoteOffCallback(
       [](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 

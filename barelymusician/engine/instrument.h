@@ -102,10 +102,9 @@ class Instrument {
   /// Starts note at timestamp.
   ///
   /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void StartNote(double pitch, double intensity, double timestamp) noexcept;
+  void StartNote(double pitch, double timestamp) noexcept;
 
   /// Stops all notes at timestamp.
   ///

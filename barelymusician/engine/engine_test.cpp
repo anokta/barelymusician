@@ -168,7 +168,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
 // Tests that single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
   const Id kPerformerId = 1;
-  const Id kEventId = 2;
+  const Id kTaskId = 2;
   const int kPriority = 0;
 
   Engine engine;
@@ -179,11 +179,11 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   auto* performer = engine.GetPerformer(kPerformerId);
   EXPECT_THAT(performer, NotNull());
 
-  // Add event.
-  double event_position = 0.0;
-  EXPECT_TRUE(performer->AddEvent(
-      kEventId, 1.0, [&]() { event_position = performer->GetPosition(); }));
-  EXPECT_DOUBLE_EQ(event_position, 0.0);
+  // Add task.
+  double task_position = 0.0;
+  EXPECT_TRUE(performer->AddTask(
+      kTaskId, 1.0, [&]() { task_position = performer->GetPosition(); }));
+  EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Start playback with one beat per second tempo.
   engine.SetTempo(60.0);
@@ -193,20 +193,20 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   performer->Start();
   EXPECT_TRUE(performer->IsPlaying());
 
-  // Update timestamp just before the event, which should not be triggered yet.
-  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(), 1.0);
+  // Update timestamp just before the task, which should not be triggered yet.
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextTask(), 1.0);
   engine.Update(1.0);
-  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(), 0.0);
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextTask(), 0.0);
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
-  EXPECT_DOUBLE_EQ(event_position, 0.0);
+  EXPECT_DOUBLE_EQ(task_position, 0.0);
 
-  // Update timestamp past the event, which should be triggered now.
-  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(), 0.0);
+  // Update timestamp past the task, which should be triggered now.
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextTask(), 0.0);
   engine.Update(1.5);
-  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);
-  EXPECT_DOUBLE_EQ(event_position, 1.0);
+  EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy performer.
   EXPECT_TRUE(engine.DestroyPerformer(kPerformerId));

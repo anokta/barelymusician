@@ -80,10 +80,10 @@ constexpr char kDrumsBaseFilename[] =
 void ScheduleNote(double position, double duration, double pitch,
                   double intensity, Instrument& instrument,
                   Sequencer& sequencer) {
-  sequencer.ScheduleOneOffEvent(position, [pitch, intensity, &instrument]() {
+  sequencer.ScheduleOneOffTask(position, [pitch, intensity, &instrument]() {
     instrument.StartNote(pitch, intensity);
   });
-  sequencer.ScheduleOneOffEvent(position + duration, [pitch, &instrument]() {
+  sequencer.ScheduleOneOffTask(position + duration, [pitch, &instrument]() {
     instrument.StopNote(pitch);
   });
 }

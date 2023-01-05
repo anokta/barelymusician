@@ -16,7 +16,7 @@ Metronome::Metronome(Engine& engine) noexcept
     : performer_(engine.CreatePerformer(kPriority)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.AddEvent(0.0, [this]() {
+  performer_.AddTask(0.0, [this]() {
     if (callback_) {
       callback_(beat_);
     }

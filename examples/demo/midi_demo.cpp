@@ -78,13 +78,13 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       const double intensity =
           static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
-      const auto status = performer.ScheduleOneOffEvent(
+      const auto status = performer.ScheduleOneOffTask(
           position, [&instrument, pitch, intensity]() {
             instrument.StartNote(pitch, intensity);
           });
-      performer.ScheduleOneOffEvent(
-          position + duration,
-          [&instrument, pitch]() { instrument.StopNote(pitch); });
+      performer.ScheduleOneOffTask(position + duration, [&instrument, pitch]() {
+        instrument.StopNote(pitch);
+      });
       has_notes = true;
     }
   }

@@ -1,8 +1,8 @@
-#include "barelymusician/engine/event.h"
+#include "barelymusician/engine/task.h"
 
 namespace barely::internal {
 
-Event::Event(const Definition& definition, void* user_data) noexcept
+Task::Task(const Definition& definition, void* user_data) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback) {
   if (definition.create_callback) {
@@ -10,13 +10,13 @@ Event::Event(const Definition& definition, void* user_data) noexcept
   }
 }
 
-Event::~Event() noexcept {
+Task::~Task() noexcept {
   if (destroy_callback_) {
     destroy_callback_(&state_);
   }
 }
 
-void Event::Process() noexcept {
+void Task::Process() noexcept {
   if (process_callback_) {
     process_callback_(&state_);
   }

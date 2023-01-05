@@ -83,20 +83,22 @@ BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyEvent_Create(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    [[maybe_unused]] BarelyEventDefinition definition, double position,
-    [[maybe_unused]] bool is_one_off, [[maybe_unused]] void* user_data,
-    BarelyId* out_event_id) {
+BarelyStatus BarelyTask_Create(BarelyMusicianHandle handle,
+                               BarelyId performer_id,
+                               [[maybe_unused]] BarelyTaskDefinition definition,
+                               double position,
+                               [[maybe_unused]] bool is_one_off,
+                               [[maybe_unused]] void* user_data,
+                               BarelyId* out_task_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (performer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (position < 0.0) return BarelyStatus_kInvalidArgument;
-  if (!out_event_id) return BarelyStatus_kInvalidArgument;
+  if (!out_task_id) return BarelyStatus_kInvalidArgument;
 
   // TODO(#109): Reenable after API cleanup.
   // if (auto* performer = handle->engine.GetPerformer(performer_id)) {
-  //   *out_event_id = ++handle->id_counter;
-  //   if (performer->CreateEvent(*out_event_id, definition, position,
+  //   *out_task_id = ++handle->id_counter;
+  //   if (performer->CreateTask(*out_task_id, definition, position,
   //                              is_one_off)) {
   //     return BarelyStatus_kOk;
   //   }
@@ -105,34 +107,34 @@ BarelyStatus BarelyEvent_Create(
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyEvent_Destroy(BarelyMusicianHandle handle,
-                                 BarelyId performer_id, BarelyId event_id) {
+BarelyStatus BarelyTask_Destroy(BarelyMusicianHandle handle,
+                                BarelyId performer_id, BarelyId task_id) {
   if (!handle) return BarelyStatus_kNotFound;
-  if (performer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
+  if (performer_id == BarelyId_kInvalid || task_id == BarelyId_kInvalid) {
     return BarelyStatus_kInvalidArgument;
   }
 
   // TODO(#109): Reenable after API cleanup.
   // if (auto* performer = handle->engine.GetPerformer(performer_id)) {
-  //   if (performer->DestroyEvent(event_id)) {
+  //   if (performer->DestroyTask(task_id)) {
   //     return BarelyStatus_kOk;
   //   }
   // }
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyEvent_GetPosition(BarelyMusicianHandle handle,
-                                     BarelyId performer_id, BarelyId event_id,
-                                     double* out_position) {
+BarelyStatus BarelyTask_GetPosition(BarelyMusicianHandle handle,
+                                    BarelyId performer_id, BarelyId task_id,
+                                    double* out_position) {
   if (!handle) return BarelyStatus_kNotFound;
-  if (performer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
+  if (performer_id == BarelyId_kInvalid || task_id == BarelyId_kInvalid) {
     return BarelyStatus_kInvalidArgument;
   }
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
   // TODO(#109): Reenable after API cleanup.
   // if (auto* performer = handle->engine.GetPerformer(performer_id)) {
-  //   if (const auto* position = performer->GetEventPosition(event_id)) {
+  //   if (const auto* position = performer->GetTaskPosition(task_id)) {
   //     *out_position = *position;
   //     return BarelyStatus_kOk;
   //   }
@@ -140,17 +142,17 @@ BarelyStatus BarelyEvent_GetPosition(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyEvent_SetPosition(BarelyMusicianHandle handle,
-                                     BarelyId performer_id, BarelyId event_id,
-                                     [[maybe_unused]] double position) {
+BarelyStatus BarelyTask_SetPosition(BarelyMusicianHandle handle,
+                                    BarelyId performer_id, BarelyId task_id,
+                                    [[maybe_unused]] double position) {
   if (!handle) return BarelyStatus_kNotFound;
-  if (performer_id == BarelyId_kInvalid || event_id == BarelyId_kInvalid) {
+  if (performer_id == BarelyId_kInvalid || task_id == BarelyId_kInvalid) {
     return BarelyStatus_kInvalidArgument;
   }
 
   // TODO(#109): Reenable after API cleanup.
   // if (auto* performer = handle->engine.GetPerformer(performer_id)) {
-  //   if (performer->SetEventPosition(event_id, position)) {
+  //   if (performer->SetTaskPosition(task_id, position)) {
   //     return BarelyStatus_kOk;
   //   }
   // }

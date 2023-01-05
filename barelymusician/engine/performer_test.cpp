@@ -9,19 +9,19 @@
 namespace barely::internal {
 namespace {
 
-// Tests that performer triggers multiple events as expected.
-TEST(PerformerTest, TriggerMultipleEvents) {
+// Tests that performer triggers multiple tasks as expected.
+TEST(PerformerTest, TriggerMultipleTasks) {
   Performer performer;
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
 
-  // Add events.
+  // Add tasks.
   std::vector<double> positions;
   for (int i = 1; i <= 4; ++i) {
-    performer.AddEvent(Id{i}, static_cast<double>(i), [&, i]() {
+    performer.AddTask(Id{i}, static_cast<double>(i), [&, i]() {
       const double position = performer.GetPosition();
       EXPECT_DOUBLE_EQ(position, static_cast<double>(i));
       positions.push_back(position);
@@ -29,7 +29,7 @@ TEST(PerformerTest, TriggerMultipleEvents) {
   }
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
   EXPECT_TRUE(positions.empty());
 
@@ -37,122 +37,122 @@ TEST(PerformerTest, TriggerMultipleEvents) {
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 1.0);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 1.0);
   EXPECT_TRUE(positions.empty());
 
-  // Trigger events.
+  // Trigger tasks.
   std::vector<double> expected_positions;
   for (int i = 1; i <= 4; ++i) {
     const double expected_position = static_cast<double>(i);
     expected_positions.push_back(expected_position);
-    EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 1.0);
+    EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 1.0);
 
-    performer.Update(performer.GetDurationToNextEvent());
+    performer.Update(performer.GetDurationToNextTask());
     EXPECT_DOUBLE_EQ(performer.GetPosition(), expected_position);
 
-    performer.TriggerAllEventsAtCurrentPosition();
+    performer.TriggerAllTasksAtCurrentPosition();
     EXPECT_EQ(positions, expected_positions);
   }
 
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 4.0);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
 }
 
-// Tests that performer triggers a single event as expected.
-TEST(PerformerTest, TriggerSingleEvent) {
+// Tests that performer triggers a single task as expected.
+TEST(PerformerTest, TriggerSingleTask) {
   Performer performer;
 
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
 
-  // Add event.
-  int event_trigger_count = 0;
-  EXPECT_TRUE(performer.AddEvent(Id{1}, 0.25, [&]() {
+  // Add task.
+  int task_trigger_count = 0;
+  EXPECT_TRUE(performer.AddTask(Id{1}, 0.25, [&]() {
     EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-    ++event_trigger_count;
+    ++task_trigger_count;
   }));
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
-  EXPECT_EQ(event_trigger_count, 0);
+  EXPECT_EQ(task_trigger_count, 0);
 
   // Start playback.
   performer.Start();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 0.25);
-  EXPECT_EQ(event_trigger_count, 0);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 0.25);
+  EXPECT_EQ(task_trigger_count, 0);
 
-  // Trigger event.
+  // Trigger task.
   performer.Update(0.25);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 0.0);
-  EXPECT_EQ(event_trigger_count, 0);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 0.0);
+  EXPECT_EQ(task_trigger_count, 0);
 
-  performer.TriggerAllEventsAtCurrentPosition();
+  performer.TriggerAllTasksAtCurrentPosition();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
-  EXPECT_EQ(event_trigger_count, 1);
+  EXPECT_EQ(task_trigger_count, 1);
 
   // Set looping on.
   performer.SetLooping(true);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 1.0);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 1.0);
 
-  // Trigger next event with a loop back.
+  // Trigger next task with a loop back.
   performer.Update(1.0);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 0.0);
-  EXPECT_EQ(event_trigger_count, 1);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 0.0);
+  EXPECT_EQ(task_trigger_count, 1);
 
-  performer.TriggerAllEventsAtCurrentPosition();
+  performer.TriggerAllTasksAtCurrentPosition();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 1.0);
-  EXPECT_EQ(event_trigger_count, 2);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 1.0);
+  EXPECT_EQ(task_trigger_count, 2);
 
-  // Update event position and callback.
-  EXPECT_TRUE(performer.SetEventPosition(Id{1}, 0.75));
-  EXPECT_TRUE(performer.SetEventCallback(Id{1}, [&]() {
+  // Update task position and callback.
+  EXPECT_TRUE(performer.SetTaskPosition(Id{1}, 0.75));
+  EXPECT_TRUE(performer.SetTaskCallback(Id{1}, [&]() {
     EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-    --event_trigger_count;
+    --task_trigger_count;
   }));
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 0.5);
-  EXPECT_EQ(event_trigger_count, 2);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 0.5);
+  EXPECT_EQ(task_trigger_count, 2);
 
-  // Trigger event with the updated position and callback.
+  // Trigger task with the updated position and callback.
   performer.Update(0.5);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 0.0);
-  EXPECT_EQ(event_trigger_count, 2);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 0.0);
+  EXPECT_EQ(task_trigger_count, 2);
 
-  performer.TriggerAllEventsAtCurrentPosition();
+  performer.TriggerAllTasksAtCurrentPosition();
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(), 1.0);
-  EXPECT_EQ(event_trigger_count, 1);
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 1.0);
+  EXPECT_EQ(task_trigger_count, 1);
 
   // Stop playback.
   performer.Stop();
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
-  EXPECT_DOUBLE_EQ(performer.GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
                    std::numeric_limits<double>::max());
-  EXPECT_EQ(event_trigger_count, 1);
+  EXPECT_EQ(task_trigger_count, 1);
 }
 
-// TODO(#108): Add `TriggerOneOffEvents` test (at minimum).
+// TODO(#108): Add `TriggerOneOffTasks` test (at minimum).
 
 // Tests that performer sets its current position as expected.
 TEST(PerformerTest, SetPosition) {

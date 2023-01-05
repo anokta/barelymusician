@@ -12,8 +12,8 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Performer::AddEvent(Id id, double position,
-                         EventCallback callback) noexcept {
+bool Performer::AddTask(Id id, double position,
+                        TaskCallback callback) noexcept {
   assert(id > kInvalid);
   if (positions_.emplace(id, position).second) {
     callbacks_.emplace(std::pair{position, id}, std::move(callback));
@@ -22,14 +22,14 @@ bool Performer::AddEvent(Id id, double position,
   return false;
 }
 
-double Performer::GetDurationToNextEvent() const noexcept {
+double Performer::GetDurationToNextTask() const noexcept {
   double next_position = std::numeric_limits<double>::max();
   if (!is_playing_) {
     return next_position;
   }
 
-  // Check next events.
-  if (const auto next_callback = GetNextEventCallback();
+  // Check next tasks.
+  if (const auto next_callback = GetNextTaskCallback();
       next_callback != callbacks_.end()) {
     next_position = next_callback->first.first;
     if (is_looping_ && (next_position < position_ ||
@@ -38,7 +38,7 @@ double Performer::GetDurationToNextEvent() const noexcept {
       next_position += loop_length_;
     }
   }
-  // Check one-off events.
+  // Check one-off tasks.
   if (!one_off_callbacks_.empty() &&
       one_off_callbacks_.begin()->first < next_position) {
     next_position = one_off_callbacks_.begin()->first;
@@ -50,7 +50,7 @@ double Performer::GetDurationToNextEvent() const noexcept {
   return next_position;
 }
 
-const Performer::EventCallback* Performer::GetEventCallback(
+const Performer::TaskCallback* Performer::GetTaskCallback(
     Id id) const noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     return FindOrNull(callbacks_, std::pair{*position, id});
@@ -58,7 +58,7 @@ const Performer::EventCallback* Performer::GetEventCallback(
   return nullptr;
 }
 
-const double* Performer::GetEventPosition(Id id) const noexcept {
+const double* Performer::GetTaskPosition(Id id) const noexcept {
   return FindOrNull(positions_, id);
 }
 
@@ -74,7 +74,7 @@ bool Performer::IsLooping() const noexcept { return is_looping_; }
 
 bool Performer::IsPlaying() const noexcept { return is_playing_; }
 
-bool Performer::RemoveEvent(Id id) noexcept {
+bool Performer::RemoveTask(Id id) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     callbacks_.erase(std::pair{position_it->second, id});
@@ -84,8 +84,8 @@ bool Performer::RemoveEvent(Id id) noexcept {
   return false;
 }
 
-bool Performer::ScheduleOneOffEvent(double position,
-                                    EventCallback callback) noexcept {
+bool Performer::ScheduleOneOffTask(double position,
+                                   TaskCallback callback) noexcept {
   if (position >= position_ && callback) {
     one_off_callbacks_.emplace(position, std::move(callback));
     return true;
@@ -93,7 +93,7 @@ bool Performer::ScheduleOneOffEvent(double position,
   return false;
 }
 
-bool Performer::SetEventCallback(Id id, EventCallback callback) noexcept {
+bool Performer::SetTaskCallback(Id id, TaskCallback callback) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     *FindOrNull(callbacks_, std::pair{*position, id}) = std::move(callback);
     return true;
@@ -101,7 +101,7 @@ bool Performer::SetEventCallback(Id id, EventCallback callback) noexcept {
   return false;
 }
 
-bool Performer::SetEventPosition(Id id, double position) noexcept {
+bool Performer::SetTaskPosition(Id id, double position) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     if (position_it->second != position) {
@@ -153,7 +153,7 @@ void Performer::SetPosition(double position) noexcept {
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_callbacks_.empty()) {
       // Reset all remaining one-off callbacks back to `loop_begin_position_`.
-      std::multimap<double, EventCallback> remaining_callbacks;
+      std::multimap<double, TaskCallback> remaining_callbacks;
       for (auto& it : one_off_callbacks_) {
         remaining_callbacks.emplace(loop_begin_position_, std::move(it.second));
       }
@@ -170,8 +170,8 @@ void Performer::Start() noexcept { is_playing_ = true; }
 
 void Performer::Stop() noexcept { is_playing_ = false; }
 
-void Performer::TriggerAllEventsAtCurrentPosition() noexcept {
-  // Trigger one-off events.
+void Performer::TriggerAllTasksAtCurrentPosition() noexcept {
+  // Trigger one-off tasks.
   if (!one_off_callbacks_.empty()) {
     auto it = one_off_callbacks_.begin();
     while (it != one_off_callbacks_.end() && it->first <= position_) {
@@ -180,8 +180,8 @@ void Performer::TriggerAllEventsAtCurrentPosition() noexcept {
     }
     one_off_callbacks_.erase(one_off_callbacks_.begin(), it);
   }
-  // Trigger next events.
-  auto callback = GetNextEventCallback();
+  // Trigger next tasks.
+  auto callback = GetNextTaskCallback();
   while (callback != callbacks_.end() && callback->first.first <= position_) {
     if (callback->second) {
       callback->second();
@@ -194,13 +194,13 @@ void Performer::TriggerAllEventsAtCurrentPosition() noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::Update(double duration) noexcept {
   if (is_playing_) {
-    assert(duration >= 0.0 && duration <= GetDurationToNextEvent());
+    assert(duration >= 0.0 && duration <= GetDurationToNextTask());
     SetPosition(position_ + duration);
   }
 }
 
-std::map<std::pair<double, Id>, Performer::EventCallback>::const_iterator
-Performer::GetNextEventCallback() const noexcept {
+std::map<std::pair<double, Id>, Performer::TaskCallback>::const_iterator
+Performer::GetNextTaskCallback() const noexcept {
   auto it = callbacks_.lower_bound(std::pair{position_, kInvalid});
   if (last_triggered_position_) {
     while (it != callbacks_.end() &&

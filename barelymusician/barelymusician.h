@@ -60,23 +60,6 @@ enum BarelyStatus_Values {
   BarelyStatus_kInternal = 4,
 };
 
-/// Event definition create callback signature.
-///
-/// @param state Pointer to event state.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyEventDefinition_CreateCallback)(void** state,
-                                                     void* user_data);
-
-/// Event definition destroy callback signature.
-///
-/// @param state Pointer to event state.
-typedef void (*BarelyEventDefinition_DestroyCallback)(void** state);
-
-/// Event definition process callback signature.
-///
-/// @param state Pointer to event state.
-typedef void (*BarelyEventDefinition_ProcessCallback)(void** state);
-
 /// Instrument note off callback signature.
 ///
 /// @param pitch Note pitch.
@@ -145,17 +128,22 @@ typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
                                                                 double value,
                                                                 double slope);
 
-/// Event definition.
-typedef struct BarelyEventDefinition {
-  /// Create callback.
-  BarelyEventDefinition_CreateCallback create_callback;
+/// Task definition create callback signature.
+///
+/// @param state Pointer to task state.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyTaskDefinition_CreateCallback)(void** state,
+                                                    void* user_data);
 
-  /// Destroy callback.
-  BarelyEventDefinition_DestroyCallback destroy_callback;
+/// Task definition destroy callback signature.
+///
+/// @param state Pointer to task state.
+typedef void (*BarelyTaskDefinition_DestroyCallback)(void** state);
 
-  /// Process callback.
-  BarelyEventDefinition_ProcessCallback process_callback;
-} BarelyEventDefinition;
+/// Task definition process callback signature.
+///
+/// @param state Pointer to task state.
+typedef void (*BarelyTaskDefinition_ProcessCallback)(void** state);
 
 /// Parameter definition.
 typedef struct BarelyParameterDefinition {
@@ -198,6 +186,18 @@ typedef struct BarelyInstrumentDefinition {
   /// Number of parameter definitions.
   int32_t parameter_definition_count;
 } BarelyInstrumentDefinition;
+
+/// Task definition.
+typedef struct BarelyTaskDefinition {
+  /// Create callback.
+  BarelyTaskDefinition_CreateCallback create_callback;
+
+  /// Destroy callback.
+  BarelyTaskDefinition_DestroyCallback destroy_callback;
+
+  /// Process callback.
+  BarelyTaskDefinition_ProcessCallback process_callback;
+} BarelyTaskDefinition;
 
 /// Creates new engine.
 ///
@@ -243,56 +243,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
                                                  double timestamp);
-
-/// Creates event.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param definition Event definition.
-/// @param position Event position.
-/// @param is_one_off True if event is one-off, false otherwise.
-/// @param out_event_id Output event identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_Create(BarelyMusicianHandle handle,
-                                              BarelyId performer_id,
-                                              BarelyEventDefinition definition,
-                                              double position, bool is_one_off,
-                                              void* user_data,
-                                              BarelyId* out_event_id);
-
-/// Destroys event.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param event_id Event identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_Destroy(BarelyMusicianHandle handle,
-                                               BarelyId performer_id,
-                                               BarelyId event_id);
-
-/// Gets event position.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param event_id Event identifier.
-/// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_GetPosition(BarelyMusicianHandle handle,
-                                                   BarelyId performer_id,
-                                                   BarelyId event_id,
-                                                   double* out_position);
-
-/// Sets event position.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param event_id Event identifier.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEvent_SetPosition(BarelyMusicianHandle handle,
-                                                   BarelyId performer_id,
-                                                   BarelyId event_id,
-                                                   double position);
 
 /// Creates new instrument.
 ///
@@ -439,7 +389,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_StopNote(
 
 /// Creates new performer.
 ///
-/// @param priority Performer priority for when executing events.
+/// @param priority Performer priority for when executing tasks.
 /// @param out_performer_id Output performer identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
@@ -553,6 +503,56 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Start(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
                                                 BarelyId performer_id);
+
+/// Creates new task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param definition Task definition.
+/// @param position Task position.
+/// @param is_one_off True if task is one-off, false otherwise.
+/// @param out_task_id Output task identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_Create(BarelyMusicianHandle handle,
+                                             BarelyId performer_id,
+                                             BarelyTaskDefinition definition,
+                                             double position, bool is_one_off,
+                                             void* user_data,
+                                             BarelyId* out_task_id);
+
+/// Destroys task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_Destroy(BarelyMusicianHandle handle,
+                                              BarelyId performer_id,
+                                              BarelyId task_id);
+
+/// Gets task position.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param out_position Output position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_GetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId performer_id,
+                                                  BarelyId task_id,
+                                                  double* out_position);
+
+/// Sets task position.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_SetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId performer_id,
+                                                  BarelyId task_id,
+                                                  double position);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -695,37 +695,37 @@ class StatusOr {
   std::variant<Status, ValueType> value_or_;
 };
 
-/// Event callback.
-using EventCallback = std::function<void()>;
+/// Task callback.
+using TaskCallback = std::function<void()>;
 
-/// Event definition.
-struct EventDefinition : public BarelyEventDefinition {
+/// Task definition.
+struct TaskDefinition : public BarelyTaskDefinition {
   /// Create callback signature.
-  using CreateCallback = BarelyEventDefinition_CreateCallback;
+  using CreateCallback = BarelyTaskDefinition_CreateCallback;
 
   /// Destroy callback signature.
-  using DestroyCallback = BarelyEventDefinition_DestroyCallback;
+  using DestroyCallback = BarelyTaskDefinition_DestroyCallback;
 
   /// Process callback signature.
-  using ProcessCallback = BarelyEventDefinition_ProcessCallback;
+  using ProcessCallback = BarelyTaskDefinition_ProcessCallback;
 
-  /// Constructs new `EventDefinition`.
+  /// Constructs new `TaskDefinition`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
-  explicit EventDefinition(CreateCallback create_callback,
-                           DestroyCallback destroy_callback,
-                           ProcessCallback process_callback)
-      : EventDefinition(BarelyEventDefinition{create_callback, destroy_callback,
-                                              process_callback}) {}
+  explicit TaskDefinition(CreateCallback create_callback,
+                          DestroyCallback destroy_callback,
+                          ProcessCallback process_callback)
+      : TaskDefinition(BarelyTaskDefinition{create_callback, destroy_callback,
+                                            process_callback}) {}
 
-  /// Constructs new `EventDefinition` from internal type.
+  /// Constructs new `TaskDefinition` from internal type.
   ///
-  /// @param definition Internal event definition.
+  /// @param definition Internal task definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  EventDefinition(BarelyEventDefinition definition)
-      : BarelyEventDefinition{definition} {}
+  TaskDefinition(BarelyTaskDefinition definition)
+      : BarelyTaskDefinition{definition} {}
 };
 
 /// Parameter definition.
@@ -827,8 +827,8 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   }
 };
 
-/// Event reference.
-class EventReference {
+/// Task reference.
+class TaskReference {
  public:
   /// Returns position.
   ///
@@ -836,7 +836,7 @@ class EventReference {
   [[nodiscard]] StatusOr<double> GetPosition() const {
     double position = 0.0;
     if (const Status status =
-            BarelyEvent_GetPosition(handle_, performer_id_, id_, &position);
+            BarelyTask_GetPosition(handle_, performer_id_, id_, &position);
         !status.IsOk()) {
       return status;
     }
@@ -848,15 +848,15 @@ class EventReference {
   /// @param position Position in beats.
   /// @return Status.
   Status SetPosition(double position) {
-    return BarelyEvent_SetPosition(handle_, performer_id_, id_, position);
+    return BarelyTask_SetPosition(handle_, performer_id_, id_, position);
   }
 
  private:
   friend class Performer;
 
-  // Constructs new `EventReference`.
-  explicit EventReference(BarelyMusicianHandle handle, BarelyId performer_id,
-                          BarelyId id)
+  // Constructs new `TaskReference`.
+  explicit TaskReference(BarelyMusicianHandle handle, BarelyId performer_id,
+                         BarelyId id)
       : handle_(handle), performer_id_(performer_id), id_(id) {}
 
   // Internal engine handle.
@@ -1132,40 +1132,39 @@ class Performer {
     return *this;
   }
 
-  /// Creates event.
+  /// Creates task.
   ///
-  /// @param definition Event definition.
-  /// @param position Event position in beats.
-  /// @param is_one_off True if one-off event, false otherwise.
+  /// @param definition Task definition.
+  /// @param position Task position in beats.
+  /// @param is_one_off True if one-off task, false otherwise.
   /// @param user_data Pointer to user data.
-  /// @return Event reference.
-  EventReference CreateEvent(EventDefinition definition, double position,
-                             bool is_one_off = false,
-                             void* user_data = nullptr) {
-    BarelyId event_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelyEvent_Create(
-        handle_, id_, definition, position, is_one_off, user_data, &event_id);
+  /// @return Task reference.
+  TaskReference CreateTask(TaskDefinition definition, double position,
+                           bool is_one_off = false, void* user_data = nullptr) {
+    BarelyId task_id = BarelyId_kInvalid;
+    [[maybe_unused]] const Status status = BarelyTask_Create(
+        handle_, id_, definition, position, is_one_off, user_data, &task_id);
     assert(status.IsOk());
-    return EventReference(handle_, id_, event_id);
+    return TaskReference(handle_, id_, task_id);
   }
 
-  /// Creates event with callback.
+  /// Creates task with callback.
   ///
-  /// @param callback Event callback.
-  /// @param position Event position in beats.
-  /// @param is_one_off True if one-off event, false otherwise.
-  /// @return Event reference.
-  EventReference CreateEvent(EventCallback callback, double position,
-                             bool is_one_off = false) {
-    return CreateEvent(
-        EventDefinition(
+  /// @param callback Task callback.
+  /// @param position Task position in beats.
+  /// @param is_one_off True if one-off task, false otherwise.
+  /// @return Task reference.
+  TaskReference CreateTask(TaskCallback callback, double position,
+                           bool is_one_off = false) {
+    return CreateTask(
+        TaskDefinition(
             [](void** state, void* user_data) {
-              *state = new EventCallback(
-                  std::move(*static_cast<EventCallback*>(user_data)));
+              *state = new TaskCallback(
+                  std::move(*static_cast<TaskCallback*>(user_data)));
             },
-            [](void** state) { delete static_cast<EventCallback*>(*state); },
+            [](void** state) { delete static_cast<TaskCallback*>(*state); },
             [](void** state) {
-              if (const auto& callback = *static_cast<EventCallback*>(*state);
+              if (const auto& callback = *static_cast<TaskCallback*>(*state);
                   callback) {
                 callback();
               }
@@ -1173,12 +1172,12 @@ class Performer {
         position, is_one_off, static_cast<void*>(&callback));
   }
 
-  /// Destroys event.
+  /// Destroys task.
   ///
-  /// @param event_reference Event reference.
+  /// @param task_reference Task reference.
   /// @return Status.
-  Status DestroyEvent(EventReference event_reference) {
-    return BarelyEvent_Destroy(handle_, id_, event_reference.id_);
+  Status DestroyTask(TaskReference task_reference) {
+    return BarelyTask_Destroy(handle_, id_, task_reference.id_);
   }
 
   /// Returns loop begin position.
@@ -1351,7 +1350,7 @@ class Musician {
 
   /// Creates new performer.
   ///
-  /// @param priority Performer priority for when executing events.
+  /// @param priority Performer priority for when executing tasks.
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer(int priority = 0) {
     return Performer(handle_, priority);

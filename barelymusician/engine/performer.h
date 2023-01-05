@@ -14,36 +14,36 @@ namespace barely::internal {
 /// Class that wraps performer.
 class Performer {
  public:
-  /// Event definition alias.
-  using EventDefinition = barely::EventDefinition;
+  /// Task definition alias.
+  using TaskDefinition = barely::TaskDefinition;
 
-  /// Creates new event at position.
+  /// Creates new task at position.
   ///
-  /// @param id Event identifier.
-  /// @param definition Event definition.
-  /// @param position Event position.
-  /// @param is_one_off True if event is one-off, false otherwise.
+  /// @param id Task identifier.
+  /// @param definition Task definition.
+  /// @param position Task position.
+  /// @param is_one_off True if task is one-off, false otherwise.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateEvent(Id id, EventDefinition definition, double position,
-                   bool is_one_off) noexcept;
+  bool CreateTask(Id id, TaskDefinition definition, double position,
+                  bool is_one_off) noexcept;
 
-  /// Destroys event.
+  /// Destroys task.
   ///
-  /// @param id Event identifier.
+  /// @param id Task identifier.
   /// @return True if successful, false otherwise.
-  bool DestroyEvent(Id id) noexcept;
+  bool DestroyTask(Id id) noexcept;
 
-  /// Returns duration to next event.
+  /// Returns duration to next task.
   ///
   /// @return Duration in beats.
-  [[nodiscard]] double GetDurationToNextEvent() const noexcept;
+  [[nodiscard]] double GetDurationToNextTask() const noexcept;
 
-  /// Returns event position.
+  /// Returns task position.
   ///
-  /// @param id Event identifier.
-  /// @return Pointer to event position.
-  [[nodiscard]] const double* GetEventPosition(Id id) const noexcept;
+  /// @param id Task identifier.
+  /// @return Pointer to task position.
+  [[nodiscard]] const double* GetTaskPosition(Id id) const noexcept;
 
   /// Returns loop begin position.
   ///
@@ -70,11 +70,11 @@ class Performer {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
 
-  /// Sets event position.
+  /// Sets task position.
   ///
-  /// @param id Event identifier.
-  /// @param position Event position.
-  bool SetEventPosition(Id id, double position) noexcept;
+  /// @param id Task identifier.
+  /// @param position Task position.
+  bool SetTaskPosition(Id id, double position) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -103,8 +103,8 @@ class Performer {
   /// Stops performer.
   void Stop() noexcept;
 
-  /// Triggers all events at current position.
-  void TriggerAllEventsAtCurrentPosition() noexcept;
+  /// Triggers all tasks at current position.
+  void TriggerAllTasksAtCurrentPosition() noexcept;
 
   /// Updates performer by duration.
   ///
@@ -113,9 +113,9 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // Returns next event callback.
-  [[nodiscard]] std::map<std::pair<double, Id>, EventCallback>::const_iterator
-  GetNextEventCallback() const noexcept;
+  // Returns next task callback.
+  [[nodiscard]] std::map<std::pair<double, Id>, TaskCallback>::const_iterator
+  GetNextTaskCallback() const noexcept;
 
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;
@@ -132,14 +132,14 @@ class Performer {
   // Position in beats.
   double position_ = 0.0;
 
-  // Sorted map of event callbacks by event position-identifier pairs.
-  std::map<std::pair<double, Id>, EventCallback> callbacks_;
+  // Sorted map of task callbacks by task position-identifier pairs.
+  std::map<std::pair<double, Id>, TaskCallback> callbacks_;
 
-  // Map of event positions by event identifiers.
+  // Map of task positions by task identifiers.
   std::unordered_map<Id, double> positions_;
 
-  // Sorted map of one-off event callbacks by event delays.
-  std::multimap<double, EventCallback> one_off_callbacks_;
+  // Sorted map of one-off task callbacks by task delays.
+  std::multimap<double, TaskCallback> one_off_callbacks_;
 
   // Last triggered position.
   std::optional<double> last_triggered_position_;

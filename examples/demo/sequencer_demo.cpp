@@ -78,16 +78,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLoopLength(5.0);
 
   const auto play_note_fn = [&](double duration,
-                                double pitch) -> Performer::EventCallback {
+                                double pitch) -> Performer::TaskCallback {
     return [&instrument, &performer, pitch, duration]() {
       instrument.StartNote(pitch, kGain);
-      performer.ScheduleOneOffEvent(
+      performer.ScheduleOneOffTask(
           performer.GetPosition() + duration,
           [&instrument, pitch]() { instrument.StopNote(pitch); });
     };
   };
 
-  std::vector<std::pair<double, Performer::EventCallback>> score;
+  std::vector<std::pair<double, Performer::TaskCallback>> score;
   score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
   score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
   score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));
@@ -100,10 +100,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
                      play_note_fn(1.0 / 3.0, barely::kPitchB5));
   score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
 
-  std::unordered_map<int, Performer::EventReference> events;
+  std::unordered_map<int, Performer::TaskReference> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    events.emplace(index++, performer.AddEvent(position, callback));
+    tasks.emplace(index++, performer.AddTask(position, callback));
   }
 
   // Audio process callback.
@@ -125,13 +125,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
       // Toggle score.
-      if (const auto it = events.find(index - 1);
-          it != events.end() && performer.RemoveEvent(it->second).IsOk()) {
-        events.erase(it);
+      if (const auto it = tasks.find(index - 1);
+          it != tasks.end() && performer.RemoveTask(it->second).IsOk()) {
+        tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        events.emplace(index - 1, performer.AddEvent(position, callback));
+        tasks.emplace(index - 1, performer.AddTask(position, callback));
         ConsoleLog() << "Added note " << index;
       }
       return;

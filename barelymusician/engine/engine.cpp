@@ -146,12 +146,12 @@ void Engine::Update(double timestamp) noexcept {
   // TODO(#109): Reenable after API cleanup.
   // while (timestamp_ < timestamp) {
   //   double update_duration = GetBeats(timestamp - timestamp_);
-  //   bool has_events_to_trigger = false;
+  //   bool has_tasks_to_trigger = false;
   //   for (const auto& [priority_id_pair, performer] : performers_) {
-  //     if (const double duration = performer.GetDurationToNextEvent();
+  //     if (const double duration = performer.GetDurationToNextTask();
   //         duration < update_duration) {
   //       update_duration = duration;
-  //       has_events_to_trigger = true;
+  //       has_tasks_to_trigger = true;
   //     }
   //   }
 
@@ -160,11 +160,11 @@ void Engine::Update(double timestamp) noexcept {
   //     performer.Update(update_duration);
   //   }
 
-  //   if (has_events_to_trigger) {
+  //   if (has_tasks_to_trigger) {
   //     for (auto& [priority_id_pair, performer] : performers_) {
-  //       if (update_duration + performer.GetDurationToNextEvent() <=
+  //       if (update_duration + performer.GetDurationToNextTask() <=
   //           performer.GetPosition()) {
-  //         performer.TriggerAllEventsAtCurrentPosition();
+  //         performer.TriggerAllTasksAtCurrentPosition();
   //       }
   //     }
   //   }

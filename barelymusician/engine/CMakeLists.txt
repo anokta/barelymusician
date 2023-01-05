@@ -13,16 +13,6 @@ target_link_libraries(
 )
 
 add_library(
-  event
-  event.cpp
-  event.h
-)
-target_link_libraries(
-  event
-  include
-)
-
-add_library(
   id INTERFACE
   id.h
 )
@@ -83,6 +73,16 @@ target_link_libraries(
   performer
   id
   find_or_null
+)
+
+add_library(
+  task
+  task.cpp
+  task.h
+)
+target_link_libraries(
+  task
+  include
 )
 
 add_executable(

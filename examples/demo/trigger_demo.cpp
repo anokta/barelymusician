@@ -23,7 +23,7 @@ namespace {
 using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::OscillatorType;
-using ::barely::Sequencer;
+using ::barely::Performer;
 using ::barely::SynthInstrument;
 using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
@@ -77,43 +77,43 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::vector<std::tuple<double, double, double>> notes;
   std::vector<std::pair<double, double>> triggers;
 
-  Sequencer sequencer = engine.CreateSequencer();
-  sequencer.SetLooping(true);
+  Performer performer = engine.CreatePerformer();
+  performer.SetLooping(true);
 
   const auto play_note_fn = [&](int scale_index,
-                                double duration) -> Sequencer::EventCallback {
+                                double duration) -> Performer::EventCallback {
     const double pitch =
         barely::kPitchD3 +
         barely::GetPitch(barely::kPitchMajorScale, scale_index);
-    return [&instrument, &sequencer, duration, pitch]() {
+    return [&instrument, &performer, duration, pitch]() {
       instrument.StartNote(pitch, kGain);
-      sequencer.ScheduleOneOffEvent(
-          sequencer.GetPosition() + duration,
+      performer.ScheduleOneOffEvent(
+          performer.GetPosition() + duration,
           [&instrument, pitch]() { instrument.StopNote(pitch); });
     };
   };
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  sequencer.AddEvent(0.0, play_note_fn(0, 1.0));
+  performer.AddEvent(0.0, play_note_fn(0, 1.0));
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  sequencer.AddEvent(1.0, play_note_fn(1, 1.0));
+  performer.AddEvent(1.0, play_note_fn(1, 1.0));
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  sequencer.AddEvent(2.0, play_note_fn(2, 1.0));
+  performer.AddEvent(2.0, play_note_fn(2, 1.0));
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  sequencer.AddEvent(3.0, play_note_fn(3, 2.0 / 3.0));
-  sequencer.AddEvent(3.0 + 2.0 / 3.0, play_note_fn(4, 1.0 / 3.0));
+  performer.AddEvent(3.0, play_note_fn(3, 2.0 / 3.0));
+  performer.AddEvent(3.0 + 2.0 / 3.0, play_note_fn(4, 1.0 / 3.0));
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  sequencer.AddEvent(4.0, play_note_fn(5, 1.0 / 3.0));
-  sequencer.AddEvent(4.0 + 1.0 / 3.0, play_note_fn(6, 1.0 / 3.0));
-  sequencer.AddEvent(4.0 + 2.0 / 3.0, play_note_fn(7, 1.0 / 3.0));
+  performer.AddEvent(4.0, play_note_fn(5, 1.0 / 3.0));
+  performer.AddEvent(4.0 + 1.0 / 3.0, play_note_fn(6, 1.0 / 3.0));
+  performer.AddEvent(4.0 + 2.0 / 3.0, play_note_fn(7, 1.0 / 3.0));
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  sequencer.AddEvent(5.0, play_note_fn(8, 2.0));
+  performer.AddEvent(5.0, play_note_fn(8, 2.0));
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
@@ -133,24 +133,24 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
-      sequencer.Stop();
+      performer.Stop();
       instrument.StopAllNotes();
-      sequencer.SetLoopBeginPosition(triggers[index].first);
-      sequencer.SetLoopLength(triggers[index].second);
-      sequencer.SetPosition(triggers[index].first);
-      sequencer.Start();
+      performer.SetLoopBeginPosition(triggers[index].first);
+      performer.SetLoopLength(triggers[index].second);
+      performer.SetPosition(triggers[index].first);
+      performer.Start();
       return;
     }
     // Adjust tempo.
     double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (sequencer.IsPlaying()) {
+        if (performer.IsPlaying()) {
           instrument.StopAllNotes();
-          sequencer.Stop();
+          performer.Stop();
           ConsoleLog() << "Stopped playback";
         } else {
-          sequencer.Start();
+          performer.Start();
           ConsoleLog() << "Started playback";
         }
         return;
@@ -183,7 +183,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  sequencer.Stop();
+  performer.Stop();
   audio_output.Stop();
 
   return 0;

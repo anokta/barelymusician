@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_SEQUENCER_H_
-#define BARELYMUSICIAN_ENGINE_SEQUENCER_H_
+#ifndef BARELYMUSICIAN_ENGINE_PERFORMER_H_
+#define BARELYMUSICIAN_ENGINE_PERFORMER_H_
 
 #include <map>
 #include <optional>
@@ -11,8 +11,8 @@
 
 namespace barely::internal {
 
-/// Class that wraps sequencer.
-class Sequencer {
+/// Class that wraps performer.
+class Performer {
  public:
   /// Event definition alias.
   using EventDefinition = barely::EventDefinition;
@@ -60,12 +60,12 @@ class Sequencer {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept;
 
-  /// Returns whether sequencer is looping or not.
+  /// Returns whether performer is looping or not.
   ///
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept;
 
-  /// Returns whether sequencer is playing or not.
+  /// Returns whether performer is playing or not.
   ///
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
@@ -86,7 +86,7 @@ class Sequencer {
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept;
 
-  /// Sets whether sequencer should be looping or not.
+  /// Sets whether performer should be looping or not.
   ///
   /// @param is_looping True if looping.
   void SetLooping(bool is_looping) noexcept;
@@ -97,16 +97,16 @@ class Sequencer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetPosition(double position) noexcept;
 
-  /// Stops sequencer.
+  /// Stops performer.
   void Start() noexcept;
 
-  /// Stops sequencer.
+  /// Stops performer.
   void Stop() noexcept;
 
   /// Triggers all events at current position.
   void TriggerAllEventsAtCurrentPosition() noexcept;
 
-  /// Updates sequencer by duration.
+  /// Updates performer by duration.
   ///
   /// @param duration Duration in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -117,10 +117,10 @@ class Sequencer {
   [[nodiscard]] std::map<std::pair<double, Id>, EventCallback>::const_iterator
   GetNextEventCallback() const noexcept;
 
-  // Denotes whether sequencer is looping or not.
+  // Denotes whether performer is looping or not.
   bool is_looping_ = false;
 
-  // Denotes whether sequencer is playing or not.
+  // Denotes whether performer is playing or not.
   bool is_playing_ = false;
 
   // Loop begin position in beats.
@@ -147,4 +147,4 @@ class Sequencer {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_SEQUENCER_H_
+#endif  // BARELYMUSICIAN_ENGINE_PERFORMER_H_

@@ -10,7 +10,7 @@
 #include "barelymusician/engine/instrument.h"
 
 // TODO(#109): Reenable after API cleanup.
-// #include "barelymusician/engine/sequencer.h"
+// #include "barelymusician/engine/performer.h"
 
 namespace barely::internal {
 
@@ -48,14 +48,14 @@ bool Engine::CreateInstrument(Id instrument_id,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::CreateSequencer([[maybe_unused]] Id sequencer_id,
+bool Engine::CreatePerformer([[maybe_unused]] Id performer_id,
                              [[maybe_unused]] int priority) noexcept {
-  assert(sequencer_id > kInvalid);
+  assert(performer_id > kInvalid);
   // if (const auto [it, success] =
-  //         sequencers_.emplace(std::pair{priority, sequencer_id},
-  //         Sequencer{});
+  //         performers_.emplace(std::pair{priority, performer_id},
+  //         Performer{});
   //     success) {
-  //   sequencer_refs_.emplace(sequencer_id, std::pair{priority, &it->second});
+  //   performer_refs_.emplace(performer_id, std::pair{priority, &it->second});
   //   return true;
   // }
   return false;
@@ -75,11 +75,11 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::DestroySequencer([[maybe_unused]] Id sequencer_id) noexcept {
-  // if (const auto it = sequencer_refs_.find(sequencer_id);
-  //     it != sequencer_refs_.end()) {
-  //   sequencers_.erase(std::pair{it->second.first, sequencer_id});
-  //   sequencer_refs_.erase(it);
+bool Engine::DestroyPerformer([[maybe_unused]] Id performer_id) noexcept {
+  // if (const auto it = performer_refs_.find(performer_id);
+  //     it != performer_refs_.end()) {
+  //   performers_.erase(std::pair{it->second.first, performer_id});
+  //   performer_refs_.erase(it);
   //   return true;
   // }
   return false;
@@ -96,9 +96,9 @@ Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
   return nullptr;
 }
 
-Sequencer* Engine::GetSequencer([[maybe_unused]] Id sequencer_id) noexcept {
-  // if (auto* sequencer_ref = FindOrNull(sequencer_refs_, sequencer_id)) {
-  //   return sequencer_ref->second;
+Performer* Engine::GetPerformer([[maybe_unused]] Id performer_id) noexcept {
+  // if (auto* performer_ref = FindOrNull(performer_refs_, performer_id)) {
+  //   return performer_ref->second;
   // }
   return nullptr;
 }
@@ -147,8 +147,8 @@ void Engine::Update(double timestamp) noexcept {
   // while (timestamp_ < timestamp) {
   //   double update_duration = GetBeats(timestamp - timestamp_);
   //   bool has_events_to_trigger = false;
-  //   for (const auto& [priority_id_pair, sequencer] : sequencers_) {
-  //     if (const double duration = sequencer.GetDurationToNextEvent();
+  //   for (const auto& [priority_id_pair, performer] : performers_) {
+  //     if (const double duration = performer.GetDurationToNextEvent();
   //         duration < update_duration) {
   //       update_duration = duration;
   //       has_events_to_trigger = true;
@@ -156,15 +156,15 @@ void Engine::Update(double timestamp) noexcept {
   //   }
 
   //   timestamp_ += GetSeconds(update_duration);
-  //   for (auto& [priority_id_pair, sequencer] : sequencers_) {
-  //     sequencer.Update(update_duration);
+  //   for (auto& [priority_id_pair, performer] : performers_) {
+  //     performer.Update(update_duration);
   //   }
 
   //   if (has_events_to_trigger) {
-  //     for (auto& [priority_id_pair, sequencer] : sequencers_) {
-  //       if (update_duration + sequencer.GetDurationToNextEvent() <=
-  //           sequencer.GetPosition()) {
-  //         sequencer.TriggerAllEventsAtCurrentPosition();
+  //     for (auto& [priority_id_pair, performer] : performers_) {
+  //       if (update_duration + performer.GetDurationToNextEvent() <=
+  //           performer.GetPosition()) {
+  //         performer.TriggerAllEventsAtCurrentPosition();
   //       }
   //     }
   //   }

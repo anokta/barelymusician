@@ -41,8 +41,8 @@ class Metronome {
   void Stop() noexcept;
 
  private:
-  // Metonome sequencer.
-  Sequencer sequencer_;
+  // Metonome performer.
+  Performer performer_;
 
   // Current beat.
   int beat_ = 0;

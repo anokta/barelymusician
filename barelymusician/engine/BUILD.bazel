@@ -11,7 +11,7 @@ cc_library(
         ":instrument",
         ":mutable_data",
         # TODO(#109): Reenable after API cleanup.
-        # ":sequencer",
+        # ":performer",
         "//barelymusician/common:find_or_null",
     ],
 )
@@ -75,9 +75,9 @@ cc_library(
 
 # TODO(#109): Reenable after API cleanup.
 # cc_library(
-#     name = "sequencer",
-#     srcs = ["sequencer.cpp"],
-#     hdrs = ["sequencer.h"],
+#     name = "performer",
+#     srcs = ["performer.cpp"],
+#     hdrs = ["performer.h"],
 #     deps = [
 #         ":id",
 #         "//barelymusician:include",
@@ -138,10 +138,10 @@ cc_test(
 
 # TODO(#109): Reenable after API cleanup.
 # cc_test(
-#     name = "sequencer_test",
-#     srcs = ["sequencer_test.cpp"],
+#     name = "performer_test",
+#     srcs = ["performer_test.cpp"],
 #     deps = [
-#         ":sequencer",
+#         ":performer",
 #         "@googletest//:gtest_main",
 #     ],
 # )

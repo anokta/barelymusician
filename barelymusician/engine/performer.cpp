@@ -1,4 +1,4 @@
-#include "barelymusician/engine/sequencer.h"
+#include "barelymusician/engine/performer.h"
 
 #include <cassert>
 #include <cmath>
@@ -12,7 +12,7 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Sequencer::AddEvent(Id id, double position,
+bool Performer::AddEvent(Id id, double position,
                          EventCallback callback) noexcept {
   assert(id > kInvalid);
   if (positions_.emplace(id, position).second) {
@@ -22,7 +22,7 @@ bool Sequencer::AddEvent(Id id, double position,
   return false;
 }
 
-double Sequencer::GetDurationToNextEvent() const noexcept {
+double Performer::GetDurationToNextEvent() const noexcept {
   double next_position = std::numeric_limits<double>::max();
   if (!is_playing_) {
     return next_position;
@@ -50,7 +50,7 @@ double Sequencer::GetDurationToNextEvent() const noexcept {
   return next_position;
 }
 
-const Sequencer::EventCallback* Sequencer::GetEventCallback(
+const Performer::EventCallback* Performer::GetEventCallback(
     Id id) const noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     return FindOrNull(callbacks_, std::pair{*position, id});
@@ -58,23 +58,23 @@ const Sequencer::EventCallback* Sequencer::GetEventCallback(
   return nullptr;
 }
 
-const double* Sequencer::GetEventPosition(Id id) const noexcept {
+const double* Performer::GetEventPosition(Id id) const noexcept {
   return FindOrNull(positions_, id);
 }
 
-double Sequencer::GetLoopBeginPosition() const noexcept {
+double Performer::GetLoopBeginPosition() const noexcept {
   return loop_begin_position_;
 }
 
-double Sequencer::GetLoopLength() const noexcept { return loop_length_; }
+double Performer::GetLoopLength() const noexcept { return loop_length_; }
 
-double Sequencer::GetPosition() const noexcept { return position_; }
+double Performer::GetPosition() const noexcept { return position_; }
 
-bool Sequencer::IsLooping() const noexcept { return is_looping_; }
+bool Performer::IsLooping() const noexcept { return is_looping_; }
 
-bool Sequencer::IsPlaying() const noexcept { return is_playing_; }
+bool Performer::IsPlaying() const noexcept { return is_playing_; }
 
-bool Sequencer::RemoveEvent(Id id) noexcept {
+bool Performer::RemoveEvent(Id id) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     callbacks_.erase(std::pair{position_it->second, id});
@@ -84,7 +84,7 @@ bool Sequencer::RemoveEvent(Id id) noexcept {
   return false;
 }
 
-bool Sequencer::ScheduleOneOffEvent(double position,
+bool Performer::ScheduleOneOffEvent(double position,
                                     EventCallback callback) noexcept {
   if (position >= position_ && callback) {
     one_off_callbacks_.emplace(position, std::move(callback));
@@ -93,7 +93,7 @@ bool Sequencer::ScheduleOneOffEvent(double position,
   return false;
 }
 
-bool Sequencer::SetEventCallback(Id id, EventCallback callback) noexcept {
+bool Performer::SetEventCallback(Id id, EventCallback callback) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     *FindOrNull(callbacks_, std::pair{*position, id}) = std::move(callback);
     return true;
@@ -101,7 +101,7 @@ bool Sequencer::SetEventCallback(Id id, EventCallback callback) noexcept {
   return false;
 }
 
-bool Sequencer::SetEventPosition(Id id, double position) noexcept {
+bool Performer::SetEventPosition(Id id, double position) noexcept {
   if (const auto position_it = positions_.find(id);
       position_it != positions_.end()) {
     if (position_it->second != position) {
@@ -116,7 +116,7 @@ bool Sequencer::SetEventPosition(Id id, double position) noexcept {
   return false;
 }
 
-void Sequencer::SetLoopBeginPosition(double loop_begin_position) noexcept {
+void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) return;
   loop_begin_position_ = loop_begin_position;
   if (is_looping_ && position_ > loop_begin_position_) {
@@ -125,7 +125,7 @@ void Sequencer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   }
 }
 
-void Sequencer::SetLoopLength(double loop_length) noexcept {
+void Performer::SetLoopLength(double loop_length) noexcept {
   assert(loop_length > 0.0);
   if (loop_length_ == loop_length) return;
   loop_length_ = loop_length;
@@ -135,7 +135,7 @@ void Sequencer::SetLoopLength(double loop_length) noexcept {
   }
 }
 
-void Sequencer::SetLooping(bool is_looping) noexcept {
+void Performer::SetLooping(bool is_looping) noexcept {
   if (is_looping_ == is_looping) return;
   is_looping_ = is_looping;
   if (is_looping_ && position_ > loop_begin_position_) {
@@ -145,7 +145,7 @@ void Sequencer::SetLooping(bool is_looping) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Sequencer::SetPosition(double position) noexcept {
+void Performer::SetPosition(double position) noexcept {
   if (position_ == position) return;
   last_triggered_position_ = std::nullopt;
   one_off_callbacks_.erase(one_off_callbacks_.begin(),
@@ -166,11 +166,11 @@ void Sequencer::SetPosition(double position) noexcept {
   }
 }
 
-void Sequencer::Start() noexcept { is_playing_ = true; }
+void Performer::Start() noexcept { is_playing_ = true; }
 
-void Sequencer::Stop() noexcept { is_playing_ = false; }
+void Performer::Stop() noexcept { is_playing_ = false; }
 
-void Sequencer::TriggerAllEventsAtCurrentPosition() noexcept {
+void Performer::TriggerAllEventsAtCurrentPosition() noexcept {
   // Trigger one-off events.
   if (!one_off_callbacks_.empty()) {
     auto it = one_off_callbacks_.begin();
@@ -192,15 +192,15 @@ void Sequencer::TriggerAllEventsAtCurrentPosition() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Sequencer::Update(double duration) noexcept {
+void Performer::Update(double duration) noexcept {
   if (is_playing_) {
     assert(duration >= 0.0 && duration <= GetDurationToNextEvent());
     SetPosition(position_ + duration);
   }
 }
 
-std::map<std::pair<double, Id>, Sequencer::EventCallback>::const_iterator
-Sequencer::GetNextEventCallback() const noexcept {
+std::map<std::pair<double, Id>, Performer::EventCallback>::const_iterator
+Performer::GetNextEventCallback() const noexcept {
   auto it = callbacks_.lower_bound(std::pair{position_, kInvalid});
   if (last_triggered_position_) {
     while (it != callbacks_.end() &&

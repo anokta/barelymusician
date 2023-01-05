@@ -21,7 +21,7 @@ namespace {
 using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::OscillatorType;
-using ::barely::Sequencer;
+using ::barely::Performer;
 using ::barely::SynthInstrument;
 using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
@@ -72,22 +72,22 @@ int main(int /*argc*/, char* /*argv*/[]) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
       });
 
-  Sequencer sequencer = engine.CreateSequencer();
-  sequencer.SetLooping(true);
-  sequencer.SetLoopBeginPosition(3.0);
-  sequencer.SetLoopLength(5.0);
+  Performer performer = engine.CreatePerformer();
+  performer.SetLooping(true);
+  performer.SetLoopBeginPosition(3.0);
+  performer.SetLoopLength(5.0);
 
   const auto play_note_fn = [&](double duration,
-                                double pitch) -> Sequencer::EventCallback {
-    return [&instrument, &sequencer, pitch, duration]() {
+                                double pitch) -> Performer::EventCallback {
+    return [&instrument, &performer, pitch, duration]() {
       instrument.StartNote(pitch, kGain);
-      sequencer.ScheduleOneOffEvent(
-          sequencer.GetPosition() + duration,
+      performer.ScheduleOneOffEvent(
+          performer.GetPosition() + duration,
           [&instrument, pitch]() { instrument.StopNote(pitch); });
     };
   };
 
-  std::vector<std::pair<double, Sequencer::EventCallback>> score;
+  std::vector<std::pair<double, Performer::EventCallback>> score;
   score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
   score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
   score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));
@@ -100,10 +100,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
                      play_note_fn(1.0 / 3.0, barely::kPitchB5));
   score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
 
-  std::unordered_map<int, Sequencer::EventReference> events;
+  std::unordered_map<int, Performer::EventReference> events;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    events.emplace(index++, sequencer.AddEvent(position, callback));
+    events.emplace(index++, performer.AddEvent(position, callback));
   }
 
   // Audio process callback.
@@ -126,12 +126,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
         index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = events.find(index - 1);
-          it != events.end() && sequencer.RemoveEvent(it->second).IsOk()) {
+          it != events.end() && performer.RemoveEvent(it->second).IsOk()) {
         events.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        events.emplace(index - 1, sequencer.AddEvent(position, callback));
+        events.emplace(index - 1, performer.AddEvent(position, callback));
         ConsoleLog() << "Added note " << index;
       }
       return;
@@ -140,27 +140,27 @@ int main(int /*argc*/, char* /*argv*/[]) {
     double tempo = engine.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (sequencer.IsPlaying()) {
-          sequencer.Stop();
+        if (performer.IsPlaying()) {
+          performer.Stop();
           instrument.StopAllNotes();
           ConsoleLog() << "Stopped playback";
         } else {
-          sequencer.Start();
+          performer.Start();
           ConsoleLog() << "Started playback";
         }
         return;
       case 'L':
-        if (sequencer.IsLooping()) {
-          sequencer.SetLooping(false);
+        if (performer.IsLooping()) {
+          performer.SetLooping(false);
           ConsoleLog() << "Loop turned off";
         } else {
-          sequencer.SetLooping(true);
+          performer.SetLooping(true);
           ConsoleLog() << "Loop turned on";
         }
         return;
       case 'P':
         instrument.StopAllNotes();
-        sequencer.SetPosition(0.0);
+        performer.SetPosition(0.0);
         return;
       case '-':
         tempo -= kTempoIncrement;
@@ -182,7 +182,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
-  sequencer.Start();
+  performer.Start();
 
   while (!quit) {
     input_manager.Update();
@@ -192,7 +192,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
-  sequencer.Stop();
+  performer.Stop();
   audio_output.Stop();
 
   return 0;

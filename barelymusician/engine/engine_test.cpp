@@ -6,7 +6,7 @@
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/parameter.h"
-#include "barelymusician/engine/sequencer.h"
+#include "barelymusician/engine/performer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -165,55 +165,55 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
               UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
 }
 
-// Tests that single sequencer is created and destroyed as expected.
-TEST(EngineTest, CreateDestroySingleSequencer) {
-  const Id kSequencerId = 1;
+// Tests that single performer is created and destroyed as expected.
+TEST(EngineTest, CreateDestroySinglePerformer) {
+  const Id kPerformerId = 1;
   const Id kEventId = 2;
   const int kPriority = 0;
 
   Engine engine;
-  EXPECT_THAT(engine.GetSequencer(kSequencerId), IsNull());
+  EXPECT_THAT(engine.GetPerformer(kPerformerId), IsNull());
 
-  // Create sequencer.
-  EXPECT_TRUE(engine.CreateSequencer(kSequencerId, kPriority));
-  auto* sequencer = engine.GetSequencer(kSequencerId);
-  EXPECT_THAT(sequencer, NotNull());
+  // Create performer.
+  EXPECT_TRUE(engine.CreatePerformer(kPerformerId, kPriority));
+  auto* performer = engine.GetPerformer(kPerformerId);
+  EXPECT_THAT(performer, NotNull());
 
   // Add event.
   double event_position = 0.0;
-  EXPECT_TRUE(sequencer->AddEvent(
-      kEventId, 1.0, [&]() { event_position = sequencer->GetPosition(); }));
+  EXPECT_TRUE(performer->AddEvent(
+      kEventId, 1.0, [&]() { event_position = performer->GetPosition(); }));
   EXPECT_DOUBLE_EQ(event_position, 0.0);
 
   // Start playback with one beat per second tempo.
   engine.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
 
-  EXPECT_FALSE(sequencer->IsPlaying());
-  sequencer->Start();
-  EXPECT_TRUE(sequencer->IsPlaying());
+  EXPECT_FALSE(performer->IsPlaying());
+  performer->Start();
+  EXPECT_TRUE(performer->IsPlaying());
 
   // Update timestamp just before the event, which should not be triggered yet.
-  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(), 1.0);
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(), 1.0);
   engine.Update(1.0);
-  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(), 0.0);
-  EXPECT_DOUBLE_EQ(sequencer->GetPosition(), 1.0);
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(), 0.0);
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(event_position, 0.0);
 
   // Update timestamp past the event, which should be triggered now.
-  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(), 0.0);
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(), 0.0);
   engine.Update(1.5);
-  EXPECT_DOUBLE_EQ(sequencer->GetDurationToNextEvent(),
+  EXPECT_DOUBLE_EQ(performer->GetDurationToNextEvent(),
                    std::numeric_limits<double>::max());
-  EXPECT_DOUBLE_EQ(sequencer->GetPosition(), 1.5);
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(event_position, 1.0);
 
-  // Destroy sequencer.
-  EXPECT_TRUE(engine.DestroySequencer(kSequencerId));
-  EXPECT_THAT(engine.GetSequencer(kSequencerId), IsNull());
+  // Destroy performer.
+  EXPECT_TRUE(engine.DestroyPerformer(kPerformerId));
+  EXPECT_THAT(engine.GetPerformer(kPerformerId), IsNull());
 }
 
-// TODO(#108): Add `CreateDestroyMultipleSequencers` using differing priorities.
+// TODO(#108): Add `CreateDestroyMultiplePerformers` using differing priorities.
 
 // Tests that engine returns beats and seconds as expected.
 TEST(EngineTest, GetBeatsSeconds) {

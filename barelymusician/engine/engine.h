@@ -8,12 +8,12 @@
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
-// #include "barelymusician/engine/sequencer.h"
+// #include "barelymusician/engine/performer.h"
 
 namespace barely::internal {
 
 // TODO(#109): Remove after API cleanup.
-class Sequencer;
+class Performer;
 
 /// Musician engine.
 class Engine {
@@ -40,13 +40,13 @@ class Engine {
   bool CreateInstrument(Id instrument_id, Instrument::Definition definition,
                         int frame_rate) noexcept;
 
-  /// Creates new sequencer.
+  /// Creates new performer.
   ///
-  /// @param sequencer_id Sequencer identifier.
-  /// @param priority Sequencer priority.
+  /// @param performer_id Performer identifier.
+  /// @param priority Performer priority.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateSequencer(Id sequencer_id, int priority) noexcept;
+  bool CreatePerformer(Id performer_id, int priority) noexcept;
 
   /// Destroys instrument.
   ///
@@ -55,12 +55,12 @@ class Engine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   bool DestroyInstrument(Id instrument_id) noexcept;
 
-  /// Destroys sequencer.
+  /// Destroys performer.
   ///
-  /// @param sequencer_id Sequencer identifier.
+  /// @param performer_id Performer identifier.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool DestroySequencer(Id sequencer_id) noexcept;
+  bool DestroyPerformer(Id performer_id) noexcept;
 
   /// Returns beats from seconds.
   ///
@@ -74,11 +74,11 @@ class Engine {
   /// @return Pointer to instrument.
   [[nodiscard]] Instrument* GetInstrument(Id instrument_id) noexcept;
 
-  /// Returns sequencer.
+  /// Returns performer.
   ///
-  /// @param sequencer_id Sequencer identifier.
-  /// @return Pointer to sequencer.
-  [[nodiscard]] Sequencer* GetSequencer(Id sequencer_id) noexcept;
+  /// @param performer_id Performer identifier.
+  /// @return Pointer to performer.
+  [[nodiscard]] Performer* GetPerformer(Id performer_id) noexcept;
 
   /// Returns seconds from beats.
   ///
@@ -134,10 +134,10 @@ class Engine {
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
   // TODO(#109): Reenable after API cleanup.
-  // // Map of sequencers by sequencer priority-identifier pairs.
-  // std::map<std::pair<int, Id>, Sequencer> sequencers_;
-  // // Map of sequencer priority-reference pairs by sequencer identifiers.
-  // std::unordered_map<Id, std::pair<int, Sequencer*>> sequencer_refs_;
+  // // Map of performers by performer priority-identifier pairs.
+  // std::map<std::pair<int, Id>, Performer> performers_;
+  // // Map of performer priority-reference pairs by performer identifiers.
+  // std::unordered_map<Id, std::pair<int, Performer*>> performer_refs_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

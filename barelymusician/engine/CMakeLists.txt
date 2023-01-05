@@ -8,7 +8,7 @@ target_link_libraries(
   id
   instrument
   mutable_data
-  sequencer
+  performer
   find_or_null
 )
 
@@ -75,12 +75,12 @@ target_link_libraries(
 )
 
 add_library(
-  sequencer
-  sequencer.cpp
-  sequencer.h
+  performer
+  performer.cpp
+  performer.h
 )
 target_link_libraries(
-  sequencer
+  performer
   id
   find_or_null
 )
@@ -150,12 +150,12 @@ target_link_libraries(
 gtest_discover_tests(parameter_test)
 
 add_library(
-  sequencer_test
-  sequencer_test.cpp
+  performer_test
+  performer_test.cpp
 )
 target_link_libraries(
-  sequencer_test
+  performer_test
   id
-  sequencer
+  performer
   gtest_main
 )

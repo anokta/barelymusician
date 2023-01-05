@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/engine/control.h"
 #include "barelymusician/engine/message_queue.h"
-#include "barelymusician/engine/parameter.h"
 
 namespace barely::internal {
 
@@ -39,11 +39,11 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Returns parameter.
+  /// Returns control.
   ///
-  /// @param index Parameter index.
-  /// @return Pointer to parameter.
-  [[nodiscard]] const Parameter* GetParameter(int index) const noexcept;
+  /// @param index Control index.
+  /// @return Pointer to control.
+  [[nodiscard]] const Control* GetControl(int index) const noexcept;
 
   /// Returns whether note is active or not.
   ///
@@ -61,17 +61,27 @@ class Instrument {
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count, double timestamp) noexcept;
 
-  /// Resets all parameters to default value at timestamp.
+  /// Resets all controls to default value at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void ResetAllParameters(double timestamp) noexcept;
+  void ResetAllControls(double timestamp) noexcept;
 
-  /// Resets parameter to default value at timestamp.
+  /// Resets control to default value at timestamp.
   ///
-  /// @param index Parameter index.
+  /// @param index Control index.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool ResetParameter(int index, double timestamp) noexcept;
+  bool ResetControl(int index, double timestamp) noexcept;
+
+  /// Sets control value at timestamp.
+  ///
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param slope_per_second Control slope in value change per second.
+  /// @param timestamp Timestamp in seconds.
+  /// @return True if successful, false otherwise.
+  bool SetControl(int index, double value, double slope_per_second,
+                  double timestamp) noexcept;
 
   /// Sets data at timestamp.
   ///
@@ -88,16 +98,6 @@ class Instrument {
   ///
   /// @param callback Note on callback.
   void SetNoteOnCallback(NoteOnCallback callback) noexcept;
-
-  /// Sets parameter value at timestamp.
-  ///
-  /// @param index Parameter index.
-  /// @param value Parameter value.
-  /// @param slope Parameter slope in value change per second.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetParameter(int index, double value, double slope,
-                    double timestamp) noexcept;
 
   /// Starts note at timestamp.
   ///
@@ -125,8 +125,8 @@ class Instrument {
   // Returns corresponding seconds for given `frames`.
   double GetSeconds(int frames) const noexcept;
 
-  // Returns corresponding slope per frame for a given `slope`.
-  double GetSlopePerFrame(double slope) const noexcept;
+  // Returns corresponding slope per frame for a given `slope_per_second`.
+  double GetSlopePerFrame(double slope_per_second) const noexcept;
 
   // Note off callback.
   NoteOffCallback note_off_callback_;
@@ -134,8 +134,8 @@ class Instrument {
   // Note on callback.
   NoteOnCallback note_on_callback_;
 
-  // List of parameters.
-  std::vector<Parameter> parameters_;
+  // List of controls.
+  std::vector<Control> controls_;
 
   // List of active note pitches.
   std::unordered_set<double> pitches_;
@@ -146,6 +146,9 @@ class Instrument {
   // Process callback.
   Definition::ProcessCallback process_callback_;
 
+  // Set control callback.
+  Definition::SetControlCallback set_control_callback_;
+
   // Set data callback.
   Definition::SetDataCallback set_data_callback_;
 
@@ -154,9 +157,6 @@ class Instrument {
 
   // Set note on callback.
   Definition::SetNoteOnCallback set_note_on_callback_;
-
-  // Set parameter callback.
-  Definition::SetParameterCallback set_parameter_callback_;
 
   // Sampling rate in hz.
   int frame_rate_;

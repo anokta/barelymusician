@@ -63,13 +63,13 @@ namespace Barely {
         _sample = Sample;
         SetData(GetSampleData());
       }
-      SetParameter(0, RootPitch);
-      SetParameter(1, Loop ? 1.0 : 0.0);
-      SetParameter(2, Attack);
-      SetParameter(3, Decay);
-      SetParameter(4, Sustain);
-      SetParameter(5, Release);
-      SetParameter(6, (double)VoiceCount);
+      SetControl(0, RootPitch);
+      SetControl(1, Loop ? 1.0 : 0.0);
+      SetControl(2, Attack);
+      SetControl(3, Decay);
+      SetControl(4, Sustain);
+      SetControl(5, Release);
+      SetControl(6, (double)VoiceCount);
     }
   }
 }

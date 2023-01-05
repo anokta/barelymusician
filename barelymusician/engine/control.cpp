@@ -1,19 +1,19 @@
-#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/control.h"
 
 #include <algorithm>
 
 namespace barely::internal {
 
-Parameter::Parameter(Definition definition) noexcept
+Control::Control(Definition definition) noexcept
     : definition_(definition), value_(definition_.default_value) {}
 
-const Parameter::Definition& Parameter::GetDefinition() const noexcept {
+const Control::Definition& Control::GetDefinition() const noexcept {
   return definition_;
 }
 
-double Parameter::GetValue() const noexcept { return value_; }
+double Control::GetValue() const noexcept { return value_; }
 
-bool Parameter::ResetValue() noexcept {
+bool Control::ResetValue() noexcept {
   if (value_ != definition_.default_value) {
     value_ = definition_.default_value;
     return true;
@@ -21,7 +21,7 @@ bool Parameter::ResetValue() noexcept {
   return false;
 }
 
-bool Parameter::SetValue(double value) noexcept {
+bool Control::SetValue(double value) noexcept {
   value =
       std::min(std::max(value, definition_.min_value), definition_.max_value);
   if (value_ != value) {

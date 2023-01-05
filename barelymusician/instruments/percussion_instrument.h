@@ -13,8 +13,8 @@
 
 namespace barely {
 
-/// Percussion parameter.
-enum class PercussionParameter : int {
+/// Percussion control.
+enum class PercussionControl : int {
   /// Pad envelope release.
   kRelease = 0,
 };
@@ -28,10 +28,11 @@ class PercussionInstrument : public GenericInstrument {
   /// Implements `GenericInstrument`.
   void Process(double* output_samples, int channel_count,
                int frame_count) noexcept override;
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept override;
   void SetData(const void* data, int size) noexcept override;
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch) noexcept override;
-  void SetParameter(int index, double value, double slope) noexcept override;
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;

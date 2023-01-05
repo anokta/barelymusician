@@ -21,6 +21,44 @@ void SamplerInstrument::Process(double* output_samples, int channel_count,
   }
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void SamplerInstrument::SetControl(int index, double value,
+                                   double /*slope*/) noexcept {
+  switch (static_cast<SamplerControl>(index)) {
+    case SamplerControl::kRootPitch:
+      root_pitch_ = value;
+      break;
+    case SamplerControl::kLoop:
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->generator().SetLoop(static_cast<bool>(value));
+      });
+      break;
+    case SamplerControl::kAttack:
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetAttack(value);
+      });
+      break;
+    case SamplerControl::kDecay:
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetDecay(value);
+      });
+      break;
+    case SamplerControl::kSustain:
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetSustain(value);
+      });
+      break;
+    case SamplerControl::kRelease:
+      voice_.Update([value](SamplerVoice* voice) noexcept {
+        voice->envelope().SetRelease(value);
+      });
+      break;
+    case SamplerControl::kVoiceCount:
+      voice_.Resize(static_cast<int>(value));
+      break;
+  }
+}
+
 void SamplerInstrument::SetData(const void* data, int size) noexcept {
   voice_.Update([sample_rate = sample_rate_, data,
                  size](SamplerVoice* voice) noexcept {
@@ -37,67 +75,29 @@ void SamplerInstrument::SetNoteOn(double pitch) noexcept {
   const double speed = std::pow(2.0, pitch - root_pitch_);
   voice_.Start(pitch, [speed](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
-    // TODO(#75): Use note parameters instead.
+    // TODO(#75): Use note controls instead.
     // voice->set_gain(intensity);
   });
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void SamplerInstrument::SetParameter(int index, double value,
-                                     double /*slope*/) noexcept {
-  switch (static_cast<SamplerParameter>(index)) {
-    case SamplerParameter::kRootPitch:
-      root_pitch_ = value;
-      break;
-    case SamplerParameter::kLoop:
-      voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->generator().SetLoop(static_cast<bool>(value));
-      });
-      break;
-    case SamplerParameter::kAttack:
-      voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetAttack(value);
-      });
-      break;
-    case SamplerParameter::kDecay:
-      voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetDecay(value);
-      });
-      break;
-    case SamplerParameter::kSustain:
-      voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetSustain(value);
-      });
-      break;
-    case SamplerParameter::kRelease:
-      voice_.Update([value](SamplerVoice* voice) noexcept {
-        voice->envelope().SetRelease(value);
-      });
-      break;
-    case SamplerParameter::kVoiceCount:
-      voice_.Resize(static_cast<int>(value));
-      break;
-  }
-}
-
 InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
-  static const std::vector<ParameterDefinition> parameter_definitions = {
+  static const std::vector<ControlDefinition> control_definitions = {
       // Root pitch.
-      ParameterDefinition{0.0},
+      ControlDefinition{0.0},
       // Sample player loop.
-      ParameterDefinition{false},
+      ControlDefinition{false},
       // Attack.
-      ParameterDefinition{0.05, 0.0, 60.0},
+      ControlDefinition{0.05, 0.0, 60.0},
       // Decay.
-      ParameterDefinition{0.0, 0.0, 60.0},
+      ControlDefinition{0.0, 0.0, 60.0},
       // Sustain.
-      ParameterDefinition{1.0, 0.0, 1.0},
+      ControlDefinition{1.0, 0.0, 1.0},
       // Release.
-      ParameterDefinition{0.25, 0.0, 60.0},
+      ControlDefinition{0.25, 0.0, 60.0},
       // Number of voices.
-      ParameterDefinition{8, 1, 64},
+      ControlDefinition{8, 1, 64},
   };
-  return GetInstrumentDefinition<SamplerInstrument>(parameter_definitions);
+  return GetInstrumentDefinition<SamplerInstrument>(control_definitions);
 }
 
 }  // namespace barely

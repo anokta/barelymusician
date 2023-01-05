@@ -101,17 +101,17 @@ namespace Barely {
         }
       }
 
-      /// Returns instrument parameter value.
+      /// Returns instrument control value.
       ///
       /// @param instrument Instrument.
-      /// @param index Parameter index.
-      /// @return Parameter value.
-      public static double Instrument_GetParameter(Instrument instrument, int index) {
-        Status status = BarelyInstrument_GetParameter(Handle, instrument.Id, index, _doublePtr);
+      /// @param index Control index.
+      /// @return Control value.
+      public static double Instrument_GetControl(Instrument instrument, int index) {
+        Status status = BarelyInstrument_GetControl(Handle, instrument.Id, index, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
         } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get instrument parameter " + index + " value for '" +
+          Debug.LogError("Failed to get instrument control " + index + " value for '" +
                          instrument.name + "': " + status);
         }
         return 0.0;
@@ -157,25 +157,25 @@ namespace Barely {
         }
       }
 
-      /// Resets all instrument parameters to default value.
+      /// Resets all instrument controls to default value.
       ///
       /// @param instrument Instrument.
-      public static void Instrument_ResetAllParameters(Instrument instrument) {
-        Status status = BarelyInstrument_ResetAllParameters(Handle, instrument.Id);
+      public static void Instrument_ResetAllControls(Instrument instrument) {
+        Status status = BarelyInstrument_ResetAllControls(Handle, instrument.Id);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset all instrument parameters for '" + instrument.name +
+          Debug.LogError("Failed to reset all instrument controls for '" + instrument.name +
                          "': " + status);
         }
       }
 
-      /// Resets instrument parameter to default value.
+      /// Resets instrument control to default value.
       ///
       /// @param instrument Instrument.
-      /// @param index Parameter index.
-      public static void Instrument_ResetParameter(Instrument instrument, int index) {
-        Status status = BarelyInstrument_ResetParameter(Handle, instrument.Id, index);
+      /// @param index Control index.
+      public static void Instrument_ResetControl(Instrument instrument, int index) {
+        Status status = BarelyInstrument_ResetControl(Handle, instrument.Id, index);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to reset instrument parameter " + index + " for '" +
+          Debug.LogError("Failed to reset instrument control " + index + " for '" +
                          instrument.name + "': " + status);
         }
       }
@@ -192,17 +192,17 @@ namespace Barely {
         }
       }
 
-      /// Sets instrument parameter value.
+      /// Sets instrument control value.
       ///
       /// @param instrument Instrument.
-      /// @param index Parameter index.
-      /// @param value Parameter value.
-      /// @param slope Parameter slope in value change per second.
-      public static void Instrument_SetParameter(Instrument instrument, int index, double value,
-                                                 double slope) {
-        Status status = BarelyInstrument_SetParameter(Handle, instrument.Id, index, value, slope);
+      /// @param index Control index.
+      /// @param value Control value.
+      /// @param slope Control slope in value change per second.
+      public static void Instrument_SetControl(Instrument instrument, int index, double value,
+                                               double slope) {
+        Status status = BarelyInstrument_SetControl(Handle, instrument.Id, index, value, slope);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument parameter " + index + " value to " + value +
+          Debug.LogError("Failed to set instrument control " + index + " value to " + value +
                          " with slope " + slope + " for '" + instrument.name + "': " + status);
         }
       }
@@ -503,9 +503,9 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Destroy")]
       private static extern Status BarelyInstrument_Destroy(IntPtr handle, Int64 instrumentId);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetParameter")]
-      private static extern Status BarelyInstrument_GetParameter(IntPtr handle, Int64 instrumentId,
-                                                                 Int32 index, IntPtr outValue);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_GetControl")]
+      private static extern Status BarelyInstrument_GetControl(IntPtr handle, Int64 instrumentId,
+                                                               Int32 index, IntPtr outValue);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_IsNoteOn")]
       private static extern Status BarelyInstrument_IsNoteOn(IntPtr handle, Int64 instrumentId,
@@ -518,13 +518,13 @@ namespace Barely {
                                                             Int32 outputFrameCount,
                                                             double timestamp);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllParameters")]
-      private static extern Status BarelyInstrument_ResetAllParameters(IntPtr handle,
-                                                                       Int64 instrumentId);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetAllControls")]
+      private static extern Status BarelyInstrument_ResetAllControls(IntPtr handle,
+                                                                     Int64 instrumentId);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetParameter")]
-      private static extern Status BarelyInstrument_ResetParameter(IntPtr handle,
-                                                                   Int64 instrumentId, Int32 index);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_ResetControl")]
+      private static extern Status BarelyInstrument_ResetControl(IntPtr handle, Int64 instrumentId,
+                                                                 Int32 index);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
@@ -540,10 +540,10 @@ namespace Barely {
                                                                            Int64 instrumentId,
                                                                            IntPtr callback);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetParameter")]
-      private static extern Status BarelyInstrument_SetParameter(IntPtr handle, Int64 instrumentId,
-                                                                 Int32 index, double value,
-                                                                 double slope);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControl")]
+      private static extern Status BarelyInstrument_SetControl(IntPtr handle, Int64 instrumentId,
+                                                               Int32 index, double value,
+                                                               double slope);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_StartNote")]
       private static extern Status BarelyInstrument_StartNote(IntPtr handle, Int64 instrumentId,

@@ -22,69 +22,69 @@ void SynthInstrument::Process(double* output_samples, int channel_count,
   }
 }
 
-void SynthInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
-
-void SynthInstrument::SetNoteOn(double pitch) noexcept {
-  voice_.Start(pitch, [pitch](SynthVoice* voice) {
-    voice->generator().SetFrequency(GetFrequency(pitch));
-    // TODO(#75): Use note parameters instead.
-    // voice->set_gain(intensity);
-  });
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetParameter(int index, double value,
-                                   double /*slope*/) noexcept {
-  switch (static_cast<SynthParameter>(index)) {
-    case SynthParameter::kOscillatorType:
+void SynthInstrument::SetControl(int index, double value,
+                                 double /*slope_per_frame*/) noexcept {
+  switch (static_cast<SynthControl>(index)) {
+    case SynthControl::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
             static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
-    case SynthParameter::kAttack:
+    case SynthControl::kAttack:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetAttack(value);
       });
       break;
-    case SynthParameter::kDecay:
+    case SynthControl::kDecay:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetDecay(value);
       });
       break;
-    case SynthParameter::kSustain:
+    case SynthControl::kSustain:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetSustain(value);
       });
       break;
-    case SynthParameter::kRelease:
+    case SynthControl::kRelease:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->envelope().SetRelease(value);
       });
       break;
-    case SynthParameter::kVoiceCount:
+    case SynthControl::kVoiceCount:
       voice_.Resize(static_cast<int>(value));
       break;
   }
 }
 
+void SynthInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
+
+void SynthInstrument::SetNoteOn(double pitch) noexcept {
+  voice_.Start(pitch, [pitch](SynthVoice* voice) {
+    voice->generator().SetFrequency(GetFrequency(pitch));
+    // TODO(#75): Use note controls instead.
+    // voice->set_gain(intensity);
+  });
+}
+
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
-  static const std::vector<ParameterDefinition> parameter_definitions = {
+  static const std::vector<ControlDefinition> control_definitions = {
       // Oscillator type.
-      ParameterDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
-                          static_cast<double>(OscillatorType::kNoise)},
+      ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
+                        static_cast<double>(OscillatorType::kNoise)},
       // Attack.
-      ParameterDefinition{0.05, 0.0, 60.0},
+      ControlDefinition{0.05, 0.0, 60.0},
       // Decay.
-      ParameterDefinition{0.0, 0.0, 60.0},
+      ControlDefinition{0.0, 0.0, 60.0},
       // Sustain.
-      ParameterDefinition{1.0, 0.0, 1.0},
+      ControlDefinition{1.0, 0.0, 1.0},
       // Release.
-      ParameterDefinition{0.25, 0.0, 60.0},
+      ControlDefinition{0.25, 0.0, 60.0},
       // Number of voices.
-      ParameterDefinition{8, 1, 64},
+      ControlDefinition{8, 1, 64},
   };
-  return GetInstrumentDefinition<SynthInstrument>(parameter_definitions);
+  return GetInstrumentDefinition<SynthInstrument>(control_definitions);
 }
 
 }  // namespace barely

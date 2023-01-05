@@ -65,12 +65,12 @@ namespace Barely {
       Id = Musician.Native.InvalidId;
     }
 
-    /// Returns parameter value.
+    /// Returns control value.
     ///
-    /// @param index Parameter index.
-    /// @return Parameter value.
-    public double GetParameter(int index) {
-      return Musician.Native.Instrument_GetParameter(this, index);
+    /// @param index Control index.
+    /// @return Control value.
+    public double GetControl(int index) {
+      return Musician.Native.Instrument_GetControl(this, index);
     }
 
     /// Returns whether note is playing or not.
@@ -81,16 +81,25 @@ namespace Barely {
       return Musician.Native.Instrument_IsNoteOn(this, pitch);
     }
 
-    /// Resets all parameters to default value.
-    public void ResetAllParameters() {
-      Musician.Native.Instrument_ResetAllParameters(this);
+    /// Resets all controls to default value.
+    public void ResetAllControls() {
+      Musician.Native.Instrument_ResetAllControls(this);
     }
 
-    /// Resets parameter to default value.
+    /// Resets control to default value.
     ///
-    /// @param index Parameter index.
-    public void ResetParameter(int index) {
-      Musician.Native.Instrument_ResetParameter(this, index);
+    /// @param index Control index.
+    public void ResetControl(int index) {
+      Musician.Native.Instrument_ResetControl(this, index);
+    }
+
+    /// Sets control value.
+    ///
+    /// @param index Control index.
+    /// @param value Control value.
+    /// @param value Control slope in value change per second.
+    public void SetControl(int index, double value, double slope = 0.0) {
+      Musician.Native.Instrument_SetControl(this, index, value, slope);
     }
 
     /// Sets data.
@@ -98,15 +107,6 @@ namespace Barely {
     /// @param data Data.
     public void SetData(byte[] data) {
       Musician.Native.Instrument_SetData(this, data);
-    }
-
-    /// Sets parameter value.
-    ///
-    /// @param index Parameter index.
-    /// @param value Parameter value.
-    /// @param value Parameter slope in value change per second.
-    public void SetParameter(int index, double value, double slope = 0.0) {
-      Musician.Native.Instrument_SetParameter(this, index, value, slope);
     }
 
     /// Starts playing note.

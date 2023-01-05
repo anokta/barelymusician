@@ -22,8 +22,8 @@ using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::OscillatorType;
 using ::barely::Performer;
+using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -64,9 +64,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument instrument =
       engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
-  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
-  instrument.SetParameter(SynthParameter::kAttack, kAttack);
-  instrument.SetParameter(SynthParameter::kRelease, kRelease);
+  instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthControl::kAttack, kAttack);
+  instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetNoteOnCallback(
       [](double pitch, [[maybe_unused]] double intensity) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";

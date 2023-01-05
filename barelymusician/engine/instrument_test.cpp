@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/control.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -20,8 +20,8 @@ constexpr int kFrameCount = 4;
 
 // Returns test instrument definition that produces constant output per note.
 Instrument::Definition GetTestDefinition() {
-  static const std::vector<Parameter::Definition> parameter_definitions = {
-      Parameter::Definition{15.0, 10.0, 20.0},
+  static const std::vector<Control::Definition> control_definitions = {
+      Control::Definition{15.0, 10.0, 20.0},
   };
   return Instrument::Definition(
       [](void** state, int /*frame_rate*/) {
@@ -33,6 +33,10 @@ Instrument::Definition GetTestDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
+      [](void** state, int index, double value, double /*slope_per_frame*/) {
+        *reinterpret_cast<double*>(*state) =
+            static_cast<double>(index + 1) * value;
+      },
       [](void** /*state*/, const void* /*data*/, int /*size*/) {},
       [](void** state, double /*pitch*/) {
         *reinterpret_cast<double*>(*state) = 0.0;
@@ -40,41 +44,37 @@ Instrument::Definition GetTestDefinition() {
       [](void** state, double pitch) {
         *reinterpret_cast<double*>(*state) = pitch;
       },
-      [](void** state, int index, double value, double /*slope*/) {
-        *reinterpret_cast<double*>(*state) =
-            static_cast<double>(index + 1) * value;
-      },
-      parameter_definitions);
+      control_definitions);
 }
 
-// Tests that instrument returns parameter as expected.
-TEST(InstrumentTest, GetParameter) {
+// Tests that instrument returns control as expected.
+TEST(InstrumentTest, GetControl) {
   Instrument instrument(GetTestDefinition(), kFrameRate);
 
-  const auto* parameter = instrument.GetParameter(0);
-  EXPECT_THAT(parameter, NotNull());
+  const auto* control = instrument.GetControl(0);
+  EXPECT_THAT(control, NotNull());
 
-  const auto& definition = parameter->GetDefinition();
+  const auto& definition = control->GetDefinition();
   EXPECT_DOUBLE_EQ(definition.default_value, 15.0);
   EXPECT_DOUBLE_EQ(definition.min_value, 10.0);
   EXPECT_DOUBLE_EQ(definition.max_value, 20.0);
 
-  EXPECT_DOUBLE_EQ(parameter->GetValue(), 15.0);
+  EXPECT_DOUBLE_EQ(control->GetValue(), 15.0);
 
-  EXPECT_TRUE(instrument.SetParameter(0, 20.0, 0.0, 0.0));
-  EXPECT_DOUBLE_EQ(parameter->GetValue(), 20.0);
+  EXPECT_TRUE(instrument.SetControl(0, 20.0, 0.0, 0.0));
+  EXPECT_DOUBLE_EQ(control->GetValue(), 20.0);
 
-  EXPECT_TRUE(instrument.ResetParameter(0, 0.0));
-  EXPECT_DOUBLE_EQ(parameter->GetValue(), 15.0);
+  EXPECT_TRUE(instrument.ResetControl(0, 0.0));
+  EXPECT_DOUBLE_EQ(control->GetValue(), 15.0);
 
-  EXPECT_TRUE(instrument.SetParameter(0, 50.0, 0.0, 0.0));
-  EXPECT_DOUBLE_EQ(parameter->GetValue(), 20.0);
+  EXPECT_TRUE(instrument.SetControl(0, 50.0, 0.0, 0.0));
+  EXPECT_DOUBLE_EQ(control->GetValue(), 20.0);
 
-  instrument.ResetAllParameters(0.0);
-  EXPECT_DOUBLE_EQ(parameter->GetValue(), 15.0);
+  instrument.ResetAllControls(0.0);
+  EXPECT_DOUBLE_EQ(control->GetValue(), 15.0);
 
-  // Parameter does not exist.
-  EXPECT_THAT(instrument.GetParameter(1), IsNull());
+  // Control does not exist.
+  EXPECT_THAT(instrument.GetControl(1), IsNull());
 }
 
 // Tests that instrument plays a single note as expected.
@@ -87,7 +87,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
-  // Parameter is set to default value.
+  // Control is set to default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp);
   for (int frame = 0; frame < kFrameCount; ++frame) {
@@ -126,7 +126,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   Instrument instrument(GetTestDefinition(), 1);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
-  // Parameter is set to default value.
+  // Control is set to default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
   for (int frame = 0; frame < kFrameCount; ++frame) {

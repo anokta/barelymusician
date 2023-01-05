@@ -1,29 +1,29 @@
-#ifndef BARELYMUSICIAN_ENGINE_PARAMETER_H_
-#define BARELYMUSICIAN_ENGINE_PARAMETER_H_
+#ifndef BARELYMUSICIAN_ENGINE_CONTROL_H_
+#define BARELYMUSICIAN_ENGINE_CONTROL_H_
 
 #include "barelymusician/barelymusician.h"
 
 namespace barely::internal {
 
-/// Class that wraps parameter.
-class Parameter {
+/// Class that wraps control.
+class Control {
  public:
   /// Definition alias.
-  using Definition = barely::ParameterDefinition;
+  using Definition = barely::ControlDefinition;
 
-  /// Constructs new `Parameter`.
+  /// Constructs new `Control`.
   ///
-  /// @param definition Parameter definition.
-  explicit Parameter(Definition definition) noexcept;
+  /// @param definition Control definition.
+  explicit Control(Definition definition) noexcept;
 
   /// Returns definition.
   ///
-  /// @return Parameter definition.
+  /// @return Control definition.
   [[nodiscard]] const Definition& GetDefinition() const noexcept;
 
   /// Returns value.
   ///
-  /// @return Parameter value.
+  /// @return Control value.
   [[nodiscard]] double GetValue() const noexcept;
 
   /// Resets value.
@@ -33,7 +33,7 @@ class Parameter {
 
   /// Sets value.
   ///
-  /// @param value Parameter value.
+  /// @param value Control value.
   /// @return True if successful, false otherwise.
   bool SetValue(double value) noexcept;
 
@@ -47,4 +47,4 @@ class Parameter {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_PARAMETER_H_
+#endif  // BARELYMUSICIAN_ENGINE_CONTROL_H_

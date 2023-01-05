@@ -1,4 +1,14 @@
 add_library(
+  control
+  control.cpp
+  control.h
+)
+target_link_libraries(
+  control
+  include
+)
+
+add_library(
   engine
   engine.cpp
   engine.h
@@ -28,9 +38,9 @@ add_library(
 )
 target_link_libraries(
   instrument
+  control
   message
   message_queue
-  parameter
   include
 )
 
@@ -55,16 +65,6 @@ add_library(
 )
 
 add_library(
-  parameter
-  parameter.cpp
-  parameter.h
-)
-target_link_libraries(
-  parameter
-  include
-)
-
-add_library(
   performer
   performer.cpp
   performer.h
@@ -86,15 +86,26 @@ target_link_libraries(
 )
 
 add_executable(
+  control_test
+  control_test.cpp
+)
+target_link_libraries(
+  control_test
+  control
+  gtest_main
+)
+gtest_discover_tests(control_test)
+
+add_executable(
   engine_test
   engine_test.cpp
 )
 target_link_libraries(
   engine_test
+  control
   engine
   id
   instrument
-  parameter
   gmock
   gtest_main
 )
@@ -106,8 +117,8 @@ add_executable(
 )
 target_link_libraries(
   instrument_test
+  control
   instrument
-  parameter
   gmock
   gtest_main
 )
@@ -138,17 +149,6 @@ target_link_libraries(
 )
 gtest_discover_tests(mutable_data_test)
 
-add_executable(
-  parameter_test
-  parameter_test.cpp
-)
-target_link_libraries(
-  parameter_test
-  parameter
-  gtest_main
-)
-gtest_discover_tests(parameter_test)
-
 add_library(
   performer_test
   performer_test.cpp
@@ -159,3 +159,4 @@ target_link_libraries(
   performer
   gtest_main
 )
+gtest_discover_tests(performer_test)

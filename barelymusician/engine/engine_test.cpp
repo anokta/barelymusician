@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <vector>
 
+#include "barelymusician/engine/control.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/parameter.h"
 #include "barelymusician/engine/performer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -26,8 +26,8 @@ constexpr int kFrameCount = 8;
 
 // Returns test instrument definition that produces constant output that is set.
 Instrument::Definition GetTestInstrumentDefinition() {
-  static const std::vector<Parameter::Definition> parameter_definitions = {
-      Parameter::Definition{0.0, -10.0, 10.0},
+  static const std::vector<Control::Definition> control_definitions = {
+      Control::Definition{0.0, -10.0, 10.0},
   };
   return Instrument::Definition(
       [](void** state, int /*frame_rate*/) {
@@ -39,6 +39,10 @@ Instrument::Definition GetTestInstrumentDefinition() {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
+      [](void** state, int index, double value, double /*slope_per_frame*/) {
+        *reinterpret_cast<double*>(*state) =
+            static_cast<double>(index + 1) * value;
+      },
       [](void** /*state*/, const void* /*data*/, int /*size*/) {},
       [](void** state, double /*pitch*/) {
         *reinterpret_cast<double*>(*state) = 0.0;
@@ -46,11 +50,7 @@ Instrument::Definition GetTestInstrumentDefinition() {
       [](void** state, double pitch, double intensity) {
         *reinterpret_cast<double*>(*state) = pitch * intensity;
       },
-      [](void** state, int index, double value, double /*slope*/) {
-        *reinterpret_cast<double*>(*state) =
-            static_cast<double>(index + 1) * value;
-      },
-      parameter_definitions);
+      control_definitions);
 }
 
 // Tests that single instrument is created and destroyed as expected.

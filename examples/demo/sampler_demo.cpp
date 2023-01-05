@@ -20,8 +20,8 @@ namespace {
 using ::barely::GainProcessor;
 using ::barely::Instrument;
 using ::barely::Musician;
+using ::barely::SamplerControl;
 using ::barely::SamplerInstrument;
-using ::barely::SamplerParameter;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -76,11 +76,11 @@ int main(int /*argc*/, char* argv[]) {
 
   Instrument instrument =
       musician.CreateInstrument(SamplerInstrument::GetDefinition(), kFrameRate);
-  instrument.SetParameter(SamplerParameter::kRootPitch, kRootPitch);
-  instrument.SetParameter(SamplerParameter::kLoop, kLoop);
-  instrument.SetParameter(SamplerParameter::kAttack, kAttack);
-  instrument.SetParameter(SamplerParameter::kRelease, kRelease);
-  instrument.SetParameter(SamplerParameter::kVoiceCount, kVoiceCount);
+  instrument.SetControl(SamplerControl::kRootPitch, kRootPitch);
+  instrument.SetControl(SamplerControl::kLoop, kLoop);
+  instrument.SetControl(SamplerControl::kAttack, kAttack);
+  instrument.SetControl(SamplerControl::kRelease, kRelease);
+  instrument.SetControl(SamplerControl::kVoiceCount, kVoiceCount);
   instrument.SetData(
       sample_file.GetData().data(),
       static_cast<int>(sample_file.GetData().size() * sizeof(double)));

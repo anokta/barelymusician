@@ -9,8 +9,8 @@
 
 namespace barely {
 
-/// Synth parameter.
-enum class SynthParameter : int {
+/// Synth control.
+enum class SynthControl : int {
   /// Oscillator type.
   kOscillatorType = 0,
   /// Envelope attack.
@@ -34,11 +34,12 @@ class SynthInstrument : public GenericInstrument {
   /// Implements `GenericInstrument`.
   void Process(double* output_samples, int channel_count,
                int frame_count) noexcept override;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept override;
   void SetData(const void* /*data*/, int /*size*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch) noexcept override;
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetParameter(int index, double value, double slope) noexcept override;
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;

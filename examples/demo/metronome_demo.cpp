@@ -17,8 +17,8 @@ using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::OscillatorType;
+using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -60,10 +60,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   // Create metronome instrument.
   Instrument instrument =
       engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
-  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
-  instrument.SetParameter(SynthParameter::kAttack, kAttack);
-  instrument.SetParameter(SynthParameter::kRelease, kRelease);
-  instrument.SetParameter(SynthParameter::kVoiceCount, kVoiceCount);
+  instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthControl::kAttack, kAttack);
+  instrument.SetControl(SynthControl::kRelease, kRelease);
+  instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
   // Add beat event.
   Metronome metronome(engine);

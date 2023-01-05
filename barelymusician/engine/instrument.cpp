@@ -12,24 +12,22 @@ namespace barely::internal {
 Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
+      set_control_callback_(definition.set_control_callback),
       set_data_callback_(definition.set_data_callback),
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
-      set_parameter_callback_(definition.set_parameter_callback),
       frame_rate_(frame_rate) {
   assert(frame_rate >= 0);
-  parameters_.reserve(definition.parameter_definition_count);
-  for (int index = 0; index < definition.parameter_definition_count; ++index) {
-    parameters_.emplace_back(definition.parameter_definitions[index]);
+  controls_.reserve(definition.control_definition_count);
+  for (int index = 0; index < definition.control_definition_count; ++index) {
+    controls_.emplace_back(definition.control_definitions[index]);
   }
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
-  if (set_parameter_callback_) {
-    for (int index = 0; index < definition.parameter_definition_count;
-         ++index) {
-      set_parameter_callback_(&state_, index, parameters_[index].GetValue(),
-                              0.0);
+  if (set_control_callback_) {
+    for (int index = 0; index < definition.control_definition_count; ++index) {
+      set_control_callback_(&state_, index, controls_[index].GetValue(), 0.0);
     }
   }
 }
@@ -40,10 +38,10 @@ Instrument::~Instrument() noexcept {
   }
 }
 
-const Parameter* Instrument::GetParameter(int index) const noexcept {
+const Control* Instrument::GetControl(int index) const noexcept {
   assert(index >= 0);
-  if (index < static_cast<int>(parameters_.size())) {
-    return &parameters_[index];
+  if (index < static_cast<int>(controls_.size())) {
+    return &controls_[index];
   }
   return nullptr;
 }
@@ -74,6 +72,14 @@ void Instrument::Process(double* output_samples, int output_channel_count,
       frame = message_frame;
     }
     std::visit(MessageVisitor{
+                   [this](ControlMessage& control_message) noexcept {
+                     if (set_control_callback_) {
+                       set_control_callback_(
+                           &state_, control_message.index,
+                           control_message.value,
+                           GetSlopePerFrame(control_message.slope_per_second));
+                     }
+                   },
                    [this](DataMessage& data_message) noexcept {
                      if (set_data_callback_) {
                        data_.swap(data_message.data);
@@ -90,14 +96,6 @@ void Instrument::Process(double* output_samples, int output_channel_count,
                      if (set_note_on_callback_) {
                        set_note_on_callback_(&state_, note_on_message.pitch);
                      }
-                   },
-                   [this](ParameterMessage& parameter_message) noexcept {
-                     if (set_parameter_callback_) {
-                       set_parameter_callback_(
-                           &state_, parameter_message.index,
-                           parameter_message.value,
-                           GetSlopePerFrame(parameter_message.slope));
-                     }
                    }},
                message->second);
   }
@@ -108,25 +106,38 @@ void Instrument::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void Instrument::ResetAllParameters(double timestamp) noexcept {
+void Instrument::ResetAllControls(double timestamp) noexcept {
   assert(timestamp >= 0.0);
-  for (int index = 0; index < static_cast<int>(parameters_.size()); ++index) {
-    if (parameters_[index].ResetValue()) {
+  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+    if (controls_[index].ResetValue()) {
       message_queue_.Add(
-          timestamp,
-          ParameterMessage{index, parameters_[index].GetValue(), 0.0});
+          timestamp, ControlMessage{index, controls_[index].GetValue(), 0.0});
     }
   }
 }
 
-bool Instrument::ResetParameter(int index, double timestamp) noexcept {
+bool Instrument::ResetControl(int index, double timestamp) noexcept {
   assert(index >= 0);
   assert(timestamp >= 0.0);
-  if (index < static_cast<int>(parameters_.size())) {
-    if (parameters_[index].ResetValue()) {
+  if (index < static_cast<int>(controls_.size())) {
+    if (controls_[index].ResetValue()) {
+      message_queue_.Add(
+          timestamp, ControlMessage{index, controls_[index].GetValue(), 0.0});
+    }
+    return true;
+  }
+  return false;
+}
+
+bool Instrument::SetControl(int index, double value, double slope_per_second,
+                            double timestamp) noexcept {
+  assert(index >= 0);
+  assert(timestamp >= 0.0);
+  if (index < static_cast<int>(controls_.size())) {
+    if (controls_[index].SetValue(value)) {
       message_queue_.Add(
           timestamp,
-          ParameterMessage{index, parameters_[index].GetValue(), 0.0});
+          ControlMessage{index, controls_[index].GetValue(), slope_per_second});
     }
     return true;
   }
@@ -145,21 +156,6 @@ void Instrument::SetNoteOffCallback(NoteOffCallback callback) noexcept {
 
 void Instrument::SetNoteOnCallback(NoteOnCallback callback) noexcept {
   note_on_callback_ = std::move(callback);
-}
-
-bool Instrument::SetParameter(int index, double value, double slope,
-                              double timestamp) noexcept {
-  assert(index >= 0);
-  assert(timestamp >= 0.0);
-  if (index < static_cast<int>(parameters_.size())) {
-    if (parameters_[index].SetValue(value)) {
-      message_queue_.Add(
-          timestamp,
-          ParameterMessage{index, parameters_[index].GetValue(), slope});
-    }
-    return true;
-  }
-  return false;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -206,8 +202,9 @@ double Instrument::GetSeconds(int frames) const noexcept {
              : 0.0;
 }
 
-double Instrument::GetSlopePerFrame(double slope) const noexcept {
-  return frame_rate_ > 0 ? slope / static_cast<double>(frame_rate_) : 0.0;
+double Instrument::GetSlopePerFrame(double slope_per_second) const noexcept {
+  return frame_rate_ > 0 ? slope_per_second / static_cast<double>(frame_rate_)
+                         : 0.0;
 }
 
 }  // namespace barely::internal

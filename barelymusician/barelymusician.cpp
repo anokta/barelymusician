@@ -186,17 +186,17 @@ BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_GetParameter(BarelyMusicianHandle handle,
-                                           BarelyId instrument_id,
-                                           int32_t index, double* out_value) {
+BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
+                                         BarelyId instrument_id, int32_t index,
+                                         double* out_value) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (index < 0) return BarelyStatus_kInvalidArgument;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
   if (const auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    if (const auto* parameter = instrument->GetParameter(index)) {
-      *out_value = parameter->GetValue();
+    if (const auto* control = instrument->GetControl(index)) {
+      *out_value = control->GetValue();
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kInvalidArgument;
@@ -239,27 +239,44 @@ BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_ResetAllParameters(BarelyMusicianHandle handle,
-                                                 BarelyId instrument_id) {
+BarelyStatus BarelyInstrument_ResetAllControls(BarelyMusicianHandle handle,
+                                               BarelyId instrument_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    instrument->ResetAllParameters(handle->engine.GetTimestamp());
+    instrument->ResetAllControls(handle->engine.GetTimestamp());
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_ResetParameter(BarelyMusicianHandle handle,
-                                             BarelyId instrument_id,
-                                             int32_t index) {
+BarelyStatus BarelyInstrument_ResetControl(BarelyMusicianHandle handle,
+                                           BarelyId instrument_id,
+                                           int32_t index) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (index < 0) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    if (instrument->ResetParameter(index, handle->engine.GetTimestamp())) {
+    if (instrument->ResetControl(index, handle->engine.GetTimestamp())) {
+      return BarelyStatus_kOk;
+    }
+    return BarelyStatus_kInvalidArgument;
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyInstrument_SetControl(BarelyMusicianHandle handle,
+                                         BarelyId instrument_id, int32_t index,
+                                         double value, double slope) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (index < 0) return BarelyStatus_kInvalidArgument;
+
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    if (instrument->SetControl(index, value, slope,
+                               handle->engine.GetTimestamp())) {
       return BarelyStatus_kOk;
     }
     return BarelyStatus_kInvalidArgument;
@@ -315,24 +332,6 @@ BarelyStatus BarelyInstrument_SetNoteOnCallback(
       instrument->SetNoteOnCallback(nullptr);
     }
     return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kNotFound;
-}
-
-BarelyStatus BarelyInstrument_SetParameter(BarelyMusicianHandle handle,
-                                           BarelyId instrument_id,
-                                           int32_t index, double value,
-                                           double slope) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (index < 0) return BarelyStatus_kInvalidArgument;
-
-  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    if (instrument->SetParameter(index, value, slope,
-                                 handle->engine.GetTimestamp())) {
-      return BarelyStatus_kOk;
-    }
-    return BarelyStatus_kInvalidArgument;
   }
   return BarelyStatus_kNotFound;
 }

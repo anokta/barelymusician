@@ -19,8 +19,8 @@ using ::barely::GainProcessor;
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -66,10 +66,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
-  instrument.SetParameter(SynthParameter::kOscillatorType, kOscillatorType);
-  instrument.SetParameter(SynthParameter::kAttack, kAttack);
-  instrument.SetParameter(SynthParameter::kRelease, kRelease);
-  instrument.SetParameter(SynthParameter::kVoiceCount, kVoiceCount);
+  instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
+  instrument.SetControl(SynthControl::kAttack, kAttack);
+  instrument.SetControl(SynthControl::kRelease, kRelease);
+  instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
   instrument.SetNoteOnCallback(
       [](double pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });

@@ -7,6 +7,18 @@
 
 namespace barely::internal {
 
+/// Control message.
+struct ControlMessage {
+  /// Index.
+  int index;
+
+  /// Value.
+  double value;
+
+  /// Slope in value change per second.
+  double slope_per_second;
+};
+
 /// Data message.
 struct DataMessage {
   /// Data.
@@ -25,21 +37,9 @@ struct NoteOnMessage {
   double pitch;
 };
 
-/// Parameter message.
-struct ParameterMessage {
-  /// Index.
-  int index;
-
-  /// Value.
-  double value;
-
-  /// Slope in value change per second.
-  double slope;
-};
-
 /// Message alias.
 using Message =
-    std::variant<DataMessage, NoteOffMessage, NoteOnMessage, ParameterMessage>;
+    std::variant<DataMessage, NoteOffMessage, NoteOnMessage, ControlMessage>;
 
 // Message visitor.
 template <class... MessageTypes>

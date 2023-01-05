@@ -36,8 +36,8 @@ using ::barely::OscillatorType;
 using ::barely::PercussionInstrument;
 using ::barely::Random;
 using ::barely::Sequencer;
+using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -217,9 +217,9 @@ int main(int /*argc*/, char* argv[]) {
         engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate));
     auto& instrument = instruments.back();
     gains.push_back(gain);
-    instrument.SetParameter(SynthParameter::kOscillatorType, type);
-    instrument.SetParameter(SynthParameter::kAttack, attack);
-    instrument.SetParameter(SynthParameter::kRelease, release);
+    instrument.SetControl(SynthControl::kOscillatorType, type);
+    instrument.SetControl(SynthControl::kAttack, attack);
+    instrument.SetControl(SynthControl::kRelease, release);
     set_note_callbacks_fn(instruments.size(), &instrument);
   };
 

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/control.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
 namespace barely {
@@ -23,6 +23,17 @@ void PercussionInstrument::Process(double* output_samples, int channel_count,
     for (int channel = 0; channel < channel_count; ++channel) {
       output_samples[channel_count * frame + channel] = mono_sample;
     }
+  }
+}
+
+void PercussionInstrument::SetControl(int index, double value,
+                                      double /*slope_per_frame*/) noexcept {
+  switch (static_cast<PercussionControl>(index)) {
+    case PercussionControl::kRelease:
+      for (auto& pad : pads_) {
+        pad.voice.envelope().SetRelease(static_cast<double>(value));
+      }
+      break;
   }
 }
 
@@ -59,7 +70,7 @@ void PercussionInstrument::SetNoteOff(double pitch) noexcept {
 void PercussionInstrument::SetNoteOn(double pitch) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
-      // TODO(#75): Use note parameters instead.
+      // TODO(#75): Use note controls instead.
       // pad.voice.set_gain(intensity);
       pad.voice.Start();
       break;
@@ -67,23 +78,12 @@ void PercussionInstrument::SetNoteOn(double pitch) noexcept {
   }
 }
 
-void PercussionInstrument::SetParameter(int index, double value,
-                                        double /*slope*/) noexcept {
-  switch (static_cast<PercussionParameter>(index)) {
-    case PercussionParameter::kRelease:
-      for (auto& pad : pads_) {
-        pad.voice.envelope().SetRelease(static_cast<double>(value));
-      }
-      break;
-  }
-}
-
 InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
-  static const std::vector<ParameterDefinition> parameter_definitions = {
+  static const std::vector<ControlDefinition> control_definitions = {
       // Pad release.
-      ParameterDefinition{0.1, 0.0, 60.0},
+      ControlDefinition{0.1, 0.0, 60.0},
   };
-  return GetInstrumentDefinition<PercussionInstrument>(parameter_definitions);
+  return GetInstrumentDefinition<PercussionInstrument>(control_definitions);
 }
 
 }  // namespace barely

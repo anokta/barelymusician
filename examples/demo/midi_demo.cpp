@@ -22,8 +22,8 @@ using ::barely::Engine;
 using ::barely::Instrument;
 using ::barely::OscillatorType;
 using ::barely::Performer;
+using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::SynthParameter;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -141,12 +141,11 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                    << MidiKeyNumberFromPitch(pitch) << ") ";
     });
-    instrument.SetParameter(SynthParameter::kOscillatorType,
-                            kInstrumentOscillatorType);
-    instrument.SetParameter(SynthParameter::kAttack, kInstrumentEnvelopeAttack);
-    instrument.SetParameter(SynthParameter::kRelease,
-                            kInstrumentEnvelopeRelease);
-    instrument.SetParameter(SynthParameter::kVoiceCount, kInstrumentVoiceCount);
+    instrument.SetControl(SynthControl::kOscillatorType,
+                          kInstrumentOscillatorType);
+    instrument.SetControl(SynthControl::kAttack, kInstrumentEnvelopeAttack);
+    instrument.SetControl(SynthControl::kRelease, kInstrumentEnvelopeRelease);
+    instrument.SetControl(SynthControl::kVoiceCount, kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 

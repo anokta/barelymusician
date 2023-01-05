@@ -3,6 +3,15 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//barelymusician:__subpackages__"])
 
 cc_library(
+    name = "control",
+    srcs = ["control.cpp"],
+    hdrs = ["control.h"],
+    deps = [
+        "//barelymusician:include",
+    ],
+)
+
+cc_library(
     name = "engine",
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
@@ -29,9 +38,9 @@ cc_library(
     srcs = ["instrument.cpp"],
     hdrs = ["instrument.h"],
     deps = [
+        ":control",
         ":message",
         ":message_queue",
-        ":parameter",
         "//barelymusician:include",
     ],
 )
@@ -55,15 +64,6 @@ cc_library(
     hdrs = ["mutable_data.h"],
 )
 
-cc_library(
-    name = "parameter",
-    srcs = ["parameter.cpp"],
-    hdrs = ["parameter.h"],
-    deps = [
-        "//barelymusician:include",
-    ],
-)
-
 # TODO(#109): Reenable after API cleanup.
 # cc_library(
 #     name = "performer",
@@ -85,15 +85,24 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "control_test",
+    srcs = ["control_test.cpp"],
+    deps = [
+        ":control",
+        "@googletest//:gtest_main",
+    ],
+)
+
 # TODO(#109): Reenable after API cleanup.
 # cc_test(
 #     name = "engine_test",
 #     srcs = ["engine_test.cpp"],
 #     deps = [
+#         ":control",
 #         ":engine",
 #         ":id",
 #         ":instrument",
-#         ":parameter",
 #         "@googletest//:gtest_main",
 #     ],
 # )
@@ -102,8 +111,8 @@ cc_test(
     name = "instrument_test",
     srcs = ["instrument_test.cpp"],
     deps = [
+        ":control",
         ":instrument",
-        ":parameter",
         "@googletest//:gtest_main",
     ],
 )
@@ -123,15 +132,6 @@ cc_test(
     srcs = ["mutable_data_test.cpp"],
     deps = [
         ":mutable_data",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "parameter_test",
-    srcs = ["parameter_test.cpp"],
-    deps = [
-        ":parameter",
         "@googletest//:gtest_main",
     ],
 )

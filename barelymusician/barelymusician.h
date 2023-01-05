@@ -94,6 +94,15 @@ typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
     void** state, double* output_samples, int32_t output_channel_count,
     int32_t output_frame_count);
 
+/// Instrument definition set control callback signature.
+///
+/// @param state Pointer to instrument state.
+/// @param index Control index.
+/// @param value Control value.
+/// @param slope_per_frame Control slope in value change per frame.
+typedef void (*BarelyInstrumentDefinition_SetControlCallback)(
+    void** state, int32_t index, double value, double slope_per_frame);
+
 /// Instrument definition set data callback signature.
 ///
 /// @param state Pointer to instrument state.
@@ -117,17 +126,6 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
                                                              double pitch);
 
-/// Instrument definition set parameter callback signature.
-///
-/// @param state Pointer to instrument state.
-/// @param index Parameter index.
-/// @param value Parameter value.
-/// @param slope Parameter slope in value change per frame.
-typedef void (*BarelyInstrumentDefinition_SetParameterCallback)(void** state,
-                                                                int32_t index,
-                                                                double value,
-                                                                double slope);
-
 /// Task definition create callback signature.
 ///
 /// @param state Pointer to task state.
@@ -145,8 +143,8 @@ typedef void (*BarelyTaskDefinition_DestroyCallback)(void** state);
 /// @param state Pointer to task state.
 typedef void (*BarelyTaskDefinition_ProcessCallback)(void** state);
 
-/// Parameter definition.
-typedef struct BarelyParameterDefinition {
+/// Control definition.
+typedef struct BarelyControlDefinition {
   /// Default value.
   double default_value;
 
@@ -155,7 +153,7 @@ typedef struct BarelyParameterDefinition {
 
   /// Maximum value.
   double max_value;
-} BarelyParameterDefinition;
+} BarelyControlDefinition;
 
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
@@ -168,6 +166,9 @@ typedef struct BarelyInstrumentDefinition {
   /// Process callback.
   BarelyInstrumentDefinition_ProcessCallback process_callback;
 
+  /// Set control callback.
+  BarelyInstrumentDefinition_SetControlCallback set_control_callback;
+
   /// Set data callback.
   BarelyInstrumentDefinition_SetDataCallback set_data_callback;
 
@@ -177,14 +178,11 @@ typedef struct BarelyInstrumentDefinition {
   /// Set note on callback.
   BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback;
 
-  /// Set parameter callback.
-  BarelyInstrumentDefinition_SetParameterCallback set_parameter_callback;
+  /// List of control definitions.
+  const BarelyControlDefinition* control_definitions;
 
-  /// List of parameter definitions.
-  const BarelyParameterDefinition* parameter_definitions;
-
-  /// Number of parameter definitions.
-  int32_t parameter_definition_count;
+  /// Number of control definitions.
+  int32_t control_definition_count;
 } BarelyInstrumentDefinition;
 
 /// Task definition.
@@ -263,16 +261,16 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
 BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
                                                     BarelyId instrument_id);
 
-/// Gets instrument parameter value.
+/// Gets instrument control value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param index Parameter index.
-/// @param out_value Output parameter value.
+/// @param index Control index.
+/// @param out_value Output control value.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_GetParameter(
-    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
-    double* out_value);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_GetControl(BarelyMusicianHandle handle, BarelyId instrument_id,
+                            int32_t index, double* out_value);
 
 /// Gets whether instrument note is playing or not.
 ///
@@ -298,22 +296,34 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
     BarelyMusicianHandle handle, BarelyId instrument_id, double* output_samples,
     int32_t output_channel_count, int32_t output_frame_count, double timestamp);
 
-/// Resets all instrument parameters to default value.
+/// Resets all instrument controls to default value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllParameters(
+BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllControls(
     BarelyMusicianHandle handle, BarelyId instrument_id);
 
-/// Resets instrument parameter to default value.
+/// Resets instrument control to default value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param index Parameter index.
+/// @param index Control index.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_ResetParameter(
+BARELY_EXPORT BarelyStatus BarelyInstrument_ResetControl(
     BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index);
+
+/// Sets instrument control value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param index Control index.
+/// @param value Control value.
+/// @param slope_per_beat Control slope in value change per beat.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_SetControl(BarelyMusicianHandle handle, BarelyId instrument_id,
+                            int32_t index, double value, double slope_per_beat);
 
 /// Sets instrument data.
 ///
@@ -348,18 +358,6 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
     BarelyInstrument_NoteOnCallback callback, void* user_data);
-
-/// Sets instrument parameter value.
-///
-/// @param handle Musician handle.
-/// @param instrument_id Instrument identifier.
-/// @param index Parameter index.
-/// @param value Parameter value.
-/// @param slope Parameter slope in value change per second.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetParameter(
-    BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index,
-    double value, double slope);
 
 /// Starts instrument note.
 ///
@@ -728,44 +726,44 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
-/// Parameter definition.
-struct ParameterDefinition : public BarelyParameterDefinition {
-  /// Constructs new `ParameterDefinition`.
+/// Control definition.
+struct ControlDefinition : public BarelyControlDefinition {
+  /// Constructs new `ControlDefinition`.
   ///
   /// @param default_value Default value.
   /// @param min_value Minimum value.
   /// @param max_value Maximum value.
-  explicit ParameterDefinition(
+  explicit ControlDefinition(
       double default_value,
       double min_value = std::numeric_limits<double>::lowest(),
       double max_value = std::numeric_limits<double>::max())
-      : ParameterDefinition(
-            BarelyParameterDefinition{default_value, min_value, max_value}) {}
+      : ControlDefinition(
+            BarelyControlDefinition{default_value, min_value, max_value}) {}
 
-  /// Constructs new `ParameterDefinition` for a boolean value.
+  /// Constructs new `ControlDefinition` for a boolean value.
   ///
   /// @param default_value Default boolean value.
-  explicit ParameterDefinition(bool default_value)
-      : ParameterDefinition(static_cast<double>(default_value)) {}
+  explicit ControlDefinition(bool default_value)
+      : ControlDefinition(static_cast<double>(default_value)) {}
 
-  /// Constructs new `ParameterDefinition` for an integer value.
+  /// Constructs new `ControlDefinition` for an integer value.
   ///
   /// @param default_value Default integer value.
   /// @param min_value Minimum integer value.
   /// @param max_value Maximum integer value.
-  explicit ParameterDefinition(
-      int default_value, int min_value = std::numeric_limits<int>::lowest(),
-      int max_value = std::numeric_limits<int>::max())
-      : ParameterDefinition(static_cast<double>(default_value),
-                            static_cast<double>(min_value),
-                            static_cast<double>(max_value)) {}
+  explicit ControlDefinition(int default_value,
+                             int min_value = std::numeric_limits<int>::lowest(),
+                             int max_value = std::numeric_limits<int>::max())
+      : ControlDefinition(static_cast<double>(default_value),
+                          static_cast<double>(min_value),
+                          static_cast<double>(max_value)) {}
 
-  /// Constructs new `ParameterDefinition` from internal type.
+  /// Constructs new `ControlDefinition` from internal type.
   ///
-  /// @param definition Internal parameter definition.
+  /// @param definition Internal control definition.
   // NOLINTNEXTLINE(google-explicit-constructor)
-  ParameterDefinition(BarelyParameterDefinition definition)
-      : BarelyParameterDefinition{definition} {
+  ControlDefinition(BarelyControlDefinition definition)
+      : BarelyControlDefinition{definition} {
     assert(default_value >= min_value && default_value <= max_value);
   }
 };
@@ -781,6 +779,9 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Process callback signature.
   using ProcessCallback = BarelyInstrumentDefinition_ProcessCallback;
 
+  /// Set control callback signature.
+  using SetControlCallback = BarelyInstrumentDefinition_SetControlCallback;
+
   /// Set data callback signature.
   using SetDataCallback = BarelyInstrumentDefinition_SetDataCallback;
 
@@ -790,31 +791,28 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Set note on callback signature.
   using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
 
-  /// Set parameter callback signature.
-  using SetParameterCallback = BarelyInstrumentDefinition_SetParameterCallback;
-
   /// Constructs new `InstrumentDefinition`.
   ///
   /// @param create_callback Create callback.
   /// @param destroy_callback Destroy callback.
   /// @param process_callback Process callback.
+  /// @param set_control_callback Set control callback.
   /// @param set_data_callback Set data callback.
   /// @param set_note_off_callback Set note off callback.
   /// @param set_note_on_callback Set note on callback.
-  /// @param set_parameter_callback Set parameter callback.
-  /// @param parameter_definitions List of parameter definitions.
+  /// @param control_definitions List of control definitions.
   explicit InstrumentDefinition(
       CreateCallback create_callback, DestroyCallback destroy_callback,
-      ProcessCallback process_callback, SetDataCallback set_data_callback,
+      ProcessCallback process_callback, SetControlCallback set_control_callback,
+      SetDataCallback set_data_callback,
       SetNoteOffCallback set_note_off_callback,
       SetNoteOnCallback set_note_on_callback,
-      SetParameterCallback set_parameter_callback = nullptr,
-      std::span<const ParameterDefinition> parameter_definitions = {})
-      : InstrumentDefinition(
-            {create_callback, destroy_callback, process_callback,
-             set_data_callback, set_note_off_callback, set_note_on_callback,
-             set_parameter_callback, parameter_definitions.data(),
-             static_cast<int>(parameter_definitions.size())}) {}
+      std::span<const ControlDefinition> control_definitions)
+      : InstrumentDefinition({create_callback, destroy_callback,
+                              process_callback, set_control_callback,
+                              set_data_callback, set_note_off_callback,
+                              set_note_on_callback, control_definitions.data(),
+                              static_cast<int>(control_definitions.size())}) {}
 
   /// Constructs new `InstrumentDefinition` from internal type.
   ///
@@ -822,8 +820,8 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   InstrumentDefinition(BarelyInstrumentDefinition definition)
       : BarelyInstrumentDefinition{definition} {
-    assert(parameter_definitions || parameter_definition_count == 0);
-    assert(parameter_definition_count >= 0);
+    assert(control_definitions || control_definition_count == 0);
+    assert(control_definition_count >= 0);
   }
 };
 
@@ -916,17 +914,17 @@ class Instrument {
     return *this;
   }
 
-  /// Returns parameter value.
+  /// Returns control value.
   ///
-  /// @param index Parameter index.
-  /// @return Parameter value, or error status.
+  /// @param index Control index.
+  /// @return Control value, or error status.
   template <typename IndexType, typename ValueType>
-  [[nodiscard]] StatusOr<ValueType> GetParameter(IndexType index) const {
+  [[nodiscard]] StatusOr<ValueType> GetControl(IndexType index) const {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
     double value = 0.0;
-    if (const Status status = BarelyInstrument_GetParameter(
+    if (const Status status = BarelyInstrument_GetControl(
             handle_, id_, static_cast<int>(index), &value);
         !status.IsOk()) {
       return status;
@@ -960,24 +958,41 @@ class Instrument {
                                     timestamp);
   }
 
-  /// Resets all parameters.
+  /// Resets all controls.
   ///
   /// @return Status.
-  Status ResetAllParameters() {
-    return BarelyInstrument_ResetAllParameters(handle_, id_);
+  Status ResetAllControls() {
+    return BarelyInstrument_ResetAllControls(handle_, id_);
   }
 
-  /// Resets parameter value.
+  /// Resets control value.
   ///
-  /// @param index Parameter index.
+  /// @param index Control index.
   /// @return Status.
   template <typename IndexType>
-  Status ResetParameter(IndexType index) {
+  Status ResetControl(IndexType index) {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
-    return BarelyInstrument_ResetParameter(handle_, id_,
-                                           static_cast<int>(index));
+    return BarelyInstrument_ResetControl(handle_, id_, static_cast<int>(index));
+  }
+
+  /// Sets control value.
+  ///
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param value Control slope in value change per second.
+  /// @return Status.
+  template <typename IndexType, typename ValueType>
+  Status SetControl(IndexType index, ValueType value, double slope = 0.0) {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
+    return BarelyInstrument_SetControl(handle_, id_, static_cast<int>(index),
+                                       static_cast<double>(value), slope);
   }
 
   /// Sets data.
@@ -1033,24 +1048,6 @@ class Instrument {
           static_cast<void*>(&note_on_callback_));
     }
     return BarelyInstrument_SetNoteOnCallback(handle_, id_, nullptr, nullptr);
-  }
-
-  /// Sets parameter value.
-  ///
-  /// @param index Parameter index.
-  /// @param value Parameter value.
-  /// @param value Parameter slope in value change per second.
-  /// @return Status.
-  template <typename IndexType, typename ValueType>
-  Status SetParameter(IndexType index, ValueType value, double slope = 0.0) {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    static_assert(
-        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-        "ValueType is not supported");
-    return BarelyInstrument_SetParameter(handle_, id_, static_cast<int>(index),
-                                         static_cast<double>(value), slope);
   }
 
   /// Starts note.

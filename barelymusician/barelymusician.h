@@ -31,17 +31,8 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Control definition.
-typedef struct BarelyControlDefinition {
-  /// Default value.
-  double default_value;
-
-  /// Minimum value.
-  double min_value;
-
-  /// Maximum value.
-  double max_value;
-} BarelyControlDefinition;
+/// Musician handle.
+typedef struct BarelyMusician* BarelyMusicianHandle;
 
 /// Identifier alias.
 typedef int64_t BarelyId;
@@ -50,6 +41,23 @@ typedef int64_t BarelyId;
 enum BarelyId_Values {
   /// Invalid identifier.
   BarelyId_kInvalid = 0,
+};
+
+/// Status enum alias.
+typedef int32_t BarelyStatus;
+
+/// Status enum values.
+enum BarelyStatus_Values {
+  /// Success.
+  BarelyStatus_kOk = 0,
+  /// Invalid argument error.
+  BarelyStatus_kInvalidArgument = 1,
+  /// Not found error.
+  BarelyStatus_kNotFound = 2,
+  /// Unimplemented error.
+  BarelyStatus_kUnimplemented = 3,
+  /// Internal error.
+  BarelyStatus_kInternal = 4,
 };
 
 /// Instrument control callback signature.
@@ -98,7 +106,7 @@ typedef void (*BarelyInstrumentDefinition_DestroyCallback)(void** state);
 /// Instrument definition process callback signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param output_samples Output samples.
+/// @param output_samples Interleaved array of output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
 typedef void (*BarelyInstrumentDefinition_ProcessCallback)(
@@ -148,6 +156,35 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
                                                              double pitch);
 
+/// Task definition create callback signature.
+///
+/// @param state Pointer to task state.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyTaskDefinition_CreateCallback)(void** state,
+                                                    void* user_data);
+
+/// Task definition destroy callback signature.
+///
+/// @param state Pointer to task state.
+typedef void (*BarelyTaskDefinition_DestroyCallback)(void** state);
+
+/// Task definition process callback signature.
+///
+/// @param state Pointer to task state.
+typedef void (*BarelyTaskDefinition_ProcessCallback)(void** state);
+
+/// Control definition.
+typedef struct BarelyControlDefinition {
+  /// Default value.
+  double default_value;
+
+  /// Minimum value.
+  double min_value;
+
+  /// Maximum value.
+  double max_value;
+} BarelyControlDefinition;
+
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create callback.
@@ -186,43 +223,6 @@ typedef struct BarelyInstrumentDefinition {
   /// Number of note control definitions.
   int32_t note_control_definition_count;
 } BarelyInstrumentDefinition;
-
-/// Musician handle.
-typedef struct BarelyMusician* BarelyMusicianHandle;
-
-/// Status enum alias.
-typedef int32_t BarelyStatus;
-
-/// Status enum values.
-enum BarelyStatus_Values {
-  /// Success.
-  BarelyStatus_kOk = 0,
-  /// Invalid argument error.
-  BarelyStatus_kInvalidArgument = 1,
-  /// Not found error.
-  BarelyStatus_kNotFound = 2,
-  /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 3,
-  /// Internal error.
-  BarelyStatus_kInternal = 4,
-};
-
-/// Task definition create callback signature.
-///
-/// @param state Pointer to task state.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyTaskDefinition_CreateCallback)(void** state,
-                                                    void* user_data);
-
-/// Task definition destroy callback signature.
-///
-/// @param state Pointer to task state.
-typedef void (*BarelyTaskDefinition_DestroyCallback)(void** state);
-
-/// Task definition process callback signature.
-///
-/// @param state Pointer to task state.
-typedef void (*BarelyTaskDefinition_ProcessCallback)(void** state);
 
 /// Task definition.
 typedef struct BarelyTaskDefinition {
@@ -293,7 +293,7 @@ BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle, BarelyId instrument_id,
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
-/// @param output_samples Output samples.
+/// @param output_samples Interleaved array of output samples.
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
@@ -775,40 +775,6 @@ class StatusOr {
   // Value or error status.
   std::variant<Status, ValueType> value_or_;
 };
-
-/// Task callback.
-using TaskCallback = std::function<void()>;
-
-/// Task definition.
-struct TaskDefinition : public BarelyTaskDefinition {
-  /// Create callback signature.
-  using CreateCallback = BarelyTaskDefinition_CreateCallback;
-
-  /// Destroy callback signature.
-  using DestroyCallback = BarelyTaskDefinition_DestroyCallback;
-
-  /// Process callback signature.
-  using ProcessCallback = BarelyTaskDefinition_ProcessCallback;
-
-  /// Constructs new `TaskDefinition`.
-  ///
-  /// @param create_callback Create callback.
-  /// @param destroy_callback Destroy callback.
-  /// @param process_callback Process callback.
-  explicit TaskDefinition(CreateCallback create_callback,
-                          DestroyCallback destroy_callback,
-                          ProcessCallback process_callback)
-      : TaskDefinition(BarelyTaskDefinition{create_callback, destroy_callback,
-                                            process_callback}) {}
-
-  /// Constructs new `TaskDefinition` from internal type.
-  ///
-  /// @param definition Internal task definition.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  TaskDefinition(BarelyTaskDefinition definition)
-      : BarelyTaskDefinition{definition} {}
-};
-
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {
   /// Constructs new `ControlDefinition`.
@@ -920,46 +886,37 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   }
 };
 
-/// Task reference.
-class TaskReference {
- public:
-  /// Returns position.
+/// Task callback.
+using TaskCallback = std::function<void()>;
+
+/// Task definition.
+struct TaskDefinition : public BarelyTaskDefinition {
+  /// Create callback signature.
+  using CreateCallback = BarelyTaskDefinition_CreateCallback;
+
+  /// Destroy callback signature.
+  using DestroyCallback = BarelyTaskDefinition_DestroyCallback;
+
+  /// Process callback signature.
+  using ProcessCallback = BarelyTaskDefinition_ProcessCallback;
+
+  /// Constructs new `TaskDefinition`.
   ///
-  /// @return Position in beats, or error status.
-  [[nodiscard]] StatusOr<double> GetPosition() const {
-    double position = 0.0;
-    if (const Status status =
-            BarelyTask_GetPosition(handle_, performer_id_, id_, &position);
-        !status.IsOk()) {
-      return status;
-    }
-    return position;
-  }
+  /// @param create_callback Create callback.
+  /// @param destroy_callback Destroy callback.
+  /// @param process_callback Process callback.
+  explicit TaskDefinition(CreateCallback create_callback,
+                          DestroyCallback destroy_callback,
+                          ProcessCallback process_callback)
+      : TaskDefinition(BarelyTaskDefinition{create_callback, destroy_callback,
+                                            process_callback}) {}
 
-  /// Sets position.
+  /// Constructs new `TaskDefinition` from internal type.
   ///
-  /// @param position Position in beats.
-  /// @return Status.
-  Status SetPosition(double position) {
-    return BarelyTask_SetPosition(handle_, performer_id_, id_, position);
-  }
-
- private:
-  friend class Performer;
-
-  // Constructs new `TaskReference`.
-  explicit TaskReference(BarelyMusicianHandle handle, BarelyId performer_id,
-                         BarelyId id)
-      : handle_(handle), performer_id_(performer_id), id_(id) {}
-
-  // Internal musician handle.
-  BarelyMusicianHandle handle_ = nullptr;
-
-  // Performer identifier.
-  BarelyId performer_id_ = BarelyId_kInvalid;
-
-  // Identifier.
-  BarelyId id_ = BarelyId_kInvalid;
+  /// @param definition Internal task definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  TaskDefinition(BarelyTaskDefinition definition)
+      : BarelyTaskDefinition{definition} {}
 };
 
 /// Instrument.
@@ -1041,7 +998,7 @@ class Instrument {
 
   /// Processes output samples at timestamp.
   ///
-  /// @param output_samples Output samples.
+  /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
@@ -1234,6 +1191,48 @@ class Instrument {
 
   // Note on callback.
   NoteOnCallback note_on_callback_;
+};
+
+/// Task reference.
+class TaskReference {
+ public:
+  /// Returns position.
+  ///
+  /// @return Position in beats, or error status.
+  [[nodiscard]] StatusOr<double> GetPosition() const {
+    double position = 0.0;
+    if (const Status status =
+            BarelyTask_GetPosition(handle_, performer_id_, id_, &position);
+        !status.IsOk()) {
+      return status;
+    }
+    return position;
+  }
+
+  /// Sets position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status SetPosition(double position) {
+    return BarelyTask_SetPosition(handle_, performer_id_, id_, position);
+  }
+
+ private:
+  friend class Performer;
+
+  // Constructs new `TaskReference`.
+  explicit TaskReference(BarelyMusicianHandle handle, BarelyId performer_id,
+                         BarelyId id)
+      : handle_(handle), performer_id_(performer_id), id_(id) {}
+
+  // Internal musician handle.
+  BarelyMusicianHandle handle_ = nullptr;
+
+  // Performer identifier.
+  BarelyId performer_id_ = BarelyId_kInvalid;
+
+  // Identifier.
+  BarelyId id_ = BarelyId_kInvalid;
 };
 
 /// Performer.

@@ -6,17 +6,7 @@ namespace barely::examples {
 
 InputManager::InputManager() noexcept
     : key_down_callback_(nullptr), key_up_callback_(nullptr) {
-#if defined(_WIN32) || defined(__CYGWIN__)
-  std_input_handle_ = GetStdHandle(STD_INPUT_HANDLE);
-  if (std_input_handle_ == INVALID_HANDLE_VALUE) {
-    return;
-  }
-  if (!GetConsoleMode(std_input_handle_, &previous_console_mode_)) {
-    return;
-  }
-  const DWORD console_mode = ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT;
-  SetConsoleMode(std_input_handle_, console_mode);
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
   event_callback_ = [this](CGEventType type, CGEventRef event) noexcept {
     UniCharCount length = 0;
     UniChar str[1];
@@ -58,9 +48,7 @@ InputManager::InputManager() noexcept
 }
 
 InputManager::~InputManager() noexcept {
-#if defined(_WIN32) || defined(__CYGWIN__)
-  SetConsoleMode(std_input_handle_, previous_console_mode_);
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
   CGEventTapEnable(event_tap_, false);
   CFRunLoopRemoveSource(CFRunLoopGetCurrent(), run_loop_source_,
                         kCFRunLoopCommonModes);
@@ -79,23 +67,12 @@ void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InputManager::Update() noexcept {
 #if defined(_WIN32) || defined(__CYGWIN__)
-  DWORD event_count = 0;
-  if (!GetNumberOfConsoleInputEvents(std_input_handle_, &event_count) ||
-      event_count == 0) {
-    return;
-  }
-  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &event_count)) {
-    return;
-  }
-  for (DWORD i = 0; i < event_count; ++i) {
-    if (input_buffer_[i].EventType == KEY_EVENT) {
-      const auto& key_event = input_buffer_[i].Event.KeyEvent;
-      const Key& key = key_event.uChar.AsciiChar;
-      if (key_event.bKeyDown) {
-        HandleKeyDown(key);
-      } else {
-        HandleKeyUp(key);
-      }
+  for (int i = 0; i < 128; ++i) {
+    const Key key = static_cast<Key>(i);
+    if (GetKeyState(i) >> 1) {
+      HandleKeyDown(key);
+    } else {
+      HandleKeyUp(key);
     }
   }
 #elif defined(__APPLE__)

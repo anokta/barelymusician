@@ -53,7 +53,7 @@ class Instrument {
 
   /// Processes output samples at timestamp.
   ///
-  /// @param output_samples Output samples.
+  /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.

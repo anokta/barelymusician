@@ -16,7 +16,7 @@ class GenericInstrument {
 
   /// Processes the next output buffer.
   ///
-  /// @param output_samples Output samples.
+  /// @param output_samples Interleaved array of output samples.
   /// @param channel_count Number of output channels.
   /// @param frame_count Number of output frames.
   virtual void Process(double* output_samples, int channel_count,

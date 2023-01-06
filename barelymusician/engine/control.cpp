@@ -5,12 +5,8 @@
 
 namespace barely::internal {
 
-Control::Control(Definition definition) noexcept
+Control::Control(ControlDefinition definition) noexcept
     : definition_(definition), value_(definition_.default_value) {}
-
-const Control::Definition& Control::GetDefinition() const noexcept {
-  return definition_;
-}
 
 double Control::GetValue() const noexcept { return value_; }
 

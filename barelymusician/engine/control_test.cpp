@@ -5,19 +5,9 @@
 namespace barely::internal {
 namespace {
 
-// Tests that control returns its definition as expected.
-TEST(ControlTest, GetDefinition) {
-  const Control control(Control::Definition{-1.0, -10.0, 10.0});
-
-  const auto definition = control.GetDefinition();
-  EXPECT_DOUBLE_EQ(definition.default_value, -1.0);
-  EXPECT_DOUBLE_EQ(definition.min_value, -10.0);
-  EXPECT_DOUBLE_EQ(definition.max_value, 10.0);
-}
-
 // Tests that control sets its value as expected.
 TEST(ControlTest, SetValue) {
-  Control control(Control::Definition{15.0, 10.0, 20.0});
+  Control control(ControlDefinition{15.0, 10.0, 20.0});
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   EXPECT_TRUE(control.SetValue(12.0));

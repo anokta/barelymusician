@@ -5,21 +5,16 @@
 
 namespace barely::internal {
 
+/// Control definition alias.
+using ControlDefinition = barely::ControlDefinition;
+
 /// Class that wraps control.
 class Control {
  public:
-  /// Definition alias.
-  using Definition = barely::ControlDefinition;
-
   /// Constructs new `Control`.
   ///
   /// @param definition Control definition.
-  explicit Control(Definition definition) noexcept;
-
-  /// Returns definition.
-  ///
-  /// @return Control definition.
-  [[nodiscard]] const Definition& GetDefinition() const noexcept;
+  explicit Control(ControlDefinition definition) noexcept;
 
   /// Returns value.
   ///
@@ -39,7 +34,7 @@ class Control {
 
  private:
   // Definition.
-  Definition definition_;
+  ControlDefinition definition_;
 
   // Value.
   double value_ = 0.0;

@@ -26,8 +26,8 @@ constexpr int kFrameCount = 8;
 
 // Returns test instrument definition that produces constant output that is set.
 InstrumentDefinition GetTestInstrumentDefinition() {
-  static const std::vector<Control::Definition> control_definitions = {
-      Control::Definition{0.0, -10.0, 10.0},
+  static const std::vector<ControlDefinition> control_definitions = {
+      ControlDefinition{0.0, -10.0, 10.0},
   };
   return InstrumentDefinition(
       [](void** state, int /*frame_rate*/) {

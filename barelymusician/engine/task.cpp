@@ -2,7 +2,7 @@
 
 namespace barely::internal {
 
-Task::Task(const Definition& definition, void* user_data) noexcept
+Task::Task(const TaskDefinition& definition, void* user_data) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback) {
   if (definition.create_callback) {

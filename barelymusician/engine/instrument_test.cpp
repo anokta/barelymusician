@@ -21,8 +21,8 @@ constexpr int kFrameCount = 4;
 
 // Returns test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestDefinition() {
-  static const std::vector<Control::Definition> control_definitions = {
-      Control::Definition{15.0, 10.0, 20.0},
+  static const std::vector<ControlDefinition> control_definitions = {
+      ControlDefinition{15.0, 10.0, 20.0},
   };
   return InstrumentDefinition(
       [](void** state, int /*frame_rate*/) {
@@ -57,12 +57,6 @@ TEST(InstrumentTest, GetControl) {
   const auto control_or = instrument.GetControl(0);
   ASSERT_TRUE(control_or.IsOk());
   const auto& control = control_or.GetValue().get();
-
-  const auto& definition = control.GetDefinition();
-  EXPECT_DOUBLE_EQ(definition.default_value, 15.0);
-  EXPECT_DOUBLE_EQ(definition.min_value, 10.0);
-  EXPECT_DOUBLE_EQ(definition.max_value, 20.0);
-
   EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   EXPECT_EQ(instrument.SetControl(0, 20.0, 0.0, 0.0), Status::kOk);

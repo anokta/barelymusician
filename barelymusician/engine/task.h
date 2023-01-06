@@ -5,16 +5,16 @@
 
 namespace barely::internal {
 
+/// Task definition alias.
+using TaskDefinition = barely::TaskDefinition;
+
 /// Class that wraps task.
 class Task {
  public:
-  /// Definition alias.
-  using Definition = barely::TaskDefinition;
-
   /// Constructs new `Task`.
   ///
   /// @param definition Task definition.
-  explicit Task(const Definition& definition,
+  explicit Task(const TaskDefinition& definition,
                 void* user_data = nullptr) noexcept;
 
   /// Destroys `Task`.
@@ -31,10 +31,10 @@ class Task {
 
  private:
   // Destroy callback.
-  Definition::DestroyCallback destroy_callback_;
+  TaskDefinition::DestroyCallback destroy_callback_;
 
   // Process callback.
-  Definition::ProcessCallback process_callback_;
+  TaskDefinition::ProcessCallback process_callback_;
 
   // State.
   void* state_ = nullptr;

@@ -170,7 +170,8 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 
   // Trigger note on callback.
   double note_on_pitch = 0.0;
-  instrument.SetNoteOnCallback([&](double pitch) { note_on_pitch = pitch; });
+  instrument.SetNoteOnEventCallback(
+      [&](double pitch) { note_on_pitch = pitch; });
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
 
   instrument.StartNote(kPitch, 10.0);
@@ -188,7 +189,8 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 
   // Trigger note off callback.
   double note_off_pitch = 0.0;
-  instrument.SetNoteOffCallback([&](double pitch) { note_off_pitch = pitch; });
+  instrument.SetNoteOffEventCallback(
+      [&](double pitch) { note_off_pitch = pitch; });
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   instrument.StopNote(kPitch, 20.0);

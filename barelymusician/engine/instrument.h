@@ -18,10 +18,10 @@ class Instrument {
   using Definition = barely::InstrumentDefinition;
 
   /// Note off callback alias.
-  using NoteOffCallback = barely::Instrument::NoteOffCallback;
+  using NoteOffEventCallback = barely::Instrument::NoteOffEventCallback;
 
   /// Note on callback alias.
-  using NoteOnCallback = barely::Instrument::NoteOnCallback;
+  using NoteOnEventCallback = barely::Instrument::NoteOnEventCallback;
 
   /// Constructs new `Instrument`.
   ///
@@ -103,12 +103,12 @@ class Instrument {
   /// Sets note off callback.
   ///
   /// @param callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback callback) noexcept;
+  void SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept;
 
   /// Sets note on callback.
   ///
   /// @param callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback callback) noexcept;
+  void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
 
   /// Starts note at timestamp.
   ///
@@ -140,10 +140,10 @@ class Instrument {
   double GetSlopePerFrame(double slope_per_second) const noexcept;
 
   // Note off callback.
-  NoteOffCallback note_off_callback_;
+  NoteOffEventCallback note_off_callback_;
 
   // Note on callback.
-  NoteOnCallback note_on_callback_;
+  NoteOnEventCallback note_on_callback_;
 
   // List of controls.
   std::vector<Control> controls_;
@@ -170,10 +170,10 @@ class Instrument {
   Definition::SetNoteControlCallback set_note_control_callback_;
 
   // Set note off callback.
-  Definition::SetNoteOffCallback set_note_off_callback_;
+  Definition::SetNoteOffEventCallback set_note_off_callback_;
 
   // Set note on callback.
-  Definition::SetNoteOnCallback set_note_on_callback_;
+  Definition::SetNoteOnEventCallback set_note_on_callback_;
 
   // Sampling rate in hz.
   int frame_rate_;

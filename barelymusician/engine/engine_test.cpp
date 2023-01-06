@@ -83,7 +83,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   // Set note callbacks.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  instrument->SetNoteOnCallback([&](double pitch, double intensity) {
+  instrument->SetNoteOnEventCallback([&](double pitch, double intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   });
@@ -91,7 +91,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   double note_off_pitch = 0.0;
-  instrument->SetNoteOffCallback([&](double pitch) { note_off_pitch = pitch; });
+  instrument->SetNoteOffEventCallback(
+      [&](double pitch) { note_off_pitch = pitch; });
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Start note.
@@ -145,7 +146,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
           instrument_id, GetTestInstrumentDefinition(), kFrameRate));
       EXPECT_THAT(engine.GetInstrument(instrument_id), NotNull());
       engine.GetInstrument(instrument_id)
-          ->SetNoteOffCallback(
+          ->SetNoteOffEventCallback(
               [&](double pitch) { note_off_pitches.push_back(pitch); });
     }
 

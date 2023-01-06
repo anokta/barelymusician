@@ -174,11 +174,12 @@ bool Instrument::SetNoteControl([[maybe_unused]] double pitch, int index,
   return false;
 }
 
-void Instrument::SetNoteOffCallback(NoteOffCallback callback) noexcept {
+void Instrument::SetNoteOffEventCallback(
+    NoteOffEventCallback callback) noexcept {
   note_off_callback_ = std::move(callback);
 }
 
-void Instrument::SetNoteOnCallback(NoteOnCallback callback) noexcept {
+void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
   note_on_callback_ = std::move(callback);
 }
 

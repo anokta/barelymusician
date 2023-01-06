@@ -71,9 +71,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnCallback(
+  instrument.SetNoteOnEventCallback(
       [](double pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
-  instrument.SetNoteOffCallback(
+  instrument.SetNoteOffEventCallback(
       [](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   GainProcessor gain(kFrameRate);

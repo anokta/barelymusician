@@ -13,7 +13,7 @@ namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool Performer::AddTask(Id id, double position,
-                        TaskCallback callback) noexcept {
+                        Task::Callback callback) noexcept {
   assert(id > kInvalid);
   if (positions_.emplace(id, position).second) {
     callbacks_.emplace(std::pair{position, id}, std::move(callback));
@@ -50,7 +50,7 @@ double Performer::GetDurationToNextTask() const noexcept {
   return next_position;
 }
 
-const Performer::TaskCallback* Performer::GetTaskCallback(
+const Performer::Task::Callback* Performer::GetTaskCallback(
     Id id) const noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     return FindOrNull(callbacks_, std::pair{*position, id});
@@ -85,7 +85,7 @@ bool Performer::RemoveTask(Id id) noexcept {
 }
 
 bool Performer::ScheduleOneOffTask(double position,
-                                   TaskCallback callback) noexcept {
+                                   Task::Callback callback) noexcept {
   if (position >= position_ && callback) {
     one_off_callbacks_.emplace(position, std::move(callback));
     return true;
@@ -93,7 +93,7 @@ bool Performer::ScheduleOneOffTask(double position,
   return false;
 }
 
-bool Performer::SetTaskCallback(Id id, TaskCallback callback) noexcept {
+bool Performer::SetTaskCallback(Id id, Task::Callback callback) noexcept {
   if (const auto* position = FindOrNull(positions_, id)) {
     *FindOrNull(callbacks_, std::pair{*position, id}) = std::move(callback);
     return true;
@@ -153,7 +153,7 @@ void Performer::SetPosition(double position) noexcept {
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_callbacks_.empty()) {
       // Reset all remaining one-off callbacks back to `loop_begin_position_`.
-      std::multimap<double, TaskCallback> remaining_callbacks;
+      std::multimap<double, Task::Callback> remaining_callbacks;
       for (auto& it : one_off_callbacks_) {
         remaining_callbacks.emplace(loop_begin_position_, std::move(it.second));
       }
@@ -199,7 +199,7 @@ void Performer::Update(double duration) noexcept {
   }
 }
 
-std::map<std::pair<double, Id>, Performer::TaskCallback>::const_iterator
+std::map<std::pair<double, Id>, Performer::Task::Callback>::const_iterator
 Performer::GetNextTaskCallback() const noexcept {
   auto it = callbacks_.lower_bound(std::pair{position_, kInvalid});
   if (last_triggered_position_) {

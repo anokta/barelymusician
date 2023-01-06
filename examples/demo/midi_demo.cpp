@@ -133,11 +133,12 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set instrument.
     const auto track_index = tracks.size();
-    instrument.SetNoteOnCallback([track_index](double pitch, double intensity) {
+    instrument.SetNoteOnEventCallback([track_index](double pitch,
+                                                    double intensity) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn("
                    << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
     });
-    instrument.SetNoteOffCallback([track_index](double pitch) {
+    instrument.SetNoteOffEventCallback([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                    << MidiKeyNumberFromPitch(pitch) << ") ";
     });

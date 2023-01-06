@@ -15,9 +15,9 @@ namespace Barely {
     ///
     /// @param pitch Note pitch.
     /// @param dspTime Note off time in seconds.
-    public delegate void NoteOffCallback(double pitch, double dspTime);
-    public event NoteOffCallback OnNoteOff;
-    private NoteOffCallback _noteOffCallback = null;
+    public delegate void NoteOffEventCallback(double pitch, double dspTime);
+    public event NoteOffEventCallback OnNoteOff;
+    private NoteOffEventCallback _noteOffCallback = null;
 
     [Serializable]
     public class NoteOffEvent : UnityEngine.Events.UnityEvent<double> {}
@@ -28,9 +28,9 @@ namespace Barely {
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
     /// @param dspTime Note on time in seconds.
-    public delegate void NoteOnCallback(double pitch, double intensity, double dspTime);
-    public event NoteOnCallback OnNoteOn;
-    private NoteOnCallback _noteOnCallback = null;
+    public delegate void NoteOnEventCallback(double pitch, double intensity, double dspTime);
+    public event NoteOnEventCallback OnNoteOn;
+    private NoteOnEventCallback _noteOnCallback = null;
 
     [Serializable]
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<double, double> {}

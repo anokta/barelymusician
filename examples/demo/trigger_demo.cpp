@@ -69,7 +69,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetNoteOnCallback(
+  instrument.SetNoteOnEventCallback(
       [](double pitch, [[maybe_unused]] double intensity) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
       });
@@ -81,7 +81,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLooping(true);
 
   const auto play_note_fn = [&](int scale_index,
-                                double duration) -> Performer::TaskCallback {
+                                double duration) -> Performer::Task::Callback {
     const double pitch =
         barely::kPitchD3 +
         barely::GetPitch(barely::kPitchMajorScale, scale_index);

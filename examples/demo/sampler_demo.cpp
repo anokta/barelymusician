@@ -85,9 +85,9 @@ int main(int /*argc*/, char* argv[]) {
       sample_file.GetData().data(),
       static_cast<int>(sample_file.GetData().size() * sizeof(double)));
 
-  instrument.SetNoteOnCallback(
+  instrument.SetNoteOnEventCallback(
       [](double pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
-  instrument.SetNoteOffCallback(
+  instrument.SetNoteOffEventCallback(
       [](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 
   GainProcessor gain(kFrameRate);

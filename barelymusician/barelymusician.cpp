@@ -312,6 +312,20 @@ BarelyStatus BarelyInstrument_SetControl(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
+BarelyStatus BarelyInstrument_SetControlEventCallback(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    [[maybe_unused]] BarelyInstrument_ControlEventCallback callback,
+    [[maybe_unused]] void* user_data) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    // TODO(#109): Implement.
+    return BarelyStatus_kUnimplemented;
+  }
+  return BarelyStatus_kNotFound;
+}
+
 BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
                                       BarelyId instrument_id, const void* data,
                                       int32_t size) {
@@ -343,36 +357,50 @@ BarelyStatus BarelyInstrument_SetNoteControl(
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_SetNoteOffCallback(
+BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOffCallback callback, void* user_data) {
+    [[maybe_unused]] BarelyInstrument_NoteControlEventCallback callback,
+    [[maybe_unused]] void* user_data) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+
+  if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    // TODO(#109): Implement.
+    return BarelyStatus_kUnimplemented;
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyInstrument_NoteOffEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (callback) {
-      instrument->SetNoteOffCallback(
+      instrument->SetNoteOffEventCallback(
           [callback, user_data](double pitch) { callback(pitch, user_data); });
     } else {
-      instrument->SetNoteOffCallback(nullptr);
+      instrument->SetNoteOffEventCallback(nullptr);
     }
     return BarelyStatus_kOk;
   }
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_SetNoteOnCallback(
+BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOnCallback callback, void* user_data) {
+    BarelyInstrument_NoteOnEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
     if (callback) {
-      instrument->SetNoteOnCallback(
+      instrument->SetNoteOnEventCallback(
           [callback, user_data](double pitch) { callback(pitch, user_data); });
     } else {
-      instrument->SetNoteOnCallback(nullptr);
+      instrument->SetNoteOnEventCallback(nullptr);
     }
     return BarelyStatus_kOk;
   }

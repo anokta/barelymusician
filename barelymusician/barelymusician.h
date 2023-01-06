@@ -60,36 +60,39 @@ enum BarelyStatus_Values {
   BarelyStatus_kInternal = 4,
 };
 
-/// Instrument control callback signature.
+/// Instrument control event callback signature.
 ///
 /// @param index Control index.
 /// @param value Control value.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_ControlCallback)(int32_t index, double value,
-                                                 void* user_data);
+typedef void (*BarelyInstrument_ControlEventCallback)(int32_t index,
+                                                      double value,
+                                                      void* user_data);
 
-/// Instrument note control callback signature.
+/// Instrument note control event callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param index Control index.
 /// @param value Control value.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteControlCallback)(double pitch,
-                                                     int32_t index,
-                                                     double value,
+typedef void (*BarelyInstrument_NoteControlEventCallback)(double pitch,
+                                                          int32_t index,
+                                                          double value,
+                                                          void* user_data);
+
+/// Instrument note off event callback signature.
+///
+/// @param pitch Note pitch.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyInstrument_NoteOffEventCallback)(double pitch,
+                                                      void* user_data);
+
+/// Instrument note on event callback signature.
+///
+/// @param pitch Note pitch.
+/// @param user_data Pointer to user data.
+typedef void (*BarelyInstrument_NoteOnEventCallback)(double pitch,
                                                      void* user_data);
-
-/// Instrument note off callback signature.
-///
-/// @param pitch Note pitch.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteOffCallback)(double pitch, void* user_data);
-
-/// Instrument note on callback signature.
-///
-/// @param pitch Note pitch.
-/// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteOnCallback)(double pitch, void* user_data);
 
 /// Instrument definition create callback signature.
 ///
@@ -146,15 +149,15 @@ typedef void (*BarelyInstrumentDefinition_SetNoteControlCallback)(
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
-                                                              double pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOffEventCallback)(
+    void** state, double pitch);
 
 /// Instrument definition set note on callback signature.
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
-typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
-                                                             double pitch);
+typedef void (*BarelyInstrumentDefinition_SetNoteOnEventCallback)(void** state,
+                                                                  double pitch);
 
 /// Task definition create callback signature.
 ///
@@ -206,10 +209,10 @@ typedef struct BarelyInstrumentDefinition {
   BarelyInstrumentDefinition_SetNoteControlCallback set_note_control_callback;
 
   /// Set note off callback.
-  BarelyInstrumentDefinition_SetNoteOffCallback set_note_off_callback;
+  BarelyInstrumentDefinition_SetNoteOffEventCallback set_note_off_callback;
 
   /// Set note on callback.
-  BarelyInstrumentDefinition_SetNoteOnCallback set_note_on_callback;
+  BarelyInstrumentDefinition_SetNoteOnEventCallback set_note_on_callback;
 
   /// List of control definitions.
   const BarelyControlDefinition* control_definitions;
@@ -351,6 +354,17 @@ BARELY_EXPORT BarelyStatus
 BarelyInstrument_SetControl(BarelyMusicianHandle handle, BarelyId instrument_id,
                             int32_t index, double value, double slope_per_beat);
 
+/// Sets instrument control callback.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param callback Control callback.
+/// @param user_data Pointer to user data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetControlEventCallback(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyInstrument_ControlEventCallback callback, void* user_data);
+
 /// Sets instrument data.
 ///
 /// @param handle Musician handle.
@@ -376,6 +390,17 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControl(
     BarelyMusicianHandle handle, BarelyId instrument_id, double pitch,
     int32_t index, double value, double slope_per_beat);
 
+/// Sets instrument note control callback.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param callback Note control callback.
+/// @param user_data Pointer to user data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
+    BarelyMusicianHandle handle, BarelyId instrument_id,
+    BarelyInstrument_NoteControlEventCallback callback, void* user_data);
+
 /// Sets instrument note off callback.
 ///
 /// @param handle Musician handle.
@@ -383,9 +408,10 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControl(
 /// @param callback Note off callback.
 /// @param user_data Pointer to user data.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOffCallback callback, void* user_data);
+    BarelyInstrument_NoteOffEventCallback callback, void* user_data);
+
 /// Sets instrument note on callback.
 ///
 /// @param handle Musician handle.
@@ -393,9 +419,9 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffCallback(
 /// @param callback Note on callback.
 /// @param user_data Pointer to user data.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnCallback(
+BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOnCallback callback, void* user_data);
+    BarelyInstrument_NoteOnEventCallback callback, void* user_data);
 
 /// Starts instrument note.
 ///
@@ -775,6 +801,7 @@ class StatusOr {
   // Value or error status.
   std::variant<Status, ValueType> value_or_;
 };
+
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {
   /// Constructs new `ControlDefinition`.
@@ -839,10 +866,12 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
       BarelyInstrumentDefinition_SetNoteControlCallback;
 
   /// Set note off callback signature
-  using SetNoteOffCallback = BarelyInstrumentDefinition_SetNoteOffCallback;
+  using SetNoteOffEventCallback =
+      BarelyInstrumentDefinition_SetNoteOffEventCallback;
 
   /// Set note on callback signature.
-  using SetNoteOnCallback = BarelyInstrumentDefinition_SetNoteOnCallback;
+  using SetNoteOnEventCallback =
+      BarelyInstrumentDefinition_SetNoteOnEventCallback;
 
   /// Constructs new `InstrumentDefinition`.
   ///
@@ -854,14 +883,14 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// @param set_note_off_callback Set note off callback.
   /// @param set_note_on_callback Set note on callback.
   /// @param control_definitions List of control definitions.
-  /// @param control_definitions List of note control definitions.
+  /// @param note_control_definitions List of note control definitions.
   explicit InstrumentDefinition(
       CreateCallback create_callback, DestroyCallback destroy_callback,
       ProcessCallback process_callback, SetControlCallback set_control_callback,
       SetDataCallback set_data_callback,
       SetNoteControlCallback set_note_control_callback,
-      SetNoteOffCallback set_note_off_callback,
-      SetNoteOnCallback set_note_on_callback,
+      SetNoteOffEventCallback set_note_off_callback,
+      SetNoteOnEventCallback set_note_on_callback,
       std::span<const ControlDefinition> control_definitions,
       std::span<const ControlDefinition> note_control_definitions)
       : InstrumentDefinition(
@@ -885,9 +914,6 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
     assert(note_control_definition_count >= 0);
   }
 };
-
-/// Task callback.
-using TaskCallback = std::function<void()>;
 
 /// Task definition.
 struct TaskDefinition : public BarelyTaskDefinition {
@@ -922,15 +948,29 @@ struct TaskDefinition : public BarelyTaskDefinition {
 /// Instrument.
 class Instrument {
  public:
-  /// Note off callback signature.
+  /// Control event callback signature.
   ///
-  /// @param pitch Note pitch.
-  using NoteOffCallback = std::function<void(double pitch)>;
+  /// @param index Control index.
+  /// @param value Control value.
+  using ControlEventCallback = std::function<void(int index, double value)>;
 
-  /// Note on callback signature.
+  /// Note control event callback signature.
   ///
   /// @param pitch Note pitch.
-  using NoteOnCallback = std::function<void(double pitch)>;
+  /// @param index Control index.
+  /// @param value Control value.
+  using NoteControlEventCallback =
+      std::function<void(double pitch, int index, double value)>;
+
+  /// Note off event callback signature.
+  ///
+  /// @param pitch Note pitch.
+  using NoteOffEventCallback = std::function<void(double pitch)>;
+
+  /// Note on event callback signature.
+  ///
+  /// @param pitch Note pitch.
+  using NoteOnEventCallback = std::function<void(double pitch)>;
 
   /// Destroys `Instrument`.
   ~Instrument() {
@@ -948,8 +988,8 @@ class Instrument {
   Instrument(Instrument&& other) noexcept
       : handle_(std::exchange(other.handle_, nullptr)),
         id_(std::exchange(other.id_, BarelyId_kInvalid)) {
-    SetNoteOffCallback(std::exchange(other.note_off_callback_, nullptr));
-    SetNoteOnCallback(std::exchange(other.note_on_callback_, nullptr));
+    SetNoteOffEventCallback(std::exchange(other.note_off_callback_, nullptr));
+    SetNoteOnEventCallback(std::exchange(other.note_on_callback_, nullptr));
   }
 
   /// Assigns `Instrument` via move.
@@ -960,8 +1000,8 @@ class Instrument {
       BarelyInstrument_Destroy(handle_, id_);
       handle_ = std::exchange(other.handle_, nullptr);
       id_ = std::exchange(other.id_, BarelyId_kInvalid);
-      SetNoteOffCallback(std::exchange(other.note_off_callback_, nullptr));
-      SetNoteOnCallback(std::exchange(other.note_on_callback_, nullptr));
+      SetNoteOffEventCallback(std::exchange(other.note_off_callback_, nullptr));
+      SetNoteOnEventCallback(std::exchange(other.note_on_callback_, nullptr));
     }
     return *this;
   }
@@ -1117,34 +1157,36 @@ class Instrument {
   ///
   /// @param callback Note off callback.
   /// @return Status.
-  Status SetNoteOffCallback(NoteOffCallback callback) {
+  Status SetNoteOffEventCallback(NoteOffEventCallback callback) {
     if (callback) {
       note_off_callback_ = std::move(callback);
-      return BarelyInstrument_SetNoteOffCallback(
+      return BarelyInstrument_SetNoteOffEventCallback(
           handle_, id_,
           [](double pitch, void* user_data) {
-            (*static_cast<NoteOffCallback*>(user_data))(pitch);
+            (*static_cast<NoteOffEventCallback*>(user_data))(pitch);
           },
           static_cast<void*>(&note_off_callback_));
     }
-    return BarelyInstrument_SetNoteOffCallback(handle_, id_, nullptr, nullptr);
+    return BarelyInstrument_SetNoteOffEventCallback(handle_, id_, nullptr,
+                                                    nullptr);
   }
 
   /// Sets note on callback.
   ///
   /// @param callback Note on callback.
   /// @return Status.
-  Status SetNoteOnCallback(NoteOnCallback callback) {
+  Status SetNoteOnEventCallback(NoteOnEventCallback callback) {
     if (callback) {
       note_on_callback_ = std::move(callback);
-      return BarelyInstrument_SetNoteOnCallback(
+      return BarelyInstrument_SetNoteOnEventCallback(
           handle_, id_,
           [](double pitch, void* user_data) {
-            (*static_cast<NoteOnCallback*>(user_data))(pitch);
+            (*static_cast<NoteOnEventCallback*>(user_data))(pitch);
           },
           static_cast<void*>(&note_on_callback_));
     }
-    return BarelyInstrument_SetNoteOnCallback(handle_, id_, nullptr, nullptr);
+    return BarelyInstrument_SetNoteOnEventCallback(handle_, id_, nullptr,
+                                                   nullptr);
   }
 
   /// Starts note.
@@ -1187,10 +1229,17 @@ class Instrument {
   BarelyId id_ = BarelyId_kInvalid;
 
   // Note off callback.
-  NoteOffCallback note_off_callback_;
+  NoteOffEventCallback note_off_callback_;
 
   // Note on callback.
-  NoteOnCallback note_on_callback_;
+  NoteOnEventCallback note_on_callback_;
+};
+
+/// Task.
+class Task {
+ public:
+  /// Callback.
+  using Callback = std::function<void()>;
 };
 
 /// Task reference.
@@ -1290,17 +1339,17 @@ class Performer {
   /// @param position Task position in beats.
   /// @param is_one_off True if one-off task, false otherwise.
   /// @return Task reference.
-  TaskReference CreateTask(TaskCallback callback, double position,
+  TaskReference CreateTask(Task::Callback callback, double position,
                            bool is_one_off = false) {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) {
-              *state = new TaskCallback(
-                  std::move(*static_cast<TaskCallback*>(user_data)));
+              *state = new Task::Callback(
+                  std::move(*static_cast<Task::Callback*>(user_data)));
             },
-            [](void** state) { delete static_cast<TaskCallback*>(*state); },
+            [](void** state) { delete static_cast<Task::Callback*>(*state); },
             [](void** state) {
-              if (const auto& callback = *static_cast<TaskCallback*>(*state);
+              if (const auto& callback = *static_cast<Task::Callback*>(*state);
                   callback) {
                 callback();
               }

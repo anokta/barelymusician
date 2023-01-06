@@ -61,8 +61,8 @@ namespace Barely {
       /// @param noteOnCallback Reference to note on callback.
       /// @return Instrument identifier.
       public static Int64 Instrument_Create(Instrument instrument,
-                                            Instrument.NoteOffCallback noteOffCallback,
-                                            Instrument.NoteOnCallback noteOnCallback) {
+                                            Instrument.NoteOffEventCallback noteOffCallback,
+                                            Instrument.NoteOnEventCallback noteOnCallback) {
         Int64 instrumentId = InvalidId;
         Int32 frameRate = AudioSettings.outputSampleRate;
         Status status = Status.UNIMPLEMENTED;
@@ -81,9 +81,9 @@ namespace Barely {
         }
         if (IsOk(status)) {
           instrumentId = Marshal.ReadInt64(_int64Ptr);
-          BarelyUnityInstrument_SetNoteOffCallback(
+          BarelyUnityInstrument_SetNoteOffEventCallback(
               _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOffCallback));
-          BarelyUnityInstrument_SetNoteOnCallback(
+          BarelyUnityInstrument_SetNoteOnEventCallback(
               _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOnCallback));
         } else if (_handle != IntPtr.Zero) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "': " + status);
@@ -530,15 +530,15 @@ namespace Barely {
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
                                                             [In] byte[] data, Int32 size);
 
-      [DllImport(pluginName, EntryPoint = "BarelyUnityInstrument_SetNoteOffCallback")]
-      private static extern Status BarelyUnityInstrument_SetNoteOffCallback(IntPtr handle,
-                                                                            Int64 instrumentId,
-                                                                            IntPtr callback);
+      [DllImport(pluginName, EntryPoint = "BarelyUnityInstrument_SetNoteOffEventCallback")]
+      private static extern Status BarelyUnityInstrument_SetNoteOffEventCallback(IntPtr handle,
+                                                                                 Int64 instrumentId,
+                                                                                 IntPtr callback);
 
-      [DllImport(pluginName, EntryPoint = "BarelyUnityInstrument_SetNoteOnCallback")]
-      private static extern Status BarelyUnityInstrument_SetNoteOnCallback(IntPtr handle,
-                                                                           Int64 instrumentId,
-                                                                           IntPtr callback);
+      [DllImport(pluginName, EntryPoint = "BarelyUnityInstrument_SetNoteOnEventCallback")]
+      private static extern Status BarelyUnityInstrument_SetNoteOnEventCallback(IntPtr handle,
+                                                                                Int64 instrumentId,
+                                                                                IntPtr callback);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControl")]
       private static extern Status BarelyInstrument_SetControl(IntPtr handle, Int64 instrumentId,

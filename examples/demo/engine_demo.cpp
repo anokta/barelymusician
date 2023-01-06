@@ -195,10 +195,10 @@ int main(int /*argc*/, char* argv[]) {
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](auto index, Instrument* instrument) {
-    instrument->SetNoteOffCallback([index](double pitch) {
+    instrument->SetNoteOffEventCallback([index](double pitch) {
       ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
-    instrument->SetNoteOnCallback([index](double pitch, double intensity) {
+    instrument->SetNoteOnEventCallback([index](double pitch, double intensity) {
       ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", "
                    << intensity << ")";
     });

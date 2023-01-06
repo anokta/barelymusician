@@ -29,18 +29,18 @@ BarelyStatus BarelyUnityInstrument_Create(BarelyMusicianHandle handle,
   return BarelyStatus_kUnimplemented;
 }
 
-BarelyStatus BarelyUnityInstrument_SetNoteOffCallback(
+BarelyStatus BarelyUnityInstrument_SetNoteOffEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOffCallback callback) {
-  return BarelyInstrument_SetNoteOffCallback(handle, instrument_id, callback,
-                                             nullptr);
+    BarelyInstrument_NoteOffEventCallback callback) {
+  return BarelyInstrument_SetNoteOffEventCallback(handle, instrument_id,
+                                                  callback, nullptr);
 }
 
-BarelyStatus BarelyUnityInstrument_SetNoteOnCallback(
+BarelyStatus BarelyUnityInstrument_SetNoteOnEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOnCallback callback) {
-  return BarelyInstrument_SetNoteOnCallback(handle, instrument_id, callback,
-                                            nullptr);
+    BarelyInstrument_NoteOnEventCallback callback) {
+  return BarelyInstrument_SetNoteOnEventCallback(handle, instrument_id,
+                                                 callback, nullptr);
 }
 
 }  // extern "C"

@@ -67,7 +67,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetNoteOnCallback(
+  instrument.SetNoteOnEventCallback(
       [](double pitch, [[maybe_unused]] double intensity) {
         ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
       });
@@ -78,7 +78,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLoopLength(5.0);
 
   const auto play_note_fn = [&](double duration,
-                                double pitch) -> Performer::TaskCallback {
+                                double pitch) -> Performer::Task::Callback {
     return [&instrument, &performer, pitch, duration]() {
       instrument.StartNote(pitch, kGain);
       performer.ScheduleOneOffTask(
@@ -87,7 +87,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     };
   };
 
-  std::vector<std::pair<double, Performer::TaskCallback>> score;
+  std::vector<std::pair<double, Performer::Task::Callback>> score;
   score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
   score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
   score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "barelymusician/engine/control.h"
+#include "barelymusician/engine/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -19,11 +20,11 @@ constexpr int kChannelCount = 1;
 constexpr int kFrameCount = 4;
 
 // Returns test instrument definition that produces constant output per note.
-Instrument::Definition GetTestDefinition() {
+InstrumentDefinition GetTestDefinition() {
   static const std::vector<Control::Definition> control_definitions = {
       Control::Definition{15.0, 10.0, 20.0},
   };
-  return Instrument::Definition(
+  return InstrumentDefinition(
       [](void** state, int /*frame_rate*/) {
         *state = static_cast<void*>(new double{0.0});
       },
@@ -53,30 +54,36 @@ Instrument::Definition GetTestDefinition() {
 TEST(InstrumentTest, GetControl) {
   Instrument instrument(GetTestDefinition(), kFrameRate);
 
-  const auto* control = instrument.GetControl(0);
-  EXPECT_THAT(control, NotNull());
+  const auto control_or = instrument.GetControl(0);
+  ASSERT_TRUE(control_or.IsOk());
+  const auto& control = control_or.GetValue().get();
 
-  const auto& definition = control->GetDefinition();
+  const auto& definition = control.GetDefinition();
   EXPECT_DOUBLE_EQ(definition.default_value, 15.0);
   EXPECT_DOUBLE_EQ(definition.min_value, 10.0);
   EXPECT_DOUBLE_EQ(definition.max_value, 20.0);
 
-  EXPECT_DOUBLE_EQ(control->GetValue(), 15.0);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
-  EXPECT_TRUE(instrument.SetControl(0, 20.0, 0.0, 0.0));
-  EXPECT_DOUBLE_EQ(control->GetValue(), 20.0);
+  EXPECT_EQ(instrument.SetControl(0, 20.0, 0.0, 0.0), Status::kOk);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
 
-  EXPECT_TRUE(instrument.ResetControl(0, 0.0));
-  EXPECT_DOUBLE_EQ(control->GetValue(), 15.0);
+  EXPECT_EQ(instrument.ResetControl(0, 0.0), Status::kOk);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
-  EXPECT_TRUE(instrument.SetControl(0, 50.0, 0.0, 0.0));
-  EXPECT_DOUBLE_EQ(control->GetValue(), 20.0);
+  EXPECT_EQ(instrument.SetControl(0, 50.0, 0.0, 0.0), Status::kOk);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
 
   instrument.ResetAllControls(0.0);
-  EXPECT_DOUBLE_EQ(control->GetValue(), 15.0);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   // Control does not exist.
-  EXPECT_THAT(instrument.GetControl(1), IsNull());
+  const auto invalid_control_or = instrument.GetControl(1);
+  ASSERT_FALSE(invalid_control_or.IsOk());
+  EXPECT_EQ(invalid_control_or.GetErrorStatus(), Status::kInvalidArgument);
+
+  EXPECT_EQ(instrument.SetControl(1, 2.0, 0.0, 0.0), Status::kInvalidArgument);
+  EXPECT_EQ(instrument.ResetControl(1, 0.0), Status::kInvalidArgument);
 }
 
 // Tests that instrument plays a single note as expected.

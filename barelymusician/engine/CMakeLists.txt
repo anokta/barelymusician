@@ -41,7 +41,9 @@ target_link_libraries(
   control
   message
   message_queue
+  status
   include
+  find_or_null
 )
 
 add_library(
@@ -73,6 +75,11 @@ target_link_libraries(
   performer
   id
   find_or_null
+)
+
+add_library(
+  status INTERFACE
+  status.h
 )
 
 add_library(
@@ -119,6 +126,7 @@ target_link_libraries(
   instrument_test
   control
   instrument
+  status
   gmock
   gtest_main
 )

@@ -2,25 +2,33 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
 #include <cstddef>
-#include <unordered_set>
+#include <functional>
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/control.h"
 #include "barelymusician/engine/message_queue.h"
+#include "barelymusician/engine/status.h"
 
 namespace barely::internal {
+
+/// Instrument definition alias.
+using InstrumentDefinition = barely::InstrumentDefinition;
 
 /// Class that wraps instrument.
 class Instrument {
  public:
-  /// Definition alias.
-  using Definition = barely::InstrumentDefinition;
+  /// Control event callback alias.
+  using ControlEventCallback = barely::Instrument::ControlEventCallback;
 
-  /// Note off callback alias.
+  /// Note control event callback alias.
+  using NoteControlEventCallback = barely::Instrument::NoteControlEventCallback;
+
+  /// Note off event callback alias.
   using NoteOffEventCallback = barely::Instrument::NoteOffEventCallback;
 
-  /// Note on callback alias.
+  /// Note on event callback alias.
   using NoteOnEventCallback = barely::Instrument::NoteOnEventCallback;
 
   /// Constructs new `Instrument`.
@@ -28,7 +36,7 @@ class Instrument {
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hz.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const Definition& definition, int frame_rate) noexcept;
+  Instrument(const InstrumentDefinition& definition, int frame_rate) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -42,8 +50,17 @@ class Instrument {
   /// Returns control.
   ///
   /// @param index Control index.
-  /// @return Pointer to control.
-  [[nodiscard]] const Control* GetControl(int index) const noexcept;
+  /// @return Reference to control or error status.
+  [[nodiscard]] StatusOr<std::reference_wrapper<const Control>> GetControl(
+      int index) const noexcept;
+
+  /// Returns note control.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Control index.
+  /// @return Reference to note control or error status.
+  [[nodiscard]] StatusOr<std::reference_wrapper<const Control>> GetNoteControl(
+      double pitch, int index) const noexcept;
 
   /// Returns whether note is active or not.
   ///
@@ -66,12 +83,27 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void ResetAllControls(double timestamp) noexcept;
 
+  /// Resets all note controls to default value at timestamp.
+  ///
+  /// @param pitch Note pitch.
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status ResetAllNoteControls(double pitch, double timestamp) noexcept;
+
   /// Resets control to default value at timestamp.
   ///
   /// @param index Control index.
   /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool ResetControl(int index, double timestamp) noexcept;
+  /// @return Status.
+  Status ResetControl(int index, double timestamp) noexcept;
+
+  /// Resets note control to default value at timestamp.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Control index.
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status ResetNoteControl(double pitch, int index, double timestamp) noexcept;
 
   /// Sets all notes off at timestamp.
   ///
@@ -85,9 +117,14 @@ class Instrument {
   /// @param value Control value.
   /// @param slope_per_second Control slope in value change per second.
   /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetControl(int index, double value, double slope_per_second,
-                  double timestamp) noexcept;
+  /// @return Status.
+  Status SetControl(int index, double value, double slope_per_second,
+                    double timestamp) noexcept;
+
+  /// Sets control event callback.
+  ///
+  /// @param callback Control event callback.
+  void SetControlEventCallback(ControlEventCallback callback) noexcept;
 
   /// Sets data at timestamp.
   ///
@@ -102,9 +139,14 @@ class Instrument {
   /// @param value Note control value.
   /// @param slope_per_second Note control slope in value change per second.
   /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int index, double value,
-                      double slope_per_second, double timestamp) noexcept;
+  /// @return Status.
+  Status SetNoteControl(double pitch, int index, double value,
+                        double slope_per_second, double timestamp) noexcept;
+
+  /// Sets note control event callback.
+  ///
+  /// @param callback Note control event callback.
+  void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept;
 
   /// Sets note off at timestamp.
   ///
@@ -112,9 +154,9 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void SetNoteOff(double pitch, double timestamp) noexcept;
 
-  /// Sets note off callback.
+  /// Sets note off event callback.
   ///
-  /// @param callback Note off callback.
+  /// @param callback Note off event callback.
   void SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept;
 
   /// Sets note on at timestamp.
@@ -124,59 +166,67 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetNoteOn(double pitch, double timestamp) noexcept;
 
-  /// Sets note on callback.
+  /// Sets note on event callback.
   ///
-  /// @param callback Note on callback.
+  /// @param callback Note on event callback.
   void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
 
+  // TODO(#109): Needs an update mechanism for control values with slope.
+
  private:
-  // Returns corresponding frames for given `seconds`.
+  // Returns corresponding frames for a given number of `seconds`.
   int GetFrames(double seconds) const noexcept;
 
-  // Returns corresponding seconds for given `frames`.
+  // Returns corresponding seconds for a given number of `frames`.
   double GetSeconds(int frames) const noexcept;
 
   // Returns corresponding slope per frame for a given `slope_per_second`.
   double GetSlopePerFrame(double slope_per_second) const noexcept;
 
-  // Note off callback.
-  NoteOffEventCallback note_off_callback_;
+  // Destroy callback.
+  const InstrumentDefinition::DestroyCallback destroy_callback_;
 
-  // Note on callback.
-  NoteOnEventCallback note_on_callback_;
+  // Process callback.
+  const InstrumentDefinition::ProcessCallback process_callback_;
+
+  // Set control callback.
+  const InstrumentDefinition::SetControlCallback set_control_callback_;
+
+  // Set data callback.
+  const InstrumentDefinition::SetDataCallback set_data_callback_;
+
+  // Set note control callback.
+  const InstrumentDefinition::SetNoteControlCallback set_note_control_callback_;
+
+  // Set note off callback.
+  const InstrumentDefinition::SetNoteOffCallback set_note_off_callback_;
+
+  // Set note on callback.
+  const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
+
+  // Sampling rate in hz.
+  const int frame_rate_;
+
+  // List of default note controls.
+  const std::vector<Control> default_note_controls_;
 
   // List of controls.
   std::vector<Control> controls_;
 
-  // List of note controls.
-  std::vector<Control> note_controls_;
+  // Map of active note controls by note pitches.
+  std::unordered_map<double, std::vector<Control>> note_controls_;
 
-  // List of active note pitches.
-  std::unordered_set<double> pitches_;
+  // Control event callback.
+  ControlEventCallback control_event_callback_;
 
-  // Destroy callback.
-  Definition::DestroyCallback destroy_callback_;
+  // Note control event callback.
+  NoteControlEventCallback note_control_event_callback_;
 
-  // Process callback.
-  Definition::ProcessCallback process_callback_;
+  // Note off event callback.
+  NoteOffEventCallback note_off_event_callback_;
 
-  // Set control callback.
-  Definition::SetControlCallback set_control_callback_;
-
-  // Set data callback.
-  Definition::SetDataCallback set_data_callback_;
-
-  // Set note control callback.
-  Definition::SetNoteControlCallback set_note_control_callback_;
-
-  // Set note off callback.
-  Definition::SetNoteOffCallback set_note_off_callback_;
-
-  // Set note on callback.
-  Definition::SetNoteOnCallback set_note_on_callback_;
-
-  // Sampling rate in hz.
-  int frame_rate_;
+  // Note on event callback.
+  NoteOnEventCallback note_on_event_callback_;
 
   // State.
   void* state_ = nullptr;

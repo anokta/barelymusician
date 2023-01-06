@@ -41,7 +41,9 @@ cc_library(
         ":control",
         ":message",
         ":message_queue",
+        ":status",
         "//barelymusician:include",
+        "//barelymusician/common:find_or_null",
     ],
 )
 
@@ -75,6 +77,11 @@ cc_library(
 #         "//barelymusician/common:find_or_null",
 #     ],
 # )
+
+cc_library(
+    name = "status",
+    hdrs = ["status.h"],
+)
 
 cc_library(
     name = "task",
@@ -113,6 +120,7 @@ cc_test(
     deps = [
         ":control",
         ":instrument",
+        ":status",
         "@googletest//:gtest_main",
     ],
 )

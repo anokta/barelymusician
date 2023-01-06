@@ -9,7 +9,7 @@ namespace barely::internal {
 using Id = BarelyId;
 
 /// Invalid identifier.
-constexpr Id kInvalid = BarelyId_kInvalid;
+inline constexpr Id kInvalid = BarelyId_kInvalid;
 
 }  // namespace barely::internal
 

@@ -32,8 +32,7 @@ Engine::~Engine() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::CreateInstrument(Id instrument_id,
-                              Instrument::Definition definition,
+bool Engine::CreateInstrument(Id instrument_id, InstrumentDefinition definition,
                               int frame_rate) noexcept {
   assert(instrument_id > kInvalid);
   assert(frame_rate >= 0);

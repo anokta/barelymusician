@@ -25,11 +25,11 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 8;
 
 // Returns test instrument definition that produces constant output that is set.
-Instrument::Definition GetTestInstrumentDefinition() {
+InstrumentDefinition GetTestInstrumentDefinition() {
   static const std::vector<Control::Definition> control_definitions = {
       Control::Definition{0.0, -10.0, 10.0},
   };
-  return Instrument::Definition(
+  return InstrumentDefinition(
       [](void** state, int /*frame_rate*/) {
         *state = reinterpret_cast<void*>(new double{0.0});
       },

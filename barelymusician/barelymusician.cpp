@@ -69,11 +69,32 @@ BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
   if (const auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    if (const auto* control = instrument->GetControl(index)) {
-      *out_value = control->GetValue();
+    const auto control_or = instrument->GetControl(index);
+    if (control_or.IsOk()) {
+      *out_value = control_or.GetValue().get().GetValue();
       return BarelyStatus_kOk;
     }
-    return BarelyStatus_kInvalidArgument;
+    return control_or.GetErrorStatus();
+  }
+  return BarelyStatus_kNotFound;
+}
+
+BarelyStatus BarelyInstrument_GetNoteControl(BarelyMusicianHandle handle,
+                                             BarelyId instrument_id,
+                                             double pitch, int32_t index,
+                                             double* out_value) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
+  if (index < 0) return BarelyStatus_kInvalidArgument;
+  if (!out_value) return BarelyStatus_kInvalidArgument;
+
+  if (const auto* instrument = handle->engine.GetInstrument(instrument_id)) {
+    const auto note_control_or = instrument->GetNoteControl(pitch, index);
+    if (note_control_or.IsOk()) {
+      *out_value = note_control_or.GetValue().get().GetValue();
+      return BarelyStatus_kOk;
+    }
+    return note_control_or.GetErrorStatus();
   }
   return BarelyStatus_kNotFound;
 }
@@ -132,8 +153,8 @@ BarelyStatus BarelyInstrument_ResetAllNoteControls(
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    // TODO(#75): Implement note control support.
-    return BarelyStatus_kUnimplemented;
+    return instrument->ResetAllNoteControls(pitch,
+                                            handle->engine.GetTimestamp());
   }
   return BarelyStatus_kNotFound;
 }
@@ -146,25 +167,21 @@ BarelyStatus BarelyInstrument_ResetControl(BarelyMusicianHandle handle,
   if (index < 0) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    if (instrument->ResetControl(index, handle->engine.GetTimestamp())) {
-      return BarelyStatus_kOk;
-    }
-    return BarelyStatus_kInvalidArgument;
+    return instrument->ResetControl(index, handle->engine.GetTimestamp());
   }
   return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelyInstrument_ResetNoteControl(BarelyMusicianHandle handle,
                                                BarelyId instrument_id,
-                                               [[maybe_unused]] double pitch,
-                                               int32_t index) {
+                                               double pitch, int32_t index) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (index < 0) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    // TODO(#75): Implement note control support.
-    return BarelyStatus_kUnimplemented;
+    return instrument->ResetNoteControl(pitch, index,
+                                        handle->engine.GetTimestamp());
   }
   return BarelyStatus_kNotFound;
 }
@@ -183,31 +200,34 @@ BarelyStatus BarelyInstrument_SetAllNotesOff(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_SetControl(BarelyMusicianHandle handle,
                                          BarelyId instrument_id, int32_t index,
-                                         double value, double slope) {
+                                         double value, double slope_per_beat) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (index < 0) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    if (instrument->SetControl(index, value, slope,
-                               handle->engine.GetTimestamp())) {
-      return BarelyStatus_kOk;
-    }
-    return BarelyStatus_kInvalidArgument;
+    // TODO(#109): Convert `slope_per_beat` to slope per second.
+    return instrument->SetControl(index, value, slope_per_beat,
+                                  handle->engine.GetTimestamp());
   }
   return BarelyStatus_kNotFound;
 }
 
 BarelyStatus BarelyInstrument_SetControlEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    [[maybe_unused]] BarelyInstrument_ControlEventCallback callback,
-    [[maybe_unused]] void* user_data) {
+    BarelyInstrument_ControlEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    // TODO(#109): Implement.
-    return BarelyStatus_kUnimplemented;
+    if (callback) {
+      instrument->SetControlEventCallback(
+          [callback, user_data](int32_t index, double value) {
+            callback(index, value, user_data);
+          });
+    } else {
+      instrument->SetControlEventCallback(nullptr);
+    }
   }
   return BarelyStatus_kNotFound;
 }
@@ -228,17 +248,19 @@ BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
   return BarelyStatus_kNotFound;
 }
 
-BarelyStatus BarelyInstrument_SetNoteControl(
-    BarelyMusicianHandle handle, BarelyId instrument_id,
-    [[maybe_unused]] double pitch, int32_t index, [[maybe_unused]] double value,
-    [[maybe_unused]] double slope_per_beat) {
+BarelyStatus BarelyInstrument_SetNoteControl(BarelyMusicianHandle handle,
+                                             BarelyId instrument_id,
+                                             double pitch, int32_t index,
+                                             double value,
+                                             double slope_per_beat) {
   if (!handle) return BarelyStatus_kNotFound;
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (index < 0) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    // TODO(#75): Implement note control support.
-    return BarelyStatus_kUnimplemented;
+    // TODO(#109): Convert `slope_per_beat` to slope per second.
+    return instrument->SetNoteControl(pitch, index, value, slope_per_beat,
+                                      handle->engine.GetTimestamp());
   }
   return BarelyStatus_kNotFound;
 }
@@ -251,8 +273,14 @@ BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
   if (instrument_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
 
   if (auto* instrument = handle->engine.GetInstrument(instrument_id)) {
-    // TODO(#109): Implement.
-    return BarelyStatus_kUnimplemented;
+    if (callback) {
+      instrument->SetNoteControlEventCallback(
+          [callback, user_data](double pitch, int32_t index, double value) {
+            callback(pitch, index, value, user_data);
+          });
+    } else {
+      instrument->SetNoteControlEventCallback(nullptr);
+    }
   }
   return BarelyStatus_kNotFound;
 }

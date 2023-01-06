@@ -37,7 +37,7 @@ class Engine {
   /// @param frame_rate Frame rate in hz.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateInstrument(Id instrument_id, Instrument::Definition definition,
+  bool CreateInstrument(Id instrument_id, InstrumentDefinition definition,
                         int frame_rate) noexcept;
 
   /// Creates new performer.

@@ -26,7 +26,7 @@ constexpr double kSecondsFromMinutes = 60.0;
 
 Engine::~Engine() noexcept {
   for (auto& [instrument_id, instrument] : instruments_) {
-    instrument->StopAllNotes(timestamp_);
+    instrument->SetAllNotesOff(timestamp_);
   }
   instrument_refs_.Update({});
 }
@@ -66,7 +66,7 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
   if (const auto it = instruments_.find(instrument_id);
       it != instruments_.end()) {
     auto instrument = std::move(it->second);
-    instrument->StopAllNotes(timestamp_);
+    instrument->SetAllNotesOff(timestamp_);
     instruments_.erase(it);
     UpdateInstrumentReferenceMap();
     return true;

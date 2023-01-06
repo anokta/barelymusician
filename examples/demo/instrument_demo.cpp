@@ -98,7 +98,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
-      instrument.StopAllNotes();
+      instrument.SetAllNotesOff();
       if (upper_key == 'Z') {
         --offset_octaves;
       } else {
@@ -112,7 +112,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument.StartNote(offset_octaves + *pitch);
+      instrument.SetNoteOn(offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -121,7 +121,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto key_up_callback = [&](const InputManager::Key& key) {
     // Stop note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument.StopNote(offset_octaves + *pitch);
+      instrument.SetNoteOff(offset_octaves + *pitch);
     }
   };
   input_manager.SetKeyUpCallback(key_up_callback);

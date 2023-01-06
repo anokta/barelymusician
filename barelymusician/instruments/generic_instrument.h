@@ -14,7 +14,7 @@ class GenericInstrument {
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~GenericInstrument() = default;
 
-  /// Processes the next output buffer.
+  /// Processes the next output samples.
   ///
   /// @param output_samples Interleaved array of output samples.
   /// @param channel_count Number of output channels.
@@ -45,12 +45,12 @@ class GenericInstrument {
   virtual void SetNoteControl(double pitch, int index, double value,
                               double slope_per_frame) noexcept = 0;
 
-  /// Stops note.
+  /// Sets note off.
   ///
   /// @param pitch Note pitch.
   virtual void SetNoteOff(double pitch) noexcept = 0;
 
-  /// Starts note.
+  /// Sets note on.
   ///
   /// @param pitch Note pitch.
   virtual void SetNoteOn(double pitch) noexcept = 0;

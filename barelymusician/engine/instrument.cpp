@@ -143,6 +143,17 @@ bool Instrument::ResetControl(int index, double timestamp) noexcept {
   return false;
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Instrument::SetAllNotesOff(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
+  for (const double pitch : std::exchange(pitches_, {})) {
+    if (note_off_callback_) {
+      note_off_callback_(pitch);
+    }
+    message_queue_.Add(timestamp, NoteOffMessage{pitch});
+  }
+}
+
 bool Instrument::SetControl(int index, double value, double slope_per_second,
                             double timestamp) noexcept {
   assert(index >= 0);
@@ -174,17 +185,23 @@ bool Instrument::SetNoteControl([[maybe_unused]] double pitch, int index,
   return false;
 }
 
+void Instrument::SetNoteOff(double pitch, double timestamp) noexcept {
+  assert(timestamp >= 0.0);
+  if (pitches_.erase(pitch) > 0) {
+    if (note_off_callback_) {
+      note_off_callback_(pitch);
+    }
+    message_queue_.Add(timestamp, NoteOffMessage{pitch});
+  }
+}
+
 void Instrument::SetNoteOffEventCallback(
     NoteOffEventCallback callback) noexcept {
   note_off_callback_ = std::move(callback);
 }
 
-void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
-  note_on_callback_ = std::move(callback);
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::StartNote(double pitch, double timestamp) noexcept {
+void Instrument::SetNoteOn(double pitch, double timestamp) noexcept {
   assert(timestamp >= 0.0);
   if (pitches_.insert(pitch).second) {
     if (note_on_callback_) {
@@ -194,25 +211,8 @@ void Instrument::StartNote(double pitch, double timestamp) noexcept {
   }
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::StopAllNotes(double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  for (const double pitch : std::exchange(pitches_, {})) {
-    if (note_off_callback_) {
-      note_off_callback_(pitch);
-    }
-    message_queue_.Add(timestamp, NoteOffMessage{pitch});
-  }
-}
-
-void Instrument::StopNote(double pitch, double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  if (pitches_.erase(pitch) > 0) {
-    if (note_off_callback_) {
-      note_off_callback_(pitch);
-    }
-    message_queue_.Add(timestamp, NoteOffMessage{pitch});
-  }
+void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
+  note_on_callback_ = std::move(callback);
 }
 
 int Instrument::GetFrames(double seconds) const noexcept {

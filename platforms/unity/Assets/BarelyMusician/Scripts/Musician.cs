@@ -133,7 +133,7 @@ namespace Barely {
         return false;
       }
 
-      /// Processes next instrument output buffer.
+      /// Processes next instrument output samples.
       ///
       /// @param instrument Instrument.
       /// @param outputSamples Output samples.
@@ -180,14 +180,14 @@ namespace Barely {
         }
       }
 
-      /// Sets instrument data.
+      /// Sets all instrument notes off.
       ///
       /// @param instrument Instrument.
-      /// @param data Data.
-      public static void Instrument_SetData(Instrument instrument, byte[] data) {
-        Status status = BarelyInstrument_SetData(Handle, instrument.Id, data, data.Length);
+      /// @return True if success, false otherwise.
+      public static void Instrument_SetAllNotesOff(Instrument instrument) {
+        Status status = BarelyInstrument_SetAllNotesOff(Handle, instrument.Id);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to set instrument data to " + data + " for '" + instrument.name +
+          Debug.LogError("Failed to stop all instrument notes for '" + instrument.name +
                          "': " + status);
         }
       }
@@ -207,42 +207,41 @@ namespace Barely {
         }
       }
 
-      /// Starts instrument note.
+      /// Sets instrument data.
       ///
       /// @param instrument Instrument.
-      /// @param pitch Note pitch.
-      /// @param intensity Note intensity.
-      public static void Instrument_StartNote(Instrument instrument, double pitch,
-                                              double intensity) {
-        Status status = BarelyInstrument_StartNote(Handle, instrument.Id, pitch, intensity);
+      /// @param data Data.
+      public static void Instrument_SetData(Instrument instrument, byte[] data) {
+        Status status = BarelyInstrument_SetData(Handle, instrument.Id, data, data.Length);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
-                         " intensity for '" + instrument.name + "': " + status);
-        }
-      }
-
-      /// Stops all instrument notes.
-      ///
-      /// @param instrument Instrument.
-      /// @return True if success, false otherwise.
-      public static void Instrument_StopAllNotes(Instrument instrument) {
-        Status status = BarelyInstrument_StopAllNotes(Handle, instrument.Id);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to stop all instrument notes for '" + instrument.name +
+          Debug.LogError("Failed to set instrument data to " + data + " for '" + instrument.name +
                          "': " + status);
         }
       }
 
-      /// Stops instrument note.
+      /// Sets instrument note off.
       ///
       /// @param instrument Instrument.
       /// @param pitch Note pitch.
       /// @return True if success, false otherwise.
-      public static void Instrument_StopNote(Instrument instrument, double pitch) {
-        Status status = BarelyInstrument_StopNote(Handle, instrument.Id, pitch);
+      public static void Instrument_SetNoteOff(Instrument instrument, double pitch) {
+        Status status = BarelyInstrument_SetNoteOff(Handle, instrument.Id, pitch);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to stop instrument note " + pitch + " for '" + instrument.name +
                          "': " + status);
+        }
+      }
+
+      /// Sets instrument note on.
+      ///
+      /// @param instrument Instrument.
+      /// @param pitch Note pitch.
+      public static void Instrument_SetNoteOn(Instrument instrument, double pitch,
+                                              double intensity) {
+        Status status = BarelyInstrument_SetNoteOn(Handle, instrument.Id, pitch, intensity);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
+                         " intensity for '" + instrument.name + "': " + status);
         }
       }
 
@@ -545,16 +544,17 @@ namespace Barely {
                                                                Int32 index, double value,
                                                                double slope);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_StartNote")]
-      private static extern Status BarelyInstrument_StartNote(IntPtr handle, Int64 instrumentId,
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
+      private static extern Status BarelyInstrument_SetNoteOn(IntPtr handle, Int64 instrumentId,
                                                               double pitch, double intensity);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_StopAllNotes")]
-      private static extern Status BarelyInstrument_StopAllNotes(IntPtr handle, Int64 instrumentId);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetAllNotesOff")]
+      private static extern Status BarelyInstrument_SetAllNotesOff(IntPtr handle,
+                                                                   Int64 instrumentId);
 
-      [DllImport(pluginName, EntryPoint = "BarelyInstrument_StopNote")]
-      private static extern Status BarelyInstrument_StopNote(IntPtr handle, Int64 instrumentId,
-                                                             double pitch);
+      [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
+      private static extern Status BarelyInstrument_SetNoteOff(IntPtr handle, Int64 instrumentId,
+                                                               double pitch);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
       private static extern Status BarelyMusician_Create(IntPtr outHandle);

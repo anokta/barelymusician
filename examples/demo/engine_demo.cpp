@@ -81,10 +81,10 @@ void ScheduleNote(double position, double duration, double pitch,
                   double intensity, Instrument& instrument,
                   Sequencer& sequencer) {
   sequencer.ScheduleOneOffTask(position, [pitch, intensity, &instrument]() {
-    instrument.StartNote(pitch, intensity);
+    instrument.SetNoteOn(pitch, intensity);
   });
   sequencer.ScheduleOneOffTask(position + duration, [pitch, &instrument]() {
-    instrument.StopNote(pitch);
+    instrument.SetNoteOff(pitch);
   });
 }
 
@@ -382,7 +382,7 @@ int main(int /*argc*/, char* argv[]) {
             sequencer.Stop();
           }
           for (auto& instrument : instruments) {
-            instrument.StopAllNotes();
+            instrument.SetAllNotesOff();
           }
           ConsoleLog() << "Stopped playback";
         } else {

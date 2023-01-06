@@ -81,15 +81,15 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLooping(true);
 
   const auto play_note_fn = [&](int scale_index,
-                                double duration) -> Performer::Task::Callback {
+                                double duration) -> Performer::TaskCallback {
     const double pitch =
         barely::kPitchD3 +
         barely::GetPitch(barely::kPitchMajorScale, scale_index);
     return [&instrument, &performer, duration, pitch]() {
-      instrument.StartNote(pitch, kGain);
+      instrument.SetNoteOn(pitch, kGain);
       performer.ScheduleOneOffTask(
           performer.GetPosition() + duration,
-          [&instrument, pitch]() { instrument.StopNote(pitch); });
+          [&instrument, pitch]() { instrument.SetNoteOff(pitch); });
     };
   };
 
@@ -134,7 +134,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '1');
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
-      instrument.StopAllNotes();
+      instrument.SetAllNotesOff();
       performer.SetLoopBeginPosition(triggers[index].first);
       performer.SetLoopLength(triggers[index].second);
       performer.SetPosition(triggers[index].first);
@@ -146,7 +146,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     switch (std::toupper(key)) {
       case ' ':
         if (performer.IsPlaying()) {
-          instrument.StopAllNotes();
+          instrument.SetAllNotesOff();
           performer.Stop();
           ConsoleLog() << "Stopped playback";
         } else {

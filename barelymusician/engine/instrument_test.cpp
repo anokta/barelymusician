@@ -98,8 +98,8 @@ TEST(InstrumentTest, PlaySingleNote) {
     }
   }
 
-  // Start note.
-  instrument.StartNote(kPitch, kTimestamp);
+  // Set note on.
+  instrument.SetNoteOn(kPitch, kTimestamp);
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -110,8 +110,8 @@ TEST(InstrumentTest, PlaySingleNote) {
     }
   }
 
-  // Stop note.
-  instrument.StopNote(kPitch, kTimestamp);
+  // Set note off.
+  instrument.SetNoteOff(kPitch, kTimestamp);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -139,8 +139,8 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Start new note per each frame in the buffer.
   for (int i = 0; i < kFrameCount; ++i) {
-    instrument.StartNote(static_cast<double>(i), static_cast<double>(i));
-    instrument.StopNote(static_cast<double>(i), static_cast<double>(i + 1));
+    instrument.SetNoteOn(static_cast<double>(i), static_cast<double>(i));
+    instrument.SetNoteOff(static_cast<double>(i), static_cast<double>(i + 1));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -174,17 +174,17 @@ TEST(InstrumentTest, SetNoteCallbacks) {
       [&](double pitch) { note_on_pitch = pitch; });
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
 
-  instrument.StartNote(kPitch, 10.0);
+  instrument.SetNoteOn(kPitch, 10.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
 
   // This should not trigger the callback since the note is already on.
   note_on_pitch = 0.0;
-  instrument.StartNote(kPitch, 15.0);
+  instrument.SetNoteOn(kPitch, 15.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
 
   // Trigger note on callback again with another note.
   note_on_pitch = 0.0;
-  instrument.StartNote(kPitch + 2.0, 15.0);
+  instrument.SetNoteOn(kPitch + 2.0, 15.0);
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch + 2.0);
 
   // Trigger note off callback.
@@ -193,21 +193,21 @@ TEST(InstrumentTest, SetNoteCallbacks) {
       [&](double pitch) { note_off_pitch = pitch; });
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
-  instrument.StopNote(kPitch, 20.0);
+  instrument.SetNoteOff(kPitch, 20.0);
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
 
   // This should not trigger the callback since the note is already off.
   note_off_pitch = 0.0;
-  instrument.StopNote(kPitch, 25.0);
+  instrument.SetNoteOff(kPitch, 25.0);
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Finally, trigger the note off callback with the remaining note.
-  instrument.StopAllNotes(25.0);
+  instrument.SetAllNotesOff(25.0);
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch + 2.0);
 }
 
 // Tests that instrument stops all notes as expected.
-TEST(InstrumentTest, StopAllNotes) {
+TEST(InstrumentTest, SetAllNotesOff) {
   const std::vector<double> kPitches = {1.0, 2.0, 3.0};
 
   Instrument instrument(GetTestDefinition(), kFrameRate);
@@ -217,12 +217,12 @@ TEST(InstrumentTest, StopAllNotes) {
 
   // Start multiple notes.
   for (const double pitch : kPitches) {
-    instrument.StartNote(pitch, 0.0);
+    instrument.SetNoteOn(pitch, 0.0);
     EXPECT_TRUE(instrument.IsNoteOn(pitch));
   }
 
   // Stop all notes.
-  instrument.StopAllNotes(0.0);
+  instrument.SetAllNotesOff(0.0);
   for (const double pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

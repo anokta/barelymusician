@@ -71,8 +71,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     ConsoleLog() << "Tick " << (beat / kBeatCount) << "."
                  << (beat % kBeatCount);
     const double pitch = (beat % kBeatCount == 0) ? kBarPitch : kBeatPitch;
-    instrument.StartNote(pitch, kGain);
-    instrument.StopNote(pitch);
+    instrument.SetNoteOn(pitch, kGain);
+    instrument.SetNoteOff(pitch);
     ++beat;
   });
 

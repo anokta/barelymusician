@@ -96,7 +96,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Start note.
-  instrument->StartNote(kPitch, kIntensity, 0.0);
+  instrument->SetNoteOn(kPitch, kIntensity, 0.0);
   EXPECT_TRUE(instrument->IsNoteOn(kPitch));
 
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
@@ -152,11 +152,11 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
 
     // Start multiple notes, then immediately stop some of them.
     for (int i = 0; i < 3; ++i) {
-      engine.GetInstrument(i + 1)->StartNote(static_cast<double>(i + 1), 1.0,
+      engine.GetInstrument(i + 1)->SetNoteOn(static_cast<double>(i + 1), 1.0,
                                              0.0);
-      engine.GetInstrument(i + 1)->StartNote(static_cast<double>(-i - 1), 1.0,
+      engine.GetInstrument(i + 1)->SetNoteOn(static_cast<double>(-i - 1), 1.0,
                                              0.0);
-      engine.GetInstrument(i + 1)->StopNote(static_cast<double>(i + 1), 0.0);
+      engine.GetInstrument(i + 1)->SetNoteOff(static_cast<double>(i + 1), 0.0);
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1.0, 2.0, 3.0));
   }

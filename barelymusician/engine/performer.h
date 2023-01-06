@@ -114,7 +114,7 @@ class Performer {
 
  private:
   // Returns next task callback.
-  [[nodiscard]] std::map<std::pair<double, Id>, Task::Callback>::const_iterator
+  [[nodiscard]] std::map<std::pair<double, Id>, TaskCallback>::const_iterator
   GetNextTaskCallback() const noexcept;
 
   // Denotes whether performer is looping or not.
@@ -133,13 +133,13 @@ class Performer {
   double position_ = 0.0;
 
   // Sorted map of task callbacks by task position-identifier pairs.
-  std::map<std::pair<double, Id>, Task::Callback> callbacks_;
+  std::map<std::pair<double, Id>, TaskCallback> callbacks_;
 
   // Map of task positions by task identifiers.
   std::unordered_map<Id, double> positions_;
 
   // Sorted map of one-off task callbacks by task delays.
-  std::multimap<double, Task::Callback> one_off_callbacks_;
+  std::multimap<double, TaskCallback> one_off_callbacks_;
 
   // Last triggered position.
   std::optional<double> last_triggered_position_;

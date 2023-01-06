@@ -109,24 +109,24 @@ namespace Barely {
       Musician.Native.Instrument_SetData(this, data);
     }
 
-    /// Starts playing note.
+    /// Sets all notes off.
+    public void SetAllNotesOff() {
+      Musician.Native.Instrument_SetAllNotesOff(this);
+    }
+
+    /// Sets note off.
+    ///
+    /// @param pitch Note pitch.
+    public void SetNoteOff(double pitch) {
+      Musician.Native.Instrument_SetNoteOff(this, pitch);
+    }
+
+    /// Sets note on.
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    public void StartNote(double pitch, double intensity = 1.0) {
-      Musician.Native.Instrument_StartNote(this, pitch, intensity);
-    }
-
-    /// Stops all notes.
-    public void StopAllNotes() {
-      Musician.Native.Instrument_StopAllNotes(this);
-    }
-
-    /// Stops playing note.
-    ///
-    /// @param pitch Note pitch.
-    public void StopNote(double pitch) {
-      Musician.Native.Instrument_StopNote(this, pitch);
+    public void SetNoteOn(double pitch, double intensity = 1.0) {
+      Musician.Native.Instrument_SetNoteOn(this, pitch, intensity);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

@@ -73,6 +73,12 @@ class Instrument {
   /// @return True if successful, false otherwise.
   bool ResetControl(int index, double timestamp) noexcept;
 
+  /// Sets all notes off at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetAllNotesOff(double timestamp) noexcept;
+
   /// Sets control value at timestamp.
   ///
   /// @param index Control index.
@@ -100,34 +106,28 @@ class Instrument {
   bool SetNoteControl(double pitch, int index, double value,
                       double slope_per_second, double timestamp) noexcept;
 
+  /// Sets note off at timestamp.
+  ///
+  /// @param pitch Note pitch.
+  /// @param timestamp Timestamp in seconds.
+  void SetNoteOff(double pitch, double timestamp) noexcept;
+
   /// Sets note off callback.
   ///
   /// @param callback Note off callback.
   void SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept;
 
+  /// Sets note on at timestamp.
+  ///
+  /// @param pitch Note pitch.
+  /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetNoteOn(double pitch, double timestamp) noexcept;
+
   /// Sets note on callback.
   ///
   /// @param callback Note on callback.
   void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
-
-  /// Starts note at timestamp.
-  ///
-  /// @param pitch Note pitch.
-  /// @param timestamp Timestamp in seconds.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void StartNote(double pitch, double timestamp) noexcept;
-
-  /// Stops all notes at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void StopAllNotes(double timestamp) noexcept;
-
-  /// Stops note at timestamp.
-  ///
-  /// @param pitch Note pitch.
-  /// @param timestamp Timestamp in seconds.
-  void StopNote(double pitch, double timestamp) noexcept;
 
  private:
   // Returns corresponding frames for given `seconds`.
@@ -170,10 +170,10 @@ class Instrument {
   Definition::SetNoteControlCallback set_note_control_callback_;
 
   // Set note off callback.
-  Definition::SetNoteOffEventCallback set_note_off_callback_;
+  Definition::SetNoteOffCallback set_note_off_callback_;
 
   // Set note on callback.
-  Definition::SetNoteOnEventCallback set_note_on_callback_;
+  Definition::SetNoteOnCallback set_note_on_callback_;
 
   // Sampling rate in hz.
   int frame_rate_;

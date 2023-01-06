@@ -78,16 +78,16 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLoopLength(5.0);
 
   const auto play_note_fn = [&](double duration,
-                                double pitch) -> Performer::Task::Callback {
+                                double pitch) -> Performer::TaskCallback {
     return [&instrument, &performer, pitch, duration]() {
-      instrument.StartNote(pitch, kGain);
+      instrument.SetNoteOn(pitch, kGain);
       performer.ScheduleOneOffTask(
           performer.GetPosition() + duration,
-          [&instrument, pitch]() { instrument.StopNote(pitch); });
+          [&instrument, pitch]() { instrument.SetNoteOff(pitch); });
     };
   };
 
-  std::vector<std::pair<double, Performer::Task::Callback>> score;
+  std::vector<std::pair<double, Performer::TaskCallback>> score;
   score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
   score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
   score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));
@@ -142,7 +142,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       case ' ':
         if (performer.IsPlaying()) {
           performer.Stop();
-          instrument.StopAllNotes();
+          instrument.SetAllNotesOff();
           ConsoleLog() << "Stopped playback";
         } else {
           performer.Start();
@@ -159,7 +159,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'P':
-        instrument.StopAllNotes();
+        instrument.SetAllNotesOff();
         performer.SetPosition(0.0);
         return;
       case '-':

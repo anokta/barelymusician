@@ -80,10 +80,10 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
           static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
       const auto status = performer.ScheduleOneOffTask(
           position, [&instrument, pitch, intensity]() {
-            instrument.StartNote(pitch, intensity);
+            instrument.SetNoteOn(pitch, intensity);
           });
       performer.ScheduleOneOffTask(position + duration, [&instrument, pitch]() {
-        instrument.StopNote(pitch);
+        instrument.SetNoteOff(pitch);
       });
       has_notes = true;
     }
@@ -194,7 +194,7 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Stopping audio stream";
   for (auto& [instrument, performer] : tracks) {
     performer.Stop();
-    instrument.StopAllNotes();
+    instrument.SetAllNotesOff();
   }
   audio_output.Stop();
 

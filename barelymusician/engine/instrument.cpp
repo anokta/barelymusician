@@ -50,7 +50,7 @@ Instrument::Instrument(const InstrumentDefinition& definition,
   }
   if (set_control_callback_) {
     for (int index = 0; index < definition.control_definition_count; ++index) {
-      set_control_callback_(&state_, index, controls_[index].GetValue(), 0.0);
+      set_control_callback_(&state_, index, controls_[index].Get(), 0.0);
     }
   }
 }
@@ -150,33 +150,28 @@ void Instrument::Process(double* output_samples, int output_channel_count,
   }
 }
 
-void Instrument::ResetAllControls(double timestamp) noexcept {
-  assert(timestamp >= 0.0);
+void Instrument::ResetAllControls() noexcept {
   for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
-    if (auto& control = controls_[index]; control.ResetValue()) {
+    if (auto& control = controls_[index]; control.Reset()) {
       if (note_control_event_callback_) {
-        control_event_callback_(index, control.GetValue());
+        control_event_callback_(index, control.Get());
       }
-      message_queue_.Add(timestamp,
-                         ControlMessage{index, control.GetValue(), 0.0});
+      message_queue_.Add(timestamp_, ControlMessage{index, control.Get(), 0.0});
     }
   }
 }
 
-Status Instrument::ResetAllNoteControls(double pitch,
-                                        double timestamp) noexcept {
-  assert(timestamp >= 0.0);
+Status Instrument::ResetAllNoteControls(double pitch) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     for (int index = 0; index < static_cast<int>(note_controls->size());
          ++index) {
-      if (auto& note_control = (*note_controls)[index];
-          note_control.ResetValue()) {
+      if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
         if (note_control_event_callback_) {
-          note_control_event_callback_(pitch, index, note_control.GetValue());
+          note_control_event_callback_(pitch, index, note_control.Get());
         }
         message_queue_.Add(
-            timestamp,
-            NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
+            timestamp_,
+            NoteControlMessage{pitch, index, note_control.Get(), 0.0});
       }
     }
     return Status::kOk;
@@ -184,36 +179,31 @@ Status Instrument::ResetAllNoteControls(double pitch,
   return Status::kNotFound;
 }
 
-Status Instrument::ResetControl(int index, double timestamp) noexcept {
+Status Instrument::ResetControl(int index) noexcept {
   assert(index >= 0);
-  assert(timestamp >= 0.0);
   if (index < static_cast<int>(controls_.size())) {
-    if (auto& control = controls_[index]; control.ResetValue()) {
+    if (auto& control = controls_[index]; control.Reset()) {
       if (note_control_event_callback_) {
-        control_event_callback_(index, control.GetValue());
+        control_event_callback_(index, control.Get());
       }
-      message_queue_.Add(timestamp,
-                         ControlMessage{index, control.GetValue(), 0.0});
+      message_queue_.Add(timestamp_, ControlMessage{index, control.Get(), 0.0});
     }
     return Status::kOk;
   }
   return Status::kInvalidArgument;
 }
 
-Status Instrument::ResetNoteControl(double pitch, int index,
-                                    double timestamp) noexcept {
+Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
   assert(index >= 0);
-  assert(timestamp >= 0.0);
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (index < static_cast<int>(note_controls->size())) {
-      if (auto& note_control = (*note_controls)[index];
-          note_control.ResetValue()) {
+      if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
         if (note_control_event_callback_) {
-          note_control_event_callback_(pitch, index, note_control.GetValue());
+          note_control_event_callback_(pitch, index, note_control.Get());
         }
         message_queue_.Add(
-            timestamp,
-            NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
+            timestamp_,
+            NoteControlMessage{pitch, index, note_control.Get(), 0.0});
       }
       return Status::kOk;
     }
@@ -223,27 +213,26 @@ Status Instrument::ResetNoteControl(double pitch, int index,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetAllNotesOff(double timestamp) noexcept {
-  assert(timestamp >= 0.0);
+void Instrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, note_controls] : std::exchange(note_controls_, {})) {
     if (note_off_event_callback_) {
       note_off_event_callback_(pitch);
     }
-    message_queue_.Add(timestamp, NoteOffMessage{pitch});
+    message_queue_.Add(timestamp_, NoteOffMessage{pitch});
   }
 }
 
-Status Instrument::SetControl(int index, double value, double slope_per_second,
-                              double timestamp) noexcept {
+Status Instrument::SetControl(int index, double value,
+                              double slope_per_second) noexcept {
   assert(index >= 0);
-  assert(timestamp >= 0.0);
   if (index < static_cast<int>(controls_.size())) {
-    if (auto& control = controls_[index]; control.SetValue(value)) {
+    if (auto& control = controls_[index];
+        control.Set(value, slope_per_second)) {
       if (note_control_event_callback_) {
-        control_event_callback_(index, control.GetValue());
+        control_event_callback_(index, control.Get());
       }
-      message_queue_.Add(timestamp, ControlMessage{index, control.GetValue(),
-                                                   slope_per_second});
+      message_queue_.Add(
+          timestamp_, ControlMessage{index, control.Get(), slope_per_second});
     }
     return Status::kOk;
   }
@@ -255,27 +244,23 @@ void Instrument::SetControlEventCallback(
   control_event_callback_ = std::move(callback);
 }
 
-void Instrument::SetData(std::vector<std::byte> data,
-                         double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  message_queue_.Add(timestamp, DataMessage{std::move(data)});
+void Instrument::SetData(std::vector<std::byte> data) noexcept {
+  message_queue_.Add(timestamp_, DataMessage{std::move(data)});
 }
 
 Status Instrument::SetNoteControl(double pitch, int index, double value,
-                                  double slope_per_second,
-                                  double timestamp) noexcept {
+                                  double slope_per_second) noexcept {
   assert(index >= 0);
-  assert(timestamp >= 0.0);
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (index < static_cast<int>(controls_.size())) {
       if (auto& note_control = (*note_controls)[index];
-          note_control.SetValue(value)) {
+          note_control.Set(value, slope_per_second)) {
         if (note_control_event_callback_) {
-          note_control_event_callback_(pitch, index, note_control.GetValue());
+          note_control_event_callback_(pitch, index, note_control.Get());
         }
-        message_queue_.Add(
-            timestamp, NoteControlMessage{pitch, index, note_control.GetValue(),
-                                          slope_per_second});
+        message_queue_.Add(timestamp_,
+                           NoteControlMessage{pitch, index, note_control.Get(),
+                                              slope_per_second});
       }
       return Status::kOk;
     }
@@ -289,13 +274,12 @@ void Instrument::SetNoteControlEventCallback(
   note_control_event_callback_ = std::move(callback);
 }
 
-void Instrument::SetNoteOff(double pitch, double timestamp) noexcept {
-  assert(timestamp >= 0.0);
+void Instrument::SetNoteOff(double pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     if (note_off_event_callback_) {
       note_off_event_callback_(pitch);
     }
-    message_queue_.Add(timestamp, NoteOffMessage{pitch});
+    message_queue_.Add(timestamp_, NoteOffMessage{pitch});
   }
 }
 
@@ -305,18 +289,43 @@ void Instrument::SetNoteOffEventCallback(
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(double pitch, double timestamp) noexcept {
-  assert(timestamp >= 0.0);
+void Instrument::SetNoteOn(double pitch) noexcept {
   if (note_controls_.try_emplace(pitch, default_note_controls_).second) {
     if (note_on_event_callback_) {
       note_on_event_callback_(pitch);
     }
-    message_queue_.Add(timestamp, NoteOnMessage{pitch});
+    message_queue_.Add(timestamp_, NoteOnMessage{pitch});
   }
 }
 
 void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
   note_on_event_callback_ = std::move(callback);
+}
+
+void Instrument::Update(double timestamp) noexcept {
+  assert(timestamp_ <= timestamp);
+  if (timestamp_ < timestamp) {
+    const double elapsed_seconds = timestamp - timestamp_;
+    // Update controls.
+    for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+      if (auto& control = controls_[index];
+          control.UpdateBy(elapsed_seconds) && control_event_callback_) {
+        control_event_callback_(index, control.Get());
+      }
+    }
+    // Update note controls.
+    for (auto& [pitch, note_controls] : note_controls_) {
+      for (int index = 0; index < static_cast<int>(note_controls.size());
+           ++index) {
+        if (auto& note_control = note_controls[index];
+            note_control.UpdateBy(elapsed_seconds) &&
+            note_control_event_callback_) {
+          note_control_event_callback_(pitch, index, note_control.Get());
+        }
+      }
+    }
+    timestamp_ = timestamp;
+  }
 }
 
 int Instrument::GetFrames(double seconds) const noexcept {

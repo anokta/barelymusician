@@ -26,7 +26,7 @@ constexpr double kSecondsFromMinutes = 60.0;
 
 Engine::~Engine() noexcept {
   for (auto& [instrument_id, instrument] : instruments_) {
-    instrument->SetAllNotesOff(timestamp_);
+    instrument->SetAllNotesOff();
   }
   instrument_refs_.Update({});
 }
@@ -36,10 +36,10 @@ bool Engine::CreateInstrument(Id instrument_id, InstrumentDefinition definition,
                               int frame_rate) noexcept {
   assert(instrument_id > kInvalid);
   assert(frame_rate >= 0);
-  if (instruments_
-          .emplace(instrument_id,
-                   std::make_unique<Instrument>(definition, frame_rate))
-          .second) {
+  if (const auto [it, success] = instruments_.emplace(
+          instrument_id, std::make_unique<Instrument>(definition, frame_rate));
+      success) {
+    it->second->Update(timestamp_);
     UpdateInstrumentReferenceMap();
     return true;
   }
@@ -65,7 +65,7 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
   if (const auto it = instruments_.find(instrument_id);
       it != instruments_.end()) {
     auto instrument = std::move(it->second);
-    instrument->SetAllNotesOff(timestamp_);
+    instrument->SetAllNotesOff();
     instruments_.erase(it);
     UpdateInstrumentReferenceMap();
     return true;
@@ -142,6 +142,9 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output_samples,
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
 
+  for (auto& [instrument_id, instrument] : instruments_) {
+    instrument->Update(timestamp);
+  }
   // TODO(#109): Reenable after API cleanup.
   // while (timestamp_ < timestamp) {
   //   double update_duration = GetBeats(timestamp - timestamp_);

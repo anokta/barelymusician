@@ -68,7 +68,7 @@ class Instrument {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
 
-  /// Processes output samples at timestamp.
+  /// Processes output samples.
   ///
   /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
@@ -78,100 +78,90 @@ class Instrument {
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count, double timestamp) noexcept;
 
-  /// Resets all controls to default value at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  void ResetAllControls(double timestamp) noexcept;
+  /// Resets all controls to default value.
+  void ResetAllControls() noexcept;
 
-  /// Resets all note controls to default value at timestamp.
+  /// Resets all note controls to default value.
   ///
   /// @param pitch Note pitch.
-  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status ResetAllNoteControls(double pitch, double timestamp) noexcept;
+  Status ResetAllNoteControls(double pitch) noexcept;
 
-  /// Resets control to default value at timestamp.
+  /// Resets control to default value.
   ///
   /// @param index Control index.
-  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status ResetControl(int index, double timestamp) noexcept;
+  Status ResetControl(int index) noexcept;
 
-  /// Resets note control to default value at timestamp.
+  /// Resets note control to default value.
   ///
   /// @param pitch Note pitch.
   /// @param index Control index.
-  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status ResetNoteControl(double pitch, int index, double timestamp) noexcept;
+  Status ResetNoteControl(double pitch, int index) noexcept;
 
-  /// Sets all notes off at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
+  /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetAllNotesOff(double timestamp) noexcept;
+  void SetAllNotesOff() noexcept;
 
-  /// Sets control value at timestamp.
+  /// Sets control value.
   ///
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_second Control slope in value change per second.
-  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status SetControl(int index, double value, double slope_per_second,
-                    double timestamp) noexcept;
+  Status SetControl(int index, double value, double slope_per_second) noexcept;
 
   /// Sets control event callback.
   ///
   /// @param callback Control event callback.
   void SetControlEventCallback(ControlEventCallback callback) noexcept;
 
-  /// Sets data at timestamp.
+  /// Sets data.
   ///
   /// @param data Data.
-  /// @param timestamp Timestamp in seconds.
-  void SetData(std::vector<std::byte> data, double timestamp) noexcept;
+  void SetData(std::vector<std::byte> data) noexcept;
 
-  /// Sets note control value at timestamp.
+  /// Sets note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @param value Note control value.
   /// @param slope_per_second Note control slope in value change per second.
-  /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status SetNoteControl(double pitch, int index, double value,
-                        double slope_per_second, double timestamp) noexcept;
+                        double slope_per_second) noexcept;
 
   /// Sets note control event callback.
   ///
   /// @param callback Note control event callback.
   void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept;
 
-  /// Sets note off at timestamp.
+  /// Sets note off.
   ///
   /// @param pitch Note pitch.
-  /// @param timestamp Timestamp in seconds.
-  void SetNoteOff(double pitch, double timestamp) noexcept;
+  void SetNoteOff(double pitch) noexcept;
 
   /// Sets note off event callback.
   ///
   /// @param callback Note off event callback.
   void SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept;
 
-  /// Sets note on at timestamp.
+  /// Sets note on.
   ///
   /// @param pitch Note pitch.
-  /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch, double timestamp) noexcept;
+  void SetNoteOn(double pitch) noexcept;
 
   /// Sets note on event callback.
   ///
   /// @param callback Note on event callback.
   void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
 
-  // TODO(#109): Needs an update mechanism for control values with slope.
+  /// Updates instrument at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp) noexcept;
 
  private:
   // Returns corresponding frames for a given number of `seconds`.
@@ -227,6 +217,9 @@ class Instrument {
 
   // Note on event callback.
   NoteOnEventCallback note_on_event_callback_;
+
+  // Timestamp in seconds.
+  double timestamp_ = 0;
 
   // State.
   void* state_ = nullptr;

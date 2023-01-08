@@ -32,32 +32,29 @@ Engine::~Engine() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::CreateInstrument(Id instrument_id, InstrumentDefinition definition,
-                              int frame_rate) noexcept {
-  assert(instrument_id > kInvalid);
+Id Engine::CreateInstrument(InstrumentDefinition definition,
+                            int frame_rate) noexcept {
   assert(frame_rate >= 0);
-  if (const auto [it, success] = instruments_.emplace(
-          instrument_id, std::make_unique<Instrument>(definition, frame_rate));
-      success) {
-    it->second->Update(timestamp_);
-    UpdateInstrumentReferenceMap();
-    return true;
-  }
-  return false;
+  const Id instrument_id = ++id_counter_;
+  const auto [it, success] = instruments_.emplace(
+      instrument_id, std::make_unique<Instrument>(definition, frame_rate));
+  assert(success);
+  it->second->Update(timestamp_);
+  UpdateInstrumentReferenceMap();
+  return instrument_id;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::CreatePerformer([[maybe_unused]] Id performer_id,
-                             [[maybe_unused]] int priority) noexcept {
-  assert(performer_id > kInvalid);
+Id Engine::CreatePerformer([[maybe_unused]] int order) noexcept {
+  const Id performer_id = ++id_counter_;
   // if (const auto [it, success] =
-  //         performers_.emplace(std::pair{priority, performer_id},
+  //         performers_.emplace(std::pair{order, performer_id},
   //         Performer{});
   //     success) {
-  //   performer_refs_.emplace(performer_id, std::pair{priority, &it->second});
+  //   performer_refs_.emplace(performer_id, std::pair{order, &it->second});
   //   return true;
   // }
-  return false;
+  return performer_id;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

@@ -153,3 +153,12 @@ cc_test(
 #         "@googletest//:gtest_main",
 #     ],
 # )
+
+cc_test(
+    name = "task_test",
+    srcs = ["task_test.cpp"],
+    deps = [
+        ":task",
+        "@googletest//:gtest_main",
+    ],
+)

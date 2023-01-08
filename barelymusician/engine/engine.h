@@ -32,21 +32,18 @@ class Engine {
 
   /// Creates new instrument.
   ///
-  /// @param instrument_id Instrument identifier.
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hz.
-  /// @return True if successful, false otherwise.
+  /// @return Instrument identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateInstrument(Id instrument_id, InstrumentDefinition definition,
-                        int frame_rate) noexcept;
+  Id CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept;
 
   /// Creates new performer.
   ///
-  /// @param performer_id Performer identifier.
-  /// @param priority Performer priority.
-  /// @return True if successful, false otherwise.
+  /// @param order Performer task execution order.
+  /// @return Performer identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreatePerformer(Id performer_id, int priority) noexcept;
+  Id CreatePerformer(int order) noexcept;
 
   /// Destroys instrument.
   ///
@@ -126,6 +123,9 @@ class Engine {
   // Updates instrument reference map.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateInstrumentReferenceMap() noexcept;
+
+  // Monotonic identifier counter.
+  Id id_counter_ = 0;
 
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;

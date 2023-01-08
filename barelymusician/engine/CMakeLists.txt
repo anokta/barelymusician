@@ -168,3 +168,14 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(performer_test)
+
+add_executable(
+  task_test
+  task_test.cpp
+)
+target_link_libraries(
+  task_test
+  task
+  gtest_main
+)
+gtest_discover_tests(task_test)

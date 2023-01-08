@@ -503,33 +503,20 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
                                                   int32_t order,
                                                   BarelyId* out_performer_id);
 
-/// Creates new one-off task.
+/// Creates new performer task at position.
 ///
 /// @param handle Musician handle.
 /// @param performer_id Performer identifier.
 /// @param definition Task definition.
-/// @param position Task position.
+/// @param position Task position in beats.
 /// @param is_one_off True if task is one-off, false otherwise.
+/// @param user_data Pointer to user data.
 /// @param out_task_id Output task identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_CreateOneOffTask(
+BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
     BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, double position, void* user_data,
-    BarelyId* out_task_id);
-
-/// Creates new task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param definition Task definition.
-/// @param position Task position.
-/// @param is_one_off True if task is one-off, false otherwise.
-/// @param out_task_id Output task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyPerformer_CreateTask(BarelyMusicianHandle handle, BarelyId performer_id,
-                           BarelyTaskDefinition definition, double position,
-                           void* user_data, BarelyId* out_task_id);
+    BarelyTaskDefinition definition, double position, bool is_one_off,
+    void* user_data, BarelyId* out_task_id);
 
 /// Destroys performer.
 ///
@@ -1391,55 +1378,19 @@ class Performer {
     return *this;
   }
 
-  /// Creates new one-off task.
+  /// Creates new task at position.
   ///
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param user_data Pointer to user data.
-  /// @return Task reference.
-  TaskReference CreateOneOffTask(TaskDefinition definition, double position,
-                                 void* user_data = nullptr) noexcept {
-    BarelyId task_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelyPerformer_CreateOneOffTask(
-        handle_, id_, definition, position, user_data, &task_id);
-    assert(status.IsOk());
-    return TaskReference(handle_, id_, task_id);
-  }
-
-  /// Creates new one-off task with callback.
-  ///
-  /// @param callback Task callback.
-  /// @param position Task position in beats.
-  /// @return Task reference.
-  TaskReference CreateOneOffTask(TaskCallback callback,
-                                 double position) noexcept {
-    return CreateOneOffTask(
-        TaskDefinition(
-            [](void** state, void* user_data) {
-              *state = new TaskCallback(
-                  std::move(*static_cast<TaskCallback*>(user_data)));
-            },
-            [](void** state) { delete static_cast<TaskCallback*>(*state); },
-            [](void** state) {
-              if (const auto& callback = *static_cast<TaskCallback*>(*state);
-                  callback) {
-                callback();
-              }
-            }),
-        position, static_cast<void*>(&callback));
-  }
-
-  /// Creates new task.
-  ///
-  /// @param definition Task definition.
-  /// @param position Task position in beats.
+  /// @param is_one_off True if task is one-off, false otherwise.
   /// @param user_data Pointer to user data.
   /// @return Task reference.
   TaskReference CreateTask(TaskDefinition definition, double position,
+                           bool is_one_off = false,
                            void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
     [[maybe_unused]] const Status status = BarelyPerformer_CreateTask(
-        handle_, id_, definition, position, user_data, &task_id);
+        handle_, id_, definition, position, is_one_off, user_data, &task_id);
     assert(status.IsOk());
     return TaskReference(handle_, id_, task_id);
   }
@@ -1448,8 +1399,10 @@ class Performer {
   ///
   /// @param callback Task callback.
   /// @param position Task position in beats.
+  /// @param is_one_off True if task is one-off, false otherwise.
   /// @return Task reference.
-  TaskReference CreateTask(TaskCallback callback, double position) noexcept {
+  TaskReference CreateTask(TaskCallback callback, double position,
+                           bool is_one_off = false) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) {
@@ -1463,7 +1416,7 @@ class Performer {
                 callback();
               }
             }),
-        position, static_cast<void*>(&callback));
+        position, is_one_off, static_cast<void*>(&callback));
   }
 
   /// Destroys task.

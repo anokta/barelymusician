@@ -23,9 +23,6 @@ struct BarelyMusician {
   // Internal engine.
   barely::internal::Engine engine;
 
-  // Monotonic identifier counter.
-  BarelyId id_counter = 0;
-
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
   friend BARELY_EXPORT BarelyStatus
@@ -41,12 +38,8 @@ BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
   if (frame_rate < 0) return BarelyStatus_kInvalidArgument;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
 
-  *out_instrument_id = ++handle->id_counter;
-  if (handle->engine.CreateInstrument(*out_instrument_id, definition,
-                                      frame_rate)) {
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kInternal;
+  *out_instrument_id = handle->engine.CreateInstrument(definition, frame_rate);
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
@@ -395,38 +388,15 @@ BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle, int32_t order,
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_performer_id) return BarelyStatus_kInvalidArgument;
 
-  *out_performer_id = ++handle->id_counter;
-  if (handle->engine.CreatePerformer(*out_performer_id, order)) {
-    return BarelyStatus_kOk;
-  }
-  return BarelyStatus_kInternal;
-}
-
-BarelyStatus BarelyPerformer_CreateOneOffTask(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    [[maybe_unused]] BarelyTaskDefinition definition, double position,
-    [[maybe_unused]] void* user_data, BarelyId* out_task_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (performer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
-  if (position < 0.0) return BarelyStatus_kInvalidArgument;
-  if (!out_task_id) return BarelyStatus_kInvalidArgument;
-
-  // TODO(#109): Reenable after API cleanup.
-  // if (auto* performer = handle->engine.GetPerformer(performer_id)) {
-  //   *out_task_id = ++handle->id_counter;
-  //   if (performer->CreateTask(*out_task_id, definition, position,
-  //                              is_one_off)) {
-  //     return BarelyStatus_kOk;
-  //   }
-  //   return BarelyStatus_kInternal;
-  // }
-  return BarelyStatus_kNotFound;
+  *out_performer_id = handle->engine.CreatePerformer(order);
+  return BarelyStatus_kOk;
 }
 
 BarelyStatus BarelyPerformer_CreateTask(
     BarelyMusicianHandle handle, BarelyId performer_id,
     [[maybe_unused]] BarelyTaskDefinition definition, double position,
-    [[maybe_unused]] void* user_data, BarelyId* out_task_id) {
+    [[maybe_unused]] bool is_one_off, [[maybe_unused]] void* user_data,
+    BarelyId* out_task_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (performer_id == BarelyId_kInvalid) return BarelyStatus_kInvalidArgument;
   if (position < 0.0) return BarelyStatus_kInvalidArgument;

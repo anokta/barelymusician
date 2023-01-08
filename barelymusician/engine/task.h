@@ -14,8 +14,8 @@ class Task {
   /// Constructs new `Task`.
   ///
   /// @param definition Task definition.
-  explicit Task(const TaskDefinition& definition,
-                void* user_data = nullptr) noexcept;
+  /// @param user_data Pointer to user data.
+  Task(const TaskDefinition& definition, void* user_data) noexcept;
 
   /// Destroys `Task`.
   ~Task() noexcept;

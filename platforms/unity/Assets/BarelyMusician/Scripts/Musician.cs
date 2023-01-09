@@ -25,22 +25,6 @@ namespace Barely {
       get { return Native.Musician_GetTimestamp(); }
     }
 
-    /// Returns beats from seconds.
-    ///
-    /// @param seconds Number of seconds.
-    /// @return Number of beats.
-    public static double GetBeats(double seconds) {
-      return Native.Musician_GetBeats(seconds);
-    }
-
-    /// Returns seconds from beats.
-    ///
-    /// @param beats Number of beats.
-    /// @return Number of seconds.
-    public static double GetSeconds(double beats) {
-      return Native.Musician_GetSeconds(beats);
-    }
-
     /// Schedules task at time.
     ///
     /// @param dspTime Time in seconds.
@@ -243,34 +227,6 @@ namespace Barely {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
                          " intensity for '" + instrument.name + "': " + status);
         }
-      }
-
-      /// Returns musician beats from seconds.
-      ///
-      /// @param seconds Number of seconds.
-      /// @return Number of beats.
-      public static double Musician_GetBeats(double seconds) {
-        Status status = BarelyMusician_GetBeats(Handle, seconds, _doublePtr);
-        if (IsOk(status)) {
-          return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician beats from seconds: " + status);
-        }
-        return 0.0;
-      }
-
-      /// Returns musician seconds from beats.
-      ///
-      /// @param beats Number of beats.
-      /// @return Number of seconds.
-      public static double Musician_GetSeconds(double beats) {
-        Status status = BarelyMusician_GetSeconds(Handle, beats, _doublePtr);
-        if (IsOk(status)) {
-          return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
-          Debug.LogError("Failed to get musician seconds from beats: " + status);
-        }
-        return 0.0;
       }
 
       /// Returns musician timestamp.
@@ -561,14 +517,6 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Destroy")]
       private static extern Status BarelyMusician_Destroy(IntPtr handle);
-
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetBeats")]
-      private static extern Status BarelyMusician_GetBeats(IntPtr handle, double seconds,
-                                                           IntPtr outBeats);
-
-      [DllImport(pluginName, EntryPoint = "BarelyMusician_GetSeconds")]
-      private static extern Status BarelyMusician_GetSeconds(IntPtr handle, double beats,
-                                                             IntPtr outSeconds);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_GetTimestamp")]
       private static extern Status BarelyMusician_GetTimestamp(IntPtr handle, IntPtr outTimestamp);

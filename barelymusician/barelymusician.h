@@ -762,6 +762,10 @@ class StatusOr {
   // NOLINTNEXTLINE(google-explicit-constructor)
   StatusOr(ValueType value) noexcept : value_or_(std::move(value)) {}
 
+  /// Member access operators.
+  const ValueType& operator*() const noexcept { return GetValue(); }
+  const ValueType* operator->() const noexcept { return &GetValue(); }
+
   /// Returns contained error status.
   ///
   /// @return Error status.

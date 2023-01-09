@@ -2,15 +2,14 @@
 #include "barelymusician/engine/engine.h"
 
 #include <cassert>
-#include <limits>
+#include <functional>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
-
-// TODO(#109): Reenable after API cleanup.
-// #include "barelymusician/engine/performer.h"
+#include "barelymusician/engine/performer.h"
+#include "barelymusician/engine/status.h"
 
 namespace barely::internal {
 
@@ -22,6 +21,18 @@ constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 // Converts minutes to seconds.
 constexpr double kSecondsFromMinutes = 60.0;
 
+/// Returns corresponding beats for given `seconds` at `tempo`.
+double GetBeats(double tempo, double seconds) noexcept {
+  assert(tempo > 0.0);
+  return tempo * seconds * kMinutesFromSeconds;
+}
+
+/// Returns corresponding seconds for given `beats` at `tempo`.
+double GetSeconds(double tempo, double beats) noexcept {
+  assert(tempo > 0.0);
+  return beats * kSecondsFromMinutes / tempo;
+}
+
 }  // namespace
 
 Engine::~Engine() noexcept {
@@ -32,10 +43,10 @@ Engine::~Engine() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Id Engine::CreateInstrument(InstrumentDefinition definition,
-                            int frame_rate) noexcept {
-  assert(frame_rate >= 0);
-  const Id instrument_id = ++id_counter_;
+StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
+                                      int frame_rate) noexcept {
+  if (frame_rate < 0) return {Status::kInvalidArgument};
+  const Id instrument_id = GenerateNextId();
   const auto [it, success] = instruments_.emplace(
       instrument_id, std::make_unique<Instrument>(definition, frame_rate));
   assert(success);
@@ -45,84 +56,88 @@ Id Engine::CreateInstrument(InstrumentDefinition definition,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Id Engine::CreatePerformer([[maybe_unused]] int order) noexcept {
-  const Id performer_id = ++id_counter_;
-  // if (const auto [it, success] =
-  //         performers_.emplace(std::pair{order, performer_id},
-  //         Performer{});
-  //     success) {
-  //   performer_refs_.emplace(performer_id, std::pair{order, &it->second});
-  //   return true;
-  // }
+StatusOr<Id> Engine::CreatePerformer(int order) noexcept {
+  const Id performer_id = GenerateNextId();
+  auto [it, success] =
+      performers_.emplace(std::pair{order, performer_id}, Performer{});
+  assert(success);
+  success = performer_refs_
+                .emplace(performer_id, std::pair{order, std::ref(it->second)})
+                .second;
+  assert(success);
   return performer_id;
 }
 
+StatusOr<Id> Engine::CreatePerformerTask(
+    [[maybe_unused]] Id performer_id,
+    [[maybe_unused]] TaskDefinition definition,
+    [[maybe_unused]] double position, [[maybe_unused]] bool is_one_off,
+    [[maybe_unused]] void* user_data) noexcept {
+  if (performer_id == kInvalid) return Status::kInvalidArgument;
+  if (position < 0.0) return Status::kInvalidArgument;
+  // TODO(#109): Implement this.
+  return {Status::kUnimplemented};
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::DestroyInstrument(Id instrument_id) noexcept {
+Status Engine::DestroyInstrument(Id instrument_id) noexcept {
+  if (instrument_id == kInvalid) return Status::kInvalidArgument;
   if (const auto it = instruments_.find(instrument_id);
       it != instruments_.end()) {
     auto instrument = std::move(it->second);
     instrument->SetAllNotesOff();
     instruments_.erase(it);
     UpdateInstrumentReferenceMap();
-    return true;
+    return Status::kOk;
   }
-  return false;
+  return Status::kNotFound;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::DestroyPerformer([[maybe_unused]] Id performer_id) noexcept {
-  // if (const auto it = performer_refs_.find(performer_id);
-  //     it != performer_refs_.end()) {
-  //   performers_.erase(std::pair{it->second.first, performer_id});
-  //   performer_refs_.erase(it);
-  //   return true;
-  // }
-  return false;
-}
-
-double Engine::GetBeats(double seconds) const noexcept {
-  return tempo_ * seconds * kMinutesFromSeconds;
-}
-
-Instrument* Engine::GetInstrument(Id instrument_id) noexcept {
-  if (auto* instrument = FindOrNull(instruments_, instrument_id)) {
-    return instrument->get();
+Status Engine::DestroyPerformer(Id performer_id) noexcept {
+  if (performer_id == kInvalid) return Status::kInvalidArgument;
+  if (const auto it = performer_refs_.find(performer_id);
+      it != performer_refs_.end()) {
+    [[maybe_unused]] const bool success =
+        performers_.erase(std::pair{it->second.first, performer_id}) > 0;
+    assert(success);
+    performer_refs_.erase(it);
+    return Status::kOk;
   }
-  return nullptr;
+  return Status::kNotFound;
 }
 
-Performer* Engine::GetPerformer([[maybe_unused]] Id performer_id) noexcept {
-  // if (auto* performer_ref = FindOrNull(performer_refs_, performer_id)) {
-  //   return performer_ref->second;
-  // }
-  return nullptr;
+StatusOr<std::reference_wrapper<Instrument>> Engine::GetInstrument(
+    Id instrument_id) noexcept {
+  if (instrument_id == kInvalid) return {Status::kInvalidArgument};
+  if (auto* instrument = FindOrNull(instruments_, instrument_id)) {
+    return std::ref(*(*instrument));
+  }
+  return {Status::kNotFound};
 }
 
-double Engine::GetSeconds(double beats) const noexcept {
-  return (tempo_ > 0.0)  ? beats * kSecondsFromMinutes / tempo_
-         : (beats > 0.0) ? std::numeric_limits<double>::max()
-         : (beats < 0.0) ? std::numeric_limits<double>::lowest()
-                         : 0.0;
+StatusOr<std::reference_wrapper<Performer>> Engine::GetPerformer(
+    [[maybe_unused]] Id performer_id) noexcept {
+  if (performer_id == kInvalid) return {Status::kInvalidArgument};
+  if (auto* performer_ref = FindOrNull(performer_refs_, performer_id)) {
+    return performer_ref->second;
+  }
+  return {Status::kNotFound};
 }
 
 double Engine::GetTempo() const noexcept { return tempo_; }
 
-void Engine::SetTempo(double tempo) noexcept {
-  assert(tempo_ >= 0.0);
-  tempo_ = tempo;
-}
-
 double Engine::GetTimestamp() const noexcept { return timestamp_; }
 
-bool Engine::ProcessInstrument(Id instrument_id, double* output_samples,
-                               int output_channel_count, int output_frame_count,
-                               double timestamp) noexcept {
-  assert(output_samples || output_channel_count == 0 ||
-         output_frame_count == 0);
-  assert(output_channel_count >= 0);
-  assert(output_frame_count >= 0);
-  assert(timestamp >= 0.0);
+Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
+                                 int output_channel_count,
+                                 int output_frame_count,
+                                 double timestamp) noexcept {
+  if (instrument_id == kInvalid) return Status::kInvalidArgument;
+  if ((!output_samples && output_channel_count > 0 && output_frame_count) ||
+      output_channel_count < 0 || output_frame_count < 0 || timestamp < 0.0) {
+    return Status::kInvalidArgument;
+  }
   auto instrument_refs = instrument_refs_.GetScopedView();
   if (const auto* instrument_ref =
           FindOrNull(*instrument_refs, instrument_id)) {
@@ -130,19 +145,34 @@ bool Engine::ProcessInstrument(Id instrument_id, double* output_samples,
     (*instrument_ref)
         ->Process(output_samples, output_channel_count, output_frame_count,
                   timestamp);
-    return true;
+    return Status::kOk;
   }
-  return false;
+  return Status::kNotFound;
 }
+
+void Engine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
 
+  // while (timestamp_ < timestamp) {
+  //   if (tempo_ > 0.0) {
+  //     double update_duration = GetBeats(tempo_, timestamp - timestamp_);
+  //   } else {
+  //     // Playback is stopped.
+  //     timestamp_ = timestamp;
+  //   }
+  //   for (auto& [instrument_id, instrument] : instruments_) {
+  //     instrument->Update(timestamp);
+  //   }
+  // }
+
   for (auto& [instrument_id, instrument] : instruments_) {
     instrument->Update(timestamp);
   }
-  // TODO(#109): Reenable after API cleanup.
+
+  // TODO(#109): Reenable after API cleanup. Check for `tempo_ > 0.0`.
   // while (timestamp_ < timestamp) {
   //   double update_duration = GetBeats(timestamp - timestamp_);
   //   bool has_tasks_to_trigger = false;
@@ -168,6 +198,11 @@ void Engine::Update(double timestamp) noexcept {
   //     }
   //   }
   // }
+}
+
+Id Engine::GenerateNextId() noexcept {
+  assert(id_counter_ >= 0);
+  return ++id_counter_;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

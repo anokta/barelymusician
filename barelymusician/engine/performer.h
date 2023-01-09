@@ -6,44 +6,37 @@
 #include <unordered_map>
 #include <utility>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/id.h"
+#include "barelymusician/engine/status.h"
+#include "barelymusician/engine/task.h"
 
 namespace barely::internal {
 
 /// Class that wraps performer.
 class Performer {
  public:
-  /// Task definition alias.
-  using TaskDefinition = barely::TaskDefinition;
-
   /// Creates new task at position.
   ///
-  /// @param id Task identifier.
+  /// @param task_id Task identifier.
   /// @param definition Task definition.
-  /// @param position Task position.
+  /// @param position Task position in beats.
   /// @param is_one_off True if task is one-off, false otherwise.
-  /// @return True if successful, false otherwise.
+  /// @param user_data Pointer to user data.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateTask(Id id, TaskDefinition definition, double position,
-                  bool is_one_off) noexcept;
+  void CreateTask(Id task_id, TaskDefinition definition, double position,
+                  bool is_one_off, void* user_data) noexcept;
 
   /// Destroys task.
   ///
-  /// @param id Task identifier.
-  /// @return True if successful, false otherwise.
-  bool DestroyTask(Id id) noexcept;
+  /// @param task_id Task identifier.
+  /// @return Status.
+  Status DestroyTask(Id task_id) noexcept;
 
-  /// Returns duration to next task.
-  ///
-  /// @return Duration in beats.
-  [[nodiscard]] double GetDurationToNextTask() const noexcept;
-
-  /// Returns task position.
-  ///
-  /// @param id Task identifier.
-  /// @return Pointer to task position.
-  [[nodiscard]] const double* GetTaskPosition(Id id) const noexcept;
+  // TODO(#109): Refactor to match `Task` functionality.
+  // /// Returns duration to next task.
+  // ///
+  // /// @return Duration in beats.
+  // [[nodiscard]] double GetDurationToNextTask() const noexcept;
 
   /// Returns loop begin position.
   ///
@@ -60,6 +53,12 @@ class Performer {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept;
 
+  /// Returns task position.
+  ///
+  /// @param task_id Task identifier.
+  /// @return Position or error status.
+  [[nodiscard]] StatusOr<double> GetTaskPosition(Id task_id) const noexcept;
+
   /// Returns whether performer is looping or not.
   ///
   /// @return True if looping, false otherwise.
@@ -69,12 +68,6 @@ class Performer {
   ///
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
-
-  /// Sets task position.
-  ///
-  /// @param id Task identifier.
-  /// @param position Task position.
-  bool SetTaskPosition(Id id, double position) noexcept;
 
   /// Sets loop begin position.
   ///
@@ -97,25 +90,34 @@ class Performer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetPosition(double position) noexcept;
 
+  /// Sets task position.
+  ///
+  /// @param task_id Task identifier.
+  /// @param position Task position.
+  /// @return Status.
+  Status SetTaskPosition(Id task_id, double position) noexcept;
+
   /// Stops performer.
   void Start() noexcept;
 
   /// Stops performer.
   void Stop() noexcept;
 
-  /// Triggers all tasks at current position.
-  void TriggerAllTasksAtCurrentPosition() noexcept;
+  // TODO(#109): Refactor to match `Task` functionality.
+  // /// Triggers all tasks at current position.
+  // void TriggerAllTasksAtCurrentPosition() noexcept;
 
-  /// Updates performer by duration.
-  ///
-  /// @param duration Duration in beats.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(double duration) noexcept;
+  // /// Updates performer by duration.
+  // ///
+  // /// @param duration Duration in beats.
+  // // NOLINTNEXTLINE(bugprone-exception-escape)
+  // void Update(double duration) noexcept;
 
  private:
-  // Returns next task callback.
-  [[nodiscard]] std::map<std::pair<double, Id>, TaskCallback>::const_iterator
-  GetNextTaskCallback() const noexcept;
+  // TODO(#109): Refactor to match `Task` functionality.
+  // // Returns next task callback.
+  // [[nodiscard]] std::map<std::pair<double, Id>, TaskCallback>::const_iterator
+  // GetNextTaskCallback() const noexcept;
 
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;
@@ -132,17 +134,15 @@ class Performer {
   // Position in beats.
   double position_ = 0.0;
 
-  // Sorted map of task callbacks by task position-identifier pairs.
-  std::map<std::pair<double, Id>, TaskCallback> callbacks_;
-
   // Map of task positions by task identifiers.
-  std::unordered_map<Id, double> positions_;
+  std::unordered_map<Id, std::pair<double, bool>> position_type_pairs_;
 
-  // Sorted map of one-off task callbacks by task delays.
-  std::multimap<double, TaskCallback> one_off_callbacks_;
+  // Sorted map of tasks by task position-identifier pairs.
+  std::map<std::pair<double, Id>, Task> one_off_tasks_;
+  std::map<std::pair<double, Id>, Task> tasks_;
 
-  // Last triggered position.
-  std::optional<double> last_triggered_position_;
+  // // Last triggered position.
+  // std::optional<double> last_triggered_position_;
 };
 
 }  // namespace barely::internal

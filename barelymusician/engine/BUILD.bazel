@@ -19,8 +19,7 @@ cc_library(
         ":id",
         ":instrument",
         ":mutable_data",
-        # TODO(#109): Reenable after API cleanup.
-        # ":performer",
+        ":performer",
         "//barelymusician/common:find_or_null",
     ],
 )
@@ -66,17 +65,17 @@ cc_library(
     hdrs = ["mutable_data.h"],
 )
 
-# TODO(#109): Reenable after API cleanup.
-# cc_library(
-#     name = "performer",
-#     srcs = ["performer.cpp"],
-#     hdrs = ["performer.h"],
-#     deps = [
-#         ":id",
-#         "//barelymusician:include",
-#         "//barelymusician/common:find_or_null",
-#     ],
-# )
+cc_library(
+    name = "performer",
+    srcs = ["performer.cpp"],
+    hdrs = ["performer.h"],
+    deps = [
+        ":id",
+        ":status",
+        ":task",
+        "//barelymusician/common:find_or_null",
+    ],
+)
 
 cc_library(
     name = "status",

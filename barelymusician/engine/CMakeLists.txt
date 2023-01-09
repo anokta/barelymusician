@@ -19,6 +19,7 @@ target_link_libraries(
   instrument
   mutable_data
   performer
+  status
   find_or_null
 )
 
@@ -74,6 +75,8 @@ add_library(
 target_link_libraries(
   performer
   id
+  status
+  task
   find_or_null
 )
 

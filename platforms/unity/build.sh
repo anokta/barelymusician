@@ -41,14 +41,14 @@ parse_flags() {
           exit 1
           ;;
       esac
-    done  
-  
+    done
+
   readonly COMPILATION_MODE
 }
 
 main() {
   set -e
-  
+
   parse_flags "$@"
 
   echo "Building BarelyMusician Unity plugins..."
@@ -68,6 +68,8 @@ main() {
     echo "Copying native Windows plugin into Unity project..."
     cp -rf "${WINDOWS_BIN_SRC_PATH}" "${WINDOWS_BIN_DST_PATH}"
   fi
+
+  echo "Done!"
 }
 
 main "$@"

@@ -17,14 +17,12 @@ namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::CreateTask(Id task_id, TaskDefinition definition,
-                           double position, bool is_one_off,
+                           double position, TaskType type,
                            void* user_data) noexcept {
   assert(task_id > kInvalid);
-  auto success =
-      position_type_pairs_.emplace(task_id, std::pair{position, is_one_off})
-          .second;
+  auto success = infos_.emplace(task_id, TaskInfo{position, type}).second;
   assert(success);
-  success = (is_one_off ? one_off_tasks_ : tasks_)
+  success = (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
                 .emplace(std::piecewise_construct,
                          std::forward_as_tuple(position, task_id),
                          std::forward_as_tuple(definition, user_data))
@@ -62,12 +60,13 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
 
 Status Performer::DestroyTask(Id task_id) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
-  if (const auto it = position_type_pairs_.find(task_id);
-      it != position_type_pairs_.end()) {
-    const auto success = (it->second.second ? one_off_tasks_ : tasks_)
-                             .erase(std::pair{it->second.first, task_id}) == 1;
+  if (const auto it = infos_.find(task_id); it != infos_.end()) {
+    const auto success =
+        (it->second.type == TaskType::kOneOff ? one_off_tasks_
+                                              : recurring_tasks_)
+            .erase(std::pair{it->second.position, task_id}) == 1;
     assert(success);
-    position_type_pairs_.erase(it);
+    infos_.erase(it);
     return Status::kOk;
   }
   return Status::kNotFound;
@@ -83,9 +82,8 @@ double Performer::GetPosition() const noexcept { return position_; }
 
 StatusOr<double> Performer::GetTaskPosition(Id task_id) const noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
-  if (const auto* position_type_pair =
-          FindOrNull(position_type_pairs_, task_id)) {
-    return position_type_pair->first;
+  if (const auto* info = FindOrNull(infos_, task_id)) {
+    return info->position;
   }
   return {Status::kNotFound};
 }
@@ -149,11 +147,11 @@ void Performer::SetPosition(double position) noexcept {
 
 Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
-  if (const auto it = position_type_pairs_.find(task_id);
-      it != position_type_pairs_.end()) {
-    auto& [current_position, is_one_off] = it->second;
+  if (const auto it = infos_.find(task_id); it != infos_.end()) {
+    auto& [current_position, type] = it->second;
     if (current_position != position) {
-      auto& tasks = (is_one_off ? one_off_tasks_ : tasks_);
+      auto& tasks =
+          (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_);
       auto node = tasks.extract(std::pair{current_position, task_id});
       node.key().first = position;
       tasks.insert(std::move(node));

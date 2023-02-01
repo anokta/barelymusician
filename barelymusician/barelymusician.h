@@ -60,6 +60,17 @@ enum BarelyStatus_Values {
   BarelyStatus_kInternal = 4,
 };
 
+/// Task type enum alias.
+typedef int32_t BarelyTaskType;
+
+/// Task type enum values.
+enum BarelyTask_Values {
+  /// One-off task.
+  BarelyTaskType_kOneOff = 0,
+  /// Recurring task.
+  BarelyTaskType_kRecurring = 1,
+};
+
 /// Instrument control event callback signature.
 ///
 /// @param index Control index.
@@ -509,13 +520,13 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
 /// @param performer_id Performer identifier.
 /// @param definition Task definition.
 /// @param position Task position in beats.
-/// @param is_one_off True if task is one-off, false otherwise.
+/// @param type Task type.
 /// @param user_data Pointer to user data.
 /// @param out_task_id Output task identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
     BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, double position, bool is_one_off,
+    BarelyTaskDefinition definition, double position, BarelyTaskType type,
     void* user_data, BarelyId* out_task_id);
 
 /// Destroys performer.
@@ -955,6 +966,14 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
+/// Task type.
+enum class TaskType : BarelyTaskType {
+  /// One-off task.
+  kOneOff = BarelyTaskType_kOneOff,
+  /// Recurring task.
+  kRecurring = BarelyTaskType_kRecurring,
+};
+
 /// Instrument.
 class Instrument {
  public:
@@ -1386,15 +1405,16 @@ class Performer {
   ///
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param is_one_off True if task is one-off, false otherwise.
+  /// @param type Task type.
   /// @param user_data Pointer to user data.
   /// @return Task reference.
   TaskReference CreateTask(TaskDefinition definition, double position,
-                           bool is_one_off = false,
+                           TaskType type = TaskType::kRecurring,
                            void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
     [[maybe_unused]] const Status status = BarelyPerformer_CreateTask(
-        handle_, id_, definition, position, is_one_off, user_data, &task_id);
+        handle_, id_, definition, position, static_cast<BarelyTaskType>(type),
+        user_data, &task_id);
     assert(status.IsOk());
     return TaskReference(handle_, id_, task_id);
   }
@@ -1403,10 +1423,10 @@ class Performer {
   ///
   /// @param callback Task callback.
   /// @param position Task position in beats.
-  /// @param is_one_off True if task is one-off, false otherwise.
+  /// @param type Task type.
   /// @return Task reference.
   TaskReference CreateTask(TaskCallback callback, double position,
-                           bool is_one_off = false) noexcept {
+                           TaskType type = TaskType::kRecurring) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) {
@@ -1420,7 +1440,7 @@ class Performer {
                 callback();
               }
             }),
-        position, is_one_off, static_cast<void*>(&callback));
+        position, type, static_cast<void*>(&callback));
   }
 
   /// Destroys task.

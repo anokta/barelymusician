@@ -20,11 +20,11 @@ class Performer {
   /// @param task_id Task identifier.
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param is_one_off True if task is one-off, false otherwise.
+  /// @param type Task type.
   /// @param user_data Pointer to user data.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void CreateTask(Id task_id, TaskDefinition definition, double position,
-                  bool is_one_off, void* user_data) noexcept;
+                  TaskType type, void* user_data) noexcept;
 
   /// Destroys task.
   ///
@@ -114,6 +114,15 @@ class Performer {
   // void Update(double duration) noexcept;
 
  private:
+  // Task info.
+  struct TaskInfo {
+    // Position.
+    double position;
+
+    // Type.
+    TaskType type;
+  };
+
   // TODO(#109): Refactor to match `Task` functionality.
   // // Returns next task callback.
   // [[nodiscard]] std::map<std::pair<double, Id>, TaskCallback>::const_iterator
@@ -134,12 +143,12 @@ class Performer {
   // Position in beats.
   double position_ = 0.0;
 
-  // Map of task positions by task identifiers.
-  std::unordered_map<Id, std::pair<double, bool>> position_type_pairs_;
+  // Map of task infos by task identifiers.
+  std::unordered_map<Id, TaskInfo> infos_;
 
   // Sorted map of tasks by task position-identifier pairs.
   std::map<std::pair<double, Id>, Task> one_off_tasks_;
-  std::map<std::pair<double, Id>, Task> tasks_;
+  std::map<std::pair<double, Id>, Task> recurring_tasks_;
 
   // // Last triggered position.
   // std::optional<double> last_triggered_position_;

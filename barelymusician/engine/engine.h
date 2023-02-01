@@ -50,12 +50,12 @@ class Engine {
   /// @param performer_id Performer identifier.
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param is_one_off True if task is one-off, false otherwise.
+  /// @param type Task type.
   /// @param user_data Pointer to user data.
   /// @return Task identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   StatusOr<Id> CreatePerformerTask(Id performer_id, TaskDefinition definition,
-                                   double position, bool is_one_off,
+                                   double position, TaskType type,
                                    void* user_data) noexcept;
 
   /// Destroys instrument.

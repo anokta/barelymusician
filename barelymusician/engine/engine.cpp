@@ -71,7 +71,7 @@ StatusOr<Id> Engine::CreatePerformer(int order) noexcept {
 StatusOr<Id> Engine::CreatePerformerTask(
     [[maybe_unused]] Id performer_id,
     [[maybe_unused]] TaskDefinition definition,
-    [[maybe_unused]] double position, [[maybe_unused]] bool is_one_off,
+    [[maybe_unused]] double position, [[maybe_unused]] TaskType type,
     [[maybe_unused]] void* user_data) noexcept {
   if (performer_id == kInvalid) return Status::kInvalidArgument;
   if (position < 0.0) return Status::kInvalidArgument;

@@ -386,14 +386,15 @@ BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle, int32_t order,
 BarelyStatus BarelyPerformer_CreateTask(BarelyMusicianHandle handle,
                                         BarelyId performer_id,
                                         BarelyTaskDefinition definition,
-                                        double position, bool is_one_off,
+                                        double position, BarelyTaskType type,
                                         void* user_data,
                                         BarelyId* out_task_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_task_id) return BarelyStatus_kInvalidArgument;
 
   const auto task_id_or = handle->engine.CreatePerformerTask(
-      performer_id, std::move(definition), position, is_one_off, user_data);
+      performer_id, std::move(definition), position,
+      static_cast<barely::TaskType>(type), user_data);
   if (task_id_or.IsOk()) {
     *out_task_id = *task_id_or;
     return BarelyStatus_kOk;

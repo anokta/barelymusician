@@ -22,41 +22,41 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
   assert(task_id > kInvalid);
   auto success = infos_.emplace(task_id, TaskInfo{position, type}).second;
   assert(success);
-  success = (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
-                .emplace(std::piecewise_construct,
-                         std::forward_as_tuple(position, task_id),
-                         std::forward_as_tuple(definition, user_data))
-                .second;
+  success =
+      (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
+          .emplace(std::pair{position, task_id}, Task(definition, user_data))
+          .second;
   assert(success);
 }
 
-// double Performer::GetDurationToNextTask() const noexcept {
-//   double next_position = std::numeric_limits<double>::max();
-//   if (!is_playing_) {
-//     return next_position;
-//   }
+std::optional<double> Performer::GetDurationToNextTask() const noexcept {
+  if (!is_playing_) {
+    return std::nullopt;
+  }
 
-//   // Check next tasks.
-//   if (const auto next_callback = GetNextTaskCallback();
-//       next_callback != callbacks_.end()) {
-//     next_position = next_callback->first.first;
-//     if (is_looping_ && (next_position < position_ ||
-//                         (last_triggered_position_ &&
-//                          *last_triggered_position_ == next_position))) {
-//       next_position += loop_length_;
-//     }
-//   }
-//   // Check one-off tasks.
-//   if (!one_off_callbacks_.empty() &&
-//       one_off_callbacks_.begin()->first < next_position) {
-//     next_position = one_off_callbacks_.begin()->first;
-//   }
+  std::optional<double> next_task_position = std::nullopt;
 
-//   if (next_position < std::numeric_limits<double>::max()) {
-//     return next_position - position_;
-//   }
-//   return next_position;
-// }
+  // Check recurring tasks.
+  if (const auto next_recurring_task = GetNextRecurringTask();
+      next_recurring_task != recurring_tasks_.end()) {
+    next_task_position = next_recurring_task->first.first;
+    if (is_looping_ && (*next_task_position < position_ ||
+                        next_task_position == last_processed_position_)) {
+      *next_task_position += loop_length_;
+    }
+  }
+  // Check one-off tasks.
+  if (!one_off_tasks_.empty() &&
+      (!next_task_position ||
+       one_off_tasks_.begin()->first.first < *next_task_position)) {
+    next_task_position = one_off_tasks_.begin()->first.first;
+  }
+
+  if (next_task_position) {
+    return *next_task_position - position_;
+  }
+  return std::nullopt;
+}
 
 Status Performer::DestroyTask(Id task_id) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
@@ -92,6 +92,25 @@ bool Performer::IsLooping() const noexcept { return is_looping_; }
 
 bool Performer::IsPlaying() const noexcept { return is_playing_; }
 
+void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
+  // Process one-off tasks.
+  if (!one_off_tasks_.empty()) {
+    auto it = one_off_tasks_.begin();
+    while (it != one_off_tasks_.end() && it->first.first <= position_) {
+      it->second.Process();
+      ++it;
+    }
+    one_off_tasks_.erase(one_off_tasks_.begin(), it);
+  }
+  // Process recurring tasks.
+  auto it = GetNextRecurringTask();
+  while (it != recurring_tasks_.end() && it->first.first <= position_) {
+    const_cast<Task&>(it->second).Process();
+    last_processed_position_ = it->first.first;
+    ++it;
+  }
+}
+
 void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) return;
   loop_begin_position_ = loop_begin_position;
@@ -123,26 +142,26 @@ void Performer::SetLooping(bool is_looping) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::SetPosition(double position) noexcept {
   if (position_ == position) return;
-  // TODO(#109): Refactor to match `Task` functionality.
-  // last_triggered_position_ = std::nullopt;
-  // one_off_callbacks_.erase(one_off_callbacks_.begin(),
-  //                          one_off_callbacks_.lower_bound(position));
-  // if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
-  //   if (!one_off_callbacks_.empty()) {
-  //     // Reset all remaining one-off callbacks back to
-  //     `loop_begin_position_`. std::multimap<double, TaskCallback>
-  //     remaining_callbacks; for (auto& it : one_off_callbacks_) {
-  //       remaining_callbacks.emplace(loop_begin_position_,
-  //       std::move(it.second));
-  //     }
-  //     one_off_callbacks_.swap(remaining_callbacks);
-  //   }
-  //   position_ = loop_begin_position_ +
-  //               std::fmod(position - loop_begin_position_, loop_length_);
-  // } else {
-  //   position_ = position;
-  // }
-  position_ = position;
+  last_processed_position_ = std::nullopt;
+  one_off_tasks_.erase(
+      one_off_tasks_.begin(),
+      one_off_tasks_.lower_bound(std::pair{position, kInvalid}));
+  if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
+    if (!one_off_tasks_.empty()) {
+      // Reset all remaining one-off tasks back to the beginning.
+      TaskMap remaining_one_off_tasks;
+      for (auto& it : one_off_tasks_) {
+        remaining_one_off_tasks.emplace(
+            std::pair{loop_begin_position_, it.first.second},
+            std::move(it.second));
+      }
+      one_off_tasks_.swap(remaining_one_off_tasks);
+    }
+    position_ = loop_begin_position_ +
+                std::fmod(position - loop_begin_position_, loop_length_);
+  } else {
+    position_ = position;
+  }
 }
 
 Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
@@ -166,50 +185,30 @@ void Performer::Start() noexcept { is_playing_ = true; }
 
 void Performer::Stop() noexcept { is_playing_ = false; }
 
-// void Performer::TriggerAllTasksAtCurrentPosition() noexcept {
-//   // Trigger one-off tasks.
-//   if (!one_off_callbacks_.empty()) {
-//     auto it = one_off_callbacks_.begin();
-//     while (it != one_off_callbacks_.end() && it->first <= position_) {
-//       it->second();
-//       ++it;
-//     }
-//     one_off_callbacks_.erase(one_off_callbacks_.begin(), it);
-//   }
-//   // Trigger next tasks.
-//   auto callback = GetNextTaskCallback();
-//   while (callback != callbacks_.end() && callback->first.first <= position_)
-//   {
-//     if (callback->second) {
-//       callback->second();
-//     }
-//     last_triggered_position_ = callback->first.first;
-//     ++callback;
-//   }
-// }
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Performer::Update(double duration) noexcept {
+  if (is_playing_) {
+    assert(duration >= 0.0 && duration <= GetDurationToNextTask());
+    SetPosition(position_ + duration);
+  }
+}
 
-// // NOLINTNEXTLINE(bugprone-exception-escape)
-// void Performer::Update(double duration) noexcept {
-//   if (is_playing_) {
-//     assert(duration >= 0.0 && duration <= GetDurationToNextTask());
-//     SetPosition(position_ + duration);
-//   }
-// }
-
-// std::map<std::pair<double, Id>, Performer::TaskCallback>::const_iterator
-// Performer::GetNextTaskCallback() const noexcept {
-//   auto it = callbacks_.lower_bound(std::pair{position_, kInvalid});
-//   if (last_triggered_position_) {
-//     while (it != callbacks_.end() &&
-//            it->first.first == *last_triggered_position_) {
-//       ++it;
-//     }
-//   }
-//   if (it == callbacks_.end() && is_looping_) {
-//     // Loop back to `loop_begin_position_`.
-//     it = callbacks_.lower_bound(std::pair{loop_begin_position_, kInvalid});
-//   }
-//   return it;
-// }
+Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
+    const noexcept {
+  auto it = recurring_tasks_.lower_bound(std::pair{position_, kInvalid});
+  if (last_processed_position_) {
+    // Skip processed tasks.
+    while (it != recurring_tasks_.end() &&
+           it->first.first == *last_processed_position_) {
+      ++it;
+    }
+  }
+  if (it == recurring_tasks_.end() && is_looping_) {
+    // Loop back to the beginning.
+    it =
+        recurring_tasks_.lower_bound(std::pair{loop_begin_position_, kInvalid});
+  }
+  return it;
+}
 
 }  // namespace barely::internal

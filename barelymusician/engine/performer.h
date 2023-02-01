@@ -32,11 +32,10 @@ class Performer {
   /// @return Status.
   Status DestroyTask(Id task_id) noexcept;
 
-  // TODO(#109): Refactor to match `Task` functionality.
-  // /// Returns duration to next task.
-  // ///
-  // /// @return Duration in beats.
-  // [[nodiscard]] double GetDurationToNextTask() const noexcept;
+  /// Returns duration to next task.
+  ///
+  /// @return Duration in beats.
+  [[nodiscard]] std::optional<double> GetDurationToNextTask() const noexcept;
 
   /// Returns loop begin position.
   ///
@@ -68,6 +67,9 @@ class Performer {
   ///
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
+
+  /// Processes all tasks at the current position.
+  void ProcessAllTasksAtCurrentPosition() noexcept;
 
   /// Sets loop begin position.
   ///
@@ -103,17 +105,16 @@ class Performer {
   /// Stops performer.
   void Stop() noexcept;
 
-  // TODO(#109): Refactor to match `Task` functionality.
-  // /// Triggers all tasks at current position.
-  // void TriggerAllTasksAtCurrentPosition() noexcept;
-
-  // /// Updates performer by duration.
-  // ///
-  // /// @param duration Duration in beats.
-  // // NOLINTNEXTLINE(bugprone-exception-escape)
-  // void Update(double duration) noexcept;
+  /// Updates performer by duration.
+  ///
+  /// @param duration Duration in beats.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void Update(double duration) noexcept;
 
  private:
+  // Task map alias.
+  using TaskMap = std::map<std::pair<double, Id>, Task>;
+
   // Task info.
   struct TaskInfo {
     // Position.
@@ -123,10 +124,8 @@ class Performer {
     TaskType type;
   };
 
-  // TODO(#109): Refactor to match `Task` functionality.
-  // // Returns next task callback.
-  // [[nodiscard]] std::map<std::pair<double, Id>, TaskCallback>::const_iterator
-  // GetNextTaskCallback() const noexcept;
+  // Returns an iterator to the next recurring task to process.
+  [[nodiscard]] TaskMap::const_iterator GetNextRecurringTask() const noexcept;
 
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;
@@ -147,11 +146,11 @@ class Performer {
   std::unordered_map<Id, TaskInfo> infos_;
 
   // Sorted map of tasks by task position-identifier pairs.
-  std::map<std::pair<double, Id>, Task> one_off_tasks_;
-  std::map<std::pair<double, Id>, Task> recurring_tasks_;
+  TaskMap one_off_tasks_;
+  TaskMap recurring_tasks_;
 
-  // // Last triggered position.
-  // std::optional<double> last_triggered_position_;
+  // Last processed recurring task position.
+  std::optional<double> last_processed_position_;
 };
 
 }  // namespace barely::internal

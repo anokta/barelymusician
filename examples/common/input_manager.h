@@ -63,7 +63,13 @@ class InputManager {
   // Currently pressed keyboard keys.
   std::unordered_set<Key> pressed_keys_;
 
-#if defined(__APPLE__)
+#if defined(_WIN32) || defined(__CYGWIN__)
+  // Console standard input handle.
+  HANDLE std_input_handle_;
+
+  // Old console mode to be restored.
+  DWORD previous_console_mode_;
+#elif defined(__APPLE__)
   // Keyboard event callback signature.
   using EventCallback = std::function<void(CGEventType type, CGEventRef event)>;
 

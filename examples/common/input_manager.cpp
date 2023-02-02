@@ -6,7 +6,17 @@ namespace barely::examples {
 
 InputManager::InputManager() noexcept
     : key_down_callback_(nullptr), key_up_callback_(nullptr) {
-#if defined(__APPLE__)
+#if defined(_WIN32) || defined(__CYGWIN__)
+  std_input_handle_ = GetStdHandle(STD_INPUT_HANDLE);
+  if (std_input_handle_ == INVALID_HANDLE_VALUE) {
+    return;
+  }
+  if (!GetConsoleMode(std_input_handle_, &previous_console_mode_)) {
+    return;
+  }
+  const DWORD console_mode = ENABLE_EXTENDED_FLAGS | ENABLE_MOUSE_INPUT;
+  SetConsoleMode(std_input_handle_, console_mode);
+#elif defined(__APPLE__)
   event_callback_ = [this](CGEventType type, CGEventRef event) noexcept {
     UniCharCount length = 0;
     UniChar str[1];
@@ -48,7 +58,9 @@ InputManager::InputManager() noexcept
 }
 
 InputManager::~InputManager() noexcept {
-#if defined(__APPLE__)
+#if defined(_WIN32) || defined(__CYGWIN__)
+  SetConsoleMode(std_input_handle_, previous_console_mode_);
+#elif defined(__APPLE__)
   CGEventTapEnable(event_tap_, false);
   CFRunLoopRemoveSource(CFRunLoopGetCurrent(), run_loop_source_,
                         kCFRunLoopCommonModes);
@@ -75,6 +87,7 @@ void InputManager::Update() noexcept {
       HandleKeyUp(key);
     }
   }
+  FlushConsoleInputBuffer(std_input_handle_);
 #elif defined(__APPLE__)
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
 #endif  // defined(__APPLE__)

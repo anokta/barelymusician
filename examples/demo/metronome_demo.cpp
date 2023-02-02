@@ -4,18 +4,19 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/instruments/synth_instrument.h"
-#include "barelymusician/sequencers/metronome.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
+#include "examples/performers/metronome.h"
 
 namespace {
 
-using ::barely::Engine;
+using ::barely::GainProcessor;
 using ::barely::Instrument;
-using ::barely::Metronome;
+using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
@@ -23,6 +24,7 @@ using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
+using ::barely::examples::Metronome;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -45,6 +47,8 @@ constexpr int kBeatCount = 4;
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
 
+constexpr int kMetronomeOrder = -1;
+
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -54,24 +58,27 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Engine engine;
-  engine.SetTempo(kInitialTempo);
+  Musician musician;
+  musician.SetTempo(kInitialTempo);
 
   // Create metronome instrument.
   Instrument instrument =
-      engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
+  GainProcessor gain(kFrameRate);
+  gain.SetGain(kGain);
+
   // Add beat event.
-  Metronome metronome(engine);
+  Metronome metronome(musician.CreatePerformer(kMetronomeOrder));
   metronome.SetBeatCallback([&](int beat) {
     ConsoleLog() << "Tick " << (beat / kBeatCount) << "."
                  << (beat % kBeatCount);
     const double pitch = (beat % kBeatCount == 0) ? kBarPitch : kBeatPitch;
-    instrument.SetNoteOn(pitch, kGain);
+    instrument.SetNoteOn(pitch);
     instrument.SetNoteOff(pitch);
     ++beat;
   });
@@ -80,6 +87,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   const auto process_callback = [&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount,
                        audio_clock.GetTimestamp());
+    gain.Process(output, kChannelCount, kFrameCount);
     audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -93,7 +101,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetTempo();
+    double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (metronome.IsPlaying()) {
@@ -108,10 +116,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
         metronome.Reset();
         ConsoleLog() << "Reset playback";
         return;
-      case '-':
+      case 'O':
         tempo -= kTempoIncrement;
         break;
-      case '+':
+      case 'P':
         tempo += kTempoIncrement;
         break;
       case '1':
@@ -126,8 +134,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       default:
         return;
     }
-    engine.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
+    musician.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
@@ -138,7 +146,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(audio_clock.GetTimestamp() + kLookahead);
+    musician.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

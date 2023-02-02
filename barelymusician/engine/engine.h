@@ -142,7 +142,7 @@ class Engine {
   // Map of performers by performer order-identifier pairs.
   std::map<std::pair<int, Id>, Performer> performers_;
 
-  // Map of performer priority-reference pairs by performer identifiers.
+  // Map of performer order-reference pairs by performer identifiers.
   std::unordered_map<Id, std::pair<int, std::reference_wrapper<Performer>>>
       performer_refs_;
 

@@ -23,13 +23,11 @@ class Task {
   /// Destroys `Task`.
   ~Task() noexcept;
 
-  /// Non-copyable.
+  /// Non-copyable and non-movable.
   Task(const Task& other) = delete;
   Task& operator=(const Task& other) = delete;
-
-  /// Movable.
-  Task(Task&& other) noexcept = default;
-  Task& operator=(Task&& other) noexcept = default;
+  Task(Task&& other) noexcept = delete;
+  Task& operator=(Task&& other) noexcept = delete;
 
   /// Processes task.
   void Process() noexcept;

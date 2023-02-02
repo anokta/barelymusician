@@ -1,11 +1,11 @@
-#ifndef BARELYMUSICIAN_SEQUENCERS_METRONOME_H_
-#define BARELYMUSICIAN_SEQUENCERS_METRONOME_H_
+#ifndef EXAMPLES_PERFORMERS_METRONOME_H_
+#define EXAMPLES_PERFORMERS_METRONOME_H_
 
 #include <functional>
 
 #include "barelymusician/barelymusician.h"
 
-namespace barely {
+namespace barely::examples {
 
 /// Simple metronome that keeps track of beats.
 class Metronome {
@@ -17,9 +17,9 @@ class Metronome {
 
   /// Creates new `Metronome`.
   ///
-  /// @param engine Engine.
+  /// @param performer Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Metronome(Engine& engine) noexcept;
+  explicit Metronome(Performer&& performer) noexcept;
 
   /// Returns whether metronome is playing or not.
   ///
@@ -51,6 +51,6 @@ class Metronome {
   BeatCallback callback_ = nullptr;
 };
 
-}  // namespace barely
+}  // namespace barely::examples
 
-#endif  // BARELYMUSICIAN_SEQUENCERS_METRONOME_H_
+#endif  // EXAMPLES_PERFORMERS_METRONOME_H_

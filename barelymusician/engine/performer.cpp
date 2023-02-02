@@ -5,6 +5,7 @@
 #include <cmath>
 #include <limits>
 #include <map>
+#include <memory>
 #include <optional>
 #include <utility>
 
@@ -22,10 +23,10 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
   assert(task_id > kInvalid);
   auto success = infos_.emplace(task_id, TaskInfo{position, type}).second;
   assert(success);
-  success =
-      (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
-          .emplace(std::pair{position, task_id}, Task(definition, user_data))
-          .second;
+  success = (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
+                .emplace(std::pair{position, task_id},
+                         std::make_unique<Task>(definition, user_data))
+                .second;
   assert(success);
 }
 
@@ -97,7 +98,7 @@ void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
   if (!one_off_tasks_.empty()) {
     auto it = one_off_tasks_.begin();
     while (it != one_off_tasks_.end() && it->first.first <= position_) {
-      it->second.Process();
+      it->second->Process();
       ++it;
     }
     one_off_tasks_.erase(one_off_tasks_.begin(), it);
@@ -105,7 +106,7 @@ void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
   // Process recurring tasks.
   auto it = GetNextRecurringTask();
   while (it != recurring_tasks_.end() && it->first.first <= position_) {
-    const_cast<Task&>(it->second).Process();
+    it->second->Process();
     last_processed_position_ = it->first.first;
     ++it;
   }

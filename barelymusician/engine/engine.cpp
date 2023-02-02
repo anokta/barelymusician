@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <functional>
+#include <unordered_set>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -68,15 +69,21 @@ StatusOr<Id> Engine::CreatePerformer(int order) noexcept {
   return performer_id;
 }
 
-StatusOr<Id> Engine::CreatePerformerTask(
-    [[maybe_unused]] Id performer_id,
-    [[maybe_unused]] TaskDefinition definition,
-    [[maybe_unused]] double position, [[maybe_unused]] TaskType type,
-    [[maybe_unused]] void* user_data) noexcept {
-  if (performer_id == kInvalid) return Status::kInvalidArgument;
-  if (position < 0.0) return Status::kInvalidArgument;
-  // TODO(#109): Implement this.
-  return {Status::kUnimplemented};
+StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
+                                         TaskDefinition definition,
+                                         double position, TaskType type,
+                                         void* user_data) noexcept {
+  if (performer_id == kInvalid) return {Status::kInvalidArgument};
+  if (position < 0.0) return {Status::kInvalidArgument};
+  auto performer_or = GetPerformer(performer_id);
+  if (performer_or.IsOk()) {
+    const Id task_id = GenerateNextId();
+    performer_or->get().CreateTask(task_id, definition, position, type,
+                                   user_data);
+    return task_id;
+  } else {
+    return performer_or.GetErrorStatus();
+  }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -156,48 +163,45 @@ void Engine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
 void Engine::Update(double timestamp) noexcept {
   assert(timestamp >= 0.0);
 
-  // while (timestamp_ < timestamp) {
-  //   if (tempo_ > 0.0) {
-  //     double update_duration = GetBeats(tempo_, timestamp - timestamp_);
-  //   } else {
-  //     // Playback is stopped.
-  //     timestamp_ = timestamp;
-  //   }
-  //   for (auto& [instrument_id, instrument] : instruments_) {
-  //     instrument->Update(timestamp);
-  //   }
-  // }
+  while (timestamp_ < timestamp) {
+    if (tempo_ > 0.0) {
+      double update_duration = GetBeats(tempo_, timestamp - timestamp_);
+      std::unordered_set<Id> performer_ids_to_process;
+      for (const auto& [order_id_pair, performer] : performers_) {
+        if (const auto maybe_duration = performer.GetDurationToNextTask();
+            maybe_duration && *maybe_duration <= update_duration) {
+          if (*maybe_duration < update_duration) {
+            update_duration = *maybe_duration;
+            std::exchange(performer_ids_to_process, {order_id_pair.second});
+          } else {
+            performer_ids_to_process.emplace(order_id_pair.second);
+          }
+        }
+      }
 
-  for (auto& [instrument_id, instrument] : instruments_) {
-    instrument->Update(timestamp);
+      timestamp_ += GetSeconds(tempo_, update_duration);
+      for (auto& [order_id_pair, performer] : performers_) {
+        performer.Update(update_duration);
+      }
+      for (auto& [instrument_id, instrument] : instruments_) {
+        instrument->Update(timestamp_);
+      }
+      if (!performer_ids_to_process.empty()) {
+        for (auto& [order_id_pair, performer] : performers_) {
+          if (performer_ids_to_process.find(order_id_pair.second) !=
+              performer_ids_to_process.end()) {
+            performer.ProcessAllTasksAtCurrentPosition();
+          }
+        }
+      }
+    } else {
+      // Playback is stopped.
+      timestamp_ = timestamp;
+      for (auto& [instrument_id, instrument] : instruments_) {
+        instrument->Update(timestamp_);
+      }
+    }
   }
-
-  // TODO(#109): Reenable after API cleanup. Check for `tempo_ > 0.0`.
-  // while (timestamp_ < timestamp) {
-  //   double update_duration = GetBeats(timestamp - timestamp_);
-  //   bool has_tasks_to_trigger = false;
-  //   for (const auto& [priority_id_pair, performer] : performers_) {
-  //     if (const double duration = performer.GetDurationToNextTask();
-  //         duration < update_duration) {
-  //       update_duration = duration;
-  //       has_tasks_to_trigger = true;
-  //     }
-  //   }
-
-  //   timestamp_ += GetSeconds(update_duration);
-  //   for (auto& [priority_id_pair, performer] : performers_) {
-  //     performer.Update(update_duration);
-  //   }
-
-  //   if (has_tasks_to_trigger) {
-  //     for (auto& [priority_id_pair, performer] : performers_) {
-  //       if (update_duration + performer.GetDurationToNextTask() <=
-  //           performer.GetPosition()) {
-  //         performer.TriggerAllTasksAtCurrentPosition();
-  //       }
-  //     }
-  //   }
-  // }
 }
 
 Id Engine::GenerateNextId() noexcept {

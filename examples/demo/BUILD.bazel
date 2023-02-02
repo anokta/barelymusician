@@ -38,21 +38,21 @@ cc_binary(
     ],
 )
 
-# TODO(#109): Reenable after API cleanup.
-# cc_binary(
-#     name = "metronome_demo",
-#     srcs = ["metronome_demo.cpp"],
-#     deps = [
-#         "//barelymusician",
-#         "//barelymusician/composition:note_pitch",
-#         "//barelymusician/instruments:synth_instrument",
-#         "//barelymusician/sequencers:metronome",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#     ],
-# )
+cc_binary(
+    name = "metronome_demo",
+    srcs = ["metronome_demo.cpp"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/composition:note_pitch",
+        "//barelymusician/dsp:gain_processor",
+        "//barelymusician/instruments:synth_instrument",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/performers:metronome",
+    ],
+)
 
 # cc_binary(
 #     name = "midi_demo",

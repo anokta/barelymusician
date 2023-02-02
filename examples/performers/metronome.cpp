@@ -1,8 +1,8 @@
-#include "barelymusician/performers/metronome.h"
+#include "examples/performers/metronome.h"
 
 #include <utility>
 
-namespace barely {
+namespace barely::examples {
 
 namespace {
 
@@ -12,16 +12,18 @@ constexpr int kPriority = -1;
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Metronome::Metronome(Engine& engine) noexcept
-    : performer_(engine.CreatePerformer(kPriority)) {
+Metronome::Metronome(Performer&& performer) noexcept
+    : performer_(std::move(performer)) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.AddTask(0.0, [this]() {
-    if (callback_) {
-      callback_(beat_);
-    }
-    ++beat_;
-  });
+  performer_.CreateTask(
+      [this]() {
+        if (callback_) {
+          callback_(beat_);
+        }
+        ++beat_;
+      },
+      0.0);
 }
 
 bool Metronome::IsPlaying() const noexcept { return performer_.IsPlaying(); }
@@ -40,4 +42,4 @@ void Metronome::Start() noexcept { performer_.Start(); }
 
 void Metronome::Stop() noexcept { performer_.Stop(); }
 
-}  // namespace barely
+}  // namespace barely::examples

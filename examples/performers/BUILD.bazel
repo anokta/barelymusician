@@ -1,0 +1,10 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "metronome",
+    srcs = ["metronome.cpp"],
+    hdrs = ["metronome.h"],
+    deps = [
+        "//barelymusician",
+    ],
+)

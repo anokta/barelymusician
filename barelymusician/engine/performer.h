@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_PERFORMER_H_
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <unordered_map>
 #include <utility>
@@ -113,7 +114,7 @@ class Performer {
 
  private:
   // Task map alias.
-  using TaskMap = std::map<std::pair<double, Id>, Task>;
+  using TaskMap = std::map<std::pair<double, Id>, std::unique_ptr<Task>>;
 
   // Task info.
   struct TaskInfo {

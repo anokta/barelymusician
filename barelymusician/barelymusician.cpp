@@ -325,11 +325,48 @@ BarelyStatus BarelyMusician_Create(BarelyMusicianHandle* out_handle) {
   return BarelyStatus_kOk;
 }
 
+BarelyStatus BarelyMusician_CreateTask(BarelyMusicianHandle handle,
+                                       BarelyTaskDefinition definition,
+                                       double timestamp, void* user_data,
+                                       BarelyId* out_task_id) {
+  if (!handle) return BarelyStatus_kInvalidArgument;
+  if (!out_task_id) return BarelyStatus_kInvalidArgument;
+
+  const auto task_id_or =
+      handle->engine.CreateTask(definition, timestamp, user_data);
+  if (task_id_or.IsOk()) {
+    *out_task_id = *task_id_or;
+    return BarelyStatus_kOk;
+  }
+  return task_id_or.GetErrorStatus();
+}
+
 BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle) {
   if (!handle) return BarelyStatus_kNotFound;
 
   delete handle;
   return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_DestroyTask(BarelyMusicianHandle handle,
+                                        BarelyId task_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+
+  return handle->engine.DestroyTask(task_id);
+}
+
+BarelyStatus BarelyMusician_GetTaskTimestamp(BarelyMusicianHandle handle,
+                                             BarelyId task_id,
+                                             double* out_timestamp) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (!out_timestamp) return BarelyStatus_kInvalidArgument;
+
+  const auto timestamp_or = handle->engine.GetTaskTimestamp(task_id);
+  if (timestamp_or.IsOk()) {
+    *out_timestamp = *timestamp_or;
+    return BarelyStatus_kOk;
+  }
+  return timestamp_or.GetErrorStatus();
 }
 
 BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
@@ -348,6 +385,14 @@ BarelyStatus BarelyMusician_GetTimestamp(BarelyMusicianHandle handle,
 
   *out_timestamp = handle->engine.GetTimestamp();
   return BarelyStatus_kOk;
+}
+
+BarelyStatus BarelyMusician_SetTaskTimestamp(BarelyMusicianHandle handle,
+                                             BarelyId task_id,
+                                             double timestamp) {
+  if (!handle) return BarelyStatus_kNotFound;
+
+  return handle->engine.SetTaskTimestamp(task_id, timestamp);
 }
 
 BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,

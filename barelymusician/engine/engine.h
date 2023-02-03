@@ -11,6 +11,7 @@
 #include "barelymusician/engine/mutable_data.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/status.h"
+#include "barelymusician/engine/task.h"
 
 namespace barely::internal {
 
@@ -58,6 +59,22 @@ class Engine {
                                    double position, TaskType type,
                                    void* user_data) noexcept;
 
+  /// Creates new task.
+  ///
+  /// @param definition Task definition.
+  /// @param timestamp Task timestamp in seconds.
+  /// @param user_data Pointer to user data.
+  /// @return Task identifier or error status.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  StatusOr<Id> CreateTask(TaskDefinition definition, double timestamp,
+                          void* user_data) noexcept;
+
+  /// Destroys task.
+  ///
+  /// @param task_id Task identifier.
+  /// @return Status.
+  Status DestroyTask(Id task_id) noexcept;
+
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument identifier.
@@ -86,6 +103,12 @@ class Engine {
   [[nodiscard]] StatusOr<std::reference_wrapper<Performer>> GetPerformer(
       Id performer_id) noexcept;
 
+  /// Returns task timestamp.
+  ///
+  /// @param task_id Task identifier.
+  /// @return Timestamp in seconds or error status.
+  [[nodiscard]] StatusOr<double> GetTaskTimestamp(Id task_id) const noexcept;
+
   /// Returns tempo.
   ///
   /// @return Tempo in beats per minute.
@@ -107,6 +130,12 @@ class Engine {
   Status ProcessInstrument(Id instrument_id, double* output_samples,
                            int output_channel_count, int output_frame_count,
                            double timestamp) noexcept;
+
+  /// Sets task timestamp.
+  /// @param task_id Task identifier.
+  /// @param timestamp Timestamp in seconds.
+  /// @return Status.
+  Status SetTaskTimestamp(Id task_id, double timestamp) noexcept;
 
   /// Sets tempo.
   ///
@@ -151,6 +180,10 @@ class Engine {
 
   // Timestamp in seconds.
   double timestamp_ = 0.0;
+
+  // Tasks.
+  std::unordered_map<Id, double> task_timestamps_;
+  TaskMap tasks_;
 };
 
 }  // namespace barely::internal

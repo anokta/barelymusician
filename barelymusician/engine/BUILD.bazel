@@ -20,6 +20,7 @@ cc_library(
         ":instrument",
         ":mutable_data",
         ":performer",
+        ":task",
         "//barelymusician/common:find_or_null",
         "//barelymusician/dsp:dsp_utils",
     ],
@@ -89,6 +90,7 @@ cc_library(
     srcs = ["task.cpp"],
     hdrs = ["task.h"],
     deps = [
+        ":id",
         "//barelymusician:include",
     ],
 )

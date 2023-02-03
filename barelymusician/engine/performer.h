@@ -113,9 +113,6 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // Task map alias.
-  using TaskMap = std::map<std::pair<double, Id>, std::unique_ptr<Task>>;
-
   // Task info.
   struct TaskInfo {
     // Position.

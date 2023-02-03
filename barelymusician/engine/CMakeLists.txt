@@ -20,6 +20,7 @@ target_link_libraries(
   mutable_data
   performer
   status
+  task
   find_or_null
   dsp_utils
 )

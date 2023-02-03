@@ -175,7 +175,6 @@ Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
       auto node = tasks.extract(std::pair{current_position, task_id});
       node.key().first = position;
       tasks.insert(std::move(node));
-      current_position = position;
     }
     return Status::kOk;
   }
@@ -194,8 +193,7 @@ void Performer::Update(double duration) noexcept {
   }
 }
 
-Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
-    const noexcept {
+TaskMap::const_iterator Performer::GetNextRecurringTask() const noexcept {
   auto it = recurring_tasks_.lower_bound(std::pair{position_, kInvalid});
   if (last_processed_position_) {
     // Skip processed tasks.

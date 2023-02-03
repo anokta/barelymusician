@@ -7,34 +7,13 @@
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
+#include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/status.h"
 
 namespace barely::internal {
-
-namespace {
-
-// Converts seconds to minutes.
-constexpr double kMinutesFromSeconds = 1.0 / 60.0;
-
-// Converts minutes to seconds.
-constexpr double kSecondsFromMinutes = 60.0;
-
-/// Returns corresponding beats for given `seconds` at `tempo`.
-double GetBeats(double tempo, double seconds) noexcept {
-  assert(tempo > 0.0);
-  return tempo * seconds * kMinutesFromSeconds;
-}
-
-/// Returns corresponding seconds for given `beats` at `tempo`.
-double GetSeconds(double tempo, double beats) noexcept {
-  assert(tempo > 0.0);
-  return beats * kSecondsFromMinutes / tempo;
-}
-
-}  // namespace
 
 Engine::~Engine() noexcept {
   for (auto& [instrument_id, instrument] : instruments_) {
@@ -49,9 +28,9 @@ StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
   if (frame_rate < 0) return {Status::kInvalidArgument};
   const Id instrument_id = GenerateNextId();
   const auto [it, success] = instruments_.emplace(
-      instrument_id, std::make_unique<Instrument>(definition, frame_rate));
+      instrument_id,
+      std::make_unique<Instrument>(definition, frame_rate, tempo_, timestamp_));
   assert(success);
-  it->second->Update(timestamp_);
   UpdateInstrumentReferenceMap();
   return instrument_id;
 }
@@ -157,7 +136,14 @@ Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
   return Status::kNotFound;
 }
 
-void Engine::SetTempo(double tempo) noexcept { tempo_ = std::max(tempo, 0.0); }
+void Engine::SetTempo(double tempo) noexcept {
+  tempo = std::max(tempo, 0.0);
+  if (tempo_ == tempo) return;
+  tempo_ = tempo;
+  for (auto& [instrument_id, instrument] : instruments_) {
+    instrument->SetTempo(tempo_);
+  }
+}
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::Update(double timestamp) noexcept {
@@ -165,7 +151,7 @@ void Engine::Update(double timestamp) noexcept {
 
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      double update_duration = GetBeats(tempo_, timestamp - timestamp_);
+      double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
       std::unordered_set<Id> performer_ids_to_process;
       for (const auto& [order_id_pair, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
@@ -179,12 +165,16 @@ void Engine::Update(double timestamp) noexcept {
         }
       }
 
-      timestamp_ += GetSeconds(tempo_, update_duration);
-      for (auto& [order_id_pair, performer] : performers_) {
-        performer.Update(update_duration);
-      }
-      for (auto& [instrument_id, instrument] : instruments_) {
-        instrument->Update(timestamp_);
+      if (const double next_timestamp =
+              timestamp_ + SecondsFromBeats(tempo_, update_duration);
+          next_timestamp > timestamp_) {
+        timestamp_ = next_timestamp;
+        for (auto& [order_id_pair, performer] : performers_) {
+          performer.Update(update_duration);
+        }
+        for (auto& [instrument_id, instrument] : instruments_) {
+          instrument->Update(timestamp_);
+        }
       }
       if (!performer_ids_to_process.empty()) {
         for (auto& [order_id_pair, performer] : performers_) {

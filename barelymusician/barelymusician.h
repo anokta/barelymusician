@@ -108,7 +108,7 @@ typedef void (*BarelyInstrument_NoteOnEventCallback)(double pitch,
 /// Instrument definition create callback signature.
 ///
 /// @param state Pointer to instrument state.
-/// @param frame_rate Frame rate in hz.
+/// @param frame_rate Frame rate in hertz.
 typedef void (*BarelyInstrumentDefinition_CreateCallback)(void** state,
                                                           int32_t frame_rate);
 
@@ -254,7 +254,7 @@ typedef struct BarelyTaskDefinition {
 ///
 /// @param handle Musician handle.
 /// @param definition Instrument definition.
-/// @param frame_rate Frame rate in hz.
+/// @param frame_rate Frame rate in hertz.
 /// @param out_instrument_id Output instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
@@ -476,7 +476,7 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
 /// Gets musician tempo.
 ///
 /// @param handle Musician handle.
-/// @param out_tempo Output tempo in bpm.
+/// @param out_tempo Output tempo in beats per minute.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
                                                    double* out_tempo);
@@ -492,7 +492,7 @@ BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
 /// Sets musician tempo.
 ///
 /// @param handle Musician handle.
-/// @param tempo Tempo in bpm.
+/// @param tempo Tempo in beats per minute.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
                                                    double tempo);
@@ -1612,7 +1612,7 @@ class Musician {
   /// Creates new instrument.
   ///
   /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hz.
+  /// @param frame_rate Frame rate in hertz.
   /// @return Instrument.
   [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
                                             int frame_rate) noexcept {
@@ -1629,7 +1629,7 @@ class Musician {
 
   /// Returns tempo.
   ///
-  /// @return Tempo in bpm.
+  /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept {
     double tempo = 0.0;
     [[maybe_unused]] const Status status =
@@ -1651,7 +1651,7 @@ class Musician {
 
   /// Sets tempo.
   ///
-  /// @param tempo Tempo in bpm.
+  /// @param tempo Tempo in beats per minute.
   /// @return Status.
   Status SetTempo(double tempo) noexcept {
     return BarelyMusician_SetTempo(handle_, tempo);

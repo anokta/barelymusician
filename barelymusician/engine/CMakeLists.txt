@@ -21,6 +21,7 @@ target_link_libraries(
   performer
   status
   find_or_null
+  dsp_utils
 )
 
 add_library(
@@ -45,6 +46,7 @@ target_link_libraries(
   status
   include
   find_or_null
+  dsp_utils
 )
 
 add_library(

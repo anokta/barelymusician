@@ -8,7 +8,7 @@ class GainProcessor {
  public:
   /// Constructs new `GainProcessor`.
   ///
-  /// @param frame_rate Frame rate in hz.
+  /// @param frame_rate Frame rate in hertz.
   explicit GainProcessor(int frame_rate) noexcept;
 
   /// Processes next buffer.

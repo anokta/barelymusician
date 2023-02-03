@@ -25,7 +25,7 @@ enum BarelyUnityInstrumentType_Values {
 ///
 /// @param handle Musician handle.
 /// @param type Unity instrument type.
-/// @param frame_rate Frame rate in hz.
+/// @param frame_rate Frame rate in hertz.
 /// @param out_instrument_id Output instrument identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyUnityInstrument_Create(

@@ -10,7 +10,7 @@ class SamplePlayer : public Generator {
  public:
   /// Construct new `SamplePlayer` with the given sample data.
   ///
-  /// @param sample_rate Sampling rate in hz.
+  /// @param sample_rate Sampling rate in hertz.
   explicit SamplePlayer(int sample_rate) noexcept;
 
   /// Implements `Generator`.
@@ -20,7 +20,7 @@ class SamplePlayer : public Generator {
   /// Sets the sample data.
   ///
   /// @param data Sample data.
-  /// @param frequency Data sampling frequency in hz.
+  /// @param frequency Data sampling frequency in hertz.
   /// @param length Data length in samples.
   void SetData(const double* data, int frequency, int length) noexcept;
 
@@ -44,7 +44,7 @@ class SamplePlayer : public Generator {
   // Sample data.
   const double* data_ = nullptr;
 
-  // Sample data sampling rate in hz.
+  // Sample data sampling rate in hertz.
   double frequency_ = 0.0;
 
   // Sample data length in samples.

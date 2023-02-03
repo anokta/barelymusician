@@ -27,17 +27,62 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
   }
 }
 
+// Tests that converting values from/to beats and seconds returns expected
+// results.
+TEST(DspUtilsTest, BeatsSecondsConversion) {
+  const double kTempo = 120.0;
+  const int kValueCount = 5;
+  const double kBeats[kValueCount] = {0.0, 1.0, 5.0, -4.0, -246.8};
+  const double kSeconds[kValueCount] = {0.0, 0.5, 2.5, -2.0, -123.4};
+
+  for (int i = 0; i < kValueCount; ++i) {
+    EXPECT_DOUBLE_EQ(BeatsFromSeconds(kTempo, kSeconds[i]), kBeats[i]);
+    EXPECT_DOUBLE_EQ(SecondsFromBeats(kTempo, kBeats[i]), kSeconds[i]);
+
+    // Verify that the back and forth conversion do not mutate the value.
+    EXPECT_DOUBLE_EQ(
+        BeatsFromSeconds(kTempo, SecondsFromBeats(kTempo, kBeats[i])),
+        kBeats[i]);
+    EXPECT_DOUBLE_EQ(
+        SecondsFromBeats(kTempo, BeatsFromSeconds(kTempo, kSeconds[i])),
+        kSeconds[i]);
+  }
+}
+
 // Tests that amplitude/decibels conversion snaps to `kMinDecibels` threshold.
 TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_DOUBLE_EQ(AmplitudeFromDecibels(kMinDecibels), 0.0);
   EXPECT_DOUBLE_EQ(DecibelsFromAmplitude(0.0), kMinDecibels);
 }
 
+// Tests that converting values from/to frames and seconds returns expected
+// results.
+TEST(DspUtilsTest, FramesSecondsConversion) {
+  const int kFrameRate = 8000;
+  const int kValueCount = 4;
+  const int kFrames[kValueCount] = {0, 800, 4000, 32000};
+  const double kSeconds[kValueCount] = {0.0, 0.1, 0.5, 4.0};
+
+  for (int i = 0; i < kValueCount; ++i) {
+    EXPECT_EQ(FramesFromSeconds(kFrameRate, kSeconds[i]), kFrames[i]);
+    EXPECT_DOUBLE_EQ(SecondsFromFrames(kFrameRate, kFrames[i]), kSeconds[i]);
+
+    // Verify that the back and forth conversion do not mutate the value.
+    EXPECT_EQ(FramesFromSeconds(kFrameRate,
+                                SecondsFromFrames(kFrameRate, kFrames[i])),
+              kFrames[i]);
+    EXPECT_DOUBLE_EQ(
+        SecondsFromFrames(kFrameRate,
+                          FramesFromSeconds(kFrameRate, kSeconds[i])),
+        kSeconds[i]);
+  }
+}
+
 // Tests that the expected filter coefficients are generated for an arbitrary
 // set of cutoff frequencies.
 TEST(DspUtilsTest, GetFilterCoefficient) {
   const double kEpsilon = 1e-2;
-  const int kSampleRate = 8000;
+  const int kFrameRate = 8000;
 
   const int kCutoffCount = 5;
   const double kCutoffs[kCutoffCount] = {0.0, 100.0, 500.0, 1000.0, 8000.0};
@@ -45,7 +90,7 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
                                                       0.00};
 
   for (int i = 0; i < kCutoffCount; ++i) {
-    EXPECT_NEAR(GetFilterCoefficient(kSampleRate, kCutoffs[i]),
+    EXPECT_NEAR(GetFilterCoefficient(kFrameRate, kCutoffs[i]),
                 kExpectedCoefficients[i], kEpsilon);
   }
 }

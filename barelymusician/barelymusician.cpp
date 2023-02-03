@@ -63,7 +63,7 @@ BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
   if (instrument_or.IsOk()) {
     const auto control_or = instrument_or->get().GetControl(index);
     if (control_or.IsOk()) {
-      *out_value = control_or->get().Get();
+      *out_value = control_or->get().GetValue();
       return BarelyStatus_kOk;
     }
     return control_or.GetErrorStatus();
@@ -83,7 +83,7 @@ BarelyStatus BarelyInstrument_GetNoteControl(BarelyMusicianHandle handle,
     const auto note_control_or =
         instrument_or->get().GetNoteControl(pitch, index);
     if (note_control_or.IsOk()) {
-      *out_value = note_control_or->get().Get();
+      *out_value = note_control_or->get().GetValue();
       return BarelyStatus_kOk;
     }
     return note_control_or.GetErrorStatus();
@@ -185,7 +185,6 @@ BarelyStatus BarelyInstrument_SetControl(BarelyMusicianHandle handle,
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
   if (instrument_or.IsOk()) {
-    // TODO(#109): Convert `slope_per_beat` to slope per second.
     return instrument_or->get().SetControl(index, value, slope_per_beat);
   }
   return instrument_or.GetErrorStatus();
@@ -233,7 +232,6 @@ BarelyStatus BarelyInstrument_SetNoteControl(BarelyMusicianHandle handle,
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
   if (instrument_or.IsOk()) {
-    // TODO(#109): Convert `slope_per_beat` to slope per second.
     return instrument_or->get().SetNoteControl(pitch, index, value,
                                                slope_per_beat);
   }

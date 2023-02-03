@@ -22,7 +22,7 @@ class AudioClock {
   void Update(int frame_count) noexcept;
 
  private:
-  // Frame rate in hz.
+  // Frame rate in hertz.
   const int frame_rate_;
 
   // Monothonic timestamp in seconds.

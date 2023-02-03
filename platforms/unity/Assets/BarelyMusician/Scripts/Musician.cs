@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Barely {
   /// Class that wraps musician.
   public static class Musician {
-    /// Playback tempo in bpm.
+    /// Playback tempo in beats per minute.
     public static double Tempo {
       get { return _tempo; }
       set {
@@ -261,7 +261,7 @@ namespace Barely {
 
       /// Sets musician tempo.
       ///
-      /// @param tempo Tempo in bpm.
+      /// @param tempo Tempo in beats per minute.
       public static void Musician_SetTempo(double tempo) {
         Status status = BarelyMusician_SetTempo(Handle, tempo);
         if (!IsOk(status) && _handle != IntPtr.Zero) {

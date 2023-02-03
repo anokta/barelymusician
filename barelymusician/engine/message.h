@@ -15,8 +15,8 @@ struct ControlMessage {
   /// Value.
   double value;
 
-  /// Slope in value change per second.
-  double slope_per_second;
+  /// Slope in value change per frame.
+  double slope_per_frame;
 };
 
 /// Data message.
@@ -36,8 +36,8 @@ struct NoteControlMessage {
   /// Value.
   double value;
 
-  /// Slope in value change per second.
-  double slope_per_second;
+  /// Slope in value change per frame.
+  double slope_per_frame;
 };
 
 /// Note off message.

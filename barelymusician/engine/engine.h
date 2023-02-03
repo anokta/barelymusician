@@ -32,7 +32,7 @@ class Engine {
   /// Creates new instrument.
   ///
   /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hz.
+  /// @param frame_rate Frame rate in hertz.
   /// @return Instrument identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   StatusOr<Id> CreateInstrument(InstrumentDefinition definition,

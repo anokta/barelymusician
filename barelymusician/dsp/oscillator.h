@@ -25,7 +25,7 @@ class Oscillator : public Generator {
  public:
   /// Constructs new `Oscillator`.
   ///
-  /// @param sample_rate Sampling rate in hz.
+  /// @param sample_rate Sampling rate in hertz.
   explicit Oscillator(int sample_rate) noexcept;
 
   /// Implements `Generator`.
@@ -34,7 +34,7 @@ class Oscillator : public Generator {
 
   /// Sets the frequency of the oscillator.
   ///
-  /// @param frequency Oscillator frequency in hz.
+  /// @param frequency Oscillator frequency in hertz.
   void SetFrequency(double frequency) noexcept;
 
   /// Sets the type of the oscillator.

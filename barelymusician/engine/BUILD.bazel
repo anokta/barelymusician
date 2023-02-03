@@ -21,6 +21,7 @@ cc_library(
         ":mutable_data",
         ":performer",
         "//barelymusician/common:find_or_null",
+        "//barelymusician/dsp:dsp_utils",
     ],
 )
 
@@ -43,6 +44,7 @@ cc_library(
         ":status",
         "//barelymusician:include",
         "//barelymusician/common:find_or_null",
+        "//barelymusician/dsp:dsp_utils",
     ],
 )
 

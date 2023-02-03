@@ -19,6 +19,8 @@ constexpr int kFrameRate = 8000;
 constexpr int kChannelCount = 1;
 constexpr int kFrameCount = 4;
 
+constexpr double kTempo = 60.0;
+
 // Returns test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestDefinition() {
   static const std::vector<ControlDefinition> control_definitions = {
@@ -58,24 +60,24 @@ InstrumentDefinition GetTestDefinition() {
 
 // Tests that instrument returns control as expected.
 TEST(InstrumentTest, GetControl) {
-  Instrument instrument(GetTestDefinition(), kFrameRate);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
 
   const auto control_or = instrument.GetControl(0);
   ASSERT_TRUE(control_or.IsOk());
-  const auto& control = control_or.GetValue().get();
-  EXPECT_DOUBLE_EQ(control.Get(), 15.0);
+  const auto& control = control_or->get();
+  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   EXPECT_EQ(instrument.SetControl(0, 20.0, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(control.Get(), 20.0);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
 
   EXPECT_EQ(instrument.ResetControl(0), Status::kOk);
-  EXPECT_DOUBLE_EQ(control.Get(), 15.0);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   EXPECT_EQ(instrument.SetControl(0, 50.0, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(control.Get(), 20.0);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
 
   instrument.ResetAllControls();
-  EXPECT_DOUBLE_EQ(control.Get(), 15.0);
+  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
 
   // Control does not exist.
   const auto invalid_control_or = instrument.GetControl(1);
@@ -90,7 +92,7 @@ TEST(InstrumentTest, GetControl) {
 TEST(InstrumentTest, GetNoteControl) {
   const double kPitch = 1.0;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   {
@@ -105,20 +107,20 @@ TEST(InstrumentTest, GetNoteControl) {
 
   const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
   ASSERT_TRUE(note_control_or.IsOk());
-  const auto& note_control = note_control_or.GetValue().get();
-  EXPECT_DOUBLE_EQ(note_control.Get(), 1.0);
+  const auto& note_control = note_control_or->get();
+  EXPECT_DOUBLE_EQ(note_control.GetValue(), 1.0);
 
   EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, 0.25, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(note_control.Get(), 0.25);
+  EXPECT_DOUBLE_EQ(note_control.GetValue(), 0.25);
 
   EXPECT_EQ(instrument.ResetNoteControl(kPitch, 0), Status::kOk);
-  EXPECT_DOUBLE_EQ(note_control.Get(), 1.0);
+  EXPECT_DOUBLE_EQ(note_control.GetValue(), 1.0);
 
   EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, -10.0, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(note_control.Get(), 0.0);
+  EXPECT_DOUBLE_EQ(note_control.GetValue(), 0.0);
 
   instrument.ResetAllNoteControls(kPitch);
-  EXPECT_DOUBLE_EQ(note_control.Get(), 1.0);
+  EXPECT_DOUBLE_EQ(note_control.GetValue(), 1.0);
 
   // Note control does not exist.
   const auto invalid_note_control_or = instrument.GetNoteControl(kPitch, 1);
@@ -145,11 +147,8 @@ TEST(InstrumentTest, PlaySingleNote) {
   const double kPitch = 32.0;
   const double kTimestamp = 20.0;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, kTimestamp);
   std::vector<double> buffer(kChannelCount * kFrameCount);
-
-  instrument.Update(kTimestamp);
-  EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   // Control is set to default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -187,7 +186,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 
 // Tests that instrument plays multiple notes as expected.
 TEST(InstrumentTest, PlayMultipleNotes) {
-  Instrument instrument(GetTestDefinition(), 1);
+  Instrument instrument(GetTestDefinition(), 1, kTempo, 0.0);
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Control is set to default value.
@@ -229,7 +228,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 TEST(InstrumentTest, SetNoteCallbacks) {
   const double kPitch = 4.0;
 
-  Instrument instrument(GetTestDefinition(), 1);
+  Instrument instrument(GetTestDefinition(), 1, kTempo, 0.0);
 
   // Trigger note on callback.
   double note_on_pitch = 0.0;
@@ -273,7 +272,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 TEST(InstrumentTest, SetAllNotesOff) {
   const std::vector<double> kPitches = {1.0, 2.0, 3.0};
 
-  Instrument instrument(GetTestDefinition(), kFrameRate);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
   for (const double pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

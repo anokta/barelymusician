@@ -21,7 +21,7 @@ class WavFile {
 
   /// Returns the audio frame rate.
   ///
-  /// @return Audio frame rate in hz.
+  /// @return Audio frame rate in hertz.
   [[nodiscard]] int GetFrameRate() const noexcept;
 
   /// Loads Wave file with the given `file_path`.
@@ -35,7 +35,7 @@ class WavFile {
   // Number of audio channels.
   int channel_count_ = 0;
 
-  // Audio frame rate in hz.
+  // Audio frame rate in hertz.
   int frame_rate_ = 0;
 
   // Audio data.

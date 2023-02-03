@@ -16,10 +16,15 @@ class Control {
   /// @param definition Control definition.
   explicit Control(ControlDefinition definition) noexcept;
 
+  /// Returns slope per beat.
+  ///
+  /// @return Control slope in value change per beat.
+  [[nodiscard]] double GetSlopePerBeat() const noexcept;
+
   /// Returns value.
   ///
   /// @return Control value.
-  [[nodiscard]] double Get() const noexcept;
+  [[nodiscard]] double GetValue() const noexcept;
 
   /// Resets value.
   ///
@@ -29,15 +34,15 @@ class Control {
   /// Sets value.
   ///
   /// @param value Control value.
-  /// @param slope_per_second Control slope in value change per second.
+  /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if changed, false otherwise.
-  bool Set(double value, double slope_per_second) noexcept;
+  bool Set(double value, double slope_per_beat) noexcept;
 
-  /// Updates value by elapsed seconds.
+  /// Updates value by duration.
   ///
-  /// @param elapsed_seconds Elapsed seconds.
+  /// @param duration Duration in beats.
   /// @return True if value changed, false otherwise.
-  bool UpdateBy(double elapsed_seconds) noexcept;
+  bool Update(double duration) noexcept;
 
  private:
   // Clamps given `value`.
@@ -49,8 +54,8 @@ class Control {
   // Value.
   double value_ = 0.0;
 
-  // Slope in value change per second.
-  double slope_per_second_ = 0.0;
+  // Slope in value change per beat.
+  double slope_per_beat_ = 0.0;
 };
 
 }  // namespace barely::internal

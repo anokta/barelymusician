@@ -30,7 +30,7 @@ class AudioOutput {
 
   /// Starts audio processing routine with the given configuration.
   ///
-  /// @param frame_rate Frame rate in hz.
+  /// @param frame_rate Frame rate in hertz.
   /// @param channel_count Number of output channels.
   /// @param frame_count Number of output frames per buffer.
   // NOLINTNEXTLINE(bugprone-exception-escape)

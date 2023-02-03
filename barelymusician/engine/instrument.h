@@ -34,9 +34,12 @@ class Instrument {
   /// Constructs new `Instrument`.
   ///
   /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hz.
+  /// @param frame_rate Frame rate in hertz.
+  /// @param initial_tempo Initial tempo in beats per minute.
+  /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate) noexcept;
+  Instrument(const InstrumentDefinition& definition, int frame_rate,
+             double initial_tempo, double initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -108,9 +111,9 @@ class Instrument {
   ///
   /// @param index Control index.
   /// @param value Control value.
-  /// @param slope_per_second Control slope in value change per second.
+  /// @param slope_per_beat Control slope in value change per beat.
   /// @return Status.
-  Status SetControl(int index, double value, double slope_per_second) noexcept;
+  Status SetControl(int index, double value, double slope_per_beat) noexcept;
 
   /// Sets control event callback.
   ///
@@ -127,10 +130,10 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @param value Note control value.
-  /// @param slope_per_second Note control slope in value change per second.
+  /// @param slope_per_beat Note control slope in value change per beat.
   /// @return Status.
   Status SetNoteControl(double pitch, int index, double value,
-                        double slope_per_second) noexcept;
+                        double slope_per_beat) noexcept;
 
   /// Sets note control event callback.
   ///
@@ -158,20 +161,19 @@ class Instrument {
   /// @param callback Note on event callback.
   void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
 
+  /// Sets playbck tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept;
+
   /// Updates instrument at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept;
 
  private:
-  // Returns corresponding frames for a given number of `seconds`.
-  int GetFrames(double seconds) const noexcept;
-
-  // Returns corresponding seconds for a given number of `frames`.
-  double GetSeconds(int frames) const noexcept;
-
-  // Returns corresponding slope per frame for a given `slope_per_second`.
-  double GetSlopePerFrame(double slope_per_second) const noexcept;
+  // Returns corresponding slope per frame for a given `slope_per_beat`.
+  double GetSlopePerFrame(double slope_per_beat) const noexcept;
 
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
@@ -194,7 +196,7 @@ class Instrument {
   // Set note on callback.
   const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
 
-  // Sampling rate in hz.
+  // Frame rate in hertz.
   const int frame_rate_;
 
   // List of default note controls.
@@ -217,6 +219,9 @@ class Instrument {
 
   // Note on event callback.
   NoteOnEventCallback note_on_event_callback_;
+
+  // Tempo in beats per minute.
+  double tempo_ = 120.0;
 
   // Timestamp in seconds.
   double timestamp_ = 0;

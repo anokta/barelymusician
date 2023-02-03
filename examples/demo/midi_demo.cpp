@@ -18,12 +18,13 @@
 
 namespace {
 
-using ::barely::Engine;
 using ::barely::Instrument;
+using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
+using ::barely::TaskType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -32,7 +33,7 @@ using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
 // System audio settings.
-constexpr int kSampleRate = 48000;
+constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
@@ -76,15 +77,15 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double position = get_position_fn(midi_event.tick);
       const double duration = get_position_fn(midi_event.getTickDuration());
       const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
-      const double intensity =
-          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
-      const auto status = performer.ScheduleOneOffTask(
-          position, [&instrument, pitch, intensity]() {
-            instrument.SetNoteOn(pitch, intensity);
-          });
-      performer.ScheduleOneOffTask(position + duration, [&instrument, pitch]() {
-        instrument.SetNoteOff(pitch);
-      });
+      // TODO(#109): Reenable intensity.
+      // const double intensity =
+      //     static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
+      performer.CreateTask(
+          [&instrument, pitch]() { instrument.SetNoteOn(pitch); }, position,
+          TaskType::kOneOff);
+      performer.CreateTask(
+          [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+          position + duration, TaskType::kOneOff);
       has_notes = true;
     }
   }
@@ -112,17 +113,17 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Initializing " << kMidiFileName << " for MIDI playback ("
                << track_count << " tracks, " << ticks_per_quarter << " TPQ)";
 
-  AudioClock clock(kSampleRate);
+  AudioClock clock(kFrameRate);
 
-  Engine engine;
-  engine.SetTempo(kTempo);
+  Musician musician;
+  musician.SetTempo(kTempo);
 
   std::vector<std::pair<Instrument, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
     tracks.emplace_back(
-        engine.CreateInstrument(SynthInstrument::GetDefinition(), kSampleRate),
-        engine.CreatePerformer());
+        musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate),
+        musician.CreatePerformer());
     Instrument& instrument = tracks.back().first;
     Performer& performer = tracks.back().second;
     // Build score.
@@ -133,10 +134,9 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set instrument.
     const auto track_index = tracks.size();
-    instrument.SetNoteOnEventCallback([track_index](double pitch,
-                                                    double intensity) {
+    instrument.SetNoteOnEventCallback([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOn("
-                   << MidiKeyNumberFromPitch(pitch) << ", " << intensity << ")";
+                   << MidiKeyNumberFromPitch(pitch) << ")";
     });
     instrument.SetNoteOffEventCallback([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
@@ -179,14 +179,14 @@ int main(int /*argc*/, char* argv[]) {
 
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
-  audio_output.Start(kSampleRate, kChannelCount, kFrameCount);
+  audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
   for (auto& [instrument, performer] : tracks) {
     performer.Start();
   }
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(clock.GetTimestamp() + kLookahead);
+    musician.Update(clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

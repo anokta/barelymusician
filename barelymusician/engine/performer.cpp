@@ -21,6 +21,7 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
                            double position, TaskType type,
                            void* user_data) noexcept {
   assert(task_id > kInvalid);
+  assert(type != TaskType::kOneOff || position >= position_);
   auto success = infos_.emplace(task_id, TaskInfo{position, type}).second;
   assert(success);
   success = (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
@@ -98,6 +99,8 @@ void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
   if (!one_off_tasks_.empty()) {
     auto it = one_off_tasks_.begin();
     while (it != one_off_tasks_.end() && it->first.first <= position_) {
+      const auto success = infos_.erase(it->first.second) == 1;
+      assert(success);
       it->second->Process();
       ++it;
     }
@@ -146,7 +149,10 @@ void Performer::SetPosition(double position) noexcept {
   last_processed_position_ = std::nullopt;
   one_off_tasks_.erase(
       one_off_tasks_.begin(),
-      one_off_tasks_.lower_bound(std::pair{position, kInvalid}));
+      one_off_tasks_.lower_bound(std::pair{
+          is_looping_ ? std::min(position, loop_begin_position_ + loop_length_)
+                      : position,
+          kInvalid}));
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_tasks_.empty()) {
       // Reset all remaining one-off tasks back to the beginning.
@@ -155,6 +161,7 @@ void Performer::SetPosition(double position) noexcept {
         remaining_one_off_tasks.emplace(
             std::pair{loop_begin_position_, it.first.second},
             std::move(it.second));
+        infos_.at(it.first.second).position = loop_begin_position_;
       }
       one_off_tasks_.swap(remaining_one_off_tasks);
     }
@@ -169,12 +176,17 @@ Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     auto& [current_position, type] = it->second;
+    if (type == TaskType::kOneOff && position < position_) {
+      // Position is in the past.
+      return Status::kInvalidArgument;
+    }
     if (current_position != position) {
       auto& tasks =
           (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_);
       auto node = tasks.extract(std::pair{current_position, task_id});
       node.key().first = position;
       tasks.insert(std::move(node));
+      current_position = position;
     }
     return Status::kOk;
   }
@@ -191,6 +203,29 @@ void Performer::Update(double duration) noexcept {
     assert(duration >= 0.0 && duration <= GetDurationToNextTask());
     SetPosition(position_ + duration);
   }
+}
+
+void Performer::UpdateToNextTask() noexcept {
+  std::optional<double> next_task_position = std::nullopt;
+
+  // Check recurring tasks.
+  if (const auto next_recurring_task = GetNextRecurringTask();
+      next_recurring_task != recurring_tasks_.end()) {
+    next_task_position = next_recurring_task->first.first;
+    if (is_looping_ && (*next_task_position < position_ ||
+                        next_task_position == last_processed_position_)) {
+      *next_task_position += loop_length_;
+    }
+  }
+  // Check one-off tasks.
+  if (!one_off_tasks_.empty() &&
+      (!next_task_position ||
+       one_off_tasks_.begin()->first.first < *next_task_position)) {
+    next_task_position = one_off_tasks_.begin()->first.first;
+  }
+
+  assert(next_task_position);
+  SetPosition(*next_task_position);
 }
 
 TaskMap::const_iterator Performer::GetNextRecurringTask() const noexcept {

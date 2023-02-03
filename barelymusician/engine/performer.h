@@ -112,6 +112,9 @@ class Performer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double duration) noexcept;
 
+  /// Updates performer to next task position.
+  void UpdateToNextTask() noexcept;
+
  private:
   // Task info.
   struct TaskInfo {

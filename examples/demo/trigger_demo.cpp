@@ -12,6 +12,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -20,12 +21,15 @@
 
 namespace {
 
-using ::barely::Engine;
+using ::barely::GainProcessor;
 using ::barely::Instrument;
+using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
+using ::barely::TaskCallback;
+using ::barely::TaskType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -61,64 +65,67 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   AudioClock audio_clock(kFrameRate);
 
-  Engine engine;
-  engine.SetTempo(kInitialTempo);
+  Musician musician;
+  musician.SetTempo(kInitialTempo);
 
   Instrument instrument =
-      engine.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetNoteOnEventCallback(
-      [](double pitch, [[maybe_unused]] double intensity) {
-        ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
-      });
+  instrument.SetNoteOnEventCallback([](double pitch) {
+    ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
+  });
+
+  GainProcessor gain(kFrameRate);
+  gain.SetGain(kGain);
 
   std::vector<std::tuple<double, double, double>> notes;
   std::vector<std::pair<double, double>> triggers;
 
-  Performer performer = engine.CreatePerformer();
+  Performer performer = musician.CreatePerformer();
   performer.SetLooping(true);
 
   const auto play_note_fn = [&](int scale_index,
-                                double duration) -> Performer::TaskCallback {
+                                double duration) -> TaskCallback {
     const double pitch =
         barely::kPitchD3 +
         barely::GetPitch(barely::kPitchMajorScale, scale_index);
     return [&instrument, &performer, duration, pitch]() {
-      instrument.SetNoteOn(pitch, kGain);
-      performer.ScheduleOneOffTask(
-          performer.GetPosition() + duration,
-          [&instrument, pitch]() { instrument.SetNoteOff(pitch); });
+      instrument.SetNoteOn(pitch);
+      performer.CreateTask(
+          [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+          performer.GetPosition() + duration, TaskType::kOneOff);
     };
   };
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  performer.AddTask(0.0, play_note_fn(0, 1.0));
+  performer.CreateTask(play_note_fn(0, 1.0), 0.0);
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  performer.AddTask(1.0, play_note_fn(1, 1.0));
+  performer.CreateTask(play_note_fn(1, 1.0), 1.0);
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  performer.AddTask(2.0, play_note_fn(2, 1.0));
+  performer.CreateTask(play_note_fn(2, 1.0), 2.0);
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  performer.AddTask(3.0, play_note_fn(3, 2.0 / 3.0));
-  performer.AddTask(3.0 + 2.0 / 3.0, play_note_fn(4, 1.0 / 3.0));
+  performer.CreateTask(play_note_fn(3, 0.66), 3.0);
+  performer.CreateTask(play_note_fn(4, 0.34), 3.66);
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  performer.AddTask(4.0, play_note_fn(5, 1.0 / 3.0));
-  performer.AddTask(4.0 + 1.0 / 3.0, play_note_fn(6, 1.0 / 3.0));
-  performer.AddTask(4.0 + 2.0 / 3.0, play_note_fn(7, 1.0 / 3.0));
+  performer.CreateTask(play_note_fn(5, 0.33), 4.0);
+  performer.CreateTask(play_note_fn(6, 0.33), 4.33);
+  performer.CreateTask(play_note_fn(7, 0.34), 4.66);
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  performer.AddTask(5.0, play_note_fn(8, 2.0));
+  performer.CreateTask(play_note_fn(8, 2.0), 5.0);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount,
                        audio_clock.GetTimestamp());
+    gain.Process(output, kChannelCount, kFrameCount);
     audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -142,7 +149,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = engine.GetTempo();
+    double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (performer.IsPlaying()) {
@@ -166,8 +173,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
       default:
         return;
     }
-    engine.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << engine.GetTempo() << " bpm";
+    musician.SetTempo(tempo);
+    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 
@@ -177,7 +184,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   while (!quit) {
     input_manager.Update();
-    engine.Update(audio_clock.GetTimestamp() + kLookahead);
+    musician.Update(audio_clock.GetTimestamp() + kLookahead);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 

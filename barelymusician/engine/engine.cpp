@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <functional>
+#include <iostream>
 #include <unordered_set>
 #include <utility>
 
@@ -60,9 +61,8 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
     performer_or->get().CreateTask(task_id, definition, position, type,
                                    user_data);
     return task_id;
-  } else {
-    return performer_or.GetErrorStatus();
   }
+  return performer_or.GetErrorStatus();
 }
 
 StatusOr<Id> Engine::CreateTask(TaskDefinition definition, double timestamp,
@@ -230,11 +230,16 @@ void Engine::Update(double timestamp) noexcept {
         }
       }
 
-      if (next_timestamp > timestamp_) {
-        timestamp_ = next_timestamp;
-        for (auto& [order_id_pair, performer] : performers_) {
+      for (auto& [order_id_pair, performer] : performers_) {
+        if (performer_ids_to_process.find(order_id_pair.second) !=
+            performer_ids_to_process.end()) {
+          performer.UpdateToNextTask();
+        } else {
           performer.Update(update_duration);
         }
+      }
+      if (next_timestamp > timestamp_) {
+        timestamp_ = next_timestamp;
         for (auto& [instrument_id, instrument] : instruments_) {
           instrument->Update(timestamp_);
         }

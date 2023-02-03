@@ -205,6 +205,7 @@ BarelyStatus BarelyInstrument_SetControlEventCallback(
     } else {
       instrument_or->get().SetControlEventCallback(nullptr);
     }
+    return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
 }
@@ -240,8 +241,7 @@ BarelyStatus BarelyInstrument_SetNoteControl(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    [[maybe_unused]] BarelyInstrument_NoteControlEventCallback callback,
-    [[maybe_unused]] void* user_data) {
+    BarelyInstrument_NoteControlEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -254,6 +254,7 @@ BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
     } else {
       instrument_or->get().SetNoteControlEventCallback(nullptr);
     }
+    return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
 }

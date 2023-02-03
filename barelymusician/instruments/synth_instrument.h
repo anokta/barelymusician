@@ -25,6 +25,12 @@ enum class SynthControl : int {
   kVoiceCount = 5,
 };
 
+/// Synth note control.
+enum class SynthNoteControl : int {
+  /// Intensity.
+  kIntensity = 0,
+};
+
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public GenericInstrument {
  public:

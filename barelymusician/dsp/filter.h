@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_PROCESSOR_H_
 #define BARELYMUSICIAN_DSP_PROCESSOR_H_
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 /// Unit filter interface that processes per sample PCM input.
@@ -13,7 +15,7 @@ class Filter {
   ///
   /// @param input Input sample.
   /// @return Filtered output sample.
-  virtual double Next(double input) noexcept = 0;
+  virtual Real Next(Real input) noexcept = 0;
 
   /// Resets module state.
   virtual void Reset() noexcept = 0;

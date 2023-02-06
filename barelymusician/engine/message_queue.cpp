@@ -7,7 +7,7 @@
 
 namespace barely::internal {
 
-bool MessageQueue::Add(double timestamp, Message message) noexcept {
+bool MessageQueue::Add(Real timestamp, Message message) noexcept {
   assert(timestamp >= 0.0);
   const Integer index = write_index_;
   const Integer next_index = (index + 1) % kMaxMessageCount;
@@ -19,8 +19,7 @@ bool MessageQueue::Add(double timestamp, Message message) noexcept {
   return true;
 }
 
-std::pair<double, Message>* MessageQueue::GetNext(
-    double end_timestamp) noexcept {
+std::pair<Real, Message>* MessageQueue::GetNext(Real end_timestamp) noexcept {
   assert(end_timestamp >= 0.0);
   const Integer index = read_index_;
   if (index == write_index_ || messages_[index].first >= end_timestamp) {

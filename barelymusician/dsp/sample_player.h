@@ -15,7 +15,7 @@ class SamplePlayer : public Generator {
   explicit SamplePlayer(Integer frame_rate) noexcept;
 
   /// Implements `Generator`.
-  double Next() noexcept override;
+  Real Next() noexcept override;
   void Reset() noexcept override;
 
   /// Sets the sample data.
@@ -23,7 +23,7 @@ class SamplePlayer : public Generator {
   /// @param data Sample data.
   /// @param frequency Data sampling frequency in hertz.
   /// @param length Data length in samples.
-  void SetData(const double* data, Integer frequency, Integer length) noexcept;
+  void SetData(const Real* data, Integer frequency, Integer length) noexcept;
 
   /// Sets whether the playback should be looping.
   ///
@@ -33,32 +33,32 @@ class SamplePlayer : public Generator {
   /// Sets the playback speed.
   ///
   /// @param speed Playback speed.
-  void SetSpeed(double speed) noexcept;
+  void SetSpeed(Real speed) noexcept;
 
  private:
   // Calculates per sample increment amount with the current properties.
   void CalculateIncrementPerSample() noexcept;
 
   // Inverse frame rate in seconds.
-  double frame_interval_ = 0.0;
+  Real frame_interval_ = 0.0;
 
   // Sample data.
-  const double* data_ = nullptr;
+  const Real* data_ = nullptr;
 
   // Sample data frame rate in hertz.
-  double frequency_ = 0.0;
+  Real frequency_ = 0.0;
 
   // Sample data length in samples.
-  double length_ = 0.0;
+  Real length_ = 0.0;
 
   // Playback speed.
-  double speed_ = 1.0;
+  Real speed_ = 1.0;
 
   // Playback cursor.
-  double cursor_ = 0.0;
+  Real cursor_ = 0.0;
 
   // Increment per sample.
-  double increment_ = 0.0;
+  Real increment_ = 0.0;
 
   // Denotes whether the playback is looping or not.
   bool loop_ = false;

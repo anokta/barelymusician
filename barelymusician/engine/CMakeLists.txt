@@ -5,6 +5,7 @@ add_library(
 )
 target_link_libraries(
   control
+  number
   include
 )
 
@@ -161,6 +162,7 @@ target_link_libraries(
   message_queue_test
   message
   message_queue
+  number
   gmock
   gtest_main
 )
@@ -186,6 +188,7 @@ add_library(
 target_link_libraries(
   performer_test
   id
+  number
   performer
   gtest_main
 )

@@ -8,11 +8,11 @@
 namespace barely {
 
 Oscillator::Oscillator(Integer frame_rate) noexcept
-    : frame_interval_(frame_rate > 0 ? 1.0 / static_cast<double>(frame_rate)
+    : frame_interval_(frame_rate > 0 ? 1.0 / static_cast<Real>(frame_rate)
                                      : 0.0) {}
 
-double Oscillator::Next() noexcept {
-  double output = 0.0;
+Real Oscillator::Next() noexcept {
+  Real output = 0.0;
   // Generate the next sample.
   switch (type_) {
     case OscillatorType::kSine:
@@ -39,7 +39,7 @@ double Oscillator::Next() noexcept {
 
 void Oscillator::Reset() noexcept { phase_ = 0.0; }
 
-void Oscillator::SetFrequency(double frequency) noexcept {
+void Oscillator::SetFrequency(Real frequency) noexcept {
   increment_ = frequency * frame_interval_;
 }
 

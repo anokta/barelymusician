@@ -20,7 +20,7 @@ class Voice {
   ///
   /// @param channel Output channel.
   /// @return Output sample.
-  virtual double Next(Integer channel) noexcept = 0;
+  virtual Real Next(Integer channel) noexcept = 0;
 
   /// Starts the voice.
   virtual void Start() noexcept = 0;

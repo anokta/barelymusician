@@ -2,6 +2,9 @@ add_library(
   dsp_utils
   dsp_utils.cpp
   dsp_utils.h
+)
+target_link_libraries(
+  dsp_utils
   barelymusician
 )
 
@@ -20,11 +23,19 @@ add_library(
   filter INTERFACE
   filter.h
 )
+target_link_libraries(
+  filter
+  barelymusician
+)
 
 add_library(
   gain_processor
   gain_processor.cpp
   gain_processor.h
+)
+target_link_libraries(
+  gain_processor
+  barelymusician
 )
 
 add_library(
@@ -44,6 +55,7 @@ add_library(
 target_link_libraries(
   one_pole_filter
   filter
+  barelymusician
 )
 
 add_library(

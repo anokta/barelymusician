@@ -2,9 +2,11 @@
 
 #include <algorithm>
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
-double OnePoleFilter::Next(double input) noexcept {
+Real OnePoleFilter::Next(Real input) noexcept {
   output_ = coefficient_ * (output_ - input) + input;
   if (type_ == FilterType::kHighPass) {
     return input - output_;
@@ -14,7 +16,7 @@ double OnePoleFilter::Next(double input) noexcept {
 
 void OnePoleFilter::Reset() noexcept { output_ = 0.0; }
 
-void OnePoleFilter::SetCoefficient(double coefficient) noexcept {
+void OnePoleFilter::SetCoefficient(Real coefficient) noexcept {
   coefficient_ = std::min(std::max(coefficient, 0.0), 1.0);
 }
 

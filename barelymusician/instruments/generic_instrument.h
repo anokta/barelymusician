@@ -19,7 +19,7 @@ class GenericInstrument {
   /// @param output_samples Interleaved array of output samples.
   /// @param channel_count Number of output channels.
   /// @param frame_count Number of output frames.
-  virtual void Process(double* output_samples, Integer channel_count,
+  virtual void Process(Real* output_samples, Integer channel_count,
                        Integer frame_count) noexcept = 0;
 
   /// Sets control value.
@@ -27,8 +27,8 @@ class GenericInstrument {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
-  virtual void SetControl(Integer index, double value,
-                          double slope_per_frame) noexcept = 0;
+  virtual void SetControl(Integer index, Real value,
+                          Real slope_per_frame) noexcept = 0;
 
   /// Sets data.
   ///
@@ -42,18 +42,18 @@ class GenericInstrument {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
-  virtual void SetNoteControl(double pitch, Integer index, double value,
-                              double slope_per_frame) noexcept = 0;
+  virtual void SetNoteControl(Real pitch, Integer index, Real value,
+                              Real slope_per_frame) noexcept = 0;
 
   /// Sets note off.
   ///
   /// @param pitch Note pitch.
-  virtual void SetNoteOff(double pitch) noexcept = 0;
+  virtual void SetNoteOff(Real pitch) noexcept = 0;
 
   /// Sets note on.
   ///
   /// @param pitch Note pitch.
-  virtual void SetNoteOn(double pitch) noexcept = 0;
+  virtual void SetNoteOn(Real pitch) noexcept = 0;
 };
 
 /// Returns instrument definition for `GenericInstrumentType`.
@@ -70,13 +70,13 @@ InstrumentDefinition GetInstrumentDefinition(
         delete static_cast<GenericInstrumentType*>(*state);
         *state = nullptr;
       },
-      [](void** state, double* output_samples, Integer output_channel_count,
+      [](void** state, Real* output_samples, Integer output_channel_count,
          Integer output_frame_count) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->Process(output_samples, output_channel_count,
                             output_frame_count);
       },
-      [](void** state, Integer index, double value, double slope_per_frame) {
+      [](void** state, Integer index, Real value, Real slope_per_frame) {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetControl(index, value, slope_per_frame);
       },
@@ -84,16 +84,16 @@ InstrumentDefinition GetInstrumentDefinition(
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetData(data, size);
       },
-      [](void** state, double pitch, Integer index, double value,
-         double slope_per_frame) {
+      [](void** state, Real pitch, Integer index, Real value,
+         Real slope_per_frame) {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetNoteControl(pitch, index, value, slope_per_frame);
       },
-      [](void** state, double pitch) noexcept {
+      [](void** state, Real pitch) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetNoteOff(pitch);
       },
-      [](void** state, double pitch) noexcept {
+      [](void** state, Real pitch) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetNoteOn(pitch);
       },

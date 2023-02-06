@@ -32,25 +32,23 @@ InstrumentDefinition GetTestInstrumentDefinition() {
   };
   return InstrumentDefinition(
       [](void** state, Integer /*frame_rate*/) {
-        *state = reinterpret_cast<void*>(new double{0.0});
+        *state = reinterpret_cast<void*>(new Real{0.0});
       },
-      [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, Integer output_channel_count,
+      [](void** state) { delete static_cast<Real*>(*state); },
+      [](void** state, Real* output_samples, Integer output_channel_count,
          Integer output_frame_count) {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
-                    *reinterpret_cast<double*>(*state));
+                    *reinterpret_cast<Real*>(*state));
       },
-      [](void** state, Integer index, double value,
-         double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) =
-            static_cast<double>(index + 1) * value;
+      [](void** state, Integer index, Real value, Real /*slope_per_frame*/) {
+        *reinterpret_cast<Real*>(*state) = static_cast<Real>(index + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, Integer /*size*/) {},
-      [](void** state, double /*pitch*/) {
-        *reinterpret_cast<double*>(*state) = 0.0;
+      [](void** state, Real /*pitch*/) {
+        *reinterpret_cast<Real*>(*state) = 0.0;
       },
-      [](void** state, double pitch, double intensity) {
-        *reinterpret_cast<double*>(*state) = pitch * intensity;
+      [](void** state, Real pitch, Real intensity) {
+        *reinterpret_cast<Real*>(*state) = pitch * intensity;
       },
       control_definitions);
 }
@@ -58,11 +56,11 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 // Tests that single instrument is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySingleInstrument) {
   const Id kId = 1;
-  const double kPitch = -1.25;
-  const double kIntensity = 0.75;
+  const Real kPitch = -1.25;
+  const Real kIntensity = 0.75;
 
   Engine engine;
-  std::vector<double> buffer(kChannelCount * kFrameCount);
+  std::vector<Real> buffer(kChannelCount * kFrameCount);
   EXPECT_THAT(engine.GetInstrument(kId), IsNull());
 
   // Create instrument.
@@ -83,18 +81,18 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_THAT(instrument, NotNull());
 
   // Set note callbacks.
-  double note_on_pitch = 0.0;
-  double note_on_intensity = 0.0;
-  instrument->SetNoteOnEventCallback([&](double pitch, double intensity) {
+  Real note_on_pitch = 0.0;
+  Real note_on_intensity = 0.0;
+  instrument->SetNoteOnEventCallback([&](Real pitch, Real intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   });
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
-  double note_off_pitch = 0.0;
+  Real note_off_pitch = 0.0;
   instrument->SetNoteOffEventCallback(
-      [&](double pitch) { note_off_pitch = pitch; });
+      [&](Real pitch) { note_off_pitch = pitch; });
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Start note.
@@ -135,7 +133,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
 
 // Tests that multiple instruments are created and destroyed as expected.
 TEST(EngineTest, CreateDestroyMultipleInstruments) {
-  std::vector<double> note_off_pitches;
+  std::vector<Real> note_off_pitches;
 
   {
     Engine engine;
@@ -149,16 +147,16 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
       EXPECT_THAT(engine.GetInstrument(instrument_id), NotNull());
       engine.GetInstrument(instrument_id)
           ->SetNoteOffEventCallback(
-              [&](double pitch) { note_off_pitches.push_back(pitch); });
+              [&](Real pitch) { note_off_pitches.push_back(pitch); });
     }
 
     // Start multiple notes, then immediately stop some of them.
     for (Integer i = 0; i < 3; ++i) {
-      engine.GetInstrument(i + 1)->SetNoteOn(static_cast<double>(i + 1), 1.0,
+      engine.GetInstrument(i + 1)->SetNoteOn(static_cast<Real>(i + 1), 1.0,
                                              0.0);
-      engine.GetInstrument(i + 1)->SetNoteOn(static_cast<double>(-i - 1), 1.0,
+      engine.GetInstrument(i + 1)->SetNoteOn(static_cast<Real>(-i - 1), 1.0,
                                              0.0);
-      engine.GetInstrument(i + 1)->SetNoteOff(static_cast<double>(i + 1), 0.0);
+      engine.GetInstrument(i + 1)->SetNoteOff(static_cast<Real>(i + 1), 0.0);
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1.0, 2.0, 3.0));
   }
@@ -183,7 +181,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_THAT(performer, NotNull());
 
   // Add task.
-  double task_position = 0.0;
+  Real task_position = 0.0;
   EXPECT_TRUE(performer->AddTask(
       kTaskId, 1.0, [&]() { task_position = performer->GetPosition(); }));
   EXPECT_DOUBLE_EQ(task_position, 0.0);
@@ -207,7 +205,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_DOUBLE_EQ(performer->GetDurationToNextTask(), 0.0);
   engine.Update(1.5);
   EXPECT_DOUBLE_EQ(performer->GetDurationToNextTask(),
-                   std::numeric_limits<double>::max());
+                   std::numeric_limits<Real>::max());
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 

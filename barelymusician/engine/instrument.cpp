@@ -32,8 +32,8 @@ std::vector<Control> BuildControls(const auto* definitions,
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument::Instrument(const InstrumentDefinition& definition,
-                       Integer frame_rate, double initial_tempo,
-                       double initial_timestamp) noexcept
+                       Integer frame_rate, Real initial_tempo,
+                       Real initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
@@ -78,7 +78,7 @@ StatusOr<std::reference_wrapper<const Control>> Instrument::GetControl(
 }
 
 StatusOr<std::reference_wrapper<const Control>> Instrument::GetNoteControl(
-    double pitch, Integer index) const noexcept {
+    Real pitch, Integer index) const noexcept {
   assert(index >= 0);
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (index >= 0 && index < static_cast<Integer>(note_controls->size())) {
@@ -89,14 +89,13 @@ StatusOr<std::reference_wrapper<const Control>> Instrument::GetNoteControl(
   return {Status::kNotFound};
 }
 
-bool Instrument::IsNoteOn(double pitch) const noexcept {
+bool Instrument::IsNoteOn(Real pitch) const noexcept {
   return note_controls_.contains(pitch);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::Process(double* output_samples, Integer output_channel_count,
-                         Integer output_frame_count,
-                         double timestamp) noexcept {
+void Instrument::Process(Real* output_samples, Integer output_channel_count,
+                         Integer output_frame_count, Real timestamp) noexcept {
   assert(output_samples || output_channel_count == 0 ||
          output_frame_count == 0);
   assert(output_channel_count >= 0);
@@ -104,7 +103,7 @@ void Instrument::Process(double* output_samples, Integer output_channel_count,
   assert(timestamp >= 0.0);
   Integer frame = 0;
   // Process *all* messages before the end timestamp.
-  const double end_timestamp =
+  const Real end_timestamp =
       timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
@@ -174,7 +173,7 @@ void Instrument::ResetAllControls() noexcept {
   }
 }
 
-Status Instrument::ResetAllNoteControls(double pitch) noexcept {
+Status Instrument::ResetAllNoteControls(Real pitch) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     for (Integer index = 0; index < static_cast<Integer>(note_controls->size());
          ++index) {
@@ -206,7 +205,7 @@ Status Instrument::ResetControl(Integer index) noexcept {
   return Status::kInvalidArgument;
 }
 
-Status Instrument::ResetNoteControl(double pitch, Integer index) noexcept {
+Status Instrument::ResetNoteControl(Real pitch, Integer index) noexcept {
   assert(index >= 0);
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (index >= 0 && index < static_cast<Integer>(note_controls->size())) {
@@ -235,8 +234,8 @@ void Instrument::SetAllNotesOff() noexcept {
   }
 }
 
-Status Instrument::SetControl(Integer index, double value,
-                              double slope_per_beat) noexcept {
+Status Instrument::SetControl(Integer index, Real value,
+                              Real slope_per_beat) noexcept {
   if (index >= 0 && index < static_cast<Integer>(controls_.size())) {
     if (auto& control = controls_[index]; control.Set(value, slope_per_beat)) {
       if (note_control_event_callback_) {
@@ -260,8 +259,8 @@ void Instrument::SetData(std::vector<std::byte> data) noexcept {
   message_queue_.Add(timestamp_, DataMessage{std::move(data)});
 }
 
-Status Instrument::SetNoteControl(double pitch, Integer index, double value,
-                                  double slope_per_beat) noexcept {
+Status Instrument::SetNoteControl(Real pitch, Integer index, Real value,
+                                  Real slope_per_beat) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (index >= 0 && index < static_cast<Integer>(controls_.size())) {
       if (auto& note_control = (*note_controls)[index];
@@ -287,7 +286,7 @@ void Instrument::SetNoteControlEventCallback(
   note_control_event_callback_ = std::move(callback);
 }
 
-void Instrument::SetNoteOff(double pitch) noexcept {
+void Instrument::SetNoteOff(Real pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
     if (note_off_event_callback_) {
       note_off_event_callback_(pitch);
@@ -302,7 +301,7 @@ void Instrument::SetNoteOffEventCallback(
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(double pitch) noexcept {
+void Instrument::SetNoteOn(Real pitch) noexcept {
   if (note_controls_.try_emplace(pitch, default_note_controls_).second) {
     if (note_on_event_callback_) {
       note_on_event_callback_(pitch);
@@ -315,7 +314,7 @@ void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
   note_on_event_callback_ = std::move(callback);
 }
 
-void Instrument::SetTempo(double tempo) noexcept {
+void Instrument::SetTempo(Real tempo) noexcept {
   assert(tempo_ != tempo);
   tempo_ = tempo;
   // Update controls.
@@ -344,9 +343,9 @@ void Instrument::SetTempo(double tempo) noexcept {
   }
 }
 
-void Instrument::Update(double timestamp) noexcept {
+void Instrument::Update(Real timestamp) noexcept {
   assert(timestamp_ < timestamp);
-  const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
+  const Real duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
   // Update controls.
   for (Integer index = 0; index < static_cast<Integer>(controls_.size());
        ++index) {
@@ -368,10 +367,10 @@ void Instrument::Update(double timestamp) noexcept {
   timestamp_ = timestamp;
 }
 
-double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
+Real Instrument::GetSlopePerFrame(Real slope_per_beat) const noexcept {
   return tempo_ > 0.0 && frame_rate_ > 0
              ? BeatsFromSeconds(tempo_, slope_per_beat) /
-                   static_cast<double>(frame_rate_)
+                   static_cast<Real>(frame_rate_)
              : 0.0;
 }
 

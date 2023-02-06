@@ -1,6 +1,7 @@
 #include "barelymusician/engine/message_queue.h"
 
 #include "barelymusician/engine/message.h"
+#include "barelymusician/engine/number.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -39,10 +40,10 @@ TEST(MessageQueueTest, AddMultipleMessages) {
   MessageQueue messages;
   EXPECT_THAT(messages.GetNext(10.0), IsNull());
 
-  for (double i = 0.0; i < 10.0; ++i) {
+  for (Real i = 0.0; i < 10.0; ++i) {
     messages.Add(i, NoteOffMessage{i});
   }
-  for (double i = 0.0; i < 10.0; ++i) {
+  for (Real i = 0.0; i < 10.0; ++i) {
     EXPECT_THAT(
         messages.GetNext(10.0),
         AllOf(NotNull(), Pointee(Pair(i, VariantWith<NoteOffMessage>(Field(

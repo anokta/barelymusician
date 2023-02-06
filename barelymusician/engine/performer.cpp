@@ -11,15 +11,15 @@
 
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/engine/id.h"
+#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/status.h"
 #include "barelymusician/engine/task.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::CreateTask(Id task_id, TaskDefinition definition,
-                           double position, TaskType type,
-                           void* user_data) noexcept {
+void Performer::CreateTask(Id task_id, TaskDefinition definition, Real position,
+                           TaskType type, void* user_data) noexcept {
   assert(task_id > kInvalid);
   assert(type != TaskType::kOneOff || position >= position_);
   auto success = infos_.emplace(task_id, TaskInfo{position, type}).second;
@@ -31,12 +31,12 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
   assert(success);
 }
 
-std::optional<double> Performer::GetDurationToNextTask() const noexcept {
+std::optional<Real> Performer::GetDurationToNextTask() const noexcept {
   if (!is_playing_) {
     return std::nullopt;
   }
 
-  std::optional<double> next_task_position = std::nullopt;
+  std::optional<Real> next_task_position = std::nullopt;
 
   // Check recurring tasks.
   if (const auto next_recurring_task = GetNextRecurringTask();
@@ -74,15 +74,15 @@ Status Performer::DestroyTask(Id task_id) noexcept {
   return Status::kNotFound;
 }
 
-double Performer::GetLoopBeginPosition() const noexcept {
+Real Performer::GetLoopBeginPosition() const noexcept {
   return loop_begin_position_;
 }
 
-double Performer::GetLoopLength() const noexcept { return loop_length_; }
+Real Performer::GetLoopLength() const noexcept { return loop_length_; }
 
-double Performer::GetPosition() const noexcept { return position_; }
+Real Performer::GetPosition() const noexcept { return position_; }
 
-StatusOr<double> Performer::GetTaskPosition(Id task_id) const noexcept {
+StatusOr<Real> Performer::GetTaskPosition(Id task_id) const noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto* info = FindOrNull(infos_, task_id)) {
     return info->position;
@@ -115,7 +115,7 @@ void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
   }
 }
 
-void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
+void Performer::SetLoopBeginPosition(Real loop_begin_position) noexcept {
   if (loop_begin_position_ == loop_begin_position) return;
   loop_begin_position_ = loop_begin_position;
   if (is_looping_ && position_ > loop_begin_position_) {
@@ -124,7 +124,7 @@ void Performer::SetLoopBeginPosition(double loop_begin_position) noexcept {
   }
 }
 
-void Performer::SetLoopLength(double loop_length) noexcept {
+void Performer::SetLoopLength(Real loop_length) noexcept {
   loop_length = std::max(loop_length, 0.0);
   if (loop_length_ == loop_length) return;
   loop_length_ = loop_length;
@@ -144,7 +144,7 @@ void Performer::SetLooping(bool is_looping) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::SetPosition(double position) noexcept {
+void Performer::SetPosition(Real position) noexcept {
   if (position_ == position) return;
   last_processed_position_ = std::nullopt;
   one_off_tasks_.erase(
@@ -172,7 +172,7 @@ void Performer::SetPosition(double position) noexcept {
   }
 }
 
-Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
+Status Performer::SetTaskPosition(Id task_id, Real position) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     auto& [current_position, type] = it->second;
@@ -198,7 +198,7 @@ void Performer::Start() noexcept { is_playing_ = true; }
 void Performer::Stop() noexcept { is_playing_ = false; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::Update(double duration) noexcept {
+void Performer::Update(Real duration) noexcept {
   if (is_playing_) {
     assert(duration >= 0.0 && duration <= GetDurationToNextTask());
     SetPosition(position_ + duration);
@@ -206,7 +206,7 @@ void Performer::Update(double duration) noexcept {
 }
 
 void Performer::UpdateToNextTask() noexcept {
-  std::optional<double> next_task_position = std::nullopt;
+  std::optional<Real> next_task_position = std::nullopt;
 
   // Check recurring tasks.
   if (const auto next_recurring_task = GetNextRecurringTask();

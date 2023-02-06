@@ -2,6 +2,7 @@
 #define BARELYMUSICIAN_ENGINE_CONTROL_H_
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/engine/number.h"
 
 namespace barely::internal {
 
@@ -19,12 +20,12 @@ class Control {
   /// Returns slope per beat.
   ///
   /// @return Control slope in value change per beat.
-  [[nodiscard]] double GetSlopePerBeat() const noexcept;
+  [[nodiscard]] Real GetSlopePerBeat() const noexcept;
 
   /// Returns value.
   ///
   /// @return Control value.
-  [[nodiscard]] double GetValue() const noexcept;
+  [[nodiscard]] Real GetValue() const noexcept;
 
   /// Resets value.
   ///
@@ -36,26 +37,26 @@ class Control {
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if changed, false otherwise.
-  bool Set(double value, double slope_per_beat) noexcept;
+  bool Set(Real value, Real slope_per_beat) noexcept;
 
   /// Updates value by duration.
   ///
   /// @param duration Duration in beats.
   /// @return True if value changed, false otherwise.
-  bool Update(double duration) noexcept;
+  bool Update(Real duration) noexcept;
 
  private:
   // Clamps given `value`.
-  double Clamp(double value) noexcept;
+  Real Clamp(Real value) noexcept;
 
   // Definition.
   ControlDefinition definition_;
 
   // Value.
-  double value_ = 0.0;
+  Real value_ = 0.0;
 
   // Slope in value change per beat.
-  double slope_per_beat_ = 0.0;
+  Real slope_per_beat_ = 0.0;
 };
 
 }  // namespace barely::internal

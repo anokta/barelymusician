@@ -13,7 +13,7 @@ constexpr Integer kSampleRate = 48000;
 
 // Sample data.
 constexpr Integer kDataLength = 5;
-constexpr double kData[kDataLength] = {1.0, 2.0, 3.0, 4.0, 5.0};
+constexpr Real kData[kDataLength] = {1.0, 2.0, 3.0, 4.0, 5.0};
 
 // Tests that the sample data is played back as expected.
 TEST(SamplePlayerTest, SimplePlayback) {
@@ -45,14 +45,14 @@ TEST(SamplePlayerTest, SetSpeed) {
   sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
-  const std::vector<double> kSpeeds = {0.0, 0.4, 1.0, 1.25, 2.0, 3.3};
-  for (const double speed : kSpeeds) {
+  const std::vector<Real> kSpeeds = {0.0, 0.4, 1.0, 1.25, 2.0, 3.3};
+  for (const Real speed : kSpeeds) {
     sample_player.Reset();
     sample_player.SetSpeed(speed);
 
     for (Integer i = 0; i < kDataLength; ++i) {
       const Integer expected_index =
-          static_cast<Integer>(static_cast<double>(i) * speed);
+          static_cast<Integer>(static_cast<Real>(i) * speed);
       EXPECT_DOUBLE_EQ(sample_player.Next(),
                        kData[expected_index % kDataLength])
           << "at index " << i << ", where speed is: " << speed;
@@ -72,9 +72,8 @@ TEST(SamplePlayerTest, DifferentSampleFrequency) {
     sample_player.SetLoop(true);
 
     for (Integer i = 0; i < kDataLength; ++i) {
-      const Integer expected_index =
-          static_cast<Integer>(static_cast<double>(i * frequency) /
-                               static_cast<double>(kSampleRate));
+      const Integer expected_index = static_cast<Integer>(
+          static_cast<Real>(i * frequency) / static_cast<Real>(kSampleRate));
       EXPECT_DOUBLE_EQ(sample_player.Next(),
                        kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;
@@ -87,7 +86,7 @@ TEST(SamplePlayerTest, Reset) {
   SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
-  const double first_sample = sample_player.Next();
+  const Real first_sample = sample_player.Next();
   EXPECT_NE(sample_player.Next(), first_sample);
 
   sample_player.Reset();

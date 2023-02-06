@@ -1,7 +1,7 @@
 #include "barelymusician/engine/task.h"
 
-#include "gtest/gtest.h"
 #include "barelymusician/engine/number.h"
+#include "gtest/gtest.h"
 
 namespace barely::internal {
 namespace {

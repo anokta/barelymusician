@@ -9,11 +9,11 @@ namespace {
 // Tests that converting values from/to amplitude and decibels returns expected
 // results.
 TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
-  const double kEpsilon = 5e-2;
+  const Real kEpsilon = 5e-2;
 
   const Integer kValueCount = 5;
-  const double kAmplitudes[kValueCount] = {0.0, 0.1, 0.25, 1.0, 2.0};
-  const double kDecibels[kValueCount] = {-80.0, -20.0, -12.0, 0.0, 6.0};
+  const Real kAmplitudes[kValueCount] = {0.0, 0.1, 0.25, 1.0, 2.0};
+  const Real kDecibels[kValueCount] = {-80.0, -20.0, -12.0, 0.0, 6.0};
 
   for (Integer i = 0; i < kValueCount; ++i) {
     EXPECT_NEAR(AmplitudeFromDecibels(kDecibels[i]), kAmplitudes[i], kEpsilon);
@@ -31,10 +31,10 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
 // Tests that converting values from/to beats and seconds returns expected
 // results.
 TEST(DspUtilsTest, BeatsSecondsConversion) {
-  const double kTempo = 120.0;
+  const Real kTempo = 120.0;
   const Integer kValueCount = 5;
-  const double kBeats[kValueCount] = {0.0, 1.0, 5.0, -4.0, -246.8};
-  const double kSeconds[kValueCount] = {0.0, 0.5, 2.5, -2.0, -123.4};
+  const Real kBeats[kValueCount] = {0.0, 1.0, 5.0, -4.0, -246.8};
+  const Real kSeconds[kValueCount] = {0.0, 0.5, 2.5, -2.0, -123.4};
 
   for (Integer i = 0; i < kValueCount; ++i) {
     EXPECT_DOUBLE_EQ(BeatsFromSeconds(kTempo, kSeconds[i]), kBeats[i]);
@@ -62,7 +62,7 @@ TEST(DspUtilsTest, FramesSecondsConversion) {
   const Integer kFrameRate = 8000;
   const Integer kValueCount = 4;
   const Integer kFrames[kValueCount] = {0, 800, 4000, 32000};
-  const double kSeconds[kValueCount] = {0.0, 0.1, 0.5, 4.0};
+  const Real kSeconds[kValueCount] = {0.0, 0.1, 0.5, 4.0};
 
   for (Integer i = 0; i < kValueCount; ++i) {
     EXPECT_EQ(FramesFromSeconds(kFrameRate, kSeconds[i]), kFrames[i]);
@@ -82,13 +82,13 @@ TEST(DspUtilsTest, FramesSecondsConversion) {
 // Tests that the expected filter coefficients are generated for an arbitrary
 // set of cutoff frequencies.
 TEST(DspUtilsTest, GetFilterCoefficient) {
-  const double kEpsilon = 1e-2;
+  const Real kEpsilon = 1e-2;
   const Integer kFrameRate = 8000;
 
   const Integer kCutoffCount = 5;
-  const double kCutoffs[kCutoffCount] = {0.0, 100.0, 500.0, 1000.0, 8000.0};
-  const double kExpectedCoefficients[kCutoffCount] = {1.00, 0.92, 0.68, 0.46,
-                                                      0.00};
+  const Real kCutoffs[kCutoffCount] = {0.0, 100.0, 500.0, 1000.0, 8000.0};
+  const Real kExpectedCoefficients[kCutoffCount] = {1.00, 0.92, 0.68, 0.46,
+                                                    0.00};
 
   for (Integer i = 0; i < kCutoffCount; ++i) {
     EXPECT_NEAR(GetFilterCoefficient(kFrameRate, kCutoffs[i]),
@@ -98,12 +98,12 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
 
 // Tests that converting arbitrary pitches returns the expected frequencies.
 TEST(DspUtilsTest, GetFrequency) {
-  const double kEpsilon = 1e-2;
+  const Real kEpsilon = 1e-2;
 
   const Integer kPitcheCount = 5;
-  const double kPitches[kPitcheCount] = {-4.0, -0.75, 0.0, 2.0, 3.3};
-  const double kFrequencies[kPitcheCount] = {27.50, 261.62, 440.00, 1760.00,
-                                             4333.63};
+  const Real kPitches[kPitcheCount] = {-4.0, -0.75, 0.0, 2.0, 3.3};
+  const Real kFrequencies[kPitcheCount] = {27.50, 261.62, 440.00, 1760.00,
+                                           4333.63};
 
   for (Integer i = 0; i < kPitcheCount; ++i) {
     EXPECT_NEAR(GetFrequency(kPitches[i]), kFrequencies[i], kEpsilon);

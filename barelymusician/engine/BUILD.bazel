@@ -1,12 +1,13 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//barelymusician:__subpackages__"])
+package(default_visibility = ["//barelymusician:__pkg__"])
 
 cc_library(
     name = "control",
     srcs = ["control.cpp"],
     hdrs = ["control.h"],
     deps = [
+        ":number",
         "//barelymusician:include",
     ],
 )
@@ -87,6 +88,7 @@ cc_library(
     hdrs = ["performer.h"],
     deps = [
         ":id",
+        ":number",
         ":status",
         ":task",
         "//barelymusician/common:find_or_null",
@@ -104,6 +106,7 @@ cc_library(
     hdrs = ["task.h"],
     deps = [
         ":id",
+        ":number",
         "//barelymusician:include",
     ],
 )
@@ -147,6 +150,7 @@ cc_test(
     deps = [
         ":message",
         ":message_queue",
+        ":number",
         "@googletest//:gtest_main",
     ],
 )

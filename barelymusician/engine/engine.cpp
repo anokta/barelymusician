@@ -52,7 +52,7 @@ StatusOr<Id> Engine::CreatePerformer(Integer order) noexcept {
 
 StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
                                          TaskDefinition definition,
-                                         double position, TaskType type,
+                                         Real position, TaskType type,
                                          void* user_data) noexcept {
   if (performer_id == kInvalid) return {Status::kInvalidArgument};
   if (position < 0.0) return {Status::kInvalidArgument};
@@ -66,7 +66,7 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
   return performer_or.GetErrorStatus();
 }
 
-StatusOr<Id> Engine::CreateTask(TaskDefinition definition, double timestamp,
+StatusOr<Id> Engine::CreateTask(TaskDefinition definition, Real timestamp,
                                 void* user_data) noexcept {
   if (timestamp < timestamp_) return {Status::kInvalidArgument};
   const Id task_id = GenerateNextId();
@@ -139,7 +139,7 @@ StatusOr<std::reference_wrapper<Performer>> Engine::GetPerformer(
   return {Status::kNotFound};
 }
 
-StatusOr<double> Engine::GetTaskTimestamp(Id task_id) const noexcept {
+StatusOr<Real> Engine::GetTaskTimestamp(Id task_id) const noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto* task_timestamp = FindOrNull(task_timestamps_, task_id)) {
     return *task_timestamp;
@@ -147,14 +147,14 @@ StatusOr<double> Engine::GetTaskTimestamp(Id task_id) const noexcept {
   return {Status::kNotFound};
 }
 
-double Engine::GetTempo() const noexcept { return tempo_; }
+Real Engine::GetTempo() const noexcept { return tempo_; }
 
-double Engine::GetTimestamp() const noexcept { return timestamp_; }
+Real Engine::GetTimestamp() const noexcept { return timestamp_; }
 
-Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
+Status Engine::ProcessInstrument(Id instrument_id, Real* output_samples,
                                  Integer output_channel_count,
                                  Integer output_frame_count,
-                                 double timestamp) noexcept {
+                                 Real timestamp) noexcept {
   if (instrument_id == kInvalid) return Status::kInvalidArgument;
   if ((!output_samples && output_channel_count > 0 && output_frame_count) ||
       output_channel_count < 0 || output_frame_count < 0 || timestamp < 0.0) {
@@ -172,7 +172,7 @@ Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
   return Status::kNotFound;
 }
 
-Status Engine::SetTaskTimestamp(Id task_id, double timestamp) noexcept {
+Status Engine::SetTaskTimestamp(Id task_id, Real timestamp) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto it = task_timestamps_.find(task_id);
       it != task_timestamps_.end()) {
@@ -188,7 +188,7 @@ Status Engine::SetTaskTimestamp(Id task_id, double timestamp) noexcept {
   return Status::kNotFound;
 }
 
-void Engine::SetTempo(double tempo) noexcept {
+void Engine::SetTempo(Real tempo) noexcept {
   tempo = std::max(tempo, 0.0);
   if (tempo_ == tempo) return;
   tempo_ = tempo;
@@ -198,12 +198,12 @@ void Engine::SetTempo(double tempo) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::Update(double timestamp) noexcept {
+void Engine::Update(Real timestamp) noexcept {
   assert(timestamp >= 0.0);
 
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
+      Real update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
       std::unordered_set<Id> performer_ids_to_process;
       for (const auto& [order_id_pair, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
@@ -217,7 +217,7 @@ void Engine::Update(double timestamp) noexcept {
         }
       }
 
-      double next_timestamp =
+      Real next_timestamp =
           timestamp_ + SecondsFromBeats(tempo_, update_duration);
 
       bool has_tasks = false;

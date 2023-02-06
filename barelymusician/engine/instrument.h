@@ -40,7 +40,7 @@ class Instrument {
   /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Instrument(const InstrumentDefinition& definition, Integer frame_rate,
-             double initial_tempo, double initial_timestamp) noexcept;
+             Real initial_tempo, Real initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -64,13 +64,13 @@ class Instrument {
   /// @param index Control index.
   /// @return Reference to note control or error status.
   [[nodiscard]] StatusOr<std::reference_wrapper<const Control>> GetNoteControl(
-      double pitch, Integer index) const noexcept;
+      Real pitch, Integer index) const noexcept;
 
   /// Returns whether note is active or not.
   ///
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
+  [[nodiscard]] bool IsNoteOn(Real pitch) const noexcept;
 
   /// Processes output samples.
   ///
@@ -79,8 +79,8 @@ class Instrument {
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(double* output_samples, Integer output_channel_count,
-               Integer output_frame_count, double timestamp) noexcept;
+  void Process(Real* output_samples, Integer output_channel_count,
+               Integer output_frame_count, Real timestamp) noexcept;
 
   /// Resets all controls to default value.
   void ResetAllControls() noexcept;
@@ -89,7 +89,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @return Status.
-  Status ResetAllNoteControls(double pitch) noexcept;
+  Status ResetAllNoteControls(Real pitch) noexcept;
 
   /// Resets control to default value.
   ///
@@ -102,7 +102,7 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param index Control index.
   /// @return Status.
-  Status ResetNoteControl(double pitch, Integer index) noexcept;
+  Status ResetNoteControl(Real pitch, Integer index) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -114,8 +114,7 @@ class Instrument {
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
   /// @return Status.
-  Status SetControl(Integer index, double value,
-                    double slope_per_beat) noexcept;
+  Status SetControl(Integer index, Real value, Real slope_per_beat) noexcept;
 
   /// Sets control event callback.
   ///
@@ -134,8 +133,8 @@ class Instrument {
   /// @param value Note control value.
   /// @param slope_per_beat Note control slope in value change per beat.
   /// @return Status.
-  Status SetNoteControl(double pitch, Integer index, double value,
-                        double slope_per_beat) noexcept;
+  Status SetNoteControl(Real pitch, Integer index, Real value,
+                        Real slope_per_beat) noexcept;
 
   /// Sets note control event callback.
   ///
@@ -145,7 +144,7 @@ class Instrument {
   /// Sets note off.
   ///
   /// @param pitch Note pitch.
-  void SetNoteOff(double pitch) noexcept;
+  void SetNoteOff(Real pitch) noexcept;
 
   /// Sets note off event callback.
   ///
@@ -156,7 +155,7 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch) noexcept;
+  void SetNoteOn(Real pitch) noexcept;
 
   /// Sets note on event callback.
   ///
@@ -166,16 +165,16 @@ class Instrument {
   /// Sets playbck tempo.
   ///
   /// @param tempo Tempo in beats per minute.
-  void SetTempo(double tempo) noexcept;
+  void SetTempo(Real tempo) noexcept;
 
   /// Updates instrument at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void Update(double timestamp) noexcept;
+  void Update(Real timestamp) noexcept;
 
  private:
   // Returns corresponding slope per frame for a given `slope_per_beat`.
-  double GetSlopePerFrame(double slope_per_beat) const noexcept;
+  Real GetSlopePerFrame(Real slope_per_beat) const noexcept;
 
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
@@ -208,7 +207,7 @@ class Instrument {
   std::vector<Control> controls_;
 
   // Map of active note controls by note pitches.
-  std::unordered_map<double, std::vector<Control>> note_controls_;
+  std::unordered_map<Real, std::vector<Control>> note_controls_;
 
   // Control event callback.
   ControlEventCallback control_event_callback_;
@@ -223,10 +222,10 @@ class Instrument {
   NoteOnEventCallback note_on_event_callback_;
 
   // Tempo in beats per minute.
-  double tempo_ = 120.0;
+  Real tempo_ = 120.0;
 
   // Timestamp in seconds.
-  double timestamp_ = 0;
+  Real timestamp_ = 0;
 
   // State.
   void* state_ = nullptr;

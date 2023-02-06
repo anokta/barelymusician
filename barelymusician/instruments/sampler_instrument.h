@@ -34,16 +34,16 @@ class SamplerInstrument : public GenericInstrument {
   explicit SamplerInstrument(Integer frame_rate) noexcept;
 
   /// Implements `GenericInstrument`.
-  void Process(double* output_samples, Integer channel_count,
+  void Process(Real* output_samples, Integer channel_count,
                Integer frame_count) noexcept override;
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(Integer index, double value,
-                  double slope_per_frame) noexcept override;
+  void SetControl(Integer index, Real value,
+                  Real slope_per_frame) noexcept override;
   void SetData(const void* data, Integer size) noexcept override;
-  void SetNoteControl(double /*pitch*/, Integer /*index*/, double /*value*/,
-                      double /*slope_per_frame*/) noexcept override {}
-  void SetNoteOff(double pitch) noexcept override;
-  void SetNoteOn(double pitch) noexcept override;
+  void SetNoteControl(Real /*pitch*/, Integer /*index*/, Real /*value*/,
+                      Real /*slope_per_frame*/) noexcept override {}
+  void SetNoteOff(Real pitch) noexcept override;
+  void SetNoteOn(Real pitch) noexcept override;
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
@@ -51,7 +51,7 @@ class SamplerInstrument : public GenericInstrument {
  private:
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
-  double root_pitch_ = 0.0;
+  Real root_pitch_ = 0.0;
   Integer frame_rate_ = 0;
 };
 

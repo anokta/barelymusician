@@ -25,6 +25,9 @@ cc_library(
 cc_library(
     name = "filter",
     hdrs = ["filter.h"],
+    deps = [
+        "//barelymusician",
+    ],
 )
 
 cc_library(
@@ -39,6 +42,9 @@ cc_library(
 cc_library(
     name = "generator",
     hdrs = ["generator.h"],
+    deps = [
+        "//barelymusician",
+    ],
 )
 
 cc_library(
@@ -47,6 +53,7 @@ cc_library(
     hdrs = ["one_pole_filter.h"],
     deps = [
         ":filter",
+        "//barelymusician",
     ],
 )
 

@@ -9,12 +9,12 @@
 
 namespace barely {
 
-PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
+PercussionInstrument::PercussionInstrument(Integer frame_rate) noexcept
     : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),
             Pad(frame_rate)} {}
 
-void PercussionInstrument::Process(double* output_samples, int channel_count,
-                                   int frame_count) noexcept {
+void PercussionInstrument::Process(double* output_samples, Integer channel_count,
+                                   Integer frame_count) noexcept {
   for (int frame = 0; frame < frame_count; ++frame) {
     double mono_sample = 0.0;
     for (auto& pad : pads_) {
@@ -26,7 +26,7 @@ void PercussionInstrument::Process(double* output_samples, int channel_count,
   }
 }
 
-void PercussionInstrument::SetControl(int index, double value,
+void PercussionInstrument::SetControl(Integer index, double value,
                                       double /*slope_per_frame*/) noexcept {
   switch (static_cast<PercussionControl>(index)) {
     case PercussionControl::kRelease:
@@ -37,16 +37,16 @@ void PercussionInstrument::SetControl(int index, double value,
   }
 }
 
-void PercussionInstrument::SetData(const void* data, int /*size*/) noexcept {
-  for (int i = 0; i < kPadCount; ++i) {
+void PercussionInstrument::SetData(const void* data, Integer /*size*/) noexcept {
+  for (Integer i = 0; i < kPadCount; ++i) {
     if (data) {
       // Pad data is sequentially aligned by pitch, frequency, length and data.
       const double pitch = *reinterpret_cast<const double*>(data);
       data = static_cast<const std::byte*>(data) + sizeof(double);
-      const int frequency = *reinterpret_cast<const int*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(int);
-      const int length = *reinterpret_cast<const int*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(int);
+      const Integer frequency = *reinterpret_cast<const Integer*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(Integer);
+      const Integer length = *reinterpret_cast<const Integer*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(Integer);
       const double* voice_data = reinterpret_cast<const double*>(data);
       data = static_cast<const std::byte*>(data) + sizeof(double) * length;
       pads_[i].pitch = pitch;

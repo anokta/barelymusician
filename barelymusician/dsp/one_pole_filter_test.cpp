@@ -2,13 +2,14 @@
 
 #include <cmath>
 
+#include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
 // Test input (single impulse).
-constexpr int kInputLength = 5;
+constexpr Integer kInputLength = 5;
 constexpr double kInput[kInputLength] = {1.0, 0.0, 0.0, 0.0, 0.0};
 
 // Test coefficent.
@@ -21,7 +22,7 @@ TEST(OnePoleFilterTest, LowPass) {
   low_pass_filter.SetType(FilterType::kLowPass);
   low_pass_filter.SetCoefficient(kCoefficient);
 
-  for (int i = 0; i < kInputLength; ++i) {
+  for (Integer i = 0; i < kInputLength; ++i) {
     const double expected_output =
         (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));
     EXPECT_DOUBLE_EQ(low_pass_filter.Next(kInput[i]), expected_output);
@@ -47,7 +48,7 @@ TEST(OnePoleFilterTest, HighPass) {
   high_pass_filter.SetType(FilterType::kHighPass);
   high_pass_filter.SetCoefficient(kCoefficient);
 
-  for (int i = 0; i < kInputLength; ++i) {
+  for (Integer i = 0; i < kInputLength; ++i) {
     const double expected_output =
         kInput[i] -
         (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));

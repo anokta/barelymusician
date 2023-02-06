@@ -11,6 +11,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/status.h"
 
@@ -25,7 +26,7 @@ Engine::~Engine() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
-                                      int frame_rate) noexcept {
+                                      Integer frame_rate) noexcept {
   if (frame_rate < 0) return {Status::kInvalidArgument};
   const Id instrument_id = GenerateNextId();
   const auto [it, success] = instruments_.emplace(
@@ -37,7 +38,7 @@ StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-StatusOr<Id> Engine::CreatePerformer(int order) noexcept {
+StatusOr<Id> Engine::CreatePerformer(Integer order) noexcept {
   const Id performer_id = GenerateNextId();
   auto [it, success] =
       performers_.emplace(std::pair{order, performer_id}, Performer{});
@@ -151,8 +152,8 @@ double Engine::GetTempo() const noexcept { return tempo_; }
 double Engine::GetTimestamp() const noexcept { return timestamp_; }
 
 Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
-                                 int output_channel_count,
-                                 int output_frame_count,
+                                 Integer output_channel_count,
+                                 Integer output_frame_count,
                                  double timestamp) noexcept {
   if (instrument_id == kInvalid) return Status::kInvalidArgument;
   if ((!output_samples && output_channel_count > 0 && output_frame_count) ||

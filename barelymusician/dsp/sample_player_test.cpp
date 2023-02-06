@@ -2,16 +2,17 @@
 
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
 // Sampling rate.
-constexpr int kSampleRate = 48000;
+constexpr Integer kSampleRate = 48000;
 
 // Sample data.
-constexpr int kDataLength = 5;
+constexpr Integer kDataLength = 5;
 constexpr double kData[kDataLength] = {1.0, 2.0, 3.0, 4.0, 5.0};
 
 // Tests that the sample data is played back as expected.
@@ -19,7 +20,7 @@ TEST(SamplePlayerTest, SimplePlayback) {
   SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
-  for (int i = 0; i < kDataLength; ++i) {
+  for (Integer i = 0; i < kDataLength; ++i) {
     EXPECT_DOUBLE_EQ(sample_player.Next(), kData[i]) << "at index " << i;
   }
   EXPECT_DOUBLE_EQ(sample_player.Next(), 0.0);
@@ -31,8 +32,8 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
   sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
-  const int kLoopCount = 10;
-  for (int i = 0; i < kDataLength * kLoopCount; ++i) {
+  const Integer kLoopCount = 10;
+  for (Integer i = 0; i < kDataLength * kLoopCount; ++i) {
     EXPECT_DOUBLE_EQ(sample_player.Next(), kData[i % kDataLength])
         << "at index " << i;
   }
@@ -49,9 +50,9 @@ TEST(SamplePlayerTest, SetSpeed) {
     sample_player.Reset();
     sample_player.SetSpeed(speed);
 
-    for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index =
-          static_cast<int>(static_cast<double>(i) * speed);
+    for (Integer i = 0; i < kDataLength; ++i) {
+      const Integer expected_index =
+          static_cast<Integer>(static_cast<double>(i) * speed);
       EXPECT_DOUBLE_EQ(sample_player.Next(),
                        kData[expected_index % kDataLength])
           << "at index " << i << ", where speed is: " << speed;
@@ -62,18 +63,18 @@ TEST(SamplePlayerTest, SetSpeed) {
 // Tests that the sample data is played back as expected at different sampling
 // frequencies.
 TEST(SamplePlayerTest, DifferentSampleFrequency) {
-  const std::vector<int> kFrequencies = {0, kSampleRate / 3, kSampleRate,
-                                         2 * kSampleRate, 5 * kSampleRate};
+  const std::vector<Integer> kFrequencies = {0, kSampleRate / 3, kSampleRate,
+                                             2 * kSampleRate, 5 * kSampleRate};
   SamplePlayer sample_player(kSampleRate);
-  for (const int frequency : kFrequencies) {
+  for (const Integer frequency : kFrequencies) {
     sample_player.Reset();
     sample_player.SetData(kData, frequency, kDataLength);
     sample_player.SetLoop(true);
 
-    for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index =
-          static_cast<int>(static_cast<double>(i * frequency) /
-                           static_cast<double>(kSampleRate));
+    for (Integer i = 0; i < kDataLength; ++i) {
+      const Integer expected_index =
+          static_cast<Integer>(static_cast<double>(i * frequency) /
+                               static_cast<double>(kSampleRate));
       EXPECT_DOUBLE_EQ(sample_player.Next(),
                        kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;

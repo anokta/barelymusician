@@ -3,12 +3,14 @@
 #include <cassert>
 #include <utility>
 
+#include "barelymusician/engine/number.h"
+
 namespace barely::internal {
 
 bool MessageQueue::Add(double timestamp, Message message) noexcept {
   assert(timestamp >= 0.0);
-  const int index = write_index_;
-  const int next_index = (index + 1) % kMaxMessageCount;
+  const Integer index = write_index_;
+  const Integer next_index = (index + 1) % kMaxMessageCount;
   if (next_index == read_index_) {
     return false;
   }
@@ -20,7 +22,7 @@ bool MessageQueue::Add(double timestamp, Message message) noexcept {
 std::pair<double, Message>* MessageQueue::GetNext(
     double end_timestamp) noexcept {
   assert(end_timestamp >= 0.0);
-  const int index = read_index_;
+  const Integer index = read_index_;
   if (index == write_index_ || messages_[index].first >= end_timestamp) {
     return nullptr;
   }

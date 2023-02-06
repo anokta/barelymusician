@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "barelymusician/engine/control.h"
+#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -15,9 +16,9 @@ namespace {
 using ::testing::IsNull;
 using ::testing::NotNull;
 
-constexpr int kFrameRate = 8000;
-constexpr int kChannelCount = 1;
-constexpr int kFrameCount = 4;
+constexpr Integer kFrameRate = 8000;
+constexpr Integer kChannelCount = 1;
+constexpr Integer kFrameCount = 4;
 
 constexpr double kTempo = 60.0;
 
@@ -30,21 +31,22 @@ InstrumentDefinition GetTestDefinition() {
       ControlDefinition{1.0, 0.0, 1.0},
   };
   return InstrumentDefinition(
-      [](void** state, int /*frame_rate*/) {
+      [](void** state, Integer /*frame_rate*/) {
         *state = static_cast<void*>(new double{0.0});
       },
       [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int output_channel_count,
-         int output_frame_count) {
+      [](void** state, double* output_samples, Integer output_channel_count,
+         Integer output_frame_count) {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int index, double value, double /*slope_per_frame*/) {
+      [](void** state, Integer index, double value,
+         double /*slope_per_frame*/) {
         *reinterpret_cast<double*>(*state) =
             static_cast<double>(index + 1) * value;
       },
-      [](void** /*state*/, const void* /*data*/, int /*size*/) {},
-      [](void** state, double pitch, int index, double value,
+      [](void** /*state*/, const void* /*data*/, Integer /*size*/) {},
+      [](void** state, double pitch, Integer index, double value,
          double /*slope_per_frame*/) {
         *reinterpret_cast<double*>(*state) =
             pitch * static_cast<double>(index + 1) * value;
@@ -153,8 +155,8 @@ TEST(InstrumentTest, PlaySingleNote) {
   // Control is set to default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp);
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
     }
   }
@@ -165,8 +167,8 @@ TEST(InstrumentTest, PlaySingleNote) {
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp);
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch);
     }
   }
@@ -177,8 +179,8 @@ TEST(InstrumentTest, PlaySingleNote) {
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp);
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
@@ -192,14 +194,14 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   // Control is set to default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
     }
   }
 
   // Start new note per each frame in the buffer.
-  for (int i = 0; i < kFrameCount; ++i) {
+  for (Integer i = 0; i < kFrameCount; ++i) {
     instrument.SetNoteOn(static_cast<double>(i));
     instrument.Update(static_cast<double>(i + 1));
     instrument.SetNoteOff(static_cast<double>(i));
@@ -207,8 +209,8 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
                        static_cast<double>(frame));
     }
@@ -217,8 +219,8 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount,
                      static_cast<double>(kFrameCount));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }

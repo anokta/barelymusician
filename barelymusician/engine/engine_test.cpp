@@ -6,6 +6,7 @@
 #include "barelymusician/engine/control.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
+#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/performer.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -20,9 +21,9 @@ using ::testing::NotNull;
 using ::testing::Pointee;
 using ::testing::UnorderedElementsAre;
 
-constexpr int kFrameRate = 48000;
-constexpr int kChannelCount = 2;
-constexpr int kFrameCount = 8;
+constexpr Integer kFrameRate = 48000;
+constexpr Integer kChannelCount = 2;
+constexpr Integer kFrameCount = 8;
 
 // Returns test instrument definition that produces constant output that is set.
 InstrumentDefinition GetTestInstrumentDefinition() {
@@ -30,20 +31,21 @@ InstrumentDefinition GetTestInstrumentDefinition() {
       ControlDefinition{0.0, -10.0, 10.0},
   };
   return InstrumentDefinition(
-      [](void** state, int /*frame_rate*/) {
+      [](void** state, Integer /*frame_rate*/) {
         *state = reinterpret_cast<void*>(new double{0.0});
       },
       [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int output_channel_count,
-         int output_frame_count) {
+      [](void** state, double* output_samples, Integer output_channel_count,
+         Integer output_frame_count) {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
-      [](void** state, int index, double value, double /*slope_per_frame*/) {
+      [](void** state, Integer index, double value,
+         double /*slope_per_frame*/) {
         *reinterpret_cast<double*>(*state) =
             static_cast<double>(index + 1) * value;
       },
-      [](void** /*state*/, const void* /*data*/, int /*size*/) {},
+      [](void** /*state*/, const void* /*data*/, Integer /*size*/) {},
       [](void** state, double /*pitch*/) {
         *reinterpret_cast<double*>(*state) = 0.0;
       },
@@ -70,8 +72,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(engine.ProcessInstrument(kId, buffer.data(), kChannelCount,
                                        kFrameCount, 0.0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
@@ -105,8 +107,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_TRUE(engine.ProcessInstrument(kId, buffer.data(), kChannelCount,
                                        kFrameCount, 0.0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
                        kPitch * kIntensity);
     }
@@ -124,8 +126,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   std::fill(buffer.begin(), buffer.end(), 0.0);
   EXPECT_FALSE(engine.ProcessInstrument(kId, buffer.data(), kChannelCount,
                                         kFrameCount, 0.0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
+  for (Integer frame = 0; frame < kFrameCount; ++frame) {
+    for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
@@ -139,7 +141,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     Engine engine;
 
     // Create instruments with note off callback.
-    for (int i = 0; i < 3; ++i) {
+    for (Integer i = 0; i < 3; ++i) {
       const Id instrument_id = i + 1;
       EXPECT_THAT(engine.GetInstrument(instrument_id), IsNull());
       EXPECT_TRUE(engine.CreateInstrument(
@@ -151,7 +153,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     }
 
     // Start multiple notes, then immediately stop some of them.
-    for (int i = 0; i < 3; ++i) {
+    for (Integer i = 0; i < 3; ++i) {
       engine.GetInstrument(i + 1)->SetNoteOn(static_cast<double>(i + 1), 1.0,
                                              0.0);
       engine.GetInstrument(i + 1)->SetNoteOn(static_cast<double>(-i - 1), 1.0,
@@ -170,7 +172,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
 TEST(EngineTest, CreateDestroySinglePerformer) {
   const Id kPerformerId = 1;
   const Id kTaskId = 2;
-  const int kPriority = 0;
+  const Integer kPriority = 0;
 
   Engine engine;
   EXPECT_THAT(engine.GetPerformer(kPerformerId), IsNull());

@@ -26,7 +26,7 @@ enum class SynthControl : int {
 };
 
 /// Synth note control.
-enum class SynthNoteControl : int {
+enum class SynthNoteControl : Integer {
   /// Intensity.
   kIntensity = 0,
 };
@@ -35,16 +35,16 @@ enum class SynthNoteControl : int {
 class SynthInstrument : public GenericInstrument {
  public:
   /// Constructs new `SynthInstrument`.
-  explicit SynthInstrument(int sample_rate) noexcept;
+  explicit SynthInstrument(Integer frame_rate) noexcept;
 
   /// Implements `GenericInstrument`.
-  void Process(double* output_samples, int channel_count,
-               int frame_count) noexcept override;
+  void Process(double* output_samples, Integer channel_count,
+               Integer frame_count) noexcept override;
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(int index, double value,
+  void SetControl(Integer index, double value,
                   double slope_per_frame) noexcept override;
-  void SetData(const void* /*data*/, int /*size*/) noexcept override {}
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+  void SetData(const void* /*data*/, Integer /*size*/) noexcept override {}
+  void SetNoteControl(double /*pitch*/, Integer /*index*/, double /*value*/,
                       double /*slope_per_frame*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch) noexcept override;

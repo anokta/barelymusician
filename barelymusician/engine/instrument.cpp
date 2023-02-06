@@ -10,6 +10,7 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/control.h"
 #include "barelymusician/engine/message.h"
+#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/status.h"
 
 namespace barely::internal {
@@ -18,10 +19,10 @@ namespace {
 
 // Builds corresponding controls for a given list of control `definitions`.
 std::vector<Control> BuildControls(const auto* definitions,
-                                   int definition_count) noexcept {
+                                   Integer definition_count) noexcept {
   std::vector<Control> controls;
   controls.reserve(definition_count);
-  for (int index = 0; index < definition_count; ++index) {
+  for (Integer index = 0; index < definition_count; ++index) {
     controls.emplace_back(definitions[index]);
   }
   return controls;
@@ -30,8 +31,9 @@ std::vector<Control> BuildControls(const auto* definitions,
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
-                       double initial_tempo, double initial_timestamp) noexcept
+Instrument::Instrument(const InstrumentDefinition& definition,
+                       Integer frame_rate, double initial_tempo,
+                       double initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
@@ -54,7 +56,8 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
     definition.create_callback(&state_, frame_rate);
   }
   if (set_control_callback_) {
-    for (int index = 0; index < definition.control_definition_count; ++index) {
+    for (Integer index = 0; index < definition.control_definition_count;
+         ++index) {
       set_control_callback_(&state_, index, controls_[index].GetValue(), 0.0);
     }
   }
@@ -67,18 +70,18 @@ Instrument::~Instrument() noexcept {
 }
 
 StatusOr<std::reference_wrapper<const Control>> Instrument::GetControl(
-    int index) const noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
+    Integer index) const noexcept {
+  if (index >= 0 && index < static_cast<Integer>(controls_.size())) {
     return {controls_[index]};
   }
   return {Status::kInvalidArgument};
 }
 
 StatusOr<std::reference_wrapper<const Control>> Instrument::GetNoteControl(
-    double pitch, int index) const noexcept {
+    double pitch, Integer index) const noexcept {
   assert(index >= 0);
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (index >= 0 && index < static_cast<int>(note_controls->size())) {
+    if (index >= 0 && index < static_cast<Integer>(note_controls->size())) {
       return {(*note_controls)[index]};
     }
     return {Status::kInvalidArgument};
@@ -91,20 +94,21 @@ bool Instrument::IsNoteOn(double pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::Process(double* output_samples, int output_channel_count,
-                         int output_frame_count, double timestamp) noexcept {
+void Instrument::Process(double* output_samples, Integer output_channel_count,
+                         Integer output_frame_count,
+                         double timestamp) noexcept {
   assert(output_samples || output_channel_count == 0 ||
          output_frame_count == 0);
   assert(output_channel_count >= 0);
   assert(output_frame_count >= 0);
   assert(timestamp >= 0.0);
-  int frame = 0;
+  Integer frame = 0;
   // Process *all* messages before the end timestamp.
   const double end_timestamp =
       timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
-    const int message_frame =
+    const Integer message_frame =
         FramesFromSeconds(frame_rate_, message->first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
@@ -126,7 +130,7 @@ void Instrument::Process(double* output_samples, int output_channel_count,
                      if (set_data_callback_) {
                        data_.swap(data_message.data);
                        set_data_callback_(&state_, data_.data(),
-                                          static_cast<int>(data_.size()));
+                                          static_cast<Integer>(data_.size()));
                      }
                    },
                    [this](NoteControlMessage& note_control_message) noexcept {
@@ -158,7 +162,8 @@ void Instrument::Process(double* output_samples, int output_channel_count,
 }
 
 void Instrument::ResetAllControls() noexcept {
-  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+  for (Integer index = 0; index < static_cast<Integer>(controls_.size());
+       ++index) {
     if (auto& control = controls_[index]; control.Reset()) {
       if (note_control_event_callback_) {
         control_event_callback_(index, control.GetValue());
@@ -171,7 +176,7 @@ void Instrument::ResetAllControls() noexcept {
 
 Status Instrument::ResetAllNoteControls(double pitch) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    for (int index = 0; index < static_cast<int>(note_controls->size());
+    for (Integer index = 0; index < static_cast<Integer>(note_controls->size());
          ++index) {
       if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
         if (note_control_event_callback_) {
@@ -187,8 +192,8 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
   return Status::kNotFound;
 }
 
-Status Instrument::ResetControl(int index) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
+Status Instrument::ResetControl(Integer index) noexcept {
+  if (index >= 0 && index < static_cast<Integer>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {
       if (note_control_event_callback_) {
         control_event_callback_(index, control.GetValue());
@@ -201,10 +206,10 @@ Status Instrument::ResetControl(int index) noexcept {
   return Status::kInvalidArgument;
 }
 
-Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
+Status Instrument::ResetNoteControl(double pitch, Integer index) noexcept {
   assert(index >= 0);
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (index >= 0 && index < static_cast<int>(note_controls->size())) {
+    if (index >= 0 && index < static_cast<Integer>(note_controls->size())) {
       if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
         if (note_control_event_callback_) {
           note_control_event_callback_(pitch, index, note_control.GetValue());
@@ -230,9 +235,9 @@ void Instrument::SetAllNotesOff() noexcept {
   }
 }
 
-Status Instrument::SetControl(int index, double value,
+Status Instrument::SetControl(Integer index, double value,
                               double slope_per_beat) noexcept {
-  if (index >= 0 && index < static_cast<int>(controls_.size())) {
+  if (index >= 0 && index < static_cast<Integer>(controls_.size())) {
     if (auto& control = controls_[index]; control.Set(value, slope_per_beat)) {
       if (note_control_event_callback_) {
         control_event_callback_(index, control.GetValue());
@@ -255,10 +260,10 @@ void Instrument::SetData(std::vector<std::byte> data) noexcept {
   message_queue_.Add(timestamp_, DataMessage{std::move(data)});
 }
 
-Status Instrument::SetNoteControl(double pitch, int index, double value,
+Status Instrument::SetNoteControl(double pitch, Integer index, double value,
                                   double slope_per_beat) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (index >= 0 && index < static_cast<int>(controls_.size())) {
+    if (index >= 0 && index < static_cast<Integer>(controls_.size())) {
       if (auto& note_control = (*note_controls)[index];
           note_control.Set(value, slope_per_beat)) {
         if (note_control_event_callback_) {
@@ -314,7 +319,8 @@ void Instrument::SetTempo(double tempo) noexcept {
   assert(tempo_ != tempo);
   tempo_ = tempo;
   // Update controls.
-  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+  for (Integer index = 0; index < static_cast<Integer>(controls_.size());
+       ++index) {
     if (const auto& control = controls_[index];
         control.GetSlopePerBeat() != 0.0) {
       message_queue_.Add(
@@ -325,7 +331,7 @@ void Instrument::SetTempo(double tempo) noexcept {
   }
   // Update note controls.
   for (auto& [pitch, note_controls] : note_controls_) {
-    for (int index = 0; index < static_cast<int>(note_controls.size());
+    for (Integer index = 0; index < static_cast<Integer>(note_controls.size());
          ++index) {
       if (const auto& note_control = note_controls[index];
           note_control.GetSlopePerBeat() != 0.0) {
@@ -339,11 +345,11 @@ void Instrument::SetTempo(double tempo) noexcept {
 }
 
 void Instrument::Update(double timestamp) noexcept {
-
   assert(timestamp_ < timestamp);
   const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
   // Update controls.
-  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+  for (Integer index = 0; index < static_cast<Integer>(controls_.size());
+       ++index) {
     if (auto& control = controls_[index];
         control.Update(duration) && control_event_callback_) {
       control_event_callback_(index, control.GetValue());
@@ -351,7 +357,7 @@ void Instrument::Update(double timestamp) noexcept {
   }
   // Update note controls.
   for (auto& [pitch, note_controls] : note_controls_) {
-    for (int index = 0; index < static_cast<int>(note_controls.size());
+    for (Integer index = 0; index < static_cast<Integer>(note_controls.size());
          ++index) {
       if (auto& note_control = note_controls[index];
           note_control.Update(duration) && note_control_event_callback_) {

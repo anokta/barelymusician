@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "barelymusician/engine/id.h"
+#include "barelymusician/engine/number.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {
@@ -20,7 +21,7 @@ TEST(PerformerTest, TriggerMultipleTasks) {
 
   // Add tasks.
   std::vector<double> positions;
-  for (int i = 1; i <= 4; ++i) {
+  for (Integer i = 1; i <= 4; ++i) {
     performer.AddTask(Id{i}, static_cast<double>(i), [&, i]() {
       const double position = performer.GetPosition();
       EXPECT_DOUBLE_EQ(position, static_cast<double>(i));
@@ -42,7 +43,7 @@ TEST(PerformerTest, TriggerMultipleTasks) {
 
   // Trigger tasks.
   std::vector<double> expected_positions;
-  for (int i = 1; i <= 4; ++i) {
+  for (Integer i = 1; i <= 4; ++i) {
     const double expected_position = static_cast<double>(i);
     expected_positions.push_back(expected_position);
     EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 1.0);
@@ -70,7 +71,7 @@ TEST(PerformerTest, TriggerSingleTask) {
                    std::numeric_limits<double>::max());
 
   // Add task.
-  int task_trigger_count = 0;
+  Integer task_trigger_count = 0;
   EXPECT_TRUE(performer.AddTask(Id{1}, 0.25, [&]() {
     EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
     ++task_trigger_count;

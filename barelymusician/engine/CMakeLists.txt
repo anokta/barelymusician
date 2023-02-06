@@ -18,6 +18,7 @@ target_link_libraries(
   id
   instrument
   mutable_data
+  number
   performer
   status
   task
@@ -54,6 +55,10 @@ add_library(
   message INTERFACE
   message.h
 )
+target_link_libraries(
+  message
+  number
+)
 
 add_library(
   message_queue
@@ -63,11 +68,21 @@ add_library(
 target_link_libraries(
   message_queue
   message
+  number
 )
 
 add_library(
   mutable_data INTERFACE
   mutable_data.h
+)
+
+add_library(
+  number INTERFACE
+  number.h
+)
+target_link_libraries(
+  number INTERFACE
+  include
 )
 
 add_library(
@@ -158,6 +173,7 @@ add_executable(
 target_link_libraries(
   mutable_data_test
   mutable_data
+  number
   gmock
   gtest_main
 )
@@ -181,6 +197,7 @@ add_executable(
 )
 target_link_libraries(
   task_test
+  number
   task
   gtest_main
 )

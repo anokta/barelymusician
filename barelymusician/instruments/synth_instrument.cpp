@@ -9,11 +9,11 @@
 
 namespace barely {
 
-SynthInstrument::SynthInstrument(int sample_rate) noexcept
-    : voice_(SynthVoice(sample_rate)) {}
+SynthInstrument::SynthInstrument(Integer frame_rate) noexcept
+    : voice_(SynthVoice(frame_rate)) {}
 
-void SynthInstrument::Process(double* output_samples, int channel_count,
-                              int frame_count) noexcept {
+void SynthInstrument::Process(double* output_samples, Integer channel_count,
+                              Integer frame_count) noexcept {
   for (int frame = 0; frame < frame_count; ++frame) {
     const double mono_sample = voice_.Next(0);
     for (int channel = 0; channel < channel_count; ++channel) {
@@ -23,13 +23,13 @@ void SynthInstrument::Process(double* output_samples, int channel_count,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetControl(int index, double value,
+void SynthInstrument::SetControl(Integer index, double value,
                                  double /*slope_per_frame*/) noexcept {
   switch (static_cast<SynthControl>(index)) {
     case SynthControl::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
-            static_cast<OscillatorType>(static_cast<int>(value)));
+            static_cast<OscillatorType>(static_cast<Integer>(value)));
       });
       break;
     case SynthControl::kAttack:
@@ -53,7 +53,7 @@ void SynthInstrument::SetControl(int index, double value,
       });
       break;
     case SynthControl::kVoiceCount:
-      voice_.Resize(static_cast<int>(value));
+      voice_.Resize(static_cast<Integer>(value));
       break;
   }
 }

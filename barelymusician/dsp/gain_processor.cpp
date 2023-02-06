@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 namespace {
@@ -17,8 +19,8 @@ constexpr double kUnityGain = 1.0;
 constexpr double kUnityRampDurationSeconds = 0.05;
 
 // Applies constant `gain`.
-void ApplyConstantGain(double gain, double* buffer, int channel_count,
-                       int frame_count) noexcept {
+void ApplyConstantGain(double gain, double* buffer, Integer channel_count,
+                       Integer frame_count) noexcept {
   if (std::abs(gain - kUnityGain) < kGainThreshold) {
     return;
   }
@@ -26,21 +28,21 @@ void ApplyConstantGain(double gain, double* buffer, int channel_count,
     std::fill_n(buffer, channel_count * frame_count, 0.0);
     return;
   }
-  for (int i = 0; i < channel_count * frame_count; ++i) {
+  for (Integer i = 0; i < channel_count * frame_count; ++i) {
     buffer[i] *= static_cast<double>(gain);
   }
 }
 
 // Applies linear ramp of `ramp_frame_count` from `gain` to `target_gain`.
-double ApplyLinearRamp(double gain, double target_gain, int ramp_frame_count,
-                       double* buffer, int channel_count,
-                       int frame_count) noexcept {
+double ApplyLinearRamp(double gain, double target_gain,
+                       Integer ramp_frame_count, double* buffer,
+                       Integer channel_count, Integer frame_count) noexcept {
   const double ramp_increment_ =
       (target_gain - gain) / static_cast<double>(ramp_frame_count);
-  for (int frame = 0; frame < std::min(ramp_frame_count, frame_count);
+  for (Integer frame = 0; frame < std::min(ramp_frame_count, frame_count);
        ++frame) {
     gain += ramp_increment_;
-    for (int channel = 0; channel < channel_count; ++channel) {
+    for (Integer channel = 0; channel < channel_count; ++channel) {
       buffer[channel_count * frame + channel] *= static_cast<double>(gain);
     }
   }
@@ -49,18 +51,18 @@ double ApplyLinearRamp(double gain, double target_gain, int ramp_frame_count,
 
 }  // namespace
 
-GainProcessor::GainProcessor(int frame_rate) noexcept
+GainProcessor::GainProcessor(Integer frame_rate) noexcept
     : unity_ramp_frame_count_(static_cast<double>(frame_rate) *
                               kUnityRampDurationSeconds) {}
 
-void GainProcessor::Process(double* buffer, int channel_count,
-                            int frame_count) noexcept {
-  int frame = 0;
+void GainProcessor::Process(double* buffer, Integer channel_count,
+                            Integer frame_count) noexcept {
+  Integer frame = 0;
   // Apply linear ramp.
   if (gain_ != target_gain_) {
     if (is_initialized_) {
-      frame = static_cast<int>(unity_ramp_frame_count_ *
-                               std::abs(target_gain_ - gain_));
+      frame = static_cast<Integer>(unity_ramp_frame_count_ *
+                                   std::abs(target_gain_ - gain_));
       if (frame > 0) {
         gain_ = ApplyLinearRamp(gain_, target_gain_, frame, buffer,
                                 channel_count, frame_count);

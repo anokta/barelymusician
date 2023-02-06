@@ -5,12 +5,14 @@
 #include <variant>
 #include <vector>
 
+#include "barelymusician/engine/number.h"
+
 namespace barely::internal {
 
 /// Control message.
 struct ControlMessage {
   /// Index.
-  int index;
+  Integer index;
 
   /// Value.
   double value;
@@ -31,7 +33,7 @@ struct NoteControlMessage {
   double pitch;
 
   /// Index.
-  int index;
+  Integer index;
 
   /// Value.
   double value;

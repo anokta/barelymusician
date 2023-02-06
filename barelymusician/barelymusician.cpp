@@ -32,7 +32,7 @@ struct BarelyMusician {
 
 BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
                                      BarelyInstrumentDefinition definition,
-                                     int32_t frame_rate,
+                                     BarelyInteger frame_rate,
                                      BarelyId* out_instrument_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
@@ -54,7 +54,8 @@ BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
 }
 
 BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
-                                         BarelyId instrument_id, int32_t index,
+                                         BarelyId instrument_id,
+                                         BarelyInteger index,
                                          double* out_value) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
@@ -73,7 +74,7 @@ BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_GetNoteControl(BarelyMusicianHandle handle,
                                              BarelyId instrument_id,
-                                             double pitch, int32_t index,
+                                             double pitch, BarelyInteger index,
                                              double* out_value) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
@@ -108,8 +109,8 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle,
 BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
                                       BarelyId instrument_id,
                                       double* output_samples,
-                                      int32_t output_channel_count,
-                                      int32_t output_frame_count,
+                                      BarelyInteger output_channel_count,
+                                      BarelyInteger output_frame_count,
                                       double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
@@ -144,7 +145,7 @@ BarelyStatus BarelyInstrument_ResetAllNoteControls(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_ResetControl(BarelyMusicianHandle handle,
                                            BarelyId instrument_id,
-                                           int32_t index) {
+                                           BarelyInteger index) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -156,7 +157,8 @@ BarelyStatus BarelyInstrument_ResetControl(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_ResetNoteControl(BarelyMusicianHandle handle,
                                                BarelyId instrument_id,
-                                               double pitch, int32_t index) {
+                                               double pitch,
+                                               BarelyInteger index) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -179,8 +181,9 @@ BarelyStatus BarelyInstrument_SetAllNotesOff(BarelyMusicianHandle handle,
 }
 
 BarelyStatus BarelyInstrument_SetControl(BarelyMusicianHandle handle,
-                                         BarelyId instrument_id, int32_t index,
-                                         double value, double slope_per_beat) {
+                                         BarelyId instrument_id,
+                                         BarelyInteger index, double value,
+                                         double slope_per_beat) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -199,7 +202,7 @@ BarelyStatus BarelyInstrument_SetControlEventCallback(
   if (instrument_or.IsOk()) {
     if (callback) {
       instrument_or->get().SetControlEventCallback(
-          [callback, user_data](int32_t index, double value) {
+          [callback, user_data](BarelyInteger index, double value) {
             callback(index, value, user_data);
           });
     } else {
@@ -212,7 +215,7 @@ BarelyStatus BarelyInstrument_SetControlEventCallback(
 
 BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
                                       BarelyId instrument_id, const void* data,
-                                      int32_t size) {
+                                      BarelyInteger size) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -226,7 +229,7 @@ BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_SetNoteControl(BarelyMusicianHandle handle,
                                              BarelyId instrument_id,
-                                             double pitch, int32_t index,
+                                             double pitch, BarelyInteger index,
                                              double value,
                                              double slope_per_beat) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -248,7 +251,8 @@ BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
   if (instrument_or.IsOk()) {
     if (callback) {
       instrument_or->get().SetNoteControlEventCallback(
-          [callback, user_data](double pitch, int32_t index, double value) {
+          [callback, user_data](double pitch, BarelyInteger index,
+                                double value) {
             callback(pitch, index, value, user_data);
           });
     } else {
@@ -414,7 +418,8 @@ BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle, int32_t order,
+BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
+                                    BarelyInteger order,
                                     BarelyId* out_performer_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_performer_id) return BarelyStatus_kInvalidArgument;

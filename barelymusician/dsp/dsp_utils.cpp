@@ -39,12 +39,13 @@ double DecibelsFromAmplitude(double amplitude) noexcept {
   return kMinDecibels;
 }
 
-int FramesFromSeconds(int frame_rate, double seconds) {
+Integer FramesFromSeconds(Integer frame_rate, double seconds) {
   assert(frame_rate > 0);
-  return static_cast<int>(seconds * static_cast<double>(frame_rate));
+  return static_cast<Integer>(seconds * static_cast<double>(frame_rate));
 }
 
-double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept {
+double GetFilterCoefficient(Integer frame_rate,
+                            double cuttoff_frequency) noexcept {
   if (const double frame_rate_double = static_cast<double>(frame_rate);
       frame_rate_double > 0.0 && cuttoff_frequency < frame_rate_double) {
     // c = exp(-2 * pi * fc / fs).
@@ -65,7 +66,7 @@ double SecondsFromBeats(double tempo, double beats) {
   return beats * kSecondsFromMinutes / tempo;
 }
 
-double SecondsFromFrames(int frame_rate, int frames) {
+double SecondsFromFrames(Integer frame_rate, Integer frames) {
   assert(frame_rate > 0);
   return static_cast<double>(frames) / static_cast<double>(frame_rate);
 }

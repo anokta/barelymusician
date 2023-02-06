@@ -6,6 +6,10 @@ cc_library(
     name = "dsp_utils",
     srcs = ["dsp_utils.cpp"],
     hdrs = ["dsp_utils.h"],
+    deps = [
+        # TODO(#109): replace by `//barelymusician`.
+        "//barelymusician:include",
+    ],
 )
 
 cc_library(
@@ -14,6 +18,7 @@ cc_library(
     hdrs = ["envelope.h"],
     deps = [
         ":generator",
+        "//barelymusician",
     ],
 )
 
@@ -26,6 +31,9 @@ cc_library(
     name = "gain_processor",
     srcs = ["gain_processor.cpp"],
     hdrs = ["gain_processor.h"],
+    deps = [
+        "//barelymusician",
+    ],
 )
 
 cc_library(
@@ -49,6 +57,7 @@ cc_library(
     deps = [
         ":dsp_utils",
         ":generator",
+        "//barelymusician",
         "//barelymusician/common:random",
     ],
 )
@@ -56,6 +65,9 @@ cc_library(
 cc_library(
     name = "polyphonic_voice",
     hdrs = ["polyphonic_voice.h"],
+    deps = [
+        "//barelymusician",
+    ],
 )
 
 cc_library(
@@ -64,12 +76,16 @@ cc_library(
     hdrs = ["sample_player.h"],
     deps = [
         ":generator",
+        "//barelymusician",
     ],
 )
 
 cc_library(
     name = "voice",
     hdrs = ["voice.h"],
+    deps = [
+        "//barelymusician",
+    ],
 )
 
 cc_test(
@@ -77,6 +93,7 @@ cc_test(
     srcs = ["dsp_utils_test.cpp"],
     deps = [
         ":dsp_utils",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )
@@ -86,6 +103,7 @@ cc_test(
     srcs = ["envelope_test.cpp"],
     deps = [
         ":envelope",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )
@@ -95,6 +113,7 @@ cc_test(
     srcs = ["gain_processor_test.cpp"],
     deps = [
         ":gain_processor",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )
@@ -104,6 +123,7 @@ cc_test(
     srcs = ["one_pole_filter_test.cpp"],
     deps = [
         ":one_pole_filter",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )
@@ -114,6 +134,7 @@ cc_test(
     deps = [
         ":polyphonic_voice",
         ":voice",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )
@@ -123,6 +144,7 @@ cc_test(
     srcs = ["sample_player_test.cpp"],
     deps = [
         ":sample_player",
+        "//barelymusician",
         "@googletest//:gtest_main",
     ],
 )

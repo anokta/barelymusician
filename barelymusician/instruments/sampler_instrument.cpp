@@ -8,21 +8,21 @@
 
 namespace barely {
 
-SamplerInstrument::SamplerInstrument(int sample_rate) noexcept
-    : voice_(SamplerVoice(sample_rate)), sample_rate_(sample_rate) {}
+SamplerInstrument::SamplerInstrument(Integer frame_rate) noexcept
+    : voice_(SamplerVoice(frame_rate)), frame_rate_(frame_rate) {}
 
-void SamplerInstrument::Process(double* output_samples, int channel_count,
-                                int frame_count) noexcept {
-  for (int frame = 0; frame < frame_count; ++frame) {
+void SamplerInstrument::Process(double* output_samples, Integer channel_count,
+                                Integer frame_count) noexcept {
+  for (Integer frame = 0; frame < frame_count; ++frame) {
     const double mono_sample = voice_.Next(0);
-    for (int channel = 0; channel < channel_count; ++channel) {
+    for (Integer channel = 0; channel < channel_count; ++channel) {
       output_samples[channel_count * frame + channel] = mono_sample;
     }
   }
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SamplerInstrument::SetControl(int index, double value,
+void SamplerInstrument::SetControl(Integer index, double value,
                                    double /*slope*/) noexcept {
   switch (static_cast<SamplerControl>(index)) {
     case SamplerControl::kRootPitch:
@@ -54,17 +54,17 @@ void SamplerInstrument::SetControl(int index, double value,
       });
       break;
     case SamplerControl::kVoiceCount:
-      voice_.Resize(static_cast<int>(value));
+      voice_.Resize(static_cast<Integer>(value));
       break;
   }
 }
 
-void SamplerInstrument::SetData(const void* data, int size) noexcept {
-  voice_.Update([sample_rate = sample_rate_, data,
-                 size](SamplerVoice* voice) noexcept {
-    voice->generator().SetData(static_cast<const double*>(data), sample_rate,
-                               size / static_cast<int>(sizeof(double)));
-  });
+void SamplerInstrument::SetData(const void* data, Integer size) noexcept {
+  voice_.Update(
+      [frame_rate = frame_rate_, data, size](SamplerVoice* voice) noexcept {
+        voice->generator().SetData(static_cast<const double*>(data), frame_rate,
+                                   size / static_cast<Integer>(sizeof(double)));
+      });
 }
 
 void SamplerInstrument::SetNoteOff(double pitch) noexcept {

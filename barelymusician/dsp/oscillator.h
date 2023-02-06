@@ -3,6 +3,7 @@
 
 #include <random>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
 #include "barelymusician/dsp/generator.h"
 
@@ -25,8 +26,8 @@ class Oscillator : public Generator {
  public:
   /// Constructs new `Oscillator`.
   ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit Oscillator(int sample_rate) noexcept;
+  /// @param frame_rate Frame rate in hertz.
+  explicit Oscillator(Integer frame_rate) noexcept;
 
   /// Implements `Generator`.
   double Next() noexcept override;
@@ -43,8 +44,8 @@ class Oscillator : public Generator {
   void SetType(OscillatorType type) noexcept;
 
  private:
-  // Inverse sampling rate in seconds.
-  double sample_interval_ = 0.0;
+  // Inverse frame rate in seconds.
+  double frame_interval_ = 0.0;
 
   // Oscillator type.
   OscillatorType type_ = OscillatorType::kNoise;

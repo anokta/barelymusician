@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "barelymusician/engine/message.h"
+#include "barelymusician/engine/number.h"
 
 namespace barely::internal {
 
@@ -27,16 +28,16 @@ class MessageQueue {
 
  private:
   // Maximum number of messages.
-  static constexpr int kMaxMessageCount = 1024;
+  static constexpr Integer kMaxMessageCount = 1024;
 
   // List of messages with their timestamps.
   std::array<std::pair<double, Message>, kMaxMessageCount> messages_;
 
   // Read index.
-  std::atomic<int> read_index_ = 0;
+  std::atomic<Integer> read_index_ = 0;
 
   // Write index.
-  std::atomic<int> write_index_ = 0;
+  std::atomic<Integer> write_index_ = 0;
 };
 
 }  // namespace barely::internal

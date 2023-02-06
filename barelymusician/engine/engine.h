@@ -9,6 +9,7 @@
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
+#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/status.h"
 #include "barelymusician/engine/task.h"
@@ -37,14 +38,14 @@ class Engine {
   /// @return Instrument identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   StatusOr<Id> CreateInstrument(InstrumentDefinition definition,
-                                int frame_rate) noexcept;
+                                Integer frame_rate) noexcept;
 
   /// Creates new performer.
   ///
   /// @param order Performer task execution order.
   /// @return Performer identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  StatusOr<Id> CreatePerformer(int order) noexcept;
+  StatusOr<Id> CreatePerformer(Integer order) noexcept;
 
   /// Creates new performer task.
   ///
@@ -128,7 +129,8 @@ class Engine {
   /// @param timestamp Timestamp in seconds.
   /// @return Status.
   Status ProcessInstrument(Id instrument_id, double* output_samples,
-                           int output_channel_count, int output_frame_count,
+                           Integer output_channel_count,
+                           Integer output_frame_count,
                            double timestamp) noexcept;
 
   /// Sets task timestamp.
@@ -169,10 +171,10 @@ class Engine {
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
   // Map of performers by performer order-identifier pairs.
-  std::map<std::pair<int, Id>, Performer> performers_;
+  std::map<std::pair<Integer, Id>, Performer> performers_;
 
   // Map of performer order-reference pairs by performer identifiers.
-  std::unordered_map<Id, std::pair<int, std::reference_wrapper<Performer>>>
+  std::unordered_map<Id, std::pair<Integer, std::reference_wrapper<Performer>>>
       performer_refs_;
 
   // Tempo in beats per minute.

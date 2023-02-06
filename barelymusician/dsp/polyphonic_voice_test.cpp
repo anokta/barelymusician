@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/voice.h"
 #include "gtest/gtest.h"
 
@@ -9,19 +10,19 @@ namespace barely {
 namespace {
 
 // Number of voices for the polyphonic instrument.
-constexpr int kVoiceCount = 4;
+constexpr Integer kVoiceCount = 4;
 
 // Default voice output value.
 constexpr double kOutput = 1.0;
 
 // Default output channel.
-constexpr int kChannel = 0;
+constexpr Integer kChannel = 0;
 
 // Fake voice that produces constant output for testing.
 class FakeVoice : public Voice {
  public:
   // Implements `UnitGenerator`.
-  double Next(int /*channel*/) noexcept override {
+  double Next(Integer /*channel*/) noexcept override {
     return active_ ? output_ : 0.0;
   }
 
@@ -65,7 +66,7 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
-  for (int i = 0; i < kVoiceCount; ++i) {
+  for (Integer i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i + 1);
     polyphonic_voice.Start(
         pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
@@ -85,7 +86,7 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   double previous_output = 0.0;
-  for (int i = 0; i < kVoiceCount; ++i) {
+  for (Integer i = 0; i < kVoiceCount; ++i) {
     polyphonic_voice.Start(static_cast<double>(i));
     const double output = polyphonic_voice.Next(kChannel);
     EXPECT_DOUBLE_EQ(output - previous_output, kOutput);
@@ -120,7 +121,7 @@ TEST(PolyphonicVoiceTest, Update) {
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
-  for (int i = 0; i < kVoiceCount; ++i) {
+  for (Integer i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i);
     polyphonic_voice.Start(pitch);
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kOutput);
@@ -130,7 +131,7 @@ TEST(PolyphonicVoiceTest, Update) {
   polyphonic_voice.Update(
       [kUpdatedOutput](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
 
-  for (int i = 0; i < kVoiceCount; ++i) {
+  for (Integer i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i);
     polyphonic_voice.Start(pitch);
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);

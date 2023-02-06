@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_DSP_ENVELOPE_H_
 #define BARELYMUSICIAN_DSP_ENVELOPE_H_
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/generator.h"
 
 namespace barely {
@@ -11,8 +12,8 @@ class Envelope : public Generator {
  public:
   /// Constructs new `Envelope`.
   ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit Envelope(int sample_rate) noexcept;
+  /// @param frame_rate Frame rate in hertz.
+  explicit Envelope(Integer frame_rate) noexcept;
 
   /// Implements `Generator`.
   double Next() noexcept override;
@@ -53,8 +54,8 @@ class Envelope : public Generator {
   // Envelope state.
   enum class State { kAttack, kDecay, kSustain, kRelease, kIdle };
 
-  // Inverse sampling rate in seconds.
-  double sample_interval_ = 0.0;
+  // Inverse frame rate in seconds.
+  double frame_interval_ = 0.0;
 
   // Current ADSR values.
   double attack_increment_ = 0.0;

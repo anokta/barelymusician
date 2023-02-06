@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_
 #define BARELYMUSICIAN_DSP_GAIN_PROCESSOR_H_
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 /// Gain processor with a linear ramp.
@@ -9,14 +11,15 @@ class GainProcessor {
   /// Constructs new `GainProcessor`.
   ///
   /// @param frame_rate Frame rate in hertz.
-  explicit GainProcessor(int frame_rate) noexcept;
+  explicit GainProcessor(Integer frame_rate) noexcept;
 
   /// Processes next buffer.
   ///
   /// @param buffer Buffer.
   /// @param channel_count Number of channels.
   /// @param frame_count Number of frames.
-  void Process(double* buffer, int channel_count, int frame_count) noexcept;
+  void Process(double* buffer, Integer channel_count,
+               Integer frame_count) noexcept;
 
   /// Sets gain.
   ///

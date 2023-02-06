@@ -23,15 +23,15 @@ enum class PercussionControl : int {
 class PercussionInstrument : public GenericInstrument {
  public:
   /// Constructs new `PercussionInstrument`.
-  explicit PercussionInstrument(int frame_rate) noexcept;
+  explicit PercussionInstrument(Integer frame_rate) noexcept;
 
   /// Implements `GenericInstrument`.
-  void Process(double* output_samples, int channel_count,
-               int frame_count) noexcept override;
-  void SetControl(int index, double value,
+  void Process(double* output_samples, Integer channel_count,
+               Integer frame_count) noexcept override;
+  void SetControl(Integer index, double value,
                   double slope_per_frame) noexcept override;
-  void SetData(const void* data, int size) noexcept override;
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+  void SetData(const void* data, Integer size) noexcept override;
+  void SetNoteControl(double /*pitch*/, Integer /*index*/, double /*value*/,
                       double /*slope_per_frame*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch) noexcept override;
@@ -40,9 +40,9 @@ class PercussionInstrument : public GenericInstrument {
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
-  static constexpr int kPadCount = 4;
+  static constexpr Integer kPadCount = 4;
   struct Pad {
-    explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
+    explicit Pad(Integer frame_rate) noexcept : voice(frame_rate) {}
 
     double pitch = 0.0;
     EnvelopedVoice<SamplePlayer> voice;

@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely {
 
 /// PI.
@@ -34,14 +36,14 @@ double DecibelsFromAmplitude(double amplitude) noexcept;
 /// @param frame_rate Frame rate in hertz.
 /// @param seconds Number of seconds.
 /// @return Number of frames.
-int FramesFromSeconds(int frame_rate, double seconds);
+Integer FramesFromSeconds(Integer frame_rate, double seconds);
 
 /// Returns one-pole filter coefficient for a given cutoff frequency.
 ///
 /// @param frame_rate Frame rate in hertz.
 /// @param cuttoff_frequency Cutoff frequency in hertz.
 /// @return Filter coefficient.
-double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept;
+double GetFilterCoefficient(Integer frame_rate, double cuttoff_frequency) noexcept;
 
 /// Returns frequency for the given pitch.
 ///
@@ -61,7 +63,7 @@ double SecondsFromBeats(double tempo, double beats);
 /// @param frame_rate Frame rate in hertz.
 /// @param frames Number of frames.
 /// @return Number of seconds.
-double SecondsFromFrames(int frame_rate, int frames);
+double SecondsFromFrames(Integer frame_rate, Integer frames);
 
 }  // namespace barely
 

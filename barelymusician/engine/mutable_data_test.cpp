@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "barelymusician/engine/number.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -14,7 +15,7 @@ using ::testing::ElementsAre;
 
 // Tests that mutable data manages simple data as expected.
 TEST(MutableDataTest, SimpleData) {
-  MutableData<int> data;
+  MutableData<Integer> data;
   EXPECT_EQ(*data.GetScopedView(), 0);
 
   data.Update(5);

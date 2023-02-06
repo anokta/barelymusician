@@ -1,6 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_
 #define BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/voice.h"
 
@@ -12,12 +13,12 @@ class EnvelopedVoice : public Voice {
  public:
   /// Constructs new `EnvelopedVoice` with the given `sample_rate`.
   ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit EnvelopedVoice(int sample_rate) noexcept;
+  /// @param sample_rate Frame rate in hertz.
+  explicit EnvelopedVoice(Integer frame_rate) noexcept;
 
   /// Implements `Voice`.
   [[nodiscard]] bool IsActive() const noexcept override;
-  double Next(int channel) noexcept override;
+  double Next(Integer channel) noexcept override;
   void Start() noexcept override;
   void Stop() noexcept override;
 
@@ -48,11 +49,11 @@ class EnvelopedVoice : public Voice {
 };
 
 template <class GeneratorType>
-EnvelopedVoice<GeneratorType>::EnvelopedVoice(int sample_rate) noexcept
-    : envelope_(sample_rate), generator_(sample_rate) {}
+EnvelopedVoice<GeneratorType>::EnvelopedVoice(Integer frame_rate) noexcept
+    : envelope_(frame_rate), generator_(frame_rate) {}
 
 template <class GeneratorType>
-double EnvelopedVoice<GeneratorType>::Next(int channel) noexcept {
+double EnvelopedVoice<GeneratorType>::Next(Integer channel) noexcept {
   if (channel == 0) {
     output_ = gain_ * envelope_.Next() * generator_.Next();
   }

@@ -4,6 +4,7 @@ add_library(
 )
 target_link_libraries(
   enveloped_voice INTERFACE
+  barelymusician
   envelope
   voice
 )

@@ -12,11 +12,14 @@ namespace {
 // Middle A (A4) frequency.
 constexpr Real kFrequencyA4 = 440.0;
 
-// Converts seconds to minutes.
-constexpr Real kMinutesFromSeconds = 1.0 / 60.0;
+// Converts nanoseconds to minutes.
+constexpr Real kMinutesFromNanoseconds = 1.0 / 60'000'000.0;
 
-// Converts minutes to seconds.
-constexpr Real kSecondsFromMinutes = 60.0;
+// Converts minutes to nanoseconds.
+constexpr Real kNanosecondsFromMinutes = 60'000'000.0;
+
+// Converts seconds to nanoseconds.
+constexpr Integer kNanosecondsFromSeconds = 1'000'000;
 
 }  // namespace
 
@@ -28,9 +31,9 @@ Real AmplitudeFromDecibels(Real decibels) noexcept {
   return 0.0;
 }
 
-Real BeatsFromSeconds(Real tempo, Real seconds) {
+Real BeatsFromNanoseconds(Real tempo, Integer nanoseconds) {
   assert(tempo > 0.0);
-  return tempo * seconds * kMinutesFromSeconds;
+  return tempo * static_cast<double>(nanoseconds) * kMinutesFromNanoseconds;
 }
 
 Real DecibelsFromAmplitude(Real amplitude) noexcept {
@@ -41,9 +44,9 @@ Real DecibelsFromAmplitude(Real amplitude) noexcept {
   return kMinDecibels;
 }
 
-Integer FramesFromSeconds(Integer frame_rate, Real seconds) {
+Integer FramesFromNanoseconds(Integer frame_rate, Integer nanoseconds) {
   assert(frame_rate > 0);
-  return static_cast<Integer>(seconds * static_cast<Real>(frame_rate));
+  return nanoseconds * frame_rate / kNanosecondsFromSeconds;
 }
 
 Real GetFilterCoefficient(Integer frame_rate, Real cuttoff_frequency) noexcept {
@@ -62,14 +65,14 @@ Real GetFrequency(Real pitch) noexcept {
   return kFrequencyA4 * std::pow(2.0, pitch);
 }
 
-Real SecondsFromBeats(Real tempo, Real beats) {
+Integer NanosecondsFromBeats(Real tempo, Real beats) {
   assert(tempo > 0.0);
-  return beats * kSecondsFromMinutes / tempo;
+  return static_cast<Integer>(beats * kNanosecondsFromMinutes / tempo);
 }
 
-Real SecondsFromFrames(Integer frame_rate, Integer frames) {
+Integer NanosecondsFromFrames(Integer frame_rate, Integer frames) {
   assert(frame_rate > 0);
-  return static_cast<Real>(frames) / static_cast<Real>(frame_rate);
+  return frames * kNanosecondsFromSeconds / frame_rate;
 }
 
 }  // namespace barely

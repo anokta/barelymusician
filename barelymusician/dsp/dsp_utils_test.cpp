@@ -28,25 +28,26 @@ TEST(DspUtilsTest, AmplitudeDecibelsConversion) {
   }
 }
 
-// Tests that converting values from/to beats and seconds returns expected
+// Tests that converting values from/to beats and nanoseconds returns expected
 // results.
-TEST(DspUtilsTest, BeatsSecondsConversion) {
+TEST(DspUtilsTest, BeatsNanosecondsConversion) {
   const Real kTempo = 120.0;
   const Integer kValueCount = 5;
   const Real kBeats[kValueCount] = {0.0, 1.0, 5.0, -4.0, -246.8};
-  const Real kSeconds[kValueCount] = {0.0, 0.5, 2.5, -2.0, -123.4};
+  const Integer kNanoseconds[kValueCount] = {0, 500'000, 2'500'000, -2'000'000,
+                                             -123'400'000};
 
   for (Integer i = 0; i < kValueCount; ++i) {
-    EXPECT_DOUBLE_EQ(BeatsFromSeconds(kTempo, kSeconds[i]), kBeats[i]);
-    EXPECT_DOUBLE_EQ(SecondsFromBeats(kTempo, kBeats[i]), kSeconds[i]);
+    EXPECT_DOUBLE_EQ(BeatsFromNanoseconds(kTempo, kNanoseconds[i]), kBeats[i]);
+    EXPECT_EQ(NanosecondsFromBeats(kTempo, kBeats[i]), kNanoseconds[i]);
 
     // Verify that the back and forth conversion do not mutate the value.
     EXPECT_DOUBLE_EQ(
-        BeatsFromSeconds(kTempo, SecondsFromBeats(kTempo, kBeats[i])),
+        BeatsFromNanoseconds(kTempo, NanosecondsFromBeats(kTempo, kBeats[i])),
         kBeats[i]);
-    EXPECT_DOUBLE_EQ(
-        SecondsFromBeats(kTempo, BeatsFromSeconds(kTempo, kSeconds[i])),
-        kSeconds[i]);
+    EXPECT_EQ(NanosecondsFromBeats(
+                  kTempo, BeatsFromNanoseconds(kTempo, kNanoseconds[i])),
+              kNanoseconds[i]);
   }
 }
 
@@ -56,26 +57,26 @@ TEST(DspUtilsTest, AmplitudeDecibelsMinThreshold) {
   EXPECT_DOUBLE_EQ(DecibelsFromAmplitude(0.0), kMinDecibels);
 }
 
-// Tests that converting values from/to frames and seconds returns expected
+// Tests that converting values from/to frames and nanoseconds returns expected
 // results.
-TEST(DspUtilsTest, FramesSecondsConversion) {
+TEST(DspUtilsTest, FramesNanosecondsConversion) {
   const Integer kFrameRate = 8000;
   const Integer kValueCount = 4;
   const Integer kFrames[kValueCount] = {0, 800, 4000, 32000};
-  const Real kSeconds[kValueCount] = {0.0, 0.1, 0.5, 4.0};
+  const Integer kNanoseconds[kValueCount] = {0, 100'000, 500'000, 4'000'000};
 
   for (Integer i = 0; i < kValueCount; ++i) {
-    EXPECT_EQ(FramesFromSeconds(kFrameRate, kSeconds[i]), kFrames[i]);
-    EXPECT_DOUBLE_EQ(SecondsFromFrames(kFrameRate, kFrames[i]), kSeconds[i]);
+    EXPECT_EQ(FramesFromNanoseconds(kFrameRate, kNanoseconds[i]), kFrames[i]);
+    EXPECT_EQ(NanosecondsFromFrames(kFrameRate, kFrames[i]), kNanoseconds[i]);
 
     // Verify that the back and forth conversion do not mutate the value.
-    EXPECT_EQ(FramesFromSeconds(kFrameRate,
-                                SecondsFromFrames(kFrameRate, kFrames[i])),
+    EXPECT_EQ(FramesFromNanoseconds(
+                  kFrameRate, NanosecondsFromFrames(kFrameRate, kFrames[i])),
               kFrames[i]);
-    EXPECT_DOUBLE_EQ(
-        SecondsFromFrames(kFrameRate,
-                          FramesFromSeconds(kFrameRate, kSeconds[i])),
-        kSeconds[i]);
+    EXPECT_EQ(
+        NanosecondsFromFrames(
+            kFrameRate, FramesFromNanoseconds(kFrameRate, kNanoseconds[i])),
+        kNanoseconds[i]);
   }
 }
 

@@ -37,10 +37,10 @@ class Instrument {
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
   /// @param initial_tempo Initial tempo in beats per minute.
-  /// @param initial_timestamp Initial timestamp in seconds.
+  /// @param initial_timestamp Initial timestamp in nanoseconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Instrument(const InstrumentDefinition& definition, Integer frame_rate,
-             Real initial_tempo, Real initial_timestamp) noexcept;
+             Real initial_tempo, Integer initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -77,10 +77,10 @@ class Instrument {
   /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
+  /// @param timestamp Timestamp in nanoseconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Process(Real* output_samples, Integer output_channel_count,
-               Integer output_frame_count, Real timestamp) noexcept;
+               Integer output_frame_count, Integer timestamp) noexcept;
 
   /// Resets all controls to default value.
   void ResetAllControls() noexcept;
@@ -169,8 +169,8 @@ class Instrument {
 
   /// Updates instrument at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
-  void Update(Real timestamp) noexcept;
+  /// @param timestamp Timestamp in nanoseconds.
+  void Update(Integer timestamp) noexcept;
 
  private:
   // Returns corresponding slope per frame for a given `slope_per_beat`.
@@ -224,8 +224,8 @@ class Instrument {
   // Tempo in beats per minute.
   Real tempo_ = 120.0;
 
-  // Timestamp in seconds.
-  Real timestamp_ = 0;
+  // Timestamp in nanoseconds.
+  Integer timestamp_ = 0;
 
   // State.
   void* state_ = nullptr;

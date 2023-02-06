@@ -15,23 +15,23 @@ class MessageQueue {
  public:
   /// Adds message at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
+  /// @param timestamp Timestamp in nanoseconds.
   /// @param message Message.
   /// @return True if successful, false otherwise.
-  bool Add(Real timestamp, Message message) noexcept;
+  bool Add(Integer timestamp, Message message) noexcept;
 
   /// Returns next message before end timestamp.
   ///
-  /// @param end_timestamp End timestamp in seconds.
+  /// @param end_timestamp End timestamp in nanoseconds.
   /// @return Pointer to message if successful, nullptr otherwise.
-  std::pair<Real, Message>* GetNext(Real end_timestamp) noexcept;
+  std::pair<Integer, Message>* GetNext(Integer end_timestamp) noexcept;
 
  private:
   // Maximum number of messages.
   static constexpr Integer kMaxMessageCount = 1024;
 
   // List of messages with their timestamps.
-  std::array<std::pair<Real, Message>, kMaxMessageCount> messages_;
+  std::array<std::pair<Integer, Message>, kMaxMessageCount> messages_;
 
   // Read index.
   std::atomic<Integer> read_index_ = 0;

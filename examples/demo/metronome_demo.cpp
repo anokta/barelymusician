@@ -31,7 +31,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 1024;
 
-constexpr double kLookahead = 0.1;
+constexpr int kLookahead = 100'000;
 
 // Metronome settings.
 constexpr OscillatorType kOscillatorType = OscillatorType::kSquare;

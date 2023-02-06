@@ -228,7 +228,8 @@ void Performer::UpdateToNextTask() noexcept {
   SetPosition(*next_task_position);
 }
 
-TaskMap::const_iterator Performer::GetNextRecurringTask() const noexcept {
+Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
+    const noexcept {
   auto it = recurring_tasks_.lower_bound(std::pair{position_, kInvalid});
   if (last_processed_position_) {
     // Skip processed tasks.

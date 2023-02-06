@@ -66,7 +66,7 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
   return performer_or.GetErrorStatus();
 }
 
-StatusOr<Id> Engine::CreateTask(TaskDefinition definition, Real timestamp,
+StatusOr<Id> Engine::CreateTask(TaskDefinition definition, Integer timestamp,
                                 void* user_data) noexcept {
   if (timestamp < timestamp_) return {Status::kInvalidArgument};
   const Id task_id = GenerateNextId();
@@ -139,7 +139,7 @@ StatusOr<std::reference_wrapper<Performer>> Engine::GetPerformer(
   return {Status::kNotFound};
 }
 
-StatusOr<Real> Engine::GetTaskTimestamp(Id task_id) const noexcept {
+StatusOr<Integer> Engine::GetTaskTimestamp(Id task_id) const noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto* task_timestamp = FindOrNull(task_timestamps_, task_id)) {
     return *task_timestamp;
@@ -149,15 +149,15 @@ StatusOr<Real> Engine::GetTaskTimestamp(Id task_id) const noexcept {
 
 Real Engine::GetTempo() const noexcept { return tempo_; }
 
-Real Engine::GetTimestamp() const noexcept { return timestamp_; }
+Integer Engine::GetTimestamp() const noexcept { return timestamp_; }
 
 Status Engine::ProcessInstrument(Id instrument_id, Real* output_samples,
                                  Integer output_channel_count,
                                  Integer output_frame_count,
-                                 Real timestamp) noexcept {
+                                 Integer timestamp) noexcept {
   if (instrument_id == kInvalid) return Status::kInvalidArgument;
   if ((!output_samples && output_channel_count > 0 && output_frame_count) ||
-      output_channel_count < 0 || output_frame_count < 0 || timestamp < 0.0) {
+      output_channel_count < 0 || output_frame_count < 0 || timestamp < 0) {
     return Status::kInvalidArgument;
   }
   auto instrument_refs = instrument_refs_.GetScopedView();
@@ -172,7 +172,7 @@ Status Engine::ProcessInstrument(Id instrument_id, Real* output_samples,
   return Status::kNotFound;
 }
 
-Status Engine::SetTaskTimestamp(Id task_id, Real timestamp) noexcept {
+Status Engine::SetTaskTimestamp(Id task_id, Integer timestamp) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto it = task_timestamps_.find(task_id);
       it != task_timestamps_.end()) {
@@ -198,12 +198,13 @@ void Engine::SetTempo(Real tempo) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::Update(Real timestamp) noexcept {
-  assert(timestamp >= 0.0);
+void Engine::Update(Integer timestamp) noexcept {
+  assert(timestamp >= 0);
 
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      Real update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
+      Real update_duration =
+          BeatsFromNanoseconds(tempo_, timestamp - timestamp_);
       std::unordered_set<Id> performer_ids_to_process;
       for (const auto& [order_id_pair, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
@@ -217,8 +218,8 @@ void Engine::Update(Real timestamp) noexcept {
         }
       }
 
-      Real next_timestamp =
-          timestamp_ + SecondsFromBeats(tempo_, update_duration);
+      Integer next_timestamp =
+          timestamp_ + NanosecondsFromBeats(tempo_, update_duration);
 
       bool has_tasks = false;
       if (!tasks_.empty() && tasks_.begin()->first.first <= next_timestamp) {
@@ -226,7 +227,7 @@ void Engine::Update(Real timestamp) noexcept {
         if (tasks_.begin()->first.first < next_timestamp) {
           next_timestamp = tasks_.begin()->first.first;
           update_duration =
-              BeatsFromSeconds(tempo_, next_timestamp - timestamp_);
+              BeatsFromNanoseconds(tempo_, next_timestamp - timestamp_);
           performer_ids_to_process.clear();
         }
       }

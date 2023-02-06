@@ -112,7 +112,7 @@ BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
                                       BarelyReal* output_samples,
                                       BarelyInteger output_channel_count,
                                       BarelyInteger output_frame_count,
-                                      BarelyReal timestamp) {
+                                      BarelyInteger timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
   return handle->engine.ProcessInstrument(instrument_id, output_samples,
@@ -337,7 +337,7 @@ BarelyStatus BarelyMusician_Create(BarelyMusicianHandle* out_handle) {
 
 BarelyStatus BarelyMusician_CreateTask(BarelyMusicianHandle handle,
                                        BarelyTaskDefinition definition,
-                                       BarelyReal timestamp, void* user_data,
+                                       BarelyInteger timestamp, void* user_data,
                                        BarelyId* out_task_id) {
   if (!handle) return BarelyStatus_kInvalidArgument;
   if (!out_task_id) return BarelyStatus_kInvalidArgument;
@@ -367,7 +367,7 @@ BarelyStatus BarelyMusician_DestroyTask(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyMusician_GetTaskTimestamp(BarelyMusicianHandle handle,
                                              BarelyId task_id,
-                                             BarelyReal* out_timestamp) {
+                                             BarelyInteger* out_timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
@@ -389,7 +389,7 @@ BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
 }
 
 BarelyStatus BarelyMusician_GetTimestamp(BarelyMusicianHandle handle,
-                                         BarelyReal* out_timestamp) {
+                                         BarelyInteger* out_timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
@@ -399,7 +399,7 @@ BarelyStatus BarelyMusician_GetTimestamp(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyMusician_SetTaskTimestamp(BarelyMusicianHandle handle,
                                              BarelyId task_id,
-                                             BarelyReal timestamp) {
+                                             BarelyInteger timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
 
   return handle->engine.SetTaskTimestamp(task_id, timestamp);
@@ -414,10 +414,10 @@ BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
 }
 
 BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
-                                   BarelyReal timestamp) {
+                                   BarelyInteger timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
   // TODO(#109): Should this also be handled internally?
-  if (timestamp < 0.0) return BarelyStatus_kInvalidArgument;
+  if (timestamp < 0) return BarelyStatus_kInvalidArgument;
 
   handle->engine.Update(timestamp);
   return BarelyStatus_kOk;

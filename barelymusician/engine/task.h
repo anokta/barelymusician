@@ -14,10 +14,6 @@ namespace barely::internal {
 /// Task definition alias.
 using TaskDefinition = barely::TaskDefinition;
 
-// Task map alias.
-class Task;
-using TaskMap = std::map<std::pair<Real, Id>, std::unique_ptr<Task>>;
-
 /// Task type alias.
 using TaskType = barely::TaskType;
 

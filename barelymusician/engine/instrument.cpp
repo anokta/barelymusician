@@ -33,7 +33,7 @@ std::vector<Control> BuildControls(const auto* definitions,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Instrument::Instrument(const InstrumentDefinition& definition,
                        Integer frame_rate, Real initial_tempo,
-                       Real initial_timestamp) noexcept
+                       Integer initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
       set_control_callback_(definition.set_control_callback),
@@ -51,7 +51,7 @@ Instrument::Instrument(const InstrumentDefinition& definition,
       timestamp_(initial_timestamp) {
   assert(frame_rate >= 0);
   assert(initial_tempo > 0.0);
-  assert(initial_tempo > 0.0);
+  assert(initial_timestamp >= 0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
@@ -95,20 +95,21 @@ bool Instrument::IsNoteOn(Real pitch) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::Process(Real* output_samples, Integer output_channel_count,
-                         Integer output_frame_count, Real timestamp) noexcept {
+                         Integer output_frame_count,
+                         Integer timestamp) noexcept {
   assert(output_samples || output_channel_count == 0 ||
          output_frame_count == 0);
   assert(output_channel_count >= 0);
   assert(output_frame_count >= 0);
-  assert(timestamp >= 0.0);
+  assert(timestamp >= 0);
   Integer frame = 0;
   // Process *all* messages before the end timestamp.
-  const Real end_timestamp =
-      timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
+  const Integer end_timestamp =
+      timestamp + NanosecondsFromFrames(frame_rate_, output_frame_count);
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
     const Integer message_frame =
-        FramesFromSeconds(frame_rate_, message->first - timestamp);
+        FramesFromNanoseconds(frame_rate_, message->first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
         process_callback_(&state_,
@@ -343,9 +344,9 @@ void Instrument::SetTempo(Real tempo) noexcept {
   }
 }
 
-void Instrument::Update(Real timestamp) noexcept {
+void Instrument::Update(Integer timestamp) noexcept {
   assert(timestamp_ < timestamp);
-  const Real duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
+  const Real duration = BeatsFromNanoseconds(tempo_, timestamp - timestamp_);
   // Update controls.
   for (Integer index = 0; index < static_cast<Integer>(controls_.size());
        ++index) {
@@ -369,7 +370,8 @@ void Instrument::Update(Real timestamp) noexcept {
 
 Real Instrument::GetSlopePerFrame(Real slope_per_beat) const noexcept {
   return tempo_ > 0.0 && frame_rate_ > 0
-             ? BeatsFromSeconds(tempo_, slope_per_beat) /
+             ? BeatsFromNanoseconds(
+                   tempo_, static_cast<Integer>(1'000'000.0 * slope_per_beat)) /
                    static_cast<Real>(frame_rate_)
              : 0.0;
 }

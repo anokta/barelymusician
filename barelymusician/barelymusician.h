@@ -322,7 +322,7 @@ BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle, BarelyId instrument_id,
 BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
     BarelyMusicianHandle handle, BarelyId instrument_id,
     BarelyReal* output_samples, BarelyInteger output_channel_count,
-    BarelyInteger output_frame_count, BarelyReal timestamp);
+    BarelyInteger output_frame_count, BarelyInteger timestamp);
 
 /// Resets all instrument controls to default value.
 ///
@@ -479,13 +479,13 @@ BarelyMusician_Create(BarelyMusicianHandle* out_handle);
 ///
 /// @param handle Musician handle.
 /// @param definition Task definition.
-/// @param timestamp Task timestamp in seconds.
+/// @param timestamp Task timestamp in nanoseconds.
 /// @param user_data Pointer to user data.
 /// @param out_task_id Output task identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_CreateTask(
     BarelyMusicianHandle handle, BarelyTaskDefinition definition,
-    BarelyReal timestamp, void* user_data, BarelyId* out_task_id);
+    BarelyInteger timestamp, void* user_data, BarelyId* out_task_id);
 
 /// Destroys musician.
 ///
@@ -505,10 +505,11 @@ BarelyMusician_DestroyTask(BarelyMusicianHandle handle, BarelyId task_id);
 ///
 /// @param handle Musician handle.
 /// @param task_id Task identifier.
-/// @param out_timestamp Output timestamp in seconds.
+/// @param out_timestamp Output timestamp in nanoseconds.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetTaskTimestamp(
-    BarelyMusicianHandle handle, BarelyId task_id, BarelyReal* out_timestamp);
+BARELY_EXPORT BarelyStatus
+BarelyMusician_GetTaskTimestamp(BarelyMusicianHandle handle, BarelyId task_id,
+                                BarelyInteger* out_timestamp);
 
 /// Gets musician tempo.
 ///
@@ -521,19 +522,19 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
 /// Gets musician timestamp.
 ///
 /// @param handle Musician handle.
-/// @param out_timestamp Output timestamp in seconds.
+/// @param out_timestamp Output timestamp in nanoseconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestamp(
-    BarelyMusicianHandle handle, BarelyReal* out_timestamp);
+    BarelyMusicianHandle handle, BarelyInteger* out_timestamp);
 
 /// Sets musician task timestamp.
 ///
 /// @param handle Musician handle.
 /// @param task_id Task identiier.
-/// @param timestamp Timestamp in seconds.
+/// @param timestamp Timestamp in nanoseconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_SetTaskTimestamp(
-    BarelyMusicianHandle handle, BarelyId task_id, BarelyReal timestamp);
+    BarelyMusicianHandle handle, BarelyId task_id, BarelyInteger timestamp);
 
 /// Sets musician tempo.
 ///
@@ -546,10 +547,10 @@ BARELY_EXPORT BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
 /// Updates musician at timestamp.
 ///
 /// @param handle Musician handle.
-/// @param timestamp Timestamp in seconds.
+/// @param timestamp Timestamp in nanoseconds.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
-                                                 BarelyReal timestamp);
+                                                 BarelyInteger timestamp);
 
 /// Creates new performer.
 ///
@@ -1151,10 +1152,10 @@ class Instrument {
   /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
+  /// @param timestamp Timestamp in nanoseconds.
   /// @return Status.
   Status Process(Real* output_samples, Integer output_channel_count,
-                 Integer output_frame_count, Real timestamp) noexcept {
+                 Integer output_frame_count, Integer timestamp) noexcept {
     return BarelyInstrument_Process(handle_, id_, output_samples,
                                     output_channel_count, output_frame_count,
                                     timestamp);
@@ -1643,9 +1644,9 @@ class Musician {
    public:
     /// Returns timestamp.
     ///
-    /// @return Timestamp in seconds, or error status.
-    [[nodiscard]] StatusOr<Real> GetTimestamp() const noexcept {
-      Real timestamp = 0.0;
+    /// @return Timestamp in nanoseconds, or error status.
+    [[nodiscard]] StatusOr<Integer> GetTimestamp() const noexcept {
+      Integer timestamp = 0;
       if (const Status status =
               BarelyMusician_GetTaskTimestamp(handle_, id_, &timestamp);
           !status.IsOk()) {
@@ -1656,9 +1657,9 @@ class Musician {
 
     /// Sets timestamp.
     ///
-    /// @param timestamp Timestamp in seconds.
+    /// @param timestamp Timestamp in nanoseconds.
     /// @return Status.
-    Status SetTimestamp(Real timestamp) noexcept {
+    Status SetTimestamp(Integer timestamp) noexcept {
       return BarelyMusician_SetTaskTimestamp(handle_, id_, timestamp);
     }
 
@@ -1736,10 +1737,10 @@ class Musician {
   /// Creates new task at timestamp.
   ///
   /// @param definition Task definition.
-  /// @param timestamp Task timestamp in seconds.
+  /// @param timestamp Task timestamp in nanoseconds.
   /// @param user_data Pointer to user data.
   /// @return Task reference.
-  TaskReference CreateTask(TaskDefinition definition, Real timestamp,
+  TaskReference CreateTask(TaskDefinition definition, Integer timestamp,
                            void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
     [[maybe_unused]] const Status status = BarelyMusician_CreateTask(
@@ -1751,9 +1752,9 @@ class Musician {
   /// Creates new task with callback.
   ///
   /// @param callback Task callback.
-  /// @param timestamp Task timestamp in seconds.
+  /// @param timestamp Task timestamp in nanoseconds.
   /// @return Task reference.
-  TaskReference CreateTask(TaskCallback callback, Real timestamp) noexcept {
+  TaskReference CreateTask(TaskCallback callback, Integer timestamp) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) {
@@ -1791,9 +1792,9 @@ class Musician {
 
   /// Returns timestamp.
   ///
-  /// @return Timestamp in seconds.
-  [[nodiscard]] Real GetTimestamp() const noexcept {
-    Real timestamp = 0.0;
+  /// @return Timestamp in nanoseconds.
+  [[nodiscard]] Integer GetTimestamp() const noexcept {
+    Integer timestamp = 0;
     [[maybe_unused]] const Status status =
         BarelyMusician_GetTimestamp(handle_, &timestamp);
     assert(status.IsOk());
@@ -1810,9 +1811,9 @@ class Musician {
 
   /// Updates internal state at timestamp.
   ///
-  /// @param timestamp Timestamp in seconds.
+  /// @param timestamp Timestamp in nanoseconds.
   /// @return Status.
-  Status Update(Real timestamp) noexcept {
+  Status Update(Integer timestamp) noexcept {
     return BarelyMusician_Update(handle_, timestamp);
   }
 

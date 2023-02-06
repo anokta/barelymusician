@@ -127,6 +127,7 @@ class Performer {
   };
 
   // Returns an iterator to the next recurring task to process.
+  using TaskMap = std::map<std::pair<Real, Id>, std::unique_ptr<Task>>;
   [[nodiscard]] TaskMap::const_iterator GetNextRecurringTask() const noexcept;
 
   // Denotes whether performer is looping or not.

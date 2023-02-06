@@ -60,7 +60,7 @@ InstrumentDefinition GetTestDefinition() {
 
 // Tests that instrument returns control as expected.
 TEST(InstrumentTest, GetControl) {
-  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
 
   const auto control_or = instrument.GetControl(0);
   ASSERT_TRUE(control_or.IsOk());
@@ -92,7 +92,7 @@ TEST(InstrumentTest, GetControl) {
 TEST(InstrumentTest, GetNoteControl) {
   const Real kPitch = 1.0;
 
-  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   {
@@ -145,7 +145,7 @@ TEST(InstrumentTest, GetNoteControl) {
 // Tests that instrument plays a single note as expected.
 TEST(InstrumentTest, PlaySingleNote) {
   const Real kPitch = 32.0;
-  const Real kTimestamp = 20.0;
+  const Integer kTimestamp = 20'000'000;
 
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, kTimestamp);
   std::vector<Real> buffer(kChannelCount * kFrameCount);
@@ -186,12 +186,12 @@ TEST(InstrumentTest, PlaySingleNote) {
 
 // Tests that instrument plays multiple notes as expected.
 TEST(InstrumentTest, PlayMultipleNotes) {
-  Instrument instrument(GetTestDefinition(), 1, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), 1, kTempo, 0);
   std::vector<Real> buffer(kChannelCount * kFrameCount);
 
   // Control is set to default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
+  instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0);
   for (Integer frame = 0; frame < kFrameCount; ++frame) {
     for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
@@ -201,12 +201,12 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   // Start new note per each frame in the buffer.
   for (Integer i = 0; i < kFrameCount; ++i) {
     instrument.SetNoteOn(static_cast<Real>(i));
-    instrument.Update(static_cast<Real>(i + 1));
+    instrument.Update(1'000'000 * (i + 1));
     instrument.SetNoteOff(static_cast<Real>(i));
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0);
+  instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0);
   for (Integer frame = 0; frame < kFrameCount; ++frame) {
     for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
@@ -216,7 +216,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
   instrument.Process(buffer.data(), kChannelCount, kFrameCount,
-                     static_cast<Real>(kFrameCount));
+                     1'000'000 * kFrameCount);
   for (Integer frame = 0; frame < kFrameCount; ++frame) {
     for (Integer channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -228,7 +228,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 TEST(InstrumentTest, SetNoteCallbacks) {
   const Real kPitch = 4.0;
 
-  Instrument instrument(GetTestDefinition(), 1, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), 1, kTempo, 0);
 
   // Trigger note on callback.
   Real note_on_pitch = 0.0;
@@ -271,7 +271,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
 TEST(InstrumentTest, SetAllNotesOff) {
   const std::vector<Real> kPitches = {1.0, 2.0, 3.0};
 
-  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
+  Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0);
   for (const Real pitch : kPitches) {
     EXPECT_FALSE(instrument.IsNoteOn(pitch));
   }

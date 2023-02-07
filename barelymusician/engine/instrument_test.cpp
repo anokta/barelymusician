@@ -62,30 +62,48 @@ InstrumentDefinition GetTestDefinition() {
 TEST(InstrumentTest, GetControl) {
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
 
-  const auto control_or = instrument.GetControl(0);
-  ASSERT_TRUE(control_or.IsOk());
-  const auto& control = control_or->get();
-  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
+  {
+    const auto control_or = instrument.GetControl(0);
+    ASSERT_TRUE(control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*control_or, 15.0);
+  }
 
-  EXPECT_EQ(instrument.SetControl(0, 20.0, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
+  EXPECT_EQ(instrument.SetControl(0, 20.0, 0.0), Status::OkStatus());
+  {
+    const auto control_or = instrument.GetControl(0);
+    ASSERT_TRUE(control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*control_or, 20.0);
+  }
 
-  EXPECT_EQ(instrument.ResetControl(0), Status::kOk);
-  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
+  EXPECT_EQ(instrument.ResetControl(0), Status::OkStatus());
+  {
+    const auto control_or = instrument.GetControl(0);
+    ASSERT_TRUE(control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*control_or, 15.0);
+  }
 
-  EXPECT_EQ(instrument.SetControl(0, 50.0, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(control.GetValue(), 20.0);
+  EXPECT_EQ(instrument.SetControl(0, 50.0, 0.0), Status::OkStatus());
+  {
+    const auto control_or = instrument.GetControl(0);
+    ASSERT_TRUE(control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*control_or, 20.0);
+  }
 
   instrument.ResetAllControls();
-  EXPECT_DOUBLE_EQ(control.GetValue(), 15.0);
+  {
+    const auto control_or = instrument.GetControl(0);
+    ASSERT_TRUE(control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*control_or, 15.0);
+  }
 
   // Control does not exist.
   const auto invalid_control_or = instrument.GetControl(1);
   ASSERT_FALSE(invalid_control_or.IsOk());
-  EXPECT_EQ(invalid_control_or.GetErrorStatus(), Status::kInvalidArgument);
+  EXPECT_EQ(invalid_control_or.GetErrorStatus(),
+            Status::InvalidArgumentError());
 
-  EXPECT_EQ(instrument.SetControl(1, 2.0, 0.0), Status::kInvalidArgument);
-  EXPECT_EQ(instrument.ResetControl(1), Status::kInvalidArgument);
+  EXPECT_EQ(instrument.SetControl(1, 2.0, 0.0), Status::InvalidArgumentError());
+  EXPECT_EQ(instrument.ResetControl(1), Status::InvalidArgumentError());
 }
 
 // Tests that instrument returns note control as expected.
@@ -105,31 +123,52 @@ TEST(InstrumentTest, GetNoteControl) {
   instrument.SetNoteOn(kPitch);
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
-  const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
-  ASSERT_TRUE(note_control_or.IsOk());
-  const auto& note_control = note_control_or->get();
-  EXPECT_DOUBLE_EQ(note_control.GetValue(), 1.0);
+  {
+    const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
+    ASSERT_TRUE(note_control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*note_control_or, 1.0);
+  }
 
-  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, 0.25, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(note_control.GetValue(), 0.25);
+  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, 0.25, 0.0),
+            Status::OkStatus());
+  {
+    const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
+    ASSERT_TRUE(note_control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*note_control_or, 0.25);
+  }
 
-  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 0), Status::kOk);
-  EXPECT_DOUBLE_EQ(note_control.GetValue(), 1.0);
+  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 0), Status::OkStatus());
+  {
+    const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
+    ASSERT_TRUE(note_control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*note_control_or, 1.0);
+  }
 
-  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, -10.0, 0.0), Status::kOk);
-  EXPECT_DOUBLE_EQ(note_control.GetValue(), 0.0);
+  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, -10.0, 0.0),
+            Status::OkStatus());
+  {
+    const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
+    ASSERT_TRUE(note_control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*note_control_or, 0.0);
+  }
 
   instrument.ResetAllNoteControls(kPitch);
-  EXPECT_DOUBLE_EQ(note_control.GetValue(), 1.0);
+  {
+    const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
+    ASSERT_TRUE(note_control_or.IsOk());
+    EXPECT_DOUBLE_EQ(*note_control_or, 1.0);
+  }
 
   // Note control does not exist.
   const auto invalid_note_control_or = instrument.GetNoteControl(kPitch, 1);
   ASSERT_FALSE(invalid_note_control_or.IsOk());
-  EXPECT_EQ(invalid_note_control_or.GetErrorStatus(), Status::kInvalidArgument);
+  EXPECT_EQ(invalid_note_control_or.GetErrorStatus(),
+            Status::InvalidArgumentError());
 
   EXPECT_EQ(instrument.SetNoteControl(kPitch, 1, 0.25, 0.0),
-            Status::kInvalidArgument);
-  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 1), Status::kInvalidArgument);
+            Status::InvalidArgumentError());
+  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 1),
+            Status::InvalidArgumentError());
 
   instrument.SetNoteOff(kPitch);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));

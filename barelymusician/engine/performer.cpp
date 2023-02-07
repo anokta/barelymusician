@@ -61,7 +61,7 @@ std::optional<double> Performer::GetDurationToNextTask() const noexcept {
 }
 
 Status Performer::DestroyTask(Id task_id) noexcept {
-  if (task_id == kInvalid) return Status::kInvalidArgument;
+  if (task_id == kInvalid) return Status::InvalidArgumentError();
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     const auto success =
         (it->second.type == TaskType::kOneOff ? one_off_tasks_
@@ -69,9 +69,9 @@ Status Performer::DestroyTask(Id task_id) noexcept {
             .erase(std::pair{it->second.position, task_id}) == 1;
     assert(success);
     infos_.erase(it);
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 double Performer::GetLoopBeginPosition() const noexcept {
@@ -83,11 +83,11 @@ double Performer::GetLoopLength() const noexcept { return loop_length_; }
 double Performer::GetPosition() const noexcept { return position_; }
 
 StatusOr<double> Performer::GetTaskPosition(Id task_id) const noexcept {
-  if (task_id == kInvalid) return Status::kInvalidArgument;
+  if (task_id == kInvalid) return Status::InvalidArgumentError();
   if (const auto* info = FindOrNull(infos_, task_id)) {
     return info->position;
   }
-  return {Status::kNotFound};
+  return Status::NotFoundError();
 }
 
 bool Performer::IsLooping() const noexcept { return is_looping_; }
@@ -178,12 +178,12 @@ void Performer::SetPosition(double position) noexcept {
 }
 
 Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
-  if (task_id == kInvalid) return Status::kInvalidArgument;
+  if (task_id == kInvalid) return Status::InvalidArgumentError();
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     auto& [current_position, type] = it->second;
     if (type == TaskType::kOneOff && position < position_) {
       // Position is in the past.
-      return Status::kInvalidArgument;
+      return Status::InvalidArgumentError();
     }
     if (current_position != position) {
       auto& tasks =
@@ -193,9 +193,9 @@ Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
       tasks.insert(std::move(node));
       current_position = position;
     }
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 void Performer::Start() noexcept {

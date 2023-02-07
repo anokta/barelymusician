@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <iostream>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -66,24 +67,23 @@ Instrument::~Instrument() noexcept {
   }
 }
 
-StatusOr<std::reference_wrapper<const Control>> Instrument::GetControl(
-    int index) const noexcept {
+StatusOr<double> Instrument::GetControl(int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    return {controls_[index]};
+    return controls_[index].GetValue();
   }
-  return {Status::kInvalidArgument};
+  return Status::InvalidArgumentError();
 }
 
-StatusOr<std::reference_wrapper<const Control>> Instrument::GetNoteControl(
-    double pitch, int index) const noexcept {
+StatusOr<double> Instrument::GetNoteControl(double pitch,
+                                            int index) const noexcept {
   assert(index >= 0);
   if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
     if (index >= 0 && index < static_cast<int>(note_controls->size())) {
-      return {(*note_controls)[index]};
+      return (*note_controls)[index].GetValue();
     }
-    return {Status::kInvalidArgument};
+    return Status::InvalidArgumentError();
   }
-  return {Status::kNotFound};
+  return Status::NotFoundError();
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
@@ -182,9 +182,9 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
       }
     }
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 Status Instrument::ResetControl(int index) noexcept {
@@ -196,9 +196,9 @@ Status Instrument::ResetControl(int index) noexcept {
       message_queue_.Add(timestamp_,
                          ControlMessage{index, control.GetValue(), 0.0});
     }
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kInvalidArgument;
+  return Status::InvalidArgumentError();
 }
 
 Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
@@ -213,11 +213,11 @@ Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
             timestamp_,
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
       }
-      return Status::kOk;
+      return Status::OkStatus();
     }
-    return Status::kInvalidArgument;
+    return Status::InvalidArgumentError();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -241,9 +241,9 @@ Status Instrument::SetControl(int index, double value,
                          ControlMessage{index, control.GetValue(),
                                         GetSlopePerFrame(slope_per_beat)});
     }
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kInvalidArgument;
+  return Status::InvalidArgumentError();
 }
 
 void Instrument::SetControlEventCallback(
@@ -270,11 +270,11 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
             NoteControlMessage{pitch, index, note_control.GetValue(),
                                GetSlopePerFrame(slope_per_beat)});
       }
-      return Status::kOk;
+      return Status::OkStatus();
     }
-    return Status::kInvalidArgument;
+    return Status::InvalidArgumentError();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 void Instrument::SetNoteControlEventCallback(

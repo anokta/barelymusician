@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
 #include <cstddef>
-#include <functional>
 #include <unordered_map>
 #include <vector>
 
@@ -50,20 +49,19 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Returns control.
+  /// Returns control value.
   ///
   /// @param index Control index.
-  /// @return Reference to control or error status.
-  [[nodiscard]] StatusOr<std::reference_wrapper<const Control>> GetControl(
-      int index) const noexcept;
+  /// @return Control value or error status.
+  [[nodiscard]] StatusOr<double> GetControl(int index) const noexcept;
 
-  /// Returns note control.
+  /// Returns note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Control index.
-  /// @return Reference to note control or error status.
-  [[nodiscard]] StatusOr<std::reference_wrapper<const Control>> GetNoteControl(
-      double pitch, int index) const noexcept;
+  /// @return Note control value or error status.
+  [[nodiscard]] StatusOr<double> GetNoteControl(double pitch,
+                                                int index) const noexcept;
 
   /// Returns whether note is active or not.
   ///

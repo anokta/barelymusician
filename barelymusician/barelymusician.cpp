@@ -63,7 +63,7 @@ BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
   if (instrument_or.IsOk()) {
     const auto control_or = instrument_or->get().GetControl(index);
     if (control_or.IsOk()) {
-      *out_value = control_or->get().GetValue();
+      *out_value = *control_or;
       return BarelyStatus_kOk;
     }
     return control_or.GetErrorStatus();
@@ -83,7 +83,7 @@ BarelyStatus BarelyInstrument_GetNoteControl(BarelyMusicianHandle handle,
     const auto note_control_or =
         instrument_or->get().GetNoteControl(pitch, index);
     if (note_control_or.IsOk()) {
-      *out_value = note_control_or->get().GetValue();
+      *out_value = *note_control_or;
       return BarelyStatus_kOk;
     }
     return note_control_or.GetErrorStatus();

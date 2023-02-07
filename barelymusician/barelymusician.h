@@ -704,6 +704,35 @@ class Status {
     kInternal = BarelyStatus_kInternal,
   };
 
+  /// Returns new `Status` with `Status::kOk`.
+  ///
+  /// @return Status.
+  static Status OkStatus() noexcept { return Status(Status::kOk); }
+
+  /// Returns new `Status` with `Status::kInvalidArgument`.
+  ///
+  /// @return Status.
+  static Status InvalidArgumentError() noexcept {
+    return Status(Status::kInvalidArgument);
+  }
+
+  /// Returns new `Status` with `Status::kNotFound`.
+  ///
+  /// @return Status.
+  static Status NotFoundError() noexcept { return Status(Status::kNotFound); }
+
+  /// Returns new `Status` with `Status::kUnimplemented`.
+  ///
+  /// @return Status.
+  static Status UnimplementedError() noexcept {
+    return Status(Status::kUnimplemented);
+  }
+
+  /// Returns new `Status` with `Status::kInternal`.
+  ///
+  /// @return Status.
+  static Status InternalError() noexcept { return Status(Status::kInternal); }
+
   /// Constructs new `Status`.
   ///
   /// @param status Status enum.

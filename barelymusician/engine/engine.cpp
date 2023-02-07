@@ -24,7 +24,7 @@ Engine::~Engine() noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
                                       int frame_rate) noexcept {
-  if (frame_rate < 0) return {Status::kInvalidArgument};
+  if (frame_rate < 0) return Status::InvalidArgumentError();
   const Id instrument_id = GenerateNextId();
   const auto [it, success] = instruments_.emplace(
       instrument_id,
@@ -51,8 +51,8 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
                                          TaskDefinition definition,
                                          double position, TaskType type,
                                          void* user_data) noexcept {
-  if (performer_id == kInvalid) return {Status::kInvalidArgument};
-  if (position < 0.0) return {Status::kInvalidArgument};
+  if (performer_id == kInvalid) return Status::InvalidArgumentError();
+  if (position < 0.0) return Status::InvalidArgumentError();
   auto performer_or = GetPerformer(performer_id);
   if (performer_or.IsOk()) {
     const Id task_id = GenerateNextId();
@@ -65,48 +65,48 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Status Engine::DestroyInstrument(Id instrument_id) noexcept {
-  if (instrument_id == kInvalid) return Status::kInvalidArgument;
+  if (instrument_id == kInvalid) return Status::InvalidArgumentError();
   if (const auto it = instruments_.find(instrument_id);
       it != instruments_.end()) {
     auto instrument = std::move(it->second);
     instrument->SetAllNotesOff();
     instruments_.erase(it);
     UpdateInstrumentReferenceMap();
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Status Engine::DestroyPerformer(Id performer_id) noexcept {
-  if (performer_id == kInvalid) return Status::kInvalidArgument;
+  if (performer_id == kInvalid) return Status::InvalidArgumentError();
   if (const auto it = performer_refs_.find(performer_id);
       it != performer_refs_.end()) {
     [[maybe_unused]] const bool success =
         performers_.erase(std::pair{it->second.first, performer_id}) > 0;
     assert(success);
     performer_refs_.erase(it);
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 StatusOr<std::reference_wrapper<Instrument>> Engine::GetInstrument(
     Id instrument_id) noexcept {
-  if (instrument_id == kInvalid) return {Status::kInvalidArgument};
+  if (instrument_id == kInvalid) return Status::InvalidArgumentError();
   if (auto* instrument = FindOrNull(instruments_, instrument_id)) {
     return std::ref(*(*instrument));
   }
-  return {Status::kNotFound};
+  return Status::NotFoundError();
 }
 
 StatusOr<std::reference_wrapper<Performer>> Engine::GetPerformer(
     [[maybe_unused]] Id performer_id) noexcept {
-  if (performer_id == kInvalid) return {Status::kInvalidArgument};
+  if (performer_id == kInvalid) return Status::InvalidArgumentError();
   if (auto* performer_ref = FindOrNull(performer_refs_, performer_id)) {
     return performer_ref->second;
   }
-  return {Status::kNotFound};
+  return Status::NotFoundError();
 }
 
 double Engine::GetTempo() const noexcept { return tempo_; }
@@ -117,10 +117,10 @@ Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
                                  int output_channel_count,
                                  int output_frame_count,
                                  double timestamp) noexcept {
-  if (instrument_id == kInvalid) return Status::kInvalidArgument;
+  if (instrument_id == kInvalid) return Status::InvalidArgumentError();
   if ((!output_samples && output_channel_count > 0 && output_frame_count) ||
       output_channel_count < 0 || output_frame_count < 0 || timestamp < 0.0) {
-    return Status::kInvalidArgument;
+    return Status::InvalidArgumentError();
   }
   auto instrument_refs = instrument_refs_.GetScopedView();
   if (const auto* instrument_ref =
@@ -129,9 +129,9 @@ Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
     (*instrument_ref)
         ->Process(output_samples, output_channel_count, output_frame_count,
                   timestamp);
-    return Status::kOk;
+    return Status::OkStatus();
   }
-  return Status::kNotFound;
+  return Status::NotFoundError();
 }
 
 void Engine::SetTempo(double tempo) noexcept {

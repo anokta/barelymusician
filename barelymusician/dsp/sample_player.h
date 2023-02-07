@@ -10,8 +10,8 @@ class SamplePlayer : public Generator {
  public:
   /// Construct new `SamplePlayer` with the given sample data.
   ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit SamplePlayer(int sample_rate) noexcept;
+  /// @param frame_rate Frame rate in hertz.
+  explicit SamplePlayer(int frame_rate) noexcept;
 
   /// Implements `Generator`.
   double Next() noexcept override;
@@ -38,13 +38,13 @@ class SamplePlayer : public Generator {
   // Calculates per sample increment amount with the current properties.
   void CalculateIncrementPerSample() noexcept;
 
-  // Inverse sampling rate in seconds.
-  double sample_interval_ = 0.0;
+  // Inverse frame rate in seconds.
+  double frame_interval_ = 0.0;
 
   // Sample data.
   const double* data_ = nullptr;
 
-  // Sample data sampling rate in hertz.
+  // Sample data frame rate in hertz.
   double frequency_ = 0.0;
 
   // Sample data length in samples.

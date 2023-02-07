@@ -54,14 +54,24 @@ constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
 
 constexpr double kTempo = 132.0;
 
-// Returns the pitch for the given `midi_key_number`.
-double PitchFromMidiKeyNumber(int midi_key_number) {
-  return static_cast<double>(midi_key_number - 69) / barely::kSemitoneCount;
+// Returns the intensity for a given `midi_velocity`.
+double IntensityFromMidiVelocity(int midi_velocity) {
+  return static_cast<double>(midi_velocity) / kMaxVelocity;
 }
 
-// Returns the MIDI key number for the given `pitch`.
+// Returns the MIDI key number for a given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
   return static_cast<int>(barely::kSemitoneCount * pitch) + 69;
+}
+
+// Returns the MIDI velocity for a given `intensity`.
+int MidiVelocityFromIntensity(double intensity) {
+  return static_cast<int>(kMaxVelocity * intensity);
+}
+
+// Returns the pitch for a given `midi_key_number`.
+double PitchFromMidiKeyNumber(int midi_key_number) {
+  return static_cast<double>(midi_key_number - 69) / barely::kSemitoneCount;
 }
 
 // Builds the score for the given `midi_events`.
@@ -78,7 +88,7 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double duration = get_position_fn(midi_event.getTickDuration());
       const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       const double intensity =
-          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
+          IntensityFromMidiVelocity(midi_event.getVelocity());
       performer.CreateTask(
           [&instrument, pitch, intensity]() {
             instrument.SetNoteOn(pitch, intensity);
@@ -137,14 +147,16 @@ int main(int /*argc*/, char* argv[]) {
     const auto track_index = tracks.size();
     instrument.SetNoteOnEventCallback(
         [track_index](double pitch, double intensity) {
-          ConsoleLog() << "MIDI track #" << track_index << ": NoteOn("
-                       << MidiKeyNumberFromPitch(pitch) << ", "
-                       << std::setprecision(2) << intensity << ")";
+          ConsoleLog() << "MIDI track #" << track_index
+                       << ": NoteOn(key: " << MidiKeyNumberFromPitch(pitch)
+                       << ", velocity: " << MidiVelocityFromIntensity(intensity)
+                       << ")";
         });
     instrument.SetNoteOffEventCallback([track_index](double pitch) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
-                   << MidiKeyNumberFromPitch(pitch) << ") ";
+      ConsoleLog() << "MIDI track #" << track_index
+                   << ": NoteOff(key: " << MidiKeyNumberFromPitch(pitch) << ")";
     });
+    instrument.SetControl(SynthControl::kGain, kInstrumentGain);
     instrument.SetControl(SynthControl::kOscillatorType,
                           kInstrumentOscillatorType);
     instrument.SetControl(SynthControl::kAttack, kInstrumentEnvelopeAttack);
@@ -162,7 +174,7 @@ int main(int /*argc*/, char* argv[]) {
                          clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
                      [](double sample, double output_sample) {
-                       return kInstrumentGain * sample + output_sample;
+                       return sample + output_sample;
                      });
     }
     clock.Update(kFrameCount);

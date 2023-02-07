@@ -7,16 +7,19 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/dsp/enveloped_voice.h"
+#include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/instruments/enveloped_voice.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
 namespace barely {
 
 /// Percussion control.
 enum class PercussionControl : int {
+  /// Gain.
+  kGain = 0,
   /// Pad envelope release.
-  kRelease = 0,
+  kRelease = 1,
 };
 
 /// Simple percussion instrument.
@@ -48,6 +51,7 @@ class PercussionInstrument : public GenericInstrument {
     EnvelopedVoice<SamplePlayer> voice;
   };
   std::array<Pad, kPadCount> pads_;
+  GainProcessor gain_processor_;
 };
 
 }  // namespace barely

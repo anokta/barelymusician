@@ -30,7 +30,6 @@ cc_binary(
     deps = [
         "//barelymusician",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/dsp:gain_processor",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_output",
         "//examples/common:console_log",
@@ -44,7 +43,6 @@ cc_binary(
     deps = [
         "//barelymusician",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/dsp:gain_processor",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
@@ -78,7 +76,6 @@ cc_binary(
     deps = [
         "//barelymusician",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/dsp:gain_processor",
         "//barelymusician/instruments:sampler_instrument",
         "//examples/common:audio_output",
         "//examples/common:console_log",
@@ -94,7 +91,6 @@ cc_binary(
     deps = [
         "//barelymusician",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/dsp:gain_processor",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
@@ -109,7 +105,6 @@ cc_binary(
     deps = [
         "//barelymusician",
         "//barelymusician/composition:note_pitch",
-        "//barelymusician/dsp:gain_processor",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",

@@ -5,8 +5,8 @@
 namespace barely {
 namespace {
 
-// Sampling rate.
-constexpr int kSampleRate = 1000;
+// Frame rate.
+constexpr int kFrameRate = 1000;
 
 // Envelope ADSR.
 constexpr double kAttack = 0.02;
@@ -20,7 +20,7 @@ constexpr double kEpsilon = 1e-3;
 // Tests that the envelope generates the expected output samples when
 // initialized with the default constructor.
 TEST(EnvelopeTest, ProcessDefault) {
-  Envelope envelope(kSampleRate);
+  Envelope envelope(kFrameRate);
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
   envelope.Start();
@@ -33,12 +33,12 @@ TEST(EnvelopeTest, ProcessDefault) {
 // Tests that the envelope generates the expected output samples consistently
 // over multiple samples.
 TEST(EnvelopeTest, ProcessMultiSamples) {
-  const int kAttackSampleCount = static_cast<int>(kSampleRate * kAttack);
-  const int kDecaySampleCount = static_cast<int>(kSampleRate * kDecay);
+  const int kAttackSampleCount = static_cast<int>(kFrameRate * kAttack);
+  const int kDecaySampleCount = static_cast<int>(kFrameRate * kDecay);
   const int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
-  const int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
+  const int kReleaseSampleCount = static_cast<int>(kFrameRate * kRelease);
 
-  Envelope envelope(kSampleRate);
+  Envelope envelope(kFrameRate);
   envelope.SetAttack(kAttack);
   envelope.SetDecay(kDecay);
   envelope.SetSustain(kSustain);
@@ -48,7 +48,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   double expected_sample = 0.0;
 
   envelope.Start();
-  for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
+  for (int i = 0; i < kSustainSampleCount + kFrameRate; ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
       expected_sample =
@@ -66,7 +66,7 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   }
 
   envelope.Stop();
-  for (int i = 0; i < kReleaseSampleCount + kSampleRate; ++i) {
+  for (int i = 0; i < kReleaseSampleCount + kFrameRate; ++i) {
     if (i < kReleaseSampleCount) {
       // Release.
       expected_sample = (1.0 - static_cast<double>(i) /

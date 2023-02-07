@@ -4,12 +4,13 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/instruments/enveloped_voice.h"
+#include "barelymusician/dsp/enveloped_voice.h"
 
 namespace barely {
 
-SamplerInstrument::SamplerInstrument(int sample_rate) noexcept
-    : voice_(SamplerVoice(sample_rate)), sample_rate_(sample_rate) {}
+SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
+    : voice_(SamplerVoice(frame_rate)), frame_rate_(frame_rate),
+      gain_processor_(frame_rate)  {}
 
 void SamplerInstrument::Process(double* output_samples, int channel_count,
                                 int frame_count) noexcept {
@@ -19,12 +20,16 @@ void SamplerInstrument::Process(double* output_samples, int channel_count,
       output_samples[channel_count * frame + channel] = mono_sample;
     }
   }
+  gain_processor_.Process(output_samples, channel_count, frame_count);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void SamplerInstrument::SetControl(int index, double value,
                                    double /*slope*/) noexcept {
   switch (static_cast<SamplerControl>(index)) {
+    case SamplerControl::kGain:
+      gain_processor_.SetGain(value);
+      break;
     case SamplerControl::kRootPitch:
       root_pitch_ = value;
       break;
@@ -60,11 +65,11 @@ void SamplerInstrument::SetControl(int index, double value,
 }
 
 void SamplerInstrument::SetData(const void* data, int size) noexcept {
-  voice_.Update([sample_rate = sample_rate_, data,
-                 size](SamplerVoice* voice) noexcept {
-    voice->generator().SetData(static_cast<const double*>(data), sample_rate,
-                               size / static_cast<int>(sizeof(double)));
-  });
+  voice_.Update(
+      [frame_rate = frame_rate_, data, size](SamplerVoice* voice) noexcept {
+        voice->generator().SetData(static_cast<const double*>(data), frame_rate,
+                                   size / static_cast<int>(sizeof(double)));
+      });
 }
 
 void SamplerInstrument::SetNoteOff(double pitch) noexcept {
@@ -81,6 +86,8 @@ void SamplerInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 
 InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
       // Root pitch.
       ControlDefinition{0.0},
       // Sample player loop.

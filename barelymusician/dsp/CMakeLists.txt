@@ -15,6 +15,16 @@ target_link_libraries(
 )
 
 add_library(
+  enveloped_voice INTERFACE
+  enveloped_voice.h
+)
+target_link_libraries(
+  enveloped_voice INTERFACE
+  envelope
+  voice
+)
+
+add_library(
   filter INTERFACE
   filter.h
 )

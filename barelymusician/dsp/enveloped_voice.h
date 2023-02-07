@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_
-#define BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_
+#ifndef BARELYMUSICIAN_DSP_ENVELOPED_VOICE_H_
+#define BARELYMUSICIAN_DSP_ENVELOPED_VOICE_H_
 
 #include "barelymusician/dsp/envelope.h"
 #include "barelymusician/dsp/voice.h"
@@ -10,10 +10,10 @@ namespace barely {
 template <class GeneratorType>
 class EnvelopedVoice : public Voice {
  public:
-  /// Constructs new `EnvelopedVoice` with the given `sample_rate`.
+  /// Constructs new `EnvelopedVoice` with the given `frame_rate`.
   ///
-  /// @param sample_rate Sampling rate in hertz.
-  explicit EnvelopedVoice(int sample_rate) noexcept;
+  /// @param frame_rate Frame rate in hertz.
+  explicit EnvelopedVoice(int frame_rate) noexcept;
 
   /// Implements `Voice`.
   [[nodiscard]] bool IsActive() const noexcept override;
@@ -48,8 +48,8 @@ class EnvelopedVoice : public Voice {
 };
 
 template <class GeneratorType>
-EnvelopedVoice<GeneratorType>::EnvelopedVoice(int sample_rate) noexcept
-    : envelope_(sample_rate), generator_(sample_rate) {}
+EnvelopedVoice<GeneratorType>::EnvelopedVoice(int frame_rate) noexcept
+    : envelope_(frame_rate), generator_(frame_rate) {}
 
 template <class GeneratorType>
 double EnvelopedVoice<GeneratorType>::Next(int channel) noexcept {
@@ -77,4 +77,4 @@ void EnvelopedVoice<GeneratorType>::Stop() noexcept {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_INSTRUMENTS_ENVELOPED_VOICE_H_
+#endif  // BARELYMUSICIAN_DSP_ENVELOPED_VOICE_H_

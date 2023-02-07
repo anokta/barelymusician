@@ -2,34 +2,37 @@
 #define BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/dsp/enveloped_voice.h"
+#include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
-#include "barelymusician/instruments/enveloped_voice.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
 namespace barely {
 
 /// Synth control.
 enum class SynthControl : int {
+  /// Gain.
+  kGain = 0,
   /// Oscillator type.
-  kOscillatorType = 0,
+  kOscillatorType = 1,
   /// Envelope attack.
-  kAttack = 1,
+  kAttack = 2,
   /// Envelope decay.
-  kDecay = 2,
+  kDecay = 3,
   /// Envelope sustain.
-  kSustain = 3,
+  kSustain = 4,
   /// Envelope release.
-  kRelease = 4,
+  kRelease = 5,
   /// Number of voices
-  kVoiceCount = 5,
+  kVoiceCount = 6,
 };
 
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public GenericInstrument {
  public:
   /// Constructs new `SynthInstrument`.
-  explicit SynthInstrument(int sample_rate) noexcept;
+  explicit SynthInstrument(int frame_rate) noexcept;
 
   /// Implements `GenericInstrument`.
   void Process(double* output_samples, int channel_count,
@@ -49,6 +52,7 @@ class SynthInstrument : public GenericInstrument {
  private:
   using SynthVoice = EnvelopedVoice<Oscillator>;
   PolyphonicVoice<SynthVoice> voice_;
+  GainProcessor gain_processor_;
 };
 
 }  // namespace barely

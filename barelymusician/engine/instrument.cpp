@@ -265,7 +265,6 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
         if (note_control_event_callback_) {
           note_control_event_callback_(pitch, index, note_control.GetValue());
         }
-        // TODO: convert
         message_queue_.Add(
             timestamp_,
             NoteControlMessage{pitch, index, note_control.GetValue(),
@@ -304,6 +303,13 @@ void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
       note_on_event_callback_(pitch, intensity);
     }
     message_queue_.Add(timestamp_, NoteOnMessage{pitch, intensity});
+    for (int index = 0; index < static_cast<int>(default_note_controls_.size());
+         ++index) {
+      message_queue_.Add(
+          timestamp_,
+          NoteControlMessage{pitch, index,
+                             default_note_controls_[index].GetValue()});
+    }
   }
 }
 

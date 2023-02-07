@@ -9,7 +9,9 @@ namespace barely::examples {
 class AudioClock {
  public:
   /// Constructs new `AudioClock`.
-  explicit AudioClock(int sample_rate) noexcept;
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  explicit AudioClock(int frame_rate) noexcept;
 
   /// Returns the timestamp.
   ///

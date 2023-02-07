@@ -10,8 +10,8 @@
 namespace barely {
 
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
-    : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),
-            Pad(frame_rate)} {}
+    : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate), Pad(frame_rate)},
+      gain_processor_(frame_rate) {}
 
 void PercussionInstrument::Process(double* output_samples, int channel_count,
                                    int frame_count) noexcept {
@@ -24,14 +24,18 @@ void PercussionInstrument::Process(double* output_samples, int channel_count,
       output_samples[channel_count * frame + channel] = mono_sample;
     }
   }
+  gain_processor_.Process(output_samples, channel_count, frame_count);
 }
 
 void PercussionInstrument::SetControl(int index, double value,
                                       double /*slope_per_frame*/) noexcept {
   switch (static_cast<PercussionControl>(index)) {
+    case PercussionControl::kGain:
+      gain_processor_.SetGain(value);
+      break;
     case PercussionControl::kRelease:
       for (auto& pad : pads_) {
-        pad.voice.envelope().SetRelease(static_cast<double>(value));
+        pad.voice.envelope().SetRelease(value);
       }
       break;
   }
@@ -79,6 +83,8 @@ void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 
 InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
       // Pad release.
       ControlDefinition{0.1, 0.0, 60.0},
   };

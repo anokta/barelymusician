@@ -1,14 +1,4 @@
 add_library(
-  enveloped_voice INTERFACE
-  enveloped_voice.h
-)
-target_link_libraries(
-  enveloped_voice INTERFACE
-  envelope
-  voice
-)
-
-add_library(
   generic_instrument INTERFACE
   generic_instrument.h
 )
@@ -24,9 +14,10 @@ add_library(
 )
 target_link_libraries(
   percussion_instrument
-  enveloped_voice
   generic_instrument
   barelymusician
+  enveloped_voice
+  gain_processor
   sample_player
 )
 
@@ -37,9 +28,10 @@ add_library(
 )
 target_link_libraries(
   sampler_instrument
-  enveloped_voice
   generic_instrument
   barelymusician
+  enveloped_voice
+  gain_processor
   polyphonic_voice
   sample_player
 )
@@ -51,10 +43,11 @@ add_library(
 )
 target_link_libraries(
   synth_instrument
-  enveloped_voice
   generic_instrument
   barelymusician
   dsp_utils
+  enveloped_voice
+  gain_processor
   oscillator
   polyphonic_voice
 )

@@ -12,7 +12,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/note_pitch.h"
-#include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -21,7 +20,6 @@
 
 namespace {
 
-using ::barely::GainProcessor;
 using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
@@ -70,15 +68,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Instrument instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  instrument.SetControl(SynthControl::kGain, kGain);
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetNoteOnEventCallback([](double pitch, double /*intensity*/) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });
-
-  GainProcessor gain(kFrameRate);
-  gain.SetGain(kGain);
 
   std::vector<std::tuple<double, double, double>> notes;
   std::vector<std::pair<double, double>> triggers;
@@ -128,7 +124,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto process_callback = [&](double* output) {
     instrument.Process(output, kChannelCount, kFrameCount,
                        audio_clock.GetTimestamp());
-    gain.Process(output, kChannelCount, kFrameCount);
     audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);

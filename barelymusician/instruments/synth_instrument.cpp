@@ -4,13 +4,13 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/enveloped_voice.h"
 
 namespace barely {
 
-SynthInstrument::SynthInstrument(int sample_rate) noexcept
-    : voice_(SynthVoice(sample_rate)) {}
+SynthInstrument::SynthInstrument(int frame_rate) noexcept
+    : voice_(SynthVoice(frame_rate)), gain_processor_(frame_rate) {}
 
 void SynthInstrument::Process(double* output_samples, int channel_count,
                               int frame_count) noexcept {
@@ -20,12 +20,16 @@ void SynthInstrument::Process(double* output_samples, int channel_count,
       output_samples[channel_count * frame + channel] = mono_sample;
     }
   }
+  gain_processor_.Process(output_samples, channel_count, frame_count);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void SynthInstrument::SetControl(int index, double value,
                                  double /*slope_per_frame*/) noexcept {
   switch (static_cast<SynthControl>(index)) {
+    case SynthControl::kGain:
+      gain_processor_.SetGain(value);
+      break;
     case SynthControl::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
@@ -69,6 +73,8 @@ void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
 
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
       // Oscillator type.
       ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
                         static_cast<double>(OscillatorType::kNoise)},

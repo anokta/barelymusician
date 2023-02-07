@@ -712,7 +712,7 @@ class Status {
   /// Returns new `Status` with `Status::kOk`.
   ///
   /// @return Status.
-  static Status OkStatus() noexcept { return Status(Status::kOk); }
+  static Status Ok() noexcept { return Status(Status::kOk); }
 
   /// Returns new `Status` with `Status::kInvalidArgument`.
   ///

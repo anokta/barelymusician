@@ -48,7 +48,7 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
                               definition.control_definition_count)),
       tempo_(initial_tempo),
       timestamp_(initial_timestamp) {
-  assert(frame_rate >= 0);
+  assert(frame_rate > 0);
   assert(initial_tempo > 0.0);
   assert(initial_tempo > 0.0);
   if (definition.create_callback) {
@@ -183,7 +183,7 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
       }
     }
-    return Status::OkStatus();
+    return Status::Ok();
   }
   return Status::NotFoundError();
 }
@@ -197,7 +197,7 @@ Status Instrument::ResetControl(int index) noexcept {
       message_queue_.Add(timestamp_,
                          ControlMessage{index, control.GetValue(), 0.0});
     }
-    return Status::OkStatus();
+    return Status::Ok();
   }
   return Status::InvalidArgumentError();
 }
@@ -214,7 +214,7 @@ Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
             timestamp_,
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
       }
-      return Status::OkStatus();
+      return Status::Ok();
     }
     return Status::InvalidArgumentError();
   }
@@ -242,7 +242,7 @@ Status Instrument::SetControl(int index, double value,
                          ControlMessage{index, control.GetValue(),
                                         GetSlopePerFrame(slope_per_beat)});
     }
-    return Status::OkStatus();
+    return Status::Ok();
   }
   return Status::InvalidArgumentError();
 }
@@ -270,7 +270,7 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
             NoteControlMessage{pitch, index, note_control.GetValue(),
                                GetSlopePerFrame(slope_per_beat)});
       }
-      return Status::OkStatus();
+      return Status::Ok();
     }
     return Status::InvalidArgumentError();
   }

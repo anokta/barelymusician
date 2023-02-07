@@ -9,8 +9,9 @@
 namespace barely {
 
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
-    : voice_(SamplerVoice(frame_rate)), frame_rate_(frame_rate),
-      gain_processor_(frame_rate)  {}
+    : voice_(SamplerVoice(frame_rate)),
+      frame_rate_(frame_rate),
+      gain_processor_(frame_rate) {}
 
 void SamplerInstrument::Process(double* output_samples, int channel_count,
                                 int frame_count) noexcept {

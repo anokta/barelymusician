@@ -65,21 +65,21 @@ TEST(InstrumentTest, GetControl) {
     EXPECT_DOUBLE_EQ(*control_or, 15.0);
   }
 
-  EXPECT_EQ(instrument.SetControl(0, 20.0, 0.0), Status::OkStatus());
+  EXPECT_EQ(instrument.SetControl(0, 20.0, 0.0), Status::Ok());
   {
     const auto control_or = instrument.GetControl(0);
     ASSERT_TRUE(control_or.IsOk());
     EXPECT_DOUBLE_EQ(*control_or, 20.0);
   }
 
-  EXPECT_EQ(instrument.ResetControl(0), Status::OkStatus());
+  EXPECT_EQ(instrument.ResetControl(0), Status::Ok());
   {
     const auto control_or = instrument.GetControl(0);
     ASSERT_TRUE(control_or.IsOk());
     EXPECT_DOUBLE_EQ(*control_or, 15.0);
   }
 
-  EXPECT_EQ(instrument.SetControl(0, 50.0, 0.0), Status::OkStatus());
+  EXPECT_EQ(instrument.SetControl(0, 50.0, 0.0), Status::Ok());
   {
     const auto control_or = instrument.GetControl(0);
     ASSERT_TRUE(control_or.IsOk());
@@ -127,23 +127,21 @@ TEST(InstrumentTest, GetNoteControl) {
     EXPECT_DOUBLE_EQ(*note_control_or, 1.0);
   }
 
-  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, 0.25, 0.0),
-            Status::OkStatus());
+  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, 0.25, 0.0), Status::Ok());
   {
     const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
     ASSERT_TRUE(note_control_or.IsOk());
     EXPECT_DOUBLE_EQ(*note_control_or, 0.25);
   }
 
-  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 0), Status::OkStatus());
+  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 0), Status::Ok());
   {
     const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
     ASSERT_TRUE(note_control_or.IsOk());
     EXPECT_DOUBLE_EQ(*note_control_or, 1.0);
   }
 
-  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, -10.0, 0.0),
-            Status::OkStatus());
+  EXPECT_EQ(instrument.SetNoteControl(kPitch, 0, -10.0, 0.0), Status::Ok());
   {
     const auto note_control_or = instrument.GetNoteControl(kPitch, 0);
     ASSERT_TRUE(note_control_or.IsOk());

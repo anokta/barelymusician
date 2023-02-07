@@ -70,7 +70,7 @@ Status Performer::DestroyTask(Id task_id) noexcept {
             .erase(std::pair{it->second.position, task_id}) == 1;
     assert(success);
     infos_.erase(it);
-    return Status::OkStatus();
+    return Status::Ok();
   }
   return Status::NotFoundError();
 }
@@ -194,7 +194,7 @@ Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
       tasks.insert(std::move(node));
       current_position = position;
     }
-    return Status::OkStatus();
+    return Status::Ok();
   }
   return Status::NotFoundError();
 }

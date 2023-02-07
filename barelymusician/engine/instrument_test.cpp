@@ -44,11 +44,8 @@ InstrumentDefinition GetTestDefinition() {
             static_cast<double>(index + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int /*size*/) {},
-      [](void** state, double pitch, int index, double value,
-         double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) =
-            pitch * static_cast<double>(index + 1) * value;
-      },
+      [](void** /*state*/, double /*pitch*/, int /*index*/, double /*value*/,
+         double /*slope_per_frame*/) {},
       [](void** state, double /*pitch*/) {
         *reinterpret_cast<double*>(*state) = 0.0;
       },

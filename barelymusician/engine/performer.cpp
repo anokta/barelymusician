@@ -17,8 +17,9 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
+// TOOD(#109): Implement order logic.
 void Performer::CreateTask(Id task_id, TaskDefinition definition,
-                           double position, TaskType type,
+                           double position, TaskType type, int /*order*/,
                            void* user_data) noexcept {
   assert(task_id > kInvalid);
   assert(type != TaskType::kOneOff || position >= position_);

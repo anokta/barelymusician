@@ -22,10 +22,11 @@ class Performer {
   /// @param definition Task definition.
   /// @param position Task position in beats.
   /// @param type Task type.
+  /// @param order Task execution order.
   /// @param user_data Pointer to user data.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void CreateTask(Id task_id, TaskDefinition definition, double position,
-                  TaskType type, void* user_data) noexcept;
+                  TaskType type, int order, void* user_data) noexcept;
 
   /// Destroys task.
   ///

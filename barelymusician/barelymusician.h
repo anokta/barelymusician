@@ -513,11 +513,9 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
 
 /// Creates new performer.
 ///
-/// @param order Task execution order amongst other performers.
 /// @param out_performer_id Output performer identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
-                                                  int32_t order,
                                                   BarelyId* out_performer_id);
 
 /// Creates new performer task at position.
@@ -527,13 +525,14 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
 /// @param definition Task definition.
 /// @param position Task position in beats.
 /// @param type Task type.
+/// @param order Task execution order.
 /// @param user_data Pointer to user data.
 /// @param out_task_id Output task identifier.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
     BarelyMusicianHandle handle, BarelyId performer_id,
     BarelyTaskDefinition definition, double position, BarelyTaskType type,
-    void* user_data, BarelyId* out_task_id);
+    int order, void* user_data, BarelyId* out_task_id);
 
 /// Destroys performer.
 ///
@@ -1444,15 +1443,16 @@ class Performer {
   /// @param definition Task definition.
   /// @param position Task position in beats.
   /// @param type Task type.
+  /// @param order Task execution order.
   /// @param user_data Pointer to user data.
   /// @return Task reference.
   TaskReference CreateTask(TaskDefinition definition, double position,
-                           TaskType type = TaskType::kRecurring,
+                           TaskType type = TaskType::kRecurring, int order = 0,
                            void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
     [[maybe_unused]] const Status status = BarelyPerformer_CreateTask(
         handle_, id_, definition, position, static_cast<BarelyTaskType>(type),
-        user_data, &task_id);
+        order, user_data, &task_id);
     assert(status.IsOk());
     return TaskReference(handle_, id_, task_id);
   }
@@ -1462,9 +1462,11 @@ class Performer {
   /// @param callback Task callback.
   /// @param position Task position in beats.
   /// @param type Task type.
+  /// @param order Task execution order.
   /// @return Task reference.
   TaskReference CreateTask(TaskCallback callback, double position,
-                           TaskType type = TaskType::kRecurring) noexcept {
+                           TaskType type = TaskType::kRecurring,
+                           int order = 0) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) {
@@ -1478,7 +1480,7 @@ class Performer {
                 callback();
               }
             }),
-        position, type, static_cast<void*>(&callback));
+        position, type, order, static_cast<void*>(&callback));
   }
 
   /// Destroys task.
@@ -1591,10 +1593,9 @@ class Performer {
   friend class Musician;
 
   // Constructs new `Performer`.
-  explicit Performer(BarelyMusicianHandle handle, int priority) noexcept
-      : handle_(handle) {
+  explicit Performer(BarelyMusicianHandle handle) noexcept : handle_(handle) {
     [[maybe_unused]] const Status status =
-        BarelyPerformer_Create(handle_, priority, &id_);
+        BarelyPerformer_Create(handle_, &id_);
     assert(status.IsOk());
   }
 
@@ -1659,10 +1660,9 @@ class Musician {
 
   /// Creates new performer.
   ///
-  /// @param order Task execution order amongst other performers.
   /// @return Performer.
-  [[nodiscard]] Performer CreatePerformer(int order = 0) noexcept {
-    return Performer(handle_, order);
+  [[nodiscard]] Performer CreatePerformer() noexcept {
+    return Performer(handle_);
   }
 
   /// Returns tempo.

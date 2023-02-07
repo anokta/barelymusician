@@ -372,12 +372,12 @@ BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle, int32_t order,
+BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
                                     BarelyId* out_performer_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_performer_id) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_id_or = handle->engine.CreatePerformer(order);
+  const auto performer_id_or = handle->engine.CreatePerformer();
   if (performer_id_or.IsOk()) {
     *out_performer_id = *performer_id_or;
     return BarelyStatus_kOk;
@@ -389,14 +389,14 @@ BarelyStatus BarelyPerformer_CreateTask(BarelyMusicianHandle handle,
                                         BarelyId performer_id,
                                         BarelyTaskDefinition definition,
                                         double position, BarelyTaskType type,
-                                        void* user_data,
+                                        int order, void* user_data,
                                         BarelyId* out_task_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_task_id) return BarelyStatus_kInvalidArgument;
 
   const auto task_id_or = handle->engine.CreatePerformerTask(
       performer_id, std::move(definition), position,
-      static_cast<barely::TaskType>(type), user_data);
+      static_cast<barely::TaskType>(type), order, user_data);
   if (task_id_or.IsOk()) {
     *out_task_id = *task_id_or;
     return BarelyStatus_kOk;

@@ -41,10 +41,9 @@ class Engine {
 
   /// Creates new performer.
   ///
-  /// @param order Performer task execution order.
   /// @return Performer identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  StatusOr<Id> CreatePerformer(int order) noexcept;
+  StatusOr<Id> CreatePerformer() noexcept;
 
   /// Creates new performer task.
   ///
@@ -52,11 +51,12 @@ class Engine {
   /// @param definition Task definition.
   /// @param position Task position in beats.
   /// @param type Task type.
+  /// @param order Task execution order.
   /// @param user_data Pointer to user data.
   /// @return Task identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   StatusOr<Id> CreatePerformerTask(Id performer_id, TaskDefinition definition,
-                                   double position, TaskType type,
+                                   double position, TaskType type, int order,
                                    void* user_data) noexcept;
 
   /// Destroys instrument.
@@ -141,11 +141,7 @@ class Engine {
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
   // Map of performers by performer order-identifier pairs.
-  std::map<std::pair<int, Id>, Performer> performers_;
-
-  // Map of performer order-reference pairs by performer identifiers.
-  std::unordered_map<Id, std::pair<int, std::reference_wrapper<Performer>>>
-      performer_refs_;
+  std::unordered_map<Id, Performer> performers_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

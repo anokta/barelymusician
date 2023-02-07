@@ -26,23 +26,20 @@ StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
                                       int frame_rate) noexcept {
   if (frame_rate < 0) return Status::InvalidArgumentError();
   const Id instrument_id = GenerateNextId();
-  const auto [it, success] = instruments_.emplace(
-      instrument_id,
-      std::make_unique<Instrument>(definition, frame_rate, tempo_, timestamp_));
+  const auto success = instruments_
+                           .emplace(instrument_id, std::make_unique<Instrument>(
+                                                       definition, frame_rate,
+                                                       tempo_, timestamp_))
+                           .second;
   assert(success);
   UpdateInstrumentReferenceMap();
   return instrument_id;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-StatusOr<Id> Engine::CreatePerformer(int order) noexcept {
+StatusOr<Id> Engine::CreatePerformer() noexcept {
   const Id performer_id = GenerateNextId();
-  auto [it, success] =
-      performers_.emplace(std::pair{order, performer_id}, Performer{});
-  assert(success);
-  success = performer_refs_
-                .emplace(performer_id, std::pair{order, std::ref(it->second)})
-                .second;
+  const auto success = performers_.emplace(performer_id, Performer{}).second;
   assert(success);
   return performer_id;
 }
@@ -50,13 +47,13 @@ StatusOr<Id> Engine::CreatePerformer(int order) noexcept {
 StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
                                          TaskDefinition definition,
                                          double position, TaskType type,
-                                         void* user_data) noexcept {
+                                         int order, void* user_data) noexcept {
   if (performer_id == kInvalid) return Status::InvalidArgumentError();
   if (position < 0.0) return Status::InvalidArgumentError();
   auto performer_or = GetPerformer(performer_id);
   if (performer_or.IsOk()) {
     const Id task_id = GenerateNextId();
-    performer_or->get().CreateTask(task_id, definition, position, type,
+    performer_or->get().CreateTask(task_id, definition, position, type, order,
                                    user_data);
     return task_id;
   }
@@ -80,12 +77,7 @@ Status Engine::DestroyInstrument(Id instrument_id) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Status Engine::DestroyPerformer(Id performer_id) noexcept {
   if (performer_id == kInvalid) return Status::InvalidArgumentError();
-  if (const auto it = performer_refs_.find(performer_id);
-      it != performer_refs_.end()) {
-    [[maybe_unused]] const bool success =
-        performers_.erase(std::pair{it->second.first, performer_id}) > 0;
-    assert(success);
-    performer_refs_.erase(it);
+  if (performers_.erase(performer_id) > 0) {
     return Status::OkStatus();
   }
   return Status::NotFoundError();
@@ -103,8 +95,8 @@ StatusOr<std::reference_wrapper<Instrument>> Engine::GetInstrument(
 StatusOr<std::reference_wrapper<Performer>> Engine::GetPerformer(
     [[maybe_unused]] Id performer_id) noexcept {
   if (performer_id == kInvalid) return Status::InvalidArgumentError();
-  if (auto* performer_ref = FindOrNull(performer_refs_, performer_id)) {
-    return performer_ref->second;
+  if (auto* performer = FindOrNull(performers_, performer_id)) {
+    return std::ref(*performer);
   }
   return Status::NotFoundError();
 }
@@ -152,7 +144,7 @@ void Engine::Update(double timestamp) noexcept {
       double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
 
       bool has_tasks_to_process = false;
-      for (const auto& [order_id_pair, performer] : performers_) {
+      for (const auto& [performer_id, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
             maybe_duration && *maybe_duration < update_duration) {
           has_tasks_to_process = true;
@@ -160,7 +152,7 @@ void Engine::Update(double timestamp) noexcept {
         }
       }
 
-      for (auto& [order_id_pair, performer] : performers_) {
+      for (auto& [performer_id, performer] : performers_) {
         performer.Update(update_duration);
       }
 
@@ -170,7 +162,7 @@ void Engine::Update(double timestamp) noexcept {
       }
 
       if (has_tasks_to_process && timestamp_ < timestamp) {
-        for (auto& [order_id_pair, performer] : performers_) {
+        for (auto& [performer_id, performer] : performers_) {
           performer.ProcessAllTasksAtCurrentPosition();
         }
       }

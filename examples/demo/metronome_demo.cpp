@@ -45,8 +45,6 @@ constexpr int kBeatCount = 4;
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
 
-constexpr int kMetronomeOrder = -1;
-
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -69,7 +67,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
   // Add beat event.
-  Metronome metronome(musician.CreatePerformer(kMetronomeOrder));
+  Metronome metronome(musician.CreatePerformer());
   metronome.SetBeatCallback([&](int beat) {
     ConsoleLog() << "Tick " << (beat / kBeatCount) << "."
                  << (beat % kBeatCount);

@@ -7,12 +7,15 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/id.h"
-#include "barelymusician/engine/number.h"
 
 namespace barely::internal {
 
 /// Task definition alias.
 using TaskDefinition = barely::TaskDefinition;
+
+// Task map alias.
+class Task;
+using TaskMap = std::map<std::pair<double, Id>, std::unique_ptr<Task>>;
 
 /// Task type alias.
 using TaskType = barely::TaskType;

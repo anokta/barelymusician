@@ -40,7 +40,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 512;
 
-constexpr int kLookahead = 50'000;
+constexpr double kLookahead = 0.05;
 
 // Instrument settings.
 constexpr double kGain = 0.1;

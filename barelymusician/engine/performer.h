@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "barelymusician/engine/id.h"
-#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/status.h"
 #include "barelymusician/engine/task.h"
 
@@ -25,7 +24,7 @@ class Performer {
   /// @param type Task type.
   /// @param user_data Pointer to user data.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void CreateTask(Id task_id, TaskDefinition definition, Real position,
+  void CreateTask(Id task_id, TaskDefinition definition, double position,
                   TaskType type, void* user_data) noexcept;
 
   /// Destroys task.
@@ -37,28 +36,28 @@ class Performer {
   /// Returns duration to next task.
   ///
   /// @return Duration in beats.
-  [[nodiscard]] std::optional<Real> GetDurationToNextTask() const noexcept;
+  [[nodiscard]] std::optional<double> GetDurationToNextTask() const noexcept;
 
   /// Returns loop begin position.
   ///
   /// @return Loop begin position in beats.
-  [[nodiscard]] Real GetLoopBeginPosition() const noexcept;
+  [[nodiscard]] double GetLoopBeginPosition() const noexcept;
 
   /// Returns loop length.
   ///
   /// @return Loop length in beats.
-  [[nodiscard]] Real GetLoopLength() const noexcept;
+  [[nodiscard]] double GetLoopLength() const noexcept;
 
   /// Returns position.
   ///
   /// @return Position in beats.
-  [[nodiscard]] Real GetPosition() const noexcept;
+  [[nodiscard]] double GetPosition() const noexcept;
 
   /// Returns task position.
   ///
   /// @param task_id Task identifier.
   /// @return Position or error status.
-  [[nodiscard]] StatusOr<Real> GetTaskPosition(Id task_id) const noexcept;
+  [[nodiscard]] StatusOr<double> GetTaskPosition(Id task_id) const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -76,12 +75,12 @@ class Performer {
   /// Sets loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
-  void SetLoopBeginPosition(Real loop_begin_position) noexcept;
+  void SetLoopBeginPosition(double loop_begin_position) noexcept;
 
   /// Sets loop length.
   ///
   /// @param loop_length Loop length in beats.
-  void SetLoopLength(Real loop_length) noexcept;
+  void SetLoopLength(double loop_length) noexcept;
 
   /// Sets whether performer should be looping or not.
   ///
@@ -92,14 +91,14 @@ class Performer {
   ///
   /// @param position Position in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetPosition(Real position) noexcept;
+  void SetPosition(double position) noexcept;
 
   /// Sets task position.
   ///
   /// @param task_id Task identifier.
   /// @param position Task position.
   /// @return Status.
-  Status SetTaskPosition(Id task_id, Real position) noexcept;
+  Status SetTaskPosition(Id task_id, double position) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -111,7 +110,7 @@ class Performer {
   ///
   /// @param duration Duration in beats.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(Real duration) noexcept;
+  void Update(double duration) noexcept;
 
   /// Updates performer to next task position.
   void UpdateToNextTask() noexcept;
@@ -120,14 +119,13 @@ class Performer {
   // Task info.
   struct TaskInfo {
     // Position.
-    Real position;
+    double position;
 
     // Type.
     TaskType type;
   };
 
   // Returns an iterator to the next recurring task to process.
-  using TaskMap = std::map<std::pair<Real, Id>, std::unique_ptr<Task>>;
   [[nodiscard]] TaskMap::const_iterator GetNextRecurringTask() const noexcept;
 
   // Denotes whether performer is looping or not.
@@ -137,13 +135,13 @@ class Performer {
   bool is_playing_ = false;
 
   // Loop begin position in beats.
-  Real loop_begin_position_ = 0.0;
+  double loop_begin_position_ = 0.0;
 
   // Loop length in beats.
-  Real loop_length_ = 1.0;
+  double loop_length_ = 1.0;
 
   // Position in beats.
-  Real position_ = 0.0;
+  double position_ = 0.0;
 
   // Map of task infos by task identifiers.
   std::unordered_map<Id, TaskInfo> infos_;
@@ -153,7 +151,7 @@ class Performer {
   TaskMap recurring_tasks_;
 
   // Last processed recurring task position.
-  std::optional<Real> last_processed_position_;
+  std::optional<double> last_processed_position_;
 };
 
 }  // namespace barely::internal

@@ -10,7 +10,7 @@
 namespace barely {
 
 /// Sampler control.
-enum class SamplerControl : Integer {
+enum class SamplerControl : int {
   /// Root pitch.
   kRootPitch = 0,
   /// Sample player loop.
@@ -31,19 +31,19 @@ enum class SamplerControl : Integer {
 class SamplerInstrument : public GenericInstrument {
  public:
   /// Constructs new `SamplerInstrument`.
-  explicit SamplerInstrument(Integer frame_rate) noexcept;
+  explicit SamplerInstrument(int sample_rate) noexcept;
 
   /// Implements `GenericInstrument`.
-  void Process(Real* output_samples, Integer channel_count,
-               Integer frame_count) noexcept override;
+  void Process(double* output_samples, int channel_count,
+               int frame_count) noexcept override;
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(Integer index, Real value,
-                  Real slope_per_frame) noexcept override;
-  void SetData(const void* data, Integer size) noexcept override;
-  void SetNoteControl(Real /*pitch*/, Integer /*index*/, Real /*value*/,
-                      Real /*slope_per_frame*/) noexcept override {}
-  void SetNoteOff(Real pitch) noexcept override;
-  void SetNoteOn(Real pitch) noexcept override;
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept override;
+  void SetData(const void* data, int size) noexcept override;
+  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+                      double /*slope_per_frame*/) noexcept override {}
+  void SetNoteOff(double pitch) noexcept override;
+  void SetNoteOn(double pitch) noexcept override;
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
@@ -51,8 +51,8 @@ class SamplerInstrument : public GenericInstrument {
  private:
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
-  Real root_pitch_ = 0.0;
-  Integer frame_rate_ = 0;
+  double root_pitch_ = 0.0;
+  int sample_rate_ = 0;
 };
 
 }  // namespace barely

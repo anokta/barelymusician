@@ -11,7 +11,6 @@
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/status.h"
 
@@ -26,7 +25,7 @@ Engine::~Engine() noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
-                                      Integer frame_rate) noexcept {
+                                      int frame_rate) noexcept {
   if (frame_rate < 0) return {Status::kInvalidArgument};
   const Id instrument_id = GenerateNextId();
   const auto [it, success] = instruments_.emplace(
@@ -38,7 +37,7 @@ StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-StatusOr<Id> Engine::CreatePerformer(Integer order) noexcept {
+StatusOr<Id> Engine::CreatePerformer(int order) noexcept {
   const Id performer_id = GenerateNextId();
   auto [it, success] =
       performers_.emplace(std::pair{order, performer_id}, Performer{});
@@ -52,7 +51,7 @@ StatusOr<Id> Engine::CreatePerformer(Integer order) noexcept {
 
 StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
                                          TaskDefinition definition,
-                                         Real position, TaskType type,
+                                         double position, TaskType type,
                                          void* user_data) noexcept {
   if (performer_id == kInvalid) return {Status::kInvalidArgument};
   if (position < 0.0) return {Status::kInvalidArgument};
@@ -66,7 +65,7 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
   return performer_or.GetErrorStatus();
 }
 
-StatusOr<Id> Engine::CreateTask(TaskDefinition definition, Integer timestamp,
+StatusOr<Id> Engine::CreateTask(TaskDefinition definition, double timestamp,
                                 void* user_data) noexcept {
   if (timestamp < timestamp_) return {Status::kInvalidArgument};
   const Id task_id = GenerateNextId();
@@ -139,7 +138,7 @@ StatusOr<std::reference_wrapper<Performer>> Engine::GetPerformer(
   return {Status::kNotFound};
 }
 
-StatusOr<Integer> Engine::GetTaskTimestamp(Id task_id) const noexcept {
+StatusOr<double> Engine::GetTaskTimestamp(Id task_id) const noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto* task_timestamp = FindOrNull(task_timestamps_, task_id)) {
     return *task_timestamp;
@@ -147,17 +146,17 @@ StatusOr<Integer> Engine::GetTaskTimestamp(Id task_id) const noexcept {
   return {Status::kNotFound};
 }
 
-Real Engine::GetTempo() const noexcept { return tempo_; }
+double Engine::GetTempo() const noexcept { return tempo_; }
 
-Integer Engine::GetTimestamp() const noexcept { return timestamp_; }
+double Engine::GetTimestamp() const noexcept { return timestamp_; }
 
-Status Engine::ProcessInstrument(Id instrument_id, Real* output_samples,
-                                 Integer output_channel_count,
-                                 Integer output_frame_count,
-                                 Integer timestamp) noexcept {
+Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
+                                 int output_channel_count,
+                                 int output_frame_count,
+                                 double timestamp) noexcept {
   if (instrument_id == kInvalid) return Status::kInvalidArgument;
   if ((!output_samples && output_channel_count > 0 && output_frame_count) ||
-      output_channel_count < 0 || output_frame_count < 0 || timestamp < 0) {
+      output_channel_count < 0 || output_frame_count < 0 || timestamp < 0.0) {
     return Status::kInvalidArgument;
   }
   auto instrument_refs = instrument_refs_.GetScopedView();
@@ -172,7 +171,7 @@ Status Engine::ProcessInstrument(Id instrument_id, Real* output_samples,
   return Status::kNotFound;
 }
 
-Status Engine::SetTaskTimestamp(Id task_id, Integer timestamp) noexcept {
+Status Engine::SetTaskTimestamp(Id task_id, double timestamp) noexcept {
   if (task_id == kInvalid) return Status::kInvalidArgument;
   if (const auto it = task_timestamps_.find(task_id);
       it != task_timestamps_.end()) {
@@ -188,7 +187,7 @@ Status Engine::SetTaskTimestamp(Id task_id, Integer timestamp) noexcept {
   return Status::kNotFound;
 }
 
-void Engine::SetTempo(Real tempo) noexcept {
+void Engine::SetTempo(double tempo) noexcept {
   tempo = std::max(tempo, 0.0);
   if (tempo_ == tempo) return;
   tempo_ = tempo;
@@ -198,13 +197,12 @@ void Engine::SetTempo(Real tempo) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::Update(Integer timestamp) noexcept {
-  assert(timestamp >= 0);
+void Engine::Update(double timestamp) noexcept {
+  assert(timestamp >= 0.0);
 
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      Real update_duration =
-          BeatsFromNanoseconds(tempo_, timestamp - timestamp_);
+      double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
       std::unordered_set<Id> performer_ids_to_process;
       for (const auto& [order_id_pair, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
@@ -218,8 +216,8 @@ void Engine::Update(Integer timestamp) noexcept {
         }
       }
 
-      Integer next_timestamp =
-          timestamp_ + NanosecondsFromBeats(tempo_, update_duration);
+      double next_timestamp =
+          timestamp_ + SecondsFromBeats(tempo_, update_duration);
 
       bool has_tasks = false;
       if (!tasks_.empty() && tasks_.begin()->first.first <= next_timestamp) {
@@ -227,7 +225,7 @@ void Engine::Update(Integer timestamp) noexcept {
         if (tasks_.begin()->first.first < next_timestamp) {
           next_timestamp = tasks_.begin()->first.first;
           update_duration =
-              BeatsFromNanoseconds(tempo_, next_timestamp - timestamp_);
+              BeatsFromSeconds(tempo_, next_timestamp - timestamp_);
           performer_ids_to_process.clear();
         }
       }

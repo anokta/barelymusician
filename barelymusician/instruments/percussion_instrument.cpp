@@ -9,14 +9,14 @@
 
 namespace barely {
 
-PercussionInstrument::PercussionInstrument(Integer frame_rate) noexcept
+PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),
             Pad(frame_rate)} {}
 
-void PercussionInstrument::Process(Real* output_samples, Integer channel_count,
-                                   Integer frame_count) noexcept {
+void PercussionInstrument::Process(double* output_samples, int channel_count,
+                                   int frame_count) noexcept {
   for (int frame = 0; frame < frame_count; ++frame) {
-    Real mono_sample = 0.0;
+    double mono_sample = 0.0;
     for (auto& pad : pads_) {
       mono_sample += pad.voice.Next(0);
     }
@@ -26,30 +26,29 @@ void PercussionInstrument::Process(Real* output_samples, Integer channel_count,
   }
 }
 
-void PercussionInstrument::SetControl(Integer index, Real value,
-                                      Real /*slope_per_frame*/) noexcept {
+void PercussionInstrument::SetControl(int index, double value,
+                                      double /*slope_per_frame*/) noexcept {
   switch (static_cast<PercussionControl>(index)) {
     case PercussionControl::kRelease:
       for (auto& pad : pads_) {
-        pad.voice.envelope().SetRelease(static_cast<Real>(value));
+        pad.voice.envelope().SetRelease(static_cast<double>(value));
       }
       break;
   }
 }
 
-void PercussionInstrument::SetData(const void* data,
-                                   Integer /*size*/) noexcept {
-  for (Integer i = 0; i < kPadCount; ++i) {
+void PercussionInstrument::SetData(const void* data, int /*size*/) noexcept {
+  for (int i = 0; i < kPadCount; ++i) {
     if (data) {
       // Pad data is sequentially aligned by pitch, frequency, length and data.
-      const Real pitch = *reinterpret_cast<const Real*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(Real);
-      const Integer frequency = *reinterpret_cast<const Integer*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(Integer);
-      const Integer length = *reinterpret_cast<const Integer*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(Integer);
-      const Real* voice_data = reinterpret_cast<const Real*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(Real) * length;
+      const double pitch = *reinterpret_cast<const double*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(double);
+      const int frequency = *reinterpret_cast<const int*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(int);
+      const int length = *reinterpret_cast<const int*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(int);
+      const double* voice_data = reinterpret_cast<const double*>(data);
+      data = static_cast<const std::byte*>(data) + sizeof(double) * length;
       pads_[i].pitch = pitch;
       pads_[i].voice.generator().SetData(voice_data, frequency, length);
     } else {
@@ -59,7 +58,7 @@ void PercussionInstrument::SetData(const void* data,
   }
 }
 
-void PercussionInstrument::SetNoteOff(Real pitch) noexcept {
+void PercussionInstrument::SetNoteOff(double pitch) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
       pad.voice.Stop();
@@ -68,7 +67,7 @@ void PercussionInstrument::SetNoteOff(Real pitch) noexcept {
   }
 }
 
-void PercussionInstrument::SetNoteOn(Real pitch) noexcept {
+void PercussionInstrument::SetNoteOn(double pitch) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
       // TODO(#75): Use note controls instead.

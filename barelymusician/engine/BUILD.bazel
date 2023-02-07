@@ -1,13 +1,12 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//barelymusician:__pkg__"])
+package(default_visibility = ["//barelymusician:__subpackages__"])
 
 cc_library(
     name = "control",
     srcs = ["control.cpp"],
     hdrs = ["control.h"],
     deps = [
-        ":number",
         "//barelymusician:include",
     ],
 )
@@ -20,7 +19,6 @@ cc_library(
         ":id",
         ":instrument",
         ":mutable_data",
-        ":number",
         ":performer",
         ":task",
         "//barelymusician/common:find_or_null",
@@ -54,9 +52,6 @@ cc_library(
 cc_library(
     name = "message",
     hdrs = ["message.h"],
-    deps = [
-        ":number",
-    ],
 )
 
 cc_library(
@@ -65,7 +60,6 @@ cc_library(
     hdrs = ["message_queue.h"],
     deps = [
         ":message",
-        ":number",
     ],
 )
 
@@ -75,20 +69,11 @@ cc_library(
 )
 
 cc_library(
-    name = "number",
-    hdrs = ["number.h"],
-    deps = [
-        "//barelymusician:include",
-    ],
-)
-
-cc_library(
     name = "performer",
     srcs = ["performer.cpp"],
     hdrs = ["performer.h"],
     deps = [
         ":id",
-        ":number",
         ":status",
         ":task",
         "//barelymusician/common:find_or_null",
@@ -106,7 +91,6 @@ cc_library(
     hdrs = ["task.h"],
     deps = [
         ":id",
-        ":number",
         "//barelymusician:include",
     ],
 )
@@ -150,7 +134,6 @@ cc_test(
     deps = [
         ":message",
         ":message_queue",
-        ":number",
         "@googletest//:gtest_main",
     ],
 )
@@ -160,7 +143,6 @@ cc_test(
     srcs = ["mutable_data_test.cpp"],
     deps = [
         ":mutable_data",
-        ":number",
         "@googletest//:gtest_main",
     ],
 )
@@ -179,7 +161,6 @@ cc_test(
     name = "task_test",
     srcs = ["task_test.cpp"],
     deps = [
-        ":number",
         ":task",
         "@googletest//:gtest_main",
     ],

@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "barelymusician/engine/id.h"
-#include "barelymusician/engine/number.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {
@@ -17,21 +16,21 @@ TEST(PerformerTest, TriggerMultipleTasks) {
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
-                   std::numeric_limits<Real>::max());
+                   std::numeric_limits<double>::max());
 
   // Add tasks.
-  std::vector<Real> positions;
-  for (Integer i = 1; i <= 4; ++i) {
-    performer.AddTask(Id{i}, static_cast<Real>(i), [&, i]() {
-      const Real position = performer.GetPosition();
-      EXPECT_DOUBLE_EQ(position, static_cast<Real>(i));
+  std::vector<double> positions;
+  for (int i = 1; i <= 4; ++i) {
+    performer.AddTask(Id{i}, static_cast<double>(i), [&, i]() {
+      const double position = performer.GetPosition();
+      EXPECT_DOUBLE_EQ(position, static_cast<double>(i));
       positions.push_back(position);
     });
   }
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
-                   std::numeric_limits<Real>::max());
+                   std::numeric_limits<double>::max());
   EXPECT_TRUE(positions.empty());
 
   // Start playback.
@@ -42,9 +41,9 @@ TEST(PerformerTest, TriggerMultipleTasks) {
   EXPECT_TRUE(positions.empty());
 
   // Trigger tasks.
-  std::vector<Real> expected_positions;
-  for (Integer i = 1; i <= 4; ++i) {
-    const Real expected_position = static_cast<Real>(i);
+  std::vector<double> expected_positions;
+  for (int i = 1; i <= 4; ++i) {
+    const double expected_position = static_cast<double>(i);
     expected_positions.push_back(expected_position);
     EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(), 1.0);
 
@@ -58,7 +57,7 @@ TEST(PerformerTest, TriggerMultipleTasks) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 4.0);
   EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
-                   std::numeric_limits<Real>::max());
+                   std::numeric_limits<double>::max());
 }
 
 // Tests that performer triggers a single task as expected.
@@ -68,10 +67,10 @@ TEST(PerformerTest, TriggerSingleTask) {
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
-                   std::numeric_limits<Real>::max());
+                   std::numeric_limits<double>::max());
 
   // Add task.
-  Integer task_trigger_count = 0;
+  int task_trigger_count = 0;
   EXPECT_TRUE(performer.AddTask(Id{1}, 0.25, [&]() {
     EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
     ++task_trigger_count;
@@ -79,7 +78,7 @@ TEST(PerformerTest, TriggerSingleTask) {
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
-                   std::numeric_limits<Real>::max());
+                   std::numeric_limits<double>::max());
   EXPECT_EQ(task_trigger_count, 0);
 
   // Start playback.
@@ -100,7 +99,7 @@ TEST(PerformerTest, TriggerSingleTask) {
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
-                   std::numeric_limits<Real>::max());
+                   std::numeric_limits<double>::max());
   EXPECT_EQ(task_trigger_count, 1);
 
   // Set looping on.
@@ -149,7 +148,7 @@ TEST(PerformerTest, TriggerSingleTask) {
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.75);
   EXPECT_DOUBLE_EQ(performer.GetDurationToNextTask(),
-                   std::numeric_limits<Real>::max());
+                   std::numeric_limits<double>::max());
   EXPECT_EQ(task_trigger_count, 1);
 }
 

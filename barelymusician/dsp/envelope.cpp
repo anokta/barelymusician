@@ -2,15 +2,13 @@
 
 #include <algorithm>
 
-#include "barelymusician/barelymusician.h"
-
 namespace barely {
 
-Envelope::Envelope(Integer frame_rate) noexcept
-    : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<Real>(frame_rate)
-                                       : 0.0) {}
+Envelope::Envelope(int sample_rate) noexcept
+    : sample_interval_(
+          (sample_rate > 0) ? 1.0 / static_cast<double>(sample_rate) : 0.0) {}
 
-Real Envelope::Next() noexcept {
+double Envelope::Next() noexcept {
   if (state_ == State::kIdle) {
     return 0.0;
   }
@@ -64,28 +62,28 @@ void Envelope::Reset() noexcept { state_ = State::kIdle; }
 
 bool Envelope::IsActive() const noexcept { return state_ != State::kIdle; }
 
-void Envelope::SetAttack(Real attack) noexcept {
-  attack_increment_ = (attack > 0.0) ? frame_interval_ / attack : 0.0;
+void Envelope::SetAttack(double attack) noexcept {
+  attack_increment_ = (attack > 0.0) ? sample_interval_ / attack : 0.0;
   if (attack_increment_ > 1.0) {
     attack_increment_ = 0.0;
   }
 }
 
-void Envelope::SetDecay(Real decay) noexcept {
-  decay_increment_ = (decay > 0.0) ? frame_interval_ / decay : 0.0;
+void Envelope::SetDecay(double decay) noexcept {
+  decay_increment_ = (decay > 0.0) ? sample_interval_ / decay : 0.0;
   if (decay_increment_ > 1.0) {
     decay_increment_ = 0.0;
   }
 }
 
-void Envelope::SetRelease(Real release) noexcept {
-  release_increment_ = (release > 0.0) ? frame_interval_ / release : 0.0;
+void Envelope::SetRelease(double release) noexcept {
+  release_increment_ = (release > 0.0) ? sample_interval_ / release : 0.0;
   if (release_increment_ > 1.0) {
     release_increment_ = 0.0;
   }
 }
 
-void Envelope::SetSustain(Real sustain) noexcept {
+void Envelope::SetSustain(double sustain) noexcept {
   sustain_ = std::min(std::max(sustain, 0.0), 1.0);
 }
 

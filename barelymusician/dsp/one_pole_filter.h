@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 #define BARELYMUSICIAN_DSP_ONE_POLE_FILTER_H_
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/filter.h"
 
 namespace barely {
@@ -16,13 +15,13 @@ enum class FilterType {
 class OnePoleFilter : public Filter {
  public:
   /// Implements `Processor`.
-  Real Next(Real input) noexcept override;
+  double Next(double input) noexcept override;
   void Reset() noexcept override;
 
   /// Sets the coefficent of the filter.
   ///
   /// @param coefficient Filter coefficient.
-  void SetCoefficient(Real coefficient) noexcept;
+  void SetCoefficient(double coefficient) noexcept;
 
   /// Sets the type of the filter.
   ///
@@ -31,10 +30,10 @@ class OnePoleFilter : public Filter {
 
  private:
   // Transfer function coefficient of the filter.
-  Real coefficient_ = 1.0;
+  double coefficient_ = 1.0;
 
   // The last output sample.
-  Real output_ = 0.0;
+  double output_ = 0.0;
 
   // Filter type.
   FilterType type_ = FilterType::kLowPass;

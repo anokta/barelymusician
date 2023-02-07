@@ -6,9 +6,6 @@ cc_library(
     name = "audio_clock",
     srcs = ["audio_clock.cpp"],
     hdrs = ["audio_clock.h"],
-    deps = [
-        "//barelymusician",
-    ],
 )
 
 cc_library(

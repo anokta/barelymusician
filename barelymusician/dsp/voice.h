@@ -1,8 +1,6 @@
 #ifndef BARELYMUSICIAN_DSP_VOICE_H_
 #define BARELYMUSICIAN_DSP_VOICE_H_
 
-#include "barelymusician/barelymusician.h"
-
 namespace barely {
 
 /// Instrument voice interface.
@@ -20,7 +18,7 @@ class Voice {
   ///
   /// @param channel Output channel.
   /// @return Output sample.
-  virtual Real Next(Integer channel) noexcept = 0;
+  virtual double Next(int channel) noexcept = 0;
 
   /// Starts the voice.
   virtual void Start() noexcept = 0;

@@ -3,32 +3,30 @@
 
 #include <atomic>
 
-#include "barelymusician/barelymusician.h"
-
 namespace barely::examples {
 
 /// Thread-safe audio dsp clock.
 class AudioClock {
  public:
   /// Constructs new `AudioClock`.
-  explicit AudioClock(Integer frame_rate) noexcept;
+  explicit AudioClock(int sample_rate) noexcept;
 
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
-  Integer GetTimestamp() const noexcept;
+  double GetTimestamp() const noexcept;
 
   /// Updates the clock.
   ///
   /// @param frame_count Number of frames to iterate.
-  void Update(Integer frame_count) noexcept;
+  void Update(int frame_count) noexcept;
 
  private:
   // Frame rate in hertz.
-  const Integer frame_rate_;
+  const int frame_rate_;
 
   // Monothonic timestamp in seconds.
-  std::atomic<Integer> timestamp_ = 0;
+  std::atomic<double> timestamp_;
 };
 
 }  // namespace barely::examples

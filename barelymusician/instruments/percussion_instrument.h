@@ -23,28 +23,28 @@ enum class PercussionControl : int {
 class PercussionInstrument : public GenericInstrument {
  public:
   /// Constructs new `PercussionInstrument`.
-  explicit PercussionInstrument(Integer frame_rate) noexcept;
+  explicit PercussionInstrument(int frame_rate) noexcept;
 
   /// Implements `GenericInstrument`.
-  void Process(Real* output_samples, Integer channel_count,
-               Integer frame_count) noexcept override;
-  void SetControl(Integer index, Real value,
-                  Real slope_per_frame) noexcept override;
-  void SetData(const void* data, Integer size) noexcept override;
-  void SetNoteControl(Real /*pitch*/, Integer /*index*/, Real /*value*/,
-                      Real /*slope_per_frame*/) noexcept override {}
-  void SetNoteOff(Real pitch) noexcept override;
-  void SetNoteOn(Real pitch) noexcept override;
+  void Process(double* output_samples, int channel_count,
+               int frame_count) noexcept override;
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept override;
+  void SetData(const void* data, int size) noexcept override;
+  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+                      double /*slope_per_frame*/) noexcept override {}
+  void SetNoteOff(double pitch) noexcept override;
+  void SetNoteOn(double pitch) noexcept override;
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
-  static constexpr Integer kPadCount = 4;
+  static constexpr int kPadCount = 4;
   struct Pad {
-    explicit Pad(Integer frame_rate) noexcept : voice(frame_rate) {}
+    explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
 
-    Real pitch = 0.0;
+    double pitch = 0.0;
     EnvelopedVoice<SamplePlayer> voice;
   };
   std::array<Pad, kPadCount> pads_;

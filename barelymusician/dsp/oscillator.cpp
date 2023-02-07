@@ -2,17 +2,16 @@
 
 #include <cmath>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
 namespace barely {
 
-Oscillator::Oscillator(Integer frame_rate) noexcept
-    : frame_interval_(frame_rate > 0 ? 1.0 / static_cast<Real>(frame_rate)
-                                     : 0.0) {}
+Oscillator::Oscillator(int sample_rate) noexcept
+    : sample_interval_(sample_rate > 0 ? 1.0 / static_cast<double>(sample_rate)
+                                       : 0.0) {}
 
-Real Oscillator::Next() noexcept {
-  Real output = 0.0;
+double Oscillator::Next() noexcept {
+  double output = 0.0;
   // Generate the next sample.
   switch (type_) {
     case OscillatorType::kSine:
@@ -39,8 +38,8 @@ Real Oscillator::Next() noexcept {
 
 void Oscillator::Reset() noexcept { phase_ = 0.0; }
 
-void Oscillator::SetFrequency(Real frequency) noexcept {
-  increment_ = frequency * frame_interval_;
+void Oscillator::SetFrequency(double frequency) noexcept {
+  increment_ = frequency * sample_interval_;
 }
 
 void Oscillator::SetType(OscillatorType type) noexcept { type_ = type; }

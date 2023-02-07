@@ -1,27 +1,26 @@
 #include "barelymusician/dsp/envelope.h"
 
-#include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
 // Sampling rate.
-constexpr Integer kFrameRate = 1000;
+constexpr int kSampleRate = 1000;
 
 // Envelope ADSR.
-constexpr Real kAttack = 0.02;
-constexpr Real kDecay = 1.0;
-constexpr Real kSustain = 0.5;
-constexpr Real kRelease = 0.8;
+constexpr double kAttack = 0.02;
+constexpr double kDecay = 1.0;
+constexpr double kSustain = 0.5;
+constexpr double kRelease = 0.8;
 
 // Tolerated error margin.
-constexpr Real kEpsilon = 1e-3;
+constexpr double kEpsilon = 1e-3;
 
 // Tests that the envelope generates the expected output samples when
 // initialized with the default constructor.
 TEST(EnvelopeTest, ProcessDefault) {
-  Envelope envelope(kFrameRate);
+  Envelope envelope(kSampleRate);
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
   envelope.Start();
@@ -34,32 +33,31 @@ TEST(EnvelopeTest, ProcessDefault) {
 // Tests that the envelope generates the expected output samples consistently
 // over multiple samples.
 TEST(EnvelopeTest, ProcessMultiSamples) {
-  const Integer kAttackSampleCount = static_cast<Integer>(kFrameRate * kAttack);
-  const Integer kDecaySampleCount = static_cast<Integer>(kFrameRate * kDecay);
-  const Integer kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
-  const Integer kReleaseSampleCount =
-      static_cast<Integer>(kFrameRate * kRelease);
+  const int kAttackSampleCount = static_cast<int>(kSampleRate * kAttack);
+  const int kDecaySampleCount = static_cast<int>(kSampleRate * kDecay);
+  const int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
+  const int kReleaseSampleCount = static_cast<int>(kSampleRate * kRelease);
 
-  Envelope envelope(kFrameRate);
+  Envelope envelope(kSampleRate);
   envelope.SetAttack(kAttack);
   envelope.SetDecay(kDecay);
   envelope.SetSustain(kSustain);
   envelope.SetRelease(kRelease);
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 
-  Real expected_sample = 0.0;
+  double expected_sample = 0.0;
 
   envelope.Start();
-  for (Integer i = 0; i < kSustainSampleCount + kFrameRate; ++i) {
+  for (int i = 0; i < kSustainSampleCount + kSampleRate; ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
       expected_sample =
-          static_cast<Real>(i) / static_cast<Real>(kAttackSampleCount);
+          static_cast<double>(i) / static_cast<double>(kAttackSampleCount);
     } else if (i < kSustainSampleCount) {
       // Decay.
       expected_sample = 1.0 - kSustain *
-                                  static_cast<Real>(i - kAttackSampleCount) /
-                                  static_cast<Real>(kDecaySampleCount);
+                                  static_cast<double>(i - kAttackSampleCount) /
+                                  static_cast<double>(kDecaySampleCount);
     } else {
       // Sustain.
       expected_sample = kSustain;
@@ -68,11 +66,11 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   }
 
   envelope.Stop();
-  for (Integer i = 0; i < kReleaseSampleCount + kFrameRate; ++i) {
+  for (int i = 0; i < kReleaseSampleCount + kSampleRate; ++i) {
     if (i < kReleaseSampleCount) {
       // Release.
-      expected_sample = (1.0 - static_cast<Real>(i) /
-                                   static_cast<Real>(kReleaseSampleCount)) *
+      expected_sample = (1.0 - static_cast<double>(i) /
+                                   static_cast<double>(kReleaseSampleCount)) *
                         kSustain;
     } else {
       // Idle.

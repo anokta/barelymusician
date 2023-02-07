@@ -3,14 +3,15 @@
 
 namespace barely::examples {
 
-AudioClock::AudioClock(Integer frame_rate) noexcept
-    : frame_rate_(frame_rate), timestamp_(0) {}
+AudioClock::AudioClock(int frame_rate) noexcept
+    : frame_rate_(frame_rate), timestamp_(0.0) {}
 
-Integer AudioClock::GetTimestamp() const noexcept { return timestamp_; }
+double AudioClock::GetTimestamp() const noexcept { return timestamp_; }
 
-void AudioClock::Update(Integer frame_count) noexcept {
+void AudioClock::Update(int frame_count) noexcept {
   if (frame_rate_ > 0 && frame_count > 0) {
-    timestamp_ += 1'000'000 * frame_count / frame_rate_;
+    timestamp_ = timestamp_ + static_cast<double>(frame_count) /
+                                  static_cast<double>(frame_rate_);
   }
 }
 

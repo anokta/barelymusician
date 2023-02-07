@@ -9,13 +9,13 @@
 
 namespace barely {
 
-SynthInstrument::SynthInstrument(Integer frame_rate) noexcept
-    : voice_(SynthVoice(frame_rate)) {}
+SynthInstrument::SynthInstrument(int sample_rate) noexcept
+    : voice_(SynthVoice(sample_rate)) {}
 
-void SynthInstrument::Process(Real* output_samples, Integer channel_count,
-                              Integer frame_count) noexcept {
+void SynthInstrument::Process(double* output_samples, int channel_count,
+                              int frame_count) noexcept {
   for (int frame = 0; frame < frame_count; ++frame) {
-    const Real mono_sample = voice_.Next(0);
+    const double mono_sample = voice_.Next(0);
     for (int channel = 0; channel < channel_count; ++channel) {
       output_samples[channel_count * frame + channel] = mono_sample;
     }
@@ -23,13 +23,13 @@ void SynthInstrument::Process(Real* output_samples, Integer channel_count,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetControl(Integer index, Real value,
-                                 Real /*slope_per_frame*/) noexcept {
+void SynthInstrument::SetControl(int index, double value,
+                                 double /*slope_per_frame*/) noexcept {
   switch (static_cast<SynthControl>(index)) {
     case SynthControl::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
         voice->generator().SetType(
-            static_cast<OscillatorType>(static_cast<Integer>(value)));
+            static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
     case SynthControl::kAttack:
@@ -53,14 +53,14 @@ void SynthInstrument::SetControl(Integer index, Real value,
       });
       break;
     case SynthControl::kVoiceCount:
-      voice_.Resize(static_cast<Integer>(value));
+      voice_.Resize(static_cast<int>(value));
       break;
   }
 }
 
-void SynthInstrument::SetNoteOff(Real pitch) noexcept { voice_.Stop(pitch); }
+void SynthInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
 
-void SynthInstrument::SetNoteOn(Real pitch) noexcept {
+void SynthInstrument::SetNoteOn(double pitch) noexcept {
   voice_.Start(pitch, [pitch](SynthVoice* voice) {
     voice->generator().SetFrequency(GetFrequency(pitch));
     // TODO(#75): Use note controls instead.
@@ -71,8 +71,8 @@ void SynthInstrument::SetNoteOn(Real pitch) noexcept {
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Oscillator type.
-      ControlDefinition{static_cast<Real>(OscillatorType::kSine), 0.0,
-                        static_cast<Real>(OscillatorType::kNoise)},
+      ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
+                        static_cast<double>(OscillatorType::kNoise)},
       // Attack.
       ControlDefinition{0.05, 0.0, 60.0},
       // Decay.

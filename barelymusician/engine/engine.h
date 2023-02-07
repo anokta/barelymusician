@@ -9,7 +9,6 @@
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
-#include "barelymusician/engine/number.h"
 #include "barelymusician/engine/performer.h"
 #include "barelymusician/engine/status.h"
 #include "barelymusician/engine/task.h"
@@ -38,14 +37,14 @@ class Engine {
   /// @return Instrument identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   StatusOr<Id> CreateInstrument(InstrumentDefinition definition,
-                                Integer frame_rate) noexcept;
+                                int frame_rate) noexcept;
 
   /// Creates new performer.
   ///
   /// @param order Performer task execution order.
   /// @return Performer identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  StatusOr<Id> CreatePerformer(Integer order) noexcept;
+  StatusOr<Id> CreatePerformer(int order) noexcept;
 
   /// Creates new performer task.
   ///
@@ -57,17 +56,17 @@ class Engine {
   /// @return Task identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   StatusOr<Id> CreatePerformerTask(Id performer_id, TaskDefinition definition,
-                                   Real position, TaskType type,
+                                   double position, TaskType type,
                                    void* user_data) noexcept;
 
   /// Creates new task.
   ///
   /// @param definition Task definition.
-  /// @param timestamp Task timestamp in nanoseconds.
+  /// @param timestamp Task timestamp in seconds.
   /// @param user_data Pointer to user data.
   /// @return Task identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  StatusOr<Id> CreateTask(TaskDefinition definition, Integer timestamp,
+  StatusOr<Id> CreateTask(TaskDefinition definition, double timestamp,
                           void* user_data) noexcept;
 
   /// Destroys task.
@@ -107,18 +106,18 @@ class Engine {
   /// Returns task timestamp.
   ///
   /// @param task_id Task identifier.
-  /// @return Timestamp in nanoseconds or error status.
-  [[nodiscard]] StatusOr<Integer> GetTaskTimestamp(Id task_id) const noexcept;
+  /// @return Timestamp in seconds or error status.
+  [[nodiscard]] StatusOr<double> GetTaskTimestamp(Id task_id) const noexcept;
 
   /// Returns tempo.
   ///
   /// @return Tempo in beats per minute.
-  [[nodiscard]] Real GetTempo() const noexcept;
+  [[nodiscard]] double GetTempo() const noexcept;
 
   /// Returns timestamp.
   ///
-  /// @return Timestamp in nanoseconds.
-  [[nodiscard]] Integer GetTimestamp() const noexcept;
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp() const noexcept;
 
   /// Processes instrument at timestamp.
   ///
@@ -126,29 +125,28 @@ class Engine {
   /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in nanoseconds.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status ProcessInstrument(Id instrument_id, Real* output_samples,
-                           Integer output_channel_count,
-                           Integer output_frame_count,
-                           Integer timestamp) noexcept;
+  Status ProcessInstrument(Id instrument_id, double* output_samples,
+                           int output_channel_count, int output_frame_count,
+                           double timestamp) noexcept;
 
   /// Sets task timestamp.
   /// @param task_id Task identifier.
-  /// @param timestamp Timestamp in nanoseconds.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  Status SetTaskTimestamp(Id task_id, Integer timestamp) noexcept;
+  Status SetTaskTimestamp(Id task_id, double timestamp) noexcept;
 
   /// Sets tempo.
   ///
   /// @param tempo Tempo in beats per minute.
-  void SetTempo(Real tempo) noexcept;
+  void SetTempo(double tempo) noexcept;
 
   /// Updates engine at timestamp.
   ///
-  /// @param timestamp Timestamp in nanoseconds.
+  /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Update(Integer timestamp) noexcept;
+  void Update(double timestamp) noexcept;
 
  private:
   // Instrument reference by identifier map.
@@ -171,21 +169,20 @@ class Engine {
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
   // Map of performers by performer order-identifier pairs.
-  std::map<std::pair<Integer, Id>, Performer> performers_;
+  std::map<std::pair<int, Id>, Performer> performers_;
 
   // Map of performer order-reference pairs by performer identifiers.
-  std::unordered_map<Id, std::pair<Integer, std::reference_wrapper<Performer>>>
+  std::unordered_map<Id, std::pair<int, std::reference_wrapper<Performer>>>
       performer_refs_;
 
   // Tempo in beats per minute.
-  Real tempo_ = 120.0;
+  double tempo_ = 120.0;
 
-  // Timestamp in nanoseconds.
-  Integer timestamp_ = 0;
+  // Timestamp in seconds.
+  double timestamp_ = 0.0;
 
   // Tasks.
-  std::unordered_map<Id, Integer> task_timestamps_;
-  using TaskMap = std::map<std::pair<Integer, Id>, std::unique_ptr<Task>>;
+  std::unordered_map<Id, double> task_timestamps_;
   TaskMap tasks_;
 };
 

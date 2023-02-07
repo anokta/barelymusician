@@ -1,18 +1,17 @@
 #include "barelymusician/engine/task.h"
 
-#include "barelymusician/engine/number.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {
 namespace {
 
 TEST(TaskTest, Process) {
-  const Integer kTotalProcessCount = 3;
+  const int kTotalProcessCount = 3;
 
   struct TestData {
-    Integer create_count = 0;
-    Integer destroy_count = 0;
-    Integer process_count = 0;
+    int create_count = 0;
+    int destroy_count = 0;
+    int process_count = 0;
   };
   TestData test_data = {};
 
@@ -39,7 +38,7 @@ TEST(TaskTest, Process) {
     EXPECT_EQ(test_data.destroy_count, 0);
     EXPECT_EQ(test_data.process_count, 0);
 
-    for (Integer i = 1; i <= kTotalProcessCount; ++i) {
+    for (int i = 1; i <= kTotalProcessCount; ++i) {
       task.Process();
 
       EXPECT_EQ(test_data.create_count, 1);

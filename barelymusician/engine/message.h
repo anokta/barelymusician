@@ -5,20 +5,18 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/engine/number.h"
-
 namespace barely::internal {
 
 /// Control message.
 struct ControlMessage {
   /// Index.
-  Integer index;
+  int index;
 
   /// Value.
-  Real value;
+  double value;
 
   /// Slope in value change per frame.
-  Real slope_per_frame;
+  double slope_per_frame;
 };
 
 /// Data message.
@@ -30,28 +28,28 @@ struct DataMessage {
 /// Note control message.
 struct NoteControlMessage {
   /// Pitch.
-  Real pitch;
+  double pitch;
 
   /// Index.
-  Integer index;
+  int index;
 
   /// Value.
-  Real value;
+  double value;
 
   /// Slope in value change per frame.
-  Real slope_per_frame;
+  double slope_per_frame;
 };
 
 /// Note off message.
 struct NoteOffMessage {
   /// Pitch.
-  Real pitch;
+  double pitch;
 };
 
 /// Note on message.
 struct NoteOnMessage {
   /// Pitch.
-  Real pitch;
+  double pitch;
 };
 
 /// Message alias.

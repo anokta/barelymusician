@@ -2,25 +2,24 @@
 
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely {
 namespace {
 
 // Sampling rate.
-constexpr Integer kSampleRate = 48000;
+constexpr int kSampleRate = 48000;
 
 // Sample data.
-constexpr Integer kDataLength = 5;
-constexpr Real kData[kDataLength] = {1.0, 2.0, 3.0, 4.0, 5.0};
+constexpr int kDataLength = 5;
+constexpr double kData[kDataLength] = {1.0, 2.0, 3.0, 4.0, 5.0};
 
 // Tests that the sample data is played back as expected.
 TEST(SamplePlayerTest, SimplePlayback) {
   SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
-  for (Integer i = 0; i < kDataLength; ++i) {
+  for (int i = 0; i < kDataLength; ++i) {
     EXPECT_DOUBLE_EQ(sample_player.Next(), kData[i]) << "at index " << i;
   }
   EXPECT_DOUBLE_EQ(sample_player.Next(), 0.0);
@@ -32,8 +31,8 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
   sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
-  const Integer kLoopCount = 10;
-  for (Integer i = 0; i < kDataLength * kLoopCount; ++i) {
+  const int kLoopCount = 10;
+  for (int i = 0; i < kDataLength * kLoopCount; ++i) {
     EXPECT_DOUBLE_EQ(sample_player.Next(), kData[i % kDataLength])
         << "at index " << i;
   }
@@ -45,14 +44,14 @@ TEST(SamplePlayerTest, SetSpeed) {
   sample_player.SetData(kData, kSampleRate, kDataLength);
   sample_player.SetLoop(true);
 
-  const std::vector<Real> kSpeeds = {0.0, 0.4, 1.0, 1.25, 2.0, 3.3};
-  for (const Real speed : kSpeeds) {
+  const std::vector<double> kSpeeds = {0.0, 0.4, 1.0, 1.25, 2.0, 3.3};
+  for (const double speed : kSpeeds) {
     sample_player.Reset();
     sample_player.SetSpeed(speed);
 
-    for (Integer i = 0; i < kDataLength; ++i) {
-      const Integer expected_index =
-          static_cast<Integer>(static_cast<Real>(i) * speed);
+    for (int i = 0; i < kDataLength; ++i) {
+      const int expected_index =
+          static_cast<int>(static_cast<double>(i) * speed);
       EXPECT_DOUBLE_EQ(sample_player.Next(),
                        kData[expected_index % kDataLength])
           << "at index " << i << ", where speed is: " << speed;
@@ -63,17 +62,18 @@ TEST(SamplePlayerTest, SetSpeed) {
 // Tests that the sample data is played back as expected at different sampling
 // frequencies.
 TEST(SamplePlayerTest, DifferentSampleFrequency) {
-  const std::vector<Integer> kFrequencies = {0, kSampleRate / 3, kSampleRate,
-                                             2 * kSampleRate, 5 * kSampleRate};
+  const std::vector<int> kFrequencies = {0, kSampleRate / 3, kSampleRate,
+                                         2 * kSampleRate, 5 * kSampleRate};
   SamplePlayer sample_player(kSampleRate);
-  for (const Integer frequency : kFrequencies) {
+  for (const int frequency : kFrequencies) {
     sample_player.Reset();
     sample_player.SetData(kData, frequency, kDataLength);
     sample_player.SetLoop(true);
 
-    for (Integer i = 0; i < kDataLength; ++i) {
-      const Integer expected_index = static_cast<Integer>(
-          static_cast<Real>(i * frequency) / static_cast<Real>(kSampleRate));
+    for (int i = 0; i < kDataLength; ++i) {
+      const int expected_index =
+          static_cast<int>(static_cast<double>(i * frequency) /
+                           static_cast<double>(kSampleRate));
       EXPECT_DOUBLE_EQ(sample_player.Next(),
                        kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;
@@ -86,7 +86,7 @@ TEST(SamplePlayerTest, Reset) {
   SamplePlayer sample_player(kSampleRate);
   sample_player.SetData(kData, kSampleRate, kDataLength);
 
-  const Real first_sample = sample_player.Next();
+  const double first_sample = sample_player.Next();
   EXPECT_NE(sample_player.Next(), first_sample);
 
   sample_player.Reset();

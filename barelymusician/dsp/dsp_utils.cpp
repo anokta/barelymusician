@@ -3,27 +3,22 @@
 #include <cassert>
 #include <cmath>
 
-#include "barelymusician/barelymusician.h"
-
 namespace barely {
 
 namespace {
 
 // Middle A (A4) frequency.
-constexpr Real kFrequencyA4 = 440.0;
+constexpr double kFrequencyA4 = 440.0;
 
-// Converts nanoseconds to minutes.
-constexpr Real kMinutesFromNanoseconds = 1.0 / 60'000'000.0;
+// Converts seconds to minutes.
+constexpr double kMinutesFromSeconds = 1.0 / 60.0;
 
-// Converts minutes to nanoseconds.
-constexpr Real kNanosecondsFromMinutes = 60'000'000.0;
-
-// Converts seconds to nanoseconds.
-constexpr Integer kNanosecondsFromSeconds = 1'000'000;
+// Converts minutes to seconds.
+constexpr double kSecondsFromMinutes = 60.0;
 
 }  // namespace
 
-Real AmplitudeFromDecibels(Real decibels) noexcept {
+double AmplitudeFromDecibels(double decibels) noexcept {
   if (decibels > kMinDecibels) {
     // A = 10 ^ (dB / 20).
     return std::pow(10.0, 0.05 * decibels);
@@ -31,12 +26,12 @@ Real AmplitudeFromDecibels(Real decibels) noexcept {
   return 0.0;
 }
 
-Real BeatsFromNanoseconds(Real tempo, Integer nanoseconds) {
+double BeatsFromSeconds(double tempo, double seconds) {
   assert(tempo > 0.0);
-  return tempo * static_cast<double>(nanoseconds) * kMinutesFromNanoseconds;
+  return tempo * seconds * kMinutesFromSeconds;
 }
 
-Real DecibelsFromAmplitude(Real amplitude) noexcept {
+double DecibelsFromAmplitude(double amplitude) noexcept {
   if (amplitude > 0.0) {
     // dB = 20 * log(A).
     return 20.0 * std::log10(amplitude);
@@ -44,13 +39,13 @@ Real DecibelsFromAmplitude(Real amplitude) noexcept {
   return kMinDecibels;
 }
 
-Integer FramesFromNanoseconds(Integer frame_rate, Integer nanoseconds) {
+int FramesFromSeconds(int frame_rate, double seconds) {
   assert(frame_rate > 0);
-  return nanoseconds * frame_rate / kNanosecondsFromSeconds;
+  return static_cast<int>(seconds * static_cast<double>(frame_rate));
 }
 
-Real GetFilterCoefficient(Integer frame_rate, Real cuttoff_frequency) noexcept {
-  if (const Real frame_rate_double = static_cast<Real>(frame_rate);
+double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept {
+  if (const double frame_rate_double = static_cast<double>(frame_rate);
       frame_rate_double > 0.0 && cuttoff_frequency < frame_rate_double) {
     // c = exp(-2 * pi * fc / fs).
     // TODO(#8): Verify if this *a proper way* to calculate the coefficient?
@@ -59,20 +54,20 @@ Real GetFilterCoefficient(Integer frame_rate, Real cuttoff_frequency) noexcept {
   return 0.0;
 }
 
-Real GetFrequency(Real pitch) noexcept {
+double GetFrequency(double pitch) noexcept {
   // Middle A note (A4) is selected as the base note frequency, where:
   //  f = fA4 * 2 ^ p.
   return kFrequencyA4 * std::pow(2.0, pitch);
 }
 
-Integer NanosecondsFromBeats(Real tempo, Real beats) {
+double SecondsFromBeats(double tempo, double beats) {
   assert(tempo > 0.0);
-  return static_cast<Integer>(beats * kNanosecondsFromMinutes / tempo);
+  return beats * kSecondsFromMinutes / tempo;
 }
 
-Integer NanosecondsFromFrames(Integer frame_rate, Integer frames) {
+double SecondsFromFrames(int frame_rate, int frames) {
   assert(frame_rate > 0);
-  return frames * kNanosecondsFromSeconds / frame_rate;
+  return static_cast<double>(frames) / static_cast<double>(frame_rate);
 }
 
 }  // namespace barely

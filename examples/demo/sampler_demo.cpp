@@ -95,7 +95,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount, 0);
+    instrument.Process(output, kChannelCount, kFrameCount, 0.0);
     gain.Process(output, kChannelCount, kFrameCount);
   });
 

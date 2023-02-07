@@ -1,71 +1,67 @@
 #ifndef BARELYMUSICIAN_DSP_DSP_UTILS_H_
 #define BARELYMUSICIAN_DSP_DSP_UTILS_H_
 
-#include "barelymusician/barelymusician.h"
-
 namespace barely {
 
 /// PI.
-inline constexpr Real kPi = 3.14159265358979323846;
-inline constexpr Real kTwoPi = 2.0 * kPi;
+inline constexpr double kPi = 3.14159265358979323846;
+inline constexpr double kTwoPi = 2.0 * kPi;
 
 /// Minimum decibel threshold.
-inline constexpr Real kMinDecibels = -80.0;
+inline constexpr double kMinDecibels = -80.0;
 
 /// Converts a value from decibels to linear amplitude.
 ///
 /// @param decibels Value in dB.
 /// @return Value in linear amplitude.
-Real AmplitudeFromDecibels(Real decibels) noexcept;
+double AmplitudeFromDecibels(double decibels) noexcept;
 
-/// Returns the corresponding number of beats for a given number of nanoseconds.
+/// Returns the corresponding number of beats for a given number of seconds.
 ///
 /// @param tempo Tempo in beats per minute.
-/// @param nanoseconds Number of nanoseconds.
+/// @param seconds Number of seconds.
 /// @return Number of beats.
-Real BeatsFromNanoseconds(Real tempo, Integer nanoseconds);
+double BeatsFromSeconds(double tempo, double seconds);
 
 /// Converts a value from linear amplitude to decibels.
 ///
 /// @param amplitude Value in linear amplitude.
 /// @return Value in dB.
-Real DecibelsFromAmplitude(Real amplitude) noexcept;
+double DecibelsFromAmplitude(double amplitude) noexcept;
 
-/// Returns the corresponding number of frames for a given number of
-/// nanoseconds.
+/// Returns the corresponding number of frames for a given number of seconds.
 ///
 /// @param frame_rate Frame rate in hertz.
-/// @param nanoseconds Number of nanoseconds.
+/// @param seconds Number of seconds.
 /// @return Number of frames.
-Integer FramesFromNanoseconds(Integer frame_rate, Integer nanoseconds);
+int FramesFromSeconds(int frame_rate, double seconds);
 
 /// Returns one-pole filter coefficient for a given cutoff frequency.
 ///
 /// @param frame_rate Frame rate in hertz.
 /// @param cuttoff_frequency Cutoff frequency in hertz.
 /// @return Filter coefficient.
-Real GetFilterCoefficient(Integer frame_rate, Real cuttoff_frequency) noexcept;
+double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept;
 
 /// Returns frequency for the given pitch.
 ///
 /// @param pitch Pitch.
 /// @return Frequency in hertz.
-Real GetFrequency(Real pitch) noexcept;
+double GetFrequency(double pitch) noexcept;
 
-/// Returns the corresponding number of nanoseconds for a given number of beats.
+/// Returns the corresponding number of seconds for a given number of beats.
 ///
 /// @param tempo Tempo in beats per minute.
 /// @param beats Number of beats.
-/// @return Number of nanoseconds.
-Integer NanosecondsFromBeats(Real tempo, Real beats);
+/// @return Number of seconds.
+double SecondsFromBeats(double tempo, double beats);
 
-/// Returns the corresponding number of nanoseconds for a given number of
-/// frames.
+/// Returns the corresponding number of seconds for a given number of frames.
 ///
 /// @param frame_rate Frame rate in hertz.
 /// @param frames Number of frames.
-/// @return Number of nanoseconds.
-Integer NanosecondsFromFrames(Integer frame_rate, Integer frames);
+/// @return Number of seconds.
+double SecondsFromFrames(int frame_rate, int frames);
 
 }  // namespace barely
 

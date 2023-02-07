@@ -339,8 +339,8 @@ void Instrument::SetTempo(double tempo) noexcept {
 }
 
 void Instrument::Update(double timestamp) noexcept {
-
-  assert(timestamp_ < timestamp);
+  assert(timestamp_ <= timestamp);
+  if (timestamp_ == timestamp) return;
   const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
   // Update controls.
   for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {

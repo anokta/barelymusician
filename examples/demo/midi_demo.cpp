@@ -104,8 +104,8 @@ int main(int /*argc*/, char* argv[]) {
 
   MidiFile midi_file;
   const std::string midi_file_path = runfiles->Rlocation(kMidiFileName);
-  assert(midi_file.read(midi_file_path));
-  assert(midi_file.isAbsoluteTicks());
+  const bool success = midi_file.read(midi_file_path);
+  assert(success && midi_file.isAbsoluteTicks());
   midi_file.linkNotePairs();
 
   const int track_count = midi_file.getTrackCount();

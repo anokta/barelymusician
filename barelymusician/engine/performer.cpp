@@ -95,10 +95,14 @@ bool Performer::IsLooping() const noexcept { return is_looping_; }
 bool Performer::IsPlaying() const noexcept { return is_playing_; }
 
 void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
+  if (!is_playing_) {
+    return;
+  }
   // Process one-off tasks.
   if (!one_off_tasks_.empty()) {
     auto it = one_off_tasks_.begin();
-    while (it != one_off_tasks_.end() && it->first.first <= position_) {
+    while (is_playing_ && it != one_off_tasks_.end() &&
+           it->first.first == position_) {
       const auto success = infos_.erase(it->first.second) == 1;
       assert(success);
       it->second->Process();
@@ -108,7 +112,8 @@ void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
   }
   // Process recurring tasks.
   auto it = GetNextRecurringTask();
-  while (it != recurring_tasks_.end() && it->first.first <= position_) {
+  while (is_playing_ && it != recurring_tasks_.end() &&
+         it->first.first == position_) {
     it->second->Process();
     last_processed_position_ = it->first.first;
     ++it;
@@ -193,42 +198,24 @@ Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
   return Status::kNotFound;
 }
 
-void Performer::Start() noexcept { is_playing_ = true; }
+void Performer::Start() noexcept {
+  last_processed_position_ = std::nullopt;
+  is_playing_ = true;
+}
 
 void Performer::Stop() noexcept { is_playing_ = false; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::Update(double duration) noexcept {
   if (is_playing_) {
-    assert(duration >= 0.0 && duration <= GetDurationToNextTask());
+    assert(duration >= 0.0 &&
+           (!GetDurationToNextTask() || duration <= *GetDurationToNextTask()));
     SetPosition(position_ + duration);
   }
 }
 
-void Performer::UpdateToNextTask() noexcept {
-  std::optional<double> next_task_position = std::nullopt;
-
-  // Check recurring tasks.
-  if (const auto next_recurring_task = GetNextRecurringTask();
-      next_recurring_task != recurring_tasks_.end()) {
-    next_task_position = next_recurring_task->first.first;
-    if (is_looping_ && (*next_task_position < position_ ||
-                        next_task_position == last_processed_position_)) {
-      *next_task_position += loop_length_;
-    }
-  }
-  // Check one-off tasks.
-  if (!one_off_tasks_.empty() &&
-      (!next_task_position ||
-       one_off_tasks_.begin()->first.first < *next_task_position)) {
-    next_task_position = one_off_tasks_.begin()->first.first;
-  }
-
-  assert(next_task_position);
-  SetPosition(*next_task_position);
-}
-
-TaskMap::const_iterator Performer::GetNextRecurringTask() const noexcept {
+Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
+    const noexcept {
   auto it = recurring_tasks_.lower_bound(std::pair{position_, kInvalid});
   if (last_processed_position_) {
     // Skip processed tasks.

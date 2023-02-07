@@ -467,40 +467,11 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
 BARELY_EXPORT BarelyStatus
 BarelyMusician_Create(BarelyMusicianHandle* out_handle);
 
-/// Creates new musician task at position.
-///
-/// @param handle Musician handle.
-/// @param definition Task definition.
-/// @param timestamp Task timestamp in seconds.
-/// @param user_data Pointer to user data.
-/// @param out_task_id Output task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_CreateTask(
-    BarelyMusicianHandle handle, BarelyTaskDefinition definition,
-    double timestamp, void* user_data, BarelyId* out_task_id);
-
 /// Destroys musician.
 ///
 /// @param handle Musician handle.
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle);
-
-/// Destroys musician task.
-///
-/// @param handle Musician handle.
-/// @param task_id Task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_DestroyTask(BarelyMusicianHandle handle, BarelyId task_id);
-
-/// Gets task timestamp.
-///
-/// @param handle Musician handle.
-/// @param task_id Task identifier.
-/// @param out_timestamp Output timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetTaskTimestamp(
-    BarelyMusicianHandle handle, BarelyId task_id, double* out_timestamp);
 
 /// Gets musician tempo.
 ///
@@ -517,15 +488,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus
 BarelyMusician_GetTimestamp(BarelyMusicianHandle handle, double* out_timestamp);
-
-/// Sets musician task timestamp.
-///
-/// @param handle Musician handle.
-/// @param task_id Task identiier.
-/// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_SetTaskTimestamp(
-    BarelyMusicianHandle handle, BarelyId task_id, double timestamp);
 
 /// Sets musician tempo.
 ///
@@ -1608,44 +1570,6 @@ class Performer {
 /// Musician.
 class Musician {
  public:
-  /// Task reference.
-  class TaskReference {
-   public:
-    /// Returns timestamp.
-    ///
-    /// @return Timestamp in seconds, or error status.
-    [[nodiscard]] StatusOr<double> GetTimestamp() const noexcept {
-      double timestamp = 0.0;
-      if (const Status status =
-              BarelyMusician_GetTaskTimestamp(handle_, id_, &timestamp);
-          !status.IsOk()) {
-        return status;
-      }
-      return timestamp;
-    }
-
-    /// Sets timestamp.
-    ///
-    /// @param timestamp Timestamp in seconds.
-    /// @return Status.
-    Status SetTimestamp(double timestamp) noexcept {
-      return BarelyMusician_SetTaskTimestamp(handle_, id_, timestamp);
-    }
-
-   private:
-    friend class Musician;
-
-    // Constructs new `TaskReference`.
-    explicit TaskReference(BarelyMusicianHandle handle, BarelyId id) noexcept
-        : handle_(handle), id_(id) {}
-
-    // Internal musician handle.
-    BarelyMusicianHandle handle_ = nullptr;
-
-    // Identifier.
-    BarelyId id_ = BarelyId_kInvalid;
-  };
-
   /// Constructs new `Musician`.
   Musician() noexcept {
     [[maybe_unused]] const Status status = BarelyMusician_Create(&handle_);
@@ -1701,51 +1625,6 @@ class Musician {
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer(int order = 0) noexcept {
     return Performer(handle_, order);
-  }
-
-  /// Creates new task at timestamp.
-  ///
-  /// @param definition Task definition.
-  /// @param timestamp Task timestamp in seconds.
-  /// @param user_data Pointer to user data.
-  /// @return Task reference.
-  TaskReference CreateTask(TaskDefinition definition, double timestamp,
-                           void* user_data = nullptr) noexcept {
-    BarelyId task_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelyMusician_CreateTask(
-        handle_, definition, timestamp, user_data, &task_id);
-    assert(status.IsOk());
-    return TaskReference(handle_, task_id);
-  }
-
-  /// Creates new task with callback.
-  ///
-  /// @param callback Task callback.
-  /// @param timestamp Task timestamp in seconds.
-  /// @return Task reference.
-  TaskReference CreateTask(TaskCallback callback, double timestamp) noexcept {
-    return CreateTask(
-        TaskDefinition(
-            [](void** state, void* user_data) {
-              *state = new TaskCallback(
-                  std::move(*static_cast<TaskCallback*>(user_data)));
-            },
-            [](void** state) { delete static_cast<TaskCallback*>(*state); },
-            [](void** state) {
-              if (const auto& callback = *static_cast<TaskCallback*>(*state);
-                  callback) {
-                callback();
-              }
-            }),
-        timestamp, static_cast<void*>(&callback));
-  }
-
-  /// Destroys task.
-  ///
-  /// @param task_ref Task reference.
-  /// @return Status.
-  Status DestroyTask(TaskReference task_ref) noexcept {
-    return BarelyMusician_DestroyTask(handle_, task_ref.id_);
   }
 
   /// Returns tempo.

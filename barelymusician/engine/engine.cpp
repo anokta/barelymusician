@@ -3,8 +3,6 @@
 
 #include <cassert>
 #include <functional>
-#include <iostream>
-#include <unordered_set>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -65,20 +63,6 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
   return performer_or.GetErrorStatus();
 }
 
-StatusOr<Id> Engine::CreateTask(TaskDefinition definition, double timestamp,
-                                void* user_data) noexcept {
-  if (timestamp < timestamp_) return {Status::kInvalidArgument};
-  const Id task_id = GenerateNextId();
-  auto success = task_timestamps_.emplace(task_id, timestamp).second;
-  assert(success);
-  success = tasks_
-                .emplace(std::pair{timestamp, task_id},
-                         std::make_unique<Task>(definition, user_data))
-                .second;
-  assert(success);
-  return task_id;
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Status Engine::DestroyInstrument(Id instrument_id) noexcept {
   if (instrument_id == kInvalid) return Status::kInvalidArgument;
@@ -107,19 +91,6 @@ Status Engine::DestroyPerformer(Id performer_id) noexcept {
   return Status::kNotFound;
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Status Engine::DestroyTask(Id task_id) noexcept {
-  if (task_id == kInvalid) return Status::kInvalidArgument;
-  if (const auto it = task_timestamps_.find(task_id);
-      it != task_timestamps_.end()) {
-    const auto success = tasks_.erase(std::pair{it->second, task_id}) == 1;
-    assert(success);
-    task_timestamps_.erase(it);
-    return Status::kOk;
-  }
-  return Status::kNotFound;
-}
-
 StatusOr<std::reference_wrapper<Instrument>> Engine::GetInstrument(
     Id instrument_id) noexcept {
   if (instrument_id == kInvalid) return {Status::kInvalidArgument};
@@ -134,14 +105,6 @@ StatusOr<std::reference_wrapper<Performer>> Engine::GetPerformer(
   if (performer_id == kInvalid) return {Status::kInvalidArgument};
   if (auto* performer_ref = FindOrNull(performer_refs_, performer_id)) {
     return performer_ref->second;
-  }
-  return {Status::kNotFound};
-}
-
-StatusOr<double> Engine::GetTaskTimestamp(Id task_id) const noexcept {
-  if (task_id == kInvalid) return Status::kInvalidArgument;
-  if (const auto* task_timestamp = FindOrNull(task_timestamps_, task_id)) {
-    return *task_timestamp;
   }
   return {Status::kNotFound};
 }
@@ -171,22 +134,6 @@ Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
   return Status::kNotFound;
 }
 
-Status Engine::SetTaskTimestamp(Id task_id, double timestamp) noexcept {
-  if (task_id == kInvalid) return Status::kInvalidArgument;
-  if (const auto it = task_timestamps_.find(task_id);
-      it != task_timestamps_.end()) {
-    auto& current_timestamp = it->second;
-    if (current_timestamp != timestamp) {
-      auto node = tasks_.extract(std::pair{current_timestamp, task_id});
-      node.key().first = timestamp;
-      tasks_.insert(std::move(node));
-      current_timestamp = timestamp;
-    }
-    return Status::kOk;
-  }
-  return Status::kNotFound;
-}
-
 void Engine::SetTempo(double tempo) noexcept {
   tempo = std::max(tempo, 0.0);
   if (tempo_ == tempo) return;
@@ -203,77 +150,31 @@ void Engine::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
       double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
-      std::unordered_set<Id> performer_ids_to_process;
+
+      bool has_tasks_to_process = false;
       for (const auto& [order_id_pair, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
-            maybe_duration && *maybe_duration <= update_duration) {
-          if (*maybe_duration < update_duration) {
-            update_duration = *maybe_duration;
-            std::exchange(performer_ids_to_process, {order_id_pair.second});
-          } else {
-            performer_ids_to_process.emplace(order_id_pair.second);
-          }
-        }
-      }
-
-      double next_timestamp =
-          timestamp_ + SecondsFromBeats(tempo_, update_duration);
-
-      bool has_tasks = false;
-      if (!tasks_.empty() && tasks_.begin()->first.first <= next_timestamp) {
-        has_tasks = true;
-        if (tasks_.begin()->first.first < next_timestamp) {
-          next_timestamp = tasks_.begin()->first.first;
-          update_duration =
-              BeatsFromSeconds(tempo_, next_timestamp - timestamp_);
-          performer_ids_to_process.clear();
+            maybe_duration && *maybe_duration < update_duration) {
+          has_tasks_to_process = true;
+          update_duration = *maybe_duration;
         }
       }
 
       for (auto& [order_id_pair, performer] : performers_) {
-        if (performer_ids_to_process.find(order_id_pair.second) !=
-            performer_ids_to_process.end()) {
-          performer.UpdateToNextTask();
-        } else {
-          performer.Update(update_duration);
-        }
-      }
-      if (next_timestamp > timestamp_) {
-        timestamp_ = next_timestamp;
-        for (auto& [instrument_id, instrument] : instruments_) {
-          instrument->Update(timestamp_);
-        }
+        performer.Update(update_duration);
       }
 
-      if (has_tasks) {
-        auto it = tasks_.begin();
-        while (it != tasks_.end() && it->first.first <= next_timestamp) {
-          it->second->Process();
-          ++it;
-        }
-        tasks_.erase(tasks_.begin(), it);
+      timestamp_ += SecondsFromBeats(tempo_, update_duration);
+      for (auto& [instrument_id, instrument] : instruments_) {
+        instrument->Update(timestamp_);
       }
 
-      if (!performer_ids_to_process.empty()) {
+      if (has_tasks_to_process && timestamp_ < timestamp) {
         for (auto& [order_id_pair, performer] : performers_) {
-          if (performer_ids_to_process.find(order_id_pair.second) !=
-              performer_ids_to_process.end()) {
-            performer.ProcessAllTasksAtCurrentPosition();
-          }
+          performer.ProcessAllTasksAtCurrentPosition();
         }
       }
     } else {
-      // Playback is stopped.
-      auto it = tasks_.begin();
-      while (it != tasks_.end() && it->first.first < timestamp) {
-        timestamp_ = it->first.first;
-        for (auto& [instrument_id, instrument] : instruments_) {
-          instrument->Update(timestamp_);
-        }
-        it->second->Process();
-        ++it;
-      }
-      tasks_.erase(tasks_.begin(), it);
       timestamp_ = timestamp;
       for (auto& [instrument_id, instrument] : instruments_) {
         instrument->Update(timestamp_);

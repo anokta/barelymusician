@@ -112,10 +112,10 @@ class Performer {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double duration) noexcept;
 
-  /// Updates performer to next task position.
-  void UpdateToNextTask() noexcept;
-
  private:
+  // Task map alias.
+  using TaskMap = std::map<std::pair<double, Id>, std::unique_ptr<Task>>;
+
   // Task info.
   struct TaskInfo {
     // Position.

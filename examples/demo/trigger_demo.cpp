@@ -84,7 +84,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::vector<std::pair<double, double>> triggers;
 
   Performer performer = musician.CreatePerformer();
-  performer.SetLooping(true);
 
   const auto play_note_fn = [&](int scale_index,
                                 double duration) -> TaskCallback {
@@ -94,10 +93,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
     return [&instrument, &performer, duration, pitch]() {
       instrument.SetNoteOn(pitch);
       performer.CreateTask(
-          [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
           performer.GetPosition() + duration, TaskType::kOneOff);
     };
   };
+
+  // Stopper.
+  auto stopper =
+      performer.CreateTask([&performer]() { performer.Stop(); }, 0.0);
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
@@ -142,9 +145,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
         index >= 0 && index < static_cast<int>(triggers.size())) {
       performer.Stop();
       instrument.SetAllNotesOff();
-      performer.SetLoopBeginPosition(triggers[index].first);
-      performer.SetLoopLength(triggers[index].second);
       performer.SetPosition(triggers[index].first);
+      stopper.SetPosition(triggers[index].first + triggers[index].second);
       performer.Start();
       return;
     }

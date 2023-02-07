@@ -50,6 +50,9 @@ struct NoteOffMessage {
 struct NoteOnMessage {
   /// Pitch.
   double pitch;
+
+  /// Intensity.
+  double intensity;
 };
 
 /// Message alias.

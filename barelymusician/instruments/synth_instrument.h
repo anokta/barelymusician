@@ -25,12 +25,6 @@ enum class SynthControl : int {
   kVoiceCount = 5,
 };
 
-/// Synth note control.
-enum class SynthNoteControl : int {
-  /// Intensity.
-  kIntensity = 0,
-};
-
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public GenericInstrument {
  public:
@@ -47,7 +41,7 @@ class SynthInstrument : public GenericInstrument {
   void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
                       double /*slope_per_frame*/) noexcept override {}
   void SetNoteOff(double pitch) noexcept override;
-  void SetNoteOn(double pitch) noexcept override;
+  void SetNoteOn(double pitch, double intensity) noexcept override;
 
   /// Returns instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;

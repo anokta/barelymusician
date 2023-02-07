@@ -67,11 +67,10 @@ void PercussionInstrument::SetNoteOff(double pitch) noexcept {
   }
 }
 
-void PercussionInstrument::SetNoteOn(double pitch) noexcept {
+void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   for (auto& pad : pads_) {
     if (pad.pitch == pitch) {
-      // TODO(#75): Use note controls instead.
-      pad.voice.set_gain(1.0);
+      pad.voice.set_gain(intensity);
       pad.voice.Start();
       break;
     }

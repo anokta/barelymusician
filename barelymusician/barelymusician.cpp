@@ -290,12 +290,13 @@ BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
 }
 
 BarelyStatus BarelyInstrument_SetNoteOn(BarelyMusicianHandle handle,
-                                        BarelyId instrument_id, double pitch) {
+                                        BarelyId instrument_id, double pitch,
+                                        double intensity) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
   if (instrument_or.IsOk()) {
-    instrument_or->get().SetNoteOn(pitch);
+    instrument_or->get().SetNoteOn(pitch, intensity);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
@@ -310,7 +311,9 @@ BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
   if (instrument_or.IsOk()) {
     if (callback) {
       instrument_or->get().SetNoteOnEventCallback(
-          [callback, user_data](double pitch) { callback(pitch, user_data); });
+          [callback, user_data](double pitch, double intensity) {
+            callback(pitch, intensity, user_data);
+          });
     } else {
       instrument_or->get().SetNoteOnEventCallback(nullptr);
     }

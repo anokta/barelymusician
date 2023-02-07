@@ -101,8 +101,10 @@ typedef void (*BarelyInstrument_NoteOffEventCallback)(double pitch,
 /// Instrument note on event callback signature.
 ///
 /// @param pitch Note pitch.
+/// @param intensity Note intensity.
 /// @param user_data Pointer to user data.
 typedef void (*BarelyInstrument_NoteOnEventCallback)(double pitch,
+                                                     double intensity,
                                                      void* user_data);
 
 /// Instrument definition create callback signature.
@@ -167,8 +169,10 @@ typedef void (*BarelyInstrumentDefinition_SetNoteOffCallback)(void** state,
 ///
 /// @param state Pointer to instrument state.
 /// @param pitch Note pitch.
+/// @param intensity Note intensity.
 typedef void (*BarelyInstrumentDefinition_SetNoteOnCallback)(void** state,
-                                                             double pitch);
+                                                             double pitch,
+                                                             double intensity);
 
 /// Task definition create callback signature.
 ///
@@ -445,9 +449,11 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
 /// @param pitch Note pitch.
+/// @param intensity Note intensity.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOn(
-    BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
+BARELY_EXPORT BarelyStatus
+BarelyInstrument_SetNoteOn(BarelyMusicianHandle handle, BarelyId instrument_id,
+                           double pitch, double intensity);
 
 /// Sets instrument note on event callback.
 ///
@@ -1031,7 +1037,9 @@ class Instrument {
   /// Note on event callback signature.
   ///
   /// @param pitch Note pitch.
-  using NoteOnEventCallback = std::function<void(double pitch)>;
+  /// @param intensity Note intensity.
+  using NoteOnEventCallback =
+      std::function<void(double pitch, double intensity)>;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept {
@@ -1300,9 +1308,10 @@ class Instrument {
   /// Sets note on.
   ///
   /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
   /// @return Status.
-  Status SetNoteOn(double pitch) noexcept {
-    return BarelyInstrument_SetNoteOn(handle_, id_, pitch);
+  Status SetNoteOn(double pitch, double intensity = 1.0) noexcept {
+    return BarelyInstrument_SetNoteOn(handle_, id_, pitch, intensity);
   }
 
   /// Sets note on event callback.
@@ -1314,8 +1323,8 @@ class Instrument {
       note_on_event_callback_ = std::move(callback);
       return BarelyInstrument_SetNoteOnEventCallback(
           handle_, id_,
-          [](double pitch, void* user_data) {
-            (*static_cast<NoteOnEventCallback*>(user_data))(pitch);
+          [](double pitch, double intensity, void* user_data) {
+            (*static_cast<NoteOnEventCallback*>(user_data))(pitch, intensity);
           },
           static_cast<void*>(&note_on_event_callback_));
     }

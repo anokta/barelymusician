@@ -77,12 +77,13 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double position = get_position_fn(midi_event.tick);
       const double duration = get_position_fn(midi_event.getTickDuration());
       const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
-      // TODO(#109): Reenable intensity.
-      // const double intensity =
-      //     static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
+      const double intensity =
+          static_cast<double>(midi_event.getVelocity()) / kMaxVelocity;
       performer.CreateTask(
-          [&instrument, pitch]() { instrument.SetNoteOn(pitch); }, position,
-          TaskType::kOneOff);
+          [&instrument, pitch, intensity]() {
+            instrument.SetNoteOn(pitch, intensity);
+          },
+          position, TaskType::kOneOff);
       performer.CreateTask(
           [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
           position + duration, TaskType::kOneOff);
@@ -134,10 +135,12 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set instrument.
     const auto track_index = tracks.size();
-    instrument.SetNoteOnEventCallback([track_index](double pitch) {
-      ConsoleLog() << "MIDI track #" << track_index << ": NoteOn("
-                   << MidiKeyNumberFromPitch(pitch) << ")";
-    });
+    instrument.SetNoteOnEventCallback(
+        [track_index](double pitch, double intensity) {
+          ConsoleLog() << "MIDI track #" << track_index << ": NoteOn("
+                       << MidiKeyNumberFromPitch(pitch) << ", "
+                       << std::setprecision(2) << intensity << ")";
+        });
     instrument.SetNoteOffEventCallback([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index << ": NoteOff("
                    << MidiKeyNumberFromPitch(pitch) << ") ";

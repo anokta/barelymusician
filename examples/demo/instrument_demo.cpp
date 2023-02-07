@@ -71,8 +71,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEventCallback(
-      [](double pitch) { ConsoleLog() << "NoteOn(" << pitch << ")"; });
+  instrument.SetNoteOnEventCallback([](double pitch, double intensity) {
+    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
+  });
   instrument.SetNoteOffEventCallback(
       [](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
 

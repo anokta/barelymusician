@@ -71,12 +71,11 @@ void SamplerInstrument::SetNoteOff(double pitch) noexcept {
   voice_.Stop(pitch);
 }
 
-void SamplerInstrument::SetNoteOn(double pitch) noexcept {
+void SamplerInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   const double speed = std::pow(2.0, pitch - root_pitch_);
-  voice_.Start(pitch, [speed](SamplerVoice* voice) noexcept {
+  voice_.Start(pitch, [speed, intensity](SamplerVoice* voice) noexcept {
     voice->generator().SetSpeed(speed);
-    // TODO(#75): Use note controls instead.
-    voice->set_gain(1.0);
+    voice->set_gain(intensity);
   });
 }
 

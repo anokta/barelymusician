@@ -151,8 +151,9 @@ class Instrument {
   /// Sets note on.
   ///
   /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetNoteOn(double pitch) noexcept;
+  void SetNoteOn(double pitch, double intensity) noexcept;
 
   /// Sets note on event callback.
   ///

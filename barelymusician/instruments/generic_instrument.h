@@ -53,7 +53,8 @@ class GenericInstrument {
   /// Sets note on.
   ///
   /// @param pitch Note pitch.
-  virtual void SetNoteOn(double pitch) noexcept = 0;
+  /// @param intensity Note intensity.
+  virtual void SetNoteOn(double pitch, double intensity) noexcept = 0;
 };
 
 /// Returns instrument definition for `GenericInstrumentType`.
@@ -93,9 +94,9 @@ InstrumentDefinition GetInstrumentDefinition(
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
         instrument->SetNoteOff(pitch);
       },
-      [](void** state, double pitch) noexcept {
+      [](void** state, double pitch, double intensity) noexcept {
         auto* instrument = static_cast<GenericInstrumentType*>(*state);
-        instrument->SetNoteOn(pitch);
+        instrument->SetNoteOn(pitch, intensity);
       },
       control_definitions, note_control_definitions);
 }

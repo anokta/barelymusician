@@ -145,7 +145,8 @@ void Instrument::Process(double* output_samples, int output_channel_count,
                    },
                    [this](NoteOnMessage& note_on_message) noexcept {
                      if (set_note_on_callback_) {
-                       set_note_on_callback_(&state_, note_on_message.pitch);
+                       set_note_on_callback_(&state_, note_on_message.pitch,
+                                             note_on_message.intensity);
                      }
                    }},
                message->second);
@@ -297,12 +298,12 @@ void Instrument::SetNoteOffEventCallback(
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::SetNoteOn(double pitch) noexcept {
+void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
   if (note_controls_.try_emplace(pitch, default_note_controls_).second) {
     if (note_on_event_callback_) {
-      note_on_event_callback_(pitch);
+      note_on_event_callback_(pitch, intensity);
     }
-    message_queue_.Add(timestamp_, NoteOnMessage{pitch});
+    message_queue_.Add(timestamp_, NoteOnMessage{pitch, intensity});
   }
 }
 

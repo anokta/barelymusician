@@ -71,7 +71,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetNoteOnEventCallback([](double pitch) {
+  instrument.SetNoteOnEventCallback([](double pitch, double /*intensity*/) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });
 

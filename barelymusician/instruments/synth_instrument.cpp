@@ -60,11 +60,10 @@ void SynthInstrument::SetControl(int index, double value,
 
 void SynthInstrument::SetNoteOff(double pitch) noexcept { voice_.Stop(pitch); }
 
-void SynthInstrument::SetNoteOn(double pitch) noexcept {
-  voice_.Start(pitch, [pitch](SynthVoice* voice) {
+void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
+  voice_.Start(pitch, [pitch, intensity](SynthVoice* voice) {
     voice->generator().SetFrequency(GetFrequency(pitch));
-    // TODO(#75): Use note controls instead.
-    voice->set_gain(1.0);
+    voice->set_gain(intensity);
   });
 }
 

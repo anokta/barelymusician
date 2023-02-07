@@ -3,17 +3,18 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/composition/metronome.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
-#include "examples/performers/metronome.h"
 
 namespace {
 
 using ::barely::Instrument;
+using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthControl;
@@ -22,7 +23,6 @@ using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
-using ::barely::examples::Metronome;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -67,7 +67,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
   // Add beat event.
-  Metronome metronome(musician.CreatePerformer());
+  Metronome metronome(musician);
   metronome.SetBeatCallback([&](int beat) {
     ConsoleLog() << "Tick " << (beat / kBeatCount) << "."
                  << (beat % kBeatCount);

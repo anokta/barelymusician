@@ -1,19 +1,21 @@
-#include "examples/performers/metronome.h"
+#include "barelymusician/composition/metronome.h"
 
 #include <utility>
 
-namespace barely::examples {
+#include "barelymusician/barelymusician.h"
+
+namespace barely {
 
 namespace {
 
-// Default metronome priority.
-constexpr int kPriority = -1;
+// Default metronome order.
+constexpr int kOrder = -1;
 
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Metronome::Metronome(Performer&& performer) noexcept
-    : performer_(std::move(performer)) {
+Metronome::Metronome(Musician& musician) noexcept
+    : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
   performer_.CreateTask(
@@ -23,7 +25,7 @@ Metronome::Metronome(Performer&& performer) noexcept
         }
         ++beat_;
       },
-      0.0);
+      0.0, TaskType::kRecurring, kOrder);
 }
 
 bool Metronome::IsPlaying() const noexcept { return performer_.IsPlaying(); }
@@ -42,4 +44,4 @@ void Metronome::Start() noexcept { performer_.Start(); }
 
 void Metronome::Stop() noexcept { performer_.Stop(); }
 
-}  // namespace barely::examples
+}  // namespace barely

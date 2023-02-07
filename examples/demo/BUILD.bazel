@@ -10,11 +10,11 @@ package(default_visibility = ["//visibility:public"])
 #     deps = [
 #         "//barelymusician",
 #         "//barelymusician/common:random",
+#         "//barelymusician/composition:metronome",
 #         "//barelymusician/composition:note_duration",
 #         "//barelymusician/composition:note_pitch",
 #         "//barelymusician/instruments:percussion_instrument",
 #         "//barelymusician/instruments:synth_instrument",
-#         "//barelymusician/sequencers:metronome",
 #         "//examples/common:audio_clock",
 #         "//examples/common:audio_output",
 #         "//examples/common:console_log",
@@ -42,13 +42,13 @@ cc_binary(
     srcs = ["metronome_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/composition:metronome",
         "//barelymusician/composition:note_pitch",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
         "//examples/common:console_log",
         "//examples/common:input_manager",
-        "//examples/performers:metronome",
     ],
 )
 

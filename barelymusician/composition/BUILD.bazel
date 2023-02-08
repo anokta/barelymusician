@@ -3,15 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "metronome",
-    srcs = ["metronome.cpp"],
-    hdrs = ["metronome.h"],
-    deps = [
-        "//barelymusician",
-    ],
-)
-
-cc_library(
     name = "note_duration",
     srcs = ["note_duration.cpp"],
     hdrs = ["note_duration.h"],

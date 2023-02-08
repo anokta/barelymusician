@@ -1648,6 +1648,15 @@ class Musician {
     return *this;
   }
 
+  /// Creates new musician component.
+  ///
+  /// @param args Component arguments.
+  /// @return Component.
+  template <class ComponentType, typename... Args>
+  [[nodiscard]] ComponentType CreateComponent(Args&&... args) {
+    return ComponentType(*this, args...);
+  }
+
   /// Creates new instrument.
   ///
   /// @param definition Instrument definition.

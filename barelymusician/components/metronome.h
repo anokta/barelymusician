@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_METRONOME_H_
-#define BARELYMUSICIAN_COMPOSITION_METRONOME_H_
+#ifndef BARELYMUSICIAN_COMPONENTS_METRONOME_H_
+#define BARELYMUSICIAN_COMPONENTS_METRONOME_H_
 
 #include <functional>
 
@@ -14,12 +14,6 @@ class Metronome {
   ///
   /// @param beat Beat.
   using BeatCallback = std::function<void(int beat)>;
-
-  /// Creates new `Metronome`.
-  ///
-  /// @param Musician musician.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Metronome(Musician& musician) noexcept;
 
   /// Returns whether metronome is playing or not.
   ///
@@ -41,6 +35,12 @@ class Metronome {
   void Stop() noexcept;
 
  private:
+  friend Metronome Musician::CreateComponent();
+
+  // Creates new `Metronome`.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  explicit Metronome(Musician& musician) noexcept;
+
   // Metonome performer.
   Performer performer_;
 
@@ -53,4 +53,4 @@ class Metronome {
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMPOSITION_METRONOME_H_
+#endif  // BARELYMUSICIAN_COMPONENTS_METRONOME_H_

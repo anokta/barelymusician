@@ -3,7 +3,7 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/metronome.h"
+#include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/note_pitch.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
@@ -67,7 +67,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
   // Add beat event.
-  Metronome metronome(musician);
+  Metronome metronome = musician.CreateComponent<Metronome>();
   metronome.SetBeatCallback([&](int beat) {
     ConsoleLog() << "Tick " << (beat / kBeatCount) << "."
                  << (beat % kBeatCount);

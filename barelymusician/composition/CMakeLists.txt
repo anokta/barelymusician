@@ -1,14 +1,4 @@
 add_library(
-  metronome
-  metronome.cpp
-  metronome.h
-)
-target_link_libraries(
-  metronome
-  barelymusician
-)
-
-add_library(
   note_duration
   note_duration.cpp
   note_duration.h

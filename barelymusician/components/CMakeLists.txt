@@ -1,0 +1,9 @@
+add_library(
+  metronome
+  metronome.cpp
+  metronome.h
+)
+target_link_libraries(
+  metronome
+  barelymusician
+)

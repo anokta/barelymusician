@@ -94,10 +94,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
     };
   };
 
-  // Stopper.
-  auto stopper =
-      performer.CreateTask([&performer]() { performer.Stop(); }, 0.0);
-
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
   performer.CreateTask(play_note_fn(0, 1.0), 0.0);
@@ -119,6 +115,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
   performer.CreateTask(play_note_fn(8, 2.0), 5.0);
+
+  // Stopper.
+  auto stopper = performer.CreateTask([&performer]() { performer.Stop(); }, 0.0,
+                                      TaskType::kRecurring, -1);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {

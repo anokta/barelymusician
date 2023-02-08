@@ -34,6 +34,10 @@ add_library(
   gain_processor.cpp
   gain_processor.h
 )
+target_link_libraries(
+  gain_processor
+  dsp_utils
+)
 
 add_library(
   generator INTERFACE

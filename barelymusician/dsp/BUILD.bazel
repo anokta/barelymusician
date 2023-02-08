@@ -35,6 +35,9 @@ cc_library(
     name = "gain_processor",
     srcs = ["gain_processor.cpp"],
     hdrs = ["gain_processor.h"],
+    deps = [
+        ":dsp_utils",
+    ],
 )
 
 cc_library(

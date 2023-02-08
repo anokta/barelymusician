@@ -1648,7 +1648,7 @@ class Musician {
     return *this;
   }
 
-  /// Creates new musician component.
+  /// Creates new component.
   ///
   /// @param args Component arguments.
   /// @return Component.

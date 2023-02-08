@@ -155,26 +155,32 @@ void Engine::Update(double timestamp) noexcept {
       double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
 
       bool has_tasks_to_process = false;
+      int order = std::numeric_limits<int>::max();
       for (const auto& [performer_id, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
-            maybe_duration && *maybe_duration < update_duration) {
+            maybe_duration && (maybe_duration->first < update_duration ||
+                               (maybe_duration->first == update_duration &&
+                                maybe_duration->second < order))) {
           has_tasks_to_process = true;
-          update_duration = *maybe_duration;
+          update_duration = maybe_duration->first;
+          order = maybe_duration->second;
         }
       }
 
-      for (auto& [performer_id, performer] : performers_) {
-        performer.Update(update_duration);
-      }
+      if (update_duration > 0) {
+        for (auto& [performer_id, performer] : performers_) {
+          performer.Update(update_duration);
+        }
 
-      timestamp_ += SecondsFromBeats(tempo_, update_duration);
-      for (auto& [instrument_id, instrument] : instruments_) {
-        instrument->Update(timestamp_);
+        timestamp_ += SecondsFromBeats(tempo_, update_duration);
+        for (auto& [instrument_id, instrument] : instruments_) {
+          instrument->Update(timestamp_);
+        }
       }
 
       if (has_tasks_to_process && timestamp_ < timestamp) {
         for (auto& [performer_id, performer] : performers_) {
-          performer.ProcessAllTasksAtCurrentPosition();
+          performer.ProcessNextTaskAtPosition();
         }
       }
     } else {

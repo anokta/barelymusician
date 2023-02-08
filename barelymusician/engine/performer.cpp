@@ -7,6 +7,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <tuple>
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
@@ -17,46 +18,48 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-// TOOD(#109): Implement order logic.
 void Performer::CreateTask(Id task_id, TaskDefinition definition,
-                           double position, TaskType type, int /*order*/,
+                           double position, TaskType type, int order,
                            void* user_data) noexcept {
   assert(task_id > kInvalid);
   assert(type != TaskType::kOneOff || position >= position_);
-  auto success = infos_.emplace(task_id, TaskInfo{position, type}).second;
+  auto success =
+      infos_.emplace(task_id, TaskInfo{position, type, order}).second;
   assert(success);
   success = (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
-                .emplace(std::pair{position, task_id},
+                .emplace(std::tuple{position, order, task_id},
                          std::make_unique<Task>(definition, user_data))
                 .second;
   assert(success);
 }
 
-std::optional<double> Performer::GetDurationToNextTask() const noexcept {
+std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
+    const noexcept {
   if (!is_playing_) {
     return std::nullopt;
   }
 
-  std::optional<double> next_task_position = std::nullopt;
+  std::optional<std::tuple<double, int, Id>> next_task_key = std::nullopt;
 
   // Check recurring tasks.
   if (const auto next_recurring_task = GetNextRecurringTask();
       next_recurring_task != recurring_tasks_.end()) {
-    next_task_position = next_recurring_task->first.first;
-    if (is_looping_ && (*next_task_position < position_ ||
+    next_task_key = next_recurring_task->first;
+    auto& next_task_position = std::get<0>(*next_task_key);
+    if (is_looping_ && (next_task_position < position_ ||
                         next_task_position == last_processed_position_)) {
-      *next_task_position += loop_length_;
+      next_task_position += loop_length_;
     }
   }
   // Check one-off tasks.
   if (!one_off_tasks_.empty() &&
-      (!next_task_position ||
-       one_off_tasks_.begin()->first.first < *next_task_position)) {
-    next_task_position = one_off_tasks_.begin()->first.first;
+      (!next_task_key || one_off_tasks_.begin()->first <= *next_task_key)) {
+    next_task_key = one_off_tasks_.begin()->first;
   }
 
-  if (next_task_position) {
-    return *next_task_position - position_;
+  if (next_task_key) {
+    return std::pair{std::get<0>(*next_task_key) - position_,
+                     std::get<1>(*next_task_key)};
   }
   return std::nullopt;
 }
@@ -67,7 +70,8 @@ Status Performer::DestroyTask(Id task_id) noexcept {
     const auto success =
         (it->second.type == TaskType::kOneOff ? one_off_tasks_
                                               : recurring_tasks_)
-            .erase(std::pair{it->second.position, task_id}) == 1;
+            .erase(std::tuple{it->second.position, it->second.order,
+                              task_id}) == 1;
     assert(success);
     infos_.erase(it);
     return Status::Ok();
@@ -95,29 +99,24 @@ bool Performer::IsLooping() const noexcept { return is_looping_; }
 
 bool Performer::IsPlaying() const noexcept { return is_playing_; }
 
-void Performer::ProcessAllTasksAtCurrentPosition() noexcept {
+void Performer::ProcessNextTaskAtPosition() noexcept {
   if (!is_playing_) {
     return;
   }
-  // Process one-off tasks.
-  if (!one_off_tasks_.empty()) {
-    auto it = one_off_tasks_.begin();
-    while (is_playing_ && it != one_off_tasks_.end() &&
-           it->first.first == position_) {
-      const auto success = infos_.erase(it->first.second) == 1;
-      assert(success);
-      it->second->Process();
-      ++it;
-    }
-    one_off_tasks_.erase(one_off_tasks_.begin(), it);
-  }
-  // Process recurring tasks.
-  auto it = GetNextRecurringTask();
-  while (is_playing_ && it != recurring_tasks_.end() &&
-         it->first.first == position_) {
+  if (const auto it = one_off_tasks_.begin();
+      it != one_off_tasks_.end() && std::get<0>(it->first) == position_) {
+    // Process the next one-off task.
+    const auto success = infos_.erase(std::get<Id>(it->first)) == 1;
+    assert(success);
     it->second->Process();
-    last_processed_position_ = it->first.first;
-    ++it;
+    one_off_tasks_.erase(it);
+    return;
+  }
+  if (const auto it = GetNextRecurringTask();
+      it != recurring_tasks_.end() && std::get<0>(it->first) == position_) {
+    // Process the next recurring task.
+    it->second->Process();
+    last_processed_position_ = std::get<0>(it->first);
   }
 }
 
@@ -155,19 +154,20 @@ void Performer::SetPosition(double position) noexcept {
   last_processed_position_ = std::nullopt;
   one_off_tasks_.erase(
       one_off_tasks_.begin(),
-      one_off_tasks_.lower_bound(std::pair{
+      one_off_tasks_.lower_bound(std::tuple{
           is_looping_ ? std::min(position, loop_begin_position_ + loop_length_)
                       : position,
-          kInvalid}));
+          std::numeric_limits<int>::lowest(), kInvalid}));
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_tasks_.empty()) {
       // Reset all remaining one-off tasks back to the beginning.
       TaskMap remaining_one_off_tasks;
       for (auto& it : one_off_tasks_) {
         remaining_one_off_tasks.emplace(
-            std::pair{loop_begin_position_, it.first.second},
+            std::tuple{loop_begin_position_, std::numeric_limits<int>::lowest(),
+                       std::get<Id>(it.first)},
             std::move(it.second));
-        infos_.at(it.first.second).position = loop_begin_position_;
+        infos_.at(std::get<Id>(it.first)).position = loop_begin_position_;
       }
       one_off_tasks_.swap(remaining_one_off_tasks);
     }
@@ -181,7 +181,7 @@ void Performer::SetPosition(double position) noexcept {
 Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
   if (task_id == kInvalid) return Status::InvalidArgumentError();
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
-    auto& [current_position, type] = it->second;
+    auto& [current_position, type, order] = it->second;
     if (type == TaskType::kOneOff && position < position_) {
       // Position is in the past.
       return Status::InvalidArgumentError();
@@ -189,8 +189,8 @@ Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
     if (current_position != position) {
       auto& tasks =
           (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_);
-      auto node = tasks.extract(std::pair{current_position, task_id});
-      node.key().first = position;
+      auto node = tasks.extract(std::tuple{current_position, order, task_id});
+      std::get<0>(node.key()) = position;
       tasks.insert(std::move(node));
       current_position = position;
     }
@@ -209,26 +209,27 @@ void Performer::Stop() noexcept { is_playing_ = false; }
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::Update(double duration) noexcept {
   if (is_playing_) {
-    assert(duration >= 0.0 &&
-           (!GetDurationToNextTask() || duration <= *GetDurationToNextTask()));
+    assert(duration >= 0.0 && (!GetDurationToNextTask() ||
+                               duration <= GetDurationToNextTask()->first));
     SetPosition(position_ + duration);
   }
 }
 
 Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
     const noexcept {
-  auto it = recurring_tasks_.lower_bound(std::pair{position_, kInvalid});
+  auto it = recurring_tasks_.lower_bound(
+      std::tuple{position_, std::numeric_limits<int>::lowest(), kInvalid});
   if (last_processed_position_) {
     // Skip processed tasks.
     while (it != recurring_tasks_.end() &&
-           it->first.first == *last_processed_position_) {
+           std::get<0>(it->first) == *last_processed_position_) {
       ++it;
     }
   }
   if (it == recurring_tasks_.end() && is_looping_) {
     // Loop back to the beginning.
-    it =
-        recurring_tasks_.lower_bound(std::pair{loop_begin_position_, kInvalid});
+    it = recurring_tasks_.lower_bound(std::tuple{
+        loop_begin_position_, std::numeric_limits<int>::lowest(), kInvalid});
   }
   return it;
 }

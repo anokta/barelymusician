@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 
@@ -37,7 +38,8 @@ class Performer {
   /// Returns duration to next task.
   ///
   /// @return Duration in beats.
-  [[nodiscard]] std::optional<double> GetDurationToNextTask() const noexcept;
+  [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask()
+      const noexcept;
 
   /// Returns loop begin position.
   ///
@@ -70,8 +72,8 @@ class Performer {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept;
 
-  /// Processes all tasks at the current position.
-  void ProcessAllTasksAtCurrentPosition() noexcept;
+  /// Processes the next task at the current position.
+  void ProcessNextTaskAtPosition() noexcept;
 
   /// Sets loop begin position.
   ///
@@ -115,7 +117,7 @@ class Performer {
 
  private:
   // Task map alias.
-  using TaskMap = std::map<std::pair<double, Id>, std::unique_ptr<Task>>;
+  using TaskMap = std::map<std::tuple<double, int, Id>, std::unique_ptr<Task>>;
 
   // Task info.
   struct TaskInfo {
@@ -124,6 +126,9 @@ class Performer {
 
     // Type.
     TaskType type;
+
+    // Order.
+    int order;
   };
 
   // Returns an iterator to the next recurring task to process.

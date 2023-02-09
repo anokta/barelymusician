@@ -9,13 +9,17 @@ readonly API_DIR="${WORKSPACE}/barelymusician"
 readonly API_H_PATH="${API_DIR}/barelymusician.h"
 readonly API_CPP_PATH="${API_DIR}/barelymusician.cpp"
 
+readonly BLACK="\e[30m"
+readonly RED="\e[31m"
+readonly GREEN="\e[32m"
+
 main() {
   set -e
 
   echo "Parsing ${API_H_PATH}..."
   local declarations=$(
     sed -n '{N; s/^BARELY_EXPORT\s\+\w\+\s\+\(Barely[A-Za-z]\+_[A-Za-z]\+\)(.*/\1/p; D}' \
-      "${API_H_PATH}"
+    "${API_H_PATH}"
   )
   echo "${declarations}"
   LC_COLLATE=C sort -uc <<<${declarations[*]}
@@ -30,12 +34,12 @@ main() {
   echo "Comparing symbols..."
   local diff=$(echo ${declarations[@]} ${definitions[@]} | tr ' ' '\n' | sort | uniq -u)
   if [ ! -z "${diff}" ]; then
-    echo "Mismatching symbols were found:"
-    echo "${diff[@]}"
+    echo -e "${RED}Mismatching symbols were found:"
+    echo -e "${BLACK}${diff[@]}"
     exit 1
   fi
 
-  echo "Done!"
+  echo -e "${GREEN}Done!"
 }
 
 main

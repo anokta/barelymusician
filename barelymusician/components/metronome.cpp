@@ -8,8 +8,8 @@ namespace barely {
 
 namespace {
 
-// Default metronome order.
-constexpr int kOrder = -1;
+// Default metronome process order.
+constexpr int kDefaultProcessOrder = -1;
 
 }  // namespace
 
@@ -34,14 +34,14 @@ Metronome::Metronome(Musician& musician) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.CreateTask(
-      [this]() {
+  performer_.CreateRecurringTask(
+      [this]() noexcept {
         if (callback_) {
           callback_(beat_);
         }
         ++beat_;
       },
-      0.0, TaskType::kRecurring, kOrder);
+      0.0, kDefaultProcessOrder);
 }
 
 }  // namespace barely

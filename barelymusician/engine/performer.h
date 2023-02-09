@@ -22,12 +22,12 @@ class Performer {
   /// @param task_id Task identifier.
   /// @param definition Task definition.
   /// @param position Task position in beats.
-  /// @param type Task type.
-  /// @param order Task execution order.
+  /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
+  /// @param is_one_off True if one-off task, false if recurring task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void CreateTask(Id task_id, TaskDefinition definition, double position,
-                  TaskType type, int order, void* user_data) noexcept;
+                  int process_order, void* user_data, bool is_one_off) noexcept;
 
   /// Destroys task.
   ///
@@ -61,6 +61,12 @@ class Performer {
   /// @param task_id Task identifier.
   /// @return Position or error status.
   [[nodiscard]] StatusOr<double> GetTaskPosition(Id task_id) const noexcept;
+
+  /// Returns task process order.
+  ///
+  /// @param task_id Task identifier.
+  /// @return Process order or error status.
+  [[nodiscard]] StatusOr<int> GetTaskProcessOrder(Id task_id) const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -103,6 +109,13 @@ class Performer {
   /// @return Status.
   Status SetTaskPosition(Id task_id, double position) noexcept;
 
+  /// Sets task process order.
+  ///
+  /// @param task_id Task identifier.
+  /// @param process_order Task process order.
+  /// @return Status.
+  Status SetTaskProcessOrder(Id task_id, int process_order) noexcept;
+
   /// Stops performer.
   void Start() noexcept;
 
@@ -121,14 +134,14 @@ class Performer {
 
   // Task info.
   struct TaskInfo {
+    // True if one-off, false if recurring.
+    bool is_one_off;
+
     // Position.
     double position;
 
-    // Type.
-    TaskType type;
-
-    // Order.
-    int order;
+    // Process order.
+    int process_order;
   };
 
   // Returns an iterator to the next recurring task to process.

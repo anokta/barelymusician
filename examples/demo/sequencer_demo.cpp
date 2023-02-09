@@ -25,7 +25,6 @@ using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
 using ::barely::TaskCallback;
-using ::barely::TaskType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -82,9 +81,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto play_note_fn = [&](double duration, double pitch) -> TaskCallback {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
-      performer.CreateTask(
+      performer.CreateOneOffTask(
           [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-          performer.GetPosition() + duration, TaskType::kOneOff);
+          performer.GetPosition() + duration);
     };
   };
 
@@ -102,8 +101,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Performer::TaskReference> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, performer.CreateTask(callback, position,
-                                                TaskType::kRecurring));
+    tasks.emplace(index++, performer.CreateRecurringTask(callback, position));
   }
 
   // Audio process callback.
@@ -131,8 +129,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, performer.CreateTask(callback, position,
-                                                      TaskType::kRecurring));
+        tasks.emplace(index - 1,
+                      performer.CreateRecurringTask(callback, position));
         ConsoleLog() << "Added note " << index;
       }
       return;

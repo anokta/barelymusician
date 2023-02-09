@@ -19,15 +19,16 @@ namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::CreateTask(Id task_id, TaskDefinition definition,
-                           double position, TaskType type, int order,
-                           void* user_data) noexcept {
+                           double position, int process_order, void* user_data,
+                           bool is_one_off) noexcept {
   assert(task_id > kInvalid);
-  assert(type != TaskType::kOneOff || position >= position_);
+  assert(!is_one_off || position >= position_);
   auto success =
-      infos_.emplace(task_id, TaskInfo{position, type, order}).second;
+      infos_.emplace(task_id, TaskInfo{is_one_off, position, process_order})
+          .second;
   assert(success);
-  success = (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_)
-                .emplace(std::tuple{position, order, task_id},
+  success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
+                .emplace(std::tuple{position, process_order, task_id},
                          std::make_unique<Task>(definition, user_data))
                 .second;
   assert(success);
@@ -45,7 +46,7 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
   if (const auto next_recurring_task = GetNextRecurringTask();
       next_recurring_task != recurring_tasks_.end()) {
     next_task_key = next_recurring_task->first;
-    auto& next_task_position = std::get<0>(*next_task_key);
+    auto& next_task_position = std::get<double>(*next_task_key);
     if (is_looping_ && (next_task_position < position_ ||
                         next_task_position == last_processed_position_)) {
       next_task_position += loop_length_;
@@ -58,25 +59,24 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
   }
 
   if (next_task_key) {
-    return std::pair{std::get<0>(*next_task_key) - position_,
-                     std::get<1>(*next_task_key)};
+    return std::pair{std::get<double>(*next_task_key) - position_,
+                     std::get<int>(*next_task_key)};
   }
   return std::nullopt;
 }
 
 Status Performer::DestroyTask(Id task_id) noexcept {
-  if (task_id == kInvalid) return Status::InvalidArgumentError();
+  if (task_id == kInvalid) return Status::InvalidArgument();
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     const auto success =
-        (it->second.type == TaskType::kOneOff ? one_off_tasks_
-                                              : recurring_tasks_)
-            .erase(std::tuple{it->second.position, it->second.order,
+        (it->second.is_one_off ? one_off_tasks_ : recurring_tasks_)
+            .erase(std::tuple{it->second.position, it->second.process_order,
                               task_id}) == 1;
     assert(success);
     infos_.erase(it);
     return Status::Ok();
   }
-  return Status::NotFoundError();
+  return Status::NotFound();
 }
 
 double Performer::GetLoopBeginPosition() const noexcept {
@@ -88,11 +88,19 @@ double Performer::GetLoopLength() const noexcept { return loop_length_; }
 double Performer::GetPosition() const noexcept { return position_; }
 
 StatusOr<double> Performer::GetTaskPosition(Id task_id) const noexcept {
-  if (task_id == kInvalid) return Status::InvalidArgumentError();
+  if (task_id == kInvalid) return Status::InvalidArgument();
   if (const auto* info = FindOrNull(infos_, task_id)) {
     return info->position;
   }
-  return Status::NotFoundError();
+  return Status::NotFound();
+}
+
+StatusOr<int> Performer::GetTaskProcessOrder(Id task_id) const noexcept {
+  if (task_id == kInvalid) return Status::InvalidArgument();
+  if (const auto* info = FindOrNull(infos_, task_id)) {
+    return info->process_order;
+  }
+  return Status::NotFound();
 }
 
 bool Performer::IsLooping() const noexcept { return is_looping_; }
@@ -104,7 +112,7 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     return;
   }
   if (const auto it = one_off_tasks_.begin();
-      it != one_off_tasks_.end() && std::get<0>(it->first) == position_) {
+      it != one_off_tasks_.end() && std::get<double>(it->first) == position_) {
     // Process the next one-off task.
     const auto success = infos_.erase(std::get<Id>(it->first)) == 1;
     assert(success);
@@ -113,10 +121,11 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     return;
   }
   if (const auto it = GetNextRecurringTask();
-      it != recurring_tasks_.end() && std::get<0>(it->first) == position_) {
+      it != recurring_tasks_.end() &&
+      std::get<double>(it->first) == position_) {
     // Process the next recurring task.
     it->second->Process();
-    last_processed_position_ = std::get<0>(it->first);
+    last_processed_position_ = std::get<double>(it->first);
   }
 }
 
@@ -179,24 +188,40 @@ void Performer::SetPosition(double position) noexcept {
 }
 
 Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
-  if (task_id == kInvalid) return Status::InvalidArgumentError();
+  if (task_id == kInvalid) return Status::InvalidArgument();
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
-    auto& [current_position, type, order] = it->second;
-    if (type == TaskType::kOneOff && position < position_) {
+    auto& [is_one_off, current_position, order] = it->second;
+    if (is_one_off && position < position_) {
       // Position is in the past.
-      return Status::InvalidArgumentError();
+      return Status::InvalidArgument();
     }
     if (current_position != position) {
-      auto& tasks =
-          (type == TaskType::kOneOff ? one_off_tasks_ : recurring_tasks_);
+      auto& tasks = (is_one_off ? one_off_tasks_ : recurring_tasks_);
       auto node = tasks.extract(std::tuple{current_position, order, task_id});
-      std::get<0>(node.key()) = position;
+      std::get<double>(node.key()) = position;
       tasks.insert(std::move(node));
       current_position = position;
     }
     return Status::Ok();
   }
-  return Status::NotFoundError();
+  return Status::NotFound();
+}
+
+Status Performer::SetTaskProcessOrder(Id task_id, int process_order) noexcept {
+  if (task_id == kInvalid) return Status::InvalidArgument();
+  if (const auto it = infos_.find(task_id); it != infos_.end()) {
+    auto& [is_one_off, position, current_process_order] = it->second;
+    if (current_process_order != process_order) {
+      auto& tasks = (is_one_off ? one_off_tasks_ : recurring_tasks_);
+      auto node =
+          tasks.extract(std::tuple{position, current_process_order, task_id});
+      std::get<int>(node.key()) = process_order;
+      tasks.insert(std::move(node));
+      current_process_order = process_order;
+    }
+    return Status::Ok();
+  }
+  return Status::NotFound();
 }
 
 void Performer::Start() noexcept {
@@ -222,7 +247,7 @@ Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
   if (last_processed_position_) {
     // Skip processed tasks.
     while (it != recurring_tasks_.end() &&
-           std::get<0>(it->first) == *last_processed_position_) {
+           std::get<double>(it->first) == *last_processed_position_) {
       ++it;
     }
   }

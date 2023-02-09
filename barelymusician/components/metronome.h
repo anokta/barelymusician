@@ -35,7 +35,7 @@ class Metronome {
   void Stop() noexcept;
 
  private:
-  friend Metronome Musician::CreateComponent();
+  friend Metronome Musician::CreateComponent() noexcept;
 
   // Creates new `Metronome`.
   // NOLINTNEXTLINE(bugprone-exception-escape)

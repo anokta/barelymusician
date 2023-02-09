@@ -96,11 +96,10 @@ TEST(InstrumentTest, GetControl) {
   // Control does not exist.
   const auto invalid_control_or = instrument.GetControl(1);
   ASSERT_FALSE(invalid_control_or.IsOk());
-  EXPECT_EQ(invalid_control_or.GetErrorStatus(),
-            Status::InvalidArgumentError());
+  EXPECT_EQ(invalid_control_or.GetErrorStatus(), Status::InvalidArgument());
 
-  EXPECT_EQ(instrument.SetControl(1, 2.0, 0.0), Status::InvalidArgumentError());
-  EXPECT_EQ(instrument.ResetControl(1), Status::InvalidArgumentError());
+  EXPECT_EQ(instrument.SetControl(1, 2.0, 0.0), Status::InvalidArgument());
+  EXPECT_EQ(instrument.ResetControl(1), Status::InvalidArgument());
 }
 
 // Tests that instrument returns note control as expected.
@@ -159,12 +158,11 @@ TEST(InstrumentTest, GetNoteControl) {
   const auto invalid_note_control_or = instrument.GetNoteControl(kPitch, 1);
   ASSERT_FALSE(invalid_note_control_or.IsOk());
   EXPECT_EQ(invalid_note_control_or.GetErrorStatus(),
-            Status::InvalidArgumentError());
+            Status::InvalidArgument());
 
   EXPECT_EQ(instrument.SetNoteControl(kPitch, 1, 0.25, 0.0),
-            Status::InvalidArgumentError());
-  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 1),
-            Status::InvalidArgumentError());
+            Status::InvalidArgument());
+  EXPECT_EQ(instrument.ResetNoteControl(kPitch, 1), Status::InvalidArgument());
 
   instrument.SetNoteOff(kPitch);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));

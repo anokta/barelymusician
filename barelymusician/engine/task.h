@@ -9,9 +9,6 @@ namespace barely::internal {
 /// Task definition alias.
 using TaskDefinition = barely::TaskDefinition;
 
-/// Task type alias.
-using TaskType = barely::TaskType;
-
 /// Class that wraps task.
 class Task {
  public:

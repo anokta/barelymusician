@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <cstddef>
-#include <iostream>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -71,7 +70,7 @@ StatusOr<double> Instrument::GetControl(int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     return controls_[index].GetValue();
   }
-  return Status::InvalidArgumentError();
+  return Status::InvalidArgument();
 }
 
 StatusOr<double> Instrument::GetNoteControl(double pitch,
@@ -81,9 +80,9 @@ StatusOr<double> Instrument::GetNoteControl(double pitch,
     if (index >= 0 && index < static_cast<int>(note_controls->size())) {
       return (*note_controls)[index].GetValue();
     }
-    return Status::InvalidArgumentError();
+    return Status::InvalidArgument();
   }
-  return Status::NotFoundError();
+  return Status::NotFound();
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
@@ -185,7 +184,7 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
     }
     return Status::Ok();
   }
-  return Status::NotFoundError();
+  return Status::NotFound();
 }
 
 Status Instrument::ResetControl(int index) noexcept {
@@ -199,7 +198,7 @@ Status Instrument::ResetControl(int index) noexcept {
     }
     return Status::Ok();
   }
-  return Status::InvalidArgumentError();
+  return Status::InvalidArgument();
 }
 
 Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
@@ -216,9 +215,9 @@ Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
       }
       return Status::Ok();
     }
-    return Status::InvalidArgumentError();
+    return Status::InvalidArgument();
   }
-  return Status::NotFoundError();
+  return Status::NotFound();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -244,7 +243,7 @@ Status Instrument::SetControl(int index, double value,
     }
     return Status::Ok();
   }
-  return Status::InvalidArgumentError();
+  return Status::InvalidArgument();
 }
 
 void Instrument::SetControlEventCallback(
@@ -272,9 +271,9 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
       }
       return Status::Ok();
     }
-    return Status::InvalidArgumentError();
+    return Status::InvalidArgument();
   }
-  return Status::NotFoundError();
+  return Status::NotFound();
 }
 
 void Instrument::SetNoteControlEventCallback(

@@ -24,7 +24,6 @@ using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::TaskType;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -89,14 +88,14 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       const double intensity =
           IntensityFromMidiVelocity(midi_event.getVelocity());
-      performer.CreateTask(
+      performer.CreateOneOffTask(
           [&instrument, pitch, intensity]() {
             instrument.SetNoteOn(pitch, intensity);
           },
-          position, TaskType::kOneOff);
-      performer.CreateTask(
+          position);
+      performer.CreateOneOffTask(
           [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-          position + duration, TaskType::kOneOff);
+          position + duration);
       has_notes = true;
     }
   }

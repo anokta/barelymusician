@@ -22,7 +22,7 @@ cc_library(
         ":performer",
         ":task",
         "//barelymusician/common:find_or_null",
-        "//barelymusician/dsp:dsp_utils",
+        "//barelymusician/common:seconds",
     ],
 )
 
@@ -45,7 +45,7 @@ cc_library(
         ":status",
         "//barelymusician:include",
         "//barelymusician/common:find_or_null",
-        "//barelymusician/dsp:dsp_utils",
+        "//barelymusician/common:seconds",
     ],
 )
 

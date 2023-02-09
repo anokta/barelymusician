@@ -1,4 +1,10 @@
 add_library(
+  decibels
+  decibels.cpp
+  decibels.h
+)
+
+add_library(
   dsp_utils
   dsp_utils.cpp
   dsp_utils.h
@@ -36,7 +42,7 @@ add_library(
 )
 target_link_libraries(
   gain_processor
-  dsp_utils
+  seconds
 )
 
 add_library(
@@ -85,6 +91,17 @@ add_library(
   voice INTERFACE
   voice.h
 )
+
+add_executable(
+  decibels_test
+  decibels_test.cpp
+)
+target_link_libraries(
+  decibels_test
+  decibels
+  gtest_main
+)
+gtest_discover_tests(decibels_test)
 
 add_executable(
   dsp_utils_test

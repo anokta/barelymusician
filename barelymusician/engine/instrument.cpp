@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/common/seconds.h"
 #include "barelymusician/engine/control.h"
 #include "barelymusician/engine/message.h"
 #include "barelymusician/engine/status.h"

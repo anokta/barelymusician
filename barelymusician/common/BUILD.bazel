@@ -13,6 +13,12 @@ cc_library(
     hdrs = ["random.h"],
 )
 
+cc_library(
+    name = "seconds",
+    srcs = ["seconds.cpp"],
+    hdrs = ["seconds.h"],
+)
+
 cc_test(
     name = "find_or_null_test",
     srcs = ["find_or_null_test.cpp"],
@@ -27,6 +33,15 @@ cc_test(
     srcs = ["random_test.cpp"],
     deps = [
         ":random",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "seconds_test",
+    srcs = ["seconds_test.cpp"],
+    deps = [
+        ":seconds",
         "@googletest//:gtest_main",
     ],
 )

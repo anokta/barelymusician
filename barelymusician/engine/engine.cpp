@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/common/seconds.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/performer.h"

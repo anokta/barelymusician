@@ -22,7 +22,7 @@ target_link_libraries(
   status
   task
   find_or_null
-  dsp_utils
+  seconds
 )
 
 add_library(
@@ -47,7 +47,7 @@ target_link_libraries(
   status
   include
   find_or_null
-  dsp_utils
+  seconds
 )
 
 add_library(

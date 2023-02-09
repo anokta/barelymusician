@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/common/seconds.h"
 
 namespace barely {
 

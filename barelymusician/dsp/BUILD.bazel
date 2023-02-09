@@ -3,6 +3,12 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "decibels",
+    srcs = ["decibels.cpp"],
+    hdrs = ["decibels.h"],
+)
+
+cc_library(
     name = "dsp_utils",
     srcs = ["dsp_utils.cpp"],
     hdrs = ["dsp_utils.h"],
@@ -36,7 +42,7 @@ cc_library(
     srcs = ["gain_processor.cpp"],
     hdrs = ["gain_processor.h"],
     deps = [
-        ":dsp_utils",
+        "//barelymusician/common:seconds",
     ],
 )
 
@@ -82,6 +88,15 @@ cc_library(
 cc_library(
     name = "voice",
     hdrs = ["voice.h"],
+)
+
+cc_test(
+    name = "decibels_test",
+    srcs = ["decibels_test.cpp"],
+    deps = [
+        ":decibels",
+        "@googletest//:gtest_main",
+    ],
 )
 
 cc_test(

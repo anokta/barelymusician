@@ -7,6 +7,14 @@
 #include "barelymusician/engine/control.h"
 #include "barelymusician/instruments/generic_instrument.h"
 
+extern "C" {
+
+BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinition() {
+  return barely::PercussionInstrument::GetDefinition();
+}
+
+}  // extern "C"
+
 namespace barely {
 
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept

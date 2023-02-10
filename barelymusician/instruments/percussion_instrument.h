@@ -1,12 +1,43 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 
+// NOLINTBEGIN
+#include <stdint.h>
+
+#include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+/// Percussion control enum alias.
+typedef int32_t BarelyPercussionControl;
+
+/// Percussion control enum values.
+enum BarelyPercussionControl_Values {
+  /// Gain.
+  BarelyPercussionControl_kGain = 0,
+  /// Pad envelope release.
+  BarelyPercussionControl_kRelease = 1,
+};
+
+/// Returns the percussion instrument definition.
+///
+/// @return Instrument definition.
+BARELY_EXPORT BarelyInstrumentDefinition
+BarelyPercussionInstrument_GetDefinition();
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
+// NOLINTEND
+
+#ifdef __cplusplus
 #include <array>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/sample_player.h"
@@ -14,12 +45,12 @@
 
 namespace barely {
 
-/// Percussion control.
-enum class PercussionControl : int {
+/// Percussion control enum.
+enum class PercussionControl : BarelyPercussionControl {
   /// Gain.
-  kGain = 0,
+  kGain = BarelyPercussionControl_kGain,
   /// Pad envelope release.
-  kRelease = 1,
+  kRelease = BarelyPercussionControl_kRelease,
 };
 
 /// Simple percussion instrument.
@@ -39,7 +70,9 @@ class PercussionInstrument : public GenericInstrument {
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;
 
-  /// Returns instrument definition.
+  /// Returns the instrument definition.
+  ///
+  /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
@@ -55,5 +88,6 @@ class PercussionInstrument : public GenericInstrument {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_

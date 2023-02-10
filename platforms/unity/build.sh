@@ -24,6 +24,8 @@ readonly OSX_BIN_DST_PATH="${PLUGINS_X64_DIR}/${PLUGIN_NAME}.bundle"
 readonly WINDOWS_BIN_SRC_PATH="${NATIVE_BIN_DIR}/unity_windows.dll"
 readonly WINDOWS_BIN_DST_PATH="${PLUGINS_X64_DIR}/${PLUGIN_NAME}.dll"
 
+readonly GREEN="\e[32m"
+
 parse_flags() {
   COMPILATION_MODE="opt"
 
@@ -69,7 +71,7 @@ main() {
     cp -rf "${WINDOWS_BIN_SRC_PATH}" "${WINDOWS_BIN_DST_PATH}"
   fi
 
-  echo "Done!"
+  echo -e "${GREEN}Done!"
 }
 
 main "$@"

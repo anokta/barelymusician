@@ -5,6 +5,7 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "generic_instrument",
     hdrs = ["generic_instrument.h"],
+    visibility = ["//visibility:private"],
     deps = [
         "//barelymusician",
     ],
@@ -14,6 +15,7 @@ cc_library(
     name = "percussion_instrument",
     srcs = ["percussion_instrument.cpp"],
     hdrs = ["percussion_instrument.h"],
+    defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":generic_instrument",
         "//barelymusician",
@@ -21,12 +23,14 @@ cc_library(
         "//barelymusician/dsp:gain_processor",
         "//barelymusician/dsp:sample_player",
     ],
+    alwayslink = True,
 )
 
 cc_library(
     name = "sampler_instrument",
     srcs = ["sampler_instrument.cpp"],
     hdrs = ["sampler_instrument.h"],
+    defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":generic_instrument",
         "//barelymusician",
@@ -41,6 +45,7 @@ cc_library(
     name = "synth_instrument",
     srcs = ["synth_instrument.cpp"],
     hdrs = ["synth_instrument.h"],
+    defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":generic_instrument",
         "//barelymusician",

@@ -12,6 +12,10 @@ add_library(
   percussion_instrument.cpp
   percussion_instrument.h
 )
+target_compile_definitions(
+  percussion_instrument
+  PUBLIC BARELYMUSICIAN_EXPORTS
+)
 target_link_libraries(
   percussion_instrument
   generic_instrument
@@ -25,6 +29,10 @@ add_library(
   sampler_instrument
   sampler_instrument.cpp
   sampler_instrument.h
+)
+target_compile_definitions(
+  sampler_instrument
+  PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
   sampler_instrument
@@ -40,6 +48,10 @@ add_library(
   synth_instrument
   synth_instrument.cpp
   synth_instrument.h
+)
+target_compile_definitions(
+  synth_instrument
+  PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
   synth_instrument

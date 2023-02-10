@@ -7,6 +7,14 @@
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/oscillator.h"
 
+extern "C" {
+
+BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition() {
+  return barely::SynthInstrument::GetDefinition();
+}
+
+}  // extern "C"
+
 namespace barely {
 
 SynthInstrument::SynthInstrument(int frame_rate) noexcept

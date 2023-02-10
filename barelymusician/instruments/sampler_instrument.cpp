@@ -6,6 +6,14 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 
+extern "C" {
+
+BarelyInstrumentDefinition BarelySamplerInstrument_GetDefinition() {
+  return barely::SamplerInstrument::GetDefinition();
+}
+
+}  // extern "C"
+
 namespace barely {
 
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept

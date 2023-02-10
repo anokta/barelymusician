@@ -1,7 +1,47 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
+// NOLINTBEGIN
+#include <stdint.h>
+
 #include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+/// Synth control enum alias.
+typedef int32_t BarelySynthControl;
+
+/// Synth control enum values.
+enum BarelySynthControl_Values {
+  /// Gain.
+  BarelySynthControl_kGain = 0,
+  /// Oscillator type.
+  BarelySynthControl_kOscillatorType = 1,
+  /// Envelope attack.
+  BarelySynthControl_kAttack = 2,
+  /// Envelope decay.
+  BarelySynthControl_kDecay = 3,
+  /// Envelope sustain.
+  BarelySynthControl_kSustain = 4,
+  /// Envelope release.
+  BarelySynthControl_kRelease = 5,
+  /// Number of voices.
+  BarelySynthControl_kVoiceCount = 6,
+};
+
+/// Returns the synth instrument definition.
+///
+/// @return Instrument definition.
+BARELY_EXPORT BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition();
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
+// NOLINTEND
+
+#ifdef __cplusplus
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -13,19 +53,19 @@ namespace barely {
 /// Synth control.
 enum class SynthControl : int {
   /// Gain.
-  kGain = 0,
+  kGain = BarelySynthControl_kGain,
   /// Oscillator type.
-  kOscillatorType = 1,
+  kOscillatorType = BarelySynthControl_kOscillatorType,
   /// Envelope attack.
-  kAttack = 2,
+  kAttack = BarelySynthControl_kAttack,
   /// Envelope decay.
-  kDecay = 3,
+  kDecay = BarelySynthControl_kDecay,
   /// Envelope sustain.
-  kSustain = 4,
+  kSustain = BarelySynthControl_kSustain,
   /// Envelope release.
-  kRelease = 5,
-  /// Number of voices
-  kVoiceCount = 6,
+  kRelease = BarelySynthControl_kRelease,
+  /// Number of voices.
+  kVoiceCount = BarelySynthControl_kVoiceCount,
 };
 
 /// Simple polyphonic synth instrument.
@@ -46,7 +86,9 @@ class SynthInstrument : public GenericInstrument {
   void SetNoteOff(double pitch) noexcept override;
   void SetNoteOn(double pitch, double intensity) noexcept override;
 
-  /// Returns instrument definition.
+  /// Returns the instrument definition.
+  ///
+  /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
@@ -56,5 +98,6 @@ class SynthInstrument : public GenericInstrument {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_

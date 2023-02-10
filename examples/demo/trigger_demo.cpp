@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/composition/pitch.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -84,7 +84,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
                                 double duration) -> TaskCallback {
     const double pitch =
         barely::kPitchD3 +
-        barely::GetPitch(barely::kPitchMajorScale, scale_index);
+        barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
     return [&instrument, &performer, duration, pitch]() {
       instrument.SetNoteOn(pitch);
       performer.CreateOneOffTask(

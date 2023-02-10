@@ -1,4 +1,4 @@
-#include "barelymusician/composition/note_duration.h"
+#include "barelymusician/composition/duration.h"
 
 #include "gtest/gtest.h"
 

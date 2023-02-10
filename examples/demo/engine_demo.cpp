@@ -15,8 +15,8 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
-#include "barelymusician/composition/note_duration.h"
-#include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/composition/duration.h"
+#include "barelymusician/composition/pitch.h"
 #include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "barelymusician/sequencers/metronome.h"
@@ -91,9 +91,10 @@ void ScheduleNote(double position, double duration, double pitch,
 void ComposeChord(double intensity, int harmonic, double offset,
                   Instrument& instrument, Sequencer& sequencer) {
   const auto add_chord_note = [&](int index) {
-    ScheduleNote(offset, 1.0,
-                 kRootNote + barely::GetPitch(barely::kPitchMajorScale, index),
-                 intensity, instrument, sequencer);
+    ScheduleNote(
+        offset, 1.0,
+        kRootNote + barely::PitchFromScale(barely::kPitchMajorScale, index),
+        intensity, instrument, sequencer);
   };
   add_chord_note(harmonic);
   add_chord_note(harmonic + 2);
@@ -108,7 +109,7 @@ void ComposeLine(double octave_offset, double intensity, int bar, int beat,
                             int index) {
     ScheduleNote(begin_position + offset, end_position - begin_position,
                  kRootNote + octave_offset +
-                     barely::GetPitch(barely::kPitchMajorScale, index),
+                     barely::PitchFromScale(barely::kPitchMajorScale, index),
                  intensity, instrument, sequencer);
   };
   if (beat % 2 == 1) {

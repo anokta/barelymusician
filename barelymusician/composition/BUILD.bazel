@@ -3,31 +3,31 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "note_duration",
-    srcs = ["note_duration.cpp"],
-    hdrs = ["note_duration.h"],
+    name = "duration",
+    srcs = ["duration.cpp"],
+    hdrs = ["duration.h"],
 )
 
 cc_library(
-    name = "note_pitch",
-    srcs = ["note_pitch.cpp"],
-    hdrs = ["note_pitch.h"],
+    name = "pitch",
+    srcs = ["pitch.cpp"],
+    hdrs = ["pitch.h"],
 )
 
 cc_test(
-    name = "note_duration_test",
-    srcs = ["note_duration_test.cpp"],
+    name = "duration_test",
+    srcs = ["duration_test.cpp"],
     deps = [
-        ":note_duration",
+        ":duration",
         "@googletest//:gtest_main",
     ],
 )
 
 cc_test(
-    name = "note_pitch_test",
-    srcs = ["note_pitch_test.cpp"],
+    name = "pitch_test",
+    srcs = ["pitch_test.cpp"],
     deps = [
-        ":note_pitch",
+        ":pitch",
         "@googletest//:gtest_main",
     ],
 )

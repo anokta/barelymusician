@@ -11,8 +11,8 @@ package(default_visibility = ["//visibility:public"])
 #         "//barelymusician",
 #         "//barelymusician/common:random",
 #         "//barelymusician/components:metronome",
-#         "//barelymusician/composition:note_duration",
-#         "//barelymusician/composition:note_pitch",
+#         "//barelymusician/composition:duration",
+#         "//barelymusician/composition:pitch",
 #         "//barelymusician/instruments:percussion_instrument",
 #         "//barelymusician/instruments:synth_instrument",
 #         "//examples/common:audio_clock",
@@ -29,7 +29,7 @@ cc_binary(
     srcs = ["instrument_demo.cpp"],
     deps = [
         "//barelymusician",
-        "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:pitch",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_output",
         "//examples/common:console_log",
@@ -43,7 +43,7 @@ cc_binary(
     deps = [
         "//barelymusician",
         "//barelymusician/components:metronome",
-        "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:pitch",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
@@ -58,7 +58,7 @@ cc_binary(
     data = ["//examples/data:midi"],
     deps = [
         "//barelymusician",
-        "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:pitch",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
@@ -75,7 +75,7 @@ cc_binary(
     data = ["//examples/data:audio"],
     deps = [
         "//barelymusician",
-        "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:pitch",
         "//barelymusician/instruments:sampler_instrument",
         "//examples/common:audio_output",
         "//examples/common:console_log",
@@ -90,7 +90,7 @@ cc_binary(
     srcs = ["sequencer_demo.cpp"],
     deps = [
         "//barelymusician",
-        "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:pitch",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",
@@ -104,7 +104,7 @@ cc_binary(
     srcs = ["trigger_demo.cpp"],
     deps = [
         "//barelymusician",
-        "//barelymusician/composition:note_pitch",
+        "//barelymusician/composition:pitch",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",
         "//examples/common:audio_output",

@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/composition/pitch.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -29,8 +29,8 @@ constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 256;
 
 // Instrument settings.
-constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kGain = 0.125;
+constexpr OscillatorType kOscillatorType = OscillatorType::kSaw;
 constexpr double kAttack = 0.05;
 constexpr double kRelease = 0.125;
 constexpr int kVoiceCount = 16;

@@ -1,6 +1,7 @@
-#ifndef BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
-#define BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
+#ifndef BARELYMUSICIAN_COMPOSITION_PITCH_H_
+#define BARELYMUSICIAN_COMPOSITION_PITCH_H_
 
+#include <array>
 #include <span>
 
 namespace barely {
@@ -9,32 +10,37 @@ namespace barely {
 inline constexpr double kSemitoneCount = 12.0;
 
 /// Semitone pitch intervals of an octave.
-inline constexpr double kPitchSemitones[12] = {0.0,
-                                               1.0 / kSemitoneCount,
-                                               2.0 / kSemitoneCount,
-                                               3.0 / kSemitoneCount,
-                                               4.0 / kSemitoneCount,
-                                               5.0 / kSemitoneCount,
-                                               6.0 / kSemitoneCount,
-                                               7.0 / kSemitoneCount,
-                                               8.0 / kSemitoneCount,
-                                               9.0 / kSemitoneCount,
-                                               10.0 / kSemitoneCount,
-                                               11.0 / kSemitoneCount};
+inline constexpr std::array<double, 12> kPitchSemitones = {
+    0.0,
+    1.0 / kSemitoneCount,
+    2.0 / kSemitoneCount,
+    3.0 / kSemitoneCount,
+    4.0 / kSemitoneCount,
+    5.0 / kSemitoneCount,
+    6.0 / kSemitoneCount,
+    7.0 / kSemitoneCount,
+    8.0 / kSemitoneCount,
+    9.0 / kSemitoneCount,
+    10.0 / kSemitoneCount,
+    11.0 / kSemitoneCount,
+};
 
 /// Common musical scales.
-inline constexpr double kPitchMajorScale[7] = {
-    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[4],
-    kPitchSemitones[5], kPitchSemitones[7], kPitchSemitones[9],
-    kPitchSemitones[11]};
-inline constexpr double kPitchNaturalMinorScale[7] = {
-    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[3],
-    kPitchSemitones[5], kPitchSemitones[7], kPitchSemitones[8],
-    kPitchSemitones[10]};
-inline constexpr double kPitchHarmonicMinorScale[7] = {
-    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[3],
-    kPitchSemitones[5], kPitchSemitones[7], kPitchSemitones[8],
-    kPitchSemitones[11]};
+inline constexpr std::array<double, 7> kPitchMajorScale = {
+    kPitchSemitones[0],  kPitchSemitones[2], kPitchSemitones[4],
+    kPitchSemitones[5],  kPitchSemitones[7], kPitchSemitones[9],
+    kPitchSemitones[11],
+};
+inline constexpr std::array<double, 7> kPitchNaturalMinorScale = {
+    kPitchSemitones[0],  kPitchSemitones[2], kPitchSemitones[3],
+    kPitchSemitones[5],  kPitchSemitones[7], kPitchSemitones[8],
+    kPitchSemitones[10],
+};
+inline constexpr std::array<double, 7> kPitchHarmonicMinorScale = {
+    kPitchSemitones[0],  kPitchSemitones[2], kPitchSemitones[3],
+    kPitchSemitones[5],  kPitchSemitones[7], kPitchSemitones[8],
+    kPitchSemitones[11],
+};
 
 /// Common note pitches.
 inline constexpr double kPitchA0 = -4.0;
@@ -138,13 +144,13 @@ inline constexpr double kPitchSnare = kPitchD3;
 inline constexpr double kPitchHihatClosed = kPitchE3;
 inline constexpr double kPitchHihatOpen = kPitchF3;
 
-/// Returns note pitch for a given scale and index.
+/// Returns the corresponding note pitch for a given scale and index.
 ///
-/// @param scale Cumulative scale intervals of an octave in increasing order.
+/// @param scale Cumulative scale intervals of an octave in an increasing order.
 /// @param index Scale index.
 /// @return Note pitch.
-double GetPitch(std::span<const double> scale, int index) noexcept;
+double PitchFromScale(std::span<const double> scale, int index) noexcept;
 
 }  // namespace barely
 
-#endif  // BARELYMUSICIAN_COMPOSITION_NOTE_PITCH_H_
+#endif  // BARELYMUSICIAN_COMPOSITION_PITCH_H_

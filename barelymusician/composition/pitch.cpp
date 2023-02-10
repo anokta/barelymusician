@@ -1,10 +1,10 @@
-#include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/composition/pitch.h"
 
 #include <cmath>
 
 namespace barely {
 
-double GetPitch(std::span<const double> scale, int index) noexcept {
+double PitchFromScale(std::span<const double> scale, int index) noexcept {
   if (!scale.empty()) {
     const double scale_length = static_cast<double>(scale.size());
     const double octave_offset =

@@ -8,7 +8,7 @@
 
 #include "MidiFile.h"
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/composition/note_pitch.h"
+#include "barelymusician/composition/pitch.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"

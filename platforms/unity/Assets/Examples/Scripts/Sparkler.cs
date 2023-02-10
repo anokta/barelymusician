@@ -29,11 +29,11 @@ public class Sparkler : MonoBehaviour {
         transform.GetComponent<Renderer>().material.color, targetColor, 32 * Time.deltaTime);
   }
 
-  private void OnNoteOff(double pitch, double dspTime) {
+  private void OnNoteOff(double pitch) {
     targetColor = noteOffColor;
   }
 
-  private void OnNoteOn(double pitch, double intensity, double dspTime) {
+  private void OnNoteOn(double pitch, double intensity) {
     targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, (float)intensity, (float)intensity);
   }
 }

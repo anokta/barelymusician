@@ -42,7 +42,7 @@ public class InstrumentDemo : MonoBehaviour {
     }
   }
 
-  private void OnNoteOff(double pitch, double dspTime) {
+  private void OnNoteOff(double pitch) {
     Vector2 value = Vector2.zero;
     if (_activePitches.TryGetValue(pitch, out value)) {
       _targetAlphas[(int)value.x, (int)value.y] = 0.0f;
@@ -50,7 +50,7 @@ public class InstrumentDemo : MonoBehaviour {
     }
   }
 
-  private void OnNoteOn(double pitch, double intensity, double dspTime) {
+  private void OnNoteOn(double pitch, double intensity) {
     int i = (int)((pitch - controller.octaveOffset - controller.rootPitch) * 12.0);
     int y = i / 4;
     int x = i - 4 * y;

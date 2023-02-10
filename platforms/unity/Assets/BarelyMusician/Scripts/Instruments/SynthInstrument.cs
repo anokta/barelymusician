@@ -15,15 +15,19 @@ namespace Barely {
 
   /// Simple polyphonic synth instrument.
   public class SynthInstrument : Instrument {
+    /// Gain.
+    [Range(0.0f, 1.0f)]
+    public double Gain = 1.0;
+
     /// Oscillator type.
     public OscillatorType OscillatorType = OscillatorType.SINE;
 
     /// Envelope attack.
-    [Min(0.0f)]
+    [Range(0.0f, 60.0f)]
     public double Attack = 0.05;
 
     /// Envelope decay.
-    [Min(0.0f)]
+    [Range(0.0f, 60.0f)]
     public double Decay = 0.0;
 
     /// Envelope sustain.
@@ -31,20 +35,21 @@ namespace Barely {
     public double Sustain = 1.0;
 
     /// Envelope release.
-    [Min(0.0f)]
+    [Range(0.0f, 60.0f)]
     public double Release = 0.25;
 
     /// Number of voices.
-    [Range(1, 32)]
+    [Range(1, 64)]
     public int VoiceCount = 8;
 
     private void Update() {
-      SetControl(0, (double)OscillatorType);
-      SetControl(1, Attack);
-      SetControl(2, Decay);
-      SetControl(3, Sustain);
-      SetControl(4, Release);
-      SetControl(5, (double)VoiceCount);
+      SetControl(0, Gain);
+      SetControl(1, (double)OscillatorType);
+      SetControl(2, Attack);
+      SetControl(3, Decay);
+      SetControl(4, Sustain);
+      SetControl(5, Release);
+      SetControl(6, (double)VoiceCount);
     }
   }
 }

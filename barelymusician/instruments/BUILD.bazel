@@ -39,6 +39,7 @@ cc_library(
         "//barelymusician/dsp:polyphonic_voice",
         "//barelymusician/dsp:sample_player",
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -55,4 +56,5 @@ cc_library(
         "//barelymusician/dsp:oscillator",
         "//barelymusician/dsp:polyphonic_voice",
     ],
+    alwayslink = True,
 )

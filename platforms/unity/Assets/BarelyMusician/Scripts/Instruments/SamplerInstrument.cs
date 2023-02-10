@@ -7,6 +7,10 @@ namespace Barely {
     /// Sample.
     public AudioClip Sample = null;
 
+    /// Gain.
+    [Range(0.0f, 1.0f)]
+    public double Gain = 1.0;
+
     /// Root pitch.
     public double RootPitch = 0.0;
 
@@ -14,11 +18,11 @@ namespace Barely {
     public bool Loop = false;
 
     /// Envelope attack.
-    [Min(0.0f)]
+    [Range(0.0f, 60.0f)]
     public double Attack = 0.05;
 
     /// Envelope decay.
-    [Min(0.0f)]
+    [Range(0.0f, 60.0f)]
     public double Decay = 0.0;
 
     /// Envelope sustain.
@@ -26,11 +30,11 @@ namespace Barely {
     public double Sustain = 1.0;
 
     /// Envelope release.
-    [Min(0.0f)]
+    [Range(0.0f, 60.0f)]
     public double Release = 0.25;
 
     /// Number of voices.
-    [Range(1, 32)]
+    [Range(1, 64)]
     public int VoiceCount = 8;
 
     // Current sample.
@@ -63,13 +67,14 @@ namespace Barely {
         _sample = Sample;
         SetData(GetSampleData());
       }
-      SetControl(0, RootPitch);
-      SetControl(1, Loop ? 1.0 : 0.0);
-      SetControl(2, Attack);
-      SetControl(3, Decay);
-      SetControl(4, Sustain);
-      SetControl(5, Release);
-      SetControl(6, (double)VoiceCount);
+      SetControl(0, Gain);
+      SetControl(1, RootPitch);
+      SetControl(2, Loop ? 1.0 : 0.0);
+      SetControl(3, Attack);
+      SetControl(4, Decay);
+      SetControl(5, Sustain);
+      SetControl(6, Release);
+      SetControl(7, (double)VoiceCount);
     }
   }
 }

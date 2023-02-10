@@ -51,3 +51,10 @@ jobs:
           cmake --build .
       - name: test
         run: ctest --output-on-failure
+
+  dev:
+    name: dev
+    steps:
+      - name: check symbols
+        shell: bash
+        run: ./dev/check_symbols.sh

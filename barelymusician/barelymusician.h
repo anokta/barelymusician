@@ -1061,8 +1061,8 @@ class Instrument {
   }
 
   /// Non-copyable.
-  Instrument(const Instrument& other) = delete;
-  Instrument& operator=(const Instrument& other) = delete;
+  Instrument(const Instrument& other) noexcept = delete;
+  Instrument& operator=(const Instrument& other) noexcept = delete;
 
   /// Constructs a new `Instrument` via move.
   ///
@@ -1454,8 +1454,8 @@ class Performer {
   }
 
   /// Non-copyable.
-  Performer(const Performer& other) = delete;
-  Performer& operator=(const Performer& other) = delete;
+  Performer(const Performer& other) noexcept = delete;
+  Performer& operator=(const Performer& other) noexcept = delete;
 
   /// Constructs a new `Performer` via move.
   ///
@@ -1710,8 +1710,8 @@ class Musician {
   }
 
   /// Non-copyable.
-  Musician(const Musician& other) = delete;
-  Musician& operator=(const Musician& other) = delete;
+  Musician(const Musician& other) noexcept = delete;
+  Musician& operator=(const Musician& other) noexcept = delete;
 
   /// Constructs new `Musician` via move.
   ///

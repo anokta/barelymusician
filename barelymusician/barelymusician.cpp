@@ -9,14 +9,14 @@
 
 extern "C" {
 
-/// Engine.
+// Musician.
 struct BarelyMusician {
   // Default constructor.
   BarelyMusician() = default;
 
   // Non-copyable and non-movable.
-  BarelyMusician(const BarelyMusician& other) = delete;
-  BarelyMusician& operator=(const BarelyMusician& other) = delete;
+  BarelyMusician(const BarelyMusician& other) noexcept = delete;
+  BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
   BarelyMusician(BarelyMusician&& other) noexcept = delete;
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 

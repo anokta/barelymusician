@@ -22,8 +22,8 @@ class Task {
   ~Task() noexcept;
 
   /// Non-copyable and non-movable.
-  Task(const Task& other) = delete;
-  Task& operator=(const Task& other) = delete;
+  Task(const Task& other) noexcept = delete;
+  Task& operator=(const Task& other) noexcept = delete;
   Task(Task&& other) noexcept = delete;
   Task& operator=(Task&& other) noexcept = delete;
 

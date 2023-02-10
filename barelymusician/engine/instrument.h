@@ -44,8 +44,8 @@ class Instrument {
   ~Instrument() noexcept;
 
   /// Non-copyable and non-movable.
-  Instrument(const Instrument& other) = delete;
-  Instrument& operator=(const Instrument& other) = delete;
+  Instrument(const Instrument& other) noexcept = delete;
+  Instrument& operator=(const Instrument& other) noexcept = delete;
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 

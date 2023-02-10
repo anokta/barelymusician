@@ -17,8 +17,8 @@ class ConsoleLog {
   ~ConsoleLog() noexcept { std::cout << stream_.str() << std::endl; }
 
   /// Non-copyable and non-movable.
-  ConsoleLog(const ConsoleLog& other) = delete;
-  ConsoleLog& operator=(const ConsoleLog& other) = delete;
+  ConsoleLog(const ConsoleLog& other) noexcept = delete;
+  ConsoleLog& operator=(const ConsoleLog& other) noexcept = delete;
   ConsoleLog(ConsoleLog&& other) noexcept = delete;
   ConsoleLog& operator=(ConsoleLog&& other) noexcept = delete;
 

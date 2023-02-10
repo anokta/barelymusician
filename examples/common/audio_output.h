@@ -23,8 +23,8 @@ class AudioOutput {
   ~AudioOutput() noexcept;
 
   /// Non-copyable and non-movable.
-  AudioOutput(const AudioOutput& other) = delete;
-  AudioOutput& operator=(const AudioOutput& other) = delete;
+  AudioOutput(const AudioOutput& other) noexcept = delete;
+  AudioOutput& operator=(const AudioOutput& other) noexcept = delete;
   AudioOutput(AudioOutput&& other) noexcept = delete;
   AudioOutput& operator=(AudioOutput&& other) noexcept = delete;
 

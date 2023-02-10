@@ -25,8 +25,8 @@ class Engine {
   ~Engine() noexcept;
 
   // Non-copyable and non-movable.
-  Engine(const Engine& other) = delete;
-  Engine& operator=(const Engine& other) = delete;
+  Engine(const Engine& other) noexcept = delete;
+  Engine& operator=(const Engine& other) noexcept = delete;
   Engine(Engine&& other) noexcept = delete;
   Engine& operator=(Engine&& other) noexcept = delete;
 

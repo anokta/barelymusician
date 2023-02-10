@@ -32,8 +32,8 @@ class MutableData {
     ~ScopedView() noexcept;
 
     // Non-copyable and non-movable.
-    ScopedView(const ScopedView& other) = delete;
-    ScopedView& operator=(const ScopedView& other) = delete;
+    ScopedView(const ScopedView& other) noexcept = delete;
+    ScopedView& operator=(const ScopedView& other) noexcept = delete;
     ScopedView(ScopedView&& other) noexcept = delete;
     ScopedView& operator=(ScopedView&& other) noexcept = delete;
 

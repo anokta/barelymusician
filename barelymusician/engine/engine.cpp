@@ -149,8 +149,6 @@ void Engine::SetTempo(double tempo) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::Update(double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
       double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);

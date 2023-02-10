@@ -214,6 +214,7 @@ BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
                                       BarelyId instrument_id, const void* data,
                                       int32_t size) {
   if (!handle) return BarelyStatus_kNotFound;
+  if (size < 0 || (!data && size > 0)) return BarelyStatus_kInvalidArgument;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
   if (instrument_or.IsOk()) {
@@ -365,8 +366,6 @@ BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
 BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
                                    double timestamp) {
   if (!handle) return BarelyStatus_kNotFound;
-  // TODO(#109): Should this also be handled internally?
-  if (timestamp < 0.0) return BarelyStatus_kInvalidArgument;
 
   handle->engine.Update(timestamp);
   return BarelyStatus_kOk;

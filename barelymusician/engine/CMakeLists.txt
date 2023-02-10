@@ -171,6 +171,7 @@ target_link_libraries(
   performer_test
   id
   performer
+  gmock
   gtest_main
 )
 gtest_discover_tests(performer_test)

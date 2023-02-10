@@ -2,28 +2,6 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 package(default_visibility = ["//visibility:public"])
 
-# TODO(#109): Reenable after API cleanup.
-# cc_binary(
-#     name = "engine_demo",
-#     srcs = ["engine_demo.cpp"],
-#     data = ["//examples/data:audio"],
-#     deps = [
-#         "//barelymusician",
-#         "//barelymusician/common:random",
-#         "//barelymusician/components:metronome",
-#         "//barelymusician/composition:duration",
-#         "//barelymusician/composition:pitch",
-#         "//barelymusician/instruments:percussion_instrument",
-#         "//barelymusician/instruments:synth_instrument",
-#         "//examples/common:audio_clock",
-#         "//examples/common:audio_output",
-#         "//examples/common:console_log",
-#         "//examples/common:input_manager",
-#         "//examples/common:wav_file",
-#         "@bazel_tools//tools/cpp/runfiles",
-#     ],
-# )
-
 cc_binary(
     name = "instrument_demo",
     srcs = ["instrument_demo.cpp"],
@@ -66,6 +44,27 @@ cc_binary(
         "//examples/common:input_manager",
         "@bazel_tools//tools/cpp/runfiles",
         "@midifile",
+    ],
+)
+
+cc_binary(
+    name = "musician_demo",
+    srcs = ["musician_demo.cpp"],
+    data = ["//examples/data:audio"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/common:random",
+        "//barelymusician/components:metronome",
+        "//barelymusician/composition:duration",
+        "//barelymusician/composition:pitch",
+        "//barelymusician/instruments:percussion_instrument",
+        "//barelymusician/instruments:synth_instrument",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+        "//examples/common:wav_file",
+        "@bazel_tools//tools/cpp/runfiles",
     ],
 )
 

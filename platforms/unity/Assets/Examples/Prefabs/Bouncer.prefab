@@ -60,10 +60,12 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 6eca3d438a8d08243b114230175e6ccc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -71,6 +73,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -83,6 +86,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!135 &775038743496979817
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -220,13 +224,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gain: 0.25
-  attack: 0
-  decay: 0
-  sustain: 1
-  release: 0.1
-  oscillatorType: 2
-  numVoices: 16
+  OnControlEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNoteControlEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNoteOffEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNoteOnEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  Gain: 0.5
+  OscillatorType: 0
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 0.20000000298023224
+  VoiceCount: 8
 --- !u!114 &775038743496979821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -240,7 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 775038743496979810}
-  rootNote: 64
+  rootPitch: 0
 --- !u!114 &979780177348129264
 MonoBehaviour:
   m_ObjectHideFlags: 0

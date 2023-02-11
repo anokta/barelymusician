@@ -29,21 +29,20 @@ readonly GREEN="\e[32m"
 parse_flags() {
   COMPILATION_MODE="opt"
 
-  for i in "$@";
-    do
-      case $i in
-        -c=*|--compilation_mode=*)
-          # compilation mode.
-          COMPILATION_MODE="${i#*=}"
-          shift
-          ;;
-        *)
-          # unknown option.
-          echo "Unknown option: ${i}" >&2
-          exit 1
-          ;;
-      esac
-    done
+  for i in "$@"; do
+    case $i in
+    -c=* | --compilation_mode=*)
+      # compilation mode.
+      COMPILATION_MODE="${i#*=}"
+      shift
+      ;;
+    *)
+      # unknown option.
+      echo "Unknown option: ${i}" >&2
+      exit 1
+      ;;
+    esac
+  done
 
   readonly COMPILATION_MODE
 }

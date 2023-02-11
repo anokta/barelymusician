@@ -1,9 +1,9 @@
 add_library(
-  generic_instrument INTERFACE
-  generic_instrument.h
+  custom_instrument INTERFACE
+  custom_instrument.h
 )
 target_link_libraries(
-  generic_instrument INTERFACE
+  custom_instrument INTERFACE
   barelymusician
 )
 
@@ -18,7 +18,7 @@ target_compile_definitions(
 )
 target_link_libraries(
   percussion_instrument
-  generic_instrument
+  custom_instrument
   barelymusician
   enveloped_voice
   gain_processor
@@ -36,7 +36,7 @@ target_compile_definitions(
 )
 target_link_libraries(
   sampler_instrument
-  generic_instrument
+  custom_instrument
   barelymusician
   enveloped_voice
   gain_processor
@@ -55,7 +55,7 @@ target_compile_definitions(
 )
 target_link_libraries(
   synth_instrument
-  generic_instrument
+  custom_instrument
   barelymusician
   dsp_utils
   enveloped_voice

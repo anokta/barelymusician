@@ -8,11 +8,11 @@
 
 namespace barely {
 
-/// Generic instrument interface.
-class GenericInstrument {
+/// Custom instrument interface.
+class CustomInstrument {
  public:
   /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~GenericInstrument() = default;
+  virtual ~CustomInstrument() = default;
 
   /// Processes the next output samples.
   ///
@@ -57,45 +57,45 @@ class GenericInstrument {
   virtual void SetNoteOn(double pitch, double intensity) noexcept = 0;
 };
 
-/// Returns instrument definition for `GenericInstrumentType`.
-template <typename GenericInstrumentType>
+/// Returns the instrument definition for `CustomInstrumentType`.
+template <typename CustomInstrumentType>
 InstrumentDefinition GetInstrumentDefinition(
     const std::vector<ControlDefinition>& control_definitions,
     const std::vector<ControlDefinition>& note_control_definitions) noexcept {
   return InstrumentDefinition(
       [](void** state, int frame_rate) noexcept {
         // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
-        *state = static_cast<void*>(new GenericInstrumentType(frame_rate));
+        *state = static_cast<void*>(new CustomInstrumentType(frame_rate));
       },
       [](void** state) noexcept {
-        delete static_cast<GenericInstrumentType*>(*state);
+        delete static_cast<CustomInstrumentType*>(*state);
         *state = nullptr;
       },
       [](void** state, double* output_samples, int output_channel_count,
          int output_frame_count) noexcept {
-        auto* instrument = static_cast<GenericInstrumentType*>(*state);
+        auto* instrument = static_cast<CustomInstrumentType*>(*state);
         instrument->Process(output_samples, output_channel_count,
                             output_frame_count);
       },
       [](void** state, int index, double value, double slope_per_frame) {
-        auto* instrument = static_cast<GenericInstrumentType*>(*state);
+        auto* instrument = static_cast<CustomInstrumentType*>(*state);
         instrument->SetControl(index, value, slope_per_frame);
       },
       [](void** state, const void* data, int size) noexcept {
-        auto* instrument = static_cast<GenericInstrumentType*>(*state);
+        auto* instrument = static_cast<CustomInstrumentType*>(*state);
         instrument->SetData(data, size);
       },
       [](void** state, double pitch, int index, double value,
          double slope_per_frame) {
-        auto* instrument = static_cast<GenericInstrumentType*>(*state);
+        auto* instrument = static_cast<CustomInstrumentType*>(*state);
         instrument->SetNoteControl(pitch, index, value, slope_per_frame);
       },
       [](void** state, double pitch) noexcept {
-        auto* instrument = static_cast<GenericInstrumentType*>(*state);
+        auto* instrument = static_cast<CustomInstrumentType*>(*state);
         instrument->SetNoteOff(pitch);
       },
       [](void** state, double pitch, double intensity) noexcept {
-        auto* instrument = static_cast<GenericInstrumentType*>(*state);
+        auto* instrument = static_cast<CustomInstrumentType*>(*state);
         instrument->SetNoteOn(pitch, intensity);
       },
       control_definitions, note_control_definitions);

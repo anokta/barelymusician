@@ -46,7 +46,7 @@ BARELY_EXPORT BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition();
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
-#include "barelymusician/instruments/generic_instrument.h"
+#include "barelymusician/instruments/custom_instrument.h"
 
 namespace barely {
 
@@ -69,12 +69,12 @@ enum class SynthControl : int {
 };
 
 /// Simple polyphonic synth instrument.
-class SynthInstrument : public GenericInstrument {
+class SynthInstrument : public CustomInstrument {
  public:
   /// Constructs new `SynthInstrument`.
   explicit SynthInstrument(int frame_rate) noexcept;
 
-  /// Implements `GenericInstrument`.
+  /// Implements `CustomInstrument`.
   void Process(double* output_samples, int channel_count,
                int frame_count) noexcept override;
   // NOLINTNEXTLINE(bugprone-exception-escape)

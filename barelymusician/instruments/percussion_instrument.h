@@ -41,7 +41,7 @@ BarelyPercussionInstrument_GetDefinition();
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/instruments/generic_instrument.h"
+#include "barelymusician/instruments/custom_instrument.h"
 
 namespace barely {
 
@@ -54,12 +54,12 @@ enum class PercussionControl : BarelyPercussionControl {
 };
 
 /// Simple percussion instrument.
-class PercussionInstrument : public GenericInstrument {
+class PercussionInstrument : public CustomInstrument {
  public:
   /// Constructs new `PercussionInstrument`.
   explicit PercussionInstrument(int frame_rate) noexcept;
 
-  /// Implements `GenericInstrument`.
+  /// Implements `CustomInstrument`.
   void Process(double* output_samples, int channel_count,
                int frame_count) noexcept override;
   void SetControl(int index, double value,

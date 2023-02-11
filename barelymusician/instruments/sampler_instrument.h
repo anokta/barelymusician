@@ -49,7 +49,7 @@ BarelySamplerInstrument_GetDefinition();
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
 #include "barelymusician/dsp/sample_player.h"
-#include "barelymusician/instruments/generic_instrument.h"
+#include "barelymusician/instruments/custom_instrument.h"
 
 namespace barely {
 
@@ -74,12 +74,12 @@ enum class SamplerControl : BarelySamplerControl {
 };
 
 /// Simple polyphonic sampler instrument.
-class SamplerInstrument : public GenericInstrument {
+class SamplerInstrument : public CustomInstrument {
  public:
   /// Constructs new `SamplerInstrument`.
   explicit SamplerInstrument(int frame_rate) noexcept;
 
-  /// Implements `GenericInstrument`.
+  /// Implements `CustomInstrument`.
   void Process(double* output_samples, int channel_count,
                int frame_count) noexcept override;
   // NOLINTNEXTLINE(bugprone-exception-escape)

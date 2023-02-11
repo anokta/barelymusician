@@ -3,8 +3,8 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "generic_instrument",
-    hdrs = ["generic_instrument.h"],
+    name = "custom_instrument",
+    hdrs = ["custom_instrument.h"],
     visibility = ["//visibility:private"],
     deps = [
         "//barelymusician",
@@ -17,7 +17,7 @@ cc_library(
     hdrs = ["percussion_instrument.h"],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":generic_instrument",
+        ":custom_instrument",
         "//barelymusician",
         "//barelymusician/dsp:enveloped_voice",
         "//barelymusician/dsp:gain_processor",
@@ -32,7 +32,7 @@ cc_library(
     hdrs = ["sampler_instrument.h"],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":generic_instrument",
+        ":custom_instrument",
         "//barelymusician",
         "//barelymusician/dsp:enveloped_voice",
         "//barelymusician/dsp:gain_processor",
@@ -48,7 +48,7 @@ cc_library(
     hdrs = ["synth_instrument.h"],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":generic_instrument",
+        ":custom_instrument",
         "//barelymusician",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:enveloped_voice",

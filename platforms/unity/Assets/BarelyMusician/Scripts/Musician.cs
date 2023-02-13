@@ -26,56 +26,16 @@ namespace Barely {
 
     /// Schedules a task at a specific time.
     ///
+    /// @param action Task action.
     /// @param dspTime Time in seconds.
-    /// @param task Task.
-    public static void ScheduleTask(double dspTime, Action task) {
-      Internal.Musician_ScheduleTask(dspTime, task);
+    public static void ScheduleTask(Action action, double dspTime) {
+      Internal.Musician_CreateOneOffTask(action, dspTime);
     }
 
     /// Class that wraps the internal api.
     public static class Internal {
       /// Invalid identifier.
       public const Int64 InvalidId = 0;
-
-      /// Instrument definition.
-      [StructLayout(LayoutKind.Sequential)]
-      public struct InstrumentDefinition {
-        /// Create callback.
-        IntPtr create_callback;
-
-        /// Destroy callback.
-        IntPtr destroy_callback;
-
-        /// Process callback.
-        IntPtr process_callback;
-
-        /// Set control callback.
-        IntPtr set_control_callback;
-
-        /// Set data callback.
-        IntPtr set_data_callback;
-
-        /// Set note control callback.
-        IntPtr set_note_control_callback;
-
-        /// Set note off callback.
-        IntPtr set_note_off_callback;
-
-        /// Set note on callback.
-        IntPtr set_note_on_callback;
-
-        /// Array of control definitions.
-        IntPtr control_definitions;
-
-        /// Number of control definitions.
-        Int32 control_definition_count;
-
-        /// Array of note control definitions.
-        IntPtr note_control_definitions;
-
-        /// Number of note control definitions.
-        Int32 note_control_definition_count;
-      }
 
       /// Creates a new instrument.
       ///
@@ -90,20 +50,19 @@ namespace Barely {
           Instrument.NoteControlEventCallback noteControlEventCallback,
           Instrument.NoteOffEventCallback noteOffEventCallback,
           Instrument.NoteOnEventCallback noteOnEventCallback) {
-        InstrumentDefinition definition;
         switch (instrument) {
           case SamplerInstrument sampler:
-            definition = BarelySamplerInstrument_GetDefinition();
+            _instrumentDefinition = BarelySamplerInstrument_GetDefinition();
             break;
           case SynthInstrument synth:
-            definition = BarelySynthInstrument_GetDefinition();
+            _instrumentDefinition = BarelySynthInstrument_GetDefinition();
             break;
           default:
             Debug.LogError("Unsupported instrument type: " + instrument.GetType());
             return InvalidId;
         }
-        Status status =
-            BarelyInstrument_Create(Handle, definition, AudioSettings.outputSampleRate, _int64Ptr);
+        Status status = BarelyInstrument_Create(Handle, _instrumentDefinition,
+                                                AudioSettings.outputSampleRate, _int64Ptr);
         if (!IsOk(status)) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "': " + status);
           return InvalidId;
@@ -342,7 +301,7 @@ namespace Barely {
         }
       }
 
-      /// Returns the musician tempo.
+      /// Returns the tempo of a musician.
       ///
       /// @return Tempo in beats per minute.
       public static double Musician_GetTempo() {
@@ -355,7 +314,7 @@ namespace Barely {
         return 0.0;
       }
 
-      /// Returns the musician timestamp.
+      /// Returns the timestamp of a musician.
       ///
       /// @return Timestamp in seconds.
       public static double Musician_GetTimestamp() {
@@ -368,13 +327,13 @@ namespace Barely {
         return 0.0;
       }
 
-      /// Schedules musician task at timestamp.
+      /// Creates a new one-off musician task.
       ///
-      /// @param timestamp Timestamp in seconds.
-      /// @param task Task.
-      public static void Musician_ScheduleTask(double timestamp, Action task) {
+      /// @param task Task action.
+      /// @param timestamp Task timestamp in seconds.
+      public static void Musician_CreateOneOffTask(Action action, double timestamp) {
         if (timestamp <= Musician_GetTimestamp()) {
-          task?.Invoke();
+          action?.Invoke();
           return;
         }
         List<Action> tasks = null;
@@ -382,16 +341,268 @@ namespace Barely {
           tasks = new List<Action>();
           _tasks.Add(timestamp, tasks);
         }
-        tasks?.Add(task);
+        tasks?.Add(action);
       }
 
-      /// Sets musician tempo.
+      /// Sets the tempo of a musician.
       ///
       /// @param tempo Tempo in beats per minute.
       public static void Musician_SetTempo(double tempo) {
         Status status = BarelyMusician_SetTempo(Handle, tempo);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set musician tempo: " + status);
+        }
+      }
+
+      /// Creates a new performer.
+      ///
+      /// @param performer Performer.
+      /// @return Performer identifier.
+      public static Int64 Performer_Create(Performer performer) {
+        Status status = BarelyPerformer_Create(Handle, _int64Ptr);
+        if (!IsOk(status)) {
+          Debug.LogError("Failed to create performer '" + performer.name + "': " + status);
+          return InvalidId;
+        }
+        Int64 performerId = Marshal.ReadInt64(_int64Ptr);
+        return performerId;
+      }
+
+      /// Creates a new performer task.
+      ///
+      /// @param performer Performer.
+      /// @return Task identifier.
+      public static Int64 Performer_CreateTask(Performer performer, Performer.TaskType type,
+                                               Action processCallback, double position,
+                                               int processOrder) {
+        _taskDefinition.processCallback = Marshal.GetFunctionPointerForDelegate(processCallback);
+        Status status = Status.UNIMPLEMENTED;
+        switch (type) {
+          case Performer.TaskType.ONE_OFF:
+            status =
+                BarelyPerformer_CreateOneOffTask(Handle, performer.Id, _taskDefinition, position,
+                                                 processOrder, IntPtr.Zero, _int64Ptr);
+            break;
+          case Performer.TaskType.RECURRING:
+            status =
+                BarelyPerformer_CreateRecurringTask(Handle, performer.Id, _taskDefinition, position,
+                                                    processOrder, IntPtr.Zero, _int64Ptr);
+            break;
+        }
+        if (!IsOk(status)) {
+          Debug.LogError("Failed to create performer '" + performer.name + "': " + status);
+          return InvalidId;
+        }
+        return Marshal.ReadInt64(_int64Ptr);
+      }
+
+      /// Destroys a performer.
+      ///
+      /// @param performer Performer.
+      public static void Performer_Destroy(Performer performer) {
+        Status status = BarelyPerformer_Destroy(Handle, performer.Id);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to destroy performer '" + performer.name + "': " + status);
+        }
+      }
+
+      /// Destroys a performer task.
+      ///
+      /// @param task Task.
+      public static void Performer_DestroyTask(Performer.Task task) {
+        Status status = BarelyPerformer_DestroyTask(Handle, task.Performer.Id, task.Id);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to destroy performer task '" + task.Id + "': " + status);
+        }
+      }
+
+      /// Returns the loop begin position of a performer.
+      ///
+      /// @param performer Performer.
+      /// @return Loop begin position in beats.
+      public static double Performer_GetLoopBeginPosition(Performer performer) {
+        Status status = BarelyPerformer_GetLoopBeginPosition(Handle, performer.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer loop begin position: " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns the loop length of a performer.
+      ///
+      /// @param performer Performer.
+      /// @return Loop length in beats.
+      public static double Performer_GetLoopLength(Performer performer) {
+        Status status = BarelyPerformer_GetLoopLength(Handle, performer.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer loop length: " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns the position of a performer.
+      ///
+      /// @param performer Performer.
+      /// @return Position in beats.
+      public static double Performer_GetPosition(Performer performer) {
+        Status status = BarelyPerformer_GetPosition(Handle, performer.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer position: " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns the position of a performer task.
+      ///
+      /// @param task Task.
+      /// @return Position in beats.
+      public static double Performer_GetTaskPosition(Performer.Task task) {
+        Status status =
+            BarelyPerformer_GetTaskPosition(Handle, task.Performer.Id, task.Id, _doublePtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Double>(_doublePtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer task position: " + status);
+        }
+        return 0.0;
+      }
+
+      /// Returns the process order of a performer task.
+      ///
+      /// @param task Task.
+      /// @return Process order.
+      public static int Performer_GetTaskProcessOrder(Performer.Task task) {
+        Status status =
+            BarelyPerformer_GetTaskProcessOrder(Handle, task.Performer.Id, task.Id, _int32Ptr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Int32>(_int32Ptr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer task process order: " + status);
+        }
+        return 0;
+      }
+
+      /// Returns whether a performer is looping or not.
+      ///
+      /// @param performer Performer.
+      /// @return True if looping, false otherwise.
+      public static bool Performer_IsLooping(Performer performer) {
+        Status status = BarelyPerformer_IsLooping(Handle, performer.Id, _booleanPtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Boolean>(_booleanPtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer looping: " + status);
+        }
+        return false;
+      }
+
+      /// Returns whether a performer is playing or not.
+      ///
+      /// @param performer Performer.
+      /// @return True if playing, false otherwise.
+      public static bool Performer_IsPlaying(Performer performer) {
+        Status status = BarelyPerformer_IsPlaying(Handle, performer.Id, _booleanPtr);
+        if (IsOk(status)) {
+          return Marshal.PtrToStructure<Boolean>(_booleanPtr);
+        } else if (_handle != IntPtr.Zero) {
+          Debug.LogError("Failed to get performer playing: " + status);
+        }
+        return false;
+      }
+
+      /// Sets the loop begin position of a performer.
+      ///
+      /// @param performer Performer.
+      /// @param loopBeginPosition Loop begin position in beats.
+      public static void Performer_SetLoopBeginPosition(Performer performer,
+                                                        double loopBeginPosition) {
+        Status status =
+            BarelyPerformer_SetLoopBeginPosition(Handle, performer.Id, loopBeginPosition);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer loop begin position: " + status);
+        }
+      }
+
+      /// Sets the loop length of a performer.
+      ///
+      /// @param performer Performer.
+      /// @param loopLength Loop length in beats.
+      public static void Performer_SetLoopLength(Performer performer, double loopLength) {
+        Status status = BarelyPerformer_SetLoopLength(Handle, performer.Id, loopLength);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer loop length: " + status);
+        }
+      }
+
+      /// Sets whether a performer is looping or not.
+      ///
+      /// @param performer Performer.
+      /// @param isLooping True if looping, false otherwise.
+      public static void Performer_SetLooping(Performer performer, bool isLooping) {
+        Status status = BarelyPerformer_SetLooping(Handle, performer.Id, isLooping);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer looping: " + status);
+        }
+      }
+
+      /// Sets the position of a performer.
+      ///
+      /// @param performer Performer.
+      /// @param position Position in beats.
+      public static void Performer_SetPosition(Performer performer, double position) {
+        Status status = BarelyPerformer_SetPosition(Handle, performer.Id, position);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer position: " + status);
+        }
+      }
+
+      /// Sets the position of a performer task.
+      ///
+      /// @param task Task.
+      /// @param position Position in beats.
+      public static void Performer_SetTaskPosition(Performer.Task task, double position) {
+        Status status =
+            BarelyPerformer_SetTaskPosition(Handle, task.Performer.Id, task.Id, position);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer task position: " + status);
+        }
+      }
+
+      /// Sets the process order of a performer task.
+      ///
+      /// @param task Task.
+      /// @param processOrder Process order.
+      public static void Performer_SetTaskProcessOrder(Performer.Task task, int processOrder) {
+        Status status =
+            BarelyPerformer_SetTaskProcessOrder(Handle, task.Performer.Id, task.Id, processOrder);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to set performer task process order: " + status);
+        }
+      }
+
+      /// Starts a performer.
+      ///
+      /// @param performer Performer.
+      public static void Performer_Start(Performer performer) {
+        Status status = BarelyPerformer_Start(Handle, performer.Id);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to start performer: " + status);
+        }
+      }
+
+      /// Stops a performer.
+      ///
+      /// @param performer Performer.
+      public static void Performer_Stop(Performer performer) {
+        Status status = BarelyPerformer_Stop(Handle, performer.Id);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop performer: " + status);
         }
       }
 
@@ -407,6 +618,59 @@ namespace Barely {
         UNIMPLEMENTED = 3,
         // Internal error.
         INTERNAL = 4,
+      }
+
+      // Instrument definition.
+      [StructLayout(LayoutKind.Sequential)]
+      private struct InstrumentDefinition {
+        // Create callback.
+        public IntPtr createCallback;
+
+        // Destroy callback.
+        public IntPtr destroyCallback;
+
+        // Process callback.
+        public IntPtr processCallback;
+
+        // Set control callback.
+        public IntPtr setControlCallback;
+
+        // Set data callback.
+        public IntPtr setDataCallback;
+
+        // Set note control callback.
+        public IntPtr setNoteControlCallback;
+
+        // Set note off callback.
+        public IntPtr setNoteOffCallback;
+
+        // Set note on callback.
+        public IntPtr setNoteOnCallback;
+
+        // Array of control definitions.
+        public IntPtr controlDefinitions;
+
+        // Number of control definitions.
+        public Int32 controlDefinitionCount;
+
+        // Array of note control definitions.
+        public IntPtr noteControlDefinitions;
+
+        // Number of note control definitions.
+        public Int32 noteControlDefinitionCount;
+      }
+
+      // Task definition.
+      [StructLayout(LayoutKind.Sequential)]
+      private struct TaskDefinition {
+        // Create callback.
+        public IntPtr createCallback;
+
+        // Destroy callback.
+        public IntPtr destroyCallback;
+
+        // Process callback.
+        public IntPtr processCallback;
       }
 
       // Returns whether a status is okay or not.
@@ -439,6 +703,9 @@ namespace Barely {
       // `Double` type pointer.
       private static IntPtr _doublePtr = IntPtr.Zero;
 
+      // `Int32` type pointer.
+      private static IntPtr _int32Ptr = IntPtr.Zero;
+
       // `Int64` type pointer.
       private static IntPtr _int64Ptr = IntPtr.Zero;
 
@@ -456,6 +723,12 @@ namespace Barely {
 
       // Map of scheduled tasks by their timestamps.
       private static Dictionary<double, List<Action>> _tasks = null;
+
+      // Instrument definition.
+      private static InstrumentDefinition _instrumentDefinition = new InstrumentDefinition();
+
+      // Task definition.
+      private static TaskDefinition _taskDefinition = new TaskDefinition();
 
       // Component that manages internal state.
       private class State : MonoBehaviour {
@@ -510,6 +783,7 @@ namespace Barely {
         private void AllocatePtrs() {
           _booleanPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Boolean>());
           _doublePtr = Marshal.AllocHGlobal(Marshal.SizeOf<Double>());
+          _int32Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int32>());
           _int64Ptr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
           _intPtrPtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
         }
@@ -523,6 +797,10 @@ namespace Barely {
           if (_doublePtr != IntPtr.Zero) {
             Marshal.FreeHGlobal(_doublePtr);
             _doublePtr = IntPtr.Zero;
+          }
+          if (_int32Ptr != IntPtr.Zero) {
+            Marshal.FreeHGlobal(_int32Ptr);
+            _int32Ptr = IntPtr.Zero;
           }
           if (_int64Ptr != IntPtr.Zero) {
             Marshal.FreeHGlobal(_int64Ptr);
@@ -680,6 +958,90 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Update")]
       private static extern Status BarelyMusician_Update(IntPtr handle, double timestamp);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_Create")]
+      private static extern Status BarelyPerformer_Create(IntPtr handle, IntPtr outPerformerId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CreateOneOffTask")]
+      private static extern Status BarelyPerformer_CreateOneOffTask(
+          IntPtr handle, Int64 performerId, TaskDefinition definition, double position,
+          Int32 processOrder, IntPtr userData, IntPtr outTaskId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CreateRecurringTask")]
+      private static extern Status BarelyPerformer_CreateRecurringTask(
+          IntPtr handle, Int64 performerId, TaskDefinition definition, double position,
+          Int32 processOrder, IntPtr userData, IntPtr outTaskId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_Destroy")]
+      private static extern Status BarelyPerformer_Destroy(IntPtr handle, Int64 performerId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_DestroyTask")]
+      private static extern Status BarelyPerformer_DestroyTask(IntPtr handle, Int64 performerId,
+                                                               Int64 taskId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
+      private static extern Status BarelyPerformer_GetLoopBeginPosition(
+          IntPtr handle, Int64 performerId, IntPtr outLoopBeginPosition);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetLoopLength")]
+      private static extern Status BarelyPerformer_GetLoopLength(IntPtr handle, Int64 performerId,
+                                                                 IntPtr outLoopLength);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
+      private static extern Status BarelyPerformer_GetPosition(IntPtr handle, Int64 performerId,
+                                                               IntPtr outPosition);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetTaskPosition")]
+      private static extern Status BarelyPerformer_GetTaskPosition(IntPtr handle, Int64 performerId,
+                                                                   Int64 taskId,
+                                                                   IntPtr outPosition);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetTaskProcessOrder")]
+      private static extern Status BarelyPerformer_GetTaskProcessOrder(IntPtr handle,
+                                                                       Int64 performerId,
+                                                                       Int64 taskId,
+                                                                       IntPtr outProcessOrder);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_IsLooping")]
+      private static extern Status BarelyPerformer_IsLooping(IntPtr handle, Int64 performerId,
+                                                             IntPtr outIsLooping);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
+      private static extern Status BarelyPerformer_IsPlaying(IntPtr handle, Int64 performerId,
+                                                             IntPtr outIsPlaying);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
+      private static extern Status BarelyPerformer_SetLoopBeginPosition(IntPtr handle,
+                                                                        Int64 performerId,
+                                                                        double loopBeginPosition);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLoopLength")]
+      private static extern Status BarelyPerformer_SetLoopLength(IntPtr handle, Int64 performerId,
+                                                                 double loopLength);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLooping")]
+      private static extern Status BarelyPerformer_SetLooping(IntPtr handle, Int64 performerId,
+                                                              bool isLooping);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetPosition")]
+      private static extern Status BarelyPerformer_SetPosition(IntPtr handle, Int64 performerId,
+                                                               double position);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetTaskPosition")]
+      private static extern Status BarelyPerformer_SetTaskPosition(IntPtr handle, Int64 performerId,
+                                                                   Int64 taskId, double position);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetTaskProcessOrder")]
+      private static extern Status BarelyPerformer_SetTaskProcessOrder(IntPtr handle,
+                                                                       Int64 performerId,
+                                                                       Int64 taskId,
+                                                                       Int32 processOrder);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_Start")]
+      private static extern Status BarelyPerformer_Start(IntPtr handle, Int64 performerId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_Stop")]
+      private static extern Status BarelyPerformer_Stop(IntPtr handle, Int64 performerId);
 
       [DllImport(pluginName, EntryPoint = "BarelySamplerInstrument_GetDefinition")]
       private static extern InstrumentDefinition BarelySamplerInstrument_GetDefinition();

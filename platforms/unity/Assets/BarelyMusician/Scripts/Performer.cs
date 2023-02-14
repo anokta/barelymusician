@@ -5,14 +5,6 @@ using UnityEngine;
 namespace Barely {
   /// Performer.
   public class Performer : MonoBehaviour {
-    /// Task type enum.
-    public enum TaskType {
-      /// One-off task.
-      [InspectorName("One-off")] ONE_OFF = 0,
-      /// Recurring task.
-      [InspectorName("Recurring")] RECURRING = 1,
-    }
-
     /// Task.
     public class Task {
       /// Performer.
@@ -21,12 +13,12 @@ namespace Barely {
       /// Identifier.
       public Int64 Id { get; private set; } = Musician.Internal.InvalidId;
 
-      /// Type.
-      public TaskType Type { get; private set; } = TaskType.RECURRING;
+      /// Callback.
+      public Action Callback { get; set; }
+      private Action _callback = null;
 
-      /// Action.
-      public Action Action { get; set; }
-      private Action _processCallback = null;
+      /// True if one-off, false otherwise.
+      public bool IsOneOff { get; private set; } = false;
 
       /// Position in beats.
       public double Position {
@@ -52,21 +44,21 @@ namespace Barely {
       }
       private int _processOrder = 0;
 
-      public Task(Performer performer, TaskType type, Action action, double position,
+      public Task(Performer performer, Action callback, bool isOneOff, double position,
                   int processOrder) {
         Performer = performer;
-        Type = type;
-        Action = action;
+        Callback = callback;
+        IsOneOff = isOneOff;
+        _callback = delegate() {
+          Callback?.Invoke();
+        };
         _position = position;
         _processOrder = processOrder;
-        _processCallback = delegate() {
-          Action?.Invoke();
-        };
         Initialize();
       }
 
       public void Initialize() {
-        Id = Musician.Internal.Performer_CreateTask(Performer, Type, _processCallback, _position,
+        Id = Musician.Internal.Performer_CreateTask(Performer, _callback, IsOneOff, _position,
                                                     _processOrder);
       }
     }
@@ -128,14 +120,13 @@ namespace Barely {
 
     /// Creates a new task.
     ///
-    /// @param type Task type.
-    /// @param action Task action.
+    /// @param callback Task callback.
+    /// @param isOneOff True if one-off task, false otherwise.
     /// @param position Task position in beats.
     /// @param processOrder Task process order.
     /// @return Task.
-    public Task CreateTask(TaskType type, Action action, double position = 0.0,
-                           int processOrder = 0) {
-      Task task = new Task(this, type, action, position, processOrder);
+    public Task CreateTask(Action callback, bool isOneOff, double position, int processOrder = 0) {
+      Task task = new Task(this, callback, isOneOff, position, processOrder);
       _tasks.Add(task.Id, task);
       return task;
     }

@@ -34,8 +34,8 @@ TEST(PerformerTest, ProcessSingleTask) {
   };
 
   // Create a recurring task.
-  performer.CreateTask(Id{1}, definition, 0.25, 0, &task_process_count,
-                       /*is_one_off=*/false);
+  performer.CreateTask(Id{1}, definition, /*is_one_off=*/false, 0.25, 0,
+                       &task_process_count);
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
@@ -135,8 +135,8 @@ TEST(PerformerTest, ProcessMultipleTasks) {
             [](void** state) {
               (*static_cast<std::function<void()>*>(*state))();
             }),
-        static_cast<double>(i), 4 - i, static_cast<void*>(&callback),
-        /*is_one_off=*/false);
+        /*is_one_off=*/false, static_cast<double>(i), 4 - i,
+        static_cast<void*>(&callback));
   };
   for (int i = 1; i <= 4; ++i) {
     create_task_fn(i);

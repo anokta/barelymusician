@@ -384,33 +384,17 @@ BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
   return performer_id_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_CreateOneOffTask(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, double position, int32_t process_order,
-    void* user_data, BarelyId* out_task_id) {
+BarelyStatus BarelyPerformer_CreateTask(BarelyMusicianHandle handle,
+                                        BarelyId performer_id,
+                                        BarelyTaskDefinition definition,
+                                        bool is_one_off, double position,
+                                        int32_t process_order, void* user_data,
+                                        BarelyId* out_task_id) {
   if (!handle) return BarelyStatus_kNotFound;
   if (!out_task_id) return BarelyStatus_kInvalidArgument;
 
   const auto task_id_or = handle->engine.CreatePerformerTask(
-      performer_id, definition, position, process_order, user_data,
-      /*is_one_off=*/true);
-  if (task_id_or.IsOk()) {
-    *out_task_id = *task_id_or;
-    return BarelyStatus_kOk;
-  }
-  return task_id_or.GetErrorStatus();
-}
-
-BarelyStatus BarelyPerformer_CreateRecurringTask(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, double position, int32_t process_order,
-    void* user_data, BarelyId* out_task_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_task_id) return BarelyStatus_kInvalidArgument;
-
-  const auto task_id_or = handle->engine.CreatePerformerTask(
-      performer_id, definition, position, process_order, user_data,
-      /*is_one_off=*/false);
+      performer_id, definition, is_one_off, position, process_order, user_data);
   if (task_id_or.IsOk()) {
     *out_task_id = *task_id_or;
     return BarelyStatus_kOk;

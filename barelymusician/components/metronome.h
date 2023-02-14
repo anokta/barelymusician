@@ -15,31 +15,32 @@ class Metronome {
   /// @param beat Beat.
   using BeatCallback = std::function<void(int beat)>;
 
-  /// Returns whether metronome is playing or not.
+  /// Returns whether the metronome is playing or not.
   ///
   /// @return True if playing, false otherwise.
   bool IsPlaying() const noexcept;
 
-  /// Resets metronome.
+  /// Resets the metronome.
   void Reset() noexcept;
 
-  /// Sets beat callback.
+  /// Sets the beat callback.
   ///
   /// @param callback Beat callback.
   void SetBeatCallback(BeatCallback callback) noexcept;
 
-  /// Starts metronome.
+  /// Starts the metronome.
   void Start() noexcept;
 
-  /// Stops metronome.
+  /// Stops the metronome.
   void Stop() noexcept;
 
  private:
-  friend Metronome Musician::CreateComponent() noexcept;
+  // Ensures that `Metronome` can only be constructed by `Musician`.
+  friend class Musician;
 
-  // Creates new `Metronome`.
+  // Creates a new `Metronome` with a given `process_order`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Metronome(Musician& musician) noexcept;
+  explicit Metronome(Musician& musician, int process_order = -1) noexcept;
 
   // Metonome performer.
   Performer performer_;

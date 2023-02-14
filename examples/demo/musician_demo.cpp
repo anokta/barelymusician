@@ -80,14 +80,13 @@ constexpr char kDrumsBaseFilename[] =
 void ScheduleNote(double position, double duration, double pitch,
                   double intensity, Instrument& instrument,
                   Performer& performer) {
-  performer.CreateOneOffTask(
+  performer.CreateTask(
       [pitch, intensity, &instrument]() {
         instrument.SetNoteOn(pitch, intensity);
       },
-      position);
-  performer.CreateOneOffTask(
-      [pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-      position + duration);
+      /*is_one_off=*/true, position);
+  performer.CreateTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
+                       /*is_one_off=*/true, position + duration);
 }
 
 void ComposeChord(double intensity, int harmonic, double offset,

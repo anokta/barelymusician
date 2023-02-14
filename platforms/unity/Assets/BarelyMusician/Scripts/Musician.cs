@@ -26,10 +26,10 @@ namespace Barely {
 
     /// Schedules a task at a specific time.
     ///
-    /// @param action Task action.
+    /// @param callback Task callback.
     /// @param dspTime Time in seconds.
-    public static void ScheduleTask(Action action, double dspTime) {
-      Internal.Musician_CreateOneOffTask(action, dspTime);
+    public static void ScheduleTask(Action callback, double dspTime) {
+      Internal.Musician_ScheduleTask(callback, dspTime);
     }
 
     /// Class that wraps the internal api.
@@ -190,7 +190,7 @@ namespace Barely {
         }
       }
 
-      /// Resets an instrument control to its default value.
+      /// Resets an instrument control value.
       ///
       /// @param instrument Instrument.
       /// @param index Control index.
@@ -202,7 +202,7 @@ namespace Barely {
         }
       }
 
-      /// Resets an instrument note control to its default value.
+      /// Resets an instrument note control value.
       ///
       /// @param instrument Instrument.
       /// @param pitch Note pitch.
@@ -327,21 +327,21 @@ namespace Barely {
         return 0.0;
       }
 
-      /// Creates a new one-off musician task.
+      /// Schedules a new musician task.
       ///
-      /// @param task Task action.
+      /// @param callback Task callback.
       /// @param timestamp Task timestamp in seconds.
-      public static void Musician_CreateOneOffTask(Action action, double timestamp) {
+      public static void Musician_ScheduleTask(Action callback, double timestamp) {
         if (timestamp <= Musician_GetTimestamp()) {
-          action?.Invoke();
+          callback?.Invoke();
           return;
         }
-        List<Action> tasks = null;
-        if (_tasks != null && !_tasks.TryGetValue(timestamp, out tasks)) {
-          tasks = new List<Action>();
-          _tasks.Add(timestamp, tasks);
+        List<Action> callbacks = null;
+        if (_callbacks != null && !_callbacks.TryGetValue(timestamp, out callbacks)) {
+          callbacks = new List<Action>();
+          _callbacks.Add(timestamp, callbacks);
         }
-        tasks?.Add(action);
+        callbacks?.Add(callback);
       }
 
       /// Sets the tempo of a musician.
@@ -371,24 +371,16 @@ namespace Barely {
       /// Creates a new performer task.
       ///
       /// @param performer Performer.
+      /// @param callback Task callback.
+      /// @param isOneOff True if one off task, false otherwise.
+      /// @param position Task position.
+      /// @param processOrder Task process order.
       /// @return Task identifier.
-      public static Int64 Performer_CreateTask(Performer performer, Performer.TaskType type,
-                                               Action processCallback, double position,
-                                               int processOrder) {
-        _taskDefinition.processCallback = Marshal.GetFunctionPointerForDelegate(processCallback);
-        Status status = Status.UNIMPLEMENTED;
-        switch (type) {
-          case Performer.TaskType.ONE_OFF:
-            status =
-                BarelyPerformer_CreateOneOffTask(Handle, performer.Id, _taskDefinition, position,
-                                                 processOrder, IntPtr.Zero, _int64Ptr);
-            break;
-          case Performer.TaskType.RECURRING:
-            status =
-                BarelyPerformer_CreateRecurringTask(Handle, performer.Id, _taskDefinition, position,
-                                                    processOrder, IntPtr.Zero, _int64Ptr);
-            break;
-        }
+      public static Int64 Performer_CreateTask(Performer performer, Action callback, bool isOneOff,
+                                               double position, int processOrder) {
+        _taskDefinition.processCallback = Marshal.GetFunctionPointerForDelegate(callback);
+        Status status = BarelyPerformer_CreateTask(Handle, performer.Id, _taskDefinition, isOneOff,
+                                                   position, processOrder, IntPtr.Zero, _int64Ptr);
         if (!IsOk(status)) {
           Debug.LogError("Failed to create performer '" + performer.name + "': " + status);
           return InvalidId;
@@ -721,8 +713,8 @@ namespace Barely {
       // Internal output samples.
       private static double[] _outputSamples = null;
 
-      // Map of scheduled tasks by their timestamps.
-      private static Dictionary<double, List<Action>> _tasks = null;
+      // Map of scheduled task callbacks by their timestamps.
+      private static Dictionary<double, List<Action>> _callbacks = null;
 
       // Instrument definition.
       private static InstrumentDefinition _instrumentDefinition = new InstrumentDefinition();
@@ -764,17 +756,17 @@ namespace Barely {
         private void LateUpdate() {
           double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
           double dspTime = AudioSettings.dspTime + lookahead;
-          while (_tasks.Count > 0) {
-            double timestamp = _tasks.ElementAt(0).Key;
+          while (_callbacks.Count > 0) {
+            double timestamp = _callbacks.ElementAt(0).Key;
             if (timestamp >= dspTime) {
               break;
             }
             BarelyMusician_Update(_handle, timestamp);
-            var tasks = _tasks.ElementAt(0).Value;
-            for (int i = 0; i < tasks.Count; ++i) {
-              tasks[i]?.Invoke();
+            var callbacks = _callbacks.ElementAt(0).Value;
+            for (int i = 0; i < callbacks.Count; ++i) {
+              callbacks[i]?.Invoke();
             }
-            _tasks.Remove(timestamp);
+            _callbacks.Remove(timestamp);
           }
           BarelyMusician_Update(_handle, dspTime);
         }
@@ -825,7 +817,7 @@ namespace Barely {
           var config = AudioSettings.GetConfiguration();
           _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
           _outputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
-          _tasks = new Dictionary<double, List<Action>>();
+          _callbacks = new Dictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
         }
 
@@ -834,7 +826,7 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
-          _tasks = null;
+          _callbacks = null;
         }
       }
 
@@ -962,15 +954,12 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Create")]
       private static extern Status BarelyPerformer_Create(IntPtr handle, IntPtr outPerformerId);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CreateOneOffTask")]
-      private static extern Status BarelyPerformer_CreateOneOffTask(
-          IntPtr handle, Int64 performerId, TaskDefinition definition, double position,
-          Int32 processOrder, IntPtr userData, IntPtr outTaskId);
-
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CreateRecurringTask")]
-      private static extern Status BarelyPerformer_CreateRecurringTask(
-          IntPtr handle, Int64 performerId, TaskDefinition definition, double position,
-          Int32 processOrder, IntPtr userData, IntPtr outTaskId);
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CreateTask")]
+      private static extern Status BarelyPerformer_CreateTask(IntPtr handle, Int64 performerId,
+                                                              TaskDefinition definition,
+                                                              bool isOneOff, double position,
+                                                              Int32 processOrder, IntPtr userData,
+                                                              IntPtr outTaskId);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Destroy")]
       private static extern Status BarelyPerformer_Destroy(IntPtr handle, Int64 performerId);

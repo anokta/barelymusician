@@ -21,13 +21,13 @@ class Performer {
   ///
   /// @param task_id Task identifier.
   /// @param definition Task definition.
+  /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  /// @param is_one_off True if one-off task, false if recurring task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void CreateTask(Id task_id, TaskDefinition definition, double position,
-                  int process_order, void* user_data, bool is_one_off) noexcept;
+  void CreateTask(Id task_id, TaskDefinition definition, bool is_one_off,
+                  double position, int process_order, void* user_data) noexcept;
 
   /// Destroys task.
   ///
@@ -134,7 +134,7 @@ class Performer {
 
   // Task info.
   struct TaskInfo {
-    // True if one-off, false if recurring.
+    // True if one-off task, false if recurring.
     bool is_one_off;
 
     // Position.

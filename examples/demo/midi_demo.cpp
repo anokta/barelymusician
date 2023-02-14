@@ -88,14 +88,14 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
       const double pitch = PitchFromMidiKeyNumber(midi_event.getKeyNumber());
       const double intensity =
           IntensityFromMidiVelocity(midi_event.getVelocity());
-      performer.CreateOneOffTask(
+      performer.CreateTask(
           [&instrument, pitch, intensity]() {
             instrument.SetNoteOn(pitch, intensity);
           },
-          position);
-      performer.CreateOneOffTask(
+          /*is_one_off=*/true, position);
+      performer.CreateTask(
           [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-          position + duration);
+          /*is_one_off=*/true, position + duration);
       has_notes = true;
     }
   }

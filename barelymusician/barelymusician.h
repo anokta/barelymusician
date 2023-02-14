@@ -262,7 +262,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
 BARELY_EXPORT BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
                                                     BarelyId instrument_id);
 
-/// Gets the value of an instrument control.
+/// Gets an instrument control value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
@@ -273,7 +273,7 @@ BARELY_EXPORT BarelyStatus
 BarelyInstrument_GetControl(BarelyMusicianHandle handle, BarelyId instrument_id,
                             int32_t index, double* out_value);
 
-/// Gets the value of an instrument note control.
+/// Gets an instrument note control value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
@@ -326,7 +326,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllControls(
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllNoteControls(
     BarelyMusicianHandle handle, BarelyId instrument_id, double pitch);
 
-/// Resets an instrument control to its default value.
+/// Resets an instrument control value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
@@ -335,7 +335,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllNoteControls(
 BARELY_EXPORT BarelyStatus BarelyInstrument_ResetControl(
     BarelyMusicianHandle handle, BarelyId instrument_id, int32_t index);
 
-/// Resets an instrument note control to its default value.
+/// Resets an instrument note control value.
 ///
 /// @param handle Musician handle.
 /// @param instrument_id Instrument identifier.
@@ -508,35 +508,21 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
                                                   BarelyId* out_performer_id);
 
-/// Creates a new one-off performer task.
+/// Creates a new performer task.
 ///
 /// @param handle Musician handle.
 /// @param performer_id Performer identifier.
 /// @param definition Task definition.
+/// @param is_one_off True if one-off task, false otherwise.
 /// @param position Task position in beats.
 /// @param process_order Task process order.
 /// @param user_data Pointer to user data.
 /// @param out_task_id Output task identifier.
 /// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_CreateOneOffTask(
+BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
     BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, double position, int32_t process_order,
-    void* user_data, BarelyId* out_task_id);
-
-/// Creates a new recurring performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param definition Task definition.
-/// @param position Task position in beats.
-/// @param process_order Task process order.
-/// @param user_data Pointer to user data.
-/// @param out_task_id Output task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_CreateRecurringTask(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, double position, int32_t process_order,
-    void* user_data, BarelyId* out_task_id);
+    BarelyTaskDefinition definition, bool is_one_off, double position,
+    int32_t process_order, void* user_data, BarelyId* out_task_id);
 
 /// Destroys a performer.
 ///
@@ -1118,6 +1104,25 @@ class Instrument {
     return static_cast<ValueType>(value);
   }
 
+  /// Returns a note control value.
+  ///
+  /// @param index Note control index.
+  /// @return Note control value, or an error status.
+  template <typename IndexType, typename ValueType>
+  [[nodiscard]] StatusOr<ValueType> GetNoteControl(
+      double pitch, IndexType index) const noexcept {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    double value = 0.0;
+    if (const Status status = BarelyInstrument_GetNoteControl(
+            handle_, id_, pitch, static_cast<int>(index), &value);
+        !status.IsOk()) {
+      return status;
+    }
+    return static_cast<ValueType>(value);
+  }
+
   /// Returns whether a note is on or not.
   ///
   /// @param pitch Note pitch.
@@ -1378,75 +1383,75 @@ class Instrument {
   NoteOnEventCallback note_on_event_callback_;
 };
 
+/// Task reference.
+class TaskReference {
+ public:
+  /// Returns the position.
+  ///
+  /// @return Position in beats, or an error status.
+  [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
+    double position = 0.0;
+    if (const Status status = BarelyPerformer_GetTaskPosition(
+            handle_, performer_id_, id_, &position);
+        !status.IsOk()) {
+      return status;
+    }
+    return position;
+  }
+
+  /// Returns the process order.
+  ///
+  /// @return Process order, or an error status.
+  [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
+    int process_order = 0;
+    if (const Status status = BarelyPerformer_GetTaskProcessOrder(
+            handle_, performer_id_, id_, &process_order);
+        !status.IsOk()) {
+      return status;
+    }
+    return process_order;
+  }
+
+  /// Sets the position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status SetPosition(double position) noexcept {
+    return BarelyPerformer_SetTaskPosition(handle_, performer_id_, id_,
+                                           position);
+  }
+
+  /// Sets the process order.
+  ///
+  /// @param process_order Process order.
+  /// @return Status.
+  Status SetProcessOrder(int process_order) noexcept {
+    return BarelyPerformer_SetTaskProcessOrder(handle_, performer_id_, id_,
+                                               process_order);
+  }
+
+ private:
+  // Ensures that `TaskReference` can only be constructed by `Performer`.
+  friend class Performer;
+
+  // Constructs a new `TaskReference`.
+  explicit TaskReference(BarelyMusicianHandle handle, BarelyId performer_id,
+                         BarelyId id) noexcept
+      : handle_(handle), performer_id_(performer_id), id_(id) {}
+
+  // Raw musician handle.
+  BarelyMusicianHandle handle_ = nullptr;
+
+  // Performer identifier.
+  BarelyId performer_id_ = BarelyId_kInvalid;
+
+  // Identifier.
+  BarelyId id_ = BarelyId_kInvalid;
+};
+
 /// Performer.
 class Performer {
  public:
-  /// Task reference.
-  class TaskReference {
-   public:
-    /// Returns the position.
-    ///
-    /// @return Position in beats, or an error status.
-    [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
-      double position = 0.0;
-      if (const Status status = BarelyPerformer_GetTaskPosition(
-              handle_, performer_id_, id_, &position);
-          !status.IsOk()) {
-        return status;
-      }
-      return position;
-    }
-
-    /// Returns the process order.
-    ///
-    /// @return Process order, or an error status.
-    [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
-      int process_order = 0;
-      if (const Status status = BarelyPerformer_GetTaskProcessOrder(
-              handle_, performer_id_, id_, &process_order);
-          !status.IsOk()) {
-        return status;
-      }
-      return process_order;
-    }
-
-    /// Sets the position.
-    ///
-    /// @param position Position in beats.
-    /// @return Status.
-    Status SetPosition(double position) noexcept {
-      return BarelyPerformer_SetTaskPosition(handle_, performer_id_, id_,
-                                             position);
-    }
-
-    /// Sets the process order.
-    ///
-    /// @param process_order Process order.
-    /// @return Status.
-    Status SetProcessOrder(int process_order) noexcept {
-      return BarelyPerformer_SetTaskProcessOrder(handle_, performer_id_, id_,
-                                                 process_order);
-    }
-
-   private:
-    // Ensures that `TaskReference` can only be constructed by `Performer`.
-    friend class Performer;
-
-    // Constructs a new `TaskReference`.
-    explicit TaskReference(BarelyMusicianHandle handle, BarelyId performer_id,
-                           BarelyId id) noexcept
-        : handle_(handle), performer_id_(performer_id), id_(id) {}
-
-    // Raw musician handle.
-    BarelyMusicianHandle handle_ = nullptr;
-
-    // Performer identifier.
-    BarelyId performer_id_ = BarelyId_kInvalid;
-
-    // Identifier.
-    BarelyId id_ = BarelyId_kInvalid;
-  };
-
   /// Destroys `Performer`.
   ~Performer() noexcept {
     BarelyPerformer_Destroy(std::exchange(handle_, nullptr),
@@ -1477,33 +1482,35 @@ class Performer {
     return *this;
   }
 
-  /// Creates a new one-off task.
+  /// Creates a new task.
   ///
   /// @param definition Task definition.
+  /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Task reference.
-  TaskReference CreateOneOffTask(TaskDefinition definition,
-                                 double position = 0.0, int process_order = 0,
-                                 void* user_data = nullptr) noexcept {
+  TaskReference CreateTask(TaskDefinition definition, bool is_one_off,
+                           double position, int process_order = 0,
+                           void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelyPerformer_CreateOneOffTask(
-        handle_, id_, definition, position, process_order, user_data, &task_id);
+    [[maybe_unused]] const Status status = BarelyPerformer_CreateTask(
+        handle_, id_, definition, is_one_off, position, process_order,
+        user_data, &task_id);
     assert(status.IsOk());
     return TaskReference(handle_, id_, task_id);
   }
 
-  /// Creates a new one-off task with a callback.
+  /// Creates a new task with a callback.
   ///
   /// @param callback Task callback.
+  /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
-  /// @param type Task type.
   /// @param process_order Task process order.
   /// @return Task reference.
-  TaskReference CreateOneOffTask(TaskCallback callback, double position = 0.0,
-                                 int process_order = 0) noexcept {
-    return CreateOneOffTask(
+  TaskReference CreateTask(TaskCallback callback, bool is_one_off,
+                           double position, int process_order = 0) noexcept {
+    return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) noexcept {
               *state = new TaskCallback(
@@ -1518,53 +1525,7 @@ class Performer {
                 (*callback_ptr)();
               }
             }),
-        position, process_order, static_cast<void*>(&callback));
-  }
-
-  /// Creates a new recurring task.
-  ///
-  /// @param definition Task definition.
-  /// @param position Task position in beats.
-  /// @param process_order Task process order.
-  /// @param user_data Pointer to user data.
-  /// @return Task reference.
-  TaskReference CreateRecurringTask(TaskDefinition definition,
-                                    double position = 0.0,
-                                    int process_order = 0,
-                                    void* user_data = nullptr) noexcept {
-    BarelyId task_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelyPerformer_CreateRecurringTask(
-        handle_, id_, definition, position, process_order, user_data, &task_id);
-    assert(status.IsOk());
-    return TaskReference(handle_, id_, task_id);
-  }
-
-  /// Creates a new recurring task with a callback.
-  ///
-  /// @param callback Task callback.
-  /// @param position Task position in beats.
-  /// @param type Task type.
-  /// @param process_order Task process order.
-  /// @return Task reference.
-  TaskReference CreateRecurringTask(TaskCallback callback,
-                                    double position = 0.0,
-                                    int process_order = 0) noexcept {
-    return CreateRecurringTask(
-        TaskDefinition(
-            [](void** state, void* user_data) noexcept {
-              *state = new TaskCallback(
-                  std::move(*static_cast<TaskCallback*>(user_data)));
-            },
-            [](void** state) noexcept {
-              delete static_cast<TaskCallback*>(*state);
-            },
-            [](void** state) noexcept {
-              if (const auto* callback_ptr = static_cast<TaskCallback*>(*state);
-                  *callback_ptr) {
-                (*callback_ptr)();
-              }
-            }),
-        position, process_order, static_cast<void*>(&callback));
+        is_one_off, position, process_order, static_cast<void*>(&callback));
   }
 
   /// Destroys a task.

@@ -48,17 +48,17 @@ StatusOr<Id> Engine::CreatePerformer() noexcept {
 
 StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
                                          TaskDefinition definition,
-                                         double position, int process_order,
-                                         void* user_data,
-                                         bool is_one_off) noexcept {
+                                         bool is_one_off, double position,
+                                         int process_order,
+                                         void* user_data) noexcept {
   if (performer_id == kInvalid || position < 0.0) {
     return Status::InvalidArgument();
   }
   auto performer_or = GetPerformer(performer_id);
   if (performer_or.IsOk()) {
     const Id task_id = GenerateNextId();
-    performer_or->get().CreateTask(task_id, definition, position, process_order,
-                                   user_data, is_one_off);
+    performer_or->get().CreateTask(task_id, definition, is_one_off, position,
+                                   process_order, user_data);
     return task_id;
   }
   return performer_or.GetErrorStatus();

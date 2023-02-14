@@ -58,7 +58,7 @@ namespace Barely {
       _performer =
           new GameObject() { hideFlags = HideFlags.HideAndDontSave }.AddComponent<Performer>();
       _performer.IsLooping = true;
-      _performer.CreateTask(Performer.TaskType.RECURRING, delegate() {
+      _performer.CreateTask(delegate() {
         int bar = _beat / beatCount;
         int beat = _beat % beatCount;
         double pitch = (beat == 0.0) ? barPitch : beatPitch;
@@ -71,7 +71,7 @@ namespace Barely {
         }
         _beatEventCallback(beat);
         ++_beat;
-      }, 0.0, -1);
+      }, /*isOneOff=*/false, 0.0, -1);
     }
 
     private void Destroy() {

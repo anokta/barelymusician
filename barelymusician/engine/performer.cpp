@@ -19,8 +19,8 @@ namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Performer::CreateTask(Id task_id, TaskDefinition definition,
-                           double position, int process_order, void* user_data,
-                           bool is_one_off) noexcept {
+                           bool is_one_off, double position, int process_order,
+                           void* user_data) noexcept {
   assert(task_id > kInvalid);
   assert(!is_one_off || position >= position_);
   auto success =
@@ -163,10 +163,8 @@ void Performer::SetPosition(double position) noexcept {
   last_processed_position_ = std::nullopt;
   one_off_tasks_.erase(
       one_off_tasks_.begin(),
-      one_off_tasks_.lower_bound(std::tuple{
-          is_looping_ ? std::min(position, loop_begin_position_ + loop_length_)
-                      : position,
-          std::numeric_limits<int>::lowest(), kInvalid}));
+      one_off_tasks_.lower_bound(
+          std::tuple{position, std::numeric_limits<int>::lowest(), kInvalid}));
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_tasks_.empty()) {
       // Reset all remaining one-off tasks back to the beginning.

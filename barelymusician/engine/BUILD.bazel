@@ -151,7 +151,9 @@ cc_test(
     name = "performer_test",
     srcs = ["performer_test.cpp"],
     deps = [
+        ":id",
         ":performer",
+        ":status",
         "@googletest//:gtest_main",
     ],
 )

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "barelymusician/engine/id.h"
+#include "barelymusician/engine/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -21,6 +22,13 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
+
+  ASSERT_FALSE(performer.GetTaskPosition(Id{1}).IsOk());
+  EXPECT_EQ(performer.GetTaskPosition(Id{1}).GetErrorStatus(),
+            Status::NotFound());
+  ASSERT_FALSE(performer.GetTaskProcessOrder(Id{1}).IsOk());
+  EXPECT_EQ(performer.GetTaskProcessOrder(Id{1}).GetErrorStatus(),
+            Status::NotFound());
 
   // Create a task definition.
   int task_process_count = 0;
@@ -40,6 +48,15 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
   EXPECT_EQ(task_process_count, 0);
+
+  {
+    const auto task_position_or = performer.GetTaskPosition(Id{1});
+    ASSERT_TRUE(task_position_or.IsOk());
+    EXPECT_DOUBLE_EQ(*task_position_or, 0.25);
+    const auto task_process_order_or = performer.GetTaskProcessOrder(Id{1});
+    ASSERT_TRUE(task_process_order_or.IsOk());
+    EXPECT_DOUBLE_EQ(*task_process_order_or, 0);
+  }
 
   // Start the performer.
   performer.Start();
@@ -84,6 +101,15 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.5, 0)));
   EXPECT_EQ(task_process_count, 2);
+
+  {
+    const auto task_position_or = performer.GetTaskPosition(Id{1});
+    ASSERT_TRUE(task_position_or.IsOk());
+    EXPECT_DOUBLE_EQ(*task_position_or, 0.75);
+    const auto task_process_order_or = performer.GetTaskProcessOrder(Id{1});
+    ASSERT_TRUE(task_process_order_or.IsOk());
+    EXPECT_DOUBLE_EQ(*task_process_order_or, 0);
+  }
 
   // Process the task with the updated position.
   performer.Update(0.5);
@@ -135,7 +161,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
             [](void** state) {
               (*static_cast<std::function<void()>*>(*state))();
             }),
-        /*is_one_off=*/false, static_cast<double>(i), 4 - i,
+        /*is_one_off=*/true, static_cast<double>(i), 4 - i,
         static_cast<void*>(&callback));
   };
   for (int i = 1; i <= 4; ++i) {
@@ -172,8 +198,6 @@ TEST(PerformerTest, ProcessMultipleTasks) {
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 4.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
 }
-
-// TODO(#108): Add `ProcessOneOffTasks` test (at minimum).
 
 // Tests that performer sets its current position as expected.
 TEST(PerformerTest, SetPosition) {

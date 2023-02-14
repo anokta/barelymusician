@@ -60,8 +60,8 @@ class PercussionInstrument : public CustomInstrument {
   explicit PercussionInstrument(int frame_rate) noexcept;
 
   /// Implements `CustomInstrument`.
-  void Process(double* output_samples, int channel_count,
-               int frame_count) noexcept override;
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count) noexcept override;
   void SetControl(int index, double value,
                   double slope_per_frame) noexcept override;
   void SetData(const void* data, int size) noexcept override;

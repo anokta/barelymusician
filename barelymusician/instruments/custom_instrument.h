@@ -14,15 +14,15 @@ class CustomInstrument {
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~CustomInstrument() = default;
 
-  /// Processes the next output samples.
+  /// Processes output samples.
   ///
-  /// @param output_samples Interleaved array of output samples.
-  /// @param channel_count Number of output channels.
-  /// @param frame_count Number of output frames.
-  virtual void Process(double* output_samples, int channel_count,
-                       int frame_count) noexcept = 0;
+  /// @param output_samples Array of interleaved output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
+  virtual void Process(double* output_samples, int output_channel_count,
+                       int output_frame_count) noexcept = 0;
 
-  /// Sets control value.
+  /// Sets a control value.
   ///
   /// @param index Control index.
   /// @param value Control value.
@@ -36,21 +36,21 @@ class CustomInstrument {
   /// @param size Data size in bytes.
   virtual void SetData(const void* data, int size) noexcept = 0;
 
-  /// Sets note control value.
+  /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param index Control index.
-  /// @param value Control value.
-  /// @param slope_per_frame Control slope in value change per frame.
+  /// @param index Note control index.
+  /// @param value Note control value.
+  /// @param slope_per_frame Note control slope in value change per frame.
   virtual void SetNoteControl(double pitch, int index, double value,
                               double slope_per_frame) noexcept = 0;
 
-  /// Sets note off.
+  /// Sets a note off.
   ///
   /// @param pitch Note pitch.
   virtual void SetNoteOff(double pitch) noexcept = 0;
 
-  /// Sets note on.
+  /// Sets a note on.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.

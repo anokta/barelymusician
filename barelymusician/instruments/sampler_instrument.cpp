@@ -21,15 +21,17 @@ SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
       frame_rate_(frame_rate),
       gain_processor_(frame_rate) {}
 
-void SamplerInstrument::Process(double* output_samples, int channel_count,
-                                int frame_count) noexcept {
-  for (int frame = 0; frame < frame_count; ++frame) {
+void SamplerInstrument::Process(double* output_samples,
+                                int output_channel_count,
+                                int output_frame_count) noexcept {
+  for (int frame = 0; frame < output_frame_count; ++frame) {
     const double mono_sample = voice_.Next(0);
-    for (int channel = 0; channel < channel_count; ++channel) {
-      output_samples[channel_count * frame + channel] = mono_sample;
+    for (int channel = 0; channel < output_channel_count; ++channel) {
+      output_samples[output_channel_count * frame + channel] = mono_sample;
     }
   }
-  gain_processor_.Process(output_samples, channel_count, frame_count);
+  gain_processor_.Process(output_samples, output_channel_count,
+                          output_frame_count);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

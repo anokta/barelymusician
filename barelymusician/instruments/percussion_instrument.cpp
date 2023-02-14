@@ -21,18 +21,20 @@ PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate), Pad(frame_rate)},
       gain_processor_(frame_rate) {}
 
-void PercussionInstrument::Process(double* output_samples, int channel_count,
-                                   int frame_count) noexcept {
-  for (int frame = 0; frame < frame_count; ++frame) {
+void PercussionInstrument::Process(double* output_samples,
+                                   int output_channel_count,
+                                   int output_frame_count) noexcept {
+  for (int frame = 0; frame < output_frame_count; ++frame) {
     double mono_sample = 0.0;
     for (auto& pad : pads_) {
       mono_sample += pad.voice.Next(0);
     }
-    for (int channel = 0; channel < channel_count; ++channel) {
-      output_samples[channel_count * frame + channel] = mono_sample;
+    for (int channel = 0; channel < output_channel_count; ++channel) {
+      output_samples[output_channel_count * frame + channel] = mono_sample;
     }
   }
-  gain_processor_.Process(output_samples, channel_count, frame_count);
+  gain_processor_.Process(output_samples, output_channel_count,
+                          output_frame_count);
 }
 
 void PercussionInstrument::SetControl(int index, double value,

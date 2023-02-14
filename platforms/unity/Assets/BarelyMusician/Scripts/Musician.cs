@@ -612,6 +612,19 @@ namespace Barely {
         INTERNAL = 4,
       }
 
+      /// Control definition.
+      [StructLayout(LayoutKind.Sequential)]
+      private struct ControlDefinition {
+        /// Default value.
+        public double defaultValue;
+
+        /// Minimum value.
+        public double minValue;
+
+        /// Maximum value.
+        public double maxValue;
+      }
+
       // Instrument definition.
       [StructLayout(LayoutKind.Sequential)]
       private struct InstrumentDefinition {

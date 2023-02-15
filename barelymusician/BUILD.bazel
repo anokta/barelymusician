@@ -9,8 +9,6 @@ cc_library(
     deps = [
         ":include",
         "//barelymusician/engine",
-        "//barelymusician/instruments:percussion_instrument",
-        "//barelymusician/instruments:synth_instrument",
     ],
     alwayslink = True,
 )

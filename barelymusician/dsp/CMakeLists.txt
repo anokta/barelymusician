@@ -1,4 +1,10 @@
 add_library(
+  decibels
+  decibels.cpp
+  decibels.h
+)
+
+add_library(
   dsp_utils
   dsp_utils.cpp
   dsp_utils.h
@@ -15,8 +21,28 @@ target_link_libraries(
 )
 
 add_library(
+  enveloped_voice INTERFACE
+  enveloped_voice.h
+)
+target_link_libraries(
+  enveloped_voice INTERFACE
+  envelope
+  voice
+)
+
+add_library(
   filter INTERFACE
   filter.h
+)
+
+add_library(
+  gain_processor
+  gain_processor.cpp
+  gain_processor.h
+)
+target_link_libraries(
+  gain_processor
+  seconds
 )
 
 add_library(
@@ -43,7 +69,6 @@ target_link_libraries(
   oscillator
   dsp_utils
   generator
-  include
   random
 )
 
@@ -68,6 +93,17 @@ add_library(
 )
 
 add_executable(
+  decibels_test
+  decibels_test.cpp
+)
+target_link_libraries(
+  decibels_test
+  decibels
+  gtest_main
+)
+gtest_discover_tests(decibels_test)
+
+add_executable(
   dsp_utils_test
   dsp_utils_test.cpp
 )
@@ -88,6 +124,17 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(envelope_test)
+
+add_executable(
+  gain_processor_test
+  gain_processor_test.cpp
+)
+target_link_libraries(
+  gain_processor_test
+  gain_processor
+  gtest_main
+)
+gtest_discover_tests(gain_processor_test)
 
 add_executable(
   one_pole_filter_test

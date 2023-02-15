@@ -79,25 +79,15 @@ void InputManager::SetKeyUpCallback(KeyUpCallback key_up_callback) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void InputManager::Update() noexcept {
 #if defined(_WIN32) || defined(__CYGWIN__)
-  DWORD num_events = 0;
-  if (!GetNumberOfConsoleInputEvents(std_input_handle_, &num_events) ||
-      num_events == 0) {
-    return;
-  }
-  if (!ReadConsoleInput(std_input_handle_, input_buffer_, 128, &num_events)) {
-    return;
-  }
-  for (DWORD i = 0; i < num_events; ++i) {
-    if (input_buffer_[i].EventType == KEY_EVENT) {
-      const auto& key_event = input_buffer_[i].Event.KeyEvent;
-      const Key& key = key_event.uChar.AsciiChar;
-      if (key_event.bKeyDown) {
-        HandleKeyDown(key);
-      } else {
-        HandleKeyUp(key);
-      }
+  for (int i = 0; i < 128; ++i) {
+    const Key key = static_cast<Key>(i);
+    if (GetKeyState(i) >> 1) {
+      HandleKeyDown(key);
+    } else {
+      HandleKeyUp(key);
     }
   }
+  FlushConsoleInputBuffer(std_input_handle_);
 #elif defined(__APPLE__)
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
 #endif  // defined(__APPLE__)

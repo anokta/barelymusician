@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Test input (single impulse).
@@ -68,4 +68,4 @@ TEST(OnePoleFilterTest, HighPassAllPass) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

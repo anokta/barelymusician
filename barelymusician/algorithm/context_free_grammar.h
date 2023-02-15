@@ -1,3 +1,4 @@
+
 #ifndef BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
 #define BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_
 
@@ -9,7 +10,7 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/random.h"
 
-namespace barelyapi {
+namespace barely {
 
 /// Context-free grammar (L-system) template that generates a sequence of
 /// `SymbolType` with the given set of substitution rules.
@@ -33,9 +34,10 @@ class ContextFreeGrammar {
                                            Random& random) const noexcept;
 
  private:
-  // Returns a substitution for a given `symbol` with a `random` draw.
-  const std::vector<SymbolType>* GetSubstitution(const SymbolType& symbol,
-                                                 Random& random) const noexcept;
+  // Returns a substitution from a given `substitutions` with a `random` draw.
+  const std::vector<SymbolType>* GetSubstitution(
+      const std::vector<std::vector<SymbolType>>& substitutions,
+      Random& random) const noexcept;
 
   // Grammar rules that map symbols to their corresponding substitutions.
   std::unordered_map<SymbolType, std::vector<std::vector<SymbolType>>> rules_;
@@ -60,7 +62,7 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
   int i = 0;
   while (i < static_cast<int>(sequence.size())) {
     if (const auto* substitutions = FindOrNull(rules_, sequence[i])) {
-      const auto* substitution = GetSubstitution(sequence[i], random);
+      const auto* substitution = GetSubstitution(*substitutions, random);
       sequence.erase(std::next(sequence.begin(), i));
       if (substitution) {
         sequence.insert(std::next(sequence.begin(), i), substitution->cbegin(),
@@ -75,17 +77,17 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
 
 template <typename SymbolType>
 const std::vector<SymbolType>* ContextFreeGrammar<SymbolType>::GetSubstitution(
-    const SymbolType& symbol, Random& random) const noexcept {
+    const std::vector<std::vector<SymbolType>>& substitutions,
+    Random& random) const noexcept {
   // Select a substitution randomly with equal probability for each selection.
-  const auto* substitutions = FindOrNull(rules_, symbol);
-  if (substitutions && !substitutions->empty()) {
+  if (!substitutions.empty()) {
     const int index =
-        random.DrawUniform(0, static_cast<int>(substitutions->size()) - 1);
-    return &(*substitutions)[index];
+        random.DrawUniform(0, static_cast<int>(substitutions.size()) - 1);
+    return &substitutions[index];
   }
   return nullptr;
 }
 
-}  // namespace barelyapi
+}  // namespace barely
 
 #endif  // BARELYMUSICIAN_ALGORITHM_CONTEXT_FREE_GRAMMAR_H_

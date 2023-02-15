@@ -1,19 +1,19 @@
 #ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
 #define BARELYMUSICIAN_ENGINE_ENGINE_H_
 
+#include <functional>
 #include <memory>
 #include <unordered_map>
 #include <utility>
 
-#include "barelymusician/engine/conductor.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"
-#include "barelymusician/engine/note.h"
-#include "barelymusician/engine/sequence.h"
-#include "barelymusician/engine/transport.h"
+#include "barelymusician/engine/performer.h"
+#include "barelymusician/engine/status.h"
+#include "barelymusician/engine/task.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Musician engine.
 class Engine {
@@ -25,109 +25,114 @@ class Engine {
   ~Engine() noexcept;
 
   // Non-copyable and non-movable.
-  Engine(const Engine& other) = delete;
-  Engine& operator=(const Engine& other) = delete;
+  Engine(const Engine& other) noexcept = delete;
+  Engine& operator=(const Engine& other) noexcept = delete;
   Engine(Engine&& other) noexcept = delete;
   Engine& operator=(Engine&& other) noexcept = delete;
 
   /// Creates new instrument.
   ///
-  /// @param instrument_id Instrument identifier.
   /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hz.
-  /// @return True if successful, false otherwise.
+  /// @param frame_rate Frame rate in hertz.
+  /// @return Instrument identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateInstrument(Id instrument_id, Instrument::Definition definition,
-                        int frame_rate) noexcept;
+  StatusOr<Id> CreateInstrument(InstrumentDefinition definition,
+                                int frame_rate) noexcept;
 
-  /// Creates new sequence.
+  /// Creates new performer.
   ///
-  /// @param sequence_id Sequence identifier.
-  /// @return True if successful, false otherwise.
+  /// @return Performer identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool CreateSequence(Id sequence_id) noexcept;
+  StatusOr<Id> CreatePerformer() noexcept;
+
+  /// Creates new performer task.
+  ///
+  /// @param performer_id Performer identifier.
+  /// @param definition Task definition.
+  /// @param is_one_off True if one-off task, false otherwise.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  /// @param user_data Pointer to user data.
+  /// @return Task identifier or error status.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  StatusOr<Id> CreatePerformerTask(Id performer_id, TaskDefinition definition,
+                                   bool is_one_off, double position,
+                                   int process_order, void* user_data) noexcept;
 
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument identifier.
-  /// @return True if successful, false otherwise.
+  /// @return Status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool DestroyInstrument(Id instrument_id) noexcept;
+  Status DestroyInstrument(Id instrument_id) noexcept;
 
-  /// Destroys sequence.
+  /// Destroys performer.
   ///
-  /// @param sequence_id Sequence identifier.
-  /// @return True if successful, false otherwise.
-  bool DestroySequence(Id sequence_id) noexcept;
-
-  /// Returns conductor.
-  ///
-  /// @return Conductor.
-  Conductor& GetConductor() noexcept;
+  /// @param performer_id Performer identifier.
+  /// @return Status.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  Status DestroyPerformer(Id performer_id) noexcept;
 
   /// Returns instrument.
   ///
   /// @param instrument_id Instrument identifier.
-  /// @return Pointer to instrument.
-  Instrument* GetInstrument(Id instrument_id) noexcept;
+  /// @return Reference to instrument or error status.
+  [[nodiscard]] StatusOr<std::reference_wrapper<Instrument>> GetInstrument(
+      Id instrument_id) noexcept;
 
-  /// Returns sequence.
+  /// Returns performer.
   ///
-  /// @param sequence_id Sequence identifier.
-  /// @return Pointer to sequence.
-  Sequence* GetSequence(Id sequence_id) noexcept;
+  /// @param performer_id Performer identifier.
+  /// @return Reference to performer or error status.
+  [[nodiscard]] StatusOr<std::reference_wrapper<Performer>> GetPerformer(
+      Id performer_id) noexcept;
 
-  /// Returns sequence instrument identifier.
+  /// Returns tempo.
   ///
-  /// @param sequence_id Sequence identifier.
-  /// @return Pointer to sequence instrument identifier.
-  Id* GetSequenceInstrumentId(Id sequence_id) noexcept;
+  /// @return Tempo in beats per minute.
+  [[nodiscard]] double GetTempo() const noexcept;
 
-  /// Returns transport.
+  /// Returns timestamp.
   ///
-  /// @return Transport.
-  Transport& GetTransport() noexcept;
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp() const noexcept;
 
   /// Processes instrument at timestamp.
   ///
   /// @param instrument_id Instrument identifier.
-  /// @param output Output buffer.
-  /// @param num_output_channels Number of output channels.
-  /// @param num_output_frames Number of output frames.
+  /// @param output_samples Interleaved array of output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool ProcessInstrument(Id instrument_id, double* output,
-                         int num_output_channels, int num_output_frames,
-                         double timestamp) noexcept;
+  /// @return Status.
+  Status ProcessInstrument(Id instrument_id, double* output_samples,
+                           int output_channel_count, int output_frame_count,
+                           double timestamp) noexcept;
 
-  /// Sets sequence instrument identifier.
+  /// Sets tempo.
   ///
-  /// @param sequence_id Sequence identifier.
-  /// @param instrument_id Instrument identifier.
-  /// @return True if successful, false otherwise.
-  bool SetSequenceInstrumentId(Id sequence_id, Id instrument_id) noexcept;
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept;
 
-  /// Starts playback.
-  void Start() noexcept;
-
-  /// Stops playback.
-  void Stop() noexcept;
-
-  /// Updates internal state.
+  /// Updates engine at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
  private:
   // Instrument reference by identifier map.
   using InstrumentReferenceMap = std::unordered_map<Id, Instrument*>;
 
+  // Generates the next identifier to use.
+  Id GenerateNextId() noexcept;
+
   // Updates instrument reference map.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void UpdateInstrumentReferenceMap() noexcept;
 
-  // Conductor.
-  Conductor conductor_;
+  // Monotonic identifier counter.
+  Id id_counter_ = 0;
 
   // Map of instruments by identifiers.
   std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;
@@ -135,13 +140,16 @@ class Engine {
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
-  // Map of sequence-instrument identifier pairs by identifiers.
-  std::unordered_map<Id, std::pair<Sequence, Id>> sequences_;
+  // Map of performers by performer order-identifier pairs.
+  std::unordered_map<Id, Performer> performers_;
 
-  // Transport.
-  Transport transport_;
+  // Tempo in beats per minute.
+  double tempo_ = 120.0;
+
+  // Timestamp in seconds.
+  double timestamp_ = 0.0;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_

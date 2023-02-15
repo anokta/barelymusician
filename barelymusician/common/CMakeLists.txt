@@ -9,6 +9,12 @@ add_library(
   random.h
 )
 
+add_library(
+  seconds
+  seconds.cpp
+  seconds.h
+)
+
 add_executable(
   find_or_null_test
   find_or_null_test.cpp
@@ -30,3 +36,14 @@ target_link_libraries(
   gtest_main
 )
 gtest_discover_tests(random_test)
+
+add_executable(
+  seconds_test
+  seconds_test.cpp
+)
+target_link_libraries(
+  seconds_test
+  seconds
+  gtest_main
+)
+gtest_discover_tests(seconds_test)

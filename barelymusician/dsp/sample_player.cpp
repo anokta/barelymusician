@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <cmath>
 
-namespace barelyapi {
+namespace barely {
 
-SamplePlayer::SamplePlayer(int sample_rate) noexcept
-    : sample_interval_(
-          (sample_rate > 0) ? 1.0 / static_cast<double>(sample_rate) : 0.0) {}
+SamplePlayer::SamplePlayer(int frame_rate) noexcept
+    : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate)
+                                       : 0.0) {}
 
 double SamplePlayer::Next() noexcept {
   if (!data_ || cursor_ >= length_) {
@@ -43,7 +43,7 @@ void SamplePlayer::SetSpeed(double speed) noexcept {
 }
 
 void SamplePlayer::CalculateIncrementPerSample() noexcept {
-  increment_ = speed_ * frequency_ * sample_interval_;
+  increment_ = speed_ * frequency_ * frame_interval_;
 }
 
-}  // namespace barelyapi
+}  // namespace barely

@@ -24,31 +24,32 @@ readonly OSX_BIN_DST_PATH="${PLUGINS_X64_DIR}/${PLUGIN_NAME}.bundle"
 readonly WINDOWS_BIN_SRC_PATH="${NATIVE_BIN_DIR}/unity_windows.dll"
 readonly WINDOWS_BIN_DST_PATH="${PLUGINS_X64_DIR}/${PLUGIN_NAME}.dll"
 
+readonly GREEN="\e[32m"
+
 parse_flags() {
   COMPILATION_MODE="opt"
 
-  for i in "$@";
-    do
-      case $i in
-        -c=*|--compilation_mode=*)
-          # compilation mode.
-          COMPILATION_MODE="${i#*=}"
-          shift
-          ;;
-        *)
-          # unknown option.
-          echo "Unknown option: ${i}" >&2
-          exit 1
-          ;;
-      esac
-    done  
-  
+  for i in "$@"; do
+    case $i in
+    -c=* | --compilation_mode=*)
+      # compilation mode.
+      COMPILATION_MODE="${i#*=}"
+      shift
+      ;;
+    *)
+      # unknown option.
+      echo "Unknown option: ${i}" >&2
+      exit 1
+      ;;
+    esac
+  done
+
   readonly COMPILATION_MODE
 }
 
 main() {
   set -e
-  
+
   parse_flags "$@"
 
   echo "Building BarelyMusician Unity plugins..."
@@ -68,6 +69,8 @@ main() {
     echo "Copying native Windows plugin into Unity project..."
     cp -rf "${WINDOWS_BIN_SRC_PATH}" "${WINDOWS_BIN_DST_PATH}"
   fi
+
+  echo -e "${GREEN}Done!"
 }
 
 main "$@"

@@ -4,23 +4,70 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/oscillator.h"
-#include "barelymusician/instruments/enveloped_voice.h"
 
-namespace barelyapi {
+extern "C" {
 
-using ::barely::SynthParameter;
+BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition() {
+  return barely::SynthInstrument::GetDefinition();
+}
 
-SynthInstrument::SynthInstrument(int sample_rate) noexcept
-    : voice_(SynthVoice(sample_rate)) {}
+}  // extern "C"
 
-void SynthInstrument::Process(double* output, int num_channels,
-                              int num_frames) noexcept {
-  for (int frame = 0; frame < num_frames; ++frame) {
+namespace barely {
+
+SynthInstrument::SynthInstrument(int frame_rate) noexcept
+    : voice_(SynthVoice(frame_rate)), gain_processor_(frame_rate) {}
+
+void SynthInstrument::Process(double* output_samples, int output_channel_count,
+                              int output_frame_count) noexcept {
+  for (int frame = 0; frame < output_frame_count; ++frame) {
     const double mono_sample = voice_.Next(0);
-    for (int channel = 0; channel < num_channels; ++channel) {
-      output[num_channels * frame + channel] = mono_sample;
+    for (int channel = 0; channel < output_channel_count; ++channel) {
+      output_samples[output_channel_count * frame + channel] = mono_sample;
     }
+  }
+  gain_processor_.Process(output_samples, output_channel_count,
+                          output_frame_count);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void SynthInstrument::SetControl(int index, double value,
+                                 double /*slope_per_frame*/) noexcept {
+  switch (static_cast<SynthControl>(index)) {
+    case SynthControl::kGain:
+      gain_processor_.SetGain(value);
+      break;
+    case SynthControl::kOscillatorType:
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->generator().SetType(
+            static_cast<OscillatorType>(static_cast<int>(value)));
+      });
+      break;
+    case SynthControl::kAttack:
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetAttack(value);
+      });
+      break;
+    case SynthControl::kDecay:
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetDecay(value);
+      });
+      break;
+    case SynthControl::kSustain:
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetSustain(value);
+      });
+      break;
+    case SynthControl::kRelease:
+      voice_.Update([value](SynthVoice* voice) noexcept {
+        voice->envelope().SetRelease(value);
+      });
+      break;
+    case SynthControl::kVoiceCount:
+      voice_.Resize(static_cast<int>(value));
+      break;
   }
 }
 
@@ -33,59 +80,25 @@ void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   });
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetParameter(int index, double value,
-                                   double /*slope*/) noexcept {
-  switch (static_cast<SynthParameter>(index)) {
-    case SynthParameter::kOscillatorType:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->generator().SetType(
-            static_cast<Oscillator::Type>(static_cast<int>(value)));
-      });
-      break;
-    case SynthParameter::kAttack:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetAttack(value);
-      });
-      break;
-    case SynthParameter::kDecay:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetRelease(value);
-      });
-      break;
-    case SynthParameter::kSustain:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetSustain(value);
-      });
-      break;
-    case SynthParameter::kRelease:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetRelease(value);
-      });
-      break;
-    case SynthParameter::kNumVoices:
-      voice_.Resize(static_cast<int>(value));
-      break;
-  }
-}
-
-Instrument::Definition SynthInstrument::GetDefinition() noexcept {
-  static const std::vector<Parameter::Definition> parameter_definitions = {
-      // Attack.
-      Parameter::Definition{0.05, 0.0, 60.0},
-      // Decay.
-      Parameter::Definition{0.0, 0.0, 60.0},
-      // Sustain.
-      Parameter::Definition{1.0, 0.0, 1.0},
-      // Release.
-      Parameter::Definition{0.25, 0.0, 60.0},
+InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
+  static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
       // Oscillator type.
-      Parameter::Definition{static_cast<double>(Oscillator::Type::kSine), 0.0,
-                            static_cast<double>(Oscillator::Type::kNoise)},
+      ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
+                        static_cast<double>(OscillatorType::kNoise)},
+      // Attack.
+      ControlDefinition{0.05, 0.0, 60.0},
+      // Decay.
+      ControlDefinition{0.0, 0.0, 60.0},
+      // Sustain.
+      ControlDefinition{1.0, 0.0, 1.0},
+      // Release.
+      ControlDefinition{0.25, 0.0, 60.0},
       // Number of voices.
-      Parameter::Definition{8, 1, 64},
+      ControlDefinition{8, 1, 64},
   };
-  return GetInstrumentDefinition<SynthInstrument>(parameter_definitions);
+  return GetInstrumentDefinition<SynthInstrument>(control_definitions, {});
 }
 
-}  // namespace barelyapi
+}  // namespace barely

@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Tests that querying a value of a const map returns the expected reference.
@@ -32,4 +32,4 @@ TEST(FindOrNullTest, FindOrNullMutableMap) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

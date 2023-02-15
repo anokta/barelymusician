@@ -1,11 +1,10 @@
 add_library(
-  conductor
-  conductor.cpp
-  conductor.h
+  control
+  control.cpp
+  control.h
 )
 target_link_libraries(
-  conductor
-  note
+  control
   include
 )
 
@@ -16,29 +15,14 @@ add_library(
 )
 target_link_libraries(
   engine
-  conductor
   id
   instrument
   mutable_data
-  note
-  sequence
-  transport
+  performer
+  status
+  task
   find_or_null
-)
-
-add_library(
-  event INTERFACE
-  event.h
-)
-
-add_library(
-  event_queue
-  event_queue.cpp
-  event_queue.h
-)
-target_link_libraries(
-  event_queue
-  event
+  seconds
 )
 
 add_library(
@@ -57,10 +41,28 @@ add_library(
 )
 target_link_libraries(
   instrument
-  event
-  event_queue
-  parameter
+  control
+  message
+  message_queue
+  status
   include
+  find_or_null
+  seconds
+)
+
+add_library(
+  message INTERFACE
+  message.h
+)
+
+add_library(
+  message_queue
+  message_queue.cpp
+  message_queue.h
+)
+target_link_libraries(
+  message_queue
+  message
 )
 
 add_library(
@@ -69,59 +71,43 @@ add_library(
 )
 
 add_library(
-  note INTERFACE
-  note.h
+  performer
+  performer.cpp
+  performer.h
 )
 target_link_libraries(
-  note INTERFACE
-  include
-)
-
-add_library(
-  parameter
-  parameter.cpp
-  parameter.h
-)
-target_link_libraries(
-  parameter
-  include
-)
-
-add_library(
-  sequence
-  sequence.cpp
-  sequence.h
-)
-target_link_libraries(
-  sequence
-  conductor
+  performer
   id
-  instrument
-  note
-  transport
+  status
+  task
   find_or_null
 )
 
 add_library(
-  transport
-  transport.cpp
-  transport.h
+  status INTERFACE
+  status.h
+)
+
+add_library(
+  task
+  task.cpp
+  task.h
 )
 target_link_libraries(
-  transport
+  task
   include
 )
 
 add_executable(
-  conductor_test
-  conductor_test.cpp
+  control_test
+  control_test.cpp
 )
 target_link_libraries(
-  conductor_test
-  conductor
+  control_test
+  control
   gtest_main
 )
-gtest_discover_tests(conductor_test)
+gtest_discover_tests(control_test)
 
 add_executable(
   engine_test
@@ -129,28 +115,16 @@ add_executable(
 )
 target_link_libraries(
   engine_test
+  control
   engine
   id
   instrument
-  note
-  parameter
+  status
+  task
   gmock
   gtest_main
 )
 gtest_discover_tests(engine_test)
-
-add_executable(
-  event_queue_test
-  event_queue_test.cpp
-)
-target_link_libraries(
-  event_queue_test
-  event
-  event_queue
-  gmock
-  gtest_main
-)
-gtest_discover_tests(event_queue_test)
 
 add_executable(
   instrument_test
@@ -158,12 +132,26 @@ add_executable(
 )
 target_link_libraries(
   instrument_test
+  control
   instrument
-  parameter
+  status
   gmock
   gtest_main
 )
 gtest_discover_tests(instrument_test)
+
+add_executable(
+  message_queue_test
+  message_queue_test.cpp
+)
+target_link_libraries(
+  message_queue_test
+  message
+  message_queue
+  gmock
+  gtest_main
+)
+gtest_discover_tests(message_queue_test)
 
 add_executable(
   mutable_data_test
@@ -178,41 +166,26 @@ target_link_libraries(
 gtest_discover_tests(mutable_data_test)
 
 add_executable(
-  parameter_test
-  parameter_test.cpp
+  performer_test
+  performer_test.cpp
 )
 target_link_libraries(
-  parameter_test
-  parameter
-  gtest_main
-)
-gtest_discover_tests(parameter_test)
-
-add_executable(
-  sequence_test
-  sequence_test.cpp
-)
-target_link_libraries(
-  sequence_test
-  conductor
+  performer_test
   id
-  instrument
-  note
-  sequence
-  transport
+  performer
+  status
   gmock
   gtest_main
 )
-gtest_discover_tests(sequence_test)
+gtest_discover_tests(performer_test)
 
 add_executable(
-  transport_test
-  transport_test.cpp
+  task_test
+  task_test.cpp
 )
 target_link_libraries(
-  transport_test
-  transport
-  gmock
+  task_test
+  task
   gtest_main
 )
-gtest_discover_tests(transport_test)
+gtest_discover_tests(task_test)

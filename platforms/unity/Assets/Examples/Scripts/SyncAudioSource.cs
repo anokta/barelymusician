@@ -4,14 +4,16 @@ using Barely;
 public class SyncAudioSource : MonoBehaviour {
   public AudioSource source;
 
+  public Metronome metronome;
+
   void Update() {
     if (Input.GetKeyDown(KeyCode.S)) {
       if (!source.isPlaying) {
-        double dspTime = AudioSettings.dspTime;
-        Musician.PlayScheduled(dspTime);
-        source.PlayScheduled(dspTime);
+        source.PlayScheduled(Musician.Timestamp);
+        metronome.Stop();
+        metronome.Play();
       } else {
-        Musician.Stop();
+        metronome.Stop();
         source.Stop();
       }
     }

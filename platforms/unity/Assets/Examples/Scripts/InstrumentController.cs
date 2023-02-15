@@ -22,16 +22,17 @@ public class InstrumentController : MonoBehaviour {
 
   // Ordered keys of one octave.
   private KeyCode[] octaveKeys =
-      new KeyCode[] { KeyCode.A, KeyCode.W, KeyCode.S, KeyCode.E, KeyCode.D, KeyCode.F, KeyCode.T,
-                      KeyCode.G, KeyCode.Y, KeyCode.H, KeyCode.U, KeyCode.J, KeyCode.K };
+      new KeyCode[] { KeyCode.A, KeyCode.W, KeyCode.S, KeyCode.E, KeyCode.D,
+                      KeyCode.F, KeyCode.T, KeyCode.G, KeyCode.Y, KeyCode.H,
+                      KeyCode.U, KeyCode.J, KeyCode.K, KeyCode.O, KeyCode.L };
 
   void Update() {
     // Shift octaves.
     if (Input.GetKeyDown(KeyCode.Z)) {
-      instrument.StopAllNotes();
+      instrument.SetAllNotesOff();
       octaveOffset = Mathf.Max(octaveOffset - 1, -3);
     } else if (Input.GetKeyDown(KeyCode.X)) {
-      instrument.StopAllNotes();
+      instrument.SetAllNotesOff();
       octaveOffset = Mathf.Min(octaveOffset + 1, 3);
     }
     // Adjust note intensity.
@@ -43,9 +44,9 @@ public class InstrumentController : MonoBehaviour {
     // Play notes.
     for (int i = 0; i < octaveKeys.Length; ++i) {
       if (Input.GetKeyDown(octaveKeys[i])) {
-        instrument.StartNote(GetPitchFromKeyIndex(i), noteIntensity);
+        instrument.SetNoteOn(GetPitchFromKeyIndex(i), noteIntensity);
       } else if (Input.GetKeyUp(octaveKeys[i])) {
-        instrument.StopNote(GetPitchFromKeyIndex(i));
+        instrument.SetNoteOff(GetPitchFromKeyIndex(i));
       }
     }
   }

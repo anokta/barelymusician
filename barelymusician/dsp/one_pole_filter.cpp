@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace barelyapi {
+namespace barely {
 
 double OnePoleFilter::Next(double input) noexcept {
   output_ = coefficient_ * (output_ - input) + input;
@@ -20,4 +20,4 @@ void OnePoleFilter::SetCoefficient(double coefficient) noexcept {
 
 void OnePoleFilter::SetType(FilterType type) noexcept { type_ = type; }
 
-}  // namespace barelyapi
+}  // namespace barely

@@ -4,32 +4,55 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/parameter.h"
-#include "barelymusician/instruments/generic_instrument.h"
+#include "barelymusician/engine/control.h"
+#include "barelymusician/instruments/custom_instrument.h"
 
-namespace barelyapi {
+extern "C" {
 
-using ::barely::PercussionParameter;
+BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinition() {
+  return barely::PercussionInstrument::GetDefinition();
+}
+
+}  // extern "C"
+
+namespace barely {
 
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
-    : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate),
-            Pad(frame_rate)} {}
+    : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate), Pad(frame_rate)},
+      gain_processor_(frame_rate) {}
 
-void PercussionInstrument::Process(double* output, int num_channels,
-                                   int num_frames) noexcept {
-  for (int frame = 0; frame < num_frames; ++frame) {
+void PercussionInstrument::Process(double* output_samples,
+                                   int output_channel_count,
+                                   int output_frame_count) noexcept {
+  for (int frame = 0; frame < output_frame_count; ++frame) {
     double mono_sample = 0.0;
     for (auto& pad : pads_) {
       mono_sample += pad.voice.Next(0);
     }
-    for (int channel = 0; channel < num_channels; ++channel) {
-      output[num_channels * frame + channel] = mono_sample;
+    for (int channel = 0; channel < output_channel_count; ++channel) {
+      output_samples[output_channel_count * frame + channel] = mono_sample;
     }
+  }
+  gain_processor_.Process(output_samples, output_channel_count,
+                          output_frame_count);
+}
+
+void PercussionInstrument::SetControl(int index, double value,
+                                      double /*slope_per_frame*/) noexcept {
+  switch (static_cast<PercussionControl>(index)) {
+    case PercussionControl::kGain:
+      gain_processor_.SetGain(value);
+      break;
+    case PercussionControl::kRelease:
+      for (auto& pad : pads_) {
+        pad.voice.envelope().SetRelease(value);
+      }
+      break;
   }
 }
 
 void PercussionInstrument::SetData(const void* data, int /*size*/) noexcept {
-  for (int i = 0; i < kNumPads; ++i) {
+  for (int i = 0; i < kPadCount; ++i) {
     if (data) {
       // Pad data is sequentially aligned by pitch, frequency, length and data.
       const double pitch = *reinterpret_cast<const double*>(data);
@@ -68,23 +91,14 @@ void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
   }
 }
 
-void PercussionInstrument::SetParameter(int index, double value,
-                                        double /*slope*/) noexcept {
-  switch (static_cast<PercussionParameter>(index)) {
-    case PercussionParameter::kRelease:
-      for (auto& pad : pads_) {
-        pad.voice.envelope().SetRelease(static_cast<double>(value));
-      }
-      break;
-  }
-}
-
-Instrument::Definition PercussionInstrument::GetDefinition() noexcept {
-  static const std::vector<Parameter::Definition> parameter_definitions = {
+InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
+  static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
       // Pad release.
-      Parameter::Definition{0.1, 0.0, 60.0},
+      ControlDefinition{0.1, 0.0, 60.0},
   };
-  return GetInstrumentDefinition<PercussionInstrument>(parameter_definitions);
+  return GetInstrumentDefinition<PercussionInstrument>(control_definitions, {});
 }
 
-}  // namespace barelyapi
+}  // namespace barely

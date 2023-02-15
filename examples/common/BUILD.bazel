@@ -23,17 +23,12 @@ cc_library(
 )
 
 cc_library(
-    name = "gain_processor",
-    srcs = ["gain_processor.cpp"],
-    hdrs = ["gain_processor.h"],
-)
-
-cc_library(
     name = "input_manager",
     srcs = ["input_manager.cpp"],
     hdrs = ["input_manager.h"],
     linkopts = select({
         "@platforms//os:osx": ["-framework ApplicationServices"],
+        "@platforms//os:windows": ["-l user32.lib"],
         "//conditions:default": [],
     }),
 )

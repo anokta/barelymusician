@@ -1,141 +1,205 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Barely {
-  // Instrument.
+  /// Instrument.
   [RequireComponent(typeof(AudioSource))]
-  public class Instrument : MonoBehaviour {
+  public abstract class Instrument : MonoBehaviour {
     /// Identifier.
-    public Int64 Id { get; private set; } = Musician.Native.InvalidId;
+    public Int64 Id { get; private set; } = Musician.Internal.InvalidId;
 
     /// Audio source.
     public AudioSource Source { get; private set; } = null;
 
-    /// Note off callback.
+    /// Control event callback.
+    ///
+    /// @param index Control index.
+    /// @param control Control value.
+    public delegate void ControlEventCallback(int index, double value);
+    public event ControlEventCallback OnControl;
+    private ControlEventCallback _controlEventCallback = null;
+
+    [Serializable]
+    public class ControlEvent : UnityEngine.Events.UnityEvent<int, float> {}
+    public ControlEvent OnControlEvent;
+
+    /// Note control event callback.
     ///
     /// @param pitch Note pitch.
-    /// @param dspTime Note off time in seconds.
-    public delegate void NoteOffCallback(double pitch, double dspTime);
-    public event NoteOffCallback OnNoteOff;
-    private NoteOffCallback _noteOffCallback = null;
+    /// @param index Note control index.
+    /// @param control Note control value.
+    public delegate void NoteControlEventCallback(double pitch, int index, double value);
+    public event NoteControlEventCallback OnNoteControl;
+    private NoteControlEventCallback _noteControlEventCallback = null;
+
+    [Serializable]
+    public class NoteControlEvent : UnityEngine.Events.UnityEvent<float, int, float> {}
+    public NoteControlEvent OnNoteControlEvent;
+
+    /// Note off event callback.
+    ///
+    /// @param pitch Note pitch.
+    public delegate void NoteOffEventCallback(double pitch);
+    public event NoteOffEventCallback OnNoteOff;
+    private NoteOffEventCallback _noteOffEventCallback = null;
 
     [Serializable]
     public class NoteOffEvent : UnityEngine.Events.UnityEvent<float> {}
-    public NoteOffEvent NoteOff;
+    public NoteOffEvent OnNoteOffEvent;
 
-    /// Note on callback.
+    /// Note on event callback.
     ///
     /// @param pitch Note pitch.
     /// @param intensity Note intensity.
-    /// @param dspTime Note on time in seconds.
-    public delegate void NoteOnCallback(double pitch, double intensity, double dspTime);
-    public event NoteOnCallback OnNoteOn;
-    private NoteOnCallback _noteOnCallback = null;
+    public delegate void NoteOnEventCallback(double pitch, double intensity);
+    public event NoteOnEventCallback OnNoteOn;
+    private NoteOnEventCallback _noteOnEventCallback = null;
 
     [Serializable]
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<float, float> {}
-    public NoteOnEvent NoteOn;
+    public NoteOnEvent OnNoteOnEvent;
 
-    // List of sequences.
-    private List<Sequence> _sequences = null;
+    /// Returns a control value.
+    ///
+    /// @param index Control index.
+    /// @return Control value.
+    public double GetControl(int index) {
+      return Musician.Internal.Instrument_GetControl(this, index);
+    }
+
+    /// Returns a note control value.
+    ///
+    /// @param pitch Note pitch.
+    /// @param index Control index.
+    /// @return Control value.
+    public double GetNoteControl(double pitch, int index) {
+      return Musician.Internal.Instrument_GetNoteControl(this, pitch, index);
+    }
+
+    /// Returns whether a note is on or not.
+    ///
+    /// @param Note pitch.
+    /// @return True if on, false otherwise.
+    public bool IsNoteOn(double pitch) {
+      return Musician.Internal.Instrument_IsNoteOn(this, pitch);
+    }
+
+    /// Resets all control values.
+    public void ResetAllControls() {
+      Musician.Internal.Instrument_ResetAllControls(this);
+    }
+
+    /// Resets all note control values.
+    ///
+    /// @param pitch Note pitch.
+    public void ResetAllNoteControls(double pitch) {
+      Musician.Internal.Instrument_ResetAllNoteControls(this, pitch);
+    }
+
+    /// Resets a control value.
+    ///
+    /// @param index Control index.
+    public void ResetControl(int index) {
+      Musician.Internal.Instrument_ResetControl(this, index);
+    }
+
+    /// Resets a note control value.
+    ///
+    /// @param pitch Note pitch.
+    /// @param index Note control index.
+    public void ResetNoteControl(double pitch, int index) {
+      Musician.Internal.Instrument_ResetNoteControl(this, pitch, index);
+    }
+
+    /// Sets all notes off.
+    public void SetAllNotesOff() {
+      Musician.Internal.Instrument_SetAllNotesOff(this);
+    }
+
+    /// Sets a control value.
+    ///
+    /// @param index Control index.
+    /// @param value Control value.
+    /// @param slopePerBeat Control slope in value change per beat.
+    public void SetControl(int index, double value, double slopePerBeat = 0.0) {
+      Musician.Internal.Instrument_SetControl(this, index, value, slopePerBeat);
+    }
+
+    /// Sets data.
+    ///
+    /// @param data Data.
+    public void SetData(byte[] data) {
+      Musician.Internal.Instrument_SetData(this, data);
+    }
+
+    /// Sets a note control value.
+    ///
+    /// @param pitch Note pitch.
+    /// @param index Note control index.
+    /// @param value Note control value.
+    /// @param slopePerBeat Note control slope in value change per beat.
+    public void SetNoteControl(double pitch, int index, double value, double slopePerBeat = 0.0) {
+      Musician.Internal.Instrument_SetNoteControl(this, pitch, index, value, slopePerBeat);
+    }
+
+    /// Sets a note off.
+    ///
+    /// @param pitch Note pitch.
+    public void SetNoteOff(double pitch) {
+      Musician.Internal.Instrument_SetNoteOff(this, pitch);
+    }
+
+    /// Sets a note on.
+    ///
+    /// @param pitch Note pitch.
+    /// @param intensity Note intensity.
+    public void SetNoteOn(double pitch, double intensity = 1.0) {
+      Musician.Internal.Instrument_SetNoteOn(this, pitch, intensity);
+    }
 
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
-      _noteOffCallback = delegate(double pitch, double dspTime) {
-        OnNoteOff?.Invoke(pitch, dspTime);
-        NoteOff?.Invoke((float)pitch);
+      _controlEventCallback = delegate(int index, double value) {
+        OnControl?.Invoke(index, value);
+        OnControlEvent?.Invoke(index, (float)value);
       };
-      _noteOnCallback = delegate(double pitch, double intensity, double dspTime) {
-        OnNoteOn?.Invoke(pitch, intensity, dspTime);
-        NoteOn?.Invoke((float)pitch, (float)intensity);
+      _noteControlEventCallback = delegate(double pitch, int index, double value) {
+        OnNoteControl?.Invoke(pitch, index, value);
+        OnNoteControlEvent?.Invoke((float)pitch, index, (float)value);
       };
-      _sequences = new List<Sequence>();
+      _noteOffEventCallback = delegate(double pitch) {
+        OnNoteOff?.Invoke(pitch);
+        OnNoteOffEvent?.Invoke((float)pitch);
+      };
+      _noteOnEventCallback = delegate(double pitch, double intensity) {
+        OnNoteOn?.Invoke(pitch, intensity);
+        OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
+      };
     }
 
     protected virtual void OnDestroy() {
       Source = null;
-      _noteOffCallback = null;
-      _noteOnCallback = null;
-      _sequences = null;
+      _controlEventCallback = null;
+      _noteControlEventCallback = null;
+      _noteOffEventCallback = null;
+      _noteOnEventCallback = null;
     }
 
     protected virtual void OnEnable() {
-      Id = Musician.Native.Instrument_Create(this, ref _noteOffCallback, ref _noteOnCallback);
-      GetComponents<Sequence>(_sequences);
-      for (int i = 0; i < _sequences.Count; ++i) {
-        var sequence = _sequences[i];
-        if (sequence.Id != Musician.Native.InvalidId && sequence.Instrument == this) {
-          Musician.Native.Sequence_SetInstrument(sequence);
-        }
-      }
+      Id = Musician.Internal.Instrument_Create(this, _controlEventCallback,
+                                               _noteControlEventCallback, _noteOffEventCallback,
+                                               _noteOnEventCallback);
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      Musician.Native.Instrument_Destroy(this);
-      Id = Musician.Native.InvalidId;
-    }
-
-    /// Returns parameter value.
-    ///
-    /// @param index Parameter index.
-    /// @return Parameter value.
-    public double GetParameter(int index) {
-      return Musician.Native.Instrument_GetParameter(this, index);
-    }
-
-    /// Returns whether note is playing or not.
-    ///
-    /// @param Note pitch.
-    /// @return True if playing, false otherwise.
-    public bool IsNoteOn(double pitch) {
-      return Musician.Native.Instrument_IsNoteOn(this, pitch);
-    }
-
-    /// Resets all parameters to default value.
-    public void ResetAllParameters() {
-      Musician.Native.Instrument_ResetAllParameters(this);
-    }
-
-    /// Resets parameter to default value.
-    ///
-    /// @param index Parameter index.
-    public void ResetParameter(int index) {
-      Musician.Native.Instrument_ResetParameter(this, index);
-    }
-
-    /// Sets parameter value.
-    ///
-    /// @param index Parameter index.
-    /// @param value Parameter value.
-    public void SetParameter(int index, double value) {
-      Musician.Native.Instrument_SetParameter(this, index, value);
-    }
-
-    /// Starts playing note.
-    ///
-    /// @param pitch Note pitch.
-    /// @param intensity Note intensity.
-    public void StartNote(double pitch, double intensity) {
-      Musician.Native.Instrument_StartNote(this, pitch, intensity);
-    }
-
-    /// Stops all notes.
-    public void StopAllNotes() {
-      Musician.Native.Instrument_StopAllNotes(this);
-    }
-
-    /// Stops playing note.
-    ///
-    /// @param pitch Note pitch.
-    public void StopNote(double pitch) {
-      Musician.Native.Instrument_StopNote(this, pitch);
+      Musician.Internal.Instrument_Destroy(this);
+      Id = Musician.Internal.InvalidId;
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {
-      Musician.Native.Instrument_Process(this, data, channels);
+      Musician.Internal.Instrument_Process(this, data, channels);
     }
   }
 }

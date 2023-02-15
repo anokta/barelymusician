@@ -5,11 +5,11 @@
 #include "barelymusician/dsp/voice.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 // Number of voices for the polyphonic instrument.
-constexpr int kNumVoices = 4;
+constexpr int kVoiceCount = 4;
 
 // Default voice output value.
 constexpr double kOutput = 1.0;
@@ -46,7 +46,7 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
   base_voice.SetOutput(kOutput);
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
-  polyphonic_voice.Resize(kNumVoices);
+  polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   polyphonic_voice.Start(kPitch);
@@ -62,10 +62,10 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
   base_voice.SetOutput(kOutput);
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
-  polyphonic_voice.Resize(kNumVoices);
+  polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
-  for (int i = 0; i < kNumVoices; ++i) {
+  for (int i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i + 1);
     polyphonic_voice.Start(
         pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
@@ -81,18 +81,18 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
   base_voice.SetOutput(kOutput);
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
-  polyphonic_voice.Resize(kNumVoices);
+  polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   double previous_output = 0.0;
-  for (int i = 0; i < kNumVoices; ++i) {
+  for (int i = 0; i < kVoiceCount; ++i) {
     polyphonic_voice.Start(static_cast<double>(i));
     const double output = polyphonic_voice.Next(kChannel);
     EXPECT_DOUBLE_EQ(output - previous_output, kOutput);
     previous_output = output;
   }
 
-  polyphonic_voice.Start(static_cast<double>(kNumVoices));
+  polyphonic_voice.Start(static_cast<double>(kVoiceCount));
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), previous_output);
 }
 
@@ -117,10 +117,10 @@ TEST(PolyphonicVoiceTest, Update) {
   base_voice.SetOutput(kOutput);
 
   PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice));
-  polyphonic_voice.Resize(kNumVoices);
+  polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
-  for (int i = 0; i < kNumVoices; ++i) {
+  for (int i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i);
     polyphonic_voice.Start(pitch);
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kOutput);
@@ -130,7 +130,7 @@ TEST(PolyphonicVoiceTest, Update) {
   polyphonic_voice.Update(
       [kUpdatedOutput](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
 
-  for (int i = 0; i < kNumVoices; ++i) {
+  for (int i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i);
     polyphonic_voice.Start(pitch);
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), kUpdatedOutput);
@@ -139,4 +139,4 @@ TEST(PolyphonicVoiceTest, Update) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

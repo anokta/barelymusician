@@ -1,34 +1,61 @@
 #include "barelymusician/engine/instrument.h"
 
 #include <cassert>
+#include <cstddef>
 #include <utility>
 #include <variant>
+#include <vector>
 
-#include "barelymusician/engine/event.h"
+#include "barelymusician/common/find_or_null.h"
+#include "barelymusician/common/seconds.h"
+#include "barelymusician/engine/control.h"
+#include "barelymusician/engine/message.h"
+#include "barelymusician/engine/status.h"
 
-namespace barelyapi {
+namespace barely::internal {
+
+namespace {
+
+// Builds corresponding controls for a given list of control `definitions`.
+std::vector<Control> BuildControls(const auto* definitions,
+                                   int definition_count) noexcept {
+  std::vector<Control> controls;
+  controls.reserve(definition_count);
+  for (int index = 0; index < definition_count; ++index) {
+    controls.emplace_back(definitions[index]);
+  }
+  return controls;
+}
+
+}  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Instrument::Instrument(const Definition& definition, int frame_rate) noexcept
+Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
+                       double initial_tempo, double initial_timestamp) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback),
+      set_control_callback_(definition.set_control_callback),
       set_data_callback_(definition.set_data_callback),
+      set_note_control_callback_(definition.set_note_control_callback),
       set_note_off_callback_(definition.set_note_off_callback),
       set_note_on_callback_(definition.set_note_on_callback),
-      set_parameter_callback_(definition.set_parameter_callback),
-      frame_rate_(frame_rate) {
-  assert(frame_rate >= 0);
-  parameters_.reserve(definition.num_parameter_definitions);
-  for (int index = 0; index < definition.num_parameter_definitions; ++index) {
-    parameters_.emplace_back(definition.parameter_definitions[index]);
-  }
+      frame_rate_(frame_rate),
+      default_note_controls_(
+          BuildControls(definition.note_control_definitions,
+                        definition.note_control_definition_count)),
+      controls_(BuildControls(definition.control_definitions,
+                              definition.control_definition_count)),
+      tempo_(initial_tempo),
+      timestamp_(initial_timestamp) {
+  assert(frame_rate > 0);
+  assert(initial_tempo > 0.0);
+  assert(initial_tempo > 0.0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
-  if (set_parameter_callback_) {
-    for (int index = 0; index < definition.num_parameter_definitions; ++index) {
-      set_parameter_callback_(&state_, index, parameters_[index].GetValue(),
-                              0.0);
+  if (set_control_callback_) {
+    for (int index = 0; index < definition.control_definition_count; ++index) {
+      set_control_callback_(&state_, index, controls_[index].GetValue(), 0.0);
     }
   }
 }
@@ -39,174 +66,313 @@ Instrument::~Instrument() noexcept {
   }
 }
 
-const Parameter* Instrument::GetParameter(int index) const noexcept {
-  assert(index >= 0);
-  if (index < static_cast<int>(parameters_.size())) {
-    return &parameters_[index];
+StatusOr<double> Instrument::GetControl(int index) const noexcept {
+  if (index >= 0 && index < static_cast<int>(controls_.size())) {
+    return controls_[index].GetValue();
   }
-  return nullptr;
+  return Status::InvalidArgument();
+}
+
+StatusOr<double> Instrument::GetNoteControl(double pitch,
+                                            int index) const noexcept {
+  assert(index >= 0);
+  if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
+    if (index >= 0 && index < static_cast<int>(note_controls->size())) {
+      return (*note_controls)[index].GetValue();
+    }
+    return Status::InvalidArgument();
+  }
+  return Status::NotFound();
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
-  return pitches_.contains(pitch);
+  return note_controls_.contains(pitch);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::Process(double* output, int num_output_channels,
-                         int num_output_frames, double timestamp) noexcept {
-  assert(output || num_output_channels == 0 || num_output_frames == 0);
-  assert(num_output_channels >= 0);
-  assert(num_output_frames >= 0);
+void Instrument::Process(double* output_samples, int output_channel_count,
+                         int output_frame_count, double timestamp) noexcept {
+  assert(output_samples || output_channel_count == 0 ||
+         output_frame_count == 0);
+  assert(output_channel_count >= 0);
+  assert(output_frame_count >= 0);
+  assert(timestamp >= 0.0);
   int frame = 0;
-  // Process *all* events before the end timestamp.
-  const double end_timestamp = timestamp + GetSeconds(num_output_frames);
-  for (auto* event = event_queue_.GetNext(end_timestamp); event;
-       event = event_queue_.GetNext(end_timestamp)) {
-    const int message_frame = GetFrames(event->first - timestamp);
+  // Process *all* messages before the end timestamp.
+  const double end_timestamp =
+      timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
+  for (auto* message = message_queue_.GetNext(end_timestamp); message;
+       message = message_queue_.GetNext(end_timestamp)) {
+    const int message_frame =
+        FramesFromSeconds(frame_rate_, message->first - timestamp);
     if (frame < message_frame) {
       if (process_callback_) {
-        process_callback_(&state_, &output[num_output_channels * frame],
-                          num_output_channels, message_frame - frame);
+        process_callback_(&state_,
+                          &output_samples[output_channel_count * frame],
+                          output_channel_count, message_frame - frame);
       }
       frame = message_frame;
     }
-    std::visit(
-        EventVisitor{[this](SetDataEvent& set_data_event) noexcept {
-                       if (set_data_callback_) {
-                         data_.swap(set_data_event.data);
-                         set_data_callback_(&state_, data_.data(),
-                                            static_cast<int>(data_.size()));
-                       }
-                     },
-                     [this](SetNoteOffEvent& set_note_off_event) noexcept {
-                       if (set_note_off_callback_) {
-                         set_note_off_callback_(&state_,
-                                                set_note_off_event.pitch);
-                       }
-                     },
-                     [this](SetNoteOnEvent& set_note_on_event) noexcept {
-                       if (set_note_on_callback_) {
-                         set_note_on_callback_(&state_, set_note_on_event.pitch,
-                                               set_note_on_event.intensity);
-                       }
-                     },
-                     [this](SetParameterEvent& set_parameter_event) noexcept {
-                       if (set_parameter_callback_) {
-                         set_parameter_callback_(
-                             &state_, set_parameter_event.index,
-                             set_parameter_event.value,
-                             GetSlopePerFrame(set_parameter_event.slope));
-                       }
-                     }},
-        event->second);
+    std::visit(MessageVisitor{
+                   [this](ControlMessage& control_message) noexcept {
+                     if (set_control_callback_) {
+                       set_control_callback_(&state_, control_message.index,
+                                             control_message.value,
+                                             control_message.slope_per_frame);
+                     }
+                   },
+                   [this](DataMessage& data_message) noexcept {
+                     if (set_data_callback_) {
+                       data_.swap(data_message.data);
+                       set_data_callback_(&state_, data_.data(),
+                                          static_cast<int>(data_.size()));
+                     }
+                   },
+                   [this](NoteControlMessage& note_control_message) noexcept {
+                     if (set_note_control_callback_) {
+                       set_note_control_callback_(
+                           &state_, note_control_message.pitch,
+                           note_control_message.index,
+                           note_control_message.value,
+                           note_control_message.slope_per_frame);
+                     }
+                   },
+                   [this](NoteOffMessage& note_off_message) noexcept {
+                     if (set_note_off_callback_) {
+                       set_note_off_callback_(&state_, note_off_message.pitch);
+                     }
+                   },
+                   [this](NoteOnMessage& note_on_message) noexcept {
+                     if (set_note_on_callback_) {
+                       set_note_on_callback_(&state_, note_on_message.pitch,
+                                             note_on_message.intensity);
+                     }
+                   }},
+               message->second);
   }
   // Process the rest of the buffer.
-  if (frame < num_output_frames && process_callback_) {
-    process_callback_(&state_, &output[num_output_channels * frame],
-                      num_output_channels, num_output_frames - frame);
+  if (frame < output_frame_count && process_callback_) {
+    process_callback_(&state_, &output_samples[output_channel_count * frame],
+                      output_channel_count, output_frame_count - frame);
   }
 }
 
-void Instrument::ResetAllParameters(double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  for (int index = 0; index < static_cast<int>(parameters_.size()); ++index) {
-    if (parameters_[index].ResetValue()) {
-      event_queue_.Add(
-          timestamp,
-          SetParameterEvent{index, parameters_[index].GetValue(), 0.0});
+void Instrument::ResetAllControls() noexcept {
+  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+    if (auto& control = controls_[index]; control.Reset()) {
+      if (note_control_event_callback_) {
+        control_event_callback_(index, control.GetValue());
+      }
+      message_queue_.Add(timestamp_,
+                         ControlMessage{index, control.GetValue(), 0.0});
     }
   }
 }
 
-bool Instrument::ResetParameter(int index, double timestamp) noexcept {
+Status Instrument::ResetAllNoteControls(double pitch) noexcept {
+  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
+    for (int index = 0; index < static_cast<int>(note_controls->size());
+         ++index) {
+      if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
+        if (note_control_event_callback_) {
+          note_control_event_callback_(pitch, index, note_control.GetValue());
+        }
+        message_queue_.Add(
+            timestamp_,
+            NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
+      }
+    }
+    return Status::Ok();
+  }
+  return Status::NotFound();
+}
+
+Status Instrument::ResetControl(int index) noexcept {
+  if (index >= 0 && index < static_cast<int>(controls_.size())) {
+    if (auto& control = controls_[index]; control.Reset()) {
+      if (note_control_event_callback_) {
+        control_event_callback_(index, control.GetValue());
+      }
+      message_queue_.Add(timestamp_,
+                         ControlMessage{index, control.GetValue(), 0.0});
+    }
+    return Status::Ok();
+  }
+  return Status::InvalidArgument();
+}
+
+Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
   assert(index >= 0);
-  assert(timestamp >= 0.0);
-  if (index < static_cast<int>(parameters_.size())) {
-    if (parameters_[index].ResetValue()) {
-      event_queue_.Add(
-          timestamp,
-          SetParameterEvent{index, parameters_[index].GetValue(), 0.0});
+  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
+    if (index >= 0 && index < static_cast<int>(note_controls->size())) {
+      if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
+        if (note_control_event_callback_) {
+          note_control_event_callback_(pitch, index, note_control.GetValue());
+        }
+        message_queue_.Add(
+            timestamp_,
+            NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
+      }
+      return Status::Ok();
     }
-    return true;
+    return Status::InvalidArgument();
   }
-  return false;
-}
-
-void Instrument::SetData(std::vector<std::byte> data,
-                         double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  event_queue_.Add(timestamp, SetDataEvent{std::move(data)});
-}
-
-void Instrument::SetNoteOffCallback(NoteOffCallback callback) noexcept {
-  note_off_callback_ = std::move(callback);
-}
-
-void Instrument::SetNoteOnCallback(NoteOnCallback callback) noexcept {
-  note_on_callback_ = std::move(callback);
-}
-
-bool Instrument::SetParameter(int index, double value, double slope,
-                              double timestamp) noexcept {
-  assert(index >= 0);
-  assert(timestamp >= 0.0);
-  if (index < static_cast<int>(parameters_.size())) {
-    if (parameters_[index].SetValue(value)) {
-      event_queue_.Add(
-          timestamp,
-          SetParameterEvent{index, parameters_[index].GetValue(), slope});
-    }
-    return true;
-  }
-  return false;
+  return Status::NotFound();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::StartNote(double pitch, double intensity,
-                           double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  if (pitches_.insert(pitch).second) {
-    if (note_on_callback_) {
-      note_on_callback_(pitch, intensity, timestamp);
+void Instrument::SetAllNotesOff() noexcept {
+  for (const auto& [pitch, note_controls] : std::exchange(note_controls_, {})) {
+    if (note_off_event_callback_) {
+      note_off_event_callback_(pitch);
     }
-    event_queue_.Add(timestamp, SetNoteOnEvent{pitch, intensity});
+    message_queue_.Add(timestamp_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::StopAllNotes(double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  for (const double pitch : std::exchange(pitches_, {})) {
-    if (note_off_callback_) {
-      note_off_callback_(pitch, timestamp);
+Status Instrument::SetControl(int index, double value,
+                              double slope_per_beat) noexcept {
+  if (index >= 0 && index < static_cast<int>(controls_.size())) {
+    if (auto& control = controls_[index]; control.Set(value, slope_per_beat)) {
+      if (note_control_event_callback_) {
+        control_event_callback_(index, control.GetValue());
+      }
+      message_queue_.Add(timestamp_,
+                         ControlMessage{index, control.GetValue(),
+                                        GetSlopePerFrame(slope_per_beat)});
     }
-    event_queue_.Add(timestamp, SetNoteOffEvent{pitch});
+    return Status::Ok();
+  }
+  return Status::InvalidArgument();
+}
+
+void Instrument::SetControlEventCallback(
+    ControlEventCallback callback) noexcept {
+  control_event_callback_ = std::move(callback);
+}
+
+void Instrument::SetData(std::vector<std::byte> data) noexcept {
+  message_queue_.Add(timestamp_, DataMessage{std::move(data)});
+}
+
+Status Instrument::SetNoteControl(double pitch, int index, double value,
+                                  double slope_per_beat) noexcept {
+  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
+    if (index >= 0 && index < static_cast<int>(controls_.size())) {
+      if (auto& note_control = (*note_controls)[index];
+          note_control.Set(value, slope_per_beat)) {
+        if (note_control_event_callback_) {
+          note_control_event_callback_(pitch, index, note_control.GetValue());
+        }
+        message_queue_.Add(
+            timestamp_,
+            NoteControlMessage{pitch, index, note_control.GetValue(),
+                               GetSlopePerFrame(slope_per_beat)});
+      }
+      return Status::Ok();
+    }
+    return Status::InvalidArgument();
+  }
+  return Status::NotFound();
+}
+
+void Instrument::SetNoteControlEventCallback(
+    NoteControlEventCallback callback) noexcept {
+  note_control_event_callback_ = std::move(callback);
+}
+
+void Instrument::SetNoteOff(double pitch) noexcept {
+  if (note_controls_.erase(pitch) > 0) {
+    if (note_off_event_callback_) {
+      note_off_event_callback_(pitch);
+    }
+    message_queue_.Add(timestamp_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::StopNote(double pitch, double timestamp) noexcept {
-  assert(timestamp >= 0.0);
-  if (pitches_.erase(pitch) > 0) {
-    if (note_off_callback_) {
-      note_off_callback_(pitch, timestamp);
+void Instrument::SetNoteOffEventCallback(
+    NoteOffEventCallback callback) noexcept {
+  note_off_event_callback_ = std::move(callback);
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
+  if (note_controls_.try_emplace(pitch, default_note_controls_).second) {
+    if (note_on_event_callback_) {
+      note_on_event_callback_(pitch, intensity);
     }
-    event_queue_.Add(timestamp, SetNoteOffEvent{pitch});
+    message_queue_.Add(timestamp_, NoteOnMessage{pitch, intensity});
+    for (int index = 0; index < static_cast<int>(default_note_controls_.size());
+         ++index) {
+      message_queue_.Add(
+          timestamp_,
+          NoteControlMessage{pitch, index,
+                             default_note_controls_[index].GetValue()});
+    }
   }
 }
 
-int Instrument::GetFrames(double seconds) const noexcept {
-  return frame_rate_ > 0
-             ? static_cast<int>(seconds * static_cast<double>(frame_rate_))
-             : 0;
+void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
+  note_on_event_callback_ = std::move(callback);
 }
 
-double Instrument::GetSeconds(int frames) const noexcept {
-  return frame_rate_ > 0
-             ? static_cast<double>(frames) / static_cast<double>(frame_rate_)
+void Instrument::SetTempo(double tempo) noexcept {
+  assert(tempo_ != tempo);
+  tempo_ = tempo;
+  // Update controls.
+  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+    if (const auto& control = controls_[index];
+        control.GetSlopePerBeat() != 0.0) {
+      message_queue_.Add(
+          timestamp_,
+          ControlMessage{index, control.GetValue(),
+                         GetSlopePerFrame(control.GetSlopePerBeat())});
+    }
+  }
+  // Update note controls.
+  for (auto& [pitch, note_controls] : note_controls_) {
+    for (int index = 0; index < static_cast<int>(note_controls.size());
+         ++index) {
+      if (const auto& note_control = note_controls[index];
+          note_control.GetSlopePerBeat() != 0.0) {
+        message_queue_.Add(
+            timestamp_, NoteControlMessage{
+                            pitch, index, note_control.GetValue(),
+                            GetSlopePerFrame(note_control.GetSlopePerBeat())});
+      }
+    }
+  }
+}
+
+void Instrument::Update(double timestamp) noexcept {
+  assert(timestamp_ <= timestamp);
+  if (timestamp_ == timestamp) return;
+  const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
+  // Update controls.
+  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+    if (auto& control = controls_[index];
+        control.Update(duration) && control_event_callback_) {
+      control_event_callback_(index, control.GetValue());
+    }
+  }
+  // Update note controls.
+  for (auto& [pitch, note_controls] : note_controls_) {
+    for (int index = 0; index < static_cast<int>(note_controls.size());
+         ++index) {
+      if (auto& note_control = note_controls[index];
+          note_control.Update(duration) && note_control_event_callback_) {
+        note_control_event_callback_(pitch, index, note_control.GetValue());
+      }
+    }
+  }
+  timestamp_ = timestamp;
+}
+
+double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
+  return tempo_ > 0.0 && frame_rate_ > 0
+             ? BeatsFromSeconds(tempo_, slope_per_beat) /
+                   static_cast<double>(frame_rate_)
              : 0.0;
 }
 
-double Instrument::GetSlopePerFrame(double slope) const noexcept {
-  return frame_rate_ > 0 ? slope / static_cast<double>(frame_rate_) : 0.0;
-}
-
-}  // namespace barelyapi
+}  // namespace barely::internal

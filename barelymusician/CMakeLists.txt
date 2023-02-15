@@ -1,5 +1,7 @@
 add_subdirectory(algorithm)
 add_subdirectory(common)
+add_subdirectory(components)
+add_subdirectory(composition)
 add_subdirectory(dsp)
 add_subdirectory(engine)
 add_subdirectory(instruments)
@@ -16,8 +18,6 @@ target_link_libraries(
   barelymusician
   include
   engine
-  percussion_instrument
-  synth_instrument
 )
 
 add_library(

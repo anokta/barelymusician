@@ -69,9 +69,6 @@ class InputManager {
 
   // Old console mode to be restored.
   DWORD previous_console_mode_;
-
-  // Temp input buffer.
-  INPUT_RECORD input_buffer_[128];
 #elif defined(__APPLE__)
   // Keyboard event callback signature.
   using EventCallback = std::function<void(CGEventType type, CGEventRef event)>;

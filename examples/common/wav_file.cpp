@@ -11,27 +11,27 @@ namespace barely::examples {
 
 const std::vector<double>& WavFile::GetData() const noexcept { return data_; }
 
-int WavFile::GetNumChannels() const noexcept { return num_channels_; }
+int WavFile::GetChannelCount() const noexcept { return channel_count_; }
 
-int WavFile::GetSampleRate() const noexcept { return sample_rate_; }
+int WavFile::GetFrameRate() const noexcept { return frame_rate_; }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 bool WavFile::Load(const std::string& file_path) noexcept {
   // Read the file.
-  unsigned int wav_num_channels;
-  unsigned int wav_sample_rate;
-  drwav_uint64 wav_num_frames;
+  unsigned int wav_channel_count;
+  unsigned int wav_frame_rate;
+  drwav_uint64 wav_frame_count;
   float* wav_data = drwav_open_file_and_read_pcm_frames_f32(
-      file_path.c_str(), &wav_num_channels, &wav_sample_rate, &wav_num_frames,
+      file_path.c_str(), &wav_channel_count, &wav_frame_rate, &wav_frame_count,
       nullptr);
   if (!wav_data) {
     return false;
   }
 
   // Copy the contents.
-  num_channels_ = static_cast<int>(wav_num_channels);
-  sample_rate_ = static_cast<int>(wav_sample_rate);
-  data_.resize(wav_num_channels * wav_num_frames);
+  channel_count_ = static_cast<int>(wav_channel_count);
+  frame_rate_ = static_cast<int>(wav_frame_rate);
+  data_.resize(wav_channel_count * wav_frame_count);
   std::copy_n(wav_data, data_.size(), data_.begin());
 
   // Free the original file.

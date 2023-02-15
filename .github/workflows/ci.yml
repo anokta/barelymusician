@@ -51,3 +51,14 @@ jobs:
           cmake --build .
       - name: test
         run: ctest --output-on-failure
+
+  dev:
+    name: dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: check symbols
+        shell: bash
+        run: |
+          chmod +x ./dev/check_symbols.sh
+          ./dev/check_symbols.sh

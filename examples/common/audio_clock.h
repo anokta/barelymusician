@@ -9,7 +9,9 @@ namespace barely::examples {
 class AudioClock {
  public:
   /// Constructs new `AudioClock`.
-  explicit AudioClock(int sample_rate) noexcept;
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  explicit AudioClock(int frame_rate) noexcept;
 
   /// Returns the timestamp.
   ///
@@ -18,12 +20,12 @@ class AudioClock {
 
   /// Updates the clock.
   ///
-  /// @param num_frames Number of frames to iterate.
-  void Update(int num_frames) noexcept;
+  /// @param frame_count Number of frames to iterate.
+  void Update(int frame_count) noexcept;
 
  private:
-  // Sampling rate in hz.
-  const int sample_rate_;
+  // Frame rate in hertz.
+  const int frame_rate_;
 
   // Monothonic timestamp in seconds.
   std::atomic<double> timestamp_;

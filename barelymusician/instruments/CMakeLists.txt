@@ -1,21 +1,10 @@
 add_library(
-  enveloped_voice INTERFACE
-  enveloped_voice.h
+  custom_instrument INTERFACE
+  custom_instrument.h
 )
 target_link_libraries(
-  enveloped_voice INTERFACE
-  envelope
-  voice
-)
-
-add_library(
-  generic_instrument INTERFACE
-  generic_instrument.h
-)
-target_link_libraries(
-  generic_instrument INTERFACE
-  instrument
-  parameter
+  custom_instrument INTERFACE
+  barelymusician
 )
 
 add_library(
@@ -23,14 +12,36 @@ add_library(
   percussion_instrument.cpp
   percussion_instrument.h
 )
+target_compile_definitions(
+  percussion_instrument
+  PUBLIC BARELYMUSICIAN_EXPORTS
+)
 target_link_libraries(
   percussion_instrument
+  custom_instrument
+  barelymusician
   enveloped_voice
-  generic_instrument
-  include
+  gain_processor
   sample_player
-  instrument
-  parameter
+)
+
+add_library(
+  sampler_instrument
+  sampler_instrument.cpp
+  sampler_instrument.h
+)
+target_compile_definitions(
+  sampler_instrument
+  PUBLIC BARELYMUSICIAN_EXPORTS
+)
+target_link_libraries(
+  sampler_instrument
+  custom_instrument
+  barelymusician
+  enveloped_voice
+  gain_processor
+  polyphonic_voice
+  sample_player
 )
 
 add_library(
@@ -38,14 +49,17 @@ add_library(
   synth_instrument.cpp
   synth_instrument.h
 )
+target_compile_definitions(
+  synth_instrument
+  PUBLIC BARELYMUSICIAN_EXPORTS
+)
 target_link_libraries(
   synth_instrument
-  enveloped_voice
-  generic_instrument
-  include
+  custom_instrument
+  barelymusician
   dsp_utils
+  enveloped_voice
+  gain_processor
   oscillator
   polyphonic_voice
-  instrument
-  parameter
 )

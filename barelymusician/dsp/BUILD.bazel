@@ -1,6 +1,12 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//barelymusician:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "decibels",
+    srcs = ["decibels.cpp"],
+    hdrs = ["decibels.h"],
+)
 
 cc_library(
     name = "dsp_utils",
@@ -18,8 +24,26 @@ cc_library(
 )
 
 cc_library(
+    name = "enveloped_voice",
+    hdrs = ["enveloped_voice.h"],
+    deps = [
+        ":envelope",
+        ":voice",
+    ],
+)
+
+cc_library(
     name = "filter",
     hdrs = ["filter.h"],
+)
+
+cc_library(
+    name = "gain_processor",
+    srcs = ["gain_processor.cpp"],
+    hdrs = ["gain_processor.h"],
+    deps = [
+        "//barelymusician/common:seconds",
+    ],
 )
 
 cc_library(
@@ -43,7 +67,6 @@ cc_library(
     deps = [
         ":dsp_utils",
         ":generator",
-        "//barelymusician:include",
         "//barelymusician/common:random",
     ],
 )
@@ -68,6 +91,15 @@ cc_library(
 )
 
 cc_test(
+    name = "decibels_test",
+    srcs = ["decibels_test.cpp"],
+    deps = [
+        ":decibels",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "dsp_utils_test",
     srcs = ["dsp_utils_test.cpp"],
     deps = [
@@ -81,6 +113,15 @@ cc_test(
     srcs = ["envelope_test.cpp"],
     deps = [
         ":envelope",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "gain_processor_test",
+    srcs = ["gain_processor_test.cpp"],
+    deps = [
+        ":gain_processor",
         "@googletest//:gtest_main",
     ],
 )

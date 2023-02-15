@@ -3,14 +3,14 @@
 
 #include "barelymusician/barelymusician.h"
 
-namespace barelyapi {
+namespace barely::internal {
 
 /// Identifier alias.
 using Id = BarelyId;
 
 /// Invalid identifier.
-constexpr Id kInvalid = BarelyId_kInvalid;
+inline constexpr Id kInvalid = BarelyId_kInvalid;
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_ID_H_

@@ -7,7 +7,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-namespace barelyapi {
+namespace barely {
 namespace {
 
 using ::testing::ElementsAre;
@@ -42,7 +42,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNestedRules) {
 // Tests that the context free grammar generation always returns a sequence with
 // the expected size range when rules with multiple substitutions are present.
 TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
-  const int kNumGenerations = 10;
+  const int kGenerationCount = 10;
   const int kStartSymbol = 0;
   const int kEndSymbol = -1;
   const int kMinSize = 2;
@@ -59,7 +59,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
   }
 
   Random random;
-  for (int n = 0; n < kNumGenerations; ++n) {
+  for (int n = 0; n < kGenerationCount; ++n) {
     const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
     EXPECT_GE(sequence.size(), kMinSize);
     EXPECT_LE(sequence.size(), kMaxSize);
@@ -93,4 +93,4 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
 }
 
 }  // namespace
-}  // namespace barelyapi
+}  // namespace barely

@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//barelymusician:__subpackages__"])
+package(default_visibility = ["//visibility:public"])
 
 cc_library(
     name = "find_or_null",
@@ -11,6 +11,12 @@ cc_library(
     name = "random",
     srcs = ["random.cpp"],
     hdrs = ["random.h"],
+)
+
+cc_library(
+    name = "seconds",
+    srcs = ["seconds.cpp"],
+    hdrs = ["seconds.h"],
 )
 
 cc_test(
@@ -27,6 +33,15 @@ cc_test(
     srcs = ["random_test.cpp"],
     deps = [
         ":random",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "seconds_test",
+    srcs = ["seconds_test.cpp"],
+    deps = [
+        ":seconds",
         "@googletest//:gtest_main",
     ],
 )

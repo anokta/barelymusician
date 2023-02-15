@@ -2,48 +2,66 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
 #include <cstddef>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/event_queue.h"
-#include "barelymusician/engine/parameter.h"
+#include "barelymusician/engine/control.h"
+#include "barelymusician/engine/message_queue.h"
+#include "barelymusician/engine/status.h"
 
-namespace barelyapi {
+namespace barely::internal {
+
+/// Instrument definition alias.
+using InstrumentDefinition = barely::InstrumentDefinition;
 
 /// Class that wraps instrument.
 class Instrument {
  public:
-  /// Definition alias.
-  using Definition = barely::InstrumentDefinition;
+  /// Control event callback alias.
+  using ControlEventCallback = barely::Instrument::ControlEventCallback;
 
-  /// Note off callback alias.
-  using NoteOffCallback = barely::Instrument::NoteOffCallback;
+  /// Note control event callback alias.
+  using NoteControlEventCallback = barely::Instrument::NoteControlEventCallback;
 
-  /// Note on callback alias.
-  using NoteOnCallback = barely::Instrument::NoteOnCallback;
+  /// Note off event callback alias.
+  using NoteOffEventCallback = barely::Instrument::NoteOffEventCallback;
+
+  /// Note on event callback alias.
+  using NoteOnEventCallback = barely::Instrument::NoteOnEventCallback;
 
   /// Constructs new `Instrument`.
   ///
   /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hz.
+  /// @param frame_rate Frame rate in hertz.
+  /// @param initial_tempo Initial tempo in beats per minute.
+  /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const Definition& definition, int frame_rate) noexcept;
+  Instrument(const InstrumentDefinition& definition, int frame_rate,
+             double initial_tempo, double initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
 
   /// Non-copyable and non-movable.
-  Instrument(const Instrument& other) = delete;
-  Instrument& operator=(const Instrument& other) = delete;
+  Instrument(const Instrument& other) noexcept = delete;
+  Instrument& operator=(const Instrument& other) noexcept = delete;
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Returns parameter.
+  /// Returns control value.
   ///
-  /// @param index Parameter index.
-  /// @return Pointer to parameter.
-  [[nodiscard]] const Parameter* GetParameter(int index) const noexcept;
+  /// @param index Control index.
+  /// @return Control value or error status.
+  [[nodiscard]] StatusOr<double> GetControl(int index) const noexcept;
+
+  /// Returns note control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Control index.
+  /// @return Note control value or error status.
+  [[nodiscard]] StatusOr<double> GetNoteControl(double pitch,
+                                                int index) const noexcept;
 
   /// Returns whether note is active or not.
   ///
@@ -51,115 +69,161 @@ class Instrument {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
 
-  /// Processes next output buffer.
+  /// Processes output samples.
   ///
-  /// @param output Output buffer.
-  /// @param num_output_channels Number of output channels.
-  /// @param num_output_frames Number of output frames.
+  /// @param output_samples Interleaved array of output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(double* output, int num_output_channels, int num_output_frames,
-               double timestamp) noexcept;
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count, double timestamp) noexcept;
 
-  /// Resets all parameters to default value at timestamp.
+  /// Resets all controls to default value.
+  void ResetAllControls() noexcept;
+
+  /// Resets all note controls to default value.
   ///
-  /// @param timestamp Timestamp in seconds.
-  void ResetAllParameters(double timestamp) noexcept;
+  /// @param pitch Note pitch.
+  /// @return Status.
+  Status ResetAllNoteControls(double pitch) noexcept;
 
-  /// Resets parameter to default value at timestamp.
+  /// Resets control to default value.
   ///
-  /// @param index Parameter index.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool ResetParameter(int index, double timestamp) noexcept;
+  /// @param index Control index.
+  /// @return Status.
+  Status ResetControl(int index) noexcept;
 
-  /// Sets data at timestamp.
+  /// Resets note control to default value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Control index.
+  /// @return Status.
+  Status ResetNoteControl(double pitch, int index) noexcept;
+
+  /// Sets all notes off.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetAllNotesOff() noexcept;
+
+  /// Sets control value.
+  ///
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param slope_per_beat Control slope in value change per beat.
+  /// @return Status.
+  Status SetControl(int index, double value, double slope_per_beat) noexcept;
+
+  /// Sets control event callback.
+  ///
+  /// @param callback Control event callback.
+  void SetControlEventCallback(ControlEventCallback callback) noexcept;
+
+  /// Sets data.
   ///
   /// @param data Data.
-  /// @param timestamp Timestamp in seconds.
-  void SetData(std::vector<std::byte> data, double timestamp) noexcept;
+  void SetData(std::vector<std::byte> data) noexcept;
 
-  /// Sets note off callback.
+  /// Sets note control value.
   ///
-  /// @param callback Note off callback.
-  void SetNoteOffCallback(NoteOffCallback callback) noexcept;
+  /// @param pitch Note pitch.
+  /// @param index Note control index.
+  /// @param value Note control value.
+  /// @param slope_per_beat Note control slope in value change per beat.
+  /// @return Status.
+  Status SetNoteControl(double pitch, int index, double value,
+                        double slope_per_beat) noexcept;
 
-  /// Sets note on callback.
+  /// Sets note control event callback.
   ///
-  /// @param callback Note on callback.
-  void SetNoteOnCallback(NoteOnCallback callback) noexcept;
+  /// @param callback Note control event callback.
+  void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept;
 
-  /// Sets parameter value at timestamp.
+  /// Sets note off.
   ///
-  /// @param index Parameter index.
-  /// @param value Parameter value.
-  /// @param slope Parameter slope in value change per second.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool SetParameter(int index, double value, double slope,
-                    double timestamp) noexcept;
+  /// @param pitch Note pitch.
+  void SetNoteOff(double pitch) noexcept;
 
-  /// Starts note at timestamp.
+  /// Sets note off event callback.
+  ///
+  /// @param callback Note off event callback.
+  void SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept;
+
+  /// Sets note on.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
-  /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void StartNote(double pitch, double intensity, double timestamp) noexcept;
+  void SetNoteOn(double pitch, double intensity) noexcept;
 
-  /// Stops all notes at timestamp.
+  /// Sets note on event callback.
+  ///
+  /// @param callback Note on event callback.
+  void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
+
+  /// Sets playbck tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept;
+
+  /// Updates instrument at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
-  void StopAllNotes(double timestamp) noexcept;
-
-  /// Stops note at timestamp.
-  ///
-  /// @param pitch Note pitch.
-  /// @param timestamp Timestamp in seconds.
-  void StopNote(double pitch, double timestamp) noexcept;
+  void Update(double timestamp) noexcept;
 
  private:
-  // Returns corresponding frames for given `seconds`.
-  int GetFrames(double seconds) const noexcept;
-
-  // Returns corresponding seconds for given `frames`.
-  double GetSeconds(int frames) const noexcept;
-
-  // Returns corresponding slope per frame for a given `slope`.
-  double GetSlopePerFrame(double slope) const noexcept;
-
-  // Note off callback.
-  NoteOffCallback note_off_callback_;
-
-  // Note on callback.
-  NoteOnCallback note_on_callback_;
-
-  // List of parameters.
-  std::vector<Parameter> parameters_;
-
-  // List of active note pitches.
-  std::unordered_set<double> pitches_;
+  // Returns corresponding slope per frame for a given `slope_per_beat`.
+  double GetSlopePerFrame(double slope_per_beat) const noexcept;
 
   // Destroy callback.
-  Definition::DestroyCallback destroy_callback_;
+  const InstrumentDefinition::DestroyCallback destroy_callback_;
 
   // Process callback.
-  Definition::ProcessCallback process_callback_;
+  const InstrumentDefinition::ProcessCallback process_callback_;
+
+  // Set control callback.
+  const InstrumentDefinition::SetControlCallback set_control_callback_;
 
   // Set data callback.
-  Definition::SetDataCallback set_data_callback_;
+  const InstrumentDefinition::SetDataCallback set_data_callback_;
+
+  // Set note control callback.
+  const InstrumentDefinition::SetNoteControlCallback set_note_control_callback_;
 
   // Set note off callback.
-  Definition::SetNoteOffCallback set_note_off_callback_;
+  const InstrumentDefinition::SetNoteOffCallback set_note_off_callback_;
 
   // Set note on callback.
-  Definition::SetNoteOnCallback set_note_on_callback_;
+  const InstrumentDefinition::SetNoteOnCallback set_note_on_callback_;
 
-  // Set parameter callback.
-  Definition::SetParameterCallback set_parameter_callback_;
+  // Frame rate in hertz.
+  const int frame_rate_;
 
-  // Sampling rate in hz.
-  int frame_rate_;
+  // List of default note controls.
+  const std::vector<Control> default_note_controls_;
+
+  // List of controls.
+  std::vector<Control> controls_;
+
+  // Map of active note controls by note pitches.
+  std::unordered_map<double, std::vector<Control>> note_controls_;
+
+  // Control event callback.
+  ControlEventCallback control_event_callback_;
+
+  // Note control event callback.
+  NoteControlEventCallback note_control_event_callback_;
+
+  // Note off event callback.
+  NoteOffEventCallback note_off_event_callback_;
+
+  // Note on event callback.
+  NoteOnEventCallback note_on_event_callback_;
+
+  // Tempo in beats per minute.
+  double tempo_ = 120.0;
+
+  // Timestamp in seconds.
+  double timestamp_ = 0;
 
   // State.
   void* state_ = nullptr;
@@ -167,10 +231,10 @@ class Instrument {
   // Data.
   std::vector<std::byte> data_;
 
-  // Event queue.
-  EventQueue event_queue_;
+  // Message queue.
+  MessageQueue message_queue_;
 };
 
-}  // namespace barelyapi
+}  // namespace barely::internal
 
 #endif  // BARELYMUSICIAN_ENGINE_INSTRUMENT_H_

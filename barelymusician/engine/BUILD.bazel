@@ -104,18 +104,17 @@ cc_test(
     ],
 )
 
-# TODO(#109): Reenable after API cleanup.
-# cc_test(
-#     name = "engine_test",
-#     srcs = ["engine_test.cpp"],
-#     deps = [
-#         ":control",
-#         ":engine",
-#         ":id",
-#         ":instrument",
-#         "@googletest//:gtest_main",
-#     ],
-# )
+cc_test(
+    name = "engine_test",
+    srcs = ["engine_test.cpp"],
+    deps = [
+        ":control",
+        ":engine",
+        ":id",
+        ":instrument",
+        "@googletest//:gtest_main",
+    ],
+)
 
 cc_test(
     name = "instrument_test",

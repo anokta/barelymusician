@@ -246,18 +246,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5432e5a3713af2a428db1f3ae30e8df4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NoteOff:
+  OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
-  NoteOn:
+  OnNoteControlEvent:
     m_PersistentCalls:
       m_Calls: []
-  oscillatorType: 2
-  attack: 0
-  decay: 0
-  sustain: 1
-  release: 0.05000000074505806
-  numVoices: 1
+  OnNoteOffEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNoteOnEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  Gain: 1
+  OscillatorType: 2
+  Attack: 0
+  Decay: 0
+  Sustain: 1
+  Release: 0.05000000074505806
+  VoiceCount: 8
 --- !u!82 &774896534
 AudioSource:
   m_ObjectHideFlags: 0
@@ -363,19 +370,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 774896532}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6fa306128e0a33a4bb531f85ca63e1f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 497b8a50d8924fe498b5b5ab8fae1c83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   tempo: 120
   instrument: {fileID: 774896533}
-  numBeats: 4
+  beatCount: 4
   barPitch: 1
   beatPitch: 0
   intensity: 1
-  logToConsole: 1
-  tick: 1
-  position: 0
-  Beat:
+  isLoggingToConsole: 1
+  isTicking: 1
+  OnBeatEvent:
     m_PersistentCalls:
       m_Calls: []
 --- !u!4 &774896536
@@ -427,8 +433,8 @@ Camera:
   m_GameObject: {fileID: 1019211076}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.08627451, g: 0.85882354, b: 0.5764706, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -444,8 +450,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 2
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -469,7 +475,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1019211076}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -489,6 +495,7 @@ GameObject:
   - component: {fileID: 1482507599}
   - component: {fileID: 1482507598}
   - component: {fileID: 1482507603}
+  - component: {fileID: 1482507604}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -624,7 +631,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: d69fa366be19ab440a6594c9dbf2c9ae, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -653,7 +660,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1482507597}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1482507602
 Transform:
   m_ObjectHideFlags: 0
@@ -677,7 +684,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 1482507597}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa91974b514670d4bae814832ceb7af1, type: 3}
+  m_Script: {fileID: 11500000, guid: 2020a47859f0e824aa1041da0a257afc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   source: {fileID: 1482507598}
+  metronome: {fileID: 774896535}
+--- !u!114 &1482507604
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1482507597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fbb0399be05119448c76a51e0b957fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetInstrument: {fileID: 774896533}
+  noteOffColor: {r: 0.9372549, g: 0.91764706, b: 0.3529412, a: 1}
+  noteOnColor: {r: 0.6431373, g: 0.011764706, b: 0.43529412, a: 1}

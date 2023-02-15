@@ -48,6 +48,29 @@ namespace Barely {
     public class BeatEvent : UnityEngine.Events.UnityEvent<int> {}
     public BeatEvent OnBeatEvent;
 
+    public void Play() {
+      _performer.Play();
+      if (isLoggingToConsole) {
+        Debug.Log("Playback started");
+      }
+    }
+
+    public void Pause() {
+      _performer.Stop();
+      if (isLoggingToConsole) {
+        Debug.Log("Playback paused");
+      }
+    }
+
+    public void Stop() {
+      _performer.Stop();
+      _performer.Position = 0.0;
+      _beat = 0;
+      if (isLoggingToConsole) {
+        Debug.Log("Playback stopped");
+      }
+    }
+
     private Performer _performer = null;
 
     private void Awake() {
@@ -83,23 +106,12 @@ namespace Barely {
       Musician.Tempo = tempo;
       if (Input.GetKeyDown(KeyCode.Space)) {
         if (_performer.IsPlaying) {
-          _performer.Stop();
-          if (isLoggingToConsole) {
-            Debug.Log("Playback paused");
-          }
+          Pause();
         } else {
-          _performer.Play();
-          if (isLoggingToConsole) {
-            Debug.Log("Playback started");
-          }
+          Play();
         }
       } else if (Input.GetKeyDown(KeyCode.Backspace)) {
-        _performer.Stop();
-        _performer.Position = 0.0;
-        _beat = 0;
-        if (isLoggingToConsole) {
-          Debug.Log("Playback stopped");
-        }
+        Stop();
       }
     }
   }

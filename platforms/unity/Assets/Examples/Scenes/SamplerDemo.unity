@@ -252,7 +252,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
+  m_BackGroundColor: {r: 0.015686275, g: 0.54509807, b: 0.65882355, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -422,20 +422,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e069298ae6f8da49b94b3567a4b8739, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  NoteOff:
+  OnControlEvent:
     m_PersistentCalls:
       m_Calls: []
-  NoteOn:
+  OnNoteControlEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNoteOffEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
   Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  Gain: 1
   RootPitch: 0
   Loop: 1
   Attack: 0
   Decay: 0
   Sustain: 1
   Release: 0.07500000298023224
-  NumVoices: 8
+  VoiceCount: 8
 --- !u!82 &1737834381
 AudioSource:
   m_ObjectHideFlags: 0

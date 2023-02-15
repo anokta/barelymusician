@@ -6,7 +6,8 @@ using Barely;
 public class Sparkler : MonoBehaviour {
   public Instrument targetInstrument;
 
-  public Color noteOffColor = Color.white;
+  public Color noteOffColor = Color.black;
+  public Color noteOnColor = Color.white;
 
   private Color targetColor = Color.white;
 
@@ -25,8 +26,8 @@ public class Sparkler : MonoBehaviour {
   }
 
   private void Update() {
-    transform.GetComponent<Renderer>().material.color = Color.Lerp(
-        transform.GetComponent<Renderer>().material.color, targetColor, 32 * Time.deltaTime);
+    GetComponent<Renderer>().material.color =
+        Color.Lerp(GetComponent<Renderer>().material.color, targetColor, 16 * Time.deltaTime);
   }
 
   private void OnNoteOff(double pitch) {
@@ -34,6 +35,7 @@ public class Sparkler : MonoBehaviour {
   }
 
   private void OnNoteOn(double pitch, double intensity) {
-    targetColor = Random.ColorHSV(0.0f, 1.0f, 1.0f, 1.0f, (float)intensity, (float)intensity);
+    targetColor = Color.Lerp(noteOffColor, noteOnColor, (float)intensity);
+    GetComponent<Renderer>().material.color = targetColor;
   }
 }

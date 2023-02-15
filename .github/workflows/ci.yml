@@ -54,7 +54,11 @@ jobs:
 
   dev:
     name: dev
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: check symbols
         shell: bash
-        run: ./dev/check_symbols.sh
+        run: |
+          chmod +x ./dev/check_symbols.sh
+          ./dev/check_symbols.sh

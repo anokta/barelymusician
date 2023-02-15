@@ -20,6 +20,7 @@ cc_library(
         ":instrument",
         ":mutable_data",
         ":performer",
+        ":status",
         ":task",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
@@ -112,6 +113,8 @@ cc_test(
         ":engine",
         ":id",
         ":instrument",
+        ":status",
+        ":task",
         "@googletest//:gtest_main",
     ],
 )

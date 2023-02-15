@@ -119,6 +119,8 @@ target_link_libraries(
   engine
   id
   instrument
+  status
+  task
   gmock
   gtest_main
 )
@@ -163,7 +165,7 @@ target_link_libraries(
 )
 gtest_discover_tests(mutable_data_test)
 
-add_library(
+add_executable(
   performer_test
   performer_test.cpp
 )

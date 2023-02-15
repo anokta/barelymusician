@@ -8,45 +8,45 @@ namespace barely::internal {
 /// Control definition alias.
 using ControlDefinition = barely::ControlDefinition;
 
-/// Class that wraps control.
+/// Class that wraps a control.
 class Control {
  public:
-  /// Constructs new `Control`.
+  /// Constructs a new `Control`.
   ///
   /// @param definition Control definition.
   explicit Control(ControlDefinition definition) noexcept;
 
-  /// Returns slope per beat.
+  /// Returns the slope per beat.
   ///
   /// @return Control slope in value change per beat.
   [[nodiscard]] double GetSlopePerBeat() const noexcept;
 
-  /// Returns value.
+  /// Returns the value.
   ///
   /// @return Control value.
   [[nodiscard]] double GetValue() const noexcept;
 
-  /// Resets value.
+  /// Resets the value.
   ///
   /// @return True if changed, false otherwise.
   bool Reset() noexcept;
 
-  /// Sets value.
+  /// Sets the value.
   ///
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
   /// @return True if changed, false otherwise.
   bool Set(double value, double slope_per_beat) noexcept;
 
-  /// Updates value by duration.
+  /// Updates the value by duration.
   ///
   /// @param duration Duration in beats.
-  /// @return True if value changed, false otherwise.
+  /// @return True if changed, false otherwise.
   bool Update(double duration) noexcept;
 
  private:
-  // Clamps given `value`.
-  double Clamp(double value) noexcept;
+  // Clamps a given `value`.
+  [[nodiscard]] double Clamp(double value) noexcept;
 
   // Definition.
   ControlDefinition definition_;

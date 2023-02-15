@@ -22,14 +22,14 @@ main() {
     "${API_H_PATH}"
   )
   echo "${declarations}"
-  LC_COLLATE=C sort -uc <<< ${declarations[*]}
+  LC_COLLATE=C sort -uc <<<${declarations[*]}
 
   echo "Parsing ${API_CPP_PATH}..."
   local definitions=$(
     sed -n '{N; s/^\w\+\s\+\(Barely[A-Za-z]\+_[A-Za-z]\+\)(.*\+/\1/p; D}' "${API_CPP_PATH}"
   )
   echo "${definitions}"
-  LC_COLLATE=C sort -uc <<< ${definitions[*]}
+  LC_COLLATE=C sort -uc <<<${definitions[*]}
 
   echo "Comparing symbols..."
   local diff=$(echo ${declarations[@]} ${definitions[@]} | tr ' ' '\n' | sort | uniq -u)

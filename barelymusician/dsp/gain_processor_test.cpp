@@ -8,9 +8,9 @@ namespace barely {
 namespace {
 
 TEST(GainProcessorTest, ProcessConstantGain) {
-  const int kFrameRate = 100;
-  const int kChannelCount = 3;
-  const double kGain = 0.75;
+  constexpr int kFrameRate = 100;
+  constexpr int kChannelCount = 3;
+  constexpr double kGain = 0.75;
 
   GainProcessor gain_processor(kFrameRate);
   gain_processor.SetGain(kGain);
@@ -33,9 +33,9 @@ TEST(GainProcessorTest, ProcessConstantGain) {
 }
 
 TEST(GainProcessorTest, ProcessSetGain) {
-  const int kFrameRate = 200;
-  const int kChannelCount = 2;
-  const double kEpsilon = 1e-12;
+  constexpr int kFrameRate = 200;
+  constexpr int kChannelCount = 2;
+  constexpr double kEpsilon = 1e-12;
 
   GainProcessor gain_processor(kFrameRate);
 

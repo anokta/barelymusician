@@ -15,7 +15,7 @@
 
 namespace barely::internal {
 
-/// Musician engine.
+/// Internal engine.
 class Engine {
  public:
   /// Default constructor.
@@ -109,12 +109,12 @@ class Engine {
                            int output_channel_count, int output_frame_count,
                            double timestamp) noexcept;
 
-  /// Sets tempo.
+  /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept;
 
-  /// Updates engine at timestamp.
+  /// Updates the engine at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)

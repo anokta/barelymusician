@@ -31,7 +31,7 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
   sample_player.SetData(kData, kFrameRate, kDataLength);
   sample_player.SetLoop(true);
 
-  const int kLoopCount = 10;
+  constexpr int kLoopCount = 10;
   for (int i = 0; i < kDataLength * kLoopCount; ++i) {
     EXPECT_DOUBLE_EQ(sample_player.Next(), kData[i % kDataLength])
         << "at index " << i;

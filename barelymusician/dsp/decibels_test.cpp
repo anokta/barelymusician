@@ -9,11 +9,12 @@ namespace {
 
 // Tests that amplitude/decibels conversion returns expected results.
 TEST(DecibelsTest, AmplitudeDecibelsConversion) {
-  const double kEpsilon = 5e-2;
+  constexpr double kEpsilon = 5e-2;
 
-  const int kValueCount = 4;
-  const std::array<double, kValueCount> kAmplitudes = {0.0, 0.1, 1.0, 2.0};
-  const std::array<double, kValueCount> kDecibels = {-80.0, -20.0, 0.0, 6.0};
+  constexpr int kValueCount = 4;
+  constexpr std::array<double, kValueCount> kAmplitudes = {0.0, 0.1, 1.0, 2.0};
+  constexpr std::array<double, kValueCount> kDecibels = {-80.0, -20.0, 0.0,
+                                                         6.0};
 
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_NEAR(AmplitudeFromDecibels(kDecibels[i]), kAmplitudes[i], kEpsilon);

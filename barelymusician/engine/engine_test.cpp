@@ -60,8 +60,8 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 
 // Tests that single instrument is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySingleInstrument) {
-  const double kPitch = -1.25;
-  const double kIntensity = 0.75;
+  constexpr double kPitch = -1.25;
+  constexpr double kIntensity = 0.75;
 
   Engine engine;
   std::vector<double> buffer(kChannelCount * kFrameCount);
@@ -73,9 +73,10 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   const Id instrument_id = *instrument_id_or;
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_EQ(engine.ProcessInstrument(instrument_id, buffer.data(),
-                                     kChannelCount, kFrameCount, 0.0),
-            Status::Ok());
+  EXPECT_TRUE(engine
+                  .ProcessInstrument(instrument_id, buffer.data(),
+                                     kChannelCount, kFrameCount, 0.0)
+                  .IsOk());
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -110,9 +111,10 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_EQ(engine.ProcessInstrument(instrument_id, buffer.data(),
-                                     kChannelCount, kFrameCount, 0.0),
-            Status::Ok());
+  EXPECT_TRUE(engine
+                  .ProcessInstrument(instrument_id, buffer.data(),
+                                     kChannelCount, kFrameCount, 0.0)
+                  .IsOk());
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
@@ -125,7 +127,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
 
   // Destroy the instrument, which should also trigger the note off callback.
   note_off_pitch = 0.0;
-  EXPECT_EQ(engine.DestroyInstrument(instrument_id), Status::Ok());
+  EXPECT_TRUE(engine.DestroyInstrument(instrument_id).IsOk());
   ASSERT_FALSE(engine.GetInstrument(instrument_id).IsOk());
   EXPECT_EQ(engine.GetInstrument(instrument_id).GetErrorStatus(),
             Status::NotFound());
@@ -181,7 +183,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
 
 // Tests that single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
-  const int kProcessOrder = 0;
+  constexpr int kProcessOrder = 0;
 
   Engine engine;
 
@@ -238,7 +240,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy the performer.
-  EXPECT_EQ(engine.DestroyPerformer(performer_id), Status::Ok());
+  EXPECT_TRUE(engine.DestroyPerformer(performer_id).IsOk());
   EXPECT_FALSE(engine.GetPerformer(performer_id).IsOk());
 }
 

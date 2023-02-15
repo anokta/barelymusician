@@ -42,11 +42,11 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNestedRules) {
 // Tests that the context free grammar generation always returns a sequence with
 // the expected size range when rules with multiple substitutions are present.
 TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
-  const int kGenerationCount = 10;
-  const int kStartSymbol = 0;
-  const int kEndSymbol = -1;
-  const int kMinSize = 2;
-  const int kMaxSize = 5;
+  constexpr int kGenerationCount = 10;
+  constexpr int kStartSymbol = 0;
+  constexpr int kEndSymbol = -1;
+  constexpr int kMinSize = 2;
+  constexpr int kMaxSize = 5;
 
   ContextFreeGrammar<int> grammar;
   std::vector<std::vector<int>> substitutions;
@@ -68,7 +68,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
 
 // Tests that no substitutions are done when there are no rules given.
 TEST(ContextFreeGrammarTest, GenerateSequenceNoRules) {
-  const int kStartSymbol = 0;
+  constexpr int kStartSymbol = 0;
 
   ContextFreeGrammar<int> grammar;
 
@@ -80,7 +80,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoRules) {
 // Tests that no substitutions are done when there are no rules given for the
 // start symbol.
 TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
-  const int kStartSymbol = 3;
+  constexpr int kStartSymbol = 3;
 
   ContextFreeGrammar<int> grammar;
   grammar.AddRule(0, {{10, 11, 12}});

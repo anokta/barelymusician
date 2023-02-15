@@ -9,10 +9,10 @@ namespace barely::internal {
 /// Task definition alias.
 using TaskDefinition = barely::TaskDefinition;
 
-/// Class that wraps task.
+/// Class that wraps a task.
 class Task {
  public:
-  /// Constructs new `Task`.
+  /// Constructs a new `Task`.
   ///
   /// @param definition Task definition.
   /// @param user_data Pointer to user data.
@@ -27,7 +27,7 @@ class Task {
   Task(Task&& other) noexcept = delete;
   Task& operator=(Task&& other) noexcept = delete;
 
-  /// Processes task.
+  /// Processes the task.
   void Process() noexcept;
 
  private:

@@ -9,9 +9,9 @@ namespace {
 
 // Tests that the generated uniform numbers are always within a given range.
 TEST(RandomTest, DrawUniformMinMax) {
-  const int kValueCount = 1000;
-  const int kMin = -7;
-  const int kMax = 35;
+  constexpr int kValueCount = 1000;
+  constexpr int kMin = -7;
+  constexpr int kMax = 35;
 
   Random random;
   for (int i = 0; i < kValueCount; ++i) {
@@ -23,10 +23,10 @@ TEST(RandomTest, DrawUniformMinMax) {
 
 // Tests that the same values are generated when reset with the same seed.
 TEST(RandomTest, Reset) {
-  const int kSeed = 1;
-  const int kValueCount = 10;
-  const double kMean = -0.5;
-  const double kVariance = 10.0;
+  constexpr int kSeed = 1;
+  constexpr int kValueCount = 10;
+  constexpr double kMean = -0.5;
+  constexpr double kVariance = 10.0;
 
   Random random(kSeed);
 

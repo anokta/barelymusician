@@ -9,7 +9,7 @@ class PositionTest : public testing::TestWithParam<int> {};
 
 // Tests that expected positions are returned with respect to the given steps.
 TEST_P(PositionTest, GetPosition) {
-  const int kBeatCount = 4;
+  constexpr int kBeatCount = 4;
   const int step_count = GetParam();
 
   for (int beat = 0; beat < kBeatCount; ++beat) {
@@ -26,7 +26,7 @@ TEST_P(PositionTest, GetPosition) {
 // Tests that the position gets quantized as expected with respect to the given
 // resolution.
 TEST_P(PositionTest, QuantizePosition) {
-  const double kPosition = 0.99;
+  constexpr double kPosition = 0.99;
   const double resolution = 1.0 / static_cast<double>(GetParam());
   EXPECT_DOUBLE_EQ(QuantizePosition(kPosition, resolution), 1.0);
   EXPECT_DOUBLE_EQ(QuantizePosition(1.0 - kPosition, resolution), 0.0);

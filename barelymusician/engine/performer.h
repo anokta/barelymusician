@@ -14,10 +14,10 @@
 
 namespace barely::internal {
 
-/// Class that wraps performer.
+/// Class that wraps a performer.
 class Performer {
  public:
-  /// Creates new task at position.
+  /// Creates a new task at position.
   ///
   /// @param task_id Task identifier.
   /// @param definition Task definition.
@@ -29,13 +29,13 @@ class Performer {
   void CreateTask(Id task_id, TaskDefinition definition, bool is_one_off,
                   double position, int process_order, void* user_data) noexcept;
 
-  /// Destroys task.
+  /// Destroys a task.
   ///
   /// @param task_id Task identifier.
   /// @return Status.
   Status DestroyTask(Id task_id) noexcept;
 
-  /// Returns duration to next task.
+  /// Returns the duration to next task.
   ///
   /// @return Duration in beats.
   [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask()

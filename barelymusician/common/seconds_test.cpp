@@ -7,13 +7,15 @@
 namespace barely {
 namespace {
 
-// Tests that beats/seconds conversion returns expected results.
+// Tests that the beats/seconds conversion returns expected results.
 TEST(SecondsTest, BeatsSecondsConversion) {
-  const double kTempo = 120.0;
+  constexpr double kTempo = 120.0;
 
-  const int kValueCount = 5;
-  const std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0, -24.6};
-  const std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0, -12.3};
+  constexpr int kValueCount = 5;
+  constexpr std::array<double, kValueCount> kBeats = {0.0, 1.0, 5.0, -4.0,
+                                                      -24.6};
+  constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.5, 2.5, -2.0,
+                                                        -12.3};
 
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_DOUBLE_EQ(BeatsFromSeconds(kTempo, kSeconds[i]), kBeats[i]);
@@ -29,13 +31,13 @@ TEST(SecondsTest, BeatsSecondsConversion) {
   }
 }
 
-// Tests that frames/seconds conversion returns expected results.
+// Tests that the frames/seconds conversion returns expected results.
 TEST(SecondsTest, FramesSecondsConversion) {
-  const int kFrameRate = 8000;
+  constexpr int kFrameRate = 8000;
 
-  const int kValueCount = 4;
-  const std::array<int, kValueCount> kFrames = {0, 800, 4000, 32000};
-  const std::array<double, kValueCount> kSeconds = {0.0, 0.1, 0.5, 4.0};
+  constexpr int kValueCount = 4;
+  constexpr std::array<int, kValueCount> kFrames = {0, 800, 4000, 32000};
+  constexpr std::array<double, kValueCount> kSeconds = {0.0, 0.1, 0.5, 4.0};
 
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_EQ(FramesFromSeconds(kFrameRate, kSeconds[i]), kFrames[i]);

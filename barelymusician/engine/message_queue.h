@@ -12,17 +12,17 @@ namespace barely::internal {
 /// Single-consumer single-producer message queue.
 class MessageQueue {
  public:
-  /// Adds message at timestamp.
+  /// Adds a message at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   /// @param message Message.
   /// @return True if successful, false otherwise.
   bool Add(double timestamp, Message message) noexcept;
 
-  /// Returns next message before end timestamp.
+  /// Returns the next message before an end timestamp.
   ///
   /// @param end_timestamp End timestamp in seconds.
-  /// @return Pointer to message if successful, nullptr otherwise.
+  /// @return Pointer to message if successful, `nullptr` otherwise.
   std::pair<double, Message>* GetNext(double end_timestamp) noexcept;
 
  private:

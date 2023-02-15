@@ -7,7 +7,10 @@
 namespace barely::internal {
 
 Control::Control(ControlDefinition definition) noexcept
-    : definition_(definition), value_(definition_.default_value) {}
+    : definition_(definition), value_(definition_.default_value) {
+  assert(definition.default_value >= definition.min_value &&
+         definition.default_value <= definition.max_value);
+}
 
 double Control::GetSlopePerBeat() const noexcept { return slope_per_beat_; }
 
@@ -33,7 +36,7 @@ bool Control::Set(double value, double slope_per_beat) noexcept {
 }
 
 bool Control::Update(double duration) noexcept {
-  assert(duration >= 0.0);
+  assert(duration > 0.0);
   if (slope_per_beat_ != 0.0) {
     if (const double value = Clamp(value_ + slope_per_beat_ * duration);
         value_ != value) {

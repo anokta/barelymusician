@@ -7,7 +7,7 @@
 
 namespace barely::internal {
 
-/// Mutable data with real-time safe view.
+/// Mutable data with a real-time safe view.
 template <typename DataType>
 class MutableData {
  public:

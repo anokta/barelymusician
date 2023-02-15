@@ -40,7 +40,7 @@ class FakeVoice : public Voice {
 
 // Tests that playing a single voice produces the expected output.
 TEST(PolyphonicVoiceTest, SingleVoice) {
-  const double kPitch = 0.0;
+  constexpr double kPitch = 0.0;
 
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
@@ -111,7 +111,7 @@ TEST(PolyphonicVoiceTest, NoVoice) {
 
 // Tests that the voice update callback updates all the voices as expected.
 TEST(PolyphonicVoiceTest, Update) {
-  const double kUpdatedOutput = 4.0 * kOutput;
+  constexpr double kUpdatedOutput = 4.0 * kOutput;
 
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);

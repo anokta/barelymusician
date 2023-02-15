@@ -12,7 +12,7 @@ namespace {
 
 using ::testing::ElementsAre;
 
-// Tests that mutable data manages simple data as expected.
+// Tests that the mutable data manages simple data as expected.
 TEST(MutableDataTest, SimpleData) {
   MutableData<int> data;
   EXPECT_EQ(*data.GetScopedView(), 0);
@@ -25,7 +25,7 @@ TEST(MutableDataTest, SimpleData) {
   EXPECT_EQ(*view, -10);
 }
 
-// Tests that mutable data manages complex data as expected.
+// Tests that the mutable data manages complex data as expected.
 TEST(MutableDataTest, ComplexData) {
   MutableData<std::vector<std::string>> data;
   EXPECT_TRUE(data.GetScopedView()->empty());

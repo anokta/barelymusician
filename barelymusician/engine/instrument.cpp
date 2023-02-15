@@ -16,7 +16,7 @@ namespace barely::internal {
 
 namespace {
 
-// Builds corresponding controls for a given list of control `definitions`.
+// Builds the corresponding controls for a given array of control `definitions`.
 std::vector<Control> BuildControls(const auto* definitions,
                                    int definition_count) noexcept {
   std::vector<Control> controls;
@@ -48,8 +48,7 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       tempo_(initial_tempo),
       timestamp_(initial_timestamp) {
   assert(frame_rate > 0);
-  assert(initial_tempo > 0.0);
-  assert(initial_tempo > 0.0);
+  assert(initial_tempo >= 0.0);
   if (definition.create_callback) {
     definition.create_callback(&state_, frame_rate);
   }
@@ -75,14 +74,13 @@ StatusOr<double> Instrument::GetControl(int index) const noexcept {
 
 StatusOr<double> Instrument::GetNoteControl(double pitch,
                                             int index) const noexcept {
-  assert(index >= 0);
-  if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (index >= 0 && index < static_cast<int>(note_controls->size())) {
+  if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
+    if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
       return (*note_controls)[index].GetValue();
     }
-    return Status::InvalidArgument();
+    return Status::NotFound();
   }
-  return Status::NotFound();
+  return Status::InvalidArgument();
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
@@ -90,13 +88,12 @@ bool Instrument::IsNoteOn(double pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::Process(double* output_samples, int output_channel_count,
-                         int output_frame_count, double timestamp) noexcept {
-  assert(output_samples || output_channel_count == 0 ||
-         output_frame_count == 0);
-  assert(output_channel_count >= 0);
-  assert(output_frame_count >= 0);
-  assert(timestamp >= 0.0);
+Status Instrument::Process(double* output_samples, int output_channel_count,
+                           int output_frame_count, double timestamp) noexcept {
+  if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
+      output_channel_count < 0 || output_frame_count < 0) {
+    return Status::kInvalidArgument;
+  }
   int frame = 0;
   // Process *all* messages before the end timestamp.
   const double end_timestamp =
@@ -155,6 +152,7 @@ void Instrument::Process(double* output_samples, int output_channel_count,
     process_callback_(&state_, &output_samples[output_channel_count * frame],
                       output_channel_count, output_frame_count - frame);
   }
+  return Status::Ok();
 }
 
 void Instrument::ResetAllControls() noexcept {
@@ -202,9 +200,8 @@ Status Instrument::ResetControl(int index) noexcept {
 }
 
 Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
-  assert(index >= 0);
-  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (index >= 0 && index < static_cast<int>(note_controls->size())) {
+  if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
+    if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
         if (note_control_event_callback_) {
           note_control_event_callback_(pitch, index, note_control.GetValue());
@@ -215,9 +212,9 @@ Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
       }
       return Status::Ok();
     }
-    return Status::InvalidArgument();
+    return Status::NotFound();
   }
-  return Status::NotFound();
+  return Status::InvalidArgument();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -257,8 +254,8 @@ void Instrument::SetData(std::vector<std::byte> data) noexcept {
 
 Status Instrument::SetNoteControl(double pitch, int index, double value,
                                   double slope_per_beat) noexcept {
-  if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
-    if (index >= 0 && index < static_cast<int>(controls_.size())) {
+  if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
+    if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index];
           note_control.Set(value, slope_per_beat)) {
         if (note_control_event_callback_) {
@@ -271,9 +268,9 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
       }
       return Status::Ok();
     }
-    return Status::InvalidArgument();
+    return Status::NotFound();
   }
-  return Status::NotFound();
+  return Status::InvalidArgument();
 }
 
 void Instrument::SetNoteControlEventCallback(
@@ -317,7 +314,10 @@ void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
 }
 
 void Instrument::SetTempo(double tempo) noexcept {
-  assert(tempo_ != tempo);
+  assert(tempo >= 0.0);
+  if (tempo_ == tempo) {
+    return;
+  }
   tempo_ = tempo;
   // Update controls.
   for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
@@ -345,23 +345,26 @@ void Instrument::SetTempo(double tempo) noexcept {
 }
 
 void Instrument::Update(double timestamp) noexcept {
-  assert(timestamp_ <= timestamp);
-  if (timestamp_ == timestamp) return;
-  const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
-  // Update controls.
-  for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
-    if (auto& control = controls_[index];
-        control.Update(duration) && control_event_callback_) {
-      control_event_callback_(index, control.GetValue());
-    }
+  if (timestamp_ >= timestamp) {
+    return;
   }
-  // Update note controls.
-  for (auto& [pitch, note_controls] : note_controls_) {
-    for (int index = 0; index < static_cast<int>(note_controls.size());
-         ++index) {
-      if (auto& note_control = note_controls[index];
-          note_control.Update(duration) && note_control_event_callback_) {
-        note_control_event_callback_(pitch, index, note_control.GetValue());
+  if (tempo_ > 0.0) {
+    const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
+    // Update controls.
+    for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
+      if (auto& control = controls_[index];
+          control.Update(duration) && control_event_callback_) {
+        control_event_callback_(index, control.GetValue());
+      }
+    }
+    // Update note controls.
+    for (auto& [pitch, note_controls] : note_controls_) {
+      for (int index = 0; index < static_cast<int>(note_controls.size());
+           ++index) {
+        if (auto& note_control = note_controls[index];
+            note_control.Update(duration) && note_control_event_callback_) {
+          note_control_event_callback_(pitch, index, note_control.GetValue());
+        }
       }
     }
   }
@@ -369,10 +372,9 @@ void Instrument::Update(double timestamp) noexcept {
 }
 
 double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
-  return tempo_ > 0.0 && frame_rate_ > 0
-             ? BeatsFromSeconds(tempo_, slope_per_beat) /
-                   static_cast<double>(frame_rate_)
-             : 0.0;
+  return tempo_ > 0.0 ? BeatsFromSeconds(tempo_, slope_per_beat) /
+                            static_cast<double>(frame_rate_)
+                      : 0.0;
 }
 
 }  // namespace barely::internal

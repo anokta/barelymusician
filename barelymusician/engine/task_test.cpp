@@ -5,8 +5,9 @@
 namespace barely::internal {
 namespace {
 
+// Tests that the task gets processed as expected.
 TEST(TaskTest, Process) {
-  const int kTotalProcessCount = 3;
+  constexpr int kTotalProcessCount = 3;
 
   struct TestData {
     int create_count = 0;
@@ -34,6 +35,7 @@ TEST(TaskTest, Process) {
               },
               static_cast<void*>(&test_data));
 
+    // Task should be created.
     EXPECT_EQ(test_data.create_count, 1);
     EXPECT_EQ(test_data.destroy_count, 0);
     EXPECT_EQ(test_data.process_count, 0);
@@ -41,12 +43,14 @@ TEST(TaskTest, Process) {
     for (int i = 1; i <= kTotalProcessCount; ++i) {
       task.Process();
 
+      // Task should be processed.
       EXPECT_EQ(test_data.create_count, 1);
       EXPECT_EQ(test_data.destroy_count, 0);
       EXPECT_EQ(test_data.process_count, i);
     }
   }
 
+  // Task should be destroyed.
   EXPECT_EQ(test_data.create_count, 1);
   EXPECT_EQ(test_data.destroy_count, 1);
   EXPECT_EQ(test_data.process_count, kTotalProcessCount);

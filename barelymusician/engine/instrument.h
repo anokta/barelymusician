@@ -15,7 +15,7 @@ namespace barely::internal {
 /// Instrument definition alias.
 using InstrumentDefinition = barely::InstrumentDefinition;
 
-/// Class that wraps instrument.
+/// Class that wraps an instrument.
 class Instrument {
  public:
   /// Control event callback alias.
@@ -30,7 +30,7 @@ class Instrument {
   /// Note on event callback alias.
   using NoteOnEventCallback = barely::Instrument::NoteOnEventCallback;
 
-  /// Constructs new `Instrument`.
+  /// Constructs a new `Instrument`.
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
@@ -49,55 +49,56 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
-  /// Returns control value.
+  /// Returns a control value.
   ///
   /// @param index Control index.
   /// @return Control value or error status.
   [[nodiscard]] StatusOr<double> GetControl(int index) const noexcept;
 
-  /// Returns note control value.
+  /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param index Control index.
+  /// @param index Note control index.
   /// @return Note control value or error status.
   [[nodiscard]] StatusOr<double> GetNoteControl(double pitch,
                                                 int index) const noexcept;
 
-  /// Returns whether note is active or not.
+  /// Returns whether a note is on or not.
   ///
   /// @param pitch Note pitch.
-  /// @return True if active, false otherwise.
+  /// @return True if on, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept;
 
-  /// Processes output samples.
+  /// Processes output samples at timestamp.
   ///
-  /// @param output_samples Interleaved array of output samples.
+  /// @param output_samples Array of interleaved output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
+  /// @return Status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void Process(double* output_samples, int output_channel_count,
-               int output_frame_count, double timestamp) noexcept;
+  Status Process(double* output_samples, int output_channel_count,
+                 int output_frame_count, double timestamp) noexcept;
 
-  /// Resets all controls to default value.
+  /// Resets all control values.
   void ResetAllControls() noexcept;
 
-  /// Resets all note controls to default value.
+  /// Resets all note control values.
   ///
   /// @param pitch Note pitch.
   /// @return Status.
   Status ResetAllNoteControls(double pitch) noexcept;
 
-  /// Resets control to default value.
+  /// Resets a control value.
   ///
   /// @param index Control index.
   /// @return Status.
   Status ResetControl(int index) noexcept;
 
-  /// Resets note control to default value.
+  /// Resets a note control value.
   ///
   /// @param pitch Note pitch.
-  /// @param index Control index.
+  /// @param index Note control index.
   /// @return Status.
   Status ResetNoteControl(double pitch, int index) noexcept;
 
@@ -105,7 +106,7 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetAllNotesOff() noexcept;
 
-  /// Sets control value.
+  /// Sets a control value.
   ///
   /// @param index Control index.
   /// @param value Control value.
@@ -113,7 +114,7 @@ class Instrument {
   /// @return Status.
   Status SetControl(int index, double value, double slope_per_beat) noexcept;
 
-  /// Sets control event callback.
+  /// Sets the control event callback.
   ///
   /// @param callback Control event callback.
   void SetControlEventCallback(ControlEventCallback callback) noexcept;
@@ -123,7 +124,7 @@ class Instrument {
   /// @param data Data.
   void SetData(std::vector<std::byte> data) noexcept;
 
-  /// Sets note control value.
+  /// Sets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
@@ -133,46 +134,46 @@ class Instrument {
   Status SetNoteControl(double pitch, int index, double value,
                         double slope_per_beat) noexcept;
 
-  /// Sets note control event callback.
+  /// Sets the a note control event callback.
   ///
   /// @param callback Note control event callback.
   void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept;
 
-  /// Sets note off.
+  /// Sets a note off.
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(double pitch) noexcept;
 
-  /// Sets note off event callback.
+  /// Sets the note off event callback.
   ///
   /// @param callback Note off event callback.
   void SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept;
 
-  /// Sets note on.
+  /// Sets a note on.
   ///
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetNoteOn(double pitch, double intensity) noexcept;
 
-  /// Sets note on event callback.
+  /// Sets the note on event callback.
   ///
   /// @param callback Note on event callback.
   void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
 
-  /// Sets playbck tempo.
+  /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept;
 
-  /// Updates instrument at timestamp.
+  /// Updates the instrument at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept;
 
  private:
-  // Returns corresponding slope per frame for a given `slope_per_beat`.
-  double GetSlopePerFrame(double slope_per_beat) const noexcept;
+  // Returns the corresponding slope per frame for a given `slope_per_beat`.
+  [[nodiscard]] double GetSlopePerFrame(double slope_per_beat) const noexcept;
 
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
@@ -198,13 +199,13 @@ class Instrument {
   // Frame rate in hertz.
   const int frame_rate_;
 
-  // List of default note controls.
+  // Array of default note controls.
   const std::vector<Control> default_note_controls_;
 
-  // List of controls.
+  // Array of controls.
   std::vector<Control> controls_;
 
-  // Map of active note controls by note pitches.
+  // Map of current note controls by note pitches.
   std::unordered_map<double, std::vector<Control>> note_controls_;
 
   // Control event callback.

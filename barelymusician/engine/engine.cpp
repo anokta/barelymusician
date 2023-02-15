@@ -51,14 +51,18 @@ StatusOr<Id> Engine::CreatePerformerTask(Id performer_id,
                                          bool is_one_off, double position,
                                          int process_order,
                                          void* user_data) noexcept {
-  if (performer_id == kInvalid || position < 0.0) {
+  if (performer_id == kInvalid) {
     return Status::InvalidArgument();
   }
   auto performer_or = GetPerformer(performer_id);
   if (performer_or.IsOk()) {
+    auto& performer = performer_or->get();
+    if (is_one_off && position < performer.GetPosition()) {
+      return Status::InvalidArgument();
+    }
     const Id task_id = GenerateNextId();
-    performer_or->get().CreateTask(task_id, definition, is_one_off, position,
-                                   process_order, user_data);
+    performer.CreateTask(task_id, definition, is_one_off, position,
+                         process_order, user_data);
     return task_id;
   }
   return performer_or.GetErrorStatus();
@@ -121,19 +125,16 @@ Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
                                  int output_channel_count,
                                  int output_frame_count,
                                  double timestamp) noexcept {
-  if (instrument_id == kInvalid ||
-      (!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
-      output_channel_count < 0 || output_frame_count < 0 || timestamp < 0.0) {
+  if (instrument_id == kInvalid) {
     return Status::InvalidArgument();
   }
   auto instrument_refs = instrument_refs_.GetScopedView();
   if (const auto* instrument_ref =
           FindOrNull(*instrument_refs, instrument_id)) {
     assert(*instrument_ref);
-    (*instrument_ref)
+    return (*instrument_ref)
         ->Process(output_samples, output_channel_count, output_frame_count,
                   timestamp);
-    return Status::Ok();
   }
   return Status::NotFound();
 }
@@ -182,7 +183,7 @@ void Engine::Update(double timestamp) noexcept {
           performer.ProcessNextTaskAtPosition();
         }
       }
-    } else {
+    } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
       for (auto& [instrument_id, instrument] : instruments_) {
         instrument->Update(timestamp_);
@@ -192,8 +193,9 @@ void Engine::Update(double timestamp) noexcept {
 }
 
 Id Engine::GenerateNextId() noexcept {
-  assert(id_counter_ >= 0);
-  return ++id_counter_;
+  const Id id = ++id_counter_;
+  assert(id > kInvalid);
+  return id;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

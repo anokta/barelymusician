@@ -33,10 +33,10 @@ TEST(EnvelopeTest, ProcessDefault) {
 // Tests that the envelope generates the expected output samples consistently
 // over multiple samples.
 TEST(EnvelopeTest, ProcessMultiSamples) {
-  const int kAttackSampleCount = static_cast<int>(kFrameRate * kAttack);
-  const int kDecaySampleCount = static_cast<int>(kFrameRate * kDecay);
-  const int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
-  const int kReleaseSampleCount = static_cast<int>(kFrameRate * kRelease);
+  constexpr int kAttackSampleCount = static_cast<int>(kFrameRate * kAttack);
+  constexpr int kDecaySampleCount = static_cast<int>(kFrameRate * kDecay);
+  constexpr int kSustainSampleCount = kAttackSampleCount + kDecaySampleCount;
+  constexpr int kReleaseSampleCount = static_cast<int>(kFrameRate * kRelease);
 
   Envelope envelope(kFrameRate);
   envelope.SetAttack(kAttack);

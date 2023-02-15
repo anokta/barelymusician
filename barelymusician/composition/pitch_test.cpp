@@ -7,7 +7,7 @@ namespace {
 
 // Tests that expected note pitches are returned for a given arbitrary scale.
 TEST(PitchTest, PitchFromScale) {
-  const int kOctaveRange = 2;
+  constexpr int kOctaveRange = 2;
   const int scale_length = static_cast<int>(kPitchMajorScale.size());
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < scale_length; ++i) {

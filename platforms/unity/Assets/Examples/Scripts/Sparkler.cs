@@ -6,9 +6,9 @@ using Barely;
 public class Sparkler : MonoBehaviour {
   public Instrument targetInstrument;
 
-  public Color noteOffColor = Color.black;
   public Color noteOnColor = Color.white;
 
+  private Color noteOffColor = Color.white;
   private Color targetColor = Color.white;
 
   private void OnEnable() {
@@ -22,6 +22,7 @@ public class Sparkler : MonoBehaviour {
   }
 
   private void Start() {
+    noteOffColor = GetComponent<Renderer>().material.color;
     targetColor = noteOffColor;
   }
 

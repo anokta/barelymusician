@@ -36,7 +36,7 @@ Shader "BarelyMusician/Examples/Unlit/Outline Color" {
 
 	    fixed _OutlineWidth;
 	    v2f vert (appdata_t v) {
-	        v2f o;
+	      v2f o;
 		    o.pos = v.vertex;
 		    o.pos.xyz += normalize(v.normal.xyz) * _OutlineWidth * 0.01;
 		    o.pos = UnityObjectToClipPos(o.pos);

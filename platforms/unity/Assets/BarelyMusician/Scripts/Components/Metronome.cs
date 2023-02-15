@@ -4,10 +4,6 @@ using UnityEngine;
 /// Simple metronome that keeps track of beats.
 namespace Barely {
   public class Metronome : MonoBehaviour {
-    /// Global tempo in beats.
-    [Range(30.0f, 960.0f)]
-    public double tempo = 120.0;
-
     /// Instrument.
     public Instrument instrument = null;
 
@@ -47,6 +43,10 @@ namespace Barely {
     [Serializable]
     public class BeatEvent : UnityEngine.Events.UnityEvent<int> {}
     public BeatEvent OnBeatEvent;
+
+    public bool IsPlaying {
+      get { return _performer.IsPlaying; }
+    }
 
     public void Play() {
       _performer.Play();
@@ -100,19 +100,6 @@ namespace Barely {
     private void Destroy() {
       _beatEventCallback = null;
       _performer = null;
-    }
-
-    private void Update() {
-      Musician.Tempo = tempo;
-      if (Input.GetKeyDown(KeyCode.Space)) {
-        if (_performer.IsPlaying) {
-          Pause();
-        } else {
-          Play();
-        }
-      } else if (Input.GetKeyDown(KeyCode.Backspace)) {
-        Stop();
-      }
     }
   }
 }  // namespace Barely

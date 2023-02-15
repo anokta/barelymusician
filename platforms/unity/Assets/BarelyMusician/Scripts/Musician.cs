@@ -50,19 +50,20 @@ namespace Barely {
           Instrument.NoteControlEventCallback noteControlEventCallback,
           Instrument.NoteOffEventCallback noteOffEventCallback,
           Instrument.NoteOnEventCallback noteOnEventCallback) {
+        InstrumentDefinition definition;
         switch (instrument) {
           case SamplerInstrument sampler:
-            _instrumentDefinition = BarelySamplerInstrument_GetDefinition();
+            definition = BarelySamplerInstrument_GetDefinition();
             break;
           case SynthInstrument synth:
-            _instrumentDefinition = BarelySynthInstrument_GetDefinition();
+            definition = BarelySynthInstrument_GetDefinition();
             break;
           default:
             Debug.LogError("Unsupported instrument type: " + instrument.GetType());
             return InvalidId;
         }
-        Status status = BarelyInstrument_Create(Handle, _instrumentDefinition,
-                                                AudioSettings.outputSampleRate, _int64Ptr);
+        Status status =
+            BarelyInstrument_Create(Handle, definition, AudioSettings.outputSampleRate, _int64Ptr);
         if (!IsOk(status)) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "': " + status);
           return InvalidId;
@@ -337,9 +338,9 @@ namespace Barely {
           return;
         }
         List<Action> callbacks = null;
-        if (_callbacks != null && !_callbacks.TryGetValue(timestamp, out callbacks)) {
+        if (_taskCallbacks != null && !_taskCallbacks.TryGetValue(timestamp, out callbacks)) {
           callbacks = new List<Action>();
-          _callbacks.Add(timestamp, callbacks);
+          _taskCallbacks.Add(timestamp, callbacks);
         }
         callbacks?.Add(callback);
       }
@@ -378,8 +379,10 @@ namespace Barely {
       /// @return Task identifier.
       public static Int64 Performer_CreateTask(Performer performer, Action callback, bool isOneOff,
                                                double position, int processOrder) {
-        _taskDefinition.processCallback = Marshal.GetFunctionPointerForDelegate(callback);
-        Status status = BarelyPerformer_CreateTask(Handle, performer.Id, _taskDefinition, isOneOff,
+        TaskDefinition definition = new TaskDefinition() {
+          processCallback = Marshal.GetFunctionPointerForDelegate(callback),
+        };
+        Status status = BarelyPerformer_CreateTask(Handle, performer.Id, definition, isOneOff,
                                                    position, processOrder, IntPtr.Zero, _int64Ptr);
         if (!IsOk(status)) {
           Debug.LogError("Failed to create performer '" + performer.name + "': " + status);
@@ -727,13 +730,7 @@ namespace Barely {
       private static double[] _outputSamples = null;
 
       // Map of scheduled task callbacks by their timestamps.
-      private static Dictionary<double, List<Action>> _callbacks = null;
-
-      // Instrument definition.
-      private static InstrumentDefinition _instrumentDefinition = new InstrumentDefinition();
-
-      // Task definition.
-      private static TaskDefinition _taskDefinition = new TaskDefinition();
+      private static Dictionary<double, List<Action>> _taskCallbacks = null;
 
       // Component that manages internal state.
       private class State : MonoBehaviour {
@@ -769,17 +766,17 @@ namespace Barely {
         private void LateUpdate() {
           double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
           double dspTime = AudioSettings.dspTime + lookahead;
-          while (_callbacks.Count > 0) {
-            double timestamp = _callbacks.ElementAt(0).Key;
+          while (_taskCallbacks.Count > 0) {
+            double timestamp = _taskCallbacks.ElementAt(0).Key;
             if (timestamp >= dspTime) {
               break;
             }
             BarelyMusician_Update(_handle, timestamp);
-            var callbacks = _callbacks.ElementAt(0).Value;
+            var callbacks = _taskCallbacks.ElementAt(0).Value;
             for (int i = 0; i < callbacks.Count; ++i) {
               callbacks[i]?.Invoke();
             }
-            _callbacks.Remove(timestamp);
+            _taskCallbacks.Remove(timestamp);
           }
           BarelyMusician_Update(_handle, dspTime);
         }
@@ -830,7 +827,7 @@ namespace Barely {
           var config = AudioSettings.GetConfiguration();
           _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
           _outputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
-          _callbacks = new Dictionary<double, List<Action>>();
+          _taskCallbacks = new Dictionary<double, List<Action>>();
           BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
         }
 
@@ -839,7 +836,7 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
-          _callbacks = null;
+          _taskCallbacks = null;
         }
       }
 

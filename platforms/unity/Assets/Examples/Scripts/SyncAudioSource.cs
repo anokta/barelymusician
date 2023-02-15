@@ -2,9 +2,9 @@
 using Barely;
 
 public class SyncAudioSource : MonoBehaviour {
-  public AudioSource source;
-
   public Metronome metronome;
+
+  public AudioSource source;
 
   void Update() {
     if (Input.GetKeyDown(KeyCode.S)) {

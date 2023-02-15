@@ -242,7 +242,7 @@ MonoBehaviour:
   Decay: 0
   Sustain: 1
   Release: 0.20000000298023224
-  VoiceCount: 8
+  VoiceCount: 16
 --- !u!114 &775038743496979821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,4 +270,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetInstrument: {fileID: 775038743496979810}
-  noteOffColor: {r: 1, g: 1, b: 1, a: 1}
+  noteOnColor: {r: 1, g: 0.7019608, b: 0.7294118, a: 1}

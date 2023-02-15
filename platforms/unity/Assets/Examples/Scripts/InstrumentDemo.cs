@@ -6,6 +6,7 @@ using Barely;
 public class InstrumentDemo : MonoBehaviour {
   public InstrumentController controller = null;
   public Texture2D pixel = null;
+  public Color color = Color.white;
 
   private const int N = 4;
   private Dictionary<double, Vector2> _activePitches = null;
@@ -29,7 +30,6 @@ public class InstrumentDemo : MonoBehaviour {
 
   private void OnGUI() {
     GUI.depth = -100;
-    Color color = Color.white;
     for (int x = 0; x < N; ++x) {
       for (int y = 0; y < N; ++y) {
         _alphas[x, y] = Mathf.Lerp(_alphas[x, y], _targetAlphas[x, y], 8.0f * Time.deltaTime);

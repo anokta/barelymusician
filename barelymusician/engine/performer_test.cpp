@@ -15,7 +15,7 @@ namespace {
 using ::testing::Optional;
 using ::testing::Pair;
 
-// Tests that performer processs a single task as expected.
+// Tests that the performer processs a single task as expected.
 TEST(PerformerTest, ProcessSingleTask) {
   Performer performer;
 
@@ -132,7 +132,7 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_count, 3);
 }
 
-// Tests that performer processs multiple tasks as expected.
+// Tests that the performer processs multiple tasks as expected.
 TEST(PerformerTest, ProcessMultipleTasks) {
   Performer performer;
 
@@ -199,7 +199,7 @@ TEST(PerformerTest, ProcessMultipleTasks) {
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
 }
 
-// Tests that performer sets its current position as expected.
+// Tests that the performer sets its current position as expected.
 TEST(PerformerTest, SetPosition) {
   Performer performer;
   EXPECT_EQ(performer.GetPosition(), 0.0);

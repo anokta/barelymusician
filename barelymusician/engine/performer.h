@@ -37,7 +37,7 @@ class Performer {
 
   /// Returns the duration to next task.
   ///
-  /// @return Duration in beats.
+  /// @return Pair of duration in beats and process order.
   [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask()
       const noexcept;
 

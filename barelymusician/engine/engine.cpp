@@ -141,7 +141,9 @@ Status Engine::ProcessInstrument(Id instrument_id, double* output_samples,
 
 void Engine::SetTempo(double tempo) noexcept {
   tempo = std::max(tempo, 0.0);
-  if (tempo_ == tempo) return;
+  if (tempo_ == tempo) {
+    return;
+  }
   tempo_ = tempo;
   for (auto& [instrument_id, instrument] : instruments_) {
     instrument->SetTempo(tempo_);
@@ -152,27 +154,24 @@ void Engine::SetTempo(double tempo) noexcept {
 void Engine::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      double update_duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
-
+      std::pair<double, int> update_duration = {
+          BeatsFromSeconds(tempo_, timestamp - timestamp_),
+          std::numeric_limits<int>::max()};
       bool has_tasks_to_process = false;
-      int order = std::numeric_limits<int>::max();
       for (const auto& [performer_id, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();
-            maybe_duration && (maybe_duration->first < update_duration ||
-                               (maybe_duration->first == update_duration &&
-                                maybe_duration->second < order))) {
+            maybe_duration && maybe_duration < update_duration) {
           has_tasks_to_process = true;
-          update_duration = maybe_duration->first;
-          order = maybe_duration->second;
+          update_duration = *maybe_duration;
         }
       }
 
-      if (update_duration > 0) {
+      if (update_duration.first > 0) {
         for (auto& [performer_id, performer] : performers_) {
-          performer.Update(update_duration);
+          performer.Update(update_duration.first);
         }
 
-        timestamp_ += SecondsFromBeats(tempo_, update_duration);
+        timestamp_ += SecondsFromBeats(tempo_, update_duration.first);
         for (auto& [instrument_id, instrument] : instruments_) {
           instrument->Update(timestamp_);
         }

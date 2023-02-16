@@ -24,7 +24,7 @@ constexpr int kFrameRate = 48000;
 constexpr int kChannelCount = 2;
 constexpr int kFrameCount = 8;
 
-// Returns test instrument definition that produces constant output that is set.
+// Returns a test instrument definition that produces constant output per note.
 InstrumentDefinition GetTestInstrumentDefinition() {
   static const std::vector<ControlDefinition> control_definitions = {
       ControlDefinition{0.0, -10.0, 10.0},
@@ -58,7 +58,7 @@ InstrumentDefinition GetTestInstrumentDefinition() {
       control_definitions, note_control_definitions);
 }
 
-// Tests that single instrument is created and destroyed as expected.
+// Tests that a single instrument is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = -1.25;
   constexpr double kIntensity = 0.75;
@@ -88,7 +88,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   ASSERT_TRUE(instrument_or.IsOk());
   auto& instrument = instrument_or->get();
 
-  // Set note callbacks.
+  // Set the note callbacks.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
   instrument.SetNoteOnEventCallback([&](double pitch, double intensity) {
@@ -122,7 +122,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
     }
   }
 
-  // Update timestamp.
+  // Update the engine.
   engine.Update(5.0);
 
   // Destroy the instrument, which should also trigger the note off callback.
@@ -181,7 +181,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
               UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
 }
 
-// Tests that single performer is created and destroyed as expected.
+// Tests that a single performer is created and destroyed as expected.
 TEST(EngineTest, CreateDestroySinglePerformer) {
   constexpr int kProcessOrder = 0;
 
@@ -244,9 +244,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_FALSE(engine.GetPerformer(performer_id).IsOk());
 }
 
-// TODO(#108): Add `CreateDestroyMultiplePerformers` using differing priorities.
-
-// Tests that engine sets its tempo as expected.
+// Tests that the engine sets its tempo as expected.
 TEST(EngineTest, SetTempo) {
   Engine engine;
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);

@@ -161,7 +161,7 @@ namespace Barely {
           }
         } else {
           if (_handle != IntPtr.Zero) {
-            Debug.LogError("Failed to process instrument '" + instrument.name + "': " + status);
+            Debug.LogError("Failed to process instrument with id " + instrument.Id + ": " + status);
           }
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;

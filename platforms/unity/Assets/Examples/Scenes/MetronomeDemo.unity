@@ -455,7 +455,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   instrument: {fileID: 2014543007}
-  beatCount: 4
+  beatCount: 3
   barPitch: 1
   beatPitch: 0
   intensity: 1
@@ -476,4 +476,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2924acef9d3214e9203ba5ca1f8f38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tempo: 124
+  tempo: 128

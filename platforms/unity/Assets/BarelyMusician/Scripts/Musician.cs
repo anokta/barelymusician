@@ -69,18 +69,14 @@ namespace Barely {
           return InvalidId;
         }
         Int64 instrumentId = Marshal.ReadInt64(_int64Ptr);
-        BarelyInstrument_SetControlEventCallback(
-            _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(controlEventCallback),
-            IntPtr.Zero);
-        BarelyInstrument_SetNoteControlEventCallback(
-            _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteControlEventCallback),
-            IntPtr.Zero);
-        BarelyInstrument_SetNoteOffEventCallback(
-            _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOffEventCallback),
-            IntPtr.Zero);
-        BarelyInstrument_SetNoteOnEventCallback(
-            _handle, instrumentId, Marshal.GetFunctionPointerForDelegate(noteOnEventCallback),
-            IntPtr.Zero);
+        BarelyInstrument_SetControlEventCallback(_handle, instrumentId, controlEventCallback,
+                                                 IntPtr.Zero);
+        BarelyInstrument_SetNoteControlEventCallback(_handle, instrumentId,
+                                                     noteControlEventCallback, IntPtr.Zero);
+        BarelyInstrument_SetNoteOffEventCallback(_handle, instrumentId, noteOffEventCallback,
+                                                 IntPtr.Zero);
+        BarelyInstrument_SetNoteOnEventCallback(_handle, instrumentId, noteOnEventCallback,
+                                                IntPtr.Zero);
         return instrumentId;
       }
 
@@ -103,7 +99,7 @@ namespace Barely {
         Status status = BarelyInstrument_GetControl(Handle, instrument.Id, index, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
+        } else if (_handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to get instrument control " + index + " value for '" +
                          instrument.name + "': " + status);
         }
@@ -122,7 +118,7 @@ namespace Barely {
             BarelyInstrument_GetNoteControl(Handle, instrument.Id, pitch, index, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
+        } else if (_handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to get instrument note pitch " + pitch + " control " + index +
                          " value for '" + instrument.name + "': " + status);
         }
@@ -138,7 +134,7 @@ namespace Barely {
         Status status = BarelyInstrument_IsNoteOn(Handle, instrument.Id, pitch, _booleanPtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Boolean>(_booleanPtr);
-        } else if (_handle != IntPtr.Zero) {
+        } else if (_handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to get if instrument note pitch " + pitch + " is on for '" +
                          instrument.name + "': " + status);
         }
@@ -160,7 +156,7 @@ namespace Barely {
             outputSamples[i] = (float)_outputSamples[i];
           }
         } else {
-          if (_handle != IntPtr.Zero) {
+          if (_handle != IntPtr.Zero && instrument.enabled) {
             Debug.LogError("Failed to process instrument with id " + instrument.Id + ": " + status);
           }
           for (int i = 0; i < outputSamples.Length; ++i) {
@@ -174,7 +170,7 @@ namespace Barely {
       /// @param instrument Instrument.
       public static void Instrument_ResetAllControls(Instrument instrument) {
         Status status = BarelyInstrument_ResetAllControls(Handle, instrument.Id);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to reset all instrument controls for '" + instrument.name +
                          "': " + status);
         }
@@ -185,7 +181,7 @@ namespace Barely {
       /// @param instrument Instrument.
       public static void Instrument_ResetAllNoteControls(Instrument instrument, double pitch) {
         Status status = BarelyInstrument_ResetAllNoteControls(Handle, instrument.Id, pitch);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to reset all instrument note pitch " + pitch + " controls for '" +
                          instrument.name + "': " + status);
         }
@@ -197,7 +193,7 @@ namespace Barely {
       /// @param index Control index.
       public static void Instrument_ResetControl(Instrument instrument, int index) {
         Status status = BarelyInstrument_ResetControl(Handle, instrument.Id, index);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to reset instrument control " + index + " for '" +
                          instrument.name + "': " + status);
         }
@@ -211,7 +207,7 @@ namespace Barely {
       public static void Instrument_ResetNoteControl(Instrument instrument, double pitch,
                                                      int index) {
         Status status = BarelyInstrument_ResetNoteControl(Handle, instrument.Id, pitch, index);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to reset instrument note pitch " + pitch + " control " + index +
                          " for '" + instrument.name + "': " + status);
         }
@@ -223,7 +219,7 @@ namespace Barely {
       /// @return True if success, false otherwise.
       public static void Instrument_SetAllNotesOff(Instrument instrument) {
         Status status = BarelyInstrument_SetAllNotesOff(Handle, instrument.Id);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to stop all instrument notes for '" + instrument.name +
                          "': " + status);
         }
@@ -239,7 +235,7 @@ namespace Barely {
                                                double slopePerBeat) {
         Status status =
             BarelyInstrument_SetControl(Handle, instrument.Id, index, value, slopePerBeat);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to set instrument control " + index + " value to " + value +
                          " with slope " + slopePerBeat + " for '" + instrument.name +
                          "': " + status);
@@ -252,7 +248,7 @@ namespace Barely {
       /// @param data Data.
       public static void Instrument_SetData(Instrument instrument, byte[] data) {
         Status status = BarelyInstrument_SetData(Handle, instrument.Id, data, data.Length);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to set instrument data to " + data + " for '" + instrument.name +
                          "': " + status);
         }
@@ -269,7 +265,7 @@ namespace Barely {
                                                    double value, double slopePerBeat) {
         Status status = BarelyInstrument_SetNoteControl(Handle, instrument.Id, pitch, index, value,
                                                         slopePerBeat);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to set instrument note pitch " + pitch + " control " + index +
                          " value to " + value + " with slope " + slopePerBeat + " for '" +
                          instrument.name + "': " + status);
@@ -283,7 +279,7 @@ namespace Barely {
       /// @return True if success, false otherwise.
       public static void Instrument_SetNoteOff(Instrument instrument, double pitch) {
         Status status = BarelyInstrument_SetNoteOff(Handle, instrument.Id, pitch);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to stop instrument note " + pitch + " for '" + instrument.name +
                          "': " + status);
         }
@@ -296,7 +292,7 @@ namespace Barely {
       public static void Instrument_SetNoteOn(Instrument instrument, double pitch,
                                               double intensity) {
         Status status = BarelyInstrument_SetNoteOn(Handle, instrument.Id, pitch, intensity);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
                          " intensity for '" + instrument.name + "': " + status);
         }
@@ -380,7 +376,7 @@ namespace Barely {
       public static Int64 Performer_CreateTask(Performer performer, Action callback, bool isOneOff,
                                                double position, int processOrder) {
         TaskDefinition definition = new TaskDefinition() {
-          processCallback = Marshal.GetFunctionPointerForDelegate(callback),
+          processCallback = callback,
         };
         Status status = BarelyPerformer_CreateTask(Handle, performer.Id, definition, isOneOff,
                                                    position, processOrder, IntPtr.Zero, _int64Ptr);
@@ -668,17 +664,17 @@ namespace Barely {
         public Int32 noteControlDefinitionCount;
       }
 
-      // Task definition.
+      /// Task definition.
       [StructLayout(LayoutKind.Sequential)]
       private struct TaskDefinition {
-        // Create callback.
-        public IntPtr createCallback;
+        /// Create callback.
+        public Action createCallback;
 
-        // Destroy callback.
-        public IntPtr destroyCallback;
+        /// Destroy callback.
+        public Action destroyCallback;
 
-        // Process callback.
-        public IntPtr processCallback;
+        /// Process callback.
+        public Action processCallback;
       }
 
       // Returns whether a status is okay or not.
@@ -902,10 +898,9 @@ namespace Barely {
                                                                double slopePerBeat);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControlEventCallback")]
-      private static extern Status BarelyInstrument_SetControlEventCallback(IntPtr handle,
-                                                                            Int64 instrumentId,
-                                                                            IntPtr callback,
-                                                                            IntPtr userData);
+      private static extern Status BarelyInstrument_SetControlEventCallback(
+          IntPtr handle, Int64 instrumentId, Instrument.ControlEventCallback callback,
+          IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
@@ -918,30 +913,27 @@ namespace Barely {
                                                                    double slopePerBeat);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControlEventCallback")]
-      private static extern Status BarelyInstrument_SetNoteControlEventCallback(IntPtr handle,
-                                                                                Int64 instrumentId,
-                                                                                IntPtr callback,
-                                                                                IntPtr userData);
+      private static extern Status BarelyInstrument_SetNoteControlEventCallback(
+          IntPtr handle, Int64 instrumentId, Instrument.NoteControlEventCallback callback,
+          IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern Status BarelyInstrument_SetNoteOff(IntPtr handle, Int64 instrumentId,
                                                                double pitch);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEventCallback")]
-      private static extern Status BarelyInstrument_SetNoteOffEventCallback(IntPtr handle,
-                                                                            Int64 instrumentId,
-                                                                            IntPtr callback,
-                                                                            IntPtr userData);
+      private static extern Status BarelyInstrument_SetNoteOffEventCallback(
+          IntPtr handle, Int64 instrumentId, Instrument.NoteOffEventCallback callback,
+          IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern Status BarelyInstrument_SetNoteOn(IntPtr handle, Int64 instrumentId,
                                                               double pitch, double intensity);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEventCallback")]
-      private static extern Status BarelyInstrument_SetNoteOnEventCallback(IntPtr handle,
-                                                                           Int64 instrumentId,
-                                                                           IntPtr callback,
-                                                                           IntPtr userData);
+      private static extern Status BarelyInstrument_SetNoteOnEventCallback(
+          IntPtr handle, Int64 instrumentId, Instrument.NoteOnEventCallback callback,
+          IntPtr userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
       private static extern Status BarelyMusician_Create(IntPtr outHandle);

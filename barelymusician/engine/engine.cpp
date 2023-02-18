@@ -28,11 +28,12 @@ StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
     return Status::InvalidArgument();
   }
   const Id instrument_id = GenerateNextId();
-  const auto success = instruments_
-                           .emplace(instrument_id, std::make_unique<Instrument>(
-                                                       definition, frame_rate,
-                                                       tempo_, timestamp_))
-                           .second;
+  [[maybe_unused]] const auto success =
+      instruments_
+          .emplace(instrument_id,
+                   std::make_unique<Instrument>(definition, frame_rate, tempo_,
+                                                timestamp_))
+          .second;
   assert(success);
   UpdateInstrumentReferenceMap();
   return instrument_id;
@@ -41,7 +42,8 @@ StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 StatusOr<Id> Engine::CreatePerformer() noexcept {
   const Id performer_id = GenerateNextId();
-  const auto success = performers_.emplace(performer_id, Performer{}).second;
+  [[maybe_unused]] const auto success =
+      performers_.emplace(performer_id, Performer{}).second;
   assert(success);
   return performer_id;
 }

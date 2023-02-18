@@ -23,7 +23,7 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
                            void* user_data) noexcept {
   assert(task_id > kInvalid);
   assert(!is_one_off || position >= position_);
-  auto success =
+  [[maybe_unused]] auto success =
       infos_.emplace(task_id, TaskInfo{is_one_off, position, process_order})
           .second;
   assert(success);
@@ -84,8 +84,9 @@ Status Performer::DestroyTask(Id task_id) noexcept {
       recurring_tasks_.erase(recurring_task_it);
     } else {
       const auto& [is_one_off, position, process_order] = it->second;
-      const auto success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
-                               .erase({position, process_order, task_id}) == 1;
+      [[maybe_unused]] const auto success =
+          (is_one_off ? one_off_tasks_ : recurring_tasks_)
+              .erase({position, process_order, task_id}) == 1;
       assert(success);
     }
     infos_.erase(it);
@@ -133,7 +134,7 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
   if (const auto it = one_off_tasks_.begin();
       it != one_off_tasks_.end() && it->first.position == position_) {
     // Process the next one-off task.
-    const auto success = infos_.erase(it->first.task_id) == 1;
+    [[maybe_unused]] const auto success = infos_.erase(it->first.task_id) == 1;
     assert(success);
     it->second->Process();
     one_off_tasks_.erase(it);

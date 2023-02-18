@@ -1,10 +1,10 @@
 #ifndef BARELYMUSICIAN_ENGINE_PERFORMER_H_
 #define BARELYMUSICIAN_ENGINE_PERFORMER_H_
 
+#include <compare>
 #include <map>
 #include <memory>
 #include <optional>
-#include <tuple>
 #include <unordered_map>
 #include <utility>
 
@@ -130,7 +130,20 @@ class Performer {
 
  private:
   // Task map alias.
-  using TaskMap = std::map<std::tuple<double, int, Id>, std::unique_ptr<Task>>;
+  struct TaskKey {
+    // Position.
+    double position;
+
+    // Process order.
+    int process_order;
+
+    // Identifier.
+    Id task_id;
+
+    // Default comparators.
+    auto operator<=>(const TaskKey& other) const noexcept = default;
+  };
+  using TaskMap = std::map<TaskKey, std::unique_ptr<Task>>;
 
   // Task info.
   struct TaskInfo {
@@ -146,6 +159,12 @@ class Performer {
 
   // Returns an iterator to the next recurring task to process.
   [[nodiscard]] TaskMap::const_iterator GetNextRecurringTask() const noexcept;
+
+  // Loops around a given `position`.
+  [[nodiscard]] double LoopAround(double position) const noexcept;
+
+  // Decremments the last processed recurring task iterator to its predecessor.
+  void PrevLastProcessedRecurringTaskIt() noexcept;
 
   // Denotes whether performer is looping or not.
   bool is_looping_ = false;
@@ -169,8 +188,8 @@ class Performer {
   TaskMap one_off_tasks_;
   TaskMap recurring_tasks_;
 
-  // Last processed recurring task position.
-  std::optional<double> last_processed_position_;
+  // Last processed recurring task iterator.
+  std::optional<TaskMap::const_iterator> last_processed_recurring_task_it_;
 };
 
 }  // namespace barely::internal

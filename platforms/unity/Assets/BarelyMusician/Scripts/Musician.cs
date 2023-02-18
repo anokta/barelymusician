@@ -26,7 +26,7 @@ namespace Barely {
 
     /// Schedules a task at a specific time.
     ///
-    /// @param callback Task callback.
+    /// @param callback Task process callback.
     /// @param dspTime Time in seconds.
     public static void ScheduleTask(Action callback, double dspTime) {
       Internal.Musician_ScheduleTask(callback, dspTime);
@@ -36,6 +36,19 @@ namespace Barely {
     public static class Internal {
       /// Invalid identifier.
       public const Int64 InvalidId = 0;
+
+      /// Task definition.
+      [StructLayout(LayoutKind.Sequential)]
+      public class TaskDefinition {
+        /// Create callback.
+        public Action createCallback;
+
+        /// Destroy callback.
+        public Action destroyCallback;
+
+        /// Process callback.
+        public Action processCallback;
+      }
 
       /// Creates a new instrument.
       ///
@@ -64,7 +77,7 @@ namespace Barely {
         }
         Status status =
             BarelyInstrument_Create(Handle, definition, AudioSettings.outputSampleRate, _int64Ptr);
-        if (!IsOk(status)) {
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to create instrument '" + instrument.name + "': " + status);
           return InvalidId;
         }
@@ -326,11 +339,12 @@ namespace Barely {
 
       /// Schedules a new musician task.
       ///
-      /// @param callback Task callback.
+      /// @param callback Task process callback.
       /// @param timestamp Task timestamp in seconds.
       public static void Musician_ScheduleTask(Action callback, double timestamp) {
-        if (timestamp <= Musician_GetTimestamp()) {
-          callback?.Invoke();
+        if (timestamp < Timestamp) {
+          Debug.LogError("Failed to create musician task at " + timestamp + ": " +
+                         Status.INVALID_ARGUMENT);
           return;
         }
         List<Action> callbacks = null;
@@ -357,7 +371,7 @@ namespace Barely {
       /// @return Performer identifier.
       public static Int64 Performer_Create(Performer performer) {
         Status status = BarelyPerformer_Create(Handle, _int64Ptr);
-        if (!IsOk(status)) {
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to create performer '" + performer.name + "': " + status);
           return InvalidId;
         }
@@ -368,19 +382,16 @@ namespace Barely {
       /// Creates a new performer task.
       ///
       /// @param performer Performer.
-      /// @param callback Task callback.
+      /// @param definition Task definition.
       /// @param isOneOff True if one off task, false otherwise.
       /// @param position Task position.
       /// @param processOrder Task process order.
       /// @return Task identifier.
-      public static Int64 Performer_CreateTask(Performer performer, Action callback, bool isOneOff,
-                                               double position, int processOrder) {
-        TaskDefinition definition = new TaskDefinition() {
-          processCallback = callback,
-        };
+      public static Int64 Performer_CreateTask(Performer performer, TaskDefinition definition,
+                                               bool isOneOff, double position, int processOrder) {
         Status status = BarelyPerformer_CreateTask(Handle, performer.Id, definition, isOneOff,
                                                    position, processOrder, IntPtr.Zero, _int64Ptr);
-        if (!IsOk(status)) {
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to create performer '" + performer.name + "': " + status);
           return InvalidId;
         }
@@ -401,7 +412,7 @@ namespace Barely {
       ///
       /// @param task Task.
       public static void Performer_DestroyTask(Performer.Task task) {
-        Status status = BarelyPerformer_DestroyTask(Handle, task.Performer.Id, task.Id);
+        Status status = BarelyPerformer_DestroyTask(Handle, task.PerformerId, task.Id);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to destroy performer task '" + task.Id + "': " + status);
         }
@@ -455,7 +466,7 @@ namespace Barely {
       /// @return Position in beats.
       public static double Performer_GetTaskPosition(Performer.Task task) {
         Status status =
-            BarelyPerformer_GetTaskPosition(Handle, task.Performer.Id, task.Id, _doublePtr);
+            BarelyPerformer_GetTaskPosition(Handle, task.PerformerId, task.Id, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
         } else if (_handle != IntPtr.Zero) {
@@ -470,7 +481,7 @@ namespace Barely {
       /// @return Process order.
       public static int Performer_GetTaskProcessOrder(Performer.Task task) {
         Status status =
-            BarelyPerformer_GetTaskProcessOrder(Handle, task.Performer.Id, task.Id, _int32Ptr);
+            BarelyPerformer_GetTaskProcessOrder(Handle, task.PerformerId, task.Id, _int32Ptr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Int32>(_int32Ptr);
         } else if (_handle != IntPtr.Zero) {
@@ -559,7 +570,7 @@ namespace Barely {
       /// @param position Position in beats.
       public static void Performer_SetTaskPosition(Performer.Task task, double position) {
         Status status =
-            BarelyPerformer_SetTaskPosition(Handle, task.Performer.Id, task.Id, position);
+            BarelyPerformer_SetTaskPosition(Handle, task.PerformerId, task.Id, position);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task position: " + status);
         }
@@ -571,7 +582,7 @@ namespace Barely {
       /// @param processOrder Process order.
       public static void Performer_SetTaskProcessOrder(Performer.Task task, int processOrder) {
         Status status =
-            BarelyPerformer_SetTaskProcessOrder(Handle, task.Performer.Id, task.Id, processOrder);
+            BarelyPerformer_SetTaskProcessOrder(Handle, task.PerformerId, task.Id, processOrder);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task process order: " + status);
         }
@@ -664,19 +675,6 @@ namespace Barely {
         public Int32 noteControlDefinitionCount;
       }
 
-      /// Task definition.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct TaskDefinition {
-        /// Create callback.
-        public Action createCallback;
-
-        /// Destroy callback.
-        public Action destroyCallback;
-
-        /// Process callback.
-        public Action processCallback;
-      }
-
       // Returns whether a status is okay or not.
       private static bool IsOk(Status status) {
         return (status == Status.OK);
@@ -725,7 +723,7 @@ namespace Barely {
       // Internal output samples.
       private static double[] _outputSamples = null;
 
-      // Map of scheduled task callbacks by their timestamps.
+      // Map of scheduled task callbacks by their times.
       private static Dictionary<double, List<Action>> _taskCallbacks = null;
 
       // Component that manages internal state.
@@ -763,16 +761,16 @@ namespace Barely {
           double lookahead = System.Math.Max(_latency, (double)Time.smoothDeltaTime);
           double dspTime = AudioSettings.dspTime + lookahead;
           while (_taskCallbacks.Count > 0) {
-            double timestamp = _taskCallbacks.ElementAt(0).Key;
-            if (timestamp >= dspTime) {
+            double taskDspTime = _taskCallbacks.ElementAt(0).Key;
+            if (taskDspTime > dspTime) {
               break;
             }
-            BarelyMusician_Update(_handle, timestamp);
+            BarelyMusician_Update(_handle, taskDspTime);
             var callbacks = _taskCallbacks.ElementAt(0).Value;
             for (int i = 0; i < callbacks.Count; ++i) {
               callbacks[i]?.Invoke();
             }
-            _taskCallbacks.Remove(timestamp);
+            _taskCallbacks.Remove(taskDspTime);
           }
           BarelyMusician_Update(_handle, dspTime);
         }

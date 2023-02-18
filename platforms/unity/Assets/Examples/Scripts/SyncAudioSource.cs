@@ -2,20 +2,30 @@
 using Barely;
 
 public class SyncAudioSource : MonoBehaviour {
-  public Metronome metronome;
-
+  public Instrument instrument;
+  public Performer performer;
   public AudioSource source;
 
+  [Range(-2.0f, 2.0f)]
+  public double notePitch = 0.0;
+
   void Update() {
-    if (Input.GetKeyDown(KeyCode.S)) {
+    if (Input.GetKeyDown(KeyCode.Space)) {
       if (!source.isPlaying) {
         source.PlayScheduled(Musician.Timestamp);
-        metronome.Stop();
-        metronome.Play();
+        performer.Stop();
+        performer.Position = 0.0;
+        performer.Play();
       } else {
-        metronome.Stop();
+        performer.Stop();
         source.Stop();
       }
     }
+    transform.rotation = Quaternion.AngleAxis((float)performer.Position * 90.0f, Vector3.forward);
+  }
+
+  public void PlayNote() {
+    instrument.SetNoteOn(notePitch);
+    instrument.SetNoteOff(notePitch);
   }
 }

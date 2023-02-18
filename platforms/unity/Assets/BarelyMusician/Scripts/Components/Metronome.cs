@@ -4,9 +4,6 @@ using UnityEngine;
 /// Simple metronome that keeps track of beats.
 namespace Barely {
   public class Metronome : MonoBehaviour {
-    /// Instrument.
-    public Instrument instrument = null;
-
     /// Beat count per bar.
     [Range(1, 16)]
     public int beatCount = 4;
@@ -36,12 +33,12 @@ namespace Barely {
     private int _beat = 0;
 
     /// Beat event callback.
-    public delegate void BeatEventCallback(int beat);
+    public delegate void BeatEventCallback(int bar, int beat);
     public event BeatEventCallback OnBeat;
     private BeatEventCallback _beatEventCallback = null;
 
     [Serializable]
-    public class BeatEvent : UnityEngine.Events.UnityEvent<int> {}
+    public class BeatEvent : UnityEngine.Events.UnityEvent<int, int> {}
     public BeatEvent OnBeatEvent;
 
     public bool IsPlaying {
@@ -71,35 +68,57 @@ namespace Barely {
       }
     }
 
+    // Process order.
+    private const int ProcessOrder = -1000;
+
+    // Performer.
     private Performer _performer = null;
 
     private void Awake() {
-      _beatEventCallback = delegate(int beat) {
-        OnBeat?.Invoke(beat);
-        OnBeatEvent?.Invoke(beat);
+      _beatEventCallback = delegate(int bar, int beat) {
+        OnBeat?.Invoke(bar, beat);
+        OnBeatEvent?.Invoke(bar, beat);
       };
-      _performer =
-          new GameObject() { hideFlags = HideFlags.HideAndDontSave }.AddComponent<Performer>();
-      _performer.IsLooping = true;
-      _performer.CreateTask(delegate() {
+      var tempGameObject = new GameObject() { hideFlags = HideFlags.HideAndDontSave };
+      var instrument = tempGameObject.AddComponent<SynthInstrument>();
+      instrument.OscillatorType = OscillatorType.SQUARE;
+      instrument.Gain = 0.25;
+      instrument.Attack = 0.0;
+      instrument.Release = 0.05;
+      _performer = tempGameObject.AddComponent<Performer>();
+      _performer.Loop = true;
+      _performer.LoopLength = 1.0;
+      _performer.Tasks.Add(new Performer.Task(delegate() {
         int bar = _beat / beatCount;
         int beat = _beat % beatCount;
         double pitch = (beat == 0.0) ? barPitch : beatPitch;
-        if (isTicking && instrument) {
+        if (isTicking) {
           instrument.SetNoteOn(pitch, intensity);
           instrument.SetNoteOff(pitch);
         }
         if (isLoggingToConsole) {
           Debug.Log("Tick " + bar + "." + beat);
         }
-        _beatEventCallback(beat);
+        _beatEventCallback(bar, beat);
         ++_beat;
-      }, /*isOneOff=*/false, 0.0, -1);
+      }, 0.0, ProcessOrder));
     }
 
-    private void Destroy() {
+    private void OnDestroy() {
       _beatEventCallback = null;
       _performer = null;
+    }
+
+    private void Update() {
+      if (Input.GetKeyDown(KeyCode.Space)) {
+        if (_performer.IsPlaying) {
+          Pause();
+        } else {
+          Play();
+        }
+      } else if (Input.GetKeyDown(KeyCode.Backspace)) {
+        Stop();
+      }
     }
   }
 }  // namespace Barely

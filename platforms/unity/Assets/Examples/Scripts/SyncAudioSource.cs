@@ -10,15 +10,17 @@ public class SyncAudioSource : MonoBehaviour {
   public double notePitch = 0.0;
 
   void Update() {
-    if (Input.GetKeyDown(KeyCode.Space)) {
+    if (((Application.platform == RuntimePlatform.Android ||
+          Application.platform == RuntimePlatform.IPhonePlayer) &&
+         Input.GetMouseButtonDown(0)) ||
+        Input.GetKeyDown(KeyCode.Space)) {
       if (!source.isPlaying) {
         source.PlayScheduled(Musician.Timestamp);
         performer.Stop();
-        performer.Position = 0.0;
         performer.Play();
       } else {
         performer.Stop();
-        source.Stop();
+        source.Pause();
       }
     }
     transform.rotation = Quaternion.AngleAxis((float)performer.Position * 90.0f, Vector3.forward);

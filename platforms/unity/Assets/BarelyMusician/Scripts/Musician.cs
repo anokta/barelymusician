@@ -95,82 +95,81 @@ namespace Barely {
 
       /// Destroys an instrument.
       ///
-      /// @param instrument Instrument.
-      public static void Instrument_Destroy(Instrument instrument) {
-        Status status = BarelyInstrument_Destroy(Handle, instrument.Id);
+      /// @param instrumentId Instrument identifier.
+      public static void Instrument_Destroy(Int64 instrumentId) {
+        Status status = BarelyInstrument_Destroy(Handle, instrumentId);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to destroy instrument '" + instrument.name + "': " + status);
+          Debug.LogError("Failed to destroy instrument '" + instrumentId + "': " + status);
         }
       }
 
       /// Returns the value of an instrument control.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param index Control index.
       /// @return Control value.
-      public static double Instrument_GetControl(Instrument instrument, int index) {
-        Status status = BarelyInstrument_GetControl(Handle, instrument.Id, index, _doublePtr);
+      public static double Instrument_GetControl(Int64 instrumentId, int index) {
+        Status status = BarelyInstrument_GetControl(Handle, instrumentId, index, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero && instrument.enabled) {
+        } else if (_handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to get instrument control " + index + " value for '" +
-                         instrument.name + "': " + status);
+                         instrumentId + "': " + status);
         }
         return 0.0;
       }
 
       /// Returns the value of an instrument note control.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param pitch Note pitch.
       /// @param index Note control index.
       /// @return Note control value.
-      public static double Instrument_GetNoteControl(Instrument instrument, double pitch,
-                                                     int index) {
+      public static double Instrument_GetNoteControl(Int64 instrumentId, double pitch, int index) {
         Status status =
-            BarelyInstrument_GetNoteControl(Handle, instrument.Id, pitch, index, _doublePtr);
+            BarelyInstrument_GetNoteControl(Handle, instrumentId, pitch, index, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero && instrument.enabled) {
+        } else if (_handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to get instrument note pitch " + pitch + " control " + index +
-                         " value for '" + instrument.name + "': " + status);
+                         " value for '" + instrumentId + "': " + status);
         }
         return 0.0;
       }
 
       /// Returns whether an instrument note is on or not.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param pitch Note pitch.
       /// @return True if on, false otherwise.
-      public static bool Instrument_IsNoteOn(Instrument instrument, double pitch) {
-        Status status = BarelyInstrument_IsNoteOn(Handle, instrument.Id, pitch, _booleanPtr);
+      public static bool Instrument_IsNoteOn(Int64 instrumentId, double pitch) {
+        Status status = BarelyInstrument_IsNoteOn(Handle, instrumentId, pitch, _booleanPtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Boolean>(_booleanPtr);
-        } else if (_handle != IntPtr.Zero && instrument.enabled) {
+        } else if (_handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to get if instrument note pitch " + pitch + " is on for '" +
-                         instrument.name + "': " + status);
+                         instrumentId + "': " + status);
         }
         return false;
       }
 
       /// Processes instrument output samples.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param outputSamples Output samples.
       /// @param outputChannelCount Number of output channels.
-      public static void Instrument_Process(Instrument instrument, float[] outputSamples,
+      public static void Instrument_Process(Int64 instrumentId, float[] outputSamples,
                                             int outputChannelCount) {
         Status status = BarelyInstrument_Process(
-            Handle, instrument.Id, _outputSamples, outputChannelCount,
+            Handle, instrumentId, _outputSamples, outputChannelCount,
             outputSamples.Length / outputChannelCount, AudioSettings.dspTime);
         if (IsOk(status)) {
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = (float)_outputSamples[i];
           }
         } else {
-          if (_handle != IntPtr.Zero && instrument.Id != InvalidId) {
-            Debug.LogError("Failed to process instrument with id " + instrument.Id + ": " + status);
+          if (_handle != IntPtr.Zero && instrumentId != InvalidId) {
+            Debug.LogError("Failed to process instrument with id " + instrumentId + ": " + status);
           }
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
@@ -180,134 +179,131 @@ namespace Barely {
 
       /// Resets all instrument control values.
       ///
-      /// @param instrument Instrument.
-      public static void Instrument_ResetAllControls(Instrument instrument) {
-        Status status = BarelyInstrument_ResetAllControls(Handle, instrument.Id);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
-          Debug.LogError("Failed to reset all instrument controls for '" + instrument.name +
+      /// @param instrumentId Instrument identifier.
+      public static void Instrument_ResetAllControls(Int64 instrumentId) {
+        Status status = BarelyInstrument_ResetAllControls(Handle, instrumentId);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
+          Debug.LogError("Failed to reset all instrument controls for '" + instrumentId +
                          "': " + status);
         }
       }
 
       /// Resets all instrument note control values.
       ///
-      /// @param instrument Instrument.
-      public static void Instrument_ResetAllNoteControls(Instrument instrument, double pitch) {
-        Status status = BarelyInstrument_ResetAllNoteControls(Handle, instrument.Id, pitch);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
+      /// @param instrumentId Instrument identifier.
+      public static void Instrument_ResetAllNoteControls(Int64 instrumentId, double pitch) {
+        Status status = BarelyInstrument_ResetAllNoteControls(Handle, instrumentId, pitch);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to reset all instrument note pitch " + pitch + " controls for '" +
-                         instrument.name + "': " + status);
+                         instrumentId + "': " + status);
         }
       }
 
       /// Resets an instrument control value.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param index Control index.
-      public static void Instrument_ResetControl(Instrument instrument, int index) {
-        Status status = BarelyInstrument_ResetControl(Handle, instrument.Id, index);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
-          Debug.LogError("Failed to reset instrument control " + index + " for '" +
-                         instrument.name + "': " + status);
+      public static void Instrument_ResetControl(Int64 instrumentId, int index) {
+        Status status = BarelyInstrument_ResetControl(Handle, instrumentId, index);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
+          Debug.LogError("Failed to reset instrument control " + index + " for '" + instrumentId +
+                         "': " + status);
         }
       }
 
       /// Resets an instrument note control value.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param pitch Note pitch.
       /// @param index Note control index.
-      public static void Instrument_ResetNoteControl(Instrument instrument, double pitch,
-                                                     int index) {
-        Status status = BarelyInstrument_ResetNoteControl(Handle, instrument.Id, pitch, index);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
+      public static void Instrument_ResetNoteControl(Int64 instrumentId, double pitch, int index) {
+        Status status = BarelyInstrument_ResetNoteControl(Handle, instrumentId, pitch, index);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to reset instrument note pitch " + pitch + " control " + index +
-                         " for '" + instrument.name + "': " + status);
+                         " for '" + instrumentId + "': " + status);
         }
       }
 
       /// Sets all instrument notes off.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @return True if success, false otherwise.
-      public static void Instrument_SetAllNotesOff(Instrument instrument) {
-        Status status = BarelyInstrument_SetAllNotesOff(Handle, instrument.Id);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
-          Debug.LogError("Failed to stop all instrument notes for '" + instrument.name +
+      public static void Instrument_SetAllNotesOff(Int64 instrumentId) {
+        Status status = BarelyInstrument_SetAllNotesOff(Handle, instrumentId);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
+          Debug.LogError("Failed to stop all instrument notes for '" + instrumentId +
                          "': " + status);
         }
       }
 
       /// Sets an instrument control value.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param index Control index.
       /// @param value Control value.
       /// @param slopePerBeat Control slope in value change per beat.
-      public static void Instrument_SetControl(Instrument instrument, int index, double value,
+      public static void Instrument_SetControl(Int64 instrumentId, int index, double value,
                                                double slopePerBeat) {
         Status status =
-            BarelyInstrument_SetControl(Handle, instrument.Id, index, value, slopePerBeat);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
+            BarelyInstrument_SetControl(Handle, instrumentId, index, value, slopePerBeat);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to set instrument control " + index + " value to " + value +
-                         " with slope " + slopePerBeat + " for '" + instrument.name +
-                         "': " + status);
+                         " with slope " + slopePerBeat + " for '" + instrumentId + "': " + status);
         }
       }
 
       /// Sets instrument data.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param data Data.
-      public static void Instrument_SetData(Instrument instrument, byte[] data) {
-        Status status = BarelyInstrument_SetData(Handle, instrument.Id, data, data.Length);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
-          Debug.LogError("Failed to set instrument data to " + data + " for '" + instrument.name +
+      public static void Instrument_SetData(Int64 instrumentId, byte[] data) {
+        Status status = BarelyInstrument_SetData(Handle, instrumentId, data, data.Length);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
+          Debug.LogError("Failed to set instrument data to " + data + " for '" + instrumentId +
                          "': " + status);
         }
       }
 
       /// Sets an instrument note control value.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param pitch Note pitch.
       /// @param index Note control index.
       /// @param value Note control value.
       /// @param slopePerBeat Note control slope in value change per beat.
-      public static void Instrument_SetNoteControl(Instrument instrument, double pitch, int index,
+      public static void Instrument_SetNoteControl(Int64 instrumentId, double pitch, int index,
                                                    double value, double slopePerBeat) {
-        Status status = BarelyInstrument_SetNoteControl(Handle, instrument.Id, pitch, index, value,
+        Status status = BarelyInstrument_SetNoteControl(Handle, instrumentId, pitch, index, value,
                                                         slopePerBeat);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to set instrument note pitch " + pitch + " control " + index +
                          " value to " + value + " with slope " + slopePerBeat + " for '" +
-                         instrument.name + "': " + status);
+                         instrumentId + "': " + status);
         }
       }
 
       /// Sets an instrument note off.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param pitch Note pitch.
       /// @return True if success, false otherwise.
-      public static void Instrument_SetNoteOff(Instrument instrument, double pitch) {
-        Status status = BarelyInstrument_SetNoteOff(Handle, instrument.Id, pitch);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
-          Debug.LogError("Failed to stop instrument note " + pitch + " for '" + instrument.name +
+      public static void Instrument_SetNoteOff(Int64 instrumentId, double pitch) {
+        Status status = BarelyInstrument_SetNoteOff(Handle, instrumentId, pitch);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
+          Debug.LogError("Failed to stop instrument note " + pitch + " for '" + instrumentId +
                          "': " + status);
         }
       }
 
       /// Sets an instrument note on.
       ///
-      /// @param instrument Instrument.
+      /// @param instrumentId Instrument identifier.
       /// @param pitch Note pitch.
-      public static void Instrument_SetNoteOn(Instrument instrument, double pitch,
-                                              double intensity) {
-        Status status = BarelyInstrument_SetNoteOn(Handle, instrument.Id, pitch, intensity);
-        if (!IsOk(status) && _handle != IntPtr.Zero && instrument.enabled) {
+      public static void Instrument_SetNoteOn(Int64 instrumentId, double pitch, double intensity) {
+        Status status = BarelyInstrument_SetNoteOn(Handle, instrumentId, pitch, intensity);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to start instrument note " + pitch + " with " + intensity +
-                         " intensity for '" + instrument.name + "': " + status);
+                         " intensity for '" + instrumentId + "': " + status);
         }
       }
 
@@ -381,18 +377,18 @@ namespace Barely {
 
       /// Creates a new performer task.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @param definition Task definition.
       /// @param isOneOff True if one off task, false otherwise.
       /// @param position Task position.
       /// @param processOrder Task process order.
       /// @return Task identifier.
-      public static Int64 Performer_CreateTask(Performer performer, TaskDefinition definition,
+      public static Int64 Performer_CreateTask(Int64 performerId, TaskDefinition definition,
                                                bool isOneOff, double position, int processOrder) {
-        Status status = BarelyPerformer_CreateTask(Handle, performer.Id, definition, isOneOff,
+        Status status = BarelyPerformer_CreateTask(Handle, performerId, definition, isOneOff,
                                                    position, processOrder, IntPtr.Zero, _int64Ptr);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to create performer '" + performer.name + "': " + status);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId) {
+          Debug.LogError("Failed to create performer '" + performerId + "': " + status);
           return InvalidId;
         }
         return Marshal.ReadInt64(_int64Ptr);
@@ -400,33 +396,35 @@ namespace Barely {
 
       /// Destroys a performer.
       ///
-      /// @param performer Performer.
-      public static void Performer_Destroy(Performer performer) {
-        Status status = BarelyPerformer_Destroy(Handle, performer.Id);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to destroy performer '" + performer.name + "': " + status);
+      /// @param performerId Performer identifier.
+      public static void Performer_Destroy(Int64 performerId) {
+        Status status = BarelyPerformer_Destroy(Handle, performerId);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId) {
+          Debug.LogError("Failed to destroy performer '" + performerId + "': " + status);
         }
       }
 
       /// Destroys a performer task.
       ///
-      /// @param task Task.
-      public static void Performer_DestroyTask(Performer.Task task) {
-        Status status = BarelyPerformer_DestroyTask(Handle, task.PerformerId, task.Id);
-        if (!IsOk(status) && _handle != IntPtr.Zero) {
-          Debug.LogError("Failed to destroy performer task '" + task.Id + "': " + status);
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
+      public static void Performer_DestroyTask(Int64 performerId, Int64 taskId) {
+        Status status = BarelyPerformer_DestroyTask(Handle, performerId, taskId);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
+            taskId != InvalidId) {
+          Debug.LogError("Failed to destroy performer task '" + taskId + "': " + status);
         }
       }
 
       /// Returns the loop begin position of a performer.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @return Loop begin position in beats.
-      public static double Performer_GetLoopBeginPosition(Performer performer) {
-        Status status = BarelyPerformer_GetLoopBeginPosition(Handle, performer.Id, _doublePtr);
+      public static double Performer_GetLoopBeginPosition(Int64 performerId) {
+        Status status = BarelyPerformer_GetLoopBeginPosition(Handle, performerId, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
+        } else if (_handle != IntPtr.Zero && performerId != InvalidId) {
           Debug.LogError("Failed to get performer loop begin position: " + status);
         }
         return 0.0;
@@ -434,13 +432,13 @@ namespace Barely {
 
       /// Returns the loop length of a performer.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @return Loop length in beats.
-      public static double Performer_GetLoopLength(Performer performer) {
-        Status status = BarelyPerformer_GetLoopLength(Handle, performer.Id, _doublePtr);
+      public static double Performer_GetLoopLength(Int64 performerId) {
+        Status status = BarelyPerformer_GetLoopLength(Handle, performerId, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
+        } else if (_handle != IntPtr.Zero && performerId != InvalidId) {
           Debug.LogError("Failed to get performer loop length: " + status);
         }
         return 0.0;
@@ -448,13 +446,13 @@ namespace Barely {
 
       /// Returns the position of a performer.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @return Position in beats.
-      public static double Performer_GetPosition(Performer performer) {
-        Status status = BarelyPerformer_GetPosition(Handle, performer.Id, _doublePtr);
+      public static double Performer_GetPosition(Int64 performerId) {
+        Status status = BarelyPerformer_GetPosition(Handle, performerId, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
-        } else if (_handle != IntPtr.Zero) {
+        } else if (_handle != IntPtr.Zero && performerId != InvalidId) {
           Debug.LogError("Failed to get performer position: " + status);
         }
         return 0.0;
@@ -462,11 +460,11 @@ namespace Barely {
 
       /// Returns the position of a performer task.
       ///
-      /// @param task Task.
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
       /// @return Position in beats.
-      public static double Performer_GetTaskPosition(Performer.Task task) {
-        Status status =
-            BarelyPerformer_GetTaskPosition(Handle, task.PerformerId, task.Id, _doublePtr);
+      public static double Performer_GetTaskPosition(Int64 performerId, Int64 taskId) {
+        Status status = BarelyPerformer_GetTaskPosition(Handle, performerId, taskId, _doublePtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Double>(_doublePtr);
         } else if (_handle != IntPtr.Zero) {
@@ -477,11 +475,11 @@ namespace Barely {
 
       /// Returns the process order of a performer task.
       ///
-      /// @param task Task.
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
       /// @return Process order.
-      public static int Performer_GetTaskProcessOrder(Performer.Task task) {
-        Status status =
-            BarelyPerformer_GetTaskProcessOrder(Handle, task.PerformerId, task.Id, _int32Ptr);
+      public static int Performer_GetTaskProcessOrder(Int64 performerId, Int64 taskId) {
+        Status status = BarelyPerformer_GetTaskProcessOrder(Handle, performerId, taskId, _int32Ptr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Int32>(_int32Ptr);
         } else if (_handle != IntPtr.Zero) {
@@ -492,10 +490,10 @@ namespace Barely {
 
       /// Returns whether a performer is looping or not.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @return True if looping, false otherwise.
-      public static bool Performer_IsLooping(Performer performer) {
-        Status status = BarelyPerformer_IsLooping(Handle, performer.Id, _booleanPtr);
+      public static bool Performer_IsLooping(Int64 performerId) {
+        Status status = BarelyPerformer_IsLooping(Handle, performerId, _booleanPtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Boolean>(_booleanPtr);
         } else if (_handle != IntPtr.Zero) {
@@ -506,10 +504,10 @@ namespace Barely {
 
       /// Returns whether a performer is playing or not.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @return True if playing, false otherwise.
-      public static bool Performer_IsPlaying(Performer performer) {
-        Status status = BarelyPerformer_IsPlaying(Handle, performer.Id, _booleanPtr);
+      public static bool Performer_IsPlaying(Int64 performerId) {
+        Status status = BarelyPerformer_IsPlaying(Handle, performerId, _booleanPtr);
         if (IsOk(status)) {
           return Marshal.PtrToStructure<Boolean>(_booleanPtr);
         } else if (_handle != IntPtr.Zero) {
@@ -520,12 +518,12 @@ namespace Barely {
 
       /// Sets the loop begin position of a performer.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @param loopBeginPosition Loop begin position in beats.
-      public static void Performer_SetLoopBeginPosition(Performer performer,
+      public static void Performer_SetLoopBeginPosition(Int64 performerId,
                                                         double loopBeginPosition) {
         Status status =
-            BarelyPerformer_SetLoopBeginPosition(Handle, performer.Id, loopBeginPosition);
+            BarelyPerformer_SetLoopBeginPosition(Handle, performerId, loopBeginPosition);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer loop begin position: " + status);
         }
@@ -533,10 +531,10 @@ namespace Barely {
 
       /// Sets the loop length of a performer.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @param loopLength Loop length in beats.
-      public static void Performer_SetLoopLength(Performer performer, double loopLength) {
-        Status status = BarelyPerformer_SetLoopLength(Handle, performer.Id, loopLength);
+      public static void Performer_SetLoopLength(Int64 performerId, double loopLength) {
+        Status status = BarelyPerformer_SetLoopLength(Handle, performerId, loopLength);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer loop length: " + status);
         }
@@ -544,10 +542,10 @@ namespace Barely {
 
       /// Sets whether a performer is looping or not.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @param isLooping True if looping, false otherwise.
-      public static void Performer_SetLooping(Performer performer, bool isLooping) {
-        Status status = BarelyPerformer_SetLooping(Handle, performer.Id, isLooping);
+      public static void Performer_SetLooping(Int64 performerId, bool isLooping) {
+        Status status = BarelyPerformer_SetLooping(Handle, performerId, isLooping);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer looping: " + status);
         }
@@ -555,10 +553,10 @@ namespace Barely {
 
       /// Sets the position of a performer.
       ///
-      /// @param performer Performer.
+      /// @param performerId Performer identifier.
       /// @param position Position in beats.
-      public static void Performer_SetPosition(Performer performer, double position) {
-        Status status = BarelyPerformer_SetPosition(Handle, performer.Id, position);
+      public static void Performer_SetPosition(Int64 performerId, double position) {
+        Status status = BarelyPerformer_SetPosition(Handle, performerId, position);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer position: " + status);
         }
@@ -566,11 +564,12 @@ namespace Barely {
 
       /// Sets the position of a performer task.
       ///
-      /// @param task Task.
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
       /// @param position Position in beats.
-      public static void Performer_SetTaskPosition(Performer.Task task, double position) {
-        Status status =
-            BarelyPerformer_SetTaskPosition(Handle, task.PerformerId, task.Id, position);
+      public static void Performer_SetTaskPosition(Int64 performerId, Int64 taskId,
+                                                   double position) {
+        Status status = BarelyPerformer_SetTaskPosition(Handle, performerId, taskId, position);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task position: " + status);
         }
@@ -578,11 +577,13 @@ namespace Barely {
 
       /// Sets the process order of a performer task.
       ///
-      /// @param task Task.
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
       /// @param processOrder Process order.
-      public static void Performer_SetTaskProcessOrder(Performer.Task task, int processOrder) {
+      public static void Performer_SetTaskProcessOrder(Int64 performerId, Int64 taskId,
+                                                       int processOrder) {
         Status status =
-            BarelyPerformer_SetTaskProcessOrder(Handle, task.PerformerId, task.Id, processOrder);
+            BarelyPerformer_SetTaskProcessOrder(Handle, performerId, taskId, processOrder);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to set performer task process order: " + status);
         }
@@ -590,9 +591,9 @@ namespace Barely {
 
       /// Starts a performer.
       ///
-      /// @param performer Performer.
-      public static void Performer_Start(Performer performer) {
-        Status status = BarelyPerformer_Start(Handle, performer.Id);
+      /// @param performerId Performer identifier.
+      public static void Performer_Start(Int64 performerId) {
+        Status status = BarelyPerformer_Start(Handle, performerId);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to start performer: " + status);
         }
@@ -600,9 +601,9 @@ namespace Barely {
 
       /// Stops a performer.
       ///
-      /// @param performer Performer.
-      public static void Performer_Stop(Performer performer) {
-        Status status = BarelyPerformer_Stop(Handle, performer.Id);
+      /// @param performerId Performer identifier.
+      public static void Performer_Stop(Int64 performerId) {
+        Status status = BarelyPerformer_Stop(Handle, performerId);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to stop performer: " + status);
         }

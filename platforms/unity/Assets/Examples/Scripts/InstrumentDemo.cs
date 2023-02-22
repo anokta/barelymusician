@@ -42,6 +42,12 @@ public class InstrumentDemo : MonoBehaviour {
     }
   }
 
+  private void Update(){
+    if (Input.GetKeyDown(KeyCode.Escape)) {
+      Application.Quit();
+    }
+  }
+
   private void OnNoteOff(double pitch) {
     Vector2 value = Vector2.zero;
     if (_activePitches.TryGetValue(pitch, out value)) {

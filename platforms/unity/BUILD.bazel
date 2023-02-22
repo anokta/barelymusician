@@ -2,6 +2,27 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+# Android plugin (rename this to libbarelymusicianunity.so).
+cc_binary(
+    name = "libunity_android.so",
+    linkopts = [
+        "-lm",
+        "-Wl,--version-script",
+        "$(location //platforms/unity:unity_android.lds)",
+        "-z defs",
+    ],
+    linkshared = True,
+    # TODO(#111): This is a temporary check to disable Android builds.
+    target_compatible_with = ["@platforms//os:android"],
+    deps = [
+        ":unity_android.lds",
+        "//barelymusician",
+        "//barelymusician/instruments:percussion_instrument",
+        "//barelymusician/instruments:sampler_instrument",
+        "//barelymusician/instruments:synth_instrument",
+    ],
+)
+
 # Linux plugin (rename this to libbarelymusicianunity.so).
 cc_binary(
     name = "libunity_linux.so",
@@ -33,6 +54,7 @@ cc_binary(
     name = "unity_windows.dll",
     linkshared = True,
     target_compatible_with = ["@platforms//os:windows"],
+    win_def_file = "unity_windows.def",
     deps = [
         "//barelymusician",
         "//barelymusician/instruments:percussion_instrument",

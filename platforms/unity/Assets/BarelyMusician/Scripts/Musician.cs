@@ -169,7 +169,7 @@ namespace Barely {
             outputSamples[i] = (float)_outputSamples[i];
           }
         } else {
-          if (_handle != IntPtr.Zero && instrument.enabled) {
+          if (_handle != IntPtr.Zero && instrument.Id != InvalidId) {
             Debug.LogError("Failed to process instrument with id " + instrument.Id + ": " + status);
           }
           for (int i = 0; i < outputSamples.Length; ++i) {

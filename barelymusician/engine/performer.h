@@ -141,7 +141,43 @@ class Performer {
     Id task_id;
 
     // Default comparators.
-    auto operator<=>(const TaskKey& other) const noexcept = default;
+    // TODO(#111): Use the default `<=>` comparator instead.
+    bool operator<(const TaskKey& other) const noexcept {
+      return this->position == other.position
+                 ? (this->process_order == other.process_order
+                        ? this->task_id < other.task_id
+                        : this->process_order < other.process_order)
+                 : this->position < other.position;
+    }
+    bool operator<=(const TaskKey& other) const noexcept {
+      return this->position == other.position
+                 ? (this->process_order == other.process_order
+                        ? this->task_id <= other.task_id
+                        : this->process_order <= other.process_order)
+                 : this->position <= other.position;
+    }
+    bool operator==(const TaskKey& other) const noexcept {
+      return this->position == other.position &&
+             this->process_order == other.process_order &&
+             this->task_id == other.task_id;
+    }
+    bool operator!=(const TaskKey& other) const noexcept {
+      return !(*this == other);
+    }
+    bool operator>=(const TaskKey& other) const noexcept {
+      return this->position == other.position
+                 ? (this->process_order == other.process_order
+                        ? this->task_id >= other.task_id
+                        : this->process_order >= other.process_order)
+                 : this->position >= other.position;
+    }
+    bool operator>(const TaskKey& other) const noexcept {
+      return this->position == other.position
+                 ? (this->process_order == other.process_order
+                        ? this->task_id > other.task_id
+                        : this->process_order > other.process_order)
+                 : this->position > other.position;
+    }
   };
   using TaskMap = std::map<TaskKey, std::unique_ptr<Task>>;
 

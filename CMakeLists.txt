@@ -1,9 +1,12 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
 project(barelymusician)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
+
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN true)
 
 if (MSVC)
   add_compile_options(
@@ -42,3 +45,4 @@ include(GoogleTest)
 include_directories(.)
 
 add_subdirectory(barelymusician)
+add_subdirectory(platforms)

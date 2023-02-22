@@ -2,6 +2,16 @@ workspace(name = "barelymusician")
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 
+# TODO(#111): Enable these once Android targets are fully supported.
+# android_ndk_repository(
+#     name = "androidndk",
+# )
+# register_toolchains("@androidndk//:all")
+
+# android_sdk_repository(
+#     name = "androidsdk",
+# )
+
 git_repository(
     name = "googletest",
     commit = "e2239ee6043f73722e7aa812a459f54a28552929",
@@ -94,10 +104,7 @@ cc_library(
         "//conditions:default": [],
     }),
     hdrs = ["include/portaudio.h"],
-    copts = select({
-        "@platforms//os:windows": ["/w"],
-        "//conditions:default": ["-w"],
-    }),
+    copts = ["-w"],
     defines = select({
         "@platforms//os:linux": ["PA_USE_ALSA=1"],
         "@platforms//os:osx": ["PA_USE_COREAUDIO=1"],

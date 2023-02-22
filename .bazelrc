@@ -1,19 +1,37 @@
 common --enable_platform_specific_config
 
 # target c++20.
-build:linux --cxxopt=-std=c++2a
-build:macos --cxxopt=-std=c++2a
-build:windows --cxxopt=-std:c++latest
+common:linux --cxxopt=-std=c++2a
+common:macos --cxxopt=-std=c++2a
+common:windows --cxxopt=-std:c++20
 
 # treat warnings as errors.
-build:linux --cxxopt=-Wall
-build:linux --cxxopt=-Wextra
-build:linux --cxxopt=-Wno-missing-field-initializers
-build:linux --cxxopt=-Werror
-build:macos --cxxopt=-Wall
-build:macos --cxxopt=-Wextra
-build:macos --cxxopt=-Wno-missing-field-initializers
-build:macos --cxxopt=-Wno-unused-lambda-capture
-build:macos --cxxopt=-Werror
-build:windows --cxxopt=-W4
-build:windows --cxxopt=-WX
+common:linux --cxxopt=-Wall
+common:linux --cxxopt=-Wextra
+common:linux --cxxopt=-Wno-missing-field-initializers
+common:linux --cxxopt=-Werror
+common:macos --cxxopt=-Wall
+common:macos --cxxopt=-Wextra
+common:macos --cxxopt=-Wno-missing-field-initializers
+common:macos --cxxopt=-Wno-unused-lambda-capture
+common:macos --cxxopt=-Werror
+common:windows --cxxopt=-W4
+common:windows --cxxopt=-WX
+
+# android configs.
+common:android_arm64-v8a --cxxopt=-std=c++2a
+common:android_arm64-v8a --cxxopt=-Wall
+common:android_arm64-v8a --cxxopt=-Wextra
+common:android_arm64-v8a --cxxopt=-Wno-missing-field-initializers
+common:android_arm64-v8a --cxxopt=-Werror
+common:android_arm64-v8a --crosstool_top=@androidndk//:default_crosstool
+common:android_arm64-v8a --cpu=arm64-v8a
+common:android_arm64-v8a --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+common:android_armeabi-v7a --cxxopt=-std=c++2a
+common:android_armeabi-v7a --cxxopt=-Wall
+common:android_armeabi-v7a --cxxopt=-Wextra
+common:android_armeabi-v7a --cxxopt=-Wno-missing-field-initializers
+common:android_armeabi-v7a --cxxopt=-Werror
+common:android_armeabi-v7a --crosstool_top=@androidndk//:default_crosstool
+common:android_armeabi-v7a --cpu=armeabi-v7a
+common:android_armeabi-v7a --host_crosstool_top=@bazel_tools//tools/cpp:toolchain

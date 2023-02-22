@@ -17,7 +17,8 @@ namespace barely::internal {
 namespace {
 
 // Builds the corresponding controls for a given array of control `definitions`.
-std::vector<Control> BuildControls(const auto* definitions,
+// TODO(#111): Use `auto` instead of `ControlDefinition`.
+std::vector<Control> BuildControls(const ControlDefinition* definitions,
                                    int definition_count) noexcept {
   std::vector<Control> controls;
   controls.reserve(definition_count);
@@ -41,10 +42,12 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate,
       set_note_on_callback_(definition.set_note_on_callback),
       frame_rate_(frame_rate),
       default_note_controls_(
-          BuildControls(definition.note_control_definitions,
+          BuildControls(static_cast<const ControlDefinition*>(
+                            definition.note_control_definitions),
                         definition.note_control_definition_count)),
-      controls_(BuildControls(definition.control_definitions,
-                              definition.control_definition_count)),
+      controls_(BuildControls(
+          static_cast<const ControlDefinition*>(definition.control_definitions),
+          definition.control_definition_count)),
       tempo_(initial_tempo),
       timestamp_(initial_timestamp) {
   assert(frame_rate > 0);
@@ -84,7 +87,8 @@ StatusOr<double> Instrument::GetNoteControl(double pitch,
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
-  return note_controls_.contains(pitch);
+  // TODO(#111): Use `contains` instead of `find`.
+  return note_controls_.find(pitch) != note_controls_.end();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

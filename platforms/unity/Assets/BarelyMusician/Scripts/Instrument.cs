@@ -14,7 +14,6 @@ namespace Barely {
     /// @param control Control value.
     public delegate void ControlEventCallback(int index, double value);
     public event ControlEventCallback OnControl;
-    private ControlEventCallback _controlEventCallback = null;
 
     [Serializable]
     public class ControlEvent : UnityEngine.Events.UnityEvent<int, float> {}
@@ -27,7 +26,6 @@ namespace Barely {
     /// @param control Note control value.
     public delegate void NoteControlEventCallback(double pitch, int index, double value);
     public event NoteControlEventCallback OnNoteControl;
-    private NoteControlEventCallback _noteControlEventCallback = null;
 
     [Serializable]
     public class NoteControlEvent : UnityEngine.Events.UnityEvent<float, int, float> {}
@@ -38,7 +36,6 @@ namespace Barely {
     /// @param pitch Note pitch.
     public delegate void NoteOffEventCallback(double pitch);
     public event NoteOffEventCallback OnNoteOff;
-    private NoteOffEventCallback _noteOffEventCallback = null;
 
     [Serializable]
     public class NoteOffEvent : UnityEngine.Events.UnityEvent<float> {}
@@ -50,7 +47,6 @@ namespace Barely {
     /// @param intensity Note intensity.
     public delegate void NoteOnEventCallback(double pitch, double intensity);
     public event NoteOnEventCallback OnNoteOn;
-    private NoteOnEventCallback _noteOnEventCallback = null;
 
     [Serializable]
     public class NoteOnEvent : UnityEngine.Events.UnityEvent<float, float> {}
@@ -154,45 +150,49 @@ namespace Barely {
       Musician.Internal.Instrument_SetNoteOn(_id, pitch, intensity);
     }
 
+    /// Class that wraps the internal api.
+    public static class Internal {
+      /// Internal control event callback.
+      public static void OnControlEvent(Instrument instrument, int index, double value) {
+        instrument.OnControl?.Invoke(index, value);
+        instrument.OnControlEvent?.Invoke(index, (float)value);
+      }
+
+      /// Internal note control event callback.
+      public static void OnNoteControlEvent(Instrument instrument, double pitch, int index,
+                                            double value) {
+        instrument.OnNoteControl?.Invoke(pitch, index, value);
+        instrument.OnNoteControlEvent?.Invoke((float)pitch, index, (float)value);
+      }
+
+      public static void OnNoteOffEvent(Instrument instrument, double pitch) {
+        instrument.OnNoteOff?.Invoke(pitch);
+        instrument.OnNoteOffEvent?.Invoke((float)pitch);
+      }
+
+      /// Internal note on event callback.
+      public static void OnNoteOnEvent(Instrument instrument, double pitch, double intensity) {
+        instrument.OnNoteOn?.Invoke(pitch, intensity);
+        instrument.OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
+      }
+    }
+
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
-      _controlEventCallback = delegate(int index, double value) {
-        OnControl?.Invoke(index, value);
-        OnControlEvent?.Invoke(index, (float)value);
-      };
-      _noteControlEventCallback = delegate(double pitch, int index, double value) {
-        OnNoteControl?.Invoke(pitch, index, value);
-        OnNoteControlEvent?.Invoke((float)pitch, index, (float)value);
-      };
-      _noteOffEventCallback = delegate(double pitch) {
-        OnNoteOff?.Invoke(pitch);
-        OnNoteOffEvent?.Invoke((float)pitch);
-      };
-      _noteOnEventCallback = delegate(double pitch, double intensity) {
-        OnNoteOn?.Invoke(pitch, intensity);
-        OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
-      };
     }
 
     protected virtual void OnDestroy() {
       Source = null;
-      _controlEventCallback = null;
-      _noteControlEventCallback = null;
-      _noteOffEventCallback = null;
-      _noteOnEventCallback = null;
     }
 
     protected virtual void OnEnable() {
-      _id = Musician.Internal.Instrument_Create(this, _controlEventCallback,
-                                                _noteControlEventCallback, _noteOffEventCallback,
-                                                _noteOnEventCallback);
+      Musician.Internal.Instrument_Create(this, ref _id);
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
-      Musician.Internal.Instrument_Destroy(_id);
-      _id = Musician.Internal.InvalidId;
+      Musician.Internal.Instrument_Destroy(ref _id);
     }
 
     private void OnAudioFilterRead(float[] data, int channels) {

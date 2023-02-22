@@ -110,7 +110,10 @@ namespace Barely {
     }
 
     private void Update() {
-      if (Input.GetKeyDown(KeyCode.Space)) {
+      if (((Application.platform == RuntimePlatform.Android ||
+            Application.platform == RuntimePlatform.IPhonePlayer) &&
+           Input.GetMouseButtonDown(0)) ||
+          Input.GetKeyDown(KeyCode.Space)) {
         if (_performer.IsPlaying) {
           Pause();
         } else {

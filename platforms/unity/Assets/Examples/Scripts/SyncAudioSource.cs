@@ -6,10 +6,12 @@ public class SyncAudioSource : MonoBehaviour {
   public Performer performer;
   public AudioSource source;
 
-  [Range(-2.0f, 2.0f)]
-  public double notePitch = 0.0;
+  private double notePitch = 0.0;
 
   void Update() {
+    if (Input.GetKeyDown(KeyCode.Escape)) {
+      Application.Quit();
+    }
     if (((Application.platform == RuntimePlatform.Android ||
           Application.platform == RuntimePlatform.IPhonePlayer) &&
          Input.GetMouseButtonDown(0)) ||
@@ -25,6 +27,7 @@ public class SyncAudioSource : MonoBehaviour {
       }
     }
     transform.rotation = Quaternion.AngleAxis((float)performer.Position * 90.0f, Vector3.forward);
+    notePitch = (double)(Mathf.PingPong(0.5f * Time.time, 2.0f) - 1.0f);
   }
 
   public void PlayNote() {

@@ -49,6 +49,14 @@ public class InstrumentController : MonoBehaviour {
         instrument.SetNoteOff(GetPitchFromKeyIndex(i));
       }
     }
+    if (Application.platform == RuntimePlatform.Android ||
+        Application.platform == RuntimePlatform.IPhonePlayer) {
+      if (Input.GetMouseButtonDown(0)) {
+        instrument.SetNoteOn(0.0);
+      } else if (Input.GetMouseButtonUp(0)) {
+        instrument.SetNoteOff(0.0);
+      }
+    }
   }
 
   // Returns the corresponding pitch for the given key.

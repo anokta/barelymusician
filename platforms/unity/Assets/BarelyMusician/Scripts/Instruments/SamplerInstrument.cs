@@ -40,21 +40,15 @@ namespace Barely {
     // Current sample.
     private AudioClip _sample = null;
 
-    // TODO(#105): Update `GetData` to support different sample frequencies.
-    private const int SampleFrequency = 48000;
-    private const int MaxSampleCount = 10 * SampleFrequency;
-    private float[] _sampleData = new float[MaxSampleCount];
-
     private byte[] GetSampleData() {
-      if (_sample.samples == 0 || _sample.channels != 1) {
+      if (_sample == null || _sample.samples == 0 || _sample.channels != 1) {
         return null;
       }
-      _sample.GetData(_sampleData, 0);
-
-      int length = Mathf.Min(_sample.samples, MaxSampleCount);
-      byte[] sampleDataBytes = new byte[sizeof(double) * length];
-      for (int i = 0; i < length; ++i) {
-        byte[] bytes = BitConverter.GetBytes((double)_sampleData[i]);
+      float[] sampleData = new float[_sample.samples];
+      _sample.GetData(sampleData, 0);
+      byte[] sampleDataBytes = new byte[sizeof(double) * sampleData.Length];
+      for (int i = 0; i < sampleData.Length; ++i) {
+        byte[] bytes = BitConverter.GetBytes((double)sampleData[i]);
         for (int byteIndex = 0; byteIndex < bytes.Length; ++byteIndex) {
           sampleDataBytes[i * bytes.Length + byteIndex] = bytes[byteIndex];
         }

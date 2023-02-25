@@ -42,7 +42,7 @@ public class InstrumentDemo : MonoBehaviour {
     }
   }
 
-  private void Update(){
+  private void Update() {
     if (Input.GetKeyDown(KeyCode.Escape)) {
       Application.Quit();
     }

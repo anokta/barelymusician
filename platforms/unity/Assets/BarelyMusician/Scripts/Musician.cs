@@ -37,6 +37,133 @@ namespace Barely {
       /// Invalid identifier.
       public const Int64 InvalidId = 0;
 
+      /// Instrument definition create callback signature.
+      ///
+      /// @param state Pointer to instrument state.
+      /// @param frame_rate Frame rate in hertz.
+      public delegate void InstrumentDefinition_CreateCallback(ref IntPtr state, Int32 frameRate);
+
+      /// Instrument definition destroy callback signature.
+      public delegate void InstrumentDefinition_DestroyCallback(ref IntPtr state);
+
+      // Instrument definition process callback signature.
+      ///
+      /// @param state Pointer to instrument state.
+      /// @param outputSamples Pointer to an array of interleaved output samples.
+      /// @param outputChannelCount Number of output channels.
+      /// @param outputFrameCount Number of output frames.
+      public delegate void InstrumentDefinition_ProcessCallback(ref IntPtr state,
+                                                                IntPtr outputSamples,
+                                                                Int32 outputChannelCount,
+                                                                Int32 outputFrameCount);
+
+      /// Instrument definition set note control callback signature.
+      ///
+      /// @param state Pointer to instrument state.
+      /// @param index Control index.
+      /// @param value Control value.
+      /// @param slopePerFrame Control slope in value change per frame.
+      public delegate void InstrumentDefinition_SetControlCallback(ref IntPtr state, Int32 index,
+                                                                   double value,
+                                                                   double slopePerFrame);
+
+      /// Instrument definition set data callback signature.
+      ///
+      /// @param state Pointer to instrument state.
+      /// @param data Data.
+      /// @param size Data size in bytes.
+      public delegate void InstrumentDefinition_SetDataCallback(
+          ref IntPtr state, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data,
+          Int32 size);
+
+      /// Instrument definition set note control callback signature.
+      ///
+      /// @param state Pointer to instrument state.
+      /// @param pitch Note pitch.
+      /// @param index Note control index.
+      /// @param value Note control value.
+      /// @param slopePerFrame Note control slope in value change per frame.
+      public delegate void InstrumentDefinition_SetNoteControlCallback(ref IntPtr state,
+                                                                       double pitch, Int32 index,
+                                                                       double value,
+                                                                       double slopePerFrame);
+
+      /// Instrument definition set note off callback signature.
+      ///
+      /// @param state Pointer to instrument state.
+      /// @param pitch Note pitch.
+      public delegate void InstrumentDefinition_SetNoteOffCallback(ref IntPtr state, double pitch);
+
+      /// Instrument definition set note on callback signature.
+      ///
+      /// @param state Pointer to instrument state.
+      /// @param pitch Note pitch.
+      /// @param intensity Note intensity.
+      public delegate void InstrumentDefinition_SetNoteOnCallback(ref IntPtr state, double pitch,
+                                                                  double intensity);
+
+      /// Instrument definition.
+      [StructLayout(LayoutKind.Sequential)]
+      public struct InstrumentDefinition {
+        /// Create callback.
+        public InstrumentDefinition_CreateCallback createCallback;
+
+        /// Destroy callback.
+        public InstrumentDefinition_DestroyCallback destroyCallback;
+
+        /// Process callback.
+        public InstrumentDefinition_ProcessCallback processCallback;
+
+        /// Set control callback.
+        public InstrumentDefinition_SetControlCallback setControlCallback;
+
+        /// Set data callback.
+        public InstrumentDefinition_SetDataCallback setDataCallback;
+
+        /// Set note control callback.
+        public InstrumentDefinition_SetNoteControlCallback setNoteControlCallback;
+
+        /// Set note off callback.
+        public InstrumentDefinition_SetNoteOffCallback setNoteOffCallback;
+
+        /// Set note on callback.
+        public InstrumentDefinition_SetNoteOnCallback setNoteOnCallback;
+
+        /// Pointer to an array of control definitions.
+        public IntPtr controlDefinitions;
+
+        /// Number of control definitions.
+        public Int32 controlDefinitionCount;
+
+        /// Pointer to an array of note control definitions.
+        public IntPtr noteControlDefinitions;
+
+        /// Number of note control definitions.
+        public Int32 noteControlDefinitionCount;
+      }
+
+      /// Custom instrument interface.
+      public interface CustomInstrumentInterface {
+        /// Returns the instrument definition.
+        ///
+        /// @return Instrument definition.
+        public InstrumentDefinition GetDefinition();
+      }
+
+      /// Returns an array of interleaved output samples.
+      ///
+      /// @param outputSamples Pointer to an array of interleaved output samples.
+      /// @param outputChannelCount Number of output channels.
+      /// @param outputFrameCount Number of output frames.
+      ///
+      /// @return Array of interleaved output samples.
+      public static double[] CustomInstrument_GetOutputSamples(IntPtr outputSamples,
+                                                               int outputChannelCount,
+                                                               int outputFrameCount) {
+        Marshal.Copy(outputSamples, _outputSamples, 0, outputChannelCount * outputFrameCount);
+        return _outputSamples;
+      }
+
       /// Creates a new instrument.
       ///
       /// @param instrument Instrument.
@@ -53,12 +180,23 @@ namespace Barely {
           case SynthInstrument synth:
             definition = BarelySynthInstrument_GetDefinition();
             break;
+          case CustomInstrumentInterface custom:
+            definition = custom.GetDefinition();
+            break;
           default:
             Debug.LogError("Unsupported instrument type: " + instrument.GetType());
             return;
         }
         Status status = BarelyInstrument_Create(Handle, definition, AudioSettings.outputSampleRate,
                                                 ref instrumentId);
+        if (instrument.GetType().IsSubclassOf(typeof(CustomInstrumentInterface))) {
+          if (definition.controlDefinitionCount > 0) {
+            Marshal.FreeHGlobal(definition.controlDefinitions);
+          }
+          if (definition.noteControlDefinitionCount > 0) {
+            Marshal.FreeHGlobal(definition.noteControlDefinitions);
+          }
+        }
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to create instrument " + instrument.name + ": " + status);
           return;
@@ -240,7 +378,8 @@ namespace Barely {
       /// @param instrumentId Instrument identifier.
       /// @param data Data.
       public static void Instrument_SetData(Int64 instrumentId, byte[] data) {
-        Status status = BarelyInstrument_SetData(Handle, instrumentId, data, data.Length);
+        Status status =
+            BarelyInstrument_SetData(Handle, instrumentId, data, data != null ? data.Length : 0);
         if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
           Debug.LogError("Failed to set instrument data to " + data + " for " + instrumentId +
                          ": " + status);
@@ -696,59 +835,6 @@ namespace Barely {
         if (_taskCallbacks.TryGetValue(Marshal.PtrToStructure<Int64>(state), out callback)) {
           callback?.Invoke();
         }
-      }
-
-      // Control definition.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct ControlDefinition {
-        /// Default value.
-        public double defaultValue;
-
-        /// Minimum value.
-        public double minValue;
-
-        /// Maximum value.
-        public double maxValue;
-      }
-
-      // Instrument definition.
-      [StructLayout(LayoutKind.Sequential)]
-      private struct InstrumentDefinition {
-        // Create callback.
-        public IntPtr createCallback;
-
-        // Destroy callback.
-        public IntPtr destroyCallback;
-
-        // Process callback.
-        public IntPtr processCallback;
-
-        // Set control callback.
-        public IntPtr setControlCallback;
-
-        // Set data callback.
-        public IntPtr setDataCallback;
-
-        // Set note control callback.
-        public IntPtr setNoteControlCallback;
-
-        // Set note off callback.
-        public IntPtr setNoteOffCallback;
-
-        // Set note on callback.
-        public IntPtr setNoteOnCallback;
-
-        // Array of control definitions.
-        public IntPtr controlDefinitions;
-
-        // Number of control definitions.
-        public Int32 controlDefinitionCount;
-
-        // Array of note control definitions.
-        public IntPtr noteControlDefinitions;
-
-        // Number of note control definitions.
-        public Int32 noteControlDefinitionCount;
       }
 
       // Task definition.

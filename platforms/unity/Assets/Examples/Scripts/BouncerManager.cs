@@ -7,6 +7,7 @@ public class BouncerManager : MonoBehaviour {
 
   public bool shouldAutoGenerate = false;
 
+  [Min(0.0f)]
   public float spawnLatency = 1.0f;
 
   private void Start() {
@@ -16,7 +17,10 @@ public class BouncerManager : MonoBehaviour {
   }
 
   private void Update() {
-    if (Input.GetKeyDown(KeyCode.Space)) {
+    if (((Application.platform == RuntimePlatform.Android ||
+          Application.platform == RuntimePlatform.IPhonePlayer) &&
+         Input.GetMouseButtonDown(0)) ||
+        Input.GetKeyDown(KeyCode.Space)) {
       InstantiateNewBouncer();
     }
   }

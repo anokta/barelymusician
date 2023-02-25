@@ -150,20 +150,6 @@ namespace Barely {
         public InstrumentDefinition GetDefinition();
       }
 
-      /// Returns an array of interleaved output samples.
-      ///
-      /// @param outputSamples Pointer to an array of interleaved output samples.
-      /// @param outputChannelCount Number of output channels.
-      /// @param outputFrameCount Number of output frames.
-      ///
-      /// @return Array of interleaved output samples.
-      public static double[] CustomInstrument_GetOutputSamples(IntPtr outputSamples,
-                                                               int outputChannelCount,
-                                                               int outputFrameCount) {
-        Marshal.Copy(outputSamples, _outputSamples, 0, outputChannelCount * outputFrameCount);
-        return _outputSamples;
-      }
-
       /// Creates a new instrument.
       ///
       /// @param instrument Instrument.

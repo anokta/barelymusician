@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 675412999}
   - component: {fileID: 675412998}
   - component: {fileID: 675413001}
+  - component: {fileID: 675413002}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -222,6 +223,18 @@ MonoBehaviour:
   controller: {fileID: 1737834379}
   pixel: {fileID: 2800000, guid: 831f86318f630fc4db677a7235341f4d, type: 3}
   color: {r: 1, g: 1, b: 0.7294118, a: 1}
+--- !u!114 &675413002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 675412997}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 552eabafa398d154c86e7588b6dee2ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!850595691 &748775628
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -229,7 +242,7 @@ LightingSettings:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Settings.lighting
-  serializedVersion: 2
+  serializedVersion: 3
   m_GIWorkflowMode: 1
   m_EnableBakedLightmaps: 1
   m_EnableRealtimeLightmaps: 1
@@ -251,7 +264,7 @@ LightingSettings:
   m_MixedBakeMode: 2
   m_LightmapsBakeMode: 1
   m_FilterMode: 1
-  m_LightmapParameters: {fileID: 0}
+  m_LightmapParameters: {fileID: 15204, guid: 0000000000000000f000000000000000, type: 0}
   m_ExportTrainingData: 0
   m_TrainingDataDestination: TrainingData
   m_RealtimeResolution: 2
@@ -268,7 +281,7 @@ LightingSettings:
   m_PVREnvironmentReferencePointCount: 2048
   m_LightProbeSampleCountMultiplier: 4
   m_PVRBounces: 2
-  m_PVRRussianRouletteStartBounce: 2
+  m_PVRMinBounces: 1
   m_PVREnvironmentMIS: 1
   m_PVRFilteringMode: 1
   m_PVRDenoiserTypeDirect: 1

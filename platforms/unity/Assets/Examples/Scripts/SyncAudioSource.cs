@@ -9,9 +9,6 @@ public class SyncAudioSource : MonoBehaviour {
   private double notePitch = 0.0;
 
   void Update() {
-    if (Input.GetKeyDown(KeyCode.Escape)) {
-      Application.Quit();
-    }
     if (((Application.platform == RuntimePlatform.Android ||
           Application.platform == RuntimePlatform.IPhonePlayer) &&
          Input.GetMouseButtonDown(0)) ||

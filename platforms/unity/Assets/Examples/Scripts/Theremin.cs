@@ -19,8 +19,8 @@ public class ThereminDefinition : CustomInstrumentDefinition {
 
   public void OnProcess(double[] outputSamples, int outputChannelCount, int outputFrameCount) {
     for (int frame = 0; frame < outputFrameCount; ++frame) {
-      _amplitude = Lerp(_amplitude, _targetAmplitude, 20.0 * _frameInterval);
-      _frequency = Lerp(_frequency, _targetFrequency, 50.0 * _frameInterval);
+      _amplitude = Lerp(_amplitude, _targetAmplitude, 25.0 * _frameInterval);
+      _frequency = Lerp(_frequency, _targetFrequency, 100.0 * _frameInterval);
       double monoSample = _amplitude * System.Math.Sin(_phase * 2.0 * System.Math.PI);
       for (int channel = 0; channel < outputChannelCount; ++channel) {
         outputSamples[frame * outputChannelCount + channel] = monoSample;
@@ -33,15 +33,12 @@ public class ThereminDefinition : CustomInstrumentDefinition {
   }
 
   public void OnSetControl(int index, double value, double slopePerBeat) {
-    if (!_isOn) {
-      return;
-    }
     switch (index) {
       case 0:
         _targetFrequency = GetFrequency(value);
         break;
       case 1:
-        _targetAmplitude = value;
+        _targetAmplitude = _isOn ? value : 0.0;
         break;
     }
   }
@@ -60,10 +57,9 @@ public class ThereminDefinition : CustomInstrumentDefinition {
   }
 
   public void OnSetNoteOn(double pitch, double intensity) {
-    _amplitude = intensity;
     _isOn = true;
     _phase = 0.0;
-    _targetAmplitude = _amplitude;
+    _targetAmplitude = intensity;
   }
 
   // Middle A (A4) frequency.
@@ -75,28 +71,35 @@ public class ThereminDefinition : CustomInstrumentDefinition {
   }
 
   // Linearly interpolates between given points.
-  double Lerp(double a, double b, double t) {
+  private double Lerp(double a, double b, double t) {
     return a + t * (b - a);
   }
 }
 
 // A simple theremin that is contolled by the mouse position on the screen.
 public class Theremin : CustomInstrument<ThereminDefinition> {
-  private double _pitch = 0.0;
-  private double _amplitude = 0.0;
+  public Texture2D texture = null;
+  public Color color = Color.white;
+
+  public void OnGUI() {
+    color.a = Mathf.Lerp(color.a, IsNoteOn(0.0) ? 0.25f : 0.0f, 8.0f * Time.deltaTime);
+    GUI.color = color;
+    float size = 0.1f * Mathf.Max(Screen.width, Screen.height);
+    GUI.DrawTexture(new Rect(Input.mousePosition.x - 0.5f * size,
+                             Screen.height - Input.mousePosition.y - 0.5f * size, size, size),
+                    texture);
+  }
 
   public void Update() {
-    _pitch = Input.mousePosition.x / Screen.width;
-    _amplitude = Input.mousePosition.y / Screen.height;
+    double pitch = Input.mousePosition.x / Screen.width;
+    double amplitude = Input.mousePosition.y / Screen.height;
     if (Input.GetMouseButtonDown(0)) {
-      SetNoteOn(0.0, _amplitude);
+      SetNoteOn(0.0, amplitude);
     } else if (Input.GetMouseButtonUp(0)) {
       SetNoteOff(0.0);
     }
-    if (Input.GetMouseButton(0)) {
-      SetControl(0, _pitch);
-      SetControl(1, _amplitude);
-    }
+    SetControl(0, pitch);
+    SetControl(1, amplitude);
   }
 
   protected override sealed ControlDefinition[] GetControlDefinitions() {

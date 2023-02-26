@@ -120,9 +120,10 @@ namespace Barely {
 
     /// Sets data.
     ///
-    /// @param data Data.
-    public void SetData(byte[] data) {
-      Musician.Internal.Instrument_SetData(_id, data);
+    /// @param dataPtr Pointer to data.
+    /// @param size Data size in bytes.
+    public void SetData(IntPtr dataPtr, int size) {
+      Musician.Internal.Instrument_SetData(_id, dataPtr, size);
     }
 
     /// Sets a note control value.

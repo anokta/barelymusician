@@ -43,7 +43,7 @@ public class ThereminDefinition : CustomInstrumentDefinition {
     }
   }
 
-  public void OnSetData(byte[] data) {
+  public void OnSetData(System.IntPtr dataPtr, int size) {
     Debug.LogWarning("Theremin does not implement OnSetData");
   }
 

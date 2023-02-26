@@ -17,9 +17,7 @@ BarelyInstrumentDefinition BarelySamplerInstrument_GetDefinition() {
 namespace barely {
 
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
-    : voice_(SamplerVoice(frame_rate)),
-      frame_rate_(frame_rate),
-      gain_processor_(frame_rate) {}
+    : voice_(SamplerVoice(frame_rate)), gain_processor_(frame_rate) {}
 
 void SamplerInstrument::Process(double* output_samples,
                                 int output_channel_count,
@@ -76,10 +74,13 @@ void SamplerInstrument::SetControl(int index, double value,
 }
 
 void SamplerInstrument::SetData(const void* data, int size) noexcept {
+  const double* data_double = static_cast<const double*>(data);
+  const double* sample_data = size > 0 ? &data_double[1] : nullptr;
+  const int frame_rate = size > 0 ? static_cast<int>(data_double[0]) : 0;
+  const int length = size > 0 ? size / static_cast<int>(sizeof(double)) - 1 : 0;
   voice_.Update(
-      [frame_rate = frame_rate_, data, size](SamplerVoice* voice) noexcept {
-        voice->generator().SetData(static_cast<const double*>(data), frame_rate,
-                                   size / static_cast<int>(sizeof(double)));
+      [sample_data, frame_rate, length](SamplerVoice* voice) noexcept {
+        voice->generator().SetData(sample_data, frame_rate, length);
       });
 }
 

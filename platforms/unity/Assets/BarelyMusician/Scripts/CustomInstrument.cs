@@ -41,8 +41,9 @@ namespace Barely {
 
     /// Set data callback.
     ///
-    /// @param data Data.
-    public void OnSetData(byte[] data);
+    /// @param dataPtr Pointer to data.
+    /// @param size Data size in bytes.
+    public void OnSetData(IntPtr data, int size);
 
     /// Set note control callback.
     ///
@@ -147,8 +148,8 @@ namespace Barely {
 
     // Set data callback.
     [AOT.MonoPInvokeCallback(typeof(Musician.Internal.InstrumentDefinition_SetDataCallback))]
-    private static void OnSetData(ref IntPtr state, byte[] data, Int32 size) {
-      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetData(data);
+    private static void OnSetData(ref IntPtr state, IntPtr dataPtr, Int32 size) {
+      (GCHandle.FromIntPtr(state).Target as DefinitionType).OnSetData(dataPtr, size);
     }
 
     // Set note control callback.

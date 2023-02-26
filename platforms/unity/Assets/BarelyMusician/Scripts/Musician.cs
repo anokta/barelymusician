@@ -70,11 +70,10 @@ namespace Barely {
       /// Instrument definition set data callback signature.
       ///
       /// @param state Pointer to instrument state.
-      /// @param data Data.
+      /// @param dataPtr Pointer to data.
       /// @param size Data size in bytes.
-      public delegate void InstrumentDefinition_SetDataCallback(
-          ref IntPtr state, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data,
-          Int32 size);
+      public delegate void InstrumentDefinition_SetDataCallback(ref IntPtr state, IntPtr data,
+                                                                Int32 size);
 
       /// Instrument definition set note control callback signature.
       ///
@@ -362,12 +361,12 @@ namespace Barely {
       /// Sets instrument data.
       ///
       /// @param instrumentId Instrument identifier.
-      /// @param data Data.
-      public static void Instrument_SetData(Int64 instrumentId, byte[] data) {
-        Status status =
-            BarelyInstrument_SetData(Handle, instrumentId, data, data != null ? data.Length : 0);
+      /// @param dataPtr Pointer to data.
+      /// @param size Data size in bytes.
+      public static void Instrument_SetData(Int64 instrumentId, IntPtr dataPtr, int size) {
+        Status status = BarelyInstrument_SetData(Handle, instrumentId, dataPtr, size);
         if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId) {
-          Debug.LogError("Failed to set instrument data to " + data + " for " + instrumentId +
+          Debug.LogError("Failed to set instrument data to " + dataPtr + " for " + instrumentId +
                          ": " + status);
         }
       }
@@ -1025,7 +1024,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
-                                                            [In] byte[] data, Int32 size);
+                                                            IntPtr data, Int32 size);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControl")]
       private static extern Status BarelyInstrument_SetNoteControl(IntPtr handle,

@@ -57,15 +57,6 @@ public class InstrumentController : MonoBehaviour {
         instrument.SetNoteOff(0.0);
       }
     }
-    if (Input.GetKeyDown(KeyCode.Alpha1)) {
-      instrument.SetControl(0, (double)Random.Range(0.0f, 10.0f), 0.0);
-    }
-    if (Input.GetKeyDown(KeyCode.Alpha2)) {
-      instrument.SetNoteControl(0.0, 0, 1.0, 0.0);
-    }
-    if (Input.GetKeyDown(KeyCode.Alpha3)) {
-      instrument.SetData(new byte[5]);
-    }
   }
 
   // Returns the corresponding pitch for the given key.

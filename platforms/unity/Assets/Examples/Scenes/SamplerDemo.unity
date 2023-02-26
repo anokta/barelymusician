@@ -356,7 +356,7 @@ MonoBehaviour:
   OnNoteOnEvent:
     m_PersistentCalls:
       m_Calls: []
-  Sample: {fileID: 8300000, guid: 8270a45002139514dad8685ea1f8482a, type: 3}
+  Sample: {fileID: 8300000, guid: 6975487e2e525c7429b87492a346d039, type: 3}
   Gain: 1
   RootPitch: 0
   Loop: 1

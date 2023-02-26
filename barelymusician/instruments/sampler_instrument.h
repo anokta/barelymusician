@@ -100,7 +100,6 @@ class SamplerInstrument : public CustomInstrument {
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
   double root_pitch_ = 0.0;
-  int frame_rate_ = 0;
   GainProcessor gain_processor_;
 };
 

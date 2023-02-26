@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
@@ -40,27 +41,36 @@ namespace Barely {
     // Current sample.
     private AudioClip _sample = null;
 
-    private byte[] GetSampleData() {
-      if (_sample == null || _sample.samples == 0 || _sample.channels != 1) {
-        return null;
+    private void SetSampleData() {
+      if (_sample == Sample) {
+        return;
       }
-      float[] sampleData = new float[_sample.samples];
+      _sample = Sample;
+      if (_sample == null || _sample.samples == 0) {
+        SetData(IntPtr.Zero, 0);
+        return;
+      }
+      double[] data = new double[_sample.samples + 1];
+      // Write the frame rate.
+      data[0] = (double)_sample.frequency;
+      // Fill the sample data.
+      float[] sampleData = new float[_sample.samples * _sample.channels];
       _sample.GetData(sampleData, 0);
-      byte[] sampleDataBytes = new byte[sizeof(double) * sampleData.Length];
-      for (int i = 0; i < sampleData.Length; ++i) {
-        byte[] bytes = BitConverter.GetBytes((double)sampleData[i]);
-        for (int byteIndex = 0; byteIndex < bytes.Length; ++byteIndex) {
-          sampleDataBytes[i * bytes.Length + byteIndex] = bytes[byteIndex];
+      for (int frame = 0; frame < _sample.samples; ++frame) {
+        for (int channel = 0; channel < _sample.channels; ++channel) {
+          data[frame + 1] += (double)sampleData[frame * _sample.channels + channel];
         }
       }
-      return sampleDataBytes;
+      // Write into unmanaged pointer.
+      int size = data.Length * sizeof(double);
+      IntPtr dataPtr = Marshal.AllocHGlobal(size);
+      Marshal.Copy(data, 0, dataPtr, data.Length);
+      SetData(dataPtr, size);
+      Marshal.FreeHGlobal(dataPtr);
     }
 
     private void Update() {
-      if (_sample != Sample) {
-        _sample = Sample;
-        SetData(GetSampleData());
-      }
+      SetSampleData();
       SetControl(0, Gain);
       SetControl(1, RootPitch);
       SetControl(2, Loop ? 1.0 : 0.0);

@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iterator>
 #include <optional>
+#include <string>
 #include <thread>
 
 #include "barelymusician/barelymusician.h"
@@ -45,7 +46,23 @@ constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                 'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr double kMaxOffsetOctaves = 3.0;
 
-// Returns the pitch for the given `key`.
+// Returns the sample data from a given `file_path`.
+std::vector<double> GetSampleData(const std::string& file_path) {
+  WavFile sample_file;
+  [[maybe_unused]] const bool success = sample_file.Load(file_path);
+  assert(success);
+
+  const double frame_rate = static_cast<double>(sample_file.GetFrameRate());
+  const auto sample_data = sample_file.GetData();
+
+  std::vector<double> data;
+  data.reserve(sample_data.size() + 1);
+  data.push_back(frame_rate);
+  data.insert(data.end(), sample_data.begin(), sample_data.end());
+  return data;
+}
+
+// Returns the pitch for a given `key`.
 std::optional<double> PitchFromKey(const InputManager::Key& key) {
   const auto* it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
                              std::toupper(key));
@@ -63,9 +80,6 @@ std::optional<double> PitchFromKey(const InputManager::Key& key) {
 int main(int /*argc*/, char* argv[]) {
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
   assert(runfiles);
-  WavFile sample_file;
-  const bool success = sample_file.Load(runfiles->Rlocation(kSamplePath));
-  assert(success);
 
   AudioOutput audio_output;
   InputManager input_manager;
@@ -80,9 +94,10 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerControl::kAttack, kAttack);
   instrument.SetControl(SamplerControl::kRelease, kRelease);
   instrument.SetControl(SamplerControl::kVoiceCount, kVoiceCount);
-  instrument.SetData(
-      sample_file.GetData().data(),
-      static_cast<int>(sample_file.GetData().size() * sizeof(double)));
+
+  const auto data = GetSampleData(runfiles->Rlocation(kSamplePath));
+  const int size = static_cast<int>(data.size() * sizeof(double));
+  instrument.SetData(data.data(), size);
 
   instrument.SetNoteOnEventCallback([](double pitch, double intensity) {
     ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";

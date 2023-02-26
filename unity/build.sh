@@ -8,9 +8,9 @@
 readonly WORKSPACE="$(bazel info workspace)"
 readonly BAZEL_BIN="${WORKSPACE}/bazel-bin"
 
-readonly NATIVE_BIN_DIR="${BAZEL_BIN}/platforms/unity"
+readonly NATIVE_BIN_DIR="${BAZEL_BIN}/unity"
 
-readonly PLUGINS_DIR="${WORKSPACE}/platforms/unity/Assets/BarelyMusician/Plugins"
+readonly PLUGINS_DIR="${WORKSPACE}/unity/Assets/BarelyMusician/Plugins"
 readonly PLUGINS_X64_DIR="${PLUGINS_DIR}/x86_64"
 
 readonly PLUGIN_NAME="barelymusicianunity"
@@ -53,7 +53,8 @@ main() {
   parse_flags "$@"
 
   echo "Building BarelyMusician Unity plugins..."
-  bazel build -c "${COMPILATION_MODE}" "//platforms/unity:all"
+  export MSYS2_ARG_CONV_EXCL="*"
+  bazel build -c "${COMPILATION_MODE}" "//unity:all"
 
   if [[ -f "${LINUX_BIN_SRC_PATH}" ]]; then
     echo "Copying native Linux plugin into Unity project..."

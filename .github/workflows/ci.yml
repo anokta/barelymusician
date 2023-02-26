@@ -81,5 +81,5 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
       - name: build
         run: |
-          chmod +x ./platforms/unity/build.sh
-          ./platforms/unity/build.sh
+          chmod +x ./unity/build.sh
+          ./unity/build.sh

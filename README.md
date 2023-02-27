@@ -2,7 +2,7 @@ barelymusician
 [![ci](https://github.com/anokta/barelymusician/actions/workflows/ci.yml/badge.svg)](https://github.com/anokta/barelymusician/actions/workflows/ci.yml)
 ==============
 
-an adaptive music engine for interactive systems.
+a real-time music engine for interactive systems.
 
 for background: http://www.aes.org/e-lib/browse.cfm?elib=17598
 

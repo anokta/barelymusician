@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -172,9 +173,7 @@ int main(int /*argc*/, char* argv[]) {
       instrument.Process(temp_buffer.data(), kChannelCount, kFrameCount,
                          clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     [](double sample, double output_sample) {
-                       return sample + output_sample;
-                     });
+                     std::plus<double>());
     }
     clock.Update(kFrameCount);
   };

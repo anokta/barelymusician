@@ -159,6 +159,9 @@ namespace Barely {
         }
         InstrumentDefinition definition;
         switch (instrument) {
+          case PercussionInstrument percussion:
+            definition = BarelyPercussionInstrument_GetDefinition();
+            break;
           case SamplerInstrument sampler:
             definition = BarelySamplerInstrument_GetDefinition();
             break;
@@ -275,9 +278,6 @@ namespace Barely {
             outputSamples[i] = (float)_outputSamples[i];
           }
         } else {
-          if (_handle != IntPtr.Zero && instrumentId != InvalidId) {
-            Debug.LogError("Failed to process instrument with id " + instrumentId + ": " + status);
-          }
           for (int i = 0; i < outputSamples.Length; ++i) {
             outputSamples[i] = 0.0f;
           }
@@ -1154,6 +1154,9 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Stop")]
       private static extern Status BarelyPerformer_Stop(IntPtr handle, Int64 performerId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelyPercussionInstrument_GetDefinition();
 
       [DllImport(pluginName, EntryPoint = "BarelySamplerInstrument_GetDefinition")]
       private static extern InstrumentDefinition BarelySamplerInstrument_GetDefinition();

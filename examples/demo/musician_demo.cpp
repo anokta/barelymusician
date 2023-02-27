@@ -33,6 +33,7 @@ using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::PercussionControl;
 using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
@@ -75,6 +76,23 @@ constexpr double kRootNote = barely::kPitchD3;
 
 constexpr char kDrumsBaseFilename[] =
     "barelymusician/examples/data/audio/drums/";
+
+// Inserts pad data to a given `data` from a given `file_path`.
+void InsertPadData(double pitch, const std::string& file_path,
+                   std::vector<double>& data) {
+  WavFile sample_file;
+  [[maybe_unused]] const bool success = sample_file.Load(file_path);
+  assert(success);
+
+  const double frame_rate = static_cast<double>(sample_file.GetFrameRate());
+  const auto& sample_data = sample_file.GetData();
+  const double length = static_cast<double>(sample_data.size());
+  data.reserve(data.size() + sample_data.size() + 3);
+  data.push_back(pitch);
+  data.push_back(frame_rate);
+  data.push_back(length);
+  data.insert(data.end(), sample_data.begin(), sample_data.end());
+}
 
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, double pitch,
@@ -196,11 +214,11 @@ int main(int /*argc*/, char* argv[]) {
   musician.SetTempo(kTempo);
 
   // Note on callback.
-  const auto set_note_callbacks_fn = [&](auto index, Instrument* instrument) {
-    instrument->SetNoteOffEventCallback([index](double pitch) {
+  const auto set_note_callbacks_fn = [&](auto index, Instrument& instrument) {
+    instrument.SetNoteOffEventCallback([index](double pitch) {
       ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
-    instrument->SetNoteOnEventCallback([index](double pitch, double intensity) {
+    instrument.SetNoteOnEventCallback([index](double pitch, double intensity) {
       ConsoleLog() << "Instrument #" << index << ": NoteOn(" << pitch << ", "
                    << intensity << ")";
     });
@@ -211,18 +229,17 @@ int main(int /*argc*/, char* argv[]) {
   // Initialize performers.
   std::vector<std::tuple<Performer, BeatComposerCallback, size_t>> performers;
   std::vector<Instrument> instruments;
-  std::vector<double> gains;
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
     instruments.push_back(musician.CreateInstrument(
         SynthInstrument::GetDefinition(), kFrameRate));
     auto& instrument = instruments.back();
-    gains.push_back(gain);
+    instrument.SetControl(SynthControl::kGain, gain);
     instrument.SetControl(SynthControl::kOscillatorType, type);
     instrument.SetControl(SynthControl::kAttack, attack);
     instrument.SetControl(SynthControl::kRelease, release);
-    set_note_callbacks_fn(instruments.size(), &instrument);
+    set_note_callbacks_fn(instruments.size(), instrument);
   };
 
   // Add synth instruments.
@@ -268,47 +285,26 @@ int main(int /*argc*/, char* argv[]) {
   // Add percussion instrument.
   instruments.push_back(musician.CreateInstrument(
       PercussionInstrument::GetDefinition(), kFrameRate));
-  gains.push_back(0.2);
-  set_note_callbacks_fn(instruments.size(), &instruments.back());
   auto& percussion = instruments.back();
+  percussion.SetControl(PercussionControl::kGain, 0.25);
+  set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::unordered_map<double, std::string>& percussion_map) {
-        std::unordered_map<double, WavFile> percussion_files;
-        for (const auto& [index, name] : percussion_map) {
-          auto it = percussion_files.emplace(index, WavFile{});
-          const std::string path =
-              runfiles->Rlocation(kDrumsBaseFilename + name);
-          const bool success = it.first->second.Load(path);
-          assert(success);
+        std::vector<double> data;
+        data.push_back(static_cast<double>(percussion_map.size()));
+        for (const auto& [pitch, file_path] : percussion_map) {
+          InsertPadData(
+              pitch, runfiles->Rlocation(kDrumsBaseFilename + file_path), data);
         }
-        std::vector<std::byte> data;
-        for (const auto& [pitch, file] : percussion_files) {
-          const int size = static_cast<int>(data.size());
-          const int frequency = file.GetFrameRate();
-          const int length = static_cast<int>(file.GetData().size());
-          const double* voice_data = file.GetData().data();
-          data.resize(size + sizeof(double) + sizeof(int) + sizeof(int) +
-                      sizeof(double) * length);
-          std::byte* back = &data[size];
-          std::memcpy(back, reinterpret_cast<const void*>(&pitch),
-                      sizeof(double));
-          back += sizeof(double);
-          std::memcpy(back, reinterpret_cast<const void*>(&frequency),
-                      sizeof(int));
-          back += sizeof(int);
-          std::memcpy(back, reinterpret_cast<const void*>(&length),
-                      sizeof(int));
-          back += sizeof(int);
-          std::memcpy(back, reinterpret_cast<const void*>(voice_data),
-                      sizeof(double) * length);
-        }
-        percussion.SetData(data.data(), static_cast<int>(data.size()));
+        percussion.SetData(data.data(),
+                           static_cast<int>(data.size()) * sizeof(double));
       };
-  set_percussion_pad_map_fn(
-      {{barely::kPitchKick, "basic_kick.wav"},
-       {barely::kPitchSnare, "basic_snare.wav"},
-       {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
-       {barely::kPitchHihatOpen, "basic_hihat_open.wav"}});
+  set_percussion_pad_map_fn({
+      {barely::kPitchKick, "basic_kick.wav"},
+      {barely::kPitchSnare, "basic_snare.wav"},
+      {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
+      {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
+  });
   const auto percussion_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int /*harmonic*/, double offset,
           Instrument& instrument, Performer& performer) {
@@ -354,15 +350,11 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<double> temp_buffer(kChannelCount * kFrameCount);
   const auto process_callback = [&](double* output) {
     std::fill_n(output, kChannelCount * kFrameCount, 0.0);
-    int i = 0;
     for (auto& instrument : instruments) {
-      const double gain = gains[i++];
       instrument.Process(temp_buffer.data(), kChannelCount, kFrameCount,
                          clock.GetTimestamp());
       std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
-                     [&](double sample, double output_sample) {
-                       return gain * sample + output_sample;
-                     });
+                     std::plus<double>());
     }
     clock.Update(kFrameCount);
   };
@@ -408,18 +400,20 @@ int main(int /*argc*/, char* argv[]) {
         ConsoleLog() << "Tempo reset to " << kTempo;
         break;
       case 'D':
-        set_percussion_pad_map_fn(
-            {{barely::kPitchKick, "basic_kick.wav"},
-             {barely::kPitchSnare, "basic_snare.wav"},
-             {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
-             {barely::kPitchHihatOpen, "basic_hihat_open.wav"}});
+        set_percussion_pad_map_fn({
+            {barely::kPitchKick, "basic_kick.wav"},
+            {barely::kPitchSnare, "basic_snare.wav"},
+            {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
+            {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
+        });
         break;
       case 'H':
-        set_percussion_pad_map_fn(
-            {{barely::kPitchKick, "basic_hihat_closed.wav"},
-             {barely::kPitchSnare, "basic_hihat_open.wav"},
-             {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
-             {barely::kPitchHihatOpen, "basic_hihat_open.wav"}});
+        set_percussion_pad_map_fn({
+            {barely::kPitchKick, "basic_hihat_closed.wav"},
+            {barely::kPitchSnare, "basic_hihat_open.wav"},
+            {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
+            {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
+        });
         break;
     }
   };

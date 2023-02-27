@@ -20,7 +20,8 @@ class PolyphonicVoice {
   /// Constructs new `PolyphonicVoice` with the given `base_voice`.
   ///
   /// @param base_voice Base voice type to be used.
-  explicit PolyphonicVoice(VoiceType&& base_voice) noexcept;
+  /// @param max_voice_count Maximum number of voices allowed to be set.
+  PolyphonicVoice(VoiceType&& base_voice, int max_voice_count) noexcept;
 
   /// Returns the next output sample for the given output `channel`.
   ///
@@ -67,8 +68,11 @@ class PolyphonicVoice {
 };
 
 template <class VoiceType>
-PolyphonicVoice<VoiceType>::PolyphonicVoice(VoiceType&& base_voice) noexcept
-    : base_voice_(std::move(base_voice)) {}
+PolyphonicVoice<VoiceType>::PolyphonicVoice(VoiceType&& base_voice,
+                                            int max_voice_count) noexcept
+    : base_voice_(std::move(base_voice)) {
+  voices_.reserve(max_voice_count);
+}
 
 template <class VoiceType>
 double PolyphonicVoice<VoiceType>::Next(int channel) noexcept {

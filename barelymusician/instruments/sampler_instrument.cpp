@@ -16,8 +16,16 @@ BarelyInstrumentDefinition BarelySamplerInstrument_GetDefinition() {
 
 namespace barely {
 
+namespace {
+
+// Maximum number of voices allowed to be set.
+constexpr int kMaxVoiceCount = 64;
+
+}  // namespace
+
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
-    : voice_(SamplerVoice(frame_rate)), gain_processor_(frame_rate) {}
+    : voice_(SamplerVoice(frame_rate), kMaxVoiceCount),
+      gain_processor_(frame_rate) {}
 
 void SamplerInstrument::Process(double* output_samples,
                                 int output_channel_count,
@@ -113,7 +121,7 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
       // Release.
       ControlDefinition{0.25, 0.0, 60.0},
       // Number of voices.
-      ControlDefinition{8, 1, 64},
+      ControlDefinition{8, 1, kMaxVoiceCount},
   };
   return GetInstrumentDefinition<SamplerInstrument>(control_definitions, {});
 }

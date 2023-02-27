@@ -61,7 +61,7 @@ namespace Barely {
           data[frame + 1] += (double)sampleData[frame * _sample.channels + channel];
         }
       }
-      // Write into unmanaged pointer.
+      // Write into an unmanaged pointer.
       int size = data.Length * sizeof(double);
       IntPtr dataPtr = Marshal.AllocHGlobal(size);
       Marshal.Copy(data, 0, dataPtr, data.Length);

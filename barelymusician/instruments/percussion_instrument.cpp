@@ -17,9 +17,22 @@ BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinition() {
 
 namespace barely {
 
+namespace {
+
+// Maximum number of pads allowed to be set.
+constexpr int kMaxPadCount = 64;
+
+// Default pad release in seconds.
+constexpr double kDefaultPadRelease = 0.1;
+
+}  // namespace
+
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
-    : pads_{Pad(frame_rate), Pad(frame_rate), Pad(frame_rate), Pad(frame_rate)},
-      gain_processor_(frame_rate) {}
+    : frame_rate_(frame_rate),
+      gain_processor_(frame_rate),
+      release_(kDefaultPadRelease) {
+  pads_.reserve(kMaxPadCount);
+}
 
 void PercussionInstrument::Process(double* output_samples,
                                    int output_channel_count,
@@ -30,7 +43,7 @@ void PercussionInstrument::Process(double* output_samples,
       mono_sample += pad.voice.Next(0);
     }
     for (int channel = 0; channel < output_channel_count; ++channel) {
-      output_samples[output_channel_count * frame + channel] = mono_sample;
+      output_samples[frame * output_channel_count + channel] = mono_sample;
     }
   }
   gain_processor_.Process(output_samples, output_channel_count,
@@ -44,31 +57,31 @@ void PercussionInstrument::SetControl(int index, double value,
       gain_processor_.SetGain(value);
       break;
     case PercussionControl::kRelease:
+      release_ = value;
       for (auto& pad : pads_) {
-        pad.voice.envelope().SetRelease(value);
+        pad.voice.envelope().SetRelease(release_);
       }
       break;
   }
 }
 
-void PercussionInstrument::SetData(const void* data, int /*size*/) noexcept {
-  for (int i = 0; i < kPadCount; ++i) {
-    if (data) {
-      // Pad data is sequentially aligned by pitch, frequency, length and data.
-      const double pitch = *reinterpret_cast<const double*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(double);
-      const int frequency = *reinterpret_cast<const int*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(int);
-      const int length = *reinterpret_cast<const int*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(int);
-      const double* voice_data = reinterpret_cast<const double*>(data);
-      data = static_cast<const std::byte*>(data) + sizeof(double) * length;
-      pads_[i].pitch = pitch;
-      pads_[i].voice.generator().SetData(voice_data, frequency, length);
-    } else {
-      pads_[i].pitch = 0.0;
-      pads_[i].voice.generator().SetData(nullptr, 0, 0);
-    }
+void PercussionInstrument::SetData(const void* data,
+                                   [[maybe_unused]] int size) noexcept {
+  const double* data_double = static_cast<const double*>(data);
+  if (!data_double) {
+    pads_.clear();
+    return;
+  }
+  const int voice_count = static_cast<int>(*data_double++);
+  pads_.resize(voice_count, Pad(frame_rate_));
+  for (int i = 0; i < static_cast<int>(pads_.size()); ++i) {
+    // Pad data is sequentially aligned by pitch, frequency, length and data.
+    pads_[i].pitch = static_cast<double>(*data_double++);
+    const int frequency = static_cast<int>(static_cast<double>(*data_double++));
+    const int length = static_cast<int>(static_cast<double>(*data_double++));
+    pads_[i].voice.generator().SetData(data_double, frequency, length);
+    pads_[i].voice.envelope().SetRelease(release_);
+    data_double += length;
   }
 }
 
@@ -96,7 +109,7 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
       // Gain.
       ControlDefinition{1.0, 0.0, 1.0},
       // Pad release.
-      ControlDefinition{0.1, 0.0, 60.0},
+      ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
   };
   return GetInstrumentDefinition<PercussionInstrument>(control_definitions, {});
 }

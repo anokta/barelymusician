@@ -53,7 +53,7 @@ std::vector<double> GetSampleData(const std::string& file_path) {
   assert(success);
 
   const double frame_rate = static_cast<double>(sample_file.GetFrameRate());
-  const auto sample_data = sample_file.GetData();
+  const auto& sample_data = sample_file.GetData();
 
   std::vector<double> data;
   data.reserve(sample_data.size() + 1);

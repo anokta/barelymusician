@@ -33,7 +33,6 @@ BarelyPercussionInstrument_GetDefinition();
 // NOLINTEND
 
 #ifdef __cplusplus
-#include <array>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -76,15 +75,16 @@ class PercussionInstrument : public CustomInstrument {
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
-  static constexpr int kPadCount = 4;
   struct Pad {
     explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
 
     double pitch = 0.0;
     EnvelopedVoice<SamplePlayer> voice;
   };
-  std::array<Pad, kPadCount> pads_;
+  int frame_rate_;
+  std::vector<Pad> pads_;
   GainProcessor gain_processor_;
+  double release_;
 };
 
 }  // namespace barely

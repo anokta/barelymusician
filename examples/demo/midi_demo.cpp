@@ -115,7 +115,7 @@ int main(int /*argc*/, char* argv[]) {
 
   MidiFile midi_file;
   const std::string midi_file_path = runfiles->Rlocation(kMidiFileName);
-  const bool success = midi_file.read(midi_file_path);
+  [[maybe_unused]] const bool success = midi_file.read(midi_file_path);
   assert(success && midi_file.isAbsoluteTicks());
   midi_file.linkNotePairs();
 

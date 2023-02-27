@@ -24,3 +24,14 @@ add_library(
   include INTERFACE
   barelymusician.h
 )
+
+add_executable(
+  barelymusician_test
+  barelymusician_test.cpp
+)
+target_link_libraries(
+  barelymusician_test
+  barelymusician
+  gtest_main
+)
+gtest_discover_tests(barelymusician_test)

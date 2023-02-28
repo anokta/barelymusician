@@ -57,7 +57,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  // Create metronome instrument.
+  // Create the metronome instrument.
   Instrument instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthControl::kGain, kGain);
@@ -66,15 +66,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
-  // Add beat event.
+  // Create the metronome with a beat callback.
   Metronome metronome = musician.CreateComponent<Metronome>();
   metronome.SetBeatCallback([&](int beat) {
-    ConsoleLog() << "Tick " << (beat / kBeatCount) << "."
-                 << (beat % kBeatCount);
-    const double pitch = (beat % kBeatCount == 0) ? kBarPitch : kBeatPitch;
+    const int current_bar = (beat / kBeatCount) + 1;
+    const int current_beat = (beat % kBeatCount) + 1;
+    ConsoleLog() << "Tick " << current_bar << "." << current_beat;
+    const double pitch = current_beat == 1 ? kBarPitch : kBeatPitch;
     instrument.SetNoteOn(pitch);
     instrument.SetNoteOff(pitch);
-    ++beat;
   });
 
   // Audio process callback.
@@ -99,15 +99,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       case ' ':
         if (metronome.IsPlaying()) {
           metronome.Stop();
-          ConsoleLog() << "Stopped playback";
+          ConsoleLog() << "Metronome stopped";
         } else {
           metronome.Start();
-          ConsoleLog() << "Started playback";
+          ConsoleLog() << "Metronome started";
         }
         return;
       case '\r':
         metronome.Reset();
-        ConsoleLog() << "Reset playback";
+        ConsoleLog() << "Metronome reset";
         return;
       case 'O':
         tempo -= kTempoIncrement;
@@ -127,6 +127,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       default:
         return;
     }
+    tempo = std::clamp(tempo, 0.0, static_cast<double>(kFrameRate));
     musician.SetTempo(tempo);
     ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };
@@ -136,6 +137,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   ConsoleLog() << "Starting audio stream";
   audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
   metronome.Start();
+
+  ConsoleLog() << "Play the metronome using the keyboard keys:";
+  ConsoleLog() << "  * Use space key to start or stop the metronome";
+  ConsoleLog() << "  * Use enter key to reset the metronome";
+  ConsoleLog() << "  * Use 12 keys to halve and double the tempo";
+  ConsoleLog() << "  * Use OP keys to increment and decrement the tempo";
+  ConsoleLog() << "  * Use R key to reset the tempo";
 
   while (!quit) {
     input_manager.Update();

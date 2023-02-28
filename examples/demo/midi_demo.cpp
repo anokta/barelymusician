@@ -137,13 +137,13 @@ int main(int /*argc*/, char* argv[]) {
         musician.CreatePerformer());
     Instrument& instrument = tracks.back().first;
     Performer& performer = tracks.back().second;
-    // Build score.
+    // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
       tracks.pop_back();
       continue;
     }
-    // Set instrument.
+    // Set the instrument settings.
     const auto track_index = tracks.size();
     instrument.SetNoteOnEventCallback(
         [track_index](double pitch, double intensity) {
@@ -166,13 +166,13 @@ int main(int /*argc*/, char* argv[]) {
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 
   // Audio process callback.
-  std::vector<double> temp_buffer(kChannelCount * kFrameCount);
+  std::vector<double> mix_buffer(kChannelCount * kFrameCount);
   const auto process_callback = [&](double* output) {
     std::fill_n(output, kChannelCount * kFrameCount, 0.0);
     for (auto& [instrument, performer] : tracks) {
-      instrument.Process(temp_buffer.data(), kChannelCount, kFrameCount,
+      instrument.Process(mix_buffer.data(), kChannelCount, kFrameCount,
                          clock.GetTimestamp());
-      std::transform(temp_buffer.cbegin(), temp_buffer.cend(), output, output,
+      std::transform(mix_buffer.begin(), mix_buffer.end(), output, output,
                      std::plus<double>());
     }
     clock.Update(kFrameCount);

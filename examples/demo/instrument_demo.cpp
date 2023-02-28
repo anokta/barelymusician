@@ -41,7 +41,7 @@ constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
                                               'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr double kMaxOffsetOctaves = 3.0;
 
-// Returns the pitch for the given `key`.
+// Returns the pitch for a given `key`.
 std::optional<double> PitchFromKey(const InputManager::Key& key) {
   const auto it =
       std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
@@ -80,7 +80,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount, 0.0);
+    instrument.Process(output, kChannelCount, kFrameCount, /*timestamp=*/0.0);
   });
 
   // Key down callback.
@@ -94,9 +94,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
 
-    // Shift octaves.
     const auto upper_key = std::toupper(key);
     if (upper_key == 'Z' || upper_key == 'X') {
+      // Shift octaves.
       instrument.SetAllNotesOff();
       if (upper_key == 'Z') {
         --offset_octaves;
@@ -109,13 +109,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     if (upper_key == 'C' || upper_key == 'V') {
+      // Change intensity.
       if (upper_key == 'C') {
         intensity -= 0.25;
       } else {
         intensity += 0.25;
       }
       intensity = std::clamp(intensity, 0.0, 1.0);
-      ConsoleLog() << "Note velocity set to " << intensity;
+      ConsoleLog() << "Note intensity set to " << intensity;
       return;
     }
 
@@ -140,10 +141,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
 
   ConsoleLog() << "Play the instrument using the keyboard keys:";
-  ConsoleLog() << "  * Use ASDFFGHJK to play the white notes in an octave";
-  ConsoleLog() << "  * Use WETYU to play the black notes in an octave";
-  ConsoleLog() << "  * Use ZX to set the octave up and down";
-  ConsoleLog() << "  * Use CV to to set the note velocity up and down";
+  ConsoleLog() << "  * Use ASDFFGHJK keys to play the white notes in an octave";
+  ConsoleLog() << "  * Use WETYU keys to play the black notes in an octave";
+  ConsoleLog() << "  * Use ZX keys to set the octave up and down";
+  ConsoleLog() << "  * Use CV keys to to set the note intensity up and down";
 
   while (!quit) {
     input_manager.Update();

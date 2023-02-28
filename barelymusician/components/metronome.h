@@ -42,7 +42,7 @@ class Metronome {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit Metronome(Musician& musician, int process_order = -1) noexcept;
 
-  // Metonome performer.
+  // Performer.
   Performer performer_;
 
   // Current beat.

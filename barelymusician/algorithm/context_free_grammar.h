@@ -65,8 +65,8 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
       const auto* substitution = GetSubstitution(*substitutions, random);
       sequence.erase(std::next(sequence.begin(), i));
       if (substitution) {
-        sequence.insert(std::next(sequence.begin(), i), substitution->cbegin(),
-                        substitution->cend());
+        sequence.insert(std::next(sequence.begin(), i), substitution->begin(),
+                        substitution->end());
       }
     } else {
       ++i;

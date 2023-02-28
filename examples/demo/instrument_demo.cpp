@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <iterator>
+#include <iomanip>
 #include <optional>
 #include <thread>
 
@@ -37,19 +37,19 @@ constexpr int kVoiceCount = 16;
 
 // Note settings.
 constexpr double kRootPitch = barely::kPitchC3;
-constexpr char kOctaveKeys[] = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
-                                'G', 'Y', 'H', 'U', 'J', 'K'};
+constexpr std::array<char, 13> kOctaveKeys = {'A', 'W', 'S', 'E', 'D', 'F', 'T',
+                                              'G', 'Y', 'H', 'U', 'J', 'K'};
 constexpr double kMaxOffsetOctaves = 3.0;
 
 // Returns the pitch for the given `key`.
 std::optional<double> PitchFromKey(const InputManager::Key& key) {
-  const auto* it = std::find(std::cbegin(kOctaveKeys), std::cend(kOctaveKeys),
-                             std::toupper(key));
-  if (it == std::cend(kOctaveKeys)) {
+  const auto it =
+      std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
+  if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
   const double distance =
-      static_cast<double>(std::distance(std::cbegin(kOctaveKeys), it));
+      static_cast<double>(std::distance(kOctaveKeys.begin(), it));
   return kRootPitch + distance / barely::kSemitoneCount;
 }
 
@@ -71,10 +71,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
   instrument.SetNoteOnEventCallback([](double pitch, double intensity) {
-    ConsoleLog() << "NoteOn(" << pitch << ", " << intensity << ")";
+    ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", "
+                 << intensity << ")";
   });
-  instrument.SetNoteOffEventCallback(
-      [](double pitch) { ConsoleLog() << "NoteOff(" << pitch << ") "; });
+  instrument.SetNoteOffEventCallback([](double pitch) {
+    ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") ";
+  });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
@@ -82,6 +84,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   // Key down callback.
+  double intensity = 1.0;
   double offset_octaves = 0.0;
   bool quit = false;
   const auto key_down_callback = [&](const InputManager::Key& key) {
@@ -105,10 +108,20 @@ int main(int /*argc*/, char* /*argv*/[]) {
       ConsoleLog() << "Octave offset set to " << offset_octaves;
       return;
     }
+    if (upper_key == 'C' || upper_key == 'V') {
+      if (upper_key == 'C') {
+        intensity -= 0.25;
+      } else {
+        intensity += 0.25;
+      }
+      intensity = std::clamp(intensity, 0.0, 1.0);
+      ConsoleLog() << "Note velocity set to " << intensity;
+      return;
+    }
 
     // Play note.
     if (const auto pitch = PitchFromKey(key)) {
-      instrument.SetNoteOn(offset_octaves + *pitch);
+      instrument.SetNoteOn(offset_octaves + *pitch, intensity);
     }
   };
   input_manager.SetKeyDownCallback(key_down_callback);
@@ -125,6 +138,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   // Start the demo.
   ConsoleLog() << "Starting audio stream";
   audio_output.Start(kFrameRate, kChannelCount, kFrameCount);
+
+  ConsoleLog() << "Play the instrument using the keyboard keys:";
+  ConsoleLog() << "  * Use ASDFFGHJK to play the white notes in an octave";
+  ConsoleLog() << "  * Use WETYU to play the black notes in an octave";
+  ConsoleLog() << "  * Use ZX to set the octave up and down";
+  ConsoleLog() << "  * Use CV to to set the note velocity up and down";
 
   while (!quit) {
     input_manager.Update();

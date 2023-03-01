@@ -80,7 +80,7 @@
 ///
 ///   // Set a note on.
 ///   //
-///   // Pitch values are normalized, where each `1.0` shifts an octave, and
+///   // Pitch values are normalized, where each `1.0` shifts one octave, and
 ///   // `0.0` represents the middle A (A4) for a typical instrument definition.
 ///   // However, this is not a strict rule, since both `pitch` and `intensity`
 ///   // values can be interpreted in any desired way by a custom instrument.
@@ -868,7 +868,7 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 ///
 ///   // Set a note on.
 ///   //
-///   // Pitch values are normalized, where each `1.0` shifts an octave, and
+///   // Pitch values are normalized, where each `1.0` shifts one octave, and
 ///   // `0.0` represents the middle A (A4) for a typical instrument definition.
 ///   // However, this is not a strict rule, since both `pitch` and `intensity`
 ///   // values can be interpreted in any desired way by a custom instrument.

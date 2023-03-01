@@ -3,17 +3,37 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 package(default_visibility = ["//visibility:public"])
 
 # Android plugin (rename this to libbarelymusicianunity.so).
+ANDROID_LINKOPTS = [
+    "-ldl",
+    "-lm",
+    "-Wl,--version-script",
+    "$(location //unity:unity_android.lds)",
+    "-z defs",
+]
+
+config_setting(
+    name = "android_arm64",
+    values = {
+        "cpu": "arme64-v8a",
+    },
+)
+
+config_setting(
+    name = "android_armv7",
+    values = {
+        "cpu": "armeabi-v7a",
+    },
+)
+
 cc_binary(
     name = "libunity_android.so",
-    linkopts = [
-        "-lm",
-        "-Wl,--version-script",
-        "$(location //unity:unity_android.lds)",
-        "-z defs",
-    ],
+    linkopts =
+        select({
+            ":android_arm64": ANDROID_LINKOPTS,
+            ":android_armv7": ANDROID_LINKOPTS,
+            "//conditions:default": [],
+        }),
     linkshared = True,
-    # TODO(#111): This is a temporary check to disable Android builds.
-    target_compatible_with = ["@platforms//os:android"],
     deps = [
         ":unity_android.lds",
         "//barelymusician",

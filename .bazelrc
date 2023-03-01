@@ -19,19 +19,14 @@ common:windows --cxxopt=-W4
 common:windows --cxxopt=-WX
 
 # android configs.
-common:android_arm64-v8a --cxxopt=-std=c++2a
-common:android_arm64-v8a --cxxopt=-Wall
-common:android_arm64-v8a --cxxopt=-Wextra
-common:android_arm64-v8a --cxxopt=-Wno-missing-field-initializers
-common:android_arm64-v8a --cxxopt=-Werror
-common:android_arm64-v8a --crosstool_top=@androidndk//:default_crosstool
+common:android --cxxopt=-std=c++2a
+common:android --cxxopt=-Wall
+common:android --cxxopt=-Wextra
+common:android --cxxopt=-Wno-missing-field-initializers
+common:android --cxxopt=-Werror
+common:android --crosstool_top=@androidndk//:default_crosstool
+common:android --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
+common:android_arm64-v8a --config=android
 common:android_arm64-v8a --cpu=arm64-v8a
-common:android_arm64-v8a --host_crosstool_top=@bazel_tools//tools/cpp:toolchain
-common:android_armeabi-v7a --cxxopt=-std=c++2a
-common:android_armeabi-v7a --cxxopt=-Wall
-common:android_armeabi-v7a --cxxopt=-Wextra
-common:android_armeabi-v7a --cxxopt=-Wno-missing-field-initializers
-common:android_armeabi-v7a --cxxopt=-Werror
-common:android_armeabi-v7a --crosstool_top=@androidndk//:default_crosstool
+common:android_armeabi-v7a --config=android
 common:android_armeabi-v7a --cpu=armeabi-v7a
-common:android_armeabi-v7a --host_crosstool_top=@bazel_tools//tools/cpp:toolchain

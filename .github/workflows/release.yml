@@ -1,9 +1,49 @@
 name: release
 
-on: workflow_dispatch
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
 
-# TODO(#94): Create a tagged release with `unitypackage` and native libraries.
 jobs:
+  examples:
+    name: examples on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r21e
+      - name: install
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update && sudo apt-get install -y libasound-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
+      # TODO(#94): Build all demos (which require `//examples/data`).
+      - name: build
+        shell: bash
+        run: |
+          bazel build -c opt \
+            //examples/demo:instrument_demo //examples/demo:metronome_demo
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+      - uses: actions/upload-artifact@v3
+        with:
+          name: examples-${{ matrix.os }}
+          path: |
+            bazel-bin/examples/demo/instrument_demo
+            bazel-bin/examples/demo/instrument_demo.exe
+            bazel-bin/examples/demo/metronome_demo
+            bazel-bin/examples/demo/metronome_demo.exe
+
   unity:
     name: unity on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -13,7 +53,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
@@ -25,6 +65,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10
       - name: build
+        shell: bash
         run: |
           chmod +x ./unity/build.sh
           ./unity/build.sh
@@ -32,8 +73,46 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - uses: actions/upload-artifact@v3
         with:
-          name: unity-${{ matrix.os }}-${{ github.sha }}
-          path: |
-            bazel-bin/unity/libunity_linux.so
-            bazel-bin/unity/unity_osx.dylib
-            bazel-bin/unity/unity_windows.dll
+          name: unity-${{ matrix.os }}
+          path: unity/Assets/BarelyMusician/Plugins
+
+  deploy:
+    name: artifacts
+    needs: [examples, unity]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          path: temp
+      - name: examples
+        shell: bash
+        run: |
+          mkdir -p artifacts/examples/demo
+          for file in temp/examples-macos*/*_demo; do
+            mv -f "${file}" "${file}".app
+          done
+          for dir in temp/examples-*/; do
+            cp -rf "${dir}"* artifacts/examples/demo/
+          done
+      - name: unity
+        shell: bash
+        run: |
+          mkdir -p artifacts/unity
+          for dir in temp/unity-*/; do
+            cp -rf "${dir}"* unity/Assets/BarelyMusician/Plugins/
+          done
+          cd unity
+          find Assets/ -name \*.meta >> meta
+      - uses: pCYSl5EDgo/create-unitypackage@master
+        with:
+          package-path: barelymusician.unitypackage
+          include-files: unity/meta
+          project-folder: unity
+      - run: |
+          cp unity/barelymusician.unitypackage artifacts/unity/
+      - uses: actions/upload-artifact@master
+        with:
+          name: artifacts-${{ github.sha }}
+          path: artifacts
+

@@ -106,11 +106,10 @@ jobs:
           find Assets/ -name \*.meta >> meta
       - uses: pCYSl5EDgo/create-unitypackage@master
         with:
-          package-path: barelymusician.unitypackage
+          package-path: |
+            ${{ github.workspace }}/artifacts/unity/barelymusician.unitypackage
           include-files: unity/meta
           project-folder: unity
-      - run: |
-          cp unity/barelymusician.unitypackage artifacts/unity/
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-${{ github.sha }}

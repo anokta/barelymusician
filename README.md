@@ -18,8 +18,6 @@ For background about this project, see the original research paper
 [here](http://www.aes.org/e-lib/browse.cfm?elib=17598), and the legacy Unity
 implementation [here](https://github.com/anokta/barelyMusicianLegacy).
 
-![alt text](https://github.com/anokta/barelymusician/raw/main/barelymusician.gif)
-
 ## Example usage
 
 ```cpp

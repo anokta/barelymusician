@@ -24,6 +24,21 @@ namespace Barely {
       get { return Internal.Musician_GetTimestamp(); }
     }
 
+    /// Returns the corresponding midi key for a given `pitch`.
+    ///
+    /// @param pitch Note pitch.
+    /// @return Midi key.
+    public static int MidiKeyFromPitch(double pitch) {
+      return 69 + (int)(pitch * 12.0);
+    }
+
+    /// Returns the corresponding pitch for a given `midiKey`.
+    /// @param midiKey Midi key.
+    /// @param Note pitch.
+    public static double PitchFromMidiKey(int midiKey) {
+      return (double)(midiKey - 69) / 12.0;
+    }
+
     /// Schedules a task at a specific time.
     ///
     /// @param callback Task process callback.

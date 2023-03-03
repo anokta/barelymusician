@@ -5,18 +5,19 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// Simple percussion instrument.
+  /// A representation of a simple sample-based percussion instrument.
   public class PercussionInstrument : Instrument {
     /// Percussion pad.
     [Serializable]
     public class Pad {
-      /// Note key.
+      /// Note key in MIDI representation.
+      [Range(0, 127)]
       public int Key = 0;
 
       /// Sample.
       public AudioClip Sample = null;
 
-      /// Data.
+      /// Internal data.
       public double[] Data {
         get {
           if (_data == null || HasChanged) {

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// Control definition.
+  /// Instrument control definition.
   public struct ControlDefinition {
     /// Default value.
     public double defaultValue;
@@ -15,9 +15,9 @@ namespace Barely {
     public double maxValue;
   }
 
-  /// Custom instrument definition.
+  /// Custom instrument definition that can be used to define new instruments.
   public interface CustomInstrumentDefinition {
-    /// Creates callback.
+    /// Create callback.
     ///
     /// @param frame_rate Frame rate in hertz.
     public void OnCreate(int frameRate);
@@ -65,13 +65,15 @@ namespace Barely {
     public void OnSetNoteOn(double pitch, double intensity);
   }
 
-  /// Custom instrument template.
+  /// Custom instrument template that implements a custom instrument.
+  ///
+  /// This template can be used to implement new instruments using a `CustomInstrumentDefinition`.
   public abstract class CustomInstrument<DefinitionType>
       : Instrument, Musician.Internal.CustomInstrumentInterface
       where DefinitionType : class, CustomInstrumentDefinition, new() {
-    /// Returns the definition.
+    /// Returns the internal definition.
     ///
-    /// @return Instrument definition.
+    /// @return Internal instrument definition.
     public Musician.Internal.InstrumentDefinition GetDefinition() {
       var controlDefinitions = GetControlDefinitions();
       var noteControlDefinitions = GetNoteControlDefinitions();

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Barely {
-  /// Performer.
+  /// A representation of a musical performer that can perform rhytmic tasks in real-time.
   public class Performer : MonoBehaviour {
     /// Recurring task.
     [Serializable]

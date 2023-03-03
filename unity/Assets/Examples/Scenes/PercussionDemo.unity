@@ -324,7 +324,7 @@ TextMesh:
   m_GameObject: {fileID: 1462435221}
   m_Text: 'play the instrument
 
-    by using keyboard'
+    using keyboard'
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1
@@ -456,13 +456,13 @@ MonoBehaviour:
   Gain: 1
   PadRelease: 1
   Pads:
-  - Key: 0
+  - Key: 69
     Sample: {fileID: 8300000, guid: cc970ecceb6bb9043b7f4837ef4324bc, type: 3}
-  - Key: 2
+  - Key: 71
     Sample: {fileID: 8300000, guid: e331d89e665ddcc46b61ac7bfeba636d, type: 3}
-  - Key: 4
+  - Key: 73
     Sample: {fileID: 8300000, guid: 1593abb0c692c4e4695269e18b179678, type: 3}
-  - Key: 5
+  - Key: 74
     Sample: {fileID: 8300000, guid: ccbc3b71159465647ac49f3271d2bb37, type: 3}
 --- !u!82 &1737834381
 AudioSource:

@@ -102,9 +102,11 @@ void ScheduleNote(double position, double duration, double pitch,
       [pitch, intensity, &instrument]() {
         instrument.SetNoteOn(pitch, intensity);
       },
-      /*is_one_off=*/true, position);
+      /*is_one_off=*/true, std::max(position, performer.GetPosition()));
   performer.CreateTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                       /*is_one_off=*/true, position + duration);
+                       /*is_one_off=*/true,
+                       std::max(position + duration, performer.GetPosition()),
+                       /*process_order=*/-1);
 }
 
 void ComposeChord(double intensity, int harmonic, double offset,
@@ -343,7 +345,7 @@ int main(int /*argc*/, char* argv[]) {
     }
   };
 
-  Metronome metronome = musician.CreateComponent<Metronome>();
+  Metronome metronome = musician.CreateComponent<Metronome>(-10);
   metronome.SetBeatCallback(beat_callback);
 
   // Audio process callback.

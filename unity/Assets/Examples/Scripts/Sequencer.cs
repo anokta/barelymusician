@@ -15,7 +15,7 @@ namespace Barely {
       public bool playOnAwake = true;
 
       [System.Serializable]
-      public struct Note {
+      public class Note {
         [Range(0, 127)]
         public int key;
         [Range(0.0f, 1.0f)]
@@ -24,8 +24,28 @@ namespace Barely {
         public double position;
         [Min(0.0f)]
         public double duration;
+        public bool muted;
       }
       public List<Note> notes = null;
+
+      public bool IsPlaying {
+        get { return _performer.IsPlaying; }
+      }
+
+      public void Play() {
+        _performer.Play();
+      }
+
+      public void Pause() {
+        _performer.Stop();
+        instrument.SetAllNotesOff();
+      }
+
+      public void Stop() {
+        _performer.Stop();
+        _performer.Position = 0.0;
+        instrument.SetAllNotesOff();
+      }
 
       private Performer _performer = null;
 
@@ -39,12 +59,15 @@ namespace Barely {
         _performer.Tasks.Clear();
         for (int i = 0; i < notes.Count; ++i) {
           var note = notes[i];
+          if (note.muted) {
+            continue;
+          }
           _performer.Tasks.Add(new Performer.Task(delegate() {
             var pitch = Musician.PitchFromMidiKey(note.key);
             instrument?.SetNoteOn(pitch, note.intensity);
             _performer.ScheduleTask(delegate() { instrument?.SetNoteOff(pitch); },
-                                    _performer.Position + note.duration, -1);
-          }, note.position));
+                                    _performer.Position + note.duration);
+          }, note.position, -1));
         }
         _performer.Loop = loop;
         _performer.LoopLength = loopLength;

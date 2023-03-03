@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// Simple polyphonic sampler instrument.
+  /// A representation of a simple sample-based polyphonic instrument with an envelope.
   public class SamplerInstrument : Instrument {
     /// Sample.
     public AudioClip Sample = null;
@@ -18,11 +18,11 @@ namespace Barely {
     /// Sample player loop.
     public bool Loop = false;
 
-    /// Envelope attack.
+    /// Envelope attack in seconds.
     [Range(0.0f, 60.0f)]
     public double Attack = 0.05;
 
-    /// Envelope decay.
+    /// Envelope decay in seconds.
     [Range(0.0f, 60.0f)]
     public double Decay = 0.0;
 
@@ -30,7 +30,7 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public double Sustain = 1.0;
 
-    /// Envelope release.
+    /// Envelope release in seconds.
     [Range(0.0f, 60.0f)]
     public double Release = 0.25;
 

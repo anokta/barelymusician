@@ -2,7 +2,7 @@
 using UnityEngine;
 
 namespace Barely {
-  /// Instrument.
+  /// A representation of a musical instrument that can be played in real-time.
   [RequireComponent(typeof(AudioSource))]
   public abstract class Instrument : MonoBehaviour {
     /// Audio source.
@@ -180,6 +180,13 @@ namespace Barely {
 
     protected virtual void Awake() {
       Source = GetComponent<AudioSource>();
+      Source.clip = AudioClip.Create("Ones", 64, 1, AudioSettings.outputSampleRate, false);
+      float[] ones = new float[64];
+      for (int i = 0; i < ones.Length; ++i) {
+        ones[i] = 1.0f;
+      }
+      Source.clip.SetData(ones, 0);
+      Source.loop = true;
     }
 
     protected virtual void OnDestroy() {

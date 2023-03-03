@@ -324,7 +324,7 @@ TextMesh:
   m_GameObject: {fileID: 764115874}
   m_Text: 'play the instrument
 
-    by using keyboard'
+    using keyboard'
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1

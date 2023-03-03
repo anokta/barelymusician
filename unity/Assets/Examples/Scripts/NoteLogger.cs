@@ -18,11 +18,12 @@ namespace Barely {
       }
 
       private void OnNoteOff(double pitch) {
-        Debug.Log(instrument.name + ": NoteOff(" + pitch + ")");
+        Debug.Log(instrument.name + ": NoteOff(" + pitch.ToString("F2") + ")");
       }
 
       private void OnNoteOn(double pitch, double intensity) {
-        Debug.Log(instrument.name + ": NoteOn(" + pitch + ", " + intensity + ")");
+        Debug.Log(instrument.name + ": NoteOn(" + pitch.ToString("F2") + ", " +
+                  intensity.ToString("F1") + ")");
       }
     }
   }  // namespace Examples

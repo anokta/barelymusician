@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 namespace Barely {
-  /// Oscillator type.
+  /// Synthesizer oscillator type.
   public enum OscillatorType {
     /// Sine wave.
     [InspectorName("Sine")] SINE = 0,
@@ -13,7 +13,7 @@ namespace Barely {
     [InspectorName("Noise")] NOISE = 3,
   }
 
-  /// Simple polyphonic synth instrument.
+  /// A representation of a simple polyphonic synthesizer instrument with an envelope.
   public class SynthInstrument : Instrument {
     /// Gain.
     [Range(0.0f, 1.0f)]
@@ -22,11 +22,11 @@ namespace Barely {
     /// Oscillator type.
     public OscillatorType OscillatorType = OscillatorType.SINE;
 
-    /// Envelope attack.
+    /// Envelope attack in seconds.
     [Range(0.0f, 60.0f)]
     public double Attack = 0.05;
 
-    /// Envelope decay.
+    /// Envelope decay in seconds.
     [Range(0.0f, 60.0f)]
     public double Decay = 0.0;
 
@@ -34,7 +34,7 @@ namespace Barely {
     [Range(0.0f, 1.0f)]
     public double Sustain = 1.0;
 
-    /// Envelope release.
+    /// Envelope release in seconds.
     [Range(0.0f, 60.0f)]
     public double Release = 0.25;
 

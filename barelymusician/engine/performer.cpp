@@ -141,7 +141,9 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     return;
   }
   if (const auto it = GetNextRecurringTask();
-      it != recurring_tasks_.end() && it->first.position == position_) {
+      it != recurring_tasks_.end() && it->first.position == position_ &&
+      (!last_processed_recurring_task_it_ ||
+       (*last_processed_recurring_task_it_)->first < it->first)) {
     // Process the next recurring task.
     it->second->Process();
     last_processed_recurring_task_it_ = it;

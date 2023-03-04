@@ -14,6 +14,9 @@ platforms[*][iOS], in addition to a native Unity game engine plugin. The library
 targets can be built with Bazel or CMake. To use in a project, simply include
 [barelymusician/barelymusician.h](barelymusician/barelymusician.h).
 
+To use in Unity, download the latest version of
+[barelymusician.unitypackage](https://github.com/anokta/barelymusician/releases/latest/download/barelymusician.unitypackage).
+
 For background about this project, see the original research paper
 [here](http://www.aes.org/e-lib/browse.cfm?elib=17598), and the legacy Unity
 implementation [here](https://github.com/anokta/barelyMusicianLegacy).

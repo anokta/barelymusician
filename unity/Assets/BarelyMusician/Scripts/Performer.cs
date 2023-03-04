@@ -47,8 +47,11 @@ namespace Barely {
       /// @param callback Task process callback.
       /// @param position Task position in beats.
       /// @param processOrder Task process order.
-      public Task(Action callback, double position, int processOrder = 0) {
+      /// @param onProcessEvent Task process event.
+      public Task(Action callback, double position, int processOrder = 0,
+                  UnityEngine.Events.UnityEvent onProcessEvent = null) {
         OnProcess = callback;
+        OnProcessEvent = onProcessEvent;
         _position = position;
         _processOrder = processOrder;
       }

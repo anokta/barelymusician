@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// A representation of a musician that governs the tempo of all musical components.
+  /// A representation of a musician that governs the tempo for all musical components.
   public static class Musician {
     /// Tempo in beats per minute.
     public static double Tempo {

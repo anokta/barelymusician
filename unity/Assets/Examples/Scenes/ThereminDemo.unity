@@ -399,9 +399,9 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1897443419}
-  m_Text: 'play the theremin
+  m_Text: 'touch the screen
 
-    by touching the screen'
+    to play the theremin'
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1

@@ -11,7 +11,8 @@ scratch in a sample accurate way.
 [iOS]: ## "see issue #112 for the status of the upcoming iOS platform support"
 This repository includes build targets for Linux, OSX, Windows and Android
 platforms[*][iOS], in addition to a native Unity game engine plugin. The library
-targets can be built with Bazel or CMake. To use in a project, simply include
+targets can be built with [Bazel](https://bazel.build/) or
+[CMake](https://cmake.org/). To use in a project, simply include
 [barelymusician/barelymusician.h](barelymusician/barelymusician.h).
 
 To use in Unity, download the latest version of

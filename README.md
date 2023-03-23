@@ -58,7 +58,7 @@ instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
 // Check if the instrument note is on.
 const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 
-// Update the musician timestamp.
+// Update the musician timestamp in seconds.
 //
 // @note Timestamp updates must happen prior to processing of instruments with
 // respective timestamps. Otherwise, such `Process` calls will be *late* to
@@ -66,8 +66,9 @@ const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 // be called from a main thread update callback, with an additional "lookahead",
 // in order to avoid any potential thread synchronization issues that could
 // occur in real-time audio applications.
+const double lookahead = 0.1;
 double timestamp = 0.0;
-musician.Update(0.0);
+musician.Update(timestamp + lookahead);
 
 // Process the next output samples of the synth instrument.
 //

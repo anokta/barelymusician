@@ -27,11 +27,11 @@ add_library(
 if (MSVC)
   target_link_options(
     input_manager
-    -l user32.lib
+    PUBLIC -l user32.lib
   )
 elseif (APPLE)
   target_link_options(
     input_manager
-    -framework ApplicationServices
+    PUBLIC -framework ApplicationServices
   )
 endif ()

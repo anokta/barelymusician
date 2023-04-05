@@ -1,0 +1,13 @@
+add_executable(
+  instrument_demo
+  instrument_demo.cpp
+)
+target_link_libraries(
+  instrument_demo
+  barelymusician
+  pitch
+  synth_instrument
+  audio_output
+  console_log
+  input_manager
+)

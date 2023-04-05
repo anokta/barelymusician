@@ -36,13 +36,20 @@ FetchContent_Declare(
   googletest
   URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
 )
+FetchContent_Declare(
+  portaudio
+  URL http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
+  URL_HASH  MD5=ad319249932c6794b551d954b8844402
+)
 if (MSVC)
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 endif ()
 FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(portaudio)
 include(GoogleTest)
 
 include_directories(.)
 
 add_subdirectory(barelymusician)
+add_subdirectory(examples)
 add_subdirectory(unity)

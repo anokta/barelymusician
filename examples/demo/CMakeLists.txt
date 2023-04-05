@@ -1,0 +1,60 @@
+add_executable(
+  instrument_demo
+  instrument_demo.cpp
+)
+target_link_libraries(
+  instrument_demo
+  barelymusician
+  pitch
+  synth_instrument
+  audio_output
+  console_log
+  input_manager
+)
+
+add_executable(
+  metronome_demo
+  metronome_demo.cpp
+)
+target_link_libraries(
+  metronome_demo
+  barelymusician
+  metronome
+  pitch
+  synth_instrument
+  audio_clock
+  audio_output
+  console_log
+  input_manager
+)
+
+add_executable(
+  sequencer_demo
+  sequencer_demo.cpp
+)
+target_link_libraries(
+  sequencer_demo
+  barelymusician
+  pitch
+  synth_instrument
+  audio_clock
+  audio_output
+  console_log
+  input_manager
+)
+
+add_executable(
+  trigger_demo
+  trigger_demo.cpp
+)
+target_link_libraries(
+  trigger_demo
+  barelymusician
+  pitch
+  synth_instrument
+  audio_clock
+  audio_output
+  console_log
+  input_manager
+)
+

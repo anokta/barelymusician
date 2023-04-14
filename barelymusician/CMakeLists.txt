@@ -25,13 +25,15 @@ add_library(
   barelymusician.h
 )
 
-add_executable(
-  barelymusician_test
-  barelymusician_test.cpp
-)
-target_link_libraries(
-  barelymusician_test
-  barelymusician
-  gtest_main
-)
-gtest_discover_tests(barelymusician_test)
+if (ENABLE_TESTS)
+  add_executable(
+    barelymusician_test
+    barelymusician_test.cpp
+  )
+  target_link_libraries(
+    barelymusician_test
+    barelymusician
+    gtest_main
+  )
+  gtest_discover_tests(barelymusician_test)
+endif()

@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.14)
 
 project(barelymusician)
 
+option(ENABLE_EXAMPLES "Build examples"  true)
+option(ENABLE_TESTS "Build tests" true)
+option(ENABLE_UNITY "Build unity" true)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 
@@ -32,35 +36,47 @@ endif ()
 
 include(FetchContent)
 
-enable_testing()
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG e2239ee6043f73722e7aa812a459f54a28552929
-)
-if (MSVC)
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-endif ()
-FetchContent_MakeAvailable(googletest)
-include(GoogleTest)
+if (ENABLE_TESTS)
+  enable_testing()
 
-FetchContent_Declare(
-  portaudio
-  GIT_REPOSITORY https://github.com/PortAudio/portaudio.git
-  GIT_TAG 147dd722548358763a8b649b3e4b41dfffbcfbb6
-)
-FetchContent_MakeAvailable(portaudio)
-target_compile_options(
-  portaudio
-  PUBLIC -w
-)
-target_compile_options(
-  portaudio_static
-  PUBLIC -w
-)
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG e2239ee6043f73722e7aa812a459f54a28552929
+  )
+  if (MSVC)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  endif ()
+  FetchContent_MakeAvailable(googletest)
+
+  include(GoogleTest)
+endif()
 
 include_directories(.)
 
 add_subdirectory(barelymusician)
-add_subdirectory(examples)
-add_subdirectory(unity)
+
+if (ENABLE_EXAMPLES)
+  add_compile_definitions(BARELYMUSICIAN_CMAKE)
+
+  FetchContent_Declare(
+    portaudio
+    GIT_REPOSITORY https://github.com/PortAudio/portaudio.git
+    GIT_TAG 147dd722548358763a8b649b3e4b41dfffbcfbb6
+  )
+  FetchContent_MakeAvailable(portaudio)
+  target_compile_options(
+    portaudio
+    PUBLIC -w
+  )
+  target_compile_options(
+    portaudio_static
+    PUBLIC -w
+  )
+
+  add_subdirectory(examples)
+endif()
+
+if (ENABLE_UNITY)
+  add_subdirectory(unity)
+endif()

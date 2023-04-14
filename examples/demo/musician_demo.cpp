@@ -25,7 +25,7 @@
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"
-#include "tools/cpp/runfiles/runfiles.h"
+#include "examples/data/data.h"
 
 namespace {
 
@@ -42,9 +42,9 @@ using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
+using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
-using ::bazel::tools::cpp::runfiles::Runfiles;
 
 // Beat composer callback signature.
 //
@@ -74,8 +74,7 @@ constexpr int kBeatCount = 3;
 // Ensemble settings.
 constexpr double kRootNote = barely::kPitchD3;
 
-constexpr char kDrumsBaseFilename[] =
-    "barelymusician/examples/data/audio/drums/";
+constexpr char kDrumsDir[] = "audio/drums/";
 
 // Inserts pad data to a given `data` from a given `file_path`.
 void InsertPadData(double pitch, const std::string& file_path,
@@ -202,9 +201,6 @@ void ComposeDrums(int bar, int beat, int beat_count, Random& random,
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
-  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
-  assert(runfiles);
-
   AudioOutput audio_output;
   InputManager input_manager;
 
@@ -295,8 +291,8 @@ int main(int /*argc*/, char* argv[]) {
         std::vector<double> data;
         data.push_back(static_cast<double>(percussion_map.size()));
         for (const auto& [pitch, file_path] : percussion_map) {
-          InsertPadData(
-              pitch, runfiles->Rlocation(kDrumsBaseFilename + file_path), data);
+          InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv),
+                        data);
         }
         percussion.SetData(data.data(),
                            static_cast<int>(data.size()) * sizeof(double));

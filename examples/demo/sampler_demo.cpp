@@ -13,7 +13,7 @@
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
 #include "examples/common/wav_file.h"
-#include "tools/cpp/runfiles/runfiles.h"
+#include "examples/data/data.h"
 
 namespace {
 
@@ -23,9 +23,9 @@ using ::barely::SamplerControl;
 using ::barely::SamplerInstrument;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
+using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
 using ::barely::examples::WavFile;
-using ::bazel::tools::cpp::runfiles::Runfiles;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -39,7 +39,7 @@ constexpr double kAttack = 0.0125;
 constexpr double kRelease = 0.125;
 constexpr int kVoiceCount = 16;
 
-constexpr char kSamplePath[] = "barelymusician/examples/data/audio/sample.wav";
+constexpr char kSamplePath[] = "audio/sample.wav";
 
 // Note settings.
 constexpr double kRootPitch = barely::kPitchC3;
@@ -79,9 +79,6 @@ std::optional<double> PitchFromKey(const InputManager::Key& key) {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
-  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
-  assert(runfiles);
-
   AudioOutput audio_output;
   InputManager input_manager;
 
@@ -96,7 +93,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerControl::kRelease, kRelease);
   instrument.SetControl(SamplerControl::kVoiceCount, kVoiceCount);
 
-  const auto data = GetSampleData(runfiles->Rlocation(kSamplePath));
+  const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));
   const int size = static_cast<int>(data.size() * sizeof(double));
   instrument.SetData(data.data(), size);
 

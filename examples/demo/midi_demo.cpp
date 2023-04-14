@@ -2,7 +2,6 @@
 #include <cassert>
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -15,7 +14,7 @@
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
 #include "examples/common/input_manager.h"
-#include "tools/cpp/runfiles/runfiles.h"
+#include "examples/data/data.h"
 
 namespace {
 
@@ -28,8 +27,8 @@ using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
+using ::barely::examples::GetDataFilePath;
 using ::barely::examples::InputManager;
-using ::bazel::tools::cpp::runfiles::Runfiles;
 using ::smf::MidiFile;
 
 // System audio settings.
@@ -50,7 +49,7 @@ constexpr double kInstrumentGain =
 constexpr double kMaxVelocity = 127.0;
 
 // Midi file name.
-constexpr char kMidiFileName[] = "barelymusician/examples/data/midi/sample.mid";
+constexpr char kMidiFileName[] = "midi/sample.mid";
 
 constexpr double kTempo = 132.0;
 
@@ -107,14 +106,11 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 int main(int /*argc*/, char* argv[]) {
-  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0]));
-  assert(runfiles);
-
   AudioOutput audio_output;
   InputManager input_manager;
 
   MidiFile midi_file;
-  const std::string midi_file_path = runfiles->Rlocation(kMidiFileName);
+  const std::string midi_file_path = GetDataFilePath(kMidiFileName, argv);
   [[maybe_unused]] const bool success = midi_file.read(midi_file_path);
   assert(success && midi_file.isAbsoluteTicks());
   midi_file.linkNotePairs();

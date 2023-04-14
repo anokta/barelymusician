@@ -29,6 +29,44 @@ target_link_libraries(
 )
 
 add_executable(
+  midi_demo
+  midi_demo.cpp
+)
+target_link_libraries(
+  midi_demo
+  barelymusician
+  pitch
+  synth_instrument
+  audio_clock
+  audio_output
+  console_log
+  input_manager
+  data
+  midifile
+)
+
+add_executable(
+  musician_demo
+  musician_demo.cpp
+)
+target_link_libraries(
+  musician_demo
+  barelymusician
+  random
+  metronome
+  duration
+  pitch
+  percussion_instrument
+  synth_instrument
+  audio_clock
+  audio_output
+  console_log
+  input_manager
+  wav_file
+  data
+)
+
+add_executable(
   sequencer_demo
   sequencer_demo.cpp
 )
@@ -41,6 +79,22 @@ target_link_libraries(
   audio_output
   console_log
   input_manager
+)
+
+add_executable(
+  sampler_demo
+  sampler_demo.cpp
+)
+target_link_libraries(
+  sampler_demo
+  barelymusician
+  pitch
+  sampler_instrument
+  audio_output
+  console_log
+  input_manager
+  wav_file
+  data
 )
 
 add_executable(

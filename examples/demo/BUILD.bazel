@@ -33,7 +33,6 @@ cc_binary(
 cc_binary(
     name = "midi_demo",
     srcs = ["midi_demo.cpp"],
-    data = ["//examples/data:midi"],
     deps = [
         "//barelymusician",
         "//barelymusician/composition:pitch",
@@ -42,7 +41,7 @@ cc_binary(
         "//examples/common:audio_output",
         "//examples/common:console_log",
         "//examples/common:input_manager",
-        "@bazel_tools//tools/cpp/runfiles",
+        "//examples/data",
         "@midifile",
     ],
 )
@@ -50,7 +49,6 @@ cc_binary(
 cc_binary(
     name = "musician_demo",
     srcs = ["musician_demo.cpp"],
-    data = ["//examples/data:audio"],
     deps = [
         "//barelymusician",
         "//barelymusician/common:random",
@@ -64,14 +62,13 @@ cc_binary(
         "//examples/common:console_log",
         "//examples/common:input_manager",
         "//examples/common:wav_file",
-        "@bazel_tools//tools/cpp/runfiles",
+        "//examples/data",
     ],
 )
 
 cc_binary(
     name = "sampler_demo",
     srcs = ["sampler_demo.cpp"],
-    data = ["//examples/data:audio"],
     deps = [
         "//barelymusician",
         "//barelymusician/composition:pitch",
@@ -80,7 +77,7 @@ cc_binary(
         "//examples/common:console_log",
         "//examples/common:input_manager",
         "//examples/common:wav_file",
-        "@bazel_tools//tools/cpp/runfiles",
+        "//examples/data",
     ],
 )
 

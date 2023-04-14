@@ -35,3 +35,13 @@ elseif (APPLE)
     PUBLIC -framework ApplicationServices
   )
 endif ()
+
+add_library(
+  wav_file
+  wav_file.cpp
+  wav_file.h
+)
+target_link_libraries(
+  wav_file
+  dr_wav
+)

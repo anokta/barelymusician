@@ -2,6 +2,9 @@
 #define EXAMPLES_COMMON_INPUT_MANAGER_H_
 
 #if defined(_WIN32) || defined(__CYGWIN__)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif  // NOMINMAX
 #include <windows.h>
 #elif defined(__APPLE__)
 #include <ApplicationServices/ApplicationServices.h>

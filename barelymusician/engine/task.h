@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_ENGINE_TASK_H_
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/id.h"
 
 namespace barely::internal {
 
@@ -32,10 +31,10 @@ class Task {
 
  private:
   // Destroy callback.
-  TaskDefinition::DestroyCallback destroy_callback_;
+  const TaskDefinition::DestroyCallback destroy_callback_;
 
   // Process callback.
-  TaskDefinition::ProcessCallback process_callback_;
+  const TaskDefinition::ProcessCallback process_callback_;
 
   // State.
   void* state_ = nullptr;

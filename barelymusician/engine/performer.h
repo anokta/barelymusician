@@ -3,7 +3,6 @@
 
 #include <compare>
 #include <map>
-#include <memory>
 #include <optional>
 #include <unordered_map>
 #include <utility>
@@ -179,7 +178,7 @@ class Performer {
                  : this->position > other.position;
     }
   };
-  using TaskMap = std::map<TaskKey, std::unique_ptr<Task>>;
+  using TaskMap = std::map<TaskKey, Task>;
 
   // Task info.
   struct TaskInfo {

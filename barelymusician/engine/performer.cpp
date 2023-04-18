@@ -6,7 +6,6 @@
 #include <iterator>
 #include <limits>
 #include <map>
-#include <memory>
 #include <optional>
 #include <utility>
 
@@ -27,10 +26,13 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
       infos_.emplace(task_id, TaskInfo{is_one_off, position, process_order})
           .second;
   assert(success);
-  success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
-                .emplace(TaskKey{position, process_order, task_id},
-                         std::make_unique<Task>(definition, user_data))
-                .second;
+  success =
+      (is_one_off ? one_off_tasks_ : recurring_tasks_)
+          .emplace(
+              std::piecewise_construct,
+              std::forward_as_tuple(TaskKey{position, process_order, task_id}),
+              std::forward_as_tuple(definition, user_data))
+          .second;
   assert(success);
 }
 
@@ -136,7 +138,7 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
     // Process the next one-off task.
     [[maybe_unused]] const auto success = infos_.erase(it->first.task_id) == 1;
     assert(success);
-    it->second->Process();
+    it->second.Process();
     one_off_tasks_.erase(it);
     return;
   }
@@ -145,7 +147,7 @@ void Performer::ProcessNextTaskAtPosition() noexcept {
       (!last_processed_recurring_task_it_ ||
        (*last_processed_recurring_task_it_)->first < it->first)) {
     // Process the next recurring task.
-    it->second->Process();
+    const_cast<Task&>(it->second).Process();
     last_processed_recurring_task_it_ = it;
   }
 }
@@ -203,15 +205,12 @@ void Performer::SetPosition(double position) noexcept {
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_tasks_.empty()) {
       // Reset all remaining one-off tasks back to the beginning.
-      TaskMap remaining_one_off_tasks;
-      for (auto& it : one_off_tasks_) {
-        remaining_one_off_tasks.emplace(
-            TaskKey{loop_begin_position_, it.first.process_order,
-                    it.first.task_id},
-            std::move(it.second));
-        infos_.at(it.first.task_id).position = loop_begin_position_;
+      for (auto it = one_off_tasks_.begin(); it != one_off_tasks_.end();) {
+        auto current = it++;
+        auto node = one_off_tasks_.extract(current);
+        node.key().position = loop_begin_position_;
+        one_off_tasks_.insert(std::move(node));
       }
-      one_off_tasks_.swap(remaining_one_off_tasks);
     }
     position_ = LoopAround(position);
   } else {

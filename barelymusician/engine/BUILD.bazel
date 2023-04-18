@@ -91,7 +91,6 @@ cc_library(
     srcs = ["task.cpp"],
     hdrs = ["task.h"],
     deps = [
-        ":id",
         "//barelymusician:include",
     ],
 )

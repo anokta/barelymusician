@@ -1,5 +1,6 @@
 #include "barelymusician/dsp/oscillator.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "barelymusician/dsp/dsp_utils.h"
@@ -8,7 +9,8 @@ namespace barely {
 
 Oscillator::Oscillator(int frame_rate) noexcept
     : frame_interval_(frame_rate > 0 ? 1.0 / static_cast<double>(frame_rate)
-                                     : 0.0) {}
+                                     : 0.0),
+      max_frequency_(static_cast<double>(frame_rate / 2)) {}
 
 double Oscillator::Next() noexcept {
   double output = 0.0;
@@ -39,7 +41,8 @@ double Oscillator::Next() noexcept {
 void Oscillator::Reset() noexcept { phase_ = 0.0; }
 
 void Oscillator::SetFrequency(double frequency) noexcept {
-  increment_ = frequency * frame_interval_;
+  increment_ =
+      std::min(std::max(frequency, 0.0), max_frequency_) * frame_interval_;
 }
 
 void Oscillator::SetType(OscillatorType type) noexcept { type_ = type; }

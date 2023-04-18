@@ -149,6 +149,17 @@ if (ENABLE_TESTS)
   gtest_discover_tests(one_pole_filter_test)
 
   add_executable(
+    oscillator_test
+    oscillator_test.cpp
+  )
+  target_link_libraries(
+    oscillator_test
+    oscillator
+    gtest_main
+  )
+  gtest_discover_tests(oscillator_test)
+
+  add_executable(
     polyphonic_voice_test
     polyphonic_voice_test.cpp
   )

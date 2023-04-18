@@ -46,6 +46,9 @@ class Oscillator : public Generator {
   // Inverse frame rate in seconds.
   double frame_interval_ = 0.0;
 
+  // Maximum allowed frequency.
+  double max_frequency_ = 0.0;
+
   // Oscillator type.
   OscillatorType type_ = OscillatorType::kNoise;
 

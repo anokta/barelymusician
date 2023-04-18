@@ -136,6 +136,15 @@ cc_test(
 )
 
 cc_test(
+    name = "oscillator_test",
+    srcs = ["oscillator_test.cpp"],
+    deps = [
+        ":oscillator",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "polyphonic_voice_test",
     srcs = ["polyphonic_voice_test.cpp"],
     deps = [

@@ -1552,7 +1552,7 @@ class InstrumentRef {
 };
 
 /// Task reference.
-class TaskReference {
+class TaskRef {
  public:
   /// Returns the position.
   ///
@@ -1599,12 +1599,12 @@ class TaskReference {
   }
 
  private:
-  // Ensures that `TaskReference` can only be constructed by `Performer`.
+  // Ensures that `TaskRef` can only be constructed by `Performer`.
   friend class Performer;
 
-  // Constructs a new `TaskReference`.
-  explicit TaskReference(BarelyMusicianHandle handle, BarelyId performer_id,
-                         BarelyId id) noexcept
+  // Constructs a new `TaskRef`.
+  explicit TaskRef(BarelyMusicianHandle handle, BarelyId performer_id,
+                   BarelyId id) noexcept
       : handle_(handle), performer_id_(performer_id), id_(id) {}
 
   // Raw musician handle.
@@ -1658,15 +1658,15 @@ class Performer {
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Task reference.
-  TaskReference CreateTask(TaskDefinition definition, bool is_one_off,
-                           double position, int process_order = 0,
-                           void* user_data = nullptr) noexcept {
+  TaskRef CreateTask(TaskDefinition definition, bool is_one_off,
+                     double position, int process_order = 0,
+                     void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
     [[maybe_unused]] const Status status = BarelyPerformer_CreateTask(
         handle_, id_, definition, is_one_off, position, process_order,
         user_data, &task_id);
     assert(status.IsOk());
-    return TaskReference(handle_, id_, task_id);
+    return TaskRef(handle_, id_, task_id);
   }
 
   /// Creates a new task with a callback.
@@ -1676,8 +1676,8 @@ class Performer {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @return Task reference.
-  TaskReference CreateTask(TaskCallback callback, bool is_one_off,
-                           double position, int process_order = 0) noexcept {
+  TaskRef CreateTask(TaskCallback callback, bool is_one_off, double position,
+                     int process_order = 0) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) noexcept {
@@ -1700,7 +1700,7 @@ class Performer {
   ///
   /// @param task_ref Task reference.
   /// @return Status.
-  Status DestroyTask(TaskReference task_ref) noexcept {
+  Status DestroyTask(TaskRef task_ref) noexcept {
     return BarelyPerformer_DestroyTask(handle_, id_, task_ref.id_);
   }
 

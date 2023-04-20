@@ -26,7 +26,6 @@ using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
 using ::barely::TaskCallback;
-using ::barely::TaskReference;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;

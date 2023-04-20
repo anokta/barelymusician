@@ -68,7 +68,8 @@ TEST(MusicianTest, CreateDestroyInstrument) {
 
 TEST(MusicianTest, CreateDestroyPerformer) {
   Musician musician;
-  Performer performer = musician.CreatePerformer();
+  PerformerRef performer_ref = musician.CreatePerformer();
+  EXPECT_EQ(musician.DestroyPerformer(performer_ref), Status::kOk);
 }
 
 }  // namespace

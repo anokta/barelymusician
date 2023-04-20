@@ -20,7 +20,6 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
 using ::barely::TaskCallback;
@@ -73,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });
 
-  Performer performer = musician.CreatePerformer();
+  auto performer = musician.CreatePerformer();
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);

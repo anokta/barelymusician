@@ -1599,8 +1599,8 @@ class TaskRef {
   }
 
  private:
-  // Ensures that `TaskRef` can only be constructed by `Performer`.
-  friend class Performer;
+  // Ensures that `TaskRef` can only be constructed by `PerformerRef`.
+  friend class PerformerRef;
 
   // Constructs a new `TaskRef`.
   explicit TaskRef(BarelyMusicianHandle handle, BarelyId performer_id,
@@ -1617,39 +1617,9 @@ class TaskRef {
   BarelyId id_ = BarelyId_kInvalid;
 };
 
-/// Performer.
-class Performer {
+/// Performer reference.
+class PerformerRef {
  public:
-  /// Destroys `Performer`.
-  ~Performer() noexcept {
-    BarelyPerformer_Destroy(std::exchange(handle_, nullptr),
-                            std::exchange(id_, BarelyId_kInvalid));
-  }
-
-  /// Non-copyable.
-  Performer(const Performer& other) noexcept = delete;
-  Performer& operator=(const Performer& other) noexcept = delete;
-
-  /// Constructs a new `Performer` via move.
-  ///
-  /// @param other Other performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer(Performer&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)),
-        id_(std::exchange(other.id_, BarelyId_kInvalid)) {}
-
-  /// Assigns `Performer` via move.
-  ///
-  /// @param other Other performer.
-  Performer& operator=(Performer&& other) noexcept {
-    if (this != &other) {
-      BarelyPerformer_Destroy(handle_, id_);
-      handle_ = std::exchange(other.handle_, nullptr);
-      id_ = std::exchange(other.id_, BarelyId_kInvalid);
-    }
-    return *this;
-  }
-
   /// Creates a new task.
   ///
   /// @param definition Task definition.
@@ -1803,15 +1773,12 @@ class Performer {
   Status Stop() noexcept { return BarelyPerformer_Stop(handle_, id_); }
 
  private:
-  // Ensures that `Performer` can only be constructed by `Musician`.
+  // Ensures that `PerformerRef` can only be constructed by `Musician`.
   friend class Musician;
 
-  // Constructs a new `Performer`.
-  explicit Performer(BarelyMusicianHandle handle) noexcept : handle_(handle) {
-    [[maybe_unused]] const Status status =
-        BarelyPerformer_Create(handle_, &id_);
-    assert(status.IsOk());
-  }
+  // Constructs a new `PerformerRef`.
+  explicit PerformerRef(BarelyMusicianHandle handle, BarelyId id) noexcept
+      : handle_(handle), id_(id) {}
 
   // Raw musician handle.
   BarelyMusicianHandle handle_ = nullptr;
@@ -1881,9 +1848,13 @@ class Musician {
 
   /// Creates a new performer.
   ///
-  /// @return Performer.
-  [[nodiscard]] Performer CreatePerformer() noexcept {
-    return Performer(handle_);
+  /// @return Performer reference.
+  [[nodiscard]] PerformerRef CreatePerformer() noexcept {
+    BarelyId performer_id = BarelyId_kInvalid;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_Create(handle_, &performer_id);
+    assert(status.IsOk());
+    return PerformerRef(handle_, performer_id);
   }
 
   /// Destroys an instrument.
@@ -1894,6 +1865,14 @@ class Musician {
     const auto status = BarelyInstrument_Destroy(handle_, instrument_ref.id_);
     instrument_refs_.erase(instrument_ref.id_);
     return status;
+  }
+
+  /// Destroys a performer.
+  ///
+  /// @param performer_ref Performer reference.
+  /// @return Status.
+  Status DestroyPerformer(PerformerRef performer_ref) noexcept {
+    return BarelyPerformer_Destroy(handle_, performer_ref.id_);
   }
 
   /// Returns the tempo.

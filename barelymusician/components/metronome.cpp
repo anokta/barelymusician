@@ -23,7 +23,7 @@ Metronome::Metronome(Musician& musician, int process_order) noexcept
 
 Metronome::~Metronome() { musician_.DestroyPerformer(performer_); }
 
-bool Metronome::IsPlaying() const noexcept { return performer_.IsPlaying(); }
+bool Metronome::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
 
 void Metronome::Reset() noexcept {
   performer_.Stop();

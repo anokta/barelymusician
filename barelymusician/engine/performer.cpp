@@ -37,6 +37,29 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
   assert(success);
 }
 
+Status Performer::DestroyTask(Id task_id) noexcept {
+  if (task_id == kInvalid) {
+    return Status::InvalidArgument();
+  }
+  if (const auto it = infos_.find(task_id); it != infos_.end()) {
+    if (last_processed_recurring_task_it_ &&
+        (*last_processed_recurring_task_it_)->first.task_id == task_id) {
+      const auto recurring_task_it = *last_processed_recurring_task_it_;
+      PrevLastProcessedRecurringTaskIt();
+      recurring_tasks_.erase(recurring_task_it);
+    } else {
+      const auto& [is_one_off, position, process_order] = it->second;
+      [[maybe_unused]] const auto success =
+          (is_one_off ? one_off_tasks_ : recurring_tasks_)
+              .erase({position, process_order, task_id}) == 1;
+      assert(success);
+    }
+    infos_.erase(it);
+    return Status::Ok();
+  }
+  return Status::NotFound();
+}
+
 std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
     const noexcept {
   if (!is_playing_) {
@@ -73,29 +96,6 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
                      next_task_key->process_order};
   }
   return std::nullopt;
-}
-
-Status Performer::DestroyTask(Id task_id) noexcept {
-  if (task_id == kInvalid) {
-    return Status::InvalidArgument();
-  }
-  if (const auto it = infos_.find(task_id); it != infos_.end()) {
-    if (last_processed_recurring_task_it_ &&
-        (*last_processed_recurring_task_it_)->first.task_id == task_id) {
-      const auto recurring_task_it = *last_processed_recurring_task_it_;
-      PrevLastProcessedRecurringTaskIt();
-      recurring_tasks_.erase(recurring_task_it);
-    } else {
-      const auto& [is_one_off, position, process_order] = it->second;
-      [[maybe_unused]] const auto success =
-          (is_one_off ? one_off_tasks_ : recurring_tasks_)
-              .erase({position, process_order, task_id}) == 1;
-      assert(success);
-    }
-    infos_.erase(it);
-    return Status::Ok();
-  }
-  return Status::NotFound();
 }
 
 double Performer::GetLoopBeginPosition() const noexcept {

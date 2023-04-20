@@ -82,7 +82,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       instrument.SetNoteOn(pitch);
       performer.CreateTask(
           [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-          /*is_one_off=*/true, performer.GetPosition() + duration);
+          /*is_one_off=*/true, *performer.GetPosition() + duration);
     };
   };
 
@@ -100,8 +100,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, TaskRef> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, performer.CreateTask(callback, /*is_one_off=*/false,
-                                                position));
+    tasks.emplace(index++, *performer.CreateTask(callback, /*is_one_off=*/false,
+                                                 position));
   }
 
   // Audio process callback.
@@ -129,7 +129,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, performer.CreateTask(
+        tasks.emplace(index - 1, *performer.CreateTask(
                                      callback, /*is_one_off=*/false, position));
         ConsoleLog() << "Added note " << index;
       }
@@ -139,7 +139,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (performer.IsPlaying()) {
+        if (*performer.IsPlaying()) {
           performer.Stop();
           instrument.SetAllNotesOff();
           ConsoleLog() << "Stopped playback";
@@ -149,7 +149,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'L':
-        if (performer.IsLooping()) {
+        if (*performer.IsLooping()) {
           performer.SetLooping(false);
           ConsoleLog() << "Loop turned off";
         } else {

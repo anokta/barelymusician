@@ -873,7 +873,7 @@ BarelyTask_SetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
 ///   instrument.SetNoteOn(/*pitch=*/-1.0, /*intensity=*/0.25);
 ///
 ///   // Check if the note is on.
-///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
+///   const bool is_note_on = *instrument.IsNoteOn(/*pitch=*/-1.0);
 ///
 ///   // Set a control value.
 ///   instrument.SetControl(barely::SynthControl::kGain, /*value=*/0.5,
@@ -914,7 +914,7 @@ BarelyTask_SetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
 ///   performer.Start();
 ///
 ///   // Check if started playing.
-///   const bool is_playing = performer.IsPlaying();
+///   const bool is_playing = *performer.IsPlaying();
 ///
 ///   // Destroy the task.
 ///   performer.DestroyTask(std::move(task));
@@ -1300,12 +1300,14 @@ class InstrumentRef {
   /// Returns whether a note is on or not.
   ///
   /// @param pitch Note pitch.
-  /// @return True if active, false otherwise.
-  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
+  /// @return True if active, false otherwise, or an error status.
+  [[nodiscard]] StatusOr<bool> IsNoteOn(double pitch) const noexcept {
     bool is_note_on = false;
-    [[maybe_unused]] const Status status =
-        BarelyInstrument_IsNoteOn(handle_, id_, pitch, &is_note_on);
-    assert(status.IsOk());
+    if (const Status status =
+            BarelyInstrument_IsNoteOn(handle_, id_, pitch, &is_note_on);
+        !status.IsOk()) {
+      return status;
+    }
     return is_note_on;
   }
 
@@ -1417,8 +1419,7 @@ class InstrumentRef {
   Status SetData(const DataType& data) noexcept {
     static_assert(std::is_trivially_copyable<DataType>::value,
                   "DataType is not trivially copyable");
-    return BarelyInstrument_SetData(
-        handle_, id_, static_cast<const void*>(&data), sizeof(decltype(data)));
+    return SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
   }
 
   /// Sets data.
@@ -1634,15 +1635,17 @@ class PerformerRef {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  /// @return Task reference.
-  TaskRef CreateTask(TaskDefinition definition, bool is_one_off,
-                     double position, int process_order = 0,
-                     void* user_data = nullptr) noexcept {
+  /// @return Task reference, or an error status.
+  StatusOr<TaskRef> CreateTask(TaskDefinition definition, bool is_one_off,
+                               double position, int process_order = 0,
+                               void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status =
-        BarelyTask_Create(handle_, id_, definition, is_one_off, position,
-                          process_order, user_data, &task_id);
-    assert(status.IsOk());
+    if (const Status status =
+            BarelyTask_Create(handle_, id_, definition, is_one_off, position,
+                              process_order, user_data, &task_id);
+        !status.IsOk()) {
+      return status;
+    }
     return TaskRef(handle_, id_, task_id);
   }
 
@@ -1652,9 +1655,10 @@ class PerformerRef {
   /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
-  /// @return Task reference.
-  TaskRef CreateTask(TaskCallback callback, bool is_one_off, double position,
-                     int process_order = 0) noexcept {
+  /// @return Task reference, or an error status.
+  StatusOr<TaskRef> CreateTask(TaskCallback callback, bool is_one_off,
+                               double position,
+                               int process_order = 0) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) noexcept {
@@ -1683,56 +1687,66 @@ class PerformerRef {
 
   /// Returns the loop begin position.
   ///
-  /// @return Loop begin position in beats.
-  [[nodiscard]] double GetLoopBeginPosition() const noexcept {
+  /// @return Loop begin position in beats, or an error status.
+  [[nodiscard]] StatusOr<double> GetLoopBeginPosition() const noexcept {
     double loop_begin_position = 0.0;
-    [[maybe_unused]] const Status status = BarelyPerformer_GetLoopBeginPosition(
-        handle_, id_, &loop_begin_position);
-    assert(status.IsOk());
+    if (const Status status = BarelyPerformer_GetLoopBeginPosition(
+            handle_, id_, &loop_begin_position);
+        !status.IsOk()) {
+      return status;
+    }
     return loop_begin_position;
   }
 
   /// Returns the loop length.
   ///
-  /// @return Loop length in beats.
-  [[nodiscard]] double GetLoopLength() const noexcept {
+  /// @return Loop length in beats, or an error status.
+  [[nodiscard]] StatusOr<double> GetLoopLength() const noexcept {
     double loop_length = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyPerformer_GetLoopLength(handle_, id_, &loop_length);
-    assert(status.IsOk());
+    if (const Status status =
+            BarelyPerformer_GetLoopLength(handle_, id_, &loop_length);
+        !status.IsOk()) {
+      return status;
+    }
     return loop_length;
   }
 
   /// Returns the position.
   ///
-  /// @return Position in beats.
-  [[nodiscard]] double GetPosition() const noexcept {
+  /// @return Position in beats, or an error status.
+  [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyPerformer_GetPosition(handle_, id_, &position);
-    assert(status.IsOk());
+    if (const Status status =
+            BarelyPerformer_GetPosition(handle_, id_, &position);
+        !status.IsOk()) {
+      return status;
+    }
     return position;
   }
 
   /// Returns whether the performer is looping or not.
   ///
-  /// @return True if looping, false otherwise.
-  [[nodiscard]] bool IsLooping() const noexcept {
+  /// @return True if looping, false otherwise, or an error status.
+  [[nodiscard]] StatusOr<bool> IsLooping() const noexcept {
     bool is_looping = false;
-    [[maybe_unused]] const Status status =
-        BarelyPerformer_IsLooping(handle_, id_, &is_looping);
-    assert(status.IsOk());
+    if (const Status status =
+            BarelyPerformer_IsLooping(handle_, id_, &is_looping);
+        !status.IsOk()) {
+      return status;
+    }
     return is_looping;
   }
 
   /// Returns whether the performer is playing or not.
   ///
-  /// @return True if playing, false otherwise.
-  [[nodiscard]] bool IsPlaying() const noexcept {
+  /// @return True if playing, false otherwise, or an error status.
+  [[nodiscard]] StatusOr<bool> IsPlaying() const noexcept {
     bool is_playing = false;
-    [[maybe_unused]] const Status status =
-        BarelyPerformer_IsPlaying(handle_, id_, &is_playing);
-    assert(status.IsOk());
+    if (const Status status =
+            BarelyPerformer_IsPlaying(handle_, id_, &is_playing);
+        !status.IsOk()) {
+      return status;
+    }
     return is_playing;
   }
 

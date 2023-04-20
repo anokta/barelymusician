@@ -87,7 +87,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       instrument.SetNoteOn(pitch);
       performer.CreateTask(
           [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
-          /*is_one_off=*/true, performer.GetPosition() + duration);
+          /*is_one_off=*/true, *performer.GetPosition() + duration);
     };
   };
 
@@ -114,9 +114,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.CreateTask(play_note_fn(8, 2.0), /*is_one_off=*/false, 5.0);
 
   // Stopper.
-  auto stopper = performer.CreateTask([&performer]() { performer.Stop(); },
-                                      /*is_one_off=*/false, 0.0,
-                                      /*process_order=*/-1);
+  auto stopper = *performer.CreateTask([&performer]() { performer.Stop(); },
+                                       /*is_one_off=*/false, 0.0,
+                                       /*process_order=*/-1);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
@@ -147,7 +147,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (performer.IsPlaying()) {
+        if (*performer.IsPlaying()) {
           instrument.SetAllNotesOff();
           performer.Stop();
           ConsoleLog() << "Stopped playback";

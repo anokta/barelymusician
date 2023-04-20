@@ -28,24 +28,24 @@ EXPORTS
   BarelyMusician_SetTempo
   BarelyMusician_Update
   BarelyPerformer_Create
-  BarelyPerformer_CreateTask
   BarelyPerformer_Destroy
-  BarelyPerformer_DestroyTask
   BarelyPerformer_GetLoopBeginPosition
   BarelyPerformer_GetLoopLength
   BarelyPerformer_GetPosition
-  BarelyPerformer_GetTaskPosition
-  BarelyPerformer_GetTaskProcessOrder
   BarelyPerformer_IsLooping
   BarelyPerformer_IsPlaying
   BarelyPerformer_SetLoopBeginPosition
   BarelyPerformer_SetLoopLength
   BarelyPerformer_SetLooping
   BarelyPerformer_SetPosition
-  BarelyPerformer_SetTaskPosition
-  BarelyPerformer_SetTaskProcessOrder
   BarelyPerformer_Start
   BarelyPerformer_Stop
+  BarelyTask_Create
+  BarelyTask_Destroy
+  BarelyTask_GetPosition
+  BarelyTask_GetProcessOrder
+  BarelyTask_SetPosition
+  BarelyTask_SetProcessOrder
 
   BarelyPercussionInstrument_GetDefinition
   BarelySamplerInstrument_GetDefinition

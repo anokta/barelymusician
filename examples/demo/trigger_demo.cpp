@@ -20,14 +20,11 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
 using ::barely::TaskCallback;
-using ::barely::TaskReference;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -66,7 +63,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  Instrument instrument =
+  auto instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthControl::kGain, kGain);
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
@@ -79,7 +76,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::vector<std::tuple<double, double, double>> notes;
   std::vector<std::pair<double, double>> triggers;
 
-  Performer performer = musician.CreatePerformer();
+  auto performer = musician.CreatePerformer();
 
   const auto play_note_fn = [&](int scale_index,
                                 double duration) -> TaskCallback {

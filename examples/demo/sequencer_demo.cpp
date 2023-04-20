@@ -18,14 +18,12 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::Performer;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
 using ::barely::TaskCallback;
-using ::barely::TaskReference;
+using ::barely::TaskRef;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -64,7 +62,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  Instrument instrument =
+  auto instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthControl::kGain, kGain);
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
@@ -74,7 +72,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });
 
-  Performer performer = musician.CreatePerformer();
+  auto performer = musician.CreatePerformer();
   performer.SetLooping(true);
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
@@ -99,7 +97,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB5));
   score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
 
-  std::unordered_map<int, TaskReference> tasks;
+  std::unordered_map<int, TaskRef> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
     tasks.emplace(index++, performer.CreateTask(callback, /*is_one_off=*/false,

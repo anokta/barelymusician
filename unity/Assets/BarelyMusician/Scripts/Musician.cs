@@ -496,33 +496,6 @@ namespace Barely {
         }
       }
 
-      /// Creates a new performer task.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param callback Task callback.
-      /// @param isOneOff True if one off task, false otherwise.
-      /// @param position Task position.
-      /// @param processOrder Task process order.
-      /// @param taskId Task identifier.
-      public static void Performer_CreateTask(Int64 performerId, Action callback, bool isOneOff,
-                                              double position, int processOrder, ref Int64 taskId) {
-        if (taskId != InvalidId) {
-          return;
-        }
-        IntPtr taskIdPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
-        Status status = BarelyPerformer_CreateTask(Handle, performerId, _taskDefinition, isOneOff,
-                                                   position, processOrder, taskIdPtr, ref taskId);
-        if (!IsOk(status)) {
-          Marshal.DestroyStructure<Int64>(taskIdPtr);
-          if (_handle != IntPtr.Zero && performerId != InvalidId) {
-            Debug.LogError("Failed to create performer " + performerId + " task': " + status);
-            return;
-          }
-        }
-        Marshal.WriteInt64(taskIdPtr, taskId);
-        _taskCallbacks.Add(taskId, callback);
-      }
-
       /// Destroys a performer.
       ///
       /// @param performerId Performer identifier.
@@ -535,23 +508,6 @@ namespace Barely {
           Debug.LogError("Failed to destroy performer " + performerId + ": " + status);
         }
         performerId = InvalidId;
-      }
-
-      /// Destroys a performer task.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param taskId Task identifier.
-      public static void Performer_DestroyTask(Int64 performerId, ref Int64 taskId) {
-        if (taskId == InvalidId) {
-          return;
-        }
-        Status status = BarelyPerformer_DestroyTask(Handle, performerId, taskId);
-        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
-            taskId != InvalidId) {
-          Debug.LogError("Failed to destroy performer task " + taskId + ": " + status);
-        }
-        taskId = InvalidId;
-        _taskCallbacks.Remove(taskId);
       }
 
       /// Returns the loop begin position of a performer.
@@ -592,37 +548,6 @@ namespace Barely {
           Debug.LogError("Failed to get performer position: " + status);
         }
         return position;
-      }
-
-      /// Returns the position of a performer task.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param taskId Task identifier.
-      /// @return Position in beats.
-      public static double Performer_GetTaskPosition(Int64 performerId, Int64 taskId) {
-        double position = 0.0;
-        Status status = BarelyPerformer_GetTaskPosition(Handle, performerId, taskId, ref position);
-        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
-            taskId != InvalidId) {
-          Debug.LogError("Failed to get performer task position: " + status);
-        }
-        return position;
-      }
-
-      /// Returns the process order of a performer task.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param taskId Task identifier.
-      /// @return Process order.
-      public static int Performer_GetTaskProcessOrder(Int64 performerId, Int64 taskId) {
-        Int32 processOrder = 0;
-        Status status =
-            BarelyPerformer_GetTaskProcessOrder(Handle, performerId, taskId, ref processOrder);
-        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
-            taskId != InvalidId) {
-          Debug.LogError("Failed to get performer task process order: " + status);
-        }
-        return processOrder;
       }
 
       /// Returns whether a performer is looping or not.
@@ -697,35 +622,6 @@ namespace Barely {
         }
       }
 
-      /// Sets the position of a performer task.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param taskId Task identifier.
-      /// @param position Position in beats.
-      public static void Performer_SetTaskPosition(Int64 performerId, Int64 taskId,
-                                                   double position) {
-        Status status = BarelyPerformer_SetTaskPosition(Handle, performerId, taskId, position);
-        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
-            taskId != InvalidId) {
-          Debug.LogError("Failed to set performer task position: " + status);
-        }
-      }
-
-      /// Sets the process order of a performer task.
-      ///
-      /// @param performerId Performer identifier.
-      /// @param taskId Task identifier.
-      /// @param processOrder Process order.
-      public static void Performer_SetTaskProcessOrder(Int64 performerId, Int64 taskId,
-                                                       int processOrder) {
-        Status status =
-            BarelyPerformer_SetTaskProcessOrder(Handle, performerId, taskId, processOrder);
-        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
-            taskId != InvalidId) {
-          Debug.LogError("Failed to set performer task process order: " + status);
-        }
-      }
-
       /// Starts a performer.
       ///
       /// @param performerId Performer identifier.
@@ -743,6 +639,106 @@ namespace Barely {
         Status status = BarelyPerformer_Stop(Handle, performerId);
         if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId) {
           Debug.LogError("Failed to stop performer: " + status);
+        }
+      }
+
+      /// Creates a new task.
+      ///
+      /// @param performerId Performer identifier.
+      /// @param callback Task callback.
+      /// @param isOneOff True if one off task, false otherwise.
+      /// @param position Task position.
+      /// @param processOrder Task process order.
+      /// @param taskId Task identifier.
+      public static void Task_Create(Int64 performerId, Action callback, bool isOneOff,
+                                     double position, int processOrder, ref Int64 taskId) {
+        if (taskId != InvalidId) {
+          return;
+        }
+        IntPtr taskIdPtr = Marshal.AllocHGlobal(Marshal.SizeOf<Int64>());
+        Status status = BarelyTask_Create(Handle, performerId, _taskDefinition, isOneOff, position,
+                                          processOrder, taskIdPtr, ref taskId);
+        if (!IsOk(status)) {
+          Marshal.DestroyStructure<Int64>(taskIdPtr);
+          if (_handle != IntPtr.Zero && performerId != InvalidId) {
+            Debug.LogError("Failed to create performer " + performerId + " task': " + status);
+            return;
+          }
+        }
+        Marshal.WriteInt64(taskIdPtr, taskId);
+        _taskCallbacks.Add(taskId, callback);
+      }
+
+      /// Destroys a task.
+      ///
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
+      public static void Task_Destroy(Int64 performerId, ref Int64 taskId) {
+        if (taskId == InvalidId) {
+          return;
+        }
+        Status status = BarelyTask_Destroy(Handle, performerId, taskId);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
+            taskId != InvalidId) {
+          Debug.LogError("Failed to destroy performer task " + taskId + ": " + status);
+        }
+        taskId = InvalidId;
+        _taskCallbacks.Remove(taskId);
+      }
+
+      /// Returns the position of a task.
+      ///
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
+      /// @return Position in beats.
+      public static double Task_GetPosition(Int64 performerId, Int64 taskId) {
+        double position = 0.0;
+        Status status = BarelyTask_GetPosition(Handle, performerId, taskId, ref position);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
+            taskId != InvalidId) {
+          Debug.LogError("Failed to get performer task position: " + status);
+        }
+        return position;
+      }
+
+      /// Returns the process order of a task.
+      ///
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
+      /// @return Process order.
+      public static int Task_GetProcessOrder(Int64 performerId, Int64 taskId) {
+        Int32 processOrder = 0;
+        Status status = BarelyTask_GetProcessOrder(Handle, performerId, taskId, ref processOrder);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
+            taskId != InvalidId) {
+          Debug.LogError("Failed to get performer task process order: " + status);
+        }
+        return processOrder;
+      }
+
+      /// Sets the position of a task.
+      ///
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
+      /// @param position Position in beats.
+      public static void Task_SetPosition(Int64 performerId, Int64 taskId, double position) {
+        Status status = BarelyTask_SetPosition(Handle, performerId, taskId, position);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
+            taskId != InvalidId) {
+          Debug.LogError("Failed to set performer task position: " + status);
+        }
+      }
+
+      /// Sets the process order of a task.
+      ///
+      /// @param performerId Performer identifier.
+      /// @param taskId Task identifier.
+      /// @param processOrder Process order.
+      public static void Task_SetProcessOrder(Int64 performerId, Int64 taskId, int processOrder) {
+        Status status = BarelyTask_SetProcessOrder(Handle, performerId, taskId, processOrder);
+        if (!IsOk(status) && _handle != IntPtr.Zero && performerId != InvalidId &&
+            taskId != InvalidId) {
+          Debug.LogError("Failed to set performer task process order: " + status);
         }
       }
 
@@ -1086,19 +1082,8 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Create")]
       private static extern Status BarelyPerformer_Create(IntPtr handle, ref Int64 outPerformerId);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_CreateTask")]
-      private static extern Status BarelyPerformer_CreateTask(IntPtr handle, Int64 performerId,
-                                                              TaskDefinition definition,
-                                                              bool isOneOff, double position,
-                                                              Int32 processOrder, IntPtr userData,
-                                                              ref Int64 outTaskId);
-
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Destroy")]
       private static extern Status BarelyPerformer_Destroy(IntPtr handle, Int64 performerId);
-
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_DestroyTask")]
-      private static extern Status BarelyPerformer_DestroyTask(IntPtr handle, Int64 performerId,
-                                                               Int64 taskId);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetLoopBeginPosition")]
       private static extern Status BarelyPerformer_GetLoopBeginPosition(
@@ -1111,17 +1096,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetPosition")]
       private static extern Status BarelyPerformer_GetPosition(IntPtr handle, Int64 performerId,
                                                                ref double outPosition);
-
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetTaskPosition")]
-      private static extern Status BarelyPerformer_GetTaskPosition(IntPtr handle, Int64 performerId,
-                                                                   Int64 taskId,
-                                                                   ref double outPosition);
-
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_GetTaskProcessOrder")]
-      private static extern Status BarelyPerformer_GetTaskProcessOrder(IntPtr handle,
-                                                                       Int64 performerId,
-                                                                       Int64 taskId,
-                                                                       ref Int32 outProcessOrder);
 
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_IsLooping")]
       private static extern Status BarelyPerformer_IsLooping(IntPtr handle, Int64 performerId,
@@ -1148,16 +1122,6 @@ namespace Barely {
       private static extern Status BarelyPerformer_SetPosition(IntPtr handle, Int64 performerId,
                                                                double position);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetTaskPosition")]
-      private static extern Status BarelyPerformer_SetTaskPosition(IntPtr handle, Int64 performerId,
-                                                                   Int64 taskId, double position);
-
-      [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetTaskProcessOrder")]
-      private static extern Status BarelyPerformer_SetTaskProcessOrder(IntPtr handle,
-                                                                       Int64 performerId,
-                                                                       Int64 taskId,
-                                                                       Int32 processOrder);
-
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Start")]
       private static extern Status BarelyPerformer_Start(IntPtr handle, Int64 performerId);
 
@@ -1172,6 +1136,33 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelySynthInstrument_GetDefinition")]
       private static extern InstrumentDefinition BarelySynthInstrument_GetDefinition();
+
+      [DllImport(pluginName, EntryPoint = "BarelyTask_Create")]
+      private static extern Status BarelyTask_Create(IntPtr handle, Int64 performerId,
+                                                     TaskDefinition definition, bool isOneOff,
+                                                     double position, Int32 processOrder,
+                                                     IntPtr userData, ref Int64 outTaskId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyTask_Destroy")]
+      private static extern Status BarelyTask_Destroy(IntPtr handle, Int64 performerId,
+                                                      Int64 taskId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyTask_GetPosition")]
+      private static extern Status BarelyTask_GetPosition(IntPtr handle, Int64 performerId,
+                                                          Int64 taskId, ref double outPosition);
+
+      [DllImport(pluginName, EntryPoint = "BarelyTask_GetProcessOrder")]
+      private static extern Status BarelyTask_GetProcessOrder(IntPtr handle, Int64 performerId,
+                                                              Int64 taskId,
+                                                              ref Int32 outProcessOrder);
+
+      [DllImport(pluginName, EntryPoint = "BarelyTask_SetPosition")]
+      private static extern Status BarelyTask_SetPosition(IntPtr handle, Int64 performerId,
+                                                          Int64 taskId, double position);
+
+      [DllImport(pluginName, EntryPoint = "BarelyTask_SetProcessOrder")]
+      private static extern Status BarelyTask_SetProcessOrder(IntPtr handle, Int64 performerId,
+                                                              Int64 taskId, Int32 processOrder);
     }
   }
 }

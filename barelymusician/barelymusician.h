@@ -124,10 +124,9 @@
 ///   // Create a task.
 ///   BarelyTaskDefinition definition;  // populate this.
 ///   BarelyId task_id = BarelyId_kInvalid;
-///   BarelyPerformer_CreateTask(handle, performer_id, definition,
-///                              /*is_one_off=*/false, /*position=*/0.0,
-///                              /*process_order=*/0, /*user_data=*/nullptr,
-///                              &task_id);
+///   BarelyTask_Create(handle, performer_id, definition, /*is_one_off=*/false,
+///                     /*position=*/0.0, /*process_order=*/0,
+///                     /*user_data=*/nullptr, &task_id);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(handle, performer_id, /*is_looping=*/true);
@@ -140,7 +139,7 @@
 ///   BarelyPerformer_IsPlaying(handle, performer_id, &is_playing);
 ///
 ///   // Destroy the task.
-///   BarelyPerformer_DestroyTask(handle, performer_id, task_id);
+///   BarelyTask_Destroy(handle, performer_id, task_id);
 ///
 ///   // Destroy.
 ///   BarelyPerformer_Destroy(handle, performer_id);
@@ -622,22 +621,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
                                                   BarelyId* out_performer_id);
 
-/// Creates a new performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param definition Task definition.
-/// @param is_one_off True if one-off task, false otherwise.
-/// @param position Task position in beats.
-/// @param process_order Task process order.
-/// @param user_data Pointer to user data.
-/// @param out_task_id Output task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, bool is_one_off, double position,
-    int32_t process_order, void* user_data, BarelyId* out_task_id);
-
 /// Destroys a performer.
 ///
 /// @param handle Musician handle.
@@ -645,15 +628,6 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_Destroy(BarelyMusicianHandle handle,
                                                    BarelyId performer_id);
-
-/// Destroys a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_DestroyTask(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id);
 
 /// Gets the loop begin position of a performer.
 ///
@@ -683,28 +657,6 @@ BarelyPerformer_GetLoopLength(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_GetPosition(
     BarelyMusicianHandle handle, BarelyId performer_id, double* out_position);
-
-/// Gets the position of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_GetTaskPosition(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    double* out_position);
-
-/// Gets the process order of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param out_process_order Output process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_GetTaskProcessOrder(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    int32_t* out_process_order);
 
 /// Gets whether a performer is looping or not.
 ///
@@ -761,28 +713,6 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_SetLooping(
 BARELY_EXPORT BarelyStatus BarelyPerformer_SetPosition(
     BarelyMusicianHandle handle, BarelyId performer_id, double position);
 
-/// Sets the position of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_SetTaskPosition(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    double position);
-
-/// Sets the process order of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param process_order Process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_SetTaskProcessOrder(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    int32_t process_order);
-
 /// Starts a performer.
 ///
 /// @param handle Musician handle.
@@ -799,6 +729,78 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Start(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
                                                 BarelyId performer_id);
 
+/// Creates a new task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param definition Task definition.
+/// @param is_one_off True if one-off task, false otherwise.
+/// @param position Task position in beats.
+/// @param process_order Task process order.
+/// @param user_data Pointer to user data.
+/// @param out_task_id Output task identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_Create(
+    BarelyMusicianHandle handle, BarelyId performer_id,
+    BarelyTaskDefinition definition, bool is_one_off, double position,
+    int32_t process_order, void* user_data, BarelyId* out_task_id);
+
+/// Destroys a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_Destroy(BarelyMusicianHandle handle,
+                                              BarelyId performer_id,
+                                              BarelyId task_id);
+
+/// Gets the position of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param out_position Output position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_GetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId performer_id,
+                                                  BarelyId task_id,
+                                                  double* out_position);
+
+/// Gets the process order of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param out_process_order Output process order.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyTask_GetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
+                           BarelyId task_id, int32_t* out_process_order);
+
+/// Sets the position of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_SetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId performer_id,
+                                                  BarelyId task_id,
+                                                  double position);
+
+/// Sets the process order of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param process_order Process order.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyTask_SetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
+                           BarelyId task_id, int32_t process_order);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
@@ -813,6 +815,7 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 #include <span>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -888,6 +891,9 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 ///   double timestamp = 0.0;
 ///   instrument.Process(output_samples.data(), output_channel_count,
 ///                      output_frame_count, timestamp);
+///
+///   // Destroy.
+///   musician.DestroyInstrument(std::move(instrument));
 ///   @endcode
 ///
 /// - Performer:
@@ -911,7 +917,10 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 ///   const bool is_playing = performer.IsPlaying();
 ///
 ///   // Destroy the task.
-///   performer.DestroyTask(task);
+///   performer.DestroyTask(std::move(task));
+///
+///   // Destroy.
+///   musician.DestroyPerformer(std::move(performer));
 ///   @endcode
 
 namespace barely {
@@ -1248,55 +1257,9 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
-/// Instrument.
-class Instrument {
+/// Instrument reference.
+class InstrumentRef {
  public:
-  /// Destroys `Instrument`.
-  ~Instrument() noexcept {
-    BarelyInstrument_Destroy(std::exchange(handle_, nullptr),
-                             std::exchange(id_, BarelyId_kInvalid));
-  }
-
-  /// Non-copyable.
-  Instrument(const Instrument& other) noexcept = delete;
-  Instrument& operator=(const Instrument& other) noexcept = delete;
-
-  /// Constructs a new `Instrument` via move.
-  ///
-  /// @param other Other instrument.
-  Instrument(Instrument&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)),
-        id_(std::exchange(other.id_, BarelyId_kInvalid)) {
-    SetControlEventCallback(
-        std::exchange(other.control_event_callback_, nullptr));
-    SetNoteControlEventCallback(
-        std::exchange(other.note_control_event_callback_, nullptr));
-    SetNoteOffEventCallback(
-        std::exchange(other.note_off_event_callback_, nullptr));
-    SetNoteOnEventCallback(
-        std::exchange(other.note_on_event_callback_, nullptr));
-  }
-
-  /// Assigns `Instrument` via move.
-  ///
-  /// @param other Other instrument.
-  Instrument& operator=(Instrument&& other) noexcept {
-    if (this != &other) {
-      BarelyInstrument_Destroy(handle_, id_);
-      handle_ = std::exchange(other.handle_, nullptr);
-      id_ = std::exchange(other.id_, BarelyId_kInvalid);
-      SetControlEventCallback(
-          std::exchange(other.control_event_callback_, nullptr));
-      SetNoteControlEventCallback(
-          std::exchange(other.note_control_event_callback_, nullptr));
-      SetNoteOffEventCallback(
-          std::exchange(other.note_off_event_callback_, nullptr));
-      SetNoteOnEventCallback(
-          std::exchange(other.note_on_event_callback_, nullptr));
-    }
-    return *this;
-  }
-
   /// Returns a control value.
   ///
   /// @param index Control index.
@@ -1433,14 +1396,14 @@ class Instrument {
   /// @param callback Control event callback.
   /// @return Status.
   Status SetControlEventCallback(ControlEventCallback callback) noexcept {
-    if (callback) {
-      control_event_callback_ = std::move(callback);
+    *control_event_callback_ = std::move(callback);
+    if (*control_event_callback_) {
       return BarelyInstrument_SetControlEventCallback(
           handle_, id_,
           [](int32_t index, double value, void* user_data) noexcept {
             (*static_cast<ControlEventCallback*>(user_data))(index, value);
           },
-          static_cast<void*>(&control_event_callback_));
+          static_cast<void*>(control_event_callback_.get()));
     }
     return BarelyInstrument_SetControlEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
@@ -1494,8 +1457,8 @@ class Instrument {
   /// @return Status.
   Status SetNoteControlEventCallback(
       NoteControlEventCallback callback) noexcept {
-    if (callback) {
-      note_control_event_callback_ = std::move(callback);
+    *note_control_event_callback_ = std::move(callback);
+    if (*note_control_event_callback_) {
       return BarelyInstrument_SetNoteControlEventCallback(
           handle_, id_,
           [](double pitch, int32_t index, double value,
@@ -1503,7 +1466,7 @@ class Instrument {
             (*static_cast<NoteControlEventCallback*>(user_data))(pitch, index,
                                                                  value);
           },
-          static_cast<void*>(&note_control_event_callback_));
+          static_cast<void*>(note_control_event_callback_.get()));
     }
     return BarelyInstrument_SetNoteControlEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
@@ -1522,14 +1485,14 @@ class Instrument {
   /// @param callback Note off event callback.
   /// @return Status.
   Status SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept {
-    if (callback) {
-      note_off_event_callback_ = std::move(callback);
+    *note_off_event_callback_ = std::move(callback);
+    if (*note_off_event_callback_) {
       return BarelyInstrument_SetNoteOffEventCallback(
           handle_, id_,
           [](double pitch, void* user_data) noexcept {
             (*static_cast<NoteOffEventCallback*>(user_data))(pitch);
           },
-          static_cast<void*>(&note_off_event_callback_));
+          static_cast<void*>(note_off_event_callback_.get()));
     }
     return BarelyInstrument_SetNoteOffEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
@@ -1549,31 +1512,32 @@ class Instrument {
   /// @param callback Note on event callback.
   /// @return Status.
   Status SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
-    if (callback) {
-      note_on_event_callback_ = std::move(callback);
+    *note_on_event_callback_ = std::move(callback);
+    if (*note_on_event_callback_) {
       return BarelyInstrument_SetNoteOnEventCallback(
           handle_, id_,
           [](double pitch, double intensity, void* user_data) noexcept {
             (*static_cast<NoteOnEventCallback*>(user_data))(pitch, intensity);
           },
-          static_cast<void*>(&note_on_event_callback_));
+          static_cast<void*>(note_on_event_callback_.get()));
     }
     return BarelyInstrument_SetNoteOnEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
   }
 
  private:
-  // Ensures that `Instrument` can only be constructed by `Musician`.
+  // Ensures that `InstrumentRef` can only be constructed by `Musician`.
   friend class Musician;
 
-  // Constructs a new `Instrument`.
-  explicit Instrument(BarelyMusicianHandle handle,
-                      InstrumentDefinition definition, int frame_rate) noexcept
-      : handle_(handle) {
-    [[maybe_unused]] const Status status =
-        BarelyInstrument_Create(handle_, definition, frame_rate, &id_);
-    assert(status.IsOk());
-  }
+  // Constructs a new `InstrumentRef`.
+  explicit InstrumentRef(BarelyMusicianHandle handle, BarelyId id) noexcept
+      : handle_(handle),
+        id_(id),
+        control_event_callback_(std::make_shared<ControlEventCallback>()),
+        note_control_event_callback_(
+            std::make_shared<NoteControlEventCallback>()),
+        note_off_event_callback_(std::make_shared<NoteOffEventCallback>()),
+        note_on_event_callback_(std::make_shared<NoteOnEventCallback>()) {}
 
   // Raw musician handle.
   BarelyMusicianHandle handle_ = nullptr;
@@ -1582,28 +1546,29 @@ class Instrument {
   BarelyId id_ = BarelyId_kInvalid;
 
   // Control event callback.
-  ControlEventCallback control_event_callback_;
+  std::shared_ptr<ControlEventCallback> control_event_callback_ = nullptr;
 
   // Note control event callback.
-  NoteControlEventCallback note_control_event_callback_;
+  std::shared_ptr<NoteControlEventCallback> note_control_event_callback_ =
+      nullptr;
 
   // Note off event callback.
-  NoteOffEventCallback note_off_event_callback_;
+  std::shared_ptr<NoteOffEventCallback> note_off_event_callback_ = nullptr;
 
   // Note on event callback.
-  NoteOnEventCallback note_on_event_callback_;
+  std::shared_ptr<NoteOnEventCallback> note_on_event_callback_ = nullptr;
 };
 
 /// Task reference.
-class TaskReference {
+class TaskRef {
  public:
   /// Returns the position.
   ///
   /// @return Position in beats, or an error status.
   [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
     double position = 0.0;
-    if (const Status status = BarelyPerformer_GetTaskPosition(
-            handle_, performer_id_, id_, &position);
+    if (const Status status =
+            BarelyTask_GetPosition(handle_, performer_id_, id_, &position);
         !status.IsOk()) {
       return status;
     }
@@ -1615,8 +1580,8 @@ class TaskReference {
   /// @return Process order, or an error status.
   [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
     int process_order = 0;
-    if (const Status status = BarelyPerformer_GetTaskProcessOrder(
-            handle_, performer_id_, id_, &process_order);
+    if (const Status status = BarelyTask_GetProcessOrder(handle_, performer_id_,
+                                                         id_, &process_order);
         !status.IsOk()) {
       return status;
     }
@@ -1628,8 +1593,7 @@ class TaskReference {
   /// @param position Position in beats.
   /// @return Status.
   Status SetPosition(double position) noexcept {
-    return BarelyPerformer_SetTaskPosition(handle_, performer_id_, id_,
-                                           position);
+    return BarelyTask_SetPosition(handle_, performer_id_, id_, position);
   }
 
   /// Sets the process order.
@@ -1637,17 +1601,17 @@ class TaskReference {
   /// @param process_order Process order.
   /// @return Status.
   Status SetProcessOrder(int process_order) noexcept {
-    return BarelyPerformer_SetTaskProcessOrder(handle_, performer_id_, id_,
-                                               process_order);
+    return BarelyTask_SetProcessOrder(handle_, performer_id_, id_,
+                                      process_order);
   }
 
  private:
-  // Ensures that `TaskReference` can only be constructed by `Performer`.
-  friend class Performer;
+  // Ensures that `TaskRef` can only be constructed by `PerformerRef`.
+  friend class PerformerRef;
 
-  // Constructs a new `TaskReference`.
-  explicit TaskReference(BarelyMusicianHandle handle, BarelyId performer_id,
-                         BarelyId id) noexcept
+  // Constructs a new `TaskRef`.
+  explicit TaskRef(BarelyMusicianHandle handle, BarelyId performer_id,
+                   BarelyId id) noexcept
       : handle_(handle), performer_id_(performer_id), id_(id) {}
 
   // Raw musician handle.
@@ -1660,39 +1624,9 @@ class TaskReference {
   BarelyId id_ = BarelyId_kInvalid;
 };
 
-/// Performer.
-class Performer {
+/// Performer reference.
+class PerformerRef {
  public:
-  /// Destroys `Performer`.
-  ~Performer() noexcept {
-    BarelyPerformer_Destroy(std::exchange(handle_, nullptr),
-                            std::exchange(id_, BarelyId_kInvalid));
-  }
-
-  /// Non-copyable.
-  Performer(const Performer& other) noexcept = delete;
-  Performer& operator=(const Performer& other) noexcept = delete;
-
-  /// Constructs a new `Performer` via move.
-  ///
-  /// @param other Other performer.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  Performer(Performer&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)),
-        id_(std::exchange(other.id_, BarelyId_kInvalid)) {}
-
-  /// Assigns `Performer` via move.
-  ///
-  /// @param other Other performer.
-  Performer& operator=(Performer&& other) noexcept {
-    if (this != &other) {
-      BarelyPerformer_Destroy(handle_, id_);
-      handle_ = std::exchange(other.handle_, nullptr);
-      id_ = std::exchange(other.id_, BarelyId_kInvalid);
-    }
-    return *this;
-  }
-
   /// Creates a new task.
   ///
   /// @param definition Task definition.
@@ -1701,15 +1635,15 @@ class Performer {
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Task reference.
-  TaskReference CreateTask(TaskDefinition definition, bool is_one_off,
-                           double position, int process_order = 0,
-                           void* user_data = nullptr) noexcept {
+  TaskRef CreateTask(TaskDefinition definition, bool is_one_off,
+                     double position, int process_order = 0,
+                     void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelyPerformer_CreateTask(
-        handle_, id_, definition, is_one_off, position, process_order,
-        user_data, &task_id);
+    [[maybe_unused]] const Status status =
+        BarelyTask_Create(handle_, id_, definition, is_one_off, position,
+                          process_order, user_data, &task_id);
     assert(status.IsOk());
-    return TaskReference(handle_, id_, task_id);
+    return TaskRef(handle_, id_, task_id);
   }
 
   /// Creates a new task with a callback.
@@ -1719,8 +1653,8 @@ class Performer {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @return Task reference.
-  TaskReference CreateTask(TaskCallback callback, bool is_one_off,
-                           double position, int process_order = 0) noexcept {
+  TaskRef CreateTask(TaskCallback callback, bool is_one_off, double position,
+                     int process_order = 0) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) noexcept {
@@ -1743,8 +1677,8 @@ class Performer {
   ///
   /// @param task_ref Task reference.
   /// @return Status.
-  Status DestroyTask(TaskReference task_ref) noexcept {
-    return BarelyPerformer_DestroyTask(handle_, id_, task_ref.id_);
+  Status DestroyTask(TaskRef task_ref) noexcept {
+    return BarelyTask_Destroy(handle_, id_, task_ref.id_);
   }
 
   /// Returns the loop begin position.
@@ -1846,15 +1780,12 @@ class Performer {
   Status Stop() noexcept { return BarelyPerformer_Stop(handle_, id_); }
 
  private:
-  // Ensures that `Performer` can only be constructed by `Musician`.
+  // Ensures that `PerformerRef` can only be constructed by `Musician`.
   friend class Musician;
 
-  // Constructs a new `Performer`.
-  explicit Performer(BarelyMusicianHandle handle) noexcept : handle_(handle) {
-    [[maybe_unused]] const Status status =
-        BarelyPerformer_Create(handle_, &id_);
-    assert(status.IsOk());
-  }
+  // Constructs a new `PerformerRef`.
+  explicit PerformerRef(BarelyMusicianHandle handle, BarelyId id) noexcept
+      : handle_(handle), id_(id) {}
 
   // Raw musician handle.
   BarelyMusicianHandle handle_ = nullptr;
@@ -1905,30 +1836,50 @@ class Musician {
     return *this;
   }
 
-  /// Creates a new component.
-  ///
-  /// @param args Component arguments.
-  /// @return Component.
-  template <class ComponentType, typename... Args>
-  [[nodiscard]] ComponentType CreateComponent(Args&&... args) noexcept {
-    return ComponentType(*this, args...);
-  }
-
   /// Creates a new instrument.
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @return Instrument.
-  [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
-                                            int frame_rate) noexcept {
-    return Instrument(handle_, definition, frame_rate);
+  /// @return Instrument reference.
+  [[nodiscard]] InstrumentRef CreateInstrument(InstrumentDefinition definition,
+                                               int frame_rate) noexcept {
+    BarelyId instrument_id = BarelyId_kInvalid;
+    [[maybe_unused]] const Status status = BarelyInstrument_Create(
+        handle_, definition, frame_rate, &instrument_id);
+    assert(status.IsOk());
+    const auto [it, success] = instrument_refs_.emplace(
+        instrument_id, InstrumentRef(handle_, instrument_id));
+    assert(success);
+    return it->second;
   }
 
   /// Creates a new performer.
   ///
-  /// @return Performer.
-  [[nodiscard]] Performer CreatePerformer() noexcept {
-    return Performer(handle_);
+  /// @return Performer reference.
+  [[nodiscard]] PerformerRef CreatePerformer() noexcept {
+    BarelyId performer_id = BarelyId_kInvalid;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_Create(handle_, &performer_id);
+    assert(status.IsOk());
+    return PerformerRef(handle_, performer_id);
+  }
+
+  /// Destroys an instrument.
+  ///
+  /// @param instrument_ref Instrument reference.
+  /// @return Status.
+  Status DestroyInstrument(InstrumentRef instrument_ref) noexcept {
+    const auto status = BarelyInstrument_Destroy(handle_, instrument_ref.id_);
+    instrument_refs_.erase(instrument_ref.id_);
+    return status;
+  }
+
+  /// Destroys a performer.
+  ///
+  /// @param performer_ref Performer reference.
+  /// @return Status.
+  Status DestroyPerformer(PerformerRef performer_ref) noexcept {
+    return BarelyPerformer_Destroy(handle_, performer_ref.id_);
   }
 
   /// Returns the tempo.
@@ -1972,6 +1923,9 @@ class Musician {
  private:
   // Raw handle.
   BarelyMusicianHandle handle_ = nullptr;
+
+  // Map of instrument references by their identifiers.
+  std::unordered_map<BarelyId, InstrumentRef> instrument_refs_;
 };
 
 }  // namespace barely

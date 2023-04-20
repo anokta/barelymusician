@@ -14,7 +14,6 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthControl;
@@ -62,7 +61,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   Musician musician;
 
-  Instrument instrument =
+  auto instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthControl::kGain, kGain);
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);

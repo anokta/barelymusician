@@ -7,15 +7,16 @@ cc_library(
     srcs = ["barelymusician.cpp"],
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
-        ":include",
+        ":barelymusician_headeronly",
         "//barelymusician/engine",
     ],
     alwayslink = True,
 )
 
 cc_library(
-    name = "include",
+    name = "barelymusician_headeronly",
     hdrs = ["barelymusician.h"],
+    visibility = ["//barelymusician/engine:__subpackages__"],
 )
 
 cc_test(

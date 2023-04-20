@@ -7,7 +7,7 @@ cc_library(
     srcs = ["control.cpp"],
     hdrs = ["control.h"],
     deps = [
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
     ],
 )
 
@@ -22,7 +22,7 @@ cc_library(
         ":performer",
         ":status",
         ":task",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
     ],
@@ -32,7 +32,7 @@ cc_library(
     name = "id",
     hdrs = ["id.h"],
     deps = [
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
     ],
 )
 
@@ -45,7 +45,7 @@ cc_library(
         ":message",
         ":message_queue",
         ":status",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
     ],
@@ -78,7 +78,7 @@ cc_library(
         ":id",
         ":status",
         ":task",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
     ],
 )
@@ -93,7 +93,7 @@ cc_library(
     srcs = ["task.cpp"],
     hdrs = ["task.h"],
     deps = [
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
     ],
 )
 
@@ -102,7 +102,7 @@ cc_test(
     srcs = ["control_test.cpp"],
     deps = [
         ":control",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )
@@ -117,7 +117,7 @@ cc_test(
         ":instrument",
         ":status",
         ":task",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )
@@ -129,7 +129,7 @@ cc_test(
         ":control",
         ":instrument",
         ":status",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )
@@ -160,7 +160,7 @@ cc_test(
         ":id",
         ":performer",
         ":status",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )
@@ -170,7 +170,7 @@ cc_test(
     srcs = ["task_test.cpp"],
     deps = [
         ":task",
-        "//barelymusician:include",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )

@@ -5,7 +5,7 @@ add_library(
 )
 target_link_libraries(
   control
-  include
+  barelymusician_headeronly
 )
 
 add_library(
@@ -21,7 +21,7 @@ target_link_libraries(
   performer
   status
   task
-  include
+  barelymusician_headeronly
   find_or_null
   seconds
 )
@@ -32,7 +32,7 @@ add_library(
 )
 target_link_libraries(
   id INTERFACE
-  include
+  barelymusician_headeronly
 )
 
 add_library(
@@ -46,7 +46,7 @@ target_link_libraries(
   message
   message_queue
   status
-  include
+  barelymusician_headeronly
   find_or_null
   seconds
 )
@@ -81,7 +81,7 @@ target_link_libraries(
   id
   status
   task
-  include
+  barelymusician_headeronly
   find_or_null
 )
 
@@ -97,7 +97,7 @@ add_library(
 )
 target_link_libraries(
   task
-  include
+  barelymusician_headeronly
 )
 
 if (ENABLE_TESTS)
@@ -108,7 +108,7 @@ if (ENABLE_TESTS)
   target_link_libraries(
     control_test
     control
-    include
+    barelymusician_headeronly
     gtest_main
   )
   gtest_discover_tests(control_test)
@@ -125,7 +125,7 @@ if (ENABLE_TESTS)
     instrument
     status
     task
-    include
+    barelymusician_headeronly
     gmock
     gtest_main
   )
@@ -140,7 +140,7 @@ if (ENABLE_TESTS)
     control
     instrument
     status
-    include
+    barelymusician_headeronly
     gmock
     gtest_main
   )
@@ -180,7 +180,7 @@ if (ENABLE_TESTS)
     id
     performer
     status
-    include
+    barelymusician_headeronly
     gmock
     gtest_main
   )
@@ -193,7 +193,7 @@ if (ENABLE_TESTS)
   target_link_libraries(
     task_test
     task
-    include
+    barelymusician_headeronly
     gtest_main
   )
   gtest_discover_tests(task_test)

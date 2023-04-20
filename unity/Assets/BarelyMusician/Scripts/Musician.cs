@@ -766,9 +766,8 @@ namespace Barely {
       }
 
       // Instrument control event callback.
-      private delegate void Instrument_ControlEventCallback(int index, double value,
-                                                            ref Int64 userData);
-      [AOT.MonoPInvokeCallback(typeof(Instrument_ControlEventCallback))]
+      private delegate void ControlEventCallback(int index, double value, ref Int64 userData);
+      [AOT.MonoPInvokeCallback(typeof(ControlEventCallback))]
       private static void Instrument_OnControlEvent(int index, double value, ref Int64 userData) {
         Instrument instrument = null;
         if (_instruments.TryGetValue(userData, out instrument)) {
@@ -777,9 +776,9 @@ namespace Barely {
       }
 
       // Instrument note control event callback.
-      private delegate void Instrument_NoteControlEventCallback(double pitch, int index,
-                                                                double value, ref Int64 userData);
-      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteControlEventCallback))]
+      private delegate void NoteControlEventCallback(double pitch, int index, double value,
+                                                     ref Int64 userData);
+      [AOT.MonoPInvokeCallback(typeof(NoteControlEventCallback))]
       private static void Instrument_OnNoteControlEvent(double pitch, int index, double value,
                                                         ref Int64 userData) {
         Instrument instrument = null;
@@ -789,8 +788,8 @@ namespace Barely {
       }
 
       // Instrument note off event callback.
-      private delegate void Instrument_NoteOffEventCallback(double pitch, ref Int64 userData);
-      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOffEventCallback))]
+      private delegate void NoteOffEventCallback(double pitch, ref Int64 userData);
+      [AOT.MonoPInvokeCallback(typeof(NoteOffEventCallback))]
       private static void Instrument_OnNoteOffEvent(double pitch, ref Int64 userData) {
         Instrument instrument = null;
         if (_instruments.TryGetValue(userData, out instrument)) {
@@ -799,9 +798,8 @@ namespace Barely {
       }
 
       // Instrument note on event callback.
-      private delegate void Instrument_NoteOnEventCallback(double pitch, double intensity,
-                                                           ref Int64 userData);
-      [AOT.MonoPInvokeCallback(typeof(Instrument_NoteOnEventCallback))]
+      private delegate void NoteOnEventCallback(double pitch, double intensity, ref Int64 userData);
+      [AOT.MonoPInvokeCallback(typeof(NoteOnEventCallback))]
       private static void Instrument_OnNoteOnEvent(double pitch, double intensity,
                                                    ref Int64 userData) {
         Instrument instrument = null;
@@ -1034,8 +1032,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetControlEventCallback")]
       private static extern Status BarelyInstrument_SetControlEventCallback(
-          IntPtr handle, Int64 instrumentId, Instrument_ControlEventCallback callback,
-          ref Int64 userData);
+          IntPtr handle, Int64 instrumentId, ControlEventCallback callback, ref Int64 userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetData")]
       private static extern Status BarelyInstrument_SetData(IntPtr handle, Int64 instrumentId,
@@ -1049,8 +1046,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteControlEventCallback")]
       private static extern Status BarelyInstrument_SetNoteControlEventCallback(
-          IntPtr handle, Int64 instrumentId, Instrument_NoteControlEventCallback callback,
-          ref Int64 userData);
+          IntPtr handle, Int64 instrumentId, NoteControlEventCallback callback, ref Int64 userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOff")]
       private static extern Status BarelyInstrument_SetNoteOff(IntPtr handle, Int64 instrumentId,
@@ -1058,8 +1054,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOffEventCallback")]
       private static extern Status BarelyInstrument_SetNoteOffEventCallback(
-          IntPtr handle, Int64 instrumentId, Instrument_NoteOffEventCallback callback,
-          ref Int64 userData);
+          IntPtr handle, Int64 instrumentId, NoteOffEventCallback callback, ref Int64 userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOn")]
       private static extern Status BarelyInstrument_SetNoteOn(IntPtr handle, Int64 instrumentId,
@@ -1067,8 +1062,7 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_SetNoteOnEventCallback")]
       private static extern Status BarelyInstrument_SetNoteOnEventCallback(
-          IntPtr handle, Int64 instrumentId, Instrument_NoteOnEventCallback callback,
-          ref Int64 userData);
+          IntPtr handle, Int64 instrumentId, NoteOnEventCallback callback, ref Int64 userData);
 
       [DllImport(pluginName, EntryPoint = "BarelyMusician_Create")]
       private static extern Status BarelyMusician_Create(ref IntPtr outHandle);

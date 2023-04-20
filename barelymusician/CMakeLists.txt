@@ -16,12 +16,12 @@ target_compile_definitions(
 )
 target_link_libraries(
   barelymusician
-  include
+  barelymusician_headeronly
   engine
 )
 
 add_library(
-  include INTERFACE
+  barelymusician_headeronly INTERFACE
   barelymusician.h
 )
 

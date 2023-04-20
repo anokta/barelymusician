@@ -1,5 +1,7 @@
 #include "barelymusician/engine/task.h"
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely::internal {
 
 Task::Task(const TaskDefinition& definition, void* user_data) noexcept

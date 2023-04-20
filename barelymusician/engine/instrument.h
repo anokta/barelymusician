@@ -12,24 +12,9 @@
 
 namespace barely::internal {
 
-/// Instrument definition alias.
-using InstrumentDefinition = barely::InstrumentDefinition;
-
 /// Class that wraps an instrument.
 class Instrument {
  public:
-  /// Control event callback alias.
-  using ControlEventCallback = barely::Instrument::ControlEventCallback;
-
-  /// Note control event callback alias.
-  using NoteControlEventCallback = barely::Instrument::NoteControlEventCallback;
-
-  /// Note off event callback alias.
-  using NoteOffEventCallback = barely::Instrument::NoteOffEventCallback;
-
-  /// Note on event callback alias.
-  using NoteOnEventCallback = barely::Instrument::NoteOnEventCallback;
-
   /// Constructs a new `Instrument`.
   ///
   /// @param definition Instrument definition.

@@ -192,7 +192,7 @@ BarelyStatus BarelyInstrument_SetControl(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_SetControlEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_ControlEventCallback callback, void* user_data) {
+    BarelyControlEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -242,7 +242,7 @@ BarelyStatus BarelyInstrument_SetNoteControl(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteControlEventCallback callback, void* user_data) {
+    BarelyNoteControlEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -274,7 +274,7 @@ BarelyStatus BarelyInstrument_SetNoteOff(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOffEventCallback callback, void* user_data) {
+    BarelyNoteOffEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);
@@ -305,7 +305,7 @@ BarelyStatus BarelyInstrument_SetNoteOn(BarelyMusicianHandle handle,
 
 BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOnEventCallback callback, void* user_data) {
+    BarelyNoteOnEventCallback callback, void* user_data) {
   if (!handle) return BarelyStatus_kNotFound;
 
   const auto instrument_or = handle->engine.GetInstrument(instrument_id);

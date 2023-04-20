@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/status.h"
 #include "gmock/gmock.h"

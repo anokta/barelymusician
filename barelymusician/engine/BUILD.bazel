@@ -22,6 +22,7 @@ cc_library(
         ":performer",
         ":status",
         ":task",
+        "//barelymusician:include",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
     ],
@@ -77,6 +78,7 @@ cc_library(
         ":id",
         ":status",
         ":task",
+        "//barelymusician:include",
         "//barelymusician/common:find_or_null",
     ],
 )
@@ -100,6 +102,7 @@ cc_test(
     srcs = ["control_test.cpp"],
     deps = [
         ":control",
+        "//barelymusician:include",
         "@googletest//:gtest_main",
     ],
 )
@@ -114,6 +117,7 @@ cc_test(
         ":instrument",
         ":status",
         ":task",
+        "//barelymusician:include",
         "@googletest//:gtest_main",
     ],
 )
@@ -125,6 +129,7 @@ cc_test(
         ":control",
         ":instrument",
         ":status",
+        "//barelymusician:include",
         "@googletest//:gtest_main",
     ],
 )
@@ -155,6 +160,7 @@ cc_test(
         ":id",
         ":performer",
         ":status",
+        "//barelymusician:include",
         "@googletest//:gtest_main",
     ],
 )
@@ -164,6 +170,7 @@ cc_test(
     srcs = ["task_test.cpp"],
     deps = [
         ":task",
+        "//barelymusician:include",
         "@googletest//:gtest_main",
     ],
 )

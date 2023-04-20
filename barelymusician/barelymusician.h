@@ -150,70 +150,36 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Musician handle.
-typedef struct BarelyMusician* BarelyMusicianHandle;
-
-/// Identifier alias.
-typedef int64_t BarelyId;
-
-/// Identifier values.
-enum BarelyId_Values {
-  /// Invalid identifier.
-  BarelyId_kInvalid = 0,
-};
-
-/// Status enum alias.
-typedef int32_t BarelyStatus;
-
-/// Status enum values.
-enum BarelyStatus_Values {
-  /// Success.
-  BarelyStatus_kOk = 0,
-  /// Invalid argument error.
-  BarelyStatus_kInvalidArgument = 1,
-  /// Not found error.
-  BarelyStatus_kNotFound = 2,
-  /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 3,
-  /// Internal error.
-  BarelyStatus_kInternal = 4,
-};
-
-/// Instrument control event callback signature.
+/// Control event callback signature.
 ///
 /// @param index Control index.
 /// @param value Control value.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_ControlEventCallback)(int32_t index,
-                                                      double value,
-                                                      void* user_data);
+typedef void (*BarelyControlEventCallback)(int32_t index, double value,
+                                           void* user_data);
 
-/// Instrument note control event callback signature.
+/// Note control event callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param index Note control index.
 /// @param value Note control value.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteControlEventCallback)(double pitch,
-                                                          int32_t index,
-                                                          double value,
-                                                          void* user_data);
+typedef void (*BarelyNoteControlEventCallback)(double pitch, int32_t index,
+                                               double value, void* user_data);
 
-/// Instrument note off event callback signature.
+/// Note off event callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteOffEventCallback)(double pitch,
-                                                      void* user_data);
+typedef void (*BarelyNoteOffEventCallback)(double pitch, void* user_data);
 
-/// Instrument note on event callback signature.
+/// Note on event callback signature.
 ///
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
 /// @param user_data Pointer to user data.
-typedef void (*BarelyInstrument_NoteOnEventCallback)(double pitch,
-                                                     double intensity,
-                                                     void* user_data);
+typedef void (*BarelyNoteOnEventCallback)(double pitch, double intensity,
+                                          void* user_data);
 
 /// Instrument definition create callback signature.
 ///
@@ -362,6 +328,35 @@ typedef struct BarelyTaskDefinition {
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
 
+/// Musician handle.
+typedef struct BarelyMusician* BarelyMusicianHandle;
+
+/// Identifier alias.
+typedef int64_t BarelyId;
+
+/// Identifier values.
+enum BarelyId_Values {
+  /// Invalid identifier.
+  BarelyId_kInvalid = 0,
+};
+
+/// Status enum alias.
+typedef int32_t BarelyStatus;
+
+/// Status enum values.
+enum BarelyStatus_Values {
+  /// Success.
+  BarelyStatus_kOk = 0,
+  /// Invalid argument error.
+  BarelyStatus_kInvalidArgument = 1,
+  /// Not found error.
+  BarelyStatus_kNotFound = 2,
+  /// Unimplemented error.
+  BarelyStatus_kUnimplemented = 3,
+  /// Internal error.
+  BarelyStatus_kInternal = 4,
+};
+
 /// Creates a new instrument.
 ///
 /// @param handle Musician handle.
@@ -494,7 +489,7 @@ BarelyInstrument_SetControl(BarelyMusicianHandle handle, BarelyId instrument_id,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetControlEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_ControlEventCallback callback, void* user_data);
+    BarelyControlEventCallback callback, void* user_data);
 
 /// Sets instrument data.
 ///
@@ -530,7 +525,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControl(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteControlEventCallback callback, void* user_data);
+    BarelyNoteControlEventCallback callback, void* user_data);
 
 /// Sets an instrument note off.
 ///
@@ -550,7 +545,7 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOff(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOffEventCallback callback, void* user_data);
+    BarelyNoteOffEventCallback callback, void* user_data);
 
 /// Sets an instrument note on.
 ///
@@ -572,7 +567,7 @@ BarelyInstrument_SetNoteOn(BarelyMusicianHandle handle, BarelyId instrument_id,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
     BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyInstrument_NoteOnEventCallback callback, void* user_data);
+    BarelyNoteOnEventCallback callback, void* user_data);
 
 /// Creates a new musician.
 ///
@@ -921,6 +916,34 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 
 namespace barely {
 
+/// Control event callback signature.
+///
+/// @param index Control index.
+/// @param value Control value.
+using ControlEventCallback = std::function<void(int index, double value)>;
+
+/// Note control event callback signature.
+///
+/// @param pitch Note pitch.
+/// @param index Note control index.
+/// @param value Note control value.
+using NoteControlEventCallback =
+    std::function<void(double pitch, int index, double value)>;
+
+/// Note off event callback signature.
+///
+/// @param pitch Note pitch.
+using NoteOffEventCallback = std::function<void(double pitch)>;
+
+/// Note on event callback signature.
+///
+/// @param pitch Note pitch.
+/// @param intensity Note intensity.
+using NoteOnEventCallback = std::function<void(double pitch, double intensity)>;
+
+/// Task callback.
+using TaskCallback = std::function<void()>;
+
 /// Status.
 class Status {
  public:
@@ -935,13 +958,13 @@ class Status {
     /// Unimplemented error.
     kUnimplemented = BarelyStatus_kUnimplemented,
     /// Internal error.
-    kRaw = BarelyStatus_kInternal,
+    kInternal = BarelyStatus_kInternal,
   };
 
   /// Returns a new `Status` with `Status::kOk`.
   ///
   /// @return Status.
-  static Status Ok() noexcept { return Status(Status::kOk); }
+  static Status Ok() noexcept { return Status::kOk; }
 
   /// Returns a new `Status` with `Status::kInvalidArgument`.
   ///
@@ -958,10 +981,10 @@ class Status {
   /// @return Status.
   static Status Unimplemented() noexcept { return Status::kUnimplemented; }
 
-  /// Returns a new `Status` with `Status::kRaw`.
+  /// Returns a new `Status` with `Status::kInternal`.
   ///
   /// @return Status.
-  static Status Raw() noexcept { return Status::kRaw; }
+  static Status Internal() noexcept { return Status::kInternal; }
 
   /// Constructs a new `Status`.
   ///
@@ -1002,7 +1025,7 @@ class Status {
         return "Not found error";
       case kUnimplemented:
         return "Unimplemented error";
-      case kRaw:
+      case kInternal:
         return "Internal error";
       default:
         return "Unknown error";
@@ -1192,9 +1215,6 @@ struct InstrumentDefinition : public BarelyInstrumentDefinition {
   }
 };
 
-/// Task callback.
-using TaskCallback = std::function<void()>;
-
 /// Task definition.
 struct TaskDefinition : public BarelyTaskDefinition {
   /// Create callback signature.
@@ -1231,32 +1251,6 @@ struct TaskDefinition : public BarelyTaskDefinition {
 /// Instrument.
 class Instrument {
  public:
-  /// Control event callback signature.
-  ///
-  /// @param index Control index.
-  /// @param value Control value.
-  using ControlEventCallback = std::function<void(int index, double value)>;
-
-  /// Note control event callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param index Note control index.
-  /// @param value Note control value.
-  using NoteControlEventCallback =
-      std::function<void(double pitch, int index, double value)>;
-
-  /// Note off event callback signature.
-  ///
-  /// @param pitch Note pitch.
-  using NoteOffEventCallback = std::function<void(double pitch)>;
-
-  /// Note on event callback signature.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  using NoteOnEventCallback =
-      std::function<void(double pitch, double intensity)>;
-
   /// Destroys `Instrument`.
   ~Instrument() noexcept {
     BarelyInstrument_Destroy(std::exchange(handle_, nullptr),

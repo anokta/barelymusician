@@ -1,5 +1,6 @@
 #include "barelymusician/engine/task.h"
 
+#include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {

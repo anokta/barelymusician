@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/control.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"

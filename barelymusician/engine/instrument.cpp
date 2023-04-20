@@ -6,6 +6,7 @@
 #include <variant>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/engine/control.h"

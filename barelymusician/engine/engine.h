@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/instrument.h"
 #include "barelymusician/engine/mutable_data.h"

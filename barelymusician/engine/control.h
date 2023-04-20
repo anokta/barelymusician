@@ -5,9 +5,6 @@
 
 namespace barely::internal {
 
-/// Control definition alias.
-using ControlDefinition = barely::ControlDefinition;
-
 /// Class that wraps a control.
 class Control {
  public:

@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/control.h"
 #include "barelymusician/engine/status.h"
 #include "gmock/gmock.h"

@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cassert>
 
+#include "barelymusician/barelymusician.h"
+
 namespace barely::internal {
 
 Control::Control(ControlDefinition definition) noexcept

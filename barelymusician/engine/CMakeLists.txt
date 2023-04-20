@@ -21,6 +21,7 @@ target_link_libraries(
   performer
   status
   task
+  include
   find_or_null
   seconds
 )
@@ -80,6 +81,7 @@ target_link_libraries(
   id
   status
   task
+  include
   find_or_null
 )
 
@@ -106,6 +108,7 @@ if (ENABLE_TESTS)
   target_link_libraries(
     control_test
     control
+    include
     gtest_main
   )
   gtest_discover_tests(control_test)
@@ -122,6 +125,7 @@ if (ENABLE_TESTS)
     instrument
     status
     task
+    include
     gmock
     gtest_main
   )
@@ -136,6 +140,7 @@ if (ENABLE_TESTS)
     control
     instrument
     status
+    include
     gmock
     gtest_main
   )
@@ -175,6 +180,7 @@ if (ENABLE_TESTS)
     id
     performer
     status
+    include
     gmock
     gtest_main
   )
@@ -187,6 +193,7 @@ if (ENABLE_TESTS)
   target_link_libraries(
     task_test
     task
+    include
     gtest_main
   )
   gtest_discover_tests(task_test)

@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/id.h"
 #include "barelymusician/engine/status.h"
 #include "barelymusician/engine/task.h"

@@ -163,7 +163,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
 void Instrument::ResetAllControls() noexcept {
   for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
     if (auto& control = controls_[index]; control.Reset()) {
-      if (note_control_event_callback_) {
+      if (control_event_callback_) {
         control_event_callback_(index, control.GetValue());
       }
       message_queue_.Add(timestamp_,
@@ -193,7 +193,7 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
 Status Instrument::ResetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {
-      if (note_control_event_callback_) {
+      if (control_event_callback_) {
         control_event_callback_(index, control.GetValue());
       }
       message_queue_.Add(timestamp_,
@@ -236,7 +236,7 @@ Status Instrument::SetControl(int index, double value,
                               double slope_per_beat) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Set(value, slope_per_beat)) {
-      if (note_control_event_callback_) {
+      if (control_event_callback_) {
         control_event_callback_(index, control.GetValue());
       }
       message_queue_.Add(timestamp_,

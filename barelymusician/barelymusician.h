@@ -813,6 +813,7 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 #include <span>
 #include <string>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 
@@ -1248,55 +1249,9 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
-/// Instrument.
-class Instrument {
+/// Instrument reference.
+class InstrumentRef {
  public:
-  /// Destroys `Instrument`.
-  ~Instrument() noexcept {
-    BarelyInstrument_Destroy(std::exchange(handle_, nullptr),
-                             std::exchange(id_, BarelyId_kInvalid));
-  }
-
-  /// Non-copyable.
-  Instrument(const Instrument& other) noexcept = delete;
-  Instrument& operator=(const Instrument& other) noexcept = delete;
-
-  /// Constructs a new `Instrument` via move.
-  ///
-  /// @param other Other instrument.
-  Instrument(Instrument&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)),
-        id_(std::exchange(other.id_, BarelyId_kInvalid)) {
-    SetControlEventCallback(
-        std::exchange(other.control_event_callback_, nullptr));
-    SetNoteControlEventCallback(
-        std::exchange(other.note_control_event_callback_, nullptr));
-    SetNoteOffEventCallback(
-        std::exchange(other.note_off_event_callback_, nullptr));
-    SetNoteOnEventCallback(
-        std::exchange(other.note_on_event_callback_, nullptr));
-  }
-
-  /// Assigns `Instrument` via move.
-  ///
-  /// @param other Other instrument.
-  Instrument& operator=(Instrument&& other) noexcept {
-    if (this != &other) {
-      BarelyInstrument_Destroy(handle_, id_);
-      handle_ = std::exchange(other.handle_, nullptr);
-      id_ = std::exchange(other.id_, BarelyId_kInvalid);
-      SetControlEventCallback(
-          std::exchange(other.control_event_callback_, nullptr));
-      SetNoteControlEventCallback(
-          std::exchange(other.note_control_event_callback_, nullptr));
-      SetNoteOffEventCallback(
-          std::exchange(other.note_off_event_callback_, nullptr));
-      SetNoteOnEventCallback(
-          std::exchange(other.note_on_event_callback_, nullptr));
-    }
-    return *this;
-  }
-
   /// Returns a control value.
   ///
   /// @param index Control index.
@@ -1433,14 +1388,14 @@ class Instrument {
   /// @param callback Control event callback.
   /// @return Status.
   Status SetControlEventCallback(ControlEventCallback callback) noexcept {
-    if (callback) {
-      control_event_callback_ = std::move(callback);
+    *control_event_callback_ = std::move(callback);
+    if (*control_event_callback_) {
       return BarelyInstrument_SetControlEventCallback(
           handle_, id_,
           [](int32_t index, double value, void* user_data) noexcept {
             (*static_cast<ControlEventCallback*>(user_data))(index, value);
           },
-          static_cast<void*>(&control_event_callback_));
+          static_cast<void*>(control_event_callback_.get()));
     }
     return BarelyInstrument_SetControlEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
@@ -1494,8 +1449,8 @@ class Instrument {
   /// @return Status.
   Status SetNoteControlEventCallback(
       NoteControlEventCallback callback) noexcept {
-    if (callback) {
-      note_control_event_callback_ = std::move(callback);
+    *note_control_event_callback_ = std::move(callback);
+    if (*note_control_event_callback_) {
       return BarelyInstrument_SetNoteControlEventCallback(
           handle_, id_,
           [](double pitch, int32_t index, double value,
@@ -1503,7 +1458,7 @@ class Instrument {
             (*static_cast<NoteControlEventCallback*>(user_data))(pitch, index,
                                                                  value);
           },
-          static_cast<void*>(&note_control_event_callback_));
+          static_cast<void*>(note_control_event_callback_.get()));
     }
     return BarelyInstrument_SetNoteControlEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
@@ -1522,14 +1477,14 @@ class Instrument {
   /// @param callback Note off event callback.
   /// @return Status.
   Status SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept {
-    if (callback) {
-      note_off_event_callback_ = std::move(callback);
+    *note_off_event_callback_ = std::move(callback);
+    if (*note_off_event_callback_) {
       return BarelyInstrument_SetNoteOffEventCallback(
           handle_, id_,
           [](double pitch, void* user_data) noexcept {
             (*static_cast<NoteOffEventCallback*>(user_data))(pitch);
           },
-          static_cast<void*>(&note_off_event_callback_));
+          static_cast<void*>(note_off_event_callback_.get()));
     }
     return BarelyInstrument_SetNoteOffEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
@@ -1549,31 +1504,32 @@ class Instrument {
   /// @param callback Note on event callback.
   /// @return Status.
   Status SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
-    if (callback) {
-      note_on_event_callback_ = std::move(callback);
+    *note_on_event_callback_ = std::move(callback);
+    if (*note_on_event_callback_) {
       return BarelyInstrument_SetNoteOnEventCallback(
           handle_, id_,
           [](double pitch, double intensity, void* user_data) noexcept {
             (*static_cast<NoteOnEventCallback*>(user_data))(pitch, intensity);
           },
-          static_cast<void*>(&note_on_event_callback_));
+          static_cast<void*>(note_on_event_callback_.get()));
     }
     return BarelyInstrument_SetNoteOnEventCallback(
         handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
   }
 
  private:
-  // Ensures that `Instrument` can only be constructed by `Musician`.
+  // Ensures that `InstrumentRef` can only be constructed by `Musician`.
   friend class Musician;
 
-  // Constructs a new `Instrument`.
-  explicit Instrument(BarelyMusicianHandle handle,
-                      InstrumentDefinition definition, int frame_rate) noexcept
-      : handle_(handle) {
-    [[maybe_unused]] const Status status =
-        BarelyInstrument_Create(handle_, definition, frame_rate, &id_);
-    assert(status.IsOk());
-  }
+  // Constructs a new `InstrumentRef`.
+  explicit InstrumentRef(BarelyMusicianHandle handle, BarelyId id) noexcept
+      : handle_(handle),
+        id_(id),
+        control_event_callback_(std::make_shared<ControlEventCallback>()),
+        note_control_event_callback_(
+            std::make_shared<NoteControlEventCallback>()),
+        note_off_event_callback_(std::make_shared<NoteOffEventCallback>()),
+        note_on_event_callback_(std::make_shared<NoteOnEventCallback>()) {}
 
   // Raw musician handle.
   BarelyMusicianHandle handle_ = nullptr;
@@ -1582,16 +1538,17 @@ class Instrument {
   BarelyId id_ = BarelyId_kInvalid;
 
   // Control event callback.
-  ControlEventCallback control_event_callback_;
+  std::shared_ptr<ControlEventCallback> control_event_callback_ = nullptr;
 
   // Note control event callback.
-  NoteControlEventCallback note_control_event_callback_;
+  std::shared_ptr<NoteControlEventCallback> note_control_event_callback_ =
+      nullptr;
 
   // Note off event callback.
-  NoteOffEventCallback note_off_event_callback_;
+  std::shared_ptr<NoteOffEventCallback> note_off_event_callback_ = nullptr;
 
   // Note on event callback.
-  NoteOnEventCallback note_on_event_callback_;
+  std::shared_ptr<NoteOnEventCallback> note_on_event_callback_ = nullptr;
 };
 
 /// Task reference.
@@ -1905,23 +1862,21 @@ class Musician {
     return *this;
   }
 
-  /// Creates a new component.
-  ///
-  /// @param args Component arguments.
-  /// @return Component.
-  template <class ComponentType, typename... Args>
-  [[nodiscard]] ComponentType CreateComponent(Args&&... args) noexcept {
-    return ComponentType(*this, args...);
-  }
-
   /// Creates a new instrument.
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @return Instrument.
-  [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
-                                            int frame_rate) noexcept {
-    return Instrument(handle_, definition, frame_rate);
+  /// @return Instrument reference.
+  [[nodiscard]] InstrumentRef CreateInstrument(InstrumentDefinition definition,
+                                               int frame_rate) noexcept {
+    BarelyId instrument_id = BarelyId_kInvalid;
+    [[maybe_unused]] const Status status = BarelyInstrument_Create(
+        handle_, definition, frame_rate, &instrument_id);
+    assert(status.IsOk());
+    const auto [it, success] = instrument_refs_.emplace(
+        instrument_id, InstrumentRef(handle_, instrument_id));
+    assert(success);
+    return it->second;
   }
 
   /// Creates a new performer.
@@ -1929,6 +1884,16 @@ class Musician {
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept {
     return Performer(handle_);
+  }
+
+  /// Destroys an instrument.
+  ///
+  /// @param instrument_ref Instrument reference.
+  /// @return Status.
+  Status DestroyInstrument(InstrumentRef instrument_ref) noexcept {
+    const auto status = BarelyInstrument_Destroy(handle_, instrument_ref.id_);
+    instrument_refs_.erase(instrument_ref.id_);
+    return status;
   }
 
   /// Returns the tempo.
@@ -1972,6 +1937,9 @@ class Musician {
  private:
   // Raw handle.
   BarelyMusicianHandle handle_ = nullptr;
+
+  // Map of instrument references by their identifiers.
+  std::unordered_map<BarelyId, InstrumentRef> instrument_refs_;
 };
 
 }  // namespace barely

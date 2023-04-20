@@ -13,7 +13,6 @@
 
 namespace {
 
-using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
@@ -58,7 +57,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  Instrument instrument =
+  auto instrument =
       musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthControl::kGain, kGain);
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
@@ -67,7 +66,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  Metronome metronome = musician.CreateComponent<Metronome>();
+  Metronome metronome(musician);
   metronome.SetBeatCallback([&](int beat) {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;

@@ -58,13 +58,12 @@ TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   EXPECT_EQ(BarelyMusician_Destroy(handle), BarelyStatus_kOk);
 }
 
-TEST(MusicianTest, CreateDestroyMusician) {
-  Musician musician;
-}
+TEST(MusicianTest, CreateDestroyMusician) { Musician musician; }
 
 TEST(MusicianTest, CreateDestroyInstrument) {
   Musician musician;
-  Instrument instrument = musician.CreateInstrument({{}}, 1);
+  InstrumentRef instrument_ref = musician.CreateInstrument({{}}, 1);
+  EXPECT_EQ(musician.DestroyInstrument(instrument_ref), Status::kOk);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {

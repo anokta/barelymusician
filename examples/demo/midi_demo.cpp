@@ -18,7 +18,7 @@
 
 namespace {
 
-using ::barely::Instrument;
+using ::barely::InstrumentRef;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
@@ -75,7 +75,7 @@ double PitchFromMidiKeyNumber(int midi_key_number) {
 
 // Builds the score for the given `midi_events`.
 bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
-                Instrument& instrument, Performer& performer) {
+                InstrumentRef& instrument, Performer& performer) {
   const auto get_position_fn = [ticks_per_beat](int tick) -> double {
     return static_cast<double>(tick) / static_cast<double>(ticks_per_beat);
   };
@@ -125,13 +125,13 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician;
   musician.SetTempo(kTempo);
 
-  std::vector<std::pair<Instrument, Performer>> tracks;
+  std::vector<std::pair<InstrumentRef, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
     tracks.emplace_back(
         musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate),
         musician.CreatePerformer());
-    Instrument& instrument = tracks.back().first;
+    InstrumentRef& instrument = tracks.back().first;
     Performer& performer = tracks.back().second;
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {

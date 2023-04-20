@@ -20,8 +20,8 @@ namespace Barely {
             _position = value;
             return;
           }
-          Musician.Internal.Performer_SetTaskPosition(_performer._id, _id, value);
-          _position = Musician.Internal.Performer_GetTaskPosition(_performer._id, _id);
+          Musician.Internal.Task_SetPosition(_performer._id, _id, value);
+          _position = Musician.Internal.Task_GetPosition(_performer._id, _id);
         }
       }
       [SerializeField]
@@ -35,8 +35,8 @@ namespace Barely {
             _processOrder = value;
             return;
           }
-          Musician.Internal.Performer_SetTaskProcessOrder(_performer._id, _id, value);
-          _processOrder = Musician.Internal.Performer_GetTaskProcessOrder(_performer._id, _id);
+          Musician.Internal.Task_SetProcessOrder(_performer._id, _id, value);
+          _processOrder = Musician.Internal.Task_GetProcessOrder(_performer._id, _id);
         }
       }
       [SerializeField]
@@ -62,16 +62,15 @@ namespace Barely {
       public void Update(Performer performer) {
         if (_performer == null) {
           _performer = performer;
-          Musician.Internal.Performer_CreateTask(_performer._id,
-                                                 delegate() {
-                                                   OnProcess?.Invoke();
-                                                   OnProcessEvent?.Invoke();
-                                                 },
-                                                 /*isOneOff=*/false, _position, _processOrder,
-                                                 ref _id);
+          Musician.Internal.Task_Create(_performer._id,
+                                        delegate() {
+                                          OnProcess?.Invoke();
+                                          OnProcessEvent?.Invoke();
+                                        },
+                                        /*isOneOff=*/false, _position, _processOrder, ref _id);
           _performer._tasks.Add(this);
         } else if (performer == null) {
-          Musician.Internal.Performer_DestroyTask(_performer._id, ref _id);
+          Musician.Internal.Task_Destroy(_performer._id, ref _id);
           _performer._tasks.Remove(this);
           _performer = null;
         } else {
@@ -151,8 +150,8 @@ namespace Barely {
     /// @param processOrder Task process order.
     public void ScheduleTask(Action callback, double position, int processOrder = 0) {
       Int64 taskId = Musician.Internal.InvalidId;
-      Musician.Internal.Performer_CreateTask(_id, callback, /*isOneOff=*/true, position,
-                                             processOrder, ref taskId);
+      Musician.Internal.Task_Create(_id, callback, /*isOneOff=*/true, position, processOrder,
+                                    ref taskId);
     }
 
     /// Stops the performer.

@@ -384,41 +384,11 @@ BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
   return performer_id_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_CreateTask(BarelyMusicianHandle handle,
-                                        BarelyId performer_id,
-                                        BarelyTaskDefinition definition,
-                                        bool is_one_off, double position,
-                                        int32_t process_order, void* user_data,
-                                        BarelyId* out_task_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_task_id) return BarelyStatus_kInvalidArgument;
-
-  const auto task_id_or = handle->engine.CreatePerformerTask(
-      performer_id, definition, is_one_off, position, process_order, user_data);
-  if (task_id_or.IsOk()) {
-    *out_task_id = *task_id_or;
-    return BarelyStatus_kOk;
-  }
-  return task_id_or.GetErrorStatus();
-}
-
 BarelyStatus BarelyPerformer_Destroy(BarelyMusicianHandle handle,
                                      BarelyId performer_id) {
   if (!handle) return BarelyStatus_kNotFound;
 
   return handle->engine.DestroyPerformer(performer_id);
-}
-
-BarelyStatus BarelyPerformer_DestroyTask(BarelyMusicianHandle handle,
-                                         BarelyId performer_id,
-                                         BarelyId task_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
-  if (performer_or.IsOk()) {
-    return performer_or->get().DestroyTask(task_id);
-  }
-  return performer_or.GetErrorStatus();
 }
 
 BarelyStatus BarelyPerformer_GetLoopBeginPosition(
@@ -459,45 +429,6 @@ BarelyStatus BarelyPerformer_GetPosition(BarelyMusicianHandle handle,
   if (performer_or.IsOk()) {
     *out_position = performer_or->get().GetPosition();
     return BarelyStatus_kOk;
-  }
-  return performer_or.GetErrorStatus();
-}
-
-BarelyStatus BarelyPerformer_GetTaskPosition(BarelyMusicianHandle handle,
-                                             BarelyId performer_id,
-                                             BarelyId task_id,
-                                             double* out_position) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_position) return BarelyStatus_kInvalidArgument;
-
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
-  if (performer_or.IsOk()) {
-    const auto position_or = performer_or->get().GetTaskPosition(task_id);
-    if (position_or.IsOk()) {
-      *out_position = *position_or;
-      return BarelyStatus_kOk;
-    }
-    return position_or.GetErrorStatus();
-  }
-  return performer_or.GetErrorStatus();
-}
-
-BarelyStatus BarelyPerformer_GetTaskProcessOrder(BarelyMusicianHandle handle,
-                                                 BarelyId performer_id,
-                                                 BarelyId task_id,
-                                                 int32_t* out_process_order) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_process_order) return BarelyStatus_kInvalidArgument;
-
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
-  if (performer_or.IsOk()) {
-    const auto process_order_or =
-        performer_or->get().GetTaskProcessOrder(task_id);
-    if (process_order_or.IsOk()) {
-      *out_process_order = *process_order_or;
-      return BarelyStatus_kOk;
-    }
-    return process_order_or.GetErrorStatus();
   }
   return performer_or.GetErrorStatus();
 }
@@ -582,32 +513,6 @@ BarelyStatus BarelyPerformer_SetPosition(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_SetTaskPosition(BarelyMusicianHandle handle,
-                                             BarelyId performer_id,
-                                             BarelyId task_id,
-                                             double position) {
-  if (!handle) return BarelyStatus_kNotFound;
-
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
-  if (performer_or.IsOk()) {
-    return performer_or->get().SetTaskPosition(task_id, position);
-  }
-  return performer_or.GetErrorStatus();
-}
-
-BarelyStatus BarelyPerformer_SetTaskProcessOrder(BarelyMusicianHandle handle,
-                                                 BarelyId performer_id,
-                                                 BarelyId task_id,
-                                                 int32_t process_order) {
-  if (!handle) return BarelyStatus_kNotFound;
-
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
-  if (performer_or.IsOk()) {
-    return performer_or->get().SetTaskProcessOrder(task_id, process_order);
-  }
-  return performer_or.GetErrorStatus();
-}
-
 BarelyStatus BarelyPerformer_Start(BarelyMusicianHandle handle,
                                    BarelyId performer_id) {
   if (!handle) return BarelyStatus_kNotFound;
@@ -628,6 +533,95 @@ BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
   if (performer_or.IsOk()) {
     performer_or->get().Stop();
     return BarelyStatus_kOk;
+  }
+  return performer_or.GetErrorStatus();
+}
+
+BarelyStatus BarelyTask_Create(BarelyMusicianHandle handle,
+                               BarelyId performer_id,
+                               BarelyTaskDefinition definition, bool is_one_off,
+                               double position, int32_t process_order,
+                               void* user_data, BarelyId* out_task_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (!out_task_id) return BarelyStatus_kInvalidArgument;
+
+  const auto task_id_or = handle->engine.CreatePerformerTask(
+      performer_id, definition, is_one_off, position, process_order, user_data);
+  if (task_id_or.IsOk()) {
+    *out_task_id = *task_id_or;
+    return BarelyStatus_kOk;
+  }
+  return task_id_or.GetErrorStatus();
+}
+
+BarelyStatus BarelyTask_Destroy(BarelyMusicianHandle handle,
+                                BarelyId performer_id, BarelyId task_id) {
+  if (!handle) return BarelyStatus_kNotFound;
+
+  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  if (performer_or.IsOk()) {
+    return performer_or->get().DestroyTask(task_id);
+  }
+  return performer_or.GetErrorStatus();
+}
+
+BarelyStatus BarelyTask_GetPosition(BarelyMusicianHandle handle,
+                                    BarelyId performer_id, BarelyId task_id,
+                                    double* out_position) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (!out_position) return BarelyStatus_kInvalidArgument;
+
+  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  if (performer_or.IsOk()) {
+    const auto position_or = performer_or->get().GetTaskPosition(task_id);
+    if (position_or.IsOk()) {
+      *out_position = *position_or;
+      return BarelyStatus_kOk;
+    }
+    return position_or.GetErrorStatus();
+  }
+  return performer_or.GetErrorStatus();
+}
+
+BarelyStatus BarelyTask_GetProcessOrder(BarelyMusicianHandle handle,
+                                        BarelyId performer_id, BarelyId task_id,
+                                        int32_t* out_process_order) {
+  if (!handle) return BarelyStatus_kNotFound;
+  if (!out_process_order) return BarelyStatus_kInvalidArgument;
+
+  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  if (performer_or.IsOk()) {
+    const auto process_order_or =
+        performer_or->get().GetTaskProcessOrder(task_id);
+    if (process_order_or.IsOk()) {
+      *out_process_order = *process_order_or;
+      return BarelyStatus_kOk;
+    }
+    return process_order_or.GetErrorStatus();
+  }
+  return performer_or.GetErrorStatus();
+}
+
+BarelyStatus BarelyTask_SetPosition(BarelyMusicianHandle handle,
+                                    BarelyId performer_id, BarelyId task_id,
+                                    double position) {
+  if (!handle) return BarelyStatus_kNotFound;
+
+  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  if (performer_or.IsOk()) {
+    return performer_or->get().SetTaskPosition(task_id, position);
+  }
+  return performer_or.GetErrorStatus();
+}
+
+BarelyStatus BarelyTask_SetProcessOrder(BarelyMusicianHandle handle,
+                                        BarelyId performer_id, BarelyId task_id,
+                                        int32_t process_order) {
+  if (!handle) return BarelyStatus_kNotFound;
+
+  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  if (performer_or.IsOk()) {
+    return performer_or->get().SetTaskProcessOrder(task_id, process_order);
   }
   return performer_or.GetErrorStatus();
 }

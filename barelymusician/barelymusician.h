@@ -124,10 +124,9 @@
 ///   // Create a task.
 ///   BarelyTaskDefinition definition;  // populate this.
 ///   BarelyId task_id = BarelyId_kInvalid;
-///   BarelyPerformer_CreateTask(handle, performer_id, definition,
-///                              /*is_one_off=*/false, /*position=*/0.0,
-///                              /*process_order=*/0, /*user_data=*/nullptr,
-///                              &task_id);
+///   BarelyTask_Create(handle, performer_id, definition, /*is_one_off=*/false,
+///                     /*position=*/0.0, /*process_order=*/0,
+///                     /*user_data=*/nullptr, &task_id);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(handle, performer_id, /*is_looping=*/true);
@@ -140,7 +139,7 @@
 ///   BarelyPerformer_IsPlaying(handle, performer_id, &is_playing);
 ///
 ///   // Destroy the task.
-///   BarelyPerformer_DestroyTask(handle, performer_id, task_id);
+///   BarelyTask_Destroy(handle, performer_id, task_id);
 ///
 ///   // Destroy.
 ///   BarelyPerformer_Destroy(handle, performer_id);
@@ -622,22 +621,6 @@ BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
 BARELY_EXPORT BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
                                                   BarelyId* out_performer_id);
 
-/// Creates a new performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param definition Task definition.
-/// @param is_one_off True if one-off task, false otherwise.
-/// @param position Task position in beats.
-/// @param process_order Task process order.
-/// @param user_data Pointer to user data.
-/// @param out_task_id Output task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    BarelyTaskDefinition definition, bool is_one_off, double position,
-    int32_t process_order, void* user_data, BarelyId* out_task_id);
-
 /// Destroys a performer.
 ///
 /// @param handle Musician handle.
@@ -645,15 +628,6 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_CreateTask(
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_Destroy(BarelyMusicianHandle handle,
                                                    BarelyId performer_id);
-
-/// Destroys a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_DestroyTask(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id);
 
 /// Gets the loop begin position of a performer.
 ///
@@ -683,28 +657,6 @@ BarelyPerformer_GetLoopLength(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_GetPosition(
     BarelyMusicianHandle handle, BarelyId performer_id, double* out_position);
-
-/// Gets the position of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_GetTaskPosition(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    double* out_position);
-
-/// Gets the process order of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param out_process_order Output process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_GetTaskProcessOrder(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    int32_t* out_process_order);
 
 /// Gets whether a performer is looping or not.
 ///
@@ -761,28 +713,6 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_SetLooping(
 BARELY_EXPORT BarelyStatus BarelyPerformer_SetPosition(
     BarelyMusicianHandle handle, BarelyId performer_id, double position);
 
-/// Sets the position of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_SetTaskPosition(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    double position);
-
-/// Sets the process order of a performer task.
-///
-/// @param handle Musician handle.
-/// @param performer_id Performer identifier.
-/// @param task_id Task identifier.
-/// @param process_order Process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_SetTaskProcessOrder(
-    BarelyMusicianHandle handle, BarelyId performer_id, BarelyId task_id,
-    int32_t process_order);
-
 /// Starts a performer.
 ///
 /// @param handle Musician handle.
@@ -798,6 +728,78 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Start(BarelyMusicianHandle handle,
 /// @return Status.
 BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
                                                 BarelyId performer_id);
+
+/// Creates a new task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param definition Task definition.
+/// @param is_one_off True if one-off task, false otherwise.
+/// @param position Task position in beats.
+/// @param process_order Task process order.
+/// @param user_data Pointer to user data.
+/// @param out_task_id Output task identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_Create(
+    BarelyMusicianHandle handle, BarelyId performer_id,
+    BarelyTaskDefinition definition, bool is_one_off, double position,
+    int32_t process_order, void* user_data, BarelyId* out_task_id);
+
+/// Destroys a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_Destroy(BarelyMusicianHandle handle,
+                                              BarelyId performer_id,
+                                              BarelyId task_id);
+
+/// Gets the position of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param out_position Output position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_GetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId performer_id,
+                                                  BarelyId task_id,
+                                                  double* out_position);
+
+/// Gets the process order of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param out_process_order Output process order.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyTask_GetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
+                           BarelyId task_id, int32_t* out_process_order);
+
+/// Sets the position of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param position Position in beats.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyTask_SetPosition(BarelyMusicianHandle handle,
+                                                  BarelyId performer_id,
+                                                  BarelyId task_id,
+                                                  double position);
+
+/// Sets the process order of a task.
+///
+/// @param handle Musician handle.
+/// @param performer_id Performer identifier.
+/// @param task_id Task identifier.
+/// @param process_order Process order.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyTask_SetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
+                           BarelyId task_id, int32_t process_order);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -889,6 +891,9 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 ///   double timestamp = 0.0;
 ///   instrument.Process(output_samples.data(), output_channel_count,
 ///                      output_frame_count, timestamp);
+///
+///   // Destroy.
+///   musician.DestroyInstrument(std::move(instrument));
 ///   @endcode
 ///
 /// - Performer:
@@ -912,7 +917,10 @@ BARELY_EXPORT BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
 ///   const bool is_playing = performer.IsPlaying();
 ///
 ///   // Destroy the task.
-///   performer.DestroyTask(task);
+///   performer.DestroyTask(std::move(task));
+///
+///   // Destroy.
+///   musician.DestroyPerformer(std::move(performer));
 ///   @endcode
 
 namespace barely {
@@ -1559,8 +1567,8 @@ class TaskRef {
   /// @return Position in beats, or an error status.
   [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
     double position = 0.0;
-    if (const Status status = BarelyPerformer_GetTaskPosition(
-            handle_, performer_id_, id_, &position);
+    if (const Status status =
+            BarelyTask_GetPosition(handle_, performer_id_, id_, &position);
         !status.IsOk()) {
       return status;
     }
@@ -1572,8 +1580,8 @@ class TaskRef {
   /// @return Process order, or an error status.
   [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
     int process_order = 0;
-    if (const Status status = BarelyPerformer_GetTaskProcessOrder(
-            handle_, performer_id_, id_, &process_order);
+    if (const Status status = BarelyTask_GetProcessOrder(handle_, performer_id_,
+                                                         id_, &process_order);
         !status.IsOk()) {
       return status;
     }
@@ -1585,8 +1593,7 @@ class TaskRef {
   /// @param position Position in beats.
   /// @return Status.
   Status SetPosition(double position) noexcept {
-    return BarelyPerformer_SetTaskPosition(handle_, performer_id_, id_,
-                                           position);
+    return BarelyTask_SetPosition(handle_, performer_id_, id_, position);
   }
 
   /// Sets the process order.
@@ -1594,8 +1601,8 @@ class TaskRef {
   /// @param process_order Process order.
   /// @return Status.
   Status SetProcessOrder(int process_order) noexcept {
-    return BarelyPerformer_SetTaskProcessOrder(handle_, performer_id_, id_,
-                                               process_order);
+    return BarelyTask_SetProcessOrder(handle_, performer_id_, id_,
+                                      process_order);
   }
 
  private:
@@ -1632,9 +1639,9 @@ class PerformerRef {
                      double position, int process_order = 0,
                      void* user_data = nullptr) noexcept {
     BarelyId task_id = BarelyId_kInvalid;
-    [[maybe_unused]] const Status status = BarelyPerformer_CreateTask(
-        handle_, id_, definition, is_one_off, position, process_order,
-        user_data, &task_id);
+    [[maybe_unused]] const Status status =
+        BarelyTask_Create(handle_, id_, definition, is_one_off, position,
+                          process_order, user_data, &task_id);
     assert(status.IsOk());
     return TaskRef(handle_, id_, task_id);
   }
@@ -1671,7 +1678,7 @@ class PerformerRef {
   /// @param task_ref Task reference.
   /// @return Status.
   Status DestroyTask(TaskRef task_ref) noexcept {
-    return BarelyPerformer_DestroyTask(handle_, id_, task_ref.id_);
+    return BarelyTask_Destroy(handle_, id_, task_ref.id_);
   }
 
   /// Returns the loop begin position.

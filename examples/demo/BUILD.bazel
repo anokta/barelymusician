@@ -72,6 +72,7 @@ cc_binary(
     deps = [
         "//barelymusician",
         "//barelymusician/composition:pitch",
+        "//barelymusician/effects:low_pass_effect",
         "//barelymusician/instruments:sampler_instrument",
         "//examples/common:audio_output",
         "//examples/common:console_log",

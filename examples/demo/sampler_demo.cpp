@@ -8,6 +8,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/pitch.h"
+#include "barelymusician/effects/low_pass_effect.h"
 #include "barelymusician/instruments/sampler_instrument.h"
 #include "examples/common/audio_output.h"
 #include "examples/common/console_log.h"
@@ -17,6 +18,8 @@
 
 namespace {
 
+using ::barely::LowPassControl;
+using ::barely::LowPassEffect;
 using ::barely::Musician;
 using ::barely::SamplerControl;
 using ::barely::SamplerInstrument;
@@ -39,6 +42,8 @@ constexpr double kRelease = 0.125;
 constexpr int kVoiceCount = 16;
 
 constexpr char kSamplePath[] = "audio/sample.wav";
+
+constexpr double kLowPassCutoffFrequency = 2000;
 
 // Note settings.
 constexpr double kRootPitch = barely::kPitchC3;
@@ -91,6 +96,9 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerControl::kAttack, kAttack);
   instrument.SetControl(SamplerControl::kRelease, kRelease);
   instrument.SetControl(SamplerControl::kVoiceCount, kVoiceCount);
+
+  auto effect = *instrument.CreateEffect(LowPassEffect::GetDefinition());
+  effect.SetControl(LowPassControl::kCutoffFrequency, kLowPassCutoffFrequency);
 
   const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));
   const int size = static_cast<int>(data.size() * sizeof(double));

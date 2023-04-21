@@ -198,9 +198,9 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
                                    static_cast<int>(data_.size()));
               }
             },
-            [this, &effect_id_ref_pairs](
+            [&effect_id_ref_pairs](
                 EffectControlMessage& effect_control_message) noexcept {
-              auto it = std::find_if(
+              const auto it = std::find_if(
                   effect_id_ref_pairs->begin(), effect_id_ref_pairs->end(),
                   [effect_id = effect_control_message.effect_id](
                       auto& effect_id_ref_pair) {
@@ -211,9 +211,9 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
                                      effect_control_message.value,
                                      effect_control_message.slope_per_frame);
             },
-            [this, &effect_id_ref_pairs](
+            [&effect_id_ref_pairs](
                 EffectDataMessage& effect_data_message) noexcept {
-              auto it = std::find_if(
+              const auto it = std::find_if(
                   effect_id_ref_pairs->begin(), effect_id_ref_pairs->end(),
                   [effect_id = effect_data_message.effect_id](
                       auto& effect_id_ref_pair) {

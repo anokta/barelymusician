@@ -40,6 +40,22 @@ StatusOr<Id> Engine::CreateInstrument(InstrumentDefinition definition,
   return instrument_id;
 }
 
+StatusOr<Id> Engine::CreateInstrumentEffect(Id instrument_id,
+                                            EffectDefinition definition,
+                                            int process_order) noexcept {
+  if (instrument_id == kInvalid) {
+    return Status::InvalidArgument();
+  }
+  auto instrument_or = GetInstrument(instrument_id);
+  if (instrument_or.IsOk()) {
+    auto& instrument = instrument_or->get();
+    const Id effect_id = GenerateNextId();
+    instrument.CreateEffect(effect_id, definition, process_order);
+    return effect_id;
+  }
+  return instrument_or.GetErrorStatus();
+}
+
 // NOLINTNEXTLINE(bugprone-exception-escape)
 StatusOr<Id> Engine::CreatePerformer() noexcept {
   const Id performer_id = GenerateNextId();

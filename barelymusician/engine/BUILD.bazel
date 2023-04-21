@@ -29,6 +29,15 @@ cc_library(
 )
 
 cc_library(
+    name = "effect",
+    srcs = ["effect.cpp"],
+    hdrs = ["effect.h"],
+    deps = [
+        "//barelymusician:barelymusician_headeronly",
+    ],
+)
+
+cc_library(
     name = "id",
     hdrs = ["id.h"],
     deps = [
@@ -42,8 +51,11 @@ cc_library(
     hdrs = ["instrument.h"],
     deps = [
         ":control",
+        ":effect",
+        ":id",
         ":message",
         ":message_queue",
+        ":mutable_data",
         ":status",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
@@ -54,6 +66,9 @@ cc_library(
 cc_library(
     name = "message",
     hdrs = ["message.h"],
+    deps = [
+        ":id",
+    ],
 )
 
 cc_library(
@@ -102,6 +117,16 @@ cc_test(
     srcs = ["control_test.cpp"],
     deps = [
         ":control",
+        "//barelymusician:barelymusician_headeronly",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "effect_test",
+    srcs = ["effect_test.cpp"],
+    deps = [
+        ":effect",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],

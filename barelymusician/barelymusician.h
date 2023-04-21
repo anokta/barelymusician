@@ -180,6 +180,46 @@ typedef void (*BarelyNoteOffEventCallback)(double pitch, void* user_data);
 typedef void (*BarelyNoteOnEventCallback)(double pitch, double intensity,
                                           void* user_data);
 
+/// Effect definition create callback signature.
+///
+/// @param state Pointer to effect state.
+/// @param frame_rate Frame rate in hertz.
+typedef void (*BarelyEffectDefinition_CreateCallback)(void** state,
+                                                      int32_t frame_rate);
+
+/// Effect definition destroy callback signature.
+///
+/// @param state Pointer to effect state.
+typedef void (*BarelyEffectDefinition_DestroyCallback)(void** state);
+
+/// Effect definition process callback signature.
+///
+/// @param state Pointer to effect state.
+/// @param output_samples Array of output samples.
+/// @param output_channel_count Number of output channels.
+/// @param output_frame_count Number of output frames.
+typedef void (*BarelyEffectDefinition_ProcessCallback)(
+    void** state, double* output_samples, int32_t output_channel_count,
+    int32_t output_frame_count);
+
+/// Effect definition set control callback signature.
+///
+/// @param state Pointer to effect state.
+/// @param index Control index.
+/// @param value Control value.
+/// @param slope_per_frame Control slope in value change per frame.
+typedef void (*BarelyEffectDefinition_SetControlCallback)(
+    void** state, int32_t index, double value, double slope_per_frame);
+
+/// Effect definition set data callback signature.
+///
+/// @param state Pointer to effect state.
+/// @param data Pointer to immutable data.
+/// @param size Data size in bytes.
+typedef void (*BarelyEffectDefinition_SetDataCallback)(void** state,
+                                                       const void* data,
+                                                       int32_t size);
+
 /// Instrument definition create callback signature.
 ///
 /// @param state Pointer to instrument state.
@@ -276,6 +316,30 @@ typedef struct BarelyControlDefinition {
   double max_value;
 } BarelyControlDefinition;
 
+/// Effect definition.
+typedef struct BarelyEffectDefinition {
+  /// Create callback.
+  BarelyEffectDefinition_CreateCallback create_callback;
+
+  /// Destroy callback.
+  BarelyEffectDefinition_DestroyCallback destroy_callback;
+
+  /// Process callback.
+  BarelyEffectDefinition_ProcessCallback process_callback;
+
+  /// Set control callback.
+  BarelyEffectDefinition_SetControlCallback set_control_callback;
+
+  /// Set data callback.
+  BarelyEffectDefinition_SetDataCallback set_data_callback;
+
+  /// Array of control definitions.
+  const BarelyControlDefinition* control_definitions;
+
+  /// Number of control definitions.
+  int32_t control_definition_count;
+} BarelyEffectDefinition;
+
 /// Instrument definition.
 typedef struct BarelyInstrumentDefinition {
   /// Create callback.
@@ -355,6 +419,125 @@ enum BarelyStatus_Values {
   /// Internal error.
   BarelyStatus_kInternal = 4,
 };
+
+/// Creates a new effect.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param definition Effect definition.
+/// @param process_order Effect process order.
+/// @param out_effect_id Output effect identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyEffect_Create(BarelyMusicianHandle handle, BarelyId instrument_id,
+                    BarelyEffectDefinition definition, int32_t process_order,
+                    BarelyId* out_effect_id);
+
+/// Destroys an effect.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_Destroy(BarelyMusicianHandle handle,
+                                                BarelyId instrument_id,
+                                                BarelyId effect_id);
+
+/// Gets an effect control value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @param index Control index.
+/// @param out_value Output control value.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_GetControl(BarelyMusicianHandle handle,
+                                                   BarelyId instrument_id,
+                                                   BarelyId effect_id,
+                                                   int32_t index,
+                                                   double* out_value);
+
+/// Gets the process order of an effect.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @param out_process_order Output process order.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_GetProcessOrder(
+    BarelyMusicianHandle handle, BarelyId instrument_id, BarelyId effect_id,
+    int32_t* out_process_order);
+
+/// Resets all effect control values.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_ResetAllControls(
+    BarelyMusicianHandle handle, BarelyId instrument_id, BarelyId effect_id);
+
+/// Resets an effect control value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @param index Control index.
+/// @return Status.
+BARELY_EXPORT BarelyStatus
+BarelyEffect_ResetControl(BarelyMusicianHandle handle, BarelyId instrument_id,
+                          BarelyId effect_id, int32_t index);
+
+/// Sets an effect control value.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @param index Control index.
+/// @param value Control value.
+/// @param slope_per_beat Control slope in value change per beat.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_SetControl(BarelyMusicianHandle handle,
+                                                   BarelyId instrument_id,
+                                                   BarelyId effect_id,
+                                                   int32_t index, double value,
+                                                   double slope_per_beat);
+
+/// Sets the control event callback of an effect.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @param callback Control event callback.
+/// @param user_data Pointer to user data.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_SetControlEventCallback(
+    BarelyMusicianHandle handle, BarelyId instrument_id, BarelyId effect_id,
+    BarelyControlEventCallback callback, void* user_data);
+
+/// Sets effect data.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @param data Pointer to immutable data.
+/// @param size Data size in bytes.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_SetData(BarelyMusicianHandle handle,
+                                                BarelyId instrument_id,
+                                                BarelyId effect_id,
+                                                const void* data, int32_t size);
+
+/// Sets the process order of an effect.
+///
+/// @param handle Musician handle.
+/// @param instrument_id Instrument identifier.
+/// @param effect_id Effect identifier.
+/// @param process_order Process order.
+/// @return Status.
+BARELY_EXPORT BarelyStatus BarelyEffect_SetProcessOrder(
+    BarelyMusicianHandle handle, BarelyId instrument_id, BarelyId effect_id,
+    int32_t process_order);
 
 /// Creates a new instrument.
 ///
@@ -1149,6 +1332,57 @@ struct ControlDefinition : public BarelyControlDefinition {
   }
 };
 
+/// Effect definition.
+struct EffectDefinition : public BarelyEffectDefinition {
+  /// Create callback signature.
+  using CreateCallback = BarelyEffectDefinition_CreateCallback;
+
+  /// Destroy callback signature.
+  using DestroyCallback = BarelyEffectDefinition_DestroyCallback;
+
+  /// Process callback signature.
+  using ProcessCallback = BarelyEffectDefinition_ProcessCallback;
+
+  /// Set control callback signature.
+  using SetControlCallback = BarelyEffectDefinition_SetControlCallback;
+
+  /// Set data callback signature.
+  using SetDataCallback = BarelyEffectDefinition_SetDataCallback;
+
+  /// Constructs a new `EffectDefinition`.
+  ///
+  /// @param create_callback Create callback.
+  /// @param destroy_callback Destroy callback.
+  /// @param process_callback Process callback.
+  /// @param set_control_callback Set control callback.
+  /// @param set_data_callback Set data callback.
+  /// @param control_definitions Span of control definitions.
+  explicit EffectDefinition(
+      CreateCallback create_callback, DestroyCallback destroy_callback,
+      ProcessCallback process_callback, SetControlCallback set_control_callback,
+      SetDataCallback set_data_callback,
+      std::span<const ControlDefinition> control_definitions) noexcept
+      : EffectDefinition({
+            create_callback,
+            destroy_callback,
+            process_callback,
+            set_control_callback,
+            set_data_callback,
+            control_definitions.data(),
+            static_cast<int>(control_definitions.size()),
+        }) {}
+
+  /// Constructs a new `EffectDefinition` from a raw type.
+  ///
+  /// @param definition Raw effect definition.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  EffectDefinition(BarelyEffectDefinition definition) noexcept
+      : BarelyEffectDefinition{definition} {
+    assert(control_definitions || control_definition_count == 0);
+    assert(control_definition_count >= 0);
+  }
+};
+
 /// Instrument definition.
 struct InstrumentDefinition : public BarelyInstrumentDefinition {
   /// Create callback signature.
@@ -1257,9 +1491,184 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
+/// Effect reference.
+class EffectRef {
+ public:
+  /// Returns a control value.
+  ///
+  /// @param index Control index.
+  /// @return Control value, or an error status.
+  template <typename IndexType, typename ValueType>
+  [[nodiscard]] StatusOr<ValueType> GetControl(IndexType index) const noexcept {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    double value = 0.0;
+    if (const Status status = BarelyEffect_GetControl(
+            handle_, instrument_id_, id_, static_cast<int>(index), &value);
+        !status.IsOk()) {
+      return status;
+    }
+    return static_cast<ValueType>(value);
+  }
+
+  /// Returns the process order.
+  ///
+  /// @return Process order, or an error status.
+  [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
+    int process_order = 0;
+    if (const Status status = BarelyEffect_GetProcessOrder(
+            handle_, instrument_id_, id_, &process_order);
+        !status.IsOk()) {
+      return status;
+    }
+    return process_order;
+  }
+
+  /// Resets all control values.
+  ///
+  /// @return Status.
+  Status ResetAllControls() noexcept {
+    return BarelyEffect_ResetAllControls(handle_, instrument_id_, id_);
+  }
+
+  /// Resets a control value.
+  ///
+  /// @param index Control index.
+  /// @return Status.
+  template <typename IndexType>
+  Status ResetControl(IndexType index) noexcept {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    return BarelyEffect_ResetControl(handle_, instrument_id_, id_,
+                                     static_cast<int>(index));
+  }
+
+  /// Sets a control value.
+  ///
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param slope_per_beat Control slope in value change per beat.
+  /// @return Status.
+  template <typename IndexType, typename ValueType>
+  Status SetControl(IndexType index, ValueType value,
+                    double slope_per_beat = 0.0) noexcept {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
+    return BarelyEffect_SetControl(handle_, instrument_id_, id_,
+                                   static_cast<int>(index),
+                                   static_cast<double>(value), slope_per_beat);
+  }
+
+  /// Sets the control event callback.
+  ///
+  /// @param callback Control event callback.
+  /// @return Status.
+  Status SetControlEventCallback(ControlEventCallback callback) noexcept {
+    *control_event_callback_ = std::move(callback);
+    if (*control_event_callback_) {
+      return BarelyInstrument_SetControlEventCallback(
+          handle_, id_,
+          [](int32_t index, double value, void* user_data) noexcept {
+            (*static_cast<ControlEventCallback*>(user_data))(index, value);
+          },
+          static_cast<void*>(control_event_callback_.get()));
+    }
+    return BarelyInstrument_SetControlEventCallback(
+        handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Immutable data.
+  /// @return Status.
+  template <typename DataType>
+  Status SetData(const DataType& data) noexcept {
+    static_assert(std::is_trivially_copyable<DataType>::value,
+                  "DataType is not trivially copyable");
+    return SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Pointer to immutable data.
+  /// @param size Data size in bytes.
+  /// @return Status.
+  Status SetData(const void* data, int size) noexcept {
+    return BarelyEffect_SetData(handle_, instrument_id_, id_, data, size);
+  }
+
+  /// Sets the process order.
+  ///
+  /// @param process_order Process order.
+  /// @return Status.
+  Status SetProcessOrder(int process_order) noexcept {
+    return BarelyEffect_SetProcessOrder(handle_, instrument_id_, id_,
+                                        process_order);
+  }
+
+ private:
+  // Ensures that `EffectRef` can only be constructed by `InstrumentRef`.
+  friend class InstrumentRef;
+
+  // Constructs a new `EffectRef`.
+  explicit EffectRef(BarelyMusicianHandle handle, BarelyId instrument_id,
+                     BarelyId id) noexcept
+      : handle_(handle),
+        instrument_id_(instrument_id),
+        id_(id),
+        control_event_callback_(std::make_shared<ControlEventCallback>()) {}
+
+  // Raw musician handle.
+  BarelyMusicianHandle handle_ = nullptr;
+
+  // Instrument identifier.
+  BarelyId instrument_id_ = BarelyId_kInvalid;
+
+  // Identifier.
+  BarelyId id_ = BarelyId_kInvalid;
+
+  // Control event callback.
+  std::shared_ptr<ControlEventCallback> control_event_callback_ = nullptr;
+};
+
 /// Instrument reference.
 class InstrumentRef {
  public:
+  /// Creates a new effect.
+  ///
+  /// @param definition Effect definition.
+  /// @param process_order Task process order.
+  /// @return Effect reference, or an error status.
+  StatusOr<EffectRef> CreateEffect(EffectDefinition definition,
+                                   int process_order = 0) noexcept {
+    BarelyId effect_id = BarelyId_kInvalid;
+    if (const Status status = BarelyEffect_Create(handle_, id_, definition,
+                                                  process_order, &effect_id);
+        !status.IsOk()) {
+      return status;
+    }
+    const auto [it, success] =
+        effect_refs_.emplace(effect_id, EffectRef(handle_, id_, effect_id));
+    assert(success);
+    return it->second;
+  }
+
+  /// Destroys an effect.
+  ///
+  /// @param effect_ref Effect reference.
+  /// @return Status.
+  Status DestroyEffect(EffectRef effect_ref) noexcept {
+    const auto status = BarelyEffect_Destroy(handle_, id_, effect_ref.id_);
+    effect_refs_.erase(effect_ref.id_);
+    return status;
+  }
+
   /// Returns a control value.
   ///
   /// @param index Control index.
@@ -1558,6 +1967,9 @@ class InstrumentRef {
 
   // Note on event callback.
   std::shared_ptr<NoteOnEventCallback> note_on_event_callback_ = nullptr;
+
+  // Map of effect references by their identifiers.
+  std::unordered_map<BarelyId, EffectRef> effect_refs_;
 };
 
 /// Task reference.

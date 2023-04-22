@@ -1,5 +1,6 @@
 var class_barely_1_1_sampler_instrument =
 [
+    [ "OnEnable", "class_barely_1_1_sampler_instrument.html#a200152cfb3fd5ca4756343fccdaf6b33", null ],
     [ "Attack", "class_barely_1_1_sampler_instrument.html#a8c81bfae153d637cfb28e69605f9be92", null ],
     [ "Decay", "class_barely_1_1_sampler_instrument.html#a6cdccfd9164fca290d0c9aab4ea72cba", null ],
     [ "Gain", "class_barely_1_1_sampler_instrument.html#a9337ed915d4f6500588c75eb521371fc", null ],

@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['instrument_0',['Instrument',['../class_barely_1_1_instrument.html',1,'Barely']]],
-  ['instrument_2ecs_1',['Instrument.cs',['../_instrument_8cs.html',1,'']]],
-  ['isnoteon_2',['IsNoteOn',['../class_barely_1_1_instrument.html#a42c50de12b701ff4484b8bab723f5284',1,'Barely::Instrument']]],
-  ['isplaying_3',['IsPlaying',['../class_barely_1_1_performer.html#a9e0097f1401eb33fefc2ef69c3ec88cb',1,'Barely::Performer']]]
+  ['haschanged_0',['HasChanged',['../class_barely_1_1_percussion_instrument_1_1_pad.html#a5b31652a420d3afec55f4c00ebd3df27',1,'Barely::PercussionInstrument::Pad']]],
+  ['highpasseffect_1',['HighPassEffect',['../class_barely_1_1_high_pass_effect.html',1,'Barely']]],
+  ['highpasseffect_2ecs_2',['HighPassEffect.cs',['../_high_pass_effect_8cs.html',1,'']]]
 ];

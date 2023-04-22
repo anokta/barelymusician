@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['instrument_2ecs_0',['Instrument.cs',['../_instrument_8cs.html',1,'']]]
+  ['effect_2ecs_0',['Effect.cs',['../_effect_8cs.html',1,'']]]
 ];

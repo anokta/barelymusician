@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['loop_0',['Loop',['../class_barely_1_1_sampler_instrument.html#ad5e7aae1822ef8fbe88889202ba32acf',1,'Barely::SamplerInstrument']]]
+  ['key_0',['Key',['../class_barely_1_1_percussion_instrument_1_1_pad.html#ab4e8804cc84c73c8d13105eab595f726',1,'Barely::PercussionInstrument::Pad']]]
 ];

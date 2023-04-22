@@ -1,23 +1,10 @@
 var searchData=
 [
-  ['oncontrol_0',['OnControl',['../class_barely_1_1_instrument.html#a66bf275f0369f91675d430f1db89773e',1,'Barely::Instrument']]],
-  ['oncontrolevent_1',['OnControlEvent',['../class_barely_1_1_instrument.html#a66fe2b53a51dd469808ef2bdf1f23d7c',1,'Barely::Instrument']]],
-  ['oncreate_2',['OnCreate',['../interface_barely_1_1_custom_instrument_definition.html#a8413fd6ad69f4c81b120ff0c4366880e',1,'Barely::CustomInstrumentDefinition']]],
-  ['ondestroy_3',['OnDestroy',['../interface_barely_1_1_custom_instrument_definition.html#a8f4b8eca579e0163ab49fea3c9b9c02a',1,'Barely.CustomInstrumentDefinition.OnDestroy()'],['../class_barely_1_1_instrument.html#ac861b9d059601c00ef44d569f1d075c0',1,'Barely.Instrument.OnDestroy()']]],
-  ['ondisable_4',['OnDisable',['../class_barely_1_1_custom_instrument.html#a16cb14ab862b88196f384552d42bcb94',1,'Barely.CustomInstrument.OnDisable()'],['../class_barely_1_1_instrument.html#a81880a6bac1cd8d2f99b47dc88a3f87f',1,'Barely.Instrument.OnDisable()']]],
-  ['onenable_5',['OnEnable',['../class_barely_1_1_custom_instrument.html#a451885284f72fbe12abb5c84011ce0f7',1,'Barely.CustomInstrument.OnEnable()'],['../class_barely_1_1_instrument.html#a186d33e2695901485c2b04c43fe777fb',1,'Barely.Instrument.OnEnable()']]],
-  ['onnotecontrol_6',['OnNoteControl',['../class_barely_1_1_instrument.html#a0e75f9c04efbeebc14f04256d271f026',1,'Barely::Instrument']]],
-  ['onnotecontrolevent_7',['OnNoteControlEvent',['../class_barely_1_1_instrument.html#aa350b26ea52310b0c7d1f95ff09fc39a',1,'Barely::Instrument']]],
-  ['onnoteoff_8',['OnNoteOff',['../class_barely_1_1_instrument.html#a20036558cd0c3bb72540ee587bf08f1c',1,'Barely::Instrument']]],
-  ['onnoteoffevent_9',['OnNoteOffEvent',['../class_barely_1_1_instrument.html#ab90d3b214aea05a7f507c52707aa7abf',1,'Barely::Instrument']]],
-  ['onnoteon_10',['OnNoteOn',['../class_barely_1_1_instrument.html#a4edcd94f08dffebcf25a022c3d8e09de',1,'Barely::Instrument']]],
-  ['onnoteonevent_11',['OnNoteOnEvent',['../class_barely_1_1_instrument.html#a6f4bb45f3600210528af7938f9011a51',1,'Barely::Instrument']]],
-  ['onprocess_12',['OnProcess',['../class_barely_1_1_performer_1_1_task.html#accfd0d7a509fb442dae277ba6bd5281d',1,'Barely.Performer.Task.OnProcess()'],['../interface_barely_1_1_custom_instrument_definition.html#a0c0da27e6ca915e11af5df8028c0a6cf',1,'Barely.CustomInstrumentDefinition.OnProcess()']]],
-  ['onprocessevent_13',['OnProcessEvent',['../class_barely_1_1_performer_1_1_task.html#a507931670cc499b7154bd8e619ececa5',1,'Barely::Performer::Task']]],
-  ['onsetcontrol_14',['OnSetControl',['../interface_barely_1_1_custom_instrument_definition.html#aa7445f44b51b2b25de41f33b57ef2cb0',1,'Barely::CustomInstrumentDefinition']]],
-  ['onsetdata_15',['OnSetData',['../interface_barely_1_1_custom_instrument_definition.html#a7134a5692af182dbba766935e68f0790',1,'Barely::CustomInstrumentDefinition']]],
-  ['onsetnotecontrol_16',['OnSetNoteControl',['../interface_barely_1_1_custom_instrument_definition.html#aaa0d1c6c4294fc25c069b2b6a8bbe059',1,'Barely::CustomInstrumentDefinition']]],
-  ['onsetnoteoff_17',['OnSetNoteOff',['../interface_barely_1_1_custom_instrument_definition.html#a5bfabe58f0dacacf99ccba94102bdc96',1,'Barely::CustomInstrumentDefinition']]],
-  ['onsetnoteon_18',['OnSetNoteOn',['../interface_barely_1_1_custom_instrument_definition.html#a3f4d5d8c81befb3cf98b026a8f3f5faa',1,'Barely::CustomInstrumentDefinition']]],
-  ['oscillatortype_19',['OscillatorType',['../class_barely_1_1_synth_instrument.html#a94d9c7ba1563d58070c22dddc2b5397b',1,'Barely.SynthInstrument.OscillatorType()'],['../namespace_barely.html#aaa183e3807f54604e7f0c68e235cf48f',1,'Barely.OscillatorType()']]]
+  ['noise_0',['NOISE',['../namespace_barely.html#aaa183e3807f54604e7f0c68e235cf48fa2a8eb3b0974dc3508ba003d3f7a37e52',1,'Barely']]],
+  ['notecontrolevent_1',['NoteControlEvent',['../class_barely_1_1_instrument_1_1_note_control_event.html',1,'Barely::Instrument']]],
+  ['notecontroleventcallback_2',['NoteControlEventCallback',['../class_barely_1_1_instrument.html#a9d4142f7191e2c0e08961f7bd867ffab',1,'Barely::Instrument']]],
+  ['noteoffevent_3',['NoteOffEvent',['../class_barely_1_1_instrument_1_1_note_off_event.html',1,'Barely::Instrument']]],
+  ['noteoffeventcallback_4',['NoteOffEventCallback',['../class_barely_1_1_instrument.html#a88ea8b63ade1d29423f4cd5c42ade9ba',1,'Barely::Instrument']]],
+  ['noteonevent_5',['NoteOnEvent',['../class_barely_1_1_instrument_1_1_note_on_event.html',1,'Barely::Instrument']]],
+  ['noteoneventcallback_6',['NoteOnEventCallback',['../class_barely_1_1_instrument.html#a63308545f18dad14bfc1e6c8302af468',1,'Barely::Instrument']]]
 ];

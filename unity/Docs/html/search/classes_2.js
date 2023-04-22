@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['musician_0',['Musician',['../class_barely_1_1_musician.html',1,'Barely']]]
+  ['highpasseffect_0',['HighPassEffect',['../class_barely_1_1_high_pass_effect.html',1,'Barely']]]
 ];

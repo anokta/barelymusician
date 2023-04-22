@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['gain_0',['Gain',['../class_barely_1_1_percussion_instrument.html#aec32d508d923804b42f271ef25e9de3d',1,'Barely.PercussionInstrument.Gain()'],['../class_barely_1_1_sampler_instrument.html#a9337ed915d4f6500588c75eb521371fc',1,'Barely.SamplerInstrument.Gain()'],['../class_barely_1_1_synth_instrument.html#a8ebaa81cb14848d49fe5010e9643be15',1,'Barely.SynthInstrument.Gain()']]]
+  ['decay_0',['Decay',['../class_barely_1_1_sampler_instrument.html#a6cdccfd9164fca290d0c9aab4ea72cba',1,'Barely.SamplerInstrument.Decay()'],['../class_barely_1_1_synth_instrument.html#a33841ef3fbee34bf781a5cc191df3c2e',1,'Barely.SynthInstrument.Decay()']]],
+  ['defaultvalue_1',['defaultValue',['../struct_barely_1_1_control_definition.html#a7ce67e87fe496cf8a0fe5caa5c472544',1,'Barely::ControlDefinition']]]
 ];

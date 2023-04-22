@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['samplerinstrument_0',['SamplerInstrument',['../class_barely_1_1_sampler_instrument.html',1,'Barely']]],
-  ['synthinstrument_1',['SynthInstrument',['../class_barely_1_1_synth_instrument.html',1,'Barely']]]
+  ['musician_0',['Musician',['../class_barely_1_1_musician.html',1,'Barely']]]
 ];

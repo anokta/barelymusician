@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['release_0',['Release',['../class_barely_1_1_sampler_instrument.html#a1bf7963e0596791b59a8d6fdd5d4a758',1,'Barely.SamplerInstrument.Release()'],['../class_barely_1_1_synth_instrument.html#ad2f3dee7cd7ef8f92db0be72a732fdc2',1,'Barely.SynthInstrument.Release()']]],
-  ['rootpitch_1',['RootPitch',['../class_barely_1_1_sampler_instrument.html#abe842abf3a69f9e72e3fa632f6656c5c',1,'Barely::SamplerInstrument']]]
+  ['padrelease_0',['PadRelease',['../class_barely_1_1_percussion_instrument.html#a0e92c7794715ff764cb091cd6fcde902',1,'Barely::PercussionInstrument']]],
+  ['pads_1',['Pads',['../class_barely_1_1_percussion_instrument.html#a64836e320819bb8e0b5fd19a61d86b9c',1,'Barely::PercussionInstrument']]],
+  ['playonawake_2',['playOnAwake',['../class_barely_1_1_performer.html#a332e677e50ce19a7714b4736edf6e206',1,'Barely::Performer']]]
 ];

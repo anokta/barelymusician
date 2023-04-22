@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
-package(default_visibility = ["//barelymusician:__subpackages__"])
+package(default_visibility = ["//visibility:private"])
 
 cc_library(
     name = "control",
@@ -15,6 +15,7 @@ cc_library(
     name = "engine",
     srcs = ["engine.cpp"],
     hdrs = ["engine.h"],
+    visibility = ["//barelymusician:__pkg__"],
     deps = [
         ":id",
         ":instrument",

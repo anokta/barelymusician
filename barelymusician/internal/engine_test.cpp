@@ -1,15 +1,15 @@
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/internal/engine.h"
 
 #include <algorithm>
 #include <array>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/control.h"
-#include "barelymusician/engine/id.h"
-#include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/status.h"
-#include "barelymusician/engine/task.h"
+#include "barelymusician/internal/control.h"
+#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/task.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

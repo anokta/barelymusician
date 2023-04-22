@@ -5,7 +5,7 @@
 
 #include <cstddef>
 
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/internal/engine.h"
 
 extern "C" {
 

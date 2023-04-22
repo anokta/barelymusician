@@ -1,5 +1,5 @@
 
-#include "barelymusician/engine/control.h"
+#include "barelymusician/internal/control.h"
 
 #include <algorithm>
 #include <cassert>

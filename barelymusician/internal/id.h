@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_ID_H_
-#define BARELYMUSICIAN_ENGINE_ID_H_
+#ifndef BARELYMUSICIAN_INTERNAL_ID_H_
+#define BARELYMUSICIAN_INTERNAL_ID_H_
 
 #include "barelymusician/barelymusician.h"
 
@@ -13,4 +13,4 @@ inline constexpr Id kInvalid = BarelyId_kInvalid;
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_ID_H_
+#endif  // BARELYMUSICIAN_INTERNAL_ID_H_

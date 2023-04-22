@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_PERFORMER_H_
-#define BARELYMUSICIAN_ENGINE_PERFORMER_H_
+#ifndef BARELYMUSICIAN_INTERNAL_PERFORMER_H_
+#define BARELYMUSICIAN_INTERNAL_PERFORMER_H_
 
 #include <compare>
 #include <map>
@@ -8,9 +8,9 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/id.h"
-#include "barelymusician/engine/status.h"
-#include "barelymusician/engine/task.h"
+#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 
@@ -230,4 +230,4 @@ class Performer {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_PERFORMER_H_
+#endif  // BARELYMUSICIAN_INTERNAL_PERFORMER_H_

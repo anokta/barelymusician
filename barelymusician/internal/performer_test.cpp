@@ -1,12 +1,12 @@
-#include "barelymusician/engine/performer.h"
+#include "barelymusician/internal/performer.h"
 
 #include <functional>
 #include <utility>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/id.h"
-#include "barelymusician/engine/status.h"
+#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

@@ -1,4 +1,4 @@
-#include "barelymusician/engine/instrument.h"
+#include "barelymusician/internal/instrument.h"
 
 #include <algorithm>
 #include <array>
@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/control.h"
-#include "barelymusician/engine/status.h"
+#include "barelymusician/internal/control.h"
+#include "barelymusician/internal/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

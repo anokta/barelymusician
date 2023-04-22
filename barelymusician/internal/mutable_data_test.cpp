@@ -1,4 +1,4 @@
-#include "barelymusician/engine/mutable_data.h"
+#include "barelymusician/internal/mutable_data.h"
 
 #include <algorithm>
 #include <memory>

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_ENGINE_H_
-#define BARELYMUSICIAN_ENGINE_ENGINE_H_
+#ifndef BARELYMUSICIAN_INTERNAL_ENGINE_H_
+#define BARELYMUSICIAN_INTERNAL_ENGINE_H_
 
 #include <functional>
 #include <memory>
@@ -7,12 +7,12 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/id.h"
-#include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/mutable_data.h"
-#include "barelymusician/engine/performer.h"
-#include "barelymusician/engine/status.h"
-#include "barelymusician/engine/task.h"
+#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/mutable_data.h"
+#include "barelymusician/internal/performer.h"
+#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 
@@ -161,4 +161,4 @@ class Engine {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_ENGINE_H_
+#endif  // BARELYMUSICIAN_INTERNAL_ENGINE_H_

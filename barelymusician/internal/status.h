@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_STATUS_H_
-#define BARELYMUSICIAN_ENGINE_STATUS_H_
+#ifndef BARELYMUSICIAN_INTERNAL_STATUS_H_
+#define BARELYMUSICIAN_INTERNAL_STATUS_H_
 
 #include "barelymusician/barelymusician.h"
 
@@ -14,4 +14,4 @@ using StatusOr = barely::StatusOr<ValueType>;
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_STATUS_H_
+#endif  // BARELYMUSICIAN_INTERNAL_STATUS_H_

@@ -8,7 +8,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":barelymusician_headeronly",
-        "//barelymusician/engine",
+        "//barelymusician/internal:engine",
     ],
     alwayslink = True,
 )
@@ -16,7 +16,7 @@ cc_library(
 cc_library(
     name = "barelymusician_headeronly",
     hdrs = ["barelymusician.h"],
-    visibility = ["//barelymusician/engine:__subpackages__"],
+    visibility = ["//barelymusician/internal:__subpackages__"],
 )
 
 cc_test(

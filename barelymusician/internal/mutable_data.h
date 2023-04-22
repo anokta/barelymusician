@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_MUTABLE_DATA_H_
-#define BARELYMUSICIAN_ENGINE_MUTABLE_DATA_H_
+#ifndef BARELYMUSICIAN_INTERNAL_MUTABLE_DATA_H_
+#define BARELYMUSICIAN_INTERNAL_MUTABLE_DATA_H_
 
 #include <atomic>
 #include <memory>
@@ -94,4 +94,4 @@ const DataType* MutableData<DataType>::ScopedView::operator->() const noexcept {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_MUTABLE_DATA_H_
+#endif  // BARELYMUSICIAN_INTERNAL_MUTABLE_DATA_H_

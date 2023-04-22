@@ -1,5 +1,5 @@
 
-#include "barelymusician/engine/engine.h"
+#include "barelymusician/internal/engine.h"
 
 #include <cassert>
 #include <functional>
@@ -8,10 +8,10 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/seconds.h"
-#include "barelymusician/engine/id.h"
-#include "barelymusician/engine/instrument.h"
-#include "barelymusician/engine/performer.h"
-#include "barelymusician/engine/status.h"
+#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/performer.h"
+#include "barelymusician/internal/status.h"
 
 namespace barely::internal {
 

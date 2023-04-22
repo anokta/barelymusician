@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/engine/control.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
 extern "C" {

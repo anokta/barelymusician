@@ -1,4 +1,4 @@
-#include "barelymusician/engine/instrument.h"
+#include "barelymusician/internal/instrument.h"
 
 #include <cassert>
 #include <cstddef>
@@ -9,9 +9,9 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/seconds.h"
-#include "barelymusician/engine/control.h"
-#include "barelymusician/engine/message.h"
-#include "barelymusician/engine/status.h"
+#include "barelymusician/internal/control.h"
+#include "barelymusician/internal/message.h"
+#include "barelymusician/internal/status.h"
 
 namespace barely::internal {
 

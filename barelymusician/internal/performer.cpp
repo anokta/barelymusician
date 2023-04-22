@@ -1,4 +1,4 @@
-#include "barelymusician/engine/performer.h"
+#include "barelymusician/internal/performer.h"
 
 #include <algorithm>
 #include <cassert>
@@ -11,9 +11,9 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
-#include "barelymusician/engine/id.h"
-#include "barelymusician/engine/status.h"
-#include "barelymusician/engine/task.h"
+#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 

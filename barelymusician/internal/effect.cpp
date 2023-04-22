@@ -1,4 +1,4 @@
-#include "barelymusician/engine/effect.h"
+#include "barelymusician/internal/effect.h"
 
 #include <cstddef>
 #include <vector>

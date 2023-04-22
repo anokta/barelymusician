@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_CONTROL_H_
-#define BARELYMUSICIAN_ENGINE_CONTROL_H_
+#ifndef BARELYMUSICIAN_INTERNAL_CONTROL_H_
+#define BARELYMUSICIAN_INTERNAL_CONTROL_H_
 
 #include "barelymusician/barelymusician.h"
 
@@ -57,4 +57,4 @@ class Control {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_CONTROL_H_
+#endif  // BARELYMUSICIAN_INTERNAL_CONTROL_H_

@@ -1,11 +1,11 @@
-#ifndef BARELYMUSICIAN_ENGINE_MESSAGE_H_
-#define BARELYMUSICIAN_ENGINE_MESSAGE_H_
+#ifndef BARELYMUSICIAN_INTERNAL_MESSAGE_H_
+#define BARELYMUSICIAN_INTERNAL_MESSAGE_H_
 
 #include <cstddef>
 #include <variant>
 #include <vector>
 
-#include "barelymusician/engine/id.h"
+#include "barelymusician/internal/id.h"
 
 namespace barely::internal {
 
@@ -96,4 +96,4 @@ MessageVisitor(MessageTypes...) -> MessageVisitor<MessageTypes...>;
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_MESSAGE_H_
+#endif  // BARELYMUSICIAN_INTERNAL_MESSAGE_H_

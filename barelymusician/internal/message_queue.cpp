@@ -1,4 +1,4 @@
-#include "barelymusician/engine/message_queue.h"
+#include "barelymusician/internal/message_queue.h"
 
 #include <utility>
 

@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_TASK_H_
-#define BARELYMUSICIAN_ENGINE_TASK_H_
+#ifndef BARELYMUSICIAN_INTERNAL_TASK_H_
+#define BARELYMUSICIAN_INTERNAL_TASK_H_
 
 #include "barelymusician/barelymusician.h"
 
@@ -39,4 +39,4 @@ class Task {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_TASK_H_
+#endif  // BARELYMUSICIAN_INTERNAL_TASK_H_

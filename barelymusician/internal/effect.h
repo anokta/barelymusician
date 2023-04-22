@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_ENGINE_EFFECT_H_
-#define BARELYMUSICIAN_ENGINE_EFFECT_H_
+#ifndef BARELYMUSICIAN_INTERNAL_EFFECT_H_
+#define BARELYMUSICIAN_INTERNAL_EFFECT_H_
 
 #include <cstddef>
 #include <vector>
@@ -70,4 +70,4 @@ class Effect {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_ENGINE_EFFECT_H_
+#endif  // BARELYMUSICIAN_INTERNAL_EFFECT_H_

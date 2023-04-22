@@ -27,6 +27,8 @@ implementation [here](https://github.com/anokta/barelyMusicianLegacy).
 ```cpp
 // Import the core engine.
 #include "barelymusician/barelymusician.h"
+// Import `barely::LowPassEffect`.
+#include "barelymusician/effects/low_pass_effect.h"
 // Import `barely::SynthInstrument`.
 #include "barelymusician/instruments/synth_instrument.h"
 
@@ -57,6 +59,13 @@ instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
 
 // Check if the instrument note is on.
 const bool is_note_on = *instrument.IsNoteOn(a3_pitch);  // will return true.
+
+// Add a low-pass effect to the instrument.
+auto effect = instrument.CreateEffect(barely::LowPassEffect::GetDefinition());
+
+// Set the low-pass cutoff frequency to increase by 100 hertz per beat.
+effect->SetControl(barely::LowPassControl::kCutoffFrequency, /*value=*/0.0,
+                   /*slope_per_beat=*/100.0);
 
 // Update the musician timestamp in seconds.
 //

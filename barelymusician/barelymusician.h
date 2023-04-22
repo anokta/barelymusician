@@ -71,6 +71,7 @@
 /// - Instrument:
 ///
 ///   @code{.cpp}
+///   #include "barelymusician/effects/low_pass_effect.h"
 ///   #include "barelymusician/instruments/synth_instrument.h"
 ///
 ///   // Create.
@@ -96,6 +97,17 @@
 ///   BarelyInstrument_SetControl(handle, instrument_id,
 ///                               BarelySynthControl_kGain,
 ///                               /*value=*/0.5, /*slope_per_beat=*/0.0);
+///
+///   // Create a low-pass effect.
+///   BarelyId effect_id = BarelyId_kInvalid;
+///   BarelyEffect_Create(handle, instrument_id,
+///                       BarelyLowPassEffect_GetDefinition(),
+///                       /*process_order=*/0, &effect_id);
+///
+///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
+///   BarelyEffect_SetControl(handle, instrument_id, effect_id,
+///                           BarelyLowPassControl_kCutoffFrequency,
+///                           /*value=*/0.0, /*slope_per_beat=*/100.0);
 ///
 ///   // Process.
 ///   //
@@ -1040,6 +1052,7 @@ BarelyTask_SetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
 /// - Instrument:
 ///
 ///   @code{.cpp}
+///   #include "barelymusician/instruments/low_pass_effect.h"
 ///   #include "barelymusician/instruments/synth_instrument.h"
 ///
 ///   // Create.
@@ -1061,6 +1074,14 @@ BarelyTask_SetProcessOrder(BarelyMusicianHandle handle, BarelyId performer_id,
 ///   // Set a control value.
 ///   instrument.SetControl(barely::SynthControl::kGain, /*value=*/0.5,
 ///                         /*slope_per_beat=*/0.0);
+///
+///   // Create a low-pass effect.
+///   auto effect =
+///       instrument.CreateEffect(barely::LowPassEffect::GetDefinition());
+///
+///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
+///   effect->SetControl(barely::LowPassControl::kCutoffFrequency,
+///                      /*value=*/0.0, /*slope_per_beat=*/100.0);
 ///
 ///   // Process.
 ///   //
@@ -1250,6 +1271,8 @@ class StatusOr {
   /// Member access operators.
   const ValueType& operator*() const noexcept { return GetValue(); }
   const ValueType* operator->() const noexcept { return &GetValue(); }
+  ValueType& operator*() noexcept { return GetValue(); }
+  ValueType* operator->() noexcept { return &GetValue(); }
 
   /// Returns the contained error status.
   ///

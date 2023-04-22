@@ -3,6 +3,7 @@ add_subdirectory(common)
 add_subdirectory(components)
 add_subdirectory(composition)
 add_subdirectory(dsp)
+add_subdirectory(effects)
 add_subdirectory(engine)
 add_subdirectory(instruments)
 

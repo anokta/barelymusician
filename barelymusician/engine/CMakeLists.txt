@@ -9,6 +9,16 @@ target_link_libraries(
 )
 
 add_library(
+  effect
+  effect.cpp
+  effect.h
+)
+target_link_libraries(
+  effect
+  barelymusician_headeronly
+)
+
+add_library(
   engine
   engine.cpp
   engine.h
@@ -43,8 +53,11 @@ add_library(
 target_link_libraries(
   instrument
   control
+  effect
+  id
   message
   message_queue
+  mutable_data
   status
   barelymusician_headeronly
   find_or_null
@@ -54,6 +67,10 @@ target_link_libraries(
 add_library(
   message INTERFACE
   message.h
+)
+target_link_libraries(
+  message INTERFACE
+  id
 )
 
 add_library(

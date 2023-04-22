@@ -31,6 +31,14 @@ class Engine {
   Engine(Engine&& other) noexcept = delete;
   Engine& operator=(Engine&& other) noexcept = delete;
 
+  /// @param instrument_id Instrument identifier.
+  /// @param definition Effect definition.
+  /// @param process_order Effect process order.
+  /// @return Effect identifier or error status.
+  StatusOr<Id> CreateInstrumentEffect(Id instrument_id,
+                                      EffectDefinition definition,
+                                      int process_order) noexcept;
+
   /// Creates new instrument.
   ///
   /// @param definition Instrument definition.

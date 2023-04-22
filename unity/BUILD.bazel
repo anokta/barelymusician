@@ -2,7 +2,15 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 package(default_visibility = ["//visibility:public"])
 
-# Android plugin (rename this to libbarelymusicianunity.so).
+BARELYMUSICIAN_DEPS = [
+    "//barelymusician",
+    "//barelymusician/effects:low_pass_effect",
+    "//barelymusician/effects:high_pass_effect",
+    "//barelymusician/instruments:percussion_instrument",
+    "//barelymusician/instruments:sampler_instrument",
+    "//barelymusician/instruments:synth_instrument",
+]
+
 ANDROID_LINKOPTS = [
     "-ldl",
     "-lm",
@@ -25,6 +33,7 @@ config_setting(
     },
 )
 
+# Android plugin (rename this to libbarelymusicianunity.so).
 cc_binary(
     name = "libunity_android.so",
     linkopts =
@@ -34,13 +43,7 @@ cc_binary(
             "//conditions:default": [],
         }),
     linkshared = True,
-    deps = [
-        ":unity_android.lds",
-        "//barelymusician",
-        "//barelymusician/instruments:percussion_instrument",
-        "//barelymusician/instruments:sampler_instrument",
-        "//barelymusician/instruments:synth_instrument",
-    ],
+    deps = BARELYMUSICIAN_DEPS + [":unity_android.lds"],
 )
 
 # Linux plugin (rename this to libbarelymusicianunity.so).
@@ -48,12 +51,7 @@ cc_binary(
     name = "libunity_linux.so",
     linkshared = True,
     target_compatible_with = ["@platforms//os:linux"],
-    deps = [
-        "//barelymusician",
-        "//barelymusician/instruments:percussion_instrument",
-        "//barelymusician/instruments:sampler_instrument",
-        "//barelymusician/instruments:synth_instrument",
-    ],
+    deps = BARELYMUSICIAN_DEPS,
 )
 
 # OSX plugin (rename this to barelymusicianunity.bundle).
@@ -61,12 +59,7 @@ cc_binary(
     name = "unity_osx.dylib",
     linkshared = True,
     target_compatible_with = ["@platforms//os:osx"],
-    deps = [
-        "//barelymusician",
-        "//barelymusician/instruments:percussion_instrument",
-        "//barelymusician/instruments:sampler_instrument",
-        "//barelymusician/instruments:synth_instrument",
-    ],
+    deps = BARELYMUSICIAN_DEPS,
 )
 
 # Windows plugin (rename this to barelymusicianunity.dll).
@@ -75,10 +68,5 @@ cc_binary(
     linkshared = True,
     target_compatible_with = ["@platforms//os:windows"],
     win_def_file = "unity_windows.def",
-    deps = [
-        "//barelymusician",
-        "//barelymusician/instruments:percussion_instrument",
-        "//barelymusician/instruments:sampler_instrument",
-        "//barelymusician/instruments:synth_instrument",
-    ],
+    deps = BARELYMUSICIAN_DEPS,
 )

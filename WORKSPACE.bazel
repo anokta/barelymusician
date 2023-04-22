@@ -5,6 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 android_ndk_repository(
     name = "androidndk",
 )
+
 register_toolchains("@androidndk//:all")
 
 git_repository(

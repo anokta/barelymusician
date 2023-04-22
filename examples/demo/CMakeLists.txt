@@ -89,6 +89,7 @@ target_link_libraries(
   sampler_demo
   barelymusician
   pitch
+  low_pass_effect
   sampler_instrument
   audio_output
   console_log

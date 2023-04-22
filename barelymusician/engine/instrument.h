@@ -2,12 +2,17 @@
 #define BARELYMUSICIAN_ENGINE_INSTRUMENT_H_
 
 #include <cstddef>
+#include <map>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/engine/control.h"
+#include "barelymusician/engine/effect.h"
+#include "barelymusician/engine/id.h"
 #include "barelymusician/engine/message_queue.h"
+#include "barelymusician/engine/mutable_data.h"
 #include "barelymusician/engine/status.h"
 
 namespace barely::internal {
@@ -34,11 +39,41 @@ class Instrument {
   Instrument(Instrument&& other) noexcept = delete;
   Instrument& operator=(Instrument&& other) noexcept = delete;
 
+  /// Creates a new effect.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @param definition Effect definition.
+  /// @param process_order Effect process order.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void CreateEffect(Id effect_id, EffectDefinition definition,
+                    int process_order) noexcept;
+
+  /// Destroys an effect.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @return Status.
+  Status DestroyEffect(Id effect_id) noexcept;
+
   /// Returns a control value.
   ///
   /// @param index Control index.
   /// @return Control value or error status.
   [[nodiscard]] StatusOr<double> GetControl(int index) const noexcept;
+
+  /// Returns an effect control value.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @param index Effect control index.
+  /// @return Effect control value or error status.
+  [[nodiscard]] StatusOr<double> GetEffectControl(Id effect_id,
+                                                  int index) const noexcept;
+
+  /// Returns effect process order.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @return Process order or error status.
+  [[nodiscard]] StatusOr<int> GetEffectProcessOrder(
+      Id effect_id) const noexcept;
 
   /// Returns a note control value.
   ///
@@ -68,6 +103,12 @@ class Instrument {
   /// Resets all control values.
   void ResetAllControls() noexcept;
 
+  /// Resets all effect control values.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @return Status.
+  Status ResetAllEffectControls(Id effect_id) noexcept;
+
   /// Resets all note control values.
   ///
   /// @param pitch Note pitch.
@@ -79,6 +120,13 @@ class Instrument {
   /// @param index Control index.
   /// @return Status.
   Status ResetControl(int index) noexcept;
+
+  /// Resets a note control value.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @param index Effect control index.
+  /// @return Status.
+  Status ResetEffectControl(Id effect_id, int index) noexcept;
 
   /// Resets a note control value.
   ///
@@ -108,6 +156,38 @@ class Instrument {
   ///
   /// @param data Data.
   void SetData(std::vector<std::byte> data) noexcept;
+
+  /// Sets an effect control value.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @param index Effect control index.
+  /// @param value Effect control value.
+  /// @param slope_per_beat Effect control slope in value change per beat.
+  /// @return Status.
+  Status SetEffectControl(Id effect_id, int index, double value,
+                          double slope_per_beat) noexcept;
+
+  /// Sets an effect control event callback.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @param callback Effect control event callback.
+  /// @return Status.
+  Status SetEffectControlEventCallback(Id effect_id,
+                                       ControlEventCallback callback) noexcept;
+
+  /// Sets effect data.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @param data Effect data.
+  /// @return Status.
+  Status SetEffectData(Id effect_id, std::vector<std::byte> data) noexcept;
+
+  /// Sets effect process order.
+  ///
+  /// @param effect_id Effect identifier.
+  /// @param process_order Effect process order.
+  /// @return Status.
+  Status SetEffectProcessOrder(Id effect_id, int process_order) noexcept;
 
   /// Sets a note control value.
   ///
@@ -157,8 +237,27 @@ class Instrument {
   void Update(double timestamp) noexcept;
 
  private:
+  // Effect info.
+  struct EffectInfo {
+    // Array of controls.
+    std::vector<Control> controls;
+
+    // Effect.
+    std::unique_ptr<Effect> effect;
+
+    // Process order.
+    int process_order;
+
+    // Control event callback.
+    ControlEventCallback control_event_callback;
+  };
+
   // Returns the corresponding slope per frame for a given `slope_per_beat`.
   [[nodiscard]] double GetSlopePerFrame(double slope_per_beat) const noexcept;
+
+  // Updates effect references.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void UpdateEffectReferences() noexcept;
 
   // Destroy callback.
   const InstrumentDefinition::DestroyCallback destroy_callback_;
@@ -190,6 +289,12 @@ class Instrument {
   // Array of controls.
   std::vector<Control> controls_;
 
+  // Map of effect infos by their identifiers.
+  std::unordered_map<Id, EffectInfo> effect_infos_;
+
+  // Ordered map of effects by their process order-identifier pairs.
+  std::map<std::pair<int, Id>, Effect*> ordered_effects_;
+
   // Map of current note controls by note pitches.
   std::unordered_map<double, std::vector<Control>> note_controls_;
 
@@ -216,6 +321,9 @@ class Instrument {
 
   // Data.
   std::vector<std::byte> data_;
+
+  // Array of effect identifier-reference pairs.
+  MutableData<std::vector<std::pair<Id, Effect*>>> effect_id_ref_pairs_;
 
   // Message queue.
   MessageQueue message_queue_;

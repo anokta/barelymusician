@@ -1,5 +1,15 @@
 VERS_1.0 {
   global:
+    BarelyEffect_Create;
+    BarelyEffect_Destroy;
+    BarelyEffect_GetControl;
+    BarelyEffect_GetProcessOrder;
+    BarelyEffect_ResetAllControls;
+    BarelyEffect_ResetControl;
+    BarelyEffect_SetControl;
+    BarelyEffect_SetControlEventCallback;
+    BarelyEffect_SetData;
+    BarelyEffect_SetProcessOrder;
     BarelyInstrument_Create;
     BarelyInstrument_Destroy;
     BarelyInstrument_GetControl;

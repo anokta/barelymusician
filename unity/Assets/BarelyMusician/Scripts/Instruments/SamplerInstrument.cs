@@ -41,10 +41,26 @@ namespace Barely {
     // Current sample.
     private AudioClip _sample = null;
 
-    private void SetSampleData() {
-      if (_sample == Sample) {
-        return;
+    protected override void OnEnable() {
+      base.OnEnable();
+      SetSampleData();
+    }
+
+    private void Update() {
+      if (_sample != Sample) {
+        SetSampleData();
       }
+      SetControl(0, Gain);
+      SetControl(1, RootPitch);
+      SetControl(2, Loop ? 1.0 : 0.0);
+      SetControl(3, Attack);
+      SetControl(4, Decay);
+      SetControl(5, Sustain);
+      SetControl(6, Release);
+      SetControl(7, (double)VoiceCount);
+    }
+
+    private void SetSampleData() {
       _sample = Sample;
       if (_sample == null || _sample.samples == 0) {
         SetData(IntPtr.Zero, 0);
@@ -67,18 +83,6 @@ namespace Barely {
       Marshal.Copy(data, 0, dataPtr, data.Length);
       SetData(dataPtr, size);
       Marshal.FreeHGlobal(dataPtr);
-    }
-
-    private void Update() {
-      SetSampleData();
-      SetControl(0, Gain);
-      SetControl(1, RootPitch);
-      SetControl(2, Loop ? 1.0 : 0.0);
-      SetControl(3, Attack);
-      SetControl(4, Decay);
-      SetControl(5, Sustain);
-      SetControl(6, Release);
-      SetControl(7, (double)VoiceCount);
     }
   }
 }

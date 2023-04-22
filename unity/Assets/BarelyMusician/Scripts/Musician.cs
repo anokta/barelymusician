@@ -52,6 +52,42 @@ namespace Barely {
       /// Invalid identifier.
       public const Int64 InvalidId = 0;
 
+      /// Effect definition create callback signature.
+      ///
+      /// @param state Pointer to effect state.
+      /// @param frame_rate Frame rate in hertz.
+      public delegate void EffectDefinition_CreateCallback(ref IntPtr state, Int32 frameRate);
+
+      /// Effect definition destroy callback signature.
+      public delegate void EffectDefinition_DestroyCallback(ref IntPtr state);
+
+      // Effect definition process callback signature.
+      ///
+      /// @param state Pointer to effect state.
+      /// @param outputSamples Pointer to an array of interleaved output samples.
+      /// @param outputChannelCount Number of output channels.
+      /// @param outputFrameCount Number of output frames.
+      public delegate void EffectDefinition_ProcessCallback(ref IntPtr state, IntPtr outputSamples,
+                                                            Int32 outputChannelCount,
+                                                            Int32 outputFrameCount);
+
+      /// Effect definition set note control callback signature.
+      ///
+      /// @param state Pointer to effect state.
+      /// @param index Control index.
+      /// @param value Control value.
+      /// @param slopePerFrame Control slope in value change per frame.
+      public delegate void EffectDefinition_SetControlCallback(ref IntPtr state, Int32 index,
+                                                               double value, double slopePerFrame);
+
+      /// Effect definition set data callback signature.
+      ///
+      /// @param state Pointer to effect state.
+      /// @param dataPtr Pointer to data.
+      /// @param size Data size in bytes.
+      public delegate void EffectDefinition_SetDataCallback(ref IntPtr state, IntPtr data,
+                                                            Int32 size);
+
       /// Instrument definition create callback signature.
       ///
       /// @param state Pointer to instrument state.
@@ -116,6 +152,31 @@ namespace Barely {
       public delegate void InstrumentDefinition_SetNoteOnCallback(ref IntPtr state, double pitch,
                                                                   double intensity);
 
+      /// Effect definition.
+      [StructLayout(LayoutKind.Sequential)]
+      public struct EffectDefinition {
+        /// Create callback.
+        public EffectDefinition_CreateCallback createCallback;
+
+        /// Destroy callback.
+        public EffectDefinition_DestroyCallback destroyCallback;
+
+        /// Process callback.
+        public EffectDefinition_ProcessCallback processCallback;
+
+        /// Set control callback.
+        public EffectDefinition_SetControlCallback setControlCallback;
+
+        /// Set data callback.
+        public EffectDefinition_SetDataCallback setDataCallback;
+
+        /// Pointer to an array of control definitions.
+        public IntPtr controlDefinitions;
+
+        /// Number of control definitions.
+        public Int32 controlDefinitionCount;
+      }
+
       /// Instrument definition.
       [StructLayout(LayoutKind.Sequential)]
       public struct InstrumentDefinition {
@@ -156,12 +217,185 @@ namespace Barely {
         public Int32 noteControlDefinitionCount;
       }
 
+      /// Custom effect interface.
+      public interface CustomEffectInterface {
+        /// Returns the effect definition.
+        ///
+        /// @return Effect definition.
+        public EffectDefinition GetDefinition();
+      }
+
       /// Custom instrument interface.
       public interface CustomInstrumentInterface {
         /// Returns the instrument definition.
         ///
         /// @return Instrument definition.
         public InstrumentDefinition GetDefinition();
+      }
+
+      /// Creates a new effect.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effect Effect.
+      /// @param effectId Effect identifier.
+      public static void Effect_Create(Int64 instrumentId, Effect effect, ref Int64 effectId) {
+        if (instrumentId == InvalidId || effectId != InvalidId) {
+          return;
+        }
+        EffectDefinition definition;
+        switch (effect) {
+          case HighPassEffect highPass:
+            definition = BarelyHighPassEffect_GetDefinition();
+            break;
+          case LowPassEffect lowPass:
+            definition = BarelyLowPassEffect_GetDefinition();
+            break;
+          case CustomEffectInterface custom:
+            definition = custom.GetDefinition();
+            break;
+          default:
+            Debug.LogError("Unsupported effect type: " + effect.GetType());
+            return;
+        }
+        Status status = BarelyEffect_Create(Handle, instrumentId, definition, effect.ProcessOrder,
+                                            ref effectId);
+        if (effect.GetType().IsSubclassOf(typeof(CustomEffectInterface))) {
+          if (definition.controlDefinitionCount > 0) {
+            Marshal.FreeHGlobal(definition.controlDefinitions);
+          }
+        }
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to create effect " + effect.name + ": " + status);
+          return;
+        }
+        _effects?.Add(effectId, effect);
+        BarelyEffect_SetControlEventCallback(_handle, instrumentId, effectId, Effect_OnControlEvent,
+                                             ref effectId);
+      }
+
+      /// Destroys an effect.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      public static void Effect_Destroy(ref Int64 instrumentId, ref Int64 effectId) {
+        if (instrumentId == InvalidId || effectId == InvalidId) {
+          return;
+        }
+        Status status = BarelyEffect_Destroy(Handle, instrumentId, effectId);
+        if (!IsOk(status) && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to destroy effect " + effectId + ": " + status);
+        }
+        _effects?.Remove(effectId);
+        instrumentId = InvalidId;
+        effectId = InvalidId;
+      }
+
+      /// Returns the value of an effect control.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      /// @param index Control index.
+      /// @return Control value.
+      public static double Effect_GetControl(Int64 instrumentId, Int64 effectId, int index) {
+        double value = 0.0;
+        Status status = BarelyEffect_GetControl(Handle, instrumentId, effectId, index, ref value);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId &&
+            effectId != InvalidId) {
+          Debug.LogError("Failed to get effect control " + index + " value for " + effectId + ": " +
+                         status);
+        }
+        return value;
+      }
+
+      /// Returns the process order of an effect.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      /// @return Process order.
+      public static int Effect_GetProcessOrder(Int64 instrumentId, Int64 effectId) {
+        Int32 processOrder = 0;
+        Status status =
+            BarelyEffect_GetProcessOrder(Handle, instrumentId, effectId, ref processOrder);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId &&
+            effectId != InvalidId) {
+          Debug.LogError("Failed to get effect process order: " + status);
+        }
+        return processOrder;
+      }
+
+      /// Resets all effect control values.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      public static void Effect_ResetAllControls(Int64 instrumentId, Int64 effectId) {
+        Status status = BarelyEffect_ResetAllControls(Handle, instrumentId, effectId);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId &&
+            effectId != InvalidId) {
+          Debug.LogError("Failed to reset all effect controls for " + effectId + ": " + status);
+        }
+      }
+
+      /// Resets an effect control value.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      /// @param index Control index.
+      public static void Effect_ResetControl(Int64 instrumentId, Int64 effectId, int index) {
+        Status status = BarelyEffect_ResetControl(Handle, instrumentId, effectId, index);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId &&
+            effectId != InvalidId) {
+          Debug.LogError("Failed to reset effect control " + index + " for " + effectId + ": " +
+                         status);
+        }
+      }
+
+      /// Sets an effect control value.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      /// @param index Control index.
+      /// @param value Control value.
+      /// @param slopePerBeat Control slope in value change per beat.
+      public static void Effect_SetControl(Int64 instrumentId, Int64 effectId, int index,
+                                           double value, double slopePerBeat) {
+        Status status =
+            BarelyEffect_SetControl(Handle, instrumentId, effectId, index, value, slopePerBeat);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId &&
+            effectId != InvalidId) {
+          Debug.LogError("Failed to set effect control " + index + " value to " + value +
+                         " with slope " + slopePerBeat + " for " + effectId + ": " + status);
+        }
+      }
+
+      /// Sets effect data.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      /// @param dataPtr Pointer to data.
+      /// @param size Data size in bytes.
+      public static void Effect_SetData(Int64 instrumentId, Int64 effectId, IntPtr dataPtr,
+                                        int size) {
+        Status status = BarelyEffect_SetData(Handle, instrumentId, effectId, dataPtr, size);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId &&
+            effectId != InvalidId) {
+          Debug.LogError("Failed to set effect data to " + dataPtr + " for " + effectId + ": " +
+                         status);
+        }
+      }
+
+      /// Sets the process order of an effect.
+      ///
+      /// @param instrumentId Instrument identifier.
+      /// @param effectId Effect identifier.
+      /// @param processOrder Process order.
+      public static void Effect_SetProcessOrder(Int64 instrumentId, Int64 effectId,
+                                                int processOrder) {
+        Status status = BarelyEffect_SetProcessOrder(Handle, instrumentId, effectId, processOrder);
+        if (!IsOk(status) && _handle != IntPtr.Zero && instrumentId != InvalidId &&
+            effectId != InvalidId) {
+          Debug.LogError("Failed to set effect process order to" + processOrder + " for " +
+                         effectId + ": " + status);
+        }
       }
 
       /// Creates a new instrument.
@@ -225,7 +459,6 @@ namespace Barely {
         Status status = BarelyInstrument_Destroy(Handle, instrumentId);
         if (!IsOk(status) && _handle != IntPtr.Zero) {
           Debug.LogError("Failed to destroy instrument " + instrumentId + ": " + status);
-          return;
         }
         _instruments?.Remove(instrumentId);
         instrumentId = InvalidId;
@@ -764,6 +997,15 @@ namespace Barely {
       // Instrument control event callback.
       private delegate void ControlEventCallback(int index, double value, ref Int64 userData);
       [AOT.MonoPInvokeCallback(typeof(ControlEventCallback))]
+      private static void Effect_OnControlEvent(int index, double value, ref Int64 userData) {
+        Effect effect = null;
+        if (_effects.TryGetValue(userData, out effect)) {
+          Effect.Internal.OnControlEvent(effect, index, value);
+        }
+      }
+
+      // Instrument control event callback.
+      [AOT.MonoPInvokeCallback(typeof(ControlEventCallback))]
       private static void Instrument_OnControlEvent(int index, double value, ref Int64 userData) {
         Instrument instrument = null;
         if (_instruments.TryGetValue(userData, out instrument)) {
@@ -863,6 +1105,9 @@ namespace Barely {
       }
       private static IntPtr _handle = IntPtr.Zero;
 
+      // Map of effects by their identifiers.
+      private static Dictionary<Int64, Effect> _effects = null;
+
       // Map of instruments by their identifiers.
       private static Dictionary<Int64, Instrument> _instruments = null;
 
@@ -946,6 +1191,7 @@ namespace Barely {
           var config = AudioSettings.GetConfiguration();
           _latency = (double)(config.dspBufferSize) / (double)config.sampleRate;
           _outputSamples = new double[config.dspBufferSize * (int)config.speakerMode];
+          _effects = new Dictionary<Int64, Effect>();
           _instruments = new Dictionary<Int64, Instrument>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
           _taskCallbacks = new Dictionary<Int64, Action>();
@@ -957,6 +1203,7 @@ namespace Barely {
           _isShuttingDown = true;
           BarelyMusician_Destroy(_handle);
           _handle = IntPtr.Zero;
+          _effects = null;
           _instruments = null;
           _scheduledTaskCallbacks = null;
           _taskCallbacks = null;
@@ -968,6 +1215,51 @@ namespace Barely {
 #else
       private const string pluginName = "barelymusicianunity";
 #endif  // !UNITY_EDITOR && UNITY_IOS
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_Create")]
+      private static extern Status BarelyEffect_Create(IntPtr handle, Int64 instrumentId,
+                                                       EffectDefinition definition,
+                                                       Int32 processOrder, ref Int64 outEffectId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_Destroy")]
+      private static extern Status BarelyEffect_Destroy(IntPtr handle, Int64 instrumentId,
+                                                        Int64 effectId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_GetControl")]
+      private static extern Status BarelyEffect_GetControl(IntPtr handle, Int64 instrumentId,
+                                                           Int64 effectId, Int32 index,
+                                                           ref double outValue);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_GetProcessOrder")]
+      private static extern Status BarelyEffect_GetProcessOrder(IntPtr handle, Int64 instrumentId,
+                                                                Int64 effectId,
+                                                                ref Int32 outProcessOrder);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_ResetAllControls")]
+      private static extern Status BarelyEffect_ResetAllControls(IntPtr handle, Int64 instrumentId,
+                                                                 Int64 effectId);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_ResetControl")]
+      private static extern Status BarelyEffect_ResetControl(IntPtr handle, Int64 instrumentId,
+                                                             Int64 effectId, Int32 index);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControl")]
+      private static extern Status BarelyEffect_SetControl(IntPtr handle, Int64 instrumentId,
+                                                           Int64 effectId, Int32 index,
+                                                           double value, double slopePerBeat);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetControlEventCallback")]
+      private static extern Status BarelyEffect_SetControlEventCallback(
+          IntPtr handle, Int64 instrumentId, Int64 effectId, ControlEventCallback callback,
+          ref Int64 userData);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetData")]
+      private static extern Status BarelyEffect_SetData(IntPtr handle, Int64 instrumentId,
+                                                        Int64 effectId, IntPtr data, Int32 size);
+
+      [DllImport(pluginName, EntryPoint = "BarelyEffect_SetProcessOrder")]
+      private static extern Status BarelyEffect_SetProcessOrder(IntPtr handle, Int64 instrumentId,
+                                                                Int64 effectId, Int32 processOrder);
 
       [DllImport(pluginName, EntryPoint = "BarelyInstrument_Create")]
       private static extern Status BarelyInstrument_Create(IntPtr handle,
@@ -1128,15 +1420,6 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_Stop")]
       private static extern Status BarelyPerformer_Stop(IntPtr handle, Int64 performerId);
 
-      [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelyPercussionInstrument_GetDefinition();
-
-      [DllImport(pluginName, EntryPoint = "BarelySamplerInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelySamplerInstrument_GetDefinition();
-
-      [DllImport(pluginName, EntryPoint = "BarelySynthInstrument_GetDefinition")]
-      private static extern InstrumentDefinition BarelySynthInstrument_GetDefinition();
-
       [DllImport(pluginName, EntryPoint = "BarelyTask_Create")]
       private static extern Status BarelyTask_Create(IntPtr handle, Int64 performerId,
                                                      TaskDefinition definition, bool isOneOff,
@@ -1163,6 +1446,21 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyTask_SetProcessOrder")]
       private static extern Status BarelyTask_SetProcessOrder(IntPtr handle, Int64 performerId,
                                                               Int64 taskId, Int32 processOrder);
+
+      [DllImport(pluginName, EntryPoint = "BarelyHighPassEffect_GetDefinition")]
+      private static extern EffectDefinition BarelyHighPassEffect_GetDefinition();
+
+      [DllImport(pluginName, EntryPoint = "BarelyLowPassEffect_GetDefinition")]
+      private static extern EffectDefinition BarelyLowPassEffect_GetDefinition();
+
+      [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelyPercussionInstrument_GetDefinition();
+
+      [DllImport(pluginName, EntryPoint = "BarelySamplerInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelySamplerInstrument_GetDefinition();
+
+      [DllImport(pluginName, EntryPoint = "BarelySynthInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelySynthInstrument_GetDefinition();
     }
   }
 }

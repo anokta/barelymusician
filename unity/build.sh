@@ -86,14 +86,14 @@ main() {
   echo "Building BarelyMusician Unity native Android-ARM32 plugin..."
   bazel build -c "${COMPILATION_MODE}" --noenable_platform_specific_config \
     --config=android_armeabi-v7a "//unity:libunity_android.so"
-    echo "Copying native Android-ARM32 plugin into Unity project..."
-    cp -rf "${ANDROID_BIN_SRC_PATH}" "${ANDROID_ARM32_BIN_DST_PATH}"
+  echo "Copying native Android-ARM32 plugin into Unity project..."
+  cp -rf "${ANDROID_BIN_SRC_PATH}" "${ANDROID_ARM32_BIN_DST_PATH}"
 
   echo "Building BarelyMusician Unity native Android-ARM64 plugin..."
   bazel build -c "${COMPILATION_MODE}" --noenable_platform_specific_config \
     --config=android_arm64-v8a "//unity:libunity_android.so"
-    echo "Copying native Android-ARM64 plugin into Unity project..."
-    cp -rf "${ANDROID_BIN_SRC_PATH}" "${ANDROID_ARM64_BIN_DST_PATH}"
+  echo "Copying native Android-ARM64 plugin into Unity project..."
+  cp -rf "${ANDROID_BIN_SRC_PATH}" "${ANDROID_ARM64_BIN_DST_PATH}"
 
   echo -e "${GREEN}Done!"
 }

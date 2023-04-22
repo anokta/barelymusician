@@ -176,6 +176,11 @@ namespace Barely {
         instrument.OnNoteOn?.Invoke(pitch, intensity);
         instrument.OnNoteOnEvent?.Invoke((float)pitch, (float)intensity);
       }
+
+      /// Sets instrument identifier.
+      public static void SetInstrumentId(Instrument instrument, ref Int64 instrumentId) {
+        instrumentId = instrument._id;
+      }
     }
 
     protected virtual void Awake() {
@@ -195,11 +200,17 @@ namespace Barely {
 
     protected virtual void OnEnable() {
       Musician.Internal.Instrument_Create(this, ref _id);
+      foreach (var effect in GetComponents<Effect>()) {
+        Effect.Internal.ReEnable(_id, effect);
+      }
       Source?.Play();
     }
 
     protected virtual void OnDisable() {
       Source?.Stop();
+      foreach (var effect in GetComponents<Effect>()) {
+        Effect.Internal.Disable(effect);
+      }
       Musician.Internal.Instrument_Destroy(ref _id);
     }
 

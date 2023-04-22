@@ -3,18 +3,6 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace Barely {
-  /// Instrument control definition.
-  public struct ControlDefinition {
-    /// Default value.
-    public double defaultValue;
-
-    /// Minimum value.
-    public double minValue;
-
-    /// Maximum value.
-    public double maxValue;
-  }
-
   /// Custom instrument definition that can be used to define new instruments.
   public interface CustomInstrumentDefinition {
     /// Create callback.

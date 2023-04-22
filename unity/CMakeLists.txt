@@ -9,6 +9,8 @@ target_compile_definitions(
 target_link_libraries(
   barelymusicianunity PUBLIC
   barelymusician
+  high_pass_effect
+  low_pass_effect
   percussion_instrument
   sampler_instrument
   synth_instrument

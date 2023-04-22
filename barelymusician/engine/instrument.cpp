@@ -160,27 +160,28 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
       output_channel_count < 0 || output_frame_count < 0) {
     return Status::kInvalidArgument;
   }
+  int frame = 0;
   // Process *all* messages before the end timestamp.
   const double end_timestamp =
       timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
   auto effect_id_ref_pairs = effect_id_ref_pairs_.GetScopedView();
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
-    const double message_timestamp = message->first;
-    if (const int message_frame_count =
-            FramesFromSeconds(frame_rate_, message_timestamp - timestamp);
-        message_frame_count > 0) {
+    if (const int message_frame =
+            FramesFromSeconds(frame_rate_, message->first - timestamp);
+        frame < message_frame) {
+      const int sample_offset = frame * output_channel_count;
+      const int frame_count = message_frame - frame;
       if (process_callback_) {
-        process_callback_(&state_, output_samples, output_channel_count,
-                          message_frame_count);
+        process_callback_(&state_, &output_samples[sample_offset],
+                          output_channel_count, frame_count);
       }
       for (auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
         assert(effect_ref);
-        effect_ref->Process(output_samples, output_channel_count,
-                            message_frame_count);
+        effect_ref->Process(&output_samples[sample_offset],
+                            output_channel_count, frame_count);
       }
-      output_samples += message_frame_count * output_channel_count;
-      output_frame_count -= message_frame_count;
+      frame = message_frame;
     }
     std::visit(
         MessageVisitor{
@@ -242,17 +243,19 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
               }
             }},
         message->second);
-    timestamp = message_timestamp;
   }
   // Process the rest of the buffer.
-  if (output_frame_count > 0) {
+  if (frame < output_frame_count) {
+    const int sample_offset = frame * output_channel_count;
+    const int frame_count = output_frame_count - frame;
     if (process_callback_) {
-      process_callback_(&state_, output_samples, output_channel_count,
-                        output_frame_count);
+      process_callback_(&state_, &output_samples[sample_offset],
+                        output_channel_count, frame_count);
     }
     for (auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
-      effect_ref->Process(output_samples, output_channel_count,
-                          output_frame_count);
+      assert(effect_ref);
+      effect_ref->Process(&output_samples[sample_offset], output_channel_count,
+                          frame_count);
     }
   }
   return Status::Ok();

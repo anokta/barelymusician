@@ -18,7 +18,7 @@ target_compile_definitions(
 target_link_libraries(
   barelymusician
   barelymusician_headeronly
-  engine
+  barely_internal_engine
 )
 
 add_library(

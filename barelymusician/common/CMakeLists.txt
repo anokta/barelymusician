@@ -1,51 +1,51 @@
 add_library(
-  find_or_null INTERFACE
+  barely_find_or_null INTERFACE
   find_or_null.h
 )
 
 add_library(
-  random
+  barely_random
   random.cpp
   random.h
 )
 
 add_library(
-  seconds
+  barely_seconds
   seconds.cpp
   seconds.h
 )
 
 if (ENABLE_TESTS)
   add_executable(
-    find_or_null_test
+    barely_find_or_null_test
     find_or_null_test.cpp
   )
   target_link_libraries(
-    find_or_null_test
-    find_or_null
+    barely_find_or_null_test
+    barely_find_or_null
     gtest_main
   )
-  gtest_discover_tests(find_or_null_test)
+  gtest_discover_tests(barely_find_or_null_test)
 
   add_executable(
-    random_test
+    barely_random_test
     random_test.cpp
   )
   target_link_libraries(
-    random_test
-    random
+    barely_random_test
+    barely_random
     gtest_main
   )
-  gtest_discover_tests(random_test)
+  gtest_discover_tests(barely_random_test)
 
   add_executable(
-    seconds_test
+    barely_seconds_test
     seconds_test.cpp
   )
   target_link_libraries(
-    seconds_test
-    seconds
+    barely_seconds_test
+    barely_seconds
     gtest_main
   )
-  gtest_discover_tests(seconds_test)
+  gtest_discover_tests(barely_seconds_test)
 endif()

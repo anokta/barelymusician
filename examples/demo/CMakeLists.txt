@@ -1,115 +1,115 @@
 add_executable(
-  instrument_demo
+  barely_examples_instrument_demo
   instrument_demo.cpp
 )
 target_link_libraries(
-  instrument_demo
+  barely_examples_instrument_demo
   barelymusician
-  pitch
-  synth_instrument
-  audio_output
-  console_log
-  input_manager
+  barely_pitch
+  barely_synth_instrument
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
 )
 
 add_executable(
-  metronome_demo
+  barely_examples_metronome_demo
   metronome_demo.cpp
 )
 target_link_libraries(
-  metronome_demo
+  barely_examples_metronome_demo
   barelymusician
-  metronome
-  pitch
-  synth_instrument
-  audio_clock
-  audio_output
-  console_log
-  input_manager
+  barely_metronome
+  barely_pitch
+  barely_synth_instrument
+  barely_examples_audio_clock
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
 )
 
 add_executable(
-  midi_demo
+  barely_examples_midi_demo
   midi_demo.cpp
 )
 target_link_libraries(
-  midi_demo
+  barely_examples_midi_demo
   barelymusician
-  pitch
-  synth_instrument
-  audio_clock
-  audio_output
-  console_log
-  input_manager
-  data
+  barely_pitch
+  barely_synth_instrument
+  barely_examples_audio_clock
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
+  barely_examples_data
   midifile
 )
 
 add_executable(
-  musician_demo
+  barely_examples_musician_demo
   musician_demo.cpp
 )
 target_link_libraries(
-  musician_demo
+  barely_examples_musician_demo
   barelymusician
-  random
-  metronome
-  duration
-  pitch
-  percussion_instrument
-  synth_instrument
-  audio_clock
-  audio_output
-  console_log
-  input_manager
-  wav_file
-  data
+  barely_random
+  barely_metronome
+  barely_duration
+  barely_pitch
+  barely_percussion_instrument
+  barely_synth_instrument
+  barely_examples_audio_clock
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
+  barely_examples_wav_file
+  barely_examples_data
 )
 
 add_executable(
-  sequencer_demo
+  barely_examples_sequencer_demo
   sequencer_demo.cpp
 )
 target_link_libraries(
-  sequencer_demo
+  barely_examples_sequencer_demo
   barelymusician
-  pitch
-  synth_instrument
-  audio_clock
-  audio_output
-  console_log
-  input_manager
+  barely_pitch
+  barely_synth_instrument
+  barely_examples_audio_clock
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
 )
 
 add_executable(
-  sampler_demo
+  barely_examples_sampler_demo
   sampler_demo.cpp
 )
 target_link_libraries(
-  sampler_demo
+  barely_examples_sampler_demo
   barelymusician
-  pitch
-  low_pass_effect
-  sampler_instrument
-  audio_output
-  console_log
-  input_manager
-  wav_file
-  data
+  barely_pitch
+  barely_low_pass_effect
+  barely_sampler_instrument
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
+  barely_examples_wav_file
+  barely_examples_data
 )
 
 add_executable(
-  trigger_demo
+  barely_examples_trigger_demo
   trigger_demo.cpp
 )
 target_link_libraries(
-  trigger_demo
+  barely_examples_trigger_demo
   barelymusician
-  pitch
-  synth_instrument
-  audio_clock
-  audio_output
-  console_log
-  input_manager
+  barely_pitch
+  barely_synth_instrument
+  barely_examples_audio_clock
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
 )
 

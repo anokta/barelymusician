@@ -1,65 +1,65 @@
 add_library(
-  custom_instrument INTERFACE
+  barely_custom_instrument INTERFACE
   custom_instrument.h
 )
 target_link_libraries(
-  custom_instrument INTERFACE
+  barely_custom_instrument INTERFACE
   barelymusician
 )
 
 add_library(
-  percussion_instrument
+  barely_percussion_instrument
   percussion_instrument.cpp
   percussion_instrument.h
 )
 target_compile_definitions(
-  percussion_instrument
+  barely_percussion_instrument
   PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
-  percussion_instrument
-  custom_instrument
+  barely_percussion_instrument
+  barely_custom_instrument
   barelymusician
-  enveloped_voice
-  gain_processor
-  sample_player
+  barely_enveloped_voice
+  barely_gain_processor
+  barely_sample_player
 )
 
 add_library(
-  sampler_instrument
+  barely_sampler_instrument
   sampler_instrument.cpp
   sampler_instrument.h
 )
 target_compile_definitions(
-  sampler_instrument
+  barely_sampler_instrument
   PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
-  sampler_instrument
-  custom_instrument
+  barely_sampler_instrument
+  barely_custom_instrument
   barelymusician
-  enveloped_voice
-  gain_processor
-  polyphonic_voice
-  sample_player
+  barely_enveloped_voice
+  barely_gain_processor
+  barely_polyphonic_voice
+  barely_sample_player
 )
 
 add_library(
-  synth_instrument
+  barely_synth_instrument
   synth_instrument.cpp
   synth_instrument.h
 )
 target_compile_definitions(
-  synth_instrument
+  barely_synth_instrument
   PUBLIC BARELYMUSICIAN_EXPORTS
 )
 target_link_libraries(
-  synth_instrument
-  custom_instrument
+  barely_synth_instrument
+  barely_custom_instrument
   barelymusician
-  dsp_utils
-  enveloped_voice
-  gain_processor
-  oscillator
-  polyphonic_voice
+  barely_dsp_utils
+  barely_enveloped_voice
+  barely_gain_processor
+  barely_oscillator
+  barely_polyphonic_voice
 )

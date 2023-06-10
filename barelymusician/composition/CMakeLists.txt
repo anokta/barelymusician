@@ -1,35 +1,35 @@
 add_library(
-  duration
+  barely_duration
   duration.cpp
   duration.h
 )
 
 add_library(
-  pitch
+  barely_pitch
   pitch.cpp
   pitch.h
 )
 
 if (ENABLE_TESTS)
   add_executable(
-    duration_test
+    barely_duration_test
     duration_test.cpp
   )
   target_link_libraries(
-    duration_test
-    duration
+    barely_duration_test
+    barely_duration
     gtest_main
   )
-  gtest_discover_tests(duration_test)
+  gtest_discover_tests(barely_duration_test)
 
   add_executable(
-    pitch_test
+    barely_pitch_test
     pitch_test.cpp
   )
   target_link_libraries(
-    pitch_test
-    pitch
+    barely_pitch_test
+    barely_pitch
     gtest_main
   )
-  gtest_discover_tests(pitch_test)
+  gtest_discover_tests(barely_pitch_test)
 endif()

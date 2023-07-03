@@ -71,27 +71,32 @@ enum class SynthControl : int {
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public CustomInstrument {
  public:
-  /// Constructs new `SynthInstrument`.
-  explicit SynthInstrument(int frame_rate) noexcept;
-
-  /// Implements `CustomInstrument`.
-  void Process(double* output_samples, int output_channel_count,
-               int output_frame_count) noexcept override;
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(int index, double value,
-                  double slope_per_frame) noexcept override;
-  void SetData(const void* /*data*/, int /*size*/) noexcept override {}
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
-                      double /*slope_per_frame*/) noexcept override {}
-  void SetNoteOff(double pitch) noexcept override;
-  void SetNoteOn(double pitch, double intensity) noexcept override;
-
   /// Returns the instrument definition.
   ///
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
+  // Ensures that `SynthInstrument` can only be used by `GetDefinition`.
+  friend InstrumentDefinition GetInstrumentDefinition<SynthInstrument>(
+      const std::vector<ControlDefinition>& control_definitions,
+      const std::vector<ControlDefinition>& note_control_definitions) noexcept;
+
+  /// Constructs new `SynthInstrument`.
+  explicit SynthInstrument(int frame_rate) noexcept;
+
+  /// Implements `CustomInstrument`.
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count) noexcept final;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept final;
+  void SetData(const void* /*data*/, int /*size*/) noexcept final {}
+  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+                      double /*slope_per_frame*/) noexcept final {}
+  void SetNoteOff(double pitch) noexcept final;
+  void SetNoteOn(double pitch, double intensity) noexcept final;
+
   using SynthVoice = EnvelopedVoice<Oscillator>;
   PolyphonicVoice<SynthVoice> voice_;
   GainProcessor gain_processor_;

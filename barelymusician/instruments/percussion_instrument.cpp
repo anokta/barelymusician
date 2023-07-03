@@ -26,6 +26,16 @@ constexpr double kDefaultPadRelease = 0.1;
 
 }  // namespace
 
+InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
+  static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
+      // Pad release.
+      ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
+  };
+  return GetInstrumentDefinition<PercussionInstrument>(control_definitions, {});
+}
+
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : frame_rate_(frame_rate),
       gain_processor_(frame_rate),
@@ -101,16 +111,6 @@ void PercussionInstrument::SetNoteOn(double pitch, double intensity) noexcept {
       break;
     }
   }
-}
-
-InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Pad release.
-      ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
-  };
-  return GetInstrumentDefinition<PercussionInstrument>(control_definitions, {});
 }
 
 }  // namespace barely

@@ -55,26 +55,31 @@ enum class PercussionControl : BarelyPercussionControl {
 /// Simple percussion instrument.
 class PercussionInstrument : public CustomInstrument {
  public:
-  /// Constructs new `PercussionInstrument`.
-  explicit PercussionInstrument(int frame_rate) noexcept;
-
-  /// Implements `CustomInstrument`.
-  void Process(double* output_samples, int output_channel_count,
-               int output_frame_count) noexcept override;
-  void SetControl(int index, double value,
-                  double slope_per_frame) noexcept override;
-  void SetData(const void* data, int size) noexcept override;
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
-                      double /*slope_per_frame*/) noexcept override {}
-  void SetNoteOff(double pitch) noexcept override;
-  void SetNoteOn(double pitch, double intensity) noexcept override;
-
   /// Returns the instrument definition.
   ///
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
+  // Ensures that `PercussionInstrument` can only be used by `GetDefinition`.
+  friend InstrumentDefinition GetInstrumentDefinition<PercussionInstrument>(
+      const std::vector<ControlDefinition>& control_definitions,
+      const std::vector<ControlDefinition>& note_control_definitions) noexcept;
+
+  /// Constructs new `PercussionInstrument`.
+  explicit PercussionInstrument(int frame_rate) noexcept;
+
+  /// Implements `CustomInstrument`.
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count) noexcept final;
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept final;
+  void SetData(const void* data, int size) noexcept final;
+  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+                      double /*slope_per_frame*/) noexcept final {}
+  void SetNoteOff(double pitch) noexcept final;
+  void SetNoteOn(double pitch, double intensity) noexcept final;
+
   struct Pad {
     explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
 

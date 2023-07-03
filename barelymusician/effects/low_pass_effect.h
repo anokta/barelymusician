@@ -46,23 +46,27 @@ enum class LowPassControl : int {
 /// Simple low-pass effect.
 class LowPassEffect : public CustomEffect {
  public:
-  /// Constructs new `LowPassEffect`.
-  explicit LowPassEffect(int frame_rate) noexcept;
-
-  /// Implements `CustomEffect`.
-  void Process(double* output_samples, int output_channel_count,
-               int output_frame_count) noexcept override;
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(int index, double value,
-                  double slope_per_frame) noexcept override;
-  void SetData(const void* /*data*/, int /*size*/) noexcept override {}
-
   /// Returns the effect definition.
   ///
   /// @return Effect definition.
   static EffectDefinition GetDefinition() noexcept;
 
  private:
+  // Ensures that `LowPassEffect` can only be used by `GetDefinition`.
+  friend EffectDefinition GetEffectDefinition<LowPassEffect>(
+      const std::vector<ControlDefinition>& control_definitions) noexcept;
+
+  /// Constructs new `LowPassEffect`.
+  explicit LowPassEffect(int frame_rate) noexcept;
+
+  /// Implements `CustomEffect`.
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count) noexcept final;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept final;
+  void SetData(const void* /*data*/, int /*size*/) noexcept final {}
+
   // Maximum number of output channels allowed.
   static constexpr int kMaxChannelCount = 8;
 

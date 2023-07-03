@@ -76,27 +76,32 @@ enum class SamplerControl : BarelySamplerControl {
 /// Simple polyphonic sampler instrument.
 class SamplerInstrument : public CustomInstrument {
  public:
-  /// Constructs new `SamplerInstrument`.
-  explicit SamplerInstrument(int frame_rate) noexcept;
-
-  /// Implements `CustomInstrument`.
-  void Process(double* output_samples, int output_channel_count,
-               int output_frame_count) noexcept override;
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(int index, double value,
-                  double slope_per_frame) noexcept override;
-  void SetData(const void* data, int size) noexcept override;
-  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
-                      double /*slope_per_frame*/) noexcept override {}
-  void SetNoteOff(double pitch) noexcept override;
-  void SetNoteOn(double pitch, double intensity) noexcept override;
-
   /// Returns the instrument definition.
   ///
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
  private:
+  // Ensures that `SamplerInstrument` can only be used by `GetDefinition`.
+  friend InstrumentDefinition GetInstrumentDefinition<SamplerInstrument>(
+      const std::vector<ControlDefinition>& control_definitions,
+      const std::vector<ControlDefinition>& note_control_definitions) noexcept;
+
+  /// Constructs new `SamplerInstrument`.
+  explicit SamplerInstrument(int frame_rate) noexcept;
+
+  /// Implements `CustomInstrument`.
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count) noexcept final;
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  void SetControl(int index, double value,
+                  double slope_per_frame) noexcept final;
+  void SetData(const void* data, int size) noexcept final;
+  void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
+                      double /*slope_per_frame*/) noexcept final {}
+  void SetNoteOff(double pitch) noexcept final;
+  void SetNoteOn(double pitch, double intensity) noexcept final;
+
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
   double root_pitch_ = 0.0;

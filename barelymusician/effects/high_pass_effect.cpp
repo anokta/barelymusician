@@ -16,6 +16,14 @@ BarelyEffectDefinition BarelyHighPassEffect_GetDefinition() {
 
 namespace barely {
 
+EffectDefinition HighPassEffect::GetDefinition() noexcept {
+  static const std::vector<ControlDefinition> control_definitions = {
+      // Cutoff frequency.
+      ControlDefinition{0.0, 0.0},
+  };
+  return GetEffectDefinition<HighPassEffect>(control_definitions);
+}
+
 HighPassEffect::HighPassEffect(int frame_rate) noexcept
     : frame_rate_(frame_rate) {
   assert(frame_rate > 0);
@@ -45,14 +53,6 @@ void HighPassEffect::SetControl(int index, double value,
       }
       break;
   }
-}
-
-EffectDefinition HighPassEffect::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Cutoff frequency.
-      ControlDefinition{0.0, 0.0},
-  };
-  return GetEffectDefinition<HighPassEffect>(control_definitions);
 }
 
 }  // namespace barely

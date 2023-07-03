@@ -24,6 +24,27 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
+InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
+  static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
+      // Oscillator type.
+      ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
+                        static_cast<double>(OscillatorType::kNoise)},
+      // Attack.
+      ControlDefinition{0.05, 0.0, 60.0},
+      // Decay.
+      ControlDefinition{0.0, 0.0, 60.0},
+      // Sustain.
+      ControlDefinition{1.0, 0.0, 1.0},
+      // Release.
+      ControlDefinition{0.25, 0.0, 60.0},
+      // Number of voices.
+      ControlDefinition{8, 1, kMaxVoiceCount},
+  };
+  return GetInstrumentDefinition<SynthInstrument>(control_definitions, {});
+}
+
 SynthInstrument::SynthInstrument(int frame_rate) noexcept
     : voice_(SynthVoice(frame_rate), kMaxVoiceCount),
       gain_processor_(frame_rate) {}
@@ -86,27 +107,6 @@ void SynthInstrument::SetNoteOn(double pitch, double intensity) noexcept {
     voice->generator().SetFrequency(GetFrequency(pitch));
     voice->set_gain(intensity);
   });
-}
-
-InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Oscillator type.
-      ControlDefinition{static_cast<double>(OscillatorType::kSine), 0.0,
-                        static_cast<double>(OscillatorType::kNoise)},
-      // Attack.
-      ControlDefinition{0.05, 0.0, 60.0},
-      // Decay.
-      ControlDefinition{0.0, 0.0, 60.0},
-      // Sustain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Release.
-      ControlDefinition{0.25, 0.0, 60.0},
-      // Number of voices.
-      ControlDefinition{8, 1, kMaxVoiceCount},
-  };
-  return GetInstrumentDefinition<SynthInstrument>(control_definitions, {});
 }
 
 }  // namespace barely

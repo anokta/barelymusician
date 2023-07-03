@@ -16,6 +16,14 @@ BarelyEffectDefinition BarelyLowPassEffect_GetDefinition() {
 
 namespace barely {
 
+EffectDefinition LowPassEffect::GetDefinition() noexcept {
+  static const std::vector<ControlDefinition> control_definitions = {
+      // Cutoff frequency.
+      ControlDefinition{48000.0, 0.0},
+  };
+  return GetEffectDefinition<LowPassEffect>(control_definitions);
+}
+
 LowPassEffect::LowPassEffect(int frame_rate) noexcept
     : frame_rate_(frame_rate) {
   assert(frame_rate > 0);
@@ -45,14 +53,6 @@ void LowPassEffect::SetControl(int index, double value,
       }
       break;
   }
-}
-
-EffectDefinition LowPassEffect::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Cutoff frequency.
-      ControlDefinition{48000.0, 0.0},
-  };
-  return GetEffectDefinition<LowPassEffect>(control_definitions);
 }
 
 }  // namespace barely

@@ -23,6 +23,28 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
+InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
+  static const std::vector<ControlDefinition> control_definitions = {
+      // Gain.
+      ControlDefinition{1.0, 0.0, 1.0},
+      // Root pitch.
+      ControlDefinition{0.0},
+      // Sample player loop.
+      ControlDefinition{false},
+      // Attack.
+      ControlDefinition{0.05, 0.0, 60.0},
+      // Decay.
+      ControlDefinition{0.0, 0.0, 60.0},
+      // Sustain.
+      ControlDefinition{1.0, 0.0, 1.0},
+      // Release.
+      ControlDefinition{0.25, 0.0, 60.0},
+      // Number of voices.
+      ControlDefinition{8, 1, kMaxVoiceCount},
+  };
+  return GetInstrumentDefinition<SamplerInstrument>(control_definitions, {});
+}
+
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
     : voice_(SamplerVoice(frame_rate), kMaxVoiceCount),
       gain_processor_(frame_rate) {}
@@ -102,28 +124,6 @@ void SamplerInstrument::SetNoteOn(double pitch, double intensity) noexcept {
     voice->generator().SetSpeed(speed);
     voice->set_gain(intensity);
   });
-}
-
-InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Root pitch.
-      ControlDefinition{0.0},
-      // Sample player loop.
-      ControlDefinition{false},
-      // Attack.
-      ControlDefinition{0.05, 0.0, 60.0},
-      // Decay.
-      ControlDefinition{0.0, 0.0, 60.0},
-      // Sustain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Release.
-      ControlDefinition{0.25, 0.0, 60.0},
-      // Number of voices.
-      ControlDefinition{8, 1, kMaxVoiceCount},
-  };
-  return GetInstrumentDefinition<SamplerInstrument>(control_definitions, {});
 }
 
 }  // namespace barely

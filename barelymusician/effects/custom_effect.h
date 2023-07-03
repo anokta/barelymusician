@@ -10,7 +10,7 @@ namespace barely {
 
 /// Custom effect interface.
 class CustomEffect {
- public:
+ protected:
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~CustomEffect() = default;
 

@@ -10,7 +10,7 @@ namespace barely {
 
 /// Custom instrument interface.
 class CustomInstrument {
- public:
+ protected:
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~CustomInstrument() = default;
 

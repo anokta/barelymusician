@@ -1595,15 +1595,16 @@ class EffectRef {
   Status SetControlEventCallback(ControlEventCallback callback) noexcept {
     *control_event_callback_ = std::move(callback);
     if (*control_event_callback_) {
-      return BarelyInstrument_SetControlEventCallback(
-          handle_, id_,
+      return BarelyEffect_SetControlEventCallback(
+          handle_, instrument_id_, id_,
           [](int32_t index, double value, void* user_data) noexcept {
             (*static_cast<ControlEventCallback*>(user_data))(index, value);
           },
           static_cast<void*>(control_event_callback_.get()));
     }
-    return BarelyInstrument_SetControlEventCallback(
-        handle_, id_, /*callback=*/nullptr, /*user_data=*/nullptr);
+    return BarelyEffect_SetControlEventCallback(handle_, instrument_id_, id_,
+                                                /*callback=*/nullptr,
+                                                /*user_data=*/nullptr);
   }
 
   /// Sets data.

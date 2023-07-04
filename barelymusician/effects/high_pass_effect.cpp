@@ -21,7 +21,7 @@ EffectDefinition HighPassEffect::GetDefinition() noexcept {
       // Cutoff frequency.
       ControlDefinition{0.0, 0.0},
   };
-  return GetEffectDefinition<HighPassEffect>(control_definitions);
+  return CustomEffect::GetDefinition<HighPassEffect>(control_definitions);
 }
 
 HighPassEffect::HighPassEffect(int frame_rate) noexcept

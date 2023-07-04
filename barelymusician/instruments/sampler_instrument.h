@@ -81,12 +81,7 @@ class SamplerInstrument : public CustomInstrument {
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
- private:
-  // Ensures that `SamplerInstrument` can only be used by `GetDefinition`.
-  friend InstrumentDefinition GetInstrumentDefinition<SamplerInstrument>(
-      const std::vector<ControlDefinition>& control_definitions,
-      const std::vector<ControlDefinition>& note_control_definitions) noexcept;
-
+ protected:
   /// Constructs new `SamplerInstrument`.
   explicit SamplerInstrument(int frame_rate) noexcept;
 

@@ -35,37 +35,44 @@ class CustomEffect {
   /// @param data Data.
   /// @param size Data size in bytes.
   virtual void SetData(const void* data, int size) noexcept = 0;
-};
 
-/// Returns the effect definition for `CustomEffectType`.
-template <typename CustomEffectType>
-EffectDefinition GetEffectDefinition(
-    const std::vector<ControlDefinition>& control_definitions) noexcept {
-  return EffectDefinition(
-      [](void** state, int frame_rate) noexcept {
-        // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
-        *state = static_cast<void*>(new CustomEffectType(frame_rate));
-      },
-      [](void** state) noexcept {
-        delete static_cast<CustomEffectType*>(*state);
-        *state = nullptr;
-      },
-      [](void** state, double* output_samples, int output_channel_count,
-         int output_frame_count) noexcept {
-        auto* effect = static_cast<CustomEffectType*>(*state);
-        effect->Process(output_samples, output_channel_count,
-                        output_frame_count);
-      },
-      [](void** state, int index, double value, double slope_per_frame) {
-        auto* effect = static_cast<CustomEffectType*>(*state);
-        effect->SetControl(index, value, slope_per_frame);
-      },
-      [](void** state, const void* data, int size) noexcept {
-        auto* effect = static_cast<CustomEffectType*>(*state);
-        effect->SetData(data, size);
-      },
-      control_definitions);
-}
+  /// Returns the effect definition for `CustomEffectType`.
+  template <typename CustomEffectType>
+  static EffectDefinition GetDefinition(
+      const std::vector<ControlDefinition>& control_definitions) noexcept {
+    class PublicEffect : public CustomEffectType {
+     public:
+      explicit PublicEffect(int frame_rate) : CustomEffectType(frame_rate) {}
+      using CustomEffectType::Process;
+      using CustomEffectType::SetControl;
+      using CustomEffectType::SetData;
+    };
+    return EffectDefinition(
+        [](void** state, int frame_rate) noexcept {
+          // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
+          *state = static_cast<void*>(new PublicEffect(frame_rate));
+        },
+        [](void** state) noexcept {
+          delete static_cast<PublicEffect*>(*state);
+          *state = nullptr;
+        },
+        [](void** state, double* output_samples, int output_channel_count,
+           int output_frame_count) noexcept {
+          auto* effect = static_cast<PublicEffect*>(*state);
+          effect->Process(output_samples, output_channel_count,
+                          output_frame_count);
+        },
+        [](void** state, int index, double value, double slope_per_frame) {
+          auto* effect = static_cast<PublicEffect*>(*state);
+          effect->SetControl(index, value, slope_per_frame);
+        },
+        [](void** state, const void* data, int size) noexcept {
+          auto* effect = static_cast<PublicEffect*>(*state);
+          effect->SetData(data, size);
+        },
+        control_definitions);
+  }
+};
 
 }  // namespace barely
 

@@ -21,7 +21,7 @@ EffectDefinition LowPassEffect::GetDefinition() noexcept {
       // Cutoff frequency.
       ControlDefinition{48000.0, 0.0},
   };
-  return GetEffectDefinition<LowPassEffect>(control_definitions);
+  return CustomEffect::GetDefinition<LowPassEffect>(control_definitions);
 }
 
 LowPassEffect::LowPassEffect(int frame_rate) noexcept

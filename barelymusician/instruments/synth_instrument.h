@@ -76,12 +76,7 @@ class SynthInstrument : public CustomInstrument {
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
- private:
-  // Ensures that `SynthInstrument` can only be used by `GetDefinition`.
-  friend InstrumentDefinition GetInstrumentDefinition<SynthInstrument>(
-      const std::vector<ControlDefinition>& control_definitions,
-      const std::vector<ControlDefinition>& note_control_definitions) noexcept;
-
+ protected:
   /// Constructs new `SynthInstrument`.
   explicit SynthInstrument(int frame_rate) noexcept;
 

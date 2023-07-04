@@ -42,7 +42,8 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
       // Number of voices.
       ControlDefinition{8, 1, kMaxVoiceCount},
   };
-  return GetInstrumentDefinition<SynthInstrument>(control_definitions, {});
+  return CustomInstrument::GetDefinition<SynthInstrument>(control_definitions,
+                                                          {});
 }
 
 SynthInstrument::SynthInstrument(int frame_rate) noexcept

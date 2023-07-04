@@ -42,7 +42,8 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
       // Number of voices.
       ControlDefinition{8, 1, kMaxVoiceCount},
   };
-  return GetInstrumentDefinition<SamplerInstrument>(control_definitions, {});
+  return CustomInstrument::GetDefinition<SamplerInstrument>(control_definitions,
+                                                            {});
 }
 
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept

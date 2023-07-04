@@ -51,11 +51,7 @@ class HighPassEffect : public CustomEffect {
   /// @return Effect definition.
   static EffectDefinition GetDefinition() noexcept;
 
- private:
-  // Ensures that `HighPassEffect` can only be used by `GetDefinition`.
-  friend EffectDefinition GetEffectDefinition<HighPassEffect>(
-      const std::vector<ControlDefinition>& control_definitions) noexcept;
-
+ protected:
   /// Constructs new `HighPassEffect`.
   explicit HighPassEffect(int frame_rate) noexcept;
 

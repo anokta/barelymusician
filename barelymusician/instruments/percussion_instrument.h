@@ -60,12 +60,7 @@ class PercussionInstrument : public CustomInstrument {
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
- private:
-  // Ensures that `PercussionInstrument` can only be used by `GetDefinition`.
-  friend InstrumentDefinition GetInstrumentDefinition<PercussionInstrument>(
-      const std::vector<ControlDefinition>& control_definitions,
-      const std::vector<ControlDefinition>& note_control_definitions) noexcept;
-
+ protected:
   /// Constructs new `PercussionInstrument`.
   explicit PercussionInstrument(int frame_rate) noexcept;
 

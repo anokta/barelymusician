@@ -33,7 +33,8 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
       // Pad release.
       ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
   };
-  return GetInstrumentDefinition<PercussionInstrument>(control_definitions, {});
+  return CustomInstrument::GetDefinition<PercussionInstrument>(
+      control_definitions, {});
 }
 
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept

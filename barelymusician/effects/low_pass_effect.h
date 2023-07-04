@@ -51,11 +51,7 @@ class LowPassEffect : public CustomEffect {
   /// @return Effect definition.
   static EffectDefinition GetDefinition() noexcept;
 
- private:
-  // Ensures that `LowPassEffect` can only be used by `GetDefinition`.
-  friend EffectDefinition GetEffectDefinition<LowPassEffect>(
-      const std::vector<ControlDefinition>& control_definitions) noexcept;
-
+ protected:
   /// Constructs new `LowPassEffect`.
   explicit LowPassEffect(int frame_rate) noexcept;
 

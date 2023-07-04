@@ -1517,6 +1517,9 @@ struct TaskDefinition : public BarelyTaskDefinition {
 /// Effect reference.
 class EffectRef {
  public:
+  /// Default constructor.
+  EffectRef() = default;
+
   /// Returns a control value.
   ///
   /// @param index Control index.
@@ -1664,6 +1667,9 @@ class EffectRef {
 /// Instrument reference.
 class InstrumentRef {
  public:
+  /// Default constructor.
+  InstrumentRef() = default;
+
   /// Creates a new effect.
   ///
   /// @param definition Effect definition.
@@ -1999,6 +2005,9 @@ class InstrumentRef {
 /// Task reference.
 class TaskRef {
  public:
+  /// Default constructor.
+  TaskRef() = default;
+
   /// Returns the position.
   ///
   /// @return Position in beats, or an error status.
@@ -2064,6 +2073,9 @@ class TaskRef {
 /// Performer reference.
 class PerformerRef {
  public:
+  /// Default constructor.
+  PerformerRef() = default;
+
   /// Creates a new task.
   ///
   /// @param definition Task definition.

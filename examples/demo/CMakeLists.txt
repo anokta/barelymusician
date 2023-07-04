@@ -1,4 +1,20 @@
 add_executable(
+  barely_examples_arpeggiator_demo
+  arpeggiator_demo.cpp
+)
+target_link_libraries(
+  barely_examples_arpeggiator_demo
+  barelymusician
+  barely_arpeggiator
+  barely_pitch
+  barely_synth_instrument
+  barely_examples_audio_clock
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
+)
+
+add_executable(
   barely_examples_instrument_demo
   instrument_demo.cpp
 )

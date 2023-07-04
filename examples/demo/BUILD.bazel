@@ -3,6 +3,21 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 package(default_visibility = ["//visibility:public"])
 
 cc_binary(
+    name = "arpeggiator_demo",
+    srcs = ["arpeggiator_demo.cpp"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/components:arpeggiator",
+        "//barelymusician/composition:pitch",
+        "//barelymusician/instruments:synth_instrument",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+    ],
+)
+
+cc_binary(
     name = "instrument_demo",
     srcs = ["instrument_demo.cpp"],
     deps = [

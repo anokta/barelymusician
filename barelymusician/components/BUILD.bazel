@@ -3,6 +3,16 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
+    name = "arpeggiator",
+    srcs = ["arpeggiator.cpp"],
+    hdrs = ["arpeggiator.h"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/common:random",
+    ],
+)
+
+cc_library(
     name = "metronome",
     srcs = ["metronome.cpp"],
     hdrs = ["metronome.h"],

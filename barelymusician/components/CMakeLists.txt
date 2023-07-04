@@ -1,4 +1,15 @@
 add_library(
+  barely_arpeggiator
+  arpeggiator.cpp
+  arpeggiator.h
+)
+target_link_libraries(
+  barely_arpeggiator
+  barelymusician
+  barely_random
+)
+
+add_library(
   barely_metronome
   metronome.cpp
   metronome.h

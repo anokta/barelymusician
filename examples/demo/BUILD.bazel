@@ -82,6 +82,21 @@ cc_binary(
 )
 
 cc_binary(
+    name = "repeater_demo",
+    srcs = ["repeater_demo.cpp"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/components:repeater",
+        "//barelymusician/composition:pitch",
+        "//barelymusician/instruments:synth_instrument",
+        "//examples/common:audio_clock",
+        "//examples/common:audio_output",
+        "//examples/common:console_log",
+        "//examples/common:input_manager",
+    ],
+)
+
+cc_binary(
     name = "sampler_demo",
     srcs = ["sampler_demo.cpp"],
     deps = [

@@ -20,3 +20,13 @@ cc_library(
         "//barelymusician",
     ],
 )
+
+cc_library(
+    name = "repeater",
+    srcs = ["repeater.cpp"],
+    hdrs = ["repeater.h"],
+    deps = [
+        "//barelymusician",
+        "//barelymusician/common:random",
+    ],
+)

@@ -18,3 +18,14 @@ target_link_libraries(
   barely_metronome
   barelymusician
 )
+
+add_library(
+  barely_repeater
+  repeater.cpp
+  repeater.h
+)
+target_link_libraries(
+  barely_repeater
+  barelymusician
+  barely_random
+)

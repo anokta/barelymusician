@@ -51,7 +51,7 @@ BARELY_EXPORT BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition();
 namespace barely {
 
 /// Synth control.
-enum class SynthControl : int {
+enum class SynthControl : BarelySynthControl {
   /// Gain.
   kGain = BarelySynthControl_kGain,
   /// Oscillator type.

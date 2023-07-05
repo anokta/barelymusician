@@ -83,12 +83,13 @@ target_link_libraries(
 )
 
 add_executable(
-  barely_examples_sequencer_demo
-  sequencer_demo.cpp
+  barely_examples_repeater_demo
+  repeater_demo.cpp
 )
 target_link_libraries(
-  barely_examples_sequencer_demo
+  barely_examples_repeater_demo
   barelymusician
+  barely_repeater
   barely_pitch
   barely_synth_instrument
   barely_examples_audio_clock
@@ -112,6 +113,21 @@ target_link_libraries(
   barely_examples_input_manager
   barely_examples_wav_file
   barely_examples_data
+)
+
+add_executable(
+  barely_examples_sequencer_demo
+  sequencer_demo.cpp
+)
+target_link_libraries(
+  barely_examples_sequencer_demo
+  barelymusician
+  barely_pitch
+  barely_synth_instrument
+  barely_examples_audio_clock
+  barely_examples_audio_output
+  barely_examples_console_log
+  barely_examples_input_manager
 )
 
 add_executable(

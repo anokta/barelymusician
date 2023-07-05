@@ -1,7 +1,6 @@
 #ifndef BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_H_
 #define BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_H_
 
-#include <optional>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -9,6 +8,7 @@
 
 namespace barely {
 
+/// Arpeggiator style.
 enum class ArpeggiatorStyle {
   kUp = 0,
   kDown = 1,
@@ -24,11 +24,6 @@ enum class ArpeggiatorStyle {
 /// Simple arpeggiator that plays notes in sequence.
 class Arpeggiator {
  public:
-  /// Beat callback signature.
-  ///
-  /// @param beat Beat.
-  using BeatCallback = std::function<void(int beat)>;
-
   /// Creates a new `Arpeggiator`.
   ///
   /// @param musician Musician.

@@ -209,7 +209,8 @@ void Performer::SetPosition(double position) noexcept {
       for (auto it = one_off_tasks_.begin(); it != one_off_tasks_.end();) {
         auto current = it++;
         auto node = one_off_tasks_.extract(current);
-        node.key().position = loop_begin_position_;
+        node.key().position =
+            std::max(node.key().position - loop_length_, loop_begin_position_);
         one_off_tasks_.insert(std::move(node));
       }
     }

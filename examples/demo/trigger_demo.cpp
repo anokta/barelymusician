@@ -44,7 +44,6 @@ constexpr double kAttack = 0.0;
 constexpr double kRelease = 0.1;
 
 constexpr double kInitialTempo = 120.0;
-constexpr double kTempoIncrement = 10.0;
 
 // Returns the MIDI key number for the given `pitch`.
 int MidiKeyNumberFromPitch(double pitch) {
@@ -143,33 +142,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
       performer.Start();
       return;
     }
-    // Adjust tempo.
-    double tempo = musician.GetTempo();
-    switch (std::toupper(key)) {
-      case ' ':
-        if (*performer.IsPlaying()) {
-          instrument.SetAllNotesOff();
-          performer.Stop();
-          ConsoleLog() << "Stopped playback";
-        } else {
-          performer.Start();
-          ConsoleLog() << "Started playback";
-        }
-        return;
-      case '-':
-        tempo -= kTempoIncrement;
-        break;
-      case '+':
-        tempo += kTempoIncrement;
-        break;
-      case 'R':
-        tempo = kInitialTempo;
-        break;
-      default:
-        return;
-    }
-    musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

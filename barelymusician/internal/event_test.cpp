@@ -1,4 +1,4 @@
-#include "barelymusician/internal/task.h"
+#include "barelymusician/internal/event.h"
 
 #include "barelymusician/barelymusician.h"
 #include "gtest/gtest.h"
@@ -6,8 +6,8 @@
 namespace barely::internal {
 namespace {
 
-// Tests that the task gets processed as expected.
-TEST(TaskTest, Process) {
+// Tests that the event gets processed as expected.
+TEST(EventTest, Process) {
   constexpr int kTotalProcessCount = 3;
 
   struct TestData {
@@ -22,36 +22,37 @@ TEST(TaskTest, Process) {
   EXPECT_EQ(test_data.process_count, 0);
 
   {
-    Task task(TaskDefinition{
-                  [](void** state, void* user_data) {
-                    *state = user_data;
-                    ++static_cast<TestData*>(*state)->create_count;
-                  },
-                  [](void** state) {
-                    ++static_cast<TestData*>(*state)->destroy_count;
-                  },
-                  [](void** state) {
-                    ++static_cast<TestData*>(*state)->process_count;
-                  },
-              },
-              static_cast<void*>(&test_data));
+    Event<TaskDefinition> event(
+        TaskDefinition{
+            [](void** state, void* user_data) {
+              *state = user_data;
+              ++static_cast<TestData*>(*state)->create_count;
+            },
+            [](void** state) {
+              ++static_cast<TestData*>(*state)->destroy_count;
+            },
+            [](void** state) {
+              ++static_cast<TestData*>(*state)->process_count;
+            },
+        },
+        static_cast<void*>(&test_data));
 
-    // Task should be created.
+    // Event should be created.
     EXPECT_EQ(test_data.create_count, 1);
     EXPECT_EQ(test_data.destroy_count, 0);
     EXPECT_EQ(test_data.process_count, 0);
 
     for (int i = 1; i <= kTotalProcessCount; ++i) {
-      task.Process();
+      event.Process();
 
-      // Task should be processed.
+      // Event should be processed.
       EXPECT_EQ(test_data.create_count, 1);
       EXPECT_EQ(test_data.destroy_count, 0);
       EXPECT_EQ(test_data.process_count, i);
     }
   }
 
-  // Task should be destroyed.
+  // Event should be destroyed.
   EXPECT_EQ(test_data.create_count, 1);
   EXPECT_EQ(test_data.destroy_count, 1);
   EXPECT_EQ(test_data.process_count, kTotalProcessCount);

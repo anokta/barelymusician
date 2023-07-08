@@ -24,7 +24,6 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::TaskCallback;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -68,7 +67,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetNoteOnEventCallback([](double pitch, double /*intensity*/) {
+  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });
 
@@ -77,8 +76,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto performer = musician.CreatePerformer();
 
-  const auto play_note_fn = [&](int scale_index,
-                                double duration) -> TaskCallback {
+  const auto play_note_fn = [&](int scale_index, double duration) {
     const double pitch =
         barely::kPitchD3 +
         barely::PitchFromScale(barely::kPitchMajorScale, scale_index);

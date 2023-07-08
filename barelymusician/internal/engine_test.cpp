@@ -9,7 +9,6 @@
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/status.h"
-#include "barelymusician/internal/task.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -92,16 +91,22 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   // Set the note callbacks.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  instrument.SetNoteOnEventCallback([&](double pitch, double intensity) {
+  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch,
+                                                         double intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
-  });
+  };
+  instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
+                            static_cast<void*>(&note_on_callback));
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
   double note_off_pitch = 0.0;
-  instrument.SetNoteOffEventCallback(
-      [&](double pitch) { note_off_pitch = pitch; });
+  NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
+    note_off_pitch = pitch;
+  };
+  instrument.SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
+                             static_cast<void*>(&note_off_callback));
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Set a note on.
@@ -161,8 +166,12 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
       instrument_ids[i] = *instrument_id_or;
       const auto instrument_or = engine.GetInstrument(instrument_ids[i]);
       ASSERT_TRUE(instrument_or.IsOk());
-      instrument_or->get().SetNoteOffEventCallback(
-          [&](double pitch) { note_off_pitches.push_back(pitch); });
+      NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
+        note_off_pitches.push_back(pitch);
+      };
+      instrument_or->get().SetNoteOffEvent(
+          NoteOffEventDefinition::WithCallback(),
+          static_cast<void*>(&note_off_callback));
     }
 
     // Start multiple notes, then immediately stop some of them.

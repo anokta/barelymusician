@@ -69,11 +69,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEventCallback([](double pitch, double intensity) {
+  instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", "
                  << intensity << ")";
   });
-  instrument.SetNoteOffEventCallback([](double pitch) {
+  instrument.SetNoteOffEvent([](double pitch) {
     ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") ";
   });
 

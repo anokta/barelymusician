@@ -22,7 +22,6 @@ cc_library(
         ":mutable_data",
         ":performer",
         ":status",
-        ":task",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
@@ -36,6 +35,11 @@ cc_library(
     deps = [
         "//barelymusician:barelymusician_headeronly",
     ],
+)
+
+cc_library(
+    name = "event",
+    hdrs = ["event.h"],
 )
 
 cc_library(
@@ -53,6 +57,7 @@ cc_library(
     deps = [
         ":control",
         ":effect",
+        ":event",
         ":id",
         ":message",
         ":message_queue",
@@ -91,9 +96,9 @@ cc_library(
     srcs = ["performer.cpp"],
     hdrs = ["performer.h"],
     deps = [
+        ":event",
         ":id",
         ":status",
-        ":task",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
     ],
@@ -102,15 +107,6 @@ cc_library(
 cc_library(
     name = "status",
     hdrs = ["status.h"],
-)
-
-cc_library(
-    name = "task",
-    srcs = ["task.cpp"],
-    hdrs = ["task.h"],
-    deps = [
-        "//barelymusician:barelymusician_headeronly",
-    ],
 )
 
 cc_test(
@@ -142,7 +138,16 @@ cc_test(
         ":id",
         ":instrument",
         ":status",
-        ":task",
+        "//barelymusician:barelymusician_headeronly",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "event_test",
+    srcs = ["event_test.cpp"],
+    deps = [
+        ":event",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
@@ -186,16 +191,6 @@ cc_test(
         ":id",
         ":performer",
         ":status",
-        "//barelymusician:barelymusician_headeronly",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "task_test",
-    srcs = ["task_test.cpp"],
-    deps = [
-        ":task",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],

@@ -140,14 +140,13 @@ int main(int /*argc*/, char* argv[]) {
     }
     // Set the instrument settings.
     const auto track_index = tracks.size() + 1;
-    instrument.SetNoteOnEventCallback(
-        [track_index](double pitch, double intensity) {
-          ConsoleLog() << "MIDI track #" << track_index
-                       << ": NoteOn(key: " << MidiKeyNumberFromPitch(pitch)
-                       << ", velocity: " << MidiVelocityFromIntensity(intensity)
-                       << ")";
-        });
-    instrument.SetNoteOffEventCallback([track_index](double pitch) {
+    instrument.SetNoteOnEvent([track_index](double pitch, double intensity) {
+      ConsoleLog() << "MIDI track #" << track_index
+                   << ": NoteOn(key: " << MidiKeyNumberFromPitch(pitch)
+                   << ", velocity: " << MidiVelocityFromIntensity(intensity)
+                   << ")";
+    });
+    instrument.SetNoteOffEvent([track_index](double pitch) {
       ConsoleLog() << "MIDI track #" << track_index
                    << ": NoteOff(key: " << MidiKeyNumberFromPitch(pitch) << ")";
     });

@@ -12,7 +12,6 @@
 #include "barelymusician/internal/mutable_data.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/status.h"
-#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 

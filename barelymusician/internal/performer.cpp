@@ -13,7 +13,6 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/status.h"
-#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 

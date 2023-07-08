@@ -8,11 +8,14 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/internal/event.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/status.h"
-#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
+
+/// Task alias.
+using Task = Event<TaskDefinition>;
 
 /// Class that wraps a performer.
 class Performer {

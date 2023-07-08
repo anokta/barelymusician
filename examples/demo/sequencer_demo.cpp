@@ -22,7 +22,7 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
-using ::barely::TaskCallback;
+using ::barely::TaskDefinition;
 using ::barely::TaskHandle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -68,7 +68,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthControl::kAttack, kAttack);
   instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetNoteOnEventCallback([](double pitch, double /*intensity*/) {
+  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });
 
@@ -77,7 +77,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  const auto play_note_fn = [&](double duration, double pitch) -> TaskCallback {
+  const auto play_note_fn = [&](double duration, double pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
       performer.CreateTask(
@@ -86,7 +86,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     };
   };
 
-  std::vector<std::pair<double, TaskCallback>> score;
+  std::vector<std::pair<double, TaskDefinition::Callback>> score;
   score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
   score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
   score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));

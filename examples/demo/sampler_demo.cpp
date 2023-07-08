@@ -104,11 +104,11 @@ int main(int /*argc*/, char* argv[]) {
   const int size = static_cast<int>(data.size() * sizeof(double));
   instrument.SetData(data.data(), size);
 
-  instrument.SetNoteOnEventCallback([](double pitch, double intensity) {
+  instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", "
                  << intensity << ")";
   });
-  instrument.SetNoteOffEventCallback([](double pitch) {
+  instrument.SetNoteOffEvent([](double pitch) {
     ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") ";
   });
 

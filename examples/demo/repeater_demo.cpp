@@ -87,12 +87,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthControl::kRelease, kRelease);
   instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEventCallback(
-      [&repeater](double pitch, double /*intensity*/) {
-        if (repeater.IsPlaying()) {
-          ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
-        }
-      });
+  instrument.SetNoteOnEvent([&repeater](double pitch, double /*intensity*/) {
+    if (repeater.IsPlaying()) {
+      ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
+    }
+  });
 
   repeater.SetInstrument(instrument);
 

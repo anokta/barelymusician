@@ -211,22 +211,16 @@ BarelyStatus BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_SetControlEventCallback(
-    BarelyEffectHandle effect, BarelyControlEventCallback callback,
+BarelyStatus BarelyEffect_SetControlEvent(
+    BarelyEffectHandle effect, BarelyControlEventDefinition definition,
     void* user_data) {
   if (!effect) return BarelyStatus_kNotFound;
 
   const auto instrument_or =
       effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetEffectControlEventCallback(
-          effect->id, [callback, user_data](int32_t index, double value) {
-            callback(index, value, user_data);
-          });
-    } else {
-      instrument_or->get().SetEffectControlEventCallback(effect->id, nullptr);
-    }
+    instrument_or->get().SetEffectControlEvent(effect->id, definition,
+                                               user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
@@ -413,21 +407,14 @@ BarelyStatus BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetControlEventCallback(
-    BarelyInstrumentHandle instrument, BarelyControlEventCallback callback,
+BarelyStatus BarelyInstrument_SetControlEvent(
+    BarelyInstrumentHandle instrument, BarelyControlEventDefinition definition,
     void* user_data) {
   if (!instrument) return BarelyStatus_kNotFound;
 
   const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetControlEventCallback(
-          [callback, user_data](int32_t index, double value) {
-            callback(index, value, user_data);
-          });
-    } else {
-      instrument_or->get().SetControlEventCallback(nullptr);
-    }
+    instrument_or->get().SetControlEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
@@ -461,21 +448,14 @@ BarelyStatus BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
-    BarelyInstrumentHandle instrument, BarelyNoteControlEventCallback callback,
-    void* user_data) {
+BarelyStatus BarelyInstrument_SetNoteControlEvent(
+    BarelyInstrumentHandle instrument,
+    BarelyNoteControlEventDefinition definition, void* user_data) {
   if (!instrument) return BarelyStatus_kNotFound;
 
   const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetNoteControlEventCallback(
-          [callback, user_data](double pitch, int32_t index, double value) {
-            callback(pitch, index, value, user_data);
-          });
-    } else {
-      instrument_or->get().SetNoteControlEventCallback(nullptr);
-    }
+    instrument_or->get().SetNoteControlEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
@@ -493,19 +473,14 @@ BarelyStatus BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
-    BarelyInstrumentHandle instrument, BarelyNoteOffEventCallback callback,
+BarelyStatus BarelyInstrument_SetNoteOffEvent(
+    BarelyInstrumentHandle instrument, BarelyNoteOffEventDefinition definition,
     void* user_data) {
   if (!instrument) return BarelyStatus_kNotFound;
 
   const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetNoteOffEventCallback(
-          [callback, user_data](double pitch) { callback(pitch, user_data); });
-    } else {
-      instrument_or->get().SetNoteOffEventCallback(nullptr);
-    }
+    instrument_or->get().SetNoteOffEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
@@ -523,21 +498,14 @@ BarelyStatus BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
-    BarelyInstrumentHandle instrument, BarelyNoteOnEventCallback callback,
+BarelyStatus BarelyInstrument_SetNoteOnEvent(
+    BarelyInstrumentHandle instrument, BarelyNoteOnEventDefinition definition,
     void* user_data) {
   if (!instrument) return BarelyStatus_kNotFound;
 
   const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetNoteOnEventCallback(
-          [callback, user_data](double pitch, double intensity) {
-            callback(pitch, intensity, user_data);
-          });
-    } else {
-      instrument_or->get().SetNoteOnEventCallback(nullptr);
-    }
+    instrument_or->get().SetNoteOnEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();

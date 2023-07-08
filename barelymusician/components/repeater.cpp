@@ -56,7 +56,7 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(InstrumentRef instrument) noexcept {
+void Repeater::SetInstrument(InstrumentHandle instrument) noexcept {
   instrument_.SetAllNotesOff();
   instrument_ = instrument;
 }

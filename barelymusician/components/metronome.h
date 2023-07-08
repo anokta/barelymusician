@@ -49,7 +49,7 @@ class Metronome {
   Musician& musician_;
 
   // Performer.
-  PerformerRef performer_;
+  PerformerHandle performer_;
 
   // Current beat.
   int beat_ = 0;

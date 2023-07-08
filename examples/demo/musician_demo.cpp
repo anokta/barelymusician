@@ -29,13 +29,13 @@
 
 namespace {
 
-using ::barely::InstrumentRef;
+using ::barely::InstrumentHandle;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::PercussionControl;
 using ::barely::PercussionInstrument;
-using ::barely::PerformerRef;
+using ::barely::PerformerHandle;
 using ::barely::Random;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
@@ -53,11 +53,11 @@ using ::barely::examples::WavFile;
 // @param beat_count Number of beats in a bar.
 // @param harmonic Harmonic index.
 // @param musician Pointer to musician.
-// @param instrument Instrument reference.
-// @param performer PerformerRef.
-using BeatComposerCallback =
-    std::function<void(int bar, int beat, int beat_count, int harmonic,
-                       InstrumentRef& instrument, PerformerRef& performer)>;
+// @param instrument Instrument handle.
+// @param performer Performer handle.
+using BeatComposerCallback = std::function<void(
+    int bar, int beat, int beat_count, int harmonic,
+    InstrumentHandle& instrument, PerformerHandle& performer)>;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -94,8 +94,8 @@ void InsertPadData(double pitch, const std::string& file_path,
 
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, double pitch,
-                  double intensity, InstrumentRef& instrument,
-                  PerformerRef& performer) {
+                  double intensity, InstrumentHandle& instrument,
+                  PerformerHandle& performer) {
   performer.CreateTask(
       [pitch, intensity, &instrument]() {
         instrument.SetNoteOn(pitch, intensity);
@@ -106,8 +106,8 @@ void ScheduleNote(double position, double duration, double pitch,
                        /*process_order=*/-1);
 }
 
-void ComposeChord(double intensity, int harmonic, InstrumentRef& instrument,
-                  PerformerRef& performer) {
+void ComposeChord(double intensity, int harmonic, InstrumentHandle& instrument,
+                  PerformerHandle& performer) {
   const auto add_chord_note = [&](int index) {
     ScheduleNote(
         0.0, 1.0,
@@ -120,8 +120,8 @@ void ComposeChord(double intensity, int harmonic, InstrumentRef& instrument,
 }
 
 void ComposeLine(double octave_offset, double intensity, int bar, int beat,
-                 int beat_count, int harmonic, InstrumentRef& instrument,
-                 PerformerRef& performer) {
+                 int beat_count, int harmonic, InstrumentHandle& instrument,
+                 PerformerHandle& performer) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
@@ -149,7 +149,7 @@ void ComposeLine(double octave_offset, double intensity, int bar, int beat,
 }
 
 void ComposeDrums(int bar, int beat, int beat_count, Random& random,
-                  InstrumentRef& instrument, PerformerRef& performer) {
+                  InstrumentHandle& instrument, PerformerHandle& performer) {
   const auto get_beat = [](int step) {
     return barely::GetPosition(step, barely::kSixteenthNotesPerBeat);
   };
@@ -211,7 +211,7 @@ int main(int /*argc*/, char* argv[]) {
 
   // Note on callback.
   const auto set_note_callbacks_fn = [&](auto index,
-                                         InstrumentRef& instrument) {
+                                         InstrumentHandle& instrument) {
     instrument.SetNoteOffEventCallback([index](double pitch) {
       ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
@@ -224,9 +224,9 @@ int main(int /*argc*/, char* argv[]) {
   const std::vector<int> progression = {0, 3, 4, 0};
 
   // Initialize performers.
-  std::vector<std::tuple<PerformerRef, BeatComposerCallback, size_t>>
+  std::vector<std::tuple<PerformerHandle, BeatComposerCallback, size_t>>
       performers;
-  std::vector<InstrumentRef> instruments;
+  std::vector<InstrumentHandle> instruments;
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
@@ -243,7 +243,7 @@ int main(int /*argc*/, char* argv[]) {
   // Add synth instruments.
   const auto chords_beat_composer_callback =
       [&](int /*bar*/, int /*beat*/, int /*beat_count*/, int harmonic,
-          InstrumentRef& instrument, PerformerRef& performer) {
+          InstrumentHandle& instrument, PerformerHandle& performer) {
         return ComposeChord(0.5, harmonic, instrument, performer);
       };
 
@@ -259,7 +259,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto line_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int harmonic,
-          InstrumentRef& instrument, PerformerRef& performer) {
+          InstrumentHandle& instrument, PerformerHandle& performer) {
         return ComposeLine(-1.0, 1.0, bar, beat, beat_count, harmonic,
                            instrument, performer);
       };
@@ -270,7 +270,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto line_2_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int harmonic,
-          InstrumentRef& instrument, PerformerRef& performer) {
+          InstrumentHandle& instrument, PerformerHandle& performer) {
         return ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, instrument,
                            performer);
       };
@@ -303,13 +303,12 @@ int main(int /*argc*/, char* argv[]) {
       {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
       {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
   });
-  const auto percussion_beat_composer_callback = [&](int bar, int beat,
-                                                     int beat_count,
-                                                     int /*harmonic*/,
-                                                     InstrumentRef& instrument,
-                                                     PerformerRef& performer) {
-    return ComposeDrums(bar, beat, beat_count, random, instrument, performer);
-  };
+  const auto percussion_beat_composer_callback =
+      [&](int bar, int beat, int beat_count, int /*harmonic*/,
+          InstrumentHandle& instrument, PerformerHandle& performer) {
+        return ComposeDrums(bar, beat, beat_count, random, instrument,
+                            performer);
+      };
 
   performers.emplace_back(musician.CreatePerformer(),
                           percussion_beat_composer_callback,

@@ -48,7 +48,7 @@ class Repeater {
   void Push(std::optional<double> pitch_or, int length = 1) noexcept;
 
   /// Sets the instrument.
-  void SetInstrument(InstrumentRef instrument) noexcept;
+  void SetInstrument(InstrumentHandle instrument) noexcept;
 
   /// Sets the rate.
   ///
@@ -76,10 +76,10 @@ class Repeater {
   Musician& musician_;
 
   // Performer.
-  PerformerRef performer_;
+  PerformerHandle performer_;
 
   // Instrument.
-  InstrumentRef instrument_;
+  InstrumentHandle instrument_;
 
   // List of pitches to play.
   std::vector<std::pair<std::optional<double>, int>> pitches_;

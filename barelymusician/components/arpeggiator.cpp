@@ -46,7 +46,7 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
   gate_ratio_ = std::min(std::max(gate_ratio, 0.0), 1.0);
 }
 
-void Arpeggiator::SetInstrument(InstrumentRef instrument) noexcept {
+void Arpeggiator::SetInstrument(InstrumentHandle instrument) noexcept {
   instrument_.SetAllNotesOff();
   instrument_ = instrument;
 }

@@ -23,7 +23,7 @@ using ::barely::OscillatorType;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
 using ::barely::TaskCallback;
-using ::barely::TaskRef;
+using ::barely::TaskHandle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -97,7 +97,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB5));
   score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
 
-  std::unordered_map<int, TaskRef> tasks;
+  std::unordered_map<int, TaskHandle> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
     tasks.emplace(index++, *performer.CreateTask(callback, /*is_one_off=*/false,

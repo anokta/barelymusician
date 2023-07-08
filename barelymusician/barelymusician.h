@@ -1428,11 +1428,16 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
-/// Effect reference.
-class EffectRef {
+/// Effect handle.
+class EffectHandle {
  public:
   /// Default constructor.
-  EffectRef() = default;
+  EffectHandle() = default;
+
+  /// Equality comparator.
+  bool operator==(const BarelyEffectHandle& handle) const {
+    return handle_ == handle;
+  }
 
   /// Returns a control value.
   ///
@@ -1551,11 +1556,11 @@ class EffectRef {
   }
 
  private:
-  // Ensures that `EffectRef` can only be constructed by `InstrumentRef`.
-  friend class InstrumentRef;
+  // Ensures that `EffectHandle` can only be constructed by `InstrumentHandle`.
+  friend class InstrumentHandle;
 
-  // Constructs a new `EffectRef`.
-  explicit EffectRef(BarelyEffectHandle handle) noexcept
+  // Constructs a new `EffectHandle`.
+  explicit EffectHandle(BarelyEffectHandle handle) noexcept
       : handle_(handle),
         control_event_callback_(std::make_shared<ControlEventCallback>()) {}
 
@@ -1566,37 +1571,37 @@ class EffectRef {
   std::shared_ptr<ControlEventCallback> control_event_callback_ = nullptr;
 };
 
-/// Instrument reference.
-class InstrumentRef {
+/// Instrument handle.
+class InstrumentHandle {
  public:
   /// Default constructor.
-  InstrumentRef() = default;
+  InstrumentHandle() = default;
 
   /// Creates a new effect.
   ///
   /// @param definition Effect definition.
   /// @param process_order Task process order.
-  /// @return Effect reference, or an error status.
-  StatusOr<EffectRef> CreateEffect(EffectDefinition definition,
-                                   int process_order = 0) noexcept {
+  /// @return Effect handle, or an error status.
+  StatusOr<EffectHandle> CreateEffect(EffectDefinition definition,
+                                      int process_order = 0) noexcept {
     BarelyEffectHandle effect = nullptr;
     if (const Status status =
             BarelyEffect_Create(handle_, definition, process_order, &effect);
         !status.IsOk()) {
       return status;
     }
-    const auto [it, success] = effect_refs_.emplace(effect, EffectRef(effect));
+    const auto [it, success] = effects_.emplace(effect, EffectHandle(effect));
     assert(success);
     return it->second;
   }
 
   /// Destroys an effect.
   ///
-  /// @param effect_ref Effect reference.
+  /// @param effect Effect handle.
   /// @return Status.
-  Status DestroyEffect(EffectRef effect_ref) noexcept {
-    const auto status = BarelyEffect_Destroy(effect_ref.handle_);
-    effect_refs_.erase(effect_ref.handle_);
+  Status DestroyEffect(EffectHandle effect) noexcept {
+    const auto status = BarelyEffect_Destroy(effect.handle_);
+    effects_.erase(effect.handle_);
     return status;
   }
 
@@ -1867,11 +1872,11 @@ class InstrumentRef {
   }
 
  private:
-  // Ensures that `InstrumentRef` can only be constructed by `Musician`.
+  // Ensures that `InstrumentHandle` can only be constructed by `Musician`.
   friend class Musician;
 
-  // Constructs a new `InstrumentRef`.
-  explicit InstrumentRef(BarelyInstrumentHandle handle) noexcept
+  // Constructs a new `InstrumentHandle`.
+  explicit InstrumentHandle(BarelyInstrumentHandle handle) noexcept
       : handle_(handle),
         control_event_callback_(std::make_shared<ControlEventCallback>()),
         note_control_event_callback_(
@@ -1895,15 +1900,15 @@ class InstrumentRef {
   // Note on event callback.
   std::shared_ptr<NoteOnEventCallback> note_on_event_callback_ = nullptr;
 
-  // Map of effect references by their identifiers.
-  std::unordered_map<BarelyEffectHandle, EffectRef> effect_refs_;
+  // Map of effect handles.
+  std::unordered_map<BarelyEffectHandle, EffectHandle> effects_;
 };
 
-/// Task reference.
-class TaskRef {
+/// Task handle.
+class TaskHandle {
  public:
   /// Default constructor.
-  TaskRef() = default;
+  TaskHandle() = default;
 
   /// Returns the position.
   ///
@@ -1947,21 +1952,21 @@ class TaskRef {
   }
 
  private:
-  // Ensures that `TaskRef` can only be constructed by `PerformerRef`.
-  friend class PerformerRef;
+  // Ensures that `TaskHandle` can only be constructed by `PerformerHandle`.
+  friend class PerformerHandle;
 
-  // Constructs a new `TaskRef`.
-  explicit TaskRef(BarelyTaskHandle handle) noexcept : handle_(handle) {}
+  // Constructs a new `TaskHandle`.
+  explicit TaskHandle(BarelyTaskHandle handle) noexcept : handle_(handle) {}
 
   // Raw handle.
   BarelyTaskHandle handle_ = nullptr;
 };
 
-/// Performer reference.
-class PerformerRef {
+/// Performer handle.
+class PerformerHandle {
  public:
   /// Default constructor.
-  PerformerRef() = default;
+  PerformerHandle() = default;
 
   /// Creates a new task.
   ///
@@ -1970,10 +1975,10 @@ class PerformerRef {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  /// @return Task reference, or an error status.
-  StatusOr<TaskRef> CreateTask(TaskDefinition definition, bool is_one_off,
-                               double position, int process_order = 0,
-                               void* user_data = nullptr) noexcept {
+  /// @return Task handle, or an error status.
+  StatusOr<TaskHandle> CreateTask(TaskDefinition definition, bool is_one_off,
+                                  double position, int process_order = 0,
+                                  void* user_data = nullptr) noexcept {
     BarelyTaskHandle task = nullptr;
     if (const Status status =
             BarelyTask_Create(handle_, definition, is_one_off, position,
@@ -1981,7 +1986,7 @@ class PerformerRef {
         !status.IsOk()) {
       return status;
     }
-    return TaskRef(task);
+    return TaskHandle(task);
   }
 
   /// Creates a new task with a callback.
@@ -1990,10 +1995,10 @@ class PerformerRef {
   /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
-  /// @return Task reference, or an error status.
-  StatusOr<TaskRef> CreateTask(TaskCallback callback, bool is_one_off,
-                               double position,
-                               int process_order = 0) noexcept {
+  /// @return Task handle, or an error status.
+  StatusOr<TaskHandle> CreateTask(TaskCallback callback, bool is_one_off,
+                                  double position,
+                                  int process_order = 0) noexcept {
     return CreateTask(
         TaskDefinition(
             [](void** state, void* user_data) noexcept {
@@ -2014,10 +2019,10 @@ class PerformerRef {
 
   /// Destroys a task.
   ///
-  /// @param task_ref Task reference.
+  /// @param task Task handle.
   /// @return Status.
-  Status DestroyTask(TaskRef task_ref) noexcept {
-    return BarelyTask_Destroy(task_ref.handle_);
+  Status DestroyTask(TaskHandle task) noexcept {
+    return BarelyTask_Destroy(task.handle_);
   }
 
   /// Returns the loop begin position.
@@ -2125,11 +2130,11 @@ class PerformerRef {
   Status Stop() noexcept { return BarelyPerformer_Stop(handle_); }
 
  private:
-  // Ensures that `PerformerRef` can only be constructed by `Musician`.
+  // Ensures that `PerformerHandle` can only be constructed by `Musician`.
   friend class Musician;
 
-  // Constructs a new `PerformerRef`.
-  explicit PerformerRef(BarelyPerformerHandle handle) noexcept
+  // Constructs a new `PerformerHandle`.
+  explicit PerformerHandle(BarelyPerformerHandle handle) noexcept
       : handle_(handle) {}
 
   // Raw handle.
@@ -2182,46 +2187,46 @@ class Musician {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @return Instrument reference.
-  [[nodiscard]] InstrumentRef CreateInstrument(InstrumentDefinition definition,
-                                               int frame_rate) noexcept {
+  /// @return Instrument handle.
+  [[nodiscard]] InstrumentHandle CreateInstrument(
+      InstrumentDefinition definition, int frame_rate) noexcept {
     BarelyInstrumentHandle instrument = nullptr;
     [[maybe_unused]] const Status status =
         BarelyInstrument_Create(handle_, definition, frame_rate, &instrument);
     assert(status.IsOk());
     const auto [it, success] =
-        instrument_refs_.emplace(instrument, InstrumentRef(instrument));
+        instruments_.emplace(instrument, InstrumentHandle(instrument));
     assert(success);
     return it->second;
   }
 
   /// Creates a new performer.
   ///
-  /// @return Performer reference.
-  [[nodiscard]] PerformerRef CreatePerformer() noexcept {
+  /// @return Performer musician.
+  [[nodiscard]] PerformerHandle CreatePerformer() noexcept {
     BarelyPerformerHandle performer = nullptr;
     [[maybe_unused]] const Status status =
         BarelyPerformer_Create(handle_, &performer);
     assert(status.IsOk());
-    return PerformerRef(performer);
+    return PerformerHandle(performer);
   }
 
   /// Destroys an instrument.
   ///
-  /// @param instrument_ref Instrument reference.
+  /// @param instrument Instrument handle.
   /// @return Status.
-  Status DestroyInstrument(InstrumentRef instrument_ref) noexcept {
-    const auto status = BarelyInstrument_Destroy(instrument_ref.handle_);
-    instrument_refs_.erase(instrument_ref.handle_);
+  Status DestroyInstrument(InstrumentHandle instrument) noexcept {
+    const auto status = BarelyInstrument_Destroy(instrument.handle_);
+    instruments_.erase(instrument.handle_);
     return status;
   }
 
   /// Destroys a performer.
   ///
-  /// @param performer_ref Performer reference.
+  /// @param performer Performer handle.
   /// @return Status.
-  Status DestroyPerformer(PerformerRef performer_ref) noexcept {
-    return BarelyPerformer_Destroy(performer_ref.handle_);
+  Status DestroyPerformer(PerformerHandle performer) noexcept {
+    return BarelyPerformer_Destroy(performer.handle_);
   }
 
   /// Returns the tempo.
@@ -2266,8 +2271,8 @@ class Musician {
   // Raw handle.
   BarelyMusicianHandle handle_ = nullptr;
 
-  // Map of instrument references by their handles.
-  std::unordered_map<BarelyInstrumentHandle, InstrumentRef> instrument_refs_;
+  // Map of instrument handles.
+  std::unordered_map<BarelyInstrumentHandle, InstrumentHandle> instruments_;
 };
 
 }  // namespace barely

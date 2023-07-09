@@ -8,26 +8,27 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
-    : musician_(musician), performer_(musician_.CreatePerformer()) {
+    : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.CreateTask(
-      [this, process_order]() noexcept {
-        Update();
-        const double pitch = pitches_[index_];
-        instrument_.SetNoteOn(pitch);
-        performer_.CreateTask(
-            [this, pitch]() { instrument_.SetNoteOff(pitch); },
-            /*is_one_off*/ true, gate_ratio_ * *performer_.GetLoopLength(),
-            process_order);
-      },
-      /*is_one_off=*/false, 0.0, process_order);
+  performer_
+      .CreateTask(
+          [this, process_order]() noexcept {
+            Update();
+            const double pitch = pitches_[index_];
+            instrument_.SetNoteOn(pitch);
+            performer_
+                .CreateTask([this, pitch]() { instrument_.SetNoteOff(pitch); },
+                            /*is_one_off*/ true,
+                            gate_ratio_ * *performer_.GetLoopLength(),
+                            process_order)
+                .Release();
+          },
+          /*is_one_off=*/false, 0.0, process_order)
+      .Release();
 }
 
-Arpeggiator::~Arpeggiator() {
-  musician_.DestroyPerformer(performer_);
-  instrument_.SetAllNotesOff();
-}
+Arpeggiator::~Arpeggiator() { instrument_.SetAllNotesOff(); }
 
 bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();

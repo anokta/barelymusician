@@ -97,7 +97,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerControl::kRelease, kRelease);
   instrument.SetControl(SamplerControl::kVoiceCount, kVoiceCount);
 
-  auto effect = *instrument.CreateEffect(LowPassEffect::GetDefinition());
+  auto effect = instrument.CreateEffect(LowPassEffect::GetDefinition());
   effect.SetControl(LowPassControl::kCutoffFrequency, kLowPassCutoffFrequency);
 
   const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));

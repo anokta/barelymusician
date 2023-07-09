@@ -82,11 +82,8 @@ class Arpeggiator {
   // Updates the arpeggiator.
   void Update() noexcept;
 
-  // Musician.
-  Musician& musician_;
-
   // Performer.
-  PerformerHandle performer_;
+  Performer performer_;
 
   // Instrument.
   InstrumentHandle instrument_;

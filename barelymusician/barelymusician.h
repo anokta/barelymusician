@@ -1744,168 +1744,177 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
-/// Effect handle.
-class EffectHandle {
+/// Musician handle.
+class MusicianHandle {
  public:
+  /// Creates a new `MusicianHandle`.
+  ///
+  /// @return Musician handle, or an error status.
+  static StatusOr<MusicianHandle> Create() noexcept {
+    BarelyMusicianHandle handle;
+    if (const Status status = BarelyMusician_Create(&handle); !status.IsOk()) {
+      return status;
+    }
+    return MusicianHandle(handle);
+  }
+
+  /// Destroys a musician handle.
+  ///
+  /// @param musician Musician handle.
+  /// @return Status.
+  static Status Destroy(MusicianHandle musician) noexcept {
+    return BarelyMusician_Destroy(musician.handle_);
+  }
+
   /// Default constructor.
-  EffectHandle() = default;
+  MusicianHandle() = default;
 
-  /// Returns a control value.
+  /// Constructs a new `MusicianHandle` from a raw type.
   ///
-  /// @param index Control index.
-  /// @return Control value, or an error status.
-  template <typename IndexType, typename ValueType>
-  [[nodiscard]] StatusOr<ValueType> GetControl(IndexType index) const noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    double value = 0.0;
-    if (const Status status =
-            BarelyEffect_GetControl(handle_, static_cast<int>(index), &value);
+  /// @param handle Raw musician handle.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  MusicianHandle(BarelyMusicianHandle handle) noexcept : handle_(handle) {}
+
+  /// Base destructor to ensure the derived classes get destroyed properly.
+  virtual ~MusicianHandle() = default;
+
+  /// Copyable.
+  MusicianHandle(const MusicianHandle& other) noexcept = default;
+  MusicianHandle& operator=(const MusicianHandle& other) noexcept = default;
+
+  /// Constructs a new `MusicianHandle` via move.
+  ///
+  /// @param other Other musician handle.
+  MusicianHandle(MusicianHandle&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {}
+
+  /// Assigns `MusicianHandle` via move.
+  ///
+  /// @param other Other musician handle.
+  /// @return Musician handle.
+  MusicianHandle& operator=(MusicianHandle&& other) noexcept {
+    if (this != &other) {
+      handle_ = std::exchange(other.handle_, nullptr);
+    }
+    return *this;
+  }
+
+  /// Returns the raw handle.
+  ///
+  /// @return Raw musician handle.
+  BarelyMusicianHandle Get() const noexcept { return handle_; }
+
+  /// Returns the tempo.
+  ///
+  /// @return Tempo in beats per minute, or an error status.
+  [[nodiscard]] StatusOr<double> GetTempo() const noexcept {
+    double tempo = 0.0;
+    if (const Status status = BarelyMusician_GetTempo(handle_, &tempo);
         !status.IsOk()) {
       return status;
     }
-    return static_cast<ValueType>(value);
+    return tempo;
   }
 
-  /// Returns the process order.
+  /// Returns the timestamp.
   ///
-  /// @return Process order, or an error status.
-  [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
-    int process_order = 0;
-    if (const Status status =
-            BarelyEffect_GetProcessOrder(handle_, &process_order);
+  /// @return Timestamp in seconds, or an error status.
+  [[nodiscard]] double GetTimestamp() const noexcept {
+    double timestamp = 0.0;
+    if (const Status status = BarelyMusician_GetTimestamp(handle_, &timestamp);
         !status.IsOk()) {
       return status;
     }
-    return process_order;
+    return timestamp;
   }
 
-  /// Resets all control values.
+  /// Sets the tempo.
   ///
+  /// @param tempo Tempo in beats per minute.
   /// @return Status.
-  Status ResetAllControls() noexcept {
-    return BarelyEffect_ResetAllControls(handle_);
+  Status SetTempo(double tempo) noexcept {
+    return BarelyMusician_SetTempo(handle_, tempo);
   }
 
-  /// Resets a control value.
+  /// Updates the musician at timestamp.
   ///
-  /// @param index Control index.
+  /// @param timestamp Timestamp in seconds.
   /// @return Status.
-  template <typename IndexType>
-  Status ResetControl(IndexType index) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    return BarelyEffect_ResetControl(handle_, static_cast<int>(index));
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param index Control index.
-  /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
-  /// @return Status.
-  template <typename IndexType, typename ValueType>
-  Status SetControl(IndexType index, ValueType value,
-                    double slope_per_beat = 0.0) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    static_assert(
-        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-        "ValueType is not supported");
-    return BarelyEffect_SetControl(handle_, static_cast<int>(index),
-                                   static_cast<double>(value), slope_per_beat);
-  }
-
-  /// Sets the control event.
-  ///
-  /// @param definition Control event definition.
-  /// @param user_data Pointer to user data.
-  /// @return Status.
-  Status SetControlEvent(ControlEventDefinition definition,
-                         void* user_data = nullptr) noexcept {
-    return BarelyEffect_SetControlEvent(handle_, definition, user_data);
-  }
-
-  /// Sets the control event with a callback.
-  ///
-  /// @param callback Control event callback.
-  /// @return Status.
-  Status SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
-    return SetControlEvent(ControlEventDefinition::WithCallback(),
-                           static_cast<void*>(&callback));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Immutable data.
-  /// @return Status.
-  template <typename DataType>
-  Status SetData(const DataType& data) noexcept {
-    static_assert(std::is_trivially_copyable<DataType>::value,
-                  "DataType is not trivially copyable");
-    return SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Pointer to immutable data.
-  /// @param size Data size in bytes.
-  /// @return Status.
-  Status SetData(const void* data, int size) noexcept {
-    return BarelyEffect_SetData(handle_, data, size);
-  }
-
-  /// Sets the process order.
-  ///
-  /// @param process_order Process order.
-  /// @return Status.
-  Status SetProcessOrder(int process_order) noexcept {
-    return BarelyEffect_SetProcessOrder(handle_, process_order);
+  Status Update(double timestamp) noexcept {
+    return BarelyMusician_Update(handle_, timestamp);
   }
 
  private:
-  // Ensures that `EffectHandle` can only be constructed by `InstrumentHandle`.
-  friend class InstrumentHandle;
-
-  // Constructs a new `EffectHandle`.
-  explicit EffectHandle(BarelyEffectHandle handle) noexcept : handle_(handle) {}
-
   // Raw handle.
-  BarelyEffectHandle handle_ = nullptr;
+  BarelyMusicianHandle handle_ = nullptr;
 };
 
 /// Instrument handle.
 class InstrumentHandle {
  public:
-  /// Default constructor.
-  InstrumentHandle() = default;
-
-  /// Creates a new effect.
+  /// Creates a new `InstrumentHandle`.
   ///
-  /// @param definition Effect definition.
-  /// @param process_order Task process order.
-  /// @return Effect handle, or an error status.
-  StatusOr<EffectHandle> CreateEffect(EffectDefinition definition,
-                                      int process_order = 0) noexcept {
-    BarelyEffectHandle effect = nullptr;
-    if (const Status status =
-            BarelyEffect_Create(handle_, definition, process_order, &effect);
+  /// @param musician Musician handle.
+  /// @param definition Instrument definition.
+  /// @param frame_rate Frame rate in hertz.
+  /// @return Instrument handle, or an error status.
+  static StatusOr<InstrumentHandle> Create(MusicianHandle musician,
+                                           InstrumentDefinition definition,
+                                           int frame_rate) noexcept {
+    BarelyInstrumentHandle handle;
+    if (const Status status = BarelyInstrument_Create(
+            musician.Get(), definition, frame_rate, &handle);
         !status.IsOk()) {
       return status;
     }
-    return EffectHandle(effect);
+    return InstrumentHandle(handle);
   }
 
-  /// Destroys an effect.
+  /// Destroys an instrument handle.
   ///
-  /// @param effect Effect handle.
+  /// @param instrument Instrument handle.
   /// @return Status.
-  Status DestroyEffect(EffectHandle effect) noexcept {
-    return BarelyEffect_Destroy(effect.handle_);
+  static Status Destroy(InstrumentHandle instrument) noexcept {
+    return BarelyInstrument_Destroy(instrument.handle_);
   }
+
+  /// Default constructor.
+  InstrumentHandle() = default;
+
+  /// Constructs a new `InstrumentHandle` from a raw type.
+  ///
+  /// @param handle Raw instrument handle.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  InstrumentHandle(BarelyInstrumentHandle handle) noexcept : handle_(handle) {}
+
+  /// Base destructor to ensure the derived classes get destroyed properly.
+  virtual ~InstrumentHandle() = default;
+
+  /// Copyable.
+  InstrumentHandle(const InstrumentHandle& other) noexcept = default;
+  InstrumentHandle& operator=(const InstrumentHandle& other) noexcept = default;
+
+  /// Constructs a new `InstrumentHandle` via move.
+  ///
+  /// @param other Other instrument handle.
+  InstrumentHandle(InstrumentHandle&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {}
+
+  /// Assigns `InstrumentHandle` via move.
+  ///
+  /// @param other Other instrument handle.
+  /// @return Instrument handle.
+  InstrumentHandle& operator=(InstrumentHandle&& other) noexcept {
+    if (this != &other) {
+      handle_ = std::exchange(other.handle_, nullptr);
+    }
+    return *this;
+  }
+
+  /// Returns the raw handle.
+  ///
+  /// @return Raw instrument handle.
+  BarelyInstrumentHandle Get() const noexcept { return handle_; }
 
   /// Returns a control value.
   ///
@@ -2176,33 +2185,93 @@ class InstrumentHandle {
   }
 
  private:
-  // Ensures that `InstrumentHandle` can only be constructed by `Musician`.
-  friend class Musician;
-
-  // Constructs a new `InstrumentHandle`.
-  explicit InstrumentHandle(BarelyInstrumentHandle handle) noexcept
-      : handle_(handle) {}
-
   // Raw handle.
   BarelyInstrumentHandle handle_ = nullptr;
 };
 
-/// Task handle.
-class TaskHandle {
+/// Effect handle.
+class EffectHandle {
  public:
-  /// Default constructor.
-  TaskHandle() = default;
-
-  /// Returns the position.
+  /// Creates a new `EffectHandle`.
   ///
-  /// @return Position in beats, or an error status.
-  [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
-    double position = 0.0;
-    if (const Status status = BarelyTask_GetPosition(handle_, &position);
+  /// @param instrument Instrument handle.
+  /// @param definition Effect definition.
+  /// @param process_order Effect process order.
+  /// @return Effect handle, or an error status.
+  static StatusOr<EffectHandle> Create(InstrumentHandle instrument,
+                                       EffectDefinition definition,
+                                       int process_order = 0) noexcept {
+    BarelyEffectHandle handle;
+    if (const Status status = BarelyEffect_Create(instrument.Get(), definition,
+                                                  process_order, &handle);
         !status.IsOk()) {
       return status;
     }
-    return position;
+    return EffectHandle(handle);
+  }
+
+  /// Destroys an effect handle.
+  ///
+  /// @param effect Effect handle.
+  /// @return Status.
+  static Status Destroy(EffectHandle effect) noexcept {
+    return BarelyEffect_Destroy(effect.handle_);
+  }
+
+  /// Default constructor.
+  EffectHandle() = default;
+
+  /// Constructs a new `EffectHandle` from a raw type.
+  ///
+  /// @param handle Raw effect handle.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  EffectHandle(BarelyEffectHandle handle) noexcept : handle_(handle) {}
+
+  /// Base destructor to ensure the derived classes get destroyed properly.
+  virtual ~EffectHandle() = default;
+
+  /// Copyable.
+  EffectHandle(const EffectHandle& other) noexcept = default;
+  EffectHandle& operator=(const EffectHandle& other) noexcept = default;
+
+  /// Constructs a new `EffectHandle` via move.
+  ///
+  /// @param other Other effect handle.
+  EffectHandle(EffectHandle&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {}
+
+  /// Assigns `EffectHandle` via move.
+  ///
+  /// @param other Other effect handle.
+  /// @return Effect handle.
+  EffectHandle& operator=(EffectHandle&& other) noexcept {
+    if (this != &other) {
+      handle_ = std::exchange(other.handle_, nullptr);
+    }
+    return *this;
+  }
+
+  /// Returns the raw handle.
+  ///
+  /// @return Raw effect handle.
+  BarelyEffectHandle Get() const noexcept { return handle_; }
+
+  /// Returns a control value.
+  ///
+  /// @param index Control index.
+  /// @return Control value, or an error status.
+  template <typename IndexType, typename ValueType>
+  [[nodiscard]] StatusOr<ValueType> GetControl(IndexType index) const noexcept {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    double value = 0.0;
+    if (const Status status =
+            BarelyEffect_GetControl(handle_, static_cast<int>(index), &value);
+        !status.IsOk()) {
+      return status;
+    }
+    return static_cast<ValueType>(value);
   }
 
   /// Returns the process order.
@@ -2211,19 +2280,88 @@ class TaskHandle {
   [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
     int process_order = 0;
     if (const Status status =
-            BarelyTask_GetProcessOrder(handle_, &process_order);
+            BarelyEffect_GetProcessOrder(handle_, &process_order);
         !status.IsOk()) {
       return status;
     }
     return process_order;
   }
 
-  /// Sets the position.
+  /// Resets all control values.
   ///
-  /// @param position Position in beats.
   /// @return Status.
-  Status SetPosition(double position) noexcept {
-    return BarelyTask_SetPosition(handle_, position);
+  Status ResetAllControls() noexcept {
+    return BarelyEffect_ResetAllControls(handle_);
+  }
+
+  /// Resets a control value.
+  ///
+  /// @param index Control index.
+  /// @return Status.
+  template <typename IndexType>
+  Status ResetControl(IndexType index) noexcept {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    return BarelyEffect_ResetControl(handle_, static_cast<int>(index));
+  }
+
+  /// Sets a control value.
+  ///
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param slope_per_beat Control slope in value change per beat.
+  /// @return Status.
+  template <typename IndexType, typename ValueType>
+  Status SetControl(IndexType index, ValueType value,
+                    double slope_per_beat = 0.0) noexcept {
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
+    return BarelyEffect_SetControl(handle_, static_cast<int>(index),
+                                   static_cast<double>(value), slope_per_beat);
+  }
+
+  /// Sets the control event.
+  ///
+  /// @param definition Control event definition.
+  /// @param user_data Pointer to user data.
+  /// @return Status.
+  Status SetControlEvent(ControlEventDefinition definition,
+                         void* user_data = nullptr) noexcept {
+    return BarelyEffect_SetControlEvent(handle_, definition, user_data);
+  }
+
+  /// Sets the control event with a callback.
+  ///
+  /// @param callback Control event callback.
+  /// @return Status.
+  Status SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
+    return SetControlEvent(ControlEventDefinition::WithCallback(),
+                           static_cast<void*>(&callback));
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Immutable data.
+  /// @return Status.
+  template <typename DataType>
+  Status SetData(const DataType& data) noexcept {
+    static_assert(std::is_trivially_copyable<DataType>::value,
+                  "DataType is not trivially copyable");
+    return SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Pointer to immutable data.
+  /// @param size Data size in bytes.
+  /// @return Status.
+  Status SetData(const void* data, int size) noexcept {
+    return BarelyEffect_SetData(handle_, data, size);
   }
 
   /// Sets the process order.
@@ -2231,68 +2369,75 @@ class TaskHandle {
   /// @param process_order Process order.
   /// @return Status.
   Status SetProcessOrder(int process_order) noexcept {
-    return BarelyTask_SetProcessOrder(handle_, process_order);
+    return BarelyEffect_SetProcessOrder(handle_, process_order);
   }
 
  private:
-  // Ensures that `TaskHandle` can only be constructed by `PerformerHandle`.
-  friend class PerformerHandle;
-
-  // Constructs a new `TaskHandle`.
-  explicit TaskHandle(BarelyTaskHandle handle) noexcept : handle_(handle) {}
-
   // Raw handle.
-  BarelyTaskHandle handle_ = nullptr;
+  BarelyEffectHandle handle_ = nullptr;
 };
 
 /// Performer handle.
 class PerformerHandle {
  public:
-  /// Default constructor.
-  PerformerHandle() = default;
-
-  /// Creates a new task.
+  /// Creates a new `PerformerHandle`.
   ///
-  /// @param definition Task definition.
-  /// @param is_one_off True if one-off task, false otherwise.
-  /// @param position Task position in beats.
-  /// @param process_order Task process order.
-  /// @param user_data Pointer to user data.
-  /// @return Task handle, or an error status.
-  StatusOr<TaskHandle> CreateTask(TaskDefinition definition, bool is_one_off,
-                                  double position, int process_order = 0,
-                                  void* user_data = nullptr) noexcept {
-    BarelyTaskHandle task = nullptr;
-    if (const Status status =
-            BarelyTask_Create(handle_, definition, is_one_off, position,
-                              process_order, user_data, &task);
+  /// @param musician Musician handle.
+  /// @return Performer handle, or an error status.
+  static StatusOr<PerformerHandle> Create(MusicianHandle musician) noexcept {
+    BarelyPerformerHandle handle;
+    if (const Status status = BarelyPerformer_Create(musician.Get(), &handle);
         !status.IsOk()) {
       return status;
     }
-    return TaskHandle(task);
+    return PerformerHandle(handle);
   }
 
-  /// Creates a new task with a callback.
+  /// Destroys a performer handle.
   ///
-  /// @param callback Task callback.
-  /// @param is_one_off True if one-off task, false otherwise.
-  /// @param position Task position in beats.
-  /// @param process_order Task process order.
-  /// @return Task handle, or an error status.
-  StatusOr<TaskHandle> CreateTask(TaskDefinition::Callback callback,
-                                  bool is_one_off, double position,
-                                  int process_order = 0) noexcept {
-    return CreateTask(TaskDefinition::WithCallback(), is_one_off, position,
-                      process_order, static_cast<void*>(&callback));
-  }
-
-  /// Destroys a task.
-  ///
-  /// @param task Task handle.
+  /// @param performer Performer handle.
   /// @return Status.
-  Status DestroyTask(TaskHandle task) noexcept {
-    return BarelyTask_Destroy(task.handle_);
+  static Status Destroy(PerformerHandle performer) noexcept {
+    return BarelyPerformer_Destroy(performer.handle_);
   }
+
+  /// Default constructor.
+  PerformerHandle() = default;
+
+  /// Constructs a new `PerformerHandle` from a raw type.
+  ///
+  /// @param handle Raw performer handle.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  PerformerHandle(BarelyPerformerHandle handle) noexcept : handle_(handle) {}
+
+  /// Base destructor to ensure the derived classes get destroyed properly.
+  virtual ~PerformerHandle() = default;
+
+  /// Copyable.
+  PerformerHandle(const PerformerHandle& other) noexcept = default;
+  PerformerHandle& operator=(const PerformerHandle& other) noexcept = default;
+
+  /// Constructs a new `PerformerHandle` via move.
+  ///
+  /// @param other Other performer handle.
+  PerformerHandle(PerformerHandle&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {}
+
+  /// Assigns `PerformerHandle` via move.
+  ///
+  /// @param other Other performer handle.
+  /// @return Performer handle.
+  PerformerHandle& operator=(PerformerHandle&& other) noexcept {
+    if (this != &other) {
+      handle_ = std::exchange(other.handle_, nullptr);
+    }
+    return *this;
+  }
+
+  /// Returns the raw handle.
+  ///
+  /// @return Raw performer handle.
+  BarelyPerformerHandle Get() const noexcept { return handle_; }
 
   /// Returns the loop begin position.
   ///
@@ -2399,44 +2544,410 @@ class PerformerHandle {
   Status Stop() noexcept { return BarelyPerformer_Stop(handle_); }
 
  private:
-  // Ensures that `PerformerHandle` can only be constructed by `Musician`.
-  friend class Musician;
-
-  // Constructs a new `PerformerHandle`.
-  explicit PerformerHandle(BarelyPerformerHandle handle) noexcept
-      : handle_(handle) {}
-
   // Raw handle.
   BarelyPerformerHandle handle_ = nullptr;
 };
 
-/// Musician.
-class Musician {
+/// Task handle.
+class TaskHandle {
  public:
-  /// Constructs a new `Musician`.
-  Musician() noexcept {
-    [[maybe_unused]] const Status status = BarelyMusician_Create(&handle_);
-    assert(status.IsOk());
+  /// Creates a new `TaskHandle`.
+  ///
+  /// @param performer Performer handle.
+  /// @param definition Task definition.
+  /// @param is_one_off True if one-off task, false otherwise.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  /// @param user_data Pointer to user data.
+  /// @return Task handle, or an error status.
+  static StatusOr<TaskHandle> Create(PerformerHandle performer,
+                                     TaskDefinition definition, bool is_one_off,
+                                     double position, int process_order = 0,
+                                     void* user_data = nullptr) noexcept {
+    BarelyTaskHandle handle;
+    if (const Status status =
+            BarelyTask_Create(performer.Get(), definition, is_one_off, position,
+                              process_order, user_data, &handle);
+        !status.IsOk()) {
+      return status;
+    }
+    return TaskHandle(handle);
   }
 
-  /// Destroys `Musician`.
-  ~Musician() noexcept {
-    if (handle_) {
-      [[maybe_unused]] const Status status =
-          BarelyMusician_Destroy(std::exchange(handle_, nullptr));
-      assert(status.IsOk());
-    }
+  /// Destroys an task handle.
+  ///
+  /// @param task Task handle.
+  /// @return Status.
+  static Status Destroy(TaskHandle task) noexcept {
+    return BarelyTask_Destroy(task.handle_);
   }
+
+  /// Default constructor.
+  TaskHandle() = default;
+
+  /// Constructs a new `TaskHandle` from a raw type.
+  ///
+  /// @param handle Raw task handle.
+  // NOLINTNEXTLINE(google-explicit-constructor)
+  TaskHandle(BarelyTaskHandle handle) noexcept : handle_(handle) {}
+
+  /// Base destructor to ensure the derived classes get destroyed properly.
+  virtual ~TaskHandle() = default;
+
+  /// Copyable.
+  TaskHandle(const TaskHandle& other) noexcept = default;
+  TaskHandle& operator=(const TaskHandle& other) noexcept = default;
+
+  /// Constructs a new `TaskHandle` via move.
+  ///
+  /// @param other Other task handle.
+  TaskHandle(TaskHandle&& other) noexcept
+      : handle_(std::exchange(other.handle_, nullptr)) {}
+
+  /// Assigns `TaskHandle` via move.
+  ///
+  /// @param other Other task handle.
+  /// @return Task handle.
+  TaskHandle& operator=(TaskHandle&& other) noexcept {
+    if (this != &other) {
+      handle_ = std::exchange(other.handle_, nullptr);
+    }
+    return *this;
+  }
+
+  /// Returns the raw handle.
+  ///
+  /// @return Raw task handle.
+  BarelyTaskHandle Get() const noexcept { return handle_; }
+
+  /// Returns the position.
+  ///
+  /// @return Position in beats, or an error status.
+  [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
+    double position = 0.0;
+    if (const Status status = BarelyTask_GetPosition(handle_, &position);
+        !status.IsOk()) {
+      return status;
+    }
+    return position;
+  }
+
+  /// Returns the process order.
+  ///
+  /// @return Process order, or an error status.
+  [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
+    int process_order = 0;
+    if (const Status status =
+            BarelyTask_GetProcessOrder(handle_, &process_order);
+        !status.IsOk()) {
+      return status;
+    }
+    return process_order;
+  }
+
+  /// Sets the position.
+  ///
+  /// @param position Position in beats.
+  /// @return Status.
+  Status SetPosition(double position) noexcept {
+    return BarelyTask_SetPosition(handle_, position);
+  }
+
+  /// Sets the process order.
+  ///
+  /// @param process_order Process order.
+  /// @return Status.
+  Status SetProcessOrder(int process_order) noexcept {
+    return BarelyTask_SetProcessOrder(handle_, process_order);
+  }
+
+ private:
+  // Raw handle.
+  BarelyTaskHandle handle_ = nullptr;
+};
+
+/// Class that wraps an effect handle.
+class Effect : EffectHandle {
+ public:
+  /// Destroys `Effect`.
+  ~Effect() noexcept { EffectHandle::Destroy(*this); }
+
+  /// Non-copyable.
+  Effect(const Effect& other) noexcept = delete;
+  Effect& operator=(const Effect& other) noexcept = delete;
+
+  /// Default move constructor.
+  Effect(Effect&& other) noexcept = default;
+
+  /// Assigns `Effect` via move.
+  ///
+  /// @param other Other effect.
+  /// @return Effect.
+  Effect& operator=(Effect&& other) noexcept {
+    if (this != &other) {
+      EffectHandle::Destroy(*this);
+      *this = std::move(other);
+    }
+    return *this;
+  }
+
+  /// Returns the handle.
+  ///
+  /// @return Effect handle.
+  EffectHandle Get() const noexcept { return *this; }
+
+  /// Releases the handle.
+  ///
+  /// @return Effect handle.
+  EffectHandle Release() noexcept { return std::move(*this); }
+
+  /// Wraps `EffectHandle`.
+  using EffectHandle::GetControl;
+  using EffectHandle::GetProcessOrder;
+  using EffectHandle::ResetAllControls;
+  using EffectHandle::ResetControl;
+  using EffectHandle::SetControl;
+  using EffectHandle::SetControlEvent;
+  using EffectHandle::SetData;
+  using EffectHandle::SetProcessOrder;
+
+ private:
+  // Ensures that `Effect` can only be constructed by `Instrument`.
+  friend class Instrument;
+
+  // Creates a new `Effect`.
+  explicit Effect(EffectHandle effect) noexcept : EffectHandle(effect) {}
+};
+
+/// Class that wraps an instrument handle.
+class Instrument : InstrumentHandle {
+ public:
+  /// Destroys `Instrument`.
+  ~Instrument() noexcept { InstrumentHandle::Destroy(*this); }
+
+  /// Non-copyable.
+  Instrument(const Instrument& other) noexcept = delete;
+  Instrument& operator=(const Instrument& other) noexcept = delete;
+
+  /// Default move constructor.
+  Instrument(Instrument&& other) noexcept = default;
+
+  /// Assigns `Instrument` via move.
+  ///
+  /// @param other Other instrument.
+  /// @return Instrument.
+  Instrument& operator=(Instrument&& other) noexcept {
+    if (this != &other) {
+      InstrumentHandle::Destroy(*this);
+      *this = std::move(other);
+    }
+    return *this;
+  }
+
+  /// Creates a new effect.
+  ///
+  /// @param definition Effect definition.
+  /// @param process_order Effect process order.
+  /// @return Effect.
+  [[nodiscard]] Effect CreateEffect(EffectDefinition definition,
+                                    int process_order = 0) noexcept {
+    const auto effect_or =
+        EffectHandle::Create(*this, definition, process_order);
+    assert(effect_or.IsOk());
+    return Effect(*effect_or);
+  }
+
+  /// Returns the handle.
+  ///
+  /// @return Instrument handle.
+  InstrumentHandle Get() const noexcept { return *this; }
+
+  /// Releases the handle.
+  ///
+  /// @return Instrument handle.
+  InstrumentHandle Release() noexcept { return std::move(*this); }
+
+  /// Wraps `InstrumentHandle`.
+  using InstrumentHandle::GetControl;
+  using InstrumentHandle::GetNoteControl;
+  using InstrumentHandle::IsNoteOn;
+  using InstrumentHandle::Process;
+  using InstrumentHandle::ResetAllControls;
+  using InstrumentHandle::ResetAllNoteControls;
+  using InstrumentHandle::ResetControl;
+  using InstrumentHandle::ResetNoteControl;
+  using InstrumentHandle::SetAllNotesOff;
+  using InstrumentHandle::SetControl;
+  using InstrumentHandle::SetControlEvent;
+  using InstrumentHandle::SetData;
+  using InstrumentHandle::SetNoteControl;
+  using InstrumentHandle::SetNoteControlEvent;
+  using InstrumentHandle::SetNoteOff;
+  using InstrumentHandle::SetNoteOffEvent;
+  using InstrumentHandle::SetNoteOn;
+  using InstrumentHandle::SetNoteOnEvent;
+
+ private:
+  // Ensures that `Instrument` can only be constructed by `Musician`.
+  friend class Musician;
+
+  // Creates a new `Instrument`.
+  explicit Instrument(InstrumentHandle instrument) noexcept
+      : InstrumentHandle(instrument) {}
+};
+
+/// Class that wraps a task handle.
+class Task : TaskHandle {
+ public:
+  /// Destroys `Effect`.
+  ~Task() noexcept { TaskHandle::Destroy(*this); }
+
+  /// Non-copyable.
+  Task(const Task& other) noexcept = delete;
+  Task& operator=(const Task& other) noexcept = delete;
+
+  /// Default move constructor.
+  Task(Task&& other) noexcept = default;
+
+  /// Assigns `Task` via move.
+  ///
+  /// @param other Other task.
+  /// @return Task.
+  Task& operator=(Task&& other) noexcept {
+    if (this != &other) {
+      TaskHandle::Destroy(*this);
+      *this = std::move(other);
+    }
+    return *this;
+  }
+
+  /// Returns the handle.
+  ///
+  /// @return Task handle.
+  TaskHandle Get() const noexcept { return *this; }
+
+  /// Releases the handle.
+  ///
+  /// @return Task handle.
+  TaskHandle Release() noexcept { return std::move(*this); }
+
+  /// Wraps `TaskHandle`.
+  using TaskHandle::GetPosition;
+  using TaskHandle::GetProcessOrder;
+  using TaskHandle::SetPosition;
+  using TaskHandle::SetProcessOrder;
+
+ private:
+  // Ensures that `Effect` can only be constructed by `Performer`.
+  friend class Performer;
+
+  // Creates a new `Task`.
+  explicit Task(TaskHandle effect) noexcept : TaskHandle(effect) {}
+};
+
+/// Class that wraps an performer handle.
+class Performer : PerformerHandle {
+ public:
+  /// Destroys `Performer`.
+  ~Performer() noexcept { PerformerHandle::Destroy(*this); }
+
+  /// Non-copyable.
+  Performer(const Performer& other) noexcept = delete;
+  Performer& operator=(const Performer& other) noexcept = delete;
+
+  /// Default move constructor.
+  Performer(Performer&& other) noexcept = default;
+
+  /// Assigns `Performer` via move.
+  ///
+  /// @param other Other performer.
+  /// @return Performer.
+  Performer& operator=(Performer&& other) noexcept {
+    if (this != &other) {
+      PerformerHandle::Destroy(*this);
+      *this = std::move(other);
+    }
+    return *this;
+  }
+
+  /// Creates a new task.
+  ///
+  /// @param definition Task definition.
+  /// @param is_one_off True if one-off task, false otherwise.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  /// @param user_data Pointer to user data.
+  /// @return Task.
+  [[nodiscard]] Task CreateTask(TaskDefinition definition, bool is_one_off,
+                                double position, int process_order = 0,
+                                void* user_data = nullptr) noexcept {
+    const auto task_or = TaskHandle::Create(*this, definition, is_one_off,
+                                            position, process_order, user_data);
+    assert(task_or.IsOk());
+    return Task(*task_or);
+  }
+
+  /// Creates a new task with a callback.
+  ///
+  /// @param callback Task callback.
+  /// @param is_one_off True if one-off task, false otherwise.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  /// @return Task.
+  [[nodiscard]] Task CreateTask(TaskDefinition::Callback callback,
+                                bool is_one_off, double position,
+                                int process_order = 0) noexcept {
+    return CreateTask(TaskDefinition::WithCallback(), is_one_off, position,
+                      process_order, static_cast<void*>(&callback));
+  }
+
+  /// Returns the handle.
+  ///
+  /// @return Performer handle.
+  PerformerHandle Get() const noexcept { return *this; }
+
+  /// Releases the handle.
+  ///
+  /// @return Performer handle.
+  PerformerHandle Release() noexcept { return std::move(*this); }
+
+  /// Wraps `PerformerHandle`.
+  using PerformerHandle::GetLoopBeginPosition;
+  using PerformerHandle::GetLoopLength;
+  using PerformerHandle::GetPosition;
+  using PerformerHandle::IsLooping;
+  using PerformerHandle::IsPlaying;
+  using PerformerHandle::SetLoopBeginPosition;
+  using PerformerHandle::SetLooping;
+  using PerformerHandle::SetLoopLength;
+  using PerformerHandle::SetPosition;
+  using PerformerHandle::Start;
+  using PerformerHandle::Stop;
+
+ private:
+  // Ensures that `Performer` can only be constructed by `Musician`.
+  friend class Musician;
+
+  // Creates a new `Performer`.
+  explicit Performer(PerformerHandle performer) noexcept
+      : PerformerHandle(performer) {}
+};
+
+/// Class that wraps a musician handle.
+class Musician : MusicianHandle {
+ public:
+  /// Creates a new `Musician`.
+  Musician() noexcept : MusicianHandle(*MusicianHandle::Create()) {}
+
+  /// Destroys `Musician`.
+  ~Musician() noexcept { MusicianHandle::Destroy(*this); }
 
   /// Non-copyable.
   Musician(const Musician& other) noexcept = delete;
   Musician& operator=(const Musician& other) noexcept = delete;
 
-  /// Constructs new `Musician` via move.
-  ///
-  /// @param other Other musician.
-  Musician(Musician&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
+  /// Default move constructor.
+  Musician(Musician&& other) noexcept = default;
 
   /// Assigns `Musician` via move.
   ///
@@ -2444,11 +2955,8 @@ class Musician {
   /// @return Musician.
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
-      if (handle_) {
-        [[maybe_unused]] const Status status = BarelyMusician_Destroy(handle_);
-        assert(status.IsOk());
-      }
-      handle_ = std::exchange(other.handle_, nullptr);
+      MusicianHandle::Destroy(*this);
+      *this = std::move(other);
     }
     return *this;
   }
@@ -2457,84 +2965,39 @@ class Musician {
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @return Instrument handle.
-  [[nodiscard]] InstrumentHandle CreateInstrument(
-      InstrumentDefinition definition, int frame_rate) noexcept {
-    BarelyInstrumentHandle instrument = nullptr;
-    [[maybe_unused]] const Status status =
-        BarelyInstrument_Create(handle_, definition, frame_rate, &instrument);
-    assert(status.IsOk());
-    return InstrumentHandle(instrument);
+  /// @return Instrument.
+  [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
+                                            int frame_rate) noexcept {
+    const auto instrument_or =
+        InstrumentHandle::Create(*this, definition, frame_rate);
+    assert(instrument_or.IsOk());
+    return Instrument(*instrument_or);
   }
 
   /// Creates a new performer.
   ///
-  /// @return Performer musician.
-  [[nodiscard]] PerformerHandle CreatePerformer() noexcept {
-    BarelyPerformerHandle performer = nullptr;
-    [[maybe_unused]] const Status status =
-        BarelyPerformer_Create(handle_, &performer);
-    assert(status.IsOk());
-    return PerformerHandle(performer);
+  /// @return Performer.
+  [[nodiscard]] Performer CreatePerformer() noexcept {
+    const auto performer_or = PerformerHandle::Create(*this);
+    assert(performer_or.IsOk());
+    return Performer(*performer_or);
   }
 
-  /// Destroys an instrument.
+  /// Returns the handle.
   ///
-  /// @param instrument Instrument handle.
-  /// @return Status.
-  Status DestroyInstrument(InstrumentHandle instrument) noexcept {
-    return BarelyInstrument_Destroy(instrument.handle_);
-  }
+  /// @return Musician handle.
+  MusicianHandle Get() const noexcept { return *this; }
 
-  /// Destroys a performer.
+  /// Releases the handle.
   ///
-  /// @param performer Performer handle.
-  /// @return Status.
-  Status DestroyPerformer(PerformerHandle performer) noexcept {
-    return BarelyPerformer_Destroy(performer.handle_);
-  }
+  /// @return Musician handle.
+  MusicianHandle Release() noexcept { return std::move(*this); }
 
-  /// Returns the tempo.
-  ///
-  /// @return Tempo in beats per minute.
-  [[nodiscard]] double GetTempo() const noexcept {
-    double tempo = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyMusician_GetTempo(handle_, &tempo);
-    assert(status.IsOk());
-    return tempo;
-  }
-
-  /// Returns the timestamp.
-  ///
-  /// @return Timestamp in seconds.
-  [[nodiscard]] double GetTimestamp() const noexcept {
-    double timestamp = 0.0;
-    [[maybe_unused]] const Status status =
-        BarelyMusician_GetTimestamp(handle_, &timestamp);
-    assert(status.IsOk());
-    return timestamp;
-  }
-
-  /// Sets the tempo.
-  ///
-  /// @param tempo Tempo in beats per minute.
-  /// @return Status.
-  Status SetTempo(double tempo) noexcept {
-    return BarelyMusician_SetTempo(handle_, tempo);
-  }
-
-  /// Updates the musician at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  /// @return Status.
-  Status Update(double timestamp) noexcept {
-    return BarelyMusician_Update(handle_, timestamp);
-  }
-
- private:
-  // Raw handle.
-  BarelyMusicianHandle handle_ = nullptr;
+  /// Wraps `MusicianHandle`.
+  using MusicianHandle::GetTempo;
+  using MusicianHandle::GetTimestamp;
+  using MusicianHandle::SetTempo;
+  using MusicianHandle::Update;
 };
 
 }  // namespace barely

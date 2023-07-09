@@ -60,14 +60,12 @@ TEST(MusicianTest, CreateDestroyMusician) { Musician musician; }
 
 TEST(MusicianTest, CreateDestroyInstrument) {
   Musician musician;
-  InstrumentHandle instrument = musician.CreateInstrument({{}}, 1);
-  EXPECT_EQ(musician.DestroyInstrument(instrument), Status::kOk);
+  Instrument instrument = musician.CreateInstrument({{}}, 1);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {
   Musician musician;
-  PerformerHandle performer = musician.CreatePerformer();
-  EXPECT_EQ(musician.DestroyPerformer(performer), Status::kOk);
+  Performer performer = musician.CreatePerformer();
 }
 
 }  // namespace

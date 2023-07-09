@@ -22,8 +22,8 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
+using ::barely::Task;
 using ::barely::TaskDefinition;
-using ::barely::TaskHandle;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -80,9 +80,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto play_note_fn = [&](double duration, double pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
-      performer.CreateTask(
-          [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-          /*is_one_off=*/true, *performer.GetPosition() + duration);
+      performer
+          .CreateTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+                      /*is_one_off=*/true, *performer.GetPosition() + duration)
+          .Release();
     };
   };
 
@@ -97,11 +98,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB5));
   score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
 
-  std::unordered_map<int, TaskHandle> tasks;
+  std::unordered_map<int, Task> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, *performer.CreateTask(callback, /*is_one_off=*/false,
-                                                 position));
+    tasks.emplace(index++, performer.CreateTask(callback, /*is_one_off=*/false,
+                                                position));
   }
 
   // Audio process callback.
@@ -123,20 +124,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
       // Toggle score.
-      if (const auto it = tasks.find(index - 1);
-          it != tasks.end() && performer.DestroyTask(it->second).IsOk()) {
+      if (const auto it = tasks.find(index - 1); it != tasks.end()) {
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, *performer.CreateTask(
+        tasks.emplace(index - 1, performer.CreateTask(
                                      callback, /*is_one_off=*/false, position));
         ConsoleLog() << "Added note " << index;
       }
       return;
     }
     // Adjust tempo.
-    double tempo = musician.GetTempo();
+    double tempo = *musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (*performer.IsPlaying()) {
@@ -174,7 +174,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
+    ConsoleLog() << "Tempo set to " << *musician.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

@@ -29,13 +29,13 @@
 
 namespace {
 
-using ::barely::InstrumentHandle;
+using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::PercussionControl;
 using ::barely::PercussionInstrument;
-using ::barely::PerformerHandle;
+using ::barely::Performer;
 using ::barely::Random;
 using ::barely::SynthControl;
 using ::barely::SynthInstrument;
@@ -53,11 +53,11 @@ using ::barely::examples::WavFile;
 // @param beat_count Number of beats in a bar.
 // @param harmonic Harmonic index.
 // @param musician Pointer to musician.
-// @param instrument Instrument handle.
-// @param performer Performer handle.
-using BeatComposerCallback = std::function<void(
-    int bar, int beat, int beat_count, int harmonic,
-    InstrumentHandle& instrument, PerformerHandle& performer)>;
+// @param instrument Instrument.
+// @param performer Performer.
+using BeatComposerCallback =
+    std::function<void(int bar, int beat, int beat_count, int harmonic,
+                       Instrument& instrument, Performer& performer)>;
 
 // System audio settings.
 constexpr int kFrameRate = 48000;
@@ -94,20 +94,22 @@ void InsertPadData(double pitch, const std::string& file_path,
 
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, double pitch,
-                  double intensity, InstrumentHandle& instrument,
-                  PerformerHandle& performer) {
-  performer.CreateTask(
-      [pitch, intensity, &instrument]() {
-        instrument.SetNoteOn(pitch, intensity);
-      },
-      /*is_one_off=*/true, position);
-  performer.CreateTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                       /*is_one_off=*/true, position + duration,
-                       /*process_order=*/-1);
+                  double intensity, Instrument& instrument,
+                  Performer& performer) {
+  performer
+      .CreateTask([pitch, intensity,
+                   &instrument]() { instrument.SetNoteOn(pitch, intensity); },
+                  /*is_one_off=*/true, position)
+      .Release();
+  performer
+      .CreateTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
+                  /*is_one_off=*/true, position + duration,
+                  /*process_order=*/-1)
+      .Release();
 }
 
-void ComposeChord(double intensity, int harmonic, InstrumentHandle& instrument,
-                  PerformerHandle& performer) {
+void ComposeChord(double intensity, int harmonic, Instrument& instrument,
+                  Performer& performer) {
   const auto add_chord_note = [&](int index) {
     ScheduleNote(
         0.0, 1.0,
@@ -120,8 +122,8 @@ void ComposeChord(double intensity, int harmonic, InstrumentHandle& instrument,
 }
 
 void ComposeLine(double octave_offset, double intensity, int bar, int beat,
-                 int beat_count, int harmonic, InstrumentHandle& instrument,
-                 PerformerHandle& performer) {
+                 int beat_count, int harmonic, Instrument& instrument,
+                 Performer& performer) {
   const int note_offset = beat;
   const auto add_note = [&](double begin_position, double end_position,
                             int index) {
@@ -149,7 +151,7 @@ void ComposeLine(double octave_offset, double intensity, int bar, int beat,
 }
 
 void ComposeDrums(int bar, int beat, int beat_count, Random& random,
-                  InstrumentHandle& instrument, PerformerHandle& performer) {
+                  Instrument& instrument, Performer& performer) {
   const auto get_beat = [](int step) {
     return barely::GetPosition(step, barely::kSixteenthNotesPerBeat);
   };
@@ -210,8 +212,7 @@ int main(int /*argc*/, char* argv[]) {
   musician.SetTempo(kTempo);
 
   // Note on callback.
-  const auto set_note_callbacks_fn = [&](auto index,
-                                         InstrumentHandle& instrument) {
+  const auto set_note_callbacks_fn = [&](auto index, Instrument& instrument) {
     instrument.SetNoteOffEvent([index](double pitch) {
       ConsoleLog() << "Instrument #" << index << ": NoteOff(" << pitch << ")";
     });
@@ -224,14 +225,13 @@ int main(int /*argc*/, char* argv[]) {
   const std::vector<int> progression = {0, 3, 4, 0};
 
   // Initialize performers.
-  std::vector<std::tuple<PerformerHandle, BeatComposerCallback, size_t>>
-      performers;
-  std::vector<InstrumentHandle> instruments;
+  std::vector<std::tuple<Performer, BeatComposerCallback, size_t>> performers;
+  std::vector<Instrument> instruments;
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
-    instruments.push_back(musician.CreateInstrument(
-        SynthInstrument::GetDefinition(), kFrameRate));
+    instruments.push_back(std::move(musician.CreateInstrument(
+        SynthInstrument::GetDefinition(), kFrameRate)));
     auto& instrument = instruments.back();
     instrument.SetControl(SynthControl::kGain, gain);
     instrument.SetControl(SynthControl::kOscillatorType, type);
@@ -243,7 +243,7 @@ int main(int /*argc*/, char* argv[]) {
   // Add synth instruments.
   const auto chords_beat_composer_callback =
       [&](int /*bar*/, int /*beat*/, int /*beat_count*/, int harmonic,
-          InstrumentHandle& instrument, PerformerHandle& performer) {
+          Instrument& instrument, Performer& performer) {
         return ComposeChord(0.5, harmonic, instrument, performer);
       };
 
@@ -259,7 +259,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto line_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int harmonic,
-          InstrumentHandle& instrument, PerformerHandle& performer) {
+          Instrument& instrument, Performer& performer) {
         return ComposeLine(-1.0, 1.0, bar, beat, beat_count, harmonic,
                            instrument, performer);
       };
@@ -270,7 +270,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto line_2_beat_composer_callback =
       [&](int bar, int beat, int beat_count, int harmonic,
-          InstrumentHandle& instrument, PerformerHandle& performer) {
+          Instrument& instrument, Performer& performer) {
         return ComposeLine(0, 1.0, bar, beat, beat_count, harmonic, instrument,
                            performer);
       };
@@ -303,12 +303,13 @@ int main(int /*argc*/, char* argv[]) {
       {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
       {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
   });
-  const auto percussion_beat_composer_callback =
-      [&](int bar, int beat, int beat_count, int /*harmonic*/,
-          InstrumentHandle& instrument, PerformerHandle& performer) {
-        return ComposeDrums(bar, beat, beat_count, random, instrument,
-                            performer);
-      };
+  const auto percussion_beat_composer_callback = [&](int bar, int beat,
+                                                     int beat_count,
+                                                     int /*harmonic*/,
+                                                     Instrument& instrument,
+                                                     Performer& performer) {
+    return ComposeDrums(bar, beat, beat_count, random, instrument, performer);
+  };
 
   performers.emplace_back(musician.CreatePerformer(),
                           percussion_beat_composer_callback,
@@ -389,12 +390,12 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        musician.SetTempo(random.DrawUniform(0.5, 0.75) * musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
+        musician.SetTempo(random.DrawUniform(0.5, 0.75) * *musician.GetTempo());
+        ConsoleLog() << "Tempo changed to " << *musician.GetTempo();
         break;
       case '2':
-        musician.SetTempo(random.DrawUniform(1.5, 2.0) * musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
+        musician.SetTempo(random.DrawUniform(1.5, 2.0) * *musician.GetTempo());
+        ConsoleLog() << "Tempo changed to " << *musician.GetTempo();
         break;
       case 'R':
         musician.SetTempo(kTempo);

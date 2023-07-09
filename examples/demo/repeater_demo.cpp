@@ -93,7 +93,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     }
   });
 
-  repeater.SetInstrument(instrument);
+  repeater.SetInstrument(instrument.Get());
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {

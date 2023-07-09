@@ -89,7 +89,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   Arpeggiator arpeggiator(musician);
-  arpeggiator.SetInstrument(instrument);
+  arpeggiator.SetInstrument(instrument.Get());
   arpeggiator.SetGateRatio(kInitialGateRatio);
   arpeggiator.SetRate(kInitialRate);
   arpeggiator.SetStyle(kInitialStyle);

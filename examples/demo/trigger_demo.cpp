@@ -82,38 +82,49 @@ int main(int /*argc*/, char* /*argv*/[]) {
         barely::PitchFromScale(barely::kPitchMajorScale, scale_index);
     return [&instrument, &performer, duration, pitch]() {
       instrument.SetNoteOn(pitch);
-      performer.CreateTask(
-          [&instrument, &performer, pitch]() { instrument.SetNoteOff(pitch); },
-          /*is_one_off=*/true, *performer.GetPosition() + duration);
+      performer
+          .CreateTask([&instrument, &performer,
+                       pitch]() { instrument.SetNoteOff(pitch); },
+                      /*is_one_off=*/true, *performer.GetPosition() + duration)
+          .Release();
     };
   };
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  performer.CreateTask(play_note_fn(0, 1.0), /*is_one_off=*/false, 0.0);
+  performer.CreateTask(play_note_fn(0, 1.0), /*is_one_off=*/false, 0.0)
+      .Release();
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  performer.CreateTask(play_note_fn(1, 1.0), /*is_one_off=*/false, 1.0);
+  performer.CreateTask(play_note_fn(1, 1.0), /*is_one_off=*/false, 1.0)
+      .Release();
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  performer.CreateTask(play_note_fn(2, 1.0), /*is_one_off=*/false, 2.0);
+  performer.CreateTask(play_note_fn(2, 1.0), /*is_one_off=*/false, 2.0)
+      .Release();
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  performer.CreateTask(play_note_fn(3, 0.66), /*is_one_off=*/false, 3.0);
-  performer.CreateTask(play_note_fn(4, 0.34), /*is_one_off=*/false, 3.66);
+  performer.CreateTask(play_note_fn(3, 0.66), /*is_one_off=*/false, 3.0)
+      .Release();
+  performer.CreateTask(play_note_fn(4, 0.34), /*is_one_off=*/false, 3.66)
+      .Release();
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  performer.CreateTask(play_note_fn(5, 0.33), /*is_one_off=*/false, 4.0);
-  performer.CreateTask(play_note_fn(6, 0.33), /*is_one_off=*/false, 4.33);
-  performer.CreateTask(play_note_fn(7, 0.34), /*is_one_off=*/false, 4.66);
+  performer.CreateTask(play_note_fn(5, 0.33), /*is_one_off=*/false, 4.0)
+      .Release();
+  performer.CreateTask(play_note_fn(6, 0.33), /*is_one_off=*/false, 4.33)
+      .Release();
+  performer.CreateTask(play_note_fn(7, 0.34), /*is_one_off=*/false, 4.66)
+      .Release();
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  performer.CreateTask(play_note_fn(8, 2.0), /*is_one_off=*/false, 5.0);
+  performer.CreateTask(play_note_fn(8, 2.0), /*is_one_off=*/false, 5.0)
+      .Release();
 
   // Stopper.
-  auto stopper = *performer.CreateTask([&performer]() { performer.Stop(); },
-                                       /*is_one_off=*/false, 0.0,
-                                       /*process_order=*/-1);
+  auto stopper = performer.CreateTask([&performer]() { performer.Stop(); },
+                                      /*is_one_off=*/false, 0.0,
+                                      /*process_order=*/-1);
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {

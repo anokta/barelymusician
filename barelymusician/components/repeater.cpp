@@ -9,33 +9,34 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Musician& musician, int process_order) noexcept
-    : musician_(musician), performer_(musician_.CreatePerformer()) {
+    : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.CreateTask(
-      [this, process_order]() noexcept {
-        if (pitches_.empty() || !Update()) {
-          return;
-        }
-        const auto& [pitch_or, length] = pitches_[index_];
-        if (!pitches_[index_].first.has_value()) {
-          return;
-        }
-        const double pitch = *pitches_[index_].first + pitch_shift_;
-        instrument_.SetNoteOn(pitch);
-        performer_.CreateTask(
-            [this, pitch]() { instrument_.SetNoteOff(pitch); },
-            /*is_one_off*/ true,
-            static_cast<double>(length) * *performer_.GetLoopLength(),
-            process_order);
-      },
-      /*is_one_off=*/false, 0.0, process_order);
+  performer_
+      .CreateTask(
+          [this, process_order]() noexcept {
+            if (pitches_.empty() || !Update()) {
+              return;
+            }
+            const auto& [pitch_or, length] = pitches_[index_];
+            if (!pitches_[index_].first.has_value()) {
+              return;
+            }
+            const double pitch = *pitches_[index_].first + pitch_shift_;
+            instrument_.SetNoteOn(pitch);
+            performer_
+                .CreateTask(
+                    [this, pitch]() { instrument_.SetNoteOff(pitch); },
+                    /*is_one_off=*/true,
+                    static_cast<double>(length) * *performer_.GetLoopLength(),
+                    process_order)
+                .Release();
+          },
+          /*is_one_off=*/false, 0.0, process_order)
+      .Release();
 }
 
-Repeater::~Repeater() {
-  musician_.DestroyPerformer(performer_);
-  instrument_.SetAllNotesOff();
-}
+Repeater::~Repeater() { instrument_.SetAllNotesOff(); }
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
 

@@ -37,6 +37,8 @@ class Event {
   Event& operator=(Event&& other) noexcept;
 
   /// Processes the event.
+  ///
+  /// @param args Process arguments.
   void Process(EventArgs... args) noexcept;
 
  private:

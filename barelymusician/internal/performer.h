@@ -14,9 +14,6 @@
 
 namespace barely::internal {
 
-/// Task alias.
-using Task = Event<TaskDefinition>;
-
 /// Class that wraps a performer.
 class Performer {
  public:
@@ -132,6 +129,9 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
+  // Task alias.
+  using Task = Event<TaskDefinition>;
+
   // Task map alias.
   struct TaskKey {
     // Position.

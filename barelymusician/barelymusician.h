@@ -48,10 +48,10 @@
 ///
 ///   // Create.
 ///   BarelyMusicianHandle musician;
-///   BarelyMusician_Create(&handle);
+///   BarelyMusician_Create(&musician);
 ///
 ///   // Set the tempo.
-///   BarelyMusician_SetTempo(handle, /*tempo=*/124.0);
+///   BarelyMusician_SetTempo(musician, /*tempo=*/124.0);
 ///
 ///   // Update the timestamp.
 ///   //
@@ -62,10 +62,10 @@
 ///   // additional "lookahead" in order to compensate for the potential thread
 ///   // synchronization issues in real-time audio applications.
 ///   double timestamp = 1.0;
-///   BarelyMusician_Update(handle, timestamp);
+///   BarelyMusician_Update(musician, timestamp);
 ///
 ///   // Destroy.
-///   BarelyMusician_Destroy(handle);
+///   BarelyMusician_Destroy(musician);
 ///   @endcode
 ///
 /// - Instrument:
@@ -76,7 +76,7 @@
 ///
 ///   // Create.
 ///   BarelyInstrumentHandle instrument;
-///   BarelyInstrument_Create(handle, BarelySynthInstrument_GetDefinition(),
+///   BarelyInstrument_Create(musician, BarelySynthInstrument_GetDefinition(),
 ///                           /*frame_rate=*/48000, &instrument);
 ///
 ///   // Set a note on.
@@ -129,7 +129,7 @@
 ///   @code{.cpp}
 ///   // Create.
 ///   BarelyPerformerHandle performer;
-///   BarelyPerformer_Create(handle, &performer);
+///   BarelyPerformer_Create(musician, &performer);
 ///
 ///   // Create a task.
 ///   BarelyTaskDefinition definition;  // populate this.
@@ -1357,6 +1357,23 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   /// Process callback signature.
   using ProcessCallback = BarelyControlEventDefinition_ProcessCallback;
 
+  /// Returns a new `ControlEventDefinition` with `Callback`.
+  ///
+  /// @return Control event definition.
+  static ControlEventDefinition WithCallback() noexcept {
+    return ControlEventDefinition(
+        [](void** state, void* user_data) noexcept {
+          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+        },
+        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
+        [](void** state, int32_t index, double value) noexcept {
+          if (const auto& callback = *static_cast<Callback*>(*state);
+              callback) {
+            callback(index, value);
+          }
+        });
+  }
+
   /// Constructs a new `ControlEventDefinition`.
   ///
   /// @param create_callback Create callback.
@@ -1377,23 +1394,6 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   ControlEventDefinition(BarelyControlEventDefinition definition) noexcept
       : BarelyControlEventDefinition{definition} {}
-
-  /// Returns a new `ControlEventDefinition` with `Callback`.
-  ///
-  /// @return Control event definition.
-  static ControlEventDefinition WithCallback() {
-    return ControlEventDefinition(
-        [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, int32_t index, double value) noexcept {
-          if (const auto* callback = static_cast<Callback*>(*state);
-              *callback) {
-            (*callback)(index, value);
-          }
-        });
-  }
 };
 
 /// Effect definition.
@@ -1540,6 +1540,23 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   /// Process callback signature.
   using ProcessCallback = BarelyNoteControlEventDefinition_ProcessCallback;
 
+  /// Returns a new `NoteControlEventDefinition` with `Callback`.
+  ///
+  /// @return Note control event definition.
+  static NoteControlEventDefinition WithCallback() noexcept {
+    return NoteControlEventDefinition(
+        [](void** state, void* user_data) noexcept {
+          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+        },
+        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
+        [](void** state, double pitch, int32_t index, double value) noexcept {
+          if (const auto& callback = *static_cast<Callback*>(*state);
+              callback) {
+            callback(pitch, index, value);
+          }
+        });
+  }
+
   /// Constructs a new `NoteControlEventDefinition`.
   ///
   /// @param create_callback Create callback.
@@ -1561,23 +1578,6 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   NoteControlEventDefinition(
       BarelyNoteControlEventDefinition definition) noexcept
       : BarelyNoteControlEventDefinition{definition} {}
-
-  /// Returns a new `NoteControlEventDefinition` with `Callback`.
-  ///
-  /// @return Note control event definition.
-  static NoteControlEventDefinition WithCallback() {
-    return NoteControlEventDefinition(
-        [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch, int32_t index, double value) noexcept {
-          if (const auto* callback = static_cast<Callback*>(*state);
-              *callback) {
-            (*callback)(pitch, index, value);
-          }
-        });
-  }
 };
 
 /// Note off event definition.
@@ -1595,6 +1595,23 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
 
   /// Process callback signature.
   using ProcessCallback = BarelyNoteOffEventDefinition_ProcessCallback;
+
+  /// Returns a new `NoteOffEventDefinition` with `Callback`.
+  ///
+  /// @return Note off event definition.
+  static NoteOffEventDefinition WithCallback() noexcept {
+    return NoteOffEventDefinition(
+        [](void** state, void* user_data) noexcept {
+          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+        },
+        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
+        [](void** state, double pitch) noexcept {
+          if (const auto& callback = *static_cast<Callback*>(*state);
+              callback) {
+            callback(pitch);
+          }
+        });
+  }
 
   /// Constructs a new `NoteOffEventDefinition`.
   ///
@@ -1616,23 +1633,6 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   NoteOffEventDefinition(BarelyNoteOffEventDefinition definition) noexcept
       : BarelyNoteOffEventDefinition{definition} {}
-
-  /// Returns a new `NoteOffEventDefinition` with `Callback`.
-  ///
-  /// @return Note off event definition.
-  static NoteOffEventDefinition WithCallback() {
-    return NoteOffEventDefinition(
-        [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch) noexcept {
-          if (const auto* callback = static_cast<Callback*>(*state);
-              *callback) {
-            (*callback)(pitch);
-          }
-        });
-  }
 };
 
 /// Note on event definition.
@@ -1651,6 +1651,23 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
 
   /// Process callback signature.
   using ProcessCallback = BarelyNoteOnEventDefinition_ProcessCallback;
+
+  /// Returns a new `NoteOnEventDefinition` with `Callback`.
+  ///
+  /// @return Note on event definition.
+  static NoteOnEventDefinition WithCallback() noexcept {
+    return NoteOnEventDefinition(
+        [](void** state, void* user_data) noexcept {
+          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+        },
+        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
+        [](void** state, double pitch, double intensity) noexcept {
+          if (const auto& callback = *static_cast<Callback*>(*state);
+              callback) {
+            callback(pitch, intensity);
+          }
+        });
+  }
 
   /// Constructs a new `NoteOnEventDefinition`.
   ///
@@ -1672,23 +1689,6 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   NoteOnEventDefinition(BarelyNoteOnEventDefinition definition) noexcept
       : BarelyNoteOnEventDefinition{definition} {}
-
-  /// Returns a new `NoteOnEventDefinition` with `Callback`.
-  ///
-  /// @return Note on event definition.
-  static NoteOnEventDefinition WithCallback() {
-    return NoteOnEventDefinition(
-        [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state, double pitch, double intensity) noexcept {
-          if (const auto* callback = static_cast<Callback*>(*state);
-              *callback) {
-            (*callback)(pitch, intensity);
-          }
-        });
-  }
 };
 
 /// Task definition.
@@ -1704,6 +1704,23 @@ struct TaskDefinition : public BarelyTaskDefinition {
 
   /// Process callback signature.
   using ProcessCallback = BarelyTaskDefinition_ProcessCallback;
+
+  /// Returns a new `TaskDefinition` with `Callback`.
+  ///
+  /// @return Task definition.
+  static TaskDefinition WithCallback() {
+    return TaskDefinition(
+        [](void** state, void* user_data) noexcept {
+          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+        },
+        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
+        [](void** state) noexcept {
+          if (const auto& callback = *static_cast<Callback*>(*state);
+              callback) {
+            callback();
+          }
+        });
+  }
 
   /// Constructs a new `TaskDefinition`.
   ///
@@ -1725,23 +1742,6 @@ struct TaskDefinition : public BarelyTaskDefinition {
   // NOLINTNEXTLINE(google-explicit-constructor)
   TaskDefinition(BarelyTaskDefinition definition) noexcept
       : BarelyTaskDefinition{definition} {}
-
-  /// Returns a new `TaskDefinition` with `Callback`.
-  ///
-  /// @return Task definition.
-  static TaskDefinition WithCallback() {
-    return TaskDefinition(
-        [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
-        },
-        [](void** state) noexcept { delete static_cast<Callback*>(*state); },
-        [](void** state) noexcept {
-          if (const auto* callback = static_cast<Callback*>(*state);
-              *callback) {
-            (*callback)();
-          }
-        });
-  }
 };
 
 /// Effect handle.
@@ -1749,11 +1749,6 @@ class EffectHandle {
  public:
   /// Default constructor.
   EffectHandle() = default;
-
-  /// Equality comparator.
-  bool operator==(const BarelyEffectHandle& handle) const {
-    return handle_ == handle;
-  }
 
   /// Returns a control value.
   ///
@@ -1827,6 +1822,7 @@ class EffectHandle {
   /// Sets the control event.
   ///
   /// @param definition Control event definition.
+  /// @param user_data Pointer to user data.
   /// @return Status.
   Status SetControlEvent(ControlEventDefinition definition,
                          void* user_data = nullptr) noexcept {
@@ -2047,6 +2043,7 @@ class InstrumentHandle {
   /// Sets the control event.
   ///
   /// @param definition Control event definition.
+  /// @param user_data Pointer to user data.
   /// @return Status.
   Status SetControlEvent(ControlEventDefinition definition,
                          void* user_data = nullptr) noexcept {
@@ -2106,6 +2103,7 @@ class InstrumentHandle {
   /// Sets the note control event.
   ///
   /// @param definition Note control event definition.
+  /// @param user_data Pointer to user data.
   /// @return Status.
   Status SetNoteControlEvent(NoteControlEventDefinition definition,
                              void* user_data = nullptr) noexcept {
@@ -2133,6 +2131,7 @@ class InstrumentHandle {
   /// Sets the note off event.
   ///
   /// @param definition Note off event definition.
+  /// @param user_data Pointer to user data.
   /// @return Status.
   Status SetNoteOffEvent(NoteOffEventDefinition definition,
                          void* user_data = nullptr) noexcept {
@@ -2160,6 +2159,7 @@ class InstrumentHandle {
   /// Sets the note on event.
   ///
   /// @param definition Note on event definition.
+  /// @param user_data Pointer to user data.
   /// @return Status.
   Status SetNoteOnEvent(NoteOnEventDefinition definition,
                         void* user_data = nullptr) noexcept {

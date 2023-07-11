@@ -79,10 +79,12 @@ class SamplerInstrument : public CustomInstrument {
   /// Returns the instrument definition.
   ///
   /// @return Instrument definition.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   static InstrumentDefinition GetDefinition() noexcept;
 
  protected:
   /// Constructs new `SamplerInstrument`.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SamplerInstrument(int frame_rate) noexcept;
 
   /// Implements `CustomInstrument`.

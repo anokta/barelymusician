@@ -23,6 +23,7 @@ Metronome::Metronome(Musician& musician, int process_order) noexcept
       .Release();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 bool Metronome::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
 
 void Metronome::Reset() noexcept {

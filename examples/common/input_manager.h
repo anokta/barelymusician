@@ -32,6 +32,7 @@ class InputManager {
   using KeyUpCallback = std::function<void(const Key& key)>;
 
   /// Constructs new `InputManager`.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   InputManager() noexcept;
 
   /// Destructs `InputManager`.

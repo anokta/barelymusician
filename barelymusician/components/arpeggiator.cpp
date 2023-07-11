@@ -34,6 +34,7 @@ bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 bool Arpeggiator::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
 
 void Arpeggiator::SetAllNotesOff() noexcept {
@@ -49,9 +50,10 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
 
 void Arpeggiator::SetInstrument(InstrumentHandle instrument) noexcept {
   instrument_.SetAllNotesOff();
-  instrument_ = instrument;
+  instrument_ = std::move(instrument);
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Arpeggiator::SetNoteOff(double pitch) noexcept {
   if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch);
       it != pitches_.end()) {
@@ -62,6 +64,7 @@ void Arpeggiator::SetNoteOff(double pitch) noexcept {
   }
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Arpeggiator::SetNoteOn(double pitch) noexcept {
   if (const auto it = std::lower_bound(pitches_.begin(), pitches_.end(), pitch);
       it == pitches_.end() || *it != pitch) {

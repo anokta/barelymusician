@@ -356,7 +356,7 @@ int main(int /*argc*/, char* argv[]) {
       instrument.Process(temp_buffer.data(), kChannelCount, kFrameCount,
                          clock.GetTimestamp());
       std::transform(temp_buffer.begin(), temp_buffer.end(), output, output,
-                     std::plus<double>());
+                     std::plus());
     }
     clock.Update(kFrameCount);
   };

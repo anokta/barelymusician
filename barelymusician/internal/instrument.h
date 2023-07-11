@@ -53,6 +53,7 @@ class Instrument {
   ///
   /// @param effect_id Effect identifier.
   /// @return Status.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   Status DestroyEffect(Id effect_id) noexcept;
 
   /// Returns a control value.
@@ -191,6 +192,7 @@ class Instrument {
   /// @param effect_id Effect identifier.
   /// @param process_order Effect process order.
   /// @return Status.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   Status SetEffectProcessOrder(Id effect_id, int process_order) noexcept;
 
   /// Sets a note control value.

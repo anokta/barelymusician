@@ -49,6 +49,7 @@ class HighPassEffect : public CustomEffect {
   /// Returns the effect definition.
   ///
   /// @return Effect definition.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   static EffectDefinition GetDefinition() noexcept;
 
  protected:

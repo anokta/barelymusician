@@ -42,6 +42,7 @@ class Arpeggiator {
   /// Returns whether the arpeggiator is playing or not.
   ///
   /// @return True if playing, false otherwise.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   bool IsPlaying() const noexcept;
 
   /// Sets all notes off.
@@ -58,11 +59,13 @@ class Arpeggiator {
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetNoteOff(double pitch) noexcept;
 
   /// Sets a note on.
   ///
   /// @param pitch Note pitch.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetNoteOn(double pitch) noexcept;
 
   /// Sets the rate.

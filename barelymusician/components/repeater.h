@@ -36,15 +36,18 @@ class Repeater {
   /// Returns whether the repeater is playing or not.
   ///
   /// @return True if playing, false otherwise.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   bool IsPlaying() const noexcept;
 
   /// Pops the last pitch from the end.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Pop() noexcept;
 
   /// Pushes a new note to the end.
   ///
   /// @param pitch_or Note pitch or silence.
   /// @param length Note length.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Push(std::optional<double> pitch_or, int length = 1) noexcept;
 
   /// Sets the instrument.
@@ -63,9 +66,11 @@ class Repeater {
   /// Starts the repeater.
   ///
   /// @param pitch_shift Note pitch shift.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Start(double pitch_shift = 0.0) noexcept;
 
   /// Stop the repeater.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   void Stop() noexcept;
 
  private:

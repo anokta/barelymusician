@@ -23,6 +23,7 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.
@@ -46,6 +47,7 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
                                                             {});
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
     : voice_(SamplerVoice(frame_rate), kMaxVoiceCount),
       gain_processor_(frame_rate) {}

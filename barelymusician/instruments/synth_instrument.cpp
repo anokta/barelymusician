@@ -24,6 +24,7 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.
@@ -46,6 +47,7 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
                                                           {});
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 SynthInstrument::SynthInstrument(int frame_rate) noexcept
     : voice_(SynthVoice(frame_rate), kMaxVoiceCount),
       gain_processor_(frame_rate) {}

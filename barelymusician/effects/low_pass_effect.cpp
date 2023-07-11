@@ -16,6 +16,7 @@ BarelyEffectDefinition BarelyLowPassEffect_GetDefinition() {
 
 namespace barely {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 EffectDefinition LowPassEffect::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Cutoff frequency.

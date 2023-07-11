@@ -18,6 +18,7 @@ namespace barely::internal {
 namespace {
 
 // Builds the corresponding controls for a given array of control `definitions`.
+// NOLINTNEXTLINE(bugprone-exception-escape)
 std::vector<Control> BuildControls(const ControlDefinition* definitions,
                                    int definition_count) noexcept {
   std::vector<Control> controls;
@@ -69,6 +70,7 @@ Instrument::~Instrument() noexcept {
   effect_id_ref_pairs_.Update({});
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::CreateEffect(Id effect_id, EffectDefinition definition,
                               int process_order) noexcept {
   assert(effect_id > kInvalid);
@@ -90,6 +92,7 @@ void Instrument::CreateEffect(Id effect_id, EffectDefinition definition,
   UpdateEffectReferences();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 Status Instrument::DestroyEffect(Id effect_id) noexcept {
   if (effect_id == kInvalid) {
     return Status::InvalidArgument();
@@ -176,7 +179,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
         process_callback_(&state_, &output_samples[sample_offset],
                           output_channel_count, frame_count);
       }
-      for (auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
+      for (const auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
         assert(effect_ref);
         effect_ref->Process(&output_samples[sample_offset],
                             output_channel_count, frame_count);
@@ -252,7 +255,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
       process_callback_(&state_, &output_samples[sample_offset],
                         output_channel_count, frame_count);
     }
-    for (auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
+    for (const auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
       assert(effect_ref);
       effect_ref->Process(&output_samples[sample_offset], output_channel_count,
                           frame_count);
@@ -433,6 +436,7 @@ Status Instrument::SetEffectData(Id effect_id,
   return Status::NotFound();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 Status Instrument::SetEffectProcessOrder(Id effect_id,
                                          int process_order) noexcept {
   if (effect_id == kInvalid) {
@@ -593,6 +597,7 @@ double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
                       : 0.0;
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::UpdateEffectReferences() noexcept {
   std::vector<std::pair<Id, Effect*>> new_effect_id_ref_pairs;
   new_effect_id_ref_pairs.reserve(ordered_effects_.size());

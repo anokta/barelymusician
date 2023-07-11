@@ -26,6 +26,7 @@ constexpr double kDefaultPadRelease = 0.1;
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.
@@ -37,6 +38,7 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
       control_definitions, {});
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : frame_rate_(frame_rate),
       gain_processor_(frame_rate),
@@ -75,6 +77,7 @@ void PercussionInstrument::SetControl(int index, double value,
   }
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void PercussionInstrument::SetData(const void* data,
                                    [[maybe_unused]] int size) noexcept {
   const double* data_double = static_cast<const double*>(data);

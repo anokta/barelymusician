@@ -36,8 +36,7 @@ enum BarelySamplerControl_Values {
 /// Returns the sampler instrument definition.
 ///
 /// @return Instrument definition.
-BARELY_EXPORT BarelyInstrumentDefinition
-BarelySamplerInstrument_GetDefinition();
+BARELY_EXPORT BarelyInstrumentDefinition BarelySamplerInstrumentDefinition();
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -73,16 +72,17 @@ enum class SamplerControl : BarelySamplerControl {
   kVoiceCount = BarelySamplerControl_kVoiceCount,
 };
 
+/// Sampler instrument definition.
+class SamplerInstrumentDefinition : public InstrumentDefinition {
+ public:
+  /// Constructs new `SamplerInstrumentDefinition`.
+  SamplerInstrumentDefinition()
+      : InstrumentDefinition(BarelySamplerInstrumentDefinition()) {}
+};
+
 /// Simple polyphonic sampler instrument.
 class SamplerInstrument : public CustomInstrument {
  public:
-  /// Returns the instrument definition.
-  ///
-  /// @return Instrument definition.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  static InstrumentDefinition GetDefinition() noexcept;
-
- protected:
   /// Constructs new `SamplerInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SamplerInstrument(int frame_rate) noexcept;

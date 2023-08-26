@@ -10,7 +10,7 @@ namespace barely {
 
 /// Custom effect interface.
 class CustomEffect {
- protected:
+ public:
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~CustomEffect() = default;
 
@@ -37,6 +37,9 @@ class CustomEffect {
   virtual void SetData(const void* data, int size) noexcept = 0;
 
   /// Returns the effect definition for `CustomEffectType`.
+  ///
+  /// @param control_definitions Array of control definitions.
+  /// @return Effect definition.
   template <typename CustomEffectType>
   static EffectDefinition GetDefinition(
       const std::vector<ControlDefinition>& control_definitions) noexcept {

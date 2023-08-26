@@ -6,14 +6,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
-extern "C" {
-
-BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinition() {
-  return barely::PercussionInstrument::GetDefinition();
-}
-
-}  // extern "C"
-
 namespace barely {
 
 namespace {
@@ -26,8 +18,9 @@ constexpr double kDefaultPadRelease = 0.1;
 
 }  // namespace
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
+extern "C" {
+
+BarelyInstrumentDefinition BarelyPercussionInstrumentDefinition() {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.
       ControlDefinition{1.0, 0.0, 1.0},
@@ -37,6 +30,8 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
   return CustomInstrument::GetDefinition<PercussionInstrument>(
       control_definitions, {});
 }
+
+}  // extern "C"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept

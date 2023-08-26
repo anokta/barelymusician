@@ -1070,7 +1070,7 @@ BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
 ///
 ///   // Create.
 ///   auto instrument =
-///       musician.CreateInstrument(barely::SynthInstrument::GetDefinition(),
+///       musician.CreateInstrument(barely::SynthInstrumentDefinition(),
 ///                                 /*frame_rate=*/48000);
 ///
 ///   // Set a note on.
@@ -1089,8 +1089,7 @@ BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
 ///                         /*slope_per_beat=*/0.0);
 ///
 ///   // Create a low-pass effect.
-///   auto effect =
-///       instrument.CreateEffect(barely::LowPassEffect::GetDefinition());
+///   auto effect = instrument.CreateEffect(barely::LowPassEffectDefinition());
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
 ///   effect->SetControl(barely::LowPassControl::kCutoffFrequency,

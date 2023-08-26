@@ -34,11 +34,11 @@ using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::PercussionControl;
-using ::barely::PercussionInstrument;
+using ::barely::PercussionInstrumentDefinition;
 using ::barely::Performer;
 using ::barely::Random;
 using ::barely::SynthControl;
-using ::barely::SynthInstrument;
+using ::barely::SynthInstrumentDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -230,8 +230,8 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
-    instruments.push_back(std::move(musician.CreateInstrument(
-        SynthInstrument::GetDefinition(), kFrameRate)));
+    instruments.push_back(std::move(
+        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate)));
     auto& instrument = instruments.back();
     instrument.SetControl(SynthControl::kGain, gain);
     instrument.SetControl(SynthControl::kOscillatorType, type);
@@ -281,8 +281,8 @@ int main(int /*argc*/, char* argv[]) {
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.push_back(musician.CreateInstrument(
-      PercussionInstrument::GetDefinition(), kFrameRate));
+  instruments.push_back(
+      musician.CreateInstrument(PercussionInstrumentDefinition(), kFrameRate));
   auto& percussion = instruments.back();
   percussion.SetControl(PercussionControl::kGain, 0.25);
   set_note_callbacks_fn(instruments.size(), percussion);

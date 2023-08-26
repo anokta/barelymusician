@@ -22,7 +22,7 @@ enum BarelyHighPassControl_Values {
 /// Returns the high-pass effect definition.
 ///
 /// @return Effect definition.
-BARELY_EXPORT BarelyEffectDefinition BarelyHighPassEffect_GetDefinition();
+BARELY_EXPORT BarelyEffectDefinition BarelyHighPassEffectDefinition();
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -43,16 +43,17 @@ enum class HighPassControl : int {
   kCutoffFrequency = BarelyHighPassControl_kCutoffFrequency,
 };
 
+/// High-pass effect definition.
+class HighPassEffectDefinition : public EffectDefinition {
+ public:
+  /// Constructs new `HighPassEffectDefinition`.
+  HighPassEffectDefinition()
+      : EffectDefinition(BarelyHighPassEffectDefinition()) {}
+};
+
 /// Simple high-pass effect.
 class HighPassEffect : public CustomEffect {
  public:
-  /// Returns the effect definition.
-  ///
-  /// @return Effect definition.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  static EffectDefinition GetDefinition() noexcept;
-
- protected:
   /// Constructs new `HighPassEffect`.
   explicit HighPassEffect(int frame_rate) noexcept;
 

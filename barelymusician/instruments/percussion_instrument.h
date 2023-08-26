@@ -24,8 +24,7 @@ enum BarelyPercussionControl_Values {
 /// Returns the percussion instrument definition.
 ///
 /// @return Instrument definition.
-BARELY_EXPORT BarelyInstrumentDefinition
-BarelyPercussionInstrument_GetDefinition();
+BARELY_EXPORT BarelyInstrumentDefinition BarelyPercussionInstrumentDefinition();
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -52,16 +51,17 @@ enum class PercussionControl : BarelyPercussionControl {
   kRelease = BarelyPercussionControl_kRelease,
 };
 
+/// Percussion instrument definition.
+class PercussionInstrumentDefinition : public InstrumentDefinition {
+ public:
+  /// Constructs new `PercussionInstrumentDefinition`.
+  PercussionInstrumentDefinition()
+      : InstrumentDefinition(BarelyPercussionInstrumentDefinition()) {}
+};
+
 /// Simple percussion instrument.
 class PercussionInstrument : public CustomInstrument {
  public:
-  /// Returns the instrument definition.
-  ///
-  /// @return Instrument definition.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  static InstrumentDefinition GetDefinition() noexcept;
-
- protected:
   /// Constructs new `PercussionInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit PercussionInstrument(int frame_rate) noexcept;

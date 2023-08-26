@@ -24,7 +24,7 @@ using ::barely::OscillatorType;
 using ::barely::Performer;
 using ::barely::PerformerHandle;
 using ::barely::SynthControl;
-using ::barely::SynthInstrument;
+using ::barely::SynthInstrumentDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -134,7 +134,7 @@ int main(int /*argc*/, char* argv[]) {
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
     auto instrument =
-        musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
     auto performer = musician.CreatePerformer();
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument.Get(),

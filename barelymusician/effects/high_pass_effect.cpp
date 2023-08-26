@@ -6,24 +6,19 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
-extern "C" {
-
-BarelyEffectDefinition BarelyHighPassEffect_GetDefinition() {
-  return barely::HighPassEffect::GetDefinition();
-}
-
-}  // extern "C"
-
 namespace barely {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-EffectDefinition HighPassEffect::GetDefinition() noexcept {
+extern "C" {
+
+BarelyEffectDefinition BarelyHighPassEffectDefinition() {
   static const std::vector<ControlDefinition> control_definitions = {
       // Cutoff frequency.
       ControlDefinition{0.0, 0.0},
   };
   return CustomEffect::GetDefinition<HighPassEffect>(control_definitions);
 }
+
+}  // extern "C"
 
 HighPassEffect::HighPassEffect(int frame_rate) noexcept
     : frame_rate_(frame_rate) {

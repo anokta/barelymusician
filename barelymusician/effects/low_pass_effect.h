@@ -22,7 +22,7 @@ enum BarelyLowPassControl_Values {
 /// Returns the low-pass effect definition.
 ///
 /// @return Effect definition.
-BARELY_EXPORT BarelyEffectDefinition BarelyLowPassEffect_GetDefinition();
+BARELY_EXPORT BarelyEffectDefinition BarelyLowPassEffectDefinition();
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -43,16 +43,17 @@ enum class LowPassControl : int {
   kCutoffFrequency = BarelyLowPassControl_kCutoffFrequency,
 };
 
+/// Low-pass effect definition.
+class LowPassEffectDefinition : public EffectDefinition {
+ public:
+  /// Constructs new `LowPassEffectDefinition`.
+  LowPassEffectDefinition()
+      : EffectDefinition(BarelyLowPassEffectDefinition()) {}
+};
+
 /// Simple low-pass effect.
 class LowPassEffect : public CustomEffect {
  public:
-  /// Returns the effect definition.
-  ///
-  /// @return Effect definition.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  static EffectDefinition GetDefinition() noexcept;
-
- protected:
   /// Constructs new `LowPassEffect`.
   explicit LowPassEffect(int frame_rate) noexcept;
 

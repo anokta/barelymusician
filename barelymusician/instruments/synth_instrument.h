@@ -34,7 +34,7 @@ enum BarelySynthControl_Values {
 /// Returns the synth instrument definition.
 ///
 /// @return Instrument definition.
-BARELY_EXPORT BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition();
+BARELY_EXPORT BarelyInstrumentDefinition BarelySynthInstrumentDefinition();
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -68,16 +68,17 @@ enum class SynthControl : BarelySynthControl {
   kVoiceCount = BarelySynthControl_kVoiceCount,
 };
 
+/// Synth instrument definition.
+class SynthInstrumentDefinition : public InstrumentDefinition {
+ public:
+  /// Constructs new `SynthInstrumentDefinition`.
+  SynthInstrumentDefinition()
+      : InstrumentDefinition(BarelySynthInstrumentDefinition()) {}
+};
+
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public CustomInstrument {
  public:
-  /// Returns the instrument definition.
-  ///
-  /// @return Instrument definition.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  static InstrumentDefinition GetDefinition() noexcept;
-
- protected:
   /// Constructs new `SynthInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SynthInstrument(int frame_rate) noexcept;

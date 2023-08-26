@@ -6,14 +6,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 
-extern "C" {
-
-BarelyInstrumentDefinition BarelySamplerInstrument_GetDefinition() {
-  return barely::SamplerInstrument::GetDefinition();
-}
-
-}  // extern "C"
-
 namespace barely {
 
 namespace {
@@ -23,8 +15,9 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
+extern "C" {
+
+BarelyInstrumentDefinition BarelySamplerInstrumentDefinition() {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.
       ControlDefinition{1.0, 0.0, 1.0},
@@ -46,6 +39,8 @@ InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
   return CustomInstrument::GetDefinition<SamplerInstrument>(control_definitions,
                                                             {});
 }
+
+}  // extern "C"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept

@@ -7,14 +7,6 @@
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/oscillator.h"
 
-extern "C" {
-
-BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition() {
-  return barely::SynthInstrument::GetDefinition();
-}
-
-}  // extern "C"
-
 namespace barely {
 
 namespace {
@@ -24,8 +16,9 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
+extern "C" {
+
+BarelyInstrumentDefinition BarelySynthInstrumentDefinition() {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.
       ControlDefinition{1.0, 0.0, 1.0},
@@ -46,6 +39,8 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
   return CustomInstrument::GetDefinition<SynthInstrument>(control_definitions,
                                                           {});
 }
+
+}  // extern "C"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SynthInstrument::SynthInstrument(int frame_rate) noexcept

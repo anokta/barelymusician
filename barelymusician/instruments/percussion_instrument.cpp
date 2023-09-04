@@ -1,10 +1,6 @@
 #include "barelymusician/instruments/percussion_instrument.h"
 
-#include <cstddef>
-#include <vector>
-
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/instruments/custom_instrument.h"
+#include <cstdlib>
 
 namespace barely {
 
@@ -13,25 +9,7 @@ namespace {
 // Maximum number of pads allowed to be set.
 constexpr int kMaxPadCount = 64;
 
-// Default pad release in seconds.
-constexpr double kDefaultPadRelease = 0.1;
-
 }  // namespace
-
-extern "C" {
-
-BarelyInstrumentDefinition BarelyPercussionInstrumentDefinition() {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Pad release.
-      ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
-  };
-  return CustomInstrument::GetDefinition<PercussionInstrument>(
-      control_definitions, {});
-}
-
-}  // extern "C"
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
@@ -59,15 +37,18 @@ void PercussionInstrument::Process(double* output_samples,
 
 void PercussionInstrument::SetControl(int index, double value,
                                       double /*slope_per_frame*/) noexcept {
-  switch (static_cast<PercussionControl>(index)) {
-    case PercussionControl::kGain:
+  switch (static_cast<PercussionInstrumentControl>(index)) {
+    case PercussionInstrumentControl::kGain:
       gain_processor_.SetGain(value);
       break;
-    case PercussionControl::kRelease:
+    case PercussionInstrumentControl::kRelease:
       release_ = value;
       for (auto& pad : pads_) {
         pad.voice.envelope().SetRelease(release_);
       }
+      break;
+    default:
+      std::abort();
       break;
   }
 }

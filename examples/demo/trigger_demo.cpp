@@ -22,7 +22,7 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::SynthControl;
+using ::barely::SynthInstrumentControl;
 using ::barely::SynthInstrumentDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -63,10 +63,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument =
       musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
-  instrument.SetControl(SynthControl::kGain, kGain);
-  instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthControl::kAttack, kAttack);
-  instrument.SetControl(SynthControl::kRelease, kRelease);
+  instrument.SetControl(SynthInstrumentControl::kGain, kGain);
+  instrument.SetControl(SynthInstrumentControl::kOscillatorType,
+                        kOscillatorType);
+  instrument.SetControl(SynthInstrumentControl::kAttack, kAttack);
+  instrument.SetControl(SynthInstrumentControl::kRelease, kRelease);
   instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });

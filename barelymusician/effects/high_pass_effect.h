@@ -1,55 +1,20 @@
 #ifndef BARELYMUSICIAN_EFFECTS_HIGH_PASS_EFFECT_H_
 #define BARELYMUSICIAN_EFFECTS_HIGH_PASS_EFFECT_H_
 
-// NOLINTBEGIN
-#include <stdint.h>
-
-#include "barelymusician/barelymusician.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif  // __cplusplus
-
-/// High-pass control enum alias.
-typedef int32_t BarelyHighPassControl;
-
-/// High-pass control enum values.
-enum BarelyHighPassControl_Values {
-  /// Cutoff frequency.
-  BarelyHighPassControl_kCutoffFrequency = 0,
-};
-
-/// Returns the high-pass effect definition.
-///
-/// @return Effect definition.
-BARELY_EXPORT BarelyEffectDefinition BarelyHighPassEffectDefinition();
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif  // __cplusplus
-// NOLINTEND
-
-#ifdef __cplusplus
 #include <array>
 
+#include "barelymusician/common/custom_macros.h"
 #include "barelymusician/dsp/one_pole_filter.h"
 #include "barelymusician/effects/custom_effect.h"
 
 namespace barely {
 
-/// High-pass control.
-enum class HighPassControl : int {
-  /// Cutoff frequency.
-  kCutoffFrequency = BarelyHighPassControl_kCutoffFrequency,
-};
-
 /// High-pass effect definition.
-class HighPassEffectDefinition : public EffectDefinition {
- public:
-  /// Constructs new `HighPassEffectDefinition`.
-  HighPassEffectDefinition()
-      : EffectDefinition(BarelyHighPassEffectDefinition()) {}
-};
+#define BARELY_HIGH_PASS_EFFECT_CONTROLS(HighPassEffectControl, X) \
+  /* Cutoff frequency. */                                          \
+  X(HighPassEffectControl, CutoffFrequency, 0.0, 0.0)
+BARELY_GENERATE_CUSTOM_EFFECT_DEFINITION(HighPassEffect,
+                                         BARELY_HIGH_PASS_EFFECT_CONTROLS)
 
 /// Simple high-pass effect.
 class HighPassEffect : public CustomEffect {
@@ -76,6 +41,5 @@ class HighPassEffect : public CustomEffect {
 };
 
 }  // namespace barely
-#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_EFFECTS_HIGH_PASS_EFFECT_H_

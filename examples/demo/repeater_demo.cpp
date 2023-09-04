@@ -20,7 +20,7 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
-using ::barely::SynthControl;
+using ::barely::SynthInstrumentControl;
 using ::barely::SynthInstrumentDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
@@ -81,11 +81,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   auto instrument =
       musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
-  instrument.SetControl(SynthControl::kGain, kGain);
-  instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthControl::kAttack, kAttack);
-  instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
+  instrument.SetControl(SynthInstrumentControl::kGain, kGain);
+  instrument.SetControl(SynthInstrumentControl::kOscillatorType,
+                        kOscillatorType);
+  instrument.SetControl(SynthInstrumentControl::kAttack, kAttack);
+  instrument.SetControl(SynthInstrumentControl::kRelease, kRelease);
+  instrument.SetControl(SynthInstrumentControl::kVoiceCount, kVoiceCount);
 
   instrument.SetNoteOnEvent([&repeater](double pitch, double /*intensity*/) {
     if (repeater.IsPlaying()) {

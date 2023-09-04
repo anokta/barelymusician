@@ -18,10 +18,10 @@
 
 namespace {
 
-using ::barely::LowPassControl;
+using ::barely::LowPassEffectControl;
 using ::barely::LowPassEffectDefinition;
 using ::barely::Musician;
-using ::barely::SamplerControl;
+using ::barely::SamplerInstrumentControl;
 using ::barely::SamplerInstrumentDefinition;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -90,15 +90,16 @@ int main(int /*argc*/, char* argv[]) {
 
   auto instrument =
       musician.CreateInstrument(SamplerInstrumentDefinition(), kFrameRate);
-  instrument.SetControl(SamplerControl::kGain, kGain);
-  instrument.SetControl(SamplerControl::kRootPitch, kRootPitch);
-  instrument.SetControl(SamplerControl::kLoop, kLoop);
-  instrument.SetControl(SamplerControl::kAttack, kAttack);
-  instrument.SetControl(SamplerControl::kRelease, kRelease);
-  instrument.SetControl(SamplerControl::kVoiceCount, kVoiceCount);
+  instrument.SetControl(SamplerInstrumentControl::kGain, kGain);
+  instrument.SetControl(SamplerInstrumentControl::kRootPitch, kRootPitch);
+  instrument.SetControl(SamplerInstrumentControl::kLoop, kLoop);
+  instrument.SetControl(SamplerInstrumentControl::kAttack, kAttack);
+  instrument.SetControl(SamplerInstrumentControl::kRelease, kRelease);
+  instrument.SetControl(SamplerInstrumentControl::kVoiceCount, kVoiceCount);
 
   auto effect = instrument.CreateEffect(LowPassEffectDefinition());
-  effect.SetControl(LowPassControl::kCutoffFrequency, kLowPassCutoffFrequency);
+  effect.SetControl(LowPassEffectControl::kCutoffFrequency,
+                    kLowPassCutoffFrequency);
 
   const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));
   const int size = static_cast<int>(data.size() * sizeof(double));

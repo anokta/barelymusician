@@ -1,10 +1,10 @@
 #ifndef BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 #define BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 
-#include <utility>
-#include <vector>
-
 #include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+#include <vector>
 
 namespace barely {
 
@@ -78,5 +78,6 @@ class CustomEffect {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_

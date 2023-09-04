@@ -1,50 +1,15 @@
 #include "barelymusician/instruments/sampler_instrument.h"
 
 #include <cmath>
-#include <vector>
+#include <cstdlib>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 
 namespace barely {
 
-namespace {
-
-// Maximum number of voices allowed to be set.
-constexpr int kMaxVoiceCount = 64;
-
-}  // namespace
-
-extern "C" {
-
-BarelyInstrumentDefinition BarelySamplerInstrumentDefinition() {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Root pitch.
-      ControlDefinition{0.0},
-      // Sample player loop.
-      ControlDefinition{false},
-      // Attack.
-      ControlDefinition{0.05, 0.0, 60.0},
-      // Decay.
-      ControlDefinition{0.0, 0.0, 60.0},
-      // Sustain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Release.
-      ControlDefinition{0.25, 0.0, 60.0},
-      // Number of voices.
-      ControlDefinition{8, 1, kMaxVoiceCount},
-  };
-  return CustomInstrument::GetDefinition<SamplerInstrument>(control_definitions,
-                                                            {});
-}
-
-}  // extern "C"
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SamplerInstrument::SamplerInstrument(int frame_rate) noexcept
-    : voice_(SamplerVoice(frame_rate), kMaxVoiceCount),
+    : voice_(SamplerVoice(frame_rate), kMaxSamplerVoiceCount),
       gain_processor_(frame_rate) {}
 
 void SamplerInstrument::Process(double* output_samples,
@@ -63,40 +28,43 @@ void SamplerInstrument::Process(double* output_samples,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void SamplerInstrument::SetControl(int index, double value,
                                    double /*slope*/) noexcept {
-  switch (static_cast<SamplerControl>(index)) {
-    case SamplerControl::kGain:
+  switch (static_cast<SamplerInstrumentControl>(index)) {
+    case SamplerInstrumentControl::kGain:
       gain_processor_.SetGain(value);
       break;
-    case SamplerControl::kRootPitch:
+    case SamplerInstrumentControl::kRootPitch:
       root_pitch_ = value;
       break;
-    case SamplerControl::kLoop:
+    case SamplerInstrumentControl::kLoop:
       voice_.Update([value](SamplerVoice* voice) noexcept {
         voice->generator().SetLoop(static_cast<bool>(value));
       });
       break;
-    case SamplerControl::kAttack:
+    case SamplerInstrumentControl::kAttack:
       voice_.Update([value](SamplerVoice* voice) noexcept {
         voice->envelope().SetAttack(value);
       });
       break;
-    case SamplerControl::kDecay:
+    case SamplerInstrumentControl::kDecay:
       voice_.Update([value](SamplerVoice* voice) noexcept {
         voice->envelope().SetDecay(value);
       });
       break;
-    case SamplerControl::kSustain:
+    case SamplerInstrumentControl::kSustain:
       voice_.Update([value](SamplerVoice* voice) noexcept {
         voice->envelope().SetSustain(value);
       });
       break;
-    case SamplerControl::kRelease:
+    case SamplerInstrumentControl::kRelease:
       voice_.Update([value](SamplerVoice* voice) noexcept {
         voice->envelope().SetRelease(value);
       });
       break;
-    case SamplerControl::kVoiceCount:
+    case SamplerInstrumentControl::kVoiceCount:
       voice_.Resize(static_cast<int>(value));
+      break;
+    default:
+      std::abort();
       break;
   }
 }

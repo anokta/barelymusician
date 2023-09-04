@@ -1,10 +1,10 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 
-#include <utility>
-#include <vector>
-
 #include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+#include <vector>
 
 namespace barely {
 
@@ -117,5 +117,6 @@ class CustomInstrument {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_

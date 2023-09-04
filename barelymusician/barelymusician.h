@@ -93,7 +93,8 @@
 ///   BarelyInstrument_IsNoteOn(instrument, /*pitch=*/-1.0, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument, BarelySynthControl_kGain,
+///   BarelyInstrument_SetControl(instrument,
+///                               BarelySynthInstrumentControl_kGain,
 ///                               /*value=*/0.5, /*slope_per_beat=*/0.0);
 ///
 ///   // Create a low-pass effect.
@@ -102,7 +103,8 @@
 ///                       /*process_order=*/0, &effect);
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   BarelyEffect_SetControl(effect, BarelyLowPassControl_kCutoffFrequency,
+///   BarelyEffect_SetControl(effect,
+///                           BarelyLowPassEffectControl_kCutoffFrequency,
 ///                           /*value=*/0.0, /*slope_per_beat=*/100.0);
 ///
 ///   // Process.
@@ -1085,14 +1087,14 @@ BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
 ///   const bool is_note_on = *instrument.IsNoteOn(/*pitch=*/-1.0);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::SynthControl::kGain, /*value=*/0.5,
-///                         /*slope_per_beat=*/0.0);
+///   instrument.SetControl(barely::SynthInstrumentControl::kGain,
+///                         /*value=*/0.5, /*slope_per_beat=*/0.0);
 ///
 ///   // Create a low-pass effect.
 ///   auto effect = instrument.CreateEffect(barely::LowPassEffectDefinition());
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   effect->SetControl(barely::LowPassControl::kCutoffFrequency,
+///   effect->SetControl(barely::LowPassEffectControl::kCutoffFrequency,
 ///                      /*value=*/0.0, /*slope_per_beat=*/100.0);
 ///
 ///   // Process.

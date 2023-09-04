@@ -1,49 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_SAMPLER_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_SAMPLER_INSTRUMENT_H_
 
-// NOLINTBEGIN
-#include <stdint.h>
-
-#include "barelymusician/barelymusician.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif  // __cplusplus
-
-/// Sampler control enum alias.
-typedef int32_t BarelySamplerControl;
-
-/// Sampler control enum values.
-enum BarelySamplerControl_Values {
-  /// Gain.
-  BarelySamplerControl_kGain = 0,
-  /// Root pitch.
-  BarelySamplerControl_kRootPitch = 1,
-  /// Sample player loop.
-  BarelySamplerControl_kLoop = 2,
-  /// Envelope attack.
-  BarelySamplerControl_kAttack = 3,
-  /// Envelope decay.
-  BarelySamplerControl_kDecay = 4,
-  /// Envelope sustain.
-  BarelySamplerControl_kSustain = 5,
-  /// Envelope release.
-  BarelySamplerControl_kRelease = 6,
-  /// Number of voices
-  BarelySamplerControl_kVoiceCount = 7,
-};
-
-/// Returns the sampler instrument definition.
-///
-/// @return Instrument definition.
-BARELY_EXPORT BarelyInstrumentDefinition BarelySamplerInstrumentDefinition();
-
-#ifdef __cplusplus
-}  // extern "C"
-#endif  // __cplusplus
-// NOLINTEND
-
-#ifdef __cplusplus
+#include "barelymusician/common/custom_macros.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
@@ -52,33 +10,29 @@ BARELY_EXPORT BarelyInstrumentDefinition BarelySamplerInstrumentDefinition();
 
 namespace barely {
 
-/// Sampler control enum.
-enum class SamplerControl : BarelySamplerControl {
-  /// Gain.
-  kGain = BarelySamplerControl_kGain,
-  /// Root pitch.
-  kRootPitch = BarelySamplerControl_kRootPitch,
-  /// Sample player loop.
-  kLoop = BarelySamplerControl_kLoop,
-  /// Envelope attack.
-  kAttack = BarelySamplerControl_kAttack,
-  /// Envelope decay.
-  kDecay = BarelySamplerControl_kDecay,
-  /// Envelope sustain.
-  kSustain = BarelySamplerControl_kSustain,
-  /// Envelope release.
-  kRelease = BarelySamplerControl_kRelease,
-  /// Number of voices
-  kVoiceCount = BarelySamplerControl_kVoiceCount,
-};
+// Maximum number of voices allowed to be set.
+inline constexpr int kMaxSamplerVoiceCount = 64;
 
 /// Sampler instrument definition.
-class SamplerInstrumentDefinition : public InstrumentDefinition {
- public:
-  /// Constructs new `SamplerInstrumentDefinition`.
-  SamplerInstrumentDefinition()
-      : InstrumentDefinition(BarelySamplerInstrumentDefinition()) {}
-};
+#define BARELY_SAMPLER_INSTRUMENT_CONTROLS(SamplerInstrumentControl, X) \
+  /* Gain. */                                                           \
+  X(SamplerInstrumentControl, Gain, 1.0, 0.0, 1.0)                      \
+  /* Root pitch. */                                                     \
+  X(SamplerInstrumentControl, RootPitch, 0.0)                           \
+  /* Sample player loop. */                                             \
+  X(SamplerInstrumentControl, Loop, false)                              \
+  /* Attack. */                                                         \
+  X(SamplerInstrumentControl, Attack, 0.05, 0.0, 60.0)                  \
+  /* Decay. */                                                          \
+  X(SamplerInstrumentControl, Decay, 0.0, 0.0, 60.0)                    \
+  /* Sustain. */                                                        \
+  X(SamplerInstrumentControl, Sustain, 1.0, 0.0, 1.0)                   \
+  /* Release. */                                                        \
+  X(SamplerInstrumentControl, Release, 0.25, 0.0, 60.0)                 \
+  /* Number of voices. */                                               \
+  X(SamplerInstrumentControl, VoiceCount, 8, 1, kMaxSamplerVoiceCount)
+BARELY_GENERATE_CUSTOM_INSTRUMENT_DEFINITION(SamplerInstrument,
+                                             BARELY_SAMPLER_INSTRUMENT_CONTROLS)
 
 /// Simple polyphonic sampler instrument.
 class SamplerInstrument : public CustomInstrument {
@@ -105,7 +59,6 @@ class SamplerInstrument : public CustomInstrument {
   GainProcessor gain_processor_;
 };
 
-#endif  // __cplusplus
 }  // namespace barely
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_SAMPLER_INSTRUMENT_H_

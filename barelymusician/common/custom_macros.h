@@ -34,12 +34,11 @@
 
 #define _BARELY_ENUM_VALUE_C(name, value, ...) Barely##name##_k##value,
 
-#define _BARELY_GENERATE_ENUM_C(name, values)                   \
-  /* Enum alias. */                                             \
-  typedef int32_t Barely##name;                                 \
-  /* Enum values. */                                            \
-  enum Barely##name##_Values{values(name, _BARELY_ENUM_VALUE_C) \
-                                 _BARELY_ENUM_VALUE_C(name, Count)};
+#define _BARELY_GENERATE_ENUM_C(name, values) \
+  /* Enum alias. */                           \
+  typedef int32_t Barely##name;               \
+  /* Enum values. */                          \
+  enum Barely##name##_Values{values(name, _BARELY_ENUM_VALUE_C)};
 
 #define _BARELY_GENERATE_CUSTOM_DEFINITION_C(name, type) \
   /* Returns the custom definition. */                   \
@@ -55,10 +54,9 @@
 #define _BARELY_ENUM_VALUE_CPP(name, value, ...) \
   k##value = Barely##name##_k##value,
 
-#define _BARELY_GENERATE_ENUM_CPP(name, values)                       \
-  /* Enum. */                                                         \
-  enum class name : Barely##name{values(name, _BARELY_ENUM_VALUE_CPP) \
-                                     _BARELY_ENUM_VALUE_CPP(name, Count)};
+#define _BARELY_GENERATE_ENUM_CPP(name, values) \
+  /* Enum. */                                   \
+  enum class name : Barely##name{values(name, _BARELY_ENUM_VALUE_CPP)};
 
 #define _BARELY_CONTROL_DEFINITION_VALUE_CPP(name, value, ...) \
   ::barely::ControlDefinition(__VA_ARGS__),

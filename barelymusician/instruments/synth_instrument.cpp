@@ -1,7 +1,5 @@
 #include "barelymusician/instruments/synth_instrument.h"
 
-#include <cstdlib>
-
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -60,9 +58,6 @@ void SynthInstrument::SetControl(int index, double value,
       break;
     case SynthInstrumentControl::kVoiceCount:
       voice_.Resize(static_cast<int>(value));
-      break;
-    default:
-      std::abort();
       break;
   }
 }

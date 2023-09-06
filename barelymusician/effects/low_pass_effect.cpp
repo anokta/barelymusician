@@ -1,7 +1,5 @@
 #include "barelymusician/effects/low_pass_effect.h"
 
-#include <cstdlib>
-
 #include "barelymusician/dsp/dsp_utils.h"
 
 namespace barely {
@@ -33,9 +31,6 @@ void LowPassEffect::SetControl(int index, double value,
       for (auto& filter : filters_) {
         filter.SetCoefficient(GetFilterCoefficient(frame_rate_, value));
       }
-      break;
-    default:
-      std::abort();
       break;
   }
 }

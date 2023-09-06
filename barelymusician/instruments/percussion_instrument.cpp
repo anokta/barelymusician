@@ -1,7 +1,5 @@
 #include "barelymusician/instruments/percussion_instrument.h"
 
-#include <cstdlib>
-
 namespace barely {
 
 namespace {
@@ -46,9 +44,6 @@ void PercussionInstrument::SetControl(int index, double value,
       for (auto& pad : pads_) {
         pad.voice.envelope().SetRelease(release_);
       }
-      break;
-    default:
-      std::abort();
       break;
   }
 }

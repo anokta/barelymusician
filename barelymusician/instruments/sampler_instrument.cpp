@@ -1,7 +1,6 @@
 #include "barelymusician/instruments/sampler_instrument.h"
 
 #include <cmath>
-#include <cstdlib>
 
 #include "barelymusician/dsp/enveloped_voice.h"
 
@@ -62,9 +61,6 @@ void SamplerInstrument::SetControl(int index, double value,
       break;
     case SamplerInstrumentControl::kVoiceCount:
       voice_.Resize(static_cast<int>(value));
-      break;
-    default:
-      std::abort();
       break;
   }
 }

@@ -20,10 +20,10 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::SynthControl;
-using ::barely::SynthInstrument;
-using ::barely::TaskCallback;
-using ::barely::TaskRef;
+using ::barely::SynthInstrumentControl;
+using ::barely::SynthInstrumentDefinition;
+using ::barely::Task;
+using ::barely::TaskDefinition;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -63,12 +63,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetTempo(kInitialTempo);
 
   auto instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
-  instrument.SetControl(SynthControl::kGain, kGain);
-  instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthControl::kAttack, kAttack);
-  instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetNoteOnEventCallback([](double pitch, double /*intensity*/) {
+      musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
+  instrument.SetControl(SynthInstrumentControl::kGain, kGain);
+  instrument.SetControl(SynthInstrumentControl::kOscillatorType,
+                        kOscillatorType);
+  instrument.SetControl(SynthInstrumentControl::kAttack, kAttack);
+  instrument.SetControl(SynthInstrumentControl::kRelease, kRelease);
+  instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
     ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
   });
 
@@ -77,16 +78,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   performer.SetLoopBeginPosition(3.0);
   performer.SetLoopLength(5.0);
 
-  const auto play_note_fn = [&](double duration, double pitch) -> TaskCallback {
+  const auto play_note_fn = [&](double duration, double pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
-      performer.CreateTask(
-          [&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-          /*is_one_off=*/true, *performer.GetPosition() + duration);
+      performer
+          .CreateTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+                      /*is_one_off=*/true, performer.GetPosition() + duration)
+          .Release();
     };
   };
 
-  std::vector<std::pair<double, TaskCallback>> score;
+  std::vector<std::pair<double, TaskDefinition::Callback>> score;
   score.emplace_back(0.0, play_note_fn(1.0, barely::kPitchC4));
   score.emplace_back(1.0, play_note_fn(1.0, barely::kPitchD4));
   score.emplace_back(2.0, play_note_fn(1.0, barely::kPitchE4));
@@ -97,11 +99,11 @@ int main(int /*argc*/, char* /*argv*/[]) {
   score.emplace_back(5 + 2.0 / 3.0, play_note_fn(1.0 / 3.0, barely::kPitchB5));
   score.emplace_back(6.0, play_note_fn(2.0, barely::kPitchC5));
 
-  std::unordered_map<int, TaskRef> tasks;
+  std::unordered_map<int, Task> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, *performer.CreateTask(callback, /*is_one_off=*/false,
-                                                 position));
+    tasks.emplace(index++, performer.CreateTask(callback, /*is_one_off=*/false,
+                                                position));
   }
 
   // Audio process callback.
@@ -123,13 +125,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
     if (const int index = static_cast<int>(key - '0');
         index > 0 && index < 10) {
       // Toggle score.
-      if (const auto it = tasks.find(index - 1);
-          it != tasks.end() && performer.DestroyTask(it->second).IsOk()) {
+      if (const auto it = tasks.find(index - 1); it != tasks.end()) {
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, *performer.CreateTask(
+        tasks.emplace(index - 1, performer.CreateTask(
                                      callback, /*is_one_off=*/false, position));
         ConsoleLog() << "Added note " << index;
       }
@@ -139,7 +140,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (*performer.IsPlaying()) {
+        if (performer.IsPlaying()) {
           performer.Stop();
           instrument.SetAllNotesOff();
           ConsoleLog() << "Stopped playback";
@@ -149,7 +150,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'L':
-        if (*performer.IsLooping()) {
+        if (performer.IsLooping()) {
           performer.SetLooping(false);
           ConsoleLog() << "Loop turned off";
         } else {

@@ -7,7 +7,7 @@ VERS_1.0 {
     BarelyEffect_ResetAllControls;
     BarelyEffect_ResetControl;
     BarelyEffect_SetControl;
-    BarelyEffect_SetControlEventCallback;
+    BarelyEffect_SetControlEvent;
     BarelyEffect_SetData;
     BarelyEffect_SetProcessOrder;
     BarelyInstrument_Create;
@@ -22,14 +22,14 @@ VERS_1.0 {
     BarelyInstrument_ResetNoteControl;
     BarelyInstrument_SetAllNotesOff;
     BarelyInstrument_SetControl;
-    BarelyInstrument_SetControlEventCallback;
+    BarelyInstrument_SetControlEvent;
     BarelyInstrument_SetData;
     BarelyInstrument_SetNoteControl;
-    BarelyInstrument_SetNoteControlEventCallback;
+    BarelyInstrument_SetNoteControlEvent;
     BarelyInstrument_SetNoteOff;
-    BarelyInstrument_SetNoteOffEventCallback;
+    BarelyInstrument_SetNoteOffEvent;
     BarelyInstrument_SetNoteOn;
-    BarelyInstrument_SetNoteOnEventCallback;
+    BarelyInstrument_SetNoteOnEvent;
     BarelyMusician_Create;
     BarelyMusician_Destroy;
     BarelyMusician_GetTempo;
@@ -56,12 +56,12 @@ VERS_1.0 {
     BarelyTask_SetPosition;
     BarelyTask_SetProcessOrder;
 
-    BarelyHighPassEffect_GetDefinition;
-    BarelyLowPassEffect_GetDefinition;
+    BarelyHighPassEffectDefinition;
+    BarelyLowPassEffectDefinition;
 
-    BarelyPercussionInstrument_GetDefinition;
-    BarelySamplerInstrument_GetDefinition;
-    BarelySynthInstrument_GetDefinition;
+    BarelyPercussionInstrumentDefinition;
+    BarelySamplerInstrumentDefinition;
+    BarelySynthInstrumentDefinition;
 
   local:
     *;

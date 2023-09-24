@@ -1,28 +1,8 @@
 #include "barelymusician/effects/low_pass_effect.h"
 
-#include <cassert>
-#include <vector>
-
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
 
-extern "C" {
-
-BarelyEffectDefinition BarelyLowPassEffect_GetDefinition() {
-  return barely::LowPassEffect::GetDefinition();
-}
-
-}  // extern "C"
-
 namespace barely {
-
-EffectDefinition LowPassEffect::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Cutoff frequency.
-      ControlDefinition{48000.0, 0.0},
-  };
-  return CustomEffect::GetDefinition<LowPassEffect>(control_definitions);
-}
 
 LowPassEffect::LowPassEffect(int frame_rate) noexcept
     : frame_rate_(frame_rate) {
@@ -46,8 +26,8 @@ void LowPassEffect::Process(double* output_samples, int output_channel_count,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void LowPassEffect::SetControl(int index, double value,
                                double /*slope_per_frame*/) noexcept {
-  switch (static_cast<LowPassControl>(index)) {
-    case LowPassControl::kCutoffFrequency:
+  switch (static_cast<LowPassEffectControl>(index)) {
+    case LowPassEffectControl::kCutoffFrequency:
       for (auto& filter : filters_) {
         filter.SetCoefficient(GetFilterCoefficient(frame_rate_, value));
       }

@@ -1,16 +1,16 @@
 #ifndef BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 #define BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 
-#include <utility>
-#include <vector>
-
 #include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+#include <vector>
 
 namespace barely {
 
 /// Custom effect interface.
 class CustomEffect {
- protected:
+ public:
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~CustomEffect() = default;
 
@@ -37,6 +37,9 @@ class CustomEffect {
   virtual void SetData(const void* data, int size) noexcept = 0;
 
   /// Returns the effect definition for `CustomEffectType`.
+  ///
+  /// @param control_definitions Array of control definitions.
+  /// @return Effect definition.
   template <typename CustomEffectType>
   static EffectDefinition GetDefinition(
       const std::vector<ControlDefinition>& control_definitions) noexcept {
@@ -75,5 +78,6 @@ class CustomEffect {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_

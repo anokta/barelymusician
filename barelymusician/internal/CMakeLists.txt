@@ -30,10 +30,14 @@ target_link_libraries(
   barely_internal_mutable_data
   barely_internal_performer
   barely_internal_status
-  barely_internal_task
   barelymusician_headeronly
   barely_find_or_null
   barely_seconds
+)
+
+add_library(
+  barely_internal_event INTERFACE
+  event.h
 )
 
 add_library(
@@ -54,6 +58,7 @@ target_link_libraries(
   barely_internal_instrument
   barely_internal_control
   barely_internal_effect
+  barely_internal_event
   barely_internal_id
   barely_internal_message
   barely_internal_message_queue
@@ -95,9 +100,9 @@ add_library(
 )
 target_link_libraries(
   barely_internal_performer
+  barely_internal_event
   barely_internal_id
   barely_internal_status
-  barely_internal_task
   barelymusician_headeronly
   barely_find_or_null
 )
@@ -105,16 +110,6 @@ target_link_libraries(
 add_library(
   barely_internal_status INTERFACE
   status.h
-)
-
-add_library(
-  barely_internal_task
-  task.cpp
-  task.h
-)
-target_link_libraries(
-  barely_internal_task
-  barelymusician_headeronly
 )
 
 if (ENABLE_TESTS)
@@ -141,12 +136,23 @@ if (ENABLE_TESTS)
     barely_internal_id
     barely_internal_instrument
     barely_internal_status
-    barely_internal_task
     barelymusician_headeronly
     gmock
     gtest_main
   )
   gtest_discover_tests(barely_internal_engine_test)
+
+  add_executable(
+    barely_internal_event_test
+    event_test.cpp
+  )
+  target_link_libraries(
+    barely_internal_event_test
+    barely_internal_event
+    barelymusician_headeronly
+    gtest_main
+  )
+  gtest_discover_tests(barely_internal_event_test)
 
   add_executable(
     barely_internal_instrument_test
@@ -202,16 +208,4 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_internal_performer_test)
-
-  add_executable(
-    barely_internal_task_test
-    task_test.cpp
-  )
-  target_link_libraries(
-    barely_internal_task_test
-    barely_internal_task
-    barelymusician_headeronly
-    gtest_main
-  )
-  gtest_discover_tests(barely_internal_task_test)
 endif()

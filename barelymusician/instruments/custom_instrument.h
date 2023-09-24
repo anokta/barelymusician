@@ -1,16 +1,16 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 
-#include <utility>
-#include <vector>
-
 #include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+#include <vector>
 
 namespace barely {
 
 /// Custom instrument interface.
 class CustomInstrument {
- protected:
+ public:
   /// Base destructor to ensure the derived classes get destroyed properly.
   virtual ~CustomInstrument() = default;
 
@@ -57,6 +57,10 @@ class CustomInstrument {
   virtual void SetNoteOn(double pitch, double intensity) noexcept = 0;
 
   /// Returns the definition for `CustomInstrumentType`.
+  ///
+  /// @param control_definitions Array of control definitions.
+  /// @param note_control_definitions Array of note control definitions.
+  /// @return Instrument definition.
   template <typename CustomInstrumentType>
   static InstrumentDefinition GetDefinition(
       const std::vector<ControlDefinition>& control_definitions,
@@ -113,5 +117,6 @@ class CustomInstrument {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_

@@ -22,12 +22,10 @@ class Metronome {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit Metronome(Musician& musician, int process_order = -1) noexcept;
 
-  /// Destroys `Metronome`.
-  ~Metronome();
-
   /// Returns whether the metronome is playing or not.
   ///
   /// @return True if playing, false otherwise.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   bool IsPlaying() const noexcept;
 
   /// Resets the metronome.
@@ -45,11 +43,8 @@ class Metronome {
   void Stop() noexcept;
 
  private:
-  // Musician.
-  Musician& musician_;
-
   // Performer.
-  PerformerRef performer_;
+  Performer performer_;
 
   // Current beat.
   int beat_ = 0;

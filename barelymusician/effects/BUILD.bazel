@@ -18,7 +18,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":custom_effect",
-        "//barelymusician",
+        "//barelymusician/common:custom_macros",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:one_pole_filter",
     ],
@@ -32,7 +32,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":custom_effect",
-        "//barelymusician",
+        "//barelymusician/common:custom_macros",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:one_pole_filter",
     ],

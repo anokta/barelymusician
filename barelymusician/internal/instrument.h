@@ -10,6 +10,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
+#include "barelymusician/internal/event.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/message_queue.h"
 #include "barelymusician/internal/mutable_data.h"
@@ -52,6 +53,7 @@ class Instrument {
   ///
   /// @param effect_id Effect identifier.
   /// @return Status.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   Status DestroyEffect(Id effect_id) noexcept;
 
   /// Returns a control value.
@@ -149,8 +151,10 @@ class Instrument {
 
   /// Sets the control event callback.
   ///
-  /// @param callback Control event callback.
-  void SetControlEventCallback(ControlEventCallback callback) noexcept;
+  /// @param callback Control event definition.
+  /// @param user_data Pointer to user data.
+  void SetControlEvent(ControlEventDefinition definition,
+                       void* user_data) noexcept;
 
   /// Sets data.
   ///
@@ -167,13 +171,14 @@ class Instrument {
   Status SetEffectControl(Id effect_id, int index, double value,
                           double slope_per_beat) noexcept;
 
-  /// Sets an effect control event callback.
+  /// Sets the effect control event.
   ///
   /// @param effect_id Effect identifier.
-  /// @param callback Effect control event callback.
+  /// @param definition Effect control event definition.
+  /// @param user_data Pointer to user data.
   /// @return Status.
-  Status SetEffectControlEventCallback(Id effect_id,
-                                       ControlEventCallback callback) noexcept;
+  Status SetEffectControlEvent(Id effect_id, ControlEventDefinition definition,
+                               void* user_data) noexcept;
 
   /// Sets effect data.
   ///
@@ -187,6 +192,7 @@ class Instrument {
   /// @param effect_id Effect identifier.
   /// @param process_order Effect process order.
   /// @return Status.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   Status SetEffectProcessOrder(Id effect_id, int process_order) noexcept;
 
   /// Sets a note control value.
@@ -199,20 +205,24 @@ class Instrument {
   Status SetNoteControl(double pitch, int index, double value,
                         double slope_per_beat) noexcept;
 
-  /// Sets the a note control event callback.
+  /// Sets the note control event.
   ///
-  /// @param callback Note control event callback.
-  void SetNoteControlEventCallback(NoteControlEventCallback callback) noexcept;
+  /// @param definition Note control event definition.
+  /// @param user_data Pointer to user data.
+  void SetNoteControlEvent(NoteControlEventDefinition definition,
+                           void* user_data) noexcept;
 
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(double pitch) noexcept;
 
-  /// Sets the note off event callback.
+  /// Sets the note off event.
   ///
-  /// @param callback Note off event callback.
-  void SetNoteOffEventCallback(NoteOffEventCallback callback) noexcept;
+  /// @param definition Note off event definition.
+  /// @param user_data Pointer to user data.
+  void SetNoteOffEvent(NoteOffEventDefinition definition,
+                       void* user_data) noexcept;
 
   /// Sets a note on.
   ///
@@ -221,10 +231,12 @@ class Instrument {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetNoteOn(double pitch, double intensity) noexcept;
 
-  /// Sets the note on event callback.
+  /// Sets the note on event.
   ///
-  /// @param callback Note on event callback.
-  void SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept;
+  /// @param definition Note on event definition.
+  /// @param user_data Pointer to user data.
+  void SetNoteOnEvent(NoteOnEventDefinition definition,
+                      void* user_data) noexcept;
 
   /// Sets the tempo.
   ///
@@ -237,6 +249,19 @@ class Instrument {
   void Update(double timestamp) noexcept;
 
  private:
+  // Control event alias.
+  using ControlEvent = Event<ControlEventDefinition, int, double>;
+
+  // Note control event alias.
+  using NoteControlEvent =
+      Event<NoteControlEventDefinition, double, int, double>;
+
+  // Note off event alias.
+  using NoteOffEvent = Event<NoteOffEventDefinition, double>;
+
+  // Note on event alias.
+  using NoteOnEvent = Event<NoteOnEventDefinition, double, double>;
+
   // Effect info.
   struct EffectInfo {
     // Array of controls.
@@ -248,8 +273,8 @@ class Instrument {
     // Process order.
     int process_order;
 
-    // Control event callback.
-    ControlEventCallback control_event_callback;
+    // Control event.
+    ControlEvent control_event;
   };
 
   // Returns the corresponding slope per frame for a given `slope_per_beat`.
@@ -298,17 +323,17 @@ class Instrument {
   // Map of current note controls by note pitches.
   std::unordered_map<double, std::vector<Control>> note_controls_;
 
-  // Control event callback.
-  ControlEventCallback control_event_callback_;
+  // Control event.
+  ControlEvent control_event_;
 
-  // Note control event callback.
-  NoteControlEventCallback note_control_event_callback_;
+  // Note control event.
+  NoteControlEvent note_control_event_;
 
-  // Note off event callback.
-  NoteOffEventCallback note_off_event_callback_;
+  // Note off event.
+  NoteOffEvent note_off_event_;
 
-  // Note on event callback.
-  NoteOnEventCallback note_on_event_callback_;
+  // Note on event.
+  NoteOnEvent note_on_event_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

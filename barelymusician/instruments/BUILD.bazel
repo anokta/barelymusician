@@ -18,7 +18,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":custom_instrument",
-        "//barelymusician",
+        "//barelymusician/common:custom_macros",
         "//barelymusician/dsp:enveloped_voice",
         "//barelymusician/dsp:gain_processor",
         "//barelymusician/dsp:sample_player",
@@ -33,7 +33,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":custom_instrument",
-        "//barelymusician",
+        "//barelymusician/common:custom_macros",
         "//barelymusician/dsp:enveloped_voice",
         "//barelymusician/dsp:gain_processor",
         "//barelymusician/dsp:polyphonic_voice",
@@ -49,7 +49,7 @@ cc_library(
     defines = ["BARELYMUSICIAN_EXPORTS"],
     deps = [
         ":custom_instrument",
-        "//barelymusician",
+        "//barelymusician/common:custom_macros",
         "//barelymusician/dsp:dsp_utils",
         "//barelymusician/dsp:enveloped_voice",
         "//barelymusician/dsp:gain_processor",

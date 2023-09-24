@@ -1,19 +1,5 @@
 #include "barelymusician/instruments/percussion_instrument.h"
 
-#include <cstddef>
-#include <vector>
-
-#include "barelymusician/barelymusician.h"
-#include "barelymusician/instruments/custom_instrument.h"
-
-extern "C" {
-
-BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinition() {
-  return barely::PercussionInstrument::GetDefinition();
-}
-
-}  // extern "C"
-
 namespace barely {
 
 namespace {
@@ -21,22 +7,9 @@ namespace {
 // Maximum number of pads allowed to be set.
 constexpr int kMaxPadCount = 64;
 
-// Default pad release in seconds.
-constexpr double kDefaultPadRelease = 0.1;
-
 }  // namespace
 
-InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
-  static const std::vector<ControlDefinition> control_definitions = {
-      // Gain.
-      ControlDefinition{1.0, 0.0, 1.0},
-      // Pad release.
-      ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
-  };
-  return CustomInstrument::GetDefinition<PercussionInstrument>(
-      control_definitions, {});
-}
-
+// NOLINTNEXTLINE(bugprone-exception-escape)
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
     : frame_rate_(frame_rate),
       gain_processor_(frame_rate),
@@ -62,11 +35,11 @@ void PercussionInstrument::Process(double* output_samples,
 
 void PercussionInstrument::SetControl(int index, double value,
                                       double /*slope_per_frame*/) noexcept {
-  switch (static_cast<PercussionControl>(index)) {
-    case PercussionControl::kGain:
+  switch (static_cast<PercussionInstrumentControl>(index)) {
+    case PercussionInstrumentControl::kGain:
       gain_processor_.SetGain(value);
       break;
-    case PercussionControl::kRelease:
+    case PercussionInstrumentControl::kRelease:
       release_ = value;
       for (auto& pad : pads_) {
         pad.voice.envelope().SetRelease(release_);
@@ -75,6 +48,7 @@ void PercussionInstrument::SetControl(int index, double value,
   }
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void PercussionInstrument::SetData(const void* data,
                                    [[maybe_unused]] int size) noexcept {
   const double* data_double = static_cast<const double*>(data);

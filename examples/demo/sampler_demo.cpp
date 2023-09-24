@@ -18,11 +18,11 @@
 
 namespace {
 
-using ::barely::LowPassControl;
-using ::barely::LowPassEffect;
+using ::barely::LowPassEffectControl;
+using ::barely::LowPassEffectDefinition;
 using ::barely::Musician;
-using ::barely::SamplerControl;
-using ::barely::SamplerInstrument;
+using ::barely::SamplerInstrumentControl;
+using ::barely::SamplerInstrumentDefinition;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::GetDataFilePath;
@@ -89,26 +89,27 @@ int main(int /*argc*/, char* argv[]) {
   Musician musician;
 
   auto instrument =
-      musician.CreateInstrument(SamplerInstrument::GetDefinition(), kFrameRate);
-  instrument.SetControl(SamplerControl::kGain, kGain);
-  instrument.SetControl(SamplerControl::kRootPitch, kRootPitch);
-  instrument.SetControl(SamplerControl::kLoop, kLoop);
-  instrument.SetControl(SamplerControl::kAttack, kAttack);
-  instrument.SetControl(SamplerControl::kRelease, kRelease);
-  instrument.SetControl(SamplerControl::kVoiceCount, kVoiceCount);
+      musician.CreateInstrument(SamplerInstrumentDefinition(), kFrameRate);
+  instrument.SetControl(SamplerInstrumentControl::kGain, kGain);
+  instrument.SetControl(SamplerInstrumentControl::kRootPitch, kRootPitch);
+  instrument.SetControl(SamplerInstrumentControl::kLoop, kLoop);
+  instrument.SetControl(SamplerInstrumentControl::kAttack, kAttack);
+  instrument.SetControl(SamplerInstrumentControl::kRelease, kRelease);
+  instrument.SetControl(SamplerInstrumentControl::kVoiceCount, kVoiceCount);
 
-  auto effect = *instrument.CreateEffect(LowPassEffect::GetDefinition());
-  effect.SetControl(LowPassControl::kCutoffFrequency, kLowPassCutoffFrequency);
+  auto effect = instrument.CreateEffect(LowPassEffectDefinition());
+  effect.SetControl(LowPassEffectControl::kCutoffFrequency,
+                    kLowPassCutoffFrequency);
 
   const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));
   const int size = static_cast<int>(data.size() * sizeof(double));
   instrument.SetData(data.data(), size);
 
-  instrument.SetNoteOnEventCallback([](double pitch, double intensity) {
+  instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", "
                  << intensity << ")";
   });
-  instrument.SetNoteOffEventCallback([](double pitch) {
+  instrument.SetNoteOffEvent([](double pitch) {
     ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") ";
   });
 

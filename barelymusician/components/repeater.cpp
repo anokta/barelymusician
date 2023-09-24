@@ -9,38 +9,41 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Repeater::Repeater(Musician& musician, int process_order) noexcept
-    : musician_(musician), performer_(musician_.CreatePerformer()) {
+    : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.CreateTask(
-      [this, process_order]() noexcept {
-        if (pitches_.empty() || !Update()) {
-          return;
-        }
-        const auto& [pitch_or, length] = pitches_[index_];
-        if (!pitches_[index_].first.has_value()) {
-          return;
-        }
-        const double pitch = *pitches_[index_].first + pitch_shift_;
-        instrument_.SetNoteOn(pitch);
-        performer_.CreateTask(
-            [this, pitch]() { instrument_.SetNoteOff(pitch); },
-            /*is_one_off*/ true,
-            static_cast<double>(length) * *performer_.GetLoopLength(),
-            process_order);
-      },
-      /*is_one_off=*/false, 0.0, process_order);
+  performer_
+      .CreateTask(
+          [this, process_order]() noexcept {
+            if (pitches_.empty() || !Update()) {
+              return;
+            }
+            const auto& [pitch_or, length] = pitches_[index_];
+            if (!pitches_[index_].first.has_value()) {
+              return;
+            }
+            const double pitch = *pitches_[index_].first + pitch_shift_;
+            instrument_.SetNoteOn(pitch);
+            performer_
+                .CreateTask(
+                    [this, pitch]() { instrument_.SetNoteOff(pitch); },
+                    /*is_one_off=*/true,
+                    static_cast<double>(length) * performer_.GetLoopLength(),
+                    process_order)
+                .Release();
+          },
+          /*is_one_off=*/false, 0.0, process_order)
+      .Release();
 }
 
-Repeater::~Repeater() {
-  musician_.DestroyPerformer(performer_);
-  instrument_.SetAllNotesOff();
-}
+Repeater::~Repeater() { instrument_.SetAllNotesOff(); }
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
 
-bool Repeater::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
+// NOLINTNEXTLINE(bugprone-exception-escape)
+bool Repeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Pop() noexcept {
   if (pitches_.empty()) {
     return;
@@ -52,13 +55,14 @@ void Repeater::Pop() noexcept {
   pitches_.pop_back();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(InstrumentRef instrument) noexcept {
+void Repeater::SetInstrument(InstrumentHandle instrument) noexcept {
   instrument_.SetAllNotesOff();
-  instrument_ = instrument;
+  instrument_ = std::move(instrument);
 }
 
 void Repeater::SetRate(double rate) noexcept {
@@ -68,6 +72,7 @@ void Repeater::SetRate(double rate) noexcept {
 
 void Repeater::SetStyle(RepeaterStyle style) noexcept { style_ = style; }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Start(double pitch_shift) noexcept {
   if (IsPlaying()) {
     return;
@@ -76,6 +81,7 @@ void Repeater::Start(double pitch_shift) noexcept {
   performer_.Start();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Stop() noexcept {
   if (!IsPlaying()) {
     return;

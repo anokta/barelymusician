@@ -13,7 +13,6 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/status.h"
-#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 
@@ -27,13 +26,10 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
       infos_.emplace(task_id, TaskInfo{is_one_off, position, process_order})
           .second;
   assert(success);
-  success =
-      (is_one_off ? one_off_tasks_ : recurring_tasks_)
-          .emplace(
-              std::piecewise_construct,
-              std::forward_as_tuple(TaskKey{position, process_order, task_id}),
-              std::forward_as_tuple(definition, user_data))
-          .second;
+  success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
+                .emplace(TaskKey{position, process_order, task_id},
+                         Task(definition, user_data))
+                .second;
   assert(success);
 }
 

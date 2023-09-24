@@ -9,6 +9,45 @@
 
 extern "C" {
 
+// Effect.
+struct BarelyEffect {
+  // Default constructor.
+  BarelyEffect() = default;
+
+  // Internal engine.
+  barely::internal::Engine* engine = nullptr;
+
+  // Instrument identifier.
+  barely::internal::Id instrument_id = barely::internal::kInvalid;
+
+  // Identifier.
+  barely::internal::Id id = barely::internal::kInvalid;
+
+ private:
+  // Ensures that the instance can only be destroyed via explicit destroy call.
+  friend BARELY_EXPORT BarelyStatus
+  BarelyEffect_Destroy(BarelyEffectHandle effect);
+  ~BarelyEffect() = default;
+};
+
+// Instrument.
+struct BarelyInstrument {
+  // Default constructor.
+  BarelyInstrument() = default;
+
+  // Internal engine.
+  barely::internal::Engine* engine = nullptr;
+
+  // Identifier.
+  barely::internal::Id id = barely::internal::kInvalid;
+
+ private:
+  // Ensures that the instance can only be destroyed via explicit destroy call.
+  friend BARELY_EXPORT BarelyStatus
+  BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
+  ~BarelyInstrument() = default;
+};
+
 // Musician.
 struct BarelyMusician {
   // Default constructor.
@@ -26,48 +65,88 @@ struct BarelyMusician {
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
   friend BARELY_EXPORT BarelyStatus
-  BarelyMusician_Destroy(BarelyMusicianHandle handle);
+  BarelyMusician_Destroy(BarelyMusicianHandle musician);
   ~BarelyMusician() = default;
 };
 
-BarelyStatus BarelyEffect_Create(BarelyMusicianHandle handle,
-                                 BarelyId instrument_id,
+// Performer.
+struct BarelyPerformer {
+  // Default constructor.
+  BarelyPerformer() = default;
+
+  // Internal engine.
+  barely::internal::Engine* engine = nullptr;
+
+  // Identifier.
+  barely::internal::Id id = barely::internal::kInvalid;
+
+ private:
+  // Ensures that the instance can only be destroyed via explicit destroy call.
+  friend BARELY_EXPORT BarelyStatus
+  BarelyPerformer_Destroy(BarelyPerformerHandle performer);
+  ~BarelyPerformer() = default;
+};
+
+// Task.
+struct BarelyTask {
+  // Default constructor.
+  BarelyTask() = default;
+
+  // Internal engine.
+  barely::internal::Engine* engine = nullptr;
+
+  // Performer identifier.
+  barely::internal::Id performer_id = barely::internal::kInvalid;
+
+  // Identifier.
+  barely::internal::Id id = barely::internal::kInvalid;
+
+ private:
+  // Ensures that the instance can only be destroyed via explicit destroy call.
+  friend BARELY_EXPORT BarelyStatus BarelyTask_Destroy(BarelyTaskHandle task);
+  ~BarelyTask() = default;
+};
+
+BarelyStatus BarelyEffect_Create(BarelyInstrumentHandle instrument,
                                  BarelyEffectDefinition definition,
                                  int32_t process_order,
-                                 BarelyId* out_effect_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_effect_id) return BarelyStatus_kInvalidArgument;
+                                 BarelyEffectHandle* out_effect) {
+  if (!instrument) return BarelyStatus_kNotFound;
+  if (!out_effect) return BarelyStatus_kInvalidArgument;
 
-  const auto effect_id_or = handle->engine.CreateInstrumentEffect(
-      instrument_id, definition, process_order);
+  const auto effect_id_or = instrument->engine->CreateInstrumentEffect(
+      instrument->id, definition, process_order);
   if (effect_id_or.IsOk()) {
-    *out_effect_id = *effect_id_or;
+    *out_effect = new BarelyEffect();
+    (*out_effect)->engine = instrument->engine;
+    (*out_effect)->instrument_id = instrument->id;
+    (*out_effect)->id = *effect_id_or;
     return BarelyStatus_kOk;
   }
   return effect_id_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_Destroy(BarelyMusicianHandle handle,
-                                  BarelyId instrument_id, BarelyId effect_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyEffect_Destroy(BarelyEffectHandle effect) {
+  if (!effect) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
-    return instrument_or->get().DestroyEffect(effect_id);
+    return instrument_or->get().DestroyEffect(effect->id);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_GetControl(BarelyMusicianHandle handle,
-                                     BarelyId instrument_id, BarelyId effect_id,
-                                     int32_t index, double* out_value) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index,
+                                     double* out_value) {
+  if (!effect) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
     const auto value_or =
-        instrument_or->get().GetEffectControl(effect_id, index);
+        instrument_or->get().GetEffectControl(effect->id, index);
     if (value_or.IsOk()) {
       *out_value = *value_or;
       return BarelyStatus_kOk;
@@ -77,17 +156,16 @@ BarelyStatus BarelyEffect_GetControl(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_GetProcessOrder(BarelyMusicianHandle handle,
-                                          BarelyId instrument_id,
-                                          BarelyId effect_id,
+BarelyStatus BarelyEffect_GetProcessOrder(BarelyEffectHandle effect,
                                           int32_t* out_process_order) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!effect) return BarelyStatus_kNotFound;
   if (!out_process_order) return BarelyStatus_kInvalidArgument;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
     const auto process_order_or =
-        instrument_or->get().GetEffectProcessOrder(effect_id);
+        instrument_or->get().GetEffectProcessOrder(effect->id);
     if (process_order_or.IsOk()) {
       *out_process_order = *process_order_or;
       return BarelyStatus_kOk;
@@ -97,119 +175,114 @@ BarelyStatus BarelyEffect_GetProcessOrder(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_ResetAllControls(BarelyMusicianHandle handle,
-                                           BarelyId instrument_id,
-                                           BarelyId effect_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
+  if (!effect) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
-    return instrument_or->get().ResetAllEffectControls(effect_id);
+    return instrument_or->get().ResetAllEffectControls(effect->id);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_ResetControl(BarelyMusicianHandle handle,
-                                       BarelyId instrument_id,
-                                       BarelyId effect_id, int32_t index) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyEffect_ResetControl(BarelyEffectHandle effect,
+                                       int32_t index) {
+  if (!effect) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
-    return instrument_or->get().ResetEffectControl(effect_id, index);
+    return instrument_or->get().ResetEffectControl(effect->id, index);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_SetControl(BarelyMusicianHandle handle,
-                                     BarelyId instrument_id, BarelyId effect_id,
-                                     int32_t index, double value,
-                                     double slope_per_beat) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index,
+                                     double value, double slope_per_beat) {
+  if (!effect) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
-    return instrument_or->get().SetEffectControl(effect_id, index, value,
+    return instrument_or->get().SetEffectControl(effect->id, index, value,
                                                  slope_per_beat);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_SetControlEventCallback(
-    BarelyMusicianHandle handle, BarelyId instrument_id, BarelyId effect_id,
-    BarelyControlEventCallback callback, void* user_data) {
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+BarelyStatus BarelyEffect_SetControlEvent(
+    BarelyEffectHandle effect, BarelyControlEventDefinition definition,
+    void* user_data) {
+  if (!effect) return BarelyStatus_kNotFound;
+
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetEffectControlEventCallback(
-          effect_id, [callback, user_data](int32_t index, double value) {
-            callback(index, value, user_data);
-          });
-    } else {
-      instrument_or->get().SetEffectControlEventCallback(effect_id, nullptr);
-    }
+    instrument_or->get().SetEffectControlEvent(effect->id, definition,
+                                               user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_SetData(BarelyMusicianHandle handle,
-                                  BarelyId instrument_id, BarelyId effect_id,
-                                  const void* data, int32_t size) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyEffect_SetData(BarelyEffectHandle effect, const void* data,
+                                  int32_t size) {
+  if (!effect) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
     return instrument_or->get().SetEffectData(
-        effect_id, {static_cast<const std::byte*>(data),
-                    static_cast<const std::byte*>(data) + size});
+        effect->id, {static_cast<const std::byte*>(data),
+                     static_cast<const std::byte*>(data) + size});
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyEffect_SetProcessOrder(BarelyMusicianHandle handle,
-                                          BarelyId instrument_id,
-                                          BarelyId effect_id,
+BarelyStatus BarelyEffect_SetProcessOrder(BarelyEffectHandle effect,
                                           int32_t process_order) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!effect) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or =
+      effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.IsOk()) {
-    return instrument_or->get().SetEffectProcessOrder(effect_id, process_order);
+    return instrument_or->get().SetEffectProcessOrder(effect->id,
+                                                      process_order);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle handle,
+BarelyStatus BarelyInstrument_Create(BarelyMusicianHandle musician,
                                      BarelyInstrumentDefinition definition,
                                      int32_t frame_rate,
-                                     BarelyId* out_instrument_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_instrument_id) return BarelyStatus_kInvalidArgument;
+                                     BarelyInstrumentHandle* out_instrument) {
+  if (!musician) return BarelyStatus_kNotFound;
+  if (!out_instrument) return BarelyStatus_kInvalidArgument;
 
   const auto instrument_id_or =
-      handle->engine.CreateInstrument(definition, frame_rate);
+      musician->engine.CreateInstrument(definition, frame_rate);
   if (instrument_id_or.IsOk()) {
-    *out_instrument_id = *instrument_id_or;
+    *out_instrument = new BarelyInstrument();
+    (*out_instrument)->engine = &musician->engine;
+    (*out_instrument)->id = *instrument_id_or;
     return BarelyStatus_kOk;
   }
   return instrument_id_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_Destroy(BarelyMusicianHandle handle,
-                                      BarelyId instrument_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  return handle->engine.DestroyInstrument(instrument_id);
+  return instrument->engine->DestroyInstrument(instrument->id);
 }
 
-BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
-                                         BarelyId instrument_id, int32_t index,
-                                         double* out_value) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_GetControl(BarelyInstrumentHandle instrument,
+                                         int32_t index, double* out_value) {
+  if (!instrument) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     const auto control_or = instrument_or->get().GetControl(index);
     if (control_or.IsOk()) {
@@ -221,14 +294,13 @@ BarelyStatus BarelyInstrument_GetControl(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_GetNoteControl(BarelyMusicianHandle handle,
-                                             BarelyId instrument_id,
+BarelyStatus BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument,
                                              double pitch, int32_t index,
                                              double* out_value) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!instrument) return BarelyStatus_kNotFound;
   if (!out_value) return BarelyStatus_kInvalidArgument;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     const auto note_control_or =
         instrument_or->get().GetNoteControl(pitch, index);
@@ -241,13 +313,12 @@ BarelyStatus BarelyInstrument_GetNoteControl(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle,
-                                       BarelyId instrument_id, double pitch,
-                                       bool* out_is_note_on) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument,
+                                       double pitch, bool* out_is_note_on) {
+  if (!instrument) return BarelyStatus_kNotFound;
   if (!out_is_note_on) return BarelyStatus_kInvalidArgument;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     *out_is_note_on = instrument_or->get().IsNoteOn(pitch);
     return BarelyStatus_kOk;
@@ -255,24 +326,23 @@ BarelyStatus BarelyInstrument_IsNoteOn(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_Process(BarelyMusicianHandle handle,
-                                      BarelyId instrument_id,
+BarelyStatus BarelyInstrument_Process(BarelyInstrumentHandle instrument,
                                       double* output_samples,
                                       int32_t output_channel_count,
                                       int32_t output_frame_count,
                                       double timestamp) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  return handle->engine.ProcessInstrument(instrument_id, output_samples,
-                                          output_channel_count,
-                                          output_frame_count, timestamp);
+  return instrument->engine->ProcessInstrument(instrument->id, output_samples,
+                                               output_channel_count,
+                                               output_frame_count, timestamp);
 }
 
-BarelyStatus BarelyInstrument_ResetAllControls(BarelyMusicianHandle handle,
-                                               BarelyId instrument_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_ResetAllControls(
+    BarelyInstrumentHandle instrument) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     instrument_or->get().ResetAllControls();
     return BarelyStatus_kOk;
@@ -280,47 +350,44 @@ BarelyStatus BarelyInstrument_ResetAllControls(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_ResetAllNoteControls(BarelyMusicianHandle handle,
-                                                   BarelyId instrument_id,
-                                                   double pitch) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_ResetAllNoteControls(
+    BarelyInstrumentHandle instrument, double pitch) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     return instrument_or->get().ResetAllNoteControls(pitch);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_ResetControl(BarelyMusicianHandle handle,
-                                           BarelyId instrument_id,
+BarelyStatus BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument,
                                            int32_t index) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     return instrument_or->get().ResetControl(index);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_ResetNoteControl(BarelyMusicianHandle handle,
-                                               BarelyId instrument_id,
-                                               double pitch, int32_t index) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_ResetNoteControl(
+    BarelyInstrumentHandle instrument, double pitch, int32_t index) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     return instrument_or->get().ResetNoteControl(pitch, index);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetAllNotesOff(BarelyMusicianHandle handle,
-                                             BarelyId instrument_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetAllNotesOff(
+    BarelyInstrumentHandle instrument) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     instrument_or->get().SetAllNotesOff();
     return BarelyStatus_kOk;
@@ -328,45 +395,37 @@ BarelyStatus BarelyInstrument_SetAllNotesOff(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetControl(BarelyMusicianHandle handle,
-                                         BarelyId instrument_id, int32_t index,
-                                         double value, double slope_per_beat) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetControl(BarelyInstrumentHandle instrument,
+                                         int32_t index, double value,
+                                         double slope_per_beat) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     return instrument_or->get().SetControl(index, value, slope_per_beat);
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetControlEventCallback(
-    BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyControlEventCallback callback, void* user_data) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetControlEvent(
+    BarelyInstrumentHandle instrument, BarelyControlEventDefinition definition,
+    void* user_data) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetControlEventCallback(
-          [callback, user_data](int32_t index, double value) {
-            callback(index, value, user_data);
-          });
-    } else {
-      instrument_or->get().SetControlEventCallback(nullptr);
-    }
+    instrument_or->get().SetControlEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
-                                      BarelyId instrument_id, const void* data,
-                                      int32_t size) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetData(BarelyInstrumentHandle instrument,
+                                      const void* data, int32_t size) {
+  if (!instrument) return BarelyStatus_kNotFound;
   if (size < 0 || (!data && size > 0)) return BarelyStatus_kInvalidArgument;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     instrument_or->get().SetData({static_cast<const std::byte*>(data),
                                   static_cast<const std::byte*>(data) + size});
@@ -375,14 +434,13 @@ BarelyStatus BarelyInstrument_SetData(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteControl(BarelyMusicianHandle handle,
-                                             BarelyId instrument_id,
+BarelyStatus BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument,
                                              double pitch, int32_t index,
                                              double value,
                                              double slope_per_beat) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     return instrument_or->get().SetNoteControl(pitch, index, value,
                                                slope_per_beat);
@@ -390,31 +448,24 @@ BarelyStatus BarelyInstrument_SetNoteControl(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteControlEventCallback(
-    BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyNoteControlEventCallback callback, void* user_data) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetNoteControlEvent(
+    BarelyInstrumentHandle instrument,
+    BarelyNoteControlEventDefinition definition, void* user_data) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetNoteControlEventCallback(
-          [callback, user_data](double pitch, int32_t index, double value) {
-            callback(pitch, index, value, user_data);
-          });
-    } else {
-      instrument_or->get().SetNoteControlEventCallback(nullptr);
-    }
+    instrument_or->get().SetNoteControlEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteOff(BarelyMusicianHandle handle,
-                                         BarelyId instrument_id, double pitch) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument,
+                                         double pitch) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     instrument_or->get().SetNoteOff(pitch);
     return BarelyStatus_kOk;
@@ -422,30 +473,24 @@ BarelyStatus BarelyInstrument_SetNoteOff(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteOffEventCallback(
-    BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyNoteOffEventCallback callback, void* user_data) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetNoteOffEvent(
+    BarelyInstrumentHandle instrument, BarelyNoteOffEventDefinition definition,
+    void* user_data) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetNoteOffEventCallback(
-          [callback, user_data](double pitch) { callback(pitch, user_data); });
-    } else {
-      instrument_or->get().SetNoteOffEventCallback(nullptr);
-    }
+    instrument_or->get().SetNoteOffEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteOn(BarelyMusicianHandle handle,
-                                        BarelyId instrument_id, double pitch,
-                                        double intensity) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
+                                        double pitch, double intensity) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
     instrument_or->get().SetNoteOn(pitch, intensity);
     return BarelyStatus_kOk;
@@ -453,21 +498,14 @@ BarelyStatus BarelyInstrument_SetNoteOn(BarelyMusicianHandle handle,
   return instrument_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyInstrument_SetNoteOnEventCallback(
-    BarelyMusicianHandle handle, BarelyId instrument_id,
-    BarelyNoteOnEventCallback callback, void* user_data) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyInstrument_SetNoteOnEvent(
+    BarelyInstrumentHandle instrument, BarelyNoteOnEventDefinition definition,
+    void* user_data) {
+  if (!instrument) return BarelyStatus_kNotFound;
 
-  const auto instrument_or = handle->engine.GetInstrument(instrument_id);
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.IsOk()) {
-    if (callback) {
-      instrument_or->get().SetNoteOnEventCallback(
-          [callback, user_data](double pitch, double intensity) {
-            callback(pitch, intensity, user_data);
-          });
-    } else {
-      instrument_or->get().SetNoteOnEventCallback(nullptr);
-    }
+    instrument_or->get().SetNoteOnEvent(definition, user_data);
     return BarelyStatus_kOk;
   }
   return instrument_or.GetErrorStatus();
@@ -480,74 +518,74 @@ BarelyStatus BarelyMusician_Create(BarelyMusicianHandle* out_handle) {
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle handle) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyMusician_Destroy(BarelyMusicianHandle musician) {
+  if (!musician) return BarelyStatus_kNotFound;
 
-  delete handle;
+  delete musician;
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle handle,
+BarelyStatus BarelyMusician_GetTempo(BarelyMusicianHandle musician,
                                      double* out_tempo) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!musician) return BarelyStatus_kNotFound;
   if (!out_tempo) return BarelyStatus_kInvalidArgument;
 
-  *out_tempo = handle->engine.GetTempo();
+  *out_tempo = musician->engine.GetTempo();
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_GetTimestamp(BarelyMusicianHandle handle,
+BarelyStatus BarelyMusician_GetTimestamp(BarelyMusicianHandle musician,
                                          double* out_timestamp) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!musician) return BarelyStatus_kNotFound;
   if (!out_timestamp) return BarelyStatus_kInvalidArgument;
 
-  *out_timestamp = handle->engine.GetTimestamp();
+  *out_timestamp = musician->engine.GetTimestamp();
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle handle,
+BarelyStatus BarelyMusician_SetTempo(BarelyMusicianHandle musician,
                                      double tempo) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!musician) return BarelyStatus_kNotFound;
 
-  handle->engine.SetTempo(tempo);
+  musician->engine.SetTempo(tempo);
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyMusician_Update(BarelyMusicianHandle handle,
+BarelyStatus BarelyMusician_Update(BarelyMusicianHandle musician,
                                    double timestamp) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!musician) return BarelyStatus_kNotFound;
 
-  handle->engine.Update(timestamp);
+  musician->engine.Update(timestamp);
   return BarelyStatus_kOk;
 }
 
-BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle handle,
-                                    BarelyId* out_performer_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_performer_id) return BarelyStatus_kInvalidArgument;
+BarelyStatus BarelyPerformer_Create(BarelyMusicianHandle musician,
+                                    BarelyPerformerHandle* out_performer) {
+  if (!musician) return BarelyStatus_kNotFound;
+  if (!out_performer) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_id_or = handle->engine.CreatePerformer();
+  const auto performer_id_or = musician->engine.CreatePerformer();
   if (performer_id_or.IsOk()) {
-    *out_performer_id = *performer_id_or;
+    *out_performer = new BarelyPerformer();
+    (*out_performer)->engine = &musician->engine;
+    (*out_performer)->id = *performer_id_or;
     return BarelyStatus_kOk;
   }
   return performer_id_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_Destroy(BarelyMusicianHandle handle,
-                                     BarelyId performer_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
+  if (!performer) return BarelyStatus_kNotFound;
 
-  return handle->engine.DestroyPerformer(performer_id);
+  return performer->engine->DestroyPerformer(performer->id);
 }
 
 BarelyStatus BarelyPerformer_GetLoopBeginPosition(
-    BarelyMusicianHandle handle, BarelyId performer_id,
-    double* out_loop_begin_position) {
-  if (!handle) return BarelyStatus_kNotFound;
+    BarelyPerformerHandle performer, double* out_loop_begin_position) {
+  if (!performer) return BarelyStatus_kNotFound;
   if (!out_loop_begin_position) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     *out_loop_begin_position = performer_or->get().GetLoopBeginPosition();
     return BarelyStatus_kOk;
@@ -555,13 +593,12 @@ BarelyStatus BarelyPerformer_GetLoopBeginPosition(
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_GetLoopLength(BarelyMusicianHandle handle,
-                                           BarelyId performer_id,
+BarelyStatus BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer,
                                            double* out_loop_length) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!performer) return BarelyStatus_kNotFound;
   if (!out_loop_length) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     *out_loop_length = performer_or->get().GetLoopLength();
     return BarelyStatus_kOk;
@@ -569,13 +606,12 @@ BarelyStatus BarelyPerformer_GetLoopLength(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_GetPosition(BarelyMusicianHandle handle,
-                                         BarelyId performer_id,
+BarelyStatus BarelyPerformer_GetPosition(BarelyPerformerHandle performer,
                                          double* out_position) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!performer) return BarelyStatus_kNotFound;
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     *out_position = performer_or->get().GetPosition();
     return BarelyStatus_kOk;
@@ -583,13 +619,12 @@ BarelyStatus BarelyPerformer_GetPosition(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_IsLooping(BarelyMusicianHandle handle,
-                                       BarelyId performer_id,
+BarelyStatus BarelyPerformer_IsLooping(BarelyPerformerHandle performer,
                                        bool* out_is_looping) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!performer) return BarelyStatus_kNotFound;
   if (!out_is_looping) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     *out_is_looping = performer_or->get().IsLooping();
     return BarelyStatus_kOk;
@@ -597,13 +632,12 @@ BarelyStatus BarelyPerformer_IsLooping(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_IsPlaying(BarelyMusicianHandle handle,
-                                       BarelyId performer_id,
+BarelyStatus BarelyPerformer_IsPlaying(BarelyPerformerHandle performer,
                                        bool* out_is_playing) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!performer) return BarelyStatus_kNotFound;
   if (!out_is_playing) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     *out_is_playing = performer_or->get().IsPlaying();
     return BarelyStatus_kOk;
@@ -611,12 +645,11 @@ BarelyStatus BarelyPerformer_IsPlaying(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_SetLoopBeginPosition(BarelyMusicianHandle handle,
-                                                  BarelyId performer_id,
-                                                  double loop_begin_position) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyPerformer_SetLoopBeginPosition(
+    BarelyPerformerHandle performer, double loop_begin_position) {
+  if (!performer) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     performer_or->get().SetLoopBeginPosition(loop_begin_position);
     return BarelyStatus_kOk;
@@ -624,12 +657,11 @@ BarelyStatus BarelyPerformer_SetLoopBeginPosition(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_SetLoopLength(BarelyMusicianHandle handle,
-                                           BarelyId performer_id,
+BarelyStatus BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer,
                                            double loop_length) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!performer) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     performer_or->get().SetLoopLength(loop_length);
     return BarelyStatus_kOk;
@@ -637,12 +669,11 @@ BarelyStatus BarelyPerformer_SetLoopLength(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_SetLooping(BarelyMusicianHandle handle,
-                                        BarelyId performer_id,
+BarelyStatus BarelyPerformer_SetLooping(BarelyPerformerHandle performer,
                                         bool is_looping) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!performer) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     performer_or->get().SetLooping(is_looping);
     return BarelyStatus_kOk;
@@ -650,12 +681,11 @@ BarelyStatus BarelyPerformer_SetLooping(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_SetPosition(BarelyMusicianHandle handle,
-                                         BarelyId performer_id,
+BarelyStatus BarelyPerformer_SetPosition(BarelyPerformerHandle performer,
                                          double position) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!performer) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     performer_or->get().SetPosition(position);
     return BarelyStatus_kOk;
@@ -663,11 +693,10 @@ BarelyStatus BarelyPerformer_SetPosition(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_Start(BarelyMusicianHandle handle,
-                                   BarelyId performer_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyPerformer_Start(BarelyPerformerHandle performer) {
+  if (!performer) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     performer_or->get().Start();
     return BarelyStatus_kOk;
@@ -675,11 +704,10 @@ BarelyStatus BarelyPerformer_Start(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
-                                  BarelyId performer_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyPerformer_Stop(BarelyPerformerHandle performer) {
+  if (!performer) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = performer->engine->GetPerformer(performer->id);
   if (performer_or.IsOk()) {
     performer_or->get().Stop();
     return BarelyStatus_kOk;
@@ -687,43 +715,44 @@ BarelyStatus BarelyPerformer_Stop(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyTask_Create(BarelyMusicianHandle handle,
-                               BarelyId performer_id,
+BarelyStatus BarelyTask_Create(BarelyPerformerHandle performer,
                                BarelyTaskDefinition definition, bool is_one_off,
                                double position, int32_t process_order,
-                               void* user_data, BarelyId* out_task_id) {
-  if (!handle) return BarelyStatus_kNotFound;
-  if (!out_task_id) return BarelyStatus_kInvalidArgument;
+                               void* user_data, BarelyTaskHandle* out_task) {
+  if (!performer) return BarelyStatus_kNotFound;
+  if (!out_task) return BarelyStatus_kInvalidArgument;
 
-  const auto task_id_or = handle->engine.CreatePerformerTask(
-      performer_id, definition, is_one_off, position, process_order, user_data);
+  const auto task_id_or = performer->engine->CreatePerformerTask(
+      performer->id, definition, is_one_off, position, process_order,
+      user_data);
   if (task_id_or.IsOk()) {
-    *out_task_id = *task_id_or;
+    *out_task = new BarelyTask();
+    (*out_task)->engine = performer->engine;
+    (*out_task)->performer_id = performer->id;
+    (*out_task)->id = *task_id_or;
     return BarelyStatus_kOk;
   }
   return task_id_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyTask_Destroy(BarelyMusicianHandle handle,
-                                BarelyId performer_id, BarelyId task_id) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyTask_Destroy(BarelyTaskHandle task) {
+  if (!task) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = task->engine->GetPerformer(task->performer_id);
   if (performer_or.IsOk()) {
-    return performer_or->get().DestroyTask(task_id);
+    return performer_or->get().DestroyTask(task->id);
   }
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyTask_GetPosition(BarelyMusicianHandle handle,
-                                    BarelyId performer_id, BarelyId task_id,
+BarelyStatus BarelyTask_GetPosition(BarelyTaskHandle task,
                                     double* out_position) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!task) return BarelyStatus_kNotFound;
   if (!out_position) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = task->engine->GetPerformer(task->performer_id);
   if (performer_or.IsOk()) {
-    const auto position_or = performer_or->get().GetTaskPosition(task_id);
+    const auto position_or = performer_or->get().GetTaskPosition(task->id);
     if (position_or.IsOk()) {
       *out_position = *position_or;
       return BarelyStatus_kOk;
@@ -733,16 +762,15 @@ BarelyStatus BarelyTask_GetPosition(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyTask_GetProcessOrder(BarelyMusicianHandle handle,
-                                        BarelyId performer_id, BarelyId task_id,
+BarelyStatus BarelyTask_GetProcessOrder(BarelyTaskHandle task,
                                         int32_t* out_process_order) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!task) return BarelyStatus_kNotFound;
   if (!out_process_order) return BarelyStatus_kInvalidArgument;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = task->engine->GetPerformer(task->performer_id);
   if (performer_or.IsOk()) {
     const auto process_order_or =
-        performer_or->get().GetTaskProcessOrder(task_id);
+        performer_or->get().GetTaskProcessOrder(task->id);
     if (process_order_or.IsOk()) {
       *out_process_order = *process_order_or;
       return BarelyStatus_kOk;
@@ -752,26 +780,23 @@ BarelyStatus BarelyTask_GetProcessOrder(BarelyMusicianHandle handle,
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyTask_SetPosition(BarelyMusicianHandle handle,
-                                    BarelyId performer_id, BarelyId task_id,
-                                    double position) {
-  if (!handle) return BarelyStatus_kNotFound;
+BarelyStatus BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
+  if (!task) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = task->engine->GetPerformer(task->performer_id);
   if (performer_or.IsOk()) {
-    return performer_or->get().SetTaskPosition(task_id, position);
+    return performer_or->get().SetTaskPosition(task->id, position);
   }
   return performer_or.GetErrorStatus();
 }
 
-BarelyStatus BarelyTask_SetProcessOrder(BarelyMusicianHandle handle,
-                                        BarelyId performer_id, BarelyId task_id,
+BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
                                         int32_t process_order) {
-  if (!handle) return BarelyStatus_kNotFound;
+  if (!task) return BarelyStatus_kNotFound;
 
-  const auto performer_or = handle->engine.GetPerformer(performer_id);
+  const auto performer_or = task->engine->GetPerformer(task->performer_id);
   if (performer_or.IsOk()) {
-    return performer_or->get().SetTaskProcessOrder(task_id, process_order);
+    return performer_or->get().SetTaskProcessOrder(task->id, process_order);
   }
   return performer_or.GetErrorStatus();
 }

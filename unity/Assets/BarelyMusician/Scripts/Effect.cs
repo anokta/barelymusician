@@ -20,12 +20,12 @@ namespace Barely {
     public int ProcessOrder {
       get { return _processOrder; }
       set {
-        if (_id == Musician.Internal.InvalidId) {
+        if (_handle == IntPtr.Zero) {
           _processOrder = value;
           return;
         }
-        Musician.Internal.Effect_SetProcessOrder(_instrumentId, _id, value);
-        _processOrder = Musician.Internal.Effect_GetProcessOrder(_instrumentId, _id);
+        Musician.Internal.Effect_SetProcessOrder(_handle, value);
+        _processOrder = Musician.Internal.Effect_GetProcessOrder(_handle);
       }
     }
     [SerializeField]
@@ -36,19 +36,19 @@ namespace Barely {
     /// @param index Control index.
     /// @return Control value.
     public double GetControl(int index) {
-      return Musician.Internal.Effect_GetControl(_instrumentId, _id, index);
+      return Musician.Internal.Effect_GetControl(_handle, index);
     }
 
     /// Resets all control values.
     public void ResetAllControls() {
-      Musician.Internal.Effect_ResetAllControls(_instrumentId, _id);
+      Musician.Internal.Effect_ResetAllControls(_handle);
     }
 
     /// Resets a control value.
     ///
     /// @param index Control index.
     public void ResetControl(int index) {
-      Musician.Internal.Effect_ResetControl(_instrumentId, _id, index);
+      Musician.Internal.Effect_ResetControl(_handle, index);
     }
 
     /// Sets a control value.
@@ -57,7 +57,7 @@ namespace Barely {
     /// @param value Control value.
     /// @param slopePerBeat Control slope in value change per beat.
     public void SetControl(int index, double value, double slopePerBeat = 0.0) {
-      Musician.Internal.Effect_SetControl(_instrumentId, _id, index, value, slopePerBeat);
+      Musician.Internal.Effect_SetControl(_handle, index, value, slopePerBeat);
     }
 
     /// Sets data.
@@ -65,47 +65,43 @@ namespace Barely {
     /// @param dataPtr Pointer to data.
     /// @param size Data size in bytes.
     public void SetData(IntPtr dataPtr, int size) {
-      Musician.Internal.Effect_SetData(_instrumentId, _id, dataPtr, size);
+      Musician.Internal.Effect_SetData(_handle, dataPtr, size);
     }
 
     /// Class that wraps the internal api.
     public static class Internal {
+      // Disables effect.
+      public static void Disable(Effect effect) {
+        if (effect.enabled) {
+          Musician.Internal.Effect_Destroy(ref effect._handle);
+        }
+      }
+
+      /// Re-enables effect.
+      public static void ReEnable(IntPtr instrumentHandle, Effect effect) {
+        if (effect.enabled) {
+          Musician.Internal.Effect_Destroy(ref effect._handle);
+          Musician.Internal.Effect_Create(instrumentHandle, effect, ref effect._handle);
+        }
+      }
+
       /// Internal control event callback.
       public static void OnControlEvent(Effect effect, int index, double value) {
         effect.OnControl?.Invoke(index, value);
         effect.OnControlEvent?.Invoke(index, (float)value);
       }
-
-      /// Re-enables effect.
-      public static void ReEnable(Int64 instrumentId, Effect effect) {
-        if (effect.enabled) {
-          Musician.Internal.Effect_Destroy(ref effect._instrumentId, ref effect._id);
-          effect._instrumentId = instrumentId;
-          Musician.Internal.Effect_Create(effect._instrumentId, effect, ref effect._id);
-        }
-      }
-
-      // Disables effect.
-      public static void Disable(Effect effect) {
-        if (effect.enabled) {
-          Musician.Internal.Effect_Destroy(ref effect._instrumentId, ref effect._id);
-        }
-      }
     }
 
     protected virtual void OnEnable() {
-      Instrument.Internal.SetInstrumentId(GetComponent<Instrument>(), ref _instrumentId);
-      Musician.Internal.Effect_Create(_instrumentId, this, ref _id);
+      Musician.Internal.Effect_Create(
+          Instrument.Internal.GetInstrumentHandle(GetComponent<Instrument>()), this, ref _handle);
     }
 
     protected virtual void OnDisable() {
-      Musician.Internal.Effect_Destroy(ref _instrumentId, ref _id);
+      Musician.Internal.Effect_Destroy(ref _handle);
     }
 
-    // Instrument identifier.
-    private Int64 _instrumentId = Musician.Internal.InvalidId;
-
-    // Identifier.
-    private Int64 _id = Musician.Internal.InvalidId;
+    // Handle.
+    private IntPtr _handle = IntPtr.Zero;
   }
 }

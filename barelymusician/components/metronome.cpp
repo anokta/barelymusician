@@ -8,22 +8,23 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Metronome::Metronome(Musician& musician, int process_order) noexcept
-    : musician_(musician), performer_(musician_.CreatePerformer()) {
+    : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.CreateTask(
-      [this]() noexcept {
-        if (callback_) {
-          callback_(beat_);
-        }
-        ++beat_;
-      },
-      /*is_one_off=*/false, 0.0, process_order);
+  performer_
+      .CreateTask(
+          [this]() noexcept {
+            if (callback_) {
+              callback_(beat_);
+            }
+            ++beat_;
+          },
+          /*is_one_off=*/false, 0.0, process_order)
+      .Release();
 }
 
-Metronome::~Metronome() { musician_.DestroyPerformer(performer_); }
-
-bool Metronome::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
+// NOLINTNEXTLINE(bugprone-exception-escape)
+bool Metronome::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 void Metronome::Reset() noexcept {
   performer_.Stop();

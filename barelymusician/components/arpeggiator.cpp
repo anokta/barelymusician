@@ -8,32 +8,34 @@ namespace barely {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
-    : musician_(musician), performer_(musician_.CreatePerformer()) {
+    : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_.CreateTask(
-      [this, process_order]() noexcept {
-        Update();
-        const double pitch = pitches_[index_];
-        instrument_.SetNoteOn(pitch);
-        performer_.CreateTask(
-            [this, pitch]() { instrument_.SetNoteOff(pitch); },
-            /*is_one_off*/ true, gate_ratio_ * *performer_.GetLoopLength(),
-            process_order);
-      },
-      /*is_one_off=*/false, 0.0, process_order);
+  performer_
+      .CreateTask(
+          [this, process_order]() noexcept {
+            Update();
+            const double pitch = pitches_[index_];
+            instrument_.SetNoteOn(pitch);
+            performer_
+                .CreateTask([this, pitch]() { instrument_.SetNoteOff(pitch); },
+                            /*is_one_off*/ true,
+                            gate_ratio_ * performer_.GetLoopLength(),
+                            process_order)
+                .Release();
+          },
+          /*is_one_off=*/false, 0.0, process_order)
+      .Release();
 }
 
-Arpeggiator::~Arpeggiator() {
-  musician_.DestroyPerformer(performer_);
-  instrument_.SetAllNotesOff();
-}
+Arpeggiator::~Arpeggiator() { instrument_.SetAllNotesOff(); }
 
 bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
 }
 
-bool Arpeggiator::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
+// NOLINTNEXTLINE(bugprone-exception-escape)
+bool Arpeggiator::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 void Arpeggiator::SetAllNotesOff() noexcept {
   if (!pitches_.empty()) {
@@ -46,11 +48,12 @@ void Arpeggiator::SetGateRatio(double gate_ratio) noexcept {
   gate_ratio_ = std::min(std::max(gate_ratio, 0.0), 1.0);
 }
 
-void Arpeggiator::SetInstrument(InstrumentRef instrument) noexcept {
+void Arpeggiator::SetInstrument(InstrumentHandle instrument) noexcept {
   instrument_.SetAllNotesOff();
-  instrument_ = instrument;
+  instrument_ = std::move(instrument);
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Arpeggiator::SetNoteOff(double pitch) noexcept {
   if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch);
       it != pitches_.end()) {
@@ -61,6 +64,7 @@ void Arpeggiator::SetNoteOff(double pitch) noexcept {
   }
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Arpeggiator::SetNoteOn(double pitch) noexcept {
   if (const auto it = std::lower_bound(pitches_.begin(), pitches_.end(), pitch);
       it == pitches_.end() || *it != pitch) {

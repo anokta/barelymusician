@@ -12,7 +12,6 @@
 #include "barelymusician/internal/mutable_data.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/status.h"
-#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 
@@ -39,7 +38,7 @@ class Engine {
                                       EffectDefinition definition,
                                       int process_order) noexcept;
 
-  /// Creates new instrument.
+  /// Creates a new instrument.
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
@@ -48,13 +47,13 @@ class Engine {
   StatusOr<Id> CreateInstrument(InstrumentDefinition definition,
                                 int frame_rate) noexcept;
 
-  /// Creates new performer.
+  /// Creates a new performer.
   ///
   /// @return Performer identifier or error status.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   StatusOr<Id> CreatePerformer() noexcept;
 
-  /// Creates new performer task.
+  /// Creates a new performer task.
   ///
   /// @param performer_id Performer identifier.
   /// @param definition Task definition.

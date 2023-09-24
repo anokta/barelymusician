@@ -18,6 +18,7 @@ namespace barely::internal {
 namespace {
 
 // Builds the corresponding controls for a given array of control `definitions`.
+// NOLINTNEXTLINE(bugprone-exception-escape)
 std::vector<Control> BuildControls(const ControlDefinition* definitions,
                                    int definition_count) noexcept {
   std::vector<Control> controls;
@@ -69,6 +70,7 @@ Instrument::~Instrument() noexcept {
   effect_id_ref_pairs_.Update({});
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::CreateEffect(Id effect_id, EffectDefinition definition,
                               int process_order) noexcept {
   assert(effect_id > kInvalid);
@@ -90,6 +92,7 @@ void Instrument::CreateEffect(Id effect_id, EffectDefinition definition,
   UpdateEffectReferences();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 Status Instrument::DestroyEffect(Id effect_id) noexcept {
   if (effect_id == kInvalid) {
     return Status::InvalidArgument();
@@ -176,7 +179,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
         process_callback_(&state_, &output_samples[sample_offset],
                           output_channel_count, frame_count);
       }
-      for (auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
+      for (const auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
         assert(effect_ref);
         effect_ref->Process(&output_samples[sample_offset],
                             output_channel_count, frame_count);
@@ -252,7 +255,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
       process_callback_(&state_, &output_samples[sample_offset],
                         output_channel_count, frame_count);
     }
-    for (auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
+    for (const auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
       assert(effect_ref);
       effect_ref->Process(&output_samples[sample_offset], output_channel_count,
                           frame_count);
@@ -264,9 +267,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
 void Instrument::ResetAllControls() noexcept {
   for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
     if (auto& control = controls_[index]; control.Reset()) {
-      if (control_event_callback_) {
-        control_event_callback_(index, control.GetValue());
-      }
+      control_event_.Process(index, control.GetValue());
       message_queue_.Add(timestamp_,
                          ControlMessage{index, control.GetValue(), 0.0});
     }
@@ -282,9 +283,7 @@ Status Instrument::ResetAllEffectControls(Id effect_id) noexcept {
          ++index) {
       if (auto& effect_control = effect_info->controls[index];
           effect_control.Reset()) {
-        if (effect_info->control_event_callback) {
-          effect_info->control_event_callback(index, effect_control.GetValue());
-        }
+        effect_info->control_event.Process(index, effect_control.GetValue());
         message_queue_.Add(
             timestamp_, EffectControlMessage{effect_id, index,
                                              effect_control.GetValue(), 0.0});
@@ -300,9 +299,7 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
     for (int index = 0; index < static_cast<int>(note_controls->size());
          ++index) {
       if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
-        if (note_control_event_callback_) {
-          note_control_event_callback_(pitch, index, note_control.GetValue());
-        }
+        note_control_event_.Process(pitch, index, note_control.GetValue());
         message_queue_.Add(
             timestamp_,
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
@@ -316,9 +313,7 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
 Status Instrument::ResetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {
-      if (control_event_callback_) {
-        control_event_callback_(index, control.GetValue());
-      }
+      control_event_.Process(index, control.GetValue());
       message_queue_.Add(timestamp_,
                          ControlMessage{index, control.GetValue(), 0.0});
     }
@@ -335,9 +330,7 @@ Status Instrument::ResetEffectControl(Id effect_id, int index) noexcept {
     if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
       if (auto& effect_control = effect_info->controls[index];
           effect_control.Reset()) {
-        if (effect_info->control_event_callback) {
-          effect_info->control_event_callback(index, effect_control.GetValue());
-        }
+        effect_info->control_event.Process(index, effect_control.GetValue());
         message_queue_.Add(
             timestamp_, ControlMessage{index, effect_control.GetValue(), 0.0});
       }
@@ -352,9 +345,7 @@ Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
-        if (note_control_event_callback_) {
-          note_control_event_callback_(pitch, index, note_control.GetValue());
-        }
+        note_control_event_.Process(pitch, index, note_control.GetValue());
         message_queue_.Add(
             timestamp_,
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
@@ -369,9 +360,7 @@ Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetAllNotesOff() noexcept {
   for (const auto& [pitch, note_controls] : std::exchange(note_controls_, {})) {
-    if (note_off_event_callback_) {
-      note_off_event_callback_(pitch);
-    }
+    note_off_event_.Process(pitch);
     message_queue_.Add(timestamp_, NoteOffMessage{pitch});
   }
 }
@@ -380,9 +369,7 @@ Status Instrument::SetControl(int index, double value,
                               double slope_per_beat) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Set(value, slope_per_beat)) {
-      if (control_event_callback_) {
-        control_event_callback_(index, control.GetValue());
-      }
+      control_event_.Process(index, control.GetValue());
       message_queue_.Add(timestamp_,
                          ControlMessage{index, control.GetValue(),
                                         GetSlopePerFrame(slope_per_beat)});
@@ -392,9 +379,9 @@ Status Instrument::SetControl(int index, double value,
   return Status::InvalidArgument();
 }
 
-void Instrument::SetControlEventCallback(
-    ControlEventCallback callback) noexcept {
-  control_event_callback_ = std::move(callback);
+void Instrument::SetControlEvent(ControlEventDefinition definition,
+                                 void* user_data) noexcept {
+  control_event_ = {definition, user_data};
 }
 
 void Instrument::SetData(std::vector<std::byte> data) noexcept {
@@ -410,9 +397,7 @@ Status Instrument::SetEffectControl(Id effect_id, int index, double value,
     if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
       if (auto& effect_control = effect_info->controls[index];
           effect_control.Set(value, slope_per_beat)) {
-        if (effect_info->control_event_callback) {
-          effect_info->control_event_callback(index, effect_control.GetValue());
-        }
+        effect_info->control_event.Process(index, effect_control.GetValue());
         message_queue_.Add(
             timestamp_,
             EffectControlMessage{effect_id, index, effect_control.GetValue(),
@@ -425,13 +410,14 @@ Status Instrument::SetEffectControl(Id effect_id, int index, double value,
   return Status::NotFound();
 }
 
-Status Instrument::SetEffectControlEventCallback(
-    Id effect_id, ControlEventCallback callback) noexcept {
+Status Instrument::SetEffectControlEvent(Id effect_id,
+                                         ControlEventDefinition definition,
+                                         void* user_data) noexcept {
   if (effect_id == kInvalid) {
     return Status::InvalidArgument();
   }
   if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
-    effect_info->control_event_callback = std::move(callback);
+    effect_info->control_event = {definition, user_data};
     return Status::Ok();
   }
   return Status::NotFound();
@@ -450,6 +436,7 @@ Status Instrument::SetEffectData(Id effect_id,
   return Status::NotFound();
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 Status Instrument::SetEffectProcessOrder(Id effect_id,
                                          int process_order) noexcept {
   if (effect_id == kInvalid) {
@@ -476,9 +463,7 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
     if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index];
           note_control.Set(value, slope_per_beat)) {
-        if (note_control_event_callback_) {
-          note_control_event_callback_(pitch, index, note_control.GetValue());
-        }
+        note_control_event_.Process(pitch, index, note_control.GetValue());
         message_queue_.Add(
             timestamp_,
             NoteControlMessage{pitch, index, note_control.GetValue(),
@@ -491,31 +476,27 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
   return Status::InvalidArgument();
 }
 
-void Instrument::SetNoteControlEventCallback(
-    NoteControlEventCallback callback) noexcept {
-  note_control_event_callback_ = std::move(callback);
+void Instrument::SetNoteControlEvent(NoteControlEventDefinition definition,
+                                     void* user_data) noexcept {
+  note_control_event_ = {definition, user_data};
 }
 
 void Instrument::SetNoteOff(double pitch) noexcept {
   if (note_controls_.erase(pitch) > 0) {
-    if (note_off_event_callback_) {
-      note_off_event_callback_(pitch);
-    }
+    note_off_event_.Process(pitch);
     message_queue_.Add(timestamp_, NoteOffMessage{pitch});
   }
 }
 
-void Instrument::SetNoteOffEventCallback(
-    NoteOffEventCallback callback) noexcept {
-  note_off_event_callback_ = std::move(callback);
+void Instrument::SetNoteOffEvent(NoteOffEventDefinition definition,
+                                 void* user_data) noexcept {
+  note_off_event_ = {definition, user_data};
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
   if (note_controls_.try_emplace(pitch, default_note_controls_).second) {
-    if (note_on_event_callback_) {
-      note_on_event_callback_(pitch, intensity);
-    }
+    note_on_event_.Process(pitch, intensity);
     message_queue_.Add(timestamp_, NoteOnMessage{pitch, intensity});
     for (int index = 0; index < static_cast<int>(default_note_controls_.size());
          ++index) {
@@ -527,8 +508,9 @@ void Instrument::SetNoteOn(double pitch, double intensity) noexcept {
   }
 }
 
-void Instrument::SetNoteOnEventCallback(NoteOnEventCallback callback) noexcept {
-  note_on_event_callback_ = std::move(callback);
+void Instrument::SetNoteOnEvent(NoteOnEventDefinition definition,
+                                void* user_data) noexcept {
+  note_on_event_ = {definition, user_data};
 }
 
 void Instrument::SetTempo(double tempo) noexcept {
@@ -581,9 +563,8 @@ void Instrument::Update(double timestamp) noexcept {
     const double duration = BeatsFromSeconds(tempo_, timestamp - timestamp_);
     // Update controls.
     for (int index = 0; index < static_cast<int>(controls_.size()); ++index) {
-      if (auto& control = controls_[index];
-          control.Update(duration) && control_event_callback_) {
-        control_event_callback_(index, control.GetValue());
+      if (auto& control = controls_[index]; control.Update(duration)) {
+        control_event_.Process(index, control.GetValue());
       }
     }
     // Update effect controls.
@@ -591,9 +572,8 @@ void Instrument::Update(double timestamp) noexcept {
       for (int index = 0; index < static_cast<int>(effect_info.controls.size());
            ++index) {
         if (auto& effect_control = effect_info.controls[index];
-            effect_control.Update(duration) &&
-            effect_info.control_event_callback) {
-          effect_info.control_event_callback(index, effect_control.GetValue());
+            effect_control.Update(duration)) {
+          effect_info.control_event.Process(index, effect_control.GetValue());
         }
       }
     }
@@ -602,8 +582,8 @@ void Instrument::Update(double timestamp) noexcept {
       for (int index = 0; index < static_cast<int>(note_controls.size());
            ++index) {
         if (auto& note_control = note_controls[index];
-            note_control.Update(duration) && note_control_event_callback_) {
-          note_control_event_callback_(pitch, index, note_control.GetValue());
+            note_control.Update(duration)) {
+          note_control_event_.Process(pitch, index, note_control.GetValue());
         }
       }
     }
@@ -617,6 +597,7 @@ double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
                       : 0.0;
 }
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::UpdateEffectReferences() noexcept {
   std::vector<std::pair<Id, Effect*>> new_effect_id_ref_pairs;
   new_effect_id_ref_pairs.reserve(ordered_effects_.size());

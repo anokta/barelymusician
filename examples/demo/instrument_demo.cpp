@@ -16,8 +16,8 @@ namespace {
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::SynthControl;
-using ::barely::SynthInstrument;
+using ::barely::SynthInstrumentControl;
+using ::barely::SynthInstrumentDefinition;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
 using ::barely::examples::InputManager;
@@ -62,18 +62,19 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
 
   auto instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
-  instrument.SetControl(SynthControl::kGain, kGain);
-  instrument.SetControl(SynthControl::kOscillatorType, kOscillatorType);
-  instrument.SetControl(SynthControl::kAttack, kAttack);
-  instrument.SetControl(SynthControl::kRelease, kRelease);
-  instrument.SetControl(SynthControl::kVoiceCount, kVoiceCount);
+      musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
+  instrument.SetControl(SynthInstrumentControl::kGain, kGain);
+  instrument.SetControl(SynthInstrumentControl::kOscillatorType,
+                        kOscillatorType);
+  instrument.SetControl(SynthInstrumentControl::kAttack, kAttack);
+  instrument.SetControl(SynthInstrumentControl::kRelease, kRelease);
+  instrument.SetControl(SynthInstrumentControl::kVoiceCount, kVoiceCount);
 
-  instrument.SetNoteOnEventCallback([](double pitch, double intensity) {
+  instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", "
                  << intensity << ")";
   });
-  instrument.SetNoteOffEventCallback([](double pitch) {
+  instrument.SetNoteOffEvent([](double pitch) {
     ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") ";
   });
 

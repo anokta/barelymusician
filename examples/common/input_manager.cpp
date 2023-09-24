@@ -4,6 +4,7 @@
 
 namespace barely::examples {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 InputManager::InputManager() noexcept
     : key_down_callback_(nullptr), key_up_callback_(nullptr) {
 #if defined(_WIN32) || defined(__CYGWIN__)

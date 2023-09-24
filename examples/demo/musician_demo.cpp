@@ -230,8 +230,8 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
-    instruments.push_back(std::move(
-        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate)));
+    instruments.push_back(
+        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate));
     auto& instrument = instruments.back();
     instrument.SetControl(SynthInstrumentControl::kGain, gain);
     instrument.SetControl(SynthInstrumentControl::kOscillatorType, type);
@@ -390,12 +390,12 @@ int main(int /*argc*/, char* argv[]) {
         }
         break;
       case '1':
-        musician.SetTempo(random.DrawUniform(0.5, 0.75) * *musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << *musician.GetTempo();
+        musician.SetTempo(random.DrawUniform(0.5, 0.75) * musician.GetTempo());
+        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
         break;
       case '2':
-        musician.SetTempo(random.DrawUniform(1.5, 2.0) * *musician.GetTempo());
-        ConsoleLog() << "Tempo changed to " << *musician.GetTempo();
+        musician.SetTempo(random.DrawUniform(1.5, 2.0) * musician.GetTempo());
+        ConsoleLog() << "Tempo changed to " << musician.GetTempo();
         break;
       case 'R':
         musician.SetTempo(kTempo);

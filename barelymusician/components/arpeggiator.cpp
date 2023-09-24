@@ -20,7 +20,7 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
             performer_
                 .CreateTask([this, pitch]() { instrument_.SetNoteOff(pitch); },
                             /*is_one_off*/ true,
-                            gate_ratio_ * *performer_.GetLoopLength(),
+                            gate_ratio_ * performer_.GetLoopLength(),
                             process_order)
                 .Release();
           },
@@ -35,7 +35,7 @@ bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Arpeggiator::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
+bool Arpeggiator::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 void Arpeggiator::SetAllNotesOff() noexcept {
   if (!pitches_.empty()) {

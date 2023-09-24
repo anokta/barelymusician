@@ -28,7 +28,7 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
                 .CreateTask(
                     [this, pitch]() { instrument_.SetNoteOff(pitch); },
                     /*is_one_off=*/true,
-                    static_cast<double>(length) * *performer_.GetLoopLength(),
+                    static_cast<double>(length) * performer_.GetLoopLength(),
                     process_order)
                 .Release();
           },
@@ -41,7 +41,7 @@ Repeater::~Repeater() { instrument_.SetAllNotesOff(); }
 void Repeater::Clear() noexcept { pitches_.clear(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Repeater::IsPlaying() const noexcept { return *performer_.IsPlaying(); }
+bool Repeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Repeater::Pop() noexcept {

@@ -87,11 +87,11 @@ using Message = std::variant<ControlMessage, DataMessage, EffectControlMessage,
                              NoteOffMessage, NoteOnMessage>;
 
 // Message visitor.
-template <class... MessageTypes>
+template <typename... MessageTypes>
 struct MessageVisitor : MessageTypes... {
   using MessageTypes::operator()...;
 };
-template <class... MessageTypes>
+template <typename... MessageTypes>
 MessageVisitor(MessageTypes...) -> MessageVisitor<MessageTypes...>;
 
 }  // namespace barely::internal

@@ -3,7 +3,7 @@ add_library(
   custom_macros.h
 )
 target_link_libraries(
-  barely_custom_macros
+  barely_custom_macros INTERFACE
   barelymusician
 )
 

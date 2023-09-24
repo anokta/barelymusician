@@ -57,7 +57,7 @@ const double a3_pitch = -1.0;
 instrument.SetNoteOn(a3_pitch, /*intensity=*/0.25);
 
 // Check if the instrument note is on.
-const bool is_note_on = *instrument.IsNoteOn(a3_pitch);  // will return true.
+const bool is_note_on = instrument.IsNoteOn(a3_pitch);  // will return true.
 
 // Add a low-pass effect to the instrument.
 auto effect = instrument.CreateEffect(barely::LowPassEffectDefinition());

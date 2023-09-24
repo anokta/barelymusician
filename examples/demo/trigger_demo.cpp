@@ -86,7 +86,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       performer
           .CreateTask([&instrument, &performer,
                        pitch]() { instrument.SetNoteOff(pitch); },
-                      /*is_one_off=*/true, *performer.GetPosition() + duration)
+                      /*is_one_off=*/true, performer.GetPosition() + duration)
           .Release();
     };
   };

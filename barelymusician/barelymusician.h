@@ -1084,7 +1084,7 @@ BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
 ///   instrument.SetNoteOn(/*pitch=*/-1.0, /*intensity=*/0.25);
 ///
 ///   // Check if the note is on.
-///   const bool is_note_on = *instrument.IsNoteOn(/*pitch=*/-1.0);
+///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
 ///
 ///   // Set a control value.
 ///   instrument.SetControl(barely::SynthInstrumentControl::kGain,
@@ -1132,7 +1132,7 @@ BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
 ///   performer.Start();
 ///
 ///   // Check if started playing.
-///   const bool is_playing = *performer.IsPlaying();
+///   const bool is_playing = performer.IsPlaying();
 ///
 ///   // Destroy the task.
 ///   performer.DestroyTask(std::move(task));
@@ -1820,7 +1820,7 @@ class MusicianHandle {
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds, or an error status.
-  [[nodiscard]] double GetTimestamp() const noexcept {
+  [[nodiscard]] StatusOr<double> GetTimestamp() const noexcept {
     double timestamp = 0.0;
     if (const Status status = BarelyMusician_GetTimestamp(handle_, &timestamp);
         !status.IsOk()) {
@@ -1991,7 +1991,7 @@ class InstrumentHandle {
 
   /// Resets all note control values.
   ///
-  /// @param pitch Note pitch
+  /// @param pitch Note pitch.
   /// @return Status.
   Status ResetAllNoteControls(double pitch) noexcept {
     return BarelyInstrument_ResetAllNoteControls(handle_, pitch);
@@ -2668,10 +2668,10 @@ class TaskHandle {
 };
 
 /// Class that wraps an effect handle.
-class Effect : EffectHandle {
+class Effect {
  public:
   /// Destroys `Effect`.
-  ~Effect() noexcept { EffectHandle::Destroy(*this); }
+  ~Effect() noexcept { EffectHandle::Destroy(effect_); }
 
   /// Non-copyable.
   Effect(const Effect& other) noexcept = delete;
@@ -2686,8 +2686,8 @@ class Effect : EffectHandle {
   /// @return Effect.
   Effect& operator=(Effect&& other) noexcept {
     if (this != &other) {
-      EffectHandle::Destroy(*this);
-      *this = std::move(other);
+      EffectHandle::Destroy(effect_);
+      effect_ = std::move(other.effect_);
     }
     return *this;
   }
@@ -2695,36 +2695,107 @@ class Effect : EffectHandle {
   /// Returns the handle.
   ///
   /// @return Effect handle.
-  EffectHandle Get() const noexcept { return *this; }
+  [[nodiscard]] EffectHandle Get() const noexcept { return effect_; }
+
+  /// Returns a control value.
+  ///
+  /// @param index Control index.
+  /// @return Control value.
+  template <typename IndexType, typename ValueType>
+  [[nodiscard]] ValueType GetControl(IndexType index) const noexcept {
+    return *effect_.GetControl(index);
+  }
+
+  /// Returns the process order.
+  ///
+  /// @return Process order.
+  [[nodiscard]] int GetProcessOrder() const noexcept {
+    return *effect_.GetProcessOrder();
+  }
 
   /// Releases the handle.
   ///
   /// @return Effect handle.
-  EffectHandle Release() noexcept { return std::move(*this); }
+  EffectHandle Release() noexcept { return std::move(effect_); }
 
-  /// Wraps `EffectHandle`.
-  using EffectHandle::GetControl;
-  using EffectHandle::GetProcessOrder;
-  using EffectHandle::ResetAllControls;
-  using EffectHandle::ResetControl;
-  using EffectHandle::SetControl;
-  using EffectHandle::SetControlEvent;
-  using EffectHandle::SetData;
-  using EffectHandle::SetProcessOrder;
+  /// Resets all control values.
+  void ResetAllControls() noexcept {
+    [[maybe_unused]] const auto status = effect_.ResetAllControls();
+    assert(status.IsOk());
+  }
+
+  /// Resets a control value.
+  ///
+  /// @param index Control index.
+  template <typename IndexType>
+  void ResetControl(IndexType index) noexcept {
+    [[maybe_unused]] const auto status = effect_.ResetControl(index);
+    assert(status.IsOk());
+  }
+
+  /// Sets a control value.
+  ///
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param slope_per_beat Control slope in value change per beat.
+  template <typename IndexType, typename ValueType>
+  void SetControl(IndexType index, ValueType value,
+                  double slope_per_beat = 0.0) noexcept {
+    [[maybe_unused]] const auto status =
+        effect_.SetControl(index, value, slope_per_beat);
+    assert(status.IsOk());
+  }
+
+  /// Sets the control event with a callback.
+  ///
+  /// @param callback Control event callback.
+  void SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
+    [[maybe_unused]] const auto status = effect_.SetControlEvent(callback);
+    assert(status.IsOk());
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Immutable data.
+  template <typename DataType>
+  void SetData(const DataType& data) noexcept {
+    [[maybe_unused]] const auto status = effect_.SetData(data);
+    assert(status.IsOk());
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Pointer to immutable data.
+  /// @param size Data size in bytes.
+  void SetData(const void* data, int size) noexcept {
+    [[maybe_unused]] const auto status = effect_.SetData(data, size);
+    assert(status.IsOk());
+  }
+
+  /// Sets the process order.
+  ///
+  /// @param process_order Process order.
+  void SetProcessOrder(int process_order) noexcept {
+    [[maybe_unused]] const auto status = effect_.SetProcessOrder(process_order);
+    assert(status.IsOk());
+  }
 
  private:
   // Ensures that `Effect` can only be constructed by `Instrument`.
   friend class Instrument;
 
   // Creates a new `Effect`.
-  explicit Effect(EffectHandle effect) noexcept : EffectHandle(effect) {}
+  explicit Effect(EffectHandle effect) noexcept : effect_(effect) {}
+
+  // Effect handle.
+  EffectHandle effect_ = nullptr;
 };
 
 /// Class that wraps an instrument handle.
-class Instrument : InstrumentHandle {
+class Instrument {
  public:
   /// Destroys `Instrument`.
-  ~Instrument() noexcept { InstrumentHandle::Destroy(*this); }
+  ~Instrument() noexcept { InstrumentHandle::Destroy(instrument_); }
 
   /// Non-copyable.
   Instrument(const Instrument& other) noexcept = delete;
@@ -2739,8 +2810,8 @@ class Instrument : InstrumentHandle {
   /// @return Instrument.
   Instrument& operator=(Instrument&& other) noexcept {
     if (this != &other) {
-      InstrumentHandle::Destroy(*this);
-      *this = std::move(other);
+      InstrumentHandle::Destroy(instrument_);
+      instrument_ = std::move(other.instrument_);
     }
     return *this;
   }
@@ -2753,7 +2824,7 @@ class Instrument : InstrumentHandle {
   [[nodiscard]] Effect CreateEffect(EffectDefinition definition,
                                     int process_order = 0) noexcept {
     const auto effect_or =
-        EffectHandle::Create(*this, definition, process_order);
+        EffectHandle::Create(instrument_, definition, process_order);
     assert(effect_or.IsOk());
     return Effect(*effect_or);
   }
@@ -2761,32 +2832,190 @@ class Instrument : InstrumentHandle {
   /// Returns the handle.
   ///
   /// @return Instrument handle.
-  InstrumentHandle Get() const noexcept { return *this; }
+  [[nodiscard]] InstrumentHandle Get() const noexcept { return instrument_; }
+
+  /// Returns a control value.
+  ///
+  /// @param index Control index.
+  /// @return Control value.
+  template <typename IndexType, typename ValueType>
+  [[nodiscard]] ValueType GetControl(IndexType index) const noexcept {
+    return *instrument_.GetControl(index);
+  }
+
+  /// Returns a note control value.
+  ///
+  /// @param index Note control index.
+  /// @return Note control value.
+  template <typename IndexType, typename ValueType>
+  [[nodiscard]] ValueType GetNoteControl(double pitch,
+                                         IndexType index) const noexcept {
+    return *instrument_.GetNoteControl(pitch, index);
+  }
+
+  /// Returns whether a note is on or not.
+  ///
+  /// @param pitch Note pitch.
+  /// @return True if active, false otherwise.
+  [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
+    return *instrument_.IsNoteOn(pitch);
+  }
+
+  /// Processes output samples at timestamp.
+  ///
+  /// @param output_samples Interleaved array of output samples.
+  /// @param output_channel_count Number of output channels.
+  /// @param output_frame_count Number of output frames.
+  /// @param timestamp Timestamp in seconds.
+  void Process(double* output_samples, int output_channel_count,
+               int output_frame_count, double timestamp) noexcept {
+    [[maybe_unused]] const auto status = instrument_.Process(
+        output_samples, output_channel_count, output_frame_count, timestamp);
+    assert(status.IsOk());
+  }
 
   /// Releases the handle.
   ///
   /// @return Instrument handle.
-  InstrumentHandle Release() noexcept { return std::move(*this); }
+  InstrumentHandle Release() noexcept { return std::move(instrument_); }
 
-  /// Wraps `InstrumentHandle`.
-  using InstrumentHandle::GetControl;
-  using InstrumentHandle::GetNoteControl;
-  using InstrumentHandle::IsNoteOn;
-  using InstrumentHandle::Process;
-  using InstrumentHandle::ResetAllControls;
-  using InstrumentHandle::ResetAllNoteControls;
-  using InstrumentHandle::ResetControl;
-  using InstrumentHandle::ResetNoteControl;
-  using InstrumentHandle::SetAllNotesOff;
-  using InstrumentHandle::SetControl;
-  using InstrumentHandle::SetControlEvent;
-  using InstrumentHandle::SetData;
-  using InstrumentHandle::SetNoteControl;
-  using InstrumentHandle::SetNoteControlEvent;
-  using InstrumentHandle::SetNoteOff;
-  using InstrumentHandle::SetNoteOffEvent;
-  using InstrumentHandle::SetNoteOn;
-  using InstrumentHandle::SetNoteOnEvent;
+  /// Resets all control values.
+  void ResetAllControls() noexcept {
+    [[maybe_unused]] const auto status = instrument_.ResetAllControls();
+    assert(status.IsOk());
+  }
+
+  /// Resets all note control values.
+  ///
+  /// @param pitch Note pitch.
+  void ResetAllNoteControls(double pitch) noexcept {
+    [[maybe_unused]] const auto status =
+        instrument_.ResetAllNoteControls(pitch);
+    assert(status.IsOk());
+  }
+
+  /// Resets a control value.
+  ///
+  /// @param index Control index.
+  template <typename IndexType>
+  void ResetControl(IndexType index) noexcept {
+    [[maybe_unused]] const auto status = instrument_.ResetControl(index);
+    assert(status.IsOk());
+  }
+
+  /// Resets a note control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Note control index.
+  template <typename IndexType>
+  void ResetNoteControl(double pitch, IndexType index) noexcept {
+    [[maybe_unused]] const auto status =
+        instrument_.ResetNoteControl(pitch, index);
+    assert(status.IsOk());
+  }
+
+  /// Sets all notes off.
+  void SetAllNotesOff() noexcept {
+    [[maybe_unused]] const auto status = instrument_.SetAllNotesOff();
+    assert(status.IsOk());
+  }
+
+  /// Sets a control value.
+  ///
+  /// @param index Control index.
+  /// @param value Control value.
+  /// @param slope_per_beat Control slope in value change per beat.
+  template <typename IndexType, typename ValueType>
+  void SetControl(IndexType index, ValueType value,
+                  double slope_per_beat = 0.0) noexcept {
+    [[maybe_unused]] const auto status =
+        instrument_.SetControl(index, value, slope_per_beat);
+    assert(status.IsOk());
+  }
+
+  /// Sets the control event with a callback.
+  ///
+  /// @param callback Control event callback.
+  void SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
+    [[maybe_unused]] const auto status = instrument_.SetControlEvent(callback);
+    assert(status.IsOk());
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Immutable data.
+  template <typename DataType>
+  void SetData(const DataType& data) noexcept {
+    [[maybe_unused]] const auto status = instrument_.SetData(data);
+    assert(status.IsOk());
+  }
+
+  /// Sets data.
+  ///
+  /// @param data Pointer to immutable data.
+  /// @param size Data size in bytes.
+  void SetData(const void* data, int size) noexcept {
+    [[maybe_unused]] const auto status = instrument_.SetData(data, size);
+    assert(status.IsOk());
+  }
+
+  /// Sets a note control value.
+  ///
+  /// @param pitch Note pitch.
+  /// @param index Note control index.
+  /// @param value Note control value.
+  /// @param slope_per_beat Note control slope in value change per beat.
+  template <typename IndexType, typename ValueType>
+  void SetNoteControl(double pitch, IndexType index, ValueType value,
+                      double slope_per_beat = 0.0) noexcept {
+    [[maybe_unused]] const auto status =
+        instrument_.SetNoteControl(pitch, index, value, slope_per_beat);
+    assert(status.IsOk());
+  }
+
+  /// Sets the note control event with a callback.
+  ///
+  /// @param callback Note control event callback.
+  void SetNoteControlEvent(
+      NoteControlEventDefinition::Callback callback) noexcept {
+    [[maybe_unused]] const auto status =
+        instrument_.SetNoteControlEvent(callback);
+    assert(status.IsOk());
+  }
+
+  /// Sets a note off.
+  ///
+  /// @param pitch Note pitch.
+  void SetNoteOff(double pitch) noexcept {
+    [[maybe_unused]] const auto status = instrument_.SetNoteOff(pitch);
+    assert(status.IsOk());
+  }
+
+  /// Sets the note off event with a callback.
+  ///
+  /// @param callback Note off event callback.
+  void SetNoteOffEvent(NoteOffEventDefinition::Callback callback) noexcept {
+    [[maybe_unused]] const auto status = instrument_.SetNoteOffEvent(callback);
+    assert(status.IsOk());
+  }
+
+  /// Sets a note on.
+  ///
+  /// @param pitch Note pitch.
+  /// @param intensity Note intensity.
+  void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
+    [[maybe_unused]] const auto status =
+        instrument_.SetNoteOn(pitch, intensity);
+    assert(status.IsOk());
+  }
+
+  /// Sets the note off event with a callback.
+  ///
+  /// @param callback Note off event callback.
+  void SetNoteOnEvent(NoteOnEventDefinition::Callback callback) noexcept {
+    [[maybe_unused]] const auto status = instrument_.SetNoteOnEvent(callback);
+    assert(status.IsOk());
+  }
 
  private:
   // Ensures that `Instrument` can only be constructed by `Musician`.
@@ -2794,14 +3023,17 @@ class Instrument : InstrumentHandle {
 
   // Creates a new `Instrument`.
   explicit Instrument(InstrumentHandle instrument) noexcept
-      : InstrumentHandle(instrument) {}
+      : instrument_(instrument) {}
+
+  // Instrument handle.
+  InstrumentHandle instrument_ = nullptr;
 };
 
 /// Class that wraps a task handle.
-class Task : TaskHandle {
+class Task {
  public:
   /// Destroys `Effect`.
-  ~Task() noexcept { TaskHandle::Destroy(*this); }
+  ~Task() noexcept { TaskHandle::Destroy(task_); }
 
   /// Non-copyable.
   Task(const Task& other) noexcept = delete;
@@ -2816,8 +3048,8 @@ class Task : TaskHandle {
   /// @return Task.
   Task& operator=(Task&& other) noexcept {
     if (this != &other) {
-      TaskHandle::Destroy(*this);
-      *this = std::move(other);
+      TaskHandle::Destroy(task_);
+      task_ = std::move(other.task_);
     }
     return *this;
   }
@@ -2825,32 +3057,59 @@ class Task : TaskHandle {
   /// Returns the handle.
   ///
   /// @return Task handle.
-  TaskHandle Get() const noexcept { return *this; }
+  [[nodiscard]] TaskHandle Get() const noexcept { return task_; }
+
+  /// Returns the position.
+  ///
+  /// @return Position in beats.
+  [[nodiscard]] double GetPosition() const noexcept {
+    return *task_.GetPosition();
+  }
+
+  /// Returns the process order.
+  ///
+  /// @return Process order.
+  [[nodiscard]] int GetProcessOrder() const noexcept {
+    return *task_.GetProcessOrder();
+  }
 
   /// Releases the handle.
   ///
   /// @return Task handle.
-  TaskHandle Release() noexcept { return std::move(*this); }
+  TaskHandle Release() noexcept { return std::move(task_); }
 
-  /// Wraps `TaskHandle`.
-  using TaskHandle::GetPosition;
-  using TaskHandle::GetProcessOrder;
-  using TaskHandle::SetPosition;
-  using TaskHandle::SetProcessOrder;
+  /// Sets the position.
+  ///
+  /// @param position Position in beats.
+  void SetPosition(double position) noexcept {
+    [[maybe_unused]] const auto status = task_.SetPosition(position);
+    assert(status.IsOk());
+  }
+
+  /// Sets the process order.
+  ///
+  /// @param process_order Process order.
+  void SetProcessOrder(int process_order) noexcept {
+    [[maybe_unused]] const auto status = task_.SetProcessOrder(process_order);
+    assert(status.IsOk());
+  }
 
  private:
   // Ensures that `Effect` can only be constructed by `Performer`.
   friend class Performer;
 
   // Creates a new `Task`.
-  explicit Task(TaskHandle effect) noexcept : TaskHandle(effect) {}
+  explicit Task(TaskHandle task) noexcept : task_(task) {}
+
+  // Task handle.
+  TaskHandle task_ = nullptr;
 };
 
 /// Class that wraps an performer handle.
-class Performer : PerformerHandle {
+class Performer {
  public:
   /// Destroys `Performer`.
-  ~Performer() noexcept { PerformerHandle::Destroy(*this); }
+  ~Performer() noexcept { PerformerHandle::Destroy(performer_); }
 
   /// Non-copyable.
   Performer(const Performer& other) noexcept = delete;
@@ -2865,8 +3124,8 @@ class Performer : PerformerHandle {
   /// @return Performer.
   Performer& operator=(Performer&& other) noexcept {
     if (this != &other) {
-      PerformerHandle::Destroy(*this);
-      *this = std::move(other);
+      PerformerHandle::Destroy(performer_);
+      performer_ = std::move(other.performer_);
     }
     return *this;
   }
@@ -2882,7 +3141,7 @@ class Performer : PerformerHandle {
   [[nodiscard]] Task CreateTask(TaskDefinition definition, bool is_one_off,
                                 double position, int process_order = 0,
                                 void* user_data = nullptr) noexcept {
-    const auto task_or = TaskHandle::Create(*this, definition, is_one_off,
+    const auto task_or = TaskHandle::Create(performer_, definition, is_one_off,
                                             position, process_order, user_data);
     assert(task_or.IsOk());
     return Task(*task_or);
@@ -2905,25 +3164,92 @@ class Performer : PerformerHandle {
   /// Returns the handle.
   ///
   /// @return Performer handle.
-  PerformerHandle Get() const noexcept { return *this; }
+  [[nodiscard]] PerformerHandle Get() const noexcept { return performer_; }
+
+  /// Returns the loop begin position.
+  ///
+  /// @return Loop begin position in beats.
+  [[nodiscard]] double GetLoopBeginPosition() const noexcept {
+    return *performer_.GetLoopBeginPosition();
+  }
+
+  /// Returns the loop length.
+  ///
+  /// @return Loop length in beats.
+  [[nodiscard]] double GetLoopLength() const noexcept {
+    return *performer_.GetLoopLength();
+  }
+
+  /// Returns the position.
+  ///
+  /// @return Position in beats.
+  [[nodiscard]] double GetPosition() const noexcept {
+    return *performer_.GetPosition();
+  }
+
+  /// Returns whether the performer is looping or not.
+  ///
+  /// @return True if looping, false otherwise.
+  [[nodiscard]] bool IsLooping() const noexcept {
+    return *performer_.IsLooping();
+  }
+
+  /// Returns whether the performer is playing or not.
+  ///
+  /// @return True if playing, false otherwise.
+  [[nodiscard]] bool IsPlaying() const noexcept {
+    return *performer_.IsPlaying();
+  }
 
   /// Releases the handle.
   ///
   /// @return Performer handle.
-  PerformerHandle Release() noexcept { return std::move(*this); }
+  PerformerHandle Release() noexcept { return std::move(performer_); }
 
-  /// Wraps `PerformerHandle`.
-  using PerformerHandle::GetLoopBeginPosition;
-  using PerformerHandle::GetLoopLength;
-  using PerformerHandle::GetPosition;
-  using PerformerHandle::IsLooping;
-  using PerformerHandle::IsPlaying;
-  using PerformerHandle::SetLoopBeginPosition;
-  using PerformerHandle::SetLooping;
-  using PerformerHandle::SetLoopLength;
-  using PerformerHandle::SetPosition;
-  using PerformerHandle::Start;
-  using PerformerHandle::Stop;
+  /// Sets the loop begin position.
+  ///
+  /// @param loop_begin_position Loop begin position in beats.
+  void SetLoopBeginPosition(double loop_begin_position) noexcept {
+    [[maybe_unused]] const auto status =
+        performer_.SetLoopBeginPosition(loop_begin_position);
+    assert(status.IsOk());
+  }
+
+  /// Sets the loop length.
+  ///
+  /// @param loop_length Loop length in beats.
+  void SetLoopLength(double loop_length) noexcept {
+    [[maybe_unused]] const auto status = performer_.SetLoopLength(loop_length);
+    assert(status.IsOk());
+  }
+
+  /// Sets whether the performer is looping or not.
+  ///
+  /// @param is_looping True if looping, false otherwise.
+  void SetLooping(bool is_looping) noexcept {
+    [[maybe_unused]] const auto status = performer_.SetLooping(is_looping);
+    assert(status.IsOk());
+  }
+
+  /// Sets the position.
+  ///
+  /// @param position Position in beats.
+  void SetPosition(double position) noexcept {
+    [[maybe_unused]] const auto status = performer_.SetPosition(position);
+    assert(status.IsOk());
+  }
+
+  /// Starts the performer.
+  void Start() noexcept {
+    [[maybe_unused]] const auto status = performer_.Start();
+    assert(status.IsOk());
+  }
+
+  /// Stops the performer.
+  void Stop() noexcept {
+    [[maybe_unused]] const auto status = performer_.Stop();
+    assert(status.IsOk());
+  }
 
  private:
   // Ensures that `Performer` can only be constructed by `Musician`.
@@ -2931,17 +3257,20 @@ class Performer : PerformerHandle {
 
   // Creates a new `Performer`.
   explicit Performer(PerformerHandle performer) noexcept
-      : PerformerHandle(performer) {}
+      : performer_(performer) {}
+
+  // Performer handle.
+  PerformerHandle performer_ = nullptr;
 };
 
 /// Class that wraps a musician handle.
-class Musician : MusicianHandle {
+class Musician {
  public:
   /// Creates a new `Musician`.
-  Musician() noexcept : MusicianHandle(*MusicianHandle::Create()) {}
+  Musician() noexcept : musician_(*MusicianHandle::Create()) {}
 
   /// Destroys `Musician`.
-  ~Musician() noexcept { MusicianHandle::Destroy(*this); }
+  ~Musician() noexcept { MusicianHandle::Destroy(musician_); }
 
   /// Non-copyable.
   Musician(const Musician& other) noexcept = delete;
@@ -2956,8 +3285,8 @@ class Musician : MusicianHandle {
   /// @return Musician.
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
-      MusicianHandle::Destroy(*this);
-      *this = std::move(other);
+      MusicianHandle::Destroy(musician_);
+      musician_ = std::move(other.musician_);
     }
     return *this;
   }
@@ -2970,7 +3299,7 @@ class Musician : MusicianHandle {
   [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
                                             int frame_rate) noexcept {
     const auto instrument_or =
-        InstrumentHandle::Create(*this, definition, frame_rate);
+        InstrumentHandle::Create(musician_, definition, frame_rate);
     assert(instrument_or.IsOk());
     return Instrument(*instrument_or);
   }
@@ -2979,7 +3308,7 @@ class Musician : MusicianHandle {
   ///
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept {
-    const auto performer_or = PerformerHandle::Create(*this);
+    const auto performer_or = PerformerHandle::Create(musician_);
     assert(performer_or.IsOk());
     return Performer(*performer_or);
   }
@@ -2987,18 +3316,46 @@ class Musician : MusicianHandle {
   /// Returns the handle.
   ///
   /// @return Musician handle.
-  MusicianHandle Get() const noexcept { return *this; }
+  [[nodiscard]] MusicianHandle Get() const noexcept { return musician_; }
+
+  /// Returns the tempo.
+  ///
+  /// @return Tempo in beats per minute.
+  [[nodiscard]] double GetTempo() const noexcept {
+    return *musician_.GetTempo();
+  }
+
+  /// Returns the timestamp.
+  ///
+  /// @return Timestamp in seconds.
+  [[nodiscard]] double GetTimestamp() const noexcept {
+    return *musician_.GetTimestamp();
+  }
 
   /// Releases the handle.
   ///
   /// @return Musician handle.
-  MusicianHandle Release() noexcept { return std::move(*this); }
+  MusicianHandle Release() noexcept { return std::move(musician_); }
 
-  /// Wraps `MusicianHandle`.
-  using MusicianHandle::GetTempo;
-  using MusicianHandle::GetTimestamp;
-  using MusicianHandle::SetTempo;
-  using MusicianHandle::Update;
+  /// Sets the tempo.
+  ///
+  /// @param tempo Tempo in beats per minute.
+  void SetTempo(double tempo) noexcept {
+    [[maybe_unused]] const auto status = musician_.SetTempo(tempo);
+    assert(status.IsOk());
+  }
+
+  /// Updates the musician at timestamp.
+  ///
+  /// @param timestamp Timestamp in seconds.
+  void Update(double timestamp) noexcept {
+    [[maybe_unused]] const auto status = musician_.Update(timestamp);
+    assert(status.IsOk());
+  }
+
+ private:
+  // Musician handle.
+  MusicianHandle musician_;
 };
 
 }  // namespace barely

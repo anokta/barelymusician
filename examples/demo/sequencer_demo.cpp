@@ -83,7 +83,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       instrument.SetNoteOn(pitch);
       performer
           .CreateTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-                      /*is_one_off=*/true, *performer.GetPosition() + duration)
+                      /*is_one_off=*/true, performer.GetPosition() + duration)
           .Release();
     };
   };
@@ -137,10 +137,10 @@ int main(int /*argc*/, char* /*argv*/[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = *musician.GetTempo();
+    double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
-        if (*performer.IsPlaying()) {
+        if (performer.IsPlaying()) {
           performer.Stop();
           instrument.SetAllNotesOff();
           ConsoleLog() << "Stopped playback";
@@ -150,7 +150,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         }
         return;
       case 'L':
-        if (*performer.IsLooping()) {
+        if (performer.IsLooping()) {
           performer.SetLooping(false);
           ConsoleLog() << "Loop turned off";
         } else {
@@ -175,7 +175,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         return;
     }
     musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << *musician.GetTempo() << " bpm";
+    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

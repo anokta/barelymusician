@@ -94,7 +94,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
       return;
     }
     // Adjust tempo.
-    double tempo = *musician.GetTempo();
+    double tempo = musician.GetTempo();
     switch (std::toupper(key)) {
       case ' ':
         if (metronome.IsPlaying()) {
@@ -129,7 +129,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
     }
     tempo = std::clamp(tempo, 0.0, static_cast<double>(kFrameRate));
     musician.SetTempo(tempo);
-    ConsoleLog() << "Tempo set to " << *musician.GetTempo() << " bpm";
+    ConsoleLog() << "Tempo set to " << musician.GetTempo() << " bpm";
   };
   input_manager.SetKeyDownCallback(key_down_callback);
 

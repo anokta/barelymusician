@@ -1,45 +1,118 @@
-#ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
-#define BARELYMUSICIAN_BARELYMUSICIAN_H_
-
-// NOLINTBEGIN
-#include <stdbool.h>
-#include <stdint.h>
-
-#if defined(_WIN32) || defined(__CYGWIN__)
-#ifdef BARELYMUSICIAN_EXPORTS
-#ifdef __GNUC__
-#define BARELY_EXPORT __attribute__((dllexport))
-#else  // __GNUC__
-#define BARELY_EXPORT __declspec(dllexport)
-#endif  // __GNUC__
-#else   // BARELYMUSICIAN_EXPORTS
-#ifdef __GNUC__
-#define BARELY_EXPORT __attribute__((dllimport))
-#else  // __GNUC__
-#define BARELY_EXPORT __declspec(dllimport)
-#endif  // __GNUC__
-#endif  // BARELYMUSICIAN_EXPORTS
-#else   // defined(_WIN32) || defined(__CYGWIN__)
-#if __GNUC__ >= 4
-#define BARELY_EXPORT __attribute__((visibility("default")))
-#else  // __GNUC__ >= 4
-#define BARELY_EXPORT
-#endif  // __GNUC__ >= 4
-#endif  // defined(_WIN32) || defined(__CYGWIN__)
-
-/// ====================
-/// barelymusician C API
-/// ====================
+/// ==================
+/// barelymusician API
+/// ==================
 ///
 /// barelymusician is a real-time music engine for interactive systems. It is
 /// used to generate and perform musical sounds from scratch in a sample
 /// accurate way.
 ///
-/// @note To use barelymusician in a C++ project, see the C++ API below.
+/// -----------------
+/// Example C++ Usage
+/// -----------------
 ///
-/// -------------
-/// Example usage
-/// -------------
+/// - Musician:
+///
+///   @code{.cpp}
+///   #include "barelymusician/barelymusician.h"
+///
+///   // Create.
+///   barely::Musician musician;
+///
+///   // Set the tempo.
+///   musician.SetTempo(/*tempo=*/124.0);
+///
+///   // Update the timestamp.
+///   //
+///   // Timestamp updates must happen prior to processing of instruments for
+///   // the respective timestamps. Otherwise, those process calls will be
+///   // *late* to receive any relevant state changes. Therefore, this should
+///   // typically be called from a main thread update callback with an
+///   // additional "lookahead" in order to compensate for the potential thread
+///   // synchronization issues in real-time audio applications.
+///   double timestamp = 1.0;
+///   musician.Update(timestamp);
+///   @endcode
+///
+/// - Instrument:
+///
+///   @code{.cpp}
+///   #include "barelymusician/instruments/low_pass_effect.h"
+///   #include "barelymusician/instruments/synth_instrument.h"
+///
+///   // Create.
+///   auto instrument =
+///       musician.CreateInstrument(barely::SynthInstrumentDefinition(),
+///                                 /*frame_rate=*/48000);
+///
+///   // Set a note on.
+///   //
+///   // Pitch values are normalized, where each `1.0` shifts one octave, and
+///   // `0.0` represents the middle A (A4) for a typical instrument definition.
+///   // However, this is not a strict rule, since both `pitch` and `intensity`
+///   // values can be interpreted in any desired way by a custom instrument.
+///   instrument.SetNoteOn(/*pitch=*/-1.0, /*intensity=*/0.25);
+///
+///   // Check if the note is on.
+///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
+///
+///   // Set a control value.
+///   instrument.SetControl(barely::SynthInstrumentControl::kGain,
+///                         /*value=*/0.5, /*slope_per_beat=*/0.0);
+///
+///   // Create a low-pass effect.
+///   auto effect = instrument.CreateEffect(barely::LowPassEffectDefinition());
+///
+///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
+///   effect->SetControl(barely::LowPassEffectControl::kCutoffFrequency,
+///                      /*value=*/0.0, /*slope_per_beat=*/100.0);
+///
+///   // Process.
+///   //
+///   // Instruments expect raw PCM audio buffer to be processed with a
+///   // synchronous call. Therefore, this should typically be called from an
+///   // audio thread process callback in real-time audio applications.
+///   const int output_channel_count = 2;
+///   const int output_frame_count = 1024;
+///   std::vector<double> output_samples(
+///       output_channel_count * output_frame_count, 0.0);
+///   double timestamp = 0.0;
+///   instrument.Process(output_samples.data(), output_channel_count,
+///                      output_frame_count, timestamp);
+///
+///   // Destroy.
+///   musician.DestroyInstrument(std::move(instrument));
+///   @endcode
+///
+/// - Performer:
+///
+///   @code{.cpp}
+///   // Create.
+///   auto performer = musician.CreatePerformer();
+///
+///   // Create a task.
+///   auto task = performer.CreateTask([]() {},  // populate this.
+///                                    /*is_one_off=*/false, /*position=*/0.0,
+///                                    /*process_order=*/0);
+///
+///   // Set looping on.
+///   performer.SetLooping(/*is_looping=*/true);
+///
+///   // Start.
+///   performer.Start();
+///
+///   // Check if started playing.
+///   const bool is_playing = performer.IsPlaying();
+///
+///   // Destroy the task.
+///   performer.DestroyTask(std::move(task));
+///
+///   // Destroy.
+///   musician.DestroyPerformer(std::move(performer));
+///   @endcode
+///
+/// ---------------
+/// Example C Usage
+/// ---------------
 ///
 /// - Musician:
 ///
@@ -156,6 +229,35 @@
 ///   // Destroy.
 ///   BarelyPerformer_Destroy(performer);
 ///   @endcode
+
+#ifndef BARELYMUSICIAN_BARELYMUSICIAN_H_
+#define BARELYMUSICIAN_BARELYMUSICIAN_H_
+
+// NOLINTBEGIN
+#include <stdbool.h>
+#include <stdint.h>
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+#ifdef BARELYMUSICIAN_EXPORTS
+#ifdef __GNUC__
+#define BARELY_EXPORT __attribute__((dllexport))
+#else  // __GNUC__
+#define BARELY_EXPORT __declspec(dllexport)
+#endif  // __GNUC__
+#else   // BARELYMUSICIAN_EXPORTS
+#ifdef __GNUC__
+#define BARELY_EXPORT __attribute__((dllimport))
+#else  // __GNUC__
+#define BARELY_EXPORT __declspec(dllimport)
+#endif  // __GNUC__
+#endif  // BARELYMUSICIAN_EXPORTS
+#else   // defined(_WIN32) || defined(__CYGWIN__)
+#if __GNUC__ >= 4
+#define BARELY_EXPORT __attribute__((visibility("default")))
+#else  // __GNUC__ >= 4
+#define BARELY_EXPORT
+#endif  // __GNUC__ >= 4
+#endif  // defined(_WIN32) || defined(__CYGWIN__)
 
 #ifdef __cplusplus
 extern "C" {
@@ -1028,118 +1130,6 @@ BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
 #include <type_traits>
 #include <utility>
 #include <variant>
-
-/// ======================
-/// barelymusician C++ API
-/// ======================
-///
-/// barelymusician is a real-time music engine for interactive systems. It is
-/// used to generate and perform musical sounds from scratch in a sample
-/// accurate way.
-///
-/// -------------
-/// Example usage
-/// -------------
-///
-/// - Musician:
-///
-///   @code{.cpp}
-///   #include "barelymusician/barelymusician.h"
-///
-///   // Create.
-///   barely::Musician musician;
-///
-///   // Set the tempo.
-///   musician.SetTempo(/*tempo=*/124.0);
-///
-///   // Update the timestamp.
-///   //
-///   // Timestamp updates must happen prior to processing of instruments for
-///   // the respective timestamps. Otherwise, those process calls will be
-///   // *late* to receive any relevant state changes. Therefore, this should
-///   // typically be called from a main thread update callback with an
-///   // additional "lookahead" in order to compensate for the potential thread
-///   // synchronization issues in real-time audio applications.
-///   double timestamp = 1.0;
-///   musician.Update(timestamp);
-///   @endcode
-///
-/// - Instrument:
-///
-///   @code{.cpp}
-///   #include "barelymusician/instruments/low_pass_effect.h"
-///   #include "barelymusician/instruments/synth_instrument.h"
-///
-///   // Create.
-///   auto instrument =
-///       musician.CreateInstrument(barely::SynthInstrumentDefinition(),
-///                                 /*frame_rate=*/48000);
-///
-///   // Set a note on.
-///   //
-///   // Pitch values are normalized, where each `1.0` shifts one octave, and
-///   // `0.0` represents the middle A (A4) for a typical instrument definition.
-///   // However, this is not a strict rule, since both `pitch` and `intensity`
-///   // values can be interpreted in any desired way by a custom instrument.
-///   instrument.SetNoteOn(/*pitch=*/-1.0, /*intensity=*/0.25);
-///
-///   // Check if the note is on.
-///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
-///
-///   // Set a control value.
-///   instrument.SetControl(barely::SynthInstrumentControl::kGain,
-///                         /*value=*/0.5, /*slope_per_beat=*/0.0);
-///
-///   // Create a low-pass effect.
-///   auto effect = instrument.CreateEffect(barely::LowPassEffectDefinition());
-///
-///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   effect->SetControl(barely::LowPassEffectControl::kCutoffFrequency,
-///                      /*value=*/0.0, /*slope_per_beat=*/100.0);
-///
-///   // Process.
-///   //
-///   // Instruments expect raw PCM audio buffer to be processed with a
-///   // synchronous call. Therefore, this should typically be called from an
-///   // audio thread process callback in real-time audio applications.
-///   const int output_channel_count = 2;
-///   const int output_frame_count = 1024;
-///   std::vector<double> output_samples(
-///       output_channel_count * output_frame_count, 0.0);
-///   double timestamp = 0.0;
-///   instrument.Process(output_samples.data(), output_channel_count,
-///                      output_frame_count, timestamp);
-///
-///   // Destroy.
-///   musician.DestroyInstrument(std::move(instrument));
-///   @endcode
-///
-/// - Performer:
-///
-///   @code{.cpp}
-///   // Create.
-///   auto performer = musician.CreatePerformer();
-///
-///   // Create a task.
-///   auto task = performer.CreateTask([]() {},  // populate this.
-///                                    /*is_one_off=*/false, /*position=*/0.0,
-///                                    /*process_order=*/0);
-///
-///   // Set looping on.
-///   performer.SetLooping(/*is_looping=*/true);
-///
-///   // Start.
-///   performer.Start();
-///
-///   // Check if started playing.
-///   const bool is_playing = performer.IsPlaying();
-///
-///   // Destroy the task.
-///   performer.DestroyTask(std::move(task));
-///
-///   // Destroy.
-///   musician.DestroyPerformer(std::move(performer));
-///   @endcode
 
 namespace barely {
 

@@ -54,7 +54,7 @@ class Arpeggiator {
   void SetGateRatio(double gate_ratio) noexcept;
 
   /// Sets the instrument.
-  void SetInstrument(InstrumentHandle instrument) noexcept;
+  void SetInstrument(Instrument* instrument) noexcept;
 
   /// Sets a note off.
   ///
@@ -89,7 +89,7 @@ class Arpeggiator {
   Performer performer_;
 
   // Instrument.
-  InstrumentHandle instrument_;
+  Instrument* instrument_ = nullptr;
 
   // List of pitches to play.
   std::vector<double> pitches_;

@@ -90,15 +90,15 @@ bool BuildScore(const smf::MidiEventList& midi_events, int ticks_per_beat,
           IntensityFromMidiVelocity(midi_event.getVelocity());
       performer
           .CreateTask(
-              [instrument = instrument.Get(), pitch, intensity]() mutable {
+              [&instrument, pitch, intensity]() mutable {
                 instrument.SetNoteOn(pitch, intensity);
               },
               /*is_one_off=*/true, position)
           .Release();
       performer
-          .CreateTask([instrument = instrument.Get(),
-                       pitch]() mutable { instrument.SetNoteOff(pitch); },
-                      /*is_one_off=*/true, position + duration)
+          .CreateTask(
+              [&instrument, pitch]() mutable { instrument.SetNoteOff(pitch); },
+              /*is_one_off=*/true, position + duration)
           .Release();
       has_notes = true;
     }
@@ -132,12 +132,14 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::pair<Instrument, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    auto instrument =
-        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
-    auto performer = musician.CreatePerformer();
+    tracks.emplace_back(
+        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate),
+        musician.CreatePerformer());
+    auto& [instrument, performer] = tracks.back();
     // Build the score to perform.
     if (!BuildScore(midi_file[i], ticks_per_quarter, instrument, performer)) {
       ConsoleLog() << "Empty MIDI track: " << i;
+      tracks.pop_back();
       continue;
     }
     // Set the instrument settings.
@@ -161,7 +163,6 @@ int main(int /*argc*/, char* argv[]) {
                           kInstrumentEnvelopeRelease);
     instrument.SetControl(SynthInstrumentControl::kVoiceCount,
                           kInstrumentVoiceCount);
-    tracks.emplace_back(std::move(instrument), std::move(performer));
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();
 

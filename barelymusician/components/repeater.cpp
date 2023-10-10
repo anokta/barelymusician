@@ -15,7 +15,7 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
   performer_
       .CreateTask(
           [this, process_order]() noexcept {
-            if (pitches_.empty() || !Update()) {
+            if (pitches_.empty() || !Update() || instrument_ == nullptr) {
               return;
             }
             const auto& [pitch_or, length] = pitches_[index_];
@@ -23,10 +23,10 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
               return;
             }
             const double pitch = *pitches_[index_].first + pitch_shift_;
-            instrument_.SetNoteOn(pitch);
+            instrument_->SetNoteOn(pitch);
             performer_
                 .CreateTask(
-                    [this, pitch]() { instrument_.SetNoteOff(pitch); },
+                    [this, pitch]() { instrument_->SetNoteOff(pitch); },
                     /*is_one_off=*/true,
                     static_cast<double>(length) * performer_.GetLoopLength(),
                     process_order)
@@ -36,7 +36,11 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
       .Release();
 }
 
-Repeater::~Repeater() { instrument_.SetAllNotesOff(); }
+Repeater::~Repeater() {
+  if (instrument_ != nullptr) {
+    instrument_->SetAllNotesOff();
+  }
+}
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
 
@@ -49,7 +53,9 @@ void Repeater::Pop() noexcept {
     return;
   }
   if (index_ == static_cast<int>(pitches_.size()) - 1 && IsPlaying()) {
-    instrument_.SetNoteOff(*pitches_.back().first + pitch_shift_);
+    if (instrument_ != nullptr) {
+      instrument_->SetNoteOff(*pitches_.back().first + pitch_shift_);
+    }
     remaining_length_ = 0;
   }
   pitches_.pop_back();
@@ -60,8 +66,10 @@ void Repeater::Push(std::optional<double> pitch_or, int length) noexcept {
   pitches_.emplace_back(pitch_or, length);
 }
 
-void Repeater::SetInstrument(InstrumentHandle instrument) noexcept {
-  instrument_.SetAllNotesOff();
+void Repeater::SetInstrument(Instrument* instrument) noexcept {
+  if (instrument_ != nullptr) {
+    instrument_->SetAllNotesOff();
+  }
   instrument_ = std::move(instrument);
 }
 
@@ -88,7 +96,9 @@ void Repeater::Stop() noexcept {
   }
   performer_.Stop();
   performer_.SetPosition(0.0);
-  instrument_.SetAllNotesOff();
+  if (instrument_ != nullptr) {
+    instrument_->SetAllNotesOff();
+  }
   index_ = -1;
   remaining_length_ = 0;
 }

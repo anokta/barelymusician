@@ -75,10 +75,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  Repeater repeater(musician);
-  repeater.SetRate(kInitialRate);
-  repeater.SetStyle(kInitialStyle);
-
   auto instrument =
       musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
   instrument.SetControl(SynthInstrumentControl::kGain, kGain);
@@ -88,13 +84,17 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrumentControl::kRelease, kRelease);
   instrument.SetControl(SynthInstrumentControl::kVoiceCount, kVoiceCount);
 
+  Repeater repeater(musician);
+  repeater.SetInstrument(&instrument);
+  repeater.SetRate(kInitialRate);
+  repeater.SetStyle(kInitialStyle);
+
   instrument.SetNoteOnEvent([&repeater](double pitch, double /*intensity*/) {
     if (repeater.IsPlaying()) {
       ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
     }
   });
 
-  repeater.SetInstrument(instrument.Get());
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {

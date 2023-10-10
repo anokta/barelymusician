@@ -1735,940 +1735,28 @@ struct TaskDefinition : public BarelyTaskDefinition {
       : BarelyTaskDefinition{definition} {}
 };
 
-/// Musician handle.
-class MusicianHandle {
- public:
-  /// Creates a new `MusicianHandle`.
-  ///
-  /// @return Musician handle, or an error status.
-  static StatusOr<MusicianHandle> Create() noexcept {
-    BarelyMusicianHandle handle;
-    if (const Status status = BarelyMusician_Create(&handle); !status.IsOk()) {
-      return status;
-    }
-    return MusicianHandle(handle);
-  }
-
-  /// Destroys a musician handle.
-  ///
-  /// @param musician Musician handle.
-  /// @return Status.
-  static Status Destroy(MusicianHandle musician) noexcept {
-    return BarelyMusician_Destroy(musician.handle_);
-  }
-
-  /// Default constructor.
-  MusicianHandle() = default;
-
-  /// Constructs a new `MusicianHandle` from a raw type.
-  ///
-  /// @param handle Raw musician handle.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  MusicianHandle(BarelyMusicianHandle handle) noexcept : handle_(handle) {}
-
-  /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~MusicianHandle() = default;
-
-  /// Copyable.
-  MusicianHandle(const MusicianHandle& other) noexcept = default;
-  MusicianHandle& operator=(const MusicianHandle& other) noexcept = default;
-
-  /// Constructs a new `MusicianHandle` via move.
-  ///
-  /// @param other Other musician handle.
-  MusicianHandle(MusicianHandle&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `MusicianHandle` via move.
-  ///
-  /// @param other Other musician handle.
-  /// @return Musician handle.
-  MusicianHandle& operator=(MusicianHandle&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
-  /// Returns the raw handle.
-  ///
-  /// @return Raw musician handle.
-  BarelyMusicianHandle Get() const noexcept { return handle_; }
-
-  /// Returns the tempo.
-  ///
-  /// @return Tempo in beats per minute, or an error status.
-  [[nodiscard]] StatusOr<double> GetTempo() const noexcept {
-    double tempo = 0.0;
-    if (const Status status = BarelyMusician_GetTempo(handle_, &tempo);
-        !status.IsOk()) {
-      return status;
-    }
-    return tempo;
-  }
-
-  /// Returns the timestamp.
-  ///
-  /// @return Timestamp in seconds, or an error status.
-  [[nodiscard]] StatusOr<double> GetTimestamp() const noexcept {
-    double timestamp = 0.0;
-    if (const Status status = BarelyMusician_GetTimestamp(handle_, &timestamp);
-        !status.IsOk()) {
-      return status;
-    }
-    return timestamp;
-  }
-
-  /// Sets the tempo.
-  ///
-  /// @param tempo Tempo in beats per minute.
-  /// @return Status.
-  Status SetTempo(double tempo) noexcept {
-    return BarelyMusician_SetTempo(handle_, tempo);
-  }
-
-  /// Updates the musician at timestamp.
-  ///
-  /// @param timestamp Timestamp in seconds.
-  /// @return Status.
-  Status Update(double timestamp) noexcept {
-    return BarelyMusician_Update(handle_, timestamp);
-  }
-
- private:
-  // Raw handle.
-  BarelyMusicianHandle handle_ = nullptr;
-};
-
-/// Instrument handle.
-class InstrumentHandle {
- public:
-  /// Creates a new `InstrumentHandle`.
-  ///
-  /// @param musician Musician handle.
-  /// @param definition Instrument definition.
-  /// @param frame_rate Frame rate in hertz.
-  /// @return Instrument handle, or an error status.
-  static StatusOr<InstrumentHandle> Create(MusicianHandle musician,
-                                           InstrumentDefinition definition,
-                                           int frame_rate) noexcept {
-    BarelyInstrumentHandle handle;
-    if (const Status status = BarelyInstrument_Create(
-            musician.Get(), definition, frame_rate, &handle);
-        !status.IsOk()) {
-      return status;
-    }
-    return InstrumentHandle(handle);
-  }
-
-  /// Destroys an instrument handle.
-  ///
-  /// @param instrument Instrument handle.
-  /// @return Status.
-  static Status Destroy(InstrumentHandle instrument) noexcept {
-    return BarelyInstrument_Destroy(instrument.handle_);
-  }
-
-  /// Default constructor.
-  InstrumentHandle() = default;
-
-  /// Constructs a new `InstrumentHandle` from a raw type.
-  ///
-  /// @param handle Raw instrument handle.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  InstrumentHandle(BarelyInstrumentHandle handle) noexcept : handle_(handle) {}
-
-  /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~InstrumentHandle() = default;
-
-  /// Copyable.
-  InstrumentHandle(const InstrumentHandle& other) noexcept = default;
-  InstrumentHandle& operator=(const InstrumentHandle& other) noexcept = default;
-
-  /// Constructs a new `InstrumentHandle` via move.
-  ///
-  /// @param other Other instrument handle.
-  InstrumentHandle(InstrumentHandle&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `InstrumentHandle` via move.
-  ///
-  /// @param other Other instrument handle.
-  /// @return Instrument handle.
-  InstrumentHandle& operator=(InstrumentHandle&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
-  /// Returns the raw handle.
-  ///
-  /// @return Raw instrument handle.
-  BarelyInstrumentHandle Get() const noexcept { return handle_; }
-
-  /// Returns a control value.
-  ///
-  /// @param index Control index.
-  /// @return Control value, or an error status.
-  template <typename IndexType, typename ValueType>
-  [[nodiscard]] StatusOr<ValueType> GetControl(IndexType index) const noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    double value = 0.0;
-    if (const Status status = BarelyInstrument_GetControl(
-            handle_, static_cast<int>(index), &value);
-        !status.IsOk()) {
-      return status;
-    }
-    return static_cast<ValueType>(value);
-  }
-
-  /// Returns a note control value.
-  ///
-  /// @param index Note control index.
-  /// @return Note control value, or an error status.
-  template <typename IndexType, typename ValueType>
-  [[nodiscard]] StatusOr<ValueType> GetNoteControl(
-      double pitch, IndexType index) const noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    double value = 0.0;
-    if (const Status status = BarelyInstrument_GetNoteControl(
-            handle_, pitch, static_cast<int>(index), &value);
-        !status.IsOk()) {
-      return status;
-    }
-    return static_cast<ValueType>(value);
-  }
-
-  /// Returns whether a note is on or not.
-  ///
-  /// @param pitch Note pitch.
-  /// @return True if active, false otherwise, or an error status.
-  [[nodiscard]] StatusOr<bool> IsNoteOn(double pitch) const noexcept {
-    bool is_note_on = false;
-    if (const Status status =
-            BarelyInstrument_IsNoteOn(handle_, pitch, &is_note_on);
-        !status.IsOk()) {
-      return status;
-    }
-    return is_note_on;
-  }
-
-  /// Processes output samples at timestamp.
-  ///
-  /// @param output_samples Interleaved array of output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
-  /// @return Status.
-  Status Process(double* output_samples, int output_channel_count,
-                 int output_frame_count, double timestamp) noexcept {
-    return BarelyInstrument_Process(handle_, output_samples,
-                                    output_channel_count, output_frame_count,
-                                    timestamp);
-  }
-
-  /// Resets all control values.
-  ///
-  /// @return Status.
-  Status ResetAllControls() noexcept {
-    return BarelyInstrument_ResetAllControls(handle_);
-  }
-
-  /// Resets all note control values.
-  ///
-  /// @param pitch Note pitch.
-  /// @return Status.
-  Status ResetAllNoteControls(double pitch) noexcept {
-    return BarelyInstrument_ResetAllNoteControls(handle_, pitch);
-  }
-
-  /// Resets a control value.
-  ///
-  /// @param index Control index.
-  /// @return Status.
-  template <typename IndexType>
-  Status ResetControl(IndexType index) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    return BarelyInstrument_ResetControl(handle_, static_cast<int>(index));
-  }
-
-  /// Resets a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param index Note control index.
-  /// @return Status.
-  template <typename IndexType>
-  Status ResetNoteControl(double pitch, IndexType index) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    return BarelyInstrument_ResetNoteControl(handle_, pitch,
-                                             static_cast<int>(index));
-  }
-
-  /// Sets all notes off.
-  ///
-  /// @return Status.
-  Status SetAllNotesOff() noexcept {
-    return BarelyInstrument_SetAllNotesOff(handle_);
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param index Control index.
-  /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
-  /// @return Status.
-  template <typename IndexType, typename ValueType>
-  Status SetControl(IndexType index, ValueType value,
-                    double slope_per_beat = 0.0) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    static_assert(
-        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-        "ValueType is not supported");
-    return BarelyInstrument_SetControl(handle_, static_cast<int>(index),
-                                       static_cast<double>(value),
-                                       slope_per_beat);
-  }
-
-  /// Sets the control event.
-  ///
-  /// @param definition Control event definition.
-  /// @param user_data Pointer to user data.
-  /// @return Status.
-  Status SetControlEvent(ControlEventDefinition definition,
-                         void* user_data = nullptr) noexcept {
-    return BarelyInstrument_SetControlEvent(handle_, definition, user_data);
-  }
-
-  /// Sets the control event with a callback.
-  ///
-  /// @param callback Control event callback.
-  /// @return Status.
-  Status SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
-    return SetControlEvent(ControlEventDefinition::WithCallback(),
-                           static_cast<void*>(&callback));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Immutable data.
-  /// @return Status.
-  template <typename DataType>
-  Status SetData(const DataType& data) noexcept {
-    static_assert(std::is_trivially_copyable<DataType>::value,
-                  "DataType is not trivially copyable");
-    return SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Pointer to immutable data.
-  /// @param size Data size in bytes.
-  /// @return Status.
-  Status SetData(const void* data, int size) noexcept {
-    return BarelyInstrument_SetData(handle_, data, size);
-  }
-
-  /// Sets a note control value.
-  ///
-  /// @param pitch Note pitch.
-  /// @param index Note control index.
-  /// @param value Note control value.
-  /// @param slope_per_beat Note control slope in value change per beat.
-  /// @return Status.
-  template <typename IndexType, typename ValueType>
-  Status SetNoteControl(double pitch, IndexType index, ValueType value,
-                        double slope_per_beat = 0.0) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    static_assert(
-        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-        "ValueType is not supported");
-    return BarelyInstrument_SetNoteControl(
-        handle_, pitch, static_cast<int>(index), static_cast<double>(value),
-        slope_per_beat);
-  }
-
-  /// Sets the note control event.
-  ///
-  /// @param definition Note control event definition.
-  /// @param user_data Pointer to user data.
-  /// @return Status.
-  Status SetNoteControlEvent(NoteControlEventDefinition definition,
-                             void* user_data = nullptr) noexcept {
-    return BarelyInstrument_SetNoteControlEvent(handle_, definition, user_data);
-  }
-
-  /// Sets the note control event with a callback.
-  ///
-  /// @param callback Note control event callback.
-  /// @return Status.
-  Status SetNoteControlEvent(
-      NoteControlEventDefinition::Callback callback) noexcept {
-    return SetNoteControlEvent(NoteControlEventDefinition::WithCallback(),
-                               static_cast<void*>(&callback));
-  }
-
-  /// Sets a note off.
-  ///
-  /// @param pitch Note pitch.
-  /// @return Status.
-  Status SetNoteOff(double pitch) noexcept {
-    return BarelyInstrument_SetNoteOff(handle_, pitch);
-  }
-
-  /// Sets the note off event.
-  ///
-  /// @param definition Note off event definition.
-  /// @param user_data Pointer to user data.
-  /// @return Status.
-  Status SetNoteOffEvent(NoteOffEventDefinition definition,
-                         void* user_data = nullptr) noexcept {
-    return BarelyInstrument_SetNoteOffEvent(handle_, definition, user_data);
-  }
-
-  /// Sets the note off event with a callback.
-  ///
-  /// @param callback Note off event callback.
-  /// @return Status.
-  Status SetNoteOffEvent(NoteOffEventDefinition::Callback callback) noexcept {
-    return SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                           static_cast<void*>(&callback));
-  }
-
-  /// Sets a note on.
-  ///
-  /// @param pitch Note pitch.
-  /// @param intensity Note intensity.
-  /// @return Status.
-  Status SetNoteOn(double pitch, double intensity = 1.0) noexcept {
-    return BarelyInstrument_SetNoteOn(handle_, pitch, intensity);
-  }
-
-  /// Sets the note on event.
-  ///
-  /// @param definition Note on event definition.
-  /// @param user_data Pointer to user data.
-  /// @return Status.
-  Status SetNoteOnEvent(NoteOnEventDefinition definition,
-                        void* user_data = nullptr) noexcept {
-    return BarelyInstrument_SetNoteOnEvent(handle_, definition, user_data);
-  }
-
-  /// Sets the note off event with a callback.
-  ///
-  /// @param callback Note off event callback.
-  /// @return Status.
-  Status SetNoteOnEvent(NoteOnEventDefinition::Callback callback) noexcept {
-    return SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
-                          static_cast<void*>(&callback));
-  }
-
- private:
-  // Raw handle.
-  BarelyInstrumentHandle handle_ = nullptr;
-};
-
-/// Effect handle.
-class EffectHandle {
- public:
-  /// Creates a new `EffectHandle`.
-  ///
-  /// @param instrument Instrument handle.
-  /// @param definition Effect definition.
-  /// @param process_order Effect process order.
-  /// @return Effect handle, or an error status.
-  static StatusOr<EffectHandle> Create(InstrumentHandle instrument,
-                                       EffectDefinition definition,
-                                       int process_order = 0) noexcept {
-    BarelyEffectHandle handle;
-    if (const Status status = BarelyEffect_Create(instrument.Get(), definition,
-                                                  process_order, &handle);
-        !status.IsOk()) {
-      return status;
-    }
-    return EffectHandle(handle);
-  }
-
-  /// Destroys an effect handle.
-  ///
-  /// @param effect Effect handle.
-  /// @return Status.
-  static Status Destroy(EffectHandle effect) noexcept {
-    return BarelyEffect_Destroy(effect.handle_);
-  }
-
-  /// Default constructor.
-  EffectHandle() = default;
-
-  /// Constructs a new `EffectHandle` from a raw type.
-  ///
-  /// @param handle Raw effect handle.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  EffectHandle(BarelyEffectHandle handle) noexcept : handle_(handle) {}
-
-  /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~EffectHandle() = default;
-
-  /// Copyable.
-  EffectHandle(const EffectHandle& other) noexcept = default;
-  EffectHandle& operator=(const EffectHandle& other) noexcept = default;
-
-  /// Constructs a new `EffectHandle` via move.
-  ///
-  /// @param other Other effect handle.
-  EffectHandle(EffectHandle&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `EffectHandle` via move.
-  ///
-  /// @param other Other effect handle.
-  /// @return Effect handle.
-  EffectHandle& operator=(EffectHandle&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
-  /// Returns the raw handle.
-  ///
-  /// @return Raw effect handle.
-  BarelyEffectHandle Get() const noexcept { return handle_; }
-
-  /// Returns a control value.
-  ///
-  /// @param index Control index.
-  /// @return Control value, or an error status.
-  template <typename IndexType, typename ValueType>
-  [[nodiscard]] StatusOr<ValueType> GetControl(IndexType index) const noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    double value = 0.0;
-    if (const Status status =
-            BarelyEffect_GetControl(handle_, static_cast<int>(index), &value);
-        !status.IsOk()) {
-      return status;
-    }
-    return static_cast<ValueType>(value);
-  }
-
-  /// Returns the process order.
-  ///
-  /// @return Process order, or an error status.
-  [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
-    int process_order = 0;
-    if (const Status status =
-            BarelyEffect_GetProcessOrder(handle_, &process_order);
-        !status.IsOk()) {
-      return status;
-    }
-    return process_order;
-  }
-
-  /// Resets all control values.
-  ///
-  /// @return Status.
-  Status ResetAllControls() noexcept {
-    return BarelyEffect_ResetAllControls(handle_);
-  }
-
-  /// Resets a control value.
-  ///
-  /// @param index Control index.
-  /// @return Status.
-  template <typename IndexType>
-  Status ResetControl(IndexType index) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    return BarelyEffect_ResetControl(handle_, static_cast<int>(index));
-  }
-
-  /// Sets a control value.
-  ///
-  /// @param index Control index.
-  /// @param value Control value.
-  /// @param slope_per_beat Control slope in value change per beat.
-  /// @return Status.
-  template <typename IndexType, typename ValueType>
-  Status SetControl(IndexType index, ValueType value,
-                    double slope_per_beat = 0.0) noexcept {
-    static_assert(
-        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
-        "IndexType is not supported");
-    static_assert(
-        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
-        "ValueType is not supported");
-    return BarelyEffect_SetControl(handle_, static_cast<int>(index),
-                                   static_cast<double>(value), slope_per_beat);
-  }
-
-  /// Sets the control event.
-  ///
-  /// @param definition Control event definition.
-  /// @param user_data Pointer to user data.
-  /// @return Status.
-  Status SetControlEvent(ControlEventDefinition definition,
-                         void* user_data = nullptr) noexcept {
-    return BarelyEffect_SetControlEvent(handle_, definition, user_data);
-  }
-
-  /// Sets the control event with a callback.
-  ///
-  /// @param callback Control event callback.
-  /// @return Status.
-  Status SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
-    return SetControlEvent(ControlEventDefinition::WithCallback(),
-                           static_cast<void*>(&callback));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Immutable data.
-  /// @return Status.
-  template <typename DataType>
-  Status SetData(const DataType& data) noexcept {
-    static_assert(std::is_trivially_copyable<DataType>::value,
-                  "DataType is not trivially copyable");
-    return SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
-  }
-
-  /// Sets data.
-  ///
-  /// @param data Pointer to immutable data.
-  /// @param size Data size in bytes.
-  /// @return Status.
-  Status SetData(const void* data, int size) noexcept {
-    return BarelyEffect_SetData(handle_, data, size);
-  }
-
-  /// Sets the process order.
-  ///
-  /// @param process_order Process order.
-  /// @return Status.
-  Status SetProcessOrder(int process_order) noexcept {
-    return BarelyEffect_SetProcessOrder(handle_, process_order);
-  }
-
- private:
-  // Raw handle.
-  BarelyEffectHandle handle_ = nullptr;
-};
-
-/// Performer handle.
-class PerformerHandle {
- public:
-  /// Creates a new `PerformerHandle`.
-  ///
-  /// @param musician Musician handle.
-  /// @return Performer handle, or an error status.
-  static StatusOr<PerformerHandle> Create(MusicianHandle musician) noexcept {
-    BarelyPerformerHandle handle;
-    if (const Status status = BarelyPerformer_Create(musician.Get(), &handle);
-        !status.IsOk()) {
-      return status;
-    }
-    return PerformerHandle(handle);
-  }
-
-  /// Destroys a performer handle.
-  ///
-  /// @param performer Performer handle.
-  /// @return Status.
-  static Status Destroy(PerformerHandle performer) noexcept {
-    return BarelyPerformer_Destroy(performer.handle_);
-  }
-
-  /// Default constructor.
-  PerformerHandle() = default;
-
-  /// Constructs a new `PerformerHandle` from a raw type.
-  ///
-  /// @param handle Raw performer handle.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  PerformerHandle(BarelyPerformerHandle handle) noexcept : handle_(handle) {}
-
-  /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~PerformerHandle() = default;
-
-  /// Copyable.
-  PerformerHandle(const PerformerHandle& other) noexcept = default;
-  PerformerHandle& operator=(const PerformerHandle& other) noexcept = default;
-
-  /// Constructs a new `PerformerHandle` via move.
-  ///
-  /// @param other Other performer handle.
-  PerformerHandle(PerformerHandle&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `PerformerHandle` via move.
-  ///
-  /// @param other Other performer handle.
-  /// @return Performer handle.
-  PerformerHandle& operator=(PerformerHandle&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
-  /// Returns the raw handle.
-  ///
-  /// @return Raw performer handle.
-  BarelyPerformerHandle Get() const noexcept { return handle_; }
-
-  /// Returns the loop begin position.
-  ///
-  /// @return Loop begin position in beats, or an error status.
-  [[nodiscard]] StatusOr<double> GetLoopBeginPosition() const noexcept {
-    double loop_begin_position = 0.0;
-    if (const Status status =
-            BarelyPerformer_GetLoopBeginPosition(handle_, &loop_begin_position);
-        !status.IsOk()) {
-      return status;
-    }
-    return loop_begin_position;
-  }
-
-  /// Returns the loop length.
-  ///
-  /// @return Loop length in beats, or an error status.
-  [[nodiscard]] StatusOr<double> GetLoopLength() const noexcept {
-    double loop_length = 0.0;
-    if (const Status status =
-            BarelyPerformer_GetLoopLength(handle_, &loop_length);
-        !status.IsOk()) {
-      return status;
-    }
-    return loop_length;
-  }
-
-  /// Returns the position.
-  ///
-  /// @return Position in beats, or an error status.
-  [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
-    double position = 0.0;
-    if (const Status status = BarelyPerformer_GetPosition(handle_, &position);
-        !status.IsOk()) {
-      return status;
-    }
-    return position;
-  }
-
-  /// Returns whether the performer is looping or not.
-  ///
-  /// @return True if looping, false otherwise, or an error status.
-  [[nodiscard]] StatusOr<bool> IsLooping() const noexcept {
-    bool is_looping = false;
-    if (const Status status = BarelyPerformer_IsLooping(handle_, &is_looping);
-        !status.IsOk()) {
-      return status;
-    }
-    return is_looping;
-  }
-
-  /// Returns whether the performer is playing or not.
-  ///
-  /// @return True if playing, false otherwise, or an error status.
-  [[nodiscard]] StatusOr<bool> IsPlaying() const noexcept {
-    bool is_playing = false;
-    if (const Status status = BarelyPerformer_IsPlaying(handle_, &is_playing);
-        !status.IsOk()) {
-      return status;
-    }
-    return is_playing;
-  }
-
-  /// Sets the loop begin position.
-  ///
-  /// @param loop_begin_position Loop begin position in beats.
-  /// @return Status.
-  Status SetLoopBeginPosition(double loop_begin_position) noexcept {
-    return BarelyPerformer_SetLoopBeginPosition(handle_, loop_begin_position);
-  }
-
-  /// Sets the loop length.
-  ///
-  /// @param loop_length Loop length in beats.
-  /// @return Status.
-  Status SetLoopLength(double loop_length) noexcept {
-    return BarelyPerformer_SetLoopLength(handle_, loop_length);
-  }
-
-  /// Sets whether the performer is looping or not.
-  ///
-  /// @param is_looping True if looping, false otherwise.
-  /// @return Status.
-  Status SetLooping(bool is_looping) noexcept {
-    return BarelyPerformer_SetLooping(handle_, is_looping);
-  }
-
-  /// Sets the position.
-  ///
-  /// @param position Position in beats.
-  /// @return Status.
-  Status SetPosition(double position) noexcept {
-    return BarelyPerformer_SetPosition(handle_, position);
-  }
-
-  /// Starts the performer.
-  ///
-  /// @return Status.
-  Status Start() noexcept { return BarelyPerformer_Start(handle_); }
-
-  /// Stops the performer.
-  ///
-  /// @return Status.
-  Status Stop() noexcept { return BarelyPerformer_Stop(handle_); }
-
- private:
-  // Raw handle.
-  BarelyPerformerHandle handle_ = nullptr;
-};
-
-/// Task handle.
-class TaskHandle {
- public:
-  /// Creates a new `TaskHandle`.
-  ///
-  /// @param performer Performer handle.
-  /// @param definition Task definition.
-  /// @param is_one_off True if one-off task, false otherwise.
-  /// @param position Task position in beats.
-  /// @param process_order Task process order.
-  /// @param user_data Pointer to user data.
-  /// @return Task handle, or an error status.
-  static StatusOr<TaskHandle> Create(PerformerHandle performer,
-                                     TaskDefinition definition, bool is_one_off,
-                                     double position, int process_order = 0,
-                                     void* user_data = nullptr) noexcept {
-    BarelyTaskHandle handle;
-    if (const Status status =
-            BarelyTask_Create(performer.Get(), definition, is_one_off, position,
-                              process_order, user_data, &handle);
-        !status.IsOk()) {
-      return status;
-    }
-    return TaskHandle(handle);
-  }
-
-  /// Destroys an task handle.
-  ///
-  /// @param task Task handle.
-  /// @return Status.
-  static Status Destroy(TaskHandle task) noexcept {
-    return BarelyTask_Destroy(task.handle_);
-  }
-
-  /// Default constructor.
-  TaskHandle() = default;
-
-  /// Constructs a new `TaskHandle` from a raw type.
-  ///
-  /// @param handle Raw task handle.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  TaskHandle(BarelyTaskHandle handle) noexcept : handle_(handle) {}
-
-  /// Base destructor to ensure the derived classes get destroyed properly.
-  virtual ~TaskHandle() = default;
-
-  /// Copyable.
-  TaskHandle(const TaskHandle& other) noexcept = default;
-  TaskHandle& operator=(const TaskHandle& other) noexcept = default;
-
-  /// Constructs a new `TaskHandle` via move.
-  ///
-  /// @param other Other task handle.
-  TaskHandle(TaskHandle&& other) noexcept
-      : handle_(std::exchange(other.handle_, nullptr)) {}
-
-  /// Assigns `TaskHandle` via move.
-  ///
-  /// @param other Other task handle.
-  /// @return Task handle.
-  TaskHandle& operator=(TaskHandle&& other) noexcept {
-    if (this != &other) {
-      handle_ = std::exchange(other.handle_, nullptr);
-    }
-    return *this;
-  }
-
-  /// Returns the raw handle.
-  ///
-  /// @return Raw task handle.
-  BarelyTaskHandle Get() const noexcept { return handle_; }
-
-  /// Returns the position.
-  ///
-  /// @return Position in beats, or an error status.
-  [[nodiscard]] StatusOr<double> GetPosition() const noexcept {
-    double position = 0.0;
-    if (const Status status = BarelyTask_GetPosition(handle_, &position);
-        !status.IsOk()) {
-      return status;
-    }
-    return position;
-  }
-
-  /// Returns the process order.
-  ///
-  /// @return Process order, or an error status.
-  [[nodiscard]] StatusOr<int> GetProcessOrder() const noexcept {
-    int process_order = 0;
-    if (const Status status =
-            BarelyTask_GetProcessOrder(handle_, &process_order);
-        !status.IsOk()) {
-      return status;
-    }
-    return process_order;
-  }
-
-  /// Sets the position.
-  ///
-  /// @param position Position in beats.
-  /// @return Status.
-  Status SetPosition(double position) noexcept {
-    return BarelyTask_SetPosition(handle_, position);
-  }
-
-  /// Sets the process order.
-  ///
-  /// @param process_order Process order.
-  /// @return Status.
-  Status SetProcessOrder(int process_order) noexcept {
-    return BarelyTask_SetProcessOrder(handle_, process_order);
-  }
-
- private:
-  // Raw handle.
-  BarelyTaskHandle handle_ = nullptr;
-};
-
-/// Class that wraps an effect handle.
+/// Class that wraps an effect.
 class Effect {
  public:
+  /// Creates a new `Effect` from a raw handle.
+  ///
+  /// @param effect Raw effect handle.
+  explicit Effect(BarelyEffectHandle effect) noexcept : effect_(effect) {
+    assert(effect);
+  }
+
   /// Destroys `Effect`.
-  ~Effect() noexcept { EffectHandle::Destroy(effect_); }
+  ~Effect() noexcept { BarelyEffect_Destroy(effect_); }
 
   /// Non-copyable.
   Effect(const Effect& other) noexcept = delete;
   Effect& operator=(const Effect& other) noexcept = delete;
 
-  /// Default move constructor.
-  Effect(Effect&& other) noexcept = default;
+  /// Constructs a new `Effect` via move.
+  ///
+  /// @param other Other effect.
+  Effect(Effect&& other) noexcept
+      : effect_(std::exchange(other.effect_, nullptr)) {}
 
   /// Assigns `Effect` via move.
   ///
@@ -2676,7 +1764,7 @@ class Effect {
   /// @return Effect.
   Effect& operator=(Effect&& other) noexcept {
     if (this != &other) {
-      EffectHandle::Destroy(effect_);
+      BarelyEffect_Destroy(effect_);
       effect_ = std::move(other.effect_);
     }
     return *this;
@@ -2684,8 +1772,8 @@ class Effect {
 
   /// Returns the handle.
   ///
-  /// @return Effect handle.
-  [[nodiscard]] EffectHandle Get() const noexcept { return effect_; }
+  /// @return Raw effect handle.
+  [[nodiscard]] BarelyEffectHandle Get() const noexcept { return effect_; }
 
   /// Returns a control value.
   ///
@@ -2693,24 +1781,39 @@ class Effect {
   /// @return Control value.
   template <typename IndexType, typename ValueType>
   [[nodiscard]] ValueType GetControl(IndexType index) const noexcept {
-    return *effect_.GetControl(index);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    double value = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyEffect_GetControl(effect_, static_cast<int>(index), &value);
+    assert(status.IsOk());
+    return static_cast<ValueType>(value);
   }
 
   /// Returns the process order.
   ///
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
-    return *effect_.GetProcessOrder();
+    int process_order = 0;
+    [[maybe_unused]] const Status status =
+        BarelyEffect_GetProcessOrder(effect_, &process_order);
+    assert(status.IsOk());
+    return process_order;
   }
 
   /// Releases the handle.
   ///
-  /// @return Effect handle.
-  EffectHandle Release() noexcept { return std::move(effect_); }
+  /// @return Raw effect handle.
+  BarelyEffectHandle Release() noexcept {
+    assert(effect_);
+    return std::exchange(effect_, nullptr);
+  }
 
   /// Resets all control values.
   void ResetAllControls() noexcept {
-    [[maybe_unused]] const auto status = effect_.ResetAllControls();
+    [[maybe_unused]] const Status status =
+        BarelyEffect_ResetAllControls(effect_);
     assert(status.IsOk());
   }
 
@@ -2719,7 +1822,11 @@ class Effect {
   /// @param index Control index.
   template <typename IndexType>
   void ResetControl(IndexType index) noexcept {
-    [[maybe_unused]] const auto status = effect_.ResetControl(index);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    [[maybe_unused]] const Status status =
+        BarelyEffect_ResetControl(effect_, static_cast<int>(index));
     assert(status.IsOk());
   }
 
@@ -2731,8 +1838,26 @@ class Effect {
   template <typename IndexType, typename ValueType>
   void SetControl(IndexType index, ValueType value,
                   double slope_per_beat = 0.0) noexcept {
-    [[maybe_unused]] const auto status =
-        effect_.SetControl(index, value, slope_per_beat);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
+    [[maybe_unused]] const Status status =
+        BarelyEffect_SetControl(effect_, static_cast<int>(index),
+                                static_cast<double>(value), slope_per_beat);
+    assert(status.IsOk());
+  }
+
+  /// Sets the control event.
+  ///
+  /// @param definition Control event definition.
+  /// @param user_data Pointer to user data.
+  void SetControlEvent(ControlEventDefinition definition,
+                       void* user_data = nullptr) noexcept {
+    [[maybe_unused]] const Status status =
+        BarelyEffect_SetControlEvent(effect_, definition, user_data);
     assert(status.IsOk());
   }
 
@@ -2740,8 +1865,8 @@ class Effect {
   ///
   /// @param callback Control event callback.
   void SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
-    [[maybe_unused]] const auto status = effect_.SetControlEvent(callback);
-    assert(status.IsOk());
+    SetControlEvent(ControlEventDefinition::WithCallback(),
+                    static_cast<void*>(&callback));
   }
 
   /// Sets data.
@@ -2749,8 +1874,9 @@ class Effect {
   /// @param data Immutable data.
   template <typename DataType>
   void SetData(const DataType& data) noexcept {
-    [[maybe_unused]] const auto status = effect_.SetData(data);
-    assert(status.IsOk());
+    static_assert(std::is_trivially_copyable<DataType>::value,
+                  "DataType is not trivially copyable");
+    SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
   }
 
   /// Sets data.
@@ -2758,7 +1884,8 @@ class Effect {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const auto status = effect_.SetData(data, size);
+    [[maybe_unused]] const Status status =
+        BarelyEffect_SetData(effect_, data, size);
     assert(status.IsOk());
   }
 
@@ -2766,33 +1893,39 @@ class Effect {
   ///
   /// @param process_order Process order.
   void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const auto status = effect_.SetProcessOrder(process_order);
+    [[maybe_unused]] const Status status =
+        BarelyEffect_SetProcessOrder(effect_, process_order);
     assert(status.IsOk());
   }
 
  private:
-  // Ensures that `Effect` can only be constructed by `Instrument`.
-  friend class Instrument;
-
-  // Creates a new `Effect`.
-  explicit Effect(EffectHandle effect) noexcept : effect_(effect) {}
-
-  // Effect handle.
-  EffectHandle effect_ = nullptr;
+  // Raw effect handle.
+  BarelyEffectHandle effect_ = nullptr;
 };
 
-/// Class that wraps an instrument handle.
+/// Class that wraps an instrument.
 class Instrument {
  public:
+  // Creates a new `Instrument` from a raw handle.
+  ///
+  /// @param instrument Raw instrument handle.
+  explicit Instrument(BarelyInstrumentHandle instrument) noexcept
+      : instrument_(instrument) {
+    assert(instrument);
+  }
+
   /// Destroys `Instrument`.
-  ~Instrument() noexcept { InstrumentHandle::Destroy(instrument_); }
+  ~Instrument() noexcept { BarelyInstrument_Destroy(instrument_); }
 
   /// Non-copyable.
   Instrument(const Instrument& other) noexcept = delete;
   Instrument& operator=(const Instrument& other) noexcept = delete;
 
-  /// Default move constructor.
-  Instrument(Instrument&& other) noexcept = default;
+  /// Constructs a new `Instrument` via move.
+  ///
+  /// @param other Other instrument.
+  Instrument(Instrument&& other) noexcept
+      : instrument_(std::exchange(other.instrument_, nullptr)) {}
 
   /// Assigns `Instrument` via move.
   ///
@@ -2800,7 +1933,7 @@ class Instrument {
   /// @return Instrument.
   Instrument& operator=(Instrument&& other) noexcept {
     if (this != &other) {
-      InstrumentHandle::Destroy(instrument_);
+      BarelyInstrument_Destroy(instrument_);
       instrument_ = std::move(other.instrument_);
     }
     return *this;
@@ -2813,16 +1946,19 @@ class Instrument {
   /// @return Effect.
   [[nodiscard]] Effect CreateEffect(EffectDefinition definition,
                                     int process_order = 0) noexcept {
-    const auto effect_or =
-        EffectHandle::Create(instrument_, definition, process_order);
-    assert(effect_or.IsOk());
-    return Effect(*effect_or);
+    BarelyEffectHandle effect;
+    [[maybe_unused]] const Status status =
+        BarelyEffect_Create(instrument_, definition, process_order, &effect);
+    assert(status.IsOk());
+    return Effect(effect);
   }
 
   /// Returns the handle.
   ///
-  /// @return Instrument handle.
-  [[nodiscard]] InstrumentHandle Get() const noexcept { return instrument_; }
+  /// @return Raw instrument handle.
+  [[nodiscard]] BarelyInstrumentHandle Get() const noexcept {
+    return instrument_;
+  }
 
   /// Returns a control value.
   ///
@@ -2830,7 +1966,14 @@ class Instrument {
   /// @return Control value.
   template <typename IndexType, typename ValueType>
   [[nodiscard]] ValueType GetControl(IndexType index) const noexcept {
-    return *instrument_.GetControl(index);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    double value = 0.0;
+    [[maybe_unused]] const Status status = BarelyInstrument_GetControl(
+        instrument_, static_cast<int>(index), &value);
+    assert(status.IsOk());
+    return static_cast<ValueType>(value);
   }
 
   /// Returns a note control value.
@@ -2840,7 +1983,14 @@ class Instrument {
   template <typename IndexType, typename ValueType>
   [[nodiscard]] ValueType GetNoteControl(double pitch,
                                          IndexType index) const noexcept {
-    return *instrument_.GetNoteControl(pitch, index);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    double value = 0.0;
+    [[maybe_unused]] const Status status = BarelyInstrument_GetNoteControl(
+        instrument_, pitch, static_cast<int>(index), &value);
+    assert(status.IsOk());
+    return static_cast<ValueType>(value);
   }
 
   /// Returns whether a note is on or not.
@@ -2848,7 +1998,11 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
-    return *instrument_.IsNoteOn(pitch);
+    bool is_note_on = false;
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_IsNoteOn(instrument_, pitch, &is_note_on);
+    assert(status.IsOk());
+    return is_note_on;
   }
 
   /// Processes output samples at timestamp.
@@ -2859,19 +2013,24 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count, double timestamp) noexcept {
-    [[maybe_unused]] const auto status = instrument_.Process(
-        output_samples, output_channel_count, output_frame_count, timestamp);
+    [[maybe_unused]] const Status status = BarelyInstrument_Process(
+        instrument_, output_samples, output_channel_count, output_frame_count,
+        timestamp);
     assert(status.IsOk());
   }
 
   /// Releases the handle.
   ///
-  /// @return Instrument handle.
-  InstrumentHandle Release() noexcept { return std::move(instrument_); }
+  /// @return Raw instrument handle.
+  BarelyInstrumentHandle Release() noexcept {
+    assert(instrument_);
+    return std::exchange(instrument_, nullptr);
+  }
 
   /// Resets all control values.
   void ResetAllControls() noexcept {
-    [[maybe_unused]] const auto status = instrument_.ResetAllControls();
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_ResetAllControls(instrument_);
     assert(status.IsOk());
   }
 
@@ -2879,8 +2038,8 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   void ResetAllNoteControls(double pitch) noexcept {
-    [[maybe_unused]] const auto status =
-        instrument_.ResetAllNoteControls(pitch);
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_ResetAllNoteControls(instrument_, pitch);
     assert(status.IsOk());
   }
 
@@ -2889,7 +2048,11 @@ class Instrument {
   /// @param index Control index.
   template <typename IndexType>
   void ResetControl(IndexType index) noexcept {
-    [[maybe_unused]] const auto status = instrument_.ResetControl(index);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_ResetControl(instrument_, index);
     assert(status.IsOk());
   }
 
@@ -2899,14 +2062,18 @@ class Instrument {
   /// @param index Note control index.
   template <typename IndexType>
   void ResetNoteControl(double pitch, IndexType index) noexcept {
-    [[maybe_unused]] const auto status =
-        instrument_.ResetNoteControl(pitch, index);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_ResetNoteControl(instrument_, pitch, index);
     assert(status.IsOk());
   }
 
   /// Sets all notes off.
   void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const auto status = instrument_.SetAllNotesOff();
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetAllNotesOff(instrument_);
     assert(status.IsOk());
   }
 
@@ -2918,8 +2085,26 @@ class Instrument {
   template <typename IndexType, typename ValueType>
   void SetControl(IndexType index, ValueType value,
                   double slope_per_beat = 0.0) noexcept {
-    [[maybe_unused]] const auto status =
-        instrument_.SetControl(index, value, slope_per_beat);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetControl(instrument_, static_cast<int>(index),
+                                    static_cast<double>(value), slope_per_beat);
+    assert(status.IsOk());
+  }
+
+  /// Sets the control event.
+  ///
+  /// @param definition Control event definition.
+  /// @param user_data Pointer to user data.
+  void SetControlEvent(ControlEventDefinition definition,
+                       void* user_data = nullptr) noexcept {
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetControlEvent(instrument_, definition, user_data);
     assert(status.IsOk());
   }
 
@@ -2927,8 +2112,8 @@ class Instrument {
   ///
   /// @param callback Control event callback.
   void SetControlEvent(ControlEventDefinition::Callback callback) noexcept {
-    [[maybe_unused]] const auto status = instrument_.SetControlEvent(callback);
-    assert(status.IsOk());
+    SetControlEvent(ControlEventDefinition::WithCallback(),
+                    static_cast<void*>(&callback));
   }
 
   /// Sets data.
@@ -2936,8 +2121,9 @@ class Instrument {
   /// @param data Immutable data.
   template <typename DataType>
   void SetData(const DataType& data) noexcept {
-    [[maybe_unused]] const auto status = instrument_.SetData(data);
-    assert(status.IsOk());
+    static_assert(std::is_trivially_copyable<DataType>::value,
+                  "DataType is not trivially copyable");
+    SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
   }
 
   /// Sets data.
@@ -2945,7 +2131,8 @@ class Instrument {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const auto status = instrument_.SetData(data, size);
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetData(instrument_, data, size);
     assert(status.IsOk());
   }
 
@@ -2958,8 +2145,26 @@ class Instrument {
   template <typename IndexType, typename ValueType>
   void SetNoteControl(double pitch, IndexType index, ValueType value,
                       double slope_per_beat = 0.0) noexcept {
-    [[maybe_unused]] const auto status =
-        instrument_.SetNoteControl(pitch, index, value, slope_per_beat);
+    static_assert(
+        std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+        "IndexType is not supported");
+    static_assert(
+        std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
+        "ValueType is not supported");
+    [[maybe_unused]] const Status status = BarelyInstrument_SetNoteControl(
+        instrument_, pitch, static_cast<int>(index), static_cast<double>(value),
+        slope_per_beat);
+    assert(status.IsOk());
+  }
+
+  /// Sets the note control event.
+  ///
+  /// @param definition Note control event definition.
+  /// @param user_data Pointer to user data.
+  void SetNoteControlEvent(NoteControlEventDefinition definition,
+                           void* user_data = nullptr) noexcept {
+    [[maybe_unused]] const Status status = BarelyInstrument_SetNoteControlEvent(
+        instrument_, definition, user_data);
     assert(status.IsOk());
   }
 
@@ -2968,16 +2173,27 @@ class Instrument {
   /// @param callback Note control event callback.
   void SetNoteControlEvent(
       NoteControlEventDefinition::Callback callback) noexcept {
-    [[maybe_unused]] const auto status =
-        instrument_.SetNoteControlEvent(callback);
-    assert(status.IsOk());
+    SetNoteControlEvent(NoteControlEventDefinition::WithCallback(),
+                        static_cast<void*>(&callback));
   }
 
   /// Sets a note off.
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(double pitch) noexcept {
-    [[maybe_unused]] const auto status = instrument_.SetNoteOff(pitch);
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetNoteOff(instrument_, pitch);
+    assert(status.IsOk());
+  }
+
+  /// Sets the note off event.
+  ///
+  /// @param definition Note off event definition.
+  /// @param user_data Pointer to user data.
+  void SetNoteOffEvent(NoteOffEventDefinition definition,
+                       void* user_data = nullptr) noexcept {
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetNoteOffEvent(instrument_, definition, user_data);
     assert(status.IsOk());
   }
 
@@ -2985,8 +2201,8 @@ class Instrument {
   ///
   /// @param callback Note off event callback.
   void SetNoteOffEvent(NoteOffEventDefinition::Callback callback) noexcept {
-    [[maybe_unused]] const auto status = instrument_.SetNoteOffEvent(callback);
-    assert(status.IsOk());
+    SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
+                    static_cast<void*>(&callback));
   }
 
   /// Sets a note on.
@@ -2994,8 +2210,19 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
-    [[maybe_unused]] const auto status =
-        instrument_.SetNoteOn(pitch, intensity);
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetNoteOn(instrument_, pitch, intensity);
+    assert(status.IsOk());
+  }
+
+  /// Sets the note on event.
+  ///
+  /// @param definition Note on event definition.
+  /// @param user_data Pointer to user data.
+  void SetNoteOnEvent(NoteOnEventDefinition definition,
+                      void* user_data = nullptr) noexcept {
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_SetNoteOnEvent(instrument_, definition, user_data);
     assert(status.IsOk());
   }
 
@@ -3003,34 +2230,34 @@ class Instrument {
   ///
   /// @param callback Note off event callback.
   void SetNoteOnEvent(NoteOnEventDefinition::Callback callback) noexcept {
-    [[maybe_unused]] const auto status = instrument_.SetNoteOnEvent(callback);
-    assert(status.IsOk());
+    SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
+                   static_cast<void*>(&callback));
   }
 
  private:
-  // Ensures that `Instrument` can only be constructed by `Musician`.
-  friend class Musician;
-
-  // Creates a new `Instrument`.
-  explicit Instrument(InstrumentHandle instrument) noexcept
-      : instrument_(instrument) {}
-
-  // Instrument handle.
-  InstrumentHandle instrument_ = nullptr;
+  // Raw instrument handle.
+  BarelyInstrumentHandle instrument_ = nullptr;
 };
 
-/// Class that wraps a task handle.
+/// Class that wraps a task.
 class Task {
  public:
-  /// Destroys `Effect`.
-  ~Task() noexcept { TaskHandle::Destroy(task_); }
+  // Creates a new `Task` from a raw handle.
+  ///
+  /// @param handle Raw task handle.
+  explicit Task(BarelyTaskHandle task) noexcept : task_(task) { assert(task); }
+
+  /// Destroys `Task`.
+  ~Task() noexcept { BarelyTask_Destroy(task_); }
 
   /// Non-copyable.
   Task(const Task& other) noexcept = delete;
   Task& operator=(const Task& other) noexcept = delete;
 
-  /// Default move constructor.
-  Task(Task&& other) noexcept = default;
+  /// Constructs a new `Task` via move.
+  ///
+  /// @param other Other task.
+  Task(Task&& other) noexcept : task_(std::exchange(other.task_, nullptr)) {}
 
   /// Assigns `Task` via move.
   ///
@@ -3038,7 +2265,7 @@ class Task {
   /// @return Task.
   Task& operator=(Task&& other) noexcept {
     if (this != &other) {
-      TaskHandle::Destroy(task_);
+      BarelyTask_Destroy(task_);
       task_ = std::move(other.task_);
     }
     return *this;
@@ -3046,33 +2273,45 @@ class Task {
 
   /// Returns the handle.
   ///
-  /// @return Task handle.
-  [[nodiscard]] TaskHandle Get() const noexcept { return task_; }
+  /// @return Raw task handle.
+  [[nodiscard]] BarelyTaskHandle Get() const noexcept { return task_; }
 
   /// Returns the position.
   ///
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
-    return *task_.GetPosition();
+    double position = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyTask_GetPosition(task_, &position);
+    assert(status.IsOk());
+    return position;
   }
 
   /// Returns the process order.
   ///
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
-    return *task_.GetProcessOrder();
+    int process_order = 0;
+    [[maybe_unused]] const Status status =
+        BarelyTask_GetProcessOrder(task_, &process_order);
+    assert(status.IsOk());
+    return process_order;
   }
 
   /// Releases the handle.
   ///
-  /// @return Task handle.
-  TaskHandle Release() noexcept { return std::move(task_); }
+  /// @return Raw task handle.
+  BarelyTaskHandle Release() noexcept {
+    assert(task_);
+    return std::exchange(task_, nullptr);
+  }
 
   /// Sets the position.
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const auto status = task_.SetPosition(position);
+    [[maybe_unused]] const Status status =
+        BarelyTask_SetPosition(task_, position);
     assert(status.IsOk());
   }
 
@@ -3080,33 +2319,39 @@ class Task {
   ///
   /// @param process_order Process order.
   void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const auto status = task_.SetProcessOrder(process_order);
+    [[maybe_unused]] const Status status =
+        BarelyTask_SetProcessOrder(task_, process_order);
     assert(status.IsOk());
   }
 
  private:
-  // Ensures that `Effect` can only be constructed by `Performer`.
-  friend class Performer;
-
-  // Creates a new `Task`.
-  explicit Task(TaskHandle task) noexcept : task_(task) {}
-
-  // Task handle.
-  TaskHandle task_ = nullptr;
+  // Raw task handle.
+  BarelyTaskHandle task_ = nullptr;
 };
 
-/// Class that wraps an performer handle.
+/// Class that wraps a performer.
 class Performer {
  public:
+  /// Creates a new `Performer` from a raw handle.
+  ///
+  /// @param performer Raw performer handle.
+  explicit Performer(BarelyPerformerHandle performer) noexcept
+      : performer_(performer) {
+    assert(performer);
+  }
+
   /// Destroys `Performer`.
-  ~Performer() noexcept { PerformerHandle::Destroy(performer_); }
+  ~Performer() noexcept { BarelyPerformer_Destroy(performer_); }
 
   /// Non-copyable.
   Performer(const Performer& other) noexcept = delete;
   Performer& operator=(const Performer& other) noexcept = delete;
 
-  /// Default move constructor.
-  Performer(Performer&& other) noexcept = default;
+  /// Constructs a new `Performer` via move.
+  ///
+  /// @param other Other performer.
+  Performer(Performer&& other) noexcept
+      : performer_(std::exchange(other.performer_, nullptr)) {}
 
   /// Assigns `Performer` via move.
   ///
@@ -3114,7 +2359,7 @@ class Performer {
   /// @return Performer.
   Performer& operator=(Performer&& other) noexcept {
     if (this != &other) {
-      PerformerHandle::Destroy(performer_);
+      BarelyPerformer_Destroy(performer_);
       performer_ = std::move(other.performer_);
     }
     return *this;
@@ -3131,10 +2376,12 @@ class Performer {
   [[nodiscard]] Task CreateTask(TaskDefinition definition, bool is_one_off,
                                 double position, int process_order = 0,
                                 void* user_data = nullptr) noexcept {
-    const auto task_or = TaskHandle::Create(performer_, definition, is_one_off,
-                                            position, process_order, user_data);
-    assert(task_or.IsOk());
-    return Task(*task_or);
+    BarelyTaskHandle task;
+    [[maybe_unused]] const Status status =
+        BarelyTask_Create(performer_, definition, is_one_off, position,
+                          process_order, user_data, &task);
+    assert(status.IsOk());
+    return Task(task);
   }
 
   /// Creates a new task with a callback.
@@ -3153,55 +2400,80 @@ class Performer {
 
   /// Returns the handle.
   ///
-  /// @return Performer handle.
-  [[nodiscard]] PerformerHandle Get() const noexcept { return performer_; }
+  /// @return Raw performer handle.
+  [[nodiscard]] BarelyPerformerHandle Get() const noexcept {
+    return performer_;
+  }
 
   /// Returns the loop begin position.
   ///
   /// @return Loop begin position in beats.
   [[nodiscard]] double GetLoopBeginPosition() const noexcept {
-    return *performer_.GetLoopBeginPosition();
+    double loop_begin_position = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_GetLoopBeginPosition(performer_, &loop_begin_position);
+    assert(status.IsOk());
+    return loop_begin_position;
   }
 
   /// Returns the loop length.
   ///
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept {
-    return *performer_.GetLoopLength();
+    double loop_length = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_GetLoopLength(performer_, &loop_length);
+    assert(status.IsOk());
+    return loop_length;
   }
 
   /// Returns the position.
   ///
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
-    return *performer_.GetPosition();
+    double position = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_GetPosition(performer_, &position);
+    assert(status.IsOk());
+    return position;
   }
 
   /// Returns whether the performer is looping or not.
   ///
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept {
-    return *performer_.IsLooping();
+    bool is_looping = false;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_IsLooping(performer_, &is_looping);
+    assert(status.IsOk());
+    return is_looping;
   }
 
   /// Returns whether the performer is playing or not.
   ///
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept {
-    return *performer_.IsPlaying();
+    bool is_playing = false;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_IsPlaying(performer_, &is_playing);
+    assert(status.IsOk());
+    return is_playing;
   }
 
   /// Releases the handle.
   ///
-  /// @return Performer handle.
-  PerformerHandle Release() noexcept { return std::move(performer_); }
+  /// @return Raw performer handle.
+  BarelyPerformerHandle Release() noexcept {
+    assert(performer_);
+    return std::exchange(performer_, nullptr);
+  }
 
   /// Sets the loop begin position.
   ///
   /// @param loop_begin_position Loop begin position in beats.
   void SetLoopBeginPosition(double loop_begin_position) noexcept {
-    [[maybe_unused]] const auto status =
-        performer_.SetLoopBeginPosition(loop_begin_position);
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_SetLoopBeginPosition(performer_, loop_begin_position);
     assert(status.IsOk());
   }
 
@@ -3209,7 +2481,8 @@ class Performer {
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept {
-    [[maybe_unused]] const auto status = performer_.SetLoopLength(loop_length);
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_SetLoopLength(performer_, loop_length);
     assert(status.IsOk());
   }
 
@@ -3217,7 +2490,8 @@ class Performer {
   ///
   /// @param is_looping True if looping, false otherwise.
   void SetLooping(bool is_looping) noexcept {
-    [[maybe_unused]] const auto status = performer_.SetLooping(is_looping);
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_SetLooping(performer_, is_looping);
     assert(status.IsOk());
   }
 
@@ -3225,49 +2499,57 @@ class Performer {
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const auto status = performer_.SetPosition(position);
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_SetPosition(performer_, position);
     assert(status.IsOk());
   }
 
   /// Starts the performer.
   void Start() noexcept {
-    [[maybe_unused]] const auto status = performer_.Start();
+    [[maybe_unused]] const Status status = BarelyPerformer_Start(performer_);
     assert(status.IsOk());
   }
 
   /// Stops the performer.
   void Stop() noexcept {
-    [[maybe_unused]] const auto status = performer_.Stop();
+    [[maybe_unused]] const Status status = BarelyPerformer_Stop(performer_);
     assert(status.IsOk());
   }
 
  private:
-  // Ensures that `Performer` can only be constructed by `Musician`.
-  friend class Musician;
-
-  // Creates a new `Performer`.
-  explicit Performer(PerformerHandle performer) noexcept
-      : performer_(performer) {}
-
-  // Performer handle.
-  PerformerHandle performer_ = nullptr;
+  // Raw performer handle.
+  BarelyPerformerHandle performer_ = nullptr;
 };
 
-/// Class that wraps a musician handle.
+/// Class that wraps a musician.
 class Musician {
  public:
   /// Creates a new `Musician`.
-  Musician() noexcept : musician_(*MusicianHandle::Create()) {}
+  Musician() noexcept {
+    [[maybe_unused]] const Status status = BarelyMusician_Create(&musician_);
+    assert(status.IsOk());
+  }
+
+  /// Creates a new `Musician` from a raw handle.
+  ///
+  /// @param musician Raw musician handle.
+  explicit Musician(BarelyMusicianHandle musician) noexcept
+      : musician_(musician) {
+    assert(musician);
+  }
 
   /// Destroys `Musician`.
-  ~Musician() noexcept { MusicianHandle::Destroy(musician_); }
+  ~Musician() noexcept { BarelyMusician_Destroy(musician_); }
 
   /// Non-copyable.
   Musician(const Musician& other) noexcept = delete;
   Musician& operator=(const Musician& other) noexcept = delete;
 
-  /// Default move constructor.
-  Musician(Musician&& other) noexcept = default;
+  /// Constructs a new `Musician` via move.
+  ///
+  /// @param other Other musician.
+  Musician(Musician&& other) noexcept
+      : musician_(std::exchange(other.musician_, nullptr)) {}
 
   /// Assigns `Musician` via move.
   ///
@@ -3275,8 +2557,8 @@ class Musician {
   /// @return Musician.
   Musician& operator=(Musician&& other) noexcept {
     if (this != &other) {
-      MusicianHandle::Destroy(musician_);
-      musician_ = std::move(other.musician_);
+      BarelyMusician_Destroy(musician_);
+      musician_ = std::exchange(other.musician_, nullptr);
     }
     return *this;
   }
@@ -3288,50 +2570,65 @@ class Musician {
   /// @return Instrument.
   [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
                                             int frame_rate) noexcept {
-    const auto instrument_or =
-        InstrumentHandle::Create(musician_, definition, frame_rate);
-    assert(instrument_or.IsOk());
-    return Instrument(*instrument_or);
+    BarelyInstrumentHandle instrument;
+    [[maybe_unused]] const Status status =
+        BarelyInstrument_Create(musician_, definition, frame_rate, &instrument);
+    assert(status.IsOk());
+    return Instrument(instrument);
   }
 
   /// Creates a new performer.
   ///
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept {
-    const auto performer_or = PerformerHandle::Create(musician_);
-    assert(performer_or.IsOk());
-    return Performer(*performer_or);
+    BarelyPerformerHandle performer;
+    [[maybe_unused]] const Status status =
+        BarelyPerformer_Create(musician_, &performer);
+    assert(status.IsOk());
+    return Performer(performer);
   }
 
   /// Returns the handle.
   ///
-  /// @return Musician handle.
-  [[nodiscard]] MusicianHandle Get() const noexcept { return musician_; }
+  /// @return Raw musician handle.
+  [[nodiscard]] BarelyMusicianHandle Get() const noexcept { return musician_; }
 
   /// Returns the tempo.
   ///
   /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept {
-    return *musician_.GetTempo();
+    double tempo = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyMusician_GetTempo(musician_, &tempo);
+    assert(status.IsOk());
+    return tempo;
   }
 
   /// Returns the timestamp.
   ///
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept {
-    return *musician_.GetTimestamp();
+    double timestamp = 0.0;
+    [[maybe_unused]] const Status status =
+        BarelyMusician_GetTimestamp(musician_, &timestamp);
+    assert(status.IsOk());
+    return timestamp;
   }
 
   /// Releases the handle.
   ///
-  /// @return Musician handle.
-  MusicianHandle Release() noexcept { return std::move(musician_); }
+  /// @return Raw musician handle.
+  BarelyMusicianHandle Release() noexcept {
+    assert(musician_);
+    return std::exchange(musician_, nullptr);
+  }
 
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const auto status = musician_.SetTempo(tempo);
+    [[maybe_unused]] const Status status =
+        BarelyMusician_SetTempo(musician_, tempo);
     assert(status.IsOk());
   }
 
@@ -3339,13 +2636,14 @@ class Musician {
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
-    [[maybe_unused]] const auto status = musician_.Update(timestamp);
+    [[maybe_unused]] const Status status =
+        BarelyMusician_Update(musician_, timestamp);
     assert(status.IsOk());
   }
 
  private:
-  // Musician handle.
-  MusicianHandle musician_;
+  // Raw musician handle.
+  BarelyMusicianHandle musician_ = nullptr;
 };
 
 }  // namespace barely

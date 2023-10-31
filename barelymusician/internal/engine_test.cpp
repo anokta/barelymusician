@@ -8,7 +8,7 @@
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
-#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/status_or.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

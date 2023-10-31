@@ -11,7 +11,7 @@
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/mutable_data.h"
 #include "barelymusician/internal/performer.h"
-#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 

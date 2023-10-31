@@ -10,7 +10,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/id.h"
-#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 

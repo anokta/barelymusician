@@ -29,7 +29,7 @@ target_link_libraries(
   barely_internal_instrument
   barely_internal_mutable_data
   barely_internal_performer
-  barely_internal_status
+  barely_internal_status_or
   barelymusician_headeronly
   barely_find_or_null
   barely_seconds
@@ -63,7 +63,7 @@ target_link_libraries(
   barely_internal_message
   barely_internal_message_queue
   barely_internal_mutable_data
-  barely_internal_status
+  barely_internal_status_or
   barelymusician_headeronly
   barely_find_or_null
   barely_seconds
@@ -102,14 +102,18 @@ target_link_libraries(
   barely_internal_performer
   barely_internal_event
   barely_internal_id
-  barely_internal_status
+  barely_internal_status_or
   barelymusician_headeronly
   barely_find_or_null
 )
 
 add_library(
-  barely_internal_status INTERFACE
-  status.h
+  barely_internal_status_or INTERFACE
+  status_or.h
+)
+target_link_libraries(
+  barely_internal_status_or INTERFACE
+  barelymusician_headeronly
 )
 
 if (ENABLE_TESTS)
@@ -135,7 +139,7 @@ if (ENABLE_TESTS)
     barely_internal_engine
     barely_internal_id
     barely_internal_instrument
-    barely_internal_status
+    barely_internal_status_or
     barelymusician_headeronly
     gmock
     gtest_main
@@ -162,7 +166,7 @@ if (ENABLE_TESTS)
     barely_internal_instrument_test
     barely_internal_control
     barely_internal_instrument
-    barely_internal_status
+    barely_internal_status_or
     barelymusician_headeronly
     gmock
     gtest_main
@@ -202,10 +206,21 @@ if (ENABLE_TESTS)
     barely_internal_performer_test
     barely_internal_id
     barely_internal_performer
-    barely_internal_status
+    barely_internal_status_or
     barelymusician_headeronly
     gmock
     gtest_main
   )
   gtest_discover_tests(barely_internal_performer_test)
+
+  add_executable(
+    barely_internal_status_or_test
+    status_or_test.cpp
+  )
+  target_link_libraries(
+    barely_internal_status_or_test
+    barely_internal_status_or
+    gtest_main
+  )
+  gtest_discover_tests(barely_internal_status_or_test)
 endif()

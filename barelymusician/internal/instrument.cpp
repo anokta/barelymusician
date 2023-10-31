@@ -11,7 +11,7 @@
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/message.h"
-#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 
@@ -161,7 +161,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
                            int output_frame_count, double timestamp) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
-    return Status::kInvalidArgument;
+    return Status::InvalidArgument();
   }
   int frame = 0;
   // Process *all* messages before the end timestamp.

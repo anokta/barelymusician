@@ -14,7 +14,7 @@
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/message_queue.h"
 #include "barelymusician/internal/mutable_data.h"
-#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 

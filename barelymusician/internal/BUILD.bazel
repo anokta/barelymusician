@@ -21,7 +21,7 @@ cc_library(
         ":instrument",
         ":mutable_data",
         ":performer",
-        ":status",
+        ":status_or",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
@@ -62,7 +62,7 @@ cc_library(
         ":message",
         ":message_queue",
         ":mutable_data",
-        ":status",
+        ":status_or",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
@@ -98,15 +98,18 @@ cc_library(
     deps = [
         ":event",
         ":id",
-        ":status",
+        ":status_or",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
     ],
 )
 
 cc_library(
-    name = "status",
-    hdrs = ["status.h"],
+    name = "status_or",
+    hdrs = ["status_or.h"],
+    deps = [
+        "//barelymusician:barelymusician_headeronly",
+    ],
 )
 
 cc_test(
@@ -137,7 +140,7 @@ cc_test(
         ":engine",
         ":id",
         ":instrument",
-        ":status",
+        ":status_or",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
@@ -159,7 +162,7 @@ cc_test(
     deps = [
         ":control",
         ":instrument",
-        ":status",
+        ":status_or",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
@@ -190,8 +193,17 @@ cc_test(
     deps = [
         ":id",
         ":performer",
-        ":status",
+        ":status_or",
         "//barelymusician:barelymusician_headeronly",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "status_or_test",
+    srcs = ["status_or_test.cpp"],
+    deps = [
+        ":status_or",
         "@googletest//:gtest_main",
     ],
 )

@@ -263,23 +263,6 @@
 extern "C" {
 #endif  // __cplusplus
 
-/// Status enum alias.
-typedef int32_t BarelyStatus;
-
-/// Status enum values.
-enum BarelyStatus_Values {
-  /// Success.
-  BarelyStatus_kOk = 0,
-  /// Invalid argument error.
-  BarelyStatus_kInvalidArgument = 1,
-  /// Not found error.
-  BarelyStatus_kNotFound = 2,
-  /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 3,
-  /// Internal error.
-  BarelyStatus_kInternal = 4,
-};
-
 /// Control definition.
 typedef struct BarelyControlDefinition {
   /// Default value.
@@ -622,6 +605,23 @@ typedef struct BarelyTaskDefinition {
   /// Process callback.
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
+
+/// Status enum alias.
+typedef int32_t BarelyStatus;
+
+/// Status enum values.
+enum BarelyStatus_Values {
+  /// Success.
+  BarelyStatus_kOk = 0,
+  /// Invalid argument error.
+  BarelyStatus_kInvalidArgument = 1,
+  /// Not found error.
+  BarelyStatus_kNotFound = 2,
+  /// Unimplemented error.
+  BarelyStatus_kUnimplemented = 3,
+  /// Internal error.
+  BarelyStatus_kInternal = 4,
+};
 
 /// Effect handle.
 typedef struct BarelyEffect* BarelyEffectHandle;
@@ -1122,169 +1122,13 @@ BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
 
 #ifdef __cplusplus
 #include <cassert>
-#include <compare>
 #include <functional>
 #include <limits>
 #include <span>
-#include <string>
 #include <type_traits>
 #include <utility>
-#include <variant>
 
 namespace barely {
-
-/// Status.
-class Status {
- public:
-  /// Enum values.
-  enum Enum : BarelyStatus {
-    /// Success.
-    kOk = BarelyStatus_kOk,
-    /// Invalid argument error.
-    kInvalidArgument = BarelyStatus_kInvalidArgument,
-    /// Not found error.
-    kNotFound = BarelyStatus_kNotFound,
-    /// Unimplemented error.
-    kUnimplemented = BarelyStatus_kUnimplemented,
-    /// Internal error.
-    kInternal = BarelyStatus_kInternal,
-  };
-
-  /// Returns a new `Status` with `Status::kOk`.
-  ///
-  /// @return Status.
-  static Status Ok() noexcept { return Status::kOk; }
-
-  /// Returns a new `Status` with `Status::kInvalidArgument`.
-  ///
-  /// @return Status.
-  static Status InvalidArgument() noexcept { return Status::kInvalidArgument; }
-
-  /// Returns a new `Status` with `Status::kNotFound`.
-  ///
-  /// @return Status.
-  static Status NotFound() noexcept { return Status::kNotFound; }
-
-  /// Returns a new `Status` with `Status::kUnimplemented`.
-  ///
-  /// @return Status.
-  static Status Unimplemented() noexcept { return Status::kUnimplemented; }
-
-  /// Returns a new `Status` with `Status::kInternal`.
-  ///
-  /// @return Status.
-  static Status Internal() noexcept { return Status::kInternal; }
-
-  /// Constructs a new `Status`.
-  ///
-  /// @param status Status enum.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  Status(Enum status) noexcept : status_(status) {}
-
-  /// Constructs a new `Status` from a raw type.
-  ///
-  /// @param status Raw status enum.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  Status(BarelyStatus status) noexcept : status_(static_cast<Enum>(status)) {}
-
-  /// Returns the enum value.
-  ///
-  /// @return Enum value.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  operator Enum() const noexcept { return status_; }
-
-  /// Enum comparators.
-  auto operator<=>(Enum status) const noexcept { return status_ <=> status; }
-
-  /// Returns whether the status is okay or not.
-  ///
-  /// @return True if okay, false otherwise.
-  [[nodiscard]] bool IsOk() const noexcept { return status_ == kOk; }
-
-  /// Returns the status string.
-  ///
-  /// @return Status string.
-  [[nodiscard]] std::string ToString() const noexcept {
-    switch (status_) {
-      case kOk:
-        return "Ok";
-      case kInvalidArgument:
-        return "Invalid argument error";
-      case kNotFound:
-        return "Not found error";
-      case kUnimplemented:
-        return "Unimplemented error";
-      case kInternal:
-        return "Internal error";
-      default:
-        return "Unknown error";
-    }
-  }
-
- private:
-  // Enum value.
-  Enum status_;
-};
-
-/// Value, or an error status.
-template <typename ValueType>
-class StatusOr {
- public:
-  /// Constructs a new `StatusOr` with an error status.
-  ///
-  /// @param error_status Error status.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  StatusOr(Status error_status) noexcept : value_or_(error_status) {
-    assert(!error_status.IsOk());
-  }
-
-  /// Constructs a new `StatusOr` with a value.
-  ///
-  /// @param value Value.
-  // NOLINTNEXTLINE(google-explicit-constructor)
-  StatusOr(ValueType value) noexcept : value_or_(std::move(value)) {}
-
-  /// Member access operators.
-  const ValueType& operator*() const noexcept { return GetValue(); }
-  const ValueType* operator->() const noexcept { return &GetValue(); }
-  ValueType& operator*() noexcept { return GetValue(); }
-  ValueType* operator->() noexcept { return &GetValue(); }
-
-  /// Returns the contained error status.
-  ///
-  /// @return Error status.
-  [[nodiscard]] Status GetErrorStatus() const noexcept {
-    assert(std::holds_alternative<Status>(value_or_));
-    return std::get<Status>(value_or_);
-  }
-
-  /// Returns the contained value.
-  ///
-  /// @return Value.
-  [[nodiscard]] const ValueType& GetValue() const noexcept {
-    assert(std::holds_alternative<ValueType>(value_or_));
-    return std::get<ValueType>(value_or_);
-  }
-
-  /// Returns the contained value.
-  ///
-  /// @return Mutable value.
-  [[nodiscard]] ValueType& GetValue() noexcept {
-    assert(std::holds_alternative<ValueType>(value_or_));
-    return std::get<ValueType>(value_or_);
-  }
-
-  /// Returns whether a value is contained or not.
-  ///
-  /// @return True if contained, false otherwise.
-  [[nodiscard]] bool IsOk() const noexcept {
-    return std::holds_alternative<ValueType>(value_or_);
-  }
-
- private:
-  // Value or an error status.
-  std::variant<Status, ValueType> value_or_;
-};
 
 /// Control definition.
 struct ControlDefinition : public BarelyControlDefinition {
@@ -1785,9 +1629,9 @@ class Effect {
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_GetControl(effect_, static_cast<int>(index), &value);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return static_cast<ValueType>(value);
   }
 
@@ -1796,9 +1640,9 @@ class Effect {
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
     int process_order = 0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_GetProcessOrder(effect_, &process_order);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return process_order;
   }
 
@@ -1812,9 +1656,8 @@ class Effect {
 
   /// Resets all control values.
   void ResetAllControls() noexcept {
-    [[maybe_unused]] const Status status =
-        BarelyEffect_ResetAllControls(effect_);
-    assert(status.IsOk());
+    [[maybe_unused]] const auto status = BarelyEffect_ResetAllControls(effect_);
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Resets a control value.
@@ -1825,9 +1668,9 @@ class Effect {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_ResetControl(effect_, static_cast<int>(index));
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets a control value.
@@ -1844,10 +1687,10 @@ class Effect {
     static_assert(
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_SetControl(effect_, static_cast<int>(index),
                                 static_cast<double>(value), slope_per_beat);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the control event.
@@ -1856,9 +1699,9 @@ class Effect {
   /// @param user_data Pointer to user data.
   void SetControlEvent(ControlEventDefinition definition,
                        void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_SetControlEvent(effect_, definition, user_data);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the control event with a callback.
@@ -1884,18 +1727,18 @@ class Effect {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_SetData(effect_, data, size);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the process order.
   ///
   /// @param process_order Process order.
   void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_SetProcessOrder(effect_, process_order);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
  private:
@@ -1947,9 +1790,9 @@ class Instrument {
   [[nodiscard]] Effect CreateEffect(EffectDefinition definition,
                                     int process_order = 0) noexcept {
     BarelyEffectHandle effect;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyEffect_Create(instrument_, definition, process_order, &effect);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return Effect(effect);
   }
 
@@ -1970,9 +1813,9 @@ class Instrument {
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const Status status = BarelyInstrument_GetControl(
+    [[maybe_unused]] const auto status = BarelyInstrument_GetControl(
         instrument_, static_cast<int>(index), &value);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return static_cast<ValueType>(value);
   }
 
@@ -1987,9 +1830,9 @@ class Instrument {
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const Status status = BarelyInstrument_GetNoteControl(
+    [[maybe_unused]] const auto status = BarelyInstrument_GetNoteControl(
         instrument_, pitch, static_cast<int>(index), &value);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return static_cast<ValueType>(value);
   }
 
@@ -1999,9 +1842,9 @@ class Instrument {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
     bool is_note_on = false;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_IsNoteOn(instrument_, pitch, &is_note_on);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return is_note_on;
   }
 
@@ -2013,10 +1856,10 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count, double timestamp) noexcept {
-    [[maybe_unused]] const Status status = BarelyInstrument_Process(
+    [[maybe_unused]] const auto status = BarelyInstrument_Process(
         instrument_, output_samples, output_channel_count, output_frame_count,
         timestamp);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Releases the handle.
@@ -2029,18 +1872,18 @@ class Instrument {
 
   /// Resets all control values.
   void ResetAllControls() noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_ResetAllControls(instrument_);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Resets all note control values.
   ///
   /// @param pitch Note pitch.
   void ResetAllNoteControls(double pitch) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_ResetAllNoteControls(instrument_, pitch);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Resets a control value.
@@ -2051,9 +1894,9 @@ class Instrument {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_ResetControl(instrument_, index);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Resets a note control value.
@@ -2065,16 +1908,16 @@ class Instrument {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_ResetNoteControl(instrument_, pitch, index);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets all notes off.
   void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetAllNotesOff(instrument_);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets a control value.
@@ -2091,10 +1934,10 @@ class Instrument {
     static_assert(
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetControl(instrument_, static_cast<int>(index),
                                     static_cast<double>(value), slope_per_beat);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the control event.
@@ -2103,9 +1946,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetControlEvent(ControlEventDefinition definition,
                        void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetControlEvent(instrument_, definition, user_data);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the control event with a callback.
@@ -2131,9 +1974,9 @@ class Instrument {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetData(instrument_, data, size);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets a note control value.
@@ -2151,10 +1994,10 @@ class Instrument {
     static_assert(
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
-    [[maybe_unused]] const Status status = BarelyInstrument_SetNoteControl(
+    [[maybe_unused]] const auto status = BarelyInstrument_SetNoteControl(
         instrument_, pitch, static_cast<int>(index), static_cast<double>(value),
         slope_per_beat);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the note control event.
@@ -2163,9 +2006,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteControlEvent(NoteControlEventDefinition definition,
                            void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const Status status = BarelyInstrument_SetNoteControlEvent(
+    [[maybe_unused]] const auto status = BarelyInstrument_SetNoteControlEvent(
         instrument_, definition, user_data);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the note control event with a callback.
@@ -2181,9 +2024,9 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(double pitch) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetNoteOff(instrument_, pitch);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the note off event.
@@ -2192,9 +2035,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOffEvent(NoteOffEventDefinition definition,
                        void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetNoteOffEvent(instrument_, definition, user_data);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the note off event with a callback.
@@ -2210,9 +2053,9 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetNoteOn(instrument_, pitch, intensity);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the note on event.
@@ -2221,9 +2064,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition,
                       void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_SetNoteOnEvent(instrument_, definition, user_data);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the note off event with a callback.
@@ -2281,9 +2124,9 @@ class Task {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyTask_GetPosition(task_, &position);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return position;
   }
 
@@ -2292,9 +2135,9 @@ class Task {
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
     int process_order = 0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyTask_GetProcessOrder(task_, &process_order);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return process_order;
   }
 
@@ -2310,18 +2153,18 @@ class Task {
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyTask_SetPosition(task_, position);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the process order.
   ///
   /// @param process_order Process order.
   void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyTask_SetProcessOrder(task_, process_order);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
  private:
@@ -2377,10 +2220,10 @@ class Performer {
                                 double position, int process_order = 0,
                                 void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyTask_Create(performer_, definition, is_one_off, position,
                           process_order, user_data, &task);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return Task(task);
   }
 
@@ -2410,9 +2253,9 @@ class Performer {
   /// @return Loop begin position in beats.
   [[nodiscard]] double GetLoopBeginPosition() const noexcept {
     double loop_begin_position = 0.0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_GetLoopBeginPosition(performer_, &loop_begin_position);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return loop_begin_position;
   }
 
@@ -2421,9 +2264,9 @@ class Performer {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept {
     double loop_length = 0.0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_GetLoopLength(performer_, &loop_length);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return loop_length;
   }
 
@@ -2432,9 +2275,9 @@ class Performer {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_GetPosition(performer_, &position);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return position;
   }
 
@@ -2443,9 +2286,9 @@ class Performer {
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept {
     bool is_looping = false;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_IsLooping(performer_, &is_looping);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return is_looping;
   }
 
@@ -2454,9 +2297,9 @@ class Performer {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept {
     bool is_playing = false;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_IsPlaying(performer_, &is_playing);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return is_playing;
   }
 
@@ -2472,48 +2315,48 @@ class Performer {
   ///
   /// @param loop_begin_position Loop begin position in beats.
   void SetLoopBeginPosition(double loop_begin_position) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_SetLoopBeginPosition(performer_, loop_begin_position);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the loop length.
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_SetLoopLength(performer_, loop_length);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets whether the performer is looping or not.
   ///
   /// @param is_looping True if looping, false otherwise.
   void SetLooping(bool is_looping) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_SetLooping(performer_, is_looping);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Sets the position.
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_SetPosition(performer_, position);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Starts the performer.
   void Start() noexcept {
-    [[maybe_unused]] const Status status = BarelyPerformer_Start(performer_);
-    assert(status.IsOk());
+    [[maybe_unused]] const auto status = BarelyPerformer_Start(performer_);
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Stops the performer.
   void Stop() noexcept {
-    [[maybe_unused]] const Status status = BarelyPerformer_Stop(performer_);
-    assert(status.IsOk());
+    [[maybe_unused]] const auto status = BarelyPerformer_Stop(performer_);
+    assert(status == BarelyStatus_kOk);
   }
 
  private:
@@ -2526,8 +2369,8 @@ class Musician {
  public:
   /// Creates a new `Musician`.
   Musician() noexcept {
-    [[maybe_unused]] const Status status = BarelyMusician_Create(&musician_);
-    assert(status.IsOk());
+    [[maybe_unused]] const auto status = BarelyMusician_Create(&musician_);
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Creates a new `Musician` from a raw handle.
@@ -2571,9 +2414,9 @@ class Musician {
   [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
                                             int frame_rate) noexcept {
     BarelyInstrumentHandle instrument;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyInstrument_Create(musician_, definition, frame_rate, &instrument);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return Instrument(instrument);
   }
 
@@ -2582,9 +2425,9 @@ class Musician {
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept {
     BarelyPerformerHandle performer;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyPerformer_Create(musician_, &performer);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return Performer(performer);
   }
 
@@ -2598,9 +2441,9 @@ class Musician {
   /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept {
     double tempo = 0.0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyMusician_GetTempo(musician_, &tempo);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return tempo;
   }
 
@@ -2609,9 +2452,9 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept {
     double timestamp = 0.0;
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyMusician_GetTimestamp(musician_, &timestamp);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
     return timestamp;
   }
 
@@ -2627,18 +2470,18 @@ class Musician {
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyMusician_SetTempo(musician_, tempo);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
   /// Updates the musician at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
-    [[maybe_unused]] const Status status =
+    [[maybe_unused]] const auto status =
         BarelyMusician_Update(musician_, timestamp);
-    assert(status.IsOk());
+    assert(status == BarelyStatus_kOk);
   }
 
  private:

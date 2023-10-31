@@ -7,7 +7,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/control.h"
-#include "barelymusician/internal/status.h"
+#include "barelymusician/internal/status_or.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 

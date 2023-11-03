@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <utility>
 
@@ -11,7 +12,6 @@
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/mutable_data.h"
 #include "barelymusician/internal/performer.h"
-#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 
@@ -33,25 +33,25 @@ class Engine {
   /// @param instrument_id Instrument identifier.
   /// @param definition Effect definition.
   /// @param process_order Effect process order.
-  /// @return Effect identifier or error status.
-  StatusOr<Id> CreateInstrumentEffect(Id instrument_id,
-                                      EffectDefinition definition,
-                                      int process_order) noexcept;
+  /// @return Optional effect identifier.
+  std::optional<Id> CreateInstrumentEffect(Id instrument_id,
+                                           EffectDefinition definition,
+                                           int process_order) noexcept;
 
   /// Creates a new instrument.
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @return Instrument identifier or error status.
+  /// @return Optional instrument identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  StatusOr<Id> CreateInstrument(InstrumentDefinition definition,
-                                int frame_rate) noexcept;
+  std::optional<Id> CreateInstrument(InstrumentDefinition definition,
+                                     int frame_rate) noexcept;
 
   /// Creates a new performer.
   ///
-  /// @return Performer identifier or error status.
+  /// @return Performer identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  StatusOr<Id> CreatePerformer() noexcept;
+  Id CreatePerformer() noexcept;
 
   /// Creates a new performer task.
   ///
@@ -61,38 +61,40 @@ class Engine {
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
-  /// @return Task identifier or error status.
+  /// @return Optional task identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  StatusOr<Id> CreatePerformerTask(Id performer_id, TaskDefinition definition,
-                                   bool is_one_off, double position,
-                                   int process_order, void* user_data) noexcept;
+  std::optional<Id> CreatePerformerTask(Id performer_id,
+                                        TaskDefinition definition,
+                                        bool is_one_off, double position,
+                                        int process_order,
+                                        void* user_data) noexcept;
 
   /// Destroys instrument.
   ///
   /// @param instrument_id Instrument identifier.
-  /// @return Status.
+  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Status DestroyInstrument(Id instrument_id) noexcept;
+  bool DestroyInstrument(Id instrument_id) noexcept;
 
   /// Destroys performer.
   ///
   /// @param performer_id Performer identifier.
-  /// @return Status.
+  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Status DestroyPerformer(Id performer_id) noexcept;
+  bool DestroyPerformer(Id performer_id) noexcept;
 
   /// Returns instrument.
   ///
   /// @param instrument_id Instrument identifier.
-  /// @return Reference to instrument or error status.
-  [[nodiscard]] StatusOr<std::reference_wrapper<Instrument>> GetInstrument(
+  /// @return Optional reference to instrument.
+  [[nodiscard]] std::optional<std::reference_wrapper<Instrument>> GetInstrument(
       Id instrument_id) noexcept;
 
   /// Returns performer.
   ///
   /// @param performer_id Performer identifier.
-  /// @return Reference to performer or error status.
-  [[nodiscard]] StatusOr<std::reference_wrapper<Performer>> GetPerformer(
+  /// @return Optional reference to performer.
+  [[nodiscard]] std::optional<std::reference_wrapper<Performer>> GetPerformer(
       Id performer_id) noexcept;
 
   /// Returns tempo.
@@ -112,10 +114,10 @@ class Engine {
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  /// @return Status.
-  Status ProcessInstrument(Id instrument_id, double* output_samples,
-                           int output_channel_count, int output_frame_count,
-                           double timestamp) noexcept;
+  /// @return True if successful, false otherwise.
+  bool ProcessInstrument(Id instrument_id, double* output_samples,
+                         int output_channel_count, int output_frame_count,
+                         double timestamp) noexcept;
 
   /// Sets the tempo.
   ///

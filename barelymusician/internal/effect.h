@@ -40,7 +40,7 @@ class Effect {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
-  /// @return Status.
+  /// @return True if successful, false otherwise.
   void SetControl(int index, double value, double slope_per_frame) noexcept;
 
   /// Sets data.

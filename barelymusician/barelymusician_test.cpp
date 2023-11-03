@@ -7,53 +7,49 @@ namespace {
 
 TEST(BarelyMusicianTest, CreateDestroyMusician) {
   // Failures.
-  EXPECT_EQ(BarelyMusician_Create(nullptr), BarelyStatus_kInvalidArgument);
-  EXPECT_EQ(BarelyMusician_Destroy(nullptr), BarelyStatus_kNotFound);
+  EXPECT_FALSE(BarelyMusician_Create(nullptr));
+  EXPECT_FALSE(BarelyMusician_Destroy(nullptr));
 
   // Success.
   BarelyMusicianHandle musician = nullptr;
-  ASSERT_EQ(BarelyMusician_Create(&musician), BarelyStatus_kOk);
-  EXPECT_EQ(BarelyMusician_Destroy(musician), BarelyStatus_kOk);
+  EXPECT_TRUE(BarelyMusician_Create(&musician));
+  EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
 TEST(BarelyMusicianTest, CreateDestroyInstrument) {
   BarelyMusicianHandle musician = nullptr;
-  ASSERT_EQ(BarelyMusician_Create(&musician), BarelyStatus_kOk);
+  ASSERT_TRUE(BarelyMusician_Create(&musician));
 
   // Failures.
-  EXPECT_EQ(BarelyInstrument_Create(musician, {}, 1, nullptr),
-            BarelyStatus_kInvalidArgument);
-  EXPECT_EQ(BarelyInstrument_Destroy(nullptr), BarelyStatus_kNotFound);
+  EXPECT_FALSE(BarelyInstrument_Create(musician, {}, 1, nullptr));
+  EXPECT_FALSE(BarelyInstrument_Destroy(nullptr));
 
   BarelyInstrumentHandle instrument = nullptr;
-  EXPECT_EQ(BarelyInstrument_Create(musician, {}, 0, &instrument),
-            BarelyStatus_kInvalidArgument);
+  EXPECT_FALSE(BarelyInstrument_Create(musician, {}, 0, &instrument));
 
   // Success.
-  EXPECT_EQ(BarelyInstrument_Create(musician, {}, 1, &instrument),
-            BarelyStatus_kOk);
+  EXPECT_TRUE(BarelyInstrument_Create(musician, {}, 1, &instrument));
   EXPECT_NE(instrument, nullptr);
 
-  EXPECT_EQ(BarelyInstrument_Destroy(instrument), BarelyStatus_kOk);
-  EXPECT_EQ(BarelyMusician_Destroy(musician), BarelyStatus_kOk);
+  EXPECT_TRUE(BarelyInstrument_Destroy(instrument));
+  EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
 TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   BarelyMusicianHandle musician = nullptr;
-  ASSERT_EQ(BarelyMusician_Create(&musician), BarelyStatus_kOk);
+  ASSERT_TRUE(BarelyMusician_Create(&musician));
 
   // Failures.
-  EXPECT_EQ(BarelyPerformer_Create(musician, nullptr),
-            BarelyStatus_kInvalidArgument);
-  EXPECT_EQ(BarelyPerformer_Destroy(nullptr), BarelyStatus_kNotFound);
+  EXPECT_FALSE(BarelyPerformer_Create(musician, nullptr));
+  EXPECT_FALSE(BarelyPerformer_Destroy(nullptr));
 
   // Success.
   BarelyPerformerHandle performer = nullptr;
-  EXPECT_EQ(BarelyPerformer_Create(musician, &performer), BarelyStatus_kOk);
+  EXPECT_TRUE(BarelyPerformer_Create(musician, &performer));
   EXPECT_NE(performer, nullptr);
 
-  EXPECT_EQ(BarelyPerformer_Destroy(performer), BarelyStatus_kOk);
-  EXPECT_EQ(BarelyMusician_Destroy(musician), BarelyStatus_kOk);
+  EXPECT_TRUE(BarelyPerformer_Destroy(performer));
+  EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
 TEST(MusicianTest, CreateDestroyMusician) { Musician musician; }

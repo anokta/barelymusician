@@ -12,7 +12,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/internal/id.h"
-#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 
@@ -33,9 +32,9 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition,
   assert(success);
 }
 
-Status Performer::DestroyTask(Id task_id) noexcept {
+bool Performer::DestroyTask(Id task_id) noexcept {
   if (task_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     if (last_processed_recurring_task_it_ &&
@@ -51,9 +50,9 @@ Status Performer::DestroyTask(Id task_id) noexcept {
       assert(success);
     }
     infos_.erase(it);
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
 std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
@@ -102,24 +101,24 @@ double Performer::GetLoopLength() const noexcept { return loop_length_; }
 
 double Performer::GetPosition() const noexcept { return position_; }
 
-StatusOr<double> Performer::GetTaskPosition(Id task_id) const noexcept {
+std::optional<double> Performer::GetTaskPosition(Id task_id) const noexcept {
   if (task_id == kInvalid) {
-    return Status::InvalidArgument();
+    return std::nullopt;
   }
   if (const auto* info = FindOrNull(infos_, task_id)) {
     return info->position;
   }
-  return Status::NotFound();
+  return std::nullopt;
 }
 
-StatusOr<int> Performer::GetTaskProcessOrder(Id task_id) const noexcept {
+std::optional<int> Performer::GetTaskProcessOrder(Id task_id) const noexcept {
   if (task_id == kInvalid) {
-    return Status::InvalidArgument();
+    return std::nullopt;
   }
   if (const auto* info = FindOrNull(infos_, task_id)) {
     return info->process_order;
   }
-  return Status::NotFound();
+  return std::nullopt;
 }
 
 bool Performer::IsLooping() const noexcept { return is_looping_; }
@@ -216,15 +215,15 @@ void Performer::SetPosition(double position) noexcept {
   }
 }
 
-Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
+bool Performer::SetTaskPosition(Id task_id, double position) noexcept {
   if (task_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     auto& [is_one_off, current_position, process_order] = it->second;
     if (is_one_off && position < position_) {
       // Position is in the past.
-      return Status::InvalidArgument();
+      return false;
     }
     if (current_position != position) {
       if (last_processed_recurring_task_it_ &&
@@ -237,14 +236,14 @@ Status Performer::SetTaskPosition(Id task_id, double position) noexcept {
       tasks.insert(std::move(node));
       current_position = position;
     }
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
-Status Performer::SetTaskProcessOrder(Id task_id, int process_order) noexcept {
+bool Performer::SetTaskProcessOrder(Id task_id, int process_order) noexcept {
   if (task_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
     auto& [is_one_off, position, current_process_order] = it->second;
@@ -259,9 +258,9 @@ Status Performer::SetTaskProcessOrder(Id task_id, int process_order) noexcept {
       tasks.insert(std::move(node));
       current_process_order = process_order;
     }
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
 void Performer::Start() noexcept { is_playing_ = true; }

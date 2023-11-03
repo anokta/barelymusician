@@ -8,7 +8,6 @@
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
-#include "barelymusician/internal/status_or.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -69,14 +68,12 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   // Create an instrument.
   const auto instrument_id_or =
       engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
-  ASSERT_TRUE(instrument_id_or.IsOk());
+  ASSERT_TRUE(instrument_id_or.has_value());
   const Id instrument_id = *instrument_id_or;
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(engine
-                  .ProcessInstrument(instrument_id, buffer.data(),
-                                     kChannelCount, kFrameCount, 0.0)
-                  .IsOk());
+  EXPECT_TRUE(engine.ProcessInstrument(instrument_id, buffer.data(),
+                                       kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -85,7 +82,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
 
   // Get the instrument.
   const auto instrument_or = engine.GetInstrument(instrument_id);
-  ASSERT_TRUE(instrument_or.IsOk());
+  ASSERT_TRUE(instrument_or.has_value());
   auto& instrument = instrument_or->get();
 
   // Set the note callbacks.
@@ -117,10 +114,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(engine
-                  .ProcessInstrument(instrument_id, buffer.data(),
-                                     kChannelCount, kFrameCount, 0.0)
-                  .IsOk());
+  EXPECT_TRUE(engine.ProcessInstrument(instrument_id, buffer.data(),
+                                       kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
@@ -133,16 +128,13 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
 
   // Destroy the instrument, which should also trigger the note off callback.
   note_off_pitch = 0.0;
-  EXPECT_TRUE(engine.DestroyInstrument(instrument_id).IsOk());
-  ASSERT_FALSE(engine.GetInstrument(instrument_id).IsOk());
-  EXPECT_EQ(engine.GetInstrument(instrument_id).GetErrorStatus(),
-            Status::NotFound());
+  EXPECT_TRUE(engine.DestroyInstrument(instrument_id));
+  EXPECT_FALSE(engine.GetInstrument(instrument_id).has_value());
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_EQ(engine.ProcessInstrument(instrument_id, buffer.data(),
-                                     kChannelCount, kFrameCount, 0.0),
-            Status::NotFound());
+  EXPECT_FALSE(engine.ProcessInstrument(instrument_id, buffer.data(),
+                                        kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -162,10 +154,10 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     for (int i = 0; i < 3; ++i) {
       const auto instrument_id_or =
           engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
-      ASSERT_TRUE(instrument_id_or.IsOk());
+      ASSERT_TRUE(instrument_id_or.has_value());
       instrument_ids[i] = *instrument_id_or;
       const auto instrument_or = engine.GetInstrument(instrument_ids[i]);
-      ASSERT_TRUE(instrument_or.IsOk());
+      ASSERT_TRUE(instrument_or.has_value());
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
@@ -177,7 +169,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     // Start multiple notes, then immediately stop some of them.
     for (int i = 0; i < 3; ++i) {
       const auto instrument_or = engine.GetInstrument(instrument_ids[i]);
-      ASSERT_TRUE(instrument_or.IsOk());
+      ASSERT_TRUE(instrument_or.has_value());
       auto& instrument = instrument_or->get();
       instrument.SetNoteOn(static_cast<double>(i + 1), 1.0);
       instrument.SetNoteOn(static_cast<double>(-i - 1), 1.0);
@@ -198,12 +190,10 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   Engine engine;
 
   // Create a performer.
-  const auto performer_id_or = engine.CreatePerformer();
-  ASSERT_TRUE(performer_id_or.IsOk());
-  const Id performer_id = *performer_id_or;
+  const Id performer_id = engine.CreatePerformer();
 
   const auto performer_or = engine.GetPerformer(performer_id);
-  ASSERT_TRUE(performer_or.IsOk());
+  ASSERT_TRUE(performer_or.has_value());
   auto& performer = performer_or->get();
 
   // Create a task definition.
@@ -218,11 +208,9 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   };
 
   // Create a task.
-  ASSERT_TRUE(engine
-                  .CreatePerformerTask(performer_id, definition,
-                                       /*is_one_off=*/false, 1.0, kProcessOrder,
-                                       &process_callback)
-                  .IsOk());
+  ASSERT_TRUE(engine.CreatePerformerTask(performer_id, definition,
+                                         /*is_one_off=*/false, 1.0,
+                                         kProcessOrder, &process_callback));
 
   // Start the performer with a tempo of one beat per second.
   engine.SetTempo(60.0);
@@ -250,8 +238,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy the performer.
-  EXPECT_TRUE(engine.DestroyPerformer(performer_id).IsOk());
-  EXPECT_FALSE(engine.GetPerformer(performer_id).IsOk());
+  EXPECT_TRUE(engine.DestroyPerformer(performer_id));
+  EXPECT_FALSE(engine.GetPerformer(performer_id).has_value());
 }
 
 // Tests that the engine sets its tempo as expected.

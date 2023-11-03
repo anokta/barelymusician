@@ -11,7 +11,6 @@
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/message.h"
-#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 
@@ -93,9 +92,9 @@ void Instrument::CreateEffect(Id effect_id, EffectDefinition definition,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Status Instrument::DestroyEffect(Id effect_id) noexcept {
+bool Instrument::DestroyEffect(Id effect_id) noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (const auto it = effect_infos_.find(effect_id);
       it != effect_infos_.end()) {
@@ -104,51 +103,50 @@ Status Instrument::DestroyEffect(Id effect_id) noexcept {
     assert(success);
     UpdateEffectReferences();
     effect_infos_.erase(it);
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
-StatusOr<double> Instrument::GetControl(int index) const noexcept {
+std::optional<double> Instrument::GetControl(int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     return controls_[index].GetValue();
   }
-  return Status::InvalidArgument();
+  return std::nullopt;
 }
 
-StatusOr<double> Instrument::GetEffectControl(Id effect_id,
-                                              int index) const noexcept {
+std::optional<double> Instrument::GetEffectControl(Id effect_id,
+                                                   int index) const noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return std::nullopt;
   }
   if (const auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
     if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
       return effect_info->controls[index].GetValue();
     }
-    return Status::InvalidArgument();
   }
-  return Status::NotFound();
+  return std::nullopt;
 }
 
-StatusOr<int> Instrument::GetEffectProcessOrder(Id effect_id) const noexcept {
+std::optional<int> Instrument::GetEffectProcessOrder(
+    Id effect_id) const noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return std::nullopt;
   }
   if (const auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
     return effect_info->process_order;
   }
-  return Status::NotFound();
+  return std::nullopt;
 }
 
-StatusOr<double> Instrument::GetNoteControl(double pitch,
-                                            int index) const noexcept {
+std::optional<double> Instrument::GetNoteControl(double pitch,
+                                                 int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
       return (*note_controls)[index].GetValue();
     }
-    return Status::NotFound();
   }
-  return Status::InvalidArgument();
+  return std::nullopt;
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {
@@ -157,11 +155,11 @@ bool Instrument::IsNoteOn(double pitch) const noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Status Instrument::Process(double* output_samples, int output_channel_count,
-                           int output_frame_count, double timestamp) noexcept {
+bool Instrument::Process(double* output_samples, int output_channel_count,
+                         int output_frame_count, double timestamp) noexcept {
   if ((!output_samples && output_channel_count > 0 && output_frame_count > 0) ||
       output_channel_count < 0 || output_frame_count < 0) {
-    return Status::InvalidArgument();
+    return false;
   }
   int frame = 0;
   // Process *all* messages before the end timestamp.
@@ -261,7 +259,7 @@ Status Instrument::Process(double* output_samples, int output_channel_count,
                           frame_count);
     }
   }
-  return Status::Ok();
+  return true;
 }
 
 void Instrument::ResetAllControls() noexcept {
@@ -274,9 +272,9 @@ void Instrument::ResetAllControls() noexcept {
   }
 }
 
-Status Instrument::ResetAllEffectControls(Id effect_id) noexcept {
+bool Instrument::ResetAllEffectControls(Id effect_id) noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
     for (int index = 0; index < static_cast<int>(effect_info->controls.size());
@@ -289,12 +287,12 @@ Status Instrument::ResetAllEffectControls(Id effect_id) noexcept {
                                              effect_control.GetValue(), 0.0});
       }
     }
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
-Status Instrument::ResetAllNoteControls(double pitch) noexcept {
+bool Instrument::ResetAllNoteControls(double pitch) noexcept {
   if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
     for (int index = 0; index < static_cast<int>(note_controls->size());
          ++index) {
@@ -305,26 +303,26 @@ Status Instrument::ResetAllNoteControls(double pitch) noexcept {
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
       }
     }
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
-Status Instrument::ResetControl(int index) noexcept {
+bool Instrument::ResetControl(int index) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Reset()) {
       control_event_.Process(index, control.GetValue());
       message_queue_.Add(timestamp_,
                          ControlMessage{index, control.GetValue(), 0.0});
     }
-    return Status::Ok();
+    return true;
   }
-  return Status::InvalidArgument();
+  return false;
 }
 
-Status Instrument::ResetEffectControl(Id effect_id, int index) noexcept {
+bool Instrument::ResetEffectControl(Id effect_id, int index) noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
     if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
@@ -334,14 +332,13 @@ Status Instrument::ResetEffectControl(Id effect_id, int index) noexcept {
         message_queue_.Add(
             timestamp_, ControlMessage{index, effect_control.GetValue(), 0.0});
       }
-      return Status::Ok();
+      return true;
     }
-    return Status::InvalidArgument();
   }
-  return Status::NotFound();
+  return false;
 }
 
-Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
+bool Instrument::ResetNoteControl(double pitch, int index) noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index]; note_control.Reset()) {
@@ -350,11 +347,10 @@ Status Instrument::ResetNoteControl(double pitch, int index) noexcept {
             timestamp_,
             NoteControlMessage{pitch, index, note_control.GetValue(), 0.0});
       }
-      return Status::Ok();
+      return true;
     }
-    return Status::NotFound();
   }
-  return Status::InvalidArgument();
+  return false;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -365,8 +361,8 @@ void Instrument::SetAllNotesOff() noexcept {
   }
 }
 
-Status Instrument::SetControl(int index, double value,
-                              double slope_per_beat) noexcept {
+bool Instrument::SetControl(int index, double value,
+                            double slope_per_beat) noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
     if (auto& control = controls_[index]; control.Set(value, slope_per_beat)) {
       control_event_.Process(index, control.GetValue());
@@ -374,9 +370,9 @@ Status Instrument::SetControl(int index, double value,
                          ControlMessage{index, control.GetValue(),
                                         GetSlopePerFrame(slope_per_beat)});
     }
-    return Status::Ok();
+    return true;
   }
-  return Status::InvalidArgument();
+  return false;
 }
 
 void Instrument::SetControlEvent(ControlEventDefinition definition,
@@ -388,10 +384,10 @@ void Instrument::SetData(std::vector<std::byte> data) noexcept {
   message_queue_.Add(timestamp_, DataMessage{std::move(data)});
 }
 
-Status Instrument::SetEffectControl(Id effect_id, int index, double value,
-                                    double slope_per_beat) noexcept {
+bool Instrument::SetEffectControl(Id effect_id, int index, double value,
+                                  double slope_per_beat) noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
     if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
@@ -403,44 +399,43 @@ Status Instrument::SetEffectControl(Id effect_id, int index, double value,
             EffectControlMessage{effect_id, index, effect_control.GetValue(),
                                  GetSlopePerFrame(slope_per_beat)});
       }
-      return Status::Ok();
+      return true;
     }
-    return Status::InvalidArgument();
   }
-  return Status::NotFound();
+  return false;
 }
 
-Status Instrument::SetEffectControlEvent(Id effect_id,
-                                         ControlEventDefinition definition,
-                                         void* user_data) noexcept {
+bool Instrument::SetEffectControlEvent(Id effect_id,
+                                       ControlEventDefinition definition,
+                                       void* user_data) noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
     effect_info->control_event = {definition, user_data};
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
-Status Instrument::SetEffectData(Id effect_id,
-                                 std::vector<std::byte> data) noexcept {
+bool Instrument::SetEffectData(Id effect_id,
+                               std::vector<std::byte> data) noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (effect_infos_.find(effect_id) != effect_infos_.end()) {
     message_queue_.Add(timestamp_,
                        EffectDataMessage{effect_id, std::move(data)});
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Status Instrument::SetEffectProcessOrder(Id effect_id,
-                                         int process_order) noexcept {
+bool Instrument::SetEffectProcessOrder(Id effect_id,
+                                       int process_order) noexcept {
   if (effect_id == kInvalid) {
-    return Status::InvalidArgument();
+    return false;
   }
   if (const auto it = effect_infos_.find(effect_id);
       it != effect_infos_.end()) {
@@ -452,13 +447,13 @@ Status Instrument::SetEffectProcessOrder(Id effect_id,
       current_process_order = process_order;
       UpdateEffectReferences();
     }
-    return Status::Ok();
+    return true;
   }
-  return Status::NotFound();
+  return false;
 }
 
-Status Instrument::SetNoteControl(double pitch, int index, double value,
-                                  double slope_per_beat) noexcept {
+bool Instrument::SetNoteControl(double pitch, int index, double value,
+                                double slope_per_beat) noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (auto* note_controls = FindOrNull(note_controls_, pitch)) {
       if (auto& note_control = (*note_controls)[index];
@@ -469,11 +464,10 @@ Status Instrument::SetNoteControl(double pitch, int index, double value,
             NoteControlMessage{pitch, index, note_control.GetValue(),
                                GetSlopePerFrame(slope_per_beat)});
       }
-      return Status::Ok();
+      return true;
     }
-    return Status::NotFound();
   }
-  return Status::InvalidArgument();
+  return false;
 }
 
 void Instrument::SetNoteControlEvent(NoteControlEventDefinition definition,

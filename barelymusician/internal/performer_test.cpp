@@ -6,7 +6,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/id.h"
-#include "barelymusician/internal/status_or.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -24,12 +23,8 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
 
-  ASSERT_FALSE(performer.GetTaskPosition(Id{1}).IsOk());
-  EXPECT_EQ(performer.GetTaskPosition(Id{1}).GetErrorStatus(),
-            Status::NotFound());
-  ASSERT_FALSE(performer.GetTaskProcessOrder(Id{1}).IsOk());
-  EXPECT_EQ(performer.GetTaskProcessOrder(Id{1}).GetErrorStatus(),
-            Status::NotFound());
+  EXPECT_FALSE(performer.GetTaskPosition(Id{1}).has_value());
+  EXPECT_FALSE(performer.GetTaskProcessOrder(Id{1}).has_value());
 
   // Create a task definition.
   int task_process_count = 0;
@@ -50,14 +45,8 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
   EXPECT_EQ(task_process_count, 0);
 
-  {
-    const auto task_position_or = performer.GetTaskPosition(Id{1});
-    ASSERT_TRUE(task_position_or.IsOk());
-    EXPECT_DOUBLE_EQ(*task_position_or, 0.25);
-    const auto task_process_order_or = performer.GetTaskProcessOrder(Id{1});
-    ASSERT_TRUE(task_process_order_or.IsOk());
-    EXPECT_DOUBLE_EQ(*task_process_order_or, 0);
-  }
+  EXPECT_THAT(performer.GetTaskPosition(Id{1}), Optional(0.25));
+  EXPECT_THAT(performer.GetTaskProcessOrder(Id{1}), Optional(0));
 
   // Start the performer.
   performer.Start();
@@ -97,20 +86,14 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_count, 2);
 
   // Update the task position.
-  EXPECT_TRUE(performer.SetTaskPosition(Id{1}, 0.75).IsOk());
+  EXPECT_TRUE(performer.SetTaskPosition(Id{1}, 0.75));
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.5, 0)));
   EXPECT_EQ(task_process_count, 2);
 
-  {
-    const auto task_position_or = performer.GetTaskPosition(Id{1});
-    ASSERT_TRUE(task_position_or.IsOk());
-    EXPECT_DOUBLE_EQ(*task_position_or, 0.75);
-    const auto task_process_order_or = performer.GetTaskProcessOrder(Id{1});
-    ASSERT_TRUE(task_process_order_or.IsOk());
-    EXPECT_DOUBLE_EQ(*task_process_order_or, 0);
-  }
+  EXPECT_THAT(performer.GetTaskPosition(Id{1}), Optional(0.75));
+  EXPECT_THAT(performer.GetTaskProcessOrder(Id{1}), Optional(0));
 
   // Process the task with the updated position.
   performer.Update(0.5);

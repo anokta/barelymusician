@@ -605,24 +605,6 @@ typedef struct BarelyTaskDefinition {
   /// Process callback.
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
-
-/// Status enum alias.
-typedef int32_t BarelyStatus;
-
-/// Status enum values.
-enum BarelyStatus_Values {
-  /// Success.
-  BarelyStatus_kOk = 0,
-  /// Invalid argument error.
-  BarelyStatus_kInvalidArgument = 1,
-  /// Not found error.
-  BarelyStatus_kNotFound = 2,
-  /// Unimplemented error.
-  BarelyStatus_kUnimplemented = 3,
-  /// Internal error.
-  BarelyStatus_kInternal = 4,
-};
-
 /// Effect handle.
 typedef struct BarelyEffect* BarelyEffectHandle;
 
@@ -644,49 +626,48 @@ typedef struct BarelyTask* BarelyTaskHandle;
 /// @param definition Effect definition.
 /// @param process_order Effect process order.
 /// @param out_effect Output effect handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_Create(
-    BarelyInstrumentHandle instrument, BarelyEffectDefinition definition,
-    int32_t process_order, BarelyEffectHandle* out_effect);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_Create(BarelyInstrumentHandle instrument,
+                                       BarelyEffectDefinition definition,
+                                       int32_t process_order,
+                                       BarelyEffectHandle* out_effect);
 
 /// Destroys an effect.
 ///
 /// @param effect Effect handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_Destroy(BarelyEffectHandle effect);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 
 /// Gets an effect control value.
 ///
 /// @param effect Effect handle.
 /// @param index Control index.
 /// @param out_value Output control value.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_GetControl(BarelyEffectHandle effect,
-                                                   int32_t index,
-                                                   double* out_value);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffectHandle effect,
+                                           int32_t index, double* out_value);
 
 /// Gets the process order of an effect.
 ///
 /// @param effect Effect handle.
 /// @param out_process_order Output process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_GetProcessOrder(
-    BarelyEffectHandle effect, int32_t* out_process_order);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect,
+                                                int32_t* out_process_order);
 
 /// Resets all effect control values.
 ///
 /// @param effect Effect handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyEffect_ResetAllControls(BarelyEffectHandle effect);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect);
 
 /// Resets an effect control value.
 ///
 /// @param effect Effect handle.
 /// @param index Control index.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_ResetControl(BarelyEffectHandle effect,
-                                                     int32_t index);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_ResetControl(BarelyEffectHandle effect,
+                                             int32_t index);
 
 /// Sets an effect control value.
 ///
@@ -694,18 +675,18 @@ BARELY_EXPORT BarelyStatus BarelyEffect_ResetControl(BarelyEffectHandle effect,
 /// @param index Control index.
 /// @param value Control value.
 /// @param slope_per_beat Control slope in value change per beat.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_SetControl(BarelyEffectHandle effect,
-                                                   int32_t index, double value,
-                                                   double slope_per_beat);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_SetControl(BarelyEffectHandle effect,
+                                           int32_t index, double value,
+                                           double slope_per_beat);
 
 /// Sets the control event of an effect.
 ///
 /// @param effect Effect handle.
 /// @param definition Control event definition.
 /// @param user_data Pointer to user data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_SetControlEvent(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_SetControlEvent(
     BarelyEffectHandle effect, BarelyControlEventDefinition definition,
     void* user_data);
 
@@ -714,17 +695,17 @@ BARELY_EXPORT BarelyStatus BarelyEffect_SetControlEvent(
 /// @param effect Effect handle.
 /// @param data Pointer to immutable data.
 /// @param size Data size in bytes.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyEffect_SetData(BarelyEffectHandle effect,
-                                                const void* data, int32_t size);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_SetData(BarelyEffectHandle effect,
+                                        const void* data, int32_t size);
 
 /// Sets the process order of an effect.
 ///
 /// @param effect Effect handle.
 /// @param process_order Process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect,
+                                                int32_t process_order);
 
 /// Creates a new instrument.
 ///
@@ -732,25 +713,24 @@ BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order);
 /// @param definition Instrument definition.
 /// @param frame_rate Frame rate in hertz.
 /// @param out_instrument Output instrument handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_Create(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_Create(
     BarelyMusicianHandle musician, BarelyInstrumentDefinition definition,
     int32_t frame_rate, BarelyInstrumentHandle* out_instrument);
 
 /// Destroys an instrument.
 ///
 /// @param instrument Instrument handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 
 /// Gets an instrument control value.
 ///
 /// @param instrument Instrument handle.
 /// @param index Control index.
 /// @param out_value Output control value.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_GetControl(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_GetControl(
     BarelyInstrumentHandle instrument, int32_t index, double* out_value);
 
 /// Gets an instrument note control value.
@@ -759,19 +739,20 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_GetControl(
 /// @param pitch Note pitch.
 /// @param index Note control index.
 /// @param out_value Output note control value.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
-                                int32_t index, double* out_value);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_GetNoteControl(
+    BarelyInstrumentHandle instrument, double pitch, int32_t index,
+    double* out_value);
 
 /// Gets whether an instrument note is on or not.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @param out_is_note_on Output true if on, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(
-    BarelyInstrumentHandle instrument, double pitch, bool* out_is_note_on);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument,
+                                             double pitch,
+                                             bool* out_is_note_on);
 
 /// Processes instrument output samples at timestamp.
 ///
@@ -780,49 +761,51 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_IsNoteOn(
 /// @param output_channel_count Number of output channels.
 /// @param output_frame_count Number of output frames.
 /// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_Process(
-    BarelyInstrumentHandle instrument, double* output_samples,
-    int32_t output_channel_count, int32_t output_frame_count, double timestamp);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_Process(BarelyInstrumentHandle instrument,
+                                            double* output_samples,
+                                            int32_t output_channel_count,
+                                            int32_t output_frame_count,
+                                            double timestamp);
 
 /// Resets all instrument control values.
 ///
 /// @param instrument Instrument handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_ResetAllControls(
+    BarelyInstrumentHandle instrument);
 
 /// Resets all instrument note control values.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_ResetAllNoteControls(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_ResetAllNoteControls(
     BarelyInstrumentHandle instrument, double pitch);
 
 /// Resets an instrument control value.
 ///
 /// @param instrument Instrument handle.
 /// @param index Control index.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t index);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_ResetControl(
+    BarelyInstrumentHandle instrument, int32_t index);
 
 /// Resets an instrument note control value.
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @param index Note control index.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_ResetNoteControl(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_ResetNoteControl(
     BarelyInstrumentHandle instrument, double pitch, int32_t index);
 
 /// Sets all instrument notes off.
 ///
 /// @param instrument Instrument handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetAllNotesOff(
+    BarelyInstrumentHandle instrument);
 
 /// Sets an instrument control value.
 ///
@@ -830,18 +813,18 @@ BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument);
 /// @param index Control index.
 /// @param value Control value.
 /// @param slope_per_beat Control slope in value change per beat.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index,
-                            double value, double slope_per_beat);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetControl(
+    BarelyInstrumentHandle instrument, int32_t index, double value,
+    double slope_per_beat);
 
 /// Sets the control event of an instrument.
 ///
 /// @param instrument Instrument handle.
 /// @param definition Control event definition.
 /// @param user_data Pointer to user data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetControlEvent(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetControlEvent(
     BarelyInstrumentHandle instrument, BarelyControlEventDefinition definition,
     void* user_data);
 
@@ -850,9 +833,9 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetControlEvent(
 /// @param instrument Instrument handle.
 /// @param data Pointer to immutable data.
 /// @param size Data size in bytes.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(
-    BarelyInstrumentHandle instrument, const void* data, int32_t size);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument,
+                                            const void* data, int32_t size);
 
 /// Sets an instrument note control value.
 ///
@@ -861,8 +844,8 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetData(
 /// @param index Note control index.
 /// @param value Note control value.
 /// @param slope_per_beat Note control slope in value change per beat.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControl(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetNoteControl(
     BarelyInstrumentHandle instrument, double pitch, int32_t index,
     double value, double slope_per_beat);
 
@@ -871,8 +854,8 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControl(
 /// @param instrument Instrument handle.
 /// @param definition Note control event definition.
 /// @param user_data Pointer to user data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControlEvent(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetNoteControlEvent(
     BarelyInstrumentHandle instrument,
     BarelyNoteControlEventDefinition definition, void* user_data);
 
@@ -880,17 +863,17 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteControlEvent(
 ///
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetNoteOff(
+    BarelyInstrumentHandle instrument, double pitch);
 
 /// Sets the note off event of an instrument.
 ///
 /// @param instrument Instrument handle.
 /// @param definition Note off event definition.
 /// @param user_data Pointer to user data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffEvent(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetNoteOffEvent(
     BarelyInstrumentHandle instrument, BarelyNoteOffEventDefinition definition,
     void* user_data);
 
@@ -899,166 +882,161 @@ BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOffEvent(
 /// @param instrument Instrument handle.
 /// @param pitch Note pitch.
 /// @param intensity Note intensity.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOn(
-    BarelyInstrumentHandle instrument, double pitch, double intensity);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument,
+                                              double pitch, double intensity);
 
 /// Sets the note on event of an instrument.
 ///
 /// @param instrument Instrument handle.
 /// @param definition Note on event definition.
 /// @param user_data Pointer to user data.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyInstrument_SetNoteOnEvent(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_SetNoteOnEvent(
     BarelyInstrumentHandle instrument, BarelyNoteOnEventDefinition definition,
     void* user_data);
 
 /// Creates a new musician.
 ///
 /// @param out_musician Output musician handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_Create(BarelyMusicianHandle* out_musician);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
 
 /// Destroys a musician.
 ///
 /// @param musician Musician handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_Destroy(BarelyMusicianHandle musician);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
 
 /// Gets the tempo of a musician.
 ///
 /// @param musician Musician handle.
 /// @param out_tempo Output tempo in beats per minute.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_GetTempo(BarelyMusicianHandle musician,
+                                           double* out_tempo);
 
 /// Gets the timestamp of a musician.
 ///
 /// @param musician Musician handle.
 /// @param out_timestamp Output timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_GetTimestamp(
-    BarelyMusicianHandle musician, double* out_timestamp);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician,
+                                               double* out_timestamp);
 
 /// Sets the tempo of a musician.
 ///
 /// @param musician Musician handle.
 /// @param tempo Tempo in beats per minute.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_SetTempo(BarelyMusicianHandle musician,
+                                           double tempo);
 
 /// Updates a musician at timestamp.
 ///
 /// @param musician Musician handle.
 /// @param timestamp Timestamp in seconds.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyMusician_Update(BarelyMusicianHandle musician,
-                                                 double timestamp);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyMusician_Update(BarelyMusicianHandle musician,
+                                         double timestamp);
 
 /// Creates a new performer.
 ///
 /// @param musician Musician handle.
 /// @param out_performer Output performer handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_Create(
-    BarelyMusicianHandle musician, BarelyPerformerHandle* out_performer);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician,
+                                          BarelyPerformerHandle* out_performer);
 
 /// Destroys a performer.
 ///
 /// @param performer Performer handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyPerformer_Destroy(BarelyPerformerHandle performer);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
 
 /// Gets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param out_loop_begin_position Output loop begin position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_GetLoopBeginPosition(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_GetLoopBeginPosition(
     BarelyPerformerHandle performer, double* out_loop_begin_position);
 
 /// Gets the loop length of a performer.
 ///
 /// @param performer Performer handle.
 /// @param out_loop_length Output loop length.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_GetLoopLength(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_GetLoopLength(
     BarelyPerformerHandle performer, double* out_loop_length);
 
 /// Gets the position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_GetPosition(
-    BarelyPerformerHandle performer, double* out_position);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer,
+                                               double* out_position);
 
 /// Gets whether a performer is looping or not.
 ///
 /// @param performer Performer handle.
 /// @param out_is_looping Output true if looping, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_IsLooping(
-    BarelyPerformerHandle performer, bool* out_is_looping);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer,
+                                             bool* out_is_looping);
 
 /// Gets whether a performer is playing or not.
 ///
 /// @param performer Performer handle.
 /// @param out_is_playing Output true if playing, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_IsPlaying(
-    BarelyPerformerHandle performer, bool* out_is_playing);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer,
+                                             bool* out_is_playing);
 
 /// Sets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param loop_begin_position Loop begin position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_SetLoopBeginPosition(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_SetLoopBeginPosition(
     BarelyPerformerHandle performer, double loop_begin_position);
 
 /// Sets the loop length of a performer.
 ///
 /// @param performer Performer handle.
 /// @param loop_length Loop length in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyPerformer_SetLoopLength(
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_SetLoopLength(
     BarelyPerformerHandle performer, double loop_length);
 
 /// Sets whether a performer is looping or not.
 ///
 /// @param performer Performer handle.
 /// @param is_looping True if looping, false otherwise.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer,
+                                              bool is_looping);
 
 /// Sets the position of a performer.
 ///
 /// @param performer Performer handle.
 /// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer,
+                                               double position);
 
 /// Starts a performer.
 ///
 /// @param performer Performer handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyPerformer_Start(BarelyPerformerHandle performer);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_Start(BarelyPerformerHandle performer);
 
 /// Stops a performer.
 ///
 /// @param performer Performer handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyPerformer_Stop(BarelyPerformerHandle performer);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 
 /// Creates a new task.
 ///
@@ -1069,51 +1047,50 @@ BarelyPerformer_Stop(BarelyPerformerHandle performer);
 /// @param process_order Task process order.
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyTask_Create(BarelyPerformerHandle performer,
-                                             BarelyTaskDefinition definition,
-                                             bool is_one_off, double position,
-                                             int32_t process_order,
-                                             void* user_data,
-                                             BarelyTaskHandle* out_task);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer,
+                                     BarelyTaskDefinition definition,
+                                     bool is_one_off, double position,
+                                     int32_t process_order, void* user_data,
+                                     BarelyTaskHandle* out_task);
 
 /// Destroys a task.
 ///
 /// @param task Task handle.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyTask_Destroy(BarelyTaskHandle task);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
 
 /// Gets the position of a task.
 ///
 /// @param task Task handle.
 /// @param out_position Output position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyTask_GetPosition(BarelyTaskHandle task,
-                                                  double* out_position);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyTask_GetPosition(BarelyTaskHandle task,
+                                          double* out_position);
 
 /// Gets the process order of a task.
 ///
 /// @param task Task handle.
 /// @param out_process_order Output process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus
-BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_order);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyTask_GetProcessOrder(BarelyTaskHandle task,
+                                              int32_t* out_process_order);
 
 /// Sets the position of a task.
 ///
 /// @param task Task handle.
 /// @param position Position in beats.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyTask_SetPosition(BarelyTaskHandle task,
-                                                  double position);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyTask_SetPosition(BarelyTaskHandle task,
+                                          double position);
 
 /// Sets the process order of a task.
 ///
 /// @param task Task handle.
 /// @param process_order Process order.
-/// @return Status.
-BARELY_EXPORT BarelyStatus BarelyTask_SetProcessOrder(BarelyTaskHandle task,
-                                                      int32_t process_order);
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyTask_SetProcessOrder(BarelyTaskHandle task,
+                                              int32_t process_order);
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -1629,9 +1606,9 @@ class Effect {
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_GetControl(effect_, static_cast<int>(index), &value);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return static_cast<ValueType>(value);
   }
 
@@ -1640,9 +1617,9 @@ class Effect {
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
     int process_order = 0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_GetProcessOrder(effect_, &process_order);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return process_order;
   }
 
@@ -1656,8 +1633,9 @@ class Effect {
 
   /// Resets all control values.
   void ResetAllControls() noexcept {
-    [[maybe_unused]] const auto status = BarelyEffect_ResetAllControls(effect_);
-    assert(status == BarelyStatus_kOk);
+    [[maybe_unused]] const bool success =
+        BarelyEffect_ResetAllControls(effect_);
+    assert(success);
   }
 
   /// Resets a control value.
@@ -1668,9 +1646,9 @@ class Effect {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_ResetControl(effect_, static_cast<int>(index));
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets a control value.
@@ -1687,10 +1665,10 @@ class Effect {
     static_assert(
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_SetControl(effect_, static_cast<int>(index),
                                 static_cast<double>(value), slope_per_beat);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the control event.
@@ -1699,9 +1677,9 @@ class Effect {
   /// @param user_data Pointer to user data.
   void SetControlEvent(ControlEventDefinition definition,
                        void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_SetControlEvent(effect_, definition, user_data);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the control event with a callback.
@@ -1727,18 +1705,18 @@ class Effect {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_SetData(effect_, data, size);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the process order.
   ///
   /// @param process_order Process order.
   void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_SetProcessOrder(effect_, process_order);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
  private:
@@ -1790,9 +1768,9 @@ class Instrument {
   [[nodiscard]] Effect CreateEffect(EffectDefinition definition,
                                     int process_order = 0) noexcept {
     BarelyEffectHandle effect;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyEffect_Create(instrument_, definition, process_order, &effect);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return Effect(effect);
   }
 
@@ -1813,9 +1791,9 @@ class Instrument {
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const auto status = BarelyInstrument_GetControl(
+    [[maybe_unused]] const bool success = BarelyInstrument_GetControl(
         instrument_, static_cast<int>(index), &value);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return static_cast<ValueType>(value);
   }
 
@@ -1830,9 +1808,9 @@ class Instrument {
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
     double value = 0.0;
-    [[maybe_unused]] const auto status = BarelyInstrument_GetNoteControl(
+    [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControl(
         instrument_, pitch, static_cast<int>(index), &value);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return static_cast<ValueType>(value);
   }
 
@@ -1842,9 +1820,9 @@ class Instrument {
   /// @return True if active, false otherwise.
   [[nodiscard]] bool IsNoteOn(double pitch) const noexcept {
     bool is_note_on = false;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_IsNoteOn(instrument_, pitch, &is_note_on);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return is_note_on;
   }
 
@@ -1856,10 +1834,10 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count, double timestamp) noexcept {
-    [[maybe_unused]] const auto status = BarelyInstrument_Process(
+    [[maybe_unused]] const bool success = BarelyInstrument_Process(
         instrument_, output_samples, output_channel_count, output_frame_count,
         timestamp);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Releases the handle.
@@ -1872,18 +1850,18 @@ class Instrument {
 
   /// Resets all control values.
   void ResetAllControls() noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_ResetAllControls(instrument_);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Resets all note control values.
   ///
   /// @param pitch Note pitch.
   void ResetAllNoteControls(double pitch) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_ResetAllNoteControls(instrument_, pitch);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Resets a control value.
@@ -1894,9 +1872,9 @@ class Instrument {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_ResetControl(instrument_, index);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Resets a note control value.
@@ -1908,16 +1886,16 @@ class Instrument {
     static_assert(
         std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
         "IndexType is not supported");
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_ResetNoteControl(instrument_, pitch, index);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets all notes off.
   void SetAllNotesOff() noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetAllNotesOff(instrument_);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets a control value.
@@ -1934,10 +1912,10 @@ class Instrument {
     static_assert(
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetControl(instrument_, static_cast<int>(index),
                                     static_cast<double>(value), slope_per_beat);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the control event.
@@ -1946,9 +1924,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetControlEvent(ControlEventDefinition definition,
                        void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetControlEvent(instrument_, definition, user_data);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the control event with a callback.
@@ -1974,9 +1952,9 @@ class Instrument {
   /// @param data Pointer to immutable data.
   /// @param size Data size in bytes.
   void SetData(const void* data, int size) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetData(instrument_, data, size);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets a note control value.
@@ -1994,10 +1972,10 @@ class Instrument {
     static_assert(
         std::is_arithmetic<ValueType>::value || std::is_enum<ValueType>::value,
         "ValueType is not supported");
-    [[maybe_unused]] const auto status = BarelyInstrument_SetNoteControl(
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControl(
         instrument_, pitch, static_cast<int>(index), static_cast<double>(value),
         slope_per_beat);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the note control event.
@@ -2006,9 +1984,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteControlEvent(NoteControlEventDefinition definition,
                            void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const auto status = BarelyInstrument_SetNoteControlEvent(
+    [[maybe_unused]] const bool success = BarelyInstrument_SetNoteControlEvent(
         instrument_, definition, user_data);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the note control event with a callback.
@@ -2024,9 +2002,9 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   void SetNoteOff(double pitch) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetNoteOff(instrument_, pitch);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the note off event.
@@ -2035,9 +2013,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOffEvent(NoteOffEventDefinition definition,
                        void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetNoteOffEvent(instrument_, definition, user_data);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the note off event with a callback.
@@ -2053,9 +2031,9 @@ class Instrument {
   /// @param pitch Note pitch.
   /// @param intensity Note intensity.
   void SetNoteOn(double pitch, double intensity = 1.0) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetNoteOn(instrument_, pitch, intensity);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the note on event.
@@ -2064,9 +2042,9 @@ class Instrument {
   /// @param user_data Pointer to user data.
   void SetNoteOnEvent(NoteOnEventDefinition definition,
                       void* user_data = nullptr) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_SetNoteOnEvent(instrument_, definition, user_data);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the note off event with a callback.
@@ -2124,9 +2102,9 @@ class Task {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyTask_GetPosition(task_, &position);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return position;
   }
 
@@ -2135,9 +2113,9 @@ class Task {
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
     int process_order = 0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyTask_GetProcessOrder(task_, &process_order);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return process_order;
   }
 
@@ -2153,18 +2131,18 @@ class Task {
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyTask_SetPosition(task_, position);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the process order.
   ///
   /// @param process_order Process order.
   void SetProcessOrder(int process_order) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyTask_SetProcessOrder(task_, process_order);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
  private:
@@ -2220,10 +2198,10 @@ class Performer {
                                 double position, int process_order = 0,
                                 void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyTask_Create(performer_, definition, is_one_off, position,
                           process_order, user_data, &task);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return Task(task);
   }
 
@@ -2253,9 +2231,9 @@ class Performer {
   /// @return Loop begin position in beats.
   [[nodiscard]] double GetLoopBeginPosition() const noexcept {
     double loop_begin_position = 0.0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_GetLoopBeginPosition(performer_, &loop_begin_position);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return loop_begin_position;
   }
 
@@ -2264,9 +2242,9 @@ class Performer {
   /// @return Loop length in beats.
   [[nodiscard]] double GetLoopLength() const noexcept {
     double loop_length = 0.0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_GetLoopLength(performer_, &loop_length);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return loop_length;
   }
 
@@ -2275,9 +2253,9 @@ class Performer {
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept {
     double position = 0.0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_GetPosition(performer_, &position);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return position;
   }
 
@@ -2286,9 +2264,9 @@ class Performer {
   /// @return True if looping, false otherwise.
   [[nodiscard]] bool IsLooping() const noexcept {
     bool is_looping = false;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_IsLooping(performer_, &is_looping);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return is_looping;
   }
 
@@ -2297,9 +2275,9 @@ class Performer {
   /// @return True if playing, false otherwise.
   [[nodiscard]] bool IsPlaying() const noexcept {
     bool is_playing = false;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_IsPlaying(performer_, &is_playing);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return is_playing;
   }
 
@@ -2315,48 +2293,48 @@ class Performer {
   ///
   /// @param loop_begin_position Loop begin position in beats.
   void SetLoopBeginPosition(double loop_begin_position) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_SetLoopBeginPosition(performer_, loop_begin_position);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the loop length.
   ///
   /// @param loop_length Loop length in beats.
   void SetLoopLength(double loop_length) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_SetLoopLength(performer_, loop_length);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets whether the performer is looping or not.
   ///
   /// @param is_looping True if looping, false otherwise.
   void SetLooping(bool is_looping) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_SetLooping(performer_, is_looping);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Sets the position.
   ///
   /// @param position Position in beats.
   void SetPosition(double position) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_SetPosition(performer_, position);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Starts the performer.
   void Start() noexcept {
-    [[maybe_unused]] const auto status = BarelyPerformer_Start(performer_);
-    assert(status == BarelyStatus_kOk);
+    [[maybe_unused]] const bool success = BarelyPerformer_Start(performer_);
+    assert(success);
   }
 
   /// Stops the performer.
   void Stop() noexcept {
-    [[maybe_unused]] const auto status = BarelyPerformer_Stop(performer_);
-    assert(status == BarelyStatus_kOk);
+    [[maybe_unused]] const bool success = BarelyPerformer_Stop(performer_);
+    assert(success);
   }
 
  private:
@@ -2369,8 +2347,8 @@ class Musician {
  public:
   /// Creates a new `Musician`.
   Musician() noexcept {
-    [[maybe_unused]] const auto status = BarelyMusician_Create(&musician_);
-    assert(status == BarelyStatus_kOk);
+    [[maybe_unused]] const bool success = BarelyMusician_Create(&musician_);
+    assert(success);
   }
 
   /// Creates a new `Musician` from a raw handle.
@@ -2414,9 +2392,9 @@ class Musician {
   [[nodiscard]] Instrument CreateInstrument(InstrumentDefinition definition,
                                             int frame_rate) noexcept {
     BarelyInstrumentHandle instrument;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyInstrument_Create(musician_, definition, frame_rate, &instrument);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return Instrument(instrument);
   }
 
@@ -2425,9 +2403,9 @@ class Musician {
   /// @return Performer.
   [[nodiscard]] Performer CreatePerformer() noexcept {
     BarelyPerformerHandle performer;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyPerformer_Create(musician_, &performer);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return Performer(performer);
   }
 
@@ -2441,9 +2419,9 @@ class Musician {
   /// @return Tempo in beats per minute.
   [[nodiscard]] double GetTempo() const noexcept {
     double tempo = 0.0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyMusician_GetTempo(musician_, &tempo);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return tempo;
   }
 
@@ -2452,9 +2430,9 @@ class Musician {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept {
     double timestamp = 0.0;
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyMusician_GetTimestamp(musician_, &timestamp);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
     return timestamp;
   }
 
@@ -2470,18 +2448,18 @@ class Musician {
   ///
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyMusician_SetTempo(musician_, tempo);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
   /// Updates the musician at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   void Update(double timestamp) noexcept {
-    [[maybe_unused]] const auto status =
+    [[maybe_unused]] const bool success =
         BarelyMusician_Update(musician_, timestamp);
-    assert(status == BarelyStatus_kOk);
+    assert(success);
   }
 
  private:

@@ -10,7 +10,6 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/id.h"
-#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 
@@ -32,12 +31,12 @@ class Performer {
   /// Destroys a task.
   ///
   /// @param task_id Task identifier.
-  /// @return Status.
-  Status DestroyTask(Id task_id) noexcept;
+  /// @return True if successful, false otherwise.
+  bool DestroyTask(Id task_id) noexcept;
 
   /// Returns the duration to next task.
   ///
-  /// @return Pair of duration in beats and process order.
+  /// @return Optional pair of duration in beats and process order.
   [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask()
       const noexcept;
 
@@ -59,14 +58,16 @@ class Performer {
   /// Returns task position.
   ///
   /// @param task_id Task identifier.
-  /// @return Position or error status.
-  [[nodiscard]] StatusOr<double> GetTaskPosition(Id task_id) const noexcept;
+  /// @return Optional position.
+  [[nodiscard]] std::optional<double> GetTaskPosition(
+      Id task_id) const noexcept;
 
   /// Returns task process order.
   ///
   /// @param task_id Task identifier.
-  /// @return Process order or error status.
-  [[nodiscard]] StatusOr<int> GetTaskProcessOrder(Id task_id) const noexcept;
+  /// @return Optional process order.
+  [[nodiscard]] std::optional<int> GetTaskProcessOrder(
+      Id task_id) const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -106,15 +107,15 @@ class Performer {
   ///
   /// @param task_id Task identifier.
   /// @param position Task position.
-  /// @return Status.
-  Status SetTaskPosition(Id task_id, double position) noexcept;
+  /// @return True if successful, false otherwise.
+  bool SetTaskPosition(Id task_id, double position) noexcept;
 
   /// Sets task process order.
   ///
   /// @param task_id Task identifier.
   /// @param process_order Task process order.
-  /// @return Status.
-  Status SetTaskProcessOrder(Id task_id, int process_order) noexcept;
+  /// @return True if successful, false otherwise.
+  bool SetTaskProcessOrder(Id task_id, int process_order) noexcept;
 
   /// Stops performer.
   void Start() noexcept;

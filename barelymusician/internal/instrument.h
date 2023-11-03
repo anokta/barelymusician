@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <map>
 #include <memory>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -14,7 +15,6 @@
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/message_queue.h"
 #include "barelymusician/internal/mutable_data.h"
-#include "barelymusician/internal/status_or.h"
 
 namespace barely::internal {
 
@@ -52,38 +52,38 @@ class Instrument {
   /// Destroys an effect.
   ///
   /// @param effect_id Effect identifier.
-  /// @return Status.
+  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Status DestroyEffect(Id effect_id) noexcept;
+  bool DestroyEffect(Id effect_id) noexcept;
 
   /// Returns a control value.
   ///
   /// @param index Control index.
-  /// @return Control value or error status.
-  [[nodiscard]] StatusOr<double> GetControl(int index) const noexcept;
+  /// @return Optional control value.
+  [[nodiscard]] std::optional<double> GetControl(int index) const noexcept;
 
   /// Returns an effect control value.
   ///
   /// @param effect_id Effect identifier.
   /// @param index Effect control index.
-  /// @return Effect control value or error status.
-  [[nodiscard]] StatusOr<double> GetEffectControl(Id effect_id,
-                                                  int index) const noexcept;
+  /// @return Optional effect control value.
+  [[nodiscard]] std::optional<double> GetEffectControl(
+      Id effect_id, int index) const noexcept;
 
   /// Returns effect process order.
   ///
   /// @param effect_id Effect identifier.
-  /// @return Process order or error status.
-  [[nodiscard]] StatusOr<int> GetEffectProcessOrder(
+  /// @return Optional process order.
+  [[nodiscard]] std::optional<int> GetEffectProcessOrder(
       Id effect_id) const noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
-  /// @return Note control value or error status.
-  [[nodiscard]] StatusOr<double> GetNoteControl(double pitch,
-                                                int index) const noexcept;
+  /// @return Optional note control value.
+  [[nodiscard]] std::optional<double> GetNoteControl(double pitch,
+                                                     int index) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -97,10 +97,10 @@ class Instrument {
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
-  /// @return Status.
+  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Status Process(double* output_samples, int output_channel_count,
-                 int output_frame_count, double timestamp) noexcept;
+  bool Process(double* output_samples, int output_channel_count,
+               int output_frame_count, double timestamp) noexcept;
 
   /// Resets all control values.
   void ResetAllControls() noexcept;
@@ -108,34 +108,34 @@ class Instrument {
   /// Resets all effect control values.
   ///
   /// @param effect_id Effect identifier.
-  /// @return Status.
-  Status ResetAllEffectControls(Id effect_id) noexcept;
+  /// @return True if successful, false otherwise.
+  bool ResetAllEffectControls(Id effect_id) noexcept;
 
   /// Resets all note control values.
   ///
   /// @param pitch Note pitch.
-  /// @return Status.
-  Status ResetAllNoteControls(double pitch) noexcept;
+  /// @return True if successful, false otherwise.
+  bool ResetAllNoteControls(double pitch) noexcept;
 
   /// Resets a control value.
   ///
   /// @param index Control index.
-  /// @return Status.
-  Status ResetControl(int index) noexcept;
+  /// @return True if successful, false otherwise.
+  bool ResetControl(int index) noexcept;
 
   /// Resets a note control value.
   ///
   /// @param effect_id Effect identifier.
   /// @param index Effect control index.
-  /// @return Status.
-  Status ResetEffectControl(Id effect_id, int index) noexcept;
+  /// @return True if successful, false otherwise.
+  bool ResetEffectControl(Id effect_id, int index) noexcept;
 
   /// Resets a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
-  /// @return Status.
-  Status ResetNoteControl(double pitch, int index) noexcept;
+  /// @return True if successful, false otherwise.
+  bool ResetNoteControl(double pitch, int index) noexcept;
 
   /// Sets all notes off.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -146,8 +146,8 @@ class Instrument {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_beat Control slope in value change per beat.
-  /// @return Status.
-  Status SetControl(int index, double value, double slope_per_beat) noexcept;
+  /// @return True if successful, false otherwise.
+  bool SetControl(int index, double value, double slope_per_beat) noexcept;
 
   /// Sets the control event callback.
   ///
@@ -167,33 +167,33 @@ class Instrument {
   /// @param index Effect control index.
   /// @param value Effect control value.
   /// @param slope_per_beat Effect control slope in value change per beat.
-  /// @return Status.
-  Status SetEffectControl(Id effect_id, int index, double value,
-                          double slope_per_beat) noexcept;
+  /// @return True if successful, false otherwise.
+  bool SetEffectControl(Id effect_id, int index, double value,
+                        double slope_per_beat) noexcept;
 
   /// Sets the effect control event.
   ///
   /// @param effect_id Effect identifier.
   /// @param definition Effect control event definition.
   /// @param user_data Pointer to user data.
-  /// @return Status.
-  Status SetEffectControlEvent(Id effect_id, ControlEventDefinition definition,
-                               void* user_data) noexcept;
+  /// @return True if successful, false otherwise.
+  bool SetEffectControlEvent(Id effect_id, ControlEventDefinition definition,
+                             void* user_data) noexcept;
 
   /// Sets effect data.
   ///
   /// @param effect_id Effect identifier.
   /// @param data Effect data.
-  /// @return Status.
-  Status SetEffectData(Id effect_id, std::vector<std::byte> data) noexcept;
+  /// @return True if successful, false otherwise.
+  bool SetEffectData(Id effect_id, std::vector<std::byte> data) noexcept;
 
   /// Sets effect process order.
   ///
   /// @param effect_id Effect identifier.
   /// @param process_order Effect process order.
-  /// @return Status.
+  /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Status SetEffectProcessOrder(Id effect_id, int process_order) noexcept;
+  bool SetEffectProcessOrder(Id effect_id, int process_order) noexcept;
 
   /// Sets a note control value.
   ///
@@ -201,9 +201,9 @@ class Instrument {
   /// @param index Note control index.
   /// @param value Note control value.
   /// @param slope_per_beat Note control slope in value change per beat.
-  /// @return Status.
-  Status SetNoteControl(double pitch, int index, double value,
-                        double slope_per_beat) noexcept;
+  /// @return True if successful, false otherwise.
+  bool SetNoteControl(double pitch, int index, double value,
+                      double slope_per_beat) noexcept;
 
   /// Sets the note control event.
   ///

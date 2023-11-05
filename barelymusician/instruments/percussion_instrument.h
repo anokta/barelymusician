@@ -1,9 +1,27 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_
 
+// NOLINTBEGIN
+#include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+/// Returns the percussion instrument definition.
+///
+/// @return Instrument definition.
+BARELY_EXPORT BarelyInstrumentDefinition
+BarelyPercussionInstrument_GetDefinition();
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
+// NOLINTEND
+
+#ifdef __cplusplus
 #include <vector>
 
-#include "barelymusician/common/custom_macros.h"
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/sample_player.h"
@@ -11,21 +29,22 @@
 
 namespace barely {
 
-/// Default pad release in seconds.
-inline constexpr double kDefaultPadRelease = 0.1;
-
-/// Percussion instrument definition.
-#define BARELY_PERCUSSION_INSTRUMENT_CONTROLS(PercussionInstrumentControl, X) \
-  /* Gain. */                                                                 \
-  X(PercussionInstrumentControl, Gain, 1.0, 0.0, 1.0)                         \
-  /* Pad envelope release. */                                                 \
-  X(PercussionInstrumentControl, Release, kDefaultPadRelease, 0.0, 60.0)
-BARELY_GENERATE_CUSTOM_INSTRUMENT_DEFINITION(
-    PercussionInstrument, BARELY_PERCUSSION_INSTRUMENT_CONTROLS)
-
 /// Simple percussion instrument.
 class PercussionInstrument : public CustomInstrument {
  public:
+  /// Control enum.
+  enum class Control : int {
+    /// Gain.
+    kGain = 0,
+    /// Pad envelope release.
+    kRelease = 1,
+  };
+
+  /// Returns the instrument definition.
+  ///
+  /// @return Instrument definition.
+  static InstrumentDefinition GetDefinition() noexcept;
+
   /// Constructs new `PercussionInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit PercussionInstrument(int frame_rate) noexcept;
@@ -55,5 +74,6 @@ class PercussionInstrument : public CustomInstrument {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_PERCUSSION_INSTRUMENT_H_

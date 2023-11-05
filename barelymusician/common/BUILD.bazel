@@ -3,12 +3,6 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "custom_macros",
-    hdrs = ["custom_macros.h"],
-    deps = ["//barelymusician"],
-)
-
-cc_library(
     name = "find_or_null",
     hdrs = ["find_or_null.h"],
 )

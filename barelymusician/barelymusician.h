@@ -41,7 +41,7 @@
 ///
 ///   // Create.
 ///   auto instrument =
-///       musician.CreateInstrument(barely::SynthInstrumentDefinition(),
+///       musician.CreateInstrument(barely::SynthInstrument::GetDefinition(),
 ///                                 /*frame_rate=*/48000);
 ///
 ///   // Set a note on.
@@ -56,11 +56,12 @@
 ///   const bool is_note_on = instrument.IsNoteOn(/*pitch=*/-1.0);
 ///
 ///   // Set a control value.
-///   instrument.SetControl(barely::SynthInstrumentControl::kGain,
+///   instrument.SetControl(barely::SynthInstrument::Control::kGain,
 ///                         /*value=*/0.5, /*slope_per_beat=*/0.0);
 ///
 ///   // Create a low-pass effect.
-///   auto effect = instrument.CreateEffect(barely::LowPassEffectDefinition());
+///   auto effect =
+///       instrument.CreateEffect(barely::LowPassEffect::GetDefinition());
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
 ///   effect->SetControl(barely::LowPassEffectControl::kCutoffFrequency,
@@ -166,9 +167,8 @@
 ///   BarelyInstrument_IsNoteOn(instrument, /*pitch=*/-1.0, &is_note_on);
 ///
 ///   // Set a control value.
-///   BarelyInstrument_SetControl(instrument,
-///                               BarelySynthInstrumentControl_kGain,
-///                               /*value=*/0.5, /*slope_per_beat=*/0.0);
+///   BarelyInstrument_SetControl(instrument, /*index=*/0, /*value=*/0.5,
+///                               /*slope_per_beat=*/0.0);
 ///
 ///   // Create a low-pass effect.
 ///   BarelyEffectHandle effect;
@@ -605,6 +605,7 @@ typedef struct BarelyTaskDefinition {
   /// Process callback.
   BarelyTaskDefinition_ProcessCallback process_callback;
 } BarelyTaskDefinition;
+
 /// Effect handle.
 typedef struct BarelyEffect* BarelyEffectHandle;
 

@@ -19,7 +19,7 @@ target_compile_definitions(
 target_link_libraries(
   barely_high_pass_effect
   barely_custom_effect
-  barely_custom_macros
+  barelymusician
   barely_dsp_utils
   barely_one_pole_filter
 )
@@ -36,7 +36,7 @@ target_compile_definitions(
 target_link_libraries(
   barely_low_pass_effect
   barely_custom_effect
-  barely_custom_macros
+  barelymusician
   barely_dsp_utils
   barely_one_pole_filter
 )

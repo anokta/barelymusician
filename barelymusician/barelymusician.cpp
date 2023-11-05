@@ -7,8 +7,6 @@
 
 #include "barelymusician/internal/engine.h"
 
-extern "C" {
-
 // Effect.
 struct BarelyEffect {
   // Default constructor.
@@ -779,5 +777,3 @@ bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order) {
   }
   return false;
 }
-
-}  // extern "C"

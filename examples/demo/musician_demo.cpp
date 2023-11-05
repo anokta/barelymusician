@@ -33,12 +33,10 @@ using ::barely::Instrument;
 using ::barely::Metronome;
 using ::barely::Musician;
 using ::barely::OscillatorType;
-using ::barely::PercussionInstrumentControl;
-using ::barely::PercussionInstrumentDefinition;
+using ::barely::PercussionInstrument;
 using ::barely::Performer;
 using ::barely::Random;
-using ::barely::SynthInstrumentControl;
-using ::barely::SynthInstrumentDefinition;
+using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -230,13 +228,13 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain,
                                              double attack, double release) {
-    instruments.push_back(
-        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate));
+    instruments.push_back(musician.CreateInstrument(
+        SynthInstrument::GetDefinition(), kFrameRate));
     auto& instrument = instruments.back();
-    instrument.SetControl(SynthInstrumentControl::kGain, gain);
-    instrument.SetControl(SynthInstrumentControl::kOscillatorType, type);
-    instrument.SetControl(SynthInstrumentControl::kAttack, attack);
-    instrument.SetControl(SynthInstrumentControl::kRelease, release);
+    instrument.SetControl(SynthInstrument::Control::kGain, gain);
+    instrument.SetControl(SynthInstrument::Control::kOscillatorType, type);
+    instrument.SetControl(SynthInstrument::Control::kAttack, attack);
+    instrument.SetControl(SynthInstrument::Control::kRelease, release);
     set_note_callbacks_fn(instruments.size(), instrument);
   };
 
@@ -281,10 +279,10 @@ int main(int /*argc*/, char* argv[]) {
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.push_back(
-      musician.CreateInstrument(PercussionInstrumentDefinition(), kFrameRate));
+  instruments.push_back(musician.CreateInstrument(
+      PercussionInstrument::GetDefinition(), kFrameRate));
   auto& percussion = instruments.back();
-  percussion.SetControl(PercussionInstrumentControl::kGain, 0.25);
+  percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
   set_note_callbacks_fn(instruments.size(), percussion);
   const auto set_percussion_pad_map_fn =
       [&](const std::unordered_map<double, std::string>& percussion_map) {

@@ -19,7 +19,6 @@ target_compile_definitions(
 target_link_libraries(
   barely_percussion_instrument
   barely_custom_instrument
-  barely_custom_macros
   barely_enveloped_voice
   barely_gain_processor
   barely_sample_player
@@ -37,7 +36,6 @@ target_compile_definitions(
 target_link_libraries(
   barely_sampler_instrument
   barely_custom_instrument
-  barely_custom_macros
   barely_enveloped_voice
   barely_gain_processor
   barely_polyphonic_voice
@@ -56,7 +54,6 @@ target_compile_definitions(
 target_link_libraries(
   barely_synth_instrument
   barely_custom_instrument
-  barely_custom_macros
   barely_dsp_utils
   barely_enveloped_voice
   barely_gain_processor

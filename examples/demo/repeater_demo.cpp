@@ -20,8 +20,7 @@ using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Repeater;
 using ::barely::RepeaterStyle;
-using ::barely::SynthInstrumentControl;
-using ::barely::SynthInstrumentDefinition;
+using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -76,13 +75,13 @@ int main(int /*argc*/, char* /*argv*/[]) {
   musician.SetTempo(kInitialTempo);
 
   auto instrument =
-      musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate);
-  instrument.SetControl(SynthInstrumentControl::kGain, kGain);
-  instrument.SetControl(SynthInstrumentControl::kOscillatorType,
+      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  instrument.SetControl(SynthInstrument::Control::kGain, kGain);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
                         kOscillatorType);
-  instrument.SetControl(SynthInstrumentControl::kAttack, kAttack);
-  instrument.SetControl(SynthInstrumentControl::kRelease, kRelease);
-  instrument.SetControl(SynthInstrumentControl::kVoiceCount, kVoiceCount);
+  instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
+  instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
+  instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
   Repeater repeater(musician);
   repeater.SetInstrument(&instrument);

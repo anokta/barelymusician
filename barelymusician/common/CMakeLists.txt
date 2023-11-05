@@ -1,13 +1,4 @@
 add_library(
-  barely_custom_macros INTERFACE
-  custom_macros.h
-)
-target_link_libraries(
-  barely_custom_macros INTERFACE
-  barelymusician
-)
-
-add_library(
   barely_find_or_null INTERFACE
   find_or_null.h
 )

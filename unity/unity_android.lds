@@ -56,12 +56,12 @@ VERS_1.0 {
     BarelyTask_SetPosition;
     BarelyTask_SetProcessOrder;
 
-    BarelyHighPassEffectDefinition;
-    BarelyLowPassEffectDefinition;
+    BarelyHighPassEffect_GetDefinition;
+    BarelyLowPassEffect_GetDefinition;
 
-    BarelyPercussionInstrumentDefinition;
-    BarelySamplerInstrumentDefinition;
-    BarelySynthInstrumentDefinition;
+    BarelyPercussionInstrument_GetDefinition;
+    BarelySamplerInstrument_GetDefinition;
+    BarelySynthInstrument_GetDefinition;
 
   local:
     *;

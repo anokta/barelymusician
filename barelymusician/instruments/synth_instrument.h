@@ -1,7 +1,24 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_
 
-#include "barelymusician/common/custom_macros.h"
+// NOLINTBEGIN
+#include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+/// Returns the synth instrument definition.
+///
+/// @return Instrument definition.
+BARELY_EXPORT BarelyInstrumentDefinition BarelySynthInstrument_GetDefinition();
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
+// NOLINTEND
+
+#ifdef __cplusplus
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/oscillator.h"
@@ -10,33 +27,32 @@
 
 namespace barely {
 
-// Maximum number of voices allowed to be set.
-inline constexpr int kMaxSynthVoiceCount = 64;
-
-/// Synth instrument definition.
-#define BARELY_SYNTH_INSTRUMENT_CONTROLS(SynthInstrumentControl, X) \
-  /* Gain. */                                                       \
-  X(SynthInstrumentControl, Gain, 1.0, 0.0, 1.0)                    \
-  /* Oscillator type. */                                            \
-  X(SynthInstrumentControl, OscillatorType,                         \
-    static_cast<double>(OscillatorType::kSine), 0.0,                \
-    static_cast<double>(OscillatorType::kNoise))                    \
-  /* Attack. */                                                     \
-  X(SynthInstrumentControl, Attack, 0.05, 0.0, 60.0)                \
-  /* Decay. */                                                      \
-  X(SynthInstrumentControl, Decay, 0.0, 0.0, 60.0)                  \
-  /* Sustain. */                                                    \
-  X(SynthInstrumentControl, Sustain, 1.0, 0.0, 1.0)                 \
-  /* Release. */                                                    \
-  X(SynthInstrumentControl, Release, 0.25, 0.0, 60.0)               \
-  /* Number of voices. */                                           \
-  X(SynthInstrumentControl, VoiceCount, 8, 1, kMaxSynthVoiceCount)
-BARELY_GENERATE_CUSTOM_INSTRUMENT_DEFINITION(SynthInstrument,
-                                             BARELY_SYNTH_INSTRUMENT_CONTROLS)
-
 /// Simple polyphonic synth instrument.
 class SynthInstrument : public CustomInstrument {
  public:
+  /// Control enum.
+  enum class Control : int {
+    /// Gain.
+    kGain = 0,
+    /// Oscillator type.
+    kOscillatorType = 1,
+    /// Envelope attack.
+    kAttack = 2,
+    /// Envelope decay.
+    kDecay = 3,
+    /// Envelope sustain.
+    kSustain = 4,
+    /// Envelope release.
+    kRelease = 5,
+    /// Number of voices.
+    kVoiceCount = 6,
+  };
+
+  /// Returns the instrument definition.
+  ///
+  /// @return Instrument definition.
+  static InstrumentDefinition GetDefinition() noexcept;
+
   /// Constructs new `SynthInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SynthInstrument(int frame_rate) noexcept;
@@ -59,5 +75,6 @@ class SynthInstrument : public CustomInstrument {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_SYNTH_INSTRUMENT_H_

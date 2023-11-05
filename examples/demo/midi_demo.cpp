@@ -22,8 +22,7 @@ using ::barely::Instrument;
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::Performer;
-using ::barely::SynthInstrumentControl;
-using ::barely::SynthInstrumentDefinition;
+using ::barely::SynthInstrument;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -133,7 +132,7 @@ int main(int /*argc*/, char* argv[]) {
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
     tracks.emplace_back(
-        musician.CreateInstrument(SynthInstrumentDefinition(), kFrameRate),
+        musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate),
         musician.CreatePerformer());
     auto& [instrument, performer] = tracks.back();
     // Build the score to perform.
@@ -154,14 +153,14 @@ int main(int /*argc*/, char* argv[]) {
       ConsoleLog() << "MIDI track #" << track_index
                    << ": NoteOff(key: " << MidiKeyNumberFromPitch(pitch) << ")";
     });
-    instrument.SetControl(SynthInstrumentControl::kGain, kInstrumentGain);
-    instrument.SetControl(SynthInstrumentControl::kOscillatorType,
+    instrument.SetControl(SynthInstrument::Control::kGain, kInstrumentGain);
+    instrument.SetControl(SynthInstrument::Control::kOscillatorType,
                           kInstrumentOscillatorType);
-    instrument.SetControl(SynthInstrumentControl::kAttack,
+    instrument.SetControl(SynthInstrument::Control::kAttack,
                           kInstrumentEnvelopeAttack);
-    instrument.SetControl(SynthInstrumentControl::kRelease,
+    instrument.SetControl(SynthInstrument::Control::kRelease,
                           kInstrumentEnvelopeRelease);
-    instrument.SetControl(SynthInstrumentControl::kVoiceCount,
+    instrument.SetControl(SynthInstrument::Control::kVoiceCount,
                           kInstrumentVoiceCount);
   }
   ConsoleLog() << "Number of active MIDI tracks: " << tracks.size();

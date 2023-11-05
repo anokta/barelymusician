@@ -1,7 +1,25 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_SAMPLER_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_SAMPLER_INSTRUMENT_H_
 
-#include "barelymusician/common/custom_macros.h"
+// NOLINTBEGIN
+#include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+/// Returns the sampler instrument definition.
+///
+/// @return Instrument definition.
+BARELY_EXPORT BarelyInstrumentDefinition
+BarelySamplerInstrument_GetDefinition();
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
+// NOLINTEND
+
+#ifdef __cplusplus
 #include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/dsp/gain_processor.h"
 #include "barelymusician/dsp/polyphonic_voice.h"
@@ -10,33 +28,34 @@
 
 namespace barely {
 
-// Maximum number of voices allowed to be set.
-inline constexpr int kMaxSamplerVoiceCount = 64;
-
-/// Sampler instrument definition.
-#define BARELY_SAMPLER_INSTRUMENT_CONTROLS(SamplerInstrumentControl, X) \
-  /* Gain. */                                                           \
-  X(SamplerInstrumentControl, Gain, 1.0, 0.0, 1.0)                      \
-  /* Root pitch. */                                                     \
-  X(SamplerInstrumentControl, RootPitch, 0.0)                           \
-  /* Sample player loop. */                                             \
-  X(SamplerInstrumentControl, Loop, false)                              \
-  /* Attack. */                                                         \
-  X(SamplerInstrumentControl, Attack, 0.05, 0.0, 60.0)                  \
-  /* Decay. */                                                          \
-  X(SamplerInstrumentControl, Decay, 0.0, 0.0, 60.0)                    \
-  /* Sustain. */                                                        \
-  X(SamplerInstrumentControl, Sustain, 1.0, 0.0, 1.0)                   \
-  /* Release. */                                                        \
-  X(SamplerInstrumentControl, Release, 0.25, 0.0, 60.0)                 \
-  /* Number of voices. */                                               \
-  X(SamplerInstrumentControl, VoiceCount, 8, 1, kMaxSamplerVoiceCount)
-BARELY_GENERATE_CUSTOM_INSTRUMENT_DEFINITION(SamplerInstrument,
-                                             BARELY_SAMPLER_INSTRUMENT_CONTROLS)
-
 /// Simple polyphonic sampler instrument.
 class SamplerInstrument : public CustomInstrument {
  public:
+  /// Control enum.
+  enum class Control : int {
+    /// Gain.
+    kGain = 0,
+    /// Root pitch.
+    kRootPitch = 1,
+    /// Sample player loop.
+    kLoop = 2,
+    /// Envelope attack.
+    kAttack = 3,
+    /// Envelope decay.
+    kDecay = 4,
+    /// Envelope sustain.
+    kSustain = 5,
+    /// Envelope release.
+    kRelease = 6,
+    /// Number of voices
+    kVoiceCount = 7,
+  };
+
+  /// Returns the instrument definition.
+  ///
+  /// @return Instrument definition.
+  static InstrumentDefinition GetDefinition() noexcept;
+
   /// Constructs new `SamplerInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SamplerInstrument(int frame_rate) noexcept;
@@ -60,5 +79,6 @@ class SamplerInstrument : public CustomInstrument {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_INSTRUMENTS_SAMPLER_INSTRUMENT_H_

@@ -244,10 +244,10 @@ namespace Barely {
         EffectDefinition definition;
         switch (effect) {
           case HighPassEffect highPass:
-            definition = BarelyHighPassEffectDefinition();
+            definition = BarelyHighPassEffect_GetDefinition();
             break;
           case LowPassEffect lowPass:
-            definition = BarelyLowPassEffectDefinition();
+            definition = BarelyLowPassEffect_GetDefinition();
             break;
           case CustomEffectInterface custom:
             definition = custom.GetDefinition();
@@ -383,13 +383,13 @@ namespace Barely {
         InstrumentDefinition definition;
         switch (instrument) {
           case PercussionInstrument percussion:
-            definition = BarelyPercussionInstrumentDefinition();
+            definition = BarelyPercussionInstrument_GetDefinition();
             break;
           case SamplerInstrument sampler:
-            definition = BarelySamplerInstrumentDefinition();
+            definition = BarelySamplerInstrument_GetDefinition();
             break;
           case SynthInstrument synth:
-            definition = BarelySynthInstrumentDefinition();
+            definition = BarelySynthInstrument_GetDefinition();
             break;
           case CustomInstrumentInterface custom:
             definition = custom.GetDefinition();
@@ -1512,20 +1512,20 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyTask_SetProcessOrder")]
       private static extern bool BarelyTask_SetProcessOrder(IntPtr task, Int32 processOrder);
 
-      [DllImport(pluginName, EntryPoint = "BarelyHighPassEffectDefinition")]
-      private static extern EffectDefinition BarelyHighPassEffectDefinition();
+      [DllImport(pluginName, EntryPoint = "BarelyHighPassEffect_GetDefinition")]
+      private static extern EffectDefinition BarelyHighPassEffect_GetDefinition();
 
-      [DllImport(pluginName, EntryPoint = "BarelyLowPassEffectDefinition")]
-      private static extern EffectDefinition BarelyLowPassEffectDefinition();
+      [DllImport(pluginName, EntryPoint = "BarelyLowPassEffect_GetDefinition")]
+      private static extern EffectDefinition BarelyLowPassEffect_GetDefinition();
 
-      [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrumentDefinition")]
-      private static extern InstrumentDefinition BarelyPercussionInstrumentDefinition();
+      [DllImport(pluginName, EntryPoint = "BarelyPercussionInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelyPercussionInstrument_GetDefinition();
 
-      [DllImport(pluginName, EntryPoint = "BarelySamplerInstrumentDefinition")]
-      private static extern InstrumentDefinition BarelySamplerInstrumentDefinition();
+      [DllImport(pluginName, EntryPoint = "BarelySamplerInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelySamplerInstrument_GetDefinition();
 
-      [DllImport(pluginName, EntryPoint = "BarelySynthInstrumentDefinition")]
-      private static extern InstrumentDefinition BarelySynthInstrumentDefinition();
+      [DllImport(pluginName, EntryPoint = "BarelySynthInstrument_GetDefinition")]
+      private static extern InstrumentDefinition BarelySynthInstrument_GetDefinition();
     }
   }
 }

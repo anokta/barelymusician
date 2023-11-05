@@ -22,6 +22,7 @@
   "clang-format.language.cpp.enable": false,
   "clang-format.style": "Google",
   "csharp.format.enable": false,
+  "dotnet.defaultSolution": "unity/unity.sln",
   "editor.insertSpaces": true,
   "editor.tabSize": 2,
   "files.exclude": {

@@ -59,8 +59,8 @@
 ///   auto effect = instrument.CreateEffect(barely::LowPassEffect::GetDefinition());
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   effect->SetControl(barely::LowPassEffectControl::kCutoffFrequency, /*value=*/0.0,
-///                      /*slope_per_beat=*/100.0);
+///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
+///                     /*slope_per_beat=*/100.0);
 ///
 ///   // Process.
 ///   //
@@ -165,8 +165,7 @@
 ///                       &effect);
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
-///   BarelyEffect_SetControl(effect, BarelyLowPassEffectControl_kCutoffFrequency, /*value=*/0.0,
-///                           /*slope_per_beat=*/100.0);
+///   BarelyEffect_SetControl(effect, /*index=*/0, /*value=*/0.0, /*slope_per_beat=*/100.0);
 ///
 ///   // Process.
 ///   //

@@ -53,6 +53,7 @@ class SynthInstrument : public CustomInstrument {
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
+ protected:
   /// Constructs new `SynthInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SynthInstrument(int frame_rate) noexcept;
@@ -68,6 +69,7 @@ class SynthInstrument : public CustomInstrument {
   void SetNoteOff(double pitch) noexcept final;
   void SetNoteOn(double pitch, double intensity) noexcept final;
 
+ private:
   using SynthVoice = EnvelopedVoice<Oscillator>;
   PolyphonicVoice<SynthVoice> voice_;
   GainProcessor gain_processor_;

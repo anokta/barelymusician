@@ -44,6 +44,7 @@ class PercussionInstrument : public CustomInstrument {
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
+ protected:
   /// Constructs new `PercussionInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit PercussionInstrument(int frame_rate) noexcept;
@@ -59,6 +60,7 @@ class PercussionInstrument : public CustomInstrument {
   void SetNoteOff(double pitch) noexcept final;
   void SetNoteOn(double pitch, double intensity) noexcept final;
 
+ private:
   struct Pad {
     explicit Pad(int frame_rate) noexcept : voice(frame_rate) {}
 

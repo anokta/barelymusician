@@ -40,6 +40,7 @@ class LowPassEffect : public CustomEffect {
   /// @return Effect definition.
   static EffectDefinition GetDefinition() noexcept;
 
+ protected:
   /// Constructs new `LowPassEffect`.
   explicit LowPassEffect(int frame_rate) noexcept;
 
@@ -50,6 +51,7 @@ class LowPassEffect : public CustomEffect {
   void SetControl(int index, double value, double slope_per_frame) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
 
+ private:
   // Maximum number of output channels allowed.
   static constexpr int kMaxChannelCount = 8;
 

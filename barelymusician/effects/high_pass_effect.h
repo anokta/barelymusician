@@ -41,6 +41,7 @@ class HighPassEffect : public CustomEffect {
   /// @return Effect definition.
   static EffectDefinition GetDefinition() noexcept;
 
+ protected:
   /// Constructs new `HighPassEffect`.
   explicit HighPassEffect(int frame_rate) noexcept;
 
@@ -51,6 +52,7 @@ class HighPassEffect : public CustomEffect {
   void SetControl(int index, double value, double slope_per_frame) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
 
+ private:
   // Maximum number of output channels alhighed.
   static constexpr int kMaxChannelCount = 8;
 

@@ -55,6 +55,7 @@ class SamplerInstrument : public CustomInstrument {
   /// @return Instrument definition.
   static InstrumentDefinition GetDefinition() noexcept;
 
+ protected:
   /// Constructs new `SamplerInstrument`.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   explicit SamplerInstrument(int frame_rate) noexcept;
@@ -70,6 +71,7 @@ class SamplerInstrument : public CustomInstrument {
   void SetNoteOff(double pitch) noexcept final;
   void SetNoteOn(double pitch, double intensity) noexcept final;
 
+ private:
   using SamplerVoice = EnvelopedVoice<SamplePlayer>;
   PolyphonicVoice<SamplerVoice> voice_;
   double root_pitch_ = 0.0;

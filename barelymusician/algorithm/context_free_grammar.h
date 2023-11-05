@@ -12,8 +12,8 @@
 
 namespace barely {
 
-/// Context-free grammar (L-system) template that generates a sequence of
-/// `SymbolType` with the given set of substitution rules.
+/// Context-free grammar (L-system) template that generates a sequence of `SymbolType` with the
+/// given set of substitution rules.
 template <typename SymbolType>
 class ContextFreeGrammar {
  public:
@@ -36,8 +36,7 @@ class ContextFreeGrammar {
  private:
   // Returns a substitution from a given `substitutions` with a `random` draw.
   const std::vector<SymbolType>* GetSubstitution(
-      const std::vector<std::vector<SymbolType>>& substitutions,
-      Random& random) const noexcept;
+      const std::vector<std::vector<SymbolType>>& substitutions, Random& random) const noexcept;
 
   // Grammar rules that map symbols to their corresponding substitutions.
   std::unordered_map<SymbolType, std::vector<std::vector<SymbolType>>> rules_;
@@ -45,8 +44,7 @@ class ContextFreeGrammar {
 
 template <typename SymbolType>
 void ContextFreeGrammar<SymbolType>::AddRule(
-    const SymbolType& symbol,
-    std::vector<std::vector<SymbolType>> substitutions) noexcept {
+    const SymbolType& symbol, std::vector<std::vector<SymbolType>> substitutions) noexcept {
   rules_[symbol] = std::move(substitutions);
 }
 
@@ -57,16 +55,15 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
   std::vector<SymbolType> sequence;
   // Add `start_symbol` to the beginning of the sequence.
   sequence.push_back(start_symbol);
-  // Iterate through all the symbols, and substitute them according to their
-  // corresponding rules until reaching to the end.
+  // Iterate through all the symbols, and substitute them according to their corresponding rules
+  // until reaching to the end.
   int i = 0;
   while (i < static_cast<int>(sequence.size())) {
     if (const auto* substitutions = FindOrNull(rules_, sequence[i])) {
       const auto* substitution = GetSubstitution(*substitutions, random);
       sequence.erase(std::next(sequence.begin(), i));
       if (substitution) {
-        sequence.insert(std::next(sequence.begin(), i), substitution->begin(),
-                        substitution->end());
+        sequence.insert(std::next(sequence.begin(), i), substitution->begin(), substitution->end());
       }
     } else {
       ++i;
@@ -77,12 +74,10 @@ std::vector<SymbolType> ContextFreeGrammar<SymbolType>::GenerateSequence(
 
 template <typename SymbolType>
 const std::vector<SymbolType>* ContextFreeGrammar<SymbolType>::GetSubstitution(
-    const std::vector<std::vector<SymbolType>>& substitutions,
-    Random& random) const noexcept {
+    const std::vector<std::vector<SymbolType>>& substitutions, Random& random) const noexcept {
   // Select a substitution randomly with equal probability for each selection.
   if (!substitutions.empty()) {
-    const int index =
-        random.DrawUniform(0, static_cast<int>(substitutions.size()) - 1);
+    const int index = random.DrawUniform(0, static_cast<int>(substitutions.size()) - 1);
     return &substitutions[index];
   }
   return nullptr;

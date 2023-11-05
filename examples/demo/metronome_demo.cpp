@@ -56,11 +56,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
-                        kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
@@ -78,8 +76,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount,
-                       audio_clock.GetTimestamp());
+    instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
     audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);

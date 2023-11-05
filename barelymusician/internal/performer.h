@@ -25,8 +25,8 @@ class Performer {
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void CreateTask(Id task_id, TaskDefinition definition, bool is_one_off,
-                  double position, int process_order, void* user_data) noexcept;
+  void CreateTask(Id task_id, TaskDefinition definition, bool is_one_off, double position,
+                  int process_order, void* user_data) noexcept;
 
   /// Destroys a task.
   ///
@@ -37,8 +37,7 @@ class Performer {
   /// Returns the duration to next task.
   ///
   /// @return Optional pair of duration in beats and process order.
-  [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask()
-      const noexcept;
+  [[nodiscard]] std::optional<std::pair<double, int>> GetDurationToNextTask() const noexcept;
 
   /// Returns loop begin position.
   ///
@@ -59,15 +58,13 @@ class Performer {
   ///
   /// @param task_id Task identifier.
   /// @return Optional position.
-  [[nodiscard]] std::optional<double> GetTaskPosition(
-      Id task_id) const noexcept;
+  [[nodiscard]] std::optional<double> GetTaskPosition(Id task_id) const noexcept;
 
   /// Returns task process order.
   ///
   /// @param task_id Task identifier.
   /// @return Optional process order.
-  [[nodiscard]] std::optional<int> GetTaskProcessOrder(
-      Id task_id) const noexcept;
+  [[nodiscard]] std::optional<int> GetTaskProcessOrder(Id task_id) const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -147,40 +144,33 @@ class Performer {
     // Default comparators.
     // TODO(#111): Use the default `<=>` comparator instead.
     bool operator<(const TaskKey& other) const noexcept {
-      return this->position == other.position
-                 ? (this->process_order == other.process_order
-                        ? this->task_id < other.task_id
-                        : this->process_order < other.process_order)
-                 : this->position < other.position;
+      return this->position == other.position ? (this->process_order == other.process_order
+                                                     ? this->task_id < other.task_id
+                                                     : this->process_order < other.process_order)
+                                              : this->position < other.position;
     }
     bool operator<=(const TaskKey& other) const noexcept {
-      return this->position == other.position
-                 ? (this->process_order == other.process_order
-                        ? this->task_id <= other.task_id
-                        : this->process_order <= other.process_order)
-                 : this->position <= other.position;
+      return this->position == other.position ? (this->process_order == other.process_order
+                                                     ? this->task_id <= other.task_id
+                                                     : this->process_order <= other.process_order)
+                                              : this->position <= other.position;
     }
     bool operator==(const TaskKey& other) const noexcept {
-      return this->position == other.position &&
-             this->process_order == other.process_order &&
+      return this->position == other.position && this->process_order == other.process_order &&
              this->task_id == other.task_id;
     }
-    bool operator!=(const TaskKey& other) const noexcept {
-      return !(*this == other);
-    }
+    bool operator!=(const TaskKey& other) const noexcept { return !(*this == other); }
     bool operator>=(const TaskKey& other) const noexcept {
-      return this->position == other.position
-                 ? (this->process_order == other.process_order
-                        ? this->task_id >= other.task_id
-                        : this->process_order >= other.process_order)
-                 : this->position >= other.position;
+      return this->position == other.position ? (this->process_order == other.process_order
+                                                     ? this->task_id >= other.task_id
+                                                     : this->process_order >= other.process_order)
+                                              : this->position >= other.position;
     }
     bool operator>(const TaskKey& other) const noexcept {
-      return this->position == other.position
-                 ? (this->process_order == other.process_order
-                        ? this->task_id > other.task_id
-                        : this->process_order > other.process_order)
-                 : this->position > other.position;
+      return this->position == other.position ? (this->process_order == other.process_order
+                                                     ? this->task_id > other.task_id
+                                                     : this->process_order > other.process_order)
+                                              : this->position > other.position;
     }
   };
   using TaskMap = std::map<TaskKey, Task>;

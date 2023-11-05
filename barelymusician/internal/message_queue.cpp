@@ -15,8 +15,7 @@ bool MessageQueue::Add(double timestamp, Message message) noexcept {
   return true;
 }
 
-std::pair<double, Message>* MessageQueue::GetNext(
-    double end_timestamp) noexcept {
+std::pair<double, Message>* MessageQueue::GetNext(double end_timestamp) noexcept {
   const int index = read_index_;
   if (index == write_index_ || messages_[index].first >= end_timestamp) {
     return nullptr;

@@ -25,8 +25,7 @@ TEST(ContextFreeGrammarTest, GenerateSequence) {
   EXPECT_EQ(sequence, kSubstition);
 }
 
-// Tests that the expected sequence is generated with a given set of nested
-// substitution rules.
+// Tests that the expected sequence is generated with a given set of nested substitution rules.
 TEST(ContextFreeGrammarTest, GenerateSequenceNestedRules) {
   ContextFreeGrammar<std::string> grammar;
   grammar.AddRule("Start", {{"Intro", "Body", "Outro"}});
@@ -35,12 +34,11 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNestedRules) {
 
   Random random;
   const auto sequence = grammar.GenerateSequence("Start", random);
-  EXPECT_THAT(sequence, ElementsAre("Intro", "Verse", "Chorus", "Break",
-                                    "Chorus", "Outro"));
+  EXPECT_THAT(sequence, ElementsAre("Intro", "Verse", "Chorus", "Break", "Chorus", "Outro"));
 }
 
-// Tests that the context free grammar generation always returns a sequence with
-// the expected size range when rules with multiple substitutions are present.
+// Tests that the context free grammar generation always returns a sequence with the expected size
+// range when rules with multiple substitutions are present.
 TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
   constexpr int kGenerationCount = 10;
   constexpr int kStartSymbol = 0;
@@ -77,8 +75,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceNoRules) {
   EXPECT_THAT(sequence, ElementsAre(kStartSymbol));
 }
 
-// Tests that no substitutions are done when there are no rules given for the
-// start symbol.
+// Tests that no substitutions are done when there are no rules given for the start symbol.
 TEST(ContextFreeGrammarTest, GenerateSequenceNoStartSymbolRule) {
   constexpr int kStartSymbol = 3;
 

@@ -29,20 +29,16 @@ InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
       // Pad release.
       ControlDefinition{kDefaultPadRelease, 0.0, 60.0},
   };
-  return CustomInstrument::GetDefinition<PercussionInstrument>(
-      control_definitions, {});
+  return CustomInstrument::GetDefinition<PercussionInstrument>(control_definitions, {});
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 PercussionInstrument::PercussionInstrument(int frame_rate) noexcept
-    : frame_rate_(frame_rate),
-      gain_processor_(frame_rate),
-      release_(kDefaultPadRelease) {
+    : frame_rate_(frame_rate), gain_processor_(frame_rate), release_(kDefaultPadRelease) {
   pads_.reserve(kMaxPadCount);
 }
 
-void PercussionInstrument::Process(double* output_samples,
-                                   int output_channel_count,
+void PercussionInstrument::Process(double* output_samples, int output_channel_count,
                                    int output_frame_count) noexcept {
   for (int frame = 0; frame < output_frame_count; ++frame) {
     double mono_sample = 0.0;
@@ -53,8 +49,7 @@ void PercussionInstrument::Process(double* output_samples,
       output_samples[frame * output_channel_count + channel] = mono_sample;
     }
   }
-  gain_processor_.Process(output_samples, output_channel_count,
-                          output_frame_count);
+  gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
 }
 
 void PercussionInstrument::SetControl(int index, double value,
@@ -73,8 +68,7 @@ void PercussionInstrument::SetControl(int index, double value,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void PercussionInstrument::SetData(const void* data,
-                                   [[maybe_unused]] int size) noexcept {
+void PercussionInstrument::SetData(const void* data, [[maybe_unused]] int size) noexcept {
   const double* data_double = static_cast<const double*>(data);
   if (!data_double) {
     pads_.clear();

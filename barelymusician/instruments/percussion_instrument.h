@@ -11,8 +11,7 @@ extern "C" {
 /// Returns the percussion instrument definition.
 ///
 /// @return Instrument definition.
-BARELY_EXPORT BarelyInstrumentDefinition
-BarelyPercussionInstrument_GetDefinition();
+BARELY_EXPORT BarelyInstrumentDefinition BarelyPercussionInstrument_GetDefinition();
 
 #ifdef __cplusplus
 }  // extern "C"
@@ -52,8 +51,7 @@ class PercussionInstrument : public CustomInstrument {
   /// Implements `CustomInstrument`.
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
-  void SetControl(int index, double value,
-                  double slope_per_frame) noexcept final;
+  void SetControl(int index, double value, double slope_per_frame) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void SetData(const void* data, int size) noexcept final;
   void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,

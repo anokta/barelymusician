@@ -11,8 +11,7 @@ class Random {
   /// Constructs a new `Random`.
   ///
   /// @param seed Seed value.
-  explicit Random(int seed = static_cast<int>(
-                      std::default_random_engine::default_seed)) noexcept;
+  explicit Random(int seed = static_cast<int>(std::default_random_engine::default_seed)) noexcept;
 
   /// Draws a number with normal distribution.
   ///

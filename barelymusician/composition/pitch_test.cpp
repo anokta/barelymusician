@@ -12,8 +12,7 @@ TEST(PitchTest, PitchFromScale) {
   for (int octave = -kOctaveRange; octave <= kOctaveRange; ++octave) {
     for (int i = 0; i < scale_length; ++i) {
       const int index = octave * scale_length + i;
-      const double expected_pitch =
-          static_cast<double>(octave) + kPitchMajorScale[i];
+      const double expected_pitch = static_cast<double>(octave) + kPitchMajorScale[i];
       EXPECT_DOUBLE_EQ(PitchFromScale(kPitchMajorScale, index), expected_pitch);
     }
   }

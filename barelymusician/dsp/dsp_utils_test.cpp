@@ -7,8 +7,8 @@
 namespace barely {
 namespace {
 
-// Tests that the expected filter coefficients are generated for an arbitrary
-// set of cutoff frequencies.
+// Tests that the expected filter coefficients are generated for an arbitrary set of cutoff
+// frequencies.
 TEST(DspUtilsTest, GetFilterCoefficient) {
   constexpr double kEpsilon = 1e-2;
   constexpr int kFrameRate = 8000;
@@ -22,8 +22,7 @@ TEST(DspUtilsTest, GetFilterCoefficient) {
   };
 
   for (int i = 0; i < kCutoffCount; ++i) {
-    EXPECT_NEAR(GetFilterCoefficient(kFrameRate, kCutoffs[i]),
-                kExpectedCoefficients[i], kEpsilon);
+    EXPECT_NEAR(GetFilterCoefficient(kFrameRate, kCutoffs[i]), kExpectedCoefficients[i], kEpsilon);
   }
 }
 

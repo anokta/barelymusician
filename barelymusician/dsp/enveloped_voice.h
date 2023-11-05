@@ -25,9 +25,7 @@ class EnvelopedVoice : public Voice {
   [[nodiscard]] const Envelope& envelope() const noexcept { return envelope_; }
   [[nodiscard]] Envelope& envelope() noexcept { return envelope_; }
 
-  [[nodiscard]] const GeneratorType& generator() const noexcept {
-    return generator_;
-  }
+  [[nodiscard]] const GeneratorType& generator() const noexcept { return generator_; }
   [[nodiscard]] GeneratorType& generator() noexcept { return generator_; }
 
   [[nodiscard]] double gain() const noexcept { return gain_; }

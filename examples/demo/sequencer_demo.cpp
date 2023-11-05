@@ -61,11 +61,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
-                        kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
@@ -101,14 +99,12 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Task> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, performer.CreateTask(callback, /*is_one_off=*/false,
-                                                position));
+    tasks.emplace(index++, performer.CreateTask(callback, /*is_one_off=*/false, position));
   }
 
   // Audio process callback.
   const auto process_callback = [&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount,
-                       audio_clock.GetTimestamp());
+    instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
     audio_clock.Update(kFrameCount);
   };
   audio_output.SetProcessCallback(process_callback);
@@ -121,16 +117,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
       quit = true;
       return;
     }
-    if (const int index = static_cast<int>(key - '0');
-        index > 0 && index < 10) {
+    if (const int index = static_cast<int>(key - '0'); index > 0 && index < 10) {
       // Toggle score.
       if (const auto it = tasks.find(index - 1); it != tasks.end()) {
         tasks.erase(it);
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, performer.CreateTask(
-                                     callback, /*is_one_off=*/false, position));
+        tasks.emplace(index - 1, performer.CreateTask(callback, /*is_one_off=*/false, position));
         ConsoleLog() << "Added note " << index;
       }
       return;

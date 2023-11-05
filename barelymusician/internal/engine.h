@@ -34,8 +34,7 @@ class Engine {
   /// @param definition Effect definition.
   /// @param process_order Effect process order.
   /// @return Optional effect identifier.
-  std::optional<Id> CreateInstrumentEffect(Id instrument_id,
-                                           EffectDefinition definition,
+  std::optional<Id> CreateInstrumentEffect(Id instrument_id, EffectDefinition definition,
                                            int process_order) noexcept;
 
   /// Creates a new instrument.
@@ -44,8 +43,7 @@ class Engine {
   /// @param frame_rate Frame rate in hertz.
   /// @return Optional instrument identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  std::optional<Id> CreateInstrument(InstrumentDefinition definition,
-                                     int frame_rate) noexcept;
+  std::optional<Id> CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept;
 
   /// Creates a new performer.
   ///
@@ -63,10 +61,8 @@ class Engine {
   /// @param user_data Pointer to user data.
   /// @return Optional task identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  std::optional<Id> CreatePerformerTask(Id performer_id,
-                                        TaskDefinition definition,
-                                        bool is_one_off, double position,
-                                        int process_order,
+  std::optional<Id> CreatePerformerTask(Id performer_id, TaskDefinition definition, bool is_one_off,
+                                        double position, int process_order,
                                         void* user_data) noexcept;
 
   /// Destroys instrument.
@@ -115,9 +111,8 @@ class Engine {
   /// @param output_frame_count Number of output frames.
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
-  bool ProcessInstrument(Id instrument_id, double* output_samples,
-                         int output_channel_count, int output_frame_count,
-                         double timestamp) noexcept;
+  bool ProcessInstrument(Id instrument_id, double* output_samples, int output_channel_count,
+                         int output_frame_count, double timestamp) noexcept;
 
   /// Sets the tempo.
   ///

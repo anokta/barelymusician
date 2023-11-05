@@ -65,16 +65,14 @@ template <typename DataType>
 void MutableData<DataType>::Update(DataType new_data) noexcept {
   auto new_data_holder = std::make_unique<DataType>(std::move(new_data));
   for (auto* data = data_holder_.get(); !data_.compare_exchange_weak(
-           data, new_data_holder.get(), std::memory_order_release,
-           std::memory_order_relaxed);) {
+           data, new_data_holder.get(), std::memory_order_release, std::memory_order_relaxed);) {
     data = data_holder_.get();
   }
   data_holder_ = std::move(new_data_holder);
 }
 
 template <typename DataType>
-MutableData<DataType>::ScopedView::ScopedView(
-    std::atomic<DataType*>& data) noexcept
+MutableData<DataType>::ScopedView::ScopedView(std::atomic<DataType*>& data) noexcept
     : data_(data), view_(data_.exchange(nullptr)) {}
 
 template <typename DataType>

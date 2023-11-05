@@ -6,8 +6,7 @@
 namespace barely {
 
 SamplePlayer::SamplePlayer(int frame_rate) noexcept
-    : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate)
-                                       : 0.0) {}
+    : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate) : 0.0) {}
 
 double SamplePlayer::Next() noexcept {
   if (!data_ || cursor_ >= length_) {
@@ -27,8 +26,7 @@ double SamplePlayer::Next() noexcept {
 
 void SamplePlayer::Reset() noexcept { cursor_ = 0.0; }
 
-void SamplePlayer::SetData(const double* data, int frequency,
-                           int length) noexcept {
+void SamplePlayer::SetData(const double* data, int frequency, int length) noexcept {
   data_ = data;
   frequency_ = static_cast<double>(std::max(frequency, 0));
   length_ = static_cast<double>(std::max(length, 0));

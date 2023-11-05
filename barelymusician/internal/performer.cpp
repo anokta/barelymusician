@@ -16,18 +16,15 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Performer::CreateTask(Id task_id, TaskDefinition definition,
-                           bool is_one_off, double position, int process_order,
-                           void* user_data) noexcept {
+void Performer::CreateTask(Id task_id, TaskDefinition definition, bool is_one_off, double position,
+                           int process_order, void* user_data) noexcept {
   assert(task_id > kInvalid);
   assert(!is_one_off || position >= position_);
   [[maybe_unused]] auto success =
-      infos_.emplace(task_id, TaskInfo{is_one_off, position, process_order})
-          .second;
+      infos_.emplace(task_id, TaskInfo{is_one_off, position, process_order}).second;
   assert(success);
   success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
-                .emplace(TaskKey{position, process_order, task_id},
-                         Task(definition, user_data))
+                .emplace(TaskKey{position, process_order, task_id}, Task(definition, user_data))
                 .second;
   assert(success);
 }
@@ -44,9 +41,8 @@ bool Performer::DestroyTask(Id task_id) noexcept {
       recurring_tasks_.erase(recurring_task_it);
     } else {
       const auto& [is_one_off, position, process_order] = it->second;
-      [[maybe_unused]] const auto success =
-          (is_one_off ? one_off_tasks_ : recurring_tasks_)
-              .erase({position, process_order, task_id}) == 1;
+      [[maybe_unused]] const auto success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
+                                                .erase({position, process_order, task_id}) == 1;
       assert(success);
     }
     infos_.erase(it);
@@ -55,8 +51,7 @@ bool Performer::DestroyTask(Id task_id) noexcept {
   return false;
 }
 
-std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
-    const noexcept {
+std::optional<std::pair<double, int>> Performer::GetDurationToNextTask() const noexcept {
   if (!is_playing_) {
     return std::nullopt;
   }
@@ -67,10 +62,10 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
   if (const auto next_recurring_task = GetNextRecurringTask();
       next_recurring_task != recurring_tasks_.end()) {
     next_task_key = next_recurring_task->first;
-    if (is_looping_ && (next_task_key->position < position_ ||
-                        (last_processed_recurring_task_it_ &&
-                         next_recurring_task->first <=
-                             (*last_processed_recurring_task_it_)->first))) {
+    if (is_looping_ &&
+        (next_task_key->position < position_ ||
+         (last_processed_recurring_task_it_ &&
+          next_recurring_task->first <= (*last_processed_recurring_task_it_)->first))) {
       // Loop around.
       if (loop_length_ > 0.0) {
         next_task_key->position += loop_length_;
@@ -87,15 +82,12 @@ std::optional<std::pair<double, int>> Performer::GetDurationToNextTask()
   }
 
   if (next_task_key) {
-    return std::pair{next_task_key->position - position_,
-                     next_task_key->process_order};
+    return std::pair{next_task_key->position - position_, next_task_key->process_order};
   }
   return std::nullopt;
 }
 
-double Performer::GetLoopBeginPosition() const noexcept {
-  return loop_begin_position_;
-}
+double Performer::GetLoopBeginPosition() const noexcept { return loop_begin_position_; }
 
 double Performer::GetLoopLength() const noexcept { return loop_length_; }
 
@@ -196,16 +188,14 @@ void Performer::SetPosition(double position) noexcept {
   }
   one_off_tasks_.erase(
       one_off_tasks_.begin(),
-      one_off_tasks_.lower_bound(
-          {position, std::numeric_limits<int>::lowest(), kInvalid}));
+      one_off_tasks_.lower_bound({position, std::numeric_limits<int>::lowest(), kInvalid}));
   if (is_looping_ && position >= loop_begin_position_ + loop_length_) {
     if (!one_off_tasks_.empty()) {
       // Reset all remaining one-off tasks back to the beginning.
       for (auto it = one_off_tasks_.begin(); it != one_off_tasks_.end();) {
         auto current = it++;
         auto node = one_off_tasks_.extract(current);
-        node.key().position =
-            std::max(node.key().position - loop_length_, loop_begin_position_);
+        node.key().position = std::max(node.key().position - loop_length_, loop_begin_position_);
         one_off_tasks_.insert(std::move(node));
       }
     }
@@ -275,24 +265,20 @@ void Performer::Update(double duration) noexcept {
   if (!is_playing_) {
     return;
   }
-  assert(duration >= 0.0 && (!GetDurationToNextTask() ||
-                             duration <= GetDurationToNextTask()->first));
-  if (const double next_position = position_ + duration;
-      next_position > position_) {
+  assert(duration >= 0.0 &&
+         (!GetDurationToNextTask() || duration <= GetDurationToNextTask()->first));
+  if (const double next_position = position_ + duration; next_position > position_) {
     SetPosition(next_position);
   }
 }
 
-Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
-    const noexcept {
+Performer::TaskMap::const_iterator Performer::GetNextRecurringTask() const noexcept {
   auto next_it =
       last_processed_recurring_task_it_
           ? std::next(*last_processed_recurring_task_it_)
-          : recurring_tasks_.lower_bound(
-                {position_, std::numeric_limits<int>::lowest(), kInvalid});
-  if (is_looping_ &&
-      (next_it == recurring_tasks_.end() ||
-       next_it->first.position >= loop_begin_position_ + loop_length_)) {
+          : recurring_tasks_.lower_bound({position_, std::numeric_limits<int>::lowest(), kInvalid});
+  if (is_looping_ && (next_it == recurring_tasks_.end() ||
+                      next_it->first.position >= loop_begin_position_ + loop_length_)) {
     // Loop back to the beginning.
     next_it = recurring_tasks_.lower_bound(
         {loop_begin_position_, std::numeric_limits<int>::lowest(), kInvalid});
@@ -302,8 +288,7 @@ Performer::TaskMap::const_iterator Performer::GetNextRecurringTask()
 
 double Performer::LoopAround(double position) const noexcept {
   return loop_length_ > 0.0
-             ? loop_begin_position_ +
-                   std::fmod(position - loop_begin_position_, loop_length_)
+             ? loop_begin_position_ + std::fmod(position - loop_begin_position_, loop_length_)
              : loop_begin_position_;
 }
 

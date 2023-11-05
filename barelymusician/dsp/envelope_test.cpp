@@ -17,8 +17,8 @@ constexpr double kRelease = 0.8;
 // Tolerated error margin.
 constexpr double kEpsilon = 1e-3;
 
-// Tests that the envelope generates the expected output samples when
-// initialized with the default constructor.
+// Tests that the envelope generates the expected output samples when initialized with the default
+// constructor.
 TEST(EnvelopeTest, ProcessDefault) {
   Envelope envelope(kFrameRate);
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
@@ -30,8 +30,7 @@ TEST(EnvelopeTest, ProcessDefault) {
   EXPECT_DOUBLE_EQ(envelope.Next(), 0.0);
 }
 
-// Tests that the envelope generates the expected output samples consistently
-// over multiple samples.
+// Tests that the envelope generates the expected output samples consistently over multiple samples.
 TEST(EnvelopeTest, ProcessMultiSamples) {
   constexpr int kAttackSampleCount = static_cast<int>(kFrameRate * kAttack);
   constexpr int kDecaySampleCount = static_cast<int>(kFrameRate * kDecay);
@@ -51,12 +50,10 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   for (int i = 0; i < kSustainSampleCount + kFrameRate; ++i) {
     if (i < kAttackSampleCount) {
       // Attack.
-      expected_sample =
-          static_cast<double>(i) / static_cast<double>(kAttackSampleCount);
+      expected_sample = static_cast<double>(i) / static_cast<double>(kAttackSampleCount);
     } else if (i < kSustainSampleCount) {
       // Decay.
-      expected_sample = 1.0 - kSustain *
-                                  static_cast<double>(i - kAttackSampleCount) /
+      expected_sample = 1.0 - kSustain * static_cast<double>(i - kAttackSampleCount) /
                                   static_cast<double>(kDecaySampleCount);
     } else {
       // Sustain.
@@ -69,9 +66,8 @@ TEST(EnvelopeTest, ProcessMultiSamples) {
   for (int i = 0; i < kReleaseSampleCount + kFrameRate; ++i) {
     if (i < kReleaseSampleCount) {
       // Release.
-      expected_sample = (1.0 - static_cast<double>(i) /
-                                   static_cast<double>(kReleaseSampleCount)) *
-                        kSustain;
+      expected_sample =
+          (1.0 - static_cast<double>(i) / static_cast<double>(kReleaseSampleCount)) * kSustain;
     } else {
       // Idle.
       expected_sample = 0.0;

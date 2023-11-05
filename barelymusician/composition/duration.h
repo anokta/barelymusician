@@ -25,8 +25,7 @@ double GetPosition(int step, int step_count) noexcept;
 /// @param resolution Quantization resolution.
 /// @param amount Quantization amount.
 /// @return Quantized position in beats.
-double QuantizePosition(double position, double resolution,
-                        double amount = 1.0) noexcept;
+double QuantizePosition(double position, double resolution, double amount = 1.0) noexcept;
 
 }  // namespace barely
 

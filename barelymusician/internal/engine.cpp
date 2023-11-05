@@ -32,16 +32,14 @@ std::optional<Id> Engine::CreateInstrument(InstrumentDefinition definition,
   [[maybe_unused]] const auto success =
       instruments_
           .emplace(instrument_id,
-                   std::make_unique<Instrument>(definition, frame_rate, tempo_,
-                                                timestamp_))
+                   std::make_unique<Instrument>(definition, frame_rate, tempo_, timestamp_))
           .second;
   assert(success);
   UpdateInstrumentReferenceMap();
   return instrument_id;
 }
 
-std::optional<Id> Engine::CreateInstrumentEffect(Id instrument_id,
-                                                 EffectDefinition definition,
+std::optional<Id> Engine::CreateInstrumentEffect(Id instrument_id, EffectDefinition definition,
                                                  int process_order) noexcept {
   if (instrument_id == kInvalid) {
     return std::nullopt;
@@ -59,16 +57,13 @@ std::optional<Id> Engine::CreateInstrumentEffect(Id instrument_id,
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Id Engine::CreatePerformer() noexcept {
   const Id performer_id = GenerateNextId();
-  [[maybe_unused]] const auto success =
-      performers_.emplace(performer_id, Performer{}).second;
+  [[maybe_unused]] const auto success = performers_.emplace(performer_id, Performer{}).second;
   assert(success);
   return performer_id;
 }
 
-std::optional<Id> Engine::CreatePerformerTask(Id performer_id,
-                                              TaskDefinition definition,
-                                              bool is_one_off, double position,
-                                              int process_order,
+std::optional<Id> Engine::CreatePerformerTask(Id performer_id, TaskDefinition definition,
+                                              bool is_one_off, double position, int process_order,
                                               void* user_data) noexcept {
   if (performer_id == kInvalid) {
     return std::nullopt;
@@ -80,8 +75,7 @@ std::optional<Id> Engine::CreatePerformerTask(Id performer_id,
       return std::nullopt;
     }
     const Id task_id = GenerateNextId();
-    performer.CreateTask(task_id, definition, is_one_off, position,
-                         process_order, user_data);
+    performer.CreateTask(task_id, definition, is_one_off, position, process_order, user_data);
     return task_id;
   }
   return std::nullopt;
@@ -92,8 +86,7 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
   if (instrument_id == kInvalid) {
     return false;
   }
-  if (const auto it = instruments_.find(instrument_id);
-      it != instruments_.end()) {
+  if (const auto it = instruments_.find(instrument_id); it != instruments_.end()) {
     auto instrument = std::move(it->second);
     instrument->SetAllNotesOff();
     instruments_.erase(it);
@@ -114,8 +107,7 @@ bool Engine::DestroyPerformer(Id performer_id) noexcept {
   return false;
 }
 
-std::optional<std::reference_wrapper<Instrument>> Engine::GetInstrument(
-    Id instrument_id) noexcept {
+std::optional<std::reference_wrapper<Instrument>> Engine::GetInstrument(Id instrument_id) noexcept {
   if (instrument_id == kInvalid) {
     return std::nullopt;
   }
@@ -125,8 +117,7 @@ std::optional<std::reference_wrapper<Instrument>> Engine::GetInstrument(
   return std::nullopt;
 }
 
-std::optional<std::reference_wrapper<Performer>> Engine::GetPerformer(
-    Id performer_id) noexcept {
+std::optional<std::reference_wrapper<Performer>> Engine::GetPerformer(Id performer_id) noexcept {
   if (performer_id == kInvalid) {
     return std::nullopt;
   }
@@ -140,19 +131,16 @@ double Engine::GetTempo() const noexcept { return tempo_; }
 
 double Engine::GetTimestamp() const noexcept { return timestamp_; }
 
-bool Engine::ProcessInstrument(Id instrument_id, double* output_samples,
-                               int output_channel_count, int output_frame_count,
-                               double timestamp) noexcept {
+bool Engine::ProcessInstrument(Id instrument_id, double* output_samples, int output_channel_count,
+                               int output_frame_count, double timestamp) noexcept {
   if (instrument_id == kInvalid) {
     return false;
   }
   auto instrument_refs = instrument_refs_.GetScopedView();
-  if (const auto* instrument_ref =
-          FindOrNull(*instrument_refs, instrument_id)) {
+  if (const auto* instrument_ref = FindOrNull(*instrument_refs, instrument_id)) {
     assert(*instrument_ref);
     return (*instrument_ref)
-        ->Process(output_samples, output_channel_count, output_frame_count,
-                  timestamp);
+        ->Process(output_samples, output_channel_count, output_frame_count, timestamp);
   }
   return false;
 }
@@ -172,9 +160,8 @@ void Engine::SetTempo(double tempo) noexcept {
 void Engine::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
-      std::pair<double, int> update_duration = {
-          BeatsFromSeconds(tempo_, timestamp - timestamp_),
-          std::numeric_limits<int>::max()};
+      std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),
+                                                std::numeric_limits<int>::max()};
       bool has_tasks_to_process = false;
       for (const auto& [performer_id, performer] : performers_) {
         if (const auto maybe_duration = performer.GetDurationToNextTask();

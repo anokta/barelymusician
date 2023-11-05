@@ -27,8 +27,7 @@ class CustomEffect {
   /// @param index Control index.
   /// @param value Control value.
   /// @param slope_per_frame Control slope in value change per frame.
-  virtual void SetControl(int index, double value,
-                          double slope_per_frame) noexcept = 0;
+  virtual void SetControl(int index, double value, double slope_per_frame) noexcept = 0;
 
   /// Sets data.
   ///
@@ -62,8 +61,7 @@ class CustomEffect {
         [](void** state, double* output_samples, int output_channel_count,
            int output_frame_count) noexcept {
           auto* effect = static_cast<PublicEffect*>(*state);
-          effect->Process(output_samples, output_channel_count,
-                          output_frame_count);
+          effect->Process(output_samples, output_channel_count, output_frame_count);
         },
         [](void** state, int index, double value, double slope_per_frame) {
           auto* effect = static_cast<PublicEffect*>(*state);

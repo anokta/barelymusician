@@ -5,8 +5,7 @@
 namespace barely {
 
 Envelope::Envelope(int frame_rate) noexcept
-    : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate)
-                                       : 0.0) {}
+    : frame_interval_((frame_rate > 0) ? 1.0 / static_cast<double>(frame_rate) : 0.0) {}
 
 double Envelope::Next() noexcept {
   if (state_ == State::kIdle) {

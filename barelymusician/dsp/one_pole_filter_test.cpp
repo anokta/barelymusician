@@ -14,8 +14,7 @@ constexpr double kInput[kInputLength] = {1.0, 0.0, 0.0, 0.0, 0.0};
 // Test coefficent.
 constexpr double kCoefficient = 0.5;
 
-// Tests that a low-pass filter generates the expected output when an arbitrary
-// coefficient is set.
+// Tests that a low-pass filter generates the expected output when an arbitrary coefficient is set.
 TEST(OnePoleFilterTest, LowPass) {
   OnePoleFilter low_pass_filter;
   low_pass_filter.SetType(FilterType::kLowPass);
@@ -28,8 +27,7 @@ TEST(OnePoleFilterTest, LowPass) {
   }
 }
 
-// Tests that a low-pass filter does not alter the input when the coefficient is
-// set to all-pass.
+// Tests that a low-pass filter does not alter the input when the coefficient is set to all-pass.
 TEST(OnePoleFilterTest, LowPassAllPass) {
   OnePoleFilter low_pass_filter;
   low_pass_filter.SetType(FilterType::kLowPass);
@@ -40,8 +38,7 @@ TEST(OnePoleFilterTest, LowPassAllPass) {
   }
 }
 
-// Tests that a high-pass filter generates the expected output when an arbitrary
-// coefficient is set.
+// Tests that a high-pass filter generates the expected output when an arbitrary coefficient is set.
 TEST(OnePoleFilterTest, HighPass) {
   OnePoleFilter high_pass_filter;
   high_pass_filter.SetType(FilterType::kHighPass);
@@ -49,14 +46,12 @@ TEST(OnePoleFilterTest, HighPass) {
 
   for (int i = 0; i < kInputLength; ++i) {
     const double expected_output =
-        kInput[i] -
-        (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));
+        kInput[i] - (1.0 - kCoefficient) * std::pow(kCoefficient, static_cast<double>(i));
     EXPECT_DOUBLE_EQ(high_pass_filter.Next(kInput[i]), expected_output);
   }
 }
 
-// Tests that a high-pass filter does not alter the input when the coefficient
-// is set to all-pass.
+// Tests that a high-pass filter does not alter the input when the coefficient is set to all-pass.
 TEST(OnePoleFilterTest, HighPassAllPass) {
   OnePoleFilter high_pass_filter;
   high_pass_filter.SetType(FilterType::kHighPass);

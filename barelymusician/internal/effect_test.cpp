@@ -17,21 +17,17 @@ EffectDefinition GetTestDefinition() {
   };
   return EffectDefinition(
       [](void** state, int frame_rate) {
-        *state =
-            static_cast<void*>(new double{static_cast<double>(frame_rate)});
+        *state = static_cast<void*>(new double{static_cast<double>(frame_rate)});
       },
       [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int output_channel_count,
-         int output_frame_count) {
+      [](void** state, double* output_samples, int output_channel_count, int output_frame_count) {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
       [](void** state, int index, double value, double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) =
-            static_cast<double>(index + 1) * value;
+        *reinterpret_cast<double*>(*state) = static_cast<double>(index + 1) * value;
       },
-      [](void** /*state*/, const void* /*data*/, int /*size*/) {},
-      control_definitions);
+      [](void** /*state*/, const void* /*data*/, int /*size*/) {}, control_definitions);
 }
 
 // Tests that the effect gets processed as expected.

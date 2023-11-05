@@ -22,8 +22,7 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
             instrument_->SetNoteOn(pitch);
             performer_
                 .CreateTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                            /*is_one_off*/ true,
-                            gate_ratio_ * performer_.GetLoopLength(),
+                            /*is_one_off*/ true, gate_ratio_ * performer_.GetLoopLength(),
                             process_order)
                 .Release();
           },
@@ -64,8 +63,7 @@ void Arpeggiator::SetInstrument(Instrument* instrument) noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Arpeggiator::SetNoteOff(double pitch) noexcept {
-  if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch);
-      it != pitches_.end()) {
+  if (const auto it = std::find(pitches_.begin(), pitches_.end(), pitch); it != pitches_.end()) {
     pitches_.erase(it);
     if (pitches_.empty() && IsPlaying()) {
       Stop();

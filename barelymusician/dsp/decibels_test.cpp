@@ -13,19 +13,15 @@ TEST(DecibelsTest, AmplitudeDecibelsConversion) {
 
   constexpr int kValueCount = 4;
   constexpr std::array<double, kValueCount> kAmplitudes = {0.0, 0.1, 1.0, 2.0};
-  constexpr std::array<double, kValueCount> kDecibels = {-80.0, -20.0, 0.0,
-                                                         6.0};
+  constexpr std::array<double, kValueCount> kDecibels = {-80.0, -20.0, 0.0, 6.0};
 
   for (int i = 0; i < kValueCount; ++i) {
     EXPECT_NEAR(AmplitudeFromDecibels(kDecibels[i]), kAmplitudes[i], kEpsilon);
     EXPECT_NEAR(DecibelsFromAmplitude(kAmplitudes[i]), kDecibels[i], kEpsilon);
 
     // Verify that the back and forth conversions do not mutate the value.
-    EXPECT_DOUBLE_EQ(
-        AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])),
-        kAmplitudes[i]);
-    EXPECT_DOUBLE_EQ(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])),
-                     kDecibels[i]);
+    EXPECT_DOUBLE_EQ(AmplitudeFromDecibels(DecibelsFromAmplitude(kAmplitudes[i])), kAmplitudes[i]);
+    EXPECT_DOUBLE_EQ(DecibelsFromAmplitude(AmplitudeFromDecibels(kDecibels[i])), kDecibels[i]);
   }
 }
 

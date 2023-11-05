@@ -32,25 +32,19 @@ InstrumentDefinition GetTestDefinition() {
       ControlDefinition{1.0, 0.0, 1.0},
   };
   return InstrumentDefinition(
-      [](void** state, int /*frame_rate*/) {
-        *state = static_cast<void*>(new double{0.0});
-      },
+      [](void** state, int /*frame_rate*/) { *state = static_cast<void*>(new double{0.0}); },
       [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int output_channel_count,
-         int output_frame_count) {
+      [](void** state, double* output_samples, int output_channel_count, int output_frame_count) {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
       [](void** state, int index, double value, double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) =
-            static_cast<double>(index + 1) * value;
+        *reinterpret_cast<double*>(*state) = static_cast<double>(index + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int /*size*/) {},
       [](void** /*state*/, double /*pitch*/, int /*index*/, double /*value*/,
          double /*slope_per_frame*/) {},
-      [](void** state, double /*pitch*/) {
-        *reinterpret_cast<double*>(*state) = 0.0;
-      },
+      [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
       [](void** state, double pitch, double intensity) {
         *reinterpret_cast<double*>(*state) = pitch * intensity;
       },
@@ -126,8 +120,7 @@ TEST(InstrumentTest, PlaySingleNote) {
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount,
-                                 kTimestamp));
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
@@ -139,12 +132,10 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount,
-                                 kTimestamp));
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-                       kPitch * kIntensity);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
     }
   }
 
@@ -153,8 +144,7 @@ TEST(InstrumentTest, PlaySingleNote) {
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount,
-                                 kTimestamp));
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, kTimestamp));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -171,8 +161,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
 
   // Control is set to its default value.
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(
-      instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 15.0);
@@ -187,8 +176,7 @@ TEST(InstrumentTest, PlayMultipleNotes) {
   }
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(
-      instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(instrument.Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
@@ -216,8 +204,7 @@ TEST(InstrumentTest, SetNoteCallbacks) {
   // Trigger the note on callback.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch,
-                                                         double intensity) {
+  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch, double intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };

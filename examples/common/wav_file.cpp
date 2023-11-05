@@ -22,8 +22,7 @@ bool WavFile::Load(const std::string& file_path) noexcept {
   unsigned int wav_frame_rate;
   drwav_uint64 wav_frame_count;
   float* wav_data = drwav_open_file_and_read_pcm_frames_f32(
-      file_path.c_str(), &wav_channel_count, &wav_frame_rate, &wav_frame_count,
-      nullptr);
+      file_path.c_str(), &wav_channel_count, &wav_frame_rate, &wav_frame_count, nullptr);
   if (!wav_data) {
     return false;
   }

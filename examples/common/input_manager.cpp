@@ -5,8 +5,7 @@
 namespace barely::examples {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-InputManager::InputManager() noexcept
-    : key_down_callback_(nullptr), key_up_callback_(nullptr) {
+InputManager::InputManager() noexcept : key_down_callback_(nullptr), key_up_callback_(nullptr) {
 #if defined(_WIN32) || defined(__CYGWIN__)
   std_input_handle_ = GetStdHandle(STD_INPUT_HANDLE);
   if (std_input_handle_ == INVALID_HANDLE_VALUE) {
@@ -32,28 +31,23 @@ InputManager::InputManager() noexcept
       HandleKeyUp(key);
     }
   };
-  const auto callback = [](CGEventTapProxy /*proxy*/, CGEventType type,
-                           CGEventRef event,
+  const auto callback = [](CGEventTapProxy /*proxy*/, CGEventType type, CGEventRef event,
                            void* refcon) noexcept -> CGEventRef {
     if (refcon) {
-      // Access the event callback via `refcon` (to avoid capturing
-      // `event_callback_`).
+      // Access the event callback via `refcon` (to avoid capturing `event_callback_`).
       const auto& event_callback = *static_cast<EventCallback*>(refcon);
       event_callback(type, event);
     }
     return event;
   };
   const CGEventMask event_mask = (1 << kCGEventKeyDown) | (1 << kCGEventKeyUp);
-  event_tap_ = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap,
-                                kCGEventTapOptionDefault, event_mask, callback,
-                                static_cast<void*>(&event_callback_));
+  event_tap_ = CGEventTapCreate(kCGSessionEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault,
+                                event_mask, callback, static_cast<void*>(&event_callback_));
   if (!event_tap_) {
     return;
   }
-  run_loop_source_ =
-      CFMachPortCreateRunLoopSource(kCFAllocatorDefault, event_tap_, 0);
-  CFRunLoopAddSource(CFRunLoopGetCurrent(), run_loop_source_,
-                     kCFRunLoopCommonModes);
+  run_loop_source_ = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, event_tap_, 0);
+  CFRunLoopAddSource(CFRunLoopGetCurrent(), run_loop_source_, kCFRunLoopCommonModes);
   CGEventTapEnable(event_tap_, true);
 #endif  // defined(__APPLE__)
 }
@@ -63,13 +57,11 @@ InputManager::~InputManager() noexcept {
   SetConsoleMode(std_input_handle_, previous_console_mode_);
 #elif defined(__APPLE__)
   CGEventTapEnable(event_tap_, false);
-  CFRunLoopRemoveSource(CFRunLoopGetCurrent(), run_loop_source_,
-                        kCFRunLoopCommonModes);
+  CFRunLoopRemoveSource(CFRunLoopGetCurrent(), run_loop_source_, kCFRunLoopCommonModes);
 #endif  // defined(__APPLE__)
 }
 
-void InputManager::SetKeyDownCallback(
-    KeyDownCallback key_down_callback) noexcept {
+void InputManager::SetKeyDownCallback(KeyDownCallback key_down_callback) noexcept {
   key_down_callback_ = std::move(key_down_callback);
 }
 

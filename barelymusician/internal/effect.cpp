@@ -27,13 +27,11 @@ Effect::~Effect() noexcept {
 void Effect::Process(double* output_samples, int output_channel_count,
                      int output_frame_count) noexcept {
   if (process_callback_) {
-    process_callback_(&state_, output_samples, output_channel_count,
-                      output_frame_count);
+    process_callback_(&state_, output_samples, output_channel_count, output_frame_count);
   }
 }
 
-void Effect::SetControl(int index, double value,
-                        double slope_per_frame) noexcept {
+void Effect::SetControl(int index, double value, double slope_per_frame) noexcept {
   if (set_control_callback_) {
     set_control_callback_(&state_, index, value, slope_per_frame);
   }

@@ -18,8 +18,7 @@ EffectDefinition LowPassEffect::GetDefinition() noexcept {
   return CustomEffect::GetDefinition<LowPassEffect>(control_definitions);
 }
 
-LowPassEffect::LowPassEffect(int frame_rate) noexcept
-    : frame_rate_(frame_rate) {
+LowPassEffect::LowPassEffect(int frame_rate) noexcept : frame_rate_(frame_rate) {
   assert(frame_rate > 0);
   for (auto& filter : filters_) {
     filter.SetType(FilterType::kLowPass);
@@ -38,8 +37,7 @@ void LowPassEffect::Process(double* output_samples, int output_channel_count,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void LowPassEffect::SetControl(int index, double value,
-                               double /*slope_per_frame*/) noexcept {
+void LowPassEffect::SetControl(int index, double value, double /*slope_per_frame*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kCutoffFrequency:
       for (auto& filter : filters_) {

@@ -40,8 +40,7 @@ bool Control::Set(double value, double slope_per_beat) noexcept {
 bool Control::Update(double duration) noexcept {
   assert(duration > 0.0);
   if (slope_per_beat_ != 0.0) {
-    if (const double value = Clamp(value_ + slope_per_beat_ * duration);
-        value_ != value) {
+    if (const double value = Clamp(value_ + slope_per_beat_ * duration); value_ != value) {
       value_ = value;
       return true;
     }
@@ -50,8 +49,7 @@ bool Control::Update(double duration) noexcept {
 }
 
 double Control::Clamp(double value) noexcept {
-  return std::min(std::max(value, definition_.min_value),
-                  definition_.max_value);
+  return std::min(std::max(value, definition_.min_value), definition_.max_value);
 }
 
 }  // namespace barely::internal

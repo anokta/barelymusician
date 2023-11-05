@@ -32,25 +32,19 @@ InstrumentDefinition GetTestInstrumentDefinition() {
       ControlDefinition{1.0, 0.0, 1.0},
   };
   return InstrumentDefinition(
-      [](void** state, int /*frame_rate*/) {
-        *state = reinterpret_cast<void*>(new double{0.0});
-      },
+      [](void** state, int /*frame_rate*/) { *state = reinterpret_cast<void*>(new double{0.0}); },
       [](void** state) { delete static_cast<double*>(*state); },
-      [](void** state, double* output_samples, int output_channel_count,
-         int output_frame_count) {
+      [](void** state, double* output_samples, int output_channel_count, int output_frame_count) {
         std::fill_n(output_samples, output_channel_count * output_frame_count,
                     *reinterpret_cast<double*>(*state));
       },
       [](void** state, int index, double value, double /*slope_per_frame*/) {
-        *reinterpret_cast<double*>(*state) =
-            static_cast<double>(index + 1) * value;
+        *reinterpret_cast<double*>(*state) = static_cast<double>(index + 1) * value;
       },
       [](void** /*state*/, const void* /*data*/, int /*size*/) {},
       [](void** /*state*/, double /*pitch*/, int /*index*/, double /*value*/,
          double /*slope_per_frame*/) {},
-      [](void** state, double /*pitch*/) {
-        *reinterpret_cast<double*>(*state) = 0.0;
-      },
+      [](void** state, double /*pitch*/) { *reinterpret_cast<double*>(*state) = 0.0; },
       [](void** state, double pitch, double intensity) {
         *reinterpret_cast<double*>(*state) = pitch * intensity;
       },
@@ -66,14 +60,13 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
-  const auto instrument_id_or =
-      engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
+  const auto instrument_id_or = engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
   ASSERT_TRUE(instrument_id_or.has_value());
   const Id instrument_id = *instrument_id_or;
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(engine.ProcessInstrument(instrument_id, buffer.data(),
-                                       kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(
+      engine.ProcessInstrument(instrument_id, buffer.data(), kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -88,8 +81,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   // Set the note callbacks.
   double note_on_pitch = 0.0;
   double note_on_intensity = 0.0;
-  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch,
-                                                         double intensity) {
+  NoteOnEventDefinition::Callback note_on_callback = [&](double pitch, double intensity) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
@@ -114,12 +106,11 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(engine.ProcessInstrument(instrument_id, buffer.data(),
-                                       kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(
+      engine.ProcessInstrument(instrument_id, buffer.data(), kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel],
-                       kPitch * kIntensity);
+      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
     }
   }
 
@@ -133,8 +124,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_FALSE(engine.ProcessInstrument(instrument_id, buffer.data(),
-                                        kChannelCount, kFrameCount, 0.0));
+  EXPECT_FALSE(
+      engine.ProcessInstrument(instrument_id, buffer.data(), kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
@@ -161,9 +152,8 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
-      instrument_or->get().SetNoteOffEvent(
-          NoteOffEventDefinition::WithCallback(),
-          static_cast<void*>(&note_off_callback));
+      instrument_or->get().SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
+                                           static_cast<void*>(&note_off_callback));
     }
 
     // Start multiple notes, then immediately stop some of them.
@@ -179,8 +169,7 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
   }
 
   // Remaining active notes should be stopped once the engine goes out of scope.
-  EXPECT_THAT(note_off_pitches,
-              UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
+  EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
 }
 
 // Tests that a single performer is created and destroyed as expected.
@@ -198,9 +187,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
   // Create a task definition.
   double task_position = 0.0;
-  std::function<void()> process_callback = [&]() {
-    task_position = performer.GetPosition();
-  };
+  std::function<void()> process_callback = [&]() { task_position = performer.GetPosition(); };
   auto definition = TaskDefinition{
       [](void** state, void* user_data) { *state = user_data; },
       [](void** /*state*/) {},
@@ -209,8 +196,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
   // Create a task.
   ASSERT_TRUE(engine.CreatePerformerTask(performer_id, definition,
-                                         /*is_one_off=*/false, 1.0,
-                                         kProcessOrder, &process_callback));
+                                         /*is_one_off=*/false, 1.0, kProcessOrder,
+                                         &process_callback));
 
   // Start the performer with a tempo of one beat per second.
   engine.SetTempo(60.0);
@@ -221,17 +208,14 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_TRUE(performer.IsPlaying());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer.GetDurationToNextTask(),
-              Optional(Pair(1.0, kProcessOrder)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, kProcessOrder)));
   engine.Update(1.0);
-  EXPECT_THAT(performer.GetDurationToNextTask(),
-              Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp past the task, which should be triggered now.
-  EXPECT_THAT(performer.GetDurationToNextTask(),
-              Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
   engine.Update(1.5);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.5);

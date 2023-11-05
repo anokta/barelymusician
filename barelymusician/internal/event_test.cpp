@@ -30,9 +30,7 @@ TEST(EventTest, Process) {
               *state = user_data;
               ++static_cast<TestData*>(*state)->create_count;
             },
-            [](void** state) {
-              ++static_cast<TestData*>(*state)->destroy_count;
-            },
+            [](void** state) { ++static_cast<TestData*>(*state)->destroy_count; },
             [](void** state, double pitch) {
               auto& test_data = *static_cast<TestData*>(*state);
               ++test_data.process_count;

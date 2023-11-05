@@ -37,14 +37,12 @@ InstrumentDefinition SynthInstrument::GetDefinition() noexcept {
       // Number of voices.
       ControlDefinition{8, 1, kMaxVoiceCount},
   };
-  return CustomInstrument::GetDefinition<SynthInstrument>(control_definitions,
-                                                          {});
+  return CustomInstrument::GetDefinition<SynthInstrument>(control_definitions, {});
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 SynthInstrument::SynthInstrument(int frame_rate) noexcept
-    : voice_(SynthVoice(frame_rate), kMaxVoiceCount),
-      gain_processor_(frame_rate) {}
+    : voice_(SynthVoice(frame_rate), kMaxVoiceCount), gain_processor_(frame_rate) {}
 
 void SynthInstrument::Process(double* output_samples, int output_channel_count,
                               int output_frame_count) noexcept {
@@ -54,42 +52,31 @@ void SynthInstrument::Process(double* output_samples, int output_channel_count,
       output_samples[output_channel_count * frame + channel] = mono_sample;
     }
   }
-  gain_processor_.Process(output_samples, output_channel_count,
-                          output_frame_count);
+  gain_processor_.Process(output_samples, output_channel_count, output_frame_count);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void SynthInstrument::SetControl(int index, double value,
-                                 double /*slope_per_frame*/) noexcept {
+void SynthInstrument::SetControl(int index, double value, double /*slope_per_frame*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kGain:
       gain_processor_.SetGain(value);
       break;
     case Control::kOscillatorType:
       voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->generator().SetType(
-            static_cast<OscillatorType>(static_cast<int>(value)));
+        voice->generator().SetType(static_cast<OscillatorType>(static_cast<int>(value)));
       });
       break;
     case Control::kAttack:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetAttack(value);
-      });
+      voice_.Update([value](SynthVoice* voice) noexcept { voice->envelope().SetAttack(value); });
       break;
     case Control::kDecay:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetDecay(value);
-      });
+      voice_.Update([value](SynthVoice* voice) noexcept { voice->envelope().SetDecay(value); });
       break;
     case Control::kSustain:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetSustain(value);
-      });
+      voice_.Update([value](SynthVoice* voice) noexcept { voice->envelope().SetSustain(value); });
       break;
     case Control::kRelease:
-      voice_.Update([value](SynthVoice* voice) noexcept {
-        voice->envelope().SetRelease(value);
-      });
+      voice_.Update([value](SynthVoice* voice) noexcept { voice->envelope().SetRelease(value); });
       break;
     case Control::kVoiceCount:
       voice_.Resize(static_cast<int>(value));

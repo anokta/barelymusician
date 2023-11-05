@@ -27,19 +27,16 @@ inline constexpr std::array<double, 12> kPitchSemitones = {
 
 /// Common musical scales.
 inline constexpr std::array<double, 7> kPitchMajorScale = {
-    kPitchSemitones[0],  kPitchSemitones[2], kPitchSemitones[4],
-    kPitchSemitones[5],  kPitchSemitones[7], kPitchSemitones[9],
-    kPitchSemitones[11],
+    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[4],  kPitchSemitones[5],
+    kPitchSemitones[7], kPitchSemitones[9], kPitchSemitones[11],
 };
 inline constexpr std::array<double, 7> kPitchNaturalMinorScale = {
-    kPitchSemitones[0],  kPitchSemitones[2], kPitchSemitones[3],
-    kPitchSemitones[5],  kPitchSemitones[7], kPitchSemitones[8],
-    kPitchSemitones[10],
+    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[3],  kPitchSemitones[5],
+    kPitchSemitones[7], kPitchSemitones[8], kPitchSemitones[10],
 };
 inline constexpr std::array<double, 7> kPitchHarmonicMinorScale = {
-    kPitchSemitones[0],  kPitchSemitones[2], kPitchSemitones[3],
-    kPitchSemitones[5],  kPitchSemitones[7], kPitchSemitones[8],
-    kPitchSemitones[11],
+    kPitchSemitones[0], kPitchSemitones[2], kPitchSemitones[3],  kPitchSemitones[5],
+    kPitchSemitones[7], kPitchSemitones[8], kPitchSemitones[11],
 };
 
 /// Common note pitches.

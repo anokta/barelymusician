@@ -61,8 +61,7 @@ class SynthInstrument : public CustomInstrument {
   void Process(double* output_samples, int output_channel_count,
                int output_frame_count) noexcept final;
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void SetControl(int index, double value,
-                  double slope_per_frame) noexcept final;
+  void SetControl(int index, double value, double slope_per_frame) noexcept final;
   void SetData(const void* /*data*/, int /*size*/) noexcept final {}
   void SetNoteControl(double /*pitch*/, int /*index*/, double /*value*/,
                       double /*slope_per_frame*/) noexcept final {}

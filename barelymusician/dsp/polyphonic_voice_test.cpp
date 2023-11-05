@@ -21,9 +21,7 @@ constexpr int kChannel = 0;
 class FakeVoice : public Voice {
  public:
   // Implements `UnitGenerator`.
-  double Next(int /*channel*/) noexcept override {
-    return active_ ? output_ : 0.0;
-  }
+  double Next(int /*channel*/) noexcept override { return active_ ? output_ : 0.0; }
 
   // Implements `Voice`.
   [[nodiscard]] bool IsActive() const noexcept override { return active_; }
@@ -45,8 +43,7 @@ TEST(PolyphonicVoiceTest, SingleVoice) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice),
-                                              kVoiceCount);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
@@ -62,28 +59,25 @@ TEST(PolyphonicVoiceTest, StartVoiceWithInit) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice),
-                                              kVoiceCount);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   for (int i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i + 1);
-    polyphonic_voice.Start(
-        pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
+    polyphonic_voice.Start(pitch, [pitch](FakeVoice* voice) { voice->SetOutput(pitch); });
     EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), pitch);
     polyphonic_voice.Stop(pitch);
   }
 }
 
-// Tests that the number of voices that is played by the polyphonic voice is
-// capped at maximum allowed number of voices.
+// Tests that the number of voices that is played by the polyphonic voice is capped at maximum
+// allowed number of voices.
 TEST(PolyphonicVoiceTest, MaxVoices) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice),
-                                              kVoiceCount);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
@@ -99,14 +93,12 @@ TEST(PolyphonicVoiceTest, MaxVoices) {
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), previous_output);
 }
 
-// Tests that the polyphonic voice produces silence when there are no available
-// voices set.
+// Tests that the polyphonic voice produces silence when there are no available voices set.
 TEST(PolyphonicVoiceTest, NoVoice) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice),
-                                              kVoiceCount);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
   polyphonic_voice.Start(0);
@@ -120,8 +112,7 @@ TEST(PolyphonicVoiceTest, Update) {
   FakeVoice base_voice;
   base_voice.SetOutput(kOutput);
 
-  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice),
-                                              kVoiceCount);
+  PolyphonicVoice<FakeVoice> polyphonic_voice(std::move(base_voice), kVoiceCount);
   polyphonic_voice.Resize(kVoiceCount);
   EXPECT_DOUBLE_EQ(polyphonic_voice.Next(kChannel), 0.0);
 
@@ -132,8 +123,7 @@ TEST(PolyphonicVoiceTest, Update) {
     polyphonic_voice.Stop(pitch);
   }
 
-  polyphonic_voice.Update(
-      [kUpdatedOutput](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
+  polyphonic_voice.Update([kUpdatedOutput](FakeVoice* voice) { voice->SetOutput(kUpdatedOutput); });
 
   for (int i = 0; i < kVoiceCount; ++i) {
     const double pitch = static_cast<double>(i);

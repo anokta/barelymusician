@@ -63,8 +63,7 @@ TEST(GainProcessorTest, ProcessSetGain) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       const int index = frame * kChannelCount + channel;
       // Gain should be ramping from 1.0 to 2.0 in the first 10 frames.
-      const double gain =
-          (frame < 10) ? 1.0 + static_cast<double>(frame + 1) / 10.0 : 2.0;
+      const double gain = (frame < 10) ? 1.0 + static_cast<double>(frame + 1) / 10.0 : 2.0;
       EXPECT_NEAR(data[index], gain * static_cast<double>(index + 1), kEpsilon);
     }
   }
@@ -104,8 +103,7 @@ TEST(GainProcessorTest, ProcessSetGain) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       const int index = frame * kChannelCount + channel;
       // Gain should be ramping from 0.0 to 1.0 in the first 10 frames.
-      const double gain =
-          (frame < 10) ? static_cast<double>(frame + 1) / 10.0 : 1.0;
+      const double gain = (frame < 10) ? static_cast<double>(frame + 1) / 10.0 : 1.0;
       EXPECT_NEAR(data[index], gain * static_cast<double>(index + 1), kEpsilon);
     }
   }
@@ -125,8 +123,7 @@ TEST(GainProcessorTest, ProcessSetGain) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       const int index = frame * kChannelCount + channel;
       // Gain should be ramping from 1.0 to 0.0 in the first 10 frames.
-      const double gain =
-          (frame < 10) ? 1.0 - static_cast<double>(frame + 1) / 10.0 : 0.0;
+      const double gain = (frame < 10) ? 1.0 - static_cast<double>(frame + 1) / 10.0 : 0.0;
       EXPECT_NEAR(data[index], gain * static_cast<double>(index + 1), kEpsilon);
     }
   }

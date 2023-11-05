@@ -52,13 +52,11 @@ constexpr double kMaxOffsetOctaves = 3.0;
 
 // Returns the pitch for a given `key`.
 std::optional<double> PitchFromKey(const InputManager::Key& key) {
-  const auto it =
-      std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
+  const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const double distance =
-      static_cast<double>(std::distance(kOctaveKeys.begin(), it));
+  const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
   return kRootPitch + distance / barely::kSemitoneCount;
 }
 
@@ -74,11 +72,9 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument =
-      musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
-  instrument.SetControl(SynthInstrument::Control::kOscillatorType,
-                        kOscillatorType);
+  instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
@@ -96,8 +92,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
-    instrument.Process(output, kChannelCount, kFrameCount,
-                       audio_clock.GetTimestamp());
+    instrument.Process(output, kChannelCount, kFrameCount, audio_clock.GetTimestamp());
     audio_clock.Update(kFrameCount);
   });
 
@@ -123,8 +118,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
       } else {
         ++offset_octaves;
       }
-      offset_octaves =
-          std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
+      offset_octaves = std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
       ConsoleLog() << "Octave offset set to " << offset_octaves;
       return;
     }

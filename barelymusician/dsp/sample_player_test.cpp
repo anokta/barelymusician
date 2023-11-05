@@ -33,8 +33,7 @@ TEST(SamplePlayerTest, SimplePlaybackLoop) {
 
   constexpr int kLoopCount = 10;
   for (int i = 0; i < kDataLength * kLoopCount; ++i) {
-    EXPECT_DOUBLE_EQ(sample_player.Next(), kData[i % kDataLength])
-        << "at index " << i;
+    EXPECT_DOUBLE_EQ(sample_player.Next(), kData[i % kDataLength]) << "at index " << i;
   }
 }
 
@@ -50,20 +49,17 @@ TEST(SamplePlayerTest, SetSpeed) {
     sample_player.SetSpeed(speed);
 
     for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index =
-          static_cast<int>(static_cast<double>(i) * speed);
-      EXPECT_DOUBLE_EQ(sample_player.Next(),
-                       kData[expected_index % kDataLength])
+      const int expected_index = static_cast<int>(static_cast<double>(i) * speed);
+      EXPECT_DOUBLE_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where speed is: " << speed;
     }
   }
 }
 
-// Tests that the sample data is played back as expected at different sampling
-// frequencies.
+// Tests that the sample data is played back as expected at different sampling frequencies.
 TEST(SamplePlayerTest, DifferentSampleFrequency) {
-  const std::vector<int> kFrequencies = {0, kFrameRate / 3, kFrameRate,
-                                         2 * kFrameRate, 5 * kFrameRate};
+  const std::vector<int> kFrequencies = {0, kFrameRate / 3, kFrameRate, 2 * kFrameRate,
+                                         5 * kFrameRate};
   SamplePlayer sample_player(kFrameRate);
   for (const int frequency : kFrequencies) {
     sample_player.Reset();
@@ -71,10 +67,9 @@ TEST(SamplePlayerTest, DifferentSampleFrequency) {
     sample_player.SetLoop(true);
 
     for (int i = 0; i < kDataLength; ++i) {
-      const int expected_index = static_cast<int>(
-          static_cast<double>(i * frequency) / static_cast<double>(kFrameRate));
-      EXPECT_DOUBLE_EQ(sample_player.Next(),
-                       kData[expected_index % kDataLength])
+      const int expected_index =
+          static_cast<int>(static_cast<double>(i * frequency) / static_cast<double>(kFrameRate));
+      EXPECT_DOUBLE_EQ(sample_player.Next(), kData[expected_index % kDataLength])
           << "at index " << i << ", where sample frequency is: " << frequency;
     }
   }

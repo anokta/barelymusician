@@ -82,9 +82,8 @@ struct NoteOnMessage {
 };
 
 /// Message alias.
-using Message = std::variant<ControlMessage, DataMessage, EffectControlMessage,
-                             EffectDataMessage, NoteControlMessage,
-                             NoteOffMessage, NoteOnMessage>;
+using Message = std::variant<ControlMessage, DataMessage, EffectControlMessage, EffectDataMessage,
+                             NoteControlMessage, NoteOffMessage, NoteOnMessage>;
 
 // Message visitor.
 template <typename... MessageTypes>

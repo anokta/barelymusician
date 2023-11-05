@@ -32,9 +32,7 @@ void Metronome::Reset() noexcept {
   beat_ = 0;
 }
 
-void Metronome::SetBeatCallback(BeatCallback callback) noexcept {
-  callback_ = std::move(callback);
-}
+void Metronome::SetBeatCallback(BeatCallback callback) noexcept { callback_ = std::move(callback); }
 
 void Metronome::Start() noexcept { performer_.Start(); }
 

@@ -22,8 +22,7 @@ double GetFilterCoefficient(int frame_rate, double cuttoff_frequency) noexcept {
 }
 
 double GetFrequency(double pitch) noexcept {
-  // Middle A note (A4) is selected as the base note frequency, where:
-  //  f = fA4 * 2 ^ p.
+  // Middle A note (A4) is selected as the base note frequency, where f = fA4 * 2 ^ p.
   return kFrequencyA4 * std::pow(2.0, pitch);
 }
 

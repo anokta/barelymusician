@@ -28,8 +28,8 @@ class Instrument {
   /// @param initial_tempo Initial tempo in beats per minute.
   /// @param initial_timestamp Initial timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Instrument(const InstrumentDefinition& definition, int frame_rate,
-             double initial_tempo, double initial_timestamp) noexcept;
+  Instrument(const InstrumentDefinition& definition, int frame_rate, double initial_tempo,
+             double initial_timestamp) noexcept;
 
   /// Destroys `Instrument`.
   ~Instrument() noexcept;
@@ -46,8 +46,7 @@ class Instrument {
   /// @param definition Effect definition.
   /// @param process_order Effect process order.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void CreateEffect(Id effect_id, EffectDefinition definition,
-                    int process_order) noexcept;
+  void CreateEffect(Id effect_id, EffectDefinition definition, int process_order) noexcept;
 
   /// Destroys an effect.
   ///
@@ -67,23 +66,20 @@ class Instrument {
   /// @param effect_id Effect identifier.
   /// @param index Effect control index.
   /// @return Optional effect control value.
-  [[nodiscard]] std::optional<double> GetEffectControl(
-      Id effect_id, int index) const noexcept;
+  [[nodiscard]] std::optional<double> GetEffectControl(Id effect_id, int index) const noexcept;
 
   /// Returns effect process order.
   ///
   /// @param effect_id Effect identifier.
   /// @return Optional process order.
-  [[nodiscard]] std::optional<int> GetEffectProcessOrder(
-      Id effect_id) const noexcept;
+  [[nodiscard]] std::optional<int> GetEffectProcessOrder(Id effect_id) const noexcept;
 
   /// Returns a note control value.
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
   /// @return Optional note control value.
-  [[nodiscard]] std::optional<double> GetNoteControl(double pitch,
-                                                     int index) const noexcept;
+  [[nodiscard]] std::optional<double> GetNoteControl(double pitch, int index) const noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -99,8 +95,8 @@ class Instrument {
   /// @param timestamp Timestamp in seconds.
   /// @return True if successful, false otherwise.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool Process(double* output_samples, int output_channel_count,
-               int output_frame_count, double timestamp) noexcept;
+  bool Process(double* output_samples, int output_channel_count, int output_frame_count,
+               double timestamp) noexcept;
 
   /// Resets all control values.
   void ResetAllControls() noexcept;
@@ -153,8 +149,7 @@ class Instrument {
   ///
   /// @param callback Control event definition.
   /// @param user_data Pointer to user data.
-  void SetControlEvent(ControlEventDefinition definition,
-                       void* user_data) noexcept;
+  void SetControlEvent(ControlEventDefinition definition, void* user_data) noexcept;
 
   /// Sets data.
   ///
@@ -168,8 +163,7 @@ class Instrument {
   /// @param value Effect control value.
   /// @param slope_per_beat Effect control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetEffectControl(Id effect_id, int index, double value,
-                        double slope_per_beat) noexcept;
+  bool SetEffectControl(Id effect_id, int index, double value, double slope_per_beat) noexcept;
 
   /// Sets the effect control event.
   ///
@@ -202,15 +196,13 @@ class Instrument {
   /// @param value Note control value.
   /// @param slope_per_beat Note control slope in value change per beat.
   /// @return True if successful, false otherwise.
-  bool SetNoteControl(double pitch, int index, double value,
-                      double slope_per_beat) noexcept;
+  bool SetNoteControl(double pitch, int index, double value, double slope_per_beat) noexcept;
 
   /// Sets the note control event.
   ///
   /// @param definition Note control event definition.
   /// @param user_data Pointer to user data.
-  void SetNoteControlEvent(NoteControlEventDefinition definition,
-                           void* user_data) noexcept;
+  void SetNoteControlEvent(NoteControlEventDefinition definition, void* user_data) noexcept;
 
   /// Sets a note off.
   ///
@@ -221,8 +213,7 @@ class Instrument {
   ///
   /// @param definition Note off event definition.
   /// @param user_data Pointer to user data.
-  void SetNoteOffEvent(NoteOffEventDefinition definition,
-                       void* user_data) noexcept;
+  void SetNoteOffEvent(NoteOffEventDefinition definition, void* user_data) noexcept;
 
   /// Sets a note on.
   ///
@@ -235,8 +226,7 @@ class Instrument {
   ///
   /// @param definition Note on event definition.
   /// @param user_data Pointer to user data.
-  void SetNoteOnEvent(NoteOnEventDefinition definition,
-                      void* user_data) noexcept;
+  void SetNoteOnEvent(NoteOnEventDefinition definition, void* user_data) noexcept;
 
   /// Sets the tempo.
   ///
@@ -253,8 +243,7 @@ class Instrument {
   using ControlEvent = Event<ControlEventDefinition, int, double>;
 
   // Note control event alias.
-  using NoteControlEvent =
-      Event<NoteControlEventDefinition, double, int, double>;
+  using NoteControlEvent = Event<NoteControlEventDefinition, double, int, double>;
 
   // Note off event alias.
   using NoteOffEvent = Event<NoteOffEventDefinition, double>;

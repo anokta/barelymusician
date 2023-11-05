@@ -60,8 +60,7 @@ Event<EventDefinitionType, EventArgs...>::Event(
       state_(std::exchange(other.state_, nullptr)) {}
 
 template <typename EventDefinitionType, typename... EventArgs>
-Event<EventDefinitionType, EventArgs...>&
-Event<EventDefinitionType, EventArgs...>::operator=(
+Event<EventDefinitionType, EventArgs...>& Event<EventDefinitionType, EventArgs...>::operator=(
     Event<EventDefinitionType, EventArgs...>&& other) noexcept {
   if (this != &other) {
     if (destroy_callback_) {
@@ -75,8 +74,8 @@ Event<EventDefinitionType, EventArgs...>::operator=(
 }
 
 template <typename EventDefinitionType, typename... EventArgs>
-Event<EventDefinitionType, EventArgs...>::Event(
-    const EventDefinitionType& definition, void* user_data) noexcept
+Event<EventDefinitionType, EventArgs...>::Event(const EventDefinitionType& definition,
+                                                void* user_data) noexcept
     : destroy_callback_(definition.destroy_callback),
       process_callback_(definition.process_callback) {
   if (definition.create_callback) {
@@ -92,8 +91,7 @@ Event<EventDefinitionType, EventArgs...>::~Event() noexcept {
 }
 
 template <typename EventDefinitionType, typename... EventArgs>
-void Event<EventDefinitionType, EventArgs...>::Process(
-    EventArgs... args) noexcept {
+void Event<EventDefinitionType, EventArgs...>::Process(EventArgs... args) noexcept {
   if (process_callback_) {
     process_callback_(&state_, args...);
   }

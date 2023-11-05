@@ -67,13 +67,11 @@ std::vector<double> GetSampleData(const std::string& file_path) {
 
 // Returns the pitch for a given `key`.
 std::optional<double> PitchFromKey(const InputManager::Key& key) {
-  const auto it =
-      std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
+  const auto it = std::find(kOctaveKeys.begin(), kOctaveKeys.end(), std::toupper(key));
   if (it == kOctaveKeys.end()) {
     return std::nullopt;
   }
-  const double distance =
-      static_cast<double>(std::distance(kOctaveKeys.begin(), it));
+  const double distance = static_cast<double>(std::distance(kOctaveKeys.begin(), it));
   return kRootPitch + distance / barely::kSemitoneCount;
 }
 
@@ -86,8 +84,7 @@ int main(int /*argc*/, char* argv[]) {
 
   Musician musician;
 
-  auto instrument =
-      musician.CreateInstrument(SamplerInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument(SamplerInstrument::GetDefinition(), kFrameRate);
   instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
   instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
   instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);
@@ -96,20 +93,17 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
 
   auto effect = instrument.CreateEffect(LowPassEffect::GetDefinition());
-  effect.SetControl(LowPassEffect::Control::kCutoffFrequency,
-                    kLowPassCutoffFrequency);
+  effect.SetControl(LowPassEffect::Control::kCutoffFrequency, kLowPassCutoffFrequency);
 
   const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));
   const int size = static_cast<int>(data.size() * sizeof(double));
   instrument.SetData(data.data(), size);
 
   instrument.SetNoteOnEvent([](double pitch, double intensity) {
-    ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", "
-                 << intensity << ")";
+    ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", " << intensity << ")";
   });
-  instrument.SetNoteOffEvent([](double pitch) {
-    ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") ";
-  });
+  instrument.SetNoteOffEvent(
+      [](double pitch) { ConsoleLog() << std::setprecision(2) << "NoteOff(" << pitch << ") "; });
 
   // Audio process callback.
   audio_output.SetProcessCallback([&](double* output) {
@@ -136,8 +130,7 @@ int main(int /*argc*/, char* argv[]) {
       } else {
         ++offset_octaves;
       }
-      offset_octaves =
-          std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
+      offset_octaves = std::clamp(offset_octaves, -kMaxOffsetOctaves, kMaxOffsetOctaves);
       ConsoleLog() << "Octave offset set to " << offset_octaves;
       return;
     }

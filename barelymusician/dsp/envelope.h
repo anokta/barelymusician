@@ -5,8 +5,8 @@
 
 namespace barely {
 
-/// Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output
-/// samples according to its current state.
+/// Standard ADSR (Attack-Decay-Sustain-Release) envelope that generates output samples according to
+/// its current state.
 class Envelope : public Generator {
  public:
   /// Constructs new `Envelope`.

@@ -12,8 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # TODO(#120): Switch back to `windows-latest` once bazel build is fixed.
-        os: [ ubuntu-latest, macos-latest, windows-2019 ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
       fail-fast: false
 
     steps:
@@ -50,8 +49,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # TODO(#120): Switch back to `windows-latest` once bazel build is fixed.
-        os: [ ubuntu-latest, macos-latest, windows-2019 ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
       fail-fast: false
 
     steps:

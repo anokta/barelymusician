@@ -20,15 +20,8 @@ enum class RepeaterStyle {
 /// Simple repeater that repeats notes in sequence.
 class Repeater {
  public:
-  /// Creates a new `Repeater`.
-  ///
-  /// @param musician Musician.
-  /// @param process_order Process order.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Repeater(Musician& musician, int process_order = 0) noexcept;
-
   /// Destroys `Repeater`.
-  ~Repeater();
+  ~Repeater() noexcept;
 
   /// Clears all pitches.
   void Clear() noexcept;
@@ -74,6 +67,13 @@ class Repeater {
   void Stop() noexcept;
 
  private:
+  // Ensures that the component can only be created by `Musician`.
+  friend class Musician;
+
+  // Creates a new `Repeater` with a given `musician` and `process_order`.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  explicit Repeater(Musician& musician, int process_order = 0) noexcept;
+
   // Updates the repeater.
   bool Update() noexcept;
 

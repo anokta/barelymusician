@@ -56,7 +56,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   musician.SetTempo(kInitialTempo);
 
   // Create the metronome instrument.
-  auto instrument = musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
@@ -64,7 +64,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
   // Create the metronome with a beat callback.
-  Metronome metronome(musician);
+  auto metronome = musician.CreateComponent<Metronome>();
   metronome.SetBeatCallback([&](int beat) {
     const int current_bar = (beat / kBeatCount) + 1;
     const int current_beat = (beat % kBeatCount) + 1;

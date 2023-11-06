@@ -216,7 +216,7 @@ int main(int /*argc*/, char* argv[]) {
 
   const auto build_synth_instrument_fn = [&](OscillatorType type, double gain, double attack,
                                              double release) {
-    instruments.push_back(musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate));
+    instruments.push_back(musician.CreateInstrument<SynthInstrument>(kFrameRate));
     auto& instrument = instruments.back();
     instrument.SetControl(SynthInstrument::Control::kGain, gain);
     instrument.SetControl(SynthInstrument::Control::kOscillatorType, type);
@@ -257,8 +257,7 @@ int main(int /*argc*/, char* argv[]) {
                           instruments.size() - 1);
 
   // Add percussion instrument.
-  instruments.push_back(
-      musician.CreateInstrument(PercussionInstrument::GetDefinition(), kFrameRate));
+  instruments.push_back(musician.CreateInstrument<PercussionInstrument>(kFrameRate));
   auto& percussion = instruments.back();
   percussion.SetControl(PercussionInstrument::Control::kGain, 0.25);
   set_note_callbacks_fn(instruments.size(), percussion);
@@ -315,7 +314,7 @@ int main(int /*argc*/, char* argv[]) {
     }
   };
 
-  Metronome metronome(musician, -10);
+  auto metronome = musician.CreateComponent<Metronome>(-10);
   metronome.SetBeatCallback(beat_callback);
 
   // Audio process callback.

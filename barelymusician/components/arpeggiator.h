@@ -24,15 +24,8 @@ enum class ArpeggiatorStyle {
 /// Simple arpeggiator that plays notes in sequence.
 class Arpeggiator {
  public:
-  /// Creates a new `Arpeggiator`.
-  ///
-  /// @param musician Musician.
-  /// @param process_order Process order.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  explicit Arpeggiator(Musician& musician, int process_order = 0) noexcept;
-
   /// Destroys `Arpeggiator`.
-  ~Arpeggiator();
+  ~Arpeggiator() noexcept;
 
   /// Returns whether a note is on or not.
   ///
@@ -79,6 +72,13 @@ class Arpeggiator {
   void SetStyle(ArpeggiatorStyle style) noexcept;
 
  private:
+  // Ensures that `Metronome` can only be created by `Musician`.
+  friend class Musician;
+
+  // Creates a new `Arpeggiator` with a given `musician` and `process_order`.
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  explicit Arpeggiator(Musician& musician, int process_order = -1) noexcept;
+
   // Stop the arpeggiator.
   void Stop() noexcept;
 

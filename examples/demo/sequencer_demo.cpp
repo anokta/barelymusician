@@ -61,7 +61,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);

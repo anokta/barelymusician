@@ -84,7 +84,7 @@ int main(int /*argc*/, char* argv[]) {
 
   Musician musician;
 
-  auto instrument = musician.CreateInstrument(SamplerInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument<SamplerInstrument>(kFrameRate);
   instrument.SetControl(SamplerInstrument::Control::kGain, kGain);
   instrument.SetControl(SamplerInstrument::Control::kRootPitch, kRootPitch);
   instrument.SetControl(SamplerInstrument::Control::kLoop, kLoop);
@@ -92,7 +92,7 @@ int main(int /*argc*/, char* argv[]) {
   instrument.SetControl(SamplerInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SamplerInstrument::Control::kVoiceCount, kVoiceCount);
 
-  auto effect = instrument.CreateEffect(LowPassEffect::GetDefinition());
+  auto effect = instrument.CreateEffect<LowPassEffect>();
   effect.SetControl(LowPassEffect::Control::kCutoffFrequency, kLowPassCutoffFrequency);
 
   const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));

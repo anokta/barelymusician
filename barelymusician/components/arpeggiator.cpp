@@ -6,31 +6,7 @@
 
 namespace barely {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
-Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
-    : performer_(musician.CreatePerformer()) {
-  performer_.SetLooping(true);
-  performer_.SetLoopLength(1.0);
-  performer_
-      .CreateTask(
-          [this, process_order]() noexcept {
-            Update();
-            if (instrument_ == nullptr) {
-              return;
-            }
-            const double pitch = pitches_[index_];
-            instrument_->SetNoteOn(pitch);
-            performer_
-                .CreateTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                            /*is_one_off*/ true, gate_ratio_ * performer_.GetLoopLength(),
-                            process_order)
-                .Release();
-          },
-          /*is_one_off=*/false, 0.0, process_order)
-      .Release();
-}
-
-Arpeggiator::~Arpeggiator() {
+Arpeggiator::~Arpeggiator() noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
@@ -110,6 +86,30 @@ void Arpeggiator::Stop() noexcept {
     instrument_->SetAllNotesOff();
   }
   index_ = -1;
+}
+
+// NOLINTNEXTLINE(bugprone-exception-escape)
+Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
+    : performer_(musician.CreatePerformer()) {
+  performer_.SetLooping(true);
+  performer_.SetLoopLength(1.0);
+  performer_
+      .CreateTask(
+          [this, process_order]() noexcept {
+            Update();
+            if (instrument_ == nullptr) {
+              return;
+            }
+            const double pitch = pitches_[index_];
+            instrument_->SetNoteOn(pitch);
+            performer_
+                .CreateTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
+                            /*is_one_off*/ true, gate_ratio_ * performer_.GetLoopLength(),
+                            process_order)
+                .Release();
+          },
+          /*is_one_off=*/false, 0.0, process_order)
+      .Release();
 }
 
 }  // namespace barely

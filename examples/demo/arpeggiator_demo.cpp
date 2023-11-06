@@ -73,7 +73,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
@@ -84,7 +84,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << std::setprecision(2) << "Note(" << pitch << ")";
   });
 
-  Arpeggiator arpeggiator(musician);
+  auto arpeggiator = musician.CreateComponent<Arpeggiator>();
   arpeggiator.SetInstrument(&instrument);
   arpeggiator.SetGateRatio(kInitialGateRatio);
   arpeggiator.SetRate(kInitialRate);

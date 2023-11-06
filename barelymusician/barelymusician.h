@@ -38,8 +38,7 @@
 ///   #include "barelymusician/instruments/synth_instrument.h"
 ///
 ///   // Create.
-///   auto instrument = musician.CreateInstrument(barely::SynthInstrument::GetDefinition(),
-///                                               /*frame_rate=*/48000);
+///   auto instrument = musician.CreateInstrument<barely::SynthInstrument>(/*frame_rate=*/48000);
 ///
 ///   // Set a note on.
 ///   //
@@ -56,7 +55,7 @@
 ///                         /*slope_per_beat=*/0.0);
 ///
 ///   // Create a low-pass effect.
-///   auto effect = instrument.CreateEffect(barely::LowPassEffect::GetDefinition());
+///   auto effect = instrument.CreateEffect<barely::LowPassEffect>();
 ///
 ///   // Set the low-pass cutoff frequency to increase by 100 hertz per beat.
 ///   effect.SetControl(barely::LowPassEffect::Control::kCutoffFrequency, /*value=*/0.0,
@@ -1673,6 +1672,14 @@ class Instrument {
     return *this;
   }
 
+  /// Creates a new effect of type.
+  ///
+  /// @return Effect.
+  template <class EffectType>
+  [[nodiscard]] Effect CreateEffect() noexcept {
+    return CreateEffect(EffectType::GetDefinition());
+  }
+
   /// Creates a new effect.
   ///
   /// @param definition Effect definition.
@@ -2244,6 +2251,24 @@ class Musician {
       musician_ = std::exchange(other.musician_, nullptr);
     }
     return *this;
+  }
+
+  /// Creates a new component of type.
+  ///
+  /// @param args Component arguments.
+  /// @return Component.
+  template <class ComponentType, typename... ComponentArgs>
+  [[nodiscard]] ComponentType CreateComponent(ComponentArgs&&... args) noexcept {
+    return ComponentType(*this, args...);
+  }
+
+  /// Creates a new instrument of type.
+  ///
+  /// @param frame_rate Frame rate in hertz.
+  /// @return Instrument.
+  template <class InstrumentType>
+  [[nodiscard]] Instrument CreateInstrument(int frame_rate) noexcept {
+    return CreateInstrument(InstrumentType::GetDefinition(), frame_rate);
   }
 
   /// Creates a new instrument.

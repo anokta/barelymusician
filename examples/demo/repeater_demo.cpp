@@ -72,14 +72,14 @@ int main(int /*argc*/, char* /*argv*/[]) {
   Musician musician;
   musician.SetTempo(kInitialTempo);
 
-  auto instrument = musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate);
+  auto instrument = musician.CreateInstrument<SynthInstrument>(kFrameRate);
   instrument.SetControl(SynthInstrument::Control::kGain, kGain);
   instrument.SetControl(SynthInstrument::Control::kOscillatorType, kOscillatorType);
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetControl(SynthInstrument::Control::kVoiceCount, kVoiceCount);
 
-  Repeater repeater(musician);
+  auto repeater = musician.CreateComponent<Repeater>();
   repeater.SetInstrument(&instrument);
   repeater.SetRate(kInitialRate);
   repeater.SetStyle(kInitialStyle);

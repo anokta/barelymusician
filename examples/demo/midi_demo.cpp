@@ -126,7 +126,7 @@ int main(int /*argc*/, char* argv[]) {
   std::vector<std::pair<Instrument, Performer>> tracks;
   tracks.reserve(track_count);
   for (int i = 0; i < track_count; ++i) {
-    tracks.emplace_back(musician.CreateInstrument(SynthInstrument::GetDefinition(), kFrameRate),
+    tracks.emplace_back(musician.CreateInstrument<SynthInstrument>(kFrameRate),
                         musician.CreatePerformer());
     auto& [instrument, performer] = tracks.back();
     // Build the score to perform.

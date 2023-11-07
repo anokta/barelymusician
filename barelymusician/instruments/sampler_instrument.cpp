@@ -20,6 +20,7 @@ constexpr int kMaxVoiceCount = 64;
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentDefinition SamplerInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.

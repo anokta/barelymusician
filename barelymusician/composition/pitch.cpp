@@ -1,6 +1,7 @@
 #include "barelymusician/composition/pitch.h"
 
 #include <cmath>
+#include <span>
 
 namespace barely {
 

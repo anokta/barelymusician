@@ -1,5 +1,8 @@
 #include "barelymusician/effects/high_pass_effect.h"
 
+#include <cassert>
+#include <vector>
+
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
 #include "barelymusician/effects/custom_effect.h"
@@ -10,6 +13,7 @@ BarelyEffectDefinition BarelyHighPassEffect_GetDefinition() {
 
 namespace barely {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 EffectDefinition HighPassEffect::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Cutoff frequency.

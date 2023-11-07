@@ -2,9 +2,12 @@
 
 #ifdef BARELYMUSICIAN_CMAKE
 #include <string>
+#include <string_view>
 #else  // BARELYMUSICIAN_CMAKE
 #include <cassert>
+#include <memory>
 #include <string>
+#include <string_view>
 
 #include "tools/cpp/runfiles/runfiles.h"
 #endif  // BARELYMUSICIAN_CMAKE

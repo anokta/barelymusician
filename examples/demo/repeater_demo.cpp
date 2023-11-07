@@ -1,7 +1,9 @@
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <chrono>
 #include <iomanip>
+#include <iterator>
 #include <optional>
 #include <thread>
 

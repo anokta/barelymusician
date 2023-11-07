@@ -1,8 +1,11 @@
 
 #include "barelymusician/internal/engine.h"
 
+#include <algorithm>
 #include <cassert>
 #include <functional>
+#include <limits>
+#include <memory>
 #include <optional>
 #include <utility>
 

@@ -1,7 +1,5 @@
 #include "barelymusician/dsp/oscillator.h"
 
-#include <cmath>
-
 #include "gtest/gtest.h"
 
 namespace barely {

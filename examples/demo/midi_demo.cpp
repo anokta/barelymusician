@@ -2,6 +2,7 @@
 #include <cassert>
 #include <chrono>
 #include <functional>
+#include <string>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -160,7 +161,7 @@ int main(int /*argc*/, char* argv[]) {
     std::fill_n(output, kChannelCount * kFrameCount, 0.0);
     for (auto& [instrument, performer] : tracks) {
       instrument.Process(mix_buffer.data(), kChannelCount, kFrameCount, clock.GetTimestamp());
-      std::transform(mix_buffer.begin(), mix_buffer.end(), output, output, std::plus<double>());
+      std::transform(mix_buffer.begin(), mix_buffer.end(), output, output, std::plus<>());
     }
     clock.Update(kFrameCount);
   };

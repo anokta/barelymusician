@@ -1610,7 +1610,7 @@ class Effect {
   /// @param data Immutable data.
   template <typename DataType, std::enable_if<std::is_trivially_copyable<DataType>::value>>
   void SetData(const DataType& data) noexcept {
-    SetData(effect_, static_cast<const void*>(&data), sizeof(decltype(data)));
+    SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
   }
 
   /// Sets data with a container.

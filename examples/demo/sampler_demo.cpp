@@ -1,10 +1,14 @@
 #include <algorithm>
+#include <array>
+#include <cassert>
 #include <cctype>
 #include <chrono>
 #include <iomanip>
+#include <iterator>
 #include <optional>
 #include <string>
 #include <thread>
+#include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/pitch.h"

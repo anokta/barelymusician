@@ -2,10 +2,10 @@
 
 #include <algorithm>
 #include <array>
+#include <functional>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/control.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
 #include "gmock/gmock.h"

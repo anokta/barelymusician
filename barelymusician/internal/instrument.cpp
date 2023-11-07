@@ -1,7 +1,10 @@
 #include "barelymusician/internal/instrument.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <memory>
+#include <optional>
 #include <utility>
 #include <variant>
 #include <vector>

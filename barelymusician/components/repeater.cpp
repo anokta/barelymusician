@@ -41,7 +41,7 @@ void Repeater::SetInstrument(Instrument* instrument) noexcept {
   if (instrument_ != nullptr) {
     instrument_->SetAllNotesOff();
   }
-  instrument_ = std::move(instrument);
+  instrument_ = instrument;
 }
 
 void Repeater::SetRate(double rate) noexcept {

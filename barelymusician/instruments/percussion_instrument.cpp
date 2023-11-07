@@ -1,6 +1,5 @@
 #include "barelymusician/instruments/percussion_instrument.h"
 
-#include <cstddef>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
@@ -22,6 +21,7 @@ constexpr double kDefaultPadRelease = 0.1;
 
 }  // namespace
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 InstrumentDefinition PercussionInstrument::GetDefinition() noexcept {
   static const std::vector<ControlDefinition> control_definitions = {
       // Gain.

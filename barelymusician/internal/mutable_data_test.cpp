@@ -1,7 +1,6 @@
 #include "barelymusician/internal/mutable_data.h"
 
-#include <algorithm>
-#include <memory>
+#include <string>
 #include <vector>
 
 #include "gmock/gmock.h"

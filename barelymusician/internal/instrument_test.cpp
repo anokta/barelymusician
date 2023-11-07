@@ -2,19 +2,15 @@
 
 #include <algorithm>
 #include <array>
-#include <memory>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/control.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {
 namespace {
 
-using ::testing::IsNull;
-using ::testing::NotNull;
 using ::testing::Optional;
 
 constexpr int kFrameRate = 8000;

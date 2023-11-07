@@ -1605,14 +1605,21 @@ class Effect {
     SetControlEvent(ControlEventDefinition::WithCallback(), static_cast<void*>(&callback));
   }
 
-  /// Sets data.
+  /// Sets data of type.
   ///
   /// @param data Immutable data.
-  template <typename DataType>
+  template <typename DataType, std::enable_if<std::is_trivially_copyable<DataType>::value>>
   void SetData(const DataType& data) noexcept {
-    static_assert(std::is_trivially_copyable<DataType>::value,
-                  "DataType is not trivially copyable");
-    SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
+    SetData(effect_, static_cast<const void*>(&data), sizeof(decltype(data)));
+  }
+
+  /// Sets data with a container.
+  ///
+  /// @param container Immutable container.
+  template <typename ContainerType, typename ValueType = typename ContainerType::value_type>
+  void SetData(const ContainerType& container) noexcept {
+    SetData(static_cast<const void*>(container.data()),
+            static_cast<int>(container.size() * sizeof(ValueType)));
   }
 
   /// Sets data.
@@ -1838,14 +1845,21 @@ class Instrument {
     SetControlEvent(ControlEventDefinition::WithCallback(), static_cast<void*>(&callback));
   }
 
-  /// Sets data.
+  /// Sets data of type.
   ///
   /// @param data Immutable data.
-  template <typename DataType>
+  template <typename DataType, std::enable_if<std::is_trivially_copyable<DataType>::value>>
   void SetData(const DataType& data) noexcept {
-    static_assert(std::is_trivially_copyable<DataType>::value,
-                  "DataType is not trivially copyable");
     SetData(static_cast<const void*>(&data), sizeof(decltype(data)));
+  }
+
+  /// Sets data with a container.
+  ///
+  /// @param container Immutable container.
+  template <typename ContainerType, typename ValueType = typename ContainerType::value_type>
+  void SetData(const ContainerType& container) noexcept {
+    SetData(static_cast<const void*>(container.data()),
+            static_cast<int>(container.size() * sizeof(ValueType)));
   }
 
   /// Sets data.

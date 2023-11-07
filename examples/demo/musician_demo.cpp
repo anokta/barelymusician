@@ -268,7 +268,7 @@ int main(int /*argc*/, char* argv[]) {
         for (const auto& [pitch, file_path] : percussion_map) {
           InsertPadData(pitch, GetDataFilePath(kDrumsDir + file_path, argv), data);
         }
-        percussion.SetData(data.data(), static_cast<int>(data.size()) * sizeof(double));
+        percussion.SetData(data);
       };
   set_percussion_pad_map_fn({
       {barely::kPitchKick, "basic_kick.wav"},

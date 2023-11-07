@@ -95,9 +95,7 @@ int main(int /*argc*/, char* argv[]) {
   auto effect = instrument.CreateEffect<LowPassEffect>();
   effect.SetControl(LowPassEffect::Control::kCutoffFrequency, kLowPassCutoffFrequency);
 
-  const auto data = GetSampleData(GetDataFilePath(kSamplePath, argv));
-  const int size = static_cast<int>(data.size() * sizeof(double));
-  instrument.SetData(data.data(), size);
+  instrument.SetData(GetSampleData(GetDataFilePath(kSamplePath, argv)));
 
   instrument.SetNoteOnEvent([](double pitch, double intensity) {
     ConsoleLog() << std::setprecision(2) << "NoteOn(" << pitch << ", " << intensity << ")";

@@ -11,4 +11,4 @@ namespace Barely {
       SetControl(0, CutoffFrequency);
     }
   }
-}
+}  // namespace Barely

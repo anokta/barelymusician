@@ -230,6 +230,116 @@ namespace Barely {
         public InstrumentDefinition GetDefinition();
       }
 
+      /// Creates a new component.
+      ///
+      /// @param component Component.
+      /// @param instrumentHandle Instrument handle.
+      /// @param componentHandle Component handle.
+      public static void Component_Create(Component component, IntPtr instrumentHandle,
+                                          ref IntPtr componentHandle) {
+        if (Handle == IntPtr.Zero || componentHandle != IntPtr.Zero) {
+          return;
+        }
+        bool success = false;
+        switch (component) {
+          case Arpeggiator arpeggiator:
+            success =
+                BarelyArpeggiator_Create(_handle, arpeggiator.ProcessOrder, ref componentHandle);
+            if (success) {
+              success = BarelyArpeggiator_SetInstrument(componentHandle, instrumentHandle);
+            }
+            break;
+          default:
+            Debug.LogError("Unsupported component type: " + component.GetType());
+            return;
+        }
+        if (!success) {
+          Debug.LogError("Failed to create component '" + component.name + "'");
+          return;
+        }
+      }
+
+      /// Destroys a component.
+      ///
+      /// @param component Component.
+      /// @param componentHandle Component handle.
+      public static void Component_Destroy(Component component, ref IntPtr componentHandle) {
+        if (Handle == IntPtr.Zero || componentHandle == IntPtr.Zero) {
+          return;
+        }
+        bool success = false;
+        switch (component) {
+          case Arpeggiator arpeggiator:
+            success = BarelyArpeggiator_Destroy(componentHandle);
+            break;
+          default:
+            Debug.LogError("Unsupported component type: " + component.GetType());
+            return;
+        }
+        if (!success && _handle != IntPtr.Zero) {
+          Debug.LogError("Failed to destroy component");
+        }
+      }
+
+      /// Returns whether an arpeggiator note is on or not.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param pitch Note pitch.
+      /// @return True if on, false otherwise.
+      public static bool Arpeggiator_IsNoteOn(IntPtr arpeggiatorHandle, double pitch) {
+        bool isNoteOn = false;
+        bool success = BarelyArpeggiator_IsNoteOn(arpeggiatorHandle, pitch, ref isNoteOn);
+        if (!success && arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get if arpeggiator note pitch " + pitch + " is on");
+        }
+        return isNoteOn;
+      }
+
+      /// Returns whether an arpeggiator is playing or not.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @return True if playing, false otherwise.
+      public static bool Arpeggiator_IsPlaying(IntPtr arpeggiatorHandle) {
+        bool isPlaying = false;
+        bool success = BarelyArpeggiator_IsPlaying(arpeggiatorHandle, ref isPlaying);
+        if (!success && arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to get if arpeggiator is playing");
+        }
+        return isPlaying;
+      }
+
+      /// Sets all arpeggiator notes off.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      public static void Arpeggiator_SetAllNotesOff(IntPtr arpeggiatorHandle) {
+        bool success = BarelyArpeggiator_SetAllNotesOff(arpeggiatorHandle);
+        if (!success && arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop all arpeggiator notes");
+        }
+      }
+
+      /// Sets an arpeggiator note off.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param pitch Note pitch.
+      public static void Arpeggiator_SetNoteOff(IntPtr arpeggiatorHandle, double pitch) {
+        bool success = BarelyArpeggiator_SetNoteOff(arpeggiatorHandle, pitch);
+        if (!success && arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to stop arpeggiator note " + pitch);
+        }
+      }
+
+      /// Sets an arpeggiator note on.
+      ///
+      /// @param arpeggiatorHandle Arpeggiator handle.
+      /// @param pitch Note pitch.
+      public static void Arpeggiator_SetNoteOn(IntPtr arpeggiatorHandle, double pitch) {
+        bool success = BarelyArpeggiator_SetNoteOn(arpeggiatorHandle, pitch);
+        if (!success && arpeggiatorHandle != IntPtr.Zero) {
+          Debug.LogError("Failed to start arpeggiator note " + pitch);
+        }
+      }
+
       /// Creates a new effect.
       ///
       /// @param instrumentHandle Instrument handle.
@@ -557,7 +667,6 @@ namespace Barely {
       /// Sets all instrument notes off.
       ///
       /// @param instrumentHandle Instrument handle.
-      /// @return True if success, false otherwise.
       public static void Instrument_SetAllNotesOff(IntPtr instrumentHandle) {
         bool success = BarelyInstrument_SetAllNotesOff(instrumentHandle);
         if (!success && instrumentHandle != IntPtr.Zero) {
@@ -613,7 +722,6 @@ namespace Barely {
       ///
       /// @param instrumentHandle Instrument handle.
       /// @param pitch Note pitch.
-      /// @return True if success, false otherwise.
       public static void Instrument_SetNoteOff(IntPtr instrumentHandle, double pitch) {
         bool success = BarelyInstrument_SetNoteOff(instrumentHandle, pitch);
         if (!success && instrumentHandle != IntPtr.Zero) {
@@ -1512,6 +1620,48 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyTask_SetProcessOrder")]
       private static extern bool BarelyTask_SetProcessOrder(IntPtr task, Int32 processOrder);
 
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_Create")]
+      private static extern bool BarelyArpeggiator_Create(IntPtr musician, Int32 processOrder,
+                                                          ref IntPtr outArpeggiator);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_Destroy")]
+      private static extern bool BarelyArpeggiator_Destroy(IntPtr arpeggiator);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_IsNoteOn")]
+      private static extern bool BarelyArpeggiator_IsNoteOn(IntPtr arpeggiator, double pitch,
+                                                            ref bool outIsNoteOn);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
+      private static extern bool BarelyArpeggiator_IsPlaying(IntPtr arpeggiator,
+                                                             ref bool outIsPlaying);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetGateRatio")]
+      private static extern bool BarelyArpeggiator_SetGateRatio(IntPtr arpeggiator,
+                                                                double gateRatio);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_IsPlaying")]
+      private static extern bool BarelyArpeggiator_IsPlaying(IntPtr arpeggiator);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetAllNotesOff")]
+      private static extern bool BarelyArpeggiator_SetAllNotesOff(IntPtr arpeggiator);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetInstrument")]
+      private static extern bool BarelyArpeggiator_SetInstrument(IntPtr arpeggiator,
+                                                                 IntPtr instrument);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOff")]
+      private static extern bool BarelyArpeggiator_SetNoteOff(IntPtr arpeggiator, double gateRatio);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetNoteOn")]
+      private static extern bool BarelyArpeggiator_SetNoteOn(IntPtr arpeggiator, double gateRatio);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetRate")]
+      private static extern bool BarelyArpeggiator_SetRate(IntPtr arpeggiator, double rate);
+
+      [DllImport(pluginName, EntryPoint = "BarelyArpeggiator_SetStyle")]
+      private static extern bool BarelyArpeggiator_SetStyle(IntPtr arpeggiator,
+                                                            ArpeggiatorStyle style);
+
       [DllImport(pluginName, EntryPoint = "BarelyHighPassEffect_GetDefinition")]
       private static extern EffectDefinition BarelyHighPassEffect_GetDefinition();
 
@@ -1528,4 +1678,4 @@ namespace Barely {
       private static extern InstrumentDefinition BarelySynthInstrument_GetDefinition();
     }
   }
-}
+}  // namespace Barely

@@ -9,6 +9,7 @@ target_compile_definitions(
 target_link_libraries(
   barelymusicianunity PUBLIC
   barelymusician
+  barely_arpeggiator
   barely_high_pass_effect
   barely_low_pass_effect
   barely_percussion_instrument

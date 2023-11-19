@@ -85,4 +85,4 @@ namespace Barely {
       Marshal.FreeHGlobal(dataPtr);
     }
   }
-}
+}  // namespace Barely

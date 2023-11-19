@@ -52,4 +52,4 @@ namespace Barely {
       SetControl(6, (double)VoiceCount);
     }
   }
-}
+}  // namespace Barely

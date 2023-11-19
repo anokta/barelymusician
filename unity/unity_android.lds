@@ -56,6 +56,18 @@ VERS_1.0 {
     BarelyTask_SetPosition;
     BarelyTask_SetProcessOrder;
 
+    BarelyArpeggiator_Create;
+    BarelyArpeggiator_Destroy;
+    BarelyArpeggiator_IsNoteOn;
+    BarelyArpeggiator_IsPlaying;
+    BarelyArpeggiator_SetAllNotesOff;
+    BarelyArpeggiator_SetGateRatio;
+    BarelyArpeggiator_SetInstrument;
+    BarelyArpeggiator_SetNoteOff;
+    BarelyArpeggiator_SetNoteOn;
+    BarelyArpeggiator_SetRate;
+    BarelyArpeggiator_SetStyle;
+
     BarelyHighPassEffect_GetDefinition;
     BarelyLowPassEffect_GetDefinition;
 

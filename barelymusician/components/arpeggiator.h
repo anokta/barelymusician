@@ -1,9 +1,106 @@
 #ifndef BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_H_
 #define BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_H_
 
+#include "barelymusician/barelymusician.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
+/// Arpeggiator handle.
+typedef struct BarelyArpeggiator* BarelyArpeggiatorHandle;
+
+/// Arpeggiator style enum alias.
+typedef int32_t BarelyArpeggiatorStyle;
+
+/// Creates a new arpeggiator.
+///
+/// @param musician Musician handle.
+/// @param process_order Arpeggiator process order.
+/// @param out_arpeggiator Output arpeggiator handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_order,
+                                            BarelyArpeggiatorHandle* out_arpeggiator);
+
+/// Destroys an arpeggiator.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator);
+
+/// Gets whether an arpeggiator note is on or not.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @param pitch Note pitch.
+/// @param out_is_note_on Output true if on, false otherwise.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_IsNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch,
+                                              bool* out_is_note_on);
+
+/// Gets whether an arpeggiator is playing or not.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @param out_is_playing Output true if playing, false otherwise.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_IsPlaying(BarelyArpeggiatorHandle arpeggiator,
+                                               bool* out_is_playing);
+
+/// Sets all arpeggiator notes off.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_SetAllNotesOff(BarelyArpeggiatorHandle arpeggiator);
+
+/// Sets the gate ratio of an arpeggiator.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @param gate_ratio Gate ratio.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_SetGateRatio(BarelyArpeggiatorHandle arpeggiator,
+                                                  double gate_ratio);
+
+/// Sets the instrument of an arpeggiator.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @param instrument Instrument handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
+                                                   BarelyInstrumentHandle instrument);
+
+/// Sets an arpeggiator note off.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOff(BarelyArpeggiatorHandle arpeggiator, double pitch);
+
+/// Sets an arpeggiator note on.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_SetNoteOn(BarelyArpeggiatorHandle arpeggiator, double pitch);
+
+/// Sets the rate of an arpeggiator.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @param rate Rate in notes per beat.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_SetRate(BarelyArpeggiatorHandle arpeggiator, double rate);
+
+/// Sets the style of an arpeggiator.
+///
+/// @param arpeggiator Arpeggiator handle.
+/// @param style Arpeggiator style.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyArpeggiator_SetStyle(BarelyArpeggiatorHandle arpeggiator,
+                                              BarelyArpeggiatorStyle style);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
+
+#ifdef __cplusplus
 #include <vector>
 
-#include "barelymusician/barelymusician.h"
 #include "barelymusician/common/random.h"
 
 namespace barely {
@@ -108,5 +205,6 @@ class Arpeggiator {
 };
 
 }  // namespace barely
+#endif  // __cplusplus
 
 #endif  // BARELYMUSICIAN_COMPONENTS_ARPEGGIATOR_H_

@@ -10,4 +10,4 @@ namespace Barely {
     /// Maximum value.
     public double maxValue;
   }
-}
+}  // namespace Barely

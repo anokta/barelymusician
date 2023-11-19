@@ -221,4 +221,4 @@ namespace Barely {
     // Handle.
     private IntPtr _handle = IntPtr.Zero;
   }
-}
+}  // namespace Barely

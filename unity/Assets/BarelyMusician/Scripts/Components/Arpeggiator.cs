@@ -20,6 +20,14 @@ namespace Barely {
   public class Arpeggiator : MonoBehaviour {
     public int ProcessOrder = 0;
 
+    /// Gate ratio.
+    [Range(0.0f, 1.0f)]
+    public double GateRatio = 0.5;
+
+    /// Rate.
+    [Range(0.0f, 8.0f)]
+    public double Rate = 1.0;
+
     /// Syle.
     public ArpeggiatorStyle Style = ArpeggiatorStyle.UP;
 
@@ -58,10 +66,12 @@ namespace Barely {
 
     protected virtual void Update() {
       if (_handle == IntPtr.Zero && GetComponent<Instrument>().enabled) {
-        Debug.Log("HAFAD");
         Musician.Internal.Component_Create(
             this, Instrument.Internal.GetInstrumentHandle(GetComponent<Instrument>()), ref _handle);
       }
+      Musician.Internal.Arpeggiator_SetGateRatio(_handle, GateRatio);
+      Musician.Internal.Arpeggiator_SetRate(_handle, Rate);
+      Musician.Internal.Arpeggiator_SetStyle(_handle, Style);
     }
 
     protected virtual void OnDisable() {

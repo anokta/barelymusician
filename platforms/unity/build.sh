@@ -8,9 +8,9 @@
 readonly WORKSPACE="$(bazel info workspace)"
 readonly BAZEL_BIN="${WORKSPACE}/bazel-bin"
 
-readonly NATIVE_BIN_DIR="${BAZEL_BIN}/unity"
+readonly NATIVE_BIN_DIR="${BAZEL_BIN}/platforms/unity"
 
-readonly PLUGINS_DIR="${WORKSPACE}/unity/Assets/BarelyMusician/Plugins"
+readonly PLUGINS_DIR="${WORKSPACE}/platforms/unity/Assets/BarelyMusician/Plugins"
 readonly PLUGINS_ANDROID_DIR="${PLUGINS_DIR}/Android/libs"
 readonly PLUGINS_X64_DIR="${PLUGINS_DIR}/x86_64"
 
@@ -60,14 +60,14 @@ main() {
   case "$(uname -s)" in
   Linux)
     echo "Building BarelyMusician Unity native Linux plugin..."
-    bazel build -c "${COMPILATION_MODE}" "//unity:libunity_linux.so"
+    bazel build -c "${COMPILATION_MODE}" "//platforms/unity:libunity_linux.so"
     echo "Copying native Linux plugin into Unity project..."
     cp -rf "${LINUX_BIN_SRC_PATH}" "${LINUX_BIN_DST_PATH}"
     ;;
 
   Darwin)
     echo "Building BarelyMusician Unity native OSX plugin..."
-    bazel build -c "${COMPILATION_MODE}" "//unity:unity_osx.dylib"
+    bazel build -c "${COMPILATION_MODE}" "//platforms/unity:unity_osx.dylib"
     echo "Copying native OSX plugin into Unity project..."
     cp -rf "${OSX_BIN_SRC_PATH}" "${OSX_BIN_DST_PATH}"
     ;;
@@ -75,7 +75,7 @@ main() {
   CYGWIN* | MINGW* | MSYS*)
     export MSYS2_ARG_CONV_EXCL="*"
     echo "Building BarelyMusician Unity native Windows plugin..."
-    bazel build -c "${COMPILATION_MODE}" "//unity:unity_windows.dll"
+    bazel build -c "${COMPILATION_MODE}" "//platforms/unity:unity_windows.dll"
     echo "Copying native Windows plugin into Unity project..."
     cp -rf "${WINDOWS_BIN_SRC_PATH}" "${WINDOWS_BIN_DST_PATH}"
     ;;
@@ -85,13 +85,13 @@ main() {
 
   echo "Building BarelyMusician Unity native Android-ARM32 plugin..."
   bazel build -c "${COMPILATION_MODE}" --noenable_platform_specific_config \
-    --config=android_armeabi-v7a "//unity:libunity_android.so"
+    --config=android_armeabi-v7a "//platforms/unity:libunity_android.so"
   echo "Copying native Android-ARM32 plugin into Unity project..."
   cp -rf "${ANDROID_BIN_SRC_PATH}" "${ANDROID_ARM32_BIN_DST_PATH}"
 
   echo "Building BarelyMusician Unity native Android-ARM64 plugin..."
   bazel build -c "${COMPILATION_MODE}" --noenable_platform_specific_config \
-    --config=android_arm64-v8a "//unity:libunity_android.so"
+    --config=android_arm64-v8a "//platforms/unity:libunity_android.so"
   echo "Copying native Android-ARM64 plugin into Unity project..."
   cp -rf "${ANDROID_BIN_SRC_PATH}" "${ANDROID_ARM64_BIN_DST_PATH}"
 

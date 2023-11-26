@@ -5,4 +5,4 @@
 
 *.cs text diff=csharp
 
-unity/Docs/** linguist-documentation
+platforms/unity/Docs/** linguist-documentation

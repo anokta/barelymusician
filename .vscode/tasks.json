@@ -24,7 +24,7 @@
     {
       "label": "barelymusician: unity",
       "type": "shell",
-      "command": "./unity/build.sh",
+      "command": "chmod +x ./platforms/unity/build.sh && ./platforms/unity/build.sh",
       "problemMatcher": [],
       "group": {
         "kind": "build",

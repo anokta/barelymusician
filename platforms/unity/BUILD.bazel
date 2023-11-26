@@ -16,7 +16,7 @@ ANDROID_LINKOPTS = [
     "-ldl",
     "-lm",
     "-Wl,--version-script",
-    "$(location //unity:unity_android.lds)",
+    "$(location //platforms/unity:unity_android.lds)",
     "-z defs",
 ]
 

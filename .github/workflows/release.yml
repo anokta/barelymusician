@@ -67,14 +67,14 @@ jobs:
       - name: build
         shell: bash
         run: |
-          chmod +x ./unity/build.sh
-          ./unity/build.sh
+          chmod +x ./platforms/unity/build.sh
+          ./platforms/unity/build.sh
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
       - uses: actions/upload-artifact@v3
         with:
           name: unity-${{ matrix.os }}
-          path: unity/Assets/BarelyMusician/Plugins
+          path: platforms/unity/Assets/BarelyMusician/Plugins
 
   deploy:
     name: artifacts
@@ -100,16 +100,16 @@ jobs:
         run: |
           mkdir -p artifacts/unity
           for dir in temp/unity-*/; do
-            cp -rf "${dir}"* unity/Assets/BarelyMusician/Plugins/
+            cp -rf "${dir}"* platforms/unity/Assets/BarelyMusician/Plugins/
           done
-          cd unity
+          cd platforms/unity
           find Assets/ -name \*.meta >> meta
       - uses: pCYSl5EDgo/create-unitypackage@master
         with:
           package-path: |
             ${{ github.workspace }}/artifacts/unity/barelymusician.unitypackage
-          include-files: unity/meta
-          project-folder: unity
+          include-files: platforms/unity/meta
+          project-folder: platforms/unity
       - uses: actions/upload-artifact@master
         with:
           name: artifacts-${{ github.sha }}

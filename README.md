@@ -5,22 +5,21 @@ barelymusician
 
 barelymusician is a real-time music engine for interactive systems.
 
-It provides a modern C/C++ API to generate and perform musical sounds from
-scratch in a sample accurate way.
+It provides a modern C/C++ API to generate and perform musical sounds from scratch in a sample
+accurate way.
 
 [iOS]: ## "see issue #112 for the status of the upcoming iOS platform support"
-This repository includes build targets for Linux, OSX, Windows and Android
-platforms[*][iOS], in addition to a native Unity game engine plugin. The library
-targets can be built with [Bazel](https://bazel.build/) or
-[CMake](https://cmake.org/). To use in a project, simply include
+This repository includes build targets for Linux, OSX, Windows, Android, and Daisy platforms, in
+addition to a native Unity game engine plugin[*][iOS]. The library targets can be built with
+[Bazel](https://bazel.build/) or [CMake](https://cmake.org/). To use in a project, simply include
 [barelymusician/barelymusician.h](barelymusician/barelymusician.h).
 
 To use in Unity, download the latest version of
 [barelymusician.unitypackage](https://github.com/anokta/barelymusician/releases/latest/download/barelymusician.unitypackage).
 
 For background about this project, see the original research paper
-[here](http://www.aes.org/e-lib/browse.cfm?elib=17598), and the legacy Unity
-implementation [here](https://github.com/anokta/barelyMusicianLegacy).
+[here](http://www.aes.org/e-lib/browse.cfm?elib=17598), and the legacy Unity implementation
+[here](https://github.com/anokta/barelyMusicianLegacy).
 
 ## Example usage
 

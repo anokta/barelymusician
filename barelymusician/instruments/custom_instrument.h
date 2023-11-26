@@ -1,7 +1,7 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 
-#include <stdint.h>   // NOLINT(modernize-deprecated-headers)
+#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
 
 #include "barelymusician/barelymusician.h"
 

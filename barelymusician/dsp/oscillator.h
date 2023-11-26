@@ -18,6 +18,8 @@ enum class OscillatorType {
   kSquare = 2,
   /// White noise.
   kNoise = 3,
+  /// Count.
+  kCount = 4,
 };
 
 /// Simple oscillator that generates output samples of basic waveforms.

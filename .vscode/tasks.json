@@ -22,6 +22,16 @@
       },
     },
     {
+      "label": "barelymusician: daisy",
+      "type": "shell",
+      "command": "chmod +x ./platforms/daisy/build.sh && ./platforms/daisy/build.sh",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false,
+      },
+    },
+    {
       "label": "barelymusician: unity",
       "type": "shell",
       "command": "chmod +x ./platforms/unity/build.sh && ./platforms/unity/build.sh",

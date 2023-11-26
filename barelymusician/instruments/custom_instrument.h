@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 #define BARELYMUSICIAN_INSTRUMENTS_CUSTOM_INSTRUMENT_H_
 
+#include <stdint.h>   // NOLINT(modernize-deprecated-headers)
+
 #include "barelymusician/barelymusician.h"
 
 #ifdef __cplusplus
@@ -75,7 +77,7 @@ class CustomInstrument {
       using CustomInstrumentType::SetNoteOn;
     };
     return InstrumentDefinition(
-        [](void** state, int frame_rate) noexcept {
+        [](void** state, int32_t frame_rate) noexcept {
           // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
           *state = static_cast<void*>(new PublicInstrument(frame_rate));
         },
@@ -83,20 +85,20 @@ class CustomInstrument {
           delete static_cast<PublicInstrument*>(*state);
           *state = nullptr;
         },
-        [](void** state, double* output_samples, int output_channel_count,
-           int output_frame_count) noexcept {
+        [](void** state, double* output_samples, int32_t output_channel_count,
+           int32_t output_frame_count) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->Process(output_samples, output_channel_count, output_frame_count);
         },
-        [](void** state, int index, double value, double slope_per_frame) {
+        [](void** state, int32_t index, double value, double slope_per_frame) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetControl(index, value, slope_per_frame);
         },
-        [](void** state, const void* data, int size) noexcept {
+        [](void** state, const void* data, int32_t size) noexcept {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetData(data, size);
         },
-        [](void** state, double pitch, int index, double value, double slope_per_frame) {
+        [](void** state, double pitch, int32_t index, double value, double slope_per_frame) {
           auto* instrument = static_cast<PublicInstrument*>(*state);
           instrument->SetNoteControl(pitch, index, value, slope_per_frame);
         },

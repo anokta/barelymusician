@@ -1,6 +1,8 @@
 #ifndef BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 #define BARELYMUSICIAN_EFFECTS_CUSTOM_EFFECT_H_
 
+#include <stdint.h>   // NOLINT(modernize-deprecated-headers)
+
 #include "barelymusician/barelymusician.h"
 
 #ifdef __cplusplus
@@ -50,7 +52,7 @@ class CustomEffect {
       using CustomEffectType::SetData;
     };
     return EffectDefinition(
-        [](void** state, int frame_rate) noexcept {
+        [](void** state, int32_t frame_rate) noexcept {
           // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
           *state = static_cast<void*>(new PublicEffect(frame_rate));
         },
@@ -58,16 +60,16 @@ class CustomEffect {
           delete static_cast<PublicEffect*>(*state);
           *state = nullptr;
         },
-        [](void** state, double* output_samples, int output_channel_count,
-           int output_frame_count) noexcept {
+        [](void** state, double* output_samples, int32_t output_channel_count,
+           int32_t output_frame_count) noexcept {
           auto* effect = static_cast<PublicEffect*>(*state);
           effect->Process(output_samples, output_channel_count, output_frame_count);
         },
-        [](void** state, int index, double value, double slope_per_frame) {
+        [](void** state, int32_t index, double value, double slope_per_frame) {
           auto* effect = static_cast<PublicEffect*>(*state);
           effect->SetControl(index, value, slope_per_frame);
         },
-        [](void** state, const void* data, int size) noexcept {
+        [](void** state, const void* data, int32_t size) noexcept {
           auto* effect = static_cast<PublicEffect*>(*state);
           effect->SetData(data, size);
         },

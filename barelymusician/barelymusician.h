@@ -1540,10 +1540,10 @@ class Effect {
   ///
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
-    int process_order = 0;
+    int32_t process_order = 0;
     [[maybe_unused]] const bool success = BarelyEffect_GetProcessOrder(effect_, &process_order);
     assert(success);
-    return process_order;
+    return static_cast<int>(process_order);
   }
 
   /// Releases the handle.
@@ -2014,10 +2014,10 @@ class Task {
   ///
   /// @return Process order.
   [[nodiscard]] int GetProcessOrder() const noexcept {
-    int process_order = 0;
+    int32_t process_order = 0;
     [[maybe_unused]] const bool success = BarelyTask_GetProcessOrder(task_, &process_order);
     assert(success);
-    return process_order;
+    return static_cast<int>(process_order);
   }
 
   /// Releases the handle.

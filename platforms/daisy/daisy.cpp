@@ -1,12 +1,14 @@
 #include <array>
 
 #include "barelymusician/barelymusician.h"
+#include "barelymusician/composition/pitch.h"
 #include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "daisy_pod.h"
 
 using ::barely::Musician;
 using ::barely::OscillatorType;
+using ::barely::PitchFromMidi;
 using ::barely::SynthInstrument;
 using ::daisy::AudioHandle;
 using ::daisy::DaisyPod;
@@ -55,12 +57,6 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
   }
 }
 
-// Returns the pitch for a given `midi_key_number`.
-// TODO(#123): Move this to a common place (likely in //barelymusician/composition).
-double PitchFromMidiKeyNumber(int midi_key_number) {
-  return static_cast<double>(midi_key_number - 69) / 12.0;
-}
-
 int main(void) {
   // Initialize the Daisy hardware.
   hw.Init();
@@ -97,11 +93,11 @@ int main(void) {
       switch (midi_event.type) {
         case MidiMessageType::NoteOn:
           if (const auto note_on_event = midi_event.AsNoteOn(); note_on_event.velocity != 0) {
-            instrument.SetNoteOn(PitchFromMidiKeyNumber(note_on_event.note));
+            instrument.SetNoteOn(PitchFromMidi(note_on_event.note));
           }
           break;
         case MidiMessageType::NoteOff:
-          instrument.SetNoteOff(PitchFromMidiKeyNumber(midi_event.AsNoteOff().note));
+          instrument.SetNoteOff(PitchFromMidi(midi_event.AsNoteOff().note));
           break;
         default:
           break;

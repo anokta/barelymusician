@@ -51,6 +51,7 @@ add_executable(
 target_link_libraries(
   barely_examples_midi_demo
   barelymusician
+  barely_intensity
   barely_pitch
   barely_synth_instrument
   barely_examples_audio_clock

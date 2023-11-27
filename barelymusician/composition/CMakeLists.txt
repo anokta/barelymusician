@@ -5,6 +5,12 @@ add_library(
 )
 
 add_library(
+  barely_intensity
+  intensity.cpp
+  intensity.h
+)
+
+add_library(
   barely_pitch
   pitch.cpp
   pitch.h
@@ -21,6 +27,17 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_duration_test)
+
+  add_executable(
+    barely_intensity_test
+    intensity_test.cpp
+  )
+  target_link_libraries(
+    barely_intensity_test
+    barely_intensity
+    gtest_main
+  )
+  gtest_discover_tests(barely_intensity_test)
 
   add_executable(
     barely_pitch_test

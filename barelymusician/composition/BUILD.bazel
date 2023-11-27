@@ -9,6 +9,12 @@ cc_library(
 )
 
 cc_library(
+    name = "intensity",
+    srcs = ["intensity.cpp"],
+    hdrs = ["intensity.h"],
+)
+
+cc_library(
     name = "pitch",
     srcs = ["pitch.cpp"],
     hdrs = ["pitch.h"],
@@ -19,6 +25,15 @@ cc_test(
     srcs = ["duration_test.cpp"],
     deps = [
         ":duration",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "intensity_test",
+    srcs = ["intensity_test.cpp"],
+    deps = [
+        ":intensity",
         "@googletest//:gtest_main",
     ],
 )

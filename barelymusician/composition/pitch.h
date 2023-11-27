@@ -10,7 +10,7 @@ namespace barely {
 inline constexpr double kSemitoneCount = 12.0;
 
 /// Semitone pitch intervals of an octave.
-inline constexpr std::array<double, 12> kPitchSemitones = {
+inline constexpr std::array<double, static_cast<int>(kSemitoneCount)> kPitchSemitones = {
     0.0,
     1.0 / kSemitoneCount,
     2.0 / kSemitoneCount,
@@ -140,6 +140,21 @@ inline constexpr double kPitchKick = kPitchC3;
 inline constexpr double kPitchSnare = kPitchD3;
 inline constexpr double kPitchHihatClosed = kPitchE3;
 inline constexpr double kPitchHihatOpen = kPitchF3;
+
+// Midi note number for A4 (middle A).
+inline constexpr int kMidiA0 = 69;
+
+/// Returns the correspnding midi note number for a given pitch.
+///
+/// @param pitch Note pitch.
+/// @return Midi note number.
+int MidiFromPitch(double pitch) noexcept;
+
+/// Returns the correspnding note pitch for a given midi note number.
+///
+/// @param midi Midi note number.
+/// @return Note pitch.
+double PitchFromMidi(int midi) noexcept;
 
 /// Returns the corresponding note pitch for a given scale and index.
 ///

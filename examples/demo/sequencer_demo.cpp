@@ -41,11 +41,6 @@ constexpr double kRelease = 0.1;
 constexpr double kInitialTempo = 120.0;
 constexpr double kTempoIncrement = 10.0;
 
-// Returns the MIDI key number for the given `pitch`.
-int MidiKeyNumberFromPitch(double pitch) {
-  return static_cast<int>(barely::kSemitoneCount * pitch) + 69;
-}
-
 }  // namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -64,7 +59,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   instrument.SetControl(SynthInstrument::Control::kAttack, kAttack);
   instrument.SetControl(SynthInstrument::Control::kRelease, kRelease);
   instrument.SetNoteOnEvent([](double pitch, double /*intensity*/) {
-    ConsoleLog() << "Note{" << MidiKeyNumberFromPitch(pitch) << "}";
+    ConsoleLog() << "Note{" << barely::MidiFromPitch(pitch) << "}";
   });
 
   auto performer = musician.CreatePerformer();

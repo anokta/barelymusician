@@ -5,6 +5,14 @@
 
 namespace barely {
 
+int MidiFromPitch(double pitch) noexcept {
+  return static_cast<int>(std::round(kSemitoneCount * pitch)) + kMidiA0;
+}
+
+double PitchFromMidi(int midi) noexcept {
+  return static_cast<double>(midi - kMidiA0) / kSemitoneCount;
+}
+
 double PitchFromScale(std::span<const double> scale, int index) noexcept {
   if (!scale.empty()) {
     const double scale_length = static_cast<double>(scale.size());

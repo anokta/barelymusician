@@ -50,6 +50,7 @@ cc_binary(
     srcs = ["midi_demo.cpp"],
     deps = [
         "//barelymusician",
+        "//barelymusician/composition:intensity",
         "//barelymusician/composition:pitch",
         "//barelymusician/instruments:synth_instrument",
         "//examples/common:audio_clock",

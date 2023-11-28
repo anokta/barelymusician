@@ -133,9 +133,23 @@ bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* o
 
   const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
   if (instrument_or.has_value()) {
-    const auto value_or = instrument_or->get().GetEffectControl(effect->id, index);
-    if (value_or.has_value()) {
-      *out_value = *value_or;
+    if (const auto* control = instrument_or->get().GetEffectControl(effect->id, index)) {
+      *out_value = control->GetValue();
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
+                                       BarelyControlDefinition* out_definition) {
+  if (!effect) return false;
+  if (!out_definition) return false;
+
+  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
+  if (instrument_or.has_value()) {
+    if (const auto* control = instrument_or->get().GetEffectControl(effect->id, index)) {
+      *out_definition = control->GetDefinition();
       return true;
     }
   }
@@ -250,9 +264,23 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t inde
 
   const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.has_value()) {
-    const auto control_or = instrument_or->get().GetControl(index);
-    if (control_or.has_value()) {
-      *out_value = *control_or;
+    if (const auto* control = instrument_or->get().GetControl(index)) {
+      *out_value = control->GetValue();
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, int32_t index,
+                                           BarelyControlDefinition* out_definition) {
+  if (!instrument) return false;
+  if (!out_definition) return false;
+
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
+  if (instrument_or.has_value()) {
+    if (const auto* control = instrument_or->get().GetControl(index)) {
+      *out_definition = control->GetDefinition();
       return true;
     }
   }
@@ -266,9 +294,24 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double p
 
   const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
   if (instrument_or.has_value()) {
-    const auto note_control_or = instrument_or->get().GetNoteControl(pitch, index);
-    if (note_control_or.has_value()) {
-      *out_value = *note_control_or;
+    if (const auto* note_control = instrument_or->get().GetNoteControl(pitch, index)) {
+      *out_value = note_control->GetValue();
+      return true;
+    }
+  }
+  return false;
+}
+
+bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument, double pitch,
+                                               int32_t index,
+                                               BarelyControlDefinition* out_definition) {
+  if (!instrument) return false;
+  if (!out_definition) return false;
+
+  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
+  if (instrument_or.has_value()) {
+    if (const auto* note_control = instrument_or->get().GetNoteControl(pitch, index)) {
+      *out_definition = note_control->GetDefinition();
       return true;
     }
   }

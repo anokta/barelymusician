@@ -4,6 +4,7 @@ EXPORTS
   BarelyEffect_Create
   BarelyEffect_Destroy
   BarelyEffect_GetControl
+  BarelyEffect_GetControlDefinition
   BarelyEffect_GetProcessOrder
   BarelyEffect_ResetAllControls
   BarelyEffect_ResetControl
@@ -14,7 +15,9 @@ EXPORTS
   BarelyInstrument_Create
   BarelyInstrument_Destroy
   BarelyInstrument_GetControl
+  BarelyInstrument_GetControlDefinition
   BarelyInstrument_GetNoteControl
+  BarelyInstrument_GetNoteControlDefinition
   BarelyInstrument_IsNoteOn
   BarelyInstrument_Process
   BarelyInstrument_ResetAllControls

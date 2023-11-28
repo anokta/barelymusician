@@ -13,7 +13,9 @@
 namespace barely::internal {
 namespace {
 
-using ::testing::Optional;
+using ::testing::IsNull;
+using ::testing::Pointee;
+using ::testing::Property;
 
 constexpr int kFrameRate = 8000;
 constexpr int kChannelCount = 1;
@@ -53,22 +55,22 @@ InstrumentDefinition GetTestDefinition() {
 // Tests that the instrument returns a control value as expected.
 TEST(InstrumentTest, GetControl) {
   Instrument instrument(GetTestDefinition(), kFrameRate, kTempo, 0.0);
-  EXPECT_THAT(instrument.GetControl(0), Optional(15.0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
 
   EXPECT_TRUE(instrument.SetControl(0, 20.0, 0.0));
-  EXPECT_THAT(instrument.GetControl(0), Optional(20.0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 20.0)));
 
   EXPECT_TRUE(instrument.ResetControl(0));
-  EXPECT_THAT(instrument.GetControl(0), Optional(15.0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
 
   EXPECT_TRUE(instrument.SetControl(0, 50.0, 0.0));
-  EXPECT_THAT(instrument.GetControl(0), Optional(20.0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 20.0)));
 
   instrument.ResetAllControls();
-  EXPECT_THAT(instrument.GetControl(0), Optional(15.0));
+  EXPECT_THAT(instrument.GetControl(0), Pointee(Property(&Control::GetValue, 15.0)));
 
   // Control does not exist.
-  EXPECT_FALSE(instrument.GetControl(1).has_value());
+  EXPECT_THAT(instrument.GetControl(1), IsNull());
   EXPECT_FALSE(instrument.SetControl(1, 2.0, 0.0));
   EXPECT_FALSE(instrument.ResetControl(1));
 }
@@ -84,28 +86,28 @@ TEST(InstrumentTest, GetNoteControl) {
 
   instrument.SetNoteOn(kPitch, kIntensity);
   EXPECT_TRUE(instrument.IsNoteOn(kPitch));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Optional(1.0));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
 
   EXPECT_TRUE(instrument.SetNoteControl(kPitch, 0, 0.25, 0.0));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Optional(0.25));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 0.25)));
 
   EXPECT_TRUE(instrument.ResetNoteControl(kPitch, 0));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Optional(1.0));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
 
   EXPECT_TRUE(instrument.SetNoteControl(kPitch, 0, -10.0, 0.0));
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Optional(0.0));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 0.0)));
 
   instrument.ResetAllNoteControls(kPitch);
-  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Optional(1.0));
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), Pointee(Property(&Control::GetValue, 1.0)));
 
   // Note control does not exist.
-  EXPECT_FALSE(instrument.GetNoteControl(kPitch, 1).has_value());
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 1), IsNull());
   EXPECT_FALSE(instrument.SetNoteControl(kPitch, 1, 0.25, 0.0));
   EXPECT_FALSE(instrument.ResetNoteControl(kPitch, 1));
 
   instrument.SetNoteOff(kPitch);
   EXPECT_FALSE(instrument.IsNoteOn(kPitch));
-  EXPECT_FALSE(instrument.GetNoteControl(kPitch, 0).has_value());
+  EXPECT_THAT(instrument.GetNoteControl(kPitch, 0), IsNull());
 }
 
 // Tests that the instrument plays a single note as expected.

@@ -616,6 +616,15 @@ BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 BARELY_EXPORT bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index,
                                            double* out_value);
 
+/// Gets an effect control definition.
+///
+/// @param effect Effect handle.
+/// @param index Control index.
+/// @param out_definition Output control definition.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
+                                                     BarelyControlDefinition* out_value);
+
 /// Gets the process order of an effect.
 ///
 /// @param effect Effect handle.
@@ -699,6 +708,16 @@ BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
                                                double* out_value);
 
+/// Gets an instrument control definition.
+///
+/// @param instrument Instrument handle.
+/// @param index Control index.
+/// @param out_definition Output control definition.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument,
+                                                         int32_t index,
+                                                         BarelyControlDefinition* out_definition);
+
 /// Gets an instrument note control value.
 ///
 /// @param instrument Instrument handle.
@@ -708,6 +727,17 @@ BARELY_EXPORT bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double pitch,
                                                    int32_t index, double* out_value);
+
+/// Gets an instrument note control definition.
+///
+/// @param instrument Instrument handle.
+/// @param pitch Note pitch.
+/// @param index Note control index.
+/// @param out_definition Output note control definition.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyInstrument_GetNoteControlDefinition(
+    BarelyInstrumentHandle instrument, double pitch, int32_t index,
+    BarelyControlDefinition* out_definition);
 
 /// Gets whether an instrument note is on or not.
 ///
@@ -1536,6 +1566,21 @@ class Effect {
     return static_cast<ValueType>(value);
   }
 
+  /// Returns a control definition.
+  ///
+  /// @param index Control index.
+  /// @return Control definition.
+  template <typename IndexType>
+  [[nodiscard]] ControlDefinition GetControlDefinition(IndexType index) const noexcept {
+    static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+                  "IndexType is not supported");
+    BarelyControlDefinition definition;
+    [[maybe_unused]] const bool success =
+        BarelyEffect_GetControlDefinition(effect_, static_cast<int>(index), &definition);
+    assert(success);
+    return definition;
+  }
+
   /// Returns the process order.
   ///
   /// @return Process order.
@@ -1720,6 +1765,21 @@ class Instrument {
     return static_cast<ValueType>(value);
   }
 
+  /// Returns a control definition.
+  ///
+  /// @param index Control index.
+  /// @return Control definition.
+  template <typename IndexType>
+  [[nodiscard]] ControlDefinition GetControlDefinition(IndexType index) const noexcept {
+    static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+                  "IndexType is not supported");
+    BarelyControlDefinition definition;
+    [[maybe_unused]] const bool success =
+        BarelyInstrument_GetControlDefinition(instrument_, static_cast<int>(index), &definition);
+    assert(success);
+    return definition;
+  }
+
   /// Returns a note control value.
   ///
   /// @param index Note control index.
@@ -1733,6 +1793,22 @@ class Instrument {
         BarelyInstrument_GetNoteControl(instrument_, pitch, static_cast<int>(index), &value);
     assert(success);
     return static_cast<ValueType>(value);
+  }
+
+  /// Returns a note control definition.
+  ///
+  /// @param index Note control index.
+  /// @return Note control definition.
+  template <typename IndexType>
+  [[nodiscard]] ControlDefinition GetNoteControlDefinition(double pitch,
+                                                           IndexType index) const noexcept {
+    static_assert(std::is_integral<IndexType>::value || std::is_enum<IndexType>::value,
+                  "IndexType is not supported");
+    BarelyControlDefinition definition;
+    [[maybe_unused]] const bool success = BarelyInstrument_GetNoteControlDefinition(
+        instrument_, pitch, static_cast<int>(index), &definition);
+    assert(success);
+    return definition;
   }
 
   /// Returns whether a note is on or not.

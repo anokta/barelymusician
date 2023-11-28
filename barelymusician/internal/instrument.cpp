@@ -106,23 +106,23 @@ bool Instrument::DestroyEffect(Id effect_id) noexcept {
   return false;
 }
 
-std::optional<double> Instrument::GetControl(int index) const noexcept {
+const Control* Instrument::GetControl(int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(controls_.size())) {
-    return controls_[index].GetValue();
+    return &controls_[index];
   }
-  return std::nullopt;
+  return nullptr;
 }
 
-std::optional<double> Instrument::GetEffectControl(Id effect_id, int index) const noexcept {
+const Control* Instrument::GetEffectControl(Id effect_id, int index) const noexcept {
   if (effect_id == kInvalid) {
-    return std::nullopt;
+    return nullptr;
   }
   if (const auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
     if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
-      return effect_info->controls[index].GetValue();
+      return &effect_info->controls[index];
     }
   }
-  return std::nullopt;
+  return nullptr;
 }
 
 std::optional<int> Instrument::GetEffectProcessOrder(Id effect_id) const noexcept {
@@ -135,13 +135,13 @@ std::optional<int> Instrument::GetEffectProcessOrder(Id effect_id) const noexcep
   return std::nullopt;
 }
 
-std::optional<double> Instrument::GetNoteControl(double pitch, int index) const noexcept {
+const Control* Instrument::GetNoteControl(double pitch, int index) const noexcept {
   if (index >= 0 && index < static_cast<int>(default_note_controls_.size())) {
     if (const auto* note_controls = FindOrNull(note_controls_, pitch)) {
-      return (*note_controls)[index].GetValue();
+      return &(*note_controls)[index];
     }
   }
-  return std::nullopt;
+  return nullptr;
 }
 
 bool Instrument::IsNoteOn(double pitch) const noexcept {

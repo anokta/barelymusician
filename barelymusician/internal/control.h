@@ -13,6 +13,11 @@ class Control {
   /// @param definition Control definition.
   explicit Control(ControlDefinition definition) noexcept;
 
+  /// Returns the definition.
+  ///
+  /// @return Control definition.
+  [[nodiscard]] const ControlDefinition& GetDefinition() const noexcept;
+
   /// Returns the slope per beat.
   ///
   /// @return Control slope in value change per beat.

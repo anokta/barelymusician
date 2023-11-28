@@ -14,6 +14,8 @@ Control::Control(ControlDefinition definition) noexcept
          definition.default_value <= definition.max_value);
 }
 
+const ControlDefinition& Control::GetDefinition() const noexcept { return definition_; }
+
 double Control::GetSlopePerBeat() const noexcept { return slope_per_beat_; }
 
 double Control::GetValue() const noexcept { return value_; }

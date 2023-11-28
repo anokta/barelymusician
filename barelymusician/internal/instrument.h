@@ -58,15 +58,15 @@ class Instrument {
   /// Returns a control value.
   ///
   /// @param index Control index.
-  /// @return Optional control value.
-  [[nodiscard]] std::optional<double> GetControl(int index) const noexcept;
+  /// @return Pointer to control, or nullptr if not found.
+  [[nodiscard]] const Control* GetControl(int index) const noexcept;
 
   /// Returns an effect control value.
   ///
   /// @param effect_id Effect identifier.
   /// @param index Effect control index.
-  /// @return Optional effect control value.
-  [[nodiscard]] std::optional<double> GetEffectControl(Id effect_id, int index) const noexcept;
+  /// @return Pointer to control, or nullptr if not found.
+  [[nodiscard]] const Control* GetEffectControl(Id effect_id, int index) const noexcept;
 
   /// Returns effect process order.
   ///
@@ -78,8 +78,8 @@ class Instrument {
   ///
   /// @param pitch Note pitch.
   /// @param index Note control index.
-  /// @return Optional note control value.
-  [[nodiscard]] std::optional<double> GetNoteControl(double pitch, int index) const noexcept;
+  /// @return Pointer to note control, or nullptr if not found.
+  [[nodiscard]] const Control* GetNoteControl(double pitch, int index) const noexcept;
 
   /// Returns whether a note is on or not.
   ///

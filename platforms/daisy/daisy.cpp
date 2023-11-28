@@ -34,7 +34,7 @@ constexpr int kOscCount = static_cast<int>(OscillatorType::kCount);
 static DaisyPod hw;  // Currently targets the Daisy Pod hardware.
 static MidiUsbHandler midi;
 
-static barely::Instrument* instrument_ptr;
+static barely::Instrument* instrument_ptr = nullptr;
 static int osc_index = static_cast<int>(kOscillatorType);
 static std::array<double, kChannelCount * kFrameCount> temp_samples{0.0};
 

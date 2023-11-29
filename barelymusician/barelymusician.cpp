@@ -1,11 +1,11 @@
 #include "barelymusician/barelymusician.h"
 
-#include <stdbool.h>  // NOLINT(modernize-deprecated-headers)
-#include <stdint.h>   // NOLINT(modernize-deprecated-headers)
+#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
 
 #include <cstddef>
 
 #include "barelymusician/internal/engine.h"
+#include "barelymusician/internal/id.h"
 
 // Effect.
 struct BarelyEffect {

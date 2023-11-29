@@ -7,6 +7,7 @@ target_link_libraries(
   barelymusician
   barely_arpeggiator
   barely_pitch
+  barely_oscillator
   barely_synth_instrument
   barely_examples_audio_clock
   barely_examples_audio_output
@@ -22,6 +23,7 @@ target_link_libraries(
   barely_examples_instrument_demo
   barelymusician
   barely_pitch
+  barely_oscillator
   barely_synth_instrument
   barely_examples_audio_output
   barely_examples_console_log
@@ -37,6 +39,7 @@ target_link_libraries(
   barelymusician
   barely_metronome
   barely_pitch
+  barely_oscillator
   barely_synth_instrument
   barely_examples_audio_clock
   barely_examples_audio_output
@@ -53,6 +56,7 @@ target_link_libraries(
   barelymusician
   barely_intensity
   barely_pitch
+  barely_oscillator
   barely_synth_instrument
   barely_examples_audio_clock
   barely_examples_audio_output
@@ -73,6 +77,7 @@ target_link_libraries(
   barely_metronome
   barely_duration
   barely_pitch
+  barely_oscillator
   barely_percussion_instrument
   barely_synth_instrument
   barely_examples_audio_clock
@@ -92,6 +97,7 @@ target_link_libraries(
   barelymusician
   barely_repeater
   barely_pitch
+  barely_oscillator
   barely_synth_instrument
   barely_examples_audio_clock
   barely_examples_audio_output
@@ -124,6 +130,7 @@ target_link_libraries(
   barely_examples_sequencer_demo
   barelymusician
   barely_pitch
+  barely_oscillator
   barely_synth_instrument
   barely_examples_audio_clock
   barely_examples_audio_output
@@ -139,6 +146,7 @@ target_link_libraries(
   barely_examples_trigger_demo
   barelymusician
   barely_pitch
+  barely_oscillator
   barely_synth_instrument
   barely_examples_audio_clock
   barely_examples_audio_output

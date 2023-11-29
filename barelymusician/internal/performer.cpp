@@ -266,7 +266,7 @@ void Performer::Update(double duration) noexcept {
     return;
   }
   assert(duration >= 0.0 &&
-         (!GetDurationToNextTask() || duration <= GetDurationToNextTask()->first));
+         (!GetDurationToNextTask().has_value() || duration <= GetDurationToNextTask()->first));
   if (const double next_position = position_ + duration; next_position > position_) {
     SetPosition(next_position);
   }

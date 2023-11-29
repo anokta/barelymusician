@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/dsp/enveloped_voice.h"
 #include "barelymusician/instruments/custom_instrument.h"
 
 BarelyInstrumentDefinition BarelySamplerInstrument_GetDefinition() {

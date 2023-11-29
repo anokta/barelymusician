@@ -57,7 +57,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
   }
 
   Random random;
-  for (int n = 0; n < kGenerationCount; ++n) {
+  for (int i = 0; i < kGenerationCount; ++i) {
     const auto sequence = grammar.GenerateSequence(kStartSymbol, random);
     EXPECT_GE(sequence.size(), kMinSize);
     EXPECT_LE(sequence.size(), kMaxSize);
@@ -68,7 +68,7 @@ TEST(ContextFreeGrammarTest, GenerateSequenceExpectedSizeRange) {
 TEST(ContextFreeGrammarTest, GenerateSequenceNoRules) {
   constexpr int kStartSymbol = 0;
 
-  ContextFreeGrammar<int> grammar;
+  const ContextFreeGrammar<int> grammar;
 
   Random random;
   const auto sequence = grammar.GenerateSequence(kStartSymbol, random);

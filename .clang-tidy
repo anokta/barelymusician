@@ -27,9 +27,9 @@ CheckOptions:
   - key: bugprone-easily-swappable-parameters.ModelImplicitConversions
     value: '0'
   - key: readability-identifier-length.IgnoredParameterNames
-    value: '(id|it)'
+    value: '[abint]|i[dt]'
   - key: readability-identifier-length.IgnoredVariableNames
-    value: '(id|it)'
+    value: 'i[dt]'
   - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
     value: '1'
   - key: readability-braces-around-statements.ShortStatementLines

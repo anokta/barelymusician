@@ -9,7 +9,7 @@ namespace barely {
 
 Oscillator::Oscillator(int frame_rate) noexcept
     : frame_interval_(frame_rate > 0 ? 1.0 / static_cast<double>(frame_rate) : 0.0),
-      max_frequency_(static_cast<double>(frame_rate / 2)) {}
+      max_frequency_(static_cast<double>(frame_rate / 2)) {}  // NOLINT(bugprone-integer-division)
 
 double Oscillator::Next() noexcept {
   double output = 0.0;

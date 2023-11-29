@@ -76,13 +76,13 @@ void PercussionInstrument::SetData(const void* data, [[maybe_unused]] int size) 
   }
   const int voice_count = static_cast<int>(*data_double++);
   pads_.resize(voice_count, Pad(frame_rate_));
-  for (int i = 0; i < static_cast<int>(pads_.size()); ++i) {
+  for (auto& pad : pads_) {
     // Pad data is sequentially aligned by pitch, frequency, length and data.
-    pads_[i].pitch = static_cast<double>(*data_double++);
+    pad.pitch = static_cast<double>(*data_double++);
     const int frequency = static_cast<int>(static_cast<double>(*data_double++));
     const int length = static_cast<int>(static_cast<double>(*data_double++));
-    pads_[i].voice.generator().SetData(data_double, frequency, length);
-    pads_[i].voice.envelope().SetRelease(release_);
+    pad.voice.generator().SetData(data_double, frequency, length);
+    pad.voice.envelope().SetRelease(release_);
     data_double += length;
   }
 }

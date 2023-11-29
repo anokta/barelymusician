@@ -1,11 +1,11 @@
 #include <chrono>
 #include <thread>
-#include <tuple>
 #include <utility>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/composition/pitch.h"
+#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -58,7 +58,6 @@ int main(int /*argc*/, char* /*argv*/[]) {
     ConsoleLog() << "Note{" << barely::MidiFromPitch(pitch) << "}";
   });
 
-  std::vector<std::tuple<double, double, double>> notes;
   std::vector<std::pair<double, double>> triggers;
 
   auto performer = musician.CreatePerformer();

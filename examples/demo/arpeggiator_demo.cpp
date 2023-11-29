@@ -10,6 +10,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/components/arpeggiator.h"
 #include "barelymusician/composition/pitch.h"
+#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"

@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -15,6 +16,7 @@
 #include "barelymusician/components/metronome.h"
 #include "barelymusician/composition/duration.h"
 #include "barelymusician/composition/pitch.h"
+#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/percussion_instrument.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
@@ -380,6 +382,8 @@ int main(int /*argc*/, char* argv[]) {
             {barely::kPitchHihatClosed, "basic_hihat_closed.wav"},
             {barely::kPitchHihatOpen, "basic_hihat_open.wav"},
         });
+        break;
+      default:
         break;
     }
   };

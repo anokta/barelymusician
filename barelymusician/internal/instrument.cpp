@@ -13,6 +13,8 @@
 #include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/control.h"
+#include "barelymusician/internal/effect.h"
+#include "barelymusician/internal/id.h"
 #include "barelymusician/internal/message.h"
 
 namespace barely::internal {

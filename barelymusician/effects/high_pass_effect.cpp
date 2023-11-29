@@ -5,6 +5,7 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/dsp/dsp_utils.h"
+#include "barelymusician/dsp/one_pole_filter.h"
 #include "barelymusician/effects/custom_effect.h"
 
 BarelyEffectDefinition BarelyHighPassEffect_GetDefinition() {

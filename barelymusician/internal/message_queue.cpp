@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "barelymusician/internal/message.h"
+
 namespace barely::internal {
 
 bool MessageQueue::Add(double timestamp, Message message) noexcept {

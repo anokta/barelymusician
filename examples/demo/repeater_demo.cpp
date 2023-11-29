@@ -10,6 +10,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/components/repeater.h"
 #include "barelymusician/composition/pitch.h"
+#include "barelymusician/dsp/oscillator.h"
 #include "barelymusician/instruments/synth_instrument.h"
 #include "examples/common/audio_clock.h"
 #include "examples/common/audio_output.h"
@@ -166,6 +167,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
           repeater.Start();
           ConsoleLog() << "Repeater started";
         }
+        break;
+      default:
         break;
     }
   };

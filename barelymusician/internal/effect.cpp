@@ -1,5 +1,6 @@
 #include "barelymusician/internal/effect.h"
 
+#include <cassert>
 #include <cstddef>
 #include <vector>
 

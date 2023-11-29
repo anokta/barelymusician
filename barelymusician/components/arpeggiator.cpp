@@ -1,5 +1,7 @@
 #include "barelymusician/components/arpeggiator.h"
 
+#include <stdint.h>  // NOLINT(modernize-deprecated-headers)
+
 #include <algorithm>
 #include <optional>
 

@@ -1,6 +1,5 @@
 #include "barelymusician/components/repeater.h"
 
-#include <algorithm>
 #include <optional>
 
 #include "barelymusician/barelymusician.h"

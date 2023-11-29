@@ -52,16 +52,16 @@ TEST(BarelyMusicianTest, CreateDestroyPerformer) {
   EXPECT_TRUE(BarelyMusician_Destroy(musician));
 }
 
-TEST(MusicianTest, CreateDestroyMusician) { Musician musician; }
+TEST(MusicianTest, CreateDestroyMusician) { [[maybe_unused]] const Musician musician; }
 
 TEST(MusicianTest, CreateDestroyInstrument) {
   Musician musician;
-  Instrument instrument = musician.CreateInstrument({{}}, 1);
+  [[maybe_unused]] const Instrument instrument = musician.CreateInstrument({{}}, 1);
 }
 
 TEST(MusicianTest, CreateDestroyPerformer) {
   Musician musician;
-  Performer performer = musician.CreatePerformer();
+  [[maybe_unused]] const Performer performer = musician.CreatePerformer();
 }
 
 }  // namespace

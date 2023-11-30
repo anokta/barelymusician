@@ -58,30 +58,25 @@ std::optional<Id> Engine::CreateInstrumentEffect(Id instrument_id, EffectDefinit
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Id Engine::CreatePerformer() noexcept {
-  const Id performer_id = GenerateNextId();
-  [[maybe_unused]] const auto success = performers_.emplace(performer_id, Performer{}).second;
+std::shared_ptr<Performer> Engine::CreatePerformer() noexcept {
+  auto performer = std::shared_ptr<Performer>(new (std::nothrow) Performer());
+  [[maybe_unused]] const auto success = performers_.emplace(performer.get()).second;
   assert(success);
-  return performer_id;
+  return performer;
 }
 
-std::optional<Id> Engine::CreatePerformerTask(Id performer_id, TaskDefinition definition,
+std::optional<Id> Engine::CreatePerformerTask(Performer* performer, TaskDefinition definition,
                                               bool is_one_off, double position, int process_order,
                                               void* user_data) noexcept {
-  if (performer_id == kInvalid) {
+  if (performer == nullptr) {
     return std::nullopt;
   }
-  auto performer_or = GetPerformer(performer_id);
-  if (performer_or.has_value()) {
-    auto& performer = performer_or->get();
-    if (is_one_off && position < performer.GetPosition()) {
-      return std::nullopt;
-    }
-    const Id task_id = GenerateNextId();
-    performer.CreateTask(task_id, definition, is_one_off, position, process_order, user_data);
-    return task_id;
+  if (is_one_off && position < performer->GetPosition()) {
+    return std::nullopt;
   }
-  return std::nullopt;
+  const Id task_id = GenerateNextId();
+  performer->CreateTask(task_id, definition, is_one_off, position, process_order, user_data);
+  return task_id;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -100,14 +95,9 @@ bool Engine::DestroyInstrument(Id instrument_id) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Engine::DestroyPerformer(Id performer_id) noexcept {
-  if (performer_id == kInvalid) {
-    return false;
-  }
-  if (performers_.erase(performer_id) > 0) {
-    return true;
-  }
-  return false;
+void Engine::DestroyPerformer(Performer* performer) noexcept {
+  [[maybe_unused]] const auto success = performers_.erase(performer) > 0;
+  assert(success);
 }
 
 std::optional<std::reference_wrapper<Instrument>> Engine::GetInstrument(Id instrument_id) noexcept {
@@ -116,16 +106,6 @@ std::optional<std::reference_wrapper<Instrument>> Engine::GetInstrument(Id instr
   }
   if (auto* instrument = FindOrNull(instruments_, instrument_id)) {
     return std::ref(*(*instrument));
-  }
-  return std::nullopt;
-}
-
-std::optional<std::reference_wrapper<Performer>> Engine::GetPerformer(Id performer_id) noexcept {
-  if (performer_id == kInvalid) {
-    return std::nullopt;
-  }
-  if (auto* performer = FindOrNull(performers_, performer_id)) {
-    return std::ref(*performer);
   }
   return std::nullopt;
 }
@@ -166,8 +146,8 @@ void Engine::Update(double timestamp) noexcept {
       std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),
                                                 std::numeric_limits<int>::max()};
       bool has_tasks_to_process = false;
-      for (const auto& [performer_id, performer] : performers_) {
-        if (const auto maybe_duration = performer.GetDurationToNextTask();
+      for (const auto* performer : performers_) {
+        if (const auto maybe_duration = performer->GetDurationToNextTask();
             maybe_duration && maybe_duration < update_duration) {
           has_tasks_to_process = true;
           update_duration = *maybe_duration;
@@ -175,8 +155,8 @@ void Engine::Update(double timestamp) noexcept {
       }
 
       if (update_duration.first > 0) {
-        for (auto& [performer_id, performer] : performers_) {
-          performer.Update(update_duration.first);
+        for (auto* performer : performers_) {
+          performer->Update(update_duration.first);
         }
 
         timestamp_ += SecondsFromBeats(tempo_, update_duration.first);
@@ -186,8 +166,8 @@ void Engine::Update(double timestamp) noexcept {
       }
 
       if (has_tasks_to_process && timestamp_ < timestamp) {
-        for (auto& [performer_id, performer] : performers_) {
-          performer.ProcessNextTaskAtPosition();
+        for (auto* performer : performers_) {
+          performer->ProcessNextTaskAtPosition();
         }
       }
     } else if (timestamp_ < timestamp) {

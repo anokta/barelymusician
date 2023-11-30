@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
@@ -47,13 +48,13 @@ class Engine {
 
   /// Creates a new performer.
   ///
-  /// @return Performer identifier.
+  /// @return Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Id CreatePerformer() noexcept;
+  std::shared_ptr<Performer> CreatePerformer() noexcept;
 
   /// Creates a new performer task.
   ///
-  /// @param performer_id Performer identifier.
+  /// @param performer Pointer to performer.
   /// @param definition Task definition.
   /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
@@ -61,8 +62,8 @@ class Engine {
   /// @param user_data Pointer to user data.
   /// @return Optional task identifier.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  std::optional<Id> CreatePerformerTask(Id performer_id, TaskDefinition definition, bool is_one_off,
-                                        double position, int process_order,
+  std::optional<Id> CreatePerformerTask(Performer* performer, TaskDefinition definition,
+                                        bool is_one_off, double position, int process_order,
                                         void* user_data) noexcept;
 
   /// Destroys instrument.
@@ -74,10 +75,9 @@ class Engine {
 
   /// Destroys performer.
   ///
-  /// @param performer_id Performer identifier.
-  /// @return True if successful, false otherwise.
+  /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool DestroyPerformer(Id performer_id) noexcept;
+  void DestroyPerformer(Performer* performer) noexcept;
 
   /// Returns instrument.
   ///
@@ -85,13 +85,6 @@ class Engine {
   /// @return Optional reference to instrument.
   [[nodiscard]] std::optional<std::reference_wrapper<Instrument>> GetInstrument(
       Id instrument_id) noexcept;
-
-  /// Returns performer.
-  ///
-  /// @param performer_id Performer identifier.
-  /// @return Optional reference to performer.
-  [[nodiscard]] std::optional<std::reference_wrapper<Performer>> GetPerformer(
-      Id performer_id) noexcept;
 
   /// Returns tempo.
   ///
@@ -145,8 +138,8 @@ class Engine {
   // Map of instrument references by identifiers.
   MutableData<InstrumentReferenceMap> instrument_refs_;
 
-  // Map of performers by performer order-identifier pairs.
-  std::unordered_map<Id, Performer> performers_;
+  // Set of performers.
+  std::unordered_set<Performer*> performers_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

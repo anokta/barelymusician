@@ -3,6 +3,7 @@
 #include <stdint.h>  // NOLINT(modernize-deprecated-headers)
 
 #include <cstddef>
+#include <memory>
 
 #include "barelymusician/internal/engine.h"
 #include "barelymusician/internal/id.h"
@@ -56,7 +57,7 @@ struct BarelyMusician {
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 
   // Internal engine.
-  barely::internal::Engine engine;
+  std::shared_ptr<barely::internal::Engine> engine = std::make_shared<barely::internal::Engine>();
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -70,10 +71,10 @@ struct BarelyPerformer {
   BarelyPerformer() = default;
 
   // Internal engine.
-  barely::internal::Engine* engine = nullptr;
+  std::weak_ptr<barely::internal::Engine> engine;
 
-  // Identifier.
-  barely::internal::Id id = barely::internal::kInvalid;
+  // Internal performer.
+  std::shared_ptr<barely::internal::Performer> internal = nullptr;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -86,11 +87,8 @@ struct BarelyTask {
   // Default constructor.
   BarelyTask() = default;
 
-  // Internal engine.
-  barely::internal::Engine* engine = nullptr;
-
-  // Performer identifier.
-  barely::internal::Id performer_id = barely::internal::kInvalid;
+  // Internal performer.
+  barely::internal::Performer* performer;
 
   // Identifier.
   barely::internal::Id id = barely::internal::kInvalid;
@@ -240,10 +238,10 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefi
   if (!musician) return false;
   if (!out_instrument) return false;
 
-  const auto instrument_id_or = musician->engine.CreateInstrument(definition, frame_rate);
+  const auto instrument_id_or = musician->engine->CreateInstrument(definition, frame_rate);
   if (instrument_id_or.has_value()) {
     *out_instrument = new BarelyInstrument();
-    (*out_instrument)->engine = &musician->engine;
+    (*out_instrument)->engine = musician->engine.get();
     (*out_instrument)->id = *instrument_id_or;
     return true;
   }
@@ -518,7 +516,7 @@ bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
   if (!musician) return false;
   if (!out_tempo) return false;
 
-  *out_tempo = musician->engine.GetTempo();
+  *out_tempo = musician->engine->GetTempo();
   return true;
 }
 
@@ -526,21 +524,21 @@ bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, double* out_time
   if (!musician) return false;
   if (!out_timestamp) return false;
 
-  *out_timestamp = musician->engine.GetTimestamp();
+  *out_timestamp = musician->engine->GetTimestamp();
   return true;
 }
 
 bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo) {
   if (!musician) return false;
 
-  musician->engine.SetTempo(tempo);
+  musician->engine->SetTempo(tempo);
   return true;
 }
 
 bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   if (!musician) return false;
 
-  musician->engine.Update(timestamp);
+  musician->engine->Update(timestamp);
   return true;
 }
 
@@ -548,19 +546,21 @@ bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle
   if (!musician) return false;
   if (!out_performer) return false;
 
-  const auto performer_id = musician->engine.CreatePerformer();
   *out_performer = new BarelyPerformer();
-  (*out_performer)->engine = &musician->engine;
-  (*out_performer)->id = performer_id;
+  (*out_performer)->engine = musician->engine;
+  (*out_performer)->internal = musician->engine->CreatePerformer();
+
   return true;
 }
 
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  const bool success = performer->engine->DestroyPerformer(performer->id);
+  if (auto engine = performer->engine.lock()) {
+    engine->DestroyPerformer(performer->internal.get());
+  }
   delete performer;
-  return success;
+  return true;
 }
 
 bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
@@ -568,127 +568,83 @@ bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
   if (!performer) return false;
   if (!out_loop_begin_position) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    *out_loop_begin_position = performer_or->get().GetLoopBeginPosition();
-    return true;
-  }
-  return false;
+  *out_loop_begin_position = performer->internal->GetLoopBeginPosition();
+  return true;
 }
 
 bool BarelyPerformer_GetLoopLength(BarelyPerformerHandle performer, double* out_loop_length) {
   if (!performer) return false;
   if (!out_loop_length) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    *out_loop_length = performer_or->get().GetLoopLength();
-    return true;
-  }
-  return false;
+  *out_loop_length = performer->internal->GetLoopLength();
+  return true;
 }
 
 bool BarelyPerformer_GetPosition(BarelyPerformerHandle performer, double* out_position) {
   if (!performer) return false;
   if (!out_position) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    *out_position = performer_or->get().GetPosition();
-    return true;
-  }
-  return false;
+  *out_position = performer->internal->GetPosition();
+  return true;
 }
 
 bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bool* out_is_looping) {
   if (!performer) return false;
   if (!out_is_looping) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    *out_is_looping = performer_or->get().IsLooping();
-    return true;
-  }
-  return false;
+  *out_is_looping = performer->internal->IsLooping();
+  return true;
 }
 
 bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing) {
   if (!performer) return false;
   if (!out_is_playing) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    *out_is_playing = performer_or->get().IsPlaying();
-    return true;
-  }
-  return false;
+  *out_is_playing = performer->internal->IsPlaying();
+  return true;
 }
 
 bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double loop_begin_position) {
   if (!performer) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    performer_or->get().SetLoopBeginPosition(loop_begin_position);
-    return true;
-  }
-  return false;
+  performer->internal->SetLoopBeginPosition(loop_begin_position);
+  return true;
 }
 
 bool BarelyPerformer_SetLoopLength(BarelyPerformerHandle performer, double loop_length) {
   if (!performer) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    performer_or->get().SetLoopLength(loop_length);
-    return true;
-  }
-  return false;
+  performer->internal->SetLoopLength(loop_length);
+  return true;
 }
 
 bool BarelyPerformer_SetLooping(BarelyPerformerHandle performer, bool is_looping) {
   if (!performer) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    performer_or->get().SetLooping(is_looping);
-    return true;
-  }
-  return false;
+  performer->internal->SetLooping(is_looping);
+  return true;
 }
 
 bool BarelyPerformer_SetPosition(BarelyPerformerHandle performer, double position) {
   if (!performer) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    performer_or->get().SetPosition(position);
-    return true;
-  }
-  return false;
+  performer->internal->SetPosition(position);
+  return true;
 }
 
 bool BarelyPerformer_Start(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    performer_or->get().Start();
-    return true;
-  }
-  return false;
+  performer->internal->Start();
+  return true;
 }
 
 bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  const auto performer_or = performer->engine->GetPerformer(performer->id);
-  if (performer_or.has_value()) {
-    performer_or->get().Stop();
-    return true;
-  }
-  return false;
+  performer->internal->Stop();
+  return true;
 }
 
 bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
@@ -696,13 +652,13 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition def
                        BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (!out_task) return false;
+  if (performer->engine.expired()) return false;
 
-  const auto task_id_or = performer->engine->CreatePerformerTask(
-      performer->id, definition, is_one_off, position, process_order, user_data);
+  const auto task_id_or = performer->engine.lock()->CreatePerformerTask(
+      performer->internal.get(), definition, is_one_off, position, process_order, user_data);
   if (task_id_or.has_value()) {
     *out_task = new BarelyTask();
-    (*out_task)->engine = performer->engine;
-    (*out_task)->performer_id = performer->id;
+    (*out_task)->performer = performer->internal.get();
     (*out_task)->id = *task_id_or;
     return true;
   }
@@ -712,8 +668,7 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition def
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
-  const auto performer_or = task->engine->GetPerformer(task->performer_id);
-  const bool success = performer_or.has_value() && performer_or->get().DestroyTask(task->id);
+  const bool success = task->performer->DestroyTask(task->id);
   delete task;
   return success;
 }
@@ -722,13 +677,10 @@ bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
   if (!task) return false;
   if (!out_position) return false;
 
-  const auto performer_or = task->engine->GetPerformer(task->performer_id);
-  if (performer_or.has_value()) {
-    const auto position_or = performer_or->get().GetTaskPosition(task->id);
-    if (position_or.has_value()) {
-      *out_position = *position_or;
-      return true;
-    }
+  const auto position_or = task->performer->GetTaskPosition(task->id);
+  if (position_or.has_value()) {
+    *out_position = *position_or;
+    return true;
   }
   return false;
 }
@@ -737,13 +689,10 @@ bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_orde
   if (!task) return false;
   if (!out_process_order) return false;
 
-  const auto performer_or = task->engine->GetPerformer(task->performer_id);
-  if (performer_or.has_value()) {
-    const auto process_order_or = performer_or->get().GetTaskProcessOrder(task->id);
-    if (process_order_or.has_value()) {
-      *out_process_order = *process_order_or;
-      return true;
-    }
+  const auto process_order_or = task->performer->GetTaskProcessOrder(task->id);
+  if (process_order_or.has_value()) {
+    *out_process_order = *process_order_or;
+    return true;
   }
   return false;
 }
@@ -751,19 +700,11 @@ bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_orde
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
   if (!task) return false;
 
-  const auto performer_or = task->engine->GetPerformer(task->performer_id);
-  if (performer_or.has_value()) {
-    return performer_or->get().SetTaskPosition(task->id, position);
-  }
-  return false;
+  return task->performer->SetTaskPosition(task->id, position);
 }
 
 bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order) {
   if (!task) return false;
 
-  const auto performer_or = task->engine->GetPerformer(task->performer_id);
-  if (performer_or.has_value()) {
-    return performer_or->get().SetTaskProcessOrder(task->id, process_order);
-  }
-  return false;
+  return task->performer->SetTaskProcessOrder(task->id, process_order);
 }

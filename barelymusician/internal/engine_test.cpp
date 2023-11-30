@@ -184,15 +184,11 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   Engine engine;
 
   // Create a performer.
-  const Id performer_id = engine.CreatePerformer();
-
-  const auto performer_or = engine.GetPerformer(performer_id);
-  ASSERT_TRUE(performer_or.has_value());
-  auto& performer = performer_or->get();
+  const auto performer = engine.CreatePerformer();
 
   // Create a task definition.
   double task_position = 0.0;
-  std::function<void()> process_callback = [&]() { task_position = performer.GetPosition(); };
+  std::function<void()> process_callback = [&]() { task_position = performer->GetPosition(); };
   auto definition = TaskDefinition{
       [](void** state, void* user_data) { *state = user_data; },
       [](void** /*state*/) {},
@@ -200,7 +196,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   };
 
   // Create a task.
-  ASSERT_TRUE(engine.CreatePerformerTask(performer_id, definition,
+  ASSERT_TRUE(engine.CreatePerformerTask(performer.get(), definition,
                                          /*is_one_off=*/false, 1.0, kProcessOrder,
                                          &process_callback));
 
@@ -208,27 +204,26 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   engine.SetTempo(60.0);
   EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
 
-  EXPECT_FALSE(performer.IsPlaying());
-  performer.Start();
-  EXPECT_TRUE(performer.IsPlaying());
+  EXPECT_FALSE(performer->IsPlaying());
+  performer->Start();
+  EXPECT_TRUE(performer->IsPlaying());
 
   // Update the timestamp just before the task, which should not be triggered.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(1.0, kProcessOrder)));
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(1.0, kProcessOrder)));
   engine.Update(1.0);
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.0);
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp past the task, which should be triggered now.
-  EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
+  EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
   engine.Update(1.5);
-  EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
-  EXPECT_DOUBLE_EQ(performer.GetPosition(), 1.5);
+  EXPECT_FALSE(performer->GetDurationToNextTask().has_value());
+  EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy the performer.
-  EXPECT_TRUE(engine.DestroyPerformer(performer_id));
-  EXPECT_FALSE(engine.GetPerformer(performer_id).has_value());
+  engine.DestroyPerformer(performer.get());
 }
 
 // Tests that the engine sets its tempo as expected.

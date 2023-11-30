@@ -18,7 +18,6 @@ class Metronome {
   /// Returns whether the metronome is playing or not.
   ///
   /// @return True if playing, false otherwise.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
   bool IsPlaying() const noexcept;
 
   /// Resets the metronome.

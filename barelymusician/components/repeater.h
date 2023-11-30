@@ -29,7 +29,6 @@ class Repeater {
   /// Returns whether the repeater is playing or not.
   ///
   /// @return True if playing, false otherwise.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
   bool IsPlaying() const noexcept;
 
   /// Pops the last pitch from the end.

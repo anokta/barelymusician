@@ -6,6 +6,8 @@
   "C_Cpp.codeAnalysis.exclude": {
     "bazel-*/**": true,
     "cmake-*/**": true,
+    // TODO(#123): This requires `libDaisy` to be included in `includePath` below.
+    "platforms/daisy/**": true,
   },
   "C_Cpp.default.cppStandard": "c++20",
   "C_Cpp.default.includePath": [

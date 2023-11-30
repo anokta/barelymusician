@@ -6,7 +6,6 @@
 
 namespace barely {
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 bool Metronome::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 void Metronome::Reset() noexcept {

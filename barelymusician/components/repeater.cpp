@@ -14,7 +14,6 @@ Repeater::~Repeater() noexcept {
 
 void Repeater::Clear() noexcept { pitches_.clear(); }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 bool Repeater::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)

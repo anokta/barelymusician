@@ -1076,6 +1076,7 @@ BARELY_EXPORT bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t pro
 #include <cassert>
 #include <functional>
 #include <limits>
+#include <new>
 #include <span>
 #include <type_traits>
 #include <utility>
@@ -1147,7 +1148,8 @@ struct ControlEventDefinition : public BarelyControlEventDefinition {
   static ControlEventDefinition WithCallback() noexcept {
     return ControlEventDefinition(
         [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
+          assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
         [](void** state, int32_t index, double value) noexcept {
@@ -1325,7 +1327,8 @@ struct NoteControlEventDefinition : public BarelyNoteControlEventDefinition {
   static NoteControlEventDefinition WithCallback() noexcept {
     return NoteControlEventDefinition(
         [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
+          assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
         [](void** state, double pitch, int32_t index, double value) noexcept {
@@ -1379,7 +1382,8 @@ struct NoteOffEventDefinition : public BarelyNoteOffEventDefinition {
   static NoteOffEventDefinition WithCallback() noexcept {
     return NoteOffEventDefinition(
         [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
+          assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
         [](void** state, double pitch) noexcept {
@@ -1433,7 +1437,8 @@ struct NoteOnEventDefinition : public BarelyNoteOnEventDefinition {
   static NoteOnEventDefinition WithCallback() noexcept {
     return NoteOnEventDefinition(
         [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
+          assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
         [](void** state, double pitch, double intensity) noexcept {
@@ -1481,10 +1486,11 @@ struct TaskDefinition : public BarelyTaskDefinition {
   /// Returns a new `TaskDefinition` with `Callback`.
   ///
   /// @return Task definition.
-  static TaskDefinition WithCallback() {
+  static TaskDefinition WithCallback() noexcept {
     return TaskDefinition(
         [](void** state, void* user_data) noexcept {
-          *state = new Callback(std::move(*static_cast<Callback*>(user_data)));
+          *state = new (std::nothrow) Callback(std::move(*static_cast<Callback*>(user_data)));
+          assert(*state);
         },
         [](void** state) noexcept { delete static_cast<Callback*>(*state); },
         [](void** state) noexcept {

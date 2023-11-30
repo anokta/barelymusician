@@ -6,6 +6,8 @@
 #include "barelymusician/barelymusician.h"
 
 #ifdef __cplusplus
+#include <cassert>
+#include <new>
 #include <vector>
 
 namespace barely {
@@ -53,8 +55,8 @@ class CustomEffect {
     };
     return EffectDefinition(
         [](void** state, int32_t frame_rate) noexcept {
-          // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
-          *state = static_cast<void*>(new PublicEffect(frame_rate));
+          *state = static_cast<void*>(new (std::nothrow) PublicEffect(frame_rate));
+          assert(*state);
         },
         [](void** state) noexcept {
           delete static_cast<PublicEffect*>(*state);

@@ -6,6 +6,8 @@
 #include "barelymusician/barelymusician.h"
 
 #ifdef __cplusplus
+#include <cassert>
+#include <new>
 #include <vector>
 
 namespace barely {
@@ -78,8 +80,8 @@ class CustomInstrument {
     };
     return InstrumentDefinition(
         [](void** state, int32_t frame_rate) noexcept {
-          // NOLINTNEXTLINE(bugprone-unhandled-exception-at-new)
-          *state = static_cast<void*>(new PublicInstrument(frame_rate));
+          *state = static_cast<void*>(new (std::nothrow) PublicInstrument(frame_rate));
+          assert(*state);
         },
         [](void** state) noexcept {
           delete static_cast<PublicInstrument*>(*state);

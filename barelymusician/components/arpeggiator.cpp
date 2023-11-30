@@ -126,7 +126,6 @@ bool Arpeggiator::IsNoteOn(double pitch) const noexcept {
   return std::find(pitches_.begin(), pitches_.end(), pitch) != pitches_.end();
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 bool Arpeggiator::IsPlaying() const noexcept { return performer_.IsPlaying(); }
 
 void Arpeggiator::SetAllNotesOff() noexcept {

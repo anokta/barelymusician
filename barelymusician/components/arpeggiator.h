@@ -132,7 +132,6 @@ class Arpeggiator {
   /// Returns whether the arpeggiator is playing or not.
   ///
   /// @return True if playing, false otherwise.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
   bool IsPlaying() const noexcept;
 
   /// Sets all notes off.

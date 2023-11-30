@@ -41,7 +41,6 @@ void HighPassEffect::Process(double* output_samples, int output_channel_count,
   }
 }
 
-// NOLINTNEXTLINE(bugprone-exception-escape)
 void HighPassEffect::SetControl(int index, double value, double /*slope_per_frame*/) noexcept {
   switch (static_cast<Control>(index)) {
     case Control::kCutoffFrequency:

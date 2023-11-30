@@ -121,10 +121,9 @@ bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
   if (!effect) return false;
 
   const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().DestroyEffect(effect->id);
-  }
-  return false;
+  const bool success = instrument_or.has_value() && instrument_or->get().DestroyEffect(effect->id);
+  delete effect;
+  return success;
 }
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
@@ -254,7 +253,9 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefi
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  return instrument->engine->DestroyInstrument(instrument->id);
+  const bool success = instrument->engine->DestroyInstrument(instrument->id);
+  delete instrument;
+  return success;
 }
 
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
@@ -557,7 +558,9 @@ bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  return performer->engine->DestroyPerformer(performer->id);
+  const bool success = performer->engine->DestroyPerformer(performer->id);
+  delete performer;
+  return success;
 }
 
 bool BarelyPerformer_GetLoopBeginPosition(BarelyPerformerHandle performer,
@@ -710,10 +713,9 @@ bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
   const auto performer_or = task->engine->GetPerformer(task->performer_id);
-  if (performer_or.has_value()) {
-    return performer_or->get().DestroyTask(task->id);
-  }
-  return false;
+  const bool success = performer_or.has_value() && performer_or->get().DestroyTask(task->id);
+  delete task;
+  return success;
 }
 
 bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {

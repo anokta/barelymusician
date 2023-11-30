@@ -7,6 +7,7 @@
 
 #include "barelymusician/internal/engine.h"
 #include "barelymusician/internal/id.h"
+#include "barelymusician/internal/performer.h"
 
 // Effect.
 struct BarelyEffect {

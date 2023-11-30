@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "barelymusician/common/random.h"
-#include "gmock/gmock.h"
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely {

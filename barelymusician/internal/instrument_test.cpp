@@ -7,7 +7,8 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "gmock/gmock.h"
+#include "barelymusician/internal/control.h"
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 namespace barely::internal {

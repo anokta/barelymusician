@@ -1,5 +1,6 @@
 #include "barelymusician/composition/duration.h"
 
+#include "gtest/gtest-param-test.h"
 #include "gtest/gtest.h"
 
 namespace barely {

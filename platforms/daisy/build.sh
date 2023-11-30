@@ -5,7 +5,7 @@
 # Options:
 #   -d=|--daisy_toolchain_prefix=[value], default: "C:/Program Files/DaisyToolchain"
 
-readonly DAISY_TOOLCHAIN_FILE="libDaisy/cmake/toolchains/stm32h750xx.cmake"
+readonly DAISY_TOOLCHAIN_FILE="_deps/libdaisy-src/cmake/toolchains/stm32h750xx.cmake"
 
 readonly GREEN="\e[32m"
 
@@ -36,8 +36,8 @@ main() {
   parse_flags "$@"
 
   echo "Building BarelyMusician for Daisy..."
-  mkdir -p cmake-build-daisy
-  cd cmake-build-daisy
+  mkdir -p cmake-build
+  cd cmake-build
   cmake -DENABLE_UNITY=OFF -DENABLE_EXAMPLES=OFF -DENABLE_TESTS=OFF -DENABLE_DAISY=ON \
     -S ../ \
     -D CMAKE_TOOLCHAIN_FILE="${DAISY_TOOLCHAIN_FILE}" \

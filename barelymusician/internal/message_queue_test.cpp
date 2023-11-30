@@ -1,7 +1,7 @@
 #include "barelymusician/internal/message_queue.h"
 
 #include "barelymusician/internal/message.h"
-#include "gmock/gmock.h"
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
 using ::testing::AllOf;

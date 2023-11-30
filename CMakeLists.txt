@@ -13,7 +13,6 @@ if (ENABLE_DAISY)
     libdaisy
     GIT_REPOSITORY https://github.com/electro-smith/libDaisy.git
     GIT_TAG ae9b45e2927aafba5f261f2ff36e3f41ae74d019
-    SOURCE_DIR ${CMAKE_BINARY_DIR}/libDaisy
   )
   FetchContent_MakeAvailable(libdaisy)
   target_compile_definitions(

@@ -108,13 +108,11 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
             }
             const double pitch = *pitches_[index_].first + pitch_shift_;
             instrument_->SetNoteOn(pitch);
-            performer_
-                .CreateTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                            /*is_one_off=*/true,
-                            static_cast<double>(length) * performer_.GetLoopLength(), process_order)
-                .Release();
+            performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
+                                          static_cast<double>(length) * performer_.GetLoopLength(),
+                                          process_order);
           },
-          /*is_one_off=*/false, 0.0, process_order)
+          0.0, process_order)
       .Release();
 }
 

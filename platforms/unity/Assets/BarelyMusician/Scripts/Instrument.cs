@@ -171,6 +171,7 @@ namespace Barely {
         instrument.OnNoteControlEvent?.Invoke((float)pitch, index, (float)value);
       }
 
+      /// Internal note off event callback.
       public static void OnNoteOffEvent(Instrument instrument, double pitch) {
         instrument.OnNoteOff?.Invoke(pitch);
         instrument.OnNoteOffEvent?.Invoke((float)pitch);

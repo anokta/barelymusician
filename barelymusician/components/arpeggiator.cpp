@@ -211,13 +211,10 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
             }
             const double pitch = pitches_[index_];
             instrument_->SetNoteOn(pitch);
-            performer_
-                .CreateTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                            /*is_one_off*/ true, gate_ratio_ * performer_.GetLoopLength(),
-                            process_order)
-                .Release();
+            performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
+                                          gate_ratio_ * performer_.GetLoopLength(), process_order);
           },
-          /*is_one_off=*/false, 0.0, process_order)
+          0.0, process_order)
       .Release();
 }
 

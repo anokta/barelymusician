@@ -90,15 +90,11 @@ void InsertPadData(double pitch, const std::string& file_path, std::vector<doubl
 // Schedules performer to play an instrument note.
 void ScheduleNote(double position, double duration, double pitch, double intensity,
                   Instrument& instrument, Performer& performer) {
-  performer
-      .CreateTask([pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); },
-                  /*is_one_off=*/true, position)
-      .Release();
-  performer
-      .CreateTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
-                  /*is_one_off=*/true, position + duration,
-                  /*process_order=*/-1)
-      .Release();
+  performer.ScheduleOneOffTask(
+      [pitch, intensity, &instrument]() { instrument.SetNoteOn(pitch, intensity); }, position);
+  performer.ScheduleOneOffTask([pitch, &instrument]() { instrument.SetNoteOff(pitch); },
+                               position + duration,
+                               /*process_order=*/-1);
 }
 
 void ComposeChord(double intensity, int harmonic, Instrument& instrument, Performer& performer) {

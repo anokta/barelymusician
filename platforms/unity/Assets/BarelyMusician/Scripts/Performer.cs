@@ -62,15 +62,13 @@ namespace Barely {
       public void Update(Performer performer) {
         if (_performer == null) {
           _performer = performer;
-          Musician.Internal.Task_Create(_performer._handle,
-                                        delegate() {
-                                          OnProcess?.Invoke();
-                                          OnProcessEvent?.Invoke();
-                                        },
-                                        /*isOneOff=*/false, _position, _processOrder, ref _handle);
+          Musician.Internal.Task_Create(_performer._handle, delegate() {
+            OnProcess?.Invoke();
+            OnProcessEvent?.Invoke();
+          }, _position, _processOrder, ref _handle);
           _performer._tasks.Add(this);
         } else if (performer == null) {
-          Musician.Internal.Task_Destroy(_performer._handle, ref _handle);
+          Musician.Internal.Task_Destroy(ref _handle);
           _performer._tasks.Remove(this);
           _performer = null;
         } else {
@@ -143,15 +141,13 @@ namespace Barely {
       Musician.Internal.Performer_Start(_handle);
     }
 
-    /// Schedules a one-off task at a specific time.
+    /// Schedules a one-off task at a specific position.
     ///
     /// @param callback Task process callback.
     /// @param position Task position in beats.
     /// @param processOrder Task process order.
-    public void ScheduleTask(Action callback, double position, int processOrder = 0) {
-      IntPtr taskHandle = IntPtr.Zero;
-      Musician.Internal.Task_Create(_handle, callback, /*isOneOff=*/true, position, processOrder,
-                                    ref taskHandle);
+    public void ScheduleOneOffTask(Action callback, double position, int processOrder = 0) {
+      Musician.Internal.Performer_ScheduleOneOffTask(_handle, callback, position, processOrder);
     }
 
     /// Stops the performer.

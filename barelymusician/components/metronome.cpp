@@ -33,7 +33,7 @@ Metronome::Metronome(Musician& musician, int process_order) noexcept
             }
             ++beat_;
           },
-          /*is_one_off=*/false, 0.0, process_order)
+          0.0, process_order)
       .Release();
 }
 

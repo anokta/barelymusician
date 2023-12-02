@@ -90,17 +90,17 @@ auto performer = musician.CreatePerformer();
 // Set the performer to loop.
 performer.SetLooping(/*is_looping=*/true);
 
-// Create a recurring performer task that plays the A4 synth instrument note at position 0.5 for a
-// duration of 0.25 in beats.
-performer.CreateTask(
+// Create a looping performer task that plays the A4 synth instrument note at position 0.5 for a
+// duration of 0.25 beats.
+auto task = performer.CreateTask(
     [&]() {
       // Set the A4 note pitch on.
       instrument.SetNoteOn(0.0);
       // Schedule a one-off task to set the A4 note pitch off after 0.25 beats.
-      performer.CreateTask([&]() { instrument.SetNoteOff(0.0); }, /*is_one_off=*/true,
-                           performer.GetPosition() + 0.25);
+      performer.ScheduleOneOffTask([&]() { instrument.SetNoteOff(0.0); },
+                                   performer.GetPosition() + 0.25);
     },
-    /*is_one_off=*/false, /*position=*/0.5);
+    /*position=*/0.5);
 
 // Start the performer.
 performer.Start();

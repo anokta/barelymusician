@@ -605,6 +605,18 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
   return true;
 }
 
+bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
+                                        BarelyTaskDefinition definition, double position,
+                                        int32_t process_order, void* user_data) {
+  if (!performer) return false;
+  if (performer->engine.expired()) return false;
+
+  const auto task_id_or = performer->engine.lock()->CreatePerformerTask(
+      performer->internal.get(), definition, /*is_one_off=*/true, position, process_order,
+      user_data);
+  return task_id_or.has_value();
+}
+
 bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
                                           double loop_begin_position) {
   if (!performer) return false;
@@ -649,14 +661,15 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
 }
 
 bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
-                       bool is_one_off, double position, int32_t process_order, void* user_data,
+                       double position, int32_t process_order, void* user_data,
                        BarelyTaskHandle* out_task) {
   if (!performer) return false;
   if (!out_task) return false;
   if (performer->engine.expired()) return false;
 
   const auto task_id_or = performer->engine.lock()->CreatePerformerTask(
-      performer->internal.get(), definition, is_one_off, position, process_order, user_data);
+      performer->internal.get(), definition, /*is_one_off=*/false, position, process_order,
+      user_data);
   if (task_id_or.has_value()) {
     *out_task = new BarelyTask();
     (*out_task)->performer = performer->internal.get();

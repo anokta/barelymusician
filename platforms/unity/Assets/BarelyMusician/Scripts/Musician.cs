@@ -809,6 +809,26 @@ namespace Barely {
         return isPlaying;
       }
 
+      /// Schedules a one-off task.
+      ///
+      /// @param performerHandle Performer handle.
+      /// @param callback Task callback.
+      /// @param position Task position.
+      /// @param processOrder Task process order.
+      public static void Performer_ScheduleOneOffTask(IntPtr performerHandle, Action callback,
+                                                      double position, int processOrder) {
+        if (Handle == null || callback == null) {
+          return;
+        }
+        GCHandle handle = GCHandle.Alloc(callback);
+        if (!BarelyPerformer_ScheduleOneOffTask(performerHandle, _taskDefinition, position,
+                                                processOrder, GCHandle.ToIntPtr(handle)) &&
+            performerHandle != IntPtr.Zero) {
+          handle.Free();
+          Debug.LogError("Failed to set performer loop begin position");
+        }
+      }
+
       /// Sets the loop begin position of a performer.
       ///
       /// @param performerHandle Performer handle.
@@ -876,30 +896,25 @@ namespace Barely {
       ///
       /// @param performerHandle Performer handle.
       /// @param callback Task callback.
-      /// @param isOneOff True if one off task, false otherwise.
       /// @param position Task position.
       /// @param processOrder Task process order.
       /// @param taskHandle Task handle.
-      public static void Task_Create(IntPtr performerHandle, Action callback, bool isOneOff,
-                                     double position, int processOrder, ref IntPtr taskHandle) {
+      public static void Task_Create(IntPtr performerHandle, Action callback, double position,
+                                     int processOrder, ref IntPtr taskHandle) {
         if (Handle == IntPtr.Zero || taskHandle != IntPtr.Zero) {
           return;
         }
-        IntPtr taskHandlePtr = Marshal.AllocHGlobal(Marshal.SizeOf<IntPtr>());
-        if (!BarelyTask_Create(performerHandle, _taskDefinition, isOneOff, position, processOrder,
-                               taskHandlePtr, ref taskHandle)) {
-          Marshal.DestroyStructure<IntPtr>(taskHandlePtr);
-          Debug.LogError("Failed to create performer task");
-          return;
+        GCHandle handle = GCHandle.Alloc(callback);
+        if (!BarelyTask_Create(performerHandle, _taskDefinition, position, processOrder,
+                               GCHandle.ToIntPtr(handle), ref taskHandle)) {
+          handle.Free();
         }
-        Marshal.WriteIntPtr(taskHandlePtr, taskHandle);
-        _taskCallbacks.Add(taskHandle, callback);
       }
 
       /// Destroys a task.
       ///
       /// @param taskHandle Task handle.
-      public static void Task_Destroy(IntPtr performerHandle, ref IntPtr taskHandle) {
+      public static void Task_Destroy(ref IntPtr taskHandle) {
         if (Handle == IntPtr.Zero || taskHandle == IntPtr.Zero) {
           return;
         }
@@ -907,7 +922,6 @@ namespace Barely {
           Debug.LogError("Failed to destroy performer task");
         }
         taskHandle = IntPtr.Zero;
-        _taskCallbacks.Remove(taskHandle);
       }
 
       /// Returns the position of a task.
@@ -1074,6 +1088,7 @@ namespace Barely {
           Effect.Internal.OnControlEvent(effect, index, value);
         }
       }
+      [AOT.MonoPInvokeCallback(typeof(ControlEventDefinition_ProcessCallback))]
       private static void InstrumentControlEventDefinition_OnProcess(ref IntPtr state, int index,
                                                                      double value) {
         Instrument instrument = null;
@@ -1227,20 +1242,14 @@ namespace Barely {
       private delegate void TaskDefinition_DestroyCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(TaskDefinition_DestroyCallback))]
       private static void TaskDefinition_OnDestroy(ref IntPtr state) {
-        if (state != IntPtr.Zero) {
-          _taskCallbacks?.Remove(Marshal.PtrToStructure<IntPtr>(state));
-          Marshal.DestroyStructure<IntPtr>(state);
-        }
+        GCHandle.FromIntPtr(state).Free();
       }
 
       // Task definition process callback.
       private delegate void TaskDefinition_ProcessCallback(ref IntPtr state);
       [AOT.MonoPInvokeCallback(typeof(TaskDefinition_ProcessCallback))]
       private static void TaskDefinition_OnProcess(ref IntPtr state) {
-        Action callback = null;
-        if (_taskCallbacks.TryGetValue(Marshal.PtrToStructure<IntPtr>(state), out callback)) {
-          callback?.Invoke();
-        }
+        (GCHandle.FromIntPtr(state).Target as Action)?.Invoke();
       }
 
       // Task definition.
@@ -1268,6 +1277,7 @@ namespace Barely {
             GameObject.DontDestroyOnLoad(state.gameObject);
             if (_handle == IntPtr.Zero) {
               GameObject.DestroyImmediate(state.gameObject);
+              _isShuttingDown = true;
             }
           }
           return _handle;
@@ -1338,9 +1348,6 @@ namespace Barely {
       // Map of scheduled list of task callbacks by their timestamps.
       private static SortedDictionary<double, List<Action>> _scheduledTaskCallbacks = null;
 
-      // Map of performer task callbacks by their handles.
-      private static Dictionary<IntPtr, Action> _taskCallbacks = null;
-
       // Component that manages internal state.
       private class State : MonoBehaviour {
         private void Awake() {
@@ -1354,7 +1361,7 @@ namespace Barely {
         }
 
         private void OnApplicationQuit() {
-          Shutdown();
+          GameObject.Destroy(gameObject);
         }
 
         private void OnAudioConfigurationChanged(bool deviceWasChanged) {
@@ -1401,7 +1408,6 @@ namespace Barely {
           _effects = new Dictionary<IntPtr, Effect>();
           _instruments = new Dictionary<IntPtr, Instrument>();
           _scheduledTaskCallbacks = new SortedDictionary<double, List<Action>>();
-          _taskCallbacks = new Dictionary<IntPtr, Action>();
           BarelyMusician_Update(_handle, AudioSettings.dspTime + _latency);
         }
 
@@ -1413,7 +1419,6 @@ namespace Barely {
           _effects = null;
           _instruments = null;
           _scheduledTaskCallbacks = null;
-          _taskCallbacks = null;
         }
       }
 
@@ -1584,6 +1589,13 @@ namespace Barely {
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_IsPlaying")]
       private static extern bool BarelyPerformer_IsPlaying(IntPtr performer, ref bool outIsPlaying);
 
+      [DllImport(pluginName, EntryPoint = "BarelyPerformer_ScheduleOneOffTask")]
+      private static extern bool BarelyPerformer_ScheduleOneOffTask(IntPtr performer,
+                                                                    TaskDefinition definition,
+                                                                    double position,
+                                                                    Int32 processOrder,
+                                                                    IntPtr userData);
+
       [DllImport(pluginName, EntryPoint = "BarelyPerformer_SetLoopBeginPosition")]
       private static extern bool BarelyPerformer_SetLoopBeginPosition(IntPtr performer,
                                                                       double loopBeginPosition);
@@ -1605,9 +1617,8 @@ namespace Barely {
 
       [DllImport(pluginName, EntryPoint = "BarelyTask_Create")]
       private static extern bool BarelyTask_Create(IntPtr performer, TaskDefinition definition,
-                                                   bool isOneOff, double position,
-                                                   Int32 processOrder, IntPtr userData,
-                                                   ref IntPtr outTask);
+                                                   double position, Int32 processOrder,
+                                                   IntPtr userData, ref IntPtr outTask);
 
       [DllImport(pluginName, EntryPoint = "BarelyTask_Destroy")]
       private static extern bool BarelyTask_Destroy(IntPtr task);

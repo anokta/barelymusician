@@ -55,6 +55,11 @@ namespace Barely {
         _performer.playOnAwake = playOnAwake;
       }
 
+      private void OnDestroy() {
+        GameObject.Destroy(_performer.gameObject);
+        _performer = null;
+      }
+
       private void Update() {
         _performer.Tasks.Clear();
         for (int i = 0; i < notes.Count; ++i) {
@@ -65,8 +70,8 @@ namespace Barely {
           _performer.Tasks.Add(new Performer.Task(delegate() {
             var pitch = Musician.PitchFromMidiKey(note.key);
             instrument?.SetNoteOn(pitch, note.intensity);
-            _performer.ScheduleTask(delegate() { instrument?.SetNoteOff(pitch); },
-                                    _performer.Position + note.duration);
+            _performer.ScheduleOneOffTask(delegate() { instrument?.SetNoteOff(pitch); },
+                                          _performer.Position + note.duration);
           }, note.position, -1));
         }
         _performer.Loop = loop;

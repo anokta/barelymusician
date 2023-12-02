@@ -85,7 +85,7 @@
 ///
 ///   // Create a task.
 ///   auto task = performer.CreateTask([]() {},  // populate this.
-///                                    /*is_one_off=*/false, /*position=*/0.0, /*process_order=*/0);
+///                                    /*position=*/0.0, /*process_order=*/0);
 ///
 ///   // Set looping on.
 ///   performer.SetLooping(/*is_looping=*/true);
@@ -195,8 +195,8 @@
 ///   // Create a task.
 ///   BarelyTaskDefinition definition;  // populate this.
 ///   BarelyTaskHandle task;
-///   BarelyTask_Create(performer, definition, /*is_one_off=*/false, /*position=*/0.0,
-///                     /*process_order=*/0, /*user_data=*/nullptr, &task);
+///   BarelyTask_Create(performer, definition, /*position=*/0.0, /*process_order=*/0,
+///                     /*user_data=*/nullptr, &task);
 ///
 ///   // Set looping on.
 ///   BarelyPerformer_SetLooping(performer, /*is_looping=*/true);
@@ -976,6 +976,19 @@ BARELY_EXPORT bool BarelyPerformer_IsLooping(BarelyPerformerHandle performer, bo
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_playing);
 
+/// Schedules a one-off task.
+///
+/// @param performer Performer handle.
+/// @param definition Task definition.
+/// @param position Task position in beats.
+/// @param process_order Task process order.
+/// @param user_data Pointer to user data.
+/// @return True if successful, false otherwise.
+BARELY_EXPORT bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
+                                                      BarelyTaskDefinition definition,
+                                                      double position, int32_t process_order,
+                                                      void* user_data);
+
 /// Sets the loop begin position of a performer.
 ///
 /// @param performer Performer handle.
@@ -1022,15 +1035,14 @@ BARELY_EXPORT bool BarelyPerformer_Stop(BarelyPerformerHandle performer);
 ///
 /// @param performer Performer handle.
 /// @param definition Task definition.
-/// @param is_one_off True if one-off task, false otherwise.
 /// @param position Task position in beats.
 /// @param process_order Task process order.
 /// @param user_data Pointer to user data.
 /// @param out_task Output task handle.
 /// @return True if successful, false otherwise.
 BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer,
-                                     BarelyTaskDefinition definition, bool is_one_off,
-                                     double position, int32_t process_order, void* user_data,
+                                     BarelyTaskDefinition definition, double position,
+                                     int32_t process_order, void* user_data,
                                      BarelyTaskHandle* out_task);
 
 /// Destroys a task.
@@ -2168,16 +2180,15 @@ class Performer {
   /// Creates a new task.
   ///
   /// @param definition Task definition.
-  /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(TaskDefinition definition, bool is_one_off, double position,
-                                int process_order = 0, void* user_data = nullptr) noexcept {
+  [[nodiscard]] Task CreateTask(TaskDefinition definition, double position, int process_order = 0,
+                                void* user_data = nullptr) noexcept {
     BarelyTaskHandle task;
-    [[maybe_unused]] const bool success = BarelyTask_Create(
-        performer_, definition, is_one_off, position, process_order, user_data, &task);
+    [[maybe_unused]] const bool success =
+        BarelyTask_Create(performer_, definition, position, process_order, user_data, &task);
     assert(success);
     return Task(task);
   }
@@ -2185,13 +2196,12 @@ class Performer {
   /// Creates a new task with a callback.
   ///
   /// @param callback Task callback.
-  /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @return Task.
-  [[nodiscard]] Task CreateTask(TaskDefinition::Callback callback, bool is_one_off, double position,
+  [[nodiscard]] Task CreateTask(TaskDefinition::Callback callback, double position,
                                 int process_order = 0) noexcept {
-    return CreateTask(TaskDefinition::WithCallback(), is_one_off, position, process_order,
+    return CreateTask(TaskDefinition::WithCallback(), position, process_order,
                       static_cast<void*>(&callback));
   }
 
@@ -2257,6 +2267,30 @@ class Performer {
   BarelyPerformerHandle Release() noexcept {
     assert(performer_);
     return std::exchange(performer_, nullptr);
+  }
+
+  /// Schedules a one-off task.
+  ///
+  /// @param definition Task definition.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  /// @param user_data Pointer to user data.
+  void ScheduleOneOffTask(TaskDefinition definition, double position, int process_order = 0,
+                          void* user_data = nullptr) noexcept {
+    [[maybe_unused]] const bool success = BarelyPerformer_ScheduleOneOffTask(
+        performer_, definition, position, process_order, user_data);
+    assert(success);
+  }
+
+  /// Schedules a one-off task with a callback.
+  ///
+  /// @param callback Task callback.
+  /// @param position Task position in beats.
+  /// @param process_order Task process order.
+  void ScheduleOneOffTask(TaskDefinition::Callback callback, double position,
+                          int process_order = 0) noexcept {
+    ScheduleOneOffTask(TaskDefinition::WithCallback(), position, process_order,
+                       static_cast<void*>(&callback));
   }
 
   /// Sets the loop begin position.

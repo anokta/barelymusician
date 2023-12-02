@@ -71,10 +71,8 @@ int main(int /*argc*/, char* /*argv*/[]) {
   const auto play_note_fn = [&](double duration, double pitch) {
     return [&instrument, &performer, pitch, duration]() {
       instrument.SetNoteOn(pitch);
-      performer
-          .CreateTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
-                      /*is_one_off=*/true, performer.GetPosition() + duration)
-          .Release();
+      performer.ScheduleOneOffTask([&instrument, pitch]() { instrument.SetNoteOff(pitch); },
+                                   performer.GetPosition() + duration);
     };
   };
 
@@ -92,7 +90,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   std::unordered_map<int, Task> tasks;
   int index = 0;
   for (const auto& [position, callback] : score) {
-    tasks.emplace(index++, performer.CreateTask(callback, /*is_one_off=*/false, position));
+    tasks.emplace(index++, performer.CreateTask(callback, position));
   }
 
   // Audio process callback.
@@ -117,7 +115,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
         ConsoleLog() << "Removed note " << index;
       } else {
         const auto& [position, callback] = score[index - 1];
-        tasks.emplace(index - 1, performer.CreateTask(callback, /*is_one_off=*/false, position));
+        tasks.emplace(index - 1, performer.CreateTask(callback, position));
         ConsoleLog() << "Added note " << index;
       }
       return;

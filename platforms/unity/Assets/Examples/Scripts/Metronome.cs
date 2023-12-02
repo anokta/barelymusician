@@ -110,8 +110,9 @@ namespace Barely {
       }
 
       private void OnDestroy() {
-        _beatEventCallback = null;
+        GameObject.Destroy(_performer.gameObject);
         _performer = null;
+        _beatEventCallback = null;
       }
 
       private void Update() {

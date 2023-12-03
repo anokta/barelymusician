@@ -45,6 +45,9 @@ class Metronome {
   // Performer.
   Performer performer_;
 
+  // Task.
+  Task task_;
+
   // Current beat.
   int beat_ = 0;
 

@@ -96,24 +96,22 @@ Repeater::Repeater(Musician& musician, int process_order) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_
-      .CreateTask(
-          [this, process_order]() noexcept {
-            if (pitches_.empty() || !Update() || instrument_ == nullptr) {
-              return;
-            }
-            const auto& [pitch_or, length] = pitches_[index_];
-            if (!pitches_[index_].first.has_value()) {
-              return;
-            }
-            const double pitch = *pitches_[index_].first + pitch_shift_;
-            instrument_->SetNoteOn(pitch);
-            performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                          static_cast<double>(length) * performer_.GetLoopLength(),
-                                          process_order);
-          },
-          0.0, process_order)
-      .Release();
+  task_ = performer_.CreateTask(
+      [this, process_order]() noexcept {
+        if (pitches_.empty() || !Update() || instrument_ == nullptr) {
+          return;
+        }
+        const auto& [pitch_or, length] = pitches_[index_];
+        if (!pitches_[index_].first.has_value()) {
+          return;
+        }
+        const double pitch = *pitches_[index_].first + pitch_shift_;
+        instrument_->SetNoteOn(pitch);
+        performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
+                                      static_cast<double>(length) * performer_.GetLoopLength(),
+                                      process_order);
+      },
+      0.0, process_order);
 }
 
 }  // namespace barely

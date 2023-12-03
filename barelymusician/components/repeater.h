@@ -99,6 +99,9 @@ class Repeater {
 
   // Random number generator.
   Random random_;
+
+  // Task.
+  Task task_;
 };
 
 }  // namespace barely

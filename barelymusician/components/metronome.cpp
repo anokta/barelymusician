@@ -25,16 +25,14 @@ Metronome::Metronome(Musician& musician, int process_order) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_
-      .CreateTask(
-          [this]() noexcept {
-            if (callback_) {
-              callback_(beat_);
-            }
-            ++beat_;
-          },
-          0.0, process_order)
-      .Release();
+  task_ = performer_.CreateTask(
+      [this]() noexcept {
+        if (callback_) {
+          callback_(beat_);
+        }
+        ++beat_;
+      },
+      0.0, process_order);
 }
 
 }  // namespace barely

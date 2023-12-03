@@ -17,6 +17,7 @@ namespace {
 using ::barely::Musician;
 using ::barely::OscillatorType;
 using ::barely::SynthInstrument;
+using ::barely::Task;
 using ::barely::examples::AudioClock;
 using ::barely::examples::AudioOutput;
 using ::barely::examples::ConsoleLog;
@@ -59,6 +60,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
   });
 
   std::vector<std::pair<double, double>> triggers;
+  std::vector<Task> tasks;
 
   auto performer = musician.CreatePerformer();
 
@@ -75,25 +77,25 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Trigger 1.
   triggers.emplace_back(0.0, 1.0);
-  performer.CreateTask(play_note_fn(0, 1.0), 0.0).Release();
+  tasks.push_back(performer.CreateTask(play_note_fn(0, 1.0), 0.0));
   // Trigger 2.
   triggers.emplace_back(1.0, 1.0);
-  performer.CreateTask(play_note_fn(1, 1.0), 1.0).Release();
+  tasks.push_back(performer.CreateTask(play_note_fn(1, 1.0), 1.0));
   // Trigger 3.
   triggers.emplace_back(2.0, 1.0);
-  performer.CreateTask(play_note_fn(2, 1.0), 2.0).Release();
+  tasks.push_back(performer.CreateTask(play_note_fn(2, 1.0), 2.0));
   // Trigger 4.
   triggers.emplace_back(3.0, 1.0);
-  performer.CreateTask(play_note_fn(3, 0.66), 3.0).Release();
-  performer.CreateTask(play_note_fn(4, 0.34), 3.66).Release();
+  tasks.push_back(performer.CreateTask(play_note_fn(3, 0.66), 3.0));
+  tasks.push_back(performer.CreateTask(play_note_fn(4, 0.34), 3.66));
   // Trigger 5.
   triggers.emplace_back(4.0, 1.0);
-  performer.CreateTask(play_note_fn(5, 0.33), 4.0).Release();
-  performer.CreateTask(play_note_fn(6, 0.33), 4.33).Release();
-  performer.CreateTask(play_note_fn(7, 0.34), 4.66).Release();
+  tasks.push_back(performer.CreateTask(play_note_fn(5, 0.33), 4.0));
+  tasks.push_back(performer.CreateTask(play_note_fn(6, 0.33), 4.33));
+  tasks.push_back(performer.CreateTask(play_note_fn(7, 0.34), 4.66));
   // Trigger 6.
   triggers.emplace_back(5.0, 2.0);
-  performer.CreateTask(play_note_fn(8, 2.0), 5.0).Release();
+  tasks.push_back(performer.CreateTask(play_note_fn(8, 2.0), 5.0));
 
   // Stopper.
   auto stopper = performer.CreateTask([&performer]() { performer.Stop(); }, 0.0,
@@ -138,6 +140,7 @@ int main(int /*argc*/, char* /*argv*/[]) {
 
   // Stop the demo.
   ConsoleLog() << "Stopping audio stream";
+  tasks.clear();
   performer.Stop();
   audio_output.Stop();
 

@@ -10,14 +10,15 @@
 // Arpeggiator.
 struct BarelyArpeggiator {
   // Default constructor.
-  BarelyArpeggiator(barely::Musician& musician, int process_order)
-      : arpeggiator(musician.CreateComponent<barely::Arpeggiator>(process_order)) {}
+  BarelyArpeggiator(BarelyMusicianHandle musician, int process_order)
+      : arpeggiator(barely::MusicianObserver(musician).CreateComponent<barely::Arpeggiator>(
+            process_order)) {}
 
   // Internal arpeggiator.
   barely::Arpeggiator arpeggiator;
 
   // Optional instrument.
-  std::optional<barely::Instrument> instrument = std::nullopt;
+  std::optional<barely::InstrumentObserver> instrument = std::nullopt;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -29,18 +30,13 @@ bool BarelyArpeggiator_Create(BarelyMusicianHandle musician, int32_t process_ord
                               BarelyArpeggiatorHandle* out_arpeggiator) {
   if (!musician || !out_arpeggiator) return false;
 
-  barely::Musician wrapper(musician);
-  *out_arpeggiator = new BarelyArpeggiator(wrapper, process_order);
-  wrapper.Release();
+  *out_arpeggiator = new BarelyArpeggiator(musician, process_order);
   return true;
 }
 
 bool BarelyArpeggiator_Destroy(BarelyArpeggiatorHandle arpeggiator) {
   if (!arpeggiator) return false;
 
-  if (arpeggiator->instrument.has_value()) {
-    arpeggiator->instrument->Release();
-  }
   delete arpeggiator;
   return true;
 }
@@ -78,9 +74,6 @@ bool BarelyArpeggiator_SetInstrument(BarelyArpeggiatorHandle arpeggiator,
                                      BarelyInstrumentHandle instrument) {
   if (!arpeggiator) return false;
 
-  if (arpeggiator->instrument.has_value()) {
-    arpeggiator->instrument->Release();
-  }
   arpeggiator->instrument.emplace(instrument);
   arpeggiator->arpeggiator.SetInstrument(&arpeggiator->instrument.value());
   return true;
@@ -202,20 +195,18 @@ Arpeggiator::Arpeggiator(Musician& musician, int process_order) noexcept
     : performer_(musician.CreatePerformer()) {
   performer_.SetLooping(true);
   performer_.SetLoopLength(1.0);
-  performer_
-      .CreateTask(
-          [this, process_order]() noexcept {
-            Update();
-            if (instrument_ == nullptr) {
-              return;
-            }
-            const double pitch = pitches_[index_];
-            instrument_->SetNoteOn(pitch);
-            performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
-                                          gate_ratio_ * performer_.GetLoopLength(), process_order);
-          },
-          0.0, process_order)
-      .Release();
+  task_ = performer_.CreateTask(
+      [this, process_order]() noexcept {
+        Update();
+        if (instrument_ == nullptr) {
+          return;
+        }
+        const double pitch = pitches_[index_];
+        instrument_->SetNoteOn(pitch);
+        performer_.ScheduleOneOffTask([this, pitch]() { instrument_->SetNoteOff(pitch); },
+                                      gate_ratio_ * performer_.GetLoopLength(), process_order);
+      },
+      0.0, process_order);
 }
 
 }  // namespace barely

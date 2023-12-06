@@ -62,7 +62,7 @@ namespace Barely {
             if (arpeggiator != null) {
               arpeggiator.SetNoteOff(GetPitchFromKeyIndex(i));
             } else {
-              arpeggiator.SetNoteOff(GetPitchFromKeyIndex(i));
+              instrument.SetNoteOff(GetPitchFromKeyIndex(i));
             }
           }
         }

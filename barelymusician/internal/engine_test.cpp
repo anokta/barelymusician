@@ -65,23 +65,16 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
-  const auto instrument_id_or = engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
-  ASSERT_TRUE(instrument_id_or.has_value());
-  const Id instrument_id = *instrument_id_or;
+  const auto instrument = engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
+  ASSERT_NE(instrument.get(), nullptr);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(
-      engine.ProcessInstrument(instrument_id, buffer.data(), kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(instrument->Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
     }
   }
-
-  // Get the instrument.
-  const auto instrument_or = engine.GetInstrument(instrument_id);
-  ASSERT_TRUE(instrument_or.has_value());
-  auto& instrument = instrument_or->get();
 
   // Set the note callbacks.
   double note_on_pitch = 0.0;
@@ -90,8 +83,8 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
     note_on_pitch = pitch;
     note_on_intensity = intensity;
   };
-  instrument.SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
-                            static_cast<void*>(&note_on_callback));
+  instrument->SetNoteOnEvent(NoteOnEventDefinition::WithCallback(),
+                             static_cast<void*>(&note_on_callback));
   EXPECT_DOUBLE_EQ(note_on_pitch, 0.0);
   EXPECT_DOUBLE_EQ(note_on_intensity, 0.0);
 
@@ -99,43 +92,27 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
     note_off_pitch = pitch;
   };
-  instrument.SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                             static_cast<void*>(&note_off_callback));
+  instrument->SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
+                              static_cast<void*>(&note_off_callback));
   EXPECT_DOUBLE_EQ(note_off_pitch, 0.0);
 
   // Set a note on.
-  instrument.SetNoteOn(kPitch, kIntensity);
-  EXPECT_TRUE(instrument.IsNoteOn(kPitch));
+  instrument->SetNoteOn(kPitch, kIntensity);
+  EXPECT_TRUE(instrument->IsNoteOn(kPitch));
 
   EXPECT_DOUBLE_EQ(note_on_pitch, kPitch);
   EXPECT_DOUBLE_EQ(note_on_intensity, kIntensity);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_TRUE(
-      engine.ProcessInstrument(instrument_id, buffer.data(), kChannelCount, kFrameCount, 0.0));
+  EXPECT_TRUE(instrument->Process(buffer.data(), kChannelCount, kFrameCount, 0.0));
   for (int frame = 0; frame < kFrameCount; ++frame) {
     for (int channel = 0; channel < kChannelCount; ++channel) {
       EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], kPitch * kIntensity);
     }
   }
 
-  // Update the engine.
-  engine.Update(5.0);
-
-  // Destroy the instrument, which should also trigger the note off callback.
-  note_off_pitch = 0.0;
-  EXPECT_TRUE(engine.DestroyInstrument(instrument_id));
-  EXPECT_FALSE(engine.GetInstrument(instrument_id).has_value());
-  EXPECT_DOUBLE_EQ(note_off_pitch, kPitch);
-
-  std::fill(buffer.begin(), buffer.end(), 0.0);
-  EXPECT_FALSE(
-      engine.ProcessInstrument(instrument_id, buffer.data(), kChannelCount, kFrameCount, 0.0));
-  for (int frame = 0; frame < kFrameCount; ++frame) {
-    for (int channel = 0; channel < kChannelCount; ++channel) {
-      EXPECT_DOUBLE_EQ(buffer[kChannelCount * frame + channel], 0.0);
-    }
-  }
+  // Destroy the instrument.
+  engine.DestroyInstrument(instrument.get());
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
@@ -146,29 +123,22 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     Engine engine;
 
     // Create instruments with note off callback.
-    std::array<Id, 3> instrument_ids;
+    std::array<std::shared_ptr<Instrument>, 3> instruments;
     for (int i = 0; i < 3; ++i) {
-      const auto instrument_id_or =
-          engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
-      ASSERT_TRUE(instrument_id_or.has_value());
-      instrument_ids[i] = *instrument_id_or;
-      const auto instrument_or = engine.GetInstrument(instrument_ids[i]);
-      ASSERT_TRUE(instrument_or.has_value());
+      instruments[i] = engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
+      ASSERT_NE(instruments[i].get(), nullptr);
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
       };
-      instrument_or->get().SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
-                                           static_cast<void*>(&note_off_callback));
+      instruments[i]->SetNoteOffEvent(NoteOffEventDefinition::WithCallback(),
+                                      static_cast<void*>(&note_off_callback));
     }
 
     // Start multiple notes, then immediately stop some of them.
     for (int i = 0; i < 3; ++i) {
-      const auto instrument_or = engine.GetInstrument(instrument_ids[i]);
-      ASSERT_TRUE(instrument_or.has_value());
-      auto& instrument = instrument_or->get();
-      instrument.SetNoteOn(static_cast<double>(i + 1), 1.0);
-      instrument.SetNoteOn(static_cast<double>(-i - 1), 1.0);
-      instrument.SetNoteOff(static_cast<double>(i + 1));
+      instruments[i]->SetNoteOn(static_cast<double>(i + 1), 1.0);
+      instruments[i]->SetNoteOn(static_cast<double>(-i - 1), 1.0);
+      instruments[i]->SetNoteOff(static_cast<double>(i + 1));
     }
     EXPECT_THAT(note_off_pitches, ElementsAre(1.0, 2.0, 3.0));
   }

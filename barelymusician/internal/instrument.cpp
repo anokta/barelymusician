@@ -66,6 +66,7 @@ Instrument::Instrument(const InstrumentDefinition& definition, int frame_rate, d
 }
 
 Instrument::~Instrument() noexcept {
+  SetAllNotesOff();
   if (destroy_callback_) {
     destroy_callback_(&state_);
   }

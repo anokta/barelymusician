@@ -2,6 +2,7 @@
 
 #include <stdint.h>  // NOLINT(modernize-deprecated-headers)
 
+#include <atomic>
 #include <cstddef>
 #include <memory>
 
@@ -14,11 +15,8 @@ struct BarelyEffect {
   // Default constructor.
   BarelyEffect() = default;
 
-  // Internal engine.
-  barely::internal::Engine* engine = nullptr;
-
-  // Instrument identifier.
-  barely::internal::Id instrument_id = barely::internal::kInvalid;
+  // Internal instrument.
+  barely::internal::Instrument* instrument;
 
   // Identifier.
   barely::internal::Id id = barely::internal::kInvalid;
@@ -35,10 +33,13 @@ struct BarelyInstrument {
   BarelyInstrument() = default;
 
   // Internal engine.
-  barely::internal::Engine* engine = nullptr;
+  std::weak_ptr<barely::internal::Engine> engine;
 
-  // Identifier.
-  barely::internal::Id id = barely::internal::kInvalid;
+  // Internal instrument.
+  std::shared_ptr<barely::internal::Instrument> internal = nullptr;
+
+  // Internal instrument reference for processing.
+  barely::internal::MutableData<barely::internal::Instrument*> internal_ref;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -104,12 +105,11 @@ bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefiniti
                          int32_t process_order, BarelyEffectHandle* out_effect) {
   if (!instrument || !out_effect) return false;
 
-  const auto effect_id_or =
-      instrument->engine->CreateInstrumentEffect(instrument->id, definition, process_order);
+  const auto effect_id_or = instrument->engine.lock()->CreateInstrumentEffect(
+      instrument->internal.get(), definition, process_order);
   if (effect_id_or.has_value()) {
     *out_effect = new BarelyEffect();
-    (*out_effect)->engine = instrument->engine;
-    (*out_effect)->instrument_id = instrument->id;
+    (*out_effect)->instrument = instrument->internal.get();
     (*out_effect)->id = *effect_id_or;
     return true;
   }
@@ -117,121 +117,88 @@ bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefiniti
 }
 
 bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
-  if (!effect) return false;
+  if (!effect || !effect->instrument) return false;
 
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  const bool success = instrument_or.has_value() && instrument_or->get().DestroyEffect(effect->id);
+  const bool success = effect->instrument->DestroyEffect(effect->id);
   delete effect;
   return success;
 }
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
-  if (!effect) return false;
+  if (!effect || !effect->instrument) return false;
   if (!out_value) return false;
 
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    if (const auto* control = instrument_or->get().GetEffectControl(effect->id, index)) {
-      *out_value = control->GetValue();
-      return true;
-    }
+  if (const auto* control = effect->instrument->GetEffectControl(effect->id, index)) {
+    *out_value = control->GetValue();
+    return true;
   }
   return false;
 }
 
 bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
                                        BarelyControlDefinition* out_definition) {
-  if (!effect) return false;
+  if (!effect || !effect->instrument) return false;
   if (!out_definition) return false;
 
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    if (const auto* control = instrument_or->get().GetEffectControl(effect->id, index)) {
-      *out_definition = control->GetDefinition();
-      return true;
-    }
-  }
-  return false;
-}
-
-bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect, int32_t* out_process_order) {
-  if (!effect) return false;
-  if (!out_process_order) return false;
-
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    const auto process_order_or = instrument_or->get().GetEffectProcessOrder(effect->id);
-    if (process_order_or.has_value()) {
-      *out_process_order = *process_order_or;
-      return true;
-    }
-  }
-  return false;
-}
-
-bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
-  if (!effect) return false;
-
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().ResetAllEffectControls(effect->id);
-  }
-  return false;
-}
-
-bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
-  if (!effect) return false;
-
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().ResetEffectControl(effect->id, index);
-  }
-  return false;
-}
-
-bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
-                             double slope_per_beat) {
-  if (!effect) return false;
-
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().SetEffectControl(effect->id, index, value, slope_per_beat);
-  }
-  return false;
-}
-
-bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
-                                  BarelyControlEventDefinition definition, void* user_data) {
-  if (!effect) return false;
-
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetEffectControlEvent(effect->id, definition, user_data);
+  if (const auto* control = effect->instrument->GetEffectControl(effect->id, index)) {
+    *out_definition = control->GetDefinition();
     return true;
   }
   return false;
 }
 
-bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
-  if (!effect) return false;
+bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect, int32_t* out_process_order) {
+  if (!effect || !effect->instrument) return false;
+  if (!out_process_order) return false;
 
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().SetEffectData(
-        effect->id,
-        {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
+  const auto process_order_or = effect->instrument->GetEffectProcessOrder(effect->id);
+  if (process_order_or.has_value()) {
+    *out_process_order = *process_order_or;
+    return true;
   }
   return false;
 }
 
-bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order) {
-  if (!effect) return false;
+bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
+  if (!effect || !effect->instrument) return false;
 
-  const auto instrument_or = effect->engine->GetInstrument(effect->instrument_id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().SetEffectProcessOrder(effect->id, process_order);
-  }
-  return false;
+  return effect->instrument->ResetAllEffectControls(effect->id);
+}
+
+bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
+  if (!effect || !effect->instrument) return false;
+
+  return effect->instrument->ResetEffectControl(effect->id, index);
+}
+
+bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
+                             double slope_per_beat) {
+  if (!effect || !effect->instrument) return false;
+
+  return effect->instrument->SetEffectControl(effect->id, index, value, slope_per_beat);
+}
+
+bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
+                                  BarelyControlEventDefinition definition, void* user_data) {
+  if (!effect || !effect->instrument) return false;
+
+  effect->instrument->SetEffectControlEvent(effect->id, definition, user_data);
+  return true;
+}
+
+bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
+  if (!effect || !effect->instrument) return false;
+
+  return effect->instrument->SetEffectData(
+      effect->id,
+      {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
+}
+
+bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order) {
+  if (!effect || !effect->instrument) return false;
+
+  effect->instrument->SetEffectProcessOrder(effect->id, process_order);
+  return true;
 }
 
 bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefinition definition,
@@ -239,11 +206,11 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefi
   if (!musician) return false;
   if (!out_instrument) return false;
 
-  const auto instrument_id_or = musician->engine->CreateInstrument(definition, frame_rate);
-  if (instrument_id_or.has_value()) {
+  if (auto instrument = musician->engine->CreateInstrument(definition, frame_rate)) {
     *out_instrument = new BarelyInstrument();
-    (*out_instrument)->engine = musician->engine.get();
-    (*out_instrument)->id = *instrument_id_or;
+    (*out_instrument)->engine = musician->engine;
+    (*out_instrument)->internal = std::move(instrument);
+    (*out_instrument)->internal_ref.Update((*out_instrument)->internal.get());
     return true;
   }
   return false;
@@ -252,9 +219,12 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefi
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  const bool success = instrument->engine->DestroyInstrument(instrument->id);
+  if (auto engine = instrument->engine.lock()) {
+    engine->DestroyInstrument(instrument->internal.get());
+  }
+  instrument->internal_ref.Update(nullptr);
   delete instrument;
-  return success;
+  return true;
 }
 
 bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t index,
@@ -262,12 +232,9 @@ bool BarelyInstrument_GetControl(BarelyInstrumentHandle instrument, int32_t inde
   if (!instrument) return false;
   if (!out_value) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    if (const auto* control = instrument_or->get().GetControl(index)) {
-      *out_value = control->GetValue();
-      return true;
-    }
+  if (const auto* control = instrument->internal->GetControl(index)) {
+    *out_value = control->GetValue();
+    return true;
   }
   return false;
 }
@@ -277,12 +244,9 @@ bool BarelyInstrument_GetControlDefinition(BarelyInstrumentHandle instrument, in
   if (!instrument) return false;
   if (!out_definition) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    if (const auto* control = instrument_or->get().GetControl(index)) {
-      *out_definition = control->GetDefinition();
-      return true;
-    }
+  if (const auto* control = instrument->internal->GetControl(index)) {
+    *out_definition = control->GetDefinition();
+    return true;
   }
   return false;
 }
@@ -292,12 +256,9 @@ bool BarelyInstrument_GetNoteControl(BarelyInstrumentHandle instrument, double p
   if (!instrument) return false;
   if (!out_value) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    if (const auto* note_control = instrument_or->get().GetNoteControl(pitch, index)) {
-      *out_value = note_control->GetValue();
-      return true;
-    }
+  if (const auto* note_control = instrument->internal->GetNoteControl(pitch, index)) {
+    *out_value = note_control->GetValue();
+    return true;
   }
   return false;
 }
@@ -308,12 +269,9 @@ bool BarelyInstrument_GetNoteControlDefinition(BarelyInstrumentHandle instrument
   if (!instrument) return false;
   if (!out_definition) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    if (const auto* note_control = instrument_or->get().GetNoteControl(pitch, index)) {
-      *out_definition = note_control->GetDefinition();
-      return true;
-    }
+  if (const auto* note_control = instrument->internal->GetNoteControl(pitch, index)) {
+    *out_definition = note_control->GetDefinition();
+    return true;
   }
   return false;
 }
@@ -323,12 +281,8 @@ bool BarelyInstrument_IsNoteOn(BarelyInstrumentHandle instrument, double pitch,
   if (!instrument) return false;
   if (!out_is_note_on) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    *out_is_note_on = instrument_or->get().IsNoteOn(pitch);
-    return true;
-  }
-  return false;
+  *out_is_note_on = instrument->internal->IsNoteOn(pitch);
+  return true;
 }
 
 bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_samples,
@@ -336,108 +290,75 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_
                               double timestamp) {
   if (!instrument) return false;
 
-  return instrument->engine->ProcessInstrument(instrument->id, output_samples, output_channel_count,
-                                               output_frame_count, timestamp);
+  if (auto instrument_ref = instrument->internal_ref.GetScopedView(); *instrument_ref) {
+    return (*instrument_ref)
+        ->Process(output_samples, output_channel_count, output_frame_count, timestamp);
+  }
+  return false;
 }
 
 bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().ResetAllControls();
-    return true;
-  }
-  return false;
+  instrument->internal->ResetAllControls();
+  return true;
 }
 
 bool BarelyInstrument_ResetAllNoteControls(BarelyInstrumentHandle instrument, double pitch) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().ResetAllNoteControls(pitch);
-  }
-  return false;
+  return instrument->internal->ResetAllNoteControls(pitch);
 }
 
 bool BarelyInstrument_ResetControl(BarelyInstrumentHandle instrument, int32_t index) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().ResetControl(index);
-  }
-  return false;
+  return instrument->internal->ResetControl(index);
 }
 
 bool BarelyInstrument_ResetNoteControl(BarelyInstrumentHandle instrument, double pitch,
                                        int32_t index) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().ResetNoteControl(pitch, index);
-  }
-  return false;
+  return instrument->internal->ResetNoteControl(pitch, index);
 }
 
 bool BarelyInstrument_SetAllNotesOff(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetAllNotesOff();
-    return true;
-  }
-  return false;
+  instrument->internal->SetAllNotesOff();
+  return true;
 }
 
 bool BarelyInstrument_SetControl(BarelyInstrumentHandle instrument, int32_t index, double value,
                                  double slope_per_beat) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().SetControl(index, value, slope_per_beat);
-  }
-  return false;
+  return instrument->internal->SetControl(index, value, slope_per_beat);
 }
 
 bool BarelyInstrument_SetControlEvent(BarelyInstrumentHandle instrument,
                                       BarelyControlEventDefinition definition, void* user_data) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetControlEvent(definition, user_data);
-    return true;
-  }
-  return false;
+  instrument->internal->SetControlEvent(definition, user_data);
+  return true;
 }
 
 bool BarelyInstrument_SetData(BarelyInstrumentHandle instrument, const void* data, int32_t size) {
   if (!instrument) return false;
   if (size < 0 || (!data && size > 0)) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetData(
-        {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
-    return true;
-  }
-  return false;
+  instrument->internal->SetData(
+      {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
+  return true;
 }
 
 bool BarelyInstrument_SetNoteControl(BarelyInstrumentHandle instrument, double pitch, int32_t index,
                                      double value, double slope_per_beat) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    return instrument_or->get().SetNoteControl(pitch, index, value, slope_per_beat);
-  }
-  return false;
+  return instrument->internal->SetNoteControl(pitch, index, value, slope_per_beat);
 }
 
 bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,
@@ -445,58 +366,37 @@ bool BarelyInstrument_SetNoteControlEvent(BarelyInstrumentHandle instrument,
                                           void* user_data) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetNoteControlEvent(definition, user_data);
-    return true;
-  }
-  return false;
+  instrument->internal->SetNoteControlEvent(definition, user_data);
+  return true;
 }
 
 bool BarelyInstrument_SetNoteOff(BarelyInstrumentHandle instrument, double pitch) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetNoteOff(pitch);
-    return true;
-  }
-  return false;
+  instrument->internal->SetNoteOff(pitch);
+  return true;
 }
 
 bool BarelyInstrument_SetNoteOffEvent(BarelyInstrumentHandle instrument,
                                       BarelyNoteOffEventDefinition definition, void* user_data) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetNoteOffEvent(definition, user_data);
-    return true;
-  }
-  return false;
+  instrument->internal->SetNoteOffEvent(definition, user_data);
+  return true;
 }
 
 bool BarelyInstrument_SetNoteOn(BarelyInstrumentHandle instrument, double pitch, double intensity) {
   if (!instrument) return false;
 
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetNoteOn(pitch, intensity);
-    return true;
-  }
-  return false;
+  instrument->internal->SetNoteOn(pitch, intensity);
+  return true;
 }
 
 bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
                                      BarelyNoteOnEventDefinition definition, void* user_data) {
   if (!instrument) return false;
-
-  const auto instrument_or = instrument->engine->GetInstrument(instrument->id);
-  if (instrument_or.has_value()) {
-    instrument_or->get().SetNoteOnEvent(definition, user_data);
-    return true;
-  }
-  return false;
+  instrument->internal->SetNoteOnEvent(definition, user_data);
+  return true;
 }
 
 bool BarelyMusician_Create(BarelyMusicianHandle* out_handle) {

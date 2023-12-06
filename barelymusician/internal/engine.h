@@ -4,7 +4,6 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -23,7 +22,7 @@ class Engine {
   Engine() = default;
 
   /// Destroys `Engine`.
-  ~Engine() noexcept;
+  ~Engine() noexcept = default;
 
   // Non-copyable and non-movable.
   Engine(const Engine& other) noexcept = delete;
@@ -31,20 +30,21 @@ class Engine {
   Engine(Engine&& other) noexcept = delete;
   Engine& operator=(Engine&& other) noexcept = delete;
 
-  /// @param instrument_id Instrument identifier.
-  /// @param definition Effect definition.
-  /// @param process_order Effect process order.
-  /// @return Optional effect identifier.
-  std::optional<Id> CreateInstrumentEffect(Id instrument_id, EffectDefinition definition,
-                                           int process_order) noexcept;
-
   /// Creates a new instrument.
   ///
   /// @param definition Instrument definition.
   /// @param frame_rate Frame rate in hertz.
-  /// @return Optional instrument identifier.
+  /// @return Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  std::optional<Id> CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept;
+  std::shared_ptr<Instrument> CreateInstrument(InstrumentDefinition definition,
+                                               int frame_rate) noexcept;
+
+  /// @param instrument Pointer to instrument.
+  /// @param definition Effect definition.
+  /// @param process_order Effect process order.
+  /// @return Optional effect identifier.
+  std::optional<Id> CreateInstrumentEffect(Instrument* instrument, EffectDefinition definition,
+                                           int process_order) noexcept;
 
   /// Creates a new performer.
   ///
@@ -68,23 +68,15 @@ class Engine {
 
   /// Destroys instrument.
   ///
-  /// @param instrument_id Instrument identifier.
-  /// @return True if successful, false otherwise.
+  /// @param instrument Pointer to instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  bool DestroyInstrument(Id instrument_id) noexcept;
+  void DestroyInstrument(Instrument* instrument) noexcept;
 
   /// Destroys performer.
   ///
   /// @param performer Pointer to performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void DestroyPerformer(Performer* performer) noexcept;
-
-  /// Returns instrument.
-  ///
-  /// @param instrument_id Instrument identifier.
-  /// @return Optional reference to instrument.
-  [[nodiscard]] std::optional<std::reference_wrapper<Instrument>> GetInstrument(
-      Id instrument_id) noexcept;
 
   /// Returns tempo.
   ///
@@ -98,7 +90,7 @@ class Engine {
 
   /// Processes instrument at timestamp.
   ///
-  /// @param instrument_id Instrument identifier.
+  /// @param instrument Pointer to instrument.
   /// @param output_samples Interleaved array of output samples.
   /// @param output_channel_count Number of output channels.
   /// @param output_frame_count Number of output frames.
@@ -119,24 +111,14 @@ class Engine {
   void Update(double timestamp) noexcept;
 
  private:
-  // Instrument reference by identifier map.
-  using InstrumentReferenceMap = std::unordered_map<Id, Instrument*>;
-
   // Generates the next identifier to use.
   Id GenerateNextId() noexcept;
-
-  // Updates instrument reference map.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  void UpdateInstrumentReferenceMap() noexcept;
 
   // Monotonic identifier counter.
   Id id_counter_ = 0;
 
   // Map of instruments by identifiers.
-  std::unordered_map<Id, std::unique_ptr<Instrument>> instruments_;
-
-  // Map of instrument references by identifiers.
-  MutableData<InstrumentReferenceMap> instrument_refs_;
+  std::unordered_set<Instrument*> instruments_;
 
   // Set of performers.
   std::unordered_set<Performer*> performers_;

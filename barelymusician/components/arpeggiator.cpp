@@ -11,14 +11,14 @@
 struct BarelyArpeggiator {
   // Default constructor.
   BarelyArpeggiator(BarelyMusicianHandle musician, int process_order)
-      : arpeggiator(barely::MusicianObserver(musician).CreateComponent<barely::Arpeggiator>(
+      : arpeggiator(barely::Musician::Observer(musician).CreateComponent<barely::Arpeggiator>(
             process_order)) {}
 
   // Internal arpeggiator.
   barely::Arpeggiator arpeggiator;
 
   // Optional instrument.
-  std::optional<barely::InstrumentObserver> instrument = std::nullopt;
+  std::optional<barely::Instrument::Observer> instrument = std::nullopt;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.

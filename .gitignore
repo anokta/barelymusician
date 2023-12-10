@@ -1,13 +1,12 @@
-# bazel build artifacts.
+# Build artifacts.
+build/
 bazel-*
-
-# cmake build artifacts.
 cmake-*
 
-# osx.
+# OSX.
 .DS_Store
 
-# visual studio code.
-.vscode/*
+# VS Code.
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json

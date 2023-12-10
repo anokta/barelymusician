@@ -1,2 +1,3 @@
-# cmake build artifacts.
+# Build artifacts.
+build
 cmake-build

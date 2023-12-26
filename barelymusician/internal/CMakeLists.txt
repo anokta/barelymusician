@@ -92,6 +92,11 @@ add_library(
 )
 
 add_library(
+  barely_internal_observable INTERFACE
+  observable.h
+)
+
+add_library(
   barely_internal_performer
   performer.cpp
   performer.h
@@ -183,6 +188,17 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_internal_mutable_data_test)
+
+  add_executable(
+    barely_internal_observable_test
+    observable_test.cpp
+  )
+  target_link_libraries(
+    barely_internal_observable_test
+    barely_internal_observable
+    gtest_main
+  )
+  gtest_discover_tests(barely_internal_observable_test)
 
   add_executable(
     barely_internal_performer_test

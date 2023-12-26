@@ -90,6 +90,11 @@ cc_library(
 )
 
 cc_library(
+    name = "observable",
+    hdrs = ["observable.h"],
+)
+
+cc_library(
     name = "performer",
     srcs = ["performer.cpp"],
     hdrs = ["performer.h"],
@@ -170,6 +175,15 @@ cc_test(
     srcs = ["mutable_data_test.cpp"],
     deps = [
         ":mutable_data",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "observable_test",
+    srcs = ["observable_test.cpp"],
+    deps = [
+        ":observable",
         "@googletest//:gtest_main",
     ],
 )

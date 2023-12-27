@@ -90,6 +90,10 @@ add_library(
   barely_internal_mutable_data INTERFACE
   mutable_data.h
 )
+target_link_libraries(
+  barely_internal_mutable_data INTERFACE
+  barely_internal_scoped_view
+)
 
 add_library(
   barely_internal_observable INTERFACE
@@ -107,6 +111,11 @@ target_link_libraries(
   barely_internal_id
   barelymusician_headeronly
   barely_find_or_null
+)
+
+add_library(
+  barely_internal_scoped_view INTERFACE
+  scoped_view.h
 )
 
 if (ENABLE_TESTS)
@@ -213,4 +222,16 @@ if (ENABLE_TESTS)
     gtest_main
   )
   gtest_discover_tests(barely_internal_performer_test)
+
+  add_executable(
+    barely_internal_scoped_view_test
+    scoped_view_test.cpp
+  )
+  target_link_libraries(
+    barely_internal_scoped_view_test
+    barely_internal_scoped_view
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barely_internal_scoped_view_test)
 endif()

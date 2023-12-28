@@ -22,10 +22,8 @@ class ScopedView {
   ScopedView& operator=(ScopedView&& other) noexcept = delete;
 
   // Member access operators.
-  DataType& operator*() noexcept;
-  DataType* operator->() noexcept;
-  const DataType& operator*() const noexcept;
-  const DataType* operator->() const noexcept;
+  DataType& operator*() const noexcept;
+  DataType* operator->() const noexcept;
 
  private:
   // Pointer reference to data.
@@ -45,22 +43,12 @@ ScopedView<DataType>::~ScopedView() noexcept {
 }
 
 template <typename DataType>
-DataType& ScopedView<DataType>::operator*() noexcept {
+DataType& ScopedView<DataType>::operator*() const noexcept {
   return *view_;
 }
 
 template <typename DataType>
-DataType* ScopedView<DataType>::operator->() noexcept {
-  return view_;
-}
-
-template <typename DataType>
-const DataType& ScopedView<DataType>::operator*() const noexcept {
-  return *view_;
-}
-
-template <typename DataType>
-const DataType* ScopedView<DataType>::operator->() const noexcept {
+DataType* ScopedView<DataType>::operator->() const noexcept {
   return view_;
 }
 

@@ -20,6 +20,7 @@ cc_library(
         ":id",
         ":instrument",
         ":mutable_data",
+        ":observable",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",

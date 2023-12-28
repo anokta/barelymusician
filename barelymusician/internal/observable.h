@@ -28,22 +28,23 @@ class Observable {
   /// Destroys `Observable`.
   ~Observable() noexcept;
 
-  /// Non-copyable and non-movable.
+  /// Non-copyable.
   Observable(const Observable& other) noexcept = delete;
   Observable& operator=(const Observable& other) noexcept = delete;
-  Observable(Observable&& other) noexcept = delete;
-  Observable& operator=(Observable&& other) noexcept = delete;
+
+  /// Movable.
+  Observable(Observable&& other) noexcept;
+  Observable& operator=(Observable&& other) noexcept;
 
   /// Member access operators.
-  DataType& operator*() noexcept;
-  DataType* operator->() noexcept;
-  const DataType& operator*() const noexcept;
-  const DataType* operator->() const noexcept;
+  DataType& operator*() const noexcept;
+  DataType* operator->() const noexcept;
+  DataType* get() const noexcept;
 
   /// Returns a new observer.
   ///
   /// @return Observer.
-  Observer<DataType> Observe() noexcept;
+  Observer<DataType> Observe() const noexcept;
 
  private:
   // Ensures that `View` is only visible to `Observer`.
@@ -77,10 +78,9 @@ class Observer {
   Observer& operator=(Observer&& other) noexcept;
 
   /// Member access operators.
-  DataType& operator*() noexcept;
-  DataType* operator->() noexcept;
-  const DataType& operator*() const noexcept;
-  const DataType* operator->() const noexcept;
+  DataType& operator*() const noexcept;
+  DataType* operator->() const noexcept;
+  DataType* get() const noexcept { return view_->data.get(); }
 
   /// Returns whether the observed data is valid or not.
   ///
@@ -109,46 +109,49 @@ Observable<DataType>::Observable(Args... args) noexcept
 
 template <typename DataType>
 Observable<DataType>::~Observable() noexcept {
-  assert(view_);
-  assert(view_->data);
-  view_->data.reset();
-
-  if (*view_->observer_count == 0) {
-    delete view_;
-    view_ = nullptr;
+  assert(view_ == nullptr || view_->data);
+  if (view_) {
+    view_->data.reset();
+    if (*view_->observer_count == 0) {
+      delete view_;
+      view_ = nullptr;
+    }
   }
 }
 
 template <typename DataType>
-DataType& Observable<DataType>::operator*() noexcept {
+Observable<DataType>::Observable(Observable<DataType>&& other) noexcept
+    : view_(std::exchange(other.view_, nullptr)) {}
+
+template <typename DataType>
+Observable<DataType>& Observable<DataType>::operator=(Observable<DataType>&& other) noexcept {
+  if (*this != other) {
+    view_ = std::exchange(other.view_, nullptr);
+  }
+  return *this;
+}
+
+template <typename DataType>
+DataType& Observable<DataType>::operator*() const noexcept {
   assert(view_);
   assert(view_->data);
   return *view_->data;
 }
 
 template <typename DataType>
-DataType* Observable<DataType>::operator->() noexcept {
+DataType* Observable<DataType>::operator->() const noexcept {
   assert(view_);
   assert(view_->data);
   return view_->data.get();
 }
 
 template <typename DataType>
-const DataType& Observable<DataType>::operator*() const noexcept {
-  assert(view_);
-  assert(view_->data);
-  return *view_->data;
+DataType* Observable<DataType>::get() const noexcept {
+  return view_ ? view_->data.get() : nullptr;
 }
 
 template <typename DataType>
-const DataType* Observable<DataType>::operator->() const noexcept {
-  assert(view_);
-  assert(view_->data);
-  return view_->data.get();
-}
-
-template <typename DataType>
-Observer<DataType> Observable<DataType>::Observe() noexcept {
+Observer<DataType> Observable<DataType>::Observe() const noexcept {
   return Observer<DataType>(view_);
 }
 
@@ -180,29 +183,16 @@ Observer<DataType>::operator bool() const noexcept {
 }
 
 template <typename DataType>
-DataType& Observer<DataType>::operator*() noexcept {
+DataType& Observer<DataType>::operator*() const noexcept {
   assert(view_);
   assert(view_->data);
   return *view_->data;
 }
 
 template <typename DataType>
-DataType* Observer<DataType>::operator->() noexcept {
+DataType* Observer<DataType>::operator->() const noexcept {
   assert(view_);
   assert(view_->data);
-  return view_->data.get();
-}
-
-template <typename DataType>
-const DataType& Observer<DataType>::operator*() const noexcept {
-  assert(view_);
-  assert(view_->data);
-  return *view_->data;
-}
-
-template <typename DataType>
-const DataType* Observer<DataType>::operator->() const noexcept {
-  assert(view_);
   return view_->data.get();
 }
 

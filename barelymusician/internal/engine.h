@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -11,6 +12,7 @@
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/mutable_data.h"
+#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
@@ -36,8 +38,7 @@ class Engine {
   /// @param frame_rate Frame rate in hertz.
   /// @return Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  std::shared_ptr<Instrument> CreateInstrument(InstrumentDefinition definition,
-                                               int frame_rate) noexcept;
+  Observer<Instrument> CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept;
 
   /// @param instrument Pointer to instrument.
   /// @param definition Effect definition.
@@ -118,7 +119,7 @@ class Engine {
   Id id_counter_ = 0;
 
   // Map of instruments by identifiers.
-  std::unordered_set<Instrument*> instruments_;
+  std::unordered_map<Instrument*, Observable<Instrument>> instruments_;
 
   // Set of performers.
   std::unordered_set<Performer*> performers_;

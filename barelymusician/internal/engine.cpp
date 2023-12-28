@@ -15,20 +15,18 @@
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-std::shared_ptr<Instrument> Engine::CreateInstrument(InstrumentDefinition definition,
-                                                     int frame_rate) noexcept {
-  if (frame_rate <= 0) {
-    return nullptr;
-  }
-  auto instrument = std::make_shared<Instrument>(definition, frame_rate, tempo_, timestamp_);
-  [[maybe_unused]] const auto success = instruments_.emplace(instrument.get()).second;
+Observer<Instrument> Engine::CreateInstrument(InstrumentDefinition definition,
+                                              int frame_rate) noexcept {
+  Observable<Instrument> observable(definition, frame_rate, tempo_, timestamp_);
+  const auto [it, success] = instruments_.emplace(observable.get(), std::move(observable));
   assert(success);
-  return instrument;
+  return it->second.Observe();
 }
 
 std::optional<Id> Engine::CreateInstrumentEffect(Instrument* instrument,
@@ -86,7 +84,7 @@ void Engine::SetTempo(double tempo) noexcept {
     return;
   }
   tempo_ = tempo;
-  for (auto* instrument : instruments_) {
+  for (auto& [instrument, observable] : instruments_) {
     instrument->SetTempo(tempo_);
   }
 }
@@ -112,7 +110,7 @@ void Engine::Update(double timestamp) noexcept {
         }
 
         timestamp_ += SecondsFromBeats(tempo_, update_duration.first);
-        for (auto* instrument : instruments_) {
+        for (auto& [instrument, observable] : instruments_) {
           instrument->Update(timestamp_);
         }
       }
@@ -124,7 +122,7 @@ void Engine::Update(double timestamp) noexcept {
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      for (auto* instrument : instruments_) {
+      for (auto& [instrument, observable] : instruments_) {
         instrument->Update(timestamp_);
       }
     }

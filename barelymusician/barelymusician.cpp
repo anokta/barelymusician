@@ -8,6 +8,7 @@
 
 #include "barelymusician/internal/engine.h"
 #include "barelymusician/internal/id.h"
+#include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 
 // Effect.
@@ -29,14 +30,18 @@ struct BarelyEffect {
 
 // Instrument.
 struct BarelyInstrument {
-  // Default constructor.
-  BarelyInstrument() = default;
+  // Constructs a new `BarelyInstrument` with a given `instrument`.
+  BarelyInstrument(const std::shared_ptr<barely::internal::Engine>& engine,
+                   barely::internal::Observer<barely::internal::Instrument> instrument) noexcept
+      : engine(engine), internal(std::move(instrument)) {
+    internal_ref.Update(internal.get());
+  }
 
   // Internal engine.
   std::weak_ptr<barely::internal::Engine> engine;
 
   // Internal instrument.
-  std::shared_ptr<barely::internal::Instrument> internal = nullptr;
+  barely::internal::Observer<barely::internal::Instrument> internal;
 
   // Internal instrument reference for processing.
   barely::internal::MutableData<barely::internal::Instrument*> internal_ref;
@@ -204,16 +209,12 @@ bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_ord
 bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefinition definition,
                              int32_t frame_rate, BarelyInstrumentHandle* out_instrument) {
   if (!musician) return false;
+  if (frame_rate <= 0) return false;
   if (!out_instrument) return false;
 
-  if (auto instrument = musician->engine->CreateInstrument(definition, frame_rate)) {
-    *out_instrument = new BarelyInstrument();
-    (*out_instrument)->engine = musician->engine;
-    (*out_instrument)->internal = std::move(instrument);
-    (*out_instrument)->internal_ref.Update((*out_instrument)->internal.get());
-    return true;
-  }
-  return false;
+  *out_instrument = new BarelyInstrument(
+      musician->engine, musician->engine->CreateInstrument(definition, frame_rate));
+  return true;
 }
 
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {

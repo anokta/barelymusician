@@ -123,9 +123,9 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     Engine engine;
 
     // Create instruments with note off callback.
-    std::array<std::shared_ptr<Instrument>, 3> instruments;
+    std::vector<Observer<Instrument>> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments[i] = engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
+      instruments.push_back(engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate));
       ASSERT_NE(instruments[i].get(), nullptr);
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);

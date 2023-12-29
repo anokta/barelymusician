@@ -33,18 +33,13 @@ struct BarelyInstrument {
   // Constructs a new `BarelyInstrument` with a given `instrument`.
   BarelyInstrument(const std::shared_ptr<barely::internal::Engine>& engine,
                    barely::internal::Observer<barely::internal::Instrument> instrument) noexcept
-      : engine(engine), internal(std::move(instrument)) {
-    internal_ref.Update(internal.get());
-  }
+      : engine(engine), internal(std::move(instrument)) {}
 
   // Internal engine.
   std::weak_ptr<barely::internal::Engine> engine;
 
   // Internal instrument.
   barely::internal::Observer<barely::internal::Instrument> internal;
-
-  // Internal instrument reference for processing.
-  barely::internal::MutableData<barely::internal::Instrument*> internal_ref;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -223,7 +218,6 @@ bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (auto engine = instrument->engine.lock()) {
     engine->DestroyInstrument(instrument->internal.get());
   }
-  instrument->internal_ref.Update(nullptr);
   delete instrument;
   return true;
 }
@@ -291,11 +285,8 @@ bool BarelyInstrument_Process(BarelyInstrumentHandle instrument, double* output_
                               double timestamp) {
   if (!instrument) return false;
 
-  if (auto instrument_ref = instrument->internal_ref.GetScopedView(); *instrument_ref) {
-    return (*instrument_ref)
-        ->Process(output_samples, output_channel_count, output_frame_count, timestamp);
-  }
-  return false;
+  return instrument->internal->Process(output_samples, output_channel_count, output_frame_count,
+                                       timestamp);
 }
 
 bool BarelyInstrument_ResetAllControls(BarelyInstrumentHandle instrument) {

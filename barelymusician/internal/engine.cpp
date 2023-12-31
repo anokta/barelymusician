@@ -41,11 +41,11 @@ std::optional<Id> Engine::CreateInstrumentEffect(Instrument* instrument,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-std::shared_ptr<Performer> Engine::CreatePerformer() noexcept {
-  auto performer = std::shared_ptr<Performer>(new (std::nothrow) Performer());
-  [[maybe_unused]] const auto success = performers_.emplace(performer.get()).second;
+Observer<Performer> Engine::CreatePerformer() noexcept {
+  Observable<Performer> observable;
+  const auto [it, success] = performers_.emplace(observable.get(), std::move(observable));
   assert(success);
-  return performer;
+  return it->second.Observe();
 }
 
 std::optional<Id> Engine::CreatePerformerTask(Performer* performer, TaskDefinition definition,
@@ -63,14 +63,14 @@ std::optional<Id> Engine::CreatePerformerTask(Performer* performer, TaskDefiniti
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::DestroyInstrument(Instrument* instrument) noexcept {
-  [[maybe_unused]] const auto success = instruments_.erase(instrument) > 0;
+void Engine::DestroyInstrument(const Observer<Instrument>& instrument) noexcept {
+  [[maybe_unused]] const auto success = instruments_.erase(instrument.get()) > 0;
   assert(success);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::DestroyPerformer(Performer* performer) noexcept {
-  [[maybe_unused]] const auto success = performers_.erase(performer) > 0;
+void Engine::DestroyPerformer(const Observer<Performer>& performer) noexcept {
+  [[maybe_unused]] const auto success = performers_.erase(performer.get()) > 0;
   assert(success);
 }
 
@@ -96,7 +96,7 @@ void Engine::Update(double timestamp) noexcept {
       std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),
                                                 std::numeric_limits<int>::max()};
       bool has_tasks_to_process = false;
-      for (const auto* performer : performers_) {
+      for (const auto& [performer, observable] : performers_) {
         if (const auto maybe_duration = performer->GetDurationToNextTask();
             maybe_duration && maybe_duration < update_duration) {
           has_tasks_to_process = true;
@@ -105,7 +105,7 @@ void Engine::Update(double timestamp) noexcept {
       }
 
       if (update_duration.first > 0) {
-        for (auto* performer : performers_) {
+        for (auto& [performer, observable] : performers_) {
           performer->Update(update_duration.first);
         }
 
@@ -116,7 +116,7 @@ void Engine::Update(double timestamp) noexcept {
       }
 
       if (has_tasks_to_process && timestamp_ < timestamp) {
-        for (auto* performer : performers_) {
+        for (auto& [performer, observable] : performers_) {
           performer->ProcessNextTaskAtPosition();
         }
       }

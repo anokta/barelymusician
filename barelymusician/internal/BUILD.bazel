@@ -141,8 +141,8 @@ cc_test(
     deps = [
         ":control",
         ":engine",
-        ":id",
         ":instrument",
+        ":observable",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],

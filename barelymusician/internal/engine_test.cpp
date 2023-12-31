@@ -3,13 +3,12 @@
 #include <stdint.h>  // NOLINT(modernize-deprecated-headers)
 
 #include <algorithm>
-#include <array>
 #include <functional>
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/observable.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -112,7 +111,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   }
 
   // Destroy the instrument.
-  engine.DestroyInstrument(instrument.get());
+  engine.DestroyInstrument(instrument);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
@@ -193,7 +192,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy the performer.
-  engine.DestroyPerformer(performer.get());
+  engine.DestroyPerformer(performer);
 }
 
 // Tests that the engine sets its tempo as expected.

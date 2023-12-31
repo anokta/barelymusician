@@ -140,8 +140,8 @@ if (ENABLE_TESTS)
     barely_internal_engine_test
     barely_internal_control
     barely_internal_engine
-    barely_internal_id
     barely_internal_instrument
+    barely_internal_observable
     barelymusician_headeronly
     gmock
     gtest_main

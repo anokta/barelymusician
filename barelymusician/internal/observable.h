@@ -109,7 +109,7 @@ Observable<DataType>::Observable(Args... args) noexcept
 
 template <typename DataType>
 Observable<DataType>::~Observable() noexcept {
-  assert(view_ == nullptr || view_->data);
+  assert(!view_ || view_->data);
   if (view_) {
     view_->data.reset();
     if (*view_->observer_count == 0) {
@@ -178,8 +178,7 @@ Observer<DataType>& Observer<DataType>::operator=(Observer<DataType>&& other) no
 
 template <typename DataType>
 Observer<DataType>::operator bool() const noexcept {
-  assert(view_);
-  return view_->data != nullptr;
+  return view_ && view_->data;
 }
 
 template <typename DataType>

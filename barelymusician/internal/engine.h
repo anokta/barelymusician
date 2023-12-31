@@ -2,7 +2,6 @@
 #define BARELYMUSICIAN_INTERNAL_ENGINE_H_
 
 #include <functional>
-#include <memory>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
@@ -51,7 +50,7 @@ class Engine {
   ///
   /// @return Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  std::shared_ptr<Performer> CreatePerformer() noexcept;
+  Observer<Performer> CreatePerformer() noexcept;
 
   /// Creates a new performer task.
   ///
@@ -69,15 +68,15 @@ class Engine {
 
   /// Destroys instrument.
   ///
-  /// @param instrument Pointer to instrument.
+  /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyInstrument(Instrument* instrument) noexcept;
+  void DestroyInstrument(const Observer<Instrument>& instrument) noexcept;
 
   /// Destroys performer.
   ///
-  /// @param performer Pointer to performer.
+  /// @param performer Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(Performer* performer) noexcept;
+  void DestroyPerformer(const Observer<Performer>& performer) noexcept;
 
   /// Returns tempo.
   ///
@@ -118,11 +117,11 @@ class Engine {
   // Monotonic identifier counter.
   Id id_counter_ = 0;
 
-  // Map of instruments by identifiers.
+  // Map of instruments by pointers.
   std::unordered_map<Instrument*, Observable<Instrument>> instruments_;
 
-  // Set of performers.
-  std::unordered_set<Performer*> performers_;
+  // Map of performers by pointers.
+  std::unordered_map<Performer*, Observable<Performer>> performers_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

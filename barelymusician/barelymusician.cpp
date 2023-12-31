@@ -2,14 +2,18 @@
 
 #include <stdint.h>  // NOLINT(modernize-deprecated-headers)
 
-#include <atomic>
 #include <cstddef>
-#include <memory>
 
 #include "barelymusician/internal/engine.h"
 #include "barelymusician/internal/id.h"
+#include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
+
+using ::barely::internal::Engine;
+using ::barely::internal::Instrument;
+using ::barely::internal::Observer;
+using ::barely::internal::Performer;
 
 // Effect.
 struct BarelyEffect {
@@ -17,7 +21,7 @@ struct BarelyEffect {
   BarelyEffect() = default;
 
   // Internal instrument.
-  barely::internal::Instrument* instrument;
+  Instrument* instrument;
 
   // Identifier.
   barely::internal::Id id = barely::internal::kInvalid;
@@ -30,16 +34,16 @@ struct BarelyEffect {
 
 // Instrument.
 struct BarelyInstrument {
-  // Constructs a new `BarelyInstrument` with a given `instrument`.
-  BarelyInstrument(const std::shared_ptr<barely::internal::Engine>& engine,
-                   barely::internal::Observer<barely::internal::Instrument> instrument) noexcept
-      : engine(engine), internal(std::move(instrument)) {}
+  // Constructs a new `BarelyInstrument` with a given `engine`, `definition` and `frame_rate`.
+  BarelyInstrument(Engine& engine, BarelyInstrumentDefinition definition,
+                   int32_t frame_rate) noexcept
+      : engine(engine), internal(engine.CreateInstrument(definition, frame_rate)) {}
 
   // Internal engine.
-  std::weak_ptr<barely::internal::Engine> engine;
+  Engine& engine;
 
   // Internal instrument.
-  barely::internal::Observer<barely::internal::Instrument> internal;
+  Observer<Instrument> internal;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -59,7 +63,7 @@ struct BarelyMusician {
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
 
   // Internal engine.
-  std::shared_ptr<barely::internal::Engine> engine = std::make_shared<barely::internal::Engine>();
+  Engine engine;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -70,13 +74,14 @@ struct BarelyMusician {
 // Performer.
 struct BarelyPerformer {
   // Default constructor.
-  BarelyPerformer() = default;
+  explicit BarelyPerformer(Engine& engine) noexcept
+      : engine(engine), internal(engine.CreatePerformer()) {}
 
   // Internal engine.
-  std::weak_ptr<barely::internal::Engine> engine;
+  Engine& engine;
 
   // Internal performer.
-  std::shared_ptr<barely::internal::Performer> internal = nullptr;
+  Observer<Performer> internal;
 
  private:
   // Ensures that the instance can only be destroyed via explicit destroy call.
@@ -90,7 +95,7 @@ struct BarelyTask {
   BarelyTask() = default;
 
   // Internal performer.
-  barely::internal::Performer* performer;
+  Performer* performer;
 
   // Identifier.
   barely::internal::Id id = barely::internal::kInvalid;
@@ -103,10 +108,10 @@ struct BarelyTask {
 
 bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefinition definition,
                          int32_t process_order, BarelyEffectHandle* out_effect) {
-  if (!instrument || !out_effect) return false;
+  if (!instrument || !instrument->internal || !out_effect) return false;
 
-  const auto effect_id_or = instrument->engine.lock()->CreateInstrumentEffect(
-      instrument->internal.get(), definition, process_order);
+  const auto effect_id_or = instrument->engine.CreateInstrumentEffect(instrument->internal.get(),
+                                                                      definition, process_order);
   if (effect_id_or.has_value()) {
     *out_effect = new BarelyEffect();
     (*out_effect)->instrument = instrument->internal.get();
@@ -207,16 +212,15 @@ bool BarelyInstrument_Create(BarelyMusicianHandle musician, BarelyInstrumentDefi
   if (frame_rate <= 0) return false;
   if (!out_instrument) return false;
 
-  *out_instrument = new BarelyInstrument(
-      musician->engine, musician->engine->CreateInstrument(definition, frame_rate));
+  *out_instrument = new BarelyInstrument(musician->engine, definition, frame_rate);
   return true;
 }
 
 bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
-  if (auto engine = instrument->engine.lock()) {
-    engine->DestroyInstrument(instrument->internal.get());
+  if (instrument->internal) {
+    instrument->engine.DestroyInstrument(instrument->internal);
   }
   delete instrument;
   return true;
@@ -409,7 +413,7 @@ bool BarelyMusician_GetTempo(BarelyMusicianHandle musician, double* out_tempo) {
   if (!musician) return false;
   if (!out_tempo) return false;
 
-  *out_tempo = musician->engine->GetTempo();
+  *out_tempo = musician->engine.GetTempo();
   return true;
 }
 
@@ -417,21 +421,21 @@ bool BarelyMusician_GetTimestamp(BarelyMusicianHandle musician, double* out_time
   if (!musician) return false;
   if (!out_timestamp) return false;
 
-  *out_timestamp = musician->engine->GetTimestamp();
+  *out_timestamp = musician->engine.GetTimestamp();
   return true;
 }
 
 bool BarelyMusician_SetTempo(BarelyMusicianHandle musician, double tempo) {
   if (!musician) return false;
 
-  musician->engine->SetTempo(tempo);
+  musician->engine.SetTempo(tempo);
   return true;
 }
 
 bool BarelyMusician_Update(BarelyMusicianHandle musician, double timestamp) {
   if (!musician) return false;
 
-  musician->engine->Update(timestamp);
+  musician->engine.Update(timestamp);
   return true;
 }
 
@@ -439,18 +443,15 @@ bool BarelyPerformer_Create(BarelyMusicianHandle musician, BarelyPerformerHandle
   if (!musician) return false;
   if (!out_performer) return false;
 
-  *out_performer = new BarelyPerformer();
-  (*out_performer)->engine = musician->engine;
-  (*out_performer)->internal = musician->engine->CreatePerformer();
-
+  *out_performer = new BarelyPerformer(musician->engine);
   return true;
 }
 
 bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
-  if (auto engine = performer->engine.lock()) {
-    engine->DestroyPerformer(performer->internal.get());
+  if (!performer->internal) {
+    performer->engine.DestroyPerformer(performer->internal);
   }
   delete performer;
   return true;
@@ -500,12 +501,11 @@ bool BarelyPerformer_IsPlaying(BarelyPerformerHandle performer, bool* out_is_pla
 bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
                                         BarelyTaskDefinition definition, double position,
                                         int32_t process_order, void* user_data) {
-  if (!performer) return false;
-  if (performer->engine.expired()) return false;
+  if (!performer || !performer->internal) return false;
 
-  const auto task_id_or = performer->engine.lock()->CreatePerformerTask(
-      performer->internal.get(), definition, /*is_one_off=*/true, position, process_order,
-      user_data);
+  const auto task_id_or = performer->engine.CreatePerformerTask(performer->internal.get(),
+                                                                definition, /*is_one_off=*/true,
+                                                                position, process_order, user_data);
   return task_id_or.has_value();
 }
 
@@ -555,13 +555,12 @@ bool BarelyPerformer_Stop(BarelyPerformerHandle performer) {
 bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition definition,
                        double position, int32_t process_order, void* user_data,
                        BarelyTaskHandle* out_task) {
-  if (!performer) return false;
+  if (!performer || !performer->internal) return false;
   if (!out_task) return false;
-  if (performer->engine.expired()) return false;
 
-  const auto task_id_or = performer->engine.lock()->CreatePerformerTask(
-      performer->internal.get(), definition, /*is_one_off=*/false, position, process_order,
-      user_data);
+  const auto task_id_or = performer->engine.CreatePerformerTask(performer->internal.get(),
+                                                                definition, /*is_one_off=*/false,
+                                                                position, process_order, user_data);
   if (task_id_or.has_value()) {
     *out_task = new BarelyTask();
     (*out_task)->performer = performer->internal.get();

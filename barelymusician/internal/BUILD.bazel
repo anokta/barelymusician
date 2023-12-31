@@ -88,9 +88,6 @@ cc_library(
 cc_library(
     name = "mutable_data",
     hdrs = ["mutable_data.h"],
-    deps = [
-        ":scoped_view",
-    ],
 )
 
 cc_library(
@@ -108,11 +105,6 @@ cc_library(
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
     ],
-)
-
-cc_library(
-    name = "scoped_view",
-    hdrs = ["scoped_view.h"],
 )
 
 cc_test(
@@ -204,15 +196,6 @@ cc_test(
         ":id",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "scoped_view_test",
-    srcs = ["scoped_view_test.cpp"],
-    deps = [
-        ":scoped_view",
         "@googletest//:gtest_main",
     ],
 )

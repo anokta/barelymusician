@@ -3,15 +3,11 @@
 
 #include <algorithm>
 #include <cassert>
-#include <functional>
 #include <limits>
-#include <memory>
-#include <new>
 #include <optional>
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/common/find_or_null.h"
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"

@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <memory>
+#include <new>
 #include <utility>
 
 namespace barely::internal {
@@ -105,7 +106,8 @@ class Observer {
 template <typename DataType>
 template <typename... Args>
 Observable<DataType>::Observable(Args... args) noexcept
-    : view_(new View{std::make_unique<DataType>(args...), std::make_unique<int>(0)}) {}
+    : view_(new(std::nothrow) View{std::make_unique<DataType>(args...), std::make_unique<int>(0)}) {
+}
 
 template <typename DataType>
 Observable<DataType>::~Observable() noexcept {

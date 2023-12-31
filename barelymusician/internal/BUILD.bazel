@@ -23,7 +23,6 @@ cc_library(
         ":observable",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
     ],
 )

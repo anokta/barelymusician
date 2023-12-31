@@ -31,7 +31,6 @@ target_link_libraries(
   barely_internal_observable
   barely_internal_performer
   barelymusician_headeronly
-  barely_find_or_null
   barely_seconds
 )
 

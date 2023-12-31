@@ -19,7 +19,7 @@ cc_library(
     deps = [
         ":id",
         ":instrument",
-        ":mutable_data",
+        ":mutable",
         ":observable",
         ":performer",
         "//barelymusician:barelymusician_headeronly",
@@ -61,7 +61,7 @@ cc_library(
         ":id",
         ":message",
         ":message_queue",
-        ":mutable_data",
+        ":mutable",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
@@ -86,8 +86,8 @@ cc_library(
 )
 
 cc_library(
-    name = "mutable_data",
-    hdrs = ["mutable_data.h"],
+    name = "mutable",
+    hdrs = ["mutable.h"],
 )
 
 cc_library(
@@ -172,10 +172,10 @@ cc_test(
 )
 
 cc_test(
-    name = "mutable_data_test",
-    srcs = ["mutable_data_test.cpp"],
+    name = "mutable_test",
+    srcs = ["mutable_test.cpp"],
     deps = [
-        ":mutable_data",
+        ":mutable",
         "@googletest//:gtest_main",
     ],
 )

@@ -14,7 +14,7 @@
 #include "barelymusician/internal/event.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/message_queue.h"
-#include "barelymusician/internal/mutable_data.h"
+#include "barelymusician/internal/mutable.h"
 
 namespace barely::internal {
 
@@ -337,7 +337,7 @@ class Instrument {
   std::vector<std::byte> data_;
 
   // Array of effect identifier-reference pairs.
-  MutableData<std::vector<std::pair<Id, Effect*>>> effect_id_ref_pairs_;
+  Mutable<std::vector<std::pair<Id, Effect*>>> effect_id_ref_pairs_;
 
   // Message queue.
   MessageQueue message_queue_;

@@ -10,7 +10,7 @@
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
-#include "barelymusician/internal/mutable_data.h"
+#include "barelymusician/internal/mutable.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 

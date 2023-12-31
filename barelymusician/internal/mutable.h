@@ -7,9 +7,9 @@
 
 namespace barely::internal {
 
-/// Mutable data with a real-time safe view.
+/// Mutable data template with a real-time safe view.
 template <typename DataType>
-class MutableData {
+class Mutable {
  public:
   /// Returns scoped view to data.
   ///
@@ -57,12 +57,12 @@ class MutableData {
 };
 
 template <typename DataType>
-auto MutableData<DataType>::GetScopedView() noexcept {
+auto Mutable<DataType>::GetScopedView() noexcept {
   return ScopedView(data_);
 }
 
 template <typename DataType>
-void MutableData<DataType>::Update(DataType new_data) noexcept {
+void Mutable<DataType>::Update(DataType new_data) noexcept {
   auto new_data_holder = std::make_unique<DataType>(std::move(new_data));
   for (auto* data = data_holder_.get(); !data_.compare_exchange_weak(
            data, new_data_holder.get(), std::memory_order_release, std::memory_order_relaxed);) {
@@ -72,21 +72,21 @@ void MutableData<DataType>::Update(DataType new_data) noexcept {
 }
 
 template <typename DataType>
-MutableData<DataType>::ScopedView::ScopedView(std::atomic<DataType*>& data) noexcept
+Mutable<DataType>::ScopedView::ScopedView(std::atomic<DataType*>& data) noexcept
     : data_(data), view_(data_.exchange(nullptr)) {}
 
 template <typename DataType>
-MutableData<DataType>::ScopedView::~ScopedView() noexcept {
+Mutable<DataType>::ScopedView::~ScopedView() noexcept {
   data_ = view_;
 }
 
 template <typename DataType>
-const DataType& MutableData<DataType>::ScopedView::operator*() const noexcept {
+const DataType& Mutable<DataType>::ScopedView::operator*() const noexcept {
   return *view_;
 }
 
 template <typename DataType>
-const DataType* MutableData<DataType>::ScopedView::operator->() const noexcept {
+const DataType* Mutable<DataType>::ScopedView::operator->() const noexcept {
   return view_;
 }
 

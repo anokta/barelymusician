@@ -1,4 +1,4 @@
-#include "barelymusician/internal/mutable_data.h"
+#include "barelymusician/internal/mutable.h"
 
 #include <string>
 #include <vector>
@@ -11,9 +11,9 @@ namespace {
 
 using ::testing::ElementsAre;
 
-// Tests that the mutable data manages simple data as expected.
-TEST(MutableDataTest, SimpleData) {
-  MutableData<int> data;
+// Tests that mutable manages simple data as expected.
+TEST(MutableTest, SimpleData) {
+  Mutable<int> data;
   EXPECT_EQ(*data.GetScopedView(), 0);
 
   data.Update(5);
@@ -24,9 +24,9 @@ TEST(MutableDataTest, SimpleData) {
   EXPECT_EQ(*view, -10);
 }
 
-// Tests that the mutable data manages complex data as expected.
-TEST(MutableDataTest, ComplexData) {
-  MutableData<std::vector<std::string>> data;
+// Tests that mutable manages complex data as expected.
+TEST(MutableTest, ComplexData) {
+  Mutable<std::vector<std::string>> data;
   EXPECT_TRUE(data.GetScopedView()->empty());
 
   data.Update({"test", "data"});

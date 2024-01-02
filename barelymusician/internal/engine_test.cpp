@@ -165,9 +165,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   };
 
   // Create a task.
-  ASSERT_TRUE(engine.CreatePerformerTask(performer.get(), definition,
-                                         /*is_one_off=*/false, 1.0, kProcessOrder,
-                                         &process_callback));
+  performer->CreateTask(definition,
+                        /*is_one_off=*/false, 1.0, kProcessOrder, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
   engine.SetTempo(60.0);

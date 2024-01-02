@@ -25,7 +25,6 @@ add_library(
 )
 target_link_libraries(
   barely_internal_engine
-  barely_internal_id
   barely_internal_instrument
   barely_internal_mutable
   barely_internal_observable
@@ -37,15 +36,6 @@ target_link_libraries(
 add_library(
   barely_internal_event INTERFACE
   event.h
-)
-
-add_library(
-  barely_internal_id INTERFACE
-  id.h
-)
-target_link_libraries(
-  barely_internal_id INTERFACE
-  barelymusician_headeronly
 )
 
 add_library(
@@ -103,10 +93,21 @@ add_library(
 )
 target_link_libraries(
   barely_internal_performer
-  barely_internal_event
-  barely_internal_id
+  barely_internal_observable
+  barely_internal_task
   barelymusician_headeronly
   barely_find_or_null
+)
+
+add_library(
+  barely_internal_task
+  task.cpp
+  task.h
+)
+target_link_libraries(
+  barely_internal_task
+  barely_internal_event
+  barelymusician_headeronly
 )
 
 if (ENABLE_TESTS)
@@ -206,11 +207,23 @@ if (ENABLE_TESTS)
   )
   target_link_libraries(
     barely_internal_performer_test
-    barely_internal_id
     barely_internal_performer
     barelymusician_headeronly
     gmock
     gtest_main
   )
   gtest_discover_tests(barely_internal_performer_test)
+
+  add_executable(
+    barely_internal_task_test
+    task_test.cpp
+  )
+  target_link_libraries(
+    barely_internal_task_test
+    barely_internal_task
+    barelymusician_headeronly
+    gmock
+    gtest_main
+  )
+  gtest_discover_tests(barely_internal_task_test)
 endif()

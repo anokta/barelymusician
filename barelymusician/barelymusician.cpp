@@ -5,16 +5,17 @@
 #include <cstddef>
 
 #include "barelymusician/internal/engine.h"
-#include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
+#include "barelymusician/internal/task.h"
 
 using ::barely::internal::Effect;
 using ::barely::internal::Engine;
 using ::barely::internal::Instrument;
 using ::barely::internal::Observer;
 using ::barely::internal::Performer;
+using ::barely::internal::Task;
 
 // Effect.
 struct BarelyEffect {
@@ -63,7 +64,8 @@ struct BarelyInstrument {
                                                     BarelyInstrumentHandle* out_instrument);
   friend BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 
-  // Constructs a new `BarelyInstrument` with a given `engine`, `definition`, and `frame_rate`.
+  // Constructs a new `BarelyInstrument` with a given `engine`, `definition`,
+  // and `frame_rate`.
   BarelyInstrument(Engine& engine, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
       : engine(engine), internal(engine.CreateInstrument(definition, frame_rate)) {}
@@ -132,10 +134,10 @@ struct BarelyPerformer {
 // Task.
 struct BarelyTask {
   // Internal performer.
-  Performer* performer;
+  Performer& performer;
 
-  // Identifier.
-  barely::internal::Id id = barely::internal::kInvalid;
+  // Internal task.
+  Observer<Task> internal;
 
  private:
   // Ensures that the instance can only be managed via explicit API calls.
@@ -145,8 +147,13 @@ struct BarelyTask {
                                               BarelyTaskHandle* out_task);
   friend BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
 
-  // Default constructor.
-  BarelyTask() noexcept = default;
+  // Constructs a new `BarelyTask` with a given `performer`, `definition`,
+  // `position`, `process_order`, and `user_data`.
+  BarelyTask(Performer& performer, BarelyTaskDefinition definition, double position,
+             int process_order, void* user_data) noexcept
+      : performer(performer),
+        internal(performer.CreateTask(definition, /*is_one_off=*/false, position, process_order,
+                                      user_data)) {}
 
   // Default destructor.
   ~BarelyTask() noexcept = default;
@@ -547,10 +554,11 @@ bool BarelyPerformer_ScheduleOneOffTask(BarelyPerformerHandle performer,
                                         int32_t process_order, void* user_data) {
   if (!performer || !performer->internal) return false;
 
-  const auto task_id_or = performer->engine.CreatePerformerTask(performer->internal.get(),
-                                                                definition, /*is_one_off=*/true,
-                                                                position, process_order, user_data);
-  return task_id_or.has_value();
+  if (position >= performer->internal->GetPosition()) {
+    performer->internal->CreateTask(definition, /*is_one_off=*/true, position, process_order,
+                                    user_data);
+  }
+  return true;
 }
 
 bool BarelyPerformer_SetLoopBeginPosition(BarelyPerformerHandle performer,
@@ -602,58 +610,47 @@ bool BarelyTask_Create(BarelyPerformerHandle performer, BarelyTaskDefinition def
   if (!performer || !performer->internal) return false;
   if (!out_task) return false;
 
-  const auto task_id_or = performer->engine.CreatePerformerTask(performer->internal.get(),
-                                                                definition, /*is_one_off=*/false,
-                                                                position, process_order, user_data);
-  if (task_id_or.has_value()) {
-    *out_task = new BarelyTask();
-    (*out_task)->performer = performer->internal.get();
-    (*out_task)->id = *task_id_or;
-    return true;
-  }
-  return false;
+  (*out_task) =
+      new BarelyTask(*performer->internal, definition, position, process_order, user_data);
+  return true;
 }
 
 bool BarelyTask_Destroy(BarelyTaskHandle task) {
   if (!task) return false;
 
-  const bool success = task->performer->DestroyTask(task->id);
+  if (task->internal) {
+    task->performer.DestroyTask(*task->internal);
+  }
   delete task;
-  return success;
+  return true;
 }
 
 bool BarelyTask_GetPosition(BarelyTaskHandle task, double* out_position) {
-  if (!task) return false;
+  if (!task || !task->internal) return false;
   if (!out_position) return false;
 
-  const auto position_or = task->performer->GetTaskPosition(task->id);
-  if (position_or.has_value()) {
-    *out_position = *position_or;
-    return true;
-  }
-  return false;
+  *out_position = task->internal->GetPosition();
+  return true;
 }
 
 bool BarelyTask_GetProcessOrder(BarelyTaskHandle task, int32_t* out_process_order) {
-  if (!task) return false;
+  if (!task || !task->internal) return false;
   if (!out_process_order) return false;
 
-  const auto process_order_or = task->performer->GetTaskProcessOrder(task->id);
-  if (process_order_or.has_value()) {
-    *out_process_order = *process_order_or;
-    return true;
-  }
-  return false;
+  *out_process_order = task->internal->GetProcessOrder();
+  return true;
 }
 
 bool BarelyTask_SetPosition(BarelyTaskHandle task, double position) {
-  if (!task) return false;
+  if (!task || !task->internal) return false;
 
-  return task->performer->SetTaskPosition(task->id, position);
+  task->performer.SetTaskPosition(*task->internal, position);
+  return true;
 }
 
 bool BarelyTask_SetProcessOrder(BarelyTaskHandle task, int32_t process_order) {
-  if (!task) return false;
+  if (!task || !task->internal) return false;
 
-  return task->performer->SetTaskProcessOrder(task->id, process_order);
+  task->performer.SetTaskProcessOrder(*task->internal, process_order);
+  return true;
 }

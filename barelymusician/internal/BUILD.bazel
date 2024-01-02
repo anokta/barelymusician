@@ -17,7 +17,6 @@ cc_library(
     hdrs = ["engine.h"],
     visibility = ["//barelymusician:__pkg__"],
     deps = [
-        ":id",
         ":instrument",
         ":mutable",
         ":observable",
@@ -39,14 +38,6 @@ cc_library(
 cc_library(
     name = "event",
     hdrs = ["event.h"],
-)
-
-cc_library(
-    name = "id",
-    hdrs = ["id.h"],
-    deps = [
-        "//barelymusician:barelymusician_headeronly",
-    ],
 )
 
 cc_library(
@@ -99,10 +90,20 @@ cc_library(
     srcs = ["performer.cpp"],
     hdrs = ["performer.h"],
     deps = [
-        ":event",
-        ":id",
+        ":observable",
+        ":task",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
+    ],
+)
+
+cc_library(
+    name = "task",
+    srcs = ["task.cpp"],
+    hdrs = ["task.h"],
+    deps = [
+        ":event",
+        "//barelymusician:barelymusician_headeronly",
     ],
 )
 
@@ -192,8 +193,17 @@ cc_test(
     name = "performer_test",
     srcs = ["performer_test.cpp"],
     deps = [
-        ":id",
         ":performer",
+        "//barelymusician:barelymusician_headeronly",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "task_test",
+    srcs = ["task_test.cpp"],
+    deps = [
+        ":task",
         "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],

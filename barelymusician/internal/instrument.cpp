@@ -97,7 +97,7 @@ Observer<Effect> Instrument::CreateEffect(EffectDefinition definition, int proce
 void Instrument::DestroyEffect(Effect& effect) noexcept {
   const auto it = effect_infos_.find(&effect);
   assert(it != effect_infos_.end());
-  [[maybe_unused]] const auto success =
+  [[maybe_unused]] const bool success =
       ordered_effects_.erase({it->second.process_order, const_cast<Effect*>(&effect)}) == 1;
   assert(success);
   UpdateEffectReferences();

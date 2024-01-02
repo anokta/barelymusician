@@ -8,8 +8,8 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/event.h"
-#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/observable.h"
+#include "barelymusician/internal/task.h"
 
 namespace barely::internal {
 
@@ -18,21 +18,20 @@ class Performer {
  public:
   /// Creates a new task at position.
   ///
-  /// @param task_id Task identifier.
   /// @param definition Task definition.
   /// @param is_one_off True if one-off task, false otherwise.
   /// @param position Task position in beats.
   /// @param process_order Task process order.
   /// @param user_data Pointer to user data.
+  /// @return Task.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void CreateTask(Id task_id, TaskDefinition definition, bool is_one_off, double position,
-                  int process_order, void* user_data) noexcept;
+  Observer<Task> CreateTask(TaskDefinition definition, bool is_one_off, double position,
+                            int process_order, void* user_data) noexcept;
 
   /// Destroys a task.
   ///
-  /// @param task_id Task identifier.
-  /// @return True if successful, false otherwise.
-  bool DestroyTask(Id task_id) noexcept;
+  /// @param task Task.
+  void DestroyTask(Task& task) noexcept;
 
   /// Returns the duration to next task.
   ///
@@ -53,18 +52,6 @@ class Performer {
   ///
   /// @return Position in beats.
   [[nodiscard]] double GetPosition() const noexcept;
-
-  /// Returns task position.
-  ///
-  /// @param task_id Task identifier.
-  /// @return Optional position.
-  [[nodiscard]] std::optional<double> GetTaskPosition(Id task_id) const noexcept;
-
-  /// Returns task process order.
-  ///
-  /// @param task_id Task identifier.
-  /// @return Optional process order.
-  [[nodiscard]] std::optional<int> GetTaskProcessOrder(Id task_id) const noexcept;
 
   /// Returns whether performer is looping or not.
   ///
@@ -102,17 +89,15 @@ class Performer {
 
   /// Sets task position.
   ///
-  /// @param task_id Task identifier.
+  /// @param task Task.
   /// @param position Task position.
-  /// @return True if successful, false otherwise.
-  bool SetTaskPosition(Id task_id, double position) noexcept;
+  void SetTaskPosition(Task& task, double position) noexcept;
 
   /// Sets task process order.
   ///
-  /// @param task_id Task identifier.
+  /// @param task Task.
   /// @param process_order Task process order.
-  /// @return True if successful, false otherwise.
-  bool SetTaskProcessOrder(Id task_id, int process_order) noexcept;
+  void SetTaskProcessOrder(Task& task, int process_order) noexcept;
 
   /// Stops performer.
   void Start() noexcept;
@@ -127,9 +112,6 @@ class Performer {
   void Update(double duration) noexcept;
 
  private:
-  // Task alias.
-  using Task = Event<TaskDefinition>;
-
   // Task map alias.
   struct TaskKey {
     // Position.
@@ -138,51 +120,42 @@ class Performer {
     // Process order.
     int process_order;
 
-    // Identifier.
-    Id task_id;
+    // Task.
+    Task* task;
 
     // Default comparators.
     // TODO(#111): Use the default `<=>` comparator instead.
     bool operator<(const TaskKey& other) const noexcept {
       return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task_id < other.task_id
+                                                     ? this->task < other.task
                                                      : this->process_order < other.process_order)
                                               : this->position < other.position;
     }
     bool operator<=(const TaskKey& other) const noexcept {
       return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task_id <= other.task_id
+                                                     ? this->task <= other.task
                                                      : this->process_order <= other.process_order)
                                               : this->position <= other.position;
     }
     bool operator==(const TaskKey& other) const noexcept {
       return this->position == other.position && this->process_order == other.process_order &&
-             this->task_id == other.task_id;
+             this->task == other.task;
     }
     bool operator!=(const TaskKey& other) const noexcept { return !(*this == other); }
     bool operator>=(const TaskKey& other) const noexcept {
       return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task_id >= other.task_id
+                                                     ? this->task >= other.task
                                                      : this->process_order >= other.process_order)
                                               : this->position >= other.position;
     }
     bool operator>(const TaskKey& other) const noexcept {
       return this->position == other.position ? (this->process_order == other.process_order
-                                                     ? this->task_id > other.task_id
+                                                     ? this->task > other.task
                                                      : this->process_order > other.process_order)
                                               : this->position > other.position;
     }
   };
-  using TaskMap = std::map<TaskKey, Task>;
-
-  // Task info.
-  struct TaskInfo {
-    // Position.
-    double position;
-
-    // Process order.
-    int process_order;
-  };
+  using TaskMap = std::map<TaskKey, Observable<Task>>;
 
   // Returns an iterator to the next recurring task to process.
   [[nodiscard]] TaskMap::const_iterator GetNextRecurringTask() const noexcept;
@@ -207,9 +180,6 @@ class Performer {
 
   // Position in beats.
   double position_ = 0.0;
-
-  // Map of task infos by task identifiers.
-  std::unordered_map<Id, TaskInfo> infos_;
 
   // Sorted map of tasks by task position-identifier pairs.
   TaskMap one_off_tasks_;

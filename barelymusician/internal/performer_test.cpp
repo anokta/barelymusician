@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/id.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 
@@ -23,9 +22,6 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
 
-  EXPECT_FALSE(performer.GetTaskPosition(Id{1}).has_value());
-  EXPECT_FALSE(performer.GetTaskProcessOrder(Id{1}).has_value());
-
   // Create a task definition.
   int task_process_count = 0;
   auto definition = TaskDefinition{
@@ -38,14 +34,11 @@ TEST(PerformerTest, ProcessSingleTask) {
   };
 
   // Create a recurring task.
-  performer.CreateTask(Id{1}, definition, /*is_one_off=*/false, 0.25, 0, &task_process_count);
+  auto task = performer.CreateTask(definition, /*is_one_off=*/false, 0.25, 0, &task_process_count);
   EXPECT_FALSE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.0);
   EXPECT_FALSE(performer.GetDurationToNextTask().has_value());
   EXPECT_EQ(task_process_count, 0);
-
-  EXPECT_THAT(performer.GetTaskPosition(Id{1}), Optional(0.25));
-  EXPECT_THAT(performer.GetTaskProcessOrder(Id{1}), Optional(0));
 
   // Start the performer.
   performer.Start();
@@ -85,14 +78,11 @@ TEST(PerformerTest, ProcessSingleTask) {
   EXPECT_EQ(task_process_count, 2);
 
   // Update the task position.
-  EXPECT_TRUE(performer.SetTaskPosition(Id{1}, 0.75));
+  performer.SetTaskPosition(*task, 0.75);
   EXPECT_TRUE(performer.IsPlaying());
   EXPECT_DOUBLE_EQ(performer.GetPosition(), 0.25);
   EXPECT_THAT(performer.GetDurationToNextTask(), Optional(Pair(0.5, 0)));
   EXPECT_EQ(task_process_count, 2);
-
-  EXPECT_THAT(performer.GetTaskPosition(Id{1}), Optional(0.75));
-  EXPECT_THAT(performer.GetTaskProcessOrder(Id{1}), Optional(0));
 
   // Process the task with the updated position.
   performer.Update(0.5);
@@ -132,7 +122,6 @@ TEST(PerformerTest, ProcessMultipleTasks) {
       positions.push_back(position);
     };
     performer.CreateTask(
-        Id{i},
         TaskDefinition(
             [](void** state, void* user_data) {
               *state = new std::function<void()>(

@@ -9,7 +9,6 @@
 
 #include "barelymusician/barelymusician.h"
 #include "barelymusician/common/seconds.h"
-#include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
@@ -33,29 +32,15 @@ Observer<Performer> Engine::CreatePerformer() noexcept {
   return it->second.Observe();
 }
 
-std::optional<Id> Engine::CreatePerformerTask(Performer* performer, TaskDefinition definition,
-                                              bool is_one_off, double position, int process_order,
-                                              void* user_data) noexcept {
-  if (performer == nullptr) {
-    return std::nullopt;
-  }
-  if (is_one_off && position < performer->GetPosition()) {
-    return std::nullopt;
-  }
-  const Id task_id = GenerateNextId();
-  performer->CreateTask(task_id, definition, is_one_off, position, process_order, user_data);
-  return task_id;
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::DestroyInstrument(Instrument& instrument) noexcept {
-  [[maybe_unused]] const auto success = instruments_.erase(&instrument) > 0;
+  [[maybe_unused]] const bool success = instruments_.erase(&instrument) > 0;
   assert(success);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Engine::DestroyPerformer(Performer& performer) noexcept {
-  [[maybe_unused]] const auto success = performers_.erase(&performer) > 0;
+  [[maybe_unused]] const bool success = performers_.erase(&performer) > 0;
   assert(success);
 }
 
@@ -112,12 +97,6 @@ void Engine::Update(double timestamp) noexcept {
       }
     }
   }
-}
-
-Id Engine::GenerateNextId() noexcept {
-  const Id id = ++id_counter_;
-  assert(id > kInvalid);
-  return id;
 }
 
 }  // namespace barely::internal

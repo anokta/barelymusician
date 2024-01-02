@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "barelymusician/barelymusician.h"
-#include "barelymusician/internal/id.h"
 #include "barelymusician/internal/instrument.h"
 #include "barelymusician/internal/mutable.h"
 #include "barelymusician/internal/observable.h"
@@ -45,20 +44,6 @@ class Engine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Observer<Performer> CreatePerformer() noexcept;
 
-  /// Creates a new performer task.
-  ///
-  /// @param performer Pointer to performer.
-  /// @param definition Task definition.
-  /// @param is_one_off True if one-off task, false otherwise.
-  /// @param position Task position in beats.
-  /// @param process_order Task process order.
-  /// @param user_data Pointer to user data.
-  /// @return Optional task identifier.
-  // NOLINTNEXTLINE(bugprone-exception-escape)
-  std::optional<Id> CreatePerformerTask(Performer* performer, TaskDefinition definition,
-                                        bool is_one_off, double position, int process_order,
-                                        void* user_data) noexcept;
-
   /// Destroys instrument.
   ///
   /// @param instrument Instrument.
@@ -81,17 +66,6 @@ class Engine {
   /// @return Timestamp in seconds.
   [[nodiscard]] double GetTimestamp() const noexcept;
 
-  /// Processes instrument at timestamp.
-  ///
-  /// @param instrument Pointer to instrument.
-  /// @param output_samples Interleaved array of output samples.
-  /// @param output_channel_count Number of output channels.
-  /// @param output_frame_count Number of output frames.
-  /// @param timestamp Timestamp in seconds.
-  /// @return True if successful, false otherwise.
-  bool ProcessInstrument(Id instrument_id, double* output_samples, int output_channel_count,
-                         int output_frame_count, double timestamp) noexcept;
-
   /// Sets the tempo.
   ///
   /// @param tempo Tempo in beats per minute.
@@ -102,13 +76,6 @@ class Engine {
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
-
- private:
-  // Generates the next identifier to use.
-  Id GenerateNextId() noexcept;
-
-  // Monotonic identifier counter.
-  Id id_counter_ = 0;
 
   // Map of instruments by pointers.
   std::unordered_map<Instrument*, Observable<Instrument>> instruments_;

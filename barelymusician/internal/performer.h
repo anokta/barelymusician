@@ -177,9 +177,6 @@ class Performer {
 
   // Task info.
   struct TaskInfo {
-    // True if one-off task, false if recurring.
-    bool is_one_off;
-
     // Position.
     double position;
 

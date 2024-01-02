@@ -20,8 +20,7 @@ void Performer::CreateTask(Id task_id, TaskDefinition definition, bool is_one_of
                            int process_order, void* user_data) noexcept {
   assert(task_id > kInvalid);
   assert(!is_one_off || position >= position_);
-  [[maybe_unused]] auto success =
-      infos_.emplace(task_id, TaskInfo{is_one_off, position, process_order}).second;
+  [[maybe_unused]] auto success = infos_.emplace(task_id, TaskInfo{position, process_order}).second;
   assert(success);
   success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
                 .emplace(TaskKey{position, process_order, task_id}, Task(definition, user_data))
@@ -40,9 +39,9 @@ bool Performer::DestroyTask(Id task_id) noexcept {
       PrevLastProcessedRecurringTaskIt();
       recurring_tasks_.erase(recurring_task_it);
     } else {
-      const auto& [is_one_off, position, process_order] = it->second;
-      [[maybe_unused]] const auto success = (is_one_off ? one_off_tasks_ : recurring_tasks_)
-                                                .erase({position, process_order, task_id}) == 1;
+      const auto& [position, process_order] = it->second;
+      [[maybe_unused]] const auto success =
+          recurring_tasks_.erase({position, process_order, task_id}) == 1;
       assert(success);
     }
     infos_.erase(it);
@@ -210,20 +209,15 @@ bool Performer::SetTaskPosition(Id task_id, double position) noexcept {
     return false;
   }
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
-    auto& [is_one_off, current_position, process_order] = it->second;
-    if (is_one_off && position < position_) {
-      // Position is in the past.
-      return false;
-    }
+    auto& [current_position, process_order] = it->second;
     if (current_position != position) {
       if (last_processed_recurring_task_it_ &&
           task_id == (*last_processed_recurring_task_it_)->first.task_id) {
         PrevLastProcessedRecurringTaskIt();
       }
-      auto& tasks = (is_one_off ? one_off_tasks_ : recurring_tasks_);
-      auto node = tasks.extract({current_position, process_order, task_id});
+      auto node = recurring_tasks_.extract({current_position, process_order, task_id});
       node.key().position = position;
-      tasks.insert(std::move(node));
+      recurring_tasks_.insert(std::move(node));
       current_position = position;
     }
     return true;
@@ -236,16 +230,15 @@ bool Performer::SetTaskProcessOrder(Id task_id, int process_order) noexcept {
     return false;
   }
   if (const auto it = infos_.find(task_id); it != infos_.end()) {
-    auto& [is_one_off, position, current_process_order] = it->second;
+    auto& [position, current_process_order] = it->second;
     if (current_process_order != process_order) {
       if (last_processed_recurring_task_it_ &&
           task_id == (*last_processed_recurring_task_it_)->first.task_id) {
         PrevLastProcessedRecurringTaskIt();
       }
-      auto& tasks = (is_one_off ? one_off_tasks_ : recurring_tasks_);
-      auto node = tasks.extract({position, current_process_order, task_id});
+      auto node = recurring_tasks_.extract({position, current_process_order, task_id});
       node.key().process_order = process_order;
-      tasks.insert(std::move(node));
+      recurring_tasks_.insert(std::move(node));
       current_process_order = process_order;
     }
     return true;

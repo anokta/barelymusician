@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "preLaunchTask": "barelymusician: build demo (debug)",
+      "type": "lldb",
+      "request": "launch",
+      "name": "Launch Demo (LLDB)",
+      "program": "${workspaceFolder}/bazel-bin/examples/demo/${fileBasenameNoExtension}",
+      "args": [],
+      "sourceMap": {
+        ".": "${workspaceFolder}"
+      },
+      "breakpointMode": "file"
+    }
+  ]
+}

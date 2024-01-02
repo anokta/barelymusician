@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "barelymusician: bazel build",
+      "label": "barelymusician: build all",
       "type": "shell",
       "command": "bazel build ...",
       "problemMatcher": [],
@@ -12,7 +12,27 @@
       },
     },
     {
-      "label": "barelymusician: bazel test",
+      "label": "barelymusician: build demo (debug)",
+      "type": "shell",
+      "command": "bazel build -c dbg //examples/demo:${fileBasenameNoExtension}",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true,
+      },
+    },
+    {
+      "label": "barelymusician: run demo",
+      "type": "shell",
+      "command": "bazel run //examples/demo:${fileBasenameNoExtension}",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true,
+      },
+    },
+    {
+      "label": "barelymusician: test all",
       "type": "shell",
       "command": "bazel build ... && bazel test --test_output=errors ...",
       "problemMatcher": [],
@@ -22,7 +42,7 @@
       },
     },
     {
-      "label": "barelymusician: daisy",
+      "label": "barelymusician: build daisy",
       "type": "shell",
       "command": "chmod +x ./platforms/daisy/build.sh && ./platforms/daisy/build.sh",
       "problemMatcher": [],
@@ -32,7 +52,7 @@
       },
     },
     {
-      "label": "barelymusician: unity",
+      "label": "barelymusician: build unity",
       "type": "shell",
       "command": "chmod +x ./platforms/unity/build.sh && ./platforms/unity/build.sh",
       "problemMatcher": [],

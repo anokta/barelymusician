@@ -17,9 +17,6 @@ using ::barely::internal::Performer;
 
 // Effect.
 struct BarelyEffect {
-  // Default constructor.
-  BarelyEffect() = default;
-
   // Internal instrument.
   Instrument* instrument;
 
@@ -27,18 +24,28 @@ struct BarelyEffect {
   barely::internal::Id id = barely::internal::kInvalid;
 
  private:
-  // Ensures that the instance can only be destroyed via explicit destroy call.
+  // Ensures that the instance can only be managed via explicit API calls.
+  friend BARELY_EXPORT bool BarelyEffect_Create(BarelyInstrumentHandle instrument,
+                                                BarelyEffectDefinition definition,
+                                                int32_t process_order,
+                                                BarelyEffectHandle* out_effect);
   friend BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
-  ~BarelyEffect() = default;
+
+  // Default constructor.
+  BarelyEffect() noexcept = default;
+
+  // Default destructor.
+  ~BarelyEffect() noexcept = default;
+
+  // Non-copyable and non-movable.
+  BarelyEffect(const BarelyEffect& other) noexcept = delete;
+  BarelyEffect& operator=(const BarelyEffect& other) noexcept = delete;
+  BarelyEffect(BarelyEffect&& other) noexcept = delete;
+  BarelyEffect& operator=(BarelyEffect&& other) noexcept = delete;
 };
 
 // Instrument.
 struct BarelyInstrument {
-  // Constructs a new `BarelyInstrument` with a given `engine`, `definition` and `frame_rate`.
-  BarelyInstrument(Engine& engine, BarelyInstrumentDefinition definition,
-                   int32_t frame_rate) noexcept
-      : engine(engine), internal(engine.CreateInstrument(definition, frame_rate)) {}
-
   // Internal engine.
   Engine& engine;
 
@@ -46,37 +53,53 @@ struct BarelyInstrument {
   Observer<Instrument> internal;
 
  private:
-  // Ensures that the instance can only be destroyed via explicit destroy call.
+  // Ensures that the instance can only be managed via explicit API calls.
+  friend BARELY_EXPORT bool BarelyInstrument_Create(BarelyMusicianHandle musician,
+                                                    BarelyInstrumentDefinition definition,
+                                                    int32_t frame_rate,
+                                                    BarelyInstrumentHandle* out_instrument);
   friend BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
-  ~BarelyInstrument() = default;
+
+  // Constructs a new `BarelyInstrument` with a given `engine`, `definition`, and `frame_rate`.
+  BarelyInstrument(Engine& engine, BarelyInstrumentDefinition definition,
+                   int32_t frame_rate) noexcept
+      : engine(engine), internal(engine.CreateInstrument(definition, frame_rate)) {}
+
+  // Default destructor.
+  ~BarelyInstrument() noexcept = default;
+
+  // Non-copyable and non-movable.
+  BarelyInstrument(const BarelyInstrument& other) noexcept = delete;
+  BarelyInstrument& operator=(const BarelyInstrument& other) noexcept = delete;
+  BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
+  BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
 };
 
 // Musician.
 struct BarelyMusician {
+  // Internal engine.
+  Engine engine;
+
+ private:
+  // Ensures that the instance can only be managed via explicit API calls.
+  friend BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
+  friend BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
+
   // Default constructor.
-  BarelyMusician() = default;
+  BarelyMusician() noexcept = default;
+
+  // Default destructor.
+  ~BarelyMusician() noexcept = default;
 
   // Non-copyable and non-movable.
   BarelyMusician(const BarelyMusician& other) noexcept = delete;
   BarelyMusician& operator=(const BarelyMusician& other) noexcept = delete;
   BarelyMusician(BarelyMusician&& other) noexcept = delete;
   BarelyMusician& operator=(BarelyMusician&& other) noexcept = delete;
-
-  // Internal engine.
-  Engine engine;
-
- private:
-  // Ensures that the instance can only be destroyed via explicit destroy call.
-  friend BARELY_EXPORT bool BarelyMusician_Destroy(BarelyMusicianHandle musician);
-  ~BarelyMusician() = default;
 };
 
 // Performer.
 struct BarelyPerformer {
-  // Default constructor.
-  explicit BarelyPerformer(Engine& engine) noexcept
-      : engine(engine), internal(engine.CreatePerformer()) {}
-
   // Internal engine.
   Engine& engine;
 
@@ -84,16 +107,27 @@ struct BarelyPerformer {
   Observer<Performer> internal;
 
  private:
-  // Ensures that the instance can only be destroyed via explicit destroy call.
+  // Ensures that the instance can only be managed via explicit API calls.
+  friend BARELY_EXPORT bool BarelyPerformer_Create(BarelyMusicianHandle musician,
+                                                   BarelyPerformerHandle* out_performer);
   friend BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
-  ~BarelyPerformer() = default;
+
+  // Constructs a new `BarelyPerformer` with a given `engine`.
+  explicit BarelyPerformer(Engine& engine) noexcept
+      : engine(engine), internal(engine.CreatePerformer()) {}
+
+  // Default destructor.
+  ~BarelyPerformer() noexcept = default;
+
+  // Non-copyable and non-movable.
+  BarelyPerformer(const BarelyPerformer& other) noexcept = delete;
+  BarelyPerformer& operator=(const BarelyPerformer& other) noexcept = delete;
+  BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
+  BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
 };
 
 // Task.
 struct BarelyTask {
-  // Default constructor.
-  BarelyTask() = default;
-
   // Internal performer.
   Performer* performer;
 
@@ -101,9 +135,24 @@ struct BarelyTask {
   barely::internal::Id id = barely::internal::kInvalid;
 
  private:
-  // Ensures that the instance can only be destroyed via explicit destroy call.
+  // Ensures that the instance can only be managed via explicit API calls.
+  friend BARELY_EXPORT bool BarelyTask_Create(BarelyPerformerHandle performer,
+                                              BarelyTaskDefinition definition, double position,
+                                              int32_t process_order, void* user_data,
+                                              BarelyTaskHandle* out_task);
   friend BARELY_EXPORT bool BarelyTask_Destroy(BarelyTaskHandle task);
-  ~BarelyTask() = default;
+
+  // Default constructor.
+  BarelyTask() noexcept = default;
+
+  // Default destructor.
+  ~BarelyTask() noexcept = default;
+
+  // Non-copyable and non-movable.
+  BarelyTask(const BarelyTask& other) noexcept = delete;
+  BarelyTask& operator=(const BarelyTask& other) noexcept = delete;
+  BarelyTask(BarelyTask&& other) noexcept = delete;
+  BarelyTask& operator=(BarelyTask&& other) noexcept = delete;
 };
 
 bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefinition definition,
@@ -395,10 +444,10 @@ bool BarelyInstrument_SetNoteOnEvent(BarelyInstrumentHandle instrument,
   return true;
 }
 
-bool BarelyMusician_Create(BarelyMusicianHandle* out_handle) {
-  if (!out_handle) return false;
+bool BarelyMusician_Create(BarelyMusicianHandle* out_musician) {
+  if (!out_musician) return false;
 
-  *out_handle = new BarelyMusician();
+  *out_musician = new BarelyMusician();
   return true;
 }
 

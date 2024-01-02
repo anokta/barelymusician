@@ -57,10 +57,10 @@ cc_library(
         ":control",
         ":effect",
         ":event",
-        ":id",
         ":message",
         ":message_queue",
         ":mutable",
+        ":observable",
         "//barelymusician:barelymusician_headeronly",
         "//barelymusician/common:find_or_null",
         "//barelymusician/common:seconds",
@@ -71,7 +71,7 @@ cc_library(
     name = "message",
     hdrs = ["message.h"],
     deps = [
-        ":id",
+        ":effect",
     ],
 )
 

@@ -14,8 +14,8 @@
 #include "barelymusician/common/seconds.h"
 #include "barelymusician/internal/control.h"
 #include "barelymusician/internal/effect.h"
-#include "barelymusician/internal/id.h"
 #include "barelymusician/internal/message.h"
+#include "barelymusician/internal/observable.h"
 
 namespace barely::internal {
 
@@ -70,43 +70,38 @@ Instrument::~Instrument() noexcept {
   if (destroy_callback_) {
     destroy_callback_(&state_);
   }
-  effect_id_ref_pairs_.Update({});
+  effect_ptrs_.Update({});
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Instrument::CreateEffect(Id effect_id, EffectDefinition definition,
-                              int process_order) noexcept {
-  assert(effect_id > kInvalid);
-  auto [it, success] = effect_infos_.emplace(
-      effect_id,
+Observer<Effect> Instrument::CreateEffect(EffectDefinition definition, int process_order) noexcept {
+  Observable<Effect> effect(definition, frame_rate_);
+  Effect* effect_ptr = effect.get();
+  auto [it, success] = effect_infos_.try_emplace(
+      effect_ptr,
       EffectInfo{
           BuildControls(static_cast<const ControlDefinition*>(definition.control_definitions),
                         definition.control_definition_count),
-          std::make_unique<Effect>(definition, frame_rate_), process_order});
+          std::move(effect), process_order});
   assert(success);
-  auto* effect_ref = it->second.effect.get();
   for (int index = 0; index < definition.control_definition_count; ++index) {
-    effect_ref->SetControl(index, it->second.controls[index].GetValue(), 0.0);
+    effect_ptr->SetControl(index, it->second.controls[index].GetValue(), 0.0);
   }
-  success = ordered_effects_.emplace(std::pair{process_order, effect_id}, effect_ref).second;
+  success = ordered_effects_.emplace(process_order, effect_ptr).second;
   assert(success);
   UpdateEffectReferences();
+  return it->second.effect.Observe();
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Instrument::DestroyEffect(Id effect_id) noexcept {
-  if (effect_id == kInvalid) {
-    return false;
-  }
-  if (const auto it = effect_infos_.find(effect_id); it != effect_infos_.end()) {
-    [[maybe_unused]] const auto success =
-        ordered_effects_.erase({it->second.process_order, effect_id}) == 1;
-    assert(success);
-    UpdateEffectReferences();
-    effect_infos_.erase(it);
-    return true;
-  }
-  return false;
+void Instrument::DestroyEffect(Effect& effect) noexcept {
+  const auto it = effect_infos_.find(&effect);
+  assert(it != effect_infos_.end());
+  [[maybe_unused]] const auto success =
+      ordered_effects_.erase({it->second.process_order, const_cast<Effect*>(&effect)}) == 1;
+  assert(success);
+  UpdateEffectReferences();
+  effect_infos_.erase(it);
 }
 
 const Control* Instrument::GetControl(int index) const noexcept {
@@ -116,26 +111,19 @@ const Control* Instrument::GetControl(int index) const noexcept {
   return nullptr;
 }
 
-const Control* Instrument::GetEffectControl(Id effect_id, int index) const noexcept {
-  if (effect_id == kInvalid) {
-    return nullptr;
-  }
-  if (const auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
-    if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
-      return &effect_info->controls[index];
-    }
+const Control* Instrument::GetEffectControl(Effect& effect, int index) const noexcept {
+  const auto* effect_info = FindOrNull(effect_infos_, &effect);
+  assert(effect_info);
+  if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
+    return &effect_info->controls[index];
   }
   return nullptr;
 }
 
-std::optional<int> Instrument::GetEffectProcessOrder(Id effect_id) const noexcept {
-  if (effect_id == kInvalid) {
-    return std::nullopt;
-  }
-  if (const auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
-    return effect_info->process_order;
-  }
-  return std::nullopt;
+int Instrument::GetEffectProcessOrder(Effect& effect) const noexcept {
+  const auto* effect_info = FindOrNull(effect_infos_, &effect);
+  assert(effect_info);
+  return effect_info->process_order;
 }
 
 const Control* Instrument::GetNoteControl(double pitch, int index) const noexcept {
@@ -162,7 +150,7 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
   int frame = 0;
   // Process *all* messages before the end timestamp.
   const double end_timestamp = timestamp + SecondsFromFrames(frame_rate_, output_frame_count);
-  auto effect_id_ref_pairs = effect_id_ref_pairs_.GetScopedView();
+  auto effect_ptrs = effect_ptrs_.GetScopedView();
   for (auto* message = message_queue_.GetNext(end_timestamp); message;
        message = message_queue_.GetNext(end_timestamp)) {
     if (const int message_frame = FramesFromSeconds(frame_rate_, message->first - timestamp);
@@ -173,9 +161,9 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
         process_callback_(&state_, &output_samples[sample_offset], output_channel_count,
                           frame_count);
       }
-      for (const auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
-        assert(effect_ref);
-        effect_ref->Process(&output_samples[sample_offset], output_channel_count, frame_count);
+      for (auto* effect_ptr : *effect_ptrs) {
+        assert(effect_ptr);
+        effect_ptr->Process(&output_samples[sample_offset], output_channel_count, frame_count);
       }
       frame = message_frame;
     }
@@ -193,24 +181,15 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
                 set_data_callback_(&state_, data_.data(), static_cast<int>(data_.size()));
               }
             },
-            [&effect_id_ref_pairs](EffectControlMessage& effect_control_message) noexcept {
-              const auto it = std::find_if(
-                  effect_id_ref_pairs->begin(), effect_id_ref_pairs->end(),
-                  [effect_id = effect_control_message.effect_id](auto& effect_id_ref_pair) {
-                    return effect_id_ref_pair.first == effect_id;
-                  });
-              assert(it != effect_id_ref_pairs->end());
-              it->second->SetControl(effect_control_message.index, effect_control_message.value,
-                                     effect_control_message.slope_per_frame);
+            [&effect_ptrs](EffectControlMessage& effect_control_message) noexcept {
+              assert(effect_control_message.effect);
+              effect_control_message.effect->SetControl(effect_control_message.index,
+                                                        effect_control_message.value,
+                                                        effect_control_message.slope_per_frame);
             },
-            [&effect_id_ref_pairs](EffectDataMessage& effect_data_message) noexcept {
-              const auto it = std::find_if(
-                  effect_id_ref_pairs->begin(), effect_id_ref_pairs->end(),
-                  [effect_id = effect_data_message.effect_id](auto& effect_id_ref_pair) {
-                    return effect_id_ref_pair.first == effect_id;
-                  });
-              assert(it != effect_id_ref_pairs->end());
-              it->second->SetData(effect_data_message.data);
+            [&effect_ptrs](EffectDataMessage& effect_data_message) noexcept {
+              assert(effect_data_message.effect);
+              effect_data_message.effect->SetData(effect_data_message.data);
             },
             [this](NoteControlMessage& note_control_message) noexcept {
               if (set_note_control_callback_) {
@@ -238,9 +217,9 @@ bool Instrument::Process(double* output_samples, int output_channel_count, int o
     if (process_callback_) {
       process_callback_(&state_, &output_samples[sample_offset], output_channel_count, frame_count);
     }
-    for (const auto& [effect_id, effect_ref] : *effect_id_ref_pairs) {
-      assert(effect_ref);
-      effect_ref->Process(&output_samples[sample_offset], output_channel_count, frame_count);
+    for (auto* effect_ptr : *effect_ptrs) {
+      assert(effect_ptr);
+      effect_ptr->Process(&output_samples[sample_offset], output_channel_count, frame_count);
     }
   }
   return true;
@@ -255,21 +234,16 @@ void Instrument::ResetAllControls() noexcept {
   }
 }
 
-bool Instrument::ResetAllEffectControls(Id effect_id) noexcept {
-  if (effect_id == kInvalid) {
-    return false;
-  }
-  if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
-    for (int index = 0; index < static_cast<int>(effect_info->controls.size()); ++index) {
-      if (auto& effect_control = effect_info->controls[index]; effect_control.Reset()) {
-        effect_info->control_event.Process(index, effect_control.GetValue());
-        message_queue_.Add(timestamp_,
-                           EffectControlMessage{effect_id, index, effect_control.GetValue(), 0.0});
-      }
+void Instrument::ResetAllEffectControls(Effect& effect) noexcept {
+  auto* effect_info = FindOrNull(effect_infos_, &effect);
+  assert(effect_info);
+  for (int index = 0; index < static_cast<int>(effect_info->controls.size()); ++index) {
+    if (auto& effect_control = effect_info->controls[index]; effect_control.Reset()) {
+      effect_info->control_event.Process(index, effect_control.GetValue());
+      message_queue_.Add(timestamp_,
+                         EffectControlMessage{&effect, index, effect_control.GetValue(), 0.0});
     }
-    return true;
   }
-  return false;
 }
 
 bool Instrument::ResetAllNoteControls(double pitch) noexcept {
@@ -297,18 +271,15 @@ bool Instrument::ResetControl(int index) noexcept {
   return false;
 }
 
-bool Instrument::ResetEffectControl(Id effect_id, int index) noexcept {
-  if (effect_id == kInvalid) {
-    return false;
-  }
-  if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
-    if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
-      if (auto& effect_control = effect_info->controls[index]; effect_control.Reset()) {
-        effect_info->control_event.Process(index, effect_control.GetValue());
-        message_queue_.Add(timestamp_, ControlMessage{index, effect_control.GetValue(), 0.0});
-      }
-      return true;
+bool Instrument::ResetEffectControl(Effect& effect, int index) noexcept {
+  auto* effect_info = FindOrNull(effect_infos_, &effect);
+  assert(effect_info);
+  if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
+    if (auto& effect_control = effect_info->controls[index]; effect_control.Reset()) {
+      effect_info->control_event.Process(index, effect_control.GetValue());
+      message_queue_.Add(timestamp_, ControlMessage{index, effect_control.GetValue(), 0.0});
     }
+    return true;
   }
   return false;
 }
@@ -355,66 +326,45 @@ void Instrument::SetData(std::vector<std::byte> data) noexcept {
   message_queue_.Add(timestamp_, DataMessage{std::move(data)});
 }
 
-bool Instrument::SetEffectControl(Id effect_id, int index, double value,
+bool Instrument::SetEffectControl(Effect& effect, int index, double value,
                                   double slope_per_beat) noexcept {
-  if (effect_id == kInvalid) {
-    return false;
-  }
-  if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
-    if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
-      if (auto& effect_control = effect_info->controls[index];
-          effect_control.Set(value, slope_per_beat)) {
-        effect_info->control_event.Process(index, effect_control.GetValue());
-        message_queue_.Add(timestamp_,
-                           EffectControlMessage{effect_id, index, effect_control.GetValue(),
-                                                GetSlopePerFrame(slope_per_beat)});
-      }
-      return true;
+  auto* effect_info = FindOrNull(effect_infos_, &effect);
+  assert(effect_info);
+  if (index >= 0 && index < static_cast<int>(effect_info->controls.size())) {
+    if (auto& effect_control = effect_info->controls[index];
+        effect_control.Set(value, slope_per_beat)) {
+      effect_info->control_event.Process(index, effect_control.GetValue());
+      message_queue_.Add(timestamp_, EffectControlMessage{&effect, index, effect_control.GetValue(),
+                                                          GetSlopePerFrame(slope_per_beat)});
     }
+    return true;
   }
   return false;
 }
 
-bool Instrument::SetEffectControlEvent(Id effect_id, ControlEventDefinition definition,
+void Instrument::SetEffectControlEvent(Effect& effect, ControlEventDefinition definition,
                                        void* user_data) noexcept {
-  if (effect_id == kInvalid) {
-    return false;
-  }
-  if (auto* effect_info = FindOrNull(effect_infos_, effect_id)) {
-    effect_info->control_event = {definition, user_data};
-    return true;
-  }
-  return false;
+  auto* effect_info = FindOrNull(effect_infos_, &effect);
+  assert(effect_info);
+  effect_info->control_event = {definition, user_data};
 }
 
-bool Instrument::SetEffectData(Id effect_id, std::vector<std::byte> data) noexcept {
-  if (effect_id == kInvalid) {
-    return false;
-  }
-  if (effect_infos_.find(effect_id) != effect_infos_.end()) {
-    message_queue_.Add(timestamp_, EffectDataMessage{effect_id, std::move(data)});
-    return true;
-  }
-  return false;
+void Instrument::SetEffectData(Effect& effect, std::vector<std::byte> data) noexcept {
+  message_queue_.Add(timestamp_, EffectDataMessage{&effect, std::move(data)});
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-bool Instrument::SetEffectProcessOrder(Id effect_id, int process_order) noexcept {
-  if (effect_id == kInvalid) {
-    return false;
+void Instrument::SetEffectProcessOrder(Effect& effect, int process_order) noexcept {
+  const auto it = effect_infos_.find(&effect);
+  assert(it != effect_infos_.end());
+  auto& current_process_order = it->second.process_order;
+  if (current_process_order != process_order) {
+    auto node = ordered_effects_.extract({current_process_order, &effect});
+    node.value().first = process_order;
+    ordered_effects_.insert(std::move(node));
+    current_process_order = process_order;
+    UpdateEffectReferences();
   }
-  if (const auto it = effect_infos_.find(effect_id); it != effect_infos_.end()) {
-    auto& current_process_order = it->second.process_order;
-    if (current_process_order != process_order) {
-      auto node = ordered_effects_.extract({current_process_order, effect_id});
-      node.key().first = process_order;
-      ordered_effects_.insert(std::move(node));
-      current_process_order = process_order;
-      UpdateEffectReferences();
-    }
-    return true;
-  }
-  return false;
 }
 
 bool Instrument::SetNoteControl(double pitch, int index, double value,
@@ -536,12 +486,12 @@ double Instrument::GetSlopePerFrame(double slope_per_beat) const noexcept {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
 void Instrument::UpdateEffectReferences() noexcept {
-  std::vector<std::pair<Id, Effect*>> new_effect_id_ref_pairs;
-  new_effect_id_ref_pairs.reserve(ordered_effects_.size());
-  for (const auto& [process_order_id_pair, effect_ref] : ordered_effects_) {
-    new_effect_id_ref_pairs.emplace_back(process_order_id_pair.second, effect_ref);
+  std::vector<Effect*> new_effect_ptrs;
+  new_effect_ptrs.reserve(ordered_effects_.size());
+  for (const auto& [process_order, effect_ptr] : ordered_effects_) {
+    new_effect_ptrs.push_back(effect_ptr);
   }
-  effect_id_ref_pairs_.Update(std::move(new_effect_id_ref_pairs));
+  effect_ptrs_.Update(std::move(new_effect_ptrs));
 }
 
 }  // namespace barely::internal

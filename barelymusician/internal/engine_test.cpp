@@ -111,7 +111,7 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   }
 
   // Destroy the instrument.
-  engine.DestroyInstrument(instrument);
+  engine.DestroyInstrument(*instrument);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
@@ -192,7 +192,7 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy the performer.
-  engine.DestroyPerformer(performer);
+  engine.DestroyPerformer(*performer);
 }
 
 // Tests that the engine sets its tempo as expected.

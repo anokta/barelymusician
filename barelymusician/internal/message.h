@@ -5,7 +5,7 @@
 #include <variant>
 #include <vector>
 
-#include "barelymusician/internal/id.h"
+#include "barelymusician/internal/effect.h"
 
 namespace barely::internal {
 
@@ -29,8 +29,8 @@ struct DataMessage {
 
 /// Effect control message.
 struct EffectControlMessage {
-  /// Effect identifier.
-  Id effect_id;
+  /// Effect.
+  Effect* effect;
 
   /// Index.
   int index;
@@ -44,8 +44,8 @@ struct EffectControlMessage {
 
 /// Effect data message.
 struct EffectDataMessage {
-  /// Effect identifier.
-  Id effect_id;
+  /// Effect.
+  Effect* effect;
 
   /// Data.
   std::vector<std::byte> data;

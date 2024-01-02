@@ -39,13 +39,6 @@ class Engine {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   Observer<Instrument> CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept;
 
-  /// @param instrument Pointer to instrument.
-  /// @param definition Effect definition.
-  /// @param process_order Effect process order.
-  /// @return Optional effect identifier.
-  std::optional<Id> CreateInstrumentEffect(Instrument* instrument, EffectDefinition definition,
-                                           int process_order) noexcept;
-
   /// Creates a new performer.
   ///
   /// @return Performer.
@@ -70,13 +63,13 @@ class Engine {
   ///
   /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyInstrument(const Observer<Instrument>& instrument) noexcept;
+  void DestroyInstrument(Instrument& instrument) noexcept;
 
   /// Destroys performer.
   ///
   /// @param performer Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(const Observer<Performer>& performer) noexcept;
+  void DestroyPerformer(Performer& performer) noexcept;
 
   /// Returns tempo.
   ///

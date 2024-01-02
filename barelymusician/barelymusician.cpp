@@ -10,6 +10,7 @@
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 
+using ::barely::internal::Effect;
 using ::barely::internal::Engine;
 using ::barely::internal::Instrument;
 using ::barely::internal::Observer;
@@ -18,10 +19,10 @@ using ::barely::internal::Performer;
 // Effect.
 struct BarelyEffect {
   // Internal instrument.
-  Instrument* instrument;
+  Instrument& instrument;
 
-  // Identifier.
-  barely::internal::Id id = barely::internal::kInvalid;
+  // Internal effect.
+  Observer<Effect> internal;
 
  private:
   // Ensures that the instance can only be managed via explicit API calls.
@@ -32,7 +33,9 @@ struct BarelyEffect {
   friend BARELY_EXPORT bool BarelyEffect_Destroy(BarelyEffectHandle effect);
 
   // Default constructor.
-  BarelyEffect() noexcept = default;
+  BarelyEffect(Instrument& instrument, BarelyEffectDefinition definition,
+               int process_order) noexcept
+      : instrument(instrument), internal(instrument.CreateEffect(definition, process_order)) {}
 
   // Default destructor.
   ~BarelyEffect() noexcept = default;
@@ -159,30 +162,25 @@ bool BarelyEffect_Create(BarelyInstrumentHandle instrument, BarelyEffectDefiniti
                          int32_t process_order, BarelyEffectHandle* out_effect) {
   if (!instrument || !instrument->internal || !out_effect) return false;
 
-  const auto effect_id_or = instrument->engine.CreateInstrumentEffect(instrument->internal.get(),
-                                                                      definition, process_order);
-  if (effect_id_or.has_value()) {
-    *out_effect = new BarelyEffect();
-    (*out_effect)->instrument = instrument->internal.get();
-    (*out_effect)->id = *effect_id_or;
-    return true;
-  }
-  return false;
+  *out_effect = new BarelyEffect(*instrument->internal, definition, process_order);
+  return true;
 }
 
 bool BarelyEffect_Destroy(BarelyEffectHandle effect) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect) return false;
 
-  const bool success = effect->instrument->DestroyEffect(effect->id);
+  if (effect->internal) {
+    effect->instrument.DestroyEffect(*effect->internal);
+  }
   delete effect;
-  return success;
+  return true;
 }
 
 bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* out_value) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
   if (!out_value) return false;
 
-  if (const auto* control = effect->instrument->GetEffectControl(effect->id, index)) {
+  if (const auto* control = effect->instrument.GetEffectControl(*effect->internal, index)) {
     *out_value = control->GetValue();
     return true;
   }
@@ -191,10 +189,10 @@ bool BarelyEffect_GetControl(BarelyEffectHandle effect, int32_t index, double* o
 
 bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
                                        BarelyControlDefinition* out_definition) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
   if (!out_definition) return false;
 
-  if (const auto* control = effect->instrument->GetEffectControl(effect->id, index)) {
+  if (const auto* control = effect->instrument.GetEffectControl(*effect->internal, index)) {
     *out_definition = control->GetDefinition();
     return true;
   }
@@ -202,56 +200,53 @@ bool BarelyEffect_GetControlDefinition(BarelyEffectHandle effect, int32_t index,
 }
 
 bool BarelyEffect_GetProcessOrder(BarelyEffectHandle effect, int32_t* out_process_order) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
   if (!out_process_order) return false;
 
-  const auto process_order_or = effect->instrument->GetEffectProcessOrder(effect->id);
-  if (process_order_or.has_value()) {
-    *out_process_order = *process_order_or;
-    return true;
-  }
-  return false;
+  *out_process_order = effect->instrument.GetEffectProcessOrder(*effect->internal);
+  return true;
 }
 
 bool BarelyEffect_ResetAllControls(BarelyEffectHandle effect) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
 
-  return effect->instrument->ResetAllEffectControls(effect->id);
+  effect->instrument.ResetAllEffectControls(*effect->internal);
+  return true;
 }
 
 bool BarelyEffect_ResetControl(BarelyEffectHandle effect, int32_t index) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
 
-  return effect->instrument->ResetEffectControl(effect->id, index);
+  return effect->instrument.ResetEffectControl(*effect->internal, index);
 }
 
 bool BarelyEffect_SetControl(BarelyEffectHandle effect, int32_t index, double value,
                              double slope_per_beat) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
 
-  return effect->instrument->SetEffectControl(effect->id, index, value, slope_per_beat);
+  return effect->instrument.SetEffectControl(*effect->internal, index, value, slope_per_beat);
 }
 
 bool BarelyEffect_SetControlEvent(BarelyEffectHandle effect,
                                   BarelyControlEventDefinition definition, void* user_data) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
 
-  effect->instrument->SetEffectControlEvent(effect->id, definition, user_data);
+  effect->instrument.SetEffectControlEvent(*effect->internal, definition, user_data);
   return true;
 }
 
 bool BarelyEffect_SetData(BarelyEffectHandle effect, const void* data, int32_t size) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
 
-  return effect->instrument->SetEffectData(
-      effect->id,
-      {static_cast<const std::byte*>(data), static_cast<const std::byte*>(data) + size});
+  effect->instrument.SetEffectData(*effect->internal, {static_cast<const std::byte*>(data),
+                                                       static_cast<const std::byte*>(data) + size});
+  return true;
 }
 
 bool BarelyEffect_SetProcessOrder(BarelyEffectHandle effect, int32_t process_order) {
-  if (!effect || !effect->instrument) return false;
+  if (!effect || !effect->internal) return false;
 
-  effect->instrument->SetEffectProcessOrder(effect->id, process_order);
+  effect->instrument.SetEffectProcessOrder(*effect->internal, process_order);
   return true;
 }
 
@@ -269,7 +264,7 @@ bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument) {
   if (!instrument) return false;
 
   if (instrument->internal) {
-    instrument->engine.DestroyInstrument(instrument->internal);
+    instrument->engine.DestroyInstrument(*instrument->internal);
   }
   delete instrument;
   return true;
@@ -500,7 +495,7 @@ bool BarelyPerformer_Destroy(BarelyPerformerHandle performer) {
   if (!performer) return false;
 
   if (!performer->internal) {
-    performer->engine.DestroyPerformer(performer->internal);
+    performer->engine.DestroyPerformer(*performer->internal);
   }
   delete performer;
   return true;

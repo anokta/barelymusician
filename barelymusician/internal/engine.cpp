@@ -25,17 +25,6 @@ Observer<Instrument> Engine::CreateInstrument(InstrumentDefinition definition,
   return it->second.Observe();
 }
 
-std::optional<Id> Engine::CreateInstrumentEffect(Instrument* instrument,
-                                                 EffectDefinition definition,
-                                                 int process_order) noexcept {
-  if (instrument == nullptr) {
-    return std::nullopt;
-  }
-  const Id effect_id = GenerateNextId();
-  instrument->CreateEffect(effect_id, definition, process_order);
-  return effect_id;
-}
-
 // NOLINTNEXTLINE(bugprone-exception-escape)
 Observer<Performer> Engine::CreatePerformer() noexcept {
   Observable<Performer> observable;
@@ -59,14 +48,14 @@ std::optional<Id> Engine::CreatePerformerTask(Performer* performer, TaskDefiniti
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::DestroyInstrument(const Observer<Instrument>& instrument) noexcept {
-  [[maybe_unused]] const auto success = instruments_.erase(instrument.get()) > 0;
+void Engine::DestroyInstrument(Instrument& instrument) noexcept {
+  [[maybe_unused]] const auto success = instruments_.erase(&instrument) > 0;
   assert(success);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::DestroyPerformer(const Observer<Performer>& performer) noexcept {
-  [[maybe_unused]] const auto success = performers_.erase(performer.get()) > 0;
+void Engine::DestroyPerformer(Performer& performer) noexcept {
+  [[maybe_unused]] const auto success = performers_.erase(&performer) > 0;
   assert(success);
 }
 

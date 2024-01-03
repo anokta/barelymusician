@@ -1,4 +1,4 @@
-#include "barelymusician/internal/engine.h"
+#include "barelymusician/internal/musician.h"
 
 #include <stdint.h>  // NOLINT(modernize-deprecated-headers)
 
@@ -56,15 +56,15 @@ InstrumentDefinition GetTestInstrumentDefinition() {
 }
 
 // Tests that a single instrument is created and destroyed as expected.
-TEST(EngineTest, CreateDestroySingleInstrument) {
+TEST(MusicianTest, CreateDestroySingleInstrument) {
   constexpr double kPitch = -1.25;
   constexpr double kIntensity = 0.75;
 
-  Engine engine;
+  Musician musician;
   std::vector<double> buffer(kChannelCount * kFrameCount);
 
   // Create an instrument.
-  const auto instrument = engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
+  const auto instrument = musician.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate);
   ASSERT_NE(instrument.get(), nullptr);
 
   std::fill(buffer.begin(), buffer.end(), 0.0);
@@ -111,20 +111,20 @@ TEST(EngineTest, CreateDestroySingleInstrument) {
   }
 
   // Destroy the instrument.
-  engine.DestroyInstrument(*instrument);
+  musician.DestroyInstrument(*instrument);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
-TEST(EngineTest, CreateDestroyMultipleInstruments) {
+TEST(MusicianTest, CreateDestroyMultipleInstruments) {
   std::vector<double> note_off_pitches;
 
   {
-    Engine engine;
+    Musician musician;
 
     // Create instruments with note off callback.
     std::vector<Observer<Instrument>> instruments;
     for (int i = 0; i < 3; ++i) {
-      instruments.push_back(engine.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate));
+      instruments.push_back(musician.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate));
       ASSERT_NE(instruments[i].get(), nullptr);
       NoteOffEventDefinition::Callback note_off_callback = [&](double pitch) {
         note_off_pitches.push_back(pitch);
@@ -142,18 +142,18 @@ TEST(EngineTest, CreateDestroyMultipleInstruments) {
     EXPECT_THAT(note_off_pitches, ElementsAre(1.0, 2.0, 3.0));
   }
 
-  // Remaining active notes should be stopped once the engine goes out of scope.
+  // Remaining active notes should be stopped once the musician goes out of scope.
   EXPECT_THAT(note_off_pitches, UnorderedElementsAre(-3.0, -2.0, -1.0, 1.0, 2.0, 3.0));
 }
 
 // Tests that a single performer is created and destroyed as expected.
-TEST(EngineTest, CreateDestroySinglePerformer) {
+TEST(MusicianTest, CreateDestroySinglePerformer) {
   constexpr int kProcessOrder = 0;
 
-  Engine engine;
+  Musician musician;
 
   // Create a performer.
-  const auto performer = engine.CreatePerformer();
+  const auto performer = musician.CreatePerformer();
 
   // Create a task definition.
   double task_position = 0.0;
@@ -169,8 +169,8 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
                         /*is_one_off=*/false, 1.0, kProcessOrder, &process_callback);
 
   // Start the performer with a tempo of one beat per second.
-  engine.SetTempo(60.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 60.0);
+  musician.SetTempo(60.0);
+  EXPECT_DOUBLE_EQ(musician.GetTempo(), 60.0);
 
   EXPECT_FALSE(performer->IsPlaying());
   performer->Start();
@@ -178,35 +178,35 @@ TEST(EngineTest, CreateDestroySinglePerformer) {
 
   // Update the timestamp just before the task, which should not be triggered.
   EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(1.0, kProcessOrder)));
-  engine.Update(1.0);
+  musician.Update(1.0);
   EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.0);
   EXPECT_DOUBLE_EQ(task_position, 0.0);
 
   // Update the timestamp past the task, which should be triggered now.
   EXPECT_THAT(performer->GetDurationToNextTask(), Optional(Pair(0.0, kProcessOrder)));
-  engine.Update(1.5);
+  musician.Update(1.5);
   EXPECT_FALSE(performer->GetDurationToNextTask().has_value());
   EXPECT_DOUBLE_EQ(performer->GetPosition(), 1.5);
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy the performer.
-  engine.DestroyPerformer(*performer);
+  musician.DestroyPerformer(*performer);
 }
 
-// Tests that the engine sets its tempo as expected.
-TEST(EngineTest, SetTempo) {
-  Engine engine;
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 120.0);
+// Tests that the musician sets its tempo as expected.
+TEST(MusicianTest, SetTempo) {
+  Musician musician;
+  EXPECT_DOUBLE_EQ(musician.GetTempo(), 120.0);
 
-  engine.SetTempo(200.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 200.0);
+  musician.SetTempo(200.0);
+  EXPECT_DOUBLE_EQ(musician.GetTempo(), 200.0);
 
-  engine.SetTempo(0.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
+  musician.SetTempo(0.0);
+  EXPECT_DOUBLE_EQ(musician.GetTempo(), 0.0);
 
-  engine.SetTempo(-100.0);
-  EXPECT_DOUBLE_EQ(engine.GetTempo(), 0.0);
+  musician.SetTempo(-100.0);
+  EXPECT_DOUBLE_EQ(musician.GetTempo(), 0.0);
 }
 
 }  // namespace

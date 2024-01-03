@@ -1,5 +1,5 @@
-#ifndef BARELYMUSICIAN_INTERNAL_ENGINE_H_
-#define BARELYMUSICIAN_INTERNAL_ENGINE_H_
+#ifndef BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
+#define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
 #include <functional>
 #include <optional>
@@ -15,21 +15,9 @@
 
 namespace barely::internal {
 
-/// Internal engine.
-class Engine {
+/// Class that wraps a musician.
+class Musician {
  public:
-  /// Default constructor.
-  Engine() = default;
-
-  /// Destroys `Engine`.
-  ~Engine() noexcept = default;
-
-  // Non-copyable and non-movable.
-  Engine(const Engine& other) noexcept = delete;
-  Engine& operator=(const Engine& other) noexcept = delete;
-  Engine(Engine&& other) noexcept = delete;
-  Engine& operator=(Engine&& other) noexcept = delete;
-
   /// Creates a new instrument.
   ///
   /// @param definition Instrument definition.
@@ -71,7 +59,7 @@ class Engine {
   /// @param tempo Tempo in beats per minute.
   void SetTempo(double tempo) noexcept;
 
-  /// Updates the engine at timestamp.
+  /// Updates the musician at timestamp.
   ///
   /// @param timestamp Timestamp in seconds.
   // NOLINTNEXTLINE(bugprone-exception-escape)
@@ -92,4 +80,4 @@ class Engine {
 
 }  // namespace barely::internal
 
-#endif  // BARELYMUSICIAN_INTERNAL_ENGINE_H_
+#endif  // BARELYMUSICIAN_INTERNAL_MUSICIAN_H_

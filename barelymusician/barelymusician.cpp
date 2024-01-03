@@ -4,15 +4,15 @@
 
 #include <cstddef>
 
-#include "barelymusician/internal/engine.h"
 #include "barelymusician/internal/instrument.h"
+#include "barelymusician/internal/musician.h"
 #include "barelymusician/internal/observable.h"
 #include "barelymusician/internal/performer.h"
 #include "barelymusician/internal/task.h"
 
 using ::barely::internal::Effect;
-using ::barely::internal::Engine;
 using ::barely::internal::Instrument;
+using ::barely::internal::Musician;
 using ::barely::internal::Observer;
 using ::barely::internal::Performer;
 using ::barely::internal::Task;
@@ -33,8 +33,8 @@ struct BarelyEffect : public Observer<Effect> {
   // Constructs `BarelyEffect` with `definition`, `instrument`, and `process_order`.
   BarelyEffect(Instrument& instrument, BarelyEffectDefinition definition,
                int process_order) noexcept
-      : instrument(instrument),
-        Observer<Effect>(instrument.CreateEffect(definition, process_order)) {}
+      : Observer<Effect>(instrument.CreateEffect(definition, process_order)),
+        instrument(instrument) {}
 
   // Destroys `BarelyEffect`.
   ~BarelyEffect() noexcept {
@@ -60,15 +60,16 @@ struct BarelyInstrument : public Observer<Instrument> {
                                                     BarelyInstrumentHandle* out_instrument);
   friend BARELY_EXPORT bool BarelyInstrument_Destroy(BarelyInstrumentHandle instrument);
 
-  // Constructs `BarelyInstrument` with `engine`, `definition`, and `frame_rate`.
-  BarelyInstrument(Engine& engine, BarelyInstrumentDefinition definition,
+  // Constructs `BarelyInstrument` with `musician`, `definition`, and `frame_rate`.
+  BarelyInstrument(Musician& musician, BarelyInstrumentDefinition definition,
                    int32_t frame_rate) noexcept
-      : Observer<Instrument>(engine.CreateInstrument(definition, frame_rate)), engine_(engine) {}
+      : Observer<Instrument>(musician.CreateInstrument(definition, frame_rate)),
+        musician_(musician) {}
 
   // Destroys `BarelyInstrument`.
   ~BarelyInstrument() noexcept {
     if (*this) {
-      engine_.DestroyInstrument(**this);
+      musician_.DestroyInstrument(**this);
     }
   }
 
@@ -78,12 +79,12 @@ struct BarelyInstrument : public Observer<Instrument> {
   BarelyInstrument(BarelyInstrument&& other) noexcept = delete;
   BarelyInstrument& operator=(BarelyInstrument&& other) noexcept = delete;
 
-  // Internal engine.
-  Engine& engine_;
+  // Internal musician.
+  Musician& musician_;
 };
 
 // Musician.
-struct BarelyMusician : public Engine {
+struct BarelyMusician : public Musician {
  private:
   // Ensures that the instance can only be managed via explicit API calls.
   friend BARELY_EXPORT bool BarelyMusician_Create(BarelyMusicianHandle* out_musician);
@@ -110,14 +111,14 @@ struct BarelyPerformer : public Observer<Performer> {
                                                    BarelyPerformerHandle* out_performer);
   friend BARELY_EXPORT bool BarelyPerformer_Destroy(BarelyPerformerHandle performer);
 
-  // Constructs `BarelyPerformer` with `engine`.
-  explicit BarelyPerformer(Engine& engine) noexcept
-      : Observer<Performer>(engine.CreatePerformer()), engine_(engine) {}
+  // Constructs `BarelyPerformer` with `musician`.
+  explicit BarelyPerformer(Musician& musician) noexcept
+      : Observer<Performer>(musician.CreatePerformer()), musician_(musician) {}
 
   // Destroys `BarelyPerformer`.
   ~BarelyPerformer() noexcept {
     if (*this) {
-      engine_.DestroyPerformer(**this);
+      musician_.DestroyPerformer(**this);
     }
   }
 
@@ -127,8 +128,8 @@ struct BarelyPerformer : public Observer<Performer> {
   BarelyPerformer(BarelyPerformer&& other) noexcept = delete;
   BarelyPerformer& operator=(BarelyPerformer&& other) noexcept = delete;
 
-  // Internal engine.
-  Engine& engine_;
+  // Internal musician.
+  Musician& musician_;
 };
 
 // Task.
@@ -148,9 +149,9 @@ struct BarelyTask : public Observer<Task> {
   // `user_data`.
   BarelyTask(Performer& performer, BarelyTaskDefinition definition, double position,
              int process_order, void* user_data) noexcept
-      : performer(performer),
-        Observer<Task>(performer.CreateTask(definition, /*is_one_off=*/false, position,
-                                            process_order, user_data)) {}
+      : Observer<Task>(performer.CreateTask(definition, /*is_one_off=*/false, position,
+                                            process_order, user_data)),
+        performer(performer) {}
 
   // Destroys `BarelyTask`.
   ~BarelyTask() noexcept {

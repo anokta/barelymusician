@@ -1,5 +1,5 @@
 
-#include "barelymusician/internal/engine.h"
+#include "barelymusician/internal/musician.h"
 
 #include <algorithm>
 #include <cassert>
@@ -16,8 +16,8 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observer<Instrument> Engine::CreateInstrument(InstrumentDefinition definition,
-                                              int frame_rate) noexcept {
+Observer<Instrument> Musician::CreateInstrument(InstrumentDefinition definition,
+                                                int frame_rate) noexcept {
   Observable<Instrument> observable(definition, frame_rate, tempo_, timestamp_);
   const auto [it, success] = instruments_.emplace(observable.get(), std::move(observable));
   assert(success);
@@ -25,7 +25,7 @@ Observer<Instrument> Engine::CreateInstrument(InstrumentDefinition definition,
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observer<Performer> Engine::CreatePerformer() noexcept {
+Observer<Performer> Musician::CreatePerformer() noexcept {
   Observable<Performer> observable;
   const auto [it, success] = performers_.emplace(observable.get(), std::move(observable));
   assert(success);
@@ -33,22 +33,22 @@ Observer<Performer> Engine::CreatePerformer() noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::DestroyInstrument(Instrument& instrument) noexcept {
+void Musician::DestroyInstrument(Instrument& instrument) noexcept {
   [[maybe_unused]] const bool success = instruments_.erase(&instrument) > 0;
   assert(success);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::DestroyPerformer(Performer& performer) noexcept {
+void Musician::DestroyPerformer(Performer& performer) noexcept {
   [[maybe_unused]] const bool success = performers_.erase(&performer) > 0;
   assert(success);
 }
 
-double Engine::GetTempo() const noexcept { return tempo_; }
+double Musician::GetTempo() const noexcept { return tempo_; }
 
-double Engine::GetTimestamp() const noexcept { return timestamp_; }
+double Musician::GetTimestamp() const noexcept { return timestamp_; }
 
-void Engine::SetTempo(double tempo) noexcept {
+void Musician::SetTempo(double tempo) noexcept {
   tempo = std::max(tempo, 0.0);
   if (tempo_ == tempo) {
     return;
@@ -60,7 +60,7 @@ void Engine::SetTempo(double tempo) noexcept {
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Engine::Update(double timestamp) noexcept {
+void Musician::Update(double timestamp) noexcept {
   while (timestamp_ < timestamp) {
     if (tempo_ > 0.0) {
       std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),

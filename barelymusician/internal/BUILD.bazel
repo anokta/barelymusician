@@ -12,21 +12,6 @@ cc_library(
 )
 
 cc_library(
-    name = "engine",
-    srcs = ["engine.cpp"],
-    hdrs = ["engine.h"],
-    visibility = ["//barelymusician:__pkg__"],
-    deps = [
-        ":instrument",
-        ":mutable",
-        ":observable",
-        ":performer",
-        "//barelymusician:barelymusician_headeronly",
-        "//barelymusician/common:seconds",
-    ],
-)
-
-cc_library(
     name = "effect",
     srcs = ["effect.cpp"],
     hdrs = ["effect.h"],
@@ -72,6 +57,21 @@ cc_library(
     hdrs = ["message_queue.h"],
     deps = [
         ":message",
+    ],
+)
+
+cc_library(
+    name = "musician",
+    srcs = ["musician.cpp"],
+    hdrs = ["musician.h"],
+    visibility = ["//barelymusician:__pkg__"],
+    deps = [
+        ":instrument",
+        ":mutable",
+        ":observable",
+        ":performer",
+        "//barelymusician:barelymusician_headeronly",
+        "//barelymusician/common:seconds",
     ],
 )
 
@@ -128,19 +128,6 @@ cc_test(
 )
 
 cc_test(
-    name = "engine_test",
-    srcs = ["engine_test.cpp"],
-    deps = [
-        ":control",
-        ":engine",
-        ":instrument",
-        ":observable",
-        "//barelymusician:barelymusician_headeronly",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "event_test",
     srcs = ["event_test.cpp"],
     deps = [
@@ -167,6 +154,19 @@ cc_test(
     deps = [
         ":message",
         ":message_queue",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "musician_test",
+    srcs = ["musician_test.cpp"],
+    deps = [
+        ":control",
+        ":instrument",
+        ":musician",
+        ":observable",
+        "//barelymusician:barelymusician_headeronly",
         "@googletest//:gtest_main",
     ],
 )

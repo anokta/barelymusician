@@ -111,7 +111,7 @@ TEST(MusicianTest, CreateDestroySingleInstrument) {
   }
 
   // Destroy the instrument.
-  musician.DestroyInstrument(*instrument);
+  musician.DestroyInstrument(instrument);
 }
 
 // Tests that multiple instruments are created and destroyed as expected.
@@ -122,7 +122,7 @@ TEST(MusicianTest, CreateDestroyMultipleInstruments) {
     Musician musician;
 
     // Create instruments with note off callback.
-    std::vector<Observer<Instrument>> instruments;
+    std::vector<Observable<Instrument>> instruments;
     for (int i = 0; i < 3; ++i) {
       instruments.push_back(musician.CreateInstrument(GetTestInstrumentDefinition(), kFrameRate));
       ASSERT_NE(instruments[i].get(), nullptr);
@@ -191,7 +191,7 @@ TEST(MusicianTest, CreateDestroySinglePerformer) {
   EXPECT_DOUBLE_EQ(task_position, 1.0);
 
   // Destroy the performer.
-  musician.DestroyPerformer(*performer);
+  musician.DestroyPerformer(performer);
 }
 
 // Tests that the musician sets its tempo as expected.

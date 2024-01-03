@@ -16,31 +16,31 @@
 namespace barely::internal {
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observer<Instrument> Musician::CreateInstrument(InstrumentDefinition definition,
-                                                int frame_rate) noexcept {
-  Observable<Instrument> observable(definition, frame_rate, tempo_, timestamp_);
-  const auto [it, success] = instruments_.emplace(observable.get(), std::move(observable));
+Observable<Instrument> Musician::CreateInstrument(InstrumentDefinition definition,
+                                                  int frame_rate) noexcept {
+  Observable<Instrument> instrument(definition, frame_rate, tempo_, timestamp_);
+  [[maybe_unused]] const bool success = instruments_.insert(instrument.get()).second;
   assert(success);
-  return it->second.Observe();
+  return instrument;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-Observer<Performer> Musician::CreatePerformer() noexcept {
-  Observable<Performer> observable;
-  const auto [it, success] = performers_.emplace(observable.get(), std::move(observable));
+Observable<Performer> Musician::CreatePerformer() noexcept {
+  Observable<Performer> performer;
+  [[maybe_unused]] const bool success = performers_.insert(performer.get()).second;
   assert(success);
-  return it->second.Observe();
+  return performer;
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyInstrument(Instrument& instrument) noexcept {
-  [[maybe_unused]] const bool success = instruments_.erase(&instrument) > 0;
+void Musician::DestroyInstrument(const Observable<Instrument>& instrument) noexcept {
+  [[maybe_unused]] const bool success = instruments_.erase(instrument.get()) > 0;
   assert(success);
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-void Musician::DestroyPerformer(Performer& performer) noexcept {
-  [[maybe_unused]] const bool success = performers_.erase(&performer) > 0;
+void Musician::DestroyPerformer(const Observable<Performer>& performer) noexcept {
+  [[maybe_unused]] const bool success = performers_.erase(performer.get()) > 0;
   assert(success);
 }
 
@@ -54,7 +54,7 @@ void Musician::SetTempo(double tempo) noexcept {
     return;
   }
   tempo_ = tempo;
-  for (auto& [instrument, observable] : instruments_) {
+  for (auto& instrument : instruments_) {
     instrument->SetTempo(tempo_);
   }
 }
@@ -66,7 +66,8 @@ void Musician::Update(double timestamp) noexcept {
       std::pair<double, int> update_duration = {BeatsFromSeconds(tempo_, timestamp - timestamp_),
                                                 std::numeric_limits<int>::max()};
       bool has_tasks_to_process = false;
-      for (const auto& [performer, observable] : performers_) {
+      for (const auto& performer : performers_) {
+        assert(performer);
         if (const auto maybe_duration = performer->GetDurationToNextTask();
             maybe_duration && maybe_duration < update_duration) {
           has_tasks_to_process = true;
@@ -75,24 +76,28 @@ void Musician::Update(double timestamp) noexcept {
       }
 
       if (update_duration.first > 0) {
-        for (auto& [performer, observable] : performers_) {
+        for (const auto& performer : performers_) {
+          assert(performer);
           performer->Update(update_duration.first);
         }
 
         timestamp_ += SecondsFromBeats(tempo_, update_duration.first);
-        for (auto& [instrument, observable] : instruments_) {
+        for (auto& instrument : instruments_) {
+          assert(instrument);
           instrument->Update(timestamp_);
         }
       }
 
       if (has_tasks_to_process && timestamp_ < timestamp) {
-        for (auto& [performer, observable] : performers_) {
+        for (const auto& performer : performers_) {
+          assert(performer);
           performer->ProcessNextTaskAtPosition();
         }
       }
     } else if (timestamp_ < timestamp) {
       timestamp_ = timestamp;
-      for (auto& [instrument, observable] : instruments_) {
+      for (auto& instrument : instruments_) {
+        assert(instrument);
         instrument->Update(timestamp_);
       }
     }

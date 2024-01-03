@@ -2,8 +2,6 @@
 #define BARELYMUSICIAN_INTERNAL_MUSICIAN_H_
 
 #include <functional>
-#include <optional>
-#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
@@ -24,25 +22,26 @@ class Musician {
   /// @param frame_rate Frame rate in hertz.
   /// @return Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Observer<Instrument> CreateInstrument(InstrumentDefinition definition, int frame_rate) noexcept;
+  [[nodiscard]] Observable<Instrument> CreateInstrument(InstrumentDefinition definition,
+                                                        int frame_rate) noexcept;
 
   /// Creates a new performer.
   ///
   /// @return Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  Observer<Performer> CreatePerformer() noexcept;
+  [[nodiscard]] Observable<Performer> CreatePerformer() noexcept;
 
   /// Destroys instrument.
   ///
   /// @param instrument Instrument.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyInstrument(Instrument& instrument) noexcept;
+  void DestroyInstrument(const Observable<Instrument>& instrument) noexcept;
 
   /// Destroys performer.
   ///
   /// @param performer Performer.
   // NOLINTNEXTLINE(bugprone-exception-escape)
-  void DestroyPerformer(Performer& performer) noexcept;
+  void DestroyPerformer(const Observable<Performer>& performer) noexcept;
 
   /// Returns tempo.
   ///
@@ -65,11 +64,11 @@ class Musician {
   // NOLINTNEXTLINE(bugprone-exception-escape)
   void Update(double timestamp) noexcept;
 
-  // Map of instruments by pointers.
-  std::unordered_map<Instrument*, Observable<Instrument>> instruments_;
+  // Set of pointers to instruments.
+  std::unordered_set<Instrument*> instruments_;
 
-  // Map of performers by pointers.
-  std::unordered_map<Performer*, Observable<Performer>> performers_;
+  // Set of pointers to performers.
+  std::unordered_set<Performer*> performers_;
 
   // Tempo in beats per minute.
   double tempo_ = 120.0;

@@ -4,7 +4,6 @@
 #include <cassert>
 #include <cstddef>
 #include <memory>
-#include <optional>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -70,7 +69,6 @@ Instrument::~Instrument() noexcept {
   if (destroy_callback_) {
     destroy_callback_(&state_);
   }
-  effect_ptrs_.Update({});
 }
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
